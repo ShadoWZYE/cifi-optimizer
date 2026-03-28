@@ -31,10 +31,12 @@ const PROFILE_FIELD_PATHS = {
   tokens: ["resources", "tokens"],
   relics: ["resources", "relics"],
   gemDust: ["resources", "gemDust"],
+  shards: ["resources", "shards"],
   gemNodeBudget: ["planning", "gemNodeBudget"],
   traitSphereCount: ["systems", "metaProgression", "traitSphereCount"],
   mechParts: ["systems", "metaProgression", "mechParts"],
   researchHours: ["planning", "researchHours"],
+  shardRatePerHour: ["systems", "shards", "ratePerHour"],
   notes: ["notes"]
 };
 
@@ -42,39 +44,43 @@ function createDefaultPlayerProfile() {
   return {
     meta: {
       schemaVersion: 1,
-      profileName: "Main account",
+      profileName: null,
       updatedAt: null
     },
     stage: {
-      highestShipUnlocked: "",
-      manualPhase: ""
+      highestShipUnlocked: null,
+      manualPhase: null
     },
     confidence: "manual",
-    notes: "Prototype baseline until real CiFi formulas are migrated.",
+    notes: null,
     resources: {
-      gems: 860,
-      tokens: 430,
-      relics: 215,
-      gemDust: 540
+      gems: null,
+      tokens: null,
+      relics: null,
+      gemDust: null,
+      shards: null
     },
     planning: {
-      resourceFocus: "credits",
-      gemNodeBudget: 280,
-      researchHours: 6
+      resourceFocus: null,
+      gemNodeBudget: null,
+      researchHours: null
     },
     systems: {
       loop: {
-        loopReset: 357
+        loopReset: null
+      },
+      shards: {
+        ratePerHour: null
       },
       metaProgression: {
-        hunterLevel: 85,
-        traitSphereCount: 12,
-        mechParts: 940
+        hunterLevel: null,
+        traitSphereCount: null,
+        mechParts: null
       },
       ship: {
-        power: 980,
-        speed: 132,
-        cargo: 670,
+        power: null,
+        speed: null,
+        cargo: null,
         playerState: {}
       }
     }
@@ -114,10 +120,12 @@ function normalizePlayerProfile(profile, baselineShipPlayerState) {
     normalized.resources.tokens = Number(profile.tokens ?? defaults.resources.tokens);
     normalized.resources.relics = Number(profile.relics ?? defaults.resources.relics);
     normalized.resources.gemDust = Number(profile.gemDust ?? defaults.resources.gemDust);
+    normalized.resources.shards = Number(profile.shards ?? defaults.resources.shards);
     normalized.planning.resourceFocus = profile.resourceFocus ?? defaults.planning.resourceFocus;
     normalized.planning.gemNodeBudget = Number(profile.gemNodeBudget ?? defaults.planning.gemNodeBudget);
     normalized.planning.researchHours = Number(profile.researchHours ?? defaults.planning.researchHours);
     normalized.systems.loop.loopReset = Number(profile.loopReset ?? defaults.systems.loop.loopReset);
+    normalized.systems.shards.ratePerHour = Number(profile.shardRatePerHour ?? defaults.systems.shards.ratePerHour);
     normalized.systems.metaProgression.hunterLevel = Number(profile.hunterLevel ?? defaults.systems.metaProgression.hunterLevel);
     normalized.systems.metaProgression.traitSphereCount = Number(profile.traitSphereCount ?? defaults.systems.metaProgression.traitSphereCount);
     normalized.systems.metaProgression.mechParts = Number(profile.mechParts ?? defaults.systems.metaProgression.mechParts);
@@ -447,7 +455,7 @@ async function bootstrap() {
   const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, null);
   const legacyProfile = loadStoredJson(LEGACY_STORAGE_KEYS.profile, null);
 
-  state.snapshot = loadStoredJson(STORAGE_KEYS.snapshot, snapshot);
+  state.snapshot = mergeDeep(snapshot, loadStoredJson(STORAGE_KEYS.snapshot, snapshot));
   state.shipBaseline = shipBaseline;
   state.shipTemplates = buildShipTemplates(shipBaseline);
   state.playerProfile = normalizePlayerProfile(
@@ -611,7 +619,7 @@ function handlePrimaryReopen() {
   }
   state.pendingLaunchRefresh = false;
   refreshFromPersistentState();
-  showLaunchNotice("CiFi reopened from launcher.");
+  showLaunchNotice("CIFI reopened from launcher.");
 }
 
 function refreshFromPersistentState() {
@@ -654,9 +662,9 @@ function renderPassiveLaunchScreen() {
   document.body.innerHTML = `
     <main class="launch-passive-shell">
       <section class="launch-passive-card">
-        <p class="eyebrow">CiFi Already Open</p>
+        <p class="eyebrow">CIFI Already Open</p>
         <h1>Using the existing app tab.</h1>
-        <p class="meta">The launcher signaled the active CiFi tab to refresh. This window stays idle so you do not end up with two competing app instances.</p>
+        <p class="meta">The launcher signaled the active CIFI tab to refresh. This window stays idle so you do not end up with two competing app instances.</p>
         <button class="button button-primary" id="passiveLaunchCloseBtn">Close this window</button>
       </section>
     </main>
@@ -899,7 +907,7 @@ function renderOverview() {
   $("#validationStatusValue").textContent = `${validation.filter((item) => item.pass).length}/${validation.length}`;
   $("#overviewHighlights").innerHTML = [
     makeRecommendationCard(runShipOptimization()[0], "ship"),
-    makeRecommendationCard(runProgressionOptimization()[0], "progression"),
+    makeRecommendationCard(runProgressionOptimization()[0], "shards"),
     makeRecommendationCard(runGemOptimization()[0], "gem")
   ].join("");
 }
@@ -1217,7 +1225,7 @@ function renderShipActions() {
 }
 
 function renderProgressionResults(results) {
-  $("#progressionResults").innerHTML = results.map((item) => makeRecommendationCard(item, "progression")).join("");
+  $("#progressionResults").innerHTML = results.map((item) => makeRecommendationCard(item, "shards")).join("");
 }
 
 function renderGemResults(results) {
@@ -1429,15 +1437,28 @@ function runShipOptimization() {
 }
 
 function runProgressionOptimization() {
-  const bias = $("#progressionBias")?.value ?? "balanced";
-  const resources = state.playerProfile.resources;
-  return [...state.snapshot.progressionActions].map((item) => ({
-    title: item.label,
-    subtitle: item.resource,
-    score: item.baseValue * Math.min(1.2, Number(resources[item.resource] || 0) / Math.max(item.baseCost, 1)) * progressionUrgency(item.resource, bias),
-    confidence: item.confidence,
-    notes: item.notes
-  })).sort((left, right) => right.score - left.score);
+  return [{
+    id: "shard-module-grounding-warning",
+    module: "shards",
+    kind: "warning",
+    title: "Shard milestone planner pending verified data",
+    subtitle: "Descriptive mode",
+    score: 0,
+    confidence: 0.24,
+    whyNow: [
+      "Shard Milestones are a real CIFI system, but this repo does not yet ship a verified milestone table.",
+      "The previous shard ranking path relied on unsourced milestone identities, cost curves, and value scoring."
+    ],
+    assumptions: [
+      "Manual shard count and shard income can still be stored in PlayerProfile.",
+      "Recommendation scoring stays disabled until verified shard milestone data is imported."
+    ],
+    warnings: [
+      "No shard milestone recommendations are being ranked in this build.",
+      "Import verified shard milestone data before re-enabling optimizer behavior."
+    ],
+    notes: "Grounded fallback mode avoids fake optimizer precision."
+  }];
 }
 
 function runGemOptimization() {
@@ -1505,13 +1526,16 @@ function normalizeImportRow(row, dataset, index = 0) {
       tags: splitList(clean.tags)
     };
   }
-  if (dataset === "progressionActions") {
+  if (dataset === "shardMilestones") {
     return {
-      id: clean.id || slugify(clean.label || `progression-${index + 1}`),
-      label: clean.label || `Action ${index + 1}`,
-      resource: clean.resource || "gems",
+      id: clean.id || slugify(clean.label || `shard-milestone-${index + 1}`),
+      label: clean.label || `Shard milestone ${index + 1}`,
+      resourceBias: clean.resourceBias || clean.resource || "shards",
       baseCost: Number(clean.baseCost || clean.cost || 0),
+      costGrowth: Number(clean.costGrowth || clean.cost_growth || 1.3),
       baseValue: Number(clean.baseValue || clean.value || 0),
+      perLevelValue: Number(clean.perLevelValue || clean.per_level_value || clean.baseValue || clean.value || 0),
+      breakpoints: normalizeShardBreakpoints(clean.breakpoints || clean.breakpointLevels || clean.breakpoint_levels),
       confidence: Number(clean.confidence || 0.5),
       notes: clean.notes || ""
     };
@@ -1781,7 +1805,7 @@ function persistShipConfig(showStatus = false) {
 }
 
 function getImportedRecordCount() {
-  return ["shipLoadouts", "progressionActions", "gemNodes", "validationCases", "researchTracks"]
+  return ["shipLoadouts", "shardMilestones", "gemNodes", "validationCases", "researchTracks"]
     .reduce((total, key) => total + (Array.isArray(state.snapshot[key]) ? state.snapshot[key].length : 0), 0);
 }
 
@@ -1796,6 +1820,19 @@ function makeRecommendationCard(item, module) {
   if (!item) {
     return "";
   }
+  const detailLines = [
+    item.cost ? `<span class="pill">cost ${escapeHtml(item.cost)}</span>` : "",
+    item.eta ? `<span class="pill">eta ${escapeHtml(item.eta)}</span>` : ""
+  ].filter(Boolean).join("");
+  const whyNow = Array.isArray(item.whyNow) && item.whyNow.length
+    ? `<div class="meta-stack"><p class="snapshot-title">Why now</p>${item.whyNow.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
+    : "";
+  const assumptions = Array.isArray(item.assumptions) && item.assumptions.length
+    ? `<div class="meta-stack"><p class="snapshot-title">Assumptions</p>${item.assumptions.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
+    : "";
+  const warnings = Array.isArray(item.warnings) && item.warnings.length
+    ? `<div class="meta-stack"><p class="snapshot-title">Warnings</p>${item.warnings.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
+    : "";
   return `
     <article class="recommendation-card">
       <div class="recommendation-head">
@@ -1808,10 +1845,56 @@ function makeRecommendationCard(item, module) {
       <div class="pill-row">
         <span class="pill">${module}</span>
         <span class="pill">confidence ${Math.round((item.confidence ?? 0.5) * 100)}%</span>
+        ${detailLines}
       </div>
       <p class="meta">${item.notes ?? ""}</p>
+      ${whyNow}
+      ${assumptions}
+      ${warnings}
     </article>
   `;
+}
+
+function normalizeShardBreakpoints(value) {
+  if (!value) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => ({
+      level: Number(item.level || 0),
+      bonusValue: Number(item.bonusValue || item.bonus_value || 0),
+      reason: item.reason || ""
+    }));
+  }
+  return String(value).split(/[|;]/).map((entry) => {
+    const [level, bonusValue, reason] = entry.split(":");
+    return {
+      level: Number(level || 0),
+      bonusValue: Number(bonusValue || 0),
+      reason: reason || ""
+    };
+  }).filter((item) => item.level > 0);
+}
+
+function formatShardNumber(value) {
+  return Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(Number(value || 0)));
+}
+
+function formatDurationHours(hours) {
+  if (hours === 0) {
+    return "now";
+  }
+  if (!Number.isFinite(hours) || hours < 0) {
+    return null;
+  }
+  if (hours < 1) {
+    return `${Math.max(1, Math.round(hours * 60))}m`;
+  }
+  if (hours < 24) {
+    return `${hours.toFixed(hours < 10 ? 1 : 0)}h`;
+  }
+  const days = hours / 24;
+  return `${days.toFixed(days < 10 ? 1 : 0)}d`;
 }
 
 function scorePowerTerm(term, weights, meltdown) {
@@ -2182,7 +2265,7 @@ function clampNumber(value, min, max) {
 
 function coerceInputValue(value) {
   if (value === "") {
-    return "";
+    return null;
   }
   if (typeof value === "string") {
     const normalized = normalizeCiNumberValue(value);

@@ -2,27 +2,42 @@
 
 ## Purpose
 
-This repository is evolving from a prototype into an MVP for a CiFi upgrade-optimization tool.
+This repository is evolving from a prototype into an MVP for a **CIFI** upgrade-optimization tool.
 
-Agents (Codex, etc.) must prioritize:
-
-* small, safe, incremental changes
-* alignment with MVP product direction
-* reuse over rewrite
+Agents must prioritize:
+- small, safe, incremental changes
+- alignment with MVP direction
+- reuse over rewrite
+- truth over placeholder sophistication
 
 ---
 
-## MVP Product Scope (DO NOT EXPAND BEYOND THIS)
+## MVP Product Scope
 
 The only first-class systems for MVP are:
 
-* PlayerProfile (single source of truth)
-* Guided/manual player import
-* Shard milestone optimizer
-* Diamond/token spend planner
-* Loop-reset guardrails (warnings)
-* Unified recommendation feed
-* Explainable recommendations ("why now")
+- PlayerProfile (single source of truth)
+- Guided/manual player import
+- Shard milestone workflow
+- Diamond/token spend planner
+- Loop-reset guardrails (warnings)
+- Unified recommendation feed
+- Explainable recommendations
+
+---
+
+## Grounding rule
+
+No field, label, formula, or recommendation should be added unless it is either:
+
+1. a known in-game CIFI concept, or
+2. imported from a named external/community tool and clearly labeled as such
+
+If uncertain:
+- preserve structure
+- document assumptions
+- avoid invented precision
+- prefer descriptive behavior over fake optimizer confidence
 
 ---
 
@@ -30,43 +45,47 @@ The only first-class systems for MVP are:
 
 Do NOT prioritize or expand:
 
-* OCR pipelines
-* Full save-file parsing
-* Generic progression tables
-* Gem-node optimizer
-* Research-tracks UI
-* "simulate everything" architectures
-* Late-game full optimization systems
+- OCR pipelines
+- Full save-file parsing
+- Generic progression tables
+- Gem-node optimizer
+- Research-tracks UI
+- “simulate everything” architectures
+- Late-game full optimization systems
 
-These may exist in the repo but are not part of MVP.
+These may exist in the repo, but they are not part of MVP.
 
 ---
 
 ## Architecture Rules
 
 ### 1. No large rewrites
-
-* Do NOT replace the entire app structure.
-* Work incrementally within existing files unless explicitly refactoring.
+- Do NOT replace the entire app structure.
+- Work incrementally within existing files unless explicitly refactoring.
 
 ### 2. Prefer extraction over redesign
-
-* If code is messy, extract functions/modules.
-* Do NOT introduce complex frameworks or abstractions.
+- If code is messy, extract functions/modules.
+- Do NOT introduce complex frameworks or abstractions.
 
 ### 3. Keep local-first behavior
-
-* The app must work fully in-browser.
-* Use localStorage or equivalent unless instructed otherwise.
+- The app must work fully in-browser.
+- Use localStorage or equivalent unless explicitly instructed otherwise.
 
 ### 4. Single source of truth
+All player state must converge into:
+- `state.playerProfile`
 
-* All player state must converge into:
-  state.playerProfile
+### 5. Separate truth from models
+Do not silently mix:
+- verified in-game state
+- derived values
+- external/community-tool model fields
+- placeholder assumptions
 
-### 5. Recommendation system contract
+Anything not directly representing game state should be clearly labeled.
 
-All modules must output actions in this shape:
+### 6. Recommendation system contract
+All modules should ultimately output actions in this shape:
 
 ```js
 {
@@ -83,65 +102,3 @@ All modules must output actions in this shape:
   assumptions?: string[],
   warnings?: string[]
 }
-```
-
----
-
-## Coding Guidelines
-
-* Keep diffs small and readable
-* Do not rename files unnecessarily
-* Do not break existing working flows unless explicitly replacing them
-* Add TODOs only if actionable
-* Avoid premature abstraction
-
----
-
-## When Working on a Feature
-
-Always:
-
-1. Identify affected files
-2. Propose a minimal plan
-3. Then implement
-
----
-
-## When Unsure
-
-* Make the most practical assumption
-* State it clearly in comments
-* Do NOT block progress on uncertainty
-
----
-
-## Preferred Strategy
-
-* Refactor → then build
-* Replace placeholder systems with real ones
-* Ship usable slices early
-
----
-
-## Definition of Success
-
-A change is good if:
-
-* it moves the repo closer to MVP scope
-* it reduces ambiguity in player state or recommendations
-* it improves clarity, not complexity
-
----
-
-## Git Workflow Rules
-
-* Do not commit directly to `main`
-* Always create or switch to a task branch
-* After changes, run verification before committing
-* Push the task branch to `origin`
-* Report final git state:
-
-  * branch
-  * commit hash
-  * push result
-* Do not claim a branch was pushed unless push completed successfully

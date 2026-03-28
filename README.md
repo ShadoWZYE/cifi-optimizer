@@ -1,91 +1,100 @@
-# CiFi Optimization Suite
+# CIFI Optimization Suite
 
-Static first-milestone implementation of the unified CiFi tool platform.
+A local-first web app for consolidating CIFI player calibration, planning inputs, and future optimizer modules into one place.
 
-Important: the current optimizer math and sample data are still prototype placeholders. The suite structure is usable, but future calibration should be grounded in the CiFi wiki and the linked community tools before treating any recommendations as game-accurate.
+Important: this repository currently contains a mix of:
+- grounded structure that is useful for MVP work
+- prototype-era assumptions that still need correction
+- community-tool style modeling that must be clearly labeled when used
 
-## What is included
+Do not treat an output as game-accurate unless the module explicitly identifies its data source and confidence.
 
-- Route-style pages for overview, player profile, data import, modules, validation, and research
-- Shared player profile with guided calibration fields
-- Local profile persistence and LR snapshots
-- Versioned game-data snapshot in [`data/game-data.snapshot.v1.json`](/C:/Users/Shadow/Desktop/CiFi/data/game-data.snapshot.v1.json)
-- Local sheet-data import workspace for CSV and JSON exports
-- Generator manual-value OCR import scaffold on the `Data` page
-- Ship loadout optimizer
-- Progression priority recommender
-- Gem-node optimizer
-- Validation panel with parity-style benchmark checks
-- Research panel for hunter simulation centralization, mech planning, and input automation
+## MVP scope
+
+Per `AGENTS.md`, the MVP focuses on:
+
+- PlayerProfile as the single source of truth
+- Guided/manual player import
+- Shard milestone workflow
+- Diamond/token spend planning
+- Loop-reset guardrails and warnings
+- Unified recommendation feed
+- Explainable recommendations
+
+## Grounding rule
+
+No new mechanic, formula, recommendation, or player field should be treated as real CIFI truth unless it is:
+
+1. a known in-game concept, or
+2. imported from a named external/community tool and clearly labeled as such
+
+If a system is incomplete, the app should prefer:
+- descriptive mode
+- placeholders
+- explicit uncertainty
+
+over fabricated precision.
 
 ## Run locally
 
-This app can still be opened directly in a browser, but it now also includes a tiny Node-based local server and smoke tests.
+This app can still be opened directly in a browser, but it also includes a tiny Node-based local workflow.
 
-## Node commands
+### Commands
 
-- `npm run dev`: starts a local static server on `http://localhost:4173`
-- `npm test`: runs the smoke test suite against the current snapshot and app shell
-- `launch-cifi.vbs`: Windows double-click launcher that starts the local server hidden when needed, reuses it when already running, and opens `http://localhost:4173/?launch=1`
-- `launch-cifi.bat`: visible debug launcher that keeps the server attached to a terminal window
+- `npm run dev` — starts a local static server on `http://localhost:4173`
+- `npm test` — runs the smoke tests
+- `node --check app.js` — validates app syntax
+- `launch-cifi.vbs` — Windows launcher for normal local use
+- `launch-cifi.bat` — visible debug launcher
 
 ## Windows launch flow
 
-Use [`launch-cifi.vbs`](/C:/Users/Shadow/Desktop/CiFi/launch-cifi.vbs) for normal desktop use.
+Use `launch-cifi.vbs` for normal desktop use.
 
 - If the local server is already running, it is reused.
-- If the local server is not running, the launcher starts it hidden and waits for readiness.
-- The launcher resolves Node.js by trying `node` from PATH first, then common Windows install locations.
+- If the local server is not running, the launcher starts it and waits for readiness.
 - The launcher opens the default browser to `http://localhost:4173/?launch=1`.
-- When a primary CiFi tab is already open, the new launcher-opened tab drops into an idle screen after signaling the existing tab to refresh and show a small reopen notice.
 
 ## Developer flow
 
-- Use `npm run dev` when you want the local server in a normal terminal session.
-- Use [`launch-cifi.bat`](/C:/Users/Shadow/Desktop/CiFi/launch-cifi.bat) when you want a visible Windows debug launcher with startup output and an explicit resolved npm path.
+- Use `npm run dev` when you want the local server in a terminal session.
+- Use `launch-cifi.bat` when you want visible Windows debug output.
 - Use `npm test` to run the smoke suite.
 
 ## Node requirement
 
-- CiFi requires Node.js 18+.
-- Best case: Node is available on PATH as `node` and `npm`.
-- Launcher fallback locations:
-- `%ProgramFiles%\nodejs`
-- `%ProgramFiles(x86)%\nodejs`
-- `%LocalAppData%\Programs\nodejs`
-- If Node is not found, the launcher shows a friendly error and does not try to start the server.
+- CIFI requires Node.js 18+.
+- Best case: `node` and `npm` are available on PATH.
+- If Node is not found, the launcher should fail clearly rather than silently.
 
-## Browser coordination limits
+## Large-number input support
 
-- The app uses `BroadcastChannel` when available and falls back to `localStorage` events when it is not.
-- Browsers cannot reliably focus another existing tab from a normal launcher-opened tab, so the safest behavior is to keep the active tab authoritative and make the new tab idle.
-- If the browser profile or privacy settings block cross-tab storage or background communication, the coordination may degrade and a second full tab can still appear.
-- The hidden launcher still depends on a local Node installation; it is not a packaged standalone desktop app.
+The app accepts:
+- suffix notation like `28.38k`
+- scientific notation like `2e5795`
 
-## Large numbers and OCR
-
-- Numeric inputs now accept CiFi-style shorthand like `28.38k` as well as scientific notation like `2e5795`
-- Generator fields in shared player state represent manual values for each `MK` tier
-- The `Data` page includes a generator OCR scaffold so screenshots can be queued and parsed OCR JSON can be applied into `n1..n10`
-- A future local OCR bridge can be attached to [`scripts/generator-ocr.py`](/C:/Users/Shadow/Desktop/CiFi/scripts/generator-ocr.py) once Tesseract is installed
-- With Tesseract installed, you can now run [`scripts/generator-ocr.ps1`](/C:/Users/Shadow/Desktop/CiFi/scripts/generator-ocr.ps1) against generator screenshots and paste the resulting JSON into the `Data` page
-
-Example:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\generator-ocr.ps1 C:\path\to\generators-1.png C:\path\to\generators-2.png
-```
-
-If `node` or `npm` are not yet on your PATH, reopen the terminal after install or reinstall Node.js with the PATH option enabled.
+Numeric UX should follow CIFI-style conventions where possible, while keeping parsing explicit and predictable.
 
 ## Structure
 
-- [`index.html`](/C:/Users/Shadow/Desktop/CiFi/index.html): app shell and module layout
-- [`styles.css`](/C:/Users/Shadow/Desktop/CiFi/styles.css): visual system and responsive layout
-- [`app.js`](/C:/Users/Shadow/Desktop/CiFi/app.js): state store, module logic, validation, persistence
-- [`data/game-data.snapshot.v1.json`](/C:/Users/Shadow/Desktop/CiFi/data/game-data.snapshot.v1.json): imported snapshot placeholder for verified game data
-- [`docs/ingest-process.md`](/C:/Users/Shadow/Desktop/CiFi/docs/ingest-process.md): lightweight import/versioning workflow
-- [`docs/import-mapping.md`](/C:/Users/Shadow/Desktop/CiFi/docs/import-mapping.md): expected row shapes for CSV/JSON imports
-- [`docs/cifi-wiki-reference.md`](/C:/Users/Shadow/Desktop/CiFi/docs/cifi-wiki-reference.md): local terminology and system reference from the wiki
-- [`docs/spec-reevaluation.md`](/C:/Users/Shadow/Desktop/CiFi/docs/spec-reevaluation.md): what the current prototype gets wrong and how to recalibrate it
-- [`docs/research-tracks.md`](/C:/Users/Shadow/Desktop/CiFi/docs/research-tracks.md): phase-1 research guidance
+- `index.html` — app shell and module layout
+- `styles.css` — visual system and layout
+- `app.js` — state, rendering, recommendation logic, persistence
+- `data/game-data.snapshot.v1.json` — app-owned snapshot data
+- `docs/ingest-process.md` — ingest and snapshot workflow
+- `docs/import-mapping.md` — supported import shapes
+- `docs/cifi_verified_spec.md` — grounding spec
+- `docs/cifi_grounding_plan.md` — grounding migration plan
+- `docs/cifi_sources.md` — public source list
+
+## Current repo status
+
+This repo is in a grounding phase.
+
+That means the immediate priority is:
+- make terminology correct
+- make defaults truthful
+- remove or label fictional mechanics
+- create a safe base for future optimizer work
+
+It is not currently the priority to expand feature count.

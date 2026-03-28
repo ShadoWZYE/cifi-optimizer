@@ -22,7 +22,7 @@ if not defined NPM_CMD (
   exit /b 1
 )
 
-echo Starting CiFi Optimization Suite debug launcher...
+echo Starting CIFI Optimization Suite debug launcher...
 echo.
 echo Local URL: http://localhost:4173
 echo Press Ctrl+C in this window to stop the server.

@@ -16,16 +16,21 @@ Expected columns:
 - `risk`
 - `notes`
 
-### `progressionActions`
+### `shardMilestones`
 
 Expected columns:
 - `id`
 - `label`
-- `resource`
+- `resourceBias`
 - `baseCost`
+- `costGrowth`
 - `baseValue`
+- `perLevelValue`
+- `breakpoints`
 - `confidence`
 - `notes`
+
+`breakpoints` can be provided as `level:bonusValue:reason|level:bonusValue:reason`.
 
 ### `gemNodes`
 

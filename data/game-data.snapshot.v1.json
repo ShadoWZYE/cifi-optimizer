@@ -5,7 +5,7 @@
     "mode": "hybrid-reference",
     "primarySources": [
       {
-        "label": "Verified CiFi reference spreadsheet",
+        "label": "Verified CIFI reference spreadsheet",
         "url": "https://docs.google.com/spreadsheets/d/1joQbD-lI7EfU83LP9Yn73cLOX-iqy-C5oHRc9bRsdow/edit"
       },
       {
@@ -62,44 +62,7 @@
       "notes": "Reliable alloy-focused generalist."
     }
   ],
-  "progressionActions": [
-    {
-      "id": "gem_hoard",
-      "label": "Bank gems for premium milestone",
-      "resource": "gems",
-      "baseCost": 500,
-      "baseValue": 780,
-      "confidence": 0.74,
-      "notes": "High-value premium path when gem inventory is below burst thresholds."
-    },
-    {
-      "id": "token_push",
-      "label": "Spend tokens on progression unlock",
-      "resource": "tokens",
-      "baseCost": 260,
-      "baseValue": 610,
-      "confidence": 0.7,
-      "notes": "Strong if token unlocks remove active bottlenecks."
-    },
-    {
-      "id": "relic_scaling",
-      "label": "Invest relics into compounding bonus",
-      "resource": "relics",
-      "baseCost": 150,
-      "baseValue": 530,
-      "confidence": 0.65,
-      "notes": "Lower immediate burst, higher long-tail compounding."
-    },
-    {
-      "id": "gem_nodes",
-      "label": "Upgrade gem nodes with current dust",
-      "resource": "gemDust",
-      "baseCost": 320,
-      "baseValue": 690,
-      "confidence": 0.79,
-      "notes": "Very efficient when current node levels are still uneven."
-    }
-  ],
+  "shardMilestones": [],
   "gemNodes": [
     {
       "id": "prism_focus",
@@ -149,9 +112,9 @@
     {
       "id": "progression-gems-midgame",
       "module": "progression",
-      "title": "Midgame premium priority",
-      "expected": "Upgrade gem nodes with current dust",
-      "description": "Balanced profile with healthy dust should surface gem nodes near the top."
+      "title": "Shard module grounded fallback",
+      "expected": "Shard milestone planner pending verified data",
+      "description": "Shard recommendations should remain in descriptive mode until verified milestone data is imported."
     },
     {
       "id": "gem-node-roi",

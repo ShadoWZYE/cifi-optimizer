@@ -9,24 +9,23 @@ const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 
 const defaultProfile = {
-  power: 980,
-  speed: 132,
-  cargo: 670,
-  gems: 860,
-  tokens: 430,
-  relics: 215,
-  gemDust: 540
+  power: 0,
+  speed: 0,
+  cargo: 0
 };
 
 assert.equal(snapshot.snapshotVersion, "v1.0.0-alpha");
 assert.ok(snapshot.shipLoadouts.length >= 4, "expected ship loadouts");
-assert.ok(snapshot.progressionActions.length >= 4, "expected progression actions");
+assert.deepEqual(snapshot.shardMilestones, [], "expected shard milestones to stay quarantined until verified");
 assert.ok(snapshot.gemNodes.length >= 4, "expected gem nodes");
+assert.ok(snapshot.validationCases.some((item) => item.expected === "Shard milestone planner pending verified data"), "expected grounded shard validation case");
 
 assert.match(html, /Player Data/);
 assert.match(html, /Game Data/);
 assert.match(html, /Ship Optimizer/);
 assert.match(html, /Apply to active snapshot/);
+assert.match(html, /Reset to blank profile/);
+assert.doesNotMatch(html, /Rank shard milestones/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);
@@ -38,6 +37,12 @@ assert.match(appJs, /function normalizePlayerProfile/);
 assert.match(appJs, /playerProfile:/);
 assert.match(appJs, /BroadcastChannel/);
 assert.match(appJs, /launcher-reopen/);
+assert.match(appJs, /kind:\s*"warning"/);
+assert.match(appJs, /Shard milestone planner pending verified data/);
+assert.doesNotMatch(appJs, /function getShardUpgradeCost/);
+assert.doesNotMatch(appJs, /function getShardUpgradeValue/);
+assert.doesNotMatch(appJs, /function getShardFocusWeight/);
+assert.doesNotMatch(appJs, /milestoneLevels/);
 assert.match(devServer, /\/api\/healthz/);
 assert.match(launcherVbs, /\?launch=1/);
 assert.match(launcherVbs, /ResolveNodePath/);
@@ -56,16 +61,6 @@ const shipWinner = [...snapshot.shipLoadouts]
   }))
   .sort((a, b) => b.score - a.score)[0];
 
-const progressionWinner = [...snapshot.progressionActions]
-  .map((item) => ({
-    label: item.label,
-    score:
-      item.baseValue *
-      Math.min(1.2, (defaultProfile[item.resource] || 0) / Math.max(item.baseCost, 1)) *
-      progressionUrgency(item.resource, "balanced")
-  }))
-  .sort((a, b) => b.score - a.score)[0];
-
 const gemWinner = [...snapshot.gemNodes]
   .map((node) => ({
     label: node.label,
@@ -74,17 +69,6 @@ const gemWinner = [...snapshot.gemNodes]
   .sort((a, b) => b.score - a.score)[0];
 
 assert.equal(shipWinner.name, "Freighter Overdrive");
-assert.equal(progressionWinner.label, "Upgrade gem nodes with current dust");
 assert.equal(gemWinner.label, "Surge Lattice");
 
 console.log("Smoke tests passed.");
-
-function progressionUrgency(resource, bias) {
-  const table = {
-    gems: bias === "premium" ? 1.16 : 0.96,
-    tokens: bias === "speed" ? 1.14 : 1,
-    relics: 0.94,
-    gemDust: 1.1
-  };
-  return table[resource] ?? 1;
-}

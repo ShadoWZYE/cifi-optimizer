@@ -14,9 +14,9 @@ startedServer = False
 
 If nodePath = "" Then
   MsgBox "Node.js could not be found." & vbCrLf & vbCrLf & _
-    "CiFi needs Node.js 18+ installed." & vbCrLf & _
+    "CIFI needs Node.js 18+ installed." & vbCrLf & _
     "Install Node.js from https://nodejs.org/ and make sure the installer adds Node to PATH, then try again." & vbCrLf & vbCrLf & _
-    "You can also use launch-cifi.bat to debug launcher startup.", vbExclamation, "CiFi Launcher"
+    "You can also use launch-cifi.bat to debug launcher startup.", vbExclamation, "CIFI Launcher"
   WScript.Quit 1
 End If
 
@@ -27,9 +27,9 @@ End If
 
 If startedServer Then
   If Not WaitForServer(healthUrl, 30, 500) Then
-    MsgBox "CiFi local server did not start within the expected time." & vbCrLf & vbCrLf & _
+    MsgBox "CIFI local server did not start within the expected time." & vbCrLf & vbCrLf & _
       "Resolved Node.js path:" & vbCrLf & nodePath & vbCrLf & vbCrLf & _
-      "Try launch-cifi.bat to see debug output.", vbExclamation, "CiFi Launcher"
+      "Try launch-cifi.bat to see debug output.", vbExclamation, "CIFI Launcher"
     WScript.Quit 1
   End If
 End If
