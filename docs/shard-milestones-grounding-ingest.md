@@ -1,7 +1,7 @@
 # Shard Milestones Grounding Ingest
 
 ## Source report
-- C:/Users/Shadow/Downloads/shard-milestones-grounded-2026-03-28.md
+- docs/research/shard-milestones-grounded-2026-03-28.md
 
 ## Generated artifacts
 - data/shard-milestones.grounded.v1.json
