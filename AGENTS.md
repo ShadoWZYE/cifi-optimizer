@@ -130,3 +130,18 @@ A change is good if:
 * it moves the repo closer to MVP scope
 * it reduces ambiguity in player state or recommendations
 * it improves clarity, not complexity
+
+---
+
+## Git Workflow Rules
+
+* Do not commit directly to `main`
+* Always create or switch to a task branch
+* After changes, run verification before committing
+* Push the task branch to `origin`
+* Report final git state:
+
+  * branch
+  * commit hash
+  * push result
+* Do not claim a branch was pushed unless push completed successfully
