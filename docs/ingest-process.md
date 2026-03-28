@@ -22,7 +22,7 @@
 
 - Resource goal weighting
 - Ship/loadout presets
-- Progression action tables
+- Shard milestone tables
 - Gem node value tables
 - Trait sphere constants
 - Hunter seed metadata

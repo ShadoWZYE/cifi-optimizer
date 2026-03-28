@@ -15,12 +15,18 @@ const defaultProfile = {
   gems: 860,
   tokens: 430,
   relics: 215,
-  gemDust: 540
+  gemDust: 540,
+  shards: 1850,
+  shardRatePerHour: 640,
+  shardMilestoneOpsLevel: 8,
+  shardMilestoneYieldLevel: 4,
+  shardMilestoneCellsLevel: 6,
+  shardMilestoneResearchLevel: 3
 };
 
 assert.equal(snapshot.snapshotVersion, "v1.0.0-alpha");
 assert.ok(snapshot.shipLoadouts.length >= 4, "expected ship loadouts");
-assert.ok(snapshot.progressionActions.length >= 4, "expected progression actions");
+assert.ok(snapshot.shardMilestones.length >= 4, "expected shard milestones");
 assert.ok(snapshot.gemNodes.length >= 4, "expected gem nodes");
 
 assert.match(html, /Player Data/);
@@ -56,14 +62,25 @@ const shipWinner = [...snapshot.shipLoadouts]
   }))
   .sort((a, b) => b.score - a.score)[0];
 
-const progressionWinner = [...snapshot.progressionActions]
-  .map((item) => ({
-    label: item.label,
-    score:
-      item.baseValue *
-      Math.min(1.2, (defaultProfile[item.resource] || 0) / Math.max(item.baseCost, 1)) *
-      progressionUrgency(item.resource, "balanced")
-  }))
+const progressionWinner = [...snapshot.shardMilestones]
+  .map((item) => {
+    const currentLevel = defaultProfile[{
+      opsAccelerator: "shardMilestoneOpsLevel",
+      shardCompression: "shardMilestoneYieldLevel",
+      hotspotScanner: "shardMilestoneCellsLevel",
+      researchSurvey: "shardMilestoneResearchLevel"
+    }[item.id]];
+    const targetLevel = item.breakpoints.map((breakpoint) => breakpoint.level).find((level) => level > currentLevel) ?? (currentLevel + 1);
+    const totalCost = sumUpgradeCost(item, currentLevel, targetLevel);
+    const totalValue = sumUpgradeValue(item, currentLevel, targetLevel);
+    const focusWeight = item.resourceBias === "shards" ? 1.25 : 1;
+    const proximityWeight = targetLevel - currentLevel <= 2 ? 1.22 : 1;
+    const affordabilityWeight = totalCost <= defaultProfile.shards ? 1.18 : 1;
+    return {
+      label: `Push ${item.label} to ${targetLevel}`,
+      score: (totalValue / Math.max(totalCost, 1)) * focusWeight * proximityWeight * affordabilityWeight * 100
+    };
+  })
   .sort((a, b) => b.score - a.score)[0];
 
 const gemWinner = [...snapshot.gemNodes]
@@ -74,17 +91,28 @@ const gemWinner = [...snapshot.gemNodes]
   .sort((a, b) => b.score - a.score)[0];
 
 assert.equal(shipWinner.name, "Freighter Overdrive");
-assert.equal(progressionWinner.label, "Upgrade gem nodes with current dust");
+assert.equal(progressionWinner.label, "Push Shard Compression to 5");
 assert.equal(gemWinner.label, "Surge Lattice");
 
 console.log("Smoke tests passed.");
 
-function progressionUrgency(resource, bias) {
-  const table = {
-    gems: bias === "premium" ? 1.16 : 0.96,
-    tokens: bias === "speed" ? 1.14 : 1,
-    relics: 0.94,
-    gemDust: 1.1
-  };
-  return table[resource] ?? 1;
+function sumUpgradeCost(item, currentLevel, targetLevel) {
+  let total = 0;
+  for (let level = currentLevel; level < targetLevel; level += 1) {
+    total += item.baseCost * Math.pow(item.costGrowth, level);
+  }
+  return Math.round(total);
+}
+
+function sumUpgradeValue(item, currentLevel, targetLevel) {
+  let total = 0;
+  for (let level = currentLevel; level < targetLevel; level += 1) {
+    total += item.perLevelValue;
+  }
+  item.breakpoints.forEach((breakpoint) => {
+    if (breakpoint.level > currentLevel && breakpoint.level <= targetLevel) {
+      total += breakpoint.bonusValue;
+    }
+  });
+  return total;
 }

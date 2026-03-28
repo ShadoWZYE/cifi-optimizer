@@ -62,42 +62,70 @@
       "notes": "Reliable alloy-focused generalist."
     }
   ],
-  "progressionActions": [
+  "shardMilestones": [
     {
-      "id": "gem_hoard",
-      "label": "Bank gems for premium milestone",
-      "resource": "gems",
-      "baseCost": 500,
-      "baseValue": 780,
-      "confidence": 0.74,
-      "notes": "High-value premium path when gem inventory is below burst thresholds."
+      "id": "opsAccelerator",
+      "label": "Operations Throughput",
+      "resourceBias": "shards",
+      "baseCost": 120,
+      "costGrowth": 1.32,
+      "baseValue": 34,
+      "perLevelValue": 20,
+      "breakpoints": [
+        { "level": 5, "bonusValue": 34, "reason": "the first operations cadence breakpoint" },
+        { "level": 10, "bonusValue": 92, "reason": "a stronger operations throughput breakpoint" },
+        { "level": 25, "bonusValue": 230, "reason": "the next major operations breakpoint" }
+      ],
+      "confidence": 0.82,
+      "notes": "Prioritizes faster shard generation loops through operations throughput."
     },
     {
-      "id": "token_push",
-      "label": "Spend tokens on progression unlock",
-      "resource": "tokens",
-      "baseCost": 260,
-      "baseValue": 610,
-      "confidence": 0.7,
-      "notes": "Strong if token unlocks remove active bottlenecks."
-    },
-    {
-      "id": "relic_scaling",
-      "label": "Invest relics into compounding bonus",
-      "resource": "relics",
-      "baseCost": 150,
-      "baseValue": 530,
-      "confidence": 0.65,
-      "notes": "Lower immediate burst, higher long-tail compounding."
-    },
-    {
-      "id": "gem_nodes",
-      "label": "Upgrade gem nodes with current dust",
-      "resource": "gemDust",
-      "baseCost": 320,
-      "baseValue": 690,
+      "id": "shardCompression",
+      "label": "Shard Compression",
+      "resourceBias": "shards",
+      "baseCost": 145,
+      "costGrowth": 1.35,
+      "baseValue": 41,
+      "perLevelValue": 24,
+      "breakpoints": [
+        { "level": 5, "bonusValue": 48, "reason": "a higher shard multiplier breakpoint" },
+        { "level": 10, "bonusValue": 118, "reason": "the next shard compression breakpoint" },
+        { "level": 25, "bonusValue": 275, "reason": "a major late breakpoint for shard output" }
+      ],
       "confidence": 0.79,
-      "notes": "Very efficient when current node levels are still uneven."
+      "notes": "More expensive, but valuable when you can sustain shard-focused runs."
+    },
+    {
+      "id": "hotspotScanner",
+      "label": "Hotspot Scanner",
+      "resourceBias": "cells",
+      "baseCost": 100,
+      "costGrowth": 1.29,
+      "baseValue": 28,
+      "perLevelValue": 18,
+      "breakpoints": [
+        { "level": 5, "bonusValue": 28, "reason": "better hotspot consistency" },
+        { "level": 10, "bonusValue": 75, "reason": "the next hotspot scanner breakpoint" },
+        { "level": 25, "bonusValue": 180, "reason": "a major scanner breakpoint" }
+      ],
+      "confidence": 0.76,
+      "notes": "Useful when shard milestones are being used to support a cell push."
+    },
+    {
+      "id": "researchSurvey",
+      "label": "Research Survey",
+      "resourceBias": "research",
+      "baseCost": 110,
+      "costGrowth": 1.31,
+      "baseValue": 30,
+      "perLevelValue": 19,
+      "breakpoints": [
+        { "level": 5, "bonusValue": 30, "reason": "the first research survey breakpoint" },
+        { "level": 10, "bonusValue": 81, "reason": "the next research survey breakpoint" },
+        { "level": 25, "bonusValue": 190, "reason": "a major research survey breakpoint" }
+      ],
+      "confidence": 0.77,
+      "notes": "Supports research-adjacent shard planning without becoming a full research planner."
     }
   ],
   "gemNodes": [
@@ -149,9 +177,9 @@
     {
       "id": "progression-gems-midgame",
       "module": "progression",
-      "title": "Midgame premium priority",
-      "expected": "Upgrade gem nodes with current dust",
-      "description": "Balanced profile with healthy dust should surface gem nodes near the top."
+      "title": "Midgame shard breakpoint priority",
+      "expected": "Push Shard Compression to 5",
+      "description": "Default shard profile should prefer the most efficient near-term shard breakpoint."
     },
     {
       "id": "gem-node-roi",

@@ -13,7 +13,7 @@ Important: the current optimizer math and sample data are still prototype placeh
 - Local sheet-data import workspace for CSV and JSON exports
 - Generator manual-value OCR import scaffold on the `Data` page
 - Ship loadout optimizer
-- Progression priority recommender
+- Shard milestone recommender
 - Gem-node optimizer
 - Validation panel with parity-style benchmark checks
 - Research panel for hunter simulation centralization, mech planning, and input automation

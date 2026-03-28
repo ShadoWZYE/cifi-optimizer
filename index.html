@@ -163,6 +163,10 @@
                 <label for="gemDust">Gem dust</label>
                 <input id="gemDust" name="gemDust" type="number" min="0" step="1">
               </div>
+              <div class="field-group">
+                <label for="shards">Current shards</label>
+                <input id="shards" name="shards" type="number" min="0" step="1">
+              </div>
             </div>
 
             <div class="field-grid">
@@ -181,6 +185,29 @@
               <div class="field-group">
                 <label for="researchHours">Available sim / research hours</label>
                 <input id="researchHours" name="researchHours" type="number" min="0" step="1">
+              </div>
+              <div class="field-group">
+                <label for="shardRatePerHour">Shard income / hour</label>
+                <input id="shardRatePerHour" name="shardRatePerHour" type="number" min="0" step="1">
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field-group">
+                <label for="shardMilestoneOpsLevel">Operations throughput level</label>
+                <input id="shardMilestoneOpsLevel" name="shardMilestoneOpsLevel" type="number" min="0" step="1">
+              </div>
+              <div class="field-group">
+                <label for="shardMilestoneYieldLevel">Shard compression level</label>
+                <input id="shardMilestoneYieldLevel" name="shardMilestoneYieldLevel" type="number" min="0" step="1">
+              </div>
+              <div class="field-group">
+                <label for="shardMilestoneCellsLevel">Hotspot scanner level</label>
+                <input id="shardMilestoneCellsLevel" name="shardMilestoneCellsLevel" type="number" min="0" step="1">
+              </div>
+              <div class="field-group">
+                <label for="shardMilestoneResearchLevel">Research survey level</label>
+                <input id="shardMilestoneResearchLevel" name="shardMilestoneResearchLevel" type="number" min="0" step="1">
               </div>
             </div>
 
@@ -232,7 +259,7 @@
                 <label for="importDataset">Dataset type</label>
                 <select id="importDataset">
                   <option value="shipLoadouts">Ship loadouts</option>
-                  <option value="progressionActions">Progression actions</option>
+                  <option value="shardMilestones">Shard milestones</option>
                   <option value="gemNodes">Gem nodes</option>
                   <option value="validationCases">Validation cases</option>
                   <option value="researchTracks">Research tracks</option>
@@ -361,7 +388,7 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Progression</p>
-            <h2>Rank next-best actions</h2>
+            <h2>Shard milestone optimizer</h2>
           </div>
         </div>
         <section class="panel">
@@ -370,11 +397,11 @@
               <label for="progressionBias">Priority bias</label>
               <select id="progressionBias">
                 <option value="balanced">Balanced</option>
-                <option value="premium">Premium efficiency</option>
-                <option value="speed">Fastest power gain</option>
+                <option value="premium">Shard-first</option>
+                <option value="speed">Cell push</option>
               </select>
             </div>
-            <button id="runProgressionOptimizer" class="button button-primary">Rank next best actions</button>
+            <button id="runProgressionOptimizer" class="button button-primary">Rank shard milestones</button>
           </div>
           <div id="progressionResults" class="recommendation-list"></div>
         </section>
