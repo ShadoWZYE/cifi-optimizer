@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+
+Name: AndroidManifest.xml
+SHA1-Digest: y4Sk7FbNDRtudUUG96RHWZs8PCE=
+
+Name: lib/x86_64/libil2cpp.so
+SHA1-Digest: gHfGkr6izeydvcFuRkiCveQyzR0=
+
+Name: lib/x86_64/liblofelt_sdk.so
+SHA1-Digest: t3Xut/ST2XFDumP/yz1nEb9TjC4=
+
+Name: lib/x86_64/libmain.so
+SHA1-Digest: 01bj9KbBcuo1dkoGQv486u3jjx0=
+
+Name: lib/x86_64/libpairipcore.so
+SHA1-Digest: +6pNduvNNOnyb/NzkisWfeV8QBI=
+
+Name: lib/x86_64/libunity.so
+SHA1-Digest: Eq6g6V7qWxXptKe2zrjTvNeXpt8=
+
+Name: stamp-cert-sha256
+SHA1-Digest: 5vTkm69vqAbusD/fho7oWwc7j+I=
+
