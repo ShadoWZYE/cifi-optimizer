@@ -86,6 +86,22 @@ Numeric UX should follow CIFI-style conventions where possible, while keeping pa
 - `docs/cifi_verified_spec.md` — grounding spec
 - `docs/cifi_grounding_plan.md` — grounding migration plan
 - `docs/cifi_sources.md` — public source list
+- `docs/unity-audit-playbook.md` — repeatable Unity/IL2CPP mechanic extraction workflow
+- `docs/unity-owner-map.md` — grounded mechanic owner index
+- `docs/token-shop-values.md` — extracted token mechanic constants
+- `docs/multiverse-market-values.md` — extracted Chrystos Emporium constants
+
+## Reverse-engineering resume
+
+The current mechanic-extraction work is resumable from checked-in scripts and documentation.
+
+- Start with [`docs/unity-audit-playbook.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity-audit-playbook.md)
+- Use [`docs/unity-owner-map.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity-owner-map.md) for the current grounded owner list
+- Re-run:
+  - `python scripts/token_shop_parse.py`
+  - `python scripts/multiverse_market_parse.py`
+
+These scripts assume the machine-local extracted Unity inputs exist under `_cifi_apk` and `_unity_joined`.
 
 ## Current repo status
 

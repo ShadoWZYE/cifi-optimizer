@@ -1,0 +1,2161 @@
+{
+  "source": {
+    "metadata": "C:\\Users\\Shadow\\Desktop\\CiFi\\_cifi_apk\\global-metadata.dat",
+    "level0": "C:\\Users\\Shadow\\Desktop\\CiFi\\_unity_joined\\level0",
+    "token_shop_absolute_offset": 32801984,
+    "token_shop_field_offset": 236
+  },
+  "field_count": 227,
+  "fields": [
+    {
+      "field": "MeltdownActiveObject",
+      "group": "controller",
+      "object_offset": 236,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 34124
+    },
+    {
+      "field": "MeltdownT2ActiveObject",
+      "group": "controller",
+      "object_offset": 248,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 34125
+    },
+    {
+      "field": "MeltdownT3ActiveObject",
+      "group": "controller",
+      "object_offset": 260,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 34129
+    },
+    {
+      "field": "BankFill",
+      "group": "controller",
+      "object_offset": 272,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 309975
+    },
+    {
+      "field": "TokenShopButtonNotification",
+      "group": "controller",
+      "object_offset": 284,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 899
+    },
+    {
+      "field": "NavButtonNotification",
+      "group": "controller",
+      "object_offset": 296,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 13639
+    },
+    {
+      "field": "TokenBankDescriptionText",
+      "group": "controller",
+      "object_offset": 308,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 290364
+    },
+    {
+      "field": "TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 320,
+      "kind": "number",
+      "raw_u32": 1101004800,
+      "raw_f32": 20.0,
+      "value": 20.0
+    },
+    {
+      "field": "TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 324,
+      "kind": "number",
+      "raw_u32": 1084227584,
+      "raw_f32": 5.0,
+      "value": 5.0
+    },
+    {
+      "field": "TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 328,
+      "kind": "number",
+      "raw_u32": 1045220557,
+      "raw_f32": 0.20000000298023224,
+      "value": 0.20000000298023224
+    },
+    {
+      "field": "TokenBoostMaxLevel",
+      "group": "tier1",
+      "object_offset": 332,
+      "kind": "number",
+      "raw_u32": 20,
+      "raw_f32": 2.802596928649634e-44,
+      "value": 20
+    },
+    {
+      "field": "TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 336,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294959
+    },
+    {
+      "field": "ATU1Button",
+      "group": "controller",
+      "object_offset": 348,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15839
+    },
+    {
+      "field": "ATU1MaxOverlay",
+      "group": "controller",
+      "object_offset": 360,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49520
+    },
+    {
+      "field": "DiamondBoostStartCost",
+      "group": "tier1",
+      "object_offset": 372,
+      "kind": "number",
+      "raw_u32": 1128792064,
+      "raw_f32": 200.0,
+      "value": 200.0
+    },
+    {
+      "field": "DiamondBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 376,
+      "kind": "number",
+      "raw_u32": 1133903872,
+      "raw_f32": 300.0,
+      "value": 300.0
+    },
+    {
+      "field": "DiamondBoostBonus",
+      "group": "tier1",
+      "object_offset": 380,
+      "kind": "number",
+      "raw_u32": 1,
+      "raw_f32": 1.401298464324817e-45,
+      "value": 1
+    },
+    {
+      "field": "DiamondBoostMaxLevel",
+      "group": "tier1",
+      "object_offset": 384,
+      "kind": "number",
+      "raw_u32": 2,
+      "raw_f32": 2.802596928649634e-45,
+      "value": 2
+    },
+    {
+      "field": "DiamondBoostFill",
+      "group": "tier1",
+      "object_offset": 388,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 295016
+    },
+    {
+      "field": "ATU2Button",
+      "group": "controller",
+      "object_offset": 400,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15804
+    },
+    {
+      "field": "ATU2MaxOverlay",
+      "group": "controller",
+      "object_offset": 412,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49464
+    },
+    {
+      "field": "CellBoostStartCost",
+      "group": "tier1",
+      "object_offset": 424,
+      "kind": "number",
+      "raw_u32": 1065353216,
+      "raw_f32": 1.0,
+      "value": 1.0
+    },
+    {
+      "field": "CellBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 428,
+      "kind": "number",
+      "raw_u32": 1048576000,
+      "raw_f32": 0.25,
+      "value": 0.25
+    },
+    {
+      "field": "CellBoostBonus",
+      "group": "tier1",
+      "object_offset": 432,
+      "kind": "number",
+      "raw_u32": 1,
+      "raw_f32": 1.401298464324817e-45,
+      "value": 1
+    },
+    {
+      "field": "CellBoostMaxLevel",
+      "group": "tier1",
+      "object_offset": 436,
+      "kind": "number",
+      "raw_u32": 60,
+      "raw_f32": 8.407790785948902e-44,
+      "value": 60
+    },
+    {
+      "field": "CellBoostFill",
+      "group": "tier1",
+      "object_offset": 440,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294990
+    },
+    {
+      "field": "ATU3Button",
+      "group": "controller",
+      "object_offset": 452,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15810
+    },
+    {
+      "field": "ATU3MaxOverlay",
+      "group": "controller",
+      "object_offset": 464,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49488
+    },
+    {
+      "field": "ModBoostStartCost",
+      "group": "tier1",
+      "object_offset": 476,
+      "kind": "number",
+      "raw_u32": 1092616192,
+      "raw_f32": 10.0,
+      "value": 10.0
+    },
+    {
+      "field": "ModBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 480,
+      "kind": "number",
+      "raw_u32": 1073741824,
+      "raw_f32": 2.0,
+      "value": 2.0
+    },
+    {
+      "field": "ModBoostBonus",
+      "group": "tier1",
+      "object_offset": 484,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "ModBoostMaxLevel",
+      "group": "tier1",
+      "object_offset": 488,
+      "kind": "number",
+      "raw_u32": 200,
+      "raw_f32": 2.802596928649634e-43,
+      "value": 200
+    },
+    {
+      "field": "ModBoostFill",
+      "group": "tier1",
+      "object_offset": 492,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 295004
+    },
+    {
+      "field": "ATU4Button",
+      "group": "controller",
+      "object_offset": 504,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15796
+    },
+    {
+      "field": "ATU4MaxOverlay",
+      "group": "controller",
+      "object_offset": 516,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49474
+    },
+    {
+      "field": "ATU4Content",
+      "group": "controller",
+      "object_offset": 528,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33007
+    },
+    {
+      "field": "ATU4Overlay",
+      "group": "controller",
+      "object_offset": 540,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32827
+    },
+    {
+      "field": "MK1TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 552,
+      "kind": "number",
+      "raw_u32": 1065353216,
+      "raw_f32": 1.0,
+      "value": 1.0
+    },
+    {
+      "field": "MK1TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 556,
+      "kind": "number",
+      "raw_u32": 1036831949,
+      "raw_f32": 0.10000000149011612,
+      "value": 0.10000000149011612
+    },
+    {
+      "field": "MK1TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 560,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "MK1TokenBoostFillMaxLevel",
+      "group": "tier1",
+      "object_offset": 564,
+      "kind": "number",
+      "raw_u32": 5000,
+      "raw_f32": 7.006492321624085e-42,
+      "value": 5000
+    },
+    {
+      "field": "MK1TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 568,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294981
+    },
+    {
+      "field": "ATU5Button",
+      "group": "controller",
+      "object_offset": 580,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15831
+    },
+    {
+      "field": "ATU5MaxOverlay",
+      "group": "controller",
+      "object_offset": 592,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49497
+    },
+    {
+      "field": "ATU5Content",
+      "group": "controller",
+      "object_offset": 604,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33042
+    },
+    {
+      "field": "ATU5Overlay",
+      "group": "controller",
+      "object_offset": 616,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32851
+    },
+    {
+      "field": "MK2TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 628,
+      "kind": "number",
+      "raw_u32": 1073741824,
+      "raw_f32": 2.0,
+      "value": 2.0
+    },
+    {
+      "field": "MK2TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 632,
+      "kind": "number",
+      "raw_u32": 1039516303,
+      "raw_f32": 0.11999999731779099,
+      "value": 0.11999999731779099
+    },
+    {
+      "field": "MK2TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 636,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "MK2TokenBoostFillMaxLevel",
+      "group": "tier1",
+      "object_offset": 640,
+      "kind": "number",
+      "raw_u32": 5000,
+      "raw_f32": 7.006492321624085e-42,
+      "value": 5000
+    },
+    {
+      "field": "MK2TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 644,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294962
+    },
+    {
+      "field": "ATU6Button",
+      "group": "controller",
+      "object_offset": 656,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15835
+    },
+    {
+      "field": "ATU6MaxOverlay",
+      "group": "controller",
+      "object_offset": 668,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49516
+    },
+    {
+      "field": "ATU6Content",
+      "group": "controller",
+      "object_offset": 680,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33047
+    },
+    {
+      "field": "ATU6Overlay",
+      "group": "controller",
+      "object_offset": 692,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32870
+    },
+    {
+      "field": "MK3TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 704,
+      "kind": "number",
+      "raw_u32": 1077936128,
+      "raw_f32": 3.0,
+      "value": 3.0
+    },
+    {
+      "field": "MK3TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 708,
+      "kind": "number",
+      "raw_u32": 1040522936,
+      "raw_f32": 0.12999999523162842,
+      "value": 0.12999999523162842
+    },
+    {
+      "field": "MK3TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 712,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "MK3TokenBoostFillMaxLevel",
+      "group": "tier1",
+      "object_offset": 716,
+      "kind": "number",
+      "raw_u32": 5000,
+      "raw_f32": 7.006492321624085e-42,
+      "value": 5000
+    },
+    {
+      "field": "MK3TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 720,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 295013
+    },
+    {
+      "field": "ATU7Button",
+      "group": "controller",
+      "object_offset": 732,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15792
+    },
+    {
+      "field": "ATU7MaxOverlay",
+      "group": "controller",
+      "object_offset": 744,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49468
+    },
+    {
+      "field": "ATU7Content",
+      "group": "controller",
+      "object_offset": 756,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33004
+    },
+    {
+      "field": "ATU7Overlay",
+      "group": "controller",
+      "object_offset": 768,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32818
+    },
+    {
+      "field": "MK4TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 780,
+      "kind": "number",
+      "raw_u32": 1082130432,
+      "raw_f32": 4.0,
+      "value": 4.0
+    },
+    {
+      "field": "MK4TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 784,
+      "kind": "number",
+      "raw_u32": 1041194025,
+      "raw_f32": 0.14000000059604645,
+      "value": 0.14000000059604645
+    },
+    {
+      "field": "MK4TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 788,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "MK4TokenBoostFillMaxLevel",
+      "group": "tier1",
+      "object_offset": 792,
+      "kind": "number",
+      "raw_u32": 5000,
+      "raw_f32": 7.006492321624085e-42,
+      "value": 5000
+    },
+    {
+      "field": "MK4TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 796,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 295008
+    },
+    {
+      "field": "ATU8Button",
+      "group": "controller",
+      "object_offset": 808,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15795
+    },
+    {
+      "field": "ATU8MaxOverlay",
+      "group": "controller",
+      "object_offset": 820,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49470
+    },
+    {
+      "field": "ATU8Content",
+      "group": "controller",
+      "object_offset": 832,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33008
+    },
+    {
+      "field": "ATU8Overlay",
+      "group": "controller",
+      "object_offset": 844,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32825
+    },
+    {
+      "field": "MK5TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 856,
+      "kind": "number",
+      "raw_u32": 1097859072,
+      "raw_f32": 15.0,
+      "value": 15.0
+    },
+    {
+      "field": "MK5TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 860,
+      "kind": "number",
+      "raw_u32": 1041865114,
+      "raw_f32": 0.15000000596046448,
+      "value": 0.15000000596046448
+    },
+    {
+      "field": "MK5TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 864,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "MK5TokenBoostFillMaxLevel",
+      "group": "tier1",
+      "object_offset": 868,
+      "kind": "number",
+      "raw_u32": 5000,
+      "raw_f32": 7.006492321624085e-42,
+      "value": 5000
+    },
+    {
+      "field": "MK5TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 872,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294973
+    },
+    {
+      "field": "ATU9Button",
+      "group": "controller",
+      "object_offset": 884,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15845
+    },
+    {
+      "field": "ATU9MaxOverlay",
+      "group": "controller",
+      "object_offset": 896,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49508
+    },
+    {
+      "field": "ATU9Content",
+      "group": "controller",
+      "object_offset": 908,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33056
+    },
+    {
+      "field": "ATU9Overlay",
+      "group": "controller",
+      "object_offset": 920,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32859
+    },
+    {
+      "field": "MK6TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 932,
+      "kind": "number",
+      "raw_u32": 1104150528,
+      "raw_f32": 26.0,
+      "value": 26.0
+    },
+    {
+      "field": "MK6TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 936,
+      "kind": "number",
+      "raw_u32": 1042536202,
+      "raw_f32": 0.1599999964237213,
+      "value": 0.1599999964237213
+    },
+    {
+      "field": "MK6TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 940,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "MK6TokenBoostFillMaxLevel",
+      "group": "tier1",
+      "object_offset": 944,
+      "kind": "number",
+      "raw_u32": 5000,
+      "raw_f32": 7.006492321624085e-42,
+      "value": 5000
+    },
+    {
+      "field": "MK6TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 948,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294961
+    },
+    {
+      "field": "ATU10Button",
+      "group": "controller",
+      "object_offset": 960,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15837
+    },
+    {
+      "field": "ATU10MaxOverlay",
+      "group": "controller",
+      "object_offset": 972,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49518
+    },
+    {
+      "field": "ATU10Content",
+      "group": "controller",
+      "object_offset": 984,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33046
+    },
+    {
+      "field": "ATU10Overlay",
+      "group": "controller",
+      "object_offset": 996,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32871
+    },
+    {
+      "field": "MK7TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 1008,
+      "kind": "number",
+      "raw_u32": 1108606976,
+      "raw_f32": 37.0,
+      "value": 37.0
+    },
+    {
+      "field": "MK7TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 1012,
+      "kind": "number",
+      "raw_u32": 1045220557,
+      "raw_f32": 0.20000000298023224,
+      "value": 0.20000000298023224
+    },
+    {
+      "field": "MK7TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 1016,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "MK7TokenBoostFillMaxLevel",
+      "group": "tier1",
+      "object_offset": 1020,
+      "kind": "number",
+      "raw_u32": 5000,
+      "raw_f32": 7.006492321624085e-42,
+      "value": 5000
+    },
+    {
+      "field": "MK7TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 1024,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 295014
+    },
+    {
+      "field": "ATU11Button",
+      "group": "controller",
+      "object_offset": 1036,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15793
+    },
+    {
+      "field": "ATU11MaxOverlay",
+      "group": "controller",
+      "object_offset": 1048,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49469
+    },
+    {
+      "field": "ATU11Content",
+      "group": "controller",
+      "object_offset": 1060,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33003
+    },
+    {
+      "field": "ATU11Overlay",
+      "group": "controller",
+      "object_offset": 1072,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32819
+    },
+    {
+      "field": "MK8TokenBoostStartCost",
+      "group": "tier1",
+      "object_offset": 1084,
+      "kind": "number",
+      "raw_u32": 1111490560,
+      "raw_f32": 48.0,
+      "value": 48.0
+    },
+    {
+      "field": "MK8TokenBoostAdditiveCost",
+      "group": "tier1",
+      "object_offset": 1088,
+      "kind": "number",
+      "raw_u32": 1050253722,
+      "raw_f32": 0.30000001192092896,
+      "value": 0.30000001192092896
+    },
+    {
+      "field": "MK8TokenBoostBonus",
+      "group": "tier1",
+      "object_offset": 1092,
+      "kind": "number",
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568,
+      "value": 1.0099999904632568
+    },
+    {
+      "field": "MK8TokenBoostFillMaxLevel",
+      "group": "tier1",
+      "object_offset": 1096,
+      "kind": "number",
+      "raw_u32": 5000,
+      "raw_f32": 7.006492321624085e-42,
+      "value": 5000
+    },
+    {
+      "field": "MK8TokenBoostFill",
+      "group": "tier1",
+      "object_offset": 1100,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 295000
+    },
+    {
+      "field": "ATU12Button",
+      "group": "controller",
+      "object_offset": 1112,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15814
+    },
+    {
+      "field": "ATU12MaxOverlay",
+      "group": "controller",
+      "object_offset": 1124,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49477
+    },
+    {
+      "field": "ATU12Content",
+      "group": "controller",
+      "object_offset": 1136,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 33025
+    },
+    {
+      "field": "ATU12Overlay",
+      "group": "controller",
+      "object_offset": 1148,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 32832
+    },
+    {
+      "field": "TokenBoostT2StartCost",
+      "group": "tier1",
+      "object_offset": 1160,
+      "kind": "number",
+      "raw_u32": 1148846080,
+      "raw_f32": 1000.0,
+      "value": 1000.0
+    },
+    {
+      "field": "TokenBoostT2AdditiveCost",
+      "group": "tier1",
+      "object_offset": 1164,
+      "kind": "number",
+      "raw_u32": 1140457472,
+      "raw_f32": 500.0,
+      "value": 500.0
+    },
+    {
+      "field": "TokenBoostT2Bonus",
+      "group": "tier1",
+      "object_offset": 1168,
+      "kind": "number",
+      "raw_u32": 1056964608,
+      "raw_f32": 0.5,
+      "value": 0.5
+    },
+    {
+      "field": "TokenBoostT2MaxLevel",
+      "group": "tier1",
+      "object_offset": 1172,
+      "kind": "number",
+      "raw_u32": 10,
+      "raw_f32": 1.401298464324817e-44,
+      "value": 10
+    },
+    {
+      "field": "TokenBoostT2Fill",
+      "group": "tier1",
+      "object_offset": 1176,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294977
+    },
+    {
+      "field": "ATU13Button",
+      "group": "controller",
+      "object_offset": 1188,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15821
+    },
+    {
+      "field": "ATU13MaxOverlay",
+      "group": "controller",
+      "object_offset": 1200,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49502
+    },
+    {
+      "field": "TokenDailiesT2StartCost",
+      "group": "tier2",
+      "object_offset": 1212,
+      "kind": "number",
+      "raw_u32": 1148846080,
+      "raw_f32": 1000.0,
+      "value": 1000.0
+    },
+    {
+      "field": "TokenDailiesT2AdditiveCost",
+      "group": "tier2",
+      "object_offset": 1216,
+      "kind": "number",
+      "raw_u32": 1145569280,
+      "raw_f32": 800.0,
+      "value": 800.0
+    },
+    {
+      "field": "TokenDailiesT2Bonus",
+      "group": "tier2",
+      "object_offset": 1220,
+      "kind": "number",
+      "raw_u32": 1045220557,
+      "raw_f32": 0.20000000298023224,
+      "value": 0.20000000298023224
+    },
+    {
+      "field": "TokenDailiesT2MaxLevel",
+      "group": "tier2",
+      "object_offset": 1224,
+      "kind": "number",
+      "raw_u32": 10,
+      "raw_f32": 1.401298464324817e-44,
+      "value": 10
+    },
+    {
+      "field": "TokenDailiesT2Fill",
+      "group": "tier2",
+      "object_offset": 1228,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294972
+    },
+    {
+      "field": "ATU14Button",
+      "group": "controller",
+      "object_offset": 1240,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15844
+    },
+    {
+      "field": "ATU14MaxOverlay",
+      "group": "controller",
+      "object_offset": 1252,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49509
+    },
+    {
+      "field": "T2Duo1StartCost",
+      "group": "tier2",
+      "object_offset": 1264,
+      "kind": "number",
+      "raw_u32": 1151295488,
+      "raw_f32": 1275.0,
+      "value": 1275.0
+    },
+    {
+      "field": "T2Duo1AdditiveCost",
+      "group": "tier2",
+      "object_offset": 1268,
+      "kind": "number",
+      "raw_u32": 1103626240,
+      "raw_f32": 25.0,
+      "value": 25.0
+    },
+    {
+      "field": "T2Duo1Bonus",
+      "group": "tier2",
+      "object_offset": 1272,
+      "kind": "number",
+      "raw_u32": 1065520988,
+      "raw_f32": 1.0199999809265137,
+      "value": 1.0199999809265137
+    },
+    {
+      "field": "T2Duo1MaxLevel",
+      "group": "tier2",
+      "object_offset": 1276,
+      "kind": "number",
+      "raw_u32": 500,
+      "raw_f32": 7.006492321624085e-43,
+      "value": 500
+    },
+    {
+      "field": "T2Duo1Fill",
+      "group": "tier2",
+      "object_offset": 1280,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294965
+    },
+    {
+      "field": "ATU15Button",
+      "group": "controller",
+      "object_offset": 1292,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15850
+    },
+    {
+      "field": "ATU15MaxOverlay",
+      "group": "controller",
+      "object_offset": 1304,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49514
+    },
+    {
+      "field": "T2Duo2StartCost",
+      "group": "tier2",
+      "object_offset": 1316,
+      "kind": "number",
+      "raw_u32": 1117126656,
+      "raw_f32": 75.0,
+      "value": 75.0
+    },
+    {
+      "field": "T2Duo2AdditiveCost",
+      "group": "tier2",
+      "object_offset": 1320,
+      "kind": "number",
+      "raw_u32": 1073741824,
+      "raw_f32": 2.0,
+      "value": 2.0
+    },
+    {
+      "field": "T2Duo2Bonus",
+      "group": "tier2",
+      "object_offset": 1324,
+      "kind": "number",
+      "raw_u32": 1065520988,
+      "raw_f32": 1.0199999809265137,
+      "value": 1.0199999809265137
+    },
+    {
+      "field": "T2Duo2MaxLevel",
+      "group": "tier2",
+      "object_offset": 1328,
+      "kind": "number",
+      "raw_u32": 2500,
+      "raw_f32": 3.5032461608120427e-42,
+      "value": 2500
+    },
+    {
+      "field": "T2Duo2Fill",
+      "group": "tier2",
+      "object_offset": 1332,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294986
+    },
+    {
+      "field": "ATU16Button",
+      "group": "controller",
+      "object_offset": 1344,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15827
+    },
+    {
+      "field": "ATU16MaxOverlay",
+      "group": "controller",
+      "object_offset": 1356,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49493
+    },
+    {
+      "field": "T2Duo3StartCost",
+      "group": "tier2",
+      "object_offset": 1368,
+      "kind": "number",
+      "raw_u32": 1120403456,
+      "raw_f32": 100.0,
+      "value": 100.0
+    },
+    {
+      "field": "T2Duo3AdditiveCost",
+      "group": "tier2",
+      "object_offset": 1372,
+      "kind": "number",
+      "raw_u32": 1077936128,
+      "raw_f32": 3.0,
+      "value": 3.0
+    },
+    {
+      "field": "T2Duo3Bonus",
+      "group": "tier2",
+      "object_offset": 1376,
+      "kind": "number",
+      "raw_u32": 1065520988,
+      "raw_f32": 1.0199999809265137,
+      "value": 1.0199999809265137
+    },
+    {
+      "field": "T2Duo3MaxLevel",
+      "group": "tier2",
+      "object_offset": 1380,
+      "kind": "number",
+      "raw_u32": 2500,
+      "raw_f32": 3.5032461608120427e-42,
+      "value": 2500
+    },
+    {
+      "field": "T2Duo3Fill",
+      "group": "tier2",
+      "object_offset": 1384,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294958
+    },
+    {
+      "field": "ATU17Button",
+      "group": "controller",
+      "object_offset": 1396,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15841
+    },
+    {
+      "field": "ATU17MaxOverlay",
+      "group": "controller",
+      "object_offset": 1408,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49521
+    },
+    {
+      "field": "T2Duo4StartCost",
+      "group": "tier2",
+      "object_offset": 1420,
+      "kind": "number",
+      "raw_u32": 1123680256,
+      "raw_f32": 125.0,
+      "value": 125.0
+    },
+    {
+      "field": "T2Duo4AdditiveCost",
+      "group": "tier2",
+      "object_offset": 1424,
+      "kind": "number",
+      "raw_u32": 1082130432,
+      "raw_f32": 4.0,
+      "value": 4.0
+    },
+    {
+      "field": "T2Duo4Bonus",
+      "group": "tier2",
+      "object_offset": 1428,
+      "kind": "number",
+      "raw_u32": 1065520988,
+      "raw_f32": 1.0199999809265137,
+      "value": 1.0199999809265137
+    },
+    {
+      "field": "T2Duo4MaxLevel",
+      "group": "tier2",
+      "object_offset": 1432,
+      "kind": "number",
+      "raw_u32": 2500,
+      "raw_f32": 3.5032461608120427e-42,
+      "value": 2500
+    },
+    {
+      "field": "T2Duo4Fill",
+      "group": "tier2",
+      "object_offset": 1436,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294985
+    },
+    {
+      "field": "ATU18Button",
+      "group": "controller",
+      "object_offset": 1448,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15834
+    },
+    {
+      "field": "ATU18MaxOverlay",
+      "group": "controller",
+      "object_offset": 1460,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49498
+    },
+    {
+      "field": "T2Duo5StartCost",
+      "group": "tier2",
+      "object_offset": 1472,
+      "kind": "number",
+      "raw_u32": 1125515264,
+      "raw_f32": 150.0,
+      "value": 150.0
+    },
+    {
+      "field": "T2Duo5AdditiveCost",
+      "group": "tier2",
+      "object_offset": 1476,
+      "kind": "number",
+      "raw_u32": 1084227584,
+      "raw_f32": 5.0,
+      "value": 5.0
+    },
+    {
+      "field": "T2Duo5Bonus",
+      "group": "tier2",
+      "object_offset": 1480,
+      "kind": "number",
+      "raw_u32": 1065520988,
+      "raw_f32": 1.0199999809265137,
+      "value": 1.0199999809265137
+    },
+    {
+      "field": "T2Duo5MaxLevel",
+      "group": "tier2",
+      "object_offset": 1484,
+      "kind": "number",
+      "raw_u32": 2500,
+      "raw_f32": 3.5032461608120427e-42,
+      "value": 2500
+    },
+    {
+      "field": "T2Duo5Fill",
+      "group": "tier2",
+      "object_offset": 1488,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294960
+    },
+    {
+      "field": "ATU19Button",
+      "group": "controller",
+      "object_offset": 1500,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15842
+    },
+    {
+      "field": "ATU19MaxOverlay",
+      "group": "controller",
+      "object_offset": 1512,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49523
+    },
+    {
+      "field": "TokenBoostT3StartCost",
+      "group": "tier1",
+      "object_offset": 1524,
+      "kind": "number",
+      "raw_u32": 1159479296,
+      "raw_f32": 2500.0,
+      "value": 2500.0
+    },
+    {
+      "field": "TokenBoostT3AdditiveCost",
+      "group": "tier1",
+      "object_offset": 1528,
+      "kind": "number",
+      "raw_u32": 1144750080,
+      "raw_f32": 750.0,
+      "value": 750.0
+    },
+    {
+      "field": "TokenBoostT3Bonus",
+      "group": "tier1",
+      "object_offset": 1532,
+      "kind": "number",
+      "raw_u32": 1065353216,
+      "raw_f32": 1.0,
+      "value": 1.0
+    },
+    {
+      "field": "TokenBoostT3MaxLevel",
+      "group": "tier1",
+      "object_offset": 1536,
+      "kind": "number",
+      "raw_u32": 25,
+      "raw_f32": 3.5032461608120427e-44,
+      "value": 25
+    },
+    {
+      "field": "TokenBoostT3Fill",
+      "group": "tier1",
+      "object_offset": 1540,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294991
+    },
+    {
+      "field": "ATU20Button",
+      "group": "controller",
+      "object_offset": 1552,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15812
+    },
+    {
+      "field": "ATU20MaxOverlay",
+      "group": "controller",
+      "object_offset": 1564,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49491
+    },
+    {
+      "field": "TokenDailiesT3StartCost",
+      "group": "tier3",
+      "object_offset": 1576,
+      "kind": "number",
+      "raw_u32": 1161527296,
+      "raw_f32": 3000.0,
+      "value": 3000.0
+    },
+    {
+      "field": "TokenDailiesT3AdditiveCost",
+      "group": "tier3",
+      "object_offset": 1580,
+      "kind": "number",
+      "raw_u32": 1147207680,
+      "raw_f32": 900.0,
+      "value": 900.0
+    },
+    {
+      "field": "TokenDailiesT3Bonus",
+      "group": "tier3",
+      "object_offset": 1584,
+      "kind": "number",
+      "raw_u32": 1045220557,
+      "raw_f32": 0.20000000298023224,
+      "value": 0.20000000298023224
+    },
+    {
+      "field": "TokenDailiesT3MaxLevel",
+      "group": "tier3",
+      "object_offset": 1588,
+      "kind": "number",
+      "raw_u32": 50,
+      "raw_f32": 7.006492321624085e-44,
+      "value": 50
+    },
+    {
+      "field": "TokenDailiesT3Fill",
+      "group": "tier3",
+      "object_offset": 1592,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294988
+    },
+    {
+      "field": "ATU21Button",
+      "group": "controller",
+      "object_offset": 1604,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15829
+    },
+    {
+      "field": "ATU21MaxOverlay",
+      "group": "controller",
+      "object_offset": 1616,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49494
+    },
+    {
+      "field": "T3Trio1StartCost",
+      "group": "tier3",
+      "object_offset": 1628,
+      "kind": "number",
+      "raw_u32": 1171963904,
+      "raw_f32": 7000.0,
+      "value": 7000.0
+    },
+    {
+      "field": "T3Trio1AdditiveCost",
+      "group": "tier3",
+      "object_offset": 1632,
+      "kind": "number",
+      "raw_u32": 1120403456,
+      "raw_f32": 100.0,
+      "value": 100.0
+    },
+    {
+      "field": "T3Trio1Bonus",
+      "group": "tier3",
+      "object_offset": 1636,
+      "kind": "number",
+      "raw_u32": 1065604874,
+      "raw_f32": 1.0299999713897705,
+      "value": 1.0299999713897705
+    },
+    {
+      "field": "T3Trio1MaxLevel",
+      "group": "tier3",
+      "object_offset": 1640,
+      "kind": "number",
+      "raw_u32": 2000,
+      "raw_f32": 2.802596928649634e-42,
+      "value": 2000
+    },
+    {
+      "field": "T3Trio1Fill",
+      "group": "tier3",
+      "object_offset": 1644,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294995
+    },
+    {
+      "field": "ATU22Button",
+      "group": "controller",
+      "object_offset": 1656,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15806
+    },
+    {
+      "field": "ATU22MaxOverlay",
+      "group": "controller",
+      "object_offset": 1668,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49485
+    },
+    {
+      "field": "T3Trio2StartCost",
+      "group": "tier3",
+      "object_offset": 1680,
+      "kind": "number",
+      "raw_u32": 1174011904,
+      "raw_f32": 8000.0,
+      "value": 8000.0
+    },
+    {
+      "field": "T3Trio2AdditiveCost",
+      "group": "tier3",
+      "object_offset": 1684,
+      "kind": "number",
+      "raw_u32": 1128792064,
+      "raw_f32": 200.0,
+      "value": 200.0
+    },
+    {
+      "field": "T3Trio2Bonus",
+      "group": "tier3",
+      "object_offset": 1688,
+      "kind": "number",
+      "raw_u32": 1065604874,
+      "raw_f32": 1.0299999713897705,
+      "value": 1.0299999713897705
+    },
+    {
+      "field": "T3Trio2MaxLevel",
+      "group": "tier3",
+      "object_offset": 1692,
+      "kind": "number",
+      "raw_u32": 2000,
+      "raw_f32": 2.802596928649634e-42,
+      "value": 2000
+    },
+    {
+      "field": "T3Trio2Fill",
+      "group": "tier3",
+      "object_offset": 1696,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294987
+    },
+    {
+      "field": "ATU23Button",
+      "group": "controller",
+      "object_offset": 1708,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15828
+    },
+    {
+      "field": "ATU23MaxOverlay",
+      "group": "controller",
+      "object_offset": 1720,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49492
+    },
+    {
+      "field": "ATU24StartCost",
+      "group": "tier4plus",
+      "object_offset": 1732,
+      "kind": "number",
+      "raw_u32": 1276679808,
+      "raw_f32": 40000000.0,
+      "value": 40000000.0
+    },
+    {
+      "field": "ATU24Bonus1",
+      "group": "tier4plus",
+      "object_offset": 1736,
+      "kind": "number",
+      "raw_u32": 1065361605,
+      "raw_f32": 1.0010000467300415,
+      "value": 1.0010000467300415
+    },
+    {
+      "field": "ATU24Bonus2",
+      "group": "tier4plus",
+      "object_offset": 1740,
+      "kind": "number",
+      "raw_u32": 1065357410,
+      "raw_f32": 1.000499963760376,
+      "value": 1.000499963760376
+    },
+    {
+      "field": "ATU24Bonus3",
+      "group": "tier4plus",
+      "object_offset": 1744,
+      "kind": "number",
+      "raw_u32": 1065355733,
+      "raw_f32": 1.0003000497817993,
+      "value": 1.0003000497817993
+    },
+    {
+      "field": "ATU24Bonus4",
+      "group": "tier4plus",
+      "object_offset": 1748,
+      "kind": "number",
+      "raw_u32": 1065354894,
+      "raw_f32": 1.0002000331878662,
+      "value": 1.0002000331878662
+    },
+    {
+      "field": "ATU24Bonus5",
+      "group": "tier4plus",
+      "object_offset": 1752,
+      "kind": "number",
+      "raw_u32": 1065354055,
+      "raw_f32": 1.000100016593933,
+      "value": 1.000100016593933
+    },
+    {
+      "field": "ATU24Fill",
+      "group": "tier4plus",
+      "object_offset": 1756,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 295005
+    },
+    {
+      "field": "ATU24Button",
+      "group": "tier4plus",
+      "object_offset": 1768,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15797
+    },
+    {
+      "field": "ATU24MaxOverlay",
+      "group": "tier4plus",
+      "object_offset": 1780,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49473
+    },
+    {
+      "field": "ATU25StartCost",
+      "group": "tier4plus",
+      "object_offset": 1792,
+      "kind": "number",
+      "raw_u32": 1232348160,
+      "raw_f32": 1000000.0,
+      "value": 1000000.0
+    },
+    {
+      "field": "ATU25AdditiveCost",
+      "group": "tier4plus",
+      "object_offset": 1796,
+      "kind": "number",
+      "raw_u32": 1187205120,
+      "raw_f32": 25000.0,
+      "value": 25000.0
+    },
+    {
+      "field": "ATU25Bonus",
+      "group": "tier4plus",
+      "object_offset": 1800,
+      "kind": "number",
+      "raw_u32": 1056964608,
+      "raw_f32": 0.5,
+      "value": 0.5
+    },
+    {
+      "field": "ATU25MaxLevel",
+      "group": "tier4plus",
+      "object_offset": 1804,
+      "kind": "number",
+      "raw_u32": 50,
+      "raw_f32": 7.006492321624085e-44,
+      "value": 50
+    },
+    {
+      "field": "ATU25Fill",
+      "group": "tier4plus",
+      "object_offset": 1808,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294979
+    },
+    {
+      "field": "ATU25Button",
+      "group": "tier4plus",
+      "object_offset": 1820,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15820
+    },
+    {
+      "field": "ATU25MaxOverlay",
+      "group": "tier4plus",
+      "object_offset": 1832,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49500
+    },
+    {
+      "field": "ATU26StartCost",
+      "group": "tier4plus",
+      "object_offset": 1844,
+      "kind": "number",
+      "raw_u32": 1259902592,
+      "raw_f32": 10000000.0,
+      "value": 10000000.0
+    },
+    {
+      "field": "ATU26AdditiveCost",
+      "group": "tier4plus",
+      "object_offset": 1848,
+      "kind": "number",
+      "raw_u32": 1232348160,
+      "raw_f32": 1000000.0,
+      "value": 1000000.0
+    },
+    {
+      "field": "ATU26Bonus",
+      "group": "tier4plus",
+      "object_offset": 1852,
+      "kind": "number",
+      "raw_u32": 1000,
+      "raw_f32": 1.401298464324817e-42,
+      "value": 1000
+    },
+    {
+      "field": "ATU26MaxLevel",
+      "group": "tier4plus",
+      "object_offset": 1856,
+      "kind": "number",
+      "raw_u32": 15,
+      "raw_f32": 2.1019476964872256e-44,
+      "value": 15
+    },
+    {
+      "field": "ATU26Fill",
+      "group": "tier4plus",
+      "object_offset": 1860,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294957
+    },
+    {
+      "field": "ATU26Button",
+      "group": "tier4plus",
+      "object_offset": 1872,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15840
+    },
+    {
+      "field": "ATU26MaxOverlay",
+      "group": "tier4plus",
+      "object_offset": 1884,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49522
+    },
+    {
+      "field": "ATU27StartCost",
+      "group": "tier4plus",
+      "object_offset": 1896,
+      "kind": "number",
+      "raw_u32": 1279179808,
+      "raw_f32": 50000000.0,
+      "value": 50000000.0
+    },
+    {
+      "field": "ATU27AdditiveCost",
+      "group": "tier4plus",
+      "object_offset": 1900,
+      "kind": "number",
+      "raw_u32": 1259902592,
+      "raw_f32": 10000000.0,
+      "value": 10000000.0
+    },
+    {
+      "field": "ATU27Bonus",
+      "group": "tier4plus",
+      "object_offset": 1904,
+      "kind": "number",
+      "raw_u32": 500,
+      "raw_f32": 7.006492321624085e-43,
+      "value": 500
+    },
+    {
+      "field": "ATU27MaxLevel",
+      "group": "tier4plus",
+      "object_offset": 1908,
+      "kind": "number",
+      "raw_u32": 15,
+      "raw_f32": 2.1019476964872256e-44,
+      "value": 15
+    },
+    {
+      "field": "ATU27Fill",
+      "group": "tier4plus",
+      "object_offset": 1912,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294982
+    },
+    {
+      "field": "ATU27Button",
+      "group": "tier4plus",
+      "object_offset": 1924,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15832
+    },
+    {
+      "field": "ATU27MaxOverlay",
+      "group": "tier4plus",
+      "object_offset": 1936,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49496
+    },
+    {
+      "field": "ATU28StartCost",
+      "group": "tier4plus",
+      "object_offset": 1948,
+      "kind": "number",
+      "raw_u32": 1299082024,
+      "raw_f32": 250000000.0,
+      "value": 250000000.0
+    },
+    {
+      "field": "ATU28AdditiveCost",
+      "group": "tier4plus",
+      "object_offset": 1952,
+      "kind": "number",
+      "raw_u32": 1279179808,
+      "raw_f32": 50000000.0,
+      "value": 50000000.0
+    },
+    {
+      "field": "ATU28Bonus",
+      "group": "tier4plus",
+      "object_offset": 1956,
+      "kind": "number",
+      "raw_u32": 500,
+      "raw_f32": 7.006492321624085e-43,
+      "value": 500
+    },
+    {
+      "field": "ATU28MaxLevel",
+      "group": "tier4plus",
+      "object_offset": 1960,
+      "kind": "number",
+      "raw_u32": 15,
+      "raw_f32": 2.1019476964872256e-44,
+      "value": 15
+    },
+    {
+      "field": "ATU28Fill",
+      "group": "tier4plus",
+      "object_offset": 1964,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 294992
+    },
+    {
+      "field": "ATU28Button",
+      "group": "tier4plus",
+      "object_offset": 1976,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 15813
+    },
+    {
+      "field": "ATU28MaxOverlay",
+      "group": "tier4plus",
+      "object_offset": 1988,
+      "kind": "pointer",
+      "file_id": 0,
+      "path_id": 49490
+    },
+    {
+      "field": "Tier2TokenUnlockReward",
+      "group": "controller",
+      "object_offset": 2000,
+      "kind": "number",
+      "raw_u32": 1184645120,
+      "raw_f32": 20000.0,
+      "value": 1184645120
+    },
+    {
+      "field": "Tier3TokenUnlockReward",
+      "group": "controller",
+      "object_offset": 2004,
+      "kind": "number",
+      "raw_u32": 1189765120,
+      "raw_f32": 30000.0,
+      "value": 1189765120
+    },
+    {
+      "field": "Tier4TokenUnlockReward",
+      "group": "tier4plus",
+      "object_offset": 2008,
+      "kind": "number",
+      "raw_u32": 1276679808,
+      "raw_f32": 40000000.0,
+      "value": 1276679808
+    },
+    {
+      "field": "Tier5TokenUnlockReward",
+      "group": "controller",
+      "object_offset": 2012,
+      "kind": "number",
+      "raw_u32": 1324247848,
+      "raw_f32": 2000000000.0,
+      "value": 1324247848
+    }
+  ],
+  "numeric_table": {
+    "TokenBoost": {
+      "StartCost": 20.0,
+      "group": "tier1",
+      "AdditiveCost": 5.0,
+      "Bonus": 0.20000000298023224,
+      "MaxLevel": 20
+    },
+    "DiamondBoost": {
+      "StartCost": 200.0,
+      "group": "tier1",
+      "AdditiveCost": 300.0,
+      "Bonus": 1,
+      "MaxLevel": 2
+    },
+    "CellBoost": {
+      "StartCost": 1.0,
+      "group": "tier1",
+      "AdditiveCost": 0.25,
+      "Bonus": 1,
+      "MaxLevel": 60
+    },
+    "ModBoost": {
+      "StartCost": 10.0,
+      "group": "tier1",
+      "AdditiveCost": 2.0,
+      "Bonus": 1.0099999904632568,
+      "MaxLevel": 200
+    },
+    "MK1TokenBoost": {
+      "StartCost": 1.0,
+      "group": "tier1",
+      "AdditiveCost": 0.10000000149011612,
+      "Bonus": 1.0099999904632568,
+      "FillMaxLevel": 5000
+    },
+    "MK2TokenBoost": {
+      "StartCost": 2.0,
+      "group": "tier1",
+      "AdditiveCost": 0.11999999731779099,
+      "Bonus": 1.0099999904632568,
+      "FillMaxLevel": 5000
+    },
+    "MK3TokenBoost": {
+      "StartCost": 3.0,
+      "group": "tier1",
+      "AdditiveCost": 0.12999999523162842,
+      "Bonus": 1.0099999904632568,
+      "FillMaxLevel": 5000
+    },
+    "MK4TokenBoost": {
+      "StartCost": 4.0,
+      "group": "tier1",
+      "AdditiveCost": 0.14000000059604645,
+      "Bonus": 1.0099999904632568,
+      "FillMaxLevel": 5000
+    },
+    "MK5TokenBoost": {
+      "StartCost": 15.0,
+      "group": "tier1",
+      "AdditiveCost": 0.15000000596046448,
+      "Bonus": 1.0099999904632568,
+      "FillMaxLevel": 5000
+    },
+    "MK6TokenBoost": {
+      "StartCost": 26.0,
+      "group": "tier1",
+      "AdditiveCost": 0.1599999964237213,
+      "Bonus": 1.0099999904632568,
+      "FillMaxLevel": 5000
+    },
+    "MK7TokenBoost": {
+      "StartCost": 37.0,
+      "group": "tier1",
+      "AdditiveCost": 0.20000000298023224,
+      "Bonus": 1.0099999904632568,
+      "FillMaxLevel": 5000
+    },
+    "MK8TokenBoost": {
+      "StartCost": 48.0,
+      "group": "tier1",
+      "AdditiveCost": 0.30000001192092896,
+      "Bonus": 1.0099999904632568,
+      "FillMaxLevel": 5000
+    },
+    "TokenBoostT2": {
+      "StartCost": 1000.0,
+      "group": "tier1",
+      "AdditiveCost": 500.0,
+      "Bonus": 0.5,
+      "MaxLevel": 10
+    },
+    "TokenDailiesT2": {
+      "StartCost": 1000.0,
+      "group": "tier2",
+      "AdditiveCost": 800.0,
+      "Bonus": 0.20000000298023224,
+      "MaxLevel": 10
+    },
+    "T2Duo1": {
+      "StartCost": 1275.0,
+      "group": "tier2",
+      "AdditiveCost": 25.0,
+      "Bonus": 1.0199999809265137,
+      "MaxLevel": 500
+    },
+    "T2Duo2": {
+      "StartCost": 75.0,
+      "group": "tier2",
+      "AdditiveCost": 2.0,
+      "Bonus": 1.0199999809265137,
+      "MaxLevel": 2500
+    },
+    "T2Duo3": {
+      "StartCost": 100.0,
+      "group": "tier2",
+      "AdditiveCost": 3.0,
+      "Bonus": 1.0199999809265137,
+      "MaxLevel": 2500
+    },
+    "T2Duo4": {
+      "StartCost": 125.0,
+      "group": "tier2",
+      "AdditiveCost": 4.0,
+      "Bonus": 1.0199999809265137,
+      "MaxLevel": 2500
+    },
+    "T2Duo5": {
+      "StartCost": 150.0,
+      "group": "tier2",
+      "AdditiveCost": 5.0,
+      "Bonus": 1.0199999809265137,
+      "MaxLevel": 2500
+    },
+    "TokenBoostT3": {
+      "StartCost": 2500.0,
+      "group": "tier1",
+      "AdditiveCost": 750.0,
+      "Bonus": 1.0,
+      "MaxLevel": 25
+    },
+    "TokenDailiesT3": {
+      "StartCost": 3000.0,
+      "group": "tier3",
+      "AdditiveCost": 900.0,
+      "Bonus": 0.20000000298023224,
+      "MaxLevel": 50
+    },
+    "T3Trio1": {
+      "StartCost": 7000.0,
+      "group": "tier3",
+      "AdditiveCost": 100.0,
+      "Bonus": 1.0299999713897705,
+      "MaxLevel": 2000
+    },
+    "T3Trio2": {
+      "StartCost": 8000.0,
+      "group": "tier3",
+      "AdditiveCost": 200.0,
+      "Bonus": 1.0299999713897705,
+      "MaxLevel": 2000
+    },
+    "ATU24": {
+      "StartCost": 40000000.0,
+      "group": "tier4plus",
+      "Bonus1": 1.0010000467300415,
+      "Bonus2": 1.000499963760376,
+      "Bonus3": 1.0003000497817993,
+      "Bonus4": 1.0002000331878662,
+      "Bonus5": 1.000100016593933
+    },
+    "ATU25": {
+      "StartCost": 1000000.0,
+      "group": "tier4plus",
+      "AdditiveCost": 25000.0,
+      "Bonus": 0.5,
+      "MaxLevel": 50
+    },
+    "ATU26": {
+      "StartCost": 10000000.0,
+      "group": "tier4plus",
+      "AdditiveCost": 1000000.0,
+      "Bonus": 1000,
+      "MaxLevel": 15
+    },
+    "ATU27": {
+      "StartCost": 50000000.0,
+      "group": "tier4plus",
+      "AdditiveCost": 10000000.0,
+      "Bonus": 500,
+      "MaxLevel": 15
+    },
+    "ATU28": {
+      "StartCost": 250000000.0,
+      "group": "tier4plus",
+      "AdditiveCost": 50000000.0,
+      "Bonus": 500,
+      "MaxLevel": 15
+    },
+    "Tier2Token": {
+      "UnlockReward": 1184645120,
+      "group": "controller"
+    },
+    "Tier3Token": {
+      "UnlockReward": 1189765120,
+      "group": "controller"
+    },
+    "Tier4Token": {
+      "UnlockReward": 1276679808,
+      "group": "tier4plus"
+    },
+    "Tier5Token": {
+      "UnlockReward": 1324247848,
+      "group": "controller"
+    }
+  }
+}

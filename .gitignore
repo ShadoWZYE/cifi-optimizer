@@ -14,6 +14,12 @@ __pycache__/
 .venv/
 venv/
 env/
+.deps/
+.nuget/
+.dotnet-home/
+.dotnet-cli/
+.appdata/
+.localappdata/
 
 # Logs and local env
 *.log
@@ -32,3 +38,16 @@ Desktop.ini
 
 # Test/debug artifacts
 tests/ocr-debug/
+tools/**/bin/
+tools/**/obj/
+tools/
+_assetripper_primary/
+_cifi_apk/
+_cifi_apk_merged/
+_cifi_extract/
+_ld_backup_instance.ldbk
+_ldbk_extract/
+_unity_data/
+_unity_joined/
+tools/UABEA/
+data/unity-textassets/
