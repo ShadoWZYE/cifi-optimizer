@@ -433,6 +433,7 @@ const state = {
   snapshot: null,
   shipBaseline: null,
   shipTemplates: null,
+  shardGrounding: null,
   playerProfile: null,
   shipConfig: null,
   launchCoordinator: null,
@@ -455,9 +456,12 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
-    fetchJson("./data/ship-optimizer.desmos-baseline.v1.json")
+    fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
+    fetchJson("./data/shard-milestones.grounded.v1.json"),
+    fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
+    fetchJson("./data/shard-milestones-provenance.grounded.v1.json")
   ]);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
@@ -468,6 +472,11 @@ async function bootstrap() {
   state.snapshot = mergeDeep(snapshot, loadStoredJson(STORAGE_KEYS.snapshot, snapshot));
   state.shipBaseline = shipBaseline;
   state.shipTemplates = buildShipTemplates(shipBaseline);
+  state.shardGrounding = {
+    milestones: groundedShardMilestones,
+    observedBehaviors: groundedShardObservedBehaviors,
+    provenance: groundedShardProvenance
+  };
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile,
     mergeDeep(
@@ -1463,6 +1472,11 @@ function runShipOptimization() {
 }
 
 function runProgressionOptimization() {
+  const groundedResults = buildGroundedShardRecommendations();
+  if (groundedResults.length) {
+    return groundedResults;
+  }
+
   return [{
     id: "shard-module-grounding-warning",
     module: "shards",
@@ -1485,6 +1499,73 @@ function runProgressionOptimization() {
     ],
     notes: "Grounded fallback mode avoids fake optimizer precision."
   }];
+}
+
+function buildGroundedShardRecommendations() {
+  const milestones = state.shardGrounding?.milestones?.milestones;
+  const mechanics = state.shardGrounding?.milestones?.canonicalMechanics?.shardMilestoneSystem;
+  const observedBehaviors = state.shardGrounding?.observedBehaviors?.observations;
+  const uncertaintyLog = state.shardGrounding?.provenance?.uncertaintyLog;
+  if (!Array.isArray(milestones) || !milestones.length || !mechanics) {
+    return [];
+  }
+
+  const thresholdSummary = formatThresholdScheduleSummary(mechanics.rarity_bonus_thresholds);
+  const levelCapRules = mechanics.max_level_rules_and_modifiers ?? {};
+  const levelCapNotes = [
+    Number.isFinite(levelCapRules.base_max_level_before_workers_badge)
+      ? `Base max level before Workers Badge: ${levelCapRules.base_max_level_before_workers_badge}.`
+      : null,
+    Number.isFinite(levelCapRules.max_level_after_workers_badge)
+      ? `Workers Badge raises shard milestone max level to ${levelCapRules.max_level_after_workers_badge}.`
+      : null,
+    levelCapRules.research_note || null,
+    levelCapRules.ultima_loop_mod_note || null
+  ].filter(Boolean);
+  const uncertaintyNotes = Array.isArray(uncertaintyLog)
+    ? uncertaintyLog.slice(0, 3).map((item) => `${item.topic}: ${item.what_is_missing || item.what_is_available || item.status}.`)
+    : [];
+
+  return [
+    {
+      id: "shard-module-grounded-descriptive-mode",
+      module: "shards",
+      kind: "warning",
+      title: "Grounded shard milestones loaded",
+      subtitle: "Descriptive mode only",
+      score: 0,
+      confidence: 0.63,
+      whyNow: [
+        `${milestones.length} grounded shard milestones are bundled into this build for descriptive reference.`,
+        `Rarity threshold schedules are loaded: ${thresholdSummary}.`,
+        "Manual shard count and shard income still live under PlayerProfile."
+      ],
+      assumptions: [
+        "This dataset is used for grounded copy and explainability, not ranking.",
+        "Observed player behaviors remain separate from canonical shard mechanics."
+      ],
+      warnings: [
+        "Shard milestone ranking remains disabled because numeric shard costs per level are still unknown.",
+        mechanics.cost_breakpoints_observed?.breakpoints_statement || "Only descriptive cost breakpoint notes are available."
+      ],
+      notes: "Grounded shard output now references imported milestone data without re-enabling optimizer math."
+    },
+    {
+      id: "shard-module-grounded-facts",
+      module: "shards",
+      kind: "warning",
+      title: "Shard milestone mechanics snapshot",
+      subtitle: "Grounded facts and preserved uncertainty",
+      score: 0,
+      confidence: 0.58,
+      whyNow: levelCapNotes,
+      assumptions: [
+        mechanics.effect_scaling?.description || "Incremental level increases milestone effects, but this build does not convert that into score math."
+      ],
+      warnings: uncertaintyNotes,
+      notes: `Observed examples bundled separately: ${Array.isArray(observedBehaviors) ? observedBehaviors.length : 0} non-authoritative player behavior snapshots.`
+    }
+  ];
 }
 
 function runGemOptimization() {
@@ -1522,7 +1603,7 @@ function previewImport() {
   if (dataset === "shardMilestones") {
     state.importPreview = [];
     $("#importPreview").innerHTML = "";
-    setStatus("importStatus", "Shard milestone import is disabled until a verified-safe schema is defined.", "warning");
+    setStatus("importStatus", "Shard milestone manual import stays disabled; this build only uses the bundled grounded descriptive dataset.", "warning");
     return [];
   }
   const raw = $("#importText").value.trim();
@@ -1601,7 +1682,7 @@ function applyImportPreview() {
   const dataset = $("#importDataset").value;
   if (dataset === "shardMilestones") {
     state.importPreview = [];
-    setStatus("importStatus", "Shard milestone import is disabled until a verified-safe schema is defined.", "warning");
+    setStatus("importStatus", "Shard milestone manual import stays disabled; this build only uses the bundled grounded descriptive dataset.", "warning");
     return;
   }
   if (!state.importPreview.length) {
@@ -1840,6 +1921,12 @@ function persistShipConfig(showStatus = false) {
 function getImportedRecordCount() {
   return ["shipLoadouts", "validationCases"]
     .reduce((total, key) => total + (Array.isArray(state.snapshot[key]) ? state.snapshot[key].length : 0), 0);
+}
+
+function formatThresholdScheduleSummary(thresholds = {}) {
+  return Object.entries(thresholds)
+    .map(([rarity, levels]) => `${rarity} ${Array.isArray(levels) ? levels.join("/") : ""}`)
+    .join("; ");
 }
 
 function getProfileCompletion(profile) {
