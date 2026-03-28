@@ -7,6 +7,7 @@ const groundedShardObserved = JSON.parse(await readFile(new URL("../data/shard-o
 const groundedShardProvenance = JSON.parse(await readFile(new URL("../data/shard-milestones-provenance.grounded.v1.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const profileSchema = await readFile(new URL("../player-profile.js", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
@@ -33,8 +34,15 @@ assert.match(html, /Gem Nodes \(Experimental\)/);
 assert.match(html, /Research \(Non-MVP\)/);
 assert.match(html, /Apply to active snapshot/);
 assert.match(html, /Reset to blank profile/);
+assert.match(html, /Canonical profile and planning inputs/);
+assert.match(html, /Canonical CIFI State/);
+assert.match(html, /Planning Inputs/);
 assert.doesNotMatch(html, /Rank shard milestones/);
 assert.match(html, /Shard milestones \(disabled pending verified schema\)/);
+assert.doesNotMatch(html, /Hunter level/);
+assert.doesNotMatch(html, /Trait spheres unlocked/);
+assert.doesNotMatch(html, /Mech parts/);
+assert.doesNotMatch(html, /Available sim \/ research hours/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);
@@ -42,11 +50,12 @@ assert.match(appJs, /function buildGroundedShardRecommendations/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
 assert.match(appJs, /function normalizeImportRow/);
-assert.match(appJs, /function createDefaultPlayerProfile/);
-assert.match(appJs, /function normalizePlayerProfile/);
+assert.match(appJs, /from "\.\/player-profile\.js"/);
 assert.match(appJs, /playerProfile:/);
 assert.match(appJs, /externalModels/);
 assert.match(appJs, /communityToolState/);
+assert.match(appJs, /state\.playerProfile\.player\.ship/);
+assert.match(appJs, /state\.playerProfile\.player\.resources\.gemDust/);
 assert.match(appJs, /BroadcastChannel/);
 assert.match(appJs, /launcher-reopen/);
 assert.match(appJs, /kind:\s*"warning"/);
@@ -59,12 +68,17 @@ assert.doesNotMatch(appJs, /function getShardUpgradeCost/);
 assert.doesNotMatch(appJs, /function getShardUpgradeValue/);
 assert.doesNotMatch(appJs, /function getShardFocusWeight/);
 assert.doesNotMatch(appJs, /milestoneLevels/);
+assert.match(profileSchema, /PLAYER_PROFILE_SCHEMA_VERSION = 2/);
+assert.match(profileSchema, /player:\s*\{/);
+assert.match(profileSchema, /planning:\s*\{/);
+assert.match(profileSchema, /compatibility:\s*\{/);
+assert.match(profileSchema, /dataConfidence/);
 assert.match(devServer, /\/api\/healthz/);
 assert.match(launcherVbs, /\?launch=1/);
 assert.match(launcherVbs, /ResolveNodePath/);
 assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
-assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+assert.equal(pkg.scripts.test, "node ./tests/run-all.mjs");
 
 const shipWinner = [...snapshot.shipLoadouts]
   .map((loadout) => ({

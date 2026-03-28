@@ -91,7 +91,7 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Player Data</p>
-            <h2>Shared profile and calibration</h2>
+            <h2>Canonical profile and planning inputs</h2>
           </div>
           <button id="saveProfileBtn" class="button button-primary">Save profile</button>
         </div>
@@ -105,26 +105,24 @@
 
             <div class="field-grid">
               <div class="field-group">
-                <label for="loopReset">Current LR</label>
-                <input id="loopReset" name="loopReset" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="resourceFocus">Primary farming focus</label>
-                <select id="resourceFocus" name="resourceFocus">
-                  <option value="">Select focus</option>
-                  <option value="credits">Credits</option>
-                  <option value="alloy">Alloy</option>
-                  <option value="research">Research</option>
-                  <option value="shards">Shards</option>
-                </select>
-              </div>
-              <div class="field-group">
                 <label for="automationConfidence">Data confidence</label>
                 <select id="automationConfidence" name="automationConfidence">
                   <option value="manual">Manual only</option>
                   <option value="mixed">Manual + assisted</option>
                   <option value="verified">Verified / imported</option>
                 </select>
+              </div>
+            </div>
+
+            <div class="meta-stack">
+              <p class="eyebrow">Canonical CIFI State</p>
+              <p class="meta">These values are treated as shared player/account truth for supported modules. Non-MVP or community-tool data is stored separately.</p>
+            </div>
+
+            <div class="field-grid">
+              <div class="field-group">
+                <label for="loopReset">Current LR</label>
+                <input id="loopReset" name="loopReset" type="number" min="0" step="1">
               </div>
             </div>
 
@@ -140,10 +138,6 @@
               <div class="field-group">
                 <label for="cargo">Cargo</label>
                 <input id="cargo" name="cargo" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="hunterLevel">Hunter level</label>
-                <input id="hunterLevel" name="hunterLevel" type="number" min="0" step="1">
               </div>
             </div>
 
@@ -170,22 +164,25 @@
               </div>
             </div>
 
+            <div class="meta-stack">
+              <p class="eyebrow">Planning Inputs</p>
+              <p class="meta">These values support current planners and explainability surfaces, but they are not stored as canonical in-game truth.</p>
+            </div>
+
             <div class="field-grid">
+              <div class="field-group">
+                <label for="resourceFocus">Primary farming focus</label>
+                <select id="resourceFocus" name="resourceFocus">
+                  <option value="">Select focus</option>
+                  <option value="credits">Credits</option>
+                  <option value="alloy">Alloy</option>
+                  <option value="research">Research</option>
+                  <option value="shards">Shards</option>
+                </select>
+              </div>
               <div class="field-group">
                 <label for="gemNodeBudget">Gem node budget</label>
                 <input id="gemNodeBudget" name="gemNodeBudget" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="traitSphereCount">Trait spheres unlocked</label>
-                <input id="traitSphereCount" name="traitSphereCount" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="mechParts">Mech parts</label>
-                <input id="mechParts" name="mechParts" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="researchHours">Available sim / research hours</label>
-                <input id="researchHours" name="researchHours" type="number" min="0" step="1">
               </div>
               <div class="field-group">
                 <label for="shardRatePerHour">Shard income / hour</label>
@@ -194,8 +191,8 @@
             </div>
 
             <div class="field-group">
-              <label for="notes">Calibration notes</label>
-              <textarea id="notes" name="notes" rows="3" placeholder="Known assumptions, partial values, or import notes"></textarea>
+              <label for="notes">Profile notes</label>
+              <textarea id="notes" name="notes" rows="3" placeholder="Known assumptions, partial values, or migration notes"></textarea>
             </div>
           </form>
 

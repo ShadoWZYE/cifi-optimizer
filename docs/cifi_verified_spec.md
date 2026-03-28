@@ -168,6 +168,13 @@ Acceptable temporary output:
 - user-supplied values
 - clearly labeled external-model fields only where necessary
 
+Recommended top-level split:
+- `meta` for profile metadata and confidence labels
+- `player` for canonical CIFI state
+- `planning` for planner-only user inputs
+- `notes` for free-form user annotations
+- `externalModels` for community-tool or calculator calibration
+
 It should not silently mix:
 - real game state
 - planning abstractions

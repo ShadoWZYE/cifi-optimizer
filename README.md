@@ -80,9 +80,11 @@ Numeric UX should follow CIFI-style conventions where possible, while keeping pa
 - `index.html` — app shell and module layout
 - `styles.css` — visual system and layout
 - `app.js` — state, rendering, recommendation logic, persistence
+- `player-profile.js` — canonical PlayerProfile schema and migration helpers
 - `data/game-data.snapshot.v1.json` — app-owned snapshot data
 - `docs/ingest-process.md` — ingest and snapshot workflow
 - `docs/import-mapping.md` — supported import shapes
+- `docs/player-profile-schema.md` — field classification, persistence boundary, and migration notes
 - `docs/cifi_verified_spec.md` — grounding spec
 - `docs/cifi_grounding_plan.md` — grounding migration plan
 - `docs/cifi_sources.md` — public source list
@@ -101,5 +103,6 @@ The app may still expose some compatibility surfaces from prototype-era work, bu
 - shard recommendations remain in descriptive fallback mode
 - Gem Nodes, Research, and OCR are non-MVP support surfaces
 - ship planner calibration should be treated as community-tool state, not raw in-game state
+- PlayerProfile now separates canonical player state, planning inputs, deferred compatibility fields, and external model state
 
 It is not currently the priority to expand feature count.

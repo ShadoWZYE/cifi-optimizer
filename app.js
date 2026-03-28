@@ -1,3 +1,10 @@
+import {
+  PLAYER_PROFILE_SCHEMA_VERSION,
+  createDefaultPlayerProfile,
+  createDefaultShipPlayerState,
+  normalizePlayerProfile
+} from "./player-profile.js";
+
 const STORAGE_KEYS = {
   playerProfile: "cifi-suite.player-profile",
   shipConfig: "cifi-suite.ship-config",
@@ -20,139 +27,21 @@ const APP_LAUNCH_STALE_MS = 15000;
 
 const PROFILE_FIELD_PATHS = {
   profileName: ["meta", "profileName"],
-  loopReset: ["systems", "loop", "loopReset"],
+  loopReset: ["player", "loop", "loopReset"],
   resourceFocus: ["planning", "resourceFocus"],
-  automationConfidence: ["confidence"],
-  power: ["systems", "ship", "power"],
-  speed: ["systems", "ship", "speed"],
-  cargo: ["systems", "ship", "cargo"],
-  hunterLevel: ["systems", "metaProgression", "hunterLevel"],
-  gems: ["resources", "gems"],
-  tokens: ["resources", "tokens"],
-  relics: ["resources", "relics"],
-  gemDust: ["resources", "gemDust"],
-  shards: ["resources", "shards"],
+  automationConfidence: ["meta", "dataConfidence"],
+  power: ["player", "ship", "power"],
+  speed: ["player", "ship", "speed"],
+  cargo: ["player", "ship", "cargo"],
+  gems: ["player", "resources", "gems"],
+  tokens: ["player", "resources", "tokens"],
+  relics: ["player", "resources", "relics"],
+  gemDust: ["player", "resources", "gemDust"],
+  shards: ["player", "resources", "shards"],
   gemNodeBudget: ["planning", "gemNodeBudget"],
-  traitSphereCount: ["systems", "metaProgression", "traitSphereCount"],
-  mechParts: ["systems", "metaProgression", "mechParts"],
-  researchHours: ["planning", "researchHours"],
-  shardRatePerHour: ["systems", "shards", "ratePerHour"],
-  notes: ["notes"]
+  shardRatePerHour: ["planning", "shardRatePerHour"],
+  notes: ["notes", "profile"]
 };
-
-function createDefaultPlayerProfile() {
-  return {
-    meta: {
-      schemaVersion: 1,
-      profileName: null,
-      updatedAt: null
-    },
-    stage: {
-      highestShipUnlocked: null,
-      manualPhase: null
-    },
-    confidence: "manual",
-    notes: null,
-    resources: {
-      gems: null,
-      tokens: null,
-      relics: null,
-      gemDust: null,
-      shards: null
-    },
-    planning: {
-      resourceFocus: null,
-      gemNodeBudget: null,
-      researchHours: null
-    },
-    externalModels: {
-      shipPlanner: {
-        communityToolState: {}
-      }
-    },
-    systems: {
-      loop: {
-        loopReset: null
-      },
-      shards: {
-        ratePerHour: null
-      },
-      metaProgression: {
-        hunterLevel: null,
-        traitSphereCount: null,
-        mechParts: null
-      },
-      ship: {
-        power: null,
-        speed: null,
-        cargo: null
-      }
-    }
-  };
-}
-
-function createDefaultShipPlayerState(baseline) {
-  return {
-    academyGears: { ...baseline.academyGears },
-    innovation: {
-      inno1: baseline.innovation.inno1,
-      inno2: baseline.innovation.inno2,
-      darkInno: baseline.innovation.darkInno,
-      softCap: Boolean(baseline.innovation.softCap)
-    },
-    generators: { ...baseline.calibration.generators },
-    techLevels: { ...baseline.calibration.techLevels },
-    zagreus: { ...baseline.calibration.zagreus },
-    hephaestus: { ...baseline.calibration.hephaestus },
-    demeter: { ...baseline.calibration.demeter },
-    koios: { ...baseline.calibration.koios },
-    zeus: { ...baseline.calibration.zeus },
-    crew: { ...baseline.calibration.crew },
-    technical: { ...baseline.calibration.technical }
-  };
-}
-
-function normalizePlayerProfile(profile, baselineShipPlayerState) {
-  const defaults = createDefaultPlayerProfile();
-  const normalized = mergeDeep(defaults, profile ?? {});
-
-  if ("loopReset" in (profile ?? {})) {
-    normalized.meta.profileName = profile.profileName ?? defaults.meta.profileName;
-    normalized.confidence = profile.automationConfidence ?? defaults.confidence;
-    normalized.notes = profile.notes ?? defaults.notes;
-    normalized.resources.gems = Number(profile.gems ?? defaults.resources.gems);
-    normalized.resources.tokens = Number(profile.tokens ?? defaults.resources.tokens);
-    normalized.resources.relics = Number(profile.relics ?? defaults.resources.relics);
-    normalized.resources.gemDust = Number(profile.gemDust ?? defaults.resources.gemDust);
-    normalized.resources.shards = Number(profile.shards ?? defaults.resources.shards);
-    normalized.planning.resourceFocus = profile.resourceFocus ?? defaults.planning.resourceFocus;
-    normalized.planning.gemNodeBudget = Number(profile.gemNodeBudget ?? defaults.planning.gemNodeBudget);
-    normalized.planning.researchHours = Number(profile.researchHours ?? defaults.planning.researchHours);
-    normalized.systems.loop.loopReset = Number(profile.loopReset ?? defaults.systems.loop.loopReset);
-    normalized.systems.shards.ratePerHour = Number(profile.shardRatePerHour ?? defaults.systems.shards.ratePerHour);
-    normalized.systems.metaProgression.hunterLevel = Number(profile.hunterLevel ?? defaults.systems.metaProgression.hunterLevel);
-    normalized.systems.metaProgression.traitSphereCount = Number(profile.traitSphereCount ?? defaults.systems.metaProgression.traitSphereCount);
-    normalized.systems.metaProgression.mechParts = Number(profile.mechParts ?? defaults.systems.metaProgression.mechParts);
-    normalized.systems.ship.power = Number(profile.power ?? defaults.systems.ship.power);
-    normalized.systems.ship.speed = Number(profile.speed ?? defaults.systems.ship.speed);
-    normalized.systems.ship.cargo = Number(profile.cargo ?? defaults.systems.ship.cargo);
-  }
-
-  normalized.meta.schemaVersion = 1;
-  normalized.meta.updatedAt = normalized.meta.updatedAt ?? null;
-  normalized.externalModels ??= {};
-  normalized.externalModels.shipPlanner ??= {};
-  normalized.externalModels.shipPlanner.communityToolState = mergeDeep(
-    baselineShipPlayerState,
-    mergeDeep(
-      normalized.systems.ship.playerState ?? {},
-      normalized.externalModels.shipPlanner.communityToolState ?? {}
-    )
-  );
-  delete normalized.systems.ship.playerState;
-
-  return normalized;
-}
 
 const SHIP_LABELS = {
   C: "Cradle",
@@ -696,6 +585,10 @@ function renderPassiveLaunchScreen() {
 
 function persistPlayerProfile() {
   state.playerProfile.meta.updatedAt = new Date().toISOString();
+  state.playerProfile = normalizePlayerProfile(
+    state.playerProfile,
+    createDefaultShipPlayerState(state.shipBaseline)
+  );
   saveStoredJson(STORAGE_KEYS.playerProfile, state.playerProfile);
 }
 
@@ -823,12 +716,12 @@ function bindProfileActions() {
     const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
     snapshots.unshift({
       savedAt: new Date().toISOString(),
-      loopReset: state.playerProfile.systems.loop.loopReset,
+      loopReset: state.playerProfile.player.loop.loopReset,
       playerProfile: structuredClone(state.playerProfile)
     });
     saveStoredJson(STORAGE_KEYS.snapshots, snapshots.slice(0, 12));
     persistPlayerProfile();
-    setStatus("profileStatus", `Saved LR snapshot for LR ${state.playerProfile.systems.loop.loopReset}.`, "success");
+    setStatus("profileStatus", `Saved LR snapshot for LR ${state.playerProfile.player.loop.loopReset}.`, "success");
     renderAll();
   });
 
@@ -1296,7 +1189,7 @@ function collectProfileForm() {
       setProfileValue(path, coerceInputValue(entries[field]), nextProfile);
     }
   });
-  nextProfile.meta.schemaVersion = 1;
+  nextProfile.meta.schemaVersion = PLAYER_PROFILE_SCHEMA_VERSION;
   return nextProfile;
 }
 
@@ -1457,7 +1350,7 @@ function rankShipTargets() {
 }
 
 function runShipOptimization() {
-  const ship = state.playerProfile.systems.ship;
+  const ship = state.playerProfile.player.ship;
   return [...state.snapshot.shipLoadouts].map((loadout) => ({
     title: loadout.name,
     subtitle: loadout.notes,
@@ -1570,7 +1463,7 @@ function buildGroundedShardRecommendations() {
 
 function runGemOptimization() {
   const mode = $("#gemBudgetMode")?.value ?? "strict";
-  const budget = Number(state.playerProfile.planning.gemNodeBudget || state.playerProfile.resources.gemDust || 0);
+  const budget = Number(state.playerProfile.planning.gemNodeBudget || state.playerProfile.player.resources.gemDust || 0);
   return [...state.snapshot.gemNodes].map((node) => {
     const affordability = node.cost <= budget ? 1 : mode === "stretch" ? 0.8 : 0.35;
     return {
