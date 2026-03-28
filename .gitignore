@@ -19,6 +19,7 @@ env/
 *.log
 .env
 .env.*
+.gh-config/
 
 # OS / editor
 .DS_Store
