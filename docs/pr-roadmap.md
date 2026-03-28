@@ -1,138 +1,161 @@
-# PR Roadmap (CiFi Optimizer MVP)
+# PR Roadmap (CIFI MVP)
 
 ## Goal
 
-Move from prototype → MVP with minimal disruption and maximum reuse.
+Move from prototype-era grounding work to a stable MVP roadmap without large rewrites.
+
+This roadmap is the short execution view of:
+
+- `AGENTS.md`
+- `docs/mvp-direction.md`
+- `docs/research-followup-execution-plan.md`
 
 ---
 
-# Phase 0 — Stabilize Architecture
+## Current position
 
-## PR 1: PlayerProfile Core Refactor
+The foundation work that used to be the first blocker is already on `main`:
+
+- `state.playerProfile` exists
+- profile normalization/migration exists
+- shard workflow is in grounded descriptive mode
+- smoke tests already include syntax checking for `app.js`
+
+The next work is not "fix the broken app." The next work is to tighten contracts and ship the MVP modules in controlled slices.
+
+---
+
+## Roadmap principles
+
+- Each PR must be shippable.
+- Prefer extraction and cleanup over redesign.
+- Keep `state.playerProfile` as the single source of truth.
+- Do not present speculative formulas as grounded game truth.
+- Keep external/community-tool data labeled.
+- Use the Research tab to queue and select future feature work, not to silently expand product scope.
+
+---
+
+## Phase 1: Contract-first stabilization
+
+## PR 1: Data Contracts and Profile Boundary
 
 ### Goals
 
-* Introduce canonical PlayerProfile
-* Remove split between profile and shipConfig.playerState
-* Prepare for module-based recommendations
+- lock the boundary between canonical state, planning inputs, and external models
+- make shipped datasets trustworthy inputs
+- reduce ambiguity before more planner logic lands
 
 ### Changes
 
-* Add createDefaultPlayerProfile()
-* Add state.playerProfile
-* Migrate persistence to PlayerProfile
-* Add schema version + migration
-* Add RecommendationAction structure
-* Hide:
-
-  * Gem Nodes
-  * Research
-  * OCR UI
+- document the dataset contract for shipped JSON assets
+- validate snapshot, shard, token-shop, and multiverse-market datasets
+- tighten `PlayerProfile` and import mapping docs
+- expand tests around normalization and contract shape
 
 ### Output
 
-* Clean state model
-* Stable foundation for modules
+- stable data boundary
+- stable profile boundary
+- safer base for planner work
 
 ---
 
-# Phase 1 — First Real Value
+## Phase 2: MVP-safe guidance modules
 
-## PR 2: Shard Milestone Optimizer
+## PR 2: Shard Workflow and Loop Guardrails
 
 ### Goals
 
-* Replace generic progression system
-* Add real recommendation engine
+- strengthen grounded shard guidance
+- add warning-oriented loop guidance without speculative simulation
 
 ### Changes
 
-* Remove progressionActions scoring
-* Add shard input fields
-* Add milestone detection + ranking
-* Add ETA + cost modeling
-* Add "why now" explanations
+- improve shard explainability and uncertainty labeling
+- ensure shard outputs follow the shared recommendation contract
+- add loop reset warning rules
+- surface warnings clearly in recommendation output
 
 ### Output
 
-* First meaningful optimizer
+- grounded shard recommendations
+- trust-building warning layer
 
 ---
 
-## PR 3: Loop Reset Guardrails
+## Phase 3: Spend planning and convergence
+
+## PR 3: Spend Planner Foundation and Unified Feed
 
 ### Goals
 
-* Add trust + safety layer
+- ship the first MVP-safe spend planner
+- converge active module outputs into one recommendation feed
 
 ### Changes
 
-* Add rule-based warnings:
-
-  * pre-reset checks
-  * inefficient loop detection
-* Surface warnings in recommendation feed
+- normalize token-shop and multiverse-market data into planner-ready structures
+- add first-pass token/diamond planning logic
+- unify shard, spend, and warning outputs into one feed
+- harden tests around recommendation contract shape
 
 ### Output
 
-* Prevent bad decisions
-* Increase trust
+- practical spend-planner foundation
+- one explainable recommendation surface
 
 ---
 
-## PR 4: Diamond / Token Planner
+## Phase 4: Release hardening
+
+## PR 4: Test and Delivery Hardening
 
 ### Goals
 
-* Deliver "best next purchase"
+- catch dataset drift and contract regressions early
+- make future feature work safer
 
 ### Changes
 
-* Add resource income inputs
-* Add planner logic
-* Rank purchases
-* Merge with shard + warnings
+- extend smoke coverage toward executable contract checks
+- add a local dataset verification path
+- optionally add lightweight CI once local commands are stable
+- document release/update expectations for dataset refreshes
 
 ### Output
 
-* Complete MVP loop:
-  input → recommendations → action
+- faster regression detection
+- safer iteration on new mechanics
 
 ---
 
-# Phase 2 — Post-MVP Expansion
+## Research-tab intake rule
 
-## PR 5+: Optional
+Future feature candidates should be introduced through the Research tab and tracked in `docs/research-tracks.md` before they become roadmap work.
 
-* Ship optimizer reintegration
-* Research planning
-* Additional systems (Zeus, Academy)
-* Improved import methods
-* Optional OCR revisit
+A feature can move from Research tab to roadmap only when:
 
----
+- the CIFI terminology is grounded
+- the source quality is documented
+- the feature is classified as canonical, planner-only, external-model, or speculative
+- the MVP impact is clear
+- the work can be sliced into a shippable chunk
 
-# Principles
-
-* Each PR must be shippable
-* No giant diffs
-* Replace, don’t layer on top of placeholders
-* Always move toward unified recommendation system
+This keeps "interesting findings" from becoming unplanned product commitments.
 
 ---
 
-# Exit Condition (MVP Complete)
+## Exit condition
 
-You have:
+MVP is complete when the app has:
 
-* Single PlayerProfile
-* 3 working modules:
+- one unambiguous `PlayerProfile`
+- grounded shard workflow
+- MVP-safe token/diamond spend planning
+- loop-reset warnings
+- one unified recommendation feed
+- explainable outputs with assumptions and confidence
+- local import/export and stable local validation flow
 
-  * shards
-  * spend
-  * loop guardrails
-* Unified recommendation feed
-* Explainable outputs
-* Local import/export
-
-At this point: you have a real product.
+At that point, the Research tab becomes the controlled intake lane for post-MVP expansion.

@@ -21,6 +21,12 @@ Per `AGENTS.md`, the MVP focuses on:
 - Unified recommendation feed
 - Explainable recommendations
 
+Execution references:
+
+- `docs/research-followup-execution-plan.md` — current staged implementation plan
+- `docs/pr-roadmap.md` — PR-sized roadmap view
+- `docs/research-tracks.md` — backlog and intake rules for the in-app Research tab
+
 ## Grounding rule
 
 No new mechanic, formula, recommendation, or player field should be treated as real CIFI truth unless it is:
@@ -34,6 +40,18 @@ If a system is incomplete, the app should prefer:
 - explicit uncertainty
 
 over fabricated precision.
+
+## Source priority
+
+Grounded data work should prefer the committed APK and Unity package artifacts in this repo as the primary source path.
+
+Use source priority in this order:
+
+1. repo-local APK/Unity packages and extraction outputs
+2. official/public sources for terminology and corroboration
+3. community sources only for documented gap-filling or clearly labeled external-model support
+
+If a future feature is being considered through the Research tab, the APK/Unity path should be checked first and documented before the feature is promoted into implementation work.
 
 ## Run locally
 
@@ -141,8 +159,20 @@ That means the immediate priority is:
 
 The app may still expose some compatibility surfaces from prototype-era work, but these should be treated as quarantined unless they are part of the MVP scope. In particular:
 - shard recommendations remain in descriptive fallback mode
-- Gem Nodes, Research, and OCR are non-MVP support surfaces
+- Gem Nodes and OCR are non-MVP support surfaces
 - ship planner calibration should be treated as community-tool state, not raw in-game state
+
+## Research tab workflow
+
+The in-app Research tab is now the intake lane for future feature work.
+
+Use it to:
+
+- review grounded findings already in the repo
+- collect candidate systems before they become roadmap work
+- decide which feature should be promoted next
+
+Do not use it as proof that a feature is already committed. A research item should only move into implementation after it meets the promotion rules in `docs/research-tracks.md`.
 
 ## PlayerProfile boundary
 
