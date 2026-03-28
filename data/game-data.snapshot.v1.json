@@ -113,8 +113,8 @@
       "id": "progression-gems-midgame",
       "module": "progression",
       "title": "Shard module grounded fallback",
-      "expected": "Grounded shard milestones loaded",
-      "description": "Shard recommendations should use grounded descriptive copy while leaving ranking disabled until numeric shard costs are sourced."
+      "expected": "Next shard unlock to watch",
+      "description": "Shard workflow should surface grounded unlock guidance while keeping ranking and cost math disabled."
     },
     {
       "id": "gem-node-roi",
