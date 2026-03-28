@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import {
   PLAYER_PROFILE_SCHEMA_VERSION,
   createDefaultPlayerProfile,
   normalizePlayerProfile
 } from "../player-profile.js";
+
+const execFileAsync = promisify(execFile);
 
 const snapshot = JSON.parse(await readFile(new URL("../data/game-data.snapshot.v1.json", import.meta.url), "utf8"));
 const groundedShardMilestones = JSON.parse(await readFile(new URL("../data/shard-milestones.grounded.v1.json", import.meta.url), "utf8"));
@@ -15,6 +20,7 @@ const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
 
 const defaultProfile = createDefaultPlayerProfile();
 
@@ -79,7 +85,7 @@ assert.doesNotMatch(appJs, /function getShardUpgradeValue/);
 assert.doesNotMatch(appJs, /function getShardFocusWeight/);
 assert.doesNotMatch(appJs, /function simulateShard/);
 assert.match(devServer, /\/api\/healthz/);
-assert.match(launcherVbs, /\?launch=1/);
+assert.match(launcherVbs, /http:\/\/localhost:4173\//);
 assert.match(launcherVbs, /ResolveNodePath/);
 assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
@@ -191,5 +197,8 @@ assert.equal(migratedNestedProfile.player.resources.diamonds, 900);
 assert.equal(migratedNestedProfile.planning.shards.ratePerHour, 110);
 assert.equal(migratedNestedProfile.notes.profile, "nested");
 assert.equal(migratedNestedProfile.externalModels.shipPlanner.communityToolState.technical.Meltdown, 12);
+
+assert.match(appJs, /function normalizeLoadoutName/);
+assert.match(appJs, /name: normalizeLoadoutName\(stored\.name, fallback\.name\)/);
 
 console.log("Smoke tests passed.");

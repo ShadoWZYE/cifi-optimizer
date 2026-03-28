@@ -8,7 +8,7 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
 nodePath = ResolveNodePath()
-appUrl = "http://localhost:4173/?launch=1"
+appUrl = "http://localhost:4173/"
 healthUrl = "http://localhost:4173/api/healthz"
 startedServer = False
 

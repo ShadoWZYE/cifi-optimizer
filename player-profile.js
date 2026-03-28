@@ -90,7 +90,10 @@ export function createDefaultPlayerProfile(baselineShipPlayerState = {}) {
     },
     planning: {
       shards: {
-        ratePerHour: null
+        ratePerHour: null,
+        totalMilestoneLevels: null,
+        focusMilestoneId: null,
+        focusMilestoneLevel: null
       }
     },
     notes: {
@@ -184,6 +187,21 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
     ["planning", "shards", "ratePerHour"],
     ["systems", "shards", "ratePerHour"],
     ["shardRatePerHour"]
+  ]));
+  normalized.planning.shards.totalMilestoneLevels = coerceNullableNumber(readFirst(source, [
+    ["planning", "shards", "totalMilestoneLevels"],
+    ["systems", "shards", "totalMilestoneLevels"],
+    ["totalShardMilestoneLevels"]
+  ]));
+  normalized.planning.shards.focusMilestoneId = coerceNullableString(readFirst(source, [
+    ["planning", "shards", "focusMilestoneId"],
+    ["planning", "shardFocusMilestoneId"],
+    ["shardFocusMilestoneId"]
+  ]));
+  normalized.planning.shards.focusMilestoneLevel = coerceNullableNumber(readFirst(source, [
+    ["planning", "shards", "focusMilestoneLevel"],
+    ["planning", "shardFocusMilestoneLevel"],
+    ["shardFocusMilestoneLevel"]
   ]));
 
   normalized.notes.profile = coerceNullableString(readFirst(source, [

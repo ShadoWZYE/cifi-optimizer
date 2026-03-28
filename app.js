@@ -26,80 +26,16 @@ const APP_LAUNCH_STALE_MS = 15000;
 
 const CANONICAL_PROFILE_FIELD_PATHS = {
   profileName: ["meta", "profileName"],
-  loopReset: ["systems", "loop", "loopReset"],
-  resourceFocus: ["planning", "resourceFocus"],
-  automationConfidence: ["confidence"],
-  power: ["systems", "ship", "power"],
-  speed: ["systems", "ship", "speed"],
-  cargo: ["systems", "ship", "cargo"],
-  hunterLevel: ["systems", "metaProgression", "hunterLevel"],
-  gems: ["resources", "gems"],
-  tokens: ["resources", "tokens"],
-  relics: ["resources", "relics"],
-  gemDust: ["resources", "gemDust"],
-  shards: ["resources", "shards"],
-  gemNodeBudget: ["planning", "gemNodeBudget"],
-  traitSphereCount: ["systems", "metaProgression", "traitSphereCount"],
-  mechParts: ["systems", "metaProgression", "mechParts"],
-  researchHours: ["planning", "researchHours"],
-  shardRatePerHour: ["systems", "shards", "ratePerHour"],
-  totalShardMilestoneLevels: ["systems", "shards", "totalMilestoneLevels"],
-  notes: ["notes"]
+  loopReset: ["player", "loop", "loopReset"],
+  dataConfidence: ["meta", "dataConfidence"],
+  diamonds: ["player", "resources", "diamonds"],
+  tokens: ["player", "resources", "tokens"],
+  academyRelics: ["player", "resources", "academyRelics"],
+  shards: ["player", "resources", "shards"],
+  shardRatePerHour: ["planning", "shards", "ratePerHour"],
+  totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"],
+  notes: ["notes", "profile"]
 };
-
-function createDefaultPlayerProfile() {
-  return {
-    meta: {
-      schemaVersion: 1,
-      profileName: null,
-      updatedAt: null
-    },
-    stage: {
-      highestShipUnlocked: null,
-      manualPhase: null
-    },
-    confidence: "manual",
-    notes: null,
-    resources: {
-      gems: null,
-      tokens: null,
-      relics: null,
-      gemDust: null,
-      shards: null
-    },
-    planning: {
-      resourceFocus: null,
-      gemNodeBudget: null,
-      researchHours: null,
-      shardFocusMilestoneId: null,
-      shardFocusMilestoneLevel: null
-    },
-    externalModels: {
-      shipPlanner: {
-        communityToolState: {}
-      }
-    },
-    systems: {
-      loop: {
-        loopReset: null
-      },
-      shards: {
-        ratePerHour: null,
-        totalMilestoneLevels: null
-      },
-      metaProgression: {
-        hunterLevel: null,
-        traitSphereCount: null,
-        mechParts: null
-      },
-      ship: {
-        power: null,
-        speed: null,
-        cargo: null
-      }
-    }
-  };
-}
 
 function createDefaultShipPlayerState(baseline) {
   return {
@@ -120,51 +56,6 @@ function createDefaultShipPlayerState(baseline) {
     crew: { ...baseline.calibration.crew },
     technical: { ...baseline.calibration.technical }
   };
-}
-
-function normalizePlayerProfile(profile, baselineShipPlayerState) {
-  const defaults = createDefaultPlayerProfile();
-  const normalized = mergeDeep(defaults, profile ?? {});
-
-  if ("loopReset" in (profile ?? {})) {
-    normalized.meta.profileName = profile.profileName ?? defaults.meta.profileName;
-    normalized.confidence = profile.automationConfidence ?? defaults.confidence;
-    normalized.notes = profile.notes ?? defaults.notes;
-    normalized.resources.gems = Number(profile.gems ?? defaults.resources.gems);
-    normalized.resources.tokens = Number(profile.tokens ?? defaults.resources.tokens);
-    normalized.resources.relics = Number(profile.relics ?? defaults.resources.relics);
-    normalized.resources.gemDust = Number(profile.gemDust ?? defaults.resources.gemDust);
-    normalized.resources.shards = Number(profile.shards ?? defaults.resources.shards);
-    normalized.planning.resourceFocus = profile.resourceFocus ?? defaults.planning.resourceFocus;
-    normalized.planning.gemNodeBudget = Number(profile.gemNodeBudget ?? defaults.planning.gemNodeBudget);
-    normalized.planning.researchHours = Number(profile.researchHours ?? defaults.planning.researchHours);
-    normalized.planning.shardFocusMilestoneId = profile.shardFocusMilestoneId ?? defaults.planning.shardFocusMilestoneId;
-    normalized.planning.shardFocusMilestoneLevel = Number(profile.shardFocusMilestoneLevel ?? defaults.planning.shardFocusMilestoneLevel);
-    normalized.systems.loop.loopReset = Number(profile.loopReset ?? defaults.systems.loop.loopReset);
-    normalized.systems.shards.ratePerHour = Number(profile.shardRatePerHour ?? defaults.systems.shards.ratePerHour);
-    normalized.systems.shards.totalMilestoneLevels = Number(profile.totalShardMilestoneLevels ?? defaults.systems.shards.totalMilestoneLevels);
-    normalized.systems.metaProgression.hunterLevel = Number(profile.hunterLevel ?? defaults.systems.metaProgression.hunterLevel);
-    normalized.systems.metaProgression.traitSphereCount = Number(profile.traitSphereCount ?? defaults.systems.metaProgression.traitSphereCount);
-    normalized.systems.metaProgression.mechParts = Number(profile.mechParts ?? defaults.systems.metaProgression.mechParts);
-    normalized.systems.ship.power = Number(profile.power ?? defaults.systems.ship.power);
-    normalized.systems.ship.speed = Number(profile.speed ?? defaults.systems.ship.speed);
-    normalized.systems.ship.cargo = Number(profile.cargo ?? defaults.systems.ship.cargo);
-  }
-
-  normalized.meta.schemaVersion = 1;
-  normalized.meta.updatedAt = normalized.meta.updatedAt ?? null;
-  normalized.externalModels ??= {};
-  normalized.externalModels.shipPlanner ??= {};
-  normalized.externalModels.shipPlanner.communityToolState = mergeDeep(
-    baselineShipPlayerState,
-    mergeDeep(
-      normalized.systems.ship.playerState ?? {},
-      normalized.externalModels.shipPlanner.communityToolState ?? {}
-    )
-  );
-  delete normalized.systems.ship.playerState;
-
-  return normalized;
 }
 
 const SHIP_LABELS = {
@@ -780,7 +671,7 @@ function hydrateLoadouts(storedLoadouts, defaultLoadouts, legacyFilters) {
   return defaultLoadouts.map((fallback, index) => {
     const stored = storedLoadouts[index] ?? {};
     return {
-      name: stored.name || fallback.name,
+      name: normalizeLoadoutName(stored.name, fallback.name),
       history: Array.isArray(stored.history) ? stored.history : [],
       filters: makeDefaultShipFilters(stored.filters ?? legacyFilters),
       ships: Object.fromEntries(
@@ -791,6 +682,11 @@ function hydrateLoadouts(storedLoadouts, defaultLoadouts, legacyFilters) {
       )
     };
   });
+}
+
+function normalizeLoadoutName(candidate, fallback) {
+  const text = typeof candidate === "string" ? candidate.trim() : "";
+  return text || fallback;
 }
 
 function mergeDeep(base, patch) {
@@ -1313,7 +1209,7 @@ function renderResearch() {
 function collectProfileForm() {
   const entries = Object.fromEntries(new FormData($("#profileForm")).entries());
   const nextProfile = structuredClone(state.playerProfile);
-  Object.entries(PROFILE_FIELD_PATHS).forEach(([field, path]) => {
+  Object.entries(CANONICAL_PROFILE_FIELD_PATHS).forEach(([field, path]) => {
     if (field in entries) {
       setProfileValue(path, coerceInputValue(entries[field]), nextProfile);
     }
@@ -1323,7 +1219,7 @@ function collectProfileForm() {
 }
 
 function fillProfileForm() {
-  Object.entries(PROFILE_FIELD_PATHS).forEach(([key, path]) => {
+  Object.entries(CANONICAL_PROFILE_FIELD_PATHS).forEach(([key, path]) => {
     const input = formControl(key);
     if (input) {
       input.value = getProfileValue(path) ?? "";
@@ -1530,11 +1426,11 @@ function buildGroundedShardRecommendations() {
     return [];
   }
 
-  const totalLevels = Number(state.playerProfile.systems.shards.totalMilestoneLevels || 0);
-  const currentShards = state.playerProfile.resources.shards;
-  const shardRate = state.playerProfile.systems.shards.ratePerHour;
+  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
+  const currentShards = state.playerProfile.player.resources.shards;
+  const shardRate = state.playerProfile.planning.shards.ratePerHour;
   const focusMilestone = getShardFocusMilestone();
-  const focusLevel = Number(state.playerProfile.planning.shardFocusMilestoneLevel || 0);
+  const focusLevel = Number(state.playerProfile.planning.shards.focusMilestoneLevel || 0);
   const nextUnlock = getNextShardUnlockMilestone(totalLevels, milestones);
   const nextThreshold = getNextShardThreshold(focusMilestone, focusLevel, mechanics);
   const nextCostBump = getNextShardCostBump(focusLevel);
@@ -1630,8 +1526,8 @@ function buildGroundedShardRecommendations() {
 function saveShardPlannerInputs() {
   const milestoneId = formControl("shardFocusMilestoneId")?.value || null;
   const milestoneLevel = coerceInputValue(formControl("shardFocusMilestoneLevel")?.value ?? "");
-  setProfileValue(["planning", "shardFocusMilestoneId"], milestoneId, state.playerProfile);
-  setProfileValue(["planning", "shardFocusMilestoneLevel"], milestoneLevel, state.playerProfile);
+  setProfileValue(["planning", "shards", "focusMilestoneId"], milestoneId, state.playerProfile);
+  setProfileValue(["planning", "shards", "focusMilestoneLevel"], milestoneLevel, state.playerProfile);
   persistPlayerProfile();
   setStatus("shardPlannerStatus", "Shard workflow inputs saved.", "success");
   renderProgressionResults(runProgressionOptimization());
@@ -1649,20 +1545,20 @@ function renderShardPlannerControls() {
     <option value="${escapeHtml(String(milestone.id))}">${escapeHtml(`${milestone.name} (${formatShardRarity(milestone.rarity)})`)}</option>
   `).join("");
   select.value = selectedId;
-  input.value = state.playerProfile.planning.shardFocusMilestoneLevel ?? "";
+  input.value = state.playerProfile.planning.shards.focusMilestoneLevel ?? "";
 }
 
 function renderShardWorkflowSnapshot() {
   const mechanicsBundle = state.shardGrounding?.milestones?.canonicalMechanics ?? {};
   const milestones = getGroundedShardMilestones();
-  const totalLevels = Number(state.playerProfile.systems.shards.totalMilestoneLevels || 0);
+  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
   const nextUnlock = getNextShardUnlockMilestone(totalLevels, milestones);
   return `
     <div class="page-grid">
       <article class="snapshot-card">
         <span class="snapshot-title">Shard workflow snapshot</span>
         <strong>${escapeHtml(nextUnlock ? nextUnlock.name : "All unlock gates covered")}</strong>
-        <p class="meta">Current shards: ${formatOptionalNumber(state.playerProfile.resources.shards)} | Shard income / hour: ${formatOptionalNumber(state.playerProfile.systems.shards.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(state.playerProfile.systems.shards.totalMilestoneLevels)}</p>
+        <p class="meta">Current shards: ${formatOptionalNumber(state.playerProfile.player.resources.shards)} | Shard income / hour: ${formatOptionalNumber(state.playerProfile.planning.shards.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(state.playerProfile.planning.shards.totalMilestoneLevels)}</p>
         <div class="meta-stack">
           <p class="snapshot-title">Grounded mechanics</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.unlock_condition?.description || "Shard unlock condition unavailable.")}</p>
@@ -2177,7 +2073,7 @@ function getGroundedShardMechanics() {
 }
 
 function getSelectedShardMilestoneId() {
-  return state.playerProfile.planning.shardFocusMilestoneId
+  return state.playerProfile.planning.shards.focusMilestoneId
     || getDefaultShardFocusMilestoneId(getGroundedShardMilestones())
     || "";
 }
@@ -2186,7 +2082,7 @@ function getDefaultShardFocusMilestoneId(milestones) {
   if (!milestones.length) {
     return "";
   }
-  const totalLevels = Number(state.playerProfile.systems.shards.totalMilestoneLevels || 0);
+  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
   return getNextShardUnlockMilestone(totalLevels, milestones)?.id || milestones[0].id;
 }
 
