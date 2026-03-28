@@ -4,6 +4,9 @@ import { readFile } from "node:fs/promises";
 const snapshot = JSON.parse(await readFile(new URL("../data/game-data.snapshot.v1.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
+const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
+const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 
 const defaultProfile = {
   power: 980,
@@ -33,6 +36,14 @@ assert.match(appJs, /function normalizeImportRow/);
 assert.match(appJs, /function createDefaultPlayerProfile/);
 assert.match(appJs, /function normalizePlayerProfile/);
 assert.match(appJs, /playerProfile:/);
+assert.match(appJs, /BroadcastChannel/);
+assert.match(appJs, /launcher-reopen/);
+assert.match(devServer, /\/api\/healthz/);
+assert.match(launcherVbs, /\?launch=1/);
+assert.match(launcherVbs, /ResolveNodePath/);
+assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
+assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
+assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
 
 const shipWinner = [...snapshot.shipLoadouts]
   .map((loadout) => ({

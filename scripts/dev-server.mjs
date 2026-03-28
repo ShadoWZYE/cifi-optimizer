@@ -21,12 +21,19 @@ const mimeTypes = {
 };
 
 const server = createServer(async (request, response) => {
-  if (request.method === "POST" && request.url === "/api/generator-ocr") {
+  const requestUrl = new URL(request.url || "/", `http://${request.headers.host || `localhost:${port}`}`);
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/healthz") {
+    writeJson(response, 200, { ok: true, port });
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/generator-ocr") {
     await handleGeneratorOcr(request, response);
     return;
   }
 
-  const urlPath = request.url === "/" ? "/index.html" : request.url;
+  const urlPath = requestUrl.pathname === "/" ? "/index.html" : requestUrl.pathname;
   const safePath = normalize(urlPath).replace(/^(\.\.[/\\])+/, "");
   const filePath = join(root, safePath);
 

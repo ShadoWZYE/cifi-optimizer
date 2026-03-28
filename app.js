@@ -9,6 +9,15 @@ const LEGACY_STORAGE_KEYS = {
   profile: "cifi-suite.profile"
 };
 
+const APP_LAUNCH_KEYS = {
+  primaryLease: "cifi-suite.primary-lease",
+  launchSignal: "cifi-suite.launch-signal"
+};
+
+const APP_LAUNCH_CHANNEL = "cifi-suite-launch";
+const APP_LAUNCH_HEARTBEAT_MS = 4000;
+const APP_LAUNCH_STALE_MS = 15000;
+
 const PROFILE_FIELD_PATHS = {
   profileName: ["meta", "profileName"],
   loopReset: ["systems", "loop", "loopReset"],
@@ -408,6 +417,9 @@ const state = {
   shipTemplates: null,
   playerProfile: null,
   shipConfig: null,
+  launchCoordinator: null,
+  launchNoticeTimer: null,
+  pendingLaunchRefresh: false,
   importPreview: [],
   generatorOcrImages: [],
   generatorOcrParsed: null,
@@ -419,6 +431,12 @@ const state = {
 bootstrap().catch((error) => console.error(error));
 
 async function bootstrap() {
+  state.launchCoordinator = initLaunchCoordinator();
+  if (state.launchCoordinator.passiveLaunch) {
+    renderPassiveLaunchScreen();
+    return;
+  }
+
   const [snapshot, shipBaseline] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json")
@@ -452,6 +470,10 @@ async function bootstrap() {
 
   fillProfileForm();
   renderAll();
+
+  if (state.pendingLaunchRefresh) {
+    refreshFromPersistentState();
+  }
 }
 
 function fetchJson(url) {
@@ -474,6 +496,175 @@ function loadStoredJson(key, fallback) {
 
 function saveStoredJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
+}
+
+function initLaunchCoordinator() {
+  const coordinator = {
+    id: `tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    channel: "BroadcastChannel" in window ? new BroadcastChannel(APP_LAUNCH_CHANNEL) : null,
+    handledSignals: new Set(),
+    passiveLaunch: false,
+    isPrimary: false,
+    heartbeatId: null
+  };
+
+  if (coordinator.channel) {
+    coordinator.channel.addEventListener("message", (event) => {
+      handleLaunchSignal(coordinator, event.data);
+    });
+  }
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === APP_LAUNCH_KEYS.launchSignal && event.newValue) {
+      try {
+        handleLaunchSignal(coordinator, JSON.parse(event.newValue));
+      } catch {
+        // Ignore malformed fallback payloads.
+      }
+    }
+  });
+
+  window.addEventListener("beforeunload", () => {
+    if (coordinator.heartbeatId) {
+      window.clearInterval(coordinator.heartbeatId);
+    }
+    releasePrimaryLease(coordinator);
+    coordinator.channel?.close();
+  });
+
+  const launchRequested = new URLSearchParams(window.location.search).get("launch") === "1";
+  const activeLease = getActivePrimaryLease();
+
+  if (launchRequested && activeLease && activeLease.id !== coordinator.id) {
+    coordinator.passiveLaunch = true;
+    dispatchLaunchSignal(coordinator, "launcher-reopen");
+    clearLaunchQueryFlag();
+    return coordinator;
+  }
+
+  syncPrimaryLease(coordinator);
+  coordinator.heartbeatId = window.setInterval(() => {
+    syncPrimaryLease(coordinator);
+  }, APP_LAUNCH_HEARTBEAT_MS);
+  clearLaunchQueryFlag();
+  return coordinator;
+}
+
+function getActivePrimaryLease() {
+  const lease = loadStoredJson(APP_LAUNCH_KEYS.primaryLease, null);
+  if (!lease?.id || !lease?.updatedAt) {
+    return null;
+  }
+  return (Date.now() - Number(lease.updatedAt)) <= APP_LAUNCH_STALE_MS ? lease : null;
+}
+
+function syncPrimaryLease(coordinator) {
+  const activeLease = getActivePrimaryLease();
+  if (!activeLease || activeLease.id === coordinator.id) {
+    coordinator.isPrimary = true;
+    saveStoredJson(APP_LAUNCH_KEYS.primaryLease, {
+      id: coordinator.id,
+      updatedAt: Date.now()
+    });
+    return;
+  }
+  coordinator.isPrimary = false;
+}
+
+function releasePrimaryLease(coordinator) {
+  const activeLease = getActivePrimaryLease();
+  if (activeLease?.id === coordinator.id) {
+    localStorage.removeItem(APP_LAUNCH_KEYS.primaryLease);
+  }
+}
+
+function dispatchLaunchSignal(coordinator, type) {
+  const payload = {
+    id: `${coordinator.id}-${Date.now()}`,
+    from: coordinator.id,
+    type,
+    sentAt: Date.now()
+  };
+  coordinator.channel?.postMessage(payload);
+  saveStoredJson(APP_LAUNCH_KEYS.launchSignal, payload);
+}
+
+function handleLaunchSignal(coordinator, payload) {
+  if (!payload?.id || coordinator.handledSignals.has(payload.id)) {
+    return;
+  }
+  coordinator.handledSignals.add(payload.id);
+  if (coordinator.handledSignals.size > 16) {
+    const [first] = coordinator.handledSignals;
+    coordinator.handledSignals.delete(first);
+  }
+  if (!coordinator.isPrimary || payload.type !== "launcher-reopen") {
+    return;
+  }
+  handlePrimaryReopen();
+}
+
+function handlePrimaryReopen() {
+  if (!state.snapshot || !state.shipBaseline) {
+    state.pendingLaunchRefresh = true;
+    return;
+  }
+  state.pendingLaunchRefresh = false;
+  refreshFromPersistentState();
+  showLaunchNotice("CiFi reopened from launcher.");
+}
+
+function refreshFromPersistentState() {
+  const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, state.playerProfile);
+  state.playerProfile = normalizePlayerProfile(storedPlayerProfile, createDefaultShipPlayerState(state.shipBaseline));
+  state.snapshot = loadStoredJson(STORAGE_KEYS.snapshot, state.snapshot);
+  state.shipConfig = buildShipConfig(loadStoredJson(STORAGE_KEYS.shipConfig, state.shipConfig));
+  fillProfileForm();
+  renderAll();
+}
+
+function showLaunchNotice(message) {
+  window.clearTimeout(state.launchNoticeTimer);
+  let banner = document.getElementById("launchNotice");
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.id = "launchNotice";
+    banner.className = "launch-notice";
+    document.body.appendChild(banner);
+  }
+  banner.textContent = message;
+  banner.classList.add("is-visible");
+  state.launchNoticeTimer = window.setTimeout(() => {
+    banner.classList.remove("is-visible");
+  }, 3200);
+}
+
+function clearLaunchQueryFlag() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("launch")) {
+    return;
+  }
+  url.searchParams.delete("launch");
+  const nextSearch = url.searchParams.toString();
+  const nextUrl = `${url.pathname}${nextSearch ? `?${nextSearch}` : ""}${url.hash}`;
+  window.history.replaceState({}, document.title, nextUrl);
+}
+
+function renderPassiveLaunchScreen() {
+  document.body.innerHTML = `
+    <main class="launch-passive-shell">
+      <section class="launch-passive-card">
+        <p class="eyebrow">CiFi Already Open</p>
+        <h1>Using the existing app tab.</h1>
+        <p class="meta">The launcher signaled the active CiFi tab to refresh. This window stays idle so you do not end up with two competing app instances.</p>
+        <button class="button button-primary" id="passiveLaunchCloseBtn">Close this window</button>
+      </section>
+    </main>
+  `;
+
+  document.getElementById("passiveLaunchCloseBtn")?.addEventListener("click", () => {
+    window.close();
+  });
 }
 
 function persistPlayerProfile() {
