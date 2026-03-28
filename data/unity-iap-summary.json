@@ -1,0 +1,163 @@
+[
+  {
+    "id": "com.octocubegames.cifi.starterpackage",
+    "type": 1,
+    "title": "THE STARTER DEVICE",
+    "description": "This pack removes all ads (you can still open chests and use boosts!)",
+    "google_price_num": 32.0
+  },
+  {
+    "id": "com.octocubegames.cifi.diamondssmallpack",
+    "type": 0,
+    "title": "SMALL SHIPMENT OF DIAMONDS",
+    "description": "600 Instant Diamonds!",
+    "google_price_num": 32.0
+  },
+  {
+    "id": "com.octocubegames.cifi.diamondslargepack",
+    "type": 0,
+    "title": "LARGE SHIPMENT OF DIAMONDS",
+    "description": "1300 Instant Diamonds!",
+    "google_price_num": 64.0
+  },
+  {
+    "id": "com.octocubegames.cifi.diamondshugepackage",
+    "type": 0,
+    "title": "HUGE SHIPMENT OF DIAMONDS",
+    "description": "2800 Instant Diamonds!",
+    "google_price_num": 128.0
+  },
+  {
+    "id": "com.octocubegames.cifi.diamondsmassivepackage",
+    "type": 0,
+    "title": "MASSIVE SHIPMENT OF DIAMONDS",
+    "description": "5000 Instant Diamonds!",
+    "google_price_num": 196.0
+  },
+  {
+    "id": "com.octocubegames.cifi.generatorpackage",
+    "type": 1,
+    "title": "THE GENERATOR DEVICE",
+    "description": "Doubles the output of all generators!",
+    "google_price_num": 128.0
+  },
+  {
+    "id": "com.octocubegames.cifi.looppackage",
+    "type": 1,
+    "title": "THE LOOP DEVICE",
+    "description": "Doubles the amount of MP gained per batch!",
+    "google_price_num": 196.0
+  },
+  {
+    "id": "com.octocubegames.cifi.explorerpackage",
+    "type": 1,
+    "title": "THE EXPLORER DEVICE",
+    "description": "Doubles your Shard and Research gains!",
+    "google_price_num": 196.0
+  },
+  {
+    "id": "com.octocubegames.cifi.elysium",
+    "type": 1,
+    "title": "ELYSIUM REWARD LANE",
+    "description": "Unlocks the 'Elysium'-lane inside Reward Lanes",
+    "google_price_num": 13.0
+  },
+  {
+    "id": "com.octocubegames.cifi.hyperion",
+    "type": 1,
+    "title": "HYPERION REWARD LANE",
+    "description": "Unlocks the 'Hyperion'-lane in Reward Lanes",
+    "google_price_num": 196.0
+  },
+  {
+    "id": "com.octocubegames.cifi.collector",
+    "type": 1,
+    "title": "COLLECTERS PACK",
+    "description": "Increases Mission Mats & Daily Tokenium Cap!",
+    "google_price_num": 68.0
+  },
+  {
+    "id": "com.octocubegames.cifi.supporter",
+    "type": 1,
+    "title": "SUPPORTER PACK",
+    "description": "Tons of Diamonds & Double Cell Gains!",
+    "google_price_num": 426.0
+  },
+  {
+    "id": "com.octocubegames.cifi.diamondauto",
+    "type": 1,
+    "title": "",
+    "description": "",
+    "google_price_num": 13.0
+  },
+  {
+    "id": "com.octocubegames.cifi.tokenauto",
+    "type": 1,
+    "title": "",
+    "description": "",
+    "google_price_num": 13.0
+  },
+  {
+    "id": "com.octocubegames.cifi.chestspeedster",
+    "type": 1,
+    "title": "",
+    "description": "",
+    "google_price_num": 13.0
+  },
+  {
+    "id": "com.octocubegames.cifi.anniversary",
+    "type": 1,
+    "title": "",
+    "description": "",
+    "google_price_num": 426.0
+  },
+  {
+    "id": "com.octocubegames.cifi.cellmas",
+    "type": 1,
+    "title": "",
+    "description": "",
+    "google_price_num": 32.0
+  },
+  {
+    "id": "com.octocubegames.cifi.ouropackage",
+    "type": 1,
+    "title": "",
+    "description": "",
+    "google_price_num": 196.0
+  },
+  {
+    "id": "com.octocubegames.cifi.mediumsale",
+    "type": 0,
+    "title": "",
+    "description": "",
+    "google_price_num": 196.0
+  },
+  {
+    "id": "com.octocubegames.cifi.cellmas2024",
+    "type": 0,
+    "title": "",
+    "description": "",
+    "google_price_num": 28.0
+  },
+  {
+    "id": "com.octocubegames.cifi.fragmentpackage",
+    "type": 1,
+    "title": "",
+    "description": "",
+    "google_price_num": 96.0
+  },
+  {
+    "id": "com.octocubegames.cifi.namechange",
+    "type": 0,
+    "title": "",
+    "description": "",
+    "google_price_num": 10.0
+  },
+  {
+    "id": "com.octocubegames.cifi.cellmas2025",
+    "type": 0,
+    "title": "",
+    "description": "",
+    "google_price_num": 28.0
+  }
+]

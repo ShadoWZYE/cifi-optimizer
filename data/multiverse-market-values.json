@@ -1,0 +1,606 @@
+{
+  "source": {
+    "level0": "C:\\Users\\Shadow\\Desktop\\CiFi\\_unity_joined\\level0",
+    "multiverse_market_absolute_offset": 33216256,
+    "late_block_start": 19288,
+    "late_block_stride": 328,
+    "validated_ids": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      57,
+      58,
+      59
+    ]
+  },
+  "records": [
+    {
+      "inscription_id": 50,
+      "record_offset": 19288,
+      "absolute_offset": 33235544,
+      "max_level": 8,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79056
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 38492
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 47995
+      },
+      "bonus_raw_u32": 1065353216,
+      "bonus_raw_f32": 1.0,
+      "bonus_value": 1.0,
+      "start_cost": 1.0,
+      "extra_raw_u32": 7,
+      "cost_exponent": 2.3,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 51,
+      "record_offset": 19616,
+      "absolute_offset": 33235872,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79137
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39882
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48037
+      },
+      "bonus_raw_u32": 1090519040,
+      "bonus_raw_f32": 8.0,
+      "bonus_value": 8.0,
+      "start_cost": 2.0,
+      "extra_raw_u32": 7,
+      "cost_exponent": 2.5,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 52,
+      "record_offset": 19944,
+      "absolute_offset": 33236200,
+      "max_level": 8,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79116
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39660
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48048
+      },
+      "bonus_raw_u32": 1065604874,
+      "bonus_raw_f32": 1.0299999713897705,
+      "bonus_value": 1.0299999713897705,
+      "start_cost": 3.0,
+      "extra_raw_u32": 7,
+      "cost_exponent": 2.4,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 53,
+      "record_offset": 20272,
+      "absolute_offset": 33236528,
+      "max_level": 8,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79070
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 38722
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 47974
+      },
+      "bonus_raw_u32": 1065353216,
+      "bonus_raw_f32": 1.0,
+      "bonus_value": 1.0,
+      "start_cost": 1.0,
+      "extra_raw_u32": 8,
+      "cost_exponent": 2.6,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 54,
+      "record_offset": 20600,
+      "absolute_offset": 33236856,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79161
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39335
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48062
+      },
+      "bonus_raw_u32": 1090519040,
+      "bonus_raw_f32": 8.0,
+      "bonus_value": 8.0,
+      "start_cost": 2.0,
+      "extra_raw_u32": 8,
+      "cost_exponent": 2.4,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 55,
+      "record_offset": 20928,
+      "absolute_offset": 33237184,
+      "max_level": 8,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79163
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39252
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48064
+      },
+      "bonus_raw_u32": 1065353216,
+      "bonus_raw_f32": 1.0,
+      "bonus_value": 1.0,
+      "start_cost": 3.0,
+      "extra_raw_u32": 8,
+      "cost_exponent": 2.2,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 56,
+      "record_offset": 21256,
+      "absolute_offset": 33237512,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79162
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39262
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48063
+      },
+      "bonus_raw_u32": 1090519040,
+      "bonus_raw_f32": 8.0,
+      "bonus_value": 8.0,
+      "start_cost": 4.0,
+      "extra_raw_u32": 8,
+      "cost_exponent": 2.1,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 63,
+      "record_offset": 21584,
+      "absolute_offset": 33237840,
+      "max_level": 7,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79133
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39957
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48033
+      },
+      "bonus_raw_u32": 1074664571,
+      "bonus_raw_f32": 2.2200000286102295,
+      "bonus_value": 2.2200000286102295,
+      "start_cost": 1.0,
+      "extra_raw_u32": 10,
+      "cost_exponent": 1.8,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 64,
+      "record_offset": 21912,
+      "absolute_offset": 33238168,
+      "max_level": 8,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79149
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39094
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48085
+      },
+      "bonus_raw_u32": 1065353216,
+      "bonus_raw_f32": 1.0,
+      "bonus_value": 1.0,
+      "start_cost": 1.0,
+      "extra_raw_u32": 10,
+      "cost_exponent": 2.5,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 65,
+      "record_offset": 22240,
+      "absolute_offset": 33238496,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79069
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 38845
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 47986
+      },
+      "bonus_raw_u32": 1090519040,
+      "bonus_raw_f32": 8.0,
+      "bonus_value": 8.0,
+      "start_cost": 2.0,
+      "extra_raw_u32": 10,
+      "cost_exponent": 2.3,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 66,
+      "record_offset": 22568,
+      "absolute_offset": 33238824,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79110
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39843
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48055
+      },
+      "bonus_raw_u32": 1083053179,
+      "bonus_raw_f32": 4.440000057220459,
+      "bonus_value": 4.440000057220459,
+      "start_cost": 5.0,
+      "extra_raw_u32": 10,
+      "cost_exponent": 2.5,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 67,
+      "record_offset": 22896,
+      "absolute_offset": 33239152,
+      "max_level": 8,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79101
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 38180
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48008
+      },
+      "bonus_raw_u32": 1065353216,
+      "bonus_raw_f32": 1.0,
+      "bonus_value": 1.0,
+      "start_cost": 1.0,
+      "extra_raw_u32": 11,
+      "cost_exponent": 2.8,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 68,
+      "record_offset": 23224,
+      "absolute_offset": 33239480,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79111
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39838
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48056
+      },
+      "bonus_raw_u32": 1090519040,
+      "bonus_raw_f32": 8.0,
+      "bonus_value": 8.0,
+      "start_cost": 2.0,
+      "extra_raw_u32": 11,
+      "cost_exponent": 2.5,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 69,
+      "record_offset": 23552,
+      "absolute_offset": 33239808,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79136
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39883
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48036
+      },
+      "bonus_raw_u32": 1502485450,
+      "bonus_raw_f32": 5000000136282112.0,
+      "bonus_value": 5000000136282112.0,
+      "start_cost": 5.0,
+      "extra_raw_u32": 11,
+      "cost_exponent": 1.0,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 70,
+      "record_offset": 23880,
+      "absolute_offset": 33240136,
+      "max_level": 7,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79077
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 37967
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48026
+      },
+      "bonus_raw_u32": 1343554297,
+      "bonus_raw_f32": 10000000000.0,
+      "bonus_value": 10000000000.0,
+      "start_cost": 6.0,
+      "extra_raw_u32": 11,
+      "cost_exponent": 1.04,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 71,
+      "record_offset": 24208,
+      "absolute_offset": 33240464,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79148
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39115
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48084
+      },
+      "bonus_raw_u32": 1017370378,
+      "bonus_raw_f32": 0.019999999552965164,
+      "bonus_value": 0.019999999552965164,
+      "start_cost": 3.0,
+      "extra_raw_u32": 12,
+      "cost_exponent": 6.0,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 72,
+      "record_offset": 24536,
+      "absolute_offset": 33240792,
+      "max_level": 5,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79146
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39198
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48082
+      },
+      "bonus_raw_u32": 1031127695,
+      "bonus_raw_f32": 0.05999999865889549,
+      "bonus_value": 0.05999999865889549,
+      "start_cost": 1.0,
+      "extra_raw_u32": 13,
+      "cost_exponent": 1.0,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 73,
+      "record_offset": 24864,
+      "absolute_offset": 33241120,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79128
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 40016
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48045
+      },
+      "bonus_raw_u32": 1092616192,
+      "bonus_raw_f32": 10.0,
+      "bonus_value": 10.0,
+      "start_cost": 2.0,
+      "extra_raw_u32": 13,
+      "cost_exponent": 3.0,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 74,
+      "record_offset": 25192,
+      "absolute_offset": 33241448,
+      "max_level": 8,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79068
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 38796
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 47985
+      },
+      "bonus_raw_u32": 1109393408,
+      "bonus_raw_f32": 40.0,
+      "bonus_value": 40.0,
+      "start_cost": 3.0,
+      "extra_raw_u32": 13,
+      "cost_exponent": 3.0,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 57,
+      "record_offset": 25520,
+      "absolute_offset": 33241776,
+      "max_level": 3,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79150
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 38963
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48071
+      },
+      "bonus_raw_u32": 1028443341,
+      "bonus_raw_f32": 0.05000000074505806,
+      "bonus_value": 0.05000000074505806,
+      "start_cost": 1.0,
+      "extra_raw_u32": 9,
+      "cost_exponent": 1.0,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 58,
+      "record_offset": 25848,
+      "absolute_offset": 33242104,
+      "max_level": 10,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79119
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 39686
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48051
+      },
+      "bonus_raw_u32": 5,
+      "bonus_raw_f32": 7.006492321624085e-45,
+      "bonus_value": 5,
+      "start_cost": 2.0,
+      "extra_raw_u32": 9,
+      "cost_exponent": 5.0,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    },
+    {
+      "inscription_id": 59,
+      "record_offset": 26176,
+      "absolute_offset": 33242432,
+      "max_level": 5,
+      "buy_button": {
+        "file_id": 0,
+        "path_id": 79092
+      },
+      "currency_box": {
+        "file_id": 0,
+        "path_id": 37717
+      },
+      "max_overlay": {
+        "file_id": 0,
+        "path_id": 48020
+      },
+      "bonus_raw_u32": 5,
+      "bonus_raw_f32": 7.006492321624085e-45,
+      "bonus_value": 5,
+      "start_cost": 3.0,
+      "extra_raw_u32": 9,
+      "cost_exponent": 6.0,
+      "progress_list_size": 10,
+      "max_level_objects_size": 10
+    }
+  ]
+}
