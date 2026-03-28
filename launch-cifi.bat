@@ -10,10 +10,12 @@ if not exist "C:\Program Files\nodejs\npm.cmd" (
   exit /b 1
 )
 
-echo Starting CiFi Optimization Suite...
+echo Starting CiFi Optimization Suite debug launcher...
 echo.
 echo Local URL: http://localhost:4173
 echo Press Ctrl+C in this window to stop the server.
+echo.
+echo For normal double-click use without a terminal window, use launch-cifi.vbs
 echo.
 
 "C:\Program Files\nodejs\npm.cmd" run dev
