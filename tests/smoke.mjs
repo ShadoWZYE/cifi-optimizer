@@ -22,10 +22,13 @@ assert.ok(snapshot.validationCases.some((item) => item.expected === "Shard miles
 
 assert.match(html, /Player Data/);
 assert.match(html, /Game Data/);
-assert.match(html, /Ship Optimizer/);
+assert.match(html, /Ship Planner \(Community-tool\)/);
+assert.match(html, /Gem Nodes \(Experimental\)/);
+assert.match(html, /Research \(Non-MVP\)/);
 assert.match(html, /Apply to active snapshot/);
 assert.match(html, /Reset to blank profile/);
 assert.doesNotMatch(html, /Rank shard milestones/);
+assert.match(html, /Shard milestones \(disabled pending verified schema\)/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);
@@ -35,10 +38,13 @@ assert.match(appJs, /function normalizeImportRow/);
 assert.match(appJs, /function createDefaultPlayerProfile/);
 assert.match(appJs, /function normalizePlayerProfile/);
 assert.match(appJs, /playerProfile:/);
+assert.match(appJs, /externalModels/);
+assert.match(appJs, /communityToolState/);
 assert.match(appJs, /BroadcastChannel/);
 assert.match(appJs, /launcher-reopen/);
 assert.match(appJs, /kind:\s*"warning"/);
 assert.match(appJs, /Shard milestone planner pending verified data/);
+assert.match(appJs, /Shard milestone import is disabled until a verified-safe schema is defined/);
 assert.doesNotMatch(appJs, /function getShardUpgradeCost/);
 assert.doesNotMatch(appJs, /function getShardUpgradeValue/);
 assert.doesNotMatch(appJs, /function getShardFocusWeight/);
