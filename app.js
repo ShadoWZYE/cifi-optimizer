@@ -26,23 +26,80 @@ const APP_LAUNCH_STALE_MS = 15000;
 
 const CANONICAL_PROFILE_FIELD_PATHS = {
   profileName: ["meta", "profileName"],
-  dataConfidence: ["meta", "dataConfidence"],
-  loopReset: ["player", "loop", "loopReset"],
-  diamonds: ["player", "resources", "diamonds"],
-  tokens: ["player", "resources", "tokens"],
-  academyRelics: ["player", "resources", "academyRelics"],
-  shards: ["player", "resources", "shards"],
-  notes: ["notes", "profile"]
+  loopReset: ["systems", "loop", "loopReset"],
+  resourceFocus: ["planning", "resourceFocus"],
+  automationConfidence: ["confidence"],
+  power: ["systems", "ship", "power"],
+  speed: ["systems", "ship", "speed"],
+  cargo: ["systems", "ship", "cargo"],
+  hunterLevel: ["systems", "metaProgression", "hunterLevel"],
+  gems: ["resources", "gems"],
+  tokens: ["resources", "tokens"],
+  relics: ["resources", "relics"],
+  gemDust: ["resources", "gemDust"],
+  shards: ["resources", "shards"],
+  gemNodeBudget: ["planning", "gemNodeBudget"],
+  traitSphereCount: ["systems", "metaProgression", "traitSphereCount"],
+  mechParts: ["systems", "metaProgression", "mechParts"],
+  researchHours: ["planning", "researchHours"],
+  shardRatePerHour: ["systems", "shards", "ratePerHour"],
+  totalShardMilestoneLevels: ["systems", "shards", "totalMilestoneLevels"],
+  notes: ["notes"]
 };
 
-const PLANNER_PROFILE_FIELD_PATHS = {
-  shardRatePerHour: ["planning", "shards", "ratePerHour"]
-};
-
-const PROFILE_FIELD_PATHS = {
-  ...CANONICAL_PROFILE_FIELD_PATHS,
-  ...PLANNER_PROFILE_FIELD_PATHS
-};
+function createDefaultPlayerProfile() {
+  return {
+    meta: {
+      schemaVersion: 1,
+      profileName: null,
+      updatedAt: null
+    },
+    stage: {
+      highestShipUnlocked: null,
+      manualPhase: null
+    },
+    confidence: "manual",
+    notes: null,
+    resources: {
+      gems: null,
+      tokens: null,
+      relics: null,
+      gemDust: null,
+      shards: null
+    },
+    planning: {
+      resourceFocus: null,
+      gemNodeBudget: null,
+      researchHours: null,
+      shardFocusMilestoneId: null,
+      shardFocusMilestoneLevel: null
+    },
+    externalModels: {
+      shipPlanner: {
+        communityToolState: {}
+      }
+    },
+    systems: {
+      loop: {
+        loopReset: null
+      },
+      shards: {
+        ratePerHour: null,
+        totalMilestoneLevels: null
+      },
+      metaProgression: {
+        hunterLevel: null,
+        traitSphereCount: null,
+        mechParts: null
+      },
+      ship: {
+        power: null,
+        speed: null,
+        cargo: null
+      }
+    }
+  };
+}
 
 function createDefaultShipPlayerState(baseline) {
   return {
@@ -63,6 +120,51 @@ function createDefaultShipPlayerState(baseline) {
     crew: { ...baseline.calibration.crew },
     technical: { ...baseline.calibration.technical }
   };
+}
+
+function normalizePlayerProfile(profile, baselineShipPlayerState) {
+  const defaults = createDefaultPlayerProfile();
+  const normalized = mergeDeep(defaults, profile ?? {});
+
+  if ("loopReset" in (profile ?? {})) {
+    normalized.meta.profileName = profile.profileName ?? defaults.meta.profileName;
+    normalized.confidence = profile.automationConfidence ?? defaults.confidence;
+    normalized.notes = profile.notes ?? defaults.notes;
+    normalized.resources.gems = Number(profile.gems ?? defaults.resources.gems);
+    normalized.resources.tokens = Number(profile.tokens ?? defaults.resources.tokens);
+    normalized.resources.relics = Number(profile.relics ?? defaults.resources.relics);
+    normalized.resources.gemDust = Number(profile.gemDust ?? defaults.resources.gemDust);
+    normalized.resources.shards = Number(profile.shards ?? defaults.resources.shards);
+    normalized.planning.resourceFocus = profile.resourceFocus ?? defaults.planning.resourceFocus;
+    normalized.planning.gemNodeBudget = Number(profile.gemNodeBudget ?? defaults.planning.gemNodeBudget);
+    normalized.planning.researchHours = Number(profile.researchHours ?? defaults.planning.researchHours);
+    normalized.planning.shardFocusMilestoneId = profile.shardFocusMilestoneId ?? defaults.planning.shardFocusMilestoneId;
+    normalized.planning.shardFocusMilestoneLevel = Number(profile.shardFocusMilestoneLevel ?? defaults.planning.shardFocusMilestoneLevel);
+    normalized.systems.loop.loopReset = Number(profile.loopReset ?? defaults.systems.loop.loopReset);
+    normalized.systems.shards.ratePerHour = Number(profile.shardRatePerHour ?? defaults.systems.shards.ratePerHour);
+    normalized.systems.shards.totalMilestoneLevels = Number(profile.totalShardMilestoneLevels ?? defaults.systems.shards.totalMilestoneLevels);
+    normalized.systems.metaProgression.hunterLevel = Number(profile.hunterLevel ?? defaults.systems.metaProgression.hunterLevel);
+    normalized.systems.metaProgression.traitSphereCount = Number(profile.traitSphereCount ?? defaults.systems.metaProgression.traitSphereCount);
+    normalized.systems.metaProgression.mechParts = Number(profile.mechParts ?? defaults.systems.metaProgression.mechParts);
+    normalized.systems.ship.power = Number(profile.power ?? defaults.systems.ship.power);
+    normalized.systems.ship.speed = Number(profile.speed ?? defaults.systems.ship.speed);
+    normalized.systems.ship.cargo = Number(profile.cargo ?? defaults.systems.ship.cargo);
+  }
+
+  normalized.meta.schemaVersion = 1;
+  normalized.meta.updatedAt = normalized.meta.updatedAt ?? null;
+  normalized.externalModels ??= {};
+  normalized.externalModels.shipPlanner ??= {};
+  normalized.externalModels.shipPlanner.communityToolState = mergeDeep(
+    baselineShipPlayerState,
+    mergeDeep(
+      normalized.systems.ship.playerState ?? {},
+      normalized.externalModels.shipPlanner.communityToolState ?? {}
+    )
+  );
+  delete normalized.systems.ship.playerState;
+
+  return normalized;
 }
 
 const SHIP_LABELS = {
@@ -784,6 +886,7 @@ function bindDataActions() {
 
 function bindOptimizerActions() {
   $("#runProgressionOptimizer").addEventListener("click", () => renderProgressionResults(runProgressionOptimization()));
+  $("#saveShardPlannerBtn").addEventListener("click", saveShardPlannerInputs);
   $("#runGemOptimizer").addEventListener("click", () => renderGemResults(runGemOptimization()));
   $("#runValidationSuite").addEventListener("click", renderValidationResults);
   $("#saveShipConfigBtn").addEventListener("click", () => {
@@ -1172,7 +1275,14 @@ function renderShipActions() {
 }
 
 function renderProgressionResults(results) {
-  $("#progressionResults").innerHTML = results.map((item) => makeRecommendationCard(item, "shards")).join("");
+  renderShardPlannerControls();
+  $("#progressionResults").innerHTML = `
+    <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, "shards")).join("")}</div>
+    ${renderShardWorkflowSnapshot()}
+    ${renderShardWorkflowReference()}
+    ${renderObservedShardBehaviors()}
+    ${renderShardMilestoneDirectory()}
+  `;
 }
 
 function renderGemResults(results) {
@@ -1414,70 +1524,282 @@ function runProgressionOptimization() {
 }
 
 function buildGroundedShardRecommendations() {
-  const milestones = state.shardGrounding?.milestones?.milestones;
-  const mechanics = state.shardGrounding?.milestones?.canonicalMechanics?.shardMilestoneSystem;
-  const observedBehaviors = state.shardGrounding?.observedBehaviors?.observations;
-  const uncertaintyLog = state.shardGrounding?.provenance?.uncertaintyLog;
+  const milestones = getGroundedShardMilestones();
+  const mechanics = getGroundedShardMechanics();
   if (!Array.isArray(milestones) || !milestones.length || !mechanics) {
     return [];
   }
 
-  const thresholdSummary = formatThresholdScheduleSummary(mechanics.rarity_bonus_thresholds);
-  const levelCapRules = mechanics.max_level_rules_and_modifiers ?? {};
-  const levelCapNotes = [
-    Number.isFinite(levelCapRules.base_max_level_before_workers_badge)
-      ? `Base max level before Workers Badge: ${levelCapRules.base_max_level_before_workers_badge}.`
-      : null,
-    Number.isFinite(levelCapRules.max_level_after_workers_badge)
-      ? `Workers Badge raises shard milestone max level to ${levelCapRules.max_level_after_workers_badge}.`
-      : null,
-    levelCapRules.research_note || null,
-    levelCapRules.ultima_loop_mod_note || null
-  ].filter(Boolean);
-  const uncertaintyNotes = Array.isArray(uncertaintyLog)
-    ? uncertaintyLog.slice(0, 3).map((item) => `${item.topic}: ${item.what_is_missing || item.what_is_available || item.status}.`)
-    : [];
+  const totalLevels = Number(state.playerProfile.systems.shards.totalMilestoneLevels || 0);
+  const currentShards = state.playerProfile.resources.shards;
+  const shardRate = state.playerProfile.systems.shards.ratePerHour;
+  const focusMilestone = getShardFocusMilestone();
+  const focusLevel = Number(state.playerProfile.planning.shardFocusMilestoneLevel || 0);
+  const nextUnlock = getNextShardUnlockMilestone(totalLevels, milestones);
+  const nextThreshold = getNextShardThreshold(focusMilestone, focusLevel, mechanics);
+  const nextCostBump = getNextShardCostBump(focusLevel);
+  const observation = getPrimaryShardObservation();
 
   return [
     {
-      id: "shard-module-grounded-descriptive-mode",
+      id: "shard-module-next-unlock-watch",
       module: "shards",
       kind: "warning",
-      title: "Grounded shard milestones loaded",
-      subtitle: "Descriptive mode only",
+      title: "Next shard unlock to watch",
+      subtitle: nextUnlock ? nextUnlock.name : "All imported unlock requirements are covered",
       score: 0,
-      confidence: 0.63,
+      confidence: 0.7,
       whyNow: [
-        `${milestones.length} grounded shard milestones are bundled into this build for descriptive reference.`,
-        `Rarity threshold schedules are loaded: ${thresholdSummary}.`,
-        "Current shards live in shared player truth, while shard income remains a planner-only helper field."
+        nextUnlock
+          ? `${nextUnlock.name} unlocks at ${formatShardNumber(getShardUnlockRequirement(nextUnlock))} total shard milestone levels.`
+          : `Tracked total shard milestone levels already cover all ${milestones.length} imported unlock requirements.`,
+        Number.isFinite(totalLevels) && totalLevels > 0
+          ? `Tracked total shard milestone levels: ${formatShardNumber(totalLevels)}.`
+          : "Add total shard milestone levels in Player Data to track unlock pacing more precisely.",
+        currentShards || shardRate
+          ? `Current shard context: ${currentShards ? `${formatShardNumber(currentShards)} shards` : "shards not tracked"}${currentShards && shardRate ? " | " : ""}${shardRate ? `${formatShardNumber(shardRate)} per hour` : "income rate not tracked"}.`
+          : "Current shards and shard income remain optional manual inputs."
       ],
       assumptions: [
-        "This dataset is used for grounded copy and explainability, not ranking.",
-        "Observed player behaviors remain separate from canonical shard mechanics."
+        "Unlock sequencing is descriptive only and does not imply best spend order.",
+        "Shard optimization math remains disabled while per-level shard costs are unknown."
       ],
       warnings: [
-        "Shard milestone ranking remains disabled because numeric shard costs per level are still unknown.",
-        mechanics.cost_breakpoints_observed?.breakpoints_statement || "Only descriptive cost breakpoint notes are available."
+        "No shard milestone ranking, ROI, ETA, or cost simulation is active in this workflow.",
+        nextUnlock
+          ? `${Math.max(getShardUnlockRequirement(nextUnlock) - totalLevels, 0)} additional total shard milestone levels are needed for this unlock.`
+          : "Unlocked does not mean affordable; shard cost data is still unavailable."
       ],
-      notes: "Grounded shard output now references imported milestone data without re-enabling optimizer math."
+      notes: "This card watches grounded unlock gates only."
     },
     {
-      id: "shard-module-grounded-facts",
+      id: "shard-module-next-threshold-watch",
       module: "shards",
       kind: "warning",
-      title: "Shard milestone mechanics snapshot",
-      subtitle: "Grounded facts and preserved uncertainty",
+      title: "Next shard threshold to watch",
+      subtitle: focusMilestone ? focusMilestone.name : "Select a focus milestone",
       score: 0,
-      confidence: 0.58,
-      whyNow: levelCapNotes,
-      assumptions: [
-        mechanics.effect_scaling?.description || "Incremental level increases milestone effects, but this build does not convert that into score math."
+      confidence: 0.64,
+      whyNow: [
+        focusMilestone
+          ? `Focus milestone rarity: ${formatShardRarity(focusMilestone.rarity)}. Threshold schedule: ${formatThresholdLevels(getThresholdScheduleForMilestone(focusMilestone, mechanics))}.`
+          : "Choose a focus milestone to inspect its grounded threshold schedule.",
+        nextThreshold
+          ? `Next bonus threshold is level ${nextThreshold} from tracked level ${formatShardNumber(focusLevel)}.`
+          : focusMilestone
+            ? "All explicit grounded threshold levels on the selected milestone are already reached."
+            : "Threshold watch is unavailable until a focus milestone is selected."
       ],
-      warnings: uncertaintyNotes,
-      notes: `Observed examples bundled separately: ${Array.isArray(observedBehaviors) ? observedBehaviors.length : 0} non-authoritative player behavior snapshots.`
+      assumptions: [
+        focusMilestone?.summary || "Threshold watch uses imported unlock/bonus entries only.",
+        mechanics.effect_scaling?.description || "Incremental level increases milestone effects, but the app does not score them."
+      ],
+      warnings: [
+        focusMilestone?.uncertaintyNotes?.[0] || "Unknown/Unkown source values remain preserved where the source was incomplete.",
+        nextThreshold ? `You need ${Math.max(nextThreshold - focusLevel, 0)} more levels on the selected milestone to reach this threshold.` : "Threshold watch ends here unless you switch milestones."
+      ],
+      notes: "Threshold guidance is milestone-specific and descriptive only."
+    },
+    {
+      id: "shard-module-cost-bump-watch",
+      module: "shards",
+      kind: "warning",
+      title: "Shard cost bump watch",
+      subtitle: focusMilestone ? focusMilestone.name : "Global shard milestone rules",
+      score: 0,
+      confidence: 0.59,
+      whyNow: [
+        mechanics.cost_breakpoints_observed?.breakpoints_statement || "Cost bump notes are descriptive only.",
+        nextCostBump
+          ? `From tracked level ${formatShardNumber(focusLevel)}, the next noted cost bump is level ${nextCostBump.level} (${nextCostBump.severity}).`
+          : "No cost bump watch could be derived from the current focus level."
+      ],
+      assumptions: [
+        "The dataset provides breakpoint notes, not numeric shard costs.",
+        observation ? `${observation.title}: ${observation.why}` : "Observed examples are shown separately and do not become optimizer truths."
+      ],
+      warnings: [
+        "Cost bumps are warning zones only; the app does not estimate shard affordability.",
+        focusMilestone?.costProgression?.notes || "No per-level shard costs were found in accessible sources."
+      ],
+      notes: "Use this to avoid false precision near known cost-bump levels."
     }
   ];
+}
+
+function saveShardPlannerInputs() {
+  const milestoneId = formControl("shardFocusMilestoneId")?.value || null;
+  const milestoneLevel = coerceInputValue(formControl("shardFocusMilestoneLevel")?.value ?? "");
+  setProfileValue(["planning", "shardFocusMilestoneId"], milestoneId, state.playerProfile);
+  setProfileValue(["planning", "shardFocusMilestoneLevel"], milestoneLevel, state.playerProfile);
+  persistPlayerProfile();
+  setStatus("shardPlannerStatus", "Shard workflow inputs saved.", "success");
+  renderProgressionResults(runProgressionOptimization());
+}
+
+function renderShardPlannerControls() {
+  const milestones = getGroundedShardMilestones();
+  const select = formControl("shardFocusMilestoneId");
+  const input = formControl("shardFocusMilestoneLevel");
+  if (!select || !input || !milestones.length) {
+    return;
+  }
+  const selectedId = getSelectedShardMilestoneId();
+  select.innerHTML = milestones.map((milestone) => `
+    <option value="${escapeHtml(String(milestone.id))}">${escapeHtml(`${milestone.name} (${formatShardRarity(milestone.rarity)})`)}</option>
+  `).join("");
+  select.value = selectedId;
+  input.value = state.playerProfile.planning.shardFocusMilestoneLevel ?? "";
+}
+
+function renderShardWorkflowSnapshot() {
+  const mechanicsBundle = state.shardGrounding?.milestones?.canonicalMechanics ?? {};
+  const milestones = getGroundedShardMilestones();
+  const totalLevels = Number(state.playerProfile.systems.shards.totalMilestoneLevels || 0);
+  const nextUnlock = getNextShardUnlockMilestone(totalLevels, milestones);
+  return `
+    <div class="page-grid">
+      <article class="snapshot-card">
+        <span class="snapshot-title">Shard workflow snapshot</span>
+        <strong>${escapeHtml(nextUnlock ? nextUnlock.name : "All unlock gates covered")}</strong>
+        <p class="meta">Current shards: ${formatOptionalNumber(state.playerProfile.resources.shards)} | Shard income / hour: ${formatOptionalNumber(state.playerProfile.systems.shards.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(state.playerProfile.systems.shards.totalMilestoneLevels)}</p>
+        <div class="meta-stack">
+          <p class="snapshot-title">Grounded mechanics</p>
+          <p class="meta">${escapeHtml(mechanicsBundle.shards?.unlock_condition?.description || "Shard unlock condition unavailable.")}</p>
+          <p class="meta">${escapeHtml(mechanicsBundle.shards?.how_acquired?.description || "Shard acquisition note unavailable.")}</p>
+          <p class="meta">${escapeHtml(mechanicsBundle.shards?.reset_behavior?.description || "Loop-reset behavior note unavailable.")}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Operations linkage</span>
+        <strong>${escapeHtml(mechanicsBundle.operations?.shard_bonus_per_operation?.value || "No operation bonus note")}</strong>
+        <p class="meta">${escapeHtml(mechanicsBundle.operations?.shard_bonus_per_operation?.description || "Operation bonus note unavailable.")}</p>
+        <div class="meta-stack">
+          <p class="snapshot-title">Timer notes</p>
+          <p class="meta">Initial ticks including reset: ${formatOptionalNumber(mechanicsBundle.operations?.ticks_per_operation?.initial_ticks_including_reset)}</p>
+          <p class="meta">Minimum ticks with loop mods: ${formatOptionalNumber(mechanicsBundle.operations?.ticks_per_operation?.minimum_ticks_with_loop_mods)}</p>
+          <p class="meta">${escapeHtml(mechanicsBundle.shardMiningMenu?.unreducible_timer_between_operations?.description || "Reset timer note unavailable.")}</p>
+        </div>
+      </article>
+    </div>
+  `;
+}
+
+function renderShardWorkflowReference() {
+  const mechanics = getGroundedShardMechanics();
+  const provenance = state.shardGrounding?.provenance;
+  const thresholds = mechanics.rarity_bonus_thresholds ?? {};
+  const levelCaps = mechanics.max_level_rules_and_modifiers ?? {};
+  const uncertaintyLog = provenance?.uncertaintyLog ?? [];
+  return `
+    <div class="page-grid">
+      <article class="snapshot-card">
+        <span class="snapshot-title">Rarity threshold schedules</span>
+        <div class="shard-threshold-grid">
+          ${Object.entries(thresholds)
+            .filter(([rarity]) => rarity !== "source_ids")
+            .map(([rarity, levels]) => `
+              <div class="shard-threshold-card">
+                <strong>${escapeHtml(rarity)}</strong>
+                <p class="meta">${escapeHtml(formatThresholdLevels(levels))}</p>
+              </div>
+            `).join("")}
+        </div>
+        <p class="meta">${escapeHtml(mechanics.effect_scaling?.description || "Effect scaling note unavailable.")}</p>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Max-level and cost-breakpoint notes</span>
+        <div class="meta-stack">
+          <p class="meta">Base max level before Workers Badge: ${formatOptionalNumber(levelCaps.base_max_level_before_workers_badge)}</p>
+          <p class="meta">Max level after Workers Badge: ${formatOptionalNumber(levelCaps.max_level_after_workers_badge)}</p>
+          <p class="meta">${escapeHtml(levelCaps.research_note || "Research max-level note unavailable.")}</p>
+          <p class="meta">${escapeHtml(levelCaps.ultima_loop_mod_note || "Ultima Loop Mod note unavailable.")}</p>
+          <p class="meta">${escapeHtml(mechanics.cost_breakpoints_observed?.breakpoints_statement || "Cost breakpoint note unavailable.")}</p>
+        </div>
+        <div class="meta-stack">
+          <p class="snapshot-title">Preserved uncertainty</p>
+          ${uncertaintyLog.map((item) => `<p class="meta">${escapeHtml(`${item.topic}: ${item.what_is_missing || item.what_is_available || item.status}.`)}</p>`).join("")}
+        </div>
+      </article>
+    </div>
+  `;
+}
+
+function renderObservedShardBehaviors() {
+  const observations = state.shardGrounding?.observedBehaviors?.observations ?? [];
+  const provenance = state.shardGrounding?.provenance;
+  return `
+    <div class="page-grid">
+      <article class="snapshot-card">
+        <span class="snapshot-title">Observed shard behavior notes</span>
+        <div class="meta-stack">
+          ${observations.map((observation) => `
+            <div class="shard-note-card">
+              <strong>${escapeHtml(getObservationTitle(observation))}</strong>
+              <p class="meta">${escapeHtml(observation.why || "No guide rationale captured.")}</p>
+              <p class="meta">${escapeHtml((observation.priorities || []).join(" | "))}</p>
+            </div>
+          `).join("")}
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Provenance hygiene</span>
+        <p class="meta">Source report: ${escapeHtml(provenance?.sourceReport || "docs/research/shard-milestones-grounded-2026-03-28.md")}</p>
+        <div class="meta-stack">
+          <p class="snapshot-title">Review sources</p>
+          ${Object.values(provenance?.sources || {}).slice(0, 5).map((source) => `
+            <p class="meta">${escapeHtml(source.title)}${source.last_edited_in_source ? ` (${escapeHtml(source.last_edited_in_source)})` : ""}</p>
+          `).join("")}
+        </div>
+      </article>
+    </div>
+  `;
+}
+
+function renderShardMilestoneDirectory() {
+  const mechanics = getGroundedShardMechanics();
+  const milestones = getMilestonesForDisplay();
+  return `
+    <div class="meta-stack">
+      <p class="eyebrow">Grounded directory</p>
+      <h3>Shard milestones</h3>
+      <div class="preview-stack">
+        ${milestones.map((milestone) => `
+          <details class="snapshot-card shard-milestone-card" ${milestone.id === getSelectedShardMilestoneId() ? "open" : ""}>
+            <summary class="shard-milestone-summary">
+              <div>
+                <strong>${escapeHtml(milestone.name)}</strong>
+                <p class="meta">${escapeHtml(`${formatShardRarity(milestone.rarity)} | Unlock ${describeUnlockCondition(milestone.unlockCondition)}`)}</p>
+              </div>
+              <span class="pill">${escapeHtml(formatThresholdLevels(getThresholdScheduleForMilestone(milestone, mechanics)))}</span>
+            </summary>
+            <div class="meta-stack">
+              <p class="meta">${escapeHtml(milestone.summary || "No milestone summary captured.")}</p>
+              <p class="meta">Unlock condition: ${escapeHtml(describeUnlockCondition(milestone.unlockCondition))}</p>
+              <p class="meta">Threshold schedule: ${escapeHtml(formatThresholdLevels(getThresholdScheduleForMilestone(milestone, mechanics)))}</p>
+              <p class="meta">${escapeHtml(milestone.costProgression?.notes || "No cost progression note available.")}</p>
+            </div>
+            <div class="shard-bonus-list">
+              ${(milestone.bonuses || []).map((bonus) => `
+                <article class="shard-bonus-card">
+                  <strong>${escapeHtml(bonus.effectLabel || "Unnamed bonus")}</strong>
+                  <p class="meta">Unlock level: ${bonus.unlockLevel ?? "Listed without explicit threshold"}</p>
+                  <p class="meta">Initial bonus: ${escapeHtml(String(bonus.initialBonus ?? "Unknown"))}</p>
+                  <p class="meta">Bonus per level: ${escapeHtml(String(bonus.bonusPerLevel ?? "Unknown"))}</p>
+                </article>
+              `).join("")}
+            </div>
+            ${(milestone.uncertaintyNotes || []).length ? `
+              <div class="meta-stack">
+                <p class="snapshot-title">Uncertainty notes</p>
+                ${milestone.uncertaintyNotes.map((note) => `<p class="meta">${escapeHtml(note)}</p>`).join("")}
+              </div>
+            ` : ""}
+          </details>
+        `).join("")}
+      </div>
+    </div>
+  `;
 }
 
 function runGemOptimization() {
@@ -1841,8 +2163,139 @@ function getImportedRecordCount() {
 
 function formatThresholdScheduleSummary(thresholds = {}) {
   return Object.entries(thresholds)
+    .filter(([rarity]) => rarity !== "source_ids")
     .map(([rarity, levels]) => `${rarity} ${Array.isArray(levels) ? levels.join("/") : ""}`)
     .join("; ");
+}
+
+function getGroundedShardMilestones() {
+  return state.shardGrounding?.milestones?.milestones ?? [];
+}
+
+function getGroundedShardMechanics() {
+  return state.shardGrounding?.milestones?.canonicalMechanics?.shardMilestoneSystem ?? {};
+}
+
+function getSelectedShardMilestoneId() {
+  return state.playerProfile.planning.shardFocusMilestoneId
+    || getDefaultShardFocusMilestoneId(getGroundedShardMilestones())
+    || "";
+}
+
+function getDefaultShardFocusMilestoneId(milestones) {
+  if (!milestones.length) {
+    return "";
+  }
+  const totalLevels = Number(state.playerProfile.systems.shards.totalMilestoneLevels || 0);
+  return getNextShardUnlockMilestone(totalLevels, milestones)?.id || milestones[0].id;
+}
+
+function getShardFocusMilestone() {
+  const milestones = getGroundedShardMilestones();
+  const selectedId = getSelectedShardMilestoneId();
+  return milestones.find((milestone) => milestone.id === selectedId) || milestones[0] || null;
+}
+
+function getMilestonesForDisplay() {
+  const selectedId = getSelectedShardMilestoneId();
+  return [...getGroundedShardMilestones()].sort((left, right) => {
+    if (left.id === selectedId) {
+      return -1;
+    }
+    if (right.id === selectedId) {
+      return 1;
+    }
+    return Number(left.milestoneNumber || 0) - Number(right.milestoneNumber || 0);
+  });
+}
+
+function getShardUnlockRequirement(milestone) {
+  if (milestone?.unlockCondition?.type === "total_milestone_levels_required") {
+    return Number(milestone.unlockCondition.value || 0);
+  }
+  return 0;
+}
+
+function getNextShardUnlockMilestone(totalLevels, milestones = getGroundedShardMilestones()) {
+  return milestones
+    .filter((milestone) => milestone.unlockCondition?.type === "total_milestone_levels_required")
+    .sort((left, right) => getShardUnlockRequirement(left) - getShardUnlockRequirement(right))
+    .find((milestone) => getShardUnlockRequirement(milestone) > totalLevels)
+    || null;
+}
+
+function getThresholdScheduleForMilestone(milestone, mechanics = getGroundedShardMechanics()) {
+  if (Array.isArray(milestone?.fixedBreakpoints) && milestone.fixedBreakpoints.length) {
+    return milestone.fixedBreakpoints;
+  }
+  const rarity = normalizeShardRarityKey(milestone?.rarity);
+  return Object.entries(mechanics.rarity_bonus_thresholds ?? {})
+    .filter(([key]) => key !== "source_ids")
+    .find(([key]) => normalizeShardRarityKey(key) === rarity)?.[1] ?? [];
+}
+
+function getNextShardThreshold(milestone, currentLevel, mechanics = getGroundedShardMechanics()) {
+  return getThresholdScheduleForMilestone(milestone, mechanics).find((level) => Number(level) > Number(currentLevel || 0)) ?? null;
+}
+
+function getNextShardCostBump(currentLevel) {
+  const level = Number(currentLevel || 0);
+  const nextHundred = Math.floor(level / 100) * 100 + 100;
+  if (!Number.isFinite(nextHundred) || nextHundred <= 0) {
+    return null;
+  }
+  let severity = "larger bump";
+  if (nextHundred === 100 || nextHundred === 400) {
+    severity = "large bump";
+  } else if (nextHundred === 200 || nextHundred === 300) {
+    severity = "small bump";
+  }
+  return { level: nextHundred, severity };
+}
+
+function getPrimaryShardObservation() {
+  return (state.shardGrounding?.observedBehaviors?.observations ?? [])
+    .map((observation) => ({
+      ...observation,
+      title: getObservationTitle(observation)
+    }))[0] ?? null;
+}
+
+function getObservationTitle(observation) {
+  const playerState = observation?.playerState ?? {};
+  return playerState.run_type
+    || playerState.context
+    || playerState.lr_range
+    || observation.id.replaceAll("_", " ");
+}
+
+function describeUnlockCondition(unlockCondition = {}) {
+  if (unlockCondition.type === "total_milestone_levels_required") {
+    return `${formatShardNumber(unlockCondition.value)} total milestone levels`;
+  }
+  if (unlockCondition.type === "event") {
+    return String(unlockCondition.value || "Event unlock");
+  }
+  return "No grounded unlock condition captured";
+}
+
+function normalizeShardRarityKey(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function formatShardRarity(value) {
+  const text = String(value || "").trim();
+  return text ? text.replace(/\b\w/g, (char) => char.toUpperCase()) : "Unknown";
+}
+
+function formatThresholdLevels(levels) {
+  return Array.isArray(levels) && levels.length ? levels.join(" / ") : "No explicit thresholds captured";
+}
+
+function formatOptionalNumber(value) {
+  return value === null || value === undefined || value === "" || Number.isNaN(Number(value))
+    ? "Not tracked"
+    : formatShardNumber(value);
 }
 
 function getProfileCompletion(profile) {

@@ -144,6 +144,10 @@
                 <label for="shardRatePerHour">Shard income / hour</label>
                 <input id="shardRatePerHour" name="shardRatePerHour" type="number" min="0" step="1">
               </div>
+              <div class="field-group">
+                <label for="totalShardMilestoneLevels">Total shard milestone levels</label>
+                <input id="totalShardMilestoneLevels" name="totalShardMilestoneLevels" type="number" min="0" step="1">
+              </div>
             </div>
 
             <div class="field-group">
@@ -325,13 +329,30 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Progression</p>
-            <h2>Shard milestone status</h2>
+            <h2>Grounded shard workflow</h2>
           </div>
         </div>
         <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Shard workflow inputs</p>
+              <h2>Reference planner controls</h2>
+            </div>
+            <button id="saveShardPlannerBtn" class="button button-primary">Save shard workflow inputs</button>
+          </div>
+          <p class="meta">This workflow is descriptive only. Track a focus milestone and level to inspect grounded unlocks, thresholds, and guardrails without any shard cost math.</p>
           <div class="module-controls">
+            <div class="field-group">
+              <label for="shardFocusMilestoneId">Focus milestone</label>
+              <select id="shardFocusMilestoneId"></select>
+            </div>
+            <div class="field-group">
+              <label for="shardFocusMilestoneLevel">Observed level on focus milestone</label>
+              <input id="shardFocusMilestoneLevel" type="number" min="0" step="1" placeholder="0">
+            </div>
             <button id="runProgressionOptimizer" class="button button-primary">Show shard module status</button>
           </div>
+          <div id="shardPlannerStatus" class="status-line"></div>
           <div id="progressionResults" class="recommendation-list"></div>
         </section>
       </section>
