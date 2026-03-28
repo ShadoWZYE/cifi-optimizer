@@ -30,6 +30,9 @@ assert.match(appJs, /function runProgressionOptimization/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
 assert.match(appJs, /function normalizeImportRow/);
+assert.match(appJs, /function createDefaultPlayerProfile/);
+assert.match(appJs, /function normalizePlayerProfile/);
+assert.match(appJs, /playerProfile:/);
 
 const shipWinner = [...snapshot.shipLoadouts]
   .map((loadout) => ({

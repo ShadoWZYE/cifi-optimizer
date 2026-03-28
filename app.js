@@ -1,29 +1,131 @@
 const STORAGE_KEYS = {
-  profile: "cifi-suite.profile",
+  playerProfile: "cifi-suite.player-profile",
   shipConfig: "cifi-suite.ship-config",
   snapshot: "cifi-suite.snapshot",
   snapshots: "cifi-suite.profile-snapshots"
 };
 
-const DEMO_PROFILE = {
-  profileName: "Main account",
-  loopReset: 357,
-  resourceFocus: "credits",
-  automationConfidence: "manual",
-  power: 980,
-  speed: 132,
-  cargo: 670,
-  hunterLevel: 85,
-  gems: 860,
-  tokens: 430,
-  relics: 215,
-  gemDust: 540,
-  gemNodeBudget: 280,
-  traitSphereCount: 12,
-  mechParts: 940,
-  researchHours: 6,
-  notes: "Prototype baseline until real CiFi formulas are migrated."
+const LEGACY_STORAGE_KEYS = {
+  profile: "cifi-suite.profile"
 };
+
+const PROFILE_FIELD_PATHS = {
+  profileName: ["meta", "profileName"],
+  loopReset: ["systems", "loop", "loopReset"],
+  resourceFocus: ["planning", "resourceFocus"],
+  automationConfidence: ["confidence"],
+  power: ["systems", "ship", "power"],
+  speed: ["systems", "ship", "speed"],
+  cargo: ["systems", "ship", "cargo"],
+  hunterLevel: ["systems", "metaProgression", "hunterLevel"],
+  gems: ["resources", "gems"],
+  tokens: ["resources", "tokens"],
+  relics: ["resources", "relics"],
+  gemDust: ["resources", "gemDust"],
+  gemNodeBudget: ["planning", "gemNodeBudget"],
+  traitSphereCount: ["systems", "metaProgression", "traitSphereCount"],
+  mechParts: ["systems", "metaProgression", "mechParts"],
+  researchHours: ["planning", "researchHours"],
+  notes: ["notes"]
+};
+
+function createDefaultPlayerProfile() {
+  return {
+    meta: {
+      schemaVersion: 1,
+      profileName: "Main account",
+      updatedAt: null
+    },
+    stage: {
+      highestShipUnlocked: "",
+      manualPhase: ""
+    },
+    confidence: "manual",
+    notes: "Prototype baseline until real CiFi formulas are migrated.",
+    resources: {
+      gems: 860,
+      tokens: 430,
+      relics: 215,
+      gemDust: 540
+    },
+    planning: {
+      resourceFocus: "credits",
+      gemNodeBudget: 280,
+      researchHours: 6
+    },
+    systems: {
+      loop: {
+        loopReset: 357
+      },
+      metaProgression: {
+        hunterLevel: 85,
+        traitSphereCount: 12,
+        mechParts: 940
+      },
+      ship: {
+        power: 980,
+        speed: 132,
+        cargo: 670,
+        playerState: {}
+      }
+    }
+  };
+}
+
+function createDefaultShipPlayerState(baseline) {
+  return {
+    academyGears: { ...baseline.academyGears },
+    innovation: {
+      inno1: baseline.innovation.inno1,
+      inno2: baseline.innovation.inno2,
+      darkInno: baseline.innovation.darkInno,
+      softCap: Boolean(baseline.innovation.softCap)
+    },
+    generators: { ...baseline.calibration.generators },
+    techLevels: { ...baseline.calibration.techLevels },
+    zagreus: { ...baseline.calibration.zagreus },
+    hephaestus: { ...baseline.calibration.hephaestus },
+    demeter: { ...baseline.calibration.demeter },
+    koios: { ...baseline.calibration.koios },
+    zeus: { ...baseline.calibration.zeus },
+    crew: { ...baseline.calibration.crew },
+    technical: { ...baseline.calibration.technical }
+  };
+}
+
+function normalizePlayerProfile(profile, baselineShipPlayerState) {
+  const defaults = createDefaultPlayerProfile();
+  const normalized = mergeDeep(defaults, profile ?? {});
+
+  if ("loopReset" in (profile ?? {})) {
+    normalized.meta.profileName = profile.profileName ?? defaults.meta.profileName;
+    normalized.confidence = profile.automationConfidence ?? defaults.confidence;
+    normalized.notes = profile.notes ?? defaults.notes;
+    normalized.resources.gems = Number(profile.gems ?? defaults.resources.gems);
+    normalized.resources.tokens = Number(profile.tokens ?? defaults.resources.tokens);
+    normalized.resources.relics = Number(profile.relics ?? defaults.resources.relics);
+    normalized.resources.gemDust = Number(profile.gemDust ?? defaults.resources.gemDust);
+    normalized.planning.resourceFocus = profile.resourceFocus ?? defaults.planning.resourceFocus;
+    normalized.planning.gemNodeBudget = Number(profile.gemNodeBudget ?? defaults.planning.gemNodeBudget);
+    normalized.planning.researchHours = Number(profile.researchHours ?? defaults.planning.researchHours);
+    normalized.systems.loop.loopReset = Number(profile.loopReset ?? defaults.systems.loop.loopReset);
+    normalized.systems.metaProgression.hunterLevel = Number(profile.hunterLevel ?? defaults.systems.metaProgression.hunterLevel);
+    normalized.systems.metaProgression.traitSphereCount = Number(profile.traitSphereCount ?? defaults.systems.metaProgression.traitSphereCount);
+    normalized.systems.metaProgression.mechParts = Number(profile.mechParts ?? defaults.systems.metaProgression.mechParts);
+    normalized.systems.ship.power = Number(profile.power ?? defaults.systems.ship.power);
+    normalized.systems.ship.speed = Number(profile.speed ?? defaults.systems.ship.speed);
+    normalized.systems.ship.cargo = Number(profile.cargo ?? defaults.systems.ship.cargo);
+  }
+
+  normalized.meta.schemaVersion = 1;
+  normalized.meta.updatedAt = normalized.meta.updatedAt ?? null;
+  normalized.systems.ship.playerState = mergeDeep(
+    baselineShipPlayerState,
+    normalized.systems.ship.playerState ?? {}
+  );
+
+  return normalized;
+}
 
 const SHIP_LABELS = {
   C: "Cradle",
@@ -303,7 +405,8 @@ function makeDefaultShipFilters(source = {}) {
 const state = {
   snapshot: null,
   shipBaseline: null,
-  profile: loadStoredJson(STORAGE_KEYS.profile, DEMO_PROFILE),
+  shipTemplates: null,
+  playerProfile: null,
   shipConfig: null,
   importPreview: [],
   generatorOcrImages: [],
@@ -321,9 +424,26 @@ async function bootstrap() {
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json")
   ]);
 
+  const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
+  const legacyShipConfig = loadStoredJson(STORAGE_KEYS.shipConfig, null);
+  const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, null);
+  const legacyProfile = loadStoredJson(LEGACY_STORAGE_KEYS.profile, null);
+
   state.snapshot = loadStoredJson(STORAGE_KEYS.snapshot, snapshot);
   state.shipBaseline = shipBaseline;
-  state.shipConfig = buildShipConfig();
+  state.shipTemplates = buildShipTemplates(shipBaseline);
+  state.playerProfile = normalizePlayerProfile(
+    storedPlayerProfile ?? legacyProfile,
+    mergeDeep(
+      mergeDeep(baselineShipPlayerState, legacyShipConfig?.playerState ?? {}),
+      typeof legacyShipConfig?.softCap === "boolean"
+        ? { innovation: { softCap: legacyShipConfig.softCap } }
+        : {}
+    )
+  );
+  state.shipConfig = buildShipConfig(legacyShipConfig);
+  persistPlayerProfile();
+  localStorage.removeItem(LEGACY_STORAGE_KEYS.profile);
 
   bindNavigation();
   bindProfileActions();
@@ -356,10 +476,32 @@ function saveStoredJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-function buildShipConfig() {
-  const stored = loadStoredJson(STORAGE_KEYS.shipConfig, null);
-  const baseline = state.shipBaseline;
-  const shipTemplates = Object.fromEntries(
+function persistPlayerProfile() {
+  state.playerProfile.meta.updatedAt = new Date().toISOString();
+  saveStoredJson(STORAGE_KEYS.playerProfile, state.playerProfile);
+}
+
+function getShipPlayerState() {
+  return state.playerProfile.systems.ship.playerState;
+}
+
+function getProfileValue(path) {
+  return path.reduce((current, key) => current?.[key], state.playerProfile);
+}
+
+function setProfileValue(path, value, target = state.playerProfile) {
+  let current = target;
+  path.slice(0, -1).forEach((key) => {
+    if (!current[key] || typeof current[key] !== "object" || Array.isArray(current[key])) {
+      current[key] = {};
+    }
+    current = current[key];
+  });
+  current[path[path.length - 1]] = value;
+}
+
+function buildShipTemplates(baseline) {
+  return Object.fromEntries(
     Object.entries(baseline.shipInstalls).map(([shipKey, shipData]) => [
       shipKey,
       {
@@ -374,25 +516,10 @@ function buildShipConfig() {
       }
     ])
   );
+}
 
-  const playerState = {
-    academyGears: { ...baseline.academyGears },
-    innovation: {
-      inno1: baseline.innovation.inno1,
-      inno2: baseline.innovation.inno2,
-      darkInno: baseline.innovation.darkInno
-    },
-    generators: { ...baseline.calibration.generators },
-    techLevels: { ...baseline.calibration.techLevels },
-    zagreus: { ...baseline.calibration.zagreus },
-    hephaestus: { ...baseline.calibration.hephaestus },
-    demeter: { ...baseline.calibration.demeter },
-    koios: { ...baseline.calibration.koios },
-    zeus: { ...baseline.calibration.zeus },
-    crew: { ...baseline.calibration.crew },
-    technical: { ...baseline.calibration.technical }
-  };
-
+function buildShipConfig(stored = loadStoredJson(STORAGE_KEYS.shipConfig, null)) {
+  const baseline = state.shipBaseline;
   const defaultLoadouts = Array.from({ length: baseline.loadoutSlots }, (_, index) => ({
     name: `Loadout ${index + 1}`,
     ships: Object.fromEntries(
@@ -403,9 +530,6 @@ function buildShipConfig() {
 
     return {
       weights: stored?.weights ? { ...baseline.weights, ...stored.weights } : { ...baseline.weights },
-      softCap: typeof stored?.softCap === "boolean" ? stored.softCap : Boolean(baseline.innovation.softCap),
-      playerState: mergeDeep(playerState, stored?.playerState ?? {}),
-      shipTemplates,
       loadouts: hydrateLoadouts(stored?.loadouts, defaultLoadouts, stored?.filters),
       activeLoadoutIndex: clampNumber(stored?.activeLoadoutIndex ?? 0, 0, baseline.loadoutSlots - 1),
       selectedShipKey: SHIP_LABELS[stored?.selectedShipKey] ? stored.selectedShipKey : "C",
@@ -462,43 +586,44 @@ function bindNavigation() {
 
 function bindProfileActions() {
   $("#saveProfileBtn").addEventListener("click", () => {
-    state.profile = collectProfileForm();
-    saveStoredJson(STORAGE_KEYS.profile, state.profile);
+    state.playerProfile = collectProfileForm();
+    persistPlayerProfile();
     setStatus("profileStatus", "Profile saved.", "success");
     renderAll();
   });
 
   $("#restoreDefaultsBtn").addEventListener("click", () => {
-    state.profile = structuredClone(DEMO_PROFILE);
-    saveStoredJson(STORAGE_KEYS.profile, state.profile);
+    state.playerProfile = normalizePlayerProfile(createDefaultPlayerProfile(), createDefaultShipPlayerState(state.shipBaseline));
+    persistPlayerProfile();
     fillProfileForm();
     setStatus("profileStatus", "Demo profile restored.", "success");
     renderAll();
   });
 
   $("#saveSnapshotBtn").addEventListener("click", () => {
-    state.profile = collectProfileForm();
+    state.playerProfile = collectProfileForm();
     const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
     snapshots.unshift({
       savedAt: new Date().toISOString(),
-      loopReset: state.profile.loopReset,
-      profile: state.profile
+      loopReset: state.playerProfile.systems.loop.loopReset,
+      playerProfile: structuredClone(state.playerProfile)
     });
     saveStoredJson(STORAGE_KEYS.snapshots, snapshots.slice(0, 12));
-    saveStoredJson(STORAGE_KEYS.profile, state.profile);
-    setStatus("profileStatus", `Saved LR snapshot for LR ${state.profile.loopReset}.`, "success");
+    persistPlayerProfile();
+    setStatus("profileStatus", `Saved LR snapshot for LR ${state.playerProfile.systems.loop.loopReset}.`, "success");
     renderAll();
   });
 
   $("#saveShipStateBtn").addEventListener("click", () => {
     const inputs = $$("#shipPlayerStatePanel [data-ship-group][data-ship-field]");
+    const shipPlayerState = getShipPlayerState();
     inputs.forEach((input) => {
       const group = input.dataset.shipGroup;
       const field = input.dataset.shipField;
-      const current = state.shipConfig.playerState[group][field];
-      state.shipConfig.playerState[group][field] = typeof current === "boolean" ? input.checked : coerceInputValue(input.value);
+      const current = shipPlayerState[group][field];
+      shipPlayerState[group][field] = typeof current === "boolean" ? input.checked : coerceInputValue(input.value);
     });
-    persistShipConfig();
+    persistPlayerProfile();
     setStatus("shipPlayerStateStatus", "Shared ship calibration saved to player state.", "success");
     renderShipPanels();
   });
@@ -563,7 +688,7 @@ function renderNavigation() {
 
 function renderQuickPanels() {
   const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
-  const completion = getProfileCompletion(state.profile);
+  const completion = getProfileCompletion(state.playerProfile);
   $("#snapshotSummary").innerHTML = `
     <span class="snapshot-title">Active snapshot</span>
     <strong class="snapshot-value">${state.snapshot.snapshotVersion}</strong>
@@ -577,7 +702,7 @@ function renderQuickPanels() {
 }
 
 function renderOverview() {
-  $("#profileCompletionValue").textContent = `${getProfileCompletion(state.profile)}%`;
+  $("#profileCompletionValue").textContent = `${getProfileCompletion(state.playerProfile)}%`;
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
   const validation = runValidationCases();
   $("#validationStatusValue").textContent = `${validation.filter((item) => item.pass).length}/${validation.length}`;
@@ -589,10 +714,11 @@ function renderOverview() {
 }
 
 function renderShipPlayerState() {
+  const shipPlayerState = getShipPlayerState();
   $("#shipPlayerStatePanel").innerHTML = SHIP_PLAYER_STATE_GROUPS.map(([groupKey, label]) => {
     const hiddenFields = SHIP_PLAYER_STATE_HIDDEN_FIELDS[groupKey] ?? new Set();
     const labelMap = SHIP_PLAYER_STATE_FIELD_LABELS[groupKey] ?? {};
-    const fields = Object.entries(state.shipConfig.playerState[groupKey])
+    const fields = Object.entries(shipPlayerState[groupKey])
       .filter(([fieldKey]) => !hiddenFields.has(fieldKey))
       .map(([fieldKey, value]) => {
         const displayLabel = labelMap[fieldKey] ?? fieldKey;
@@ -666,11 +792,11 @@ function renderSourceRegistry() {
           <div class="mini-grid">
             <label class="mini-field">
               <span>softCap</span>
-              <input id="shipSoftCapToggle" type="checkbox" ${state.shipConfig.softCap ? "checked" : ""}>
+              <input id="shipSoftCapToggle" type="checkbox" ${getShipPlayerState().innovation.softCap ? "checked" : ""}>
             </label>
             <label class="mini-field">
                 <span>Meltdown</span>
-                <input id="shipMeltdownInput" type="number" step="any" min="0" value="${Number(state.shipConfig.playerState.technical.Meltdown || 0)}">
+                <input id="shipMeltdownInput" type="number" step="any" min="0" value="${Number(getShipPlayerState().technical.Meltdown || 0)}">
               </label>
           </div>
       </article>
@@ -685,14 +811,14 @@ function renderSourceRegistry() {
   });
 
     $("#shipSoftCapToggle").addEventListener("change", (event) => {
-      state.shipConfig.softCap = event.target.checked;
-      persistShipConfig(false);
+      getShipPlayerState().innovation.softCap = event.target.checked;
+      persistPlayerProfile();
       renderShipPanels();
     });
 
     $("#shipMeltdownInput").addEventListener("change", (event) => {
-      state.shipConfig.playerState.technical.Meltdown = coerceInputValue(event.target.value);
-      persistShipConfig(false);
+      getShipPlayerState().technical.Meltdown = coerceInputValue(event.target.value);
+      persistPlayerProfile();
       renderShipPlayerState();
       renderShipPanels();
     });
@@ -767,7 +893,7 @@ function renderSourceRegistry() {
   const shipKey = state.shipConfig.selectedShipKey;
     const active = getActiveLoadout();
     const values = active.ships[shipKey];
-    const template = state.shipConfig.shipTemplates[shipKey];
+    const template = state.shipTemplates[shipKey];
       const bestInstall = getBestNextInstall(shipKey);
       const bestIndexes = new Set(bestInstall?.indexes ?? []);
       const installTotal = sum(values);
@@ -889,7 +1015,7 @@ function renderShipActions() {
     const bestInstall = getBestNextInstall(state.shipConfig.selectedShipKey);
     const shipRankings = rankShipTargets();
     const leadCard = bestInstall ? {
-      title: `Next best install: ${bestInstall.indexes.map((index) => state.shipConfig.shipTemplates[state.shipConfig.selectedShipKey].installs[index].name).join(" | ")}`,
+      title: `Next best install: ${bestInstall.indexes.map((index) => state.shipTemplates[state.shipConfig.selectedShipKey].installs[index].name).join(" | ")}`,
       subtitle: SHIP_LABELS[state.shipConfig.selectedShipKey],
       score: bestInstall.score,
       confidence: 0.58,
@@ -930,14 +1056,21 @@ function renderResearch() {
 
 function collectProfileForm() {
   const entries = Object.fromEntries(new FormData($("#profileForm")).entries());
-  return Object.fromEntries(Object.entries(entries).map(([key, value]) => [key, coerceInputValue(value)]));
+  const nextProfile = structuredClone(state.playerProfile);
+  Object.entries(PROFILE_FIELD_PATHS).forEach(([field, path]) => {
+    if (field in entries) {
+      setProfileValue(path, coerceInputValue(entries[field]), nextProfile);
+    }
+  });
+  nextProfile.meta.schemaVersion = 1;
+  return nextProfile;
 }
 
 function fillProfileForm() {
-  Object.entries(state.profile).forEach(([key, value]) => {
+  Object.entries(PROFILE_FIELD_PATHS).forEach(([key, path]) => {
     const input = formControl(key);
     if (input) {
-      input.value = value;
+      input.value = getProfileValue(path) ?? "";
     }
   });
 }
@@ -946,7 +1079,7 @@ function applyInstallTap(installIndex, direction = 1) {
   const loadout = getActiveLoadout();
   const shipKey = state.shipConfig.selectedShipKey;
   const current = loadout.ships[shipKey][installIndex];
-  const cap = getEffectiveCap(state.shipConfig.shipTemplates[shipKey].caps[installIndex]);
+  const cap = getEffectiveCap(state.shipTemplates[shipKey].caps[installIndex]);
   const delta = getTapDelta(shipKey, installIndex, direction);
   if (direction > 0) {
     if (!canInstallPoint(shipKey, installIndex) || delta <= 0 || current >= cap) {
@@ -1009,7 +1142,7 @@ function getActiveLoadout() {
 }
 
 function getEffectiveCap(baseCap) {
-  return Number(baseCap || 0) * (state.shipConfig.playerState.technical.CapX5 ? 5 : 1);
+  return Number(baseCap || 0) * (getShipPlayerState().technical.CapX5 ? 5 : 1);
 }
 
 function getShipInstallTotal(shipKey) {
@@ -1017,13 +1150,13 @@ function getShipInstallTotal(shipKey) {
 }
 
 function canInstallPoint(shipKey, installIndex) {
-  const template = state.shipConfig.shipTemplates[shipKey];
+  const template = state.shipTemplates[shipKey];
   const current = getActiveLoadout().ships[shipKey][installIndex];
   return current < getEffectiveCap(template.caps[installIndex]) && getShipInstallTotal(shipKey) >= template.reserveThresholds[installIndex];
 }
 
 function getTapDelta(shipKey, installIndex, direction = 1) {
-  const template = state.shipConfig.shipTemplates[shipKey];
+  const template = state.shipTemplates[shipKey];
   const current = getActiveLoadout().ships[shipKey][installIndex];
   const capRemaining = Math.max(getEffectiveCap(template.caps[installIndex]) - current, 0);
   const removable = Math.max(current, 0);
@@ -1042,7 +1175,7 @@ function getTapDelta(shipKey, installIndex, direction = 1) {
   function getInstallGain(shipKey, installIndex) {
     const crew = getShipCrew(shipKey);
     const baseMultiplier = getInstallBaseMultiplier(shipKey, installIndex);
-    const exponent = scorePowerTerm(state.shipConfig.shipTemplates[shipKey].powerTerms[installIndex], state.shipConfig.weights, Number(state.shipConfig.playerState.technical.Meltdown || 0));
+    const exponent = scorePowerTerm(state.shipTemplates[shipKey].powerTerms[installIndex], state.shipConfig.weights, Number(getShipPlayerState().technical.Meltdown || 0));
     const currentLevel = getActiveLoadout().ships[shipKey][installIndex];
     const denom = (crew * baseMultiplier * currentLevel) + 1;
     const numer = (crew * baseMultiplier * (currentLevel + 1)) + 1;
@@ -1081,7 +1214,7 @@ function rankShipTargets() {
     title: SHIP_LABELS[shipKey],
     subtitle: `${sum(values)} installs assigned`,
     score: values.reduce((total, value, index) => {
-      const cap = getEffectiveCap(state.shipConfig.shipTemplates[shipKey].caps[index]);
+      const cap = getEffectiveCap(state.shipTemplates[shipKey].caps[index]);
       return total + ((value / Math.max(cap, 1)) * 100);
     }, 0),
     confidence: 0.48,
@@ -1090,13 +1223,14 @@ function rankShipTargets() {
 }
 
 function runShipOptimization() {
+  const ship = state.playerProfile.systems.ship;
   return [...state.snapshot.shipLoadouts].map((loadout) => ({
     title: loadout.name,
     subtitle: loadout.notes,
     score:
-      (Number(state.profile.power || 0) * loadout.powerScale * state.snapshot.resourceGoals.credits.powerWeight) +
-      (Number(state.profile.speed || 0) * loadout.speedScale * state.snapshot.resourceGoals.credits.speedWeight * 10) +
-      (Number(state.profile.cargo || 0) * loadout.cargoScale * state.snapshot.resourceGoals.credits.cargoWeight) +
+      (Number(ship.power || 0) * loadout.powerScale * state.snapshot.resourceGoals.credits.powerWeight) +
+      (Number(ship.speed || 0) * loadout.speedScale * state.snapshot.resourceGoals.credits.speedWeight * 10) +
+      (Number(ship.cargo || 0) * loadout.cargoScale * state.snapshot.resourceGoals.credits.cargoWeight) +
       (loadout.resourceBias === "credits" ? 45 : 0),
     confidence: loadout.risk === "safe" ? 0.72 : 0.61,
     notes: loadout.notes
@@ -1105,10 +1239,11 @@ function runShipOptimization() {
 
 function runProgressionOptimization() {
   const bias = $("#progressionBias")?.value ?? "balanced";
+  const resources = state.playerProfile.resources;
   return [...state.snapshot.progressionActions].map((item) => ({
     title: item.label,
     subtitle: item.resource,
-    score: item.baseValue * Math.min(1.2, Number(state.profile[item.resource] || 0) / Math.max(item.baseCost, 1)) * progressionUrgency(item.resource, bias),
+    score: item.baseValue * Math.min(1.2, Number(resources[item.resource] || 0) / Math.max(item.baseCost, 1)) * progressionUrgency(item.resource, bias),
     confidence: item.confidence,
     notes: item.notes
   })).sort((left, right) => right.score - left.score);
@@ -1116,7 +1251,7 @@ function runProgressionOptimization() {
 
 function runGemOptimization() {
   const mode = $("#gemBudgetMode")?.value ?? "strict";
-  const budget = Number(state.profile.gemNodeBudget || state.profile.gemDust || 0);
+  const budget = Number(state.playerProfile.planning.gemNodeBudget || state.playerProfile.resources.gemDust || 0);
   return [...state.snapshot.gemNodes].map((node) => {
     const affordability = node.cost <= budget ? 1 : mode === "stretch" ? 0.8 : 0.35;
     return {
@@ -1436,11 +1571,11 @@ function applyGeneratorOcrPreview() {
     return;
   }
 
-  state.shipConfig.playerState.generators = {
-    ...state.shipConfig.playerState.generators,
+  getShipPlayerState().generators = {
+    ...getShipPlayerState().generators,
     ...normalized
   };
-  persistShipConfig(false);
+  persistPlayerProfile();
   renderShipPlayerState();
   renderShipPanels();
   renderGeneratorOcrButtons();
@@ -1460,8 +1595,9 @@ function getImportedRecordCount() {
 }
 
 function getProfileCompletion(profile) {
-  const fields = Object.keys(DEMO_PROFILE);
-  const filled = fields.filter((field) => String(profile[field] ?? "").trim() !== "").length;
+  const filled = Object.values(PROFILE_FIELD_PATHS)
+    .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
+  const fields = Object.keys(PROFILE_FIELD_PATHS);
   return Math.round((filled / fields.length) * 100);
 }
 
@@ -1500,14 +1636,14 @@ function scorePowerTerm(term, weights, meltdown) {
     return Math.max(Math.min(highest, Number(limit?.[1] || 8)) * meltdown, 1e-9);
   }
   if (term.includes("MaxGenHWunlocked+MaxGenSWunlocked")) {
-    const total = Number(state.shipConfig.playerState.techLevels.MaxGenHWunlocked || 0) + Number(state.shipConfig.playerState.techLevels.MaxGenSWunlocked || 0);
+    const total = Number(getShipPlayerState().techLevels.MaxGenHWunlocked || 0) + Number(getShipPlayerState().techLevels.MaxGenSWunlocked || 0);
     return Math.max(Math.min(total, 16) * meltdown, 1e-9);
   }
   if (term.includes("MaxGenHWunlocked")) {
-    return Math.max(Math.min(Number(state.shipConfig.playerState.techLevels.MaxGenHWunlocked || 0), 8) * meltdown, 1e-9);
+    return Math.max(Math.min(Number(getShipPlayerState().techLevels.MaxGenHWunlocked || 0), 8) * meltdown, 1e-9);
   }
   if (term.includes("MaxGenSWunlocked")) {
-    return Math.max(Math.min(Number(state.shipConfig.playerState.techLevels.MaxGenSWunlocked || 0), 8) * meltdown, 1e-9);
+    return Math.max(Math.min(Number(getShipPlayerState().techLevels.MaxGenSWunlocked || 0), 8) * meltdown, 1e-9);
   }
   if (term.includes("Meltdown")) {
     return Math.max(meltdown, 1e-9);
@@ -1536,7 +1672,7 @@ function scorePowerTerm(term, weights, meltdown) {
       if (enabled !== false) {
         return getEffectWeight(normalized, weights);
       }
-      if (state.shipConfig.softCap) {
+      if (getShipPlayerState().innovation.softCap) {
         return 0.01;
       }
       return 0;
@@ -1544,7 +1680,7 @@ function scorePowerTerm(term, weights, meltdown) {
 
   function getInstallEffectTypes(shipKey, installIndex) {
       const effectTypes = DESMOS_INSTALL_WEIGHT_MAPS[shipKey]?.[installIndex]
-        ?? state.shipConfig.shipTemplates[shipKey].installs[installIndex].effectTypes
+        ?? state.shipTemplates[shipKey].installs[installIndex].effectTypes
         ?? ["other"];
       return (Array.isArray(effectTypes) ? effectTypes : [effectTypes]).map(normalizeEffectType);
     }
@@ -1599,13 +1735,13 @@ function formatPercentGain(value) {
 
 function getHighestGen() {
   return Math.max(
-    Number(state.shipConfig.playerState.techLevels.MaxGenHWunlocked || 0),
-    Number(state.shipConfig.playerState.techLevels.MaxGenSWunlocked || 0)
+    Number(getShipPlayerState().techLevels.MaxGenHWunlocked || 0),
+    Number(getShipPlayerState().techLevels.MaxGenSWunlocked || 0)
   );
 }
 
 function getShipCrew(shipKey) {
-  const crew = state.shipConfig.playerState.crew;
+  const crew = getShipPlayerState().crew;
   const map = {
     C: Number(crew.Crew || 0),
     A: Number(crew.AuxesiaCrew || 0),
@@ -1619,7 +1755,7 @@ function getShipCrew(shipKey) {
 }
 
 function getShipInnovationMultiplier(shipKey) {
-  const innovation = state.shipConfig.playerState.innovation;
+  const innovation = getShipPlayerState().innovation;
   const dark = innovation.darkInno ? 3 : 1;
   const main = ["C", "A", "Zg", "H"].includes(shipKey)
     ? (innovation.inno1 ? 7 : 1)
@@ -1628,14 +1764,15 @@ function getShipInnovationMultiplier(shipKey) {
 }
 
 function getInstallBaseMultiplier(shipKey, installIndex) {
-  const gears = state.shipConfig.playerState.academyGears;
-  const generators = state.shipConfig.playerState.generators;
-  const tech = state.shipConfig.playerState.techLevels;
-  const zagreus = state.shipConfig.playerState.zagreus;
-  const hephaestus = state.shipConfig.playerState.hephaestus;
-  const demeter = state.shipConfig.playerState.demeter;
-  const koios = state.shipConfig.playerState.koios;
-  const zeus = state.shipConfig.playerState.zeus;
+  const shipPlayerState = getShipPlayerState();
+  const gears = shipPlayerState.academyGears;
+  const generators = shipPlayerState.generators;
+  const tech = shipPlayerState.techLevels;
+  const zagreus = shipPlayerState.zagreus;
+  const hephaestus = shipPlayerState.hephaestus;
+  const demeter = shipPlayerState.demeter;
+  const koios = shipPlayerState.koios;
+  const zeus = shipPlayerState.zeus;
   const innovation = getShipInnovationMultiplier(shipKey);
   const ticksRun = getTicksRun();
   const ops = getOperationsTotal();
@@ -1744,27 +1881,29 @@ function getInstallBaseMultiplier(shipKey, installIndex) {
 }
 
 function getTicksRun() {
-  const technical = state.shipConfig.playerState.technical;
+  const shipPlayerState = getShipPlayerState();
+  const technical = shipPlayerState.technical;
   const runHours = technical.LongRun ? Number(technical.LongRunLenDays || 0) * 24 : Number(technical.ShortRunLenMins || 0) / 60;
-  const tickTimer = Number(state.shipConfig.playerState.hephaestus.tickTimer || 1);
+  const tickTimer = Number(shipPlayerState.hephaestus.tickTimer || 1);
   return Math.floor((runHours * 3600) / Math.max(tickTimer, 0.001));
 }
 
 function getOperationsTotal() {
-  const demeter = state.shipConfig.playerState.demeter;
+  const demeter = getShipPlayerState().demeter;
   const efficiency = 1;
   return Number(demeter.OpsFromAotC || 0) + (Math.floor(getTicksRun() / Math.max(Number(demeter.TicksPerOp || 1), 1)) * efficiency);
 }
 
 function getStudiesTotal() {
-  const koios = state.shipConfig.playerState.koios;
+  const koios = getShipPlayerState().koios;
   const efficiency = 1;
   return Math.floor(getTicksRun() * Number(koios.StudiesPerResBar || 0) / Math.max(Number(koios.TicksPerResBar || 1), 1)) * efficiency;
 }
 
 function getMissionTotal() {
-  const technical = state.shipConfig.playerState.technical;
-  const zeus = state.shipConfig.playerState.zeus;
+  const shipPlayerState = getShipPlayerState();
+  const technical = shipPlayerState.technical;
+  const zeus = shipPlayerState.zeus;
   const runMinutes = technical.LongRun ? Number(technical.LongRunLenDays || 0) * 24 * 60 : Number(technical.ShortRunLenMins || 0);
   return Math.floor(runMinutes * ((Number(zeus.CappedMissions || 0) / 2) + (1 / Math.max(Number(zeus.LowestUncappedMissionTimer || 1), 1))));
 }
