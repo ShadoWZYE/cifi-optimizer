@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import {
+  PLAYER_PROFILE_SCHEMA_VERSION,
+  createDefaultPlayerProfile,
+  normalizePlayerProfile
+} from "../player-profile.js";
 
 const snapshot = JSON.parse(await readFile(new URL("../data/game-data.snapshot.v1.json", import.meta.url), "utf8"));
 const groundedShardMilestones = JSON.parse(await readFile(new URL("../data/shard-milestones.grounded.v1.json", import.meta.url), "utf8"));
@@ -11,11 +16,7 @@ const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.met
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 
-const defaultProfile = {
-  power: 0,
-  speed: 0,
-  cargo: 0
-};
+const defaultProfile = createDefaultPlayerProfile();
 
 assert.equal(snapshot.snapshotVersion, "v1.0.0-alpha");
 assert.ok(snapshot.shipLoadouts.length >= 4, "expected ship loadouts");
@@ -33,8 +34,15 @@ assert.match(html, /Gem Nodes \(Experimental\)/);
 assert.match(html, /Research \(Non-MVP\)/);
 assert.match(html, /Apply to active snapshot/);
 assert.match(html, /Reset to blank profile/);
+assert.match(html, /Shared PlayerProfile truth is limited to grounded CIFI account state/);
+assert.match(html, /Diamonds/);
+assert.match(html, /Academy relics/);
+assert.match(html, /Planner-only helper inputs are optional/);
 assert.doesNotMatch(html, /Rank shard milestones/);
 assert.match(html, /Shard milestones \(disabled pending verified schema\)/);
+assert.doesNotMatch(html, /Primary farming focus/);
+assert.doesNotMatch(html, /Ship power/);
+assert.doesNotMatch(html, /Gem dust/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);
@@ -42,11 +50,12 @@ assert.match(appJs, /function buildGroundedShardRecommendations/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
 assert.match(appJs, /function normalizeImportRow/);
-assert.match(appJs, /function createDefaultPlayerProfile/);
-assert.match(appJs, /function normalizePlayerProfile/);
+assert.match(appJs, /from "\.\/player-profile\.js"/);
+assert.match(appJs, /PLAYER_PROFILE_SCHEMA_VERSION/);
 assert.match(appJs, /playerProfile:/);
 assert.match(appJs, /externalModels/);
 assert.match(appJs, /communityToolState/);
+assert.match(appJs, /CANONICAL_PROFILE_FIELD_PATHS/);
 assert.match(appJs, /BroadcastChannel/);
 assert.match(appJs, /launcher-reopen/);
 assert.match(appJs, /kind:\s*"warning"/);
@@ -70,9 +79,9 @@ const shipWinner = [...snapshot.shipLoadouts]
   .map((loadout) => ({
     name: loadout.name,
     score:
-      (defaultProfile.power * loadout.powerScale * snapshot.resourceGoals.credits.powerWeight) +
-      (defaultProfile.speed * loadout.speedScale * snapshot.resourceGoals.credits.speedWeight * 10) +
-      (defaultProfile.cargo * loadout.cargoScale * snapshot.resourceGoals.credits.cargoWeight) +
+      ((defaultProfile.externalModels.shipPlanner.summary.power ?? 0) * loadout.powerScale * snapshot.resourceGoals.credits.powerWeight) +
+      ((defaultProfile.externalModels.shipPlanner.summary.speed ?? 0) * loadout.speedScale * snapshot.resourceGoals.credits.speedWeight * 10) +
+      ((defaultProfile.externalModels.shipPlanner.summary.cargo ?? 0) * loadout.cargoScale * snapshot.resourceGoals.credits.cargoWeight) +
       (loadout.resourceBias === "credits" ? 45 : 0)
   }))
   .sort((a, b) => b.score - a.score)[0];
@@ -86,5 +95,91 @@ const gemWinner = [...snapshot.gemNodes]
 
 assert.equal(shipWinner.name, "Freighter Overdrive");
 assert.equal(gemWinner.label, "Surge Lattice");
+
+const migratedLegacyProfile = normalizePlayerProfile({
+  profileName: "Legacy main",
+  automationConfidence: "mixed",
+  loopReset: "41",
+  gems: "500",
+  tokens: 120,
+  relics: "12",
+  shards: "9000",
+  shardRatePerHour: "80",
+  power: "7",
+  speed: "2.5",
+  cargo: "19",
+  resourceFocus: "shards",
+  gemNodeBudget: "250",
+  researchHours: "6",
+  gemDust: "33",
+  hunterLevel: "14",
+  traitSphereCount: "5",
+  mechParts: "9",
+  notes: "legacy"
+});
+
+assert.equal(migratedLegacyProfile.meta.schemaVersion, PLAYER_PROFILE_SCHEMA_VERSION);
+assert.equal(migratedLegacyProfile.meta.dataConfidence, "mixed");
+assert.equal(migratedLegacyProfile.player.loop.loopReset, 41);
+assert.equal(migratedLegacyProfile.player.resources.diamonds, 500);
+assert.equal(migratedLegacyProfile.player.resources.tokens, 120);
+assert.equal(migratedLegacyProfile.player.resources.academyRelics, 12);
+assert.equal(migratedLegacyProfile.player.resources.shards, 9000);
+assert.equal(migratedLegacyProfile.planning.shards.ratePerHour, 80);
+assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.power, 7);
+assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.speed, 2.5);
+assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.cargo, 19);
+assert.equal(migratedLegacyProfile.externalModels.experimental.profileHints.primaryFarmingFocus, "shards");
+assert.equal(migratedLegacyProfile.externalModels.experimental.profileHints.researchHours, 6);
+assert.equal(migratedLegacyProfile.externalModels.experimental.gemNodes.budget, 250);
+assert.equal(migratedLegacyProfile.compatibility.unresolvedProfileFields.gemDust, 33);
+assert.equal(migratedLegacyProfile.compatibility.unresolvedProfileFields.hunterLevel, 14);
+assert.equal(migratedLegacyProfile.compatibility.unresolvedProfileFields.traitSphereCount, 5);
+assert.equal(migratedLegacyProfile.compatibility.unresolvedProfileFields.mechParts, 9);
+assert.equal(migratedLegacyProfile.notes.profile, "legacy");
+
+const migratedNestedProfile = normalizePlayerProfile({
+  meta: {
+    profileName: "Nested main",
+    updatedAt: "2026-03-28T00:00:00.000Z",
+    dataConfidence: "verified"
+  },
+  player: {
+    loop: {
+      loopReset: 64
+    },
+    resources: {
+      diamonds: 900,
+      tokens: 250,
+      academyRelics: 40,
+      shards: 15000
+    }
+  },
+  planning: {
+    shards: {
+      ratePerHour: 110
+    }
+  },
+  notes: {
+    profile: "nested"
+  },
+  externalModels: {
+    shipPlanner: {
+      communityToolState: {
+        technical: {
+          Meltdown: 12
+        }
+      }
+    }
+  }
+});
+
+assert.equal(migratedNestedProfile.meta.profileName, "Nested main");
+assert.equal(migratedNestedProfile.meta.updatedAt, "2026-03-28T00:00:00.000Z");
+assert.equal(migratedNestedProfile.meta.dataConfidence, "verified");
+assert.equal(migratedNestedProfile.player.resources.diamonds, 900);
+assert.equal(migratedNestedProfile.planning.shards.ratePerHour, 110);
+assert.equal(migratedNestedProfile.notes.profile, "nested");
+assert.equal(migratedNestedProfile.externalModels.shipPlanner.communityToolState.technical.Meltdown, 12);
 
 console.log("Smoke tests passed.");

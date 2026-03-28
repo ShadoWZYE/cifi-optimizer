@@ -1,0 +1,79 @@
+# PlayerProfile Schema
+
+This document defines the grounded boundary for `state.playerProfile`.
+
+## Classification rule
+
+Only place a field in canonical shared player truth when it is both:
+
+1. a real CIFI account or progression concept, and
+2. useful to the MVP surfaces currently shipped in this repo.
+
+If a field fails either test, it must be moved under a labeled non-canonical namespace or removed from the active form.
+
+## Canonical shared truth
+
+These fields are the active shared PlayerProfile surface:
+
+| Field | Path | Classification | Notes |
+|---|---|---|---|
+| Profile name | `meta.profileName` | metadata | App label, not gameplay state. |
+| Data confidence | `meta.dataConfidence` | metadata | Tracks how trustworthy the entered values are. |
+| Current LR | `player.loop.loopReset` | canonical in-game state | Grounded loop-reset context for shard and warning flows. |
+| Diamonds | `player.resources.diamonds` | canonical in-game state | Legacy `gems` values migrate here. |
+| Tokens | `player.resources.tokens` | canonical in-game state | Kept for MVP spend planning. |
+| Academy relics | `player.resources.academyRelics` | canonical in-game state | Legacy `relics` values migrate here. |
+| Current shards | `player.resources.shards` | canonical in-game state | Grounded shard workflow input. |
+| Profile notes | `notes.profile` | metadata | Manual context and import notes. |
+
+## Planner-only inputs
+
+These fields may be stored in `state.playerProfile`, but they are not canonical game truth:
+
+| Field | Path | Classification | Notes |
+|---|---|---|---|
+| Shard income / hour | `planning.shards.ratePerHour` | planner-only input | Manual helper for descriptive shard planning. |
+
+## External or experimental model state
+
+These fields stay isolated from canonical truth:
+
+| Field | Path | Classification | Notes |
+|---|---|---|---|
+| Ship planner summary | `externalModels.shipPlanner.summary.*` | external/community-tool state | Preserves old `power` / `speed` / `cargo` values without treating them as raw CIFI state. |
+| Ship planner calibration | `externalModels.shipPlanner.communityToolState` | external/community-tool state | Desmos/community-tool calibration payload. |
+| Gem node budget | `externalModels.experimental.gemNodes.budget` | planner-only / experimental | Experimental gem-node helper, not shared account truth. |
+| Primary farming focus | `externalModels.experimental.profileHints.primaryFarmingFocus` | planner-only / experimental | Old prototype focus toggle, not canonical game state. |
+| Research hours | `externalModels.experimental.profileHints.researchHours` | planner-only / experimental | App-side planning helper, not a real CIFI field. |
+
+## Unresolved compatibility fields
+
+These values are preserved only for migration compatibility:
+
+| Legacy field | Path | Classification | Why not canonical |
+|---|---|---|---|
+| Gem dust | `compatibility.unresolvedProfileFields.gemDust` | unresolved | Current research baseline does not verify it as active shared MVP profile truth. |
+| Hunter level | `compatibility.unresolvedProfileFields.hunterLevel` | unresolved | Hunter terms are real, but this exact shared field is not yet grounded enough for MVP schema truth. |
+| Trait spheres unlocked | `compatibility.unresolvedProfileFields.traitSphereCount` | unresolved | Real term, unresolved shared-profile role. |
+| Mech parts | `compatibility.unresolvedProfileFields.mechParts` | unresolved | Real term family remains research-track territory. |
+| Highest ship unlocked / manual phase | `compatibility.legacyStage.*` | unresolved | Preserved from earlier schema drafts, but not active grounded profile truth. |
+
+## Migration policy
+
+- Legacy flat profile fields migrate into the version 2 schema.
+- Old nested prototype fields also migrate into version 2.
+- Canonical renames:
+  - `gems` -> `player.resources.diamonds`
+  - `relics` -> `player.resources.academyRelics`
+- Removed visible fields are not discarded; they move into `externalModels` or `compatibility`.
+- `externalModels.shipPlanner.communityToolState` is always preserved during migration.
+
+## UI rule
+
+The active Profile form should show:
+
+- canonical shared truth
+- metadata
+- clearly labeled planner-only helpers
+
+It should not present external-model or unresolved compatibility fields as raw CIFI account state.

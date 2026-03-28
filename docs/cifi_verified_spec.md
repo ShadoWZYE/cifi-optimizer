@@ -174,6 +174,20 @@ It should not silently mix:
 - mock defaults
 - heuristic assumptions
 
+Current grounded shared-profile baseline:
+- `player.loop.loopReset`
+- `player.resources.diamonds`
+- `player.resources.tokens`
+- `player.resources.academyRelics`
+- `player.resources.shards`
+
+Current non-canonical-but-allowed namespaces:
+- `planning`
+- `externalModels`
+- `compatibility`
+
+The repo should migrate legacy profile fields into those labeled namespaces rather than continuing to present them as canonical CIFI truth.
+
 ### External model fields
 If a field is not directly from the game, place it under a clearly labeled namespace such as:
 - `externalModels`

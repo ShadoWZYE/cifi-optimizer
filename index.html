@@ -98,6 +98,7 @@
 
         <section class="panel">
           <form id="profileForm" class="profile-form">
+            <p class="meta">Shared PlayerProfile truth is limited to grounded CIFI account state. Planner-only helpers and community-tool calibration stay labeled as non-canonical.</p>
             <div class="field-group">
               <label for="profileName">Profile name</label>
               <input id="profileName" name="profileName" type="text" placeholder="Main account">
@@ -109,18 +110,8 @@
                 <input id="loopReset" name="loopReset" type="number" min="0" step="1">
               </div>
               <div class="field-group">
-                <label for="resourceFocus">Primary farming focus</label>
-                <select id="resourceFocus" name="resourceFocus">
-                  <option value="">Select focus</option>
-                  <option value="credits">Credits</option>
-                  <option value="alloy">Alloy</option>
-                  <option value="research">Research</option>
-                  <option value="shards">Shards</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label for="automationConfidence">Data confidence</label>
-                <select id="automationConfidence" name="automationConfidence">
+                <label for="dataConfidence">Data confidence</label>
+                <select id="dataConfidence" name="dataConfidence">
                   <option value="manual">Manual only</option>
                   <option value="mixed">Manual + assisted</option>
                   <option value="verified">Verified / imported</option>
@@ -130,39 +121,16 @@
 
             <div class="field-grid">
               <div class="field-group">
-                <label for="power">Ship power</label>
-                <input id="power" name="power" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="speed">Ship speed</label>
-                <input id="speed" name="speed" type="number" min="0" step="0.1">
-              </div>
-              <div class="field-group">
-                <label for="cargo">Cargo</label>
-                <input id="cargo" name="cargo" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="hunterLevel">Hunter level</label>
-                <input id="hunterLevel" name="hunterLevel" type="number" min="0" step="1">
-              </div>
-            </div>
-
-            <div class="field-grid">
-              <div class="field-group">
-                <label for="gems">Gems</label>
-                <input id="gems" name="gems" type="number" min="0" step="1">
+                <label for="diamonds">Diamonds</label>
+                <input id="diamonds" name="diamonds" type="number" min="0" step="1">
               </div>
               <div class="field-group">
                 <label for="tokens">Tokens</label>
                 <input id="tokens" name="tokens" type="number" min="0" step="1">
               </div>
               <div class="field-group">
-                <label for="relics">Relics</label>
-                <input id="relics" name="relics" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="gemDust">Gem dust</label>
-                <input id="gemDust" name="gemDust" type="number" min="0" step="1">
+                <label for="academyRelics">Academy relics</label>
+                <input id="academyRelics" name="academyRelics" type="number" min="0" step="1">
               </div>
               <div class="field-group">
                 <label for="shards">Current shards</label>
@@ -170,23 +138,8 @@
               </div>
             </div>
 
+            <p class="meta">Planner-only helper inputs are optional. They support descriptive planning surfaces but are not treated as raw in-game account truth.</p>
             <div class="field-grid">
-              <div class="field-group">
-                <label for="gemNodeBudget">Gem node budget</label>
-                <input id="gemNodeBudget" name="gemNodeBudget" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="traitSphereCount">Trait spheres unlocked</label>
-                <input id="traitSphereCount" name="traitSphereCount" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="mechParts">Mech parts</label>
-                <input id="mechParts" name="mechParts" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="researchHours">Available sim / research hours</label>
-                <input id="researchHours" name="researchHours" type="number" min="0" step="1">
-              </div>
               <div class="field-group">
                 <label for="shardRatePerHour">Shard income / hour</label>
                 <input id="shardRatePerHour" name="shardRatePerHour" type="number" min="0" step="1">
@@ -194,7 +147,7 @@
             </div>
 
             <div class="field-group">
-              <label for="notes">Calibration notes</label>
+              <label for="notes">Profile notes</label>
               <textarea id="notes" name="notes" rows="3" placeholder="Known assumptions, partial values, or import notes"></textarea>
             </div>
           </form>
