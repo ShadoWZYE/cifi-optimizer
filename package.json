@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "powershell -NoProfile -Command \"& \\\"$env:ProgramFiles\\\\nodejs\\\\node.exe\\\" ./scripts/dev-server.mjs\"",
-    "test": "powershell -NoProfile -Command \"& \\\"$env:ProgramFiles\\\\nodejs\\\\node.exe\\\" ./tests/smoke.mjs\""
+    "dev": "node ./scripts/dev-server.mjs",
+    "test": "node ./tests/smoke.mjs"
   }
 }

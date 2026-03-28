@@ -35,15 +35,32 @@ Use [`launch-cifi.vbs`](/C:/Users/Shadow/Desktop/CiFi/launch-cifi.vbs) for norma
 
 - If the local server is already running, it is reused.
 - If the local server is not running, the launcher starts it hidden and waits for readiness.
+- The launcher resolves Node.js by trying `node` from PATH first, then common Windows install locations.
 - The launcher opens the default browser to `http://localhost:4173/?launch=1`.
 - When a primary CiFi tab is already open, the new launcher-opened tab drops into an idle screen after signaling the existing tab to refresh and show a small reopen notice.
+
+## Developer flow
+
+- Use `npm run dev` when you want the local server in a normal terminal session.
+- Use [`launch-cifi.bat`](/C:/Users/Shadow/Desktop/CiFi/launch-cifi.bat) when you want a visible Windows debug launcher with startup output and an explicit resolved npm path.
+- Use `npm test` to run the smoke suite.
+
+## Node requirement
+
+- CiFi requires Node.js 18+.
+- Best case: Node is available on PATH as `node` and `npm`.
+- Launcher fallback locations:
+- `%ProgramFiles%\nodejs`
+- `%ProgramFiles(x86)%\nodejs`
+- `%LocalAppData%\Programs\nodejs`
+- If Node is not found, the launcher shows a friendly error and does not try to start the server.
 
 ## Browser coordination limits
 
 - The app uses `BroadcastChannel` when available and falls back to `localStorage` events when it is not.
 - Browsers cannot reliably focus another existing tab from a normal launcher-opened tab, so the safest behavior is to keep the active tab authoritative and make the new tab idle.
 - If the browser profile or privacy settings block cross-tab storage or background communication, the coordination may degrade and a second full tab can still appear.
-- The hidden launcher assumes Node.js is installed at `C:\Program Files\nodejs\node.exe`.
+- The hidden launcher still depends on a local Node installation; it is not a packaged standalone desktop app.
 
 ## Large numbers and OCR
 
@@ -59,7 +76,7 @@ Example:
 powershell -ExecutionPolicy Bypass -File .\scripts\generator-ocr.ps1 C:\path\to\generators-1.png C:\path\to\generators-2.png
 ```
 
-If `node` or `npm` are not yet on your PATH, reopen the terminal after install or call them from `C:\Program Files\nodejs`.
+If `node` or `npm` are not yet on your PATH, reopen the terminal after install or reinstall Node.js with the PATH option enabled.
 
 ## Structure
 

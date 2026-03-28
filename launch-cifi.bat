@@ -3,9 +3,21 @@ setlocal
 
 cd /d "%~dp0"
 
-if not exist "C:\Program Files\nodejs\npm.cmd" (
-  echo Node.js npm launcher was not found at C:\Program Files\nodejs\npm.cmd
-  echo Install Node.js or update this batch file to match your install path.
+set "NPM_CMD="
+
+for /f "delims=" %%I in ('where npm.cmd 2^>nul') do (
+  if not defined NPM_CMD set "NPM_CMD=%%I"
+)
+
+if not defined NPM_CMD if exist "%ProgramFiles%\nodejs\npm.cmd" set "NPM_CMD=%ProgramFiles%\nodejs\npm.cmd"
+if not defined NPM_CMD if exist "%ProgramFiles(x86)%\nodejs\npm.cmd" set "NPM_CMD=%ProgramFiles(x86)%\nodejs\npm.cmd"
+if not defined NPM_CMD if exist "%LocalAppData%\Programs\nodejs\npm.cmd" set "NPM_CMD=%LocalAppData%\Programs\nodejs\npm.cmd"
+
+if not defined NPM_CMD (
+  echo Node.js npm launcher could not be found.
+  echo.
+  echo Install Node.js 18+ from https://nodejs.org/ and make sure the installer adds Node.js to PATH.
+  echo You can also verify with: where node
   pause
   exit /b 1
 )
@@ -17,5 +29,7 @@ echo Press Ctrl+C in this window to stop the server.
 echo.
 echo For normal double-click use without a terminal window, use launch-cifi.vbs
 echo.
+echo Using npm at: %NPM_CMD%
+echo.
 
-"C:\Program Files\nodejs\npm.cmd" run dev
+"%NPM_CMD%" run dev
