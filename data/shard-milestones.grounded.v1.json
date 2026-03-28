@@ -1,0 +1,1888 @@
+{
+  "dataset": "shard-milestones.grounded.v1",
+  "generatedAt": "2026-03-28",
+  "sourceReport": "C:/Users/Shadow/Downloads/shard-milestones-grounded-2026-03-28.md",
+  "canonicalMechanics": {
+    "shards": {
+      "unlock_condition": {
+        "description": "Unlocked by purchasing The Demeter ship.",
+        "source_ids": [
+          "SRC_FANDOM_SHARDS"
+        ]
+      },
+      "how_acquired": {
+        "description": "Obtained by doing Operations.",
+        "source_ids": [
+          "SRC_FANDOM_SHARDS",
+          "SRC_FANDOM_OPERATIONS"
+        ]
+      },
+      "uses": {
+        "description": "Used to upgrade Shard Milestones for bonuses (including shards per operation).",
+        "source_ids": [
+          "SRC_FANDOM_SHARDS"
+        ]
+      },
+      "reset_behavior": {
+        "description": "Reset back to 0 every Loop Prestige.",
+        "source_ids": [
+          "SRC_FANDOM_SHARDS"
+        ]
+      }
+    },
+    "operations": {
+      "unlock_condition": {
+        "description": "Unlocked once The Demeter ship is purchased.",
+        "source_ids": [
+          "SRC_FANDOM_OPERATIONS"
+        ]
+      },
+      "ticks_per_operation": {
+        "initial_ticks_including_reset": 65,
+        "includes_reset_ticks": 10,
+        "minimum_ticks_with_loop_mods": 29,
+        "source_ids": [
+          "SRC_FANDOM_OPERATIONS"
+        ],
+        "uncertainty_notes": []
+      },
+      "shard_bonus_per_operation": {
+        "description": "Each completed operation grants shards and a stacking 0.5% (additive) bonus to shards gained.",
+        "value": "0.5% (additive) per operation completed",
+        "source_ids": [
+          "SRC_FANDOM_OPERATIONS"
+        ]
+      }
+    },
+    "shardMiningMenu": {
+      "unlock_condition": {
+        "description": "Unlocked after purchasing The Demeter ship.",
+        "source_ids": [
+          "SRC_FANDOM_SHARD_MINING_MENU"
+        ]
+      },
+      "unreducible_timer_between_operations": {
+        "description": "There will always be a 10 tick reset timer in between operations; cannot be reduced.",
+        "value": 10,
+        "source_ids": [
+          "SRC_FANDOM_SHARD_MINING_MENU"
+        ]
+      }
+    },
+    "shardMilestoneSystem": {
+      "rarity_bonus_thresholds": {
+        "Common": [
+          1,
+          25,
+          50
+        ],
+        "Rare": [
+          1,
+          25,
+          50,
+          75
+        ],
+        "Epic": [
+          1,
+          10,
+          25,
+          50,
+          75
+        ],
+        "Legendary": [
+          1,
+          5,
+          10,
+          25,
+          50,
+          75
+        ],
+        "Low Pristine": [
+          1,
+          30,
+          60
+        ],
+        "Mid Pristine": [
+          1,
+          30,
+          60,
+          90,
+          120
+        ],
+        "source_ids": [
+          "SRC_FANDOM_SHARD_MILESTONES",
+          "SRC_GV_SHARD_MILESTONES_2023"
+        ]
+      },
+      "effect_scaling": {
+        "description": "Besides thresholds, incremental level increases the effect of each bonus (multiplicatively).",
+        "source_ids": [
+          "SRC_FANDOM_SHARD_MILESTONES",
+          "SRC_GV_SHARD_MILESTONES_2023"
+        ]
+      },
+      "max_level_rules_and_modifiers": {
+        "base_max_level_before_workers_badge": 100,
+        "max_level_after_workers_badge": 200,
+        "research_note": "Mining Tech Analysis 6 (Should be 7) Level 1 Research can double the maximum level of milestones to 400.",
+        "ultima_loop_mod_note": "Ultima Loop Mod: Rule of Hard Work can increase Max level of all Shard Milestone by 2% (Additive) each level (Maximum of 50 Level), When maxed, will increase the maximum of all Shard Milestone to 800.",
+        "source_ids": [
+          "SRC_FANDOM_SHARD_MILESTONES"
+        ]
+      },
+      "cost_breakpoints_observed": {
+        "numeric_costs_available": false,
+        "breakpoints_statement": "Shard Milestones experience a cost bump every 100 levels (Large cost bump at level 100 and 400 and small cost bump at level 200 and 300, Larger Bumps every 100 afterwards).",
+        "source_ids": [
+          "SRC_FANDOM_SHARD_MILESTONES"
+        ]
+      }
+    }
+  },
+  "milestones": [
+    {
+      "milestoneNumber": 0,
+      "id": "shard-milestone-0",
+      "name": "Eternal Milestone",
+      "rarity": "Unique",
+      "summary": "Provides multiple bonuses including Cells & Ouro Orbs gained and bonuses tied to Attraction gem quality tiers (as listed in the source).",
+      "unlockCondition": {
+        "type": "event",
+        "value": "First traversal completed"
+      },
+      "levelStructure": {
+        "bonus_entries_have_explicit_thresholds": false,
+        "notes": "Source lists bonuses without explicit level thresholds for this milestone."
+      },
+      "bonuses": [
+        {
+          "unlockLevel": null,
+          "effectLabel": "Cells & Ouro Orbs gained",
+          "initialBonus": "1.1x",
+          "bonusPerLevel": "1.1x"
+        },
+        {
+          "unlockLevel": null,
+          "effectLabel": "Attraction gem quality 1 - Ozzy & Borge Loot",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.02x"
+        },
+        {
+          "unlockLevel": null,
+          "effectLabel": "Attraction gem quality 2 - Mod Points, Shards and Research Points gained",
+          "initialBonus": "Unkown",
+          "bonusPerLevel": "1.3x"
+        }
+      ],
+      "fixedBreakpoints": [],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided for this milestone in accessible sources; only global cost-bump statements exist."
+      },
+      "uncertaintyNotes": [
+        "No explicit level thresholds shown for this milestone in the source.",
+        "Some fields are spelled 'Unkown' / shown as 'Unknown' in the source; preserved verbatim."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 1,
+      "id": "shard-milestone-1",
+      "name": "Alpha Milestone",
+      "rarity": "common",
+      "summary": "Boosts Cells gained, MK5 output, and Shards gained at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 0
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "1.06x",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK5 Output",
+          "initialBonus": "1.34x",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Shards Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided; only global cost-bump statements exist."
+      },
+      "uncertaintyNotes": [
+        "Name/bonus mismatch versus older Game-Vault snapshot (Aqua vs Alpha; MK5 Output vs Mod Points at level 25)."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 2,
+      "id": "shard-milestone-2",
+      "name": "Aquarius Milestone",
+      "rarity": "common",
+      "summary": "Boosts Mod Points gained, MK4 output, and Cells gained at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 5
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "1.06x",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Initial bonus values are Unknown for some bonuses per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 3,
+      "id": "shard-milestone-3",
+      "name": "Libra Milestone",
+      "rarity": "common",
+      "summary": "Boosts MK1, MK2, and MK3 output at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 10
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK1 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK2 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK3 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.08x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 4,
+      "id": "shard-milestone-4",
+      "name": "Modifying Milestone",
+      "rarity": "Rare",
+      "summary": "Boosts Mod Points gained at multiple thresholds and provides a Tick Speed bonus at level 75 with a stated cap.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 20
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.05x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.04x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "Tick Speed",
+          "initialBonus": "0.05s",
+          "bonusPerLevel": "0.01s/level"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Initial bonus values for Mod Points bonuses are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 5,
+      "id": "shard-milestone-5",
+      "name": "Flowering Milestone",
+      "rarity": "common",
+      "summary": "Boosts Shards gained, Cells gained, and MK5 output at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 30
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Shards Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.05x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK5 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.08x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 6,
+      "id": "shard-milestone-6",
+      "name": "Connecting Milestone",
+      "rarity": "common",
+      "summary": "Boosts MK2, MK3, and MK4 output at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 40
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK2 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK3 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.08x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 7,
+      "id": "shard-milestone-7",
+      "name": "Duality Milestone",
+      "rarity": "Rare",
+      "summary": "Boosts Cells gained and Mod Points gained at alternating thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 50
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.09x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.11x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.13x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.15x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 8,
+      "id": "shard-milestone-8",
+      "name": "Morphing Milestone",
+      "rarity": "Epic",
+      "summary": "Boosts Cells gained and multiple generator outputs at several thresholds, including a level 10 threshold.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 120
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          10,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.40x"
+        },
+        {
+          "unlockLevel": 10,
+          "effectLabel": "MK1 & MK2 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.20x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.80x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK3 & Mk4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.20x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "2.00x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        10,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Rarity differs in older Game-Vault snapshot (Rare) vs Fandom (Epic)."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 9,
+      "id": "shard-milestone-9",
+      "name": "Producing Milestone",
+      "rarity": "common",
+      "summary": "Boosts MK5 output, MK4 output, and MK3 output at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 150
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK5 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK3 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.08x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 10,
+      "id": "shard-milestone-10",
+      "name": "Expanding Milestone",
+      "rarity": "common",
+      "summary": "Boosts MK2 output, MK1 output, and MK6 output at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 180
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK2 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK1 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK6 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.08x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 11,
+      "id": "shard-milestone-11",
+      "name": "Triangular Milestone",
+      "rarity": "Rare",
+      "summary": "Boosts MK3 output at all thresholds (multiple separate MK3 output bonuses).",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 340
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK3 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.40x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK3 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.50x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK3 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.60x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "MK3 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.70x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 12,
+      "id": "shard-milestone-12",
+      "name": "Extracting Milestone",
+      "rarity": "Epic",
+      "summary": "Boosts Shards gained, Mod Points gained, combined Shards & Mod Points gained, and MK6 output across multiple thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 520
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          10,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Shards Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.20x"
+        },
+        {
+          "unlockLevel": 10,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.15x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Shards & Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.10x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK6 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "2.00x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "Shards & Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.25x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        10,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 13,
+      "id": "shard-milestone-13",
+      "name": "Seeding Milestone",
+      "rarity": "common",
+      "summary": "Boosts Cells gained across all thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 560
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.08x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 14,
+      "id": "shard-milestone-14",
+      "name": "Pathing Milestone",
+      "rarity": "Rare",
+      "summary": "Boosts MK3/MK4/MK5 output and provides a Tick Speed Increase bonus at level 75 with a stated cap.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 700
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK3 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.15x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.18x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK5 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.21x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "Tick Speed Increase",
+          "initialBonus": "0.05s",
+          "bonusPerLevel": "0.01s/level"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Initial bonus values are Unknown for several bonuses per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 15,
+      "id": "shard-milestone-15",
+      "name": "Ritualistic Milestone",
+      "rarity": "common",
+      "summary": "Boosts MK6 output across all thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 800
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK6 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK6 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK6 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 16,
+      "id": "shard-milestone-16",
+      "name": "Modulistic Milestone",
+      "rarity": "Rare",
+      "summary": "Boosts Mod Points gained and MK5 output at multiple thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 900
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.05x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK5 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.25x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.05x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "MK5 Output",
+          "initialBonus": "3.71x",
+          "bonusPerLevel": "1.30x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Some initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 17,
+      "id": "shard-milestone-17",
+      "name": "Machining Milestone",
+      "rarity": "Epic",
+      "summary": "Boosts Cells gained, Research Points gained, combined Shards & Research Points gained, and combined Mod Points & Research Points gained at multiple thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 1000
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          10,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "2.20x"
+        },
+        {
+          "unlockLevel": 10,
+          "effectLabel": "Research Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.09x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Shards & Research Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Research Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.13x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "Mod Points & Research Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.09x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        10,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 18,
+      "id": "shard-milestone-18",
+      "name": "Studying Milestone",
+      "rarity": "Legendary",
+      "summary": "Boosts Research Points gained, Cells gained, Mod Points gained, Shards gained, and combined Research Points & Academy Points gained at multiple thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 1100
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          5,
+          10,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Research Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.15x"
+        },
+        {
+          "unlockLevel": 5,
+          "effectLabel": "Research Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.16x"
+        },
+        {
+          "unlockLevel": 10,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "6.00x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.37x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Shards Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.59x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "Research Points & Academy Points Gained",
+          "initialBonus": "5.19x",
+          "bonusPerLevel": "1.39x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        5,
+        10,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Many initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 19,
+      "id": "shard-milestone-19",
+      "name": "Lucky Milestone",
+      "rarity": "common",
+      "summary": "Boosts MK7 output across all thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 1400
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK7 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.13x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK7 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.15x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK7 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.17x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 20,
+      "id": "shard-milestone-20",
+      "name": "Duplicating Milestone",
+      "rarity": "common",
+      "summary": "Boosts Cells gained, MK2 output, and Shards gained at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 1500
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.15x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK 2 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.20x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Shards Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Definition differs substantially versus older Game-Vault snapshot (bonus set differs).",
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 21,
+      "id": "shard-milestone-21",
+      "name": "Targeting Milestone",
+      "rarity": "common",
+      "summary": "Boosts Academy Points gained, Mod Points gained, and Research Points gained at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 1600
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Academy Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.02x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Research Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.12x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 22,
+      "id": "shard-milestone-22",
+      "name": "Quadratic Milestone",
+      "rarity": "Rare",
+      "summary": "Boosts MK4 Output at all thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 1700
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MK4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "2.20x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "2.30x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "MK4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "2.40x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "MK4 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "2.50x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 23,
+      "id": "shard-milestone-23",
+      "name": "Layering Milestone",
+      "rarity": "Epic",
+      "summary": "Boosts All Generator Output, Mod Points gained, All Generator Output (additional), Academy Points gained, and All Generator Output (additional) at multiple thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 1800
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          10,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "All Generator Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.12x"
+        },
+        {
+          "unlockLevel": 10,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.12x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "All Generator Output",
+          "initialBonus": "2.29x",
+          "bonusPerLevel": "1.18x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Academy Points Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "All Generator Output",
+          "initialBonus": "4.48x",
+          "bonusPerLevel": "1.35x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        10,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Some initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 24,
+      "id": "shard-milestone-24",
+      "name": "Torn Milestone",
+      "rarity": "Rare",
+      "summary": "Boosts Mod Points gained and Shards gained at multiple thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 3300
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50,
+          75
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "1.55x",
+          "bonusPerLevel": "1.55x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Mod Points & Shards Gained",
+          "initialBonus": "7.59x",
+          "bonusPerLevel": "1.50x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Shards Gained",
+          "initialBonus": "28.2x",
+          "bonusPerLevel": "1.95x"
+        },
+        {
+          "unlockLevel": 75,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "36.21x",
+          "bonusPerLevel": "2.05x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50,
+        75
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Older Game-Vault snapshot expresses the level-25 effect differently ('Mod Points % Shards Gained') and truncates the level-75 label."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 25,
+      "id": "shard-milestone-25",
+      "name": "Fabricating Milestone",
+      "rarity": "Low Pristine",
+      "summary": "Boosts combined Mod Points/Research Points/Shards gained, All Generators Output, and Mod Points gained at specific thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 3600
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          30,
+          60
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Mod Points, Research Points, & Shards Gained",
+          "initialBonus": "1.22x",
+          "bonusPerLevel": "1.22x"
+        },
+        {
+          "unlockLevel": 30,
+          "effectLabel": "All Generators Output",
+          "initialBonus": "269.39x",
+          "bonusPerLevel": "1.75x"
+        },
+        {
+          "unlockLevel": 60,
+          "effectLabel": "Mod Points Gained",
+          "initialBonus": "90.16x",
+          "bonusPerLevel": "1.35x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        30,
+        60
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 26,
+      "id": "shard-milestone-26",
+      "name": "Wonderous Milestone",
+      "rarity": "Mid Pristine",
+      "summary": "Boosts combined Mod Points/Research Points/Cells gained, Academy Points gained, Mission Materials gained, and All Generators Output at multiple thresholds (including 90 and 120).",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 3900
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          30,
+          60,
+          90,
+          120
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Mod Points, Research Points, & Cells Gained",
+          "initialBonus": "2.20x",
+          "bonusPerLevel": "2.20x"
+        },
+        {
+          "unlockLevel": 30,
+          "effectLabel": "Academy Points Gained",
+          "initialBonus": "1.36x",
+          "bonusPerLevel": "1.064x"
+        },
+        {
+          "unlockLevel": 60,
+          "effectLabel": "Mission Materials Gained & All Generators Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.044x"
+        },
+        {
+          "unlockLevel": 90,
+          "effectLabel": "Mission Materials Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.068x"
+        },
+        {
+          "unlockLevel": 120,
+          "effectLabel": "Academy Points Gained & All Generators Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1,072x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        30,
+        60,
+        90,
+        120
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Fandom entry includes values for levels 90 and 120, while older Game-Vault snapshot lists N/A at those levels.",
+        "Fandom shows '1,072x' (comma included); preserved verbatim."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 27,
+      "id": "shard-milestone-27",
+      "name": "The Sharp Milestone",
+      "rarity": "common",
+      "summary": "Boosts MP gained, MK8 output, and RP gained at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 8000
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "MP Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.10x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK8 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.19x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "RP Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.13x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 28,
+      "id": "shard-milestone-28",
+      "name": "The Sly Milestone",
+      "rarity": "common",
+      "summary": "Boosts AP gained, MK1 output, and Shards gained at milestone level thresholds (formatting partially incomplete in source).",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 8050
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "AP Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.07x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK1 Output",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.28x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Shards gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.12x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "Source formatting appears truncated (missing closing parentheses in the displayed text); values preserved as best-effort transcription without repair."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "milestoneNumber": 29,
+      "id": "shard-milestone-29",
+      "name": "The Earthly Milestone",
+      "rarity": "common",
+      "summary": "Boosts RP gained and Mission Materials gained at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 8100
+      },
+      "levelStructure": {
+        "bonus_unlock_levels": [
+          1,
+          25,
+          50
+        ]
+      },
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "RP Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.16x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "Mission Materials gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.018x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Mission Materials gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.028x"
+        }
+      ],
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "costProgression": {
+        "observable_numeric_progression": false,
+        "notes": "No per-level shard costs provided."
+      },
+      "uncertaintyNotes": [
+        "All initial bonus values are Unknown per source."
+      ],
+      "sourceIds": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    }
+  ]
+}

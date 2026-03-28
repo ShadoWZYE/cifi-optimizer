@@ -1,0 +1,102 @@
+{
+  "dataset": "shard-milestones-provenance.grounded.v1",
+  "generatedAt": "2026-03-28",
+  "sourceReport": "C:/Users/Shadow/Downloads/shard-milestones-grounded-2026-03-28.md",
+  "sources": {
+    "SRC_FANDOM_SHARDS": {
+      "type": "community_wiki",
+      "title": "Shards | Cell: Idle Factory Incremental Wiki | Fandom",
+      "url": "https://cifi.fandom.com/wiki/Shards"
+    },
+    "SRC_FANDOM_OPERATIONS": {
+      "type": "community_wiki",
+      "title": "Operations | Cell: Idle Factory Incremental Wiki | Fandom",
+      "url": "https://cifi.fandom.com/wiki/Operations"
+    },
+    "SRC_FANDOM_SHARD_MINING_MENU": {
+      "type": "community_wiki",
+      "title": "Shard Mining Menu | Cell: Idle Factory Incremental Wiki | Fandom",
+      "url": "https://cifi.fandom.com/wiki/Shard_Mining_Menu"
+    },
+    "SRC_FANDOM_SHARD_MILESTONES": {
+      "type": "community_wiki",
+      "title": "Shard Milestones | Cell: Idle Factory Incremental Wiki | Fandom",
+      "url": "https://cifi.fandom.com/wiki/Shard_Milestones"
+    },
+    "SRC_GV_SHARD_MILESTONES_2023": {
+      "type": "community_wiki_snapshot",
+      "title": "Shard Milestones - CIFI - Cell: Idle Factory Incremental Wiki (Game-Vault; oldid=790)",
+      "url": "https://cifi.game-vault.net/w/index.php?title=Shard_Milestones&oldid=790",
+      "last_edited_in_source": "2023-06-18"
+    },
+    "SRC_GV_SHARDS_2023": {
+      "type": "community_wiki_snapshot",
+      "title": "Shards - CIFI - Cell: Idle Factory Incremental Wiki (Game-Vault; oldid=493)",
+      "url": "https://cifi.game-vault.net/w/index.php?title=Shards&oldid=493",
+      "last_edited_in_source": "2023-04-01"
+    },
+    "SRC_GV_SHARD_MINING_2023": {
+      "type": "community_wiki_snapshot",
+      "title": "Shard Mining - CIFI - Cell: Idle Factory Incremental Wiki (Game-Vault; oldid=780)",
+      "url": "https://cifi.game-vault.net/w/index.php?title=Shard_Mining&oldid=780",
+      "last_edited_in_source": "2023-05-21"
+    },
+    "SRC_FANDOM_LOOP_MODIFICATIONS": {
+      "type": "community_wiki",
+      "title": "Loop Modifications | Cell: Idle Factory Incremental Wiki | Fandom",
+      "url": "https://cifi.fandom.com/wiki/Loop_Modifications"
+    },
+    "SRC_GV_BEGINNERS_GUIDE_2024": {
+      "type": "community_guide_snapshot",
+      "title": "Guide:Beginners Guide - CIFI - Cell: Idle Factory Incremental Wiki (Game-Vault; oldid=888)",
+      "url": "https://cifi.game-vault.net/w/index.php?title=Guide:Beginners_Guide&oldid=888",
+      "last_edited_in_source": "2024-10-26",
+      "attribution_in_source": "Guide by kingarthur_666 @ Official CIFI Discord"
+    },
+    "SRC_GV_SHORT_LONG_RUNS_GUIDE_2024": {
+      "type": "community_guide_snapshot",
+      "title": "Guide:Short and Long Runs Guide - CIFI - Cell: Idle Factory Incremental Wiki (Game-Vault; oldid=889)",
+      "url": "https://cifi.game-vault.net/w/index.php?title=Guide:Short_and_Long_Runs_Guide&oldid=889",
+      "last_edited_in_source": "2024-10-26",
+      "attribution_in_source": "Sources used: Kongren#0001's write up from Official CIFI Discord"
+    },
+    "SRC_GV_ZEUS_E1000_GUIDE_2024": {
+      "type": "community_guide_snapshot",
+      "title": "Guide:E1000+MP Zeus Breakthrough Guide - CIFI - Cell: Idle Factory Incremental Wiki (Game-Vault; oldid=852)",
+      "url": "https://cifi.game-vault.net/w/index.php?title=Guide:E1000%2BMP_Zeus_Breakthrough_Guide&oldid=852",
+      "last_edited_in_source": "2024-02-24",
+      "attribution_in_source": "Made by Darth[SW], Originally posted by wsxandres"
+    }
+  },
+  "uncertaintyLog": [
+    {
+      "topic": "Shard milestone shard-cost-per-level tables",
+      "status": "missing_in_accessible_sources",
+      "what_is_missing": "Numeric cost per level for each shard milestone, and/or a confirmed cost formula.",
+      "what_is_available": "Global statement about cost bumps every 100 levels with specified large/small bump points.",
+      "inference_used": false,
+      "source_ids": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "topic": "Unknown initial bonus values in shard milestone list",
+      "status": "partially_missing_in_source",
+      "what_is_missing": "Many initial bonus values are displayed as 'Unknown' / 'Unkown'.",
+      "inference_used": false,
+      "source_ids": [
+        "SRC_FANDOM_SHARD_MILESTONES"
+      ]
+    },
+    {
+      "topic": "Source discrepancies between Game-Vault (2023) and Fandom shard milestone lists",
+      "status": "conflict_detected",
+      "what_is_missing": "A single authoritative, version-tagged milestone list covering updates between 2023 and present with official patch provenance (not available in the sources accessed).",
+      "inference_used": false,
+      "source_ids": [
+        "SRC_FANDOM_SHARD_MILESTONES",
+        "SRC_GV_SHARD_MILESTONES_2023"
+      ]
+    }
+  ]
+}

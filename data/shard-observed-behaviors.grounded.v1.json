@@ -1,0 +1,147 @@
+{
+  "dataset": "shard-observed-behaviors.grounded.v1",
+  "generatedAt": "2026-03-28",
+  "sourceReport": "C:/Users/Shadow/Downloads/shard-milestones-grounded-2026-03-28.md",
+  "observations": [
+    {
+      "id": "PPX_EARLY_LR1_MP78",
+      "playerState": {
+        "lr_label_meaning": "Loop Reset",
+        "loop_reset_number": 1,
+        "mod_points_gained_on_first_lr": 78,
+        "run_duration_estimate": "4-8 hours",
+        "shards": null,
+        "notes": "Shards not specified for this example."
+      },
+      "priorities": [
+        "Fast Loop mod",
+        "Daily rewards",
+        "Arcade",
+        "Time dilation",
+        "MK1+MK2 duo output",
+        "Then additional time dilation and MK1/MK2 enhancements (as written)"
+      ],
+      "why": "Guide frames this as a way to make early Loop Resets meaningful and build MP efficiently for progression.",
+      "sourceIds": [
+        "SRC_GV_BEGINNERS_GUIDE_2024"
+      ]
+    },
+    {
+      "id": "PPX_EARLY_LR_ANTIBRICKING",
+      "playerState": {
+        "lr_range": "Early game",
+        "loop_requirement_examples": [
+          {
+            "transition": "LR 5 -> 6",
+            "loops_required": 7
+          },
+          {
+            "transition": "LR 6 -> 7",
+            "loops_required": 8
+          }
+        ],
+        "shards": null
+      },
+      "priorities": [
+        "Avoid rapid LR increases that raise loop requirements too fast",
+        "Use buffer / instant loop checks to avoid bricking"
+      ],
+      "why": "Guide explicitly warns that too-fast LR progression can brick the player by making loop requirements grow beyond what they can complete quickly.",
+      "sourceIds": [
+        "SRC_GV_BEGINNERS_GUIDE_2024"
+      ]
+    },
+    {
+      "id": "PPX_SHORT_MP_RUNS",
+      "playerState": {
+        "run_type": "Short MP run",
+        "duration": "From one tick loop up to 1-2 hours",
+        "lr": null,
+        "shards": null
+      },
+      "priorities": [
+        "Buy as many affordable loop mods",
+        "Increase MP gains every reset",
+        "Start buying shard mods towards end of MP farming session"
+      ],
+      "why": "Guide positions this as part of alternating short vs long runs to progress; switching criteria includes readiness to compensate for shard bonus resets from completed operations.",
+      "sourceIds": [
+        "SRC_GV_SHORT_LONG_RUNS_GUIDE_2024"
+      ]
+    },
+    {
+      "id": "PPX_LONG_SHARD_CELL_RUNS",
+      "playerState": {
+        "run_type": "Long shard/cell run",
+        "duration": "12+ hours",
+        "lr": null,
+        "shards": null
+      },
+      "priorities": [
+        "Farm shards",
+        "Prioritize MP/shard milestones",
+        "Push cells for ship evolutions/levels/LP achievement"
+      ],
+      "why": "Guide frames longer runs as shard/cell focused, and provides switching rules based on progress/pacing.",
+      "sourceIds": [
+        "SRC_GV_SHORT_LONG_RUNS_GUIDE_2024"
+      ]
+    },
+    {
+      "id": "PPX_ZEUS_E1000_RESOURCE_PRIO_AND_LR_TARGETS",
+      "playerState": {
+        "context": "e1000+MP Zeus progression",
+        "resource_priority_declared": "Mats>AP>Shards>RP",
+        "run_type_notes": {
+          "short_run": "mp run (just instant loops)",
+          "mid_run": "shards run (maybe 1-48 hours)",
+          "long_run": "mats run (+48 hours)"
+        },
+        "loop_reset_goals_by_mp": [
+          {
+            "mp_level": "e1300 (before 2nd burst)",
+            "lr_goal": 970
+          },
+          {
+            "mp_level": "e1700 (after 2nd burst)",
+            "lr_goal": 1000
+          },
+          {
+            "mp_level": "e1800",
+            "lr_goal": 1050
+          },
+          {
+            "mp_level": "e1880",
+            "lr_goal": "1100+"
+          }
+        ],
+        "shards": null
+      },
+      "priorities": [
+        "Materials-focused play with shards as a mid-priority resource",
+        "Manage LR cautiously (explicit warning about high LR being 'playing with fire')"
+      ],
+      "why": "Guide explicitly defines a mats-first roadmap and ties LR targets to MP breakpoints for pacing.",
+      "sourceIds": [
+        "SRC_GV_ZEUS_E1000_GUIDE_2024"
+      ]
+    },
+    {
+      "id": "PPX_SHARDS_EARLY_DISTRIBUTION",
+      "playerState": {
+        "lr": null,
+        "shards": null,
+        "context": "Early shard milestone spending guidance"
+      },
+      "priorities": [
+        "Evenly distribute shards among shard milestones early",
+        "Start with milestones that give Mod Points and Shard bonuses",
+        "Spend shards before Loop Resets"
+      ],
+      "why": "Guide frames this as early best strategy and emphasizes shard reset on loop resets (in that wiki snapshot).",
+      "sourceIds": [
+        "SRC_GV_SHARDS_2023"
+      ]
+    }
+  ]
+}

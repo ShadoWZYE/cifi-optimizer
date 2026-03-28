@@ -113,8 +113,8 @@
       "id": "progression-gems-midgame",
       "module": "progression",
       "title": "Shard module grounded fallback",
-      "expected": "Shard milestone planner pending verified data",
-      "description": "Shard recommendations should remain in descriptive mode until verified milestone data is imported."
+      "expected": "Grounded shard milestones loaded",
+      "description": "Shard recommendations should use grounded descriptive copy while leaving ranking disabled until numeric shard costs are sourced."
     },
     {
       "id": "gem-node-roi",
