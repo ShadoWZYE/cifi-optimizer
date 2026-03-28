@@ -18,21 +18,19 @@ Expected columns:
 
 ### `shardMilestones`
 
-Expected columns:
-- `id`
-- `label`
-- `resourceBias`
-- `baseCost`
-- `costGrowth`
-- `baseValue`
-- `perLevelValue`
-- `breakpoints`
-- `confidence`
-- `notes`
+Current status:
+- import is disabled pending a verified-safe shard milestone schema
+- do not treat cost, value, growth, breakpoint, or ROI-style fields as grounded input
 
-`breakpoints` can be provided as `level:bonusValue:reason|level:bonusValue:reason`.
+Future shard milestone imports should only be re-enabled once the repo has:
+- verified source provenance
+- a reviewed descriptive or verified-safe record shape
+- clear labeling for any non-canonical fields
 
 ### `gemNodes`
+
+Status:
+- experimental / non-MVP
 
 Expected columns:
 - `id`
@@ -55,6 +53,9 @@ Expected columns:
 - `description`
 
 ### `researchTracks`
+
+Status:
+- non-MVP research only
 
 Expected columns:
 - `id`

@@ -65,6 +65,11 @@ function createDefaultPlayerProfile() {
       gemNodeBudget: null,
       researchHours: null
     },
+    externalModels: {
+      shipPlanner: {
+        communityToolState: {}
+      }
+    },
     systems: {
       loop: {
         loopReset: null
@@ -80,8 +85,7 @@ function createDefaultPlayerProfile() {
       ship: {
         power: null,
         speed: null,
-        cargo: null,
-        playerState: {}
+        cargo: null
       }
     }
   };
@@ -136,10 +140,16 @@ function normalizePlayerProfile(profile, baselineShipPlayerState) {
 
   normalized.meta.schemaVersion = 1;
   normalized.meta.updatedAt = normalized.meta.updatedAt ?? null;
-  normalized.systems.ship.playerState = mergeDeep(
+  normalized.externalModels ??= {};
+  normalized.externalModels.shipPlanner ??= {};
+  normalized.externalModels.shipPlanner.communityToolState = mergeDeep(
     baselineShipPlayerState,
-    normalized.systems.ship.playerState ?? {}
+    mergeDeep(
+      normalized.systems.ship.playerState ?? {},
+      normalized.externalModels.shipPlanner.communityToolState ?? {}
+    )
   );
+  delete normalized.systems.ship.playerState;
 
   return normalized;
 }
@@ -680,8 +690,8 @@ function persistPlayerProfile() {
   saveStoredJson(STORAGE_KEYS.playerProfile, state.playerProfile);
 }
 
-function getShipPlayerState() {
-  return state.playerProfile.systems.ship.playerState;
+function getShipCommunityToolState() {
+  return state.playerProfile.externalModels.shipPlanner.communityToolState;
 }
 
 function getProfileValue(path) {
@@ -795,7 +805,7 @@ function bindProfileActions() {
     state.playerProfile = normalizePlayerProfile(createDefaultPlayerProfile(), createDefaultShipPlayerState(state.shipBaseline));
     persistPlayerProfile();
     fillProfileForm();
-    setStatus("profileStatus", "Demo profile restored.", "success");
+    setStatus("profileStatus", "Profile reset to blank values.", "success");
     renderAll();
   });
 
@@ -815,7 +825,7 @@ function bindProfileActions() {
 
   $("#saveShipStateBtn").addEventListener("click", () => {
     const inputs = $$("#shipPlayerStatePanel [data-ship-group][data-ship-field]");
-    const shipPlayerState = getShipPlayerState();
+    const shipPlayerState = getShipCommunityToolState();
     inputs.forEach((input) => {
       const group = input.dataset.shipGroup;
       const field = input.dataset.shipField;
@@ -823,7 +833,7 @@ function bindProfileActions() {
       shipPlayerState[group][field] = typeof current === "boolean" ? input.checked : coerceInputValue(input.value);
     });
     persistPlayerProfile();
-    setStatus("shipPlayerStateStatus", "Shared ship calibration saved to player state.", "success");
+    setStatus("shipPlayerStateStatus", "Community-tool ship calibration saved.", "success");
     renderShipPanels();
   });
 }
@@ -857,7 +867,7 @@ function bindOptimizerActions() {
   $("#runValidationSuite").addEventListener("click", renderValidationResults);
   $("#saveShipConfigBtn").addEventListener("click", () => {
     persistShipConfig();
-    setStatus("shipConfigStatus", "Ship loadouts and weights saved.", "success");
+    setStatus("shipConfigStatus", "Community-tool ship planner weights and loadouts saved.", "success");
   });
 }
 
@@ -906,14 +916,30 @@ function renderOverview() {
   const validation = runValidationCases();
   $("#validationStatusValue").textContent = `${validation.filter((item) => item.pass).length}/${validation.length}`;
   $("#overviewHighlights").innerHTML = [
-    makeRecommendationCard(runShipOptimization()[0], "ship"),
     makeRecommendationCard(runProgressionOptimization()[0], "shards"),
-    makeRecommendationCard(runGemOptimization()[0], "gem")
+    makeRecommendationCard({
+      id: "non-mvp-modules-warning",
+      module: "warning",
+      kind: "warning",
+      title: "Non-MVP modules are quarantined",
+      subtitle: "Community-tool and experimental surfaces",
+      score: 0,
+      confidence: 0.84,
+      whyNow: [
+        "Gem Nodes, Research, and OCR remain available only as non-MVP support surfaces.",
+        "Ship planner calibration is preserved, but labeled as community-tool state rather than raw in-game state."
+      ],
+      warnings: [
+        "These modules are not part of the grounded MVP path.",
+        "Do not treat them as verified CIFI recommendations."
+      ],
+      notes: "The primary MVP flow centers on PlayerProfile, imports, shard safety, validation, and explainable recommendations."
+    }, "warning")
   ].join("");
 }
 
 function renderShipPlayerState() {
-  const shipPlayerState = getShipPlayerState();
+  const shipPlayerState = getShipCommunityToolState();
   $("#shipPlayerStatePanel").innerHTML = SHIP_PLAYER_STATE_GROUPS.map(([groupKey, label]) => {
     const hiddenFields = SHIP_PLAYER_STATE_HIDDEN_FIELDS[groupKey] ?? new Set();
     const labelMap = SHIP_PLAYER_STATE_FIELD_LABELS[groupKey] ?? {};
@@ -975,7 +1001,7 @@ function renderSourceRegistry() {
       $("#shipWeightsPanel").innerHTML = `
         <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
           <span class="snapshot-title">Resource priority weights</span>
-        <p class="meta">These weights drive the ship optimizer recommendation and highlighted next best install.</p>
+        <p class="meta">These community-tool weights drive the quarantined ship planner recommendation and highlighted next best install.</p>
         <div class="mini-grid">
           ${Object.entries(state.shipConfig.weights).map(([key, value]) => `
             <label class="mini-field">
@@ -987,15 +1013,15 @@ function renderSourceRegistry() {
         </article>
           <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
             <span class="snapshot-title">Ship optimizer toggles</span>
-          <p class="meta"><code>softCap</code> keeps filtered resource lanes in play at a tiny flat priority of <code>0.01</code> instead of removing them completely.</p>
+          <p class="meta">These toggles affect only the community-tool ship planner. <code>softCap</code> keeps filtered resource lanes in play at a tiny flat priority of <code>0.01</code>.</p>
           <div class="mini-grid">
             <label class="mini-field">
               <span>softCap</span>
-              <input id="shipSoftCapToggle" type="checkbox" ${getShipPlayerState().innovation.softCap ? "checked" : ""}>
+              <input id="shipSoftCapToggle" type="checkbox" ${getShipCommunityToolState().innovation.softCap ? "checked" : ""}>
             </label>
             <label class="mini-field">
                 <span>Meltdown</span>
-                <input id="shipMeltdownInput" type="number" step="any" min="0" value="${Number(getShipPlayerState().technical.Meltdown || 0)}">
+                <input id="shipMeltdownInput" type="number" step="any" min="0" value="${Number(getShipCommunityToolState().technical.Meltdown || 0)}">
               </label>
           </div>
       </article>
@@ -1010,13 +1036,13 @@ function renderSourceRegistry() {
   });
 
     $("#shipSoftCapToggle").addEventListener("change", (event) => {
-      getShipPlayerState().innovation.softCap = event.target.checked;
+      getShipCommunityToolState().innovation.softCap = event.target.checked;
       persistPlayerProfile();
       renderShipPanels();
     });
 
     $("#shipMeltdownInput").addEventListener("change", (event) => {
-      getShipPlayerState().technical.Meltdown = coerceInputValue(event.target.value);
+      getShipCommunityToolState().technical.Meltdown = coerceInputValue(event.target.value);
       persistPlayerProfile();
       renderShipPlayerState();
       renderShipPanels();
@@ -1195,7 +1221,7 @@ function renderShipActions() {
       const action = button.dataset.shipAction;
       if (action === "apply") {
         persistShipConfig();
-        setStatus("shipConfigStatus", "Applied loadout changes.", "success");
+        setStatus("shipConfigStatus", "Applied community-tool ship planner changes.", "success");
       }
       if (action === "undo") {
         undoLoadoutChange();
@@ -1247,7 +1273,7 @@ function renderResearch() {
   $("#researchResults").innerHTML = state.snapshot.researchTracks.map((track) => `
     <article class="research-card">
       <strong>${track.title}</strong>
-      <p class="meta">${track.goal}</p>
+      <p class="meta">Non-MVP research track. ${track.goal}</p>
       <ul>${track.nextSteps.map((step) => `<li>${step}</li>`).join("")}</ul>
     </article>
   `).join("");
@@ -1341,7 +1367,7 @@ function getActiveLoadout() {
 }
 
 function getEffectiveCap(baseCap) {
-  return Number(baseCap || 0) * (getShipPlayerState().technical.CapX5 ? 5 : 1);
+  return Number(baseCap || 0) * (getShipCommunityToolState().technical.CapX5 ? 5 : 1);
 }
 
 function getShipInstallTotal(shipKey) {
@@ -1374,7 +1400,7 @@ function getTapDelta(shipKey, installIndex, direction = 1) {
   function getInstallGain(shipKey, installIndex) {
     const crew = getShipCrew(shipKey);
     const baseMultiplier = getInstallBaseMultiplier(shipKey, installIndex);
-    const exponent = scorePowerTerm(state.shipTemplates[shipKey].powerTerms[installIndex], state.shipConfig.weights, Number(getShipPlayerState().technical.Meltdown || 0));
+    const exponent = scorePowerTerm(state.shipTemplates[shipKey].powerTerms[installIndex], state.shipConfig.weights, Number(getShipCommunityToolState().technical.Meltdown || 0));
     const currentLevel = getActiveLoadout().ships[shipKey][installIndex];
     const denom = (crew * baseMultiplier * currentLevel) + 1;
     const numer = (crew * baseMultiplier * (currentLevel + 1)) + 1;
@@ -1493,6 +1519,12 @@ function runValidationCases() {
 function previewImport() {
   const format = $("#importFormat").value;
   const dataset = $("#importDataset").value;
+  if (dataset === "shardMilestones") {
+    state.importPreview = [];
+    $("#importPreview").innerHTML = "";
+    setStatus("importStatus", "Shard milestone import is disabled until a verified-safe schema is defined.", "warning");
+    return [];
+  }
   const raw = $("#importText").value.trim();
   if (!raw) {
     state.importPreview = [];
@@ -1530,14 +1562,10 @@ function normalizeImportRow(row, dataset, index = 0) {
     return {
       id: clean.id || slugify(clean.label || `shard-milestone-${index + 1}`),
       label: clean.label || `Shard milestone ${index + 1}`,
-      resourceBias: clean.resourceBias || clean.resource || "shards",
-      baseCost: Number(clean.baseCost || clean.cost || 0),
-      costGrowth: Number(clean.costGrowth || clean.cost_growth || 1.3),
-      baseValue: Number(clean.baseValue || clean.value || 0),
-      perLevelValue: Number(clean.perLevelValue || clean.per_level_value || clean.baseValue || clean.value || 0),
-      breakpoints: normalizeShardBreakpoints(clean.breakpoints || clean.breakpointLevels || clean.breakpoint_levels),
-      confidence: Number(clean.confidence || 0.5),
-      notes: clean.notes || ""
+      notes: clean.notes || "",
+      sourceLabel: clean.sourceLabel || clean.source || "",
+      sourceUrl: clean.sourceUrl || clean.url || "",
+      verified: clean.verified === true || clean.verified === "true"
     };
   }
   if (dataset === "validationCases") {
@@ -1571,6 +1599,11 @@ function normalizeImportRow(row, dataset, index = 0) {
 
 function applyImportPreview() {
   const dataset = $("#importDataset").value;
+  if (dataset === "shardMilestones") {
+    state.importPreview = [];
+    setStatus("importStatus", "Shard milestone import is disabled until a verified-safe schema is defined.", "warning");
+    return;
+  }
   if (!state.importPreview.length) {
     previewImport();
   }
@@ -1622,13 +1655,13 @@ function renderGeneratorOcrFileList() {
 
   if (state.generatorOcrParsed) {
     const count = Object.keys(state.generatorOcrParsed.parsed ?? {}).length;
-    setStatus("generatorOcrStatus", `Parsed OCR output for ${count} generator tiers. Review it, then apply if it looks right.`, "success");
+    setStatus("generatorOcrStatus", `Experimental OCR parsed ${count} generator tiers. Review it carefully before applying.`, "success");
     return;
   }
 
   const message = items.length
-    ? "Screenshots queued. Click Parse screenshots to extract generator manual values."
-    : "Select one or more generator screenshots or paste them from the clipboard, then click Parse screenshots.";
+    ? "Experimental OCR screenshots queued. Click Parse screenshots to extract generator manual values."
+    : "Experimental OCR is not part of the MVP path. Select screenshots or paste them from the clipboard only if you need this support flow.";
   setStatus("generatorOcrStatus", message, "warning");
 }
 
@@ -1726,7 +1759,7 @@ async function parseGeneratorOcrImages() {
 
     state.generatorOcrParsed = payload;
     $("#generatorOcrText").value = JSON.stringify(payload.parsed ?? payload, null, 2);
-    setStatus("generatorOcrStatus", "Generator OCR parsed successfully. Review the rows below, then apply if they look right.", "success");
+    setStatus("generatorOcrStatus", "Experimental OCR parsed successfully. Review the rows below before applying.", "success");
   } catch (error) {
     state.generatorOcrParsed = null;
     setStatus("generatorOcrStatus", `Generator OCR failed: ${error.message}`, "warning");
@@ -1786,26 +1819,26 @@ function applyGeneratorOcrPreview() {
     return;
   }
 
-  getShipPlayerState().generators = {
-    ...getShipPlayerState().generators,
+  getShipCommunityToolState().generators = {
+    ...getShipCommunityToolState().generators,
     ...normalized
   };
   persistPlayerProfile();
   renderShipPlayerState();
   renderShipPanels();
   renderGeneratorOcrButtons();
-  setStatus("generatorOcrStatus", `Applied manual values for ${Object.keys(normalized).length} generator tiers.`, "success");
+  setStatus("generatorOcrStatus", `Applied experimental OCR values for ${Object.keys(normalized).length} generator tiers.`, "success");
 }
 
 function persistShipConfig(showStatus = false) {
   saveStoredJson(STORAGE_KEYS.shipConfig, state.shipConfig);
   if (showStatus) {
-    setStatus("shipConfigStatus", "Ship configuration saved.", "success");
+    setStatus("shipConfigStatus", "Community-tool ship planner state saved.", "success");
   }
 }
 
 function getImportedRecordCount() {
-  return ["shipLoadouts", "shardMilestones", "gemNodes", "validationCases", "researchTracks"]
+  return ["shipLoadouts", "validationCases"]
     .reduce((total, key) => total + (Array.isArray(state.snapshot[key]) ? state.snapshot[key].length : 0), 0);
 }
 
@@ -1910,14 +1943,14 @@ function scorePowerTerm(term, weights, meltdown) {
     return Math.max(Math.min(highest, Number(limit?.[1] || 8)) * meltdown, 1e-9);
   }
   if (term.includes("MaxGenHWunlocked+MaxGenSWunlocked")) {
-    const total = Number(getShipPlayerState().techLevels.MaxGenHWunlocked || 0) + Number(getShipPlayerState().techLevels.MaxGenSWunlocked || 0);
+    const total = Number(getShipCommunityToolState().techLevels.MaxGenHWunlocked || 0) + Number(getShipCommunityToolState().techLevels.MaxGenSWunlocked || 0);
     return Math.max(Math.min(total, 16) * meltdown, 1e-9);
   }
   if (term.includes("MaxGenHWunlocked")) {
-    return Math.max(Math.min(Number(getShipPlayerState().techLevels.MaxGenHWunlocked || 0), 8) * meltdown, 1e-9);
+    return Math.max(Math.min(Number(getShipCommunityToolState().techLevels.MaxGenHWunlocked || 0), 8) * meltdown, 1e-9);
   }
   if (term.includes("MaxGenSWunlocked")) {
-    return Math.max(Math.min(Number(getShipPlayerState().techLevels.MaxGenSWunlocked || 0), 8) * meltdown, 1e-9);
+    return Math.max(Math.min(Number(getShipCommunityToolState().techLevels.MaxGenSWunlocked || 0), 8) * meltdown, 1e-9);
   }
   if (term.includes("Meltdown")) {
     return Math.max(meltdown, 1e-9);
@@ -1946,7 +1979,7 @@ function scorePowerTerm(term, weights, meltdown) {
       if (enabled !== false) {
         return getEffectWeight(normalized, weights);
       }
-      if (getShipPlayerState().innovation.softCap) {
+      if (getShipCommunityToolState().innovation.softCap) {
         return 0.01;
       }
       return 0;
@@ -2009,13 +2042,13 @@ function formatPercentGain(value) {
 
 function getHighestGen() {
   return Math.max(
-    Number(getShipPlayerState().techLevels.MaxGenHWunlocked || 0),
-    Number(getShipPlayerState().techLevels.MaxGenSWunlocked || 0)
+    Number(getShipCommunityToolState().techLevels.MaxGenHWunlocked || 0),
+    Number(getShipCommunityToolState().techLevels.MaxGenSWunlocked || 0)
   );
 }
 
 function getShipCrew(shipKey) {
-  const crew = getShipPlayerState().crew;
+  const crew = getShipCommunityToolState().crew;
   const map = {
     C: Number(crew.Crew || 0),
     A: Number(crew.AuxesiaCrew || 0),
@@ -2029,7 +2062,7 @@ function getShipCrew(shipKey) {
 }
 
 function getShipInnovationMultiplier(shipKey) {
-  const innovation = getShipPlayerState().innovation;
+  const innovation = getShipCommunityToolState().innovation;
   const dark = innovation.darkInno ? 3 : 1;
   const main = ["C", "A", "Zg", "H"].includes(shipKey)
     ? (innovation.inno1 ? 7 : 1)
@@ -2038,7 +2071,7 @@ function getShipInnovationMultiplier(shipKey) {
 }
 
 function getInstallBaseMultiplier(shipKey, installIndex) {
-  const shipPlayerState = getShipPlayerState();
+  const shipPlayerState = getShipCommunityToolState();
   const gears = shipPlayerState.academyGears;
   const generators = shipPlayerState.generators;
   const tech = shipPlayerState.techLevels;
@@ -2155,7 +2188,7 @@ function getInstallBaseMultiplier(shipKey, installIndex) {
 }
 
 function getTicksRun() {
-  const shipPlayerState = getShipPlayerState();
+  const shipPlayerState = getShipCommunityToolState();
   const technical = shipPlayerState.technical;
   const runHours = technical.LongRun ? Number(technical.LongRunLenDays || 0) * 24 : Number(technical.ShortRunLenMins || 0) / 60;
   const tickTimer = Number(shipPlayerState.hephaestus.tickTimer || 1);
@@ -2163,19 +2196,19 @@ function getTicksRun() {
 }
 
 function getOperationsTotal() {
-  const demeter = getShipPlayerState().demeter;
+  const demeter = getShipCommunityToolState().demeter;
   const efficiency = 1;
   return Number(demeter.OpsFromAotC || 0) + (Math.floor(getTicksRun() / Math.max(Number(demeter.TicksPerOp || 1), 1)) * efficiency);
 }
 
 function getStudiesTotal() {
-  const koios = getShipPlayerState().koios;
+  const koios = getShipCommunityToolState().koios;
   const efficiency = 1;
   return Math.floor(getTicksRun() * Number(koios.StudiesPerResBar || 0) / Math.max(Number(koios.TicksPerResBar || 1), 1)) * efficiency;
 }
 
 function getMissionTotal() {
-  const shipPlayerState = getShipPlayerState();
+  const shipPlayerState = getShipCommunityToolState();
   const technical = shipPlayerState.technical;
   const zeus = shipPlayerState.zeus;
   const runMinutes = technical.LongRun ? Number(technical.LongRunLenDays || 0) * 24 * 60 : Number(technical.ShortRunLenMins || 0);

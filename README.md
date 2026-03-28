@@ -97,4 +97,9 @@ That means the immediate priority is:
 - remove or label fictional mechanics
 - create a safe base for future optimizer work
 
+The app may still expose some compatibility surfaces from prototype-era work, but these should be treated as quarantined unless they are part of the MVP scope. In particular:
+- shard recommendations remain in descriptive fallback mode
+- Gem Nodes, Research, and OCR are non-MVP support surfaces
+- ship planner calibration should be treated as community-tool state, not raw in-game state
+
 It is not currently the priority to expand feature count.

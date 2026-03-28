@@ -22,11 +22,11 @@
         <button class="nav-link is-active" data-page="overview">Overview</button>
         <button class="nav-link" data-page="profile">Profile</button>
         <button class="nav-link" data-page="data">Data</button>
-        <button class="nav-link" data-page="ship">Ship Optimizer</button>
         <button class="nav-link" data-page="progression">Progression</button>
-        <button class="nav-link" data-page="gem">Gem Nodes</button>
         <button class="nav-link" data-page="validation">Validation</button>
-        <button class="nav-link" data-page="research">Research</button>
+        <button class="nav-link" data-page="ship">Ship Planner (Community-tool)</button>
+        <button class="nav-link" data-page="gem">Gem Nodes (Experimental)</button>
+        <button class="nav-link" data-page="research">Research (Non-MVP)</button>
       </nav>
 
       <div class="snapshot-stack">
@@ -209,11 +209,12 @@
         <section class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Ship Player State</p>
-              <h2>Shared calibration moved out of the ship editor</h2>
+              <p class="eyebrow">Community-tool Ship Calibration</p>
+              <h2>External model inputs preserved outside raw game state</h2>
             </div>
-            <button id="saveShipStateBtn" class="button button-primary">Save ship state</button>
+            <button id="saveShipStateBtn" class="button button-primary">Save community-tool calibration</button>
           </div>
+          <p class="meta">These fields support the quarantined ship planner and community-tool calibration flows. They are not treated as raw in-game CIFI state.</p>
           <div id="shipPlayerStateStatus" class="status-line"></div>
           <div id="shipPlayerStatePanel" class="page-grid"></div>
         </section>
@@ -241,10 +242,10 @@
                 <label for="importDataset">Dataset type</label>
                 <select id="importDataset">
                   <option value="shipLoadouts">Ship loadouts</option>
-                  <option value="shardMilestones">Shard milestones</option>
-                  <option value="gemNodes">Gem nodes</option>
+                  <option value="shardMilestones">Shard milestones (disabled pending verified schema)</option>
+                  <option value="gemNodes">Gem nodes (experimental)</option>
                   <option value="validationCases">Validation cases</option>
-                  <option value="researchTracks">Research tracks</option>
+                  <option value="researchTracks">Research tracks (non-MVP)</option>
                 </select>
               </div>
               <div class="field-group">
@@ -293,8 +294,8 @@
             <section class="panel">
                 <div class="panel-header">
                   <div>
-                    <p class="eyebrow">Generators OCR</p>
-                    <h2>Manual values import</h2>
+                    <p class="eyebrow">Experimental OCR</p>
+                    <h2>Non-MVP manual values import</h2>
                   </div>
                 </div>
                 <div class="module-controls">
@@ -310,7 +311,7 @@
                     <textarea id="generatorOcrText" rows="8" placeholder='Paste OCR output like {"mk1":"28.38k","mk2":"7.06k"}'></textarea>
                   </div>
                 </div>
-                <p class="meta">Parse screenshots first, review the extracted MK manual values, then apply them to player data.</p>
+                <p class="meta">OCR is quarantined from the MVP path. Parse screenshots only if you need this experimental support flow, then review all extracted values manually.</p>
                 <div class="profile-actions">
                   <button id="parseGeneratorOcrBtn" class="button">Parse screenshots</button>
                   <button id="applyGeneratorOcrBtn" class="button button-primary" disabled>Apply parsed OCR JSON</button>
@@ -348,11 +349,12 @@
       <section class="page" data-page="ship">
         <div class="page-header">
           <div>
-            <p class="eyebrow">Ship Optimizer</p>
-            <h2>Persistent loadout editor</h2>
+            <p class="eyebrow">Community-tool Ship Planner</p>
+            <h2>Quarantined calibration and loadout editor</h2>
           </div>
-          <button id="saveShipConfigBtn" class="button button-primary">Save ship calibration</button>
+          <button id="saveShipConfigBtn" class="button button-primary">Save ship planner state</button>
         </div>
+          <p class="meta">This planner remains available for compatibility, but it is not a first-class MVP system and its calibration data is labeled as community-tool state.</p>
           <section class="panel">
             <div id="shipConfigStatus" class="status-line"></div>
             <div class="ship-workbench">
@@ -384,11 +386,12 @@
       <section class="page" data-page="gem">
         <div class="page-header">
           <div>
-            <p class="eyebrow">Gem Nodes</p>
-            <h2>Budget-aware gem optimizer</h2>
+            <p class="eyebrow">Gem Nodes (Experimental)</p>
+            <h2>Non-MVP gem planner</h2>
           </div>
         </div>
         <section class="panel">
+          <p class="meta">Gem Nodes are currently quarantined from the grounded MVP path. This page remains available only as an experimental planning surface.</p>
           <div class="module-controls">
             <div class="field-group">
               <label for="gemBudgetMode">Budget mode</label>
@@ -419,11 +422,12 @@
       <section class="page" data-page="research">
         <div class="page-header">
           <div>
-            <p class="eyebrow">Research</p>
-            <h2>Phase-1 streams</h2>
+            <p class="eyebrow">Research (Non-MVP)</p>
+            <h2>Deferred investigation tracks</h2>
           </div>
         </div>
         <section class="panel">
+          <p class="meta">These research tracks are intentionally outside the current MVP scope and should not be treated as product commitments.</p>
           <div id="researchResults" class="research-stack"></div>
         </section>
       </section>
