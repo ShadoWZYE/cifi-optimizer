@@ -12,12 +12,19 @@ This document captures the current extraction pathway for grounded CIFI mechanic
 
 ## Source Inputs
 
-These inputs are machine-local and are not required to be committed:
+These inputs are now committed in the repository and restored through Git LFS:
 
-- LDPlayer instance containing CIFI
 - extracted APK payload under `_cifi_apk`
 - merged APK layout under `_cifi_apk_merged`
 - joined Unity asset files under `_unity_joined`
+
+These remain external prerequisites:
+
+- Git LFS to restore the committed large files
+- Python 3.11+ to run the maintained parser scripts
+- `.NET 6 Runtime` for `UABEA`
+- `.NET 8 SDK` only if rebuilding `tools/CifiAssetProbe`
+- LDPlayer only if recreating raw extracts from the emulator
 
 Important primary files:
 
@@ -88,13 +95,18 @@ The currently validated serialized late block yields 22 structurally valid rows 
 
 If resuming on another machine:
 
-1. clone the repo
-2. restore the machine-local extracted inputs or recreate them from LDPlayer/APK
+1. clone the repo with Git LFS enabled
+2. confirm the large files under `_cifi_apk`, `_cifi_apk_merged`, `_unity_joined`, and `tools` were restored
 3. run:
    - `python scripts/token_shop_parse.py`
    - `python scripts/multiverse_market_parse.py`
 4. inspect the grounded outputs in `docs/` and `data/`
 5. continue by targeting the next unresolved owner object, not by returning to broad string scraping
+
+## Portability Notes
+
+- `scripts/uabea_probe.ps1` resolves the repo root from its own path and is clone-location agnostic.
+- `scripts/token_shop_parse.py` and `scripts/multiverse_market_parse.py` also resolve the repo root from their own path and are clone-location agnostic.
 
 ## Rework Guidance
 

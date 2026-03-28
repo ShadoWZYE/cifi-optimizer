@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$root = "C:\Users\Shadow\Desktop\CiFi"
+$root = Split-Path -Parent $PSScriptRoot
 $uabeaDir = Join-Path $root "tools\UABEA"
 $gameRoot = Join-Path $root "_cifi_apk_merged\base"
 $dataDir = Join-Path $gameRoot "assets\bin\Data"

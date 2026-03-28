@@ -5,7 +5,7 @@ import struct
 from pathlib import Path
 
 
-ROOT = Path(r"C:\Users\Shadow\Desktop\CiFi")
+ROOT = Path(__file__).resolve().parents[1]
 LEVEL0_PATH = ROOT / "_unity_joined" / "level0"
 JSON_OUT = ROOT / "data" / "multiverse-market-values.json"
 MD_OUT = ROOT / "docs" / "multiverse-market-values.md"

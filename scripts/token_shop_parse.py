@@ -5,7 +5,7 @@ import struct
 from pathlib import Path
 
 
-ROOT = Path(r"C:\Users\Shadow\Desktop\CiFi")
+ROOT = Path(__file__).resolve().parents[1]
 METADATA_PATH = ROOT / "_cifi_apk" / "global-metadata.dat"
 LEVEL0_PATH = ROOT / "_unity_joined" / "level0"
 JSON_OUT = ROOT / "data" / "token-shop-values.json"

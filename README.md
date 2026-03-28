@@ -103,6 +103,32 @@ The current mechanic-extraction work is resumable from checked-in scripts and do
 
 These scripts assume the machine-local extracted Unity inputs exist under `_cifi_apk` and `_unity_joined`.
 
+## Unity audit dependencies
+
+To resume the checked-in Unity extraction workflow from a fresh clone:
+
+- Git LFS is required.
+- Python 3.11+ is required.
+- Node.js 18+ is still required for the app itself.
+- The vendored Python packages under `.deps` are used by the Unity helper scripts.
+- The vendored Windows binaries under `tools` are used for manual asset inspection.
+
+Required for the checked-in parser scripts:
+
+- `git lfs clone` or `git lfs pull` so `_cifi_apk`, `_cifi_apk_merged`, `_unity_joined`, and large tool binaries are restored
+- Python on PATH
+
+Required only for specific optional tools:
+
+- `.NET 6 Runtime` for `tools/UABEA/UABEAvalonia.exe`
+- `.NET 8 SDK` plus NuGet restore if rebuilding `tools/CifiAssetProbe`
+- LDPlayer only if you need to recreate emulator-side extracts instead of using the committed inputs
+
+Current portability note:
+
+- `scripts/uabea_probe.ps1` is repo-relative and can run from any clone location.
+- `scripts/token_shop_parse.py` and `scripts/multiverse_market_parse.py` are also repo-relative and can run from any clone location.
+
 ## Current repo status
 
 This repo is in a grounding phase.
