@@ -1199,11 +1199,63 @@ function renderValidationResults() {
 function renderResearch() {
   $("#researchResults").innerHTML = state.snapshot.researchTracks.map((track) => `
     <article class="research-card">
-      <strong>${track.title}</strong>
-      <p class="meta">Non-MVP research track. ${track.goal}</p>
-      <ul>${track.nextSteps.map((step) => `<li>${step}</li>`).join("")}</ul>
+      <div class="research-card-head">
+        <div>
+          <p class="eyebrow">${escapeHtml(getResearchTrackLane(track))}</p>
+          <strong>${escapeHtml(track.title)}</strong>
+        </div>
+        <div class="pill-row">
+          <span class="pill">${escapeHtml(getResearchTrackPhase(track))}</span>
+          <span class="pill">${escapeHtml(getResearchTrackSource(track))}</span>
+        </div>
+      </div>
+      <p class="meta">${escapeHtml(track.goal)}</p>
+      <div class="meta-stack">
+        <p class="snapshot-title">Next to-do</p>
+        <ul class="research-step-list">${track.nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>
+      </div>
     </article>
   `).join("");
+}
+
+function getResearchTrackLane(track) {
+  const order = [
+    "data-contracts-and-apk-pipeline",
+    "playerprofile-boundary-and-imports",
+    "shards-and-loop-guardrails",
+    "spend-planner-from-extracted-data",
+    "unified-feed-and-hardening"
+  ];
+  const index = order.indexOf(track.id);
+  if (index === 0) {
+    return "Start Here";
+  }
+  if (index > 0 && index < 3) {
+    return "Next Up";
+  }
+  return "Queue";
+}
+
+function getResearchTrackPhase(track) {
+  const phaseById = {
+    "data-contracts-and-apk-pipeline": "PR 1",
+    "playerprofile-boundary-and-imports": "PR 1",
+    "shards-and-loop-guardrails": "PR 2",
+    "spend-planner-from-extracted-data": "PR 3",
+    "unified-feed-and-hardening": "PR 3+"
+  };
+  return phaseById[track.id] || "Research";
+}
+
+function getResearchTrackSource(track) {
+  const sourceById = {
+    "data-contracts-and-apk-pipeline": "APK-first",
+    "playerprofile-boundary-and-imports": "Schema",
+    "shards-and-loop-guardrails": "Grounded data",
+    "spend-planner-from-extracted-data": "Extracted data",
+    "unified-feed-and-hardening": "Integration"
+  };
+  return sourceById[track.id] || "Research";
 }
 
 function collectProfileForm() {
