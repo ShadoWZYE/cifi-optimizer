@@ -1,6 +1,6 @@
 # CIFI Optimization Suite
 
-A local-first web app for consolidating CIFI player calibration, planning inputs, and future optimizer modules into one place.
+A local-first web app for consolidating grounded CIFI player state, labeled planning inputs, and future optimizer modules into one place.
 
 Important: this repository currently contains a mix of:
 - grounded structure that is useful for MVP work
@@ -101,5 +101,25 @@ The app may still expose some compatibility surfaces from prototype-era work, bu
 - shard recommendations remain in descriptive fallback mode
 - Gem Nodes, Research, and OCR are non-MVP support surfaces
 - ship planner calibration should be treated as community-tool state, not raw in-game state
+
+## PlayerProfile boundary
+
+`state.playerProfile` is split into explicit namespaces:
+
+- `player` for grounded shared CIFI truth
+- `planning` for labeled planner-only helper inputs
+- `externalModels` for community-tool or experimental state
+- `compatibility` for unresolved legacy fields kept only for migration safety
+
+The active shared profile surface currently treats these as canonical:
+
+- current LR
+- diamonds
+- tokens
+- Academy relics
+- current shards
+
+Reference:
+- `docs/player-profile-schema.md`
 
 It is not currently the priority to expand feature count.

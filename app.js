@@ -1,3 +1,9 @@
+import {
+  PLAYER_PROFILE_SCHEMA_VERSION,
+  createDefaultPlayerProfile,
+  normalizePlayerProfile
+} from "./player-profile.js";
+
 const STORAGE_KEYS = {
   playerProfile: "cifi-suite.player-profile",
   shipConfig: "cifi-suite.ship-config",
@@ -18,7 +24,7 @@ const APP_LAUNCH_CHANNEL = "cifi-suite-launch";
 const APP_LAUNCH_HEARTBEAT_MS = 4000;
 const APP_LAUNCH_STALE_MS = 15000;
 
-const PROFILE_FIELD_PATHS = {
+const CANONICAL_PROFILE_FIELD_PATHS = {
   profileName: ["meta", "profileName"],
   loopReset: ["systems", "loop", "loopReset"],
   resourceFocus: ["planning", "resourceFocus"],
@@ -703,6 +709,7 @@ function renderPassiveLaunchScreen() {
 
 function persistPlayerProfile() {
   state.playerProfile.meta.updatedAt = new Date().toISOString();
+  state.playerProfile.meta.schemaVersion = PLAYER_PROFILE_SCHEMA_VERSION;
   saveStoredJson(STORAGE_KEYS.playerProfile, state.playerProfile);
 }
 
@@ -830,12 +837,12 @@ function bindProfileActions() {
     const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
     snapshots.unshift({
       savedAt: new Date().toISOString(),
-      loopReset: state.playerProfile.systems.loop.loopReset,
+      loopReset: state.playerProfile.player.loop.loopReset,
       playerProfile: structuredClone(state.playerProfile)
     });
     saveStoredJson(STORAGE_KEYS.snapshots, snapshots.slice(0, 12));
     persistPlayerProfile();
-    setStatus("profileStatus", `Saved LR snapshot for LR ${state.playerProfile.systems.loop.loopReset}.`, "success");
+    setStatus("profileStatus", `Saved LR snapshot for LR ${state.playerProfile.player.loop.loopReset}.`, "success");
     renderAll();
   });
 
@@ -1311,7 +1318,7 @@ function collectProfileForm() {
       setProfileValue(path, coerceInputValue(entries[field]), nextProfile);
     }
   });
-  nextProfile.meta.schemaVersion = 1;
+  nextProfile.meta.schemaVersion = PLAYER_PROFILE_SCHEMA_VERSION;
   return nextProfile;
 }
 
@@ -1472,7 +1479,7 @@ function rankShipTargets() {
 }
 
 function runShipOptimization() {
-  const ship = state.playerProfile.systems.ship;
+  const ship = state.playerProfile.externalModels.shipPlanner.summary;
   return [...state.snapshot.shipLoadouts].map((loadout) => ({
     title: loadout.name,
     subtitle: loadout.notes,
@@ -1505,8 +1512,8 @@ function runProgressionOptimization() {
       "The previous shard ranking path relied on unsourced milestone identities, cost curves, and value scoring."
     ],
     assumptions: [
-      "Manual shard count and shard income can still be stored in PlayerProfile.",
-      "Recommendation scoring stays disabled until verified shard milestone data is imported."
+      "Current shards remain canonical shared player state.",
+      "Shard income stays available only as a labeled planner input."
     ],
     warnings: [
       "No shard milestone recommendations are being ranked in this build.",
@@ -1797,7 +1804,11 @@ function renderShardMilestoneDirectory() {
 
 function runGemOptimization() {
   const mode = $("#gemBudgetMode")?.value ?? "strict";
-  const budget = Number(state.playerProfile.planning.gemNodeBudget || state.playerProfile.resources.gemDust || 0);
+  const budget = Number(
+    state.playerProfile.externalModels.experimental.gemNodes.budget
+    || state.playerProfile.compatibility.unresolvedProfileFields.gemDust
+    || 0
+  );
   return [...state.snapshot.gemNodes].map((node) => {
     const affordability = node.cost <= budget ? 1 : mode === "stretch" ? 0.8 : 0.35;
     return {
@@ -2288,9 +2299,9 @@ function formatOptionalNumber(value) {
 }
 
 function getProfileCompletion(profile) {
-  const filled = Object.values(PROFILE_FIELD_PATHS)
+  const filled = Object.values(CANONICAL_PROFILE_FIELD_PATHS)
     .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
-  const fields = Object.keys(PROFILE_FIELD_PATHS);
+  const fields = Object.keys(CANONICAL_PROFILE_FIELD_PATHS);
   return Math.round((filled / fields.length) * 100);
 }
 
