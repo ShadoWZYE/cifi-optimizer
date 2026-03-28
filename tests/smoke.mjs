@@ -8,6 +8,7 @@ import {
   createDefaultPlayerProfile,
   normalizePlayerProfile
 } from "../player-profile.js";
+import { validateBundledDatasets } from "../scripts/validate-datasets.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -21,6 +22,7 @@ const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.met
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
+const datasetValidation = await validateBundledDatasets();
 
 const defaultProfile = createDefaultPlayerProfile();
 
@@ -35,6 +37,10 @@ assert.ok(groundedShardProvenance.uncertaintyLog.length >= 2, "expected grounded
 assert.equal(groundedShardMilestones.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.equal(groundedShardObserved.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.equal(groundedShardProvenance.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
+assert.deepEqual(
+  datasetValidation.map((entry) => entry.id),
+  ["snapshot", "shards", "token-shop", "multiverse-market"]
+);
 
 assert.match(html, /Player Data/);
 assert.match(html, /Game Data/);
@@ -42,6 +48,7 @@ assert.match(html, /Ship Planner \(Community-tool\)/);
 assert.match(html, /Gem Nodes \(Experimental\)/);
 assert.match(html, /Research Intake/);
 assert.match(html, /Candidate tracks and grounded findings/);
+assert.match(html, /bundled data changes should pass local contract validation first/);
 assert.match(html, /Apply to active snapshot/);
 assert.match(html, /Reset to blank profile/);
 assert.match(html, /Shared PlayerProfile truth is limited to grounded CIFI account state/);
@@ -60,6 +67,7 @@ assert.match(appJs, /function runProgressionOptimization/);
 assert.match(appJs, /function buildGroundedShardRecommendations/);
 assert.match(appJs, /function renderShardMilestoneDirectory/);
 assert.match(appJs, /function renderShardWorkflowReference/);
+assert.match(appJs, /function renderResearchTrackSupport/);
 assert.match(appJs, /function saveShardPlannerInputs/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
@@ -80,6 +88,7 @@ assert.match(appJs, /Shard milestone manual import stays disabled; this build on
 assert.match(appJs, /\.\/data\/shard-milestones\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-observed-behaviors\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestones-provenance\.grounded\.v1\.json/);
+assert.match(appJs, /npm run verify:data/);
 assert.doesNotMatch(appJs, /C:\/Users\/Shadow\/Downloads/);
 assert.doesNotMatch(appJs, /function getShardUpgradeCost/);
 assert.doesNotMatch(appJs, /function getShardUpgradeValue/);
@@ -90,6 +99,7 @@ assert.match(launcherVbs, /http:\/\/localhost:4173\//);
 assert.match(launcherVbs, /ResolveNodePath/);
 assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
+assert.equal(pkg.scripts["verify:data"], "node ./scripts/validate-datasets.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
 
 const shipWinner = [...snapshot.shipLoadouts]

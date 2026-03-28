@@ -1210,12 +1210,32 @@ function renderResearch() {
         </div>
       </div>
       <p class="meta">${escapeHtml(track.goal)}</p>
+      ${renderResearchTrackSupport(track)}
       <div class="meta-stack">
         <p class="snapshot-title">Next to-do</p>
         <ul class="research-step-list">${track.nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>
       </div>
     </article>
   `).join("");
+}
+
+function renderResearchTrackSupport(track) {
+  if (track.id !== "data-contracts-and-apk-pipeline") {
+    return "";
+  }
+
+  return `
+    <div class="meta-stack">
+      <p class="snapshot-title">Validation path</p>
+      <p class="meta">Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
+      <div class="pill-row">
+        <span class="pill">Snapshot</span>
+        <span class="pill">Shards</span>
+        <span class="pill">Token shop</span>
+        <span class="pill">Multiverse market</span>
+      </div>
+    </div>
+  `;
 }
 
 function getResearchTrackLane(track) {

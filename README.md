@@ -60,6 +60,7 @@ This app can still be opened directly in a browser, but it also includes a tiny 
 ### Commands
 
 - `npm run dev` — starts a local static server on `http://localhost:4173`
+- `npm run verify:data` — validates bundled dataset contracts for snapshot, shard, token-shop, and multiverse-market assets
 - `npm test` — runs the smoke tests
 - `node --check app.js` — validates app syntax
 - `launch-cifi.vbs` — Windows launcher for normal local use
@@ -104,6 +105,7 @@ Numeric UX should follow CIFI-style conventions where possible, while keeping pa
 - `docs/cifi_verified_spec.md` — grounding spec
 - `docs/cifi_grounding_plan.md` — grounding migration plan
 - `docs/cifi_sources.md` — public source list
+- `docs/dataset-contracts.md` — bundled dataset contract and validation path
 - `docs/unity-audit-playbook.md` — repeatable Unity/IL2CPP mechanic extraction workflow
 - `docs/unity-owner-map.md` — grounded mechanic owner index
 - `docs/token-shop-values.md` — extracted token mechanic constants
