@@ -1,34 +1,88 @@
-# Game Data Ingest Process
+# CIFI Data Ingest Process
 
-## Goals
+## Purpose
 
-- Keep verified game data separate from player state.
-- Import reference spreadsheets into app-owned versioned snapshots.
-- Make updates reviewable before they affect optimizer behavior.
+Keep repository data reviewable, sourceable, and safe to use in the app.
 
-## Proposed workflow
+The ingest process should prevent:
+- accidental promotion of fictional values
+- silent schema drift
+- untraceable optimizer behavior
 
-1. Export source sheet tabs into normalized JSON or CSV artifacts.
-2. Map raw sheet columns into stable internal records by subsystem.
-3. Attach snapshot metadata:
-   - source URL
-   - capture date
-   - source sheet/tab names
-   - import notes
-4. Run validation comparisons against benchmark cases before promoting a new snapshot.
-5. Store the promoted snapshot as the current app version and keep older snapshots for regression diffs.
+---
 
-## Initial subsystems
+## Ingest principles
 
-- Resource goal weighting
-- Ship/loadout presets
-- Shard milestone tables
-- Gem node value tables
-- Trait sphere constants
-- Hunter seed metadata
+1. source first
+2. schema second
+3. app snapshot third
+
+That means:
+- verify the external source
+- define the internal shape
+- only then promote data into app-owned snapshots
+
+---
+
+## Preferred workflow
+
+### 1. Collect source material
+Examples:
+- official public listings
+- public wiki pages
+- named community tools
+- community-maintained sheets with clear provenance
+
+### 2. Record provenance
+For each imported table, record:
+- source label
+- source URL if public
+- import date
+- confidence note
+- whether it is verified, derived, or community-tool data
+
+### 3. Normalize into stable records
+Map the raw data into app-owned fields that:
+- use consistent naming
+- are documented
+- avoid mixing verified and invented values
+
+### 4. Validate before promotion
+Run:
+- smoke tests
+- schema checks
+- manual review of changed records
+
+### 5. Promote snapshot
+Only after the above should a snapshot become active/default.
+
+---
+
+## Initial grounded priorities
+
+For current MVP work, focus on:
+- PlayerProfile grounding
+- shard milestone definitions
+- validation cases
+- terminology consistency
+
+---
 
 ## Review gates
 
-- No silent schema changes
-- No snapshot promotion without benchmark results
-- Confidence notes required for partially verified formulas
+A data update should not be promoted if:
+- the source is unclear
+- the data is fictional or speculative
+- the schema change is undocumented
+- the resulting module would emit misleading user-facing recommendations
+
+---
+
+## Temporary rule for incomplete systems
+
+If data is incomplete:
+- keep the structure
+- mark the uncertainty
+- prefer descriptive mode in the UI
+
+Do not invent formulas just to make the feature look finished.

@@ -1,98 +1,108 @@
-# Spec Reevaluation Against CiFi Wiki
+# Spec Reevaluation
 
-This document captures where the current first-pass suite is structurally useful but semantically inaccurate.
+This document captures what the repository structure gets right and what still needs grounding.
 
-## What the current prototype gets right
+## Goal
 
-- Shared player profile
-- Shared data snapshot model
-- Validation as a first-class feature
-- Separate optimizer modules
-- Local import pipeline for sheet-derived data
-- A layout that can support one tool at a time
+The purpose of this reevaluation is to prevent the repo from accumulating polished but fictional optimizer behavior.
 
-## What is currently wrong
+The immediate objective is not to expand features.
 
-The current prototype still uses placeholder data and placeholder categories in several places.
+The immediate objective is to:
+- align the schema with real CIFI concepts
+- align docs and terminology with CIFI
+- remove or label unsourced mechanics
+- prepare a safer base for future optimizer work
 
-Examples:
+---
 
-- some resources and priorities do not map to real CiFi currencies,
-- ship optimization is based on invented generic stats rather than real ship/install mechanics,
-- progression recommendations are not yet organized around actual CiFi subsystems from the wiki,
-- gem-node language is likely too generic and needs to be replaced with the exact in-game terminology and mechanics,
-- hunter, trait-sphere, and Ouroboros systems need to be aligned with the wiki naming and menu structure.
+## What the current repo gets right
 
-## Real system anchors from the wiki
+The repository already has useful structural ideas:
 
-The unified suite should be re-centered around these actual areas:
+- local-first architecture
+- shared PlayerProfile pattern
+- central app state
+- modular recommendation structure
+- import-oriented workflow
+- smoke test harness
+- a clear MVP-oriented direction in `AGENTS.md`
 
-- Ships
-- Loop Prestige / Loop Modifications
-- Shard systems
-- Research systems
-- Space Academy / missions / projects
-- Trait Spheres Collection
-- Ouroboros Gems Collection
-- Hunters Headquarters
-- Multiverse Market
-- The game's actual currencies
+These are worth preserving.
 
-## Recommended rebuild order
+---
 
-Recalibrate one tool at a time, in this order:
+## What is still wrong
 
-1. Shared terminology and profile schema
-2. Ship optimizer
-3. Broad progression recommender
-4. Gem-related optimizer that corresponds to actual in-game systems
-5. Trait-sphere optimizer
-6. Hunter and mech-related systems
+The current prototype still contains important semantic problems:
 
-## Ship optimizer details confirmed by user
+- some defaults are fictional or demo-like
+- some naming is not clearly grounded in real CIFI systems
+- some shard logic is heuristic fiction presented too confidently
+- some documentation mixes prototype assumptions with real mechanics
+- some datasets imply optimizer authority without external grounding
 
-The ship optimizer must be rebuilt around the actual CiFi loadout system, not generic ship stats.
+---
 
-Confirmed mechanics:
+## Current rule
 
-- Players can have 3 ship loadouts at a time.
-- These loadouts are commonly swapped between different LRs.
-- Each loadout contains every ship in the game.
-- Each ship has its own install allocation inside the loadout.
-- Loadouts are built one install point at a time initially.
-- In-game automation respects the install order used when the loadout is created.
-- Available installs are constrained by progression and unlock state.
-- Those install availability constraints are part of the calibration problem and may be inferable from the existing Desmos tool.
-- Meltdown is a critical cross-system modifier after Ouroboros unlock / first traversal and must be represented in the model.
+The app should not optimize against invented mechanics.
 
-## Ship optimizer implementation implications
+Where grounding is incomplete, the system should:
+- fall back
+- label uncertainty
+- keep structure safe for future work
 
-The current placeholder ship model should be replaced with:
+A clear placeholder is better than a misleading recommendation.
 
-- a per-loadout model,
-- per-ship install allocation,
-- install ordering metadata,
-- install availability constraints,
-- LR swap intent,
-- and meltdown-aware calibration.
+---
 
-This means the ship optimizer should eventually answer questions like:
+## Repo grounding priorities
 
-- which of the 3 loadouts should exist for a given stage,
-- what install order each ship should follow,
-- which installs are legal or currently available,
-- and how loadout recommendations change across LR phases and meltdown state.
+### 1. Terminology
+- standardize user-facing terminology to **CIFI**
+- remove mixed casing like `CiFi`
+- stop using vague prototype labels when a real CIFI term exists
 
-## Immediate implementation implications
+### 2. PlayerProfile
+- ensure `state.playerProfile` reflects actual CIFI state or clearly labeled derived state
+- remove fictional first-run defaults
+- separate canonical game state from external-model fields
 
-- Replace placeholder resource names in the shared profile and snapshot with real CiFi names.
-- Replace placeholder module copy with actual game-system names from the wiki.
-- Re-scope each optimizer around one real source tool instead of a generic placeholder category.
-- Use imported sheet data and wiki naming together: the wiki defines the canonical system names, while community sheets provide operational formulas and data tables.
+### 3. Shard system
+- align shard work to real anchors:
+  - Shards
+  - Shard Mining Menu
+  - Operations
+  - Shard Milestones
+  - Loop Prestige reset behavior
+- remove or neutralize invented milestone/value logic until verified inputs exist
 
-## Working rule going forward
+### 4. Documentation
+- make docs reflect repo reality
+- distinguish verified, derived, community-tool, and speculative content
+- remove local-machine path references and misleading examples
 
-No new optimizer formula or UI copy should be added unless it maps to:
+### 5. Tests
+- stop asserting fictional optimizer winners
+- validate safe grounded behavior and contract shape instead
 
-1. a known in-game system from the wiki, or
-2. a known community tool that targets a real CiFi system.
+---
+
+## Non-goal during reevaluation
+
+Do not:
+- redesign the whole app
+- expand speculative systems
+- add new invented formulas
+- preserve fake logic just because the UI is polished
+
+---
+
+## Immediate direction
+
+1. ground terminology
+2. ground schema
+3. neutralize fake shard logic
+4. update docs
+5. rebuild future optimizer work on grounded structures
