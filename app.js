@@ -37,10 +37,6 @@ const PROFILE_FIELD_PATHS = {
   mechParts: ["systems", "metaProgression", "mechParts"],
   researchHours: ["planning", "researchHours"],
   shardRatePerHour: ["systems", "shards", "ratePerHour"],
-  shardMilestoneOpsLevel: ["systems", "shards", "milestoneLevels", "opsAccelerator"],
-  shardMilestoneYieldLevel: ["systems", "shards", "milestoneLevels", "shardCompression"],
-  shardMilestoneCellsLevel: ["systems", "shards", "milestoneLevels", "hotspotScanner"],
-  shardMilestoneResearchLevel: ["systems", "shards", "milestoneLevels", "researchSurvey"],
   notes: ["notes"]
 };
 
@@ -48,49 +44,43 @@ function createDefaultPlayerProfile() {
   return {
     meta: {
       schemaVersion: 1,
-      profileName: "Main account",
+      profileName: null,
       updatedAt: null
     },
     stage: {
-      highestShipUnlocked: "",
-      manualPhase: ""
+      highestShipUnlocked: null,
+      manualPhase: null
     },
     confidence: "manual",
-    notes: "Prototype baseline until real CiFi formulas are migrated.",
+    notes: null,
     resources: {
-      gems: 860,
-      tokens: 430,
-      relics: 215,
-      gemDust: 540,
-      shards: 1850
+      gems: null,
+      tokens: null,
+      relics: null,
+      gemDust: null,
+      shards: null
     },
     planning: {
-      resourceFocus: "credits",
-      gemNodeBudget: 280,
-      researchHours: 6
+      resourceFocus: null,
+      gemNodeBudget: null,
+      researchHours: null
     },
     systems: {
       loop: {
-        loopReset: 357
+        loopReset: null
       },
       shards: {
-        ratePerHour: 640,
-        milestoneLevels: {
-          opsAccelerator: 8,
-          shardCompression: 4,
-          hotspotScanner: 6,
-          researchSurvey: 3
-        }
+        ratePerHour: null
       },
       metaProgression: {
-        hunterLevel: 85,
-        traitSphereCount: 12,
-        mechParts: 940
+        hunterLevel: null,
+        traitSphereCount: null,
+        mechParts: null
       },
       ship: {
-        power: 980,
-        speed: 132,
-        cargo: 670,
+        power: null,
+        speed: null,
+        cargo: null,
         playerState: {}
       }
     }
@@ -629,7 +619,7 @@ function handlePrimaryReopen() {
   }
   state.pendingLaunchRefresh = false;
   refreshFromPersistentState();
-  showLaunchNotice("CiFi reopened from launcher.");
+  showLaunchNotice("CIFI reopened from launcher.");
 }
 
 function refreshFromPersistentState() {
@@ -672,9 +662,9 @@ function renderPassiveLaunchScreen() {
   document.body.innerHTML = `
     <main class="launch-passive-shell">
       <section class="launch-passive-card">
-        <p class="eyebrow">CiFi Already Open</p>
+        <p class="eyebrow">CIFI Already Open</p>
         <h1>Using the existing app tab.</h1>
-        <p class="meta">The launcher signaled the active CiFi tab to refresh. This window stays idle so you do not end up with two competing app instances.</p>
+        <p class="meta">The launcher signaled the active CIFI tab to refresh. This window stays idle so you do not end up with two competing app instances.</p>
         <button class="button button-primary" id="passiveLaunchCloseBtn">Close this window</button>
       </section>
     </main>
@@ -1447,63 +1437,28 @@ function runShipOptimization() {
 }
 
 function runProgressionOptimization() {
-  const focus = $("#progressionBias")?.value ?? "balanced";
-  const resources = state.playerProfile.resources;
-  const shardProfile = state.playerProfile.systems.shards;
-  return [...(state.snapshot.shardMilestones ?? [])].map((milestone) => {
-    const currentLevel = Number(shardProfile.milestoneLevels?.[milestone.id] || 0);
-    const targetLevel = getShardTargetLevel(milestone, currentLevel);
-    const totalCost = getShardUpgradeCost(milestone, currentLevel, targetLevel);
-    const totalValue = getShardUpgradeValue(milestone, currentLevel, targetLevel);
-    const valueDensity = totalValue / Math.max(totalCost, 1);
-    const focusWeight = getShardFocusWeight(milestone, state.playerProfile.planning.resourceFocus, focus);
-    const proximityWeight = targetLevel - currentLevel <= 2 ? 1.22 : 1;
-    const affordabilityWeight = totalCost <= resources.shards ? 1.18 : 1;
-    const score = valueDensity * focusWeight * proximityWeight * affordabilityWeight * 100;
-    const etaHours = getShardEtaHours(totalCost, resources.shards, shardProfile.ratePerHour);
-    const breakpoint = milestone.breakpoints.find((item) => item.level === targetLevel);
-    const whyNow = [
-      `You are at level ${currentLevel}; the next breakpoint is level ${targetLevel}.`,
-      breakpoint
-        ? `Level ${targetLevel} unlocks ${breakpoint.reason}.`
-        : `This is the next efficient level under the current heuristic cost curve.`
-    ];
-    if (state.playerProfile.planning.resourceFocus === milestone.resourceBias) {
-      whyNow.push(`It matches your current ${milestone.resourceBias} focus.`);
-    }
-    if (totalCost <= resources.shards) {
-      whyNow.push("You can afford this immediately with current shards.");
-    }
-
-    const assumptions = [
-      "Costs use the local milestone cost curve from the app snapshot.",
-      shardProfile.ratePerHour > 0
-        ? `ETA uses ${formatShardNumber(shardProfile.ratePerHour)} shards/hour from manual profile input.`
-        : "ETA is omitted because shard rate is not set."
-    ];
-    const warnings = [];
-    if (state.playerProfile.confidence !== "verified") {
-      warnings.push("Profile values are not marked as verified.");
-    }
-    if (!Number(shardProfile.ratePerHour || 0) && totalCost > resources.shards) {
-      warnings.push("Shard ETA is unavailable until shard income/hour is filled in.");
-    }
-
-    return {
-      title: `Push ${milestone.label} to ${targetLevel}`,
-      subtitle: `${currentLevel} -> ${targetLevel} | ${milestone.resourceBias}`,
-      score,
-      confidence: getShardConfidence(state.playerProfile.confidence, breakpoint),
-      cost: `${formatShardNumber(totalCost)} shards`,
-      eta: etaHours === null ? null : formatDurationHours(etaHours),
-      whyNow,
-      assumptions,
-      warnings,
-      notes: breakpoint
-        ? `${breakpoint.reason} and ${formatPercentGain(totalValue / 100)} heuristic value.`
-        : `${formatPercentGain(totalValue / 100)} heuristic value to the next level band.`
-    };
-  }).sort((left, right) => right.score - left.score);
+  return [{
+    id: "shard-module-grounding-warning",
+    module: "shards",
+    kind: "warning",
+    title: "Shard milestone planner pending verified data",
+    subtitle: "Descriptive mode",
+    score: 0,
+    confidence: 0.24,
+    whyNow: [
+      "Shard Milestones are a real CIFI system, but this repo does not yet ship a verified milestone table.",
+      "The previous shard ranking path relied on unsourced milestone identities, cost curves, and value scoring."
+    ],
+    assumptions: [
+      "Manual shard count and shard income can still be stored in PlayerProfile.",
+      "Recommendation scoring stays disabled until verified shard milestone data is imported."
+    ],
+    warnings: [
+      "No shard milestone recommendations are being ranked in this build.",
+      "Import verified shard milestone data before re-enabling optimizer behavior."
+    ],
+    notes: "Grounded fallback mode avoids fake optimizer precision."
+  }];
 }
 
 function runGemOptimization() {
@@ -1898,67 +1853,6 @@ function makeRecommendationCard(item, module) {
       ${warnings}
     </article>
   `;
-}
-
-function getShardTargetLevel(milestone, currentLevel) {
-  const nextBreakpoint = [...milestone.breakpoints]
-    .map((item) => Number(item.level || 0))
-    .filter((level) => level > currentLevel)
-    .sort((left, right) => left - right)[0];
-  return nextBreakpoint ?? (currentLevel + 1);
-}
-
-function getShardUpgradeCost(milestone, currentLevel, targetLevel) {
-  let total = 0;
-  for (let level = currentLevel; level < targetLevel; level += 1) {
-    total += Number(milestone.baseCost || 0) * Math.pow(Number(milestone.costGrowth || 1.3), level);
-  }
-  return Math.round(total);
-}
-
-function getShardUpgradeValue(milestone, currentLevel, targetLevel) {
-  let total = 0;
-  for (let level = currentLevel; level < targetLevel; level += 1) {
-    total += Number(milestone.perLevelValue || milestone.baseValue || 0);
-  }
-  milestone.breakpoints.forEach((breakpoint) => {
-    if (Number(breakpoint.level || 0) > currentLevel && Number(breakpoint.level || 0) <= targetLevel) {
-      total += Number(breakpoint.bonusValue || 0);
-    }
-  });
-  return total;
-}
-
-function getShardFocusWeight(milestone, resourceFocus, bias) {
-  let weight = milestone.resourceBias === resourceFocus ? 1.25 : 1;
-  if (bias === "premium" && milestone.resourceBias === "shards") {
-    weight += 0.12;
-  }
-  if (bias === "speed" && milestone.resourceBias === "cells") {
-    weight += 0.08;
-  }
-  return weight;
-}
-
-function getShardEtaHours(cost, currentShards, ratePerHour) {
-  const deficit = Math.max(Number(cost || 0) - Number(currentShards || 0), 0);
-  const rate = Number(ratePerHour || 0);
-  if (deficit <= 0) {
-    return 0;
-  }
-  if (rate <= 0) {
-    return null;
-  }
-  return deficit / rate;
-}
-
-function getShardConfidence(profileConfidence, breakpoint) {
-  const base = {
-    manual: 0.62,
-    mixed: 0.74,
-    verified: 0.86
-  }[profileConfidence] ?? 0.62;
-  return Math.min(base + (breakpoint ? 0.05 : 0), 0.95);
 }
 
 function normalizeShardBreakpoints(value) {
@@ -2371,7 +2265,7 @@ function clampNumber(value, min, max) {
 
 function coerceInputValue(value) {
   if (value === "") {
-    return "";
+    return null;
   }
   if (typeof value === "string") {
     const normalized = normalizeCiNumberValue(value);

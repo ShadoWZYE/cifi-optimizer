@@ -165,5 +165,5 @@ function writeJson(response, status, payload) {
 }
 
 server.listen(port, () => {
-  console.log(`CiFi Optimization Suite running at http://localhost:${port}`);
+  console.log(`CIFI Optimization Suite running at http://localhost:${port}`);
 });

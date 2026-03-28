@@ -5,7 +5,7 @@
     "mode": "hybrid-reference",
     "primarySources": [
       {
-        "label": "Verified CiFi reference spreadsheet",
+        "label": "Verified CIFI reference spreadsheet",
         "url": "https://docs.google.com/spreadsheets/d/1joQbD-lI7EfU83LP9Yn73cLOX-iqy-C5oHRc9bRsdow/edit"
       },
       {
@@ -62,72 +62,7 @@
       "notes": "Reliable alloy-focused generalist."
     }
   ],
-  "shardMilestones": [
-    {
-      "id": "opsAccelerator",
-      "label": "Operations Throughput",
-      "resourceBias": "shards",
-      "baseCost": 120,
-      "costGrowth": 1.32,
-      "baseValue": 34,
-      "perLevelValue": 20,
-      "breakpoints": [
-        { "level": 5, "bonusValue": 34, "reason": "the first operations cadence breakpoint" },
-        { "level": 10, "bonusValue": 92, "reason": "a stronger operations throughput breakpoint" },
-        { "level": 25, "bonusValue": 230, "reason": "the next major operations breakpoint" }
-      ],
-      "confidence": 0.82,
-      "notes": "Prioritizes faster shard generation loops through operations throughput."
-    },
-    {
-      "id": "shardCompression",
-      "label": "Shard Compression",
-      "resourceBias": "shards",
-      "baseCost": 145,
-      "costGrowth": 1.35,
-      "baseValue": 41,
-      "perLevelValue": 24,
-      "breakpoints": [
-        { "level": 5, "bonusValue": 48, "reason": "a higher shard multiplier breakpoint" },
-        { "level": 10, "bonusValue": 118, "reason": "the next shard compression breakpoint" },
-        { "level": 25, "bonusValue": 275, "reason": "a major late breakpoint for shard output" }
-      ],
-      "confidence": 0.79,
-      "notes": "More expensive, but valuable when you can sustain shard-focused runs."
-    },
-    {
-      "id": "hotspotScanner",
-      "label": "Hotspot Scanner",
-      "resourceBias": "cells",
-      "baseCost": 100,
-      "costGrowth": 1.29,
-      "baseValue": 28,
-      "perLevelValue": 18,
-      "breakpoints": [
-        { "level": 5, "bonusValue": 28, "reason": "better hotspot consistency" },
-        { "level": 10, "bonusValue": 75, "reason": "the next hotspot scanner breakpoint" },
-        { "level": 25, "bonusValue": 180, "reason": "a major scanner breakpoint" }
-      ],
-      "confidence": 0.76,
-      "notes": "Useful when shard milestones are being used to support a cell push."
-    },
-    {
-      "id": "researchSurvey",
-      "label": "Research Survey",
-      "resourceBias": "research",
-      "baseCost": 110,
-      "costGrowth": 1.31,
-      "baseValue": 30,
-      "perLevelValue": 19,
-      "breakpoints": [
-        { "level": 5, "bonusValue": 30, "reason": "the first research survey breakpoint" },
-        { "level": 10, "bonusValue": 81, "reason": "the next research survey breakpoint" },
-        { "level": 25, "bonusValue": 190, "reason": "a major research survey breakpoint" }
-      ],
-      "confidence": 0.77,
-      "notes": "Supports research-adjacent shard planning without becoming a full research planner."
-    }
-  ],
+  "shardMilestones": [],
   "gemNodes": [
     {
       "id": "prism_focus",
@@ -177,9 +112,9 @@
     {
       "id": "progression-gems-midgame",
       "module": "progression",
-      "title": "Midgame shard breakpoint priority",
-      "expected": "Push Shard Compression to 5",
-      "description": "Default shard profile should prefer the most efficient near-term shard breakpoint."
+      "title": "Shard module grounded fallback",
+      "expected": "Shard milestone planner pending verified data",
+      "description": "Shard recommendations should remain in descriptive mode until verified milestone data is imported."
     },
     {
       "id": "gem-node-roi",

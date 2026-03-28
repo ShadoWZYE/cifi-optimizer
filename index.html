@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CiFi Optimization Suite</title>
+  <title>CIFI Optimization Suite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand-card">
-        <p class="eyebrow">Unified CiFi Optimization Suite</p>
+        <p class="eyebrow">Unified CIFI Optimization Suite</p>
         <h1>One profile, one data backbone, many optimizers.</h1>
         <p class="meta">Refactors the current Desmos and spreadsheet stack into a modular web app with importable sheet data and shared player calibration.</p>
       </div>
@@ -111,6 +111,7 @@
               <div class="field-group">
                 <label for="resourceFocus">Primary farming focus</label>
                 <select id="resourceFocus" name="resourceFocus">
+                  <option value="">Select focus</option>
                   <option value="credits">Credits</option>
                   <option value="alloy">Alloy</option>
                   <option value="research">Research</option>
@@ -192,25 +193,6 @@
               </div>
             </div>
 
-            <div class="field-grid">
-              <div class="field-group">
-                <label for="shardMilestoneOpsLevel">Operations throughput level</label>
-                <input id="shardMilestoneOpsLevel" name="shardMilestoneOpsLevel" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="shardMilestoneYieldLevel">Shard compression level</label>
-                <input id="shardMilestoneYieldLevel" name="shardMilestoneYieldLevel" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="shardMilestoneCellsLevel">Hotspot scanner level</label>
-                <input id="shardMilestoneCellsLevel" name="shardMilestoneCellsLevel" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="shardMilestoneResearchLevel">Research survey level</label>
-                <input id="shardMilestoneResearchLevel" name="shardMilestoneResearchLevel" type="number" min="0" step="1">
-              </div>
-            </div>
-
             <div class="field-group">
               <label for="notes">Calibration notes</label>
               <textarea id="notes" name="notes" rows="3" placeholder="Known assumptions, partial values, or import notes"></textarea>
@@ -219,7 +201,7 @@
 
           <div class="profile-actions">
             <button id="saveSnapshotBtn" class="button">Save LR snapshot</button>
-            <button id="restoreDefaultsBtn" class="button button-ghost">Reset to demo data</button>
+            <button id="restoreDefaultsBtn" class="button button-ghost">Reset to blank profile</button>
           </div>
           <div id="profileStatus" class="status-line"></div>
         </section>
@@ -388,20 +370,12 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Progression</p>
-            <h2>Shard milestone optimizer</h2>
+            <h2>Shard milestone status</h2>
           </div>
         </div>
         <section class="panel">
           <div class="module-controls">
-            <div class="field-group">
-              <label for="progressionBias">Priority bias</label>
-              <select id="progressionBias">
-                <option value="balanced">Balanced</option>
-                <option value="premium">Shard-first</option>
-                <option value="speed">Cell push</option>
-              </select>
-            </div>
-            <button id="runProgressionOptimizer" class="button button-primary">Rank shard milestones</button>
+            <button id="runProgressionOptimizer" class="button button-primary">Show shard module status</button>
           </div>
           <div id="progressionResults" class="recommendation-list"></div>
         </section>
