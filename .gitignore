@@ -1,0 +1,33 @@
+# Node / web
+node_modules/
+dist/
+build/
+coverage/
+.parcel-cache/
+.vite/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+
+# Logs and local env
+*.log
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test/debug artifacts
+tests/ocr-debug/

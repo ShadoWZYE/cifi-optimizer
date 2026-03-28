@@ -1,0 +1,126 @@
+{
+  "source": "Desmos ship loadout optimizer",
+  "capturedAt": "2026-03-23",
+  "loadoutSlots": 3,
+  "ships": [
+    { "key": "C", "code": "c", "name": "Cradle" },
+    { "key": "A", "code": "a", "name": "Auxesia" },
+    { "key": "Zg", "code": "zg", "name": "Zagreus" },
+    { "key": "H", "code": "h", "name": "Hephaestus" },
+    { "key": "D", "code": "d", "name": "Demeter" },
+    { "key": "K", "code": "k", "name": "Koios" },
+    { "key": "Ze", "code": "ze", "name": "Zeus" }
+  ],
+  "weights": {
+    "CellsAndGens": 1,
+    "Mods": 100,
+    "Shards": 16,
+    "RP": 8,
+    "AP": 8,
+    "Mats": 100
+  },
+  "academyGears": {
+    "G1": 241, "G2": 241, "G3": 241, "G4": 324, "G5": 263, "G6": 274, "G7": 300, "G8": 279, "G9": 326, "G10": 281, "G11": 260,
+    "G12": 244, "G13": 326, "G14": 244, "G15": 300, "G16": 278, "G17": 260, "G18": 299, "G19": 354, "G20": 324, "G21": 277, "G22": 258
+  },
+  "innovation": {
+    "inno1": false,
+    "inno2": false,
+    "darkInno": false,
+    "softCap": true
+  },
+  "calibration": {
+    "generators": {
+      "n1": 5910, "n2": 1360, "n3": 858, "n4": 361, "n5": 312, "n6": 186, "n7": 97, "n8": 40, "n9": 0, "n10": 0
+    },
+    "techLevels": {
+      "S_techs": 4320,
+      "MaxGenHWunlocked": 8,
+      "MaxGenSWunlocked": 8
+    },
+    "zagreus": {
+      "S_loopReset": 357,
+      "S_mod": 11867,
+      "S_loopFill": 1055
+    },
+    "hephaestus": {
+      "tickTimer": 0.87,
+      "S_automt": 40
+    },
+    "demeter": {
+      "OpsFromAotC": 84470000,
+      "TicksPerOp": 28
+    },
+    "koios": {
+      "StudiesPerResBar": 38,
+      "TicksPerResBar": 2,
+      "S_fullRes": 43,
+      "S_resLvl": 166
+    },
+    "zeus": {
+      "CappedMissions": 0,
+      "LowestUncappedMissionTimer": 7
+    },
+    "crew": {
+      "Crew": 407,
+      "AuxesiaCrew": 316,
+      "ZagreusCrew": 180,
+      "HephaestusCrew": 141,
+      "DemeterCrew": 119,
+      "KoiosCrew": 104,
+      "ZeusCrew": 68
+    },
+    "technical": {
+      "CrewCap": 1200,
+      "CapX5": true,
+      "ShortRunLenMins": 15,
+      "LongRunLenDays": 2,
+      "Meltdown": 0.303,
+      "LongRun": true
+    }
+  },
+  "shipInstalls": {
+    "C": {
+      "current": [37, 11, 10, 11, 10, 10, 11, 1, 49, 99, 1],
+      "caps": [250, 25, 25, 20, 20, 10, 15, 100, 40, 30, 50],
+      "reserveThresholds": [0, 5, 5, 25, 25, 40, 40, 100, 100, 100, 100],
+      "powerTerms": ["1", "Meltdown", "Meltdown", "Meltdown", "Meltdown", "Meltdown", "Meltdown", "min(HighestGen,8)*Meltdown", "1", "1", "1"]
+    },
+    "A": {
+      "current": [34, 35, 15, 4, 4, 4, 4, 1, 48, 50, 1],
+      "caps": [250, 15, 15, 20, 20, 15, 15, 25, 30, 10, 30],
+      "reserveThresholds": [0, 5, 5, 25, 25, 50, 50, 100, 100, 100, 100],
+      "powerTerms": ["min(MaxGenSWunlocked,8)*Meltdown", "min(MaxGenHWunlocked,8)*Meltdown", "1", "Meltdown", "Meltdown", "Meltdown", "Meltdown", "min(HighestGen,8)*Meltdown", "1", "1", "1"]
+    },
+    "Zg": {
+      "current": [25, 22, 25, 7, 7, 7, 7, 1, 33, 65, 1],
+      "caps": [250, 10, 10, 20, 20, 20, 20, 30, 20, 25, 10],
+      "reserveThresholds": [0, 5, 5, 20, 20, 40, 40, 100, 100, 100, 100],
+      "powerTerms": ["1", "min(HighestGen,3)*Meltdown", "1", "Meltdown", "Meltdown", "Meltdown", "Meltdown", "min(HighestGen,8)*Meltdown", "1", "1", "1"]
+    },
+    "H": {
+      "current": [15, 25, 14, 14, 14, 14, 4, 0, 50, 99, 1],
+      "caps": [250, 5, 5, 15, 15, 5, 20, 40, 85, 85, 85],
+      "reserveThresholds": [0, 5, 5, 20, 20, 60, 60, 100, 100, 100, 100],
+      "powerTerms": ["min(HighestGen,4)*Meltdown", "min(MaxGenHWunlocked+MaxGenSWunlocked,16)*Meltdown", "1", "1", "1", "1", "Meltdown", "min(HighestGen,8)*Meltdown", "1", "1", "1"]
+    },
+    "D": {
+      "current": [25, 70, 1, 1, 1, 1, 1, 0, 33, 66, 1],
+      "caps": [5, 250, 25, 25, 25, 5, 10, 5, 55, 125, 25],
+      "reserveThresholds": [0, 0, 0, 10, 10, 25, 25, 100, 100, 100, 100],
+      "powerTerms": ["1", "1", "1", "min(HighestGen,2)*Meltdown", "min(HighestGen,2)*Meltdown", "1", "min(HighestGen,2)*Meltdown", "min(HighestGen,8)*Meltdown", "1", "1", "1"]
+    },
+    "K": {
+      "current": [5, 25, 1, 1, 25, 50, 1, 1, 30, 60, 1],
+      "caps": [250, 5, 5, 5, 5, 10, 10, 60, 150, 40, 30],
+      "reserveThresholds": [0, 5, 5, 10, 10, 30, 30, 100, 100, 100, 100],
+      "powerTerms": ["1", "1", "1", "min(HighestGen,2)*Meltdown", "1", "max(Mods+Shards,1)", "min(HighestGen,6)*Meltdown", "min(HighestGen,8)*Meltdown", "1", "1", "1"]
+    },
+    "Ze": {
+      "current": [1, 5, 5, 26, 13, 45, 5, 0, 0, 0, 0],
+      "caps": [250, 1, 1, 15, 20, 15, 50, 50, 50, 50, 50],
+      "reserveThresholds": [0, 0, 0, 2, 2, 50, 50, 100, 100, 100, 100],
+      "powerTerms": ["1", "1", "1", "1", "1", "1", "1", "min(HighestGen,8)*Meltdown", "1", "1", "1"]
+    }
+  }
+}

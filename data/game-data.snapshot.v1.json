@@ -1,0 +1,196 @@
+{
+  "snapshotVersion": "v1.0.0-alpha",
+  "capturedAt": "2026-03-23",
+  "sourceStrategy": {
+    "mode": "hybrid-reference",
+    "primarySources": [
+      {
+        "label": "Verified CiFi reference spreadsheet",
+        "url": "https://docs.google.com/spreadsheets/d/1joQbD-lI7EfU83LP9Yn73cLOX-iqy-C5oHRc9bRsdow/edit"
+      },
+      {
+        "label": "Gem node optimizer spreadsheet",
+        "url": "https://docs.google.com/spreadsheets/d/1m63Dx08dDusNUYngIF-_8kdZw4l21TosD2rBGdKT8QM/edit"
+      }
+    ]
+  },
+  "resourceGoals": {
+    "credits": { "powerWeight": 0.35, "speedWeight": 0.2, "cargoWeight": 0.45 },
+    "alloy": { "powerWeight": 0.4, "speedWeight": 0.3, "cargoWeight": 0.3 },
+    "research": { "powerWeight": 0.22, "speedWeight": 0.48, "cargoWeight": 0.3 },
+    "shards": { "powerWeight": 0.44, "speedWeight": 0.26, "cargoWeight": 0.3 }
+  },
+  "shipLoadouts": [
+    {
+      "id": "freighter_overdrive",
+      "name": "Freighter Overdrive",
+      "resourceBias": "credits",
+      "powerScale": 1.08,
+      "speedScale": 0.96,
+      "cargoScale": 1.25,
+      "risk": "safe",
+      "notes": "Stable LR farming loadout with stronger carry capacity."
+    },
+    {
+      "id": "ion_splitter",
+      "name": "Ion Splitter",
+      "resourceBias": "research",
+      "powerScale": 0.94,
+      "speedScale": 1.22,
+      "cargoScale": 1.04,
+      "risk": "balanced",
+      "notes": "Best used when resets emphasize cycle speed and research looping."
+    },
+    {
+      "id": "shard_lance",
+      "name": "Shard Lance",
+      "resourceBias": "shards",
+      "powerScale": 1.28,
+      "speedScale": 1.02,
+      "cargoScale": 0.9,
+      "risk": "aggressive",
+      "notes": "High spike output with narrower handling margin."
+    },
+    {
+      "id": "alloy_bastion",
+      "name": "Alloy Bastion",
+      "resourceBias": "alloy",
+      "powerScale": 1.18,
+      "speedScale": 1.04,
+      "cargoScale": 1.05,
+      "risk": "balanced",
+      "notes": "Reliable alloy-focused generalist."
+    }
+  ],
+  "progressionActions": [
+    {
+      "id": "gem_hoard",
+      "label": "Bank gems for premium milestone",
+      "resource": "gems",
+      "baseCost": 500,
+      "baseValue": 780,
+      "confidence": 0.74,
+      "notes": "High-value premium path when gem inventory is below burst thresholds."
+    },
+    {
+      "id": "token_push",
+      "label": "Spend tokens on progression unlock",
+      "resource": "tokens",
+      "baseCost": 260,
+      "baseValue": 610,
+      "confidence": 0.7,
+      "notes": "Strong if token unlocks remove active bottlenecks."
+    },
+    {
+      "id": "relic_scaling",
+      "label": "Invest relics into compounding bonus",
+      "resource": "relics",
+      "baseCost": 150,
+      "baseValue": 530,
+      "confidence": 0.65,
+      "notes": "Lower immediate burst, higher long-tail compounding."
+    },
+    {
+      "id": "gem_nodes",
+      "label": "Upgrade gem nodes with current dust",
+      "resource": "gemDust",
+      "baseCost": 320,
+      "baseValue": 690,
+      "confidence": 0.79,
+      "notes": "Very efficient when current node levels are still uneven."
+    }
+  ],
+  "gemNodes": [
+    {
+      "id": "prism_focus",
+      "label": "Prism Focus",
+      "level": 3,
+      "maxLevel": 10,
+      "cost": 120,
+      "value": 185,
+      "tags": ["premium", "burst"]
+    },
+    {
+      "id": "relay_mesh",
+      "label": "Relay Mesh",
+      "level": 2,
+      "maxLevel": 10,
+      "cost": 90,
+      "value": 155,
+      "tags": ["efficiency", "steady"]
+    },
+    {
+      "id": "vault_tap",
+      "label": "Vault Tap",
+      "level": 4,
+      "maxLevel": 10,
+      "cost": 140,
+      "value": 170,
+      "tags": ["credits", "banking"]
+    },
+    {
+      "id": "surge_lattice",
+      "label": "Surge Lattice",
+      "level": 1,
+      "maxLevel": 10,
+      "cost": 80,
+      "value": 160,
+      "tags": ["catchup", "low-level"]
+    }
+  ],
+  "validationCases": [
+    {
+      "id": "ship-parity-credits",
+      "module": "ship",
+      "title": "Credits loadout parity",
+      "expected": "Freighter Overdrive",
+      "description": "Baseline credits-focused LR profile should prefer stable cargo-biased loadout."
+    },
+    {
+      "id": "progression-gems-midgame",
+      "module": "progression",
+      "title": "Midgame premium priority",
+      "expected": "Upgrade gem nodes with current dust",
+      "description": "Balanced profile with healthy dust should surface gem nodes near the top."
+    },
+    {
+      "id": "gem-node-roi",
+      "module": "gem",
+      "title": "Low-level node catchup",
+      "expected": "Surge Lattice",
+      "description": "Low-level underinvested node should beat flatter alternatives on ROI."
+    }
+  ],
+  "researchTracks": [
+    {
+      "id": "hunter-sim-centralization",
+      "title": "Hunter simulation centralization",
+      "goal": "Define storage and retrieval for shared simulation seeds.",
+      "nextSteps": [
+        "Normalize hunter build descriptors into a compact indexed schema.",
+        "Store sampled simulation outcomes with tags for objective, profile bracket, and confidence.",
+        "Prototype nearest-neighbor retrieval for player-specific seed recommendations."
+      ]
+    },
+    {
+      "id": "mech-planner-feasibility",
+      "title": "Mech planner feasibility",
+      "goal": "Map the existing calculator inputs, hidden assumptions, and max-time estimates.",
+      "nextSteps": [
+        "Catalog required mech resource inputs and progression constraints.",
+        "Extract candidate formulas from the current planner behavior.",
+        "Decide whether to ship as a recommendation module or research-only estimator."
+      ]
+    },
+    {
+      "id": "input-automation",
+      "title": "Input automation research",
+      "goal": "Lower calibration cost via structured paste, imports, and screenshot-assisted capture.",
+      "nextSteps": [
+        "Rank all profile fields by calibration pain and automation feasibility.",
+        "Define import templates for spreadsheet-like data.",
+        "Evaluate screenshot parsing only for highest-friction profile slices."
+      ]
+    }
+  ]
+}
