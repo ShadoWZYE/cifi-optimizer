@@ -4,6 +4,10 @@ This document records what is currently verified about the shard workflow and wh
 
 It exists because the current shard workflow uses a repo dataset, but that dataset is primarily grounded from community references rather than from shipped-game owner mapping.
 
+Boundary reference:
+
+- [shard-grounding-boundary.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-grounding-boundary.md)
+
 ## Current status
 
 The shard system is a real CIFI system, but the current milestone layer should be treated as:
@@ -22,6 +26,22 @@ The following are currently safe repo truths:
 - Shards are tied to Operations and the Shard Mining Menu.
 - Shards reset on Loop Prestige.
 - The shard workflow can safely show descriptive warnings and planning helpers around those anchors.
+
+### Asset-grounded shell evidence
+
+Repo-local Unity evidence also confirms that shipped assets contain shard and loop milestone shell content, including:
+
+- `LoopResetStage1` through `LoopResetStage5`
+- `ShardMilestones-64`
+- `ShardMilestones-256`
+- `MilestoneBonusesPerLevel`
+- `Milestone1` through at least `Milestone57`
+- `Milestones, Assembly-CSharp`
+- `SpaceShip-ShardMining-LV1` through `SpaceShip-ShardMining-LV4`
+
+This is enough to say the shard and loop milestone families are present in shipped assets.
+
+It is not enough to treat the current milestone list as extracted game data.
 
 ### Current milestone dataset status
 
@@ -44,15 +64,18 @@ That makes it suitable for:
 
 - shipped-game owner mapping for shard milestones themselves
 - asset-grounded shard milestone labels and bonus tables
+- asset-grounded milestone row order and milestone-number mapping
 - asset-grounded milestone unlock list
 - asset-grounded per-level shard costs
 - a single authoritative milestone list across conflicting community snapshots
+- player-owned milestone levels or comparable save-side inputs for truthful planner logic
 
 ## Current app implication
 
 - The shard page can remain in descriptive mode.
 - The shard dataset should be labeled as community-grounded descriptive data, not as fully game-side-grounded mechanics.
 - The app should not imply that shard milestone names, unlock tables, or effect lists are extracted from Unity/APK assets unless that mapping is actually completed.
+- The app may reference the asset-grounded shard shell only to justify warning-oriented shard and loop surfaces, not stronger planner claims.
 
 ## Next allowed shard slice
 

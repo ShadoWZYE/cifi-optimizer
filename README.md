@@ -68,6 +68,9 @@ Optional tooling:
 - `player-profile.js` — PlayerProfile schema and normalization
 - `data/game-data.snapshot.v1.json` — app-owned snapshot and research track status
 - `data/bundled-dataset-contract.v1.json` — shipped dataset manifest
+- `data/shard-asset-grounding.v1.json` — APK/Unity-grounded shard shell summary for validation and boundary UI
+- `data/extraction-candidate-families.v1.json` — configured unknown-target families for repo-wide and filtered extraction scoring
+- `data/extraction-candidate-ranking.v1.json` — generated default ranking of unresolved extraction targets across committed extracted-data surfaces
 - `docs/contracts/dataset-contracts.md` — dataset contract
 - `docs/contracts/dataset-refresh-checklist.md` — dataset promotion checklist
 - `docs/contracts/research-note-template.md` — APK-first note template

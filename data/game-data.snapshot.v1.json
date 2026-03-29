@@ -164,16 +164,19 @@
       "title": "Shard workflow and loop guardrails",
       "status": "active",
       "goal": "Keep shard guidance truthful while the repo verifies how much of the shard system is grounded from shipped-game evidence versus descriptive/community sources.",
-      "currentSlice": "Audit the current shard workflow against the stricter system-mapping gate and document which shard facts are game-side grounded versus still descriptive-only.",
+      "currentSlice": "Use the repo-wide extraction-candidate ranking as the default unknown-target scorer, then filter it to PR2 and keep the shard milestone owner family as the current shard follow-up.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
         "Normalize shard and loop module outputs through the shared recommendation action contract.",
         "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes.",
-        "Document that the current shard milestone dataset is community-grounded descriptive data, not shipped-game owner-grounded milestone data."
+        "Document that the current shard milestone dataset is community-grounded descriptive data, not shipped-game owner-grounded milestone data.",
+        "Document the current boundary between APK or Unity-grounded shard shell evidence and the still-descriptive community milestone layer in docs and progression UI.",
+        "Ship a small shard asset-grounding dataset so APK-grounding validation and progression boundary copy no longer depend on markdown-only notes.",
+        "Add a repo-local extraction-candidate ranking path so unknown extraction work is ranked from unresolved mention density plus anchor strength across committed extracted-data artifacts, then filter that ranking back to the active roadmap track."
       ],
       "nextSteps": [
-        "Document the current boundary between asset-grounded shard facts and descriptive/community-backed shard guidance.",
+        "Use the ranked milestone-owner family path first, then fall back to the loop-reset stage family if the owner trail stalls.",
         "Verify shard milestone owner mapping from shipped-game assets before promoting milestone names and rows as stronger repo truth.",
         "Only expand shard recommendations after the system-mapping gate is satisfied."
       ]

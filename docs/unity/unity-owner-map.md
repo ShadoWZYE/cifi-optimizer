@@ -62,3 +62,23 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
 
 Next likely targets should follow the same pattern: find the real owner object first, then parse the serialized payload directly when typetree tooling fails.
 
+Available but unmapped owner families:
+
+- shard milestones / loop-reset shell
+  - system: shard workflow and loop-reset progression shell
+  - current source evidence:
+    - [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
+    - [`workbench/unity/joined/sharedassets0.assets`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\sharedassets0.assets)
+    - [`docs/unity/unity-mechanics-pass.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity\unity-mechanics-pass.md)
+  - recovered shell identifiers:
+    - `LoopResetStage1` through `LoopResetStage5`
+    - `ShardMilestones-64`
+    - `ShardMilestones-256`
+    - `MilestoneBonusesPerLevel`
+    - `Milestone1` through at least `Milestone57`
+    - `Milestones, Assembly-CSharp`
+    - `SpaceShip-ShardMining-LV1` through `SpaceShip-ShardMining-LV4`
+  - integration status: shard and loop milestone shell presence is grounded, but the real owner object, player-owned milestone state, and player-facing milestone label mapping are still unresolved; keep app behavior descriptive
+  - next extraction target:
+    - recover the concrete owner behind the shard milestone shell before promoting milestone rows, labels, or costs as game-side truth
+

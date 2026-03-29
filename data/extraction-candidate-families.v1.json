@@ -1,0 +1,201 @@
+{
+  "dataset": "extraction-candidate-families.v1",
+  "generatedAt": "2026-03-29",
+  "binaryFiles": [
+    "workbench/unity/joined/level0",
+    "workbench/unity/joined/sharedassets0.assets",
+    "workbench/apk/base/global-metadata.dat"
+  ],
+  "textFiles": [
+    "docs/systems/shards/shard-system-verification.md",
+    "docs/systems/shards/shard-grounding-boundary.md",
+    "docs/systems/shards/shard-extraction-candidates.md",
+    "docs/systems/spend/spend-system-verification.md",
+    "docs/systems/spend/token-bank-state-verification.md",
+    "docs/systems/spend/daily-tokenium-mission-lane-verification.md",
+    "docs/systems/spend/multiverse-market-verification.md",
+    "docs/systems/spend/multiverse-market-state-verification.md",
+    "docs/unity/unity-owner-map.md",
+    "docs/unity/unity-audit-playbook.md",
+    "data/game-data.snapshot.v1.json",
+    "data/shard-asset-grounding.v1.json"
+  ],
+  "globalContextTerms": [
+    "shard",
+    "milestone",
+    "operation",
+    "demeter",
+    "loopreset",
+    "loop mod",
+    "loopmod",
+    "mining",
+    "token",
+    "token bank",
+    "daily tokenium",
+    "inscryptions",
+    "playerprofiledata",
+    "farm mission",
+    "academy"
+  ],
+  "unresolvedMarkers": [
+    "unresolved",
+    "unknown",
+    "not yet",
+    "not safe",
+    "available but unmapped",
+    "still to map",
+    "blocked",
+    "fails",
+    "not build-ready",
+    "not enough",
+    "still remain unresolved",
+    "must still",
+    "still needs",
+    "required before planner ui",
+    "current gaps",
+    "not yet verified enough"
+  ],
+  "families": [
+    {
+      "id": "shards.milestone-owner-family",
+      "label": "Milestone owner family",
+      "track": "shards-and-loop-guardrails",
+      "terms": [
+        "milestone owner",
+        "shard milestone",
+        "milestones, assembly-csharp",
+        "milestonebonusesperlevel",
+        "shardmilestones"
+      ],
+      "anchors": [
+        "Milestones, Assembly-CSharp",
+        "MilestoneBonusesPerLevel",
+        "ShardMilestones-64",
+        "ShardMilestones-256",
+        "Milestone1"
+      ]
+    },
+    {
+      "id": "shards.loop-reset-stage-family",
+      "label": "Loop-reset stage family",
+      "track": "shards-and-loop-guardrails",
+      "terms": [
+        "loop reset",
+        "loop-reset",
+        "loop prestige",
+        "loopresetstage"
+      ],
+      "anchors": [
+        "LoopResetStage1",
+        "LoopResetStage2",
+        "LoopResetStage3",
+        "LoopResetStage4",
+        "LoopResetStage5"
+      ]
+    },
+    {
+      "id": "shards.shard-mining-ship-family",
+      "label": "Shard-mining ship family",
+      "track": "shards-and-loop-guardrails",
+      "terms": [
+        "shard mining",
+        "demeter",
+        "operations"
+      ],
+      "anchors": [
+        "SpaceShip-ShardMining-LV1",
+        "SpaceShip-ShardMining-LV2",
+        "SpaceShip-ShardMining-LV3",
+        "SpaceShip-ShardMining-LV4"
+      ]
+    },
+    {
+      "id": "shards.shard-text-handlers",
+      "label": "Shard milestone text handlers",
+      "track": "shards-and-loop-guardrails",
+      "terms": [
+        "texthandlershard",
+        "shard milestone bonuses per level"
+      ],
+      "anchors": [
+        "TextHandlerShardMilestoneBonusesPerLevel",
+        "TextHandlerShard",
+        "ShardMilestoneBonusesPerLevel"
+      ]
+    },
+    {
+      "id": "spend.token-bank-state-lane",
+      "label": "Token-bank state lane",
+      "track": "spend-planner-from-extracted-data",
+      "terms": [
+        "token bank",
+        "banked tokens",
+        "claimbankedtokens",
+        "tokenbankcap",
+        "fill speed"
+      ],
+      "anchors": [
+        "ClaimBankedTokens",
+        "TokenBankCap",
+        "FinalTokenBankFillSpeed",
+        "OR_TokenBankCap"
+      ]
+    },
+    {
+      "id": "spend.daily-tokenium-lane",
+      "label": "Daily Tokenium lane",
+      "track": "spend-planner-from-extracted-data",
+      "terms": [
+        "daily tokenium",
+        "lm244",
+        "farm mission",
+        "spaceacademy",
+        "collector pack"
+      ],
+      "anchors": [
+        "SetLM244BonusText",
+        "Daily Tokenium",
+        "SpaceAcademy",
+        "FarmMissions",
+        "Collector"
+      ]
+    },
+    {
+      "id": "spend.multiverse-market-owner-family",
+      "label": "MultiverseMarket owner family",
+      "track": "spend-planner-from-extracted-data",
+      "terms": [
+        "multiverse market",
+        "chrystos emporium",
+        "inscryptions",
+        "buyis"
+      ],
+      "anchors": [
+        "MultiverseMarket, Assembly-CSharp",
+        "BuyIS47",
+        "BuyIS64",
+        "BuyIS73",
+        "CostBox-InscryptionsDone"
+      ]
+    },
+    {
+      "id": "spend.multiverse-market-save-model",
+      "label": "MultiverseMarket save model",
+      "track": "spend-planner-from-extracted-data",
+      "terms": [
+        "inscryptionsdone",
+        "playerprofiledata",
+        "is50level",
+        "trade counter",
+        "declaring save model"
+      ],
+      "anchors": [
+        "InscryptionsDone",
+        "PlayerProfileData",
+        "IS50Level",
+        "EsotericR1Trades",
+        "Mech1Unlocked"
+      ]
+    }
+  ]
+}
