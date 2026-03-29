@@ -34,6 +34,7 @@ const multiverseMarketVerificationDoc = await readFile(new URL("../docs/multiver
 const multiverseMarketStateDoc = await readFile(new URL("../docs/multiverse-market-state-verification.md", import.meta.url), "utf8");
 const multiverseMarketMetadataNeighborhoodDoc = await readFile(new URL("../docs/multiverse-market-metadata-neighborhood.md", import.meta.url), "utf8");
 const recommendationContractModule = await readFile(new URL("../recommendation-contract.js", import.meta.url), "utf8");
+const recommendationFixtures = JSON.parse(await readFile(new URL("./fixtures/recommendation-actions.fixtures.json", import.meta.url), "utf8"));
 const shardVerificationDoc = await readFile(new URL("../docs/shard-system-verification.md", import.meta.url), "utf8");
 const playerProfileSchemaDoc = await readFile(new URL("../docs/player-profile-schema.md", import.meta.url), "utf8");
 const importMappingDoc = await readFile(new URL("../docs/import-mapping.md", import.meta.url), "utf8");
@@ -83,6 +84,8 @@ const invalidFeedIssues = getRecommendationContractIssues({
   assumptions: null,
   warnings: ["warning"]
 });
+const normalizedFixtureActions = recommendationFixtures.actions.map((item) => toRecommendationAction(item, item.module));
+const sortedFixtureActions = sortRecommendationFeed(normalizedFixtureActions);
 
 const defaultProfile = createDefaultPlayerProfile();
 
@@ -114,6 +117,19 @@ assert.equal(fallbackFeedAction.confidence, 0);
 assert.deepEqual(sortedFeedFixture.map((item) => item.id), ["warning-high", "warning-low", "upgrade-high"]);
 assert.equal(getRecommendationContractIssues(normalizedFeedAction).length, 0);
 assert.ok(invalidFeedIssues.length >= 4, "expected multiple recommendation contract issues");
+assert.equal(recommendationFixtures.actions.length, 2);
+assert.deepEqual(
+  recommendationFixtures.actions.map((item) => item.module),
+  ["loop", "shards"]
+);
+assert.ok(
+  normalizedFixtureActions.every((item) => getRecommendationContractIssues(item).length === 0),
+  "expected representative shard and loop fixtures to satisfy the recommendation contract"
+);
+assert.deepEqual(
+  sortedFixtureActions.map((item) => item.id),
+  ["loop-guardrail-input-warning", "shard-module-next-unlock-watch"]
+);
 const shardTrack = snapshot.researchTracks.find((track) => track.id === "shards-and-loop-guardrails");
 assert.ok(shardTrack, "expected shard workflow track");
 assert.match(shardTrack.goal, /Keep shard guidance truthful/);
@@ -125,7 +141,7 @@ assert.match(spendTrack.currentSlice, /Use the recovered progression-field block
 const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-feed-and-hardening");
 assert.ok(feedTrack, "expected unified feed track");
 assert.equal(feedTrack.status, "active");
-assert.match(feedTrack.currentSlice, /Extract the shared recommendation contract into a pure module/);
+assert.match(feedTrack.currentSlice, /Validate representative shard and loop action fixtures through the shared recommendation contract/);
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
 assert.match(agentsMd, /available but unmapped/);
