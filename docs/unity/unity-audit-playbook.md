@@ -1,3 +1,16 @@
+## Agent default behavior
+
+This playbook is not only for manual research refreshes. It is also the default fallback path for agents when repo docs or shipped datasets do not fully explain a game system.
+
+If an agent encounters a mechanic, label, owner, currency, unlock rule, or player-state dependency that is unclear or missing:
+
+1. check the relevant repo docs and current datasets
+2. if still unresolved, inspect the committed APK/Unity artifacts described in this playbook
+3. attempt to ground the answer from repo-local extraction evidence
+4. only after that fails should external/public/community sources be considered
+
+Agents should treat external sources as fallback evidence, not the first stop, for unresolved game-mechanic questions.
+
 # Unity Audit Playbook
 
 This document captures the current extraction pathway for grounded CIFI mechanics from the Android/Unity build so the work can be resumed on another machine without reconstructing the process from chat history.
