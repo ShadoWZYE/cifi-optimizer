@@ -1042,49 +1042,11 @@ function renderOverview() {
   const mvpValidation = validation.filter((item) => item.scope === "MVP");
   const apkValidation = validation.filter((item) => item.scope === "APK");
   const supportValidation = validation.filter((item) => item.scope === "Support");
+  const recommendationFeed = getActiveMvpRecommendationFeed();
   $("#validationStatusValue").textContent = `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
   $("#overviewHighlights").innerHTML = [
-    makeRecommendationCard(runProgressionOptimization()[0], "shards"),
-    makeRecommendationCard({
-      id: "profile-boundary-status",
-      module: "warning",
-      kind: "warning",
-      title: "Profile boundary stays grounded",
-      subtitle: "Canonical truth and labeled helpers",
-      score: 0,
-      confidence: 0.86,
-      whyNow: [
-        "Shared PlayerProfile truth is limited to canonical MVP fields plus labeled planner helpers.",
-        "Ship calibration remains isolated as external-model state even though the ship system itself is canonical."
-      ],
-      warnings: [
-        "Do not treat gem nodes, research intake, or OCR as grounded MVP recommendations.",
-        "Legacy compatibility fields are preserved for migration, not treated as active planning truth."
-      ],
-      notes: "The primary MVP flow centers on PlayerProfile, imports, shard safety, validation, and explainable recommendations."
-    }, "warning"),
-    makeRecommendationCard({
-      id: "ship-system-bridge-status",
-      module: "ship",
-      kind: "warning",
-      title: "Ship planner is a canonical system with provisional tool wiring",
-      subtitle: "Grounding remap still in progress",
-      score: 0,
-      confidence: 0.78,
-      whyNow: [
-        "The ship loadout optimizer is modeling a real game system, not a speculative support feature.",
-        "Current labels and calibration still come through the community-tool implementation until grounded naming and extracted data are mapped in-repo."
-      ],
-      assumptions: [
-        "Ship calibration remains labeled as external-model state until extracted game data replaces or remaps those fields.",
-        "This does not promote tool-specific labels into canonical PlayerProfile truth."
-      ],
-      warnings: [
-        "Treat current ship labels as provisional where the repo has not yet remapped them to grounded in-game terminology.",
-        "Gem Nodes, OCR, and Research Intake remain outside the grounded MVP recommendation path."
-      ],
-      notes: "Next ship-focused work should remap names and extracted data, not discard the system."
-    }, "ship"),
+    renderRecommendationFeedSummary(recommendationFeed, "overview"),
+    ...recommendationFeed.slice(0, 3).map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : item.module)),
     renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
 }
@@ -1411,6 +1373,7 @@ function renderShipActions() {
 }
 
 function renderProgressionResults(results) {
+  const recommendationFeed = getActiveMvpRecommendationFeed();
   renderShardPlannerControls();
   $("#progressionResults").innerHTML = `
     <article class="validation-card warn">
@@ -1418,6 +1381,7 @@ function renderProgressionResults(results) {
       <p class="meta">System-level shard anchors are grounded enough for repo truth, but the current milestone list is still community-grounded descriptive data.</p>
       <p class="meta">Do not treat milestone names, unlock rows, or bonus labels here as shipped-game extracted truth until shard owner mapping is completed.</p>
     </article>
+    ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
     <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
     ${renderShardWorkflowSnapshot()}
     ${renderShardWorkflowReference()}
@@ -1894,16 +1858,16 @@ function runProgressionOptimization() {
   const groundedResults = buildGroundedShardRecommendations().map((item) => toRecommendationAction(item, "shards"));
   const loopWarnings = buildLoopGuardrailRecommendations().map((item) => toRecommendationAction(item, "loop"));
   if (groundedResults.length) {
-    return [...groundedResults, ...loopWarnings];
+    return sortRecommendationFeed([...groundedResults, ...loopWarnings]);
   }
 
-  return [toRecommendationAction({
+  return sortRecommendationFeed([toRecommendationAction({
     id: "shard-module-grounding-warning",
     module: "shards",
     kind: "warning",
     title: "Shard milestone planner pending verified data",
     subtitle: "Descriptive mode",
-    score: 0,
+    score: 40,
     confidence: 0.24,
     whyNow: [
       "Shard Milestones are a real CIFI system, but this repo does not yet ship a verified milestone table.",
@@ -1918,7 +1882,7 @@ function runProgressionOptimization() {
       "Import verified shard milestone data before re-enabling optimizer behavior."
     ],
     notes: "Descriptive fallback mode avoids fake optimizer precision."
-  }, "shards"), ...loopWarnings];
+  }, "shards"), ...loopWarnings]);
 }
 
 function buildLoopGuardrailRecommendations() {
@@ -1926,9 +1890,17 @@ function buildLoopGuardrailRecommendations() {
   const loopReset = Number(canonical.loopReset || 0);
   const currentShards = Number(canonical.shards || 0);
   const antiBricking = getObservedBehaviorById("PPX_EARLY_LR_ANTIBRICKING");
+  const earlyLoop = getObservedBehaviorById("PPX_EARLY_LR1_MP78");
+  const shortRuns = getObservedBehaviorById("PPX_SHORT_MP_RUNS");
+  const longRuns = getObservedBehaviorById("PPX_LONG_SHARD_CELL_RUNS");
   const shardSpend = getObservedBehaviorById("PPX_SHARDS_EARLY_DISTRIBUTION");
   const zeusWarning = getObservedBehaviorById("PPX_ZEUS_E1000_RESOURCE_PRIO_AND_LR_TARGETS");
   const antiBrickingSource = getSourceTitlesForIds(antiBricking?.sourceIds).join(" | ");
+  const runCadenceSource = Array.from(new Set([
+    ...getSourceTitlesForIds(earlyLoop?.sourceIds),
+    ...getSourceTitlesForIds(shortRuns?.sourceIds),
+    ...getSourceTitlesForIds(longRuns?.sourceIds)
+  ])).join(" | ");
   const shardSpendSource = getSourceTitlesForIds(shardSpend?.sourceIds).join(" | ");
 
   if (!loopReset) {
@@ -1938,7 +1910,7 @@ function buildLoopGuardrailRecommendations() {
       kind: "warning",
       title: "Add current LR for loop guardrails",
       subtitle: "Minimum loop-warning input missing",
-      score: 0,
+      score: 96,
       confidence: 0.63,
       whyNow: [
         "Current LR is the minimum grounded input needed for loop-reset guardrails in this build.",
@@ -1958,6 +1930,39 @@ function buildLoopGuardrailRecommendations() {
 
   const warnings = [];
 
+  warnings.push({
+    id: "loop-guardrail-run-cadence-reference",
+    module: "loop",
+    kind: "warning",
+    title: "Use intentional short vs long runs",
+    subtitle: `Current LR ${formatShardNumber(loopReset)}`,
+    score: loopReset <= 4 ? 78 : 62,
+    confidence: 0.66,
+    whyNow: [
+      earlyLoop?.playerState?.mod_points_gained_on_first_lr
+        ? `One grounded early-loop example shows LR 1 earning ${formatShardNumber(earlyLoop.playerState.mod_points_gained_on_first_lr)} MP on the first reset.`
+        : "Grounded guide notes show early loop pacing depends on deliberate run selection, not constant reset spam.",
+      shortRuns?.why || "Short MP runs are used to buy affordable loop mods and increase MP gains between resets.",
+      longRuns?.why || "Longer runs shift toward shards and cells instead of only pushing fast reset count."
+    ],
+    assumptions: [
+      "This is a pacing reference only; the app does not estimate your best run duration.",
+      shortRuns?.playerState?.duration
+        ? `Short-run reference window: ${shortRuns.playerState.duration}.`
+        : "Short-run duration varies by account state.",
+      longRuns?.playerState?.duration
+        ? `Long-run reference window: ${longRuns.playerState.duration}.`
+        : "Long-run duration varies by account state."
+    ],
+    warnings: [
+      shortRuns?.priorities?.[2] || "Use short runs to build loop mod momentum before relying on longer shard-focused sessions.",
+      longRuns?.priorities?.[0] || "Long runs are a shard/cell pacing choice, not proof that immediate reset pushing is correct."
+    ],
+    notes: runCadenceSource
+      ? `Run-cadence reference only (${runCadenceSource}).`
+      : "Run-cadence reference only."
+  });
+
   if (loopReset >= 5) {
     warnings.push({
       id: "loop-guardrail-rising-requirements-warning",
@@ -1965,7 +1970,7 @@ function buildLoopGuardrailRecommendations() {
       kind: "warning",
       title: "Loop requirement pacing warning",
       subtitle: `Current LR ${formatShardNumber(loopReset)}`,
-      score: 0,
+      score: 88,
       confidence: 0.71,
       whyNow: [
         antiBricking?.why || "Guide examples warn that pushing LR too quickly can raise loop requirements faster than the account can clear them.",
@@ -1992,7 +1997,7 @@ function buildLoopGuardrailRecommendations() {
       kind: "warning",
       title: "Spend tracked shards before reset",
       subtitle: `${formatShardNumber(currentShards)} shards currently tracked`,
-      score: 0,
+      score: 92,
       confidence: 0.68,
       whyNow: [
         "Shards reset to 0 on Loop Prestige in the grounded shard sources.",
@@ -2042,7 +2047,7 @@ function buildGroundedShardRecommendations() {
       kind: "warning",
       title: "Next shard unlock to watch",
       subtitle: nextUnlock ? nextUnlock.name : "All imported unlock requirements are covered",
-      score: 0,
+      score: nextUnlock ? 58 : 46,
       confidence: 0.7,
       whyNow: [
         nextUnlock
@@ -2076,7 +2081,7 @@ function buildGroundedShardRecommendations() {
       kind: "warning",
       title: "Next shard threshold to watch",
       subtitle: focusMilestone ? focusMilestone.name : "Select a focus milestone",
-      score: 0,
+      score: focusMilestone ? 52 : 34,
       confidence: 0.64,
       whyNow: [
         focusMilestone
@@ -2107,7 +2112,7 @@ function buildGroundedShardRecommendations() {
       kind: "warning",
       title: "Shard cost bump watch",
       subtitle: focusMilestone ? focusMilestone.name : "Global shard milestone rules",
-      score: 0,
+      score: focusMilestone ? 47 : 30,
       confidence: 0.59,
       whyNow: [
         mechanics.cost_breakpoints_observed?.breakpoints_statement || "Cost bump notes are descriptive only.",
@@ -2417,6 +2422,49 @@ function renderOverviewSupportSummary(apkValidation, supportValidation) {
       ${apkValidation.length ? `<p class="meta">${apkPassing}/${apkValidation.length} APK-grounding checks currently pass.</p>` : ""}
       ${supportValidation.length ? `<p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>` : ""}
       <p class="meta">APK-grounding checks confirm extracted mechanic bundles and mapping gates so available-but-unmapped systems do not get mixed into app truth. Shard milestone rows currently remain descriptive community-grounded data until game-side owner mapping exists.</p>
+    </article>
+  `;
+}
+
+function getActiveMvpRecommendationFeed() {
+  return runProgressionOptimization().filter((item) => item.module === "shards" || item.module === "loop");
+}
+
+function sortRecommendationFeed(items) {
+  return [...items].sort((left, right) => {
+    const kindRank = getRecommendationKindRank(right.kind) - getRecommendationKindRank(left.kind);
+    if (kindRank !== 0) {
+      return kindRank;
+    }
+    const scoreDiff = Number(right.score || 0) - Number(left.score || 0);
+    if (scoreDiff !== 0) {
+      return scoreDiff;
+    }
+    const confidenceDiff = Number(right.confidence || 0) - Number(left.confidence || 0);
+    if (confidenceDiff !== 0) {
+      return confidenceDiff;
+    }
+    return String(left.title || "").localeCompare(String(right.title || ""));
+  });
+}
+
+function getRecommendationKindRank(kind) {
+  return kind === "warning" ? 2 : 1;
+}
+
+function renderRecommendationFeedSummary(results, surface) {
+  if (!results.length) {
+    return "";
+  }
+
+  const loopCount = results.filter((item) => item.module === "loop").length;
+  const shardCount = results.filter((item) => item.module === "shards").length;
+  return `
+    <article class="validation-card warn">
+      <strong>${surface === "overview" ? "Active MVP recommendation feed" : "Progression feed status"}</strong>
+      <p class="meta">The current feed ranks trust-oriented warning urgency for the active shard and loop modules. These scores are UI priority, not optimizer ROI.</p>
+      <p class="meta">Visible feed items: ${results.length}. Loop guardrails: ${loopCount}. Shard workflow cards: ${shardCount}.</p>
+      <p class="meta">Spend-planner recommendations are still blocked by system-mapping gaps, so this feed currently covers the MVP-safe guidance surfaces only.</p>
     </article>
   `;
 }

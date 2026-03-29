@@ -84,32 +84,51 @@ The next work is not "fix the broken app." The next work is to tighten contracts
 
 ---
 
-## Phase 3: Spend planning and convergence
+## Phase 3: Feed convergence and spend planning
 
-## PR 3: Spend Planner Foundation and Unified Feed
+## PR 3: Unified Feed for Active MVP Guidance
 
 ### Goals
 
-- ship the first MVP-safe spend planner
-- converge active module outputs into one recommendation feed
+- converge active shard and loop outputs into one recommendation feed
+- make feed ranking explicit without pretending the scores are optimizer math
 
 ### Changes
 
-- normalize token-shop and multiverse-market data into planner-ready structures
+- normalize shard and loop warning priority into one visible feed
+- improve rendering and validation around mixed-module recommendation output
+- keep spend-planner work blocked until its integration gate is satisfied
+
+### Output
+
+- one explainable recommendation surface for active MVP-safe guidance modules
+- clearer feed-priority semantics for warning-first behavior
+
+---
+
+## Phase 4: Spend planner foundation
+
+## PR 4: Spend Planner Foundation
+
+### Goals
+
+- ship the first MVP-safe spend planner once the spend systems are mapped enough for app use
+
+### Changes
+
+- normalize token-shop and multiverse-market data into planner-ready structures only after their integration gates pass
 - add first-pass token/diamond planning logic
-- unify shard, spend, and warning outputs into one feed
 - harden tests around recommendation contract shape
 
 ### Output
 
 - practical spend-planner foundation
-- one explainable recommendation surface
 
 ---
 
-## Phase 4: Release hardening
+## Phase 5: Release hardening
 
-## PR 4: Test and Delivery Hardening
+## PR 5: Test and Delivery Hardening
 
 ### Goals
 

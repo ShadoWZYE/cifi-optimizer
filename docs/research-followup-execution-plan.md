@@ -263,7 +263,7 @@ Use the extracted token-shop and multiverse-market data to build the MVP spend-p
 
 **Goal**
 
-Make shard, spend, and loop-warning outputs converge into one explainable recommendation feed.
+Make active MVP-safe module outputs converge into one explainable recommendation feed, starting with shard and loop guidance and extending later to spend planning.
 
 **Primary files**
 
@@ -289,12 +289,12 @@ Make shard, spend, and loop-warning outputs converge into one explainable recomm
 **Dependencies**
 
 - Workstream C for shard output
-- Workstream D for spend output
-- loop warning source work must exist before final integration
+- loop warning source work must exist before the first feed slice
+- Workstream D must pass its integration gate before spend recommendations join the feed
 
 **Can run in parallel with**
 
-- partial UI work can begin early, but final integration depends on upstream modules
+- partial UI work can begin as soon as shard and loop outputs exist; spend integration still depends on upstream mapping
 
 ---
 
@@ -471,18 +471,29 @@ Why second:
 - both are MVP-safe guidance features
 - both can ship value without pretending to solve spend optimization yet
 
-### PR 3: Spend planner and unified feed
+### PR 3: Unified feed for active guidance modules
 
 Bundle:
 
-- Workstream D
 - Workstream E
 - Workstream G follow-through needed to protect the new contracts
 
 Why third:
 
-- spend planning depends on the earlier contract work
-- unified-feed work is easier once at least two recommendation-producing modules exist
+- shard and loop already provide enough MVP-safe output to justify a first real feed slice
+- feed semantics should be explicit before spend planning joins the same contract
+
+### PR 4: Spend planner foundation
+
+Bundle:
+
+- Workstream D
+- Workstream G follow-through needed to protect the new contracts
+
+Why fourth:
+
+- spend planning still depends on the earlier contract work
+- token and market integration should only land after the spend-system mapping gates are cleared
 
 ---
 
