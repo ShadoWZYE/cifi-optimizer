@@ -47,6 +47,8 @@ const PROFILE_FORM_FIELD_PATHS = {
   totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"]
 };
 
+const NON_MVP_VALIDATION_MODULES = new Set(["ship", "gem"]);
+
 function createDefaultShipPlayerState(baseline) {
   return {
     academyGears: { ...baseline.academyGears },
@@ -981,7 +983,7 @@ function renderQuickPanels() {
 function renderOverview() {
   $("#profileCompletionValue").textContent = `${getProfileCompletion(state.playerProfile)}%`;
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
-  const validation = runValidationCases();
+  const validation = runValidationCases().filter((item) => item.scope === "MVP");
   $("#validationStatusValue").textContent = `${validation.filter((item) => item.pass).length}/${validation.length}`;
   $("#overviewHighlights").innerHTML = [
     makeRecommendationCard(runProgressionOptimization()[0], "shards"),
@@ -1357,6 +1359,7 @@ function renderValidationResults() {
   $("#validationResults").innerHTML = results.map((item) => `
     <article class="validation-card ${item.pass ? "pass" : "warn"}">
       <strong>${item.title}</strong>
+      <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : "| grounded MVP surface"}</p>
       <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
       <p class="meta">${item.actual}</p>
     </article>
@@ -2121,7 +2124,8 @@ function runValidationCases() {
     title: item.title,
     expected: item.expected,
     actual: current[item.module],
-    pass: item.expected === current[item.module]
+    pass: item.expected === current[item.module],
+    scope: NON_MVP_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
   }));
 }
 

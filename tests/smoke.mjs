@@ -67,6 +67,7 @@ assert.match(html, /Grounded shard workflow/);
 assert.match(html, /Focus milestone/);
 assert.match(html, /Observed level on focus milestone/);
 assert.match(html, /Total shard milestone levels/);
+assert.match(html, /Grounded MVP checks only/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);
@@ -84,6 +85,7 @@ assert.match(appJs, /function closeServerSession/);
 assert.match(appJs, /function parseServerEvent/);
 assert.match(appJs, /function getGemPlannerBudget/);
 assert.match(appJs, /function getPlannerHelperCompletion/);
+assert.match(appJs, /NON_MVP_VALIDATION_MODULES/);
 assert.match(appJs, /function buildLoopGuardrailRecommendations/);
 assert.match(appJs, /function getObservedBehaviorById/);
 assert.match(appJs, /function saveShardPlannerInputs/);
@@ -111,6 +113,7 @@ assert.match(appJs, /PlayerProfile JSON imported through the grounded normalizer
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
+assert.match(appJs, /quarantined support surface/);
 assert.match(appJs, /\/api\/client\/open/);
 assert.match(appJs, /\/api\/client\/events/);
 assert.match(appJs, /new EventSource/);
