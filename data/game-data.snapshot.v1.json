@@ -146,19 +146,20 @@
       "title": "PlayerProfile boundary and import cleanup",
       "status": "active",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Centralize the surviving PlayerProfile alias inventory in one classified map so canonical, planner, external, experimental, and compatibility imports cannot drift silently.",
+      "currentSlice": "Ship a checked-in PlayerProfile alias audit artifact and validation path so the import boundary is inspectable and cannot drift silently.",
       "completedSteps": [
         "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
         "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
         "Show the current PlayerProfile boundary summary in the guided import flow so imported values are visibly classified by namespace.",
         "Route main ship, shard, loop, and gem reads through labeled PlayerProfile accessor helpers instead of direct nested field access.",
         "Add executable migration coverage for shard helper aliases, including systems.shards focus fields and invalid helper-value normalization.",
-        "Document and test compatibility-only aliases so stage and metaProgression imports remain migration-only sinks."
+        "Document and test compatibility-only aliases so stage and metaProgression imports remain migration-only sinks.",
+        "Centralize the surviving alias inventory in one classified map inside the normalizer."
       ],
       "nextSteps": [
         "Audit current PlayerProfile fields against MVP-only CIFI concepts.",
         "Clean up import mapping so new modules read from state.playerProfile first and keep experimental support-surface aliases visibly labeled.",
-        "Only add new aliases through the classified import inventory, matching docs, and migration tests.",
+        "Only add new aliases through the classified import inventory, checked-in alias audit, matching docs, and migration tests.",
         "Only promote compatibility-only aliases if a grounded MVP module later proves they belong in canonical or planner state."
       ]
     },

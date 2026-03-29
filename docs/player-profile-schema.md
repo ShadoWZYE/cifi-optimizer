@@ -4,6 +4,7 @@ This document defines the grounded boundary for `state.playerProfile`.
 
 Reference:
 - the repo-local alias inventory now lives in `PLAYER_PROFILE_IMPORT_ALIASES` within [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
+- the checked-in alias audit artifact lives in [`docs/player-profile-import-aliases.md`](C:\Users\Shadow\Desktop\CiFi\docs\player-profile-import-aliases.md) and [`data/player-profile-import-aliases.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\player-profile-import-aliases.v1.json)
 
 ## Classification rule
 

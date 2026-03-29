@@ -17,6 +17,7 @@ Accepted shapes:
 
 Alias inventory:
 - the supported legacy and nested alias groups are centrally defined in `PLAYER_PROFILE_IMPORT_ALIASES` within [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
+- the current checked-in alias audit is recorded in [`docs/player-profile-import-aliases.md`](C:\Users\Shadow\Desktop\CiFi\docs\player-profile-import-aliases.md) and [`data/player-profile-import-aliases.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\player-profile-import-aliases.v1.json)
 - future alias changes should update that inventory, the docs here, and the migration smoke checks together
 
 Grounding rules:

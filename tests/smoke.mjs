@@ -39,6 +39,8 @@ const recommendationFixtures = JSON.parse(await readFile(new URL("./fixtures/rec
 const shardVerificationDoc = await readFile(new URL("../docs/shard-system-verification.md", import.meta.url), "utf8");
 const playerProfileSchemaDoc = await readFile(new URL("../docs/player-profile-schema.md", import.meta.url), "utf8");
 const importMappingDoc = await readFile(new URL("../docs/import-mapping.md", import.meta.url), "utf8");
+const playerProfileAliasAuditDoc = await readFile(new URL("../docs/player-profile-import-aliases.md", import.meta.url), "utf8");
+const playerProfileAliasAuditData = JSON.parse(await readFile(new URL("../data/player-profile-import-aliases.v1.json", import.meta.url), "utf8"));
 const tokenShopDoc = await readFile(new URL("../docs/token-shop-values.md", import.meta.url), "utf8");
 const multiverseMarketDoc = await readFile(new URL("../docs/multiverse-market-values.md", import.meta.url), "utf8");
 const shardIngestDoc = await readFile(new URL("../docs/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
@@ -100,6 +102,17 @@ assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel.some((p
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.experimental.primaryFarmingFocus.some((path) => path.join(".") === "resourceFocus"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel.some((path) => path.join(".") === "systems.metaProgression.hunterLevel"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
+assert.equal(playerProfileAliasAuditData.version, "v1");
+assert.equal(playerProfileAliasAuditData.groupCount, 7);
+assert.equal(playerProfileAliasAuditData.aliasCount, 29);
+assert.deepEqual(
+  playerProfileAliasAuditData.groups.map((group) => group.id),
+  ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
+);
+assert.match(playerProfileAliasAuditDoc, /# PlayerProfile Import Aliases/);
+assert.match(playerProfileAliasAuditDoc, /## Canonical Shared Truth/);
+assert.match(playerProfileAliasAuditDoc, /## Compatibility-only Migration Sinks/);
+assert.match(playerProfileAliasAuditDoc, /systems\.ship\.playerState/);
 assert.ok(snapshot.shipLoadouts.length >= 4, "expected ship loadouts");
 assert.deepEqual(snapshot.shardMilestones, [], "expected shard milestones to stay quarantined until verified");
 assert.ok(snapshot.gemNodes.length >= 4, "expected gem nodes");
@@ -154,7 +167,7 @@ assert.equal(feedTrack.status, "active");
 assert.match(feedTrack.currentSlice, /Validate representative shard and loop action fixtures through the shared recommendation contract/);
 const profileTrack = snapshot.researchTracks.find((track) => track.id === "playerprofile-boundary-and-imports");
 assert.ok(profileTrack, "expected player profile track");
-assert.match(profileTrack.currentSlice, /Centralize the surviving PlayerProfile alias inventory in one classified map/);
+assert.match(profileTrack.currentSlice, /Ship a checked-in PlayerProfile alias audit artifact and validation path/);
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
 assert.match(agentsMd, /available but unmapped/);

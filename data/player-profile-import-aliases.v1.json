@@ -1,0 +1,325 @@
+{
+  "version": "v1",
+  "generatedFrom": "player-profile.js",
+  "groupCount": 7,
+  "aliasCount": 30,
+  "groups": [
+    {
+      "id": "meta",
+      "title": "Metadata",
+      "classification": "metadata",
+      "purpose": "Shared profile metadata accepted by the normalizer.",
+      "aliases": [
+        {
+          "field": "profileName",
+          "targetPath": "meta.profileName",
+          "acceptedPaths": [
+            "meta.profileName",
+            "profileName"
+          ]
+        },
+        {
+          "field": "updatedAt",
+          "targetPath": "meta.updatedAt",
+          "acceptedPaths": [
+            "meta.updatedAt"
+          ]
+        },
+        {
+          "field": "dataConfidence",
+          "targetPath": "meta.dataConfidence",
+          "acceptedPaths": [
+            "meta.dataConfidence",
+            "confidence",
+            "automationConfidence"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "canonical",
+      "title": "Canonical Shared Truth",
+      "classification": "canonical",
+      "purpose": "Grounded MVP profile inputs that belong in shared PlayerProfile truth.",
+      "aliases": [
+        {
+          "field": "loopReset",
+          "targetPath": "player.loop.loopReset",
+          "acceptedPaths": [
+            "player.loop.loopReset",
+            "systems.loop.loopReset",
+            "loopReset"
+          ]
+        },
+        {
+          "field": "diamonds",
+          "targetPath": "player.resources.diamonds",
+          "acceptedPaths": [
+            "player.resources.diamonds",
+            "resources.diamonds",
+            "resources.gems",
+            "gems"
+          ]
+        },
+        {
+          "field": "tokens",
+          "targetPath": "player.resources.tokens",
+          "acceptedPaths": [
+            "player.resources.tokens",
+            "resources.tokens",
+            "tokens"
+          ]
+        },
+        {
+          "field": "academyRelics",
+          "targetPath": "player.resources.academyRelics",
+          "acceptedPaths": [
+            "player.resources.academyRelics",
+            "resources.academyRelics",
+            "resources.relics",
+            "relics"
+          ]
+        },
+        {
+          "field": "shards",
+          "targetPath": "player.resources.shards",
+          "acceptedPaths": [
+            "player.resources.shards",
+            "resources.shards",
+            "shards"
+          ]
+        },
+        {
+          "field": "notes",
+          "targetPath": "notes.profile",
+          "acceptedPaths": [
+            "notes.profile",
+            "notes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "planner",
+      "title": "Planner-only Helpers",
+      "classification": "planner",
+      "purpose": "Descriptive helper inputs that stay outside canonical account truth.",
+      "aliases": [
+        {
+          "field": "shardRatePerHour",
+          "targetPath": "planning.shards.ratePerHour",
+          "acceptedPaths": [
+            "planning.shards.ratePerHour",
+            "systems.shards.ratePerHour",
+            "shardRatePerHour"
+          ]
+        },
+        {
+          "field": "totalShardMilestoneLevels",
+          "targetPath": "planning.shards.totalMilestoneLevels",
+          "acceptedPaths": [
+            "planning.shards.totalMilestoneLevels",
+            "systems.shards.totalMilestoneLevels",
+            "totalShardMilestoneLevels"
+          ]
+        },
+        {
+          "field": "shardFocusMilestoneId",
+          "targetPath": "planning.shards.focusMilestoneId",
+          "acceptedPaths": [
+            "planning.shards.focusMilestoneId",
+            "systems.shards.focusMilestoneId",
+            "planning.shardFocusMilestoneId",
+            "shardFocusMilestoneId"
+          ]
+        },
+        {
+          "field": "shardFocusMilestoneLevel",
+          "targetPath": "planning.shards.focusMilestoneLevel",
+          "acceptedPaths": [
+            "planning.shards.focusMilestoneLevel",
+            "systems.shards.focusMilestoneLevel",
+            "planning.shardFocusMilestoneLevel",
+            "shardFocusMilestoneLevel"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "externalModel",
+      "title": "External-model Implementation State",
+      "classification": "external-model",
+      "purpose": "Canonical-system implementation state kept separate from shared truth.",
+      "aliases": [
+        {
+          "field": "shipPower",
+          "targetPath": "externalModels.shipPlanner.summary.power",
+          "acceptedPaths": [
+            "externalModels.shipPlanner.summary.power",
+            "systems.ship.power",
+            "power"
+          ]
+        },
+        {
+          "field": "shipSpeed",
+          "targetPath": "externalModels.shipPlanner.summary.speed",
+          "acceptedPaths": [
+            "externalModels.shipPlanner.summary.speed",
+            "systems.ship.speed",
+            "speed"
+          ]
+        },
+        {
+          "field": "shipCargo",
+          "targetPath": "externalModels.shipPlanner.summary.cargo",
+          "acceptedPaths": [
+            "externalModels.shipPlanner.summary.cargo",
+            "systems.ship.cargo",
+            "cargo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "experimental",
+      "title": "Experimental Support Helpers",
+      "classification": "experimental",
+      "purpose": "Non-MVP support-surface helpers preserved as labeled imports only.",
+      "aliases": [
+        {
+          "field": "gemNodeBudget",
+          "targetPath": "externalModels.experimental.gemNodes.budget",
+          "acceptedPaths": [
+            "externalModels.experimental.gemNodes.budget",
+            "planning.gemNodeBudget",
+            "gemNodeBudget"
+          ]
+        },
+        {
+          "field": "primaryFarmingFocus",
+          "targetPath": "externalModels.experimental.profileHints.primaryFarmingFocus",
+          "acceptedPaths": [
+            "externalModels.experimental.profileHints.primaryFarmingFocus",
+            "planning.resourceFocus",
+            "resourceFocus"
+          ]
+        },
+        {
+          "field": "researchHours",
+          "targetPath": "externalModels.experimental.profileHints.researchHours",
+          "acceptedPaths": [
+            "externalModels.experimental.profileHints.researchHours",
+            "planning.researchHours",
+            "researchHours"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "compatibility",
+      "title": "Compatibility-only Migration Sinks",
+      "classification": "compatibility",
+      "purpose": "Legacy or unmapped values preserved for migration safety only.",
+      "aliases": [
+        {
+          "field": "highestShipUnlocked",
+          "targetPath": "compatibility.legacyStage.highestShipUnlocked",
+          "acceptedPaths": [
+            "compatibility.legacyStage.highestShipUnlocked",
+            "stage.highestShipUnlocked"
+          ]
+        },
+        {
+          "field": "manualPhase",
+          "targetPath": "compatibility.legacyStage.manualPhase",
+          "acceptedPaths": [
+            "compatibility.legacyStage.manualPhase",
+            "stage.manualPhase"
+          ]
+        },
+        {
+          "field": "gemDust",
+          "targetPath": "compatibility.unresolvedProfileFields.gemDust",
+          "acceptedPaths": [
+            "compatibility.unresolvedProfileFields.gemDust",
+            "resources.gemDust",
+            "gemDust"
+          ]
+        },
+        {
+          "field": "hunterLevel",
+          "targetPath": "compatibility.unresolvedProfileFields.hunterLevel",
+          "acceptedPaths": [
+            "compatibility.unresolvedProfileFields.hunterLevel",
+            "systems.metaProgression.hunterLevel",
+            "hunterLevel"
+          ]
+        },
+        {
+          "field": "traitSphereCount",
+          "targetPath": "compatibility.unresolvedProfileFields.traitSphereCount",
+          "acceptedPaths": [
+            "compatibility.unresolvedProfileFields.traitSphereCount",
+            "systems.metaProgression.traitSphereCount",
+            "traitSphereCount"
+          ]
+        },
+        {
+          "field": "mechParts",
+          "targetPath": "compatibility.unresolvedProfileFields.mechParts",
+          "acceptedPaths": [
+            "compatibility.unresolvedProfileFields.mechParts",
+            "systems.metaProgression.mechParts",
+            "mechParts"
+          ]
+        },
+        {
+          "field": "shardMilestones",
+          "targetPath": "compatibility.unmappedSystemState.shardMilestones",
+          "acceptedPaths": [
+            "compatibility.unmappedSystemState.shardMilestones",
+            "systems.shardMilestones"
+          ]
+        },
+        {
+          "field": "tokenShop",
+          "targetPath": "compatibility.unmappedSystemState.tokenShop",
+          "acceptedPaths": [
+            "compatibility.unmappedSystemState.tokenShop",
+            "systems.tokenShop"
+          ]
+        },
+        {
+          "field": "multiverseMarket",
+          "targetPath": "compatibility.unmappedSystemState.multiverseMarket",
+          "acceptedPaths": [
+            "compatibility.unmappedSystemState.multiverseMarket",
+            "systems.multiverseMarket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shipCalibration",
+      "title": "Ship Calibration Preservation",
+      "classification": "external-model",
+      "purpose": "Community-tool ship payloads preserved alongside the ship implementation surface.",
+      "aliases": [
+        {
+          "field": "communityToolState",
+          "targetPath": "externalModels.shipPlanner.communityToolState",
+          "acceptedPaths": [
+            "externalModels.shipPlanner.communityToolState"
+          ]
+        },
+        {
+          "field": "legacyShipPlayerState",
+          "targetPath": "externalModels.shipPlanner.communityToolState",
+          "acceptedPaths": [
+            "systems.ship.playerState"
+          ]
+        }
+      ]
+    }
+  ]
+}
