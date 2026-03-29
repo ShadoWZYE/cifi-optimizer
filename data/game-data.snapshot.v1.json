@@ -143,9 +143,9 @@
     {
       "id": "playerprofile-boundary-and-imports",
       "title": "PlayerProfile boundary and import cleanup",
-      "status": "active",
+      "status": "completed",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Ship a checked-in PlayerProfile alias audit artifact and validation path so the import boundary is inspectable and cannot drift silently.",
+      "currentSlice": "Completed: PlayerProfile imports now run through a classified alias inventory, a checked-in alias audit, boundary summary copy, and a reduced non-canonical migration surface.",
       "completedSteps": [
         "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
         "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
@@ -153,14 +153,11 @@
         "Route main ship, shard, loop, and gem reads through labeled PlayerProfile accessor helpers instead of direct nested field access.",
         "Add executable migration coverage for shard helper aliases, including systems.shards focus fields and invalid helper-value normalization.",
         "Document and test compatibility-only aliases so stage and metaProgression imports remain migration-only sinks.",
-        "Centralize the surviving alias inventory in one classified map inside the normalizer."
+        "Centralize the surviving alias inventory in one classified map inside the normalizer.",
+        "Ship a checked-in PlayerProfile alias audit artifact and validation path so the import boundary is inspectable and cannot drift silently.",
+        "Retire loose non-canonical aliases so experimental, compatibility, and ship-implementation imports require explicit namespaced paths."
       ],
-      "nextSteps": [
-        "Audit current PlayerProfile fields against MVP-only CIFI concepts.",
-        "Clean up import mapping so new modules read from state.playerProfile first and keep experimental support-surface aliases visibly labeled.",
-        "Only add new aliases through the classified import inventory, checked-in alias audit, matching docs, and migration tests.",
-        "Only promote compatibility-only aliases if a grounded MVP module later proves they belong in canonical or planner state."
-      ]
+      "nextSteps": []
     },
     {
       "id": "shards-and-loop-guardrails",

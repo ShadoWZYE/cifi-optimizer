@@ -124,13 +124,24 @@ assert.deepEqual(
   ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
 );
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.canonical.diamonds.some((path) => path.join(".") === "gems"));
+assert.deepEqual(
+  PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipPower.map((path) => path.join(".")),
+  ["externalModels.shipPlanner.summary.power", "systems.ship.power"]
+);
+assert.deepEqual(
+  PLAYER_PROFILE_IMPORT_ALIASES.experimental.primaryFarmingFocus.map((path) => path.join(".")),
+  ["externalModels.experimental.profileHints.primaryFarmingFocus"]
+);
+assert.deepEqual(
+  PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel.map((path) => path.join(".")),
+  ["compatibility.unresolvedProfileFields.hunterLevel", "systems.metaProgression.hunterLevel"]
+);
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel.some((path) => path.join(".") === "systems.shards.focusMilestoneLevel"));
-assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.experimental.primaryFarmingFocus.some((path) => path.join(".") === "resourceFocus"));
-assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel.some((path) => path.join(".") === "systems.metaProgression.hunterLevel"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
 assert.equal(playerProfileAliasAuditData.version, "v1");
 assert.equal(playerProfileAliasAuditData.groupCount, 7);
 assert.equal(playerProfileAliasAuditData.aliasCount, 30);
+assert.equal(playerProfileAliasAuditData.acceptedPathCount, 68);
 assert.deepEqual(
   playerProfileAliasAuditData.groups.map((group) => group.id),
   ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
@@ -139,6 +150,11 @@ assert.match(playerProfileAliasAuditDoc, /# PlayerProfile Import Aliases/);
 assert.match(playerProfileAliasAuditDoc, /## Canonical Shared Truth/);
 assert.match(playerProfileAliasAuditDoc, /## Compatibility-only Migration Sinks/);
 assert.match(playerProfileAliasAuditDoc, /systems\.ship\.playerState/);
+assert.match(playerProfileAliasAuditDoc, /Accepted alias paths: 3/);
+assert.match(playerProfileAliasAuditDoc, /Accepted alias paths: 18/);
+assert.doesNotMatch(playerProfileAliasAuditDoc, /, `resourceFocus`/);
+assert.doesNotMatch(playerProfileAliasAuditDoc, /, `power`/);
+assert.doesNotMatch(playerProfileAliasAuditDoc, /, `hunterLevel` \|/);
 assert.ok(snapshot.shipLoadouts.length >= 4, "expected ship loadouts");
 assert.deepEqual(snapshot.shardMilestones, [], "expected shard milestones to stay quarantined until verified");
 assert.ok(snapshot.gemNodes.length >= 4, "expected gem nodes");
@@ -197,7 +213,10 @@ assert.equal(feedTrack.status, "active");
 assert.match(feedTrack.currentSlice, /Validate representative shard and loop action fixtures through the shared recommendation contract/);
 const profileTrack = snapshot.researchTracks.find((track) => track.id === "playerprofile-boundary-and-imports");
 assert.ok(profileTrack, "expected player profile track");
-assert.match(profileTrack.currentSlice, /Ship a checked-in PlayerProfile alias audit artifact and validation path/);
+assert.equal(profileTrack.status, "completed");
+assert.match(profileTrack.currentSlice, /classified alias inventory/);
+assert.match(profileTrack.currentSlice, /reduced non-canonical migration surface/);
+assert.equal(profileTrack.nextSteps.length, 0);
 const datasetContractTrack = snapshot.researchTracks.find((track) => track.id === "data-contracts-and-apk-pipeline");
 assert.ok(datasetContractTrack, "expected dataset contract track");
 assert.equal(datasetContractTrack.status, "completed");
@@ -317,9 +336,14 @@ assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState/);
 assert.match(playerProfileSchemaDoc, /## Experimental support-surface helpers/);
 assert.match(playerProfileSchemaDoc, /systems\.metaProgression\.hunterLevel/);
 assert.match(playerProfileSchemaDoc, /stage\.highestShipUnlocked/);
+assert.match(playerProfileSchemaDoc, /top-level `power`, `speed`, and `cargo` no longer migrate/);
+assert.match(playerProfileSchemaDoc, /planning\.gemNodeBudget`, `planning\.resourceFocus`, `planning\.researchHours`, and their flat helper forms are retired/);
+assert.match(playerProfileSchemaDoc, /flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically/);
 assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
-assert.match(importMappingDoc, /resourceFocus`, `researchHours`, and `gemNodeBudget` may still normalize into `externalModels\.experimental\.\*`/);
+assert.match(importMappingDoc, /experimental helper imports now require explicit `externalModels\.experimental\.\*` paths/);
 assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
+assert.match(importMappingDoc, /flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired/);
+assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(tokenShopDoc, /## Adjacent systems still to map/);
@@ -555,16 +579,34 @@ const migratedLegacyProfile = normalizePlayerProfile({
   totalShardMilestoneLevels: "17",
   shardFocusMilestoneId: "milestone_alpha",
   shardFocusMilestoneLevel: "12",
-  power: "7",
-  speed: "2.5",
-  cargo: "19",
-  resourceFocus: "shards",
-  gemNodeBudget: "250",
-  researchHours: "6",
-  gemDust: "33",
-  hunterLevel: "14",
-  traitSphereCount: "5",
-  mechParts: "9",
+  systems: {
+    ship: {
+      power: "7",
+      speed: "2.5",
+      cargo: "19"
+    },
+    metaProgression: {
+      hunterLevel: "14",
+      traitSphereCount: "5",
+      mechParts: "9"
+    }
+  },
+  externalModels: {
+    experimental: {
+      gemNodes: {
+        budget: "250"
+      },
+      profileHints: {
+        primaryFarmingFocus: "shards",
+        researchHours: "6"
+      }
+    }
+  },
+  compatibility: {
+    unresolvedProfileFields: {
+      gemDust: "33"
+    }
+  },
   notes: "legacy"
 });
 
@@ -590,6 +632,30 @@ assert.equal(migratedLegacyProfile.compatibility.unresolvedProfileFields.hunterL
 assert.equal(migratedLegacyProfile.compatibility.unresolvedProfileFields.traitSphereCount, 5);
 assert.equal(migratedLegacyProfile.compatibility.unresolvedProfileFields.mechParts, 9);
 assert.equal(migratedLegacyProfile.notes.profile, "legacy");
+
+const migratedRetiredLooseAliasProfile = normalizePlayerProfile({
+  power: "7",
+  speed: "2.5",
+  cargo: "19",
+  resourceFocus: "shards",
+  gemNodeBudget: "250",
+  researchHours: "6",
+  gemDust: "33",
+  hunterLevel: "14",
+  traitSphereCount: "5",
+  mechParts: "9"
+});
+
+assert.equal(migratedRetiredLooseAliasProfile.externalModels.shipPlanner.summary.power, null);
+assert.equal(migratedRetiredLooseAliasProfile.externalModels.shipPlanner.summary.speed, null);
+assert.equal(migratedRetiredLooseAliasProfile.externalModels.shipPlanner.summary.cargo, null);
+assert.equal(migratedRetiredLooseAliasProfile.externalModels.experimental.gemNodes.budget, null);
+assert.equal(migratedRetiredLooseAliasProfile.externalModels.experimental.profileHints.primaryFarmingFocus, null);
+assert.equal(migratedRetiredLooseAliasProfile.externalModels.experimental.profileHints.researchHours, null);
+assert.equal(migratedRetiredLooseAliasProfile.compatibility.unresolvedProfileFields.gemDust, null);
+assert.equal(migratedRetiredLooseAliasProfile.compatibility.unresolvedProfileFields.hunterLevel, null);
+assert.equal(migratedRetiredLooseAliasProfile.compatibility.unresolvedProfileFields.traitSphereCount, null);
+assert.equal(migratedRetiredLooseAliasProfile.compatibility.unresolvedProfileFields.mechParts, null);
 
 const migratedNestedProfile = normalizePlayerProfile({
   meta: {

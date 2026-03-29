@@ -30,11 +30,13 @@ Grounding rules:
 Boundary note:
 - legacy `gemDust` may be preserved under `compatibility.unresolvedProfileFields.gemDust`
 - it must not be treated as the active experimental gem-node budget unless a user explicitly maps it into `externalModels.experimental.gemNodes.budget`
-- legacy aliases such as `resourceFocus`, `researchHours`, and `gemNodeBudget` may still normalize into `externalModels.experimental.*`, but they remain experimental support-surface helpers rather than shared MVP profile truth
+- experimental helper imports now require explicit `externalModels.experimental.*` paths; old `planning.resourceFocus`, `planning.researchHours`, `planning.gemNodeBudget`, and flat helper aliases are retired
 - shard helper aliases such as `shardRatePerHour`, `totalShardMilestoneLevels`, `shardFocusMilestoneId`, `shardFocusMilestoneLevel`, and their `systems.shards.*` forms should normalize into `planning.shards.*`
 - those shard helper fields stay planner-only; importing them does not promote shard milestone math into canonical game truth
 - legacy `stage.highestShipUnlocked`, `stage.manualPhase`, and `systems.metaProgression.*` aliases should normalize into compatibility-only fields, not into canonical or planner namespaces
 - preserving those compatibility aliases is migration safety only; it does not make hunter, mech, or stage terms active MVP profile truth
+- flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired; imports must use explicit compatibility paths or the still-namespaced legacy forms
+- ship implementation imports now require `systems.ship.*` or `externalModels.shipPlanner.*`; top-level `power`, `speed`, and `cargo` are retired
 - imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`
 - preserving those objects does not make the system planner-ready or canonical
 

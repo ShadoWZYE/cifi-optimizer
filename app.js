@@ -1662,7 +1662,7 @@ function renderPlayerProfileBoundarySummary() {
     },
     {
       title: "External-model implementation state",
-      note: "Current implementation data for canonical systems that stays isolated from shared profile truth.",
+      note: "Current implementation data for canonical systems that stays isolated from shared profile truth. Imports must use explicit systems.ship or externalModels.shipPlanner paths.",
       items: [
         ["Ship planner power", shipPlanner.summary.power],
         ["Ship planner speed", shipPlanner.summary.speed],
@@ -1672,7 +1672,7 @@ function renderPlayerProfileBoundarySummary() {
     },
     {
       title: "Experimental support-surface helpers",
-      note: "Non-MVP experimental or prototype helpers that stay outside canonical shared truth and outside canonical-system implementation state.",
+      note: "Non-MVP experimental or prototype helpers that stay outside canonical shared truth and outside canonical-system implementation state. Loose planning and flat helper aliases are retired.",
       items: [
         ["Gem-node budget", experimental.gemNodeBudget],
         ["Primary farming focus", experimental.primaryFarmingFocus],
@@ -1681,7 +1681,7 @@ function renderPlayerProfileBoundarySummary() {
     },
     {
       title: "Compatibility leftovers",
-      note: "Preserved migration values and quarantined unmapped system blobs that are not treated as active shared truth.",
+      note: "Preserved migration values and quarantined unmapped system blobs that are not treated as active shared truth. Loose top-level compatibility aliases are retired in favor of explicit compatibility or namespaced legacy paths.",
       items: [
         ["Legacy highest ship unlocked", compatibility.legacyStage.highestShipUnlocked],
         ["Legacy manual phase", compatibility.legacyStage.manualPhase],

@@ -48,6 +48,10 @@ These fields stay isolated from canonical truth, but still belong to a canonical
 | Ship planner summary | `externalModels.shipPlanner.summary.*` | external-model implementation state | Current ship-planner summary values for a canonical system, pending grounded terminology/data remap. |
 | Ship planner calibration | `externalModels.shipPlanner.communityToolState` | external-model implementation state | Current ship-planner calibration payload, kept separate from shared PlayerProfile truth. |
 
+Import rule:
+- ship implementation imports must now use explicit `systems.ship.*` or `externalModels.shipPlanner.*` paths
+- loose top-level ship calibration numbers like `power`, `speed`, or `cargo` are no longer accepted by the PlayerProfile normalizer
+
 ## Experimental support-surface helpers
 
 These fields stay isolated from canonical truth and should not be presented as active MVP profile truth:
@@ -57,6 +61,10 @@ These fields stay isolated from canonical truth and should not be presented as a
 | Gem node budget | `externalModels.experimental.gemNodes.budget` | planner-only / experimental | Experimental gem-node helper, not shared account truth. |
 | Primary farming focus | `externalModels.experimental.profileHints.primaryFarmingFocus` | planner-only / experimental | Old prototype focus toggle, not canonical game state. |
 | Research hours | `externalModels.experimental.profileHints.researchHours` | planner-only / experimental | App-side planning helper, not a real CIFI field. |
+
+Import rule:
+- experimental helper imports must now use explicit `externalModels.experimental.*` paths
+- old `planning.gemNodeBudget`, `planning.resourceFocus`, `planning.researchHours`, and their flat helper forms are retired to keep planner-only shard inputs separate from experimental support-surface state
 
 ## Unresolved compatibility fields
 
@@ -70,6 +78,10 @@ These values are preserved only for migration compatibility:
 | Mech parts | `compatibility.unresolvedProfileFields.mechParts` | unresolved | Real term family remains research-track territory. |
 | Highest ship unlocked / manual phase | `compatibility.legacyStage.*` | unresolved | Preserved from earlier schema drafts, but not active grounded profile truth. |
 | Unmapped system state blobs | `compatibility.unmappedSystemState.*` | unresolved / quarantined | Preserved imported objects for real-but-unmapped systems such as shard milestones, TokenShop, or MultiverseMarket. These blobs must not be treated as canonical fields or planner-ready state until system mapping is completed. |
+
+Import rule:
+- compatibility migration now prefers explicit `compatibility.*` paths or the still-namespaced legacy sources such as `stage.*` and `systems.metaProgression.*`
+- loose top-level unresolved fields like `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are no longer accepted as automatic migration aliases
 
 ## Migration policy
 
@@ -89,7 +101,11 @@ These values are preserved only for migration compatibility:
   - `systems.metaProgression.hunterLevel` -> `compatibility.unresolvedProfileFields.hunterLevel`
   - `systems.metaProgression.traitSphereCount` -> `compatibility.unresolvedProfileFields.traitSphereCount`
   - `systems.metaProgression.mechParts` -> `compatibility.unresolvedProfileFields.mechParts`
-  - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` remain compatibility-only unless a future grounded MVP surface promotes them
+  - `resources.gemDust` remains a compatibility-only migration sink
+- Retired loose aliases:
+  - top-level `power`, `speed`, and `cargo` no longer migrate into ship implementation state
+  - `planning.gemNodeBudget`, `planning.resourceFocus`, `planning.researchHours`, and their flat helper forms no longer migrate into `externalModels.experimental.*`
+  - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
 - Removed visible fields are not discarded; they move into `externalModels` or `compatibility`.
 - `externalModels.shipPlanner.communityToolState` is always preserved during migration.
 - Imported objects for real-but-unmapped systems should be preserved under `compatibility.unmappedSystemState` instead of being collapsed into canonical or planner namespaces.

@@ -3,6 +3,7 @@
   "generatedFrom": "player-profile.js",
   "groupCount": 7,
   "aliasCount": 30,
+  "acceptedPathCount": 68,
   "groups": [
     {
       "id": "meta",
@@ -34,7 +35,8 @@
             "automationConfidence"
           ]
         }
-      ]
+      ],
+      "acceptedPathCount": 6
     },
     {
       "id": "canonical",
@@ -97,7 +99,8 @@
             "notes"
           ]
         }
-      ]
+      ],
+      "acceptedPathCount": 19
     },
     {
       "id": "planner",
@@ -143,7 +146,8 @@
             "shardFocusMilestoneLevel"
           ]
         }
-      ]
+      ],
+      "acceptedPathCount": 14
     },
     {
       "id": "externalModel",
@@ -156,8 +160,7 @@
           "targetPath": "externalModels.shipPlanner.summary.power",
           "acceptedPaths": [
             "externalModels.shipPlanner.summary.power",
-            "systems.ship.power",
-            "power"
+            "systems.ship.power"
           ]
         },
         {
@@ -165,8 +168,7 @@
           "targetPath": "externalModels.shipPlanner.summary.speed",
           "acceptedPaths": [
             "externalModels.shipPlanner.summary.speed",
-            "systems.ship.speed",
-            "speed"
+            "systems.ship.speed"
           ]
         },
         {
@@ -174,11 +176,11 @@
           "targetPath": "externalModels.shipPlanner.summary.cargo",
           "acceptedPaths": [
             "externalModels.shipPlanner.summary.cargo",
-            "systems.ship.cargo",
-            "cargo"
+            "systems.ship.cargo"
           ]
         }
-      ]
+      ],
+      "acceptedPathCount": 6
     },
     {
       "id": "experimental",
@@ -190,30 +192,25 @@
           "field": "gemNodeBudget",
           "targetPath": "externalModels.experimental.gemNodes.budget",
           "acceptedPaths": [
-            "externalModels.experimental.gemNodes.budget",
-            "planning.gemNodeBudget",
-            "gemNodeBudget"
+            "externalModels.experimental.gemNodes.budget"
           ]
         },
         {
           "field": "primaryFarmingFocus",
           "targetPath": "externalModels.experimental.profileHints.primaryFarmingFocus",
           "acceptedPaths": [
-            "externalModels.experimental.profileHints.primaryFarmingFocus",
-            "planning.resourceFocus",
-            "resourceFocus"
+            "externalModels.experimental.profileHints.primaryFarmingFocus"
           ]
         },
         {
           "field": "researchHours",
           "targetPath": "externalModels.experimental.profileHints.researchHours",
           "acceptedPaths": [
-            "externalModels.experimental.profileHints.researchHours",
-            "planning.researchHours",
-            "researchHours"
+            "externalModels.experimental.profileHints.researchHours"
           ]
         }
-      ]
+      ],
+      "acceptedPathCount": 3
     },
     {
       "id": "compatibility",
@@ -242,8 +239,7 @@
           "targetPath": "compatibility.unresolvedProfileFields.gemDust",
           "acceptedPaths": [
             "compatibility.unresolvedProfileFields.gemDust",
-            "resources.gemDust",
-            "gemDust"
+            "resources.gemDust"
           ]
         },
         {
@@ -251,8 +247,7 @@
           "targetPath": "compatibility.unresolvedProfileFields.hunterLevel",
           "acceptedPaths": [
             "compatibility.unresolvedProfileFields.hunterLevel",
-            "systems.metaProgression.hunterLevel",
-            "hunterLevel"
+            "systems.metaProgression.hunterLevel"
           ]
         },
         {
@@ -260,8 +255,7 @@
           "targetPath": "compatibility.unresolvedProfileFields.traitSphereCount",
           "acceptedPaths": [
             "compatibility.unresolvedProfileFields.traitSphereCount",
-            "systems.metaProgression.traitSphereCount",
-            "traitSphereCount"
+            "systems.metaProgression.traitSphereCount"
           ]
         },
         {
@@ -269,8 +263,7 @@
           "targetPath": "compatibility.unresolvedProfileFields.mechParts",
           "acceptedPaths": [
             "compatibility.unresolvedProfileFields.mechParts",
-            "systems.metaProgression.mechParts",
-            "mechParts"
+            "systems.metaProgression.mechParts"
           ]
         },
         {
@@ -297,7 +290,8 @@
             "systems.multiverseMarket"
           ]
         }
-      ]
+      ],
+      "acceptedPathCount": 18
     },
     {
       "id": "shipCalibration",
@@ -319,7 +313,8 @@
             "systems.ship.playerState"
           ]
         }
-      ]
+      ],
+      "acceptedPathCount": 2
     }
   ]
 }

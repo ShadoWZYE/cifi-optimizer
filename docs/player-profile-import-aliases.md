@@ -8,6 +8,8 @@ Classification: `metadata`
 
 Shared profile metadata accepted by the normalizer.
 
+Accepted alias paths: 6
+
 | Field | Target path | Accepted aliases |
 |---|---|---|
 | `profileName` | `meta.profileName` | `meta.profileName`, `profileName` |
@@ -19,6 +21,8 @@ Shared profile metadata accepted by the normalizer.
 Classification: `canonical`
 
 Grounded MVP profile inputs that belong in shared PlayerProfile truth.
+
+Accepted alias paths: 19
 
 | Field | Target path | Accepted aliases |
 |---|---|---|
@@ -35,6 +39,8 @@ Classification: `planner`
 
 Descriptive helper inputs that stay outside canonical account truth.
 
+Accepted alias paths: 14
+
 | Field | Target path | Accepted aliases |
 |---|---|---|
 | `shardRatePerHour` | `planning.shards.ratePerHour` | `planning.shards.ratePerHour`, `systems.shards.ratePerHour`, `shardRatePerHour` |
@@ -48,11 +54,13 @@ Classification: `external-model`
 
 Canonical-system implementation state kept separate from shared truth.
 
+Accepted alias paths: 6
+
 | Field | Target path | Accepted aliases |
 |---|---|---|
-| `shipPower` | `externalModels.shipPlanner.summary.power` | `externalModels.shipPlanner.summary.power`, `systems.ship.power`, `power` |
-| `shipSpeed` | `externalModels.shipPlanner.summary.speed` | `externalModels.shipPlanner.summary.speed`, `systems.ship.speed`, `speed` |
-| `shipCargo` | `externalModels.shipPlanner.summary.cargo` | `externalModels.shipPlanner.summary.cargo`, `systems.ship.cargo`, `cargo` |
+| `shipPower` | `externalModels.shipPlanner.summary.power` | `externalModels.shipPlanner.summary.power`, `systems.ship.power` |
+| `shipSpeed` | `externalModels.shipPlanner.summary.speed` | `externalModels.shipPlanner.summary.speed`, `systems.ship.speed` |
+| `shipCargo` | `externalModels.shipPlanner.summary.cargo` | `externalModels.shipPlanner.summary.cargo`, `systems.ship.cargo` |
 
 ## Experimental Support Helpers
 
@@ -60,11 +68,13 @@ Classification: `experimental`
 
 Non-MVP support-surface helpers preserved as labeled imports only.
 
+Accepted alias paths: 3
+
 | Field | Target path | Accepted aliases |
 |---|---|---|
-| `gemNodeBudget` | `externalModels.experimental.gemNodes.budget` | `externalModels.experimental.gemNodes.budget`, `planning.gemNodeBudget`, `gemNodeBudget` |
-| `primaryFarmingFocus` | `externalModels.experimental.profileHints.primaryFarmingFocus` | `externalModels.experimental.profileHints.primaryFarmingFocus`, `planning.resourceFocus`, `resourceFocus` |
-| `researchHours` | `externalModels.experimental.profileHints.researchHours` | `externalModels.experimental.profileHints.researchHours`, `planning.researchHours`, `researchHours` |
+| `gemNodeBudget` | `externalModels.experimental.gemNodes.budget` | `externalModels.experimental.gemNodes.budget` |
+| `primaryFarmingFocus` | `externalModels.experimental.profileHints.primaryFarmingFocus` | `externalModels.experimental.profileHints.primaryFarmingFocus` |
+| `researchHours` | `externalModels.experimental.profileHints.researchHours` | `externalModels.experimental.profileHints.researchHours` |
 
 ## Compatibility-only Migration Sinks
 
@@ -72,14 +82,16 @@ Classification: `compatibility`
 
 Legacy or unmapped values preserved for migration safety only.
 
+Accepted alias paths: 18
+
 | Field | Target path | Accepted aliases |
 |---|---|---|
 | `highestShipUnlocked` | `compatibility.legacyStage.highestShipUnlocked` | `compatibility.legacyStage.highestShipUnlocked`, `stage.highestShipUnlocked` |
 | `manualPhase` | `compatibility.legacyStage.manualPhase` | `compatibility.legacyStage.manualPhase`, `stage.manualPhase` |
-| `gemDust` | `compatibility.unresolvedProfileFields.gemDust` | `compatibility.unresolvedProfileFields.gemDust`, `resources.gemDust`, `gemDust` |
-| `hunterLevel` | `compatibility.unresolvedProfileFields.hunterLevel` | `compatibility.unresolvedProfileFields.hunterLevel`, `systems.metaProgression.hunterLevel`, `hunterLevel` |
-| `traitSphereCount` | `compatibility.unresolvedProfileFields.traitSphereCount` | `compatibility.unresolvedProfileFields.traitSphereCount`, `systems.metaProgression.traitSphereCount`, `traitSphereCount` |
-| `mechParts` | `compatibility.unresolvedProfileFields.mechParts` | `compatibility.unresolvedProfileFields.mechParts`, `systems.metaProgression.mechParts`, `mechParts` |
+| `gemDust` | `compatibility.unresolvedProfileFields.gemDust` | `compatibility.unresolvedProfileFields.gemDust`, `resources.gemDust` |
+| `hunterLevel` | `compatibility.unresolvedProfileFields.hunterLevel` | `compatibility.unresolvedProfileFields.hunterLevel`, `systems.metaProgression.hunterLevel` |
+| `traitSphereCount` | `compatibility.unresolvedProfileFields.traitSphereCount` | `compatibility.unresolvedProfileFields.traitSphereCount`, `systems.metaProgression.traitSphereCount` |
+| `mechParts` | `compatibility.unresolvedProfileFields.mechParts` | `compatibility.unresolvedProfileFields.mechParts`, `systems.metaProgression.mechParts` |
 | `shardMilestones` | `compatibility.unmappedSystemState.shardMilestones` | `compatibility.unmappedSystemState.shardMilestones`, `systems.shardMilestones` |
 | `tokenShop` | `compatibility.unmappedSystemState.tokenShop` | `compatibility.unmappedSystemState.tokenShop`, `systems.tokenShop` |
 | `multiverseMarket` | `compatibility.unmappedSystemState.multiverseMarket` | `compatibility.unmappedSystemState.multiverseMarket`, `systems.multiverseMarket` |
@@ -89,6 +101,8 @@ Legacy or unmapped values preserved for migration safety only.
 Classification: `external-model`
 
 Community-tool ship payloads preserved alongside the ship implementation surface.
+
+Accepted alias paths: 2
 
 | Field | Target path | Accepted aliases |
 |---|---|---|

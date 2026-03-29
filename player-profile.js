@@ -20,22 +20,22 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
     shardFocusMilestoneLevel: [["planning", "shards", "focusMilestoneLevel"], ["systems", "shards", "focusMilestoneLevel"], ["planning", "shardFocusMilestoneLevel"], ["shardFocusMilestoneLevel"]]
   },
   externalModel: {
-    shipPower: [["externalModels", "shipPlanner", "summary", "power"], ["systems", "ship", "power"], ["power"]],
-    shipSpeed: [["externalModels", "shipPlanner", "summary", "speed"], ["systems", "ship", "speed"], ["speed"]],
-    shipCargo: [["externalModels", "shipPlanner", "summary", "cargo"], ["systems", "ship", "cargo"], ["cargo"]]
+    shipPower: [["externalModels", "shipPlanner", "summary", "power"], ["systems", "ship", "power"]],
+    shipSpeed: [["externalModels", "shipPlanner", "summary", "speed"], ["systems", "ship", "speed"]],
+    shipCargo: [["externalModels", "shipPlanner", "summary", "cargo"], ["systems", "ship", "cargo"]]
   },
   experimental: {
-    gemNodeBudget: [["externalModels", "experimental", "gemNodes", "budget"], ["planning", "gemNodeBudget"], ["gemNodeBudget"]],
-    primaryFarmingFocus: [["externalModels", "experimental", "profileHints", "primaryFarmingFocus"], ["planning", "resourceFocus"], ["resourceFocus"]],
-    researchHours: [["externalModels", "experimental", "profileHints", "researchHours"], ["planning", "researchHours"], ["researchHours"]]
+    gemNodeBudget: [["externalModels", "experimental", "gemNodes", "budget"]],
+    primaryFarmingFocus: [["externalModels", "experimental", "profileHints", "primaryFarmingFocus"]],
+    researchHours: [["externalModels", "experimental", "profileHints", "researchHours"]]
   },
   compatibility: {
     highestShipUnlocked: [["compatibility", "legacyStage", "highestShipUnlocked"], ["stage", "highestShipUnlocked"]],
     manualPhase: [["compatibility", "legacyStage", "manualPhase"], ["stage", "manualPhase"]],
-    gemDust: [["compatibility", "unresolvedProfileFields", "gemDust"], ["resources", "gemDust"], ["gemDust"]],
-    hunterLevel: [["compatibility", "unresolvedProfileFields", "hunterLevel"], ["systems", "metaProgression", "hunterLevel"], ["hunterLevel"]],
-    traitSphereCount: [["compatibility", "unresolvedProfileFields", "traitSphereCount"], ["systems", "metaProgression", "traitSphereCount"], ["traitSphereCount"]],
-    mechParts: [["compatibility", "unresolvedProfileFields", "mechParts"], ["systems", "metaProgression", "mechParts"], ["mechParts"]],
+    gemDust: [["compatibility", "unresolvedProfileFields", "gemDust"], ["resources", "gemDust"]],
+    hunterLevel: [["compatibility", "unresolvedProfileFields", "hunterLevel"], ["systems", "metaProgression", "hunterLevel"]],
+    traitSphereCount: [["compatibility", "unresolvedProfileFields", "traitSphereCount"], ["systems", "metaProgression", "traitSphereCount"]],
+    mechParts: [["compatibility", "unresolvedProfileFields", "mechParts"], ["systems", "metaProgression", "mechParts"]],
     shardMilestones: [["compatibility", "unmappedSystemState", "shardMilestones"], ["systems", "shardMilestones"]],
     tokenShop: [["compatibility", "unmappedSystemState", "tokenShop"], ["systems", "tokenShop"]],
     multiverseMarket: [["compatibility", "unmappedSystemState", "multiverseMarket"], ["systems", "multiverseMarket"]]

@@ -99,7 +99,8 @@ const groups = Object.entries(PLAYER_PROFILE_IMPORT_ALIASES).map(([groupId, alia
     field,
     targetPath: TARGET_PATHS[groupId]?.[field] || "",
     acceptedPaths: paths.map((path) => path.join("."))
-  }))
+  })),
+  acceptedPathCount: Object.values(aliases).reduce((count, paths) => count + paths.length, 0)
 }));
 
 const payload = {
@@ -107,6 +108,7 @@ const payload = {
   generatedFrom: "player-profile.js",
   groupCount: groups.length,
   aliasCount: groups.reduce((count, group) => count + group.aliases.length, 0),
+  acceptedPathCount: groups.reduce((count, group) => count + group.acceptedPathCount, 0),
   groups
 };
 
@@ -121,6 +123,8 @@ const markdown = [
     `Classification: \`${group.classification}\``,
     "",
     group.purpose,
+    "",
+    `Accepted alias paths: ${group.acceptedPathCount}`,
     "",
     "| Field | Target path | Accepted aliases |",
     "|---|---|---|",
