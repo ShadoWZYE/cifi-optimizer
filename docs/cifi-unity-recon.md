@@ -53,6 +53,14 @@ MultiverseMarket-specific save-side narrowing from repo-local metadata:
 - `FillPlayerProfileData`
 - `GetPlayerProfileData`
 - `CloudSavePlayerProfile`
+- `InscryptionsDone`
+- `IS1Level`
+- `IS50Level`
+- `IS51Level`
+- `IS64Level`
+- `IS73Level`
+- `IS110Level`
+- `EsotericR1Trades` through `EsotericR8Trades`
 - `AchievementInscryptionsReward`
 - `<FinalISShardsBonus>k__BackingField`
 
@@ -60,13 +68,18 @@ Current conclusion:
 
 - the Emporium owner is still `MultiverseMarket`
 - the `Inscryptions Done` purchase lane is grounded from the scene/UI side
-- the saved-state search is now better narrowed toward the broader player-profile persistence family, while `AchievementInscryptionsReward` and `FinalIS*` symbols remain effect/reward clues rather than recovered saved-balance fields
+- the saved-state search is now better narrowed toward the broader player-profile persistence family
+- exact metadata field names now exist for `InscryptionsDone` and nearby `IS*Level`, but the declaring save model still needs confirmation
+- `AchievementInscryptionsReward` and `FinalIS*` symbols remain effect/reward clues rather than recovered saved-balance fields
 
 Generated artifacts:
 - `scripts/unity_apk_probe.py`
 - `scripts/unity_textasset_dump.py`
+- `scripts/metadata_neighborhood_probe.py`
 - `docs/unity-probe-report.md`
+- `docs/multiverse-market-metadata-neighborhood.md`
 - `data/unity-probe-report.json`
+- `data/multiverse-market-metadata-neighborhood.json`
 - `data/unity-textassets-manifest.json`
 - `data/unity-iap-summary.json`
 

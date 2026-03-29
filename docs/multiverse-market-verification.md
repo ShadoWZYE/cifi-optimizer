@@ -64,10 +64,12 @@ Current grounded conclusion:
 ## Saved-state narrowing from this pass
 
 - Repo-local metadata now narrows the persistence search toward `PlayerProfileData`, `FillPlayerProfileData`, and `GetPlayerProfileData`.
+- Repo-local metadata now also exposes exact Emporium-adjacent field strings including `InscryptionsDone`, nearby `IS*Level` entries such as `IS50Level`, `IS64Level`, `IS73Level`, and nearby trade fields such as `EsotericR1Trades`.
 - Repo-local metadata also shows Inscryptions-adjacent reward/effect symbols such as `AchievementInscryptionsReward` and `<FinalISShardsBonus>k__BackingField`.
 - Current grounded conclusion:
   - `MultiverseMarket` remains the mechanic owner
   - the likely saved-state search path now runs through the broader player-profile persistence family
+  - `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
   - effect/reward symbols should not be treated as recovered saved-balance fields
 
 ## Current app implication
@@ -79,8 +81,8 @@ Current grounded conclusion:
 
 ## Next allowed slice
 
-1. inspect `PlayerProfileData`-side field neighborhoods to recover the exact saved-state field for the `Inscryptions Done` balance
-2. recover player-owned inscription levels or equivalent next-purchase state from that same persistence family if present
+1. determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` fields
+2. recover player-owned inscription levels or equivalent next-purchase state from that same save-side neighborhood
 3. extend parsing past the current validated late block
 4. finish the inscription-number and prefab-to-label remap
 5. only then add spend-planner recommendations

@@ -97,6 +97,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
   - `FillPlayerProfileData`
   - `GetPlayerProfileData`
   - `CloudSavePlayerProfile`
+  - exact Emporium-adjacent metadata field clues such as `InscryptionsDone`, `IS1Level`, `IS50Level`, `IS51Level`, `IS64Level`, `IS73Level`, `IS110Level`, and `EsotericR1Trades`
 
 ### Not yet verified enough for app recommendations
 
@@ -109,8 +110,9 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 
 - It is safe to treat MultiverseMarket as a real system with partially grounded extracted constants.
 - It is safe to stop inferring its spend lane from diamonds, tokens, or other unrelated player resources.
-- It is not yet safe to treat `Inscryptions Done` as an import-ready player field until its saved-state owner is recovered.
+- It is not yet safe to treat `Inscryptions Done` as an import-ready player field until its declaring save model is recovered.
 - The current best repo-local saved-state path is the broader `PlayerProfileData` persistence family, not the raw `MultiverseMarket` owner object by itself.
+- The repo now has exact metadata field names for this lane, but not the import-ready save contract for `state.playerProfile`.
 
 ## Next allowed slice
 
@@ -120,6 +122,6 @@ Priority order:
 
 1. verify the token-shop spend lane and player-owned current-level inputs
 2. map the TokenShop-connected token-bank cap, fill, claim, and Academy or Farm Mission Daily Tokenium lane strongly enough to identify their saved-state inputs
-3. inspect `PlayerProfileData`-side fields to recover the saved-state owner and owned-state inputs behind the multiverse-market `Inscryptions Done` lane
+3. use the recovered `InscryptionsDone` and `IS*Level` metadata cluster to determine the declaring save model and authoritative owned-state range behind the multiverse-market lane
 4. remap serialized ids to grounded player-facing labels
 5. only then add spend recommendations with explicit assumptions
