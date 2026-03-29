@@ -112,9 +112,9 @@
     {
       "id": "progression-gems-midgame",
       "module": "progression",
-      "title": "Shard module grounded fallback",
-      "expected": "Next shard unlock to watch",
-      "description": "Shard workflow should surface grounded unlock guidance while keeping ranking and cost math disabled."
+      "title": "Progression feed prioritizes missing loop input",
+      "expected": "Add current LR for loop guardrails",
+      "description": "The ranked progression feed should surface missing LR guardrail input before lower-priority descriptive shard watch cards."
     },
     {
       "id": "gem-node-roi",
@@ -204,12 +204,15 @@
     {
       "id": "unified-feed-and-hardening",
       "title": "Unified recommendation feed and test hardening",
-      "status": "queued",
-      "goal": "Converge shard, spend, and warning outputs into one explainable feed and make contract drift fail fast.",
-      "currentSlice": "Wait for at least one more active MVP module before integrating the feed.",
-      "completedSteps": [],
+      "status": "active",
+      "goal": "Converge active MVP-safe module outputs into one explainable feed and make contract drift fail fast.",
+      "currentSlice": "Rank shard and loop warning outputs in one visible feed now, then extend the same contract when spend planning becomes build-ready.",
+      "completedSteps": [
+        "Normalize active shard and loop outputs through one ranked recommendation feed.",
+        "Treat feed scores as trust-oriented UI priority rather than as optimizer ROI."
+      ],
       "nextSteps": [
-        "Map the output adapters needed so shard, spend, and loop all render through one contract.",
+        "Extend the same feed contract to spend recommendations after TokenShop and MultiverseMarket pass their integration gates.",
         "Expand smoke coverage toward dataset and recommendation contract checks.",
         "Define the hardening path for future dataset refreshes."
       ]
