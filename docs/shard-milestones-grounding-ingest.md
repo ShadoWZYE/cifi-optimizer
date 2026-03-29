@@ -13,6 +13,12 @@
 - Descriptive milestone records: names, rarities, unlock requirements, threshold levels, and explicitly cited effect labels and per-level bonus strings.
 - Observed player behavior examples as validation or explanatory fixtures only.
 
+## Classification
+
+- System-level shard anchors: grounded enough for repo truth.
+- Milestone list and milestone detail rows: community-grounded descriptive data, not yet shipped-game owner-grounded data.
+- Observed behavior notes: community-backed explanatory data, not optimizer truth.
+
 ## Must stay disabled or descriptive
 - Numeric shard cost tables per level.
 - Any inferred shard cost formula.
@@ -30,3 +36,4 @@
 - Use data/shard-observed-behaviors.grounded.v1.json for validation fixtures, hints, or future explainability copy.
 - Use data/shard-milestones-provenance.grounded.v1.json for docs, import review, or uncertainty display, not for ranking logic.
 - Keep the shard module in grounded descriptive mode until a separately sourced cost table exists.
+- Do not present milestone names, unlock tables, or effect rows as Unity/APK-extracted facts unless a shipped-game owner mapping is added first.

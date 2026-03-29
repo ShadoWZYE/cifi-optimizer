@@ -199,6 +199,7 @@ Keep shards in truthful descriptive mode until the game-side shard system is map
 - tests for shard recommendation contract shape and guardrails
 - shard and loop module outputs normalized through the shared recommendation action contract before they reach rendering
 - shard and loop wording that points back to grounded source titles and provenance conflicts instead of generic caution text
+- explicit validation or UI signaling that shard milestones are currently community-grounded descriptive data until shipped-game owner mapping exists
 
 **Dependencies**
 

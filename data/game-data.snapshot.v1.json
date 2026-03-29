@@ -169,11 +169,12 @@
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
         "Normalize shard and loop module outputs through the shared recommendation action contract.",
-        "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes."
+        "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes.",
+        "Document that the current shard milestone dataset is community-grounded descriptive data, not shipped-game owner-grounded milestone data."
       ],
       "nextSteps": [
         "Document the current boundary between asset-grounded shard facts and descriptive/community-backed shard guidance.",
-        "Verify whether the current shard milestone layer is grounded enough to stay in MVP-facing workflow copy.",
+        "Verify shard milestone owner mapping from shipped-game assets before promoting milestone names and rows as stronger repo truth.",
         "Only expand shard recommendations after the system-mapping gate is satisfied."
       ]
     },

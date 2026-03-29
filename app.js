@@ -1412,6 +1412,11 @@ function renderShipActions() {
 function renderProgressionResults(results) {
   renderShardPlannerControls();
   $("#progressionResults").innerHTML = `
+    <article class="validation-card warn">
+      <strong>Shard milestone mapping status</strong>
+      <p class="meta">System-level shard anchors are grounded enough for repo truth, but the current milestone list is still community-grounded descriptive data.</p>
+      <p class="meta">Do not treat milestone names, unlock rows, or bonus labels here as shipped-game extracted truth until shard owner mapping is completed.</p>
+    </article>
     <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
     ${renderShardWorkflowSnapshot()}
     ${renderShardWorkflowReference()}
@@ -1908,7 +1913,7 @@ function runProgressionOptimization() {
       "No shard milestone recommendations are being ranked in this build.",
       "Import verified shard milestone data before re-enabling optimizer behavior."
     ],
-    notes: "Grounded fallback mode avoids fake optimizer precision."
+    notes: "Descriptive fallback mode avoids fake optimizer precision."
   }, "shards"), ...loopWarnings];
 }
 
@@ -2058,8 +2063,8 @@ function buildGroundedShardRecommendations() {
           : "Unlocked does not mean affordable; shard cost data is still unavailable."
       ],
       notes: sourceLabel
-        ? `This card watches grounded unlock gates only (${sourceLabel}).`
-        : "This card watches grounded unlock gates only."
+        ? `This card watches descriptive unlock gates only (${sourceLabel}).`
+        : "This card watches descriptive unlock gates only."
     },
     {
       id: "shard-module-next-threshold-watch",
@@ -2161,7 +2166,7 @@ function renderShardWorkflowSnapshot() {
         <strong>${escapeHtml(nextUnlock ? nextUnlock.name : "All unlock gates covered")}</strong>
         <p class="meta">Current shards: ${formatOptionalNumber(shardPlanner.currentShards)} | Shard income / hour: ${formatOptionalNumber(shardPlanner.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(shardPlanner.totalMilestoneLevels)}</p>
         <div class="meta-stack">
-          <p class="snapshot-title">Grounded mechanics</p>
+          <p class="snapshot-title">Grounded shard anchors</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.unlock_condition?.description || "Shard unlock condition unavailable.")}</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.how_acquired?.description || "Shard acquisition note unavailable.")}</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.reset_behavior?.description || "Loop-reset behavior note unavailable.")}</p>
@@ -2242,6 +2247,7 @@ function renderObservedShardBehaviors() {
       <article class="snapshot-card">
         <span class="snapshot-title">Provenance hygiene</span>
         <p class="meta">Source report: ${escapeHtml(provenance?.sourceReport || "docs/research/shard-milestones-grounded-2026-03-28.md")}</p>
+        <p class="meta">Milestone rows in this workflow are community-grounded descriptive data, not shipped-game owner-mapped shard milestone data.</p>
         <div class="meta-stack">
           <p class="snapshot-title">Review sources</p>
           ${Object.values(provenance?.sources || {}).slice(0, 5).map((source) => `
@@ -2258,8 +2264,9 @@ function renderShardMilestoneDirectory() {
   const milestones = getMilestonesForDisplay();
   return `
     <div class="meta-stack">
-      <p class="eyebrow">Grounded directory</p>
+      <p class="eyebrow">Descriptive directory</p>
       <h3>Shard milestones</h3>
+      <p class="meta">These milestone rows are sourced from named community references with preserved uncertainty and conflicts. They are not yet mapped from shipped-game shard milestone owners.</p>
       <div class="preview-stack">
         ${milestones.map((milestone) => `
           <details class="snapshot-card shard-milestone-card" ${milestone.id === getSelectedShardMilestoneId() ? "open" : ""}>
@@ -2338,6 +2345,7 @@ function runValidationCases() {
 function buildApkGroundingValidationCases() {
   const tokenShop = state.extractedMechanics?.tokenShop;
   const multiverseMarket = state.extractedMechanics?.multiverseMarket;
+  const shardMilestones = state.shardGrounding?.milestones;
   const cases = [];
 
   if (tokenShop) {
@@ -2379,6 +2387,16 @@ function buildApkGroundingValidationCases() {
     });
   }
 
+  if (shardMilestones) {
+    cases.push({
+      title: "Shard milestone mapping gate",
+      expected: "Community-grounded descriptive dataset",
+      actual: "Community-grounded descriptive dataset",
+      pass: true,
+      scope: "APK"
+    });
+  }
+
   return cases;
 }
 
@@ -2394,7 +2412,7 @@ function renderOverviewSupportSummary(apkValidation, supportValidation) {
       <strong>Grounding checks stay separate from MVP behavior</strong>
       ${apkValidation.length ? `<p class="meta">${apkPassing}/${apkValidation.length} APK-grounding checks currently pass.</p>` : ""}
       ${supportValidation.length ? `<p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>` : ""}
-      <p class="meta">APK-grounding checks confirm extracted mechanic bundles and mapping gates so available-but-unmapped systems do not get mixed into app truth.</p>
+      <p class="meta">APK-grounding checks confirm extracted mechanic bundles and mapping gates so available-but-unmapped systems do not get mixed into app truth. Shard milestone rows currently remain descriptive community-grounded data until game-side owner mapping exists.</p>
     </article>
   `;
 }
