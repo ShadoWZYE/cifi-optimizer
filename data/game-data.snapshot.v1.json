@@ -208,14 +208,15 @@
       "title": "Unified recommendation feed and test hardening",
       "status": "active",
       "goal": "Converge active MVP-safe module outputs into one explainable feed and make contract drift fail fast.",
-      "currentSlice": "Rank shard and loop warning outputs in one visible feed now, then extend the same contract when spend planning becomes build-ready.",
+      "currentSlice": "Extract the shared recommendation contract into a pure module and harden executable feed-contract checks before spend joins the feed.",
       "completedSteps": [
         "Normalize active shard and loop outputs through one ranked recommendation feed.",
-        "Treat feed scores as trust-oriented UI priority rather than as optimizer ROI."
+        "Treat feed scores as trust-oriented UI priority rather than as optimizer ROI.",
+        "Extract recommendation-action normalization and sorting into a shared pure module that app code and tests can both exercise."
       ],
       "nextSteps": [
         "Extend the same feed contract to spend recommendations after TokenShop and MultiverseMarket pass their integration gates.",
-        "Expand smoke coverage toward dataset and recommendation contract checks.",
+        "Expand smoke coverage from normalization and sort checks toward real module output fixtures.",
         "Define the hardening path for future dataset refreshes."
       ]
     }

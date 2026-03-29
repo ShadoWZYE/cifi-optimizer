@@ -3,6 +3,11 @@ import {
   createDefaultPlayerProfile,
   normalizePlayerProfile
 } from "./player-profile.js";
+import {
+  sanitizeRecommendationLines as sanitizeNormalizedRecommendationLines,
+  sortRecommendationFeed as sortNormalizedRecommendationFeed,
+  toRecommendationAction as normalizeRecommendationAction
+} from "./recommendation-contract.js";
 
 const STORAGE_KEYS = {
   playerProfile: "cifi-suite.player-profile",
@@ -2439,25 +2444,7 @@ function getActiveMvpRecommendationFeed() {
 }
 
 function sortRecommendationFeed(items) {
-  return [...items].sort((left, right) => {
-    const kindRank = getRecommendationKindRank(right.kind) - getRecommendationKindRank(left.kind);
-    if (kindRank !== 0) {
-      return kindRank;
-    }
-    const scoreDiff = Number(right.score || 0) - Number(left.score || 0);
-    if (scoreDiff !== 0) {
-      return scoreDiff;
-    }
-    const confidenceDiff = Number(right.confidence || 0) - Number(left.confidence || 0);
-    if (confidenceDiff !== 0) {
-      return confidenceDiff;
-    }
-    return String(left.title || "").localeCompare(String(right.title || ""));
-  });
-}
-
-function getRecommendationKindRank(kind) {
-  return kind === "warning" ? 2 : 1;
+  return sortNormalizedRecommendationFeed(items);
 }
 
 function renderRecommendationFeedSummary(results, surface) {
@@ -3031,28 +3018,11 @@ function getProfileCompletion(profile) {
 }
 
 function toRecommendationAction(item, fallbackModule) {
-  return {
-    id: String(item?.id || `${fallbackModule || "module"}-${Math.random().toString(36).slice(2, 8)}`),
-    module: String(item?.module || fallbackModule || "module"),
-    kind: item?.kind === "upgrade" ? "upgrade" : "warning",
-    title: String(item?.title || "Untitled recommendation"),
-    score: Number.isFinite(Number(item?.score)) ? Number(item.score) : 0,
-    confidence: Number.isFinite(Number(item?.confidence)) ? Number(item.confidence) : 0,
-    cost: item?.cost,
-    eta: item?.eta,
-    benefit: sanitizeRecommendationLines(item?.benefit),
-    whyNow: sanitizeRecommendationLines(item?.whyNow),
-    assumptions: sanitizeRecommendationLines(item?.assumptions),
-    warnings: sanitizeRecommendationLines(item?.warnings),
-    subtitle: item?.subtitle ?? null,
-    notes: item?.notes ?? null
-  };
+  return normalizeRecommendationAction(item, fallbackModule);
 }
 
 function sanitizeRecommendationLines(value) {
-  return Array.isArray(value)
-    ? value.map((entry) => String(entry || "").trim()).filter(Boolean)
-    : [];
+  return sanitizeNormalizedRecommendationLines(value);
 }
 
 function getPlannerHelperCompletion(profile) {

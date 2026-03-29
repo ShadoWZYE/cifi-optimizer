@@ -8,6 +8,11 @@ import {
   createDefaultPlayerProfile,
   normalizePlayerProfile
 } from "../player-profile.js";
+import {
+  getRecommendationContractIssues,
+  sortRecommendationFeed,
+  toRecommendationAction
+} from "../recommendation-contract.js";
 import { validateBundledDatasets } from "../scripts/validate-datasets.mjs";
 
 const execFileAsync = promisify(execFile);
@@ -28,6 +33,7 @@ const dailyTokeniumMissionDoc = await readFile(new URL("../docs/daily-tokenium-m
 const multiverseMarketVerificationDoc = await readFile(new URL("../docs/multiverse-market-verification.md", import.meta.url), "utf8");
 const multiverseMarketStateDoc = await readFile(new URL("../docs/multiverse-market-state-verification.md", import.meta.url), "utf8");
 const multiverseMarketMetadataNeighborhoodDoc = await readFile(new URL("../docs/multiverse-market-metadata-neighborhood.md", import.meta.url), "utf8");
+const recommendationContractModule = await readFile(new URL("../recommendation-contract.js", import.meta.url), "utf8");
 const shardVerificationDoc = await readFile(new URL("../docs/shard-system-verification.md", import.meta.url), "utf8");
 const playerProfileSchemaDoc = await readFile(new URL("../docs/player-profile-schema.md", import.meta.url), "utf8");
 const importMappingDoc = await readFile(new URL("../docs/import-mapping.md", import.meta.url), "utf8");
@@ -40,6 +46,43 @@ const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
 await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
 const datasetValidation = await validateBundledDatasets();
+const normalizedFeedAction = toRecommendationAction({
+  id: " shard-threshold ",
+  module: "shards",
+  kind: "upgrade",
+  title: "Threshold watch",
+  score: "42",
+  confidence: "1.4",
+  benefit: ["  Track next threshold  ", "", null],
+  whyNow: ["  Grounded shard threshold  "],
+  assumptions: [" descriptive only "],
+  warnings: [" no ROI implied "]
+}, "loop");
+const fallbackFeedAction = toRecommendationAction(
+  {
+    score: "bad",
+    confidence: -5,
+    whyNow: [" ", "Missing inputs"]
+  },
+  "loop"
+);
+const sortedFeedFixture = sortRecommendationFeed([
+  toRecommendationAction({ id: "upgrade-high", module: "shards", kind: "upgrade", title: "Upgrade high", score: 99, confidence: 0.9 }, "shards"),
+  toRecommendationAction({ id: "warning-low", module: "loop", kind: "warning", title: "Warning low", score: 20, confidence: 0.2 }, "loop"),
+  toRecommendationAction({ id: "warning-high", module: "loop", kind: "warning", title: "Warning high", score: 20, confidence: 0.8 }, "loop")
+]);
+const invalidFeedIssues = getRecommendationContractIssues({
+  id: "",
+  module: "",
+  kind: "todo",
+  title: "",
+  score: Number.NaN,
+  confidence: 2,
+  benefit: [],
+  whyNow: ["ok", ""],
+  assumptions: null,
+  warnings: ["warning"]
+});
 
 const defaultProfile = createDefaultPlayerProfile();
 
@@ -58,6 +101,19 @@ assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
   ["snapshot", "shards", "token-shop", "multiverse-market"]
 );
+assert.equal(normalizedFeedAction.id, "shard-threshold");
+assert.equal(normalizedFeedAction.kind, "upgrade");
+assert.equal(normalizedFeedAction.score, 42);
+assert.equal(normalizedFeedAction.confidence, 1);
+assert.deepEqual(normalizedFeedAction.benefit, ["Track next threshold"]);
+assert.deepEqual(fallbackFeedAction.whyNow, ["Missing inputs"]);
+assert.equal(fallbackFeedAction.module, "loop");
+assert.equal(fallbackFeedAction.kind, "warning");
+assert.equal(fallbackFeedAction.score, 0);
+assert.equal(fallbackFeedAction.confidence, 0);
+assert.deepEqual(sortedFeedFixture.map((item) => item.id), ["warning-high", "warning-low", "upgrade-high"]);
+assert.equal(getRecommendationContractIssues(normalizedFeedAction).length, 0);
+assert.ok(invalidFeedIssues.length >= 4, "expected multiple recommendation contract issues");
 const shardTrack = snapshot.researchTracks.find((track) => track.id === "shards-and-loop-guardrails");
 assert.ok(shardTrack, "expected shard workflow track");
 assert.match(shardTrack.goal, /Keep shard guidance truthful/);
@@ -69,6 +125,7 @@ assert.match(spendTrack.currentSlice, /Use the recovered progression-field block
 const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-feed-and-hardening");
 assert.ok(feedTrack, "expected unified feed track");
 assert.equal(feedTrack.status, "active");
+assert.match(feedTrack.currentSlice, /Extract the shared recommendation contract into a pure module/);
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
 assert.match(agentsMd, /available but unmapped/);
@@ -240,6 +297,7 @@ assert.match(appJs, /function renderResearchTrackProgress/);
 assert.match(appJs, /function getResearchTrackOrder/);
 assert.match(appJs, /function getResearchTrackStatus/);
 assert.match(appJs, /function getResearchTrackProgressLabel/);
+assert.match(appJs, /from "\.\/recommendation-contract\.js"/);
 assert.match(appJs, /"unified-feed-and-hardening": "PR 3"/);
 assert.match(appJs, /"spend-planner-from-extracted-data": "PR 4"/);
 assert.match(appJs, /function importPlayerProfileJson/);
@@ -267,6 +325,9 @@ assert.match(appJs, /function renderSupportSurfaceNotice/);
 assert.match(appJs, /function renderValidationSection/);
 assert.match(appJs, /function toRecommendationAction/);
 assert.match(appJs, /function sanitizeRecommendationLines/);
+assert.match(recommendationContractModule, /export function toRecommendationAction/);
+assert.match(recommendationContractModule, /export function sortRecommendationFeed/);
+assert.match(recommendationContractModule, /export function getRecommendationContractIssues/);
 assert.match(appJs, /function getSourceTitlesForIds/);
 assert.match(appJs, /function getMilestoneSourceLabel/);
 assert.match(appJs, /function getProvenanceConflictNote/);
