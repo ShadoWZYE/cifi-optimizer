@@ -20,10 +20,13 @@ Grounding rules:
 - planner-only values stay under `planning`
 - external/community-tool state stays under `externalModels`
 - unresolved legacy values stay under `compatibility`
+- imported blobs for real-but-unmapped systems stay under `compatibility.unmappedSystemState`
 
 Boundary note:
 - legacy `gemDust` may be preserved under `compatibility.unresolvedProfileFields.gemDust`
 - it must not be treated as the active experimental gem-node budget unless a user explicitly maps it into `externalModels.experimental.gemNodes.budget`
+- imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`
+- preserving those objects does not make the system planner-ready or canonical
 
 ## Supported datasets
 

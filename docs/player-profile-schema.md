@@ -58,6 +58,7 @@ These values are preserved only for migration compatibility:
 | Trait spheres unlocked | `compatibility.unresolvedProfileFields.traitSphereCount` | unresolved | Real term, unresolved shared-profile role. |
 | Mech parts | `compatibility.unresolvedProfileFields.mechParts` | unresolved | Real term family remains research-track territory. |
 | Highest ship unlocked / manual phase | `compatibility.legacyStage.*` | unresolved | Preserved from earlier schema drafts, but not active grounded profile truth. |
+| Unmapped system state blobs | `compatibility.unmappedSystemState.*` | unresolved / quarantined | Preserved imported objects for real-but-unmapped systems such as shard milestones, TokenShop, or MultiverseMarket. These blobs must not be treated as canonical fields or planner-ready state until system mapping is completed. |
 
 ## Migration policy
 
@@ -68,6 +69,7 @@ These values are preserved only for migration compatibility:
   - `relics` -> `player.resources.academyRelics`
 - Removed visible fields are not discarded; they move into `externalModels` or `compatibility`.
 - `externalModels.shipPlanner.communityToolState` is always preserved during migration.
+- Imported objects for real-but-unmapped systems should be preserved under `compatibility.unmappedSystemState` instead of being collapsed into canonical or planner namespaces.
 
 ## UI rule
 

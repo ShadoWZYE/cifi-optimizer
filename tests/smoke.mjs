@@ -24,6 +24,8 @@ const unityAuditPlaybook = await readFile(new URL("../docs/unity-audit-playbook.
 const ownerMap = await readFile(new URL("../docs/unity-owner-map.md", import.meta.url), "utf8");
 const spendVerificationDoc = await readFile(new URL("../docs/spend-system-verification.md", import.meta.url), "utf8");
 const shardVerificationDoc = await readFile(new URL("../docs/shard-system-verification.md", import.meta.url), "utf8");
+const playerProfileSchemaDoc = await readFile(new URL("../docs/player-profile-schema.md", import.meta.url), "utf8");
+const importMappingDoc = await readFile(new URL("../docs/import-mapping.md", import.meta.url), "utf8");
 const tokenShopDoc = await readFile(new URL("../docs/token-shop-values.md", import.meta.url), "utf8");
 const multiverseMarketDoc = await readFile(new URL("../docs/multiverse-market-values.md", import.meta.url), "utf8");
 const shardIngestDoc = await readFile(new URL("../docs/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
@@ -73,6 +75,8 @@ assert.match(spendVerificationDoc, /available but unmapped/);
 assert.match(shardVerificationDoc, /# Shard System Verification Gate/);
 assert.match(shardVerificationDoc, /community-grounded descriptive data/);
 assert.match(shardVerificationDoc, /not yet mapped enough from shipped-game assets/);
+assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState/);
+assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(multiverseMarketDoc, /## Integration status/);
@@ -177,6 +181,9 @@ assert.match(appJs, /Canonical shared truth/);
 assert.match(appJs, /Planner-only helpers/);
 assert.match(appJs, /External-model implementation state/);
 assert.match(appJs, /Compatibility leftovers/);
+assert.match(appJs, /Unmapped shard milestone state/);
+assert.match(appJs, /Unmapped TokenShop state/);
+assert.match(appJs, /Unmapped MultiverseMarket state/);
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
@@ -337,6 +344,35 @@ assert.equal(migratedNestedProfile.player.resources.diamonds, 900);
 assert.equal(migratedNestedProfile.planning.shards.ratePerHour, 110);
 assert.equal(migratedNestedProfile.notes.profile, "nested");
 assert.equal(migratedNestedProfile.externalModels.shipPlanner.communityToolState.technical.Meltdown, 12);
+
+const migratedUnmappedSystemsProfile = normalizePlayerProfile({
+  profileName: "Unmapped systems",
+  systems: {
+    shardMilestones: {
+      selectedMilestone: "alpha",
+      observedLevel: 12
+    },
+    tokenShop: {
+      tokenBoostLevel: 4
+    },
+    multiverseMarket: {
+      inscription51Level: 2
+    }
+  }
+});
+
+assert.equal(migratedUnmappedSystemsProfile.meta.profileName, "Unmapped systems");
+assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestones, {
+  selectedMilestone: "alpha",
+  observedLevel: 12
+});
+assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.tokenShop, {
+  tokenBoostLevel: 4
+});
+assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.multiverseMarket, {
+  inscription51Level: 2
+});
+assert.equal(migratedUnmappedSystemsProfile.player.resources.tokens, null);
 
 assert.match(appJs, /function normalizeLoadoutName/);
 assert.match(appJs, /name: normalizeLoadoutName\(stored\.name, fallback\.name\)/);

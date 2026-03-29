@@ -69,6 +69,10 @@ function coerceEnum(value, allowedValues, fallback = null) {
   return next && allowedValues.has(next) ? next : fallback;
 }
 
+function coerceRecordOrNull(value) {
+  return isRecord(value) ? cloneValue(value) : null;
+}
+
 export function createDefaultPlayerProfile(baselineShipPlayerState = {}) {
   return {
     meta: {
@@ -128,6 +132,11 @@ export function createDefaultPlayerProfile(baselineShipPlayerState = {}) {
         hunterLevel: null,
         traitSphereCount: null,
         mechParts: null
+      },
+      unmappedSystemState: {
+        shardMilestones: null,
+        tokenShop: null,
+        multiverseMarket: null
       }
     }
   };
@@ -268,6 +277,18 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
     ["compatibility", "unresolvedProfileFields", "mechParts"],
     ["systems", "metaProgression", "mechParts"],
     ["mechParts"]
+  ]));
+  normalized.compatibility.unmappedSystemState.shardMilestones = coerceRecordOrNull(readFirst(source, [
+    ["compatibility", "unmappedSystemState", "shardMilestones"],
+    ["systems", "shardMilestones"]
+  ]));
+  normalized.compatibility.unmappedSystemState.tokenShop = coerceRecordOrNull(readFirst(source, [
+    ["compatibility", "unmappedSystemState", "tokenShop"],
+    ["systems", "tokenShop"]
+  ]));
+  normalized.compatibility.unmappedSystemState.multiverseMarket = coerceRecordOrNull(readFirst(source, [
+    ["compatibility", "unmappedSystemState", "multiverseMarket"],
+    ["systems", "multiverseMarket"]
   ]));
 
   const mergedShipToolState = mergeDeep(

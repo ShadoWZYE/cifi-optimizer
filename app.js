@@ -787,7 +787,8 @@ function getExperimentalProfileState() {
 function getCompatibilityProfileState() {
   return {
     legacyStage: state.playerProfile.compatibility.legacyStage,
-    unresolved: state.playerProfile.compatibility.unresolvedProfileFields
+    unresolved: state.playerProfile.compatibility.unresolvedProfileFields,
+    unmappedSystems: state.playerProfile.compatibility.unmappedSystemState
   };
 }
 
@@ -1697,14 +1698,17 @@ function renderPlayerProfileBoundarySummary() {
     },
     {
       title: "Compatibility leftovers",
-      note: "Preserved migration values that are not treated as active shared truth.",
+      note: "Preserved migration values and quarantined unmapped system blobs that are not treated as active shared truth.",
       items: [
         ["Legacy highest ship unlocked", compatibility.legacyStage.highestShipUnlocked],
         ["Legacy manual phase", compatibility.legacyStage.manualPhase],
         ["Legacy gemDust", compatibility.unresolved.gemDust],
         ["Legacy hunter level", compatibility.unresolved.hunterLevel],
         ["Legacy trait sphere count", compatibility.unresolved.traitSphereCount],
-        ["Legacy mech parts", compatibility.unresolved.mechParts]
+        ["Legacy mech parts", compatibility.unresolved.mechParts],
+        ["Unmapped shard milestone state", compatibility.unmappedSystems.shardMilestones],
+        ["Unmapped TokenShop state", compatibility.unmappedSystems.tokenShop],
+        ["Unmapped MultiverseMarket state", compatibility.unmappedSystems.multiverseMarket]
       ]
     }
   ];
