@@ -22,7 +22,13 @@ const APP_LAUNCH_KEYS = {
 
 const APP_LAUNCH_CHANNEL = "cifi-suite-launch";
 const APP_LAUNCH_HEARTBEAT_MS = 4000;
-const APP_LAUNCH_STALE_MS = 15000;
+const APP_LAUNCH_STALE_MS = 60000;
+const SERVER_SESSION_ENDPOINTS = {
+  open: "/api/client/open",
+  heartbeat: "/api/client/heartbeat",
+  close: "/api/client/close",
+  events: "/api/client/events"
+};
 
 const CANONICAL_PROFILE_FIELD_PATHS = {
   profileName: ["meta", "profileName"],
@@ -32,10 +38,16 @@ const CANONICAL_PROFILE_FIELD_PATHS = {
   tokens: ["player", "resources", "tokens"],
   academyRelics: ["player", "resources", "academyRelics"],
   shards: ["player", "resources", "shards"],
-  shardRatePerHour: ["planning", "shards", "ratePerHour"],
-  totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"],
   notes: ["notes", "profile"]
 };
+
+const PROFILE_FORM_FIELD_PATHS = {
+  ...CANONICAL_PROFILE_FIELD_PATHS,
+  shardRatePerHour: ["planning", "shards", "ratePerHour"],
+  totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"]
+};
+
+const NON_MVP_VALIDATION_MODULES = new Set(["ship", "gem"]);
 
 function createDefaultShipPlayerState(baseline) {
   return {
@@ -342,6 +354,7 @@ const state = {
   shipConfig: null,
   launchCoordinator: null,
   launchNoticeTimer: null,
+  serverSession: null,
   pendingLaunchRefresh: false,
   importPreview: [],
   generatorOcrImages: [],
@@ -401,6 +414,7 @@ async function bootstrap() {
 
   fillProfileForm();
   renderAll();
+  initServerSession();
 
   if (state.pendingLaunchRefresh) {
     refreshFromPersistentState();
@@ -479,6 +493,118 @@ function initLaunchCoordinator() {
   }, APP_LAUNCH_HEARTBEAT_MS);
   clearLaunchQueryFlag();
   return coordinator;
+}
+
+async function initServerSession() {
+  if (!window.location.origin.startsWith("http")) {
+    return;
+  }
+
+  const session = {
+    id: `client-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    events: null,
+    heartbeatId: null,
+    launchSignalSequence: 0,
+    enabled: false
+  };
+  state.serverSession = session;
+
+  const opened = await postServerSession(SERVER_SESSION_ENDPOINTS.open, session.id);
+  if (!opened) {
+    return;
+  }
+
+  session.enabled = true;
+  session.launchSignalSequence = Number(opened.launchSignalSequence || 0);
+  session.heartbeatId = window.setInterval(() => {
+    postServerSession(SERVER_SESSION_ENDPOINTS.heartbeat, session.id);
+  }, APP_LAUNCH_HEARTBEAT_MS);
+  session.events = new EventSource(`${SERVER_SESSION_ENDPOINTS.events}?clientId=${encodeURIComponent(session.id)}`);
+  session.events.addEventListener("ready", (event) => {
+    const payload = parseServerEvent(event);
+    if (!payload) {
+      return;
+    }
+    session.launchSignalSequence = Number(payload.launchSignalSequence || session.launchSignalSequence || 0);
+  });
+  session.events.addEventListener("launch", (event) => {
+    const payload = parseServerEvent(event);
+    if (!payload) {
+      return;
+    }
+    const nextSequence = Number(payload.launchSignalSequence || 0);
+    if (nextSequence > session.launchSignalSequence) {
+      session.launchSignalSequence = nextSequence;
+      if (state.launchCoordinator?.isPrimary) {
+        handlePrimaryReopen();
+      }
+    }
+  });
+
+  window.addEventListener("pagehide", () => {
+    closeServerSession(session);
+  });
+  window.addEventListener("beforeunload", () => {
+    closeServerSession(session);
+  });
+  window.addEventListener("unload", () => {
+    closeServerSession(session);
+  });
+}
+
+async function postServerSession(endpoint, clientId) {
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId }),
+      keepalive: true
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return response.json();
+  } catch {
+    return null;
+  }
+}
+
+function closeServerSession(session = state.serverSession) {
+  if (!session?.enabled) {
+    return;
+  }
+
+  if (session.events) {
+    session.events.close();
+    session.events = null;
+  }
+
+  if (session.heartbeatId) {
+    window.clearInterval(session.heartbeatId);
+    session.heartbeatId = null;
+  }
+
+  session.enabled = false;
+  const payload = JSON.stringify({ clientId: session.id });
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon(SERVER_SESSION_ENDPOINTS.close, new Blob([payload], { type: "application/json" }));
+    return;
+  }
+
+  fetch(SERVER_SESSION_ENDPOINTS.close, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true
+  }).catch(() => {});
+}
+
+function parseServerEvent(event) {
+  try {
+    return JSON.parse(event.data);
+  } catch {
+    return null;
+  }
 }
 
 function getActivePrimaryLease() {
@@ -582,12 +708,13 @@ function clearLaunchQueryFlag() {
 }
 
 function renderPassiveLaunchScreen() {
+  document.title = "CIFI Already Open";
   document.body.innerHTML = `
     <main class="launch-passive-shell">
       <section class="launch-passive-card">
         <p class="eyebrow">CIFI Already Open</p>
         <h1>Using the existing app tab.</h1>
-        <p class="meta">The launcher signaled the active CIFI tab to refresh. This window stays idle so you do not end up with two competing app instances.</p>
+        <p class="meta">Another launcher instance was triggered while CIFI is already open. This tab will try to close itself so the existing app tab stays primary.</p>
         <button class="button button-primary" id="passiveLaunchCloseBtn">Close this window</button>
       </section>
     </main>
@@ -596,6 +723,10 @@ function renderPassiveLaunchScreen() {
   document.getElementById("passiveLaunchCloseBtn")?.addEventListener("click", () => {
     window.close();
   });
+
+  window.setTimeout(() => {
+    window.close();
+  }, 1200);
 }
 
 function persistPlayerProfile() {
@@ -835,6 +966,7 @@ function renderNavigation() {
 function renderQuickPanels() {
   const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
   const completion = getProfileCompletion(state.playerProfile);
+  const helperCompletion = getPlannerHelperCompletion(state.playerProfile);
   $("#snapshotSummary").innerHTML = `
     <span class="snapshot-title">Active snapshot</span>
     <strong class="snapshot-value">${state.snapshot.snapshotVersion}</strong>
@@ -844,6 +976,7 @@ function renderQuickPanels() {
     <span class="snapshot-title">Quick status</span>
     <strong class="snapshot-value">${completion}%</strong>
     <p class="meta">${snapshots.length} LR snapshots saved locally.</p>
+    <p class="meta">Planner helpers filled: ${helperCompletion}%.</p>
   `;
 }
 
@@ -851,27 +984,30 @@ function renderOverview() {
   $("#profileCompletionValue").textContent = `${getProfileCompletion(state.playerProfile)}%`;
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
   const validation = runValidationCases();
-  $("#validationStatusValue").textContent = `${validation.filter((item) => item.pass).length}/${validation.length}`;
+  const mvpValidation = validation.filter((item) => item.scope === "MVP");
+  const supportValidation = validation.filter((item) => item.scope === "Support");
+  $("#validationStatusValue").textContent = `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
   $("#overviewHighlights").innerHTML = [
     makeRecommendationCard(runProgressionOptimization()[0], "shards"),
     makeRecommendationCard({
-      id: "non-mvp-modules-warning",
+      id: "profile-boundary-status",
       module: "warning",
       kind: "warning",
-      title: "Non-MVP modules are quarantined",
-      subtitle: "Community-tool and experimental surfaces",
+      title: "Profile boundary stays grounded",
+      subtitle: "Canonical truth and labeled helpers",
       score: 0,
-      confidence: 0.84,
+      confidence: 0.86,
       whyNow: [
-        "Gem Nodes, Research, and OCR remain available only as non-MVP support surfaces.",
-        "Ship planner calibration is preserved, but labeled as community-tool state rather than raw in-game state."
+        "Shared PlayerProfile truth is limited to canonical MVP fields plus labeled planner helpers.",
+        "Community-tool and experimental state remain isolated instead of being promoted into raw CIFI truth."
       ],
       warnings: [
-        "These modules are not part of the grounded MVP path.",
-        "Do not treat them as verified CIFI recommendations."
+        "Do not treat ship planner, gem nodes, research intake, or OCR as grounded MVP recommendations.",
+        "Legacy compatibility fields are preserved for migration, not treated as active planning truth."
       ],
       notes: "The primary MVP flow centers on PlayerProfile, imports, shard safety, validation, and explainable recommendations."
-    }, "warning")
+    }, "warning"),
+    renderOverviewSupportSummary(supportValidation)
   ].join("");
 }
 
@@ -1184,13 +1320,22 @@ function renderShipActions() {
       notes: `Adds ${bestInstall.delta} point(s) on ${state.shipConfig.loadouts[state.shipConfig.activeLoadoutIndex].name}.`
   } : null;
 
-  $("#shipResults").innerHTML = [leadCard, ...shipRankings.slice(0, 3)].filter(Boolean).map((item) => makeRecommendationCard(item, "ship")).join("");
+  $("#shipResults").innerHTML = `
+    ${renderSupportSurfaceNotice(
+      "Community-tool ship results",
+      [
+        "These cards come from the quarantined ship planner and preserved community-tool calibration.",
+        "Treat them as labeled support output, not grounded MVP recommendations."
+      ]
+    )}
+    ${[leadCard, ...shipRankings.slice(0, 3)].filter(Boolean).map((item) => makeRecommendationCard(item, "ship")).join("")}
+  `;
 }
 
 function renderProgressionResults(results) {
   renderShardPlannerControls();
   $("#progressionResults").innerHTML = `
-    <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, "shards")).join("")}</div>
+    <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
     ${renderShardWorkflowSnapshot()}
     ${renderShardWorkflowReference()}
     ${renderObservedShardBehaviors()}
@@ -1199,18 +1344,51 @@ function renderProgressionResults(results) {
 }
 
 function renderGemResults(results) {
-  $("#gemResults").innerHTML = results.map((item) => makeRecommendationCard(item, "gem")).join("");
+  const budget = getGemPlannerBudget();
+  const legacyGemDust = state.playerProfile.compatibility.unresolvedProfileFields.gemDust;
+  const boundaryNotes = [];
+
+  if (budget === 0) {
+    boundaryNotes.push("Gem-node rankings are using a zero planner budget until you enter an experimental gem-node budget in PlayerProfile JSON.");
+  }
+  if (legacyGemDust != null) {
+    boundaryNotes.push(`Legacy gemDust is preserved under compatibility (${formatOptionalNumber(legacyGemDust)}) and is not used as active planner budget.`);
+  }
+
+  $("#gemResults").innerHTML = `
+    ${renderSupportSurfaceNotice(
+      "Experimental gem results",
+      [
+        "Gem-node rankings remain an experimental support surface outside the grounded MVP path.",
+        "Use them only as labeled helper output, not as verified CIFI recommendation truth."
+      ]
+    )}
+    ${boundaryNotes.length ? `
+      <article class="validation-card warn">
+        <strong>Experimental budget boundary</strong>
+        ${boundaryNotes.map((note) => `<p class="meta">${escapeHtml(note)}</p>`).join("")}
+      </article>
+    ` : ""}
+    <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, "gem")).join("")}</div>
+  `;
 }
 
 function renderValidationResults() {
   const results = runValidationCases();
-  $("#validationResults").innerHTML = results.map((item) => `
-    <article class="validation-card ${item.pass ? "pass" : "warn"}">
-      <strong>${item.title}</strong>
-      <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
-      <p class="meta">${item.actual}</p>
-    </article>
-  `).join("");
+  const mvpResults = results.filter((item) => item.scope === "MVP");
+  const supportResults = results.filter((item) => item.scope === "Support");
+  $("#validationResults").innerHTML = [
+    renderValidationSection(
+      "Grounded MVP checks",
+      "These checks contribute to the overview benchmark and track current grounded MVP behavior.",
+      mvpResults
+    ),
+    renderValidationSection(
+      "Support-surface checks",
+      "These checks cover quarantined ship and gem surfaces. Keep them labeled, but do not treat them as MVP truth.",
+      supportResults
+    )
+  ].join("");
 }
 
 function renderResearch() {
@@ -1333,7 +1511,7 @@ function getResearchTrackSource(track) {
 function collectProfileForm() {
   const entries = Object.fromEntries(new FormData($("#profileForm")).entries());
   const nextProfile = structuredClone(state.playerProfile);
-  Object.entries(CANONICAL_PROFILE_FIELD_PATHS).forEach(([field, path]) => {
+  Object.entries(PROFILE_FORM_FIELD_PATHS).forEach(([field, path]) => {
     if (field in entries) {
       setProfileValue(path, coerceInputValue(entries[field]), nextProfile);
     }
@@ -1343,7 +1521,7 @@ function collectProfileForm() {
 }
 
 function fillProfileForm() {
-  Object.entries(CANONICAL_PROFILE_FIELD_PATHS).forEach(([key, path]) => {
+  Object.entries(PROFILE_FORM_FIELD_PATHS).forEach(([key, path]) => {
     const input = formControl(key);
     if (input) {
       input.value = getProfileValue(path) ?? "";
@@ -1549,8 +1727,9 @@ function runShipOptimization() {
 
 function runProgressionOptimization() {
   const groundedResults = buildGroundedShardRecommendations();
+  const loopWarnings = buildLoopGuardrailRecommendations();
   if (groundedResults.length) {
-    return groundedResults;
+    return [...groundedResults, ...loopWarnings];
   }
 
   return [{
@@ -1574,7 +1753,92 @@ function runProgressionOptimization() {
       "Import verified shard milestone data before re-enabling optimizer behavior."
     ],
     notes: "Grounded fallback mode avoids fake optimizer precision."
-  }];
+  }, ...loopWarnings];
+}
+
+function buildLoopGuardrailRecommendations() {
+  const loopReset = Number(state.playerProfile.player.loop.loopReset || 0);
+  const currentShards = Number(state.playerProfile.player.resources.shards || 0);
+  const antiBricking = getObservedBehaviorById("PPX_EARLY_LR_ANTIBRICKING");
+  const shardSpend = getObservedBehaviorById("PPX_SHARDS_EARLY_DISTRIBUTION");
+  const zeusWarning = getObservedBehaviorById("PPX_ZEUS_E1000_RESOURCE_PRIO_AND_LR_TARGETS");
+
+  if (!loopReset) {
+    return [{
+      id: "loop-guardrail-input-warning",
+      module: "loop",
+      kind: "warning",
+      title: "Add current LR for loop guardrails",
+      subtitle: "Minimum loop-warning input missing",
+      score: 0,
+      confidence: 0.63,
+      whyNow: [
+        "Current LR is the minimum grounded input needed for loop-reset guardrails in this build.",
+        antiBricking?.why || "Grounded loop guidance depends on pacing examples tied to specific LR transitions."
+      ],
+      assumptions: [
+        "This module is warning-oriented only and does not simulate best reset timing."
+      ],
+      warnings: [
+        "Without current LR, the app cannot show the anti-bricking pacing notes captured in the research bundle."
+      ],
+      notes: "Loop guardrails remain descriptive and source-linked."
+    }];
+  }
+
+  const warnings = [];
+
+  if (loopReset >= 5) {
+    warnings.push({
+      id: "loop-guardrail-rising-requirements-warning",
+      module: "loop",
+      kind: "warning",
+      title: "Loop requirement pacing warning",
+      subtitle: `Current LR ${formatShardNumber(loopReset)}`,
+      score: 0,
+      confidence: 0.71,
+      whyNow: [
+        antiBricking?.why || "Guide examples warn that pushing LR too quickly can raise loop requirements faster than the account can clear them.",
+        "Grounded examples show LR 5 -> 6 requiring 7 loops and LR 6 -> 7 requiring 8 loops."
+      ],
+      assumptions: [
+        "This is a caution zone, not an optimizer target.",
+        "The app does not estimate whether your account can safely push the next LR."
+      ],
+      warnings: [
+        "Use buffer / instant loop checks before pushing LR higher.",
+        zeusWarning?.priorities?.[1] || "High LR progression can become 'playing with fire' in guide-side progression notes."
+      ],
+      notes: "Guardrail based on grounded community guide examples, not simulated reset math."
+    });
+  }
+
+  if (currentShards > 0) {
+    warnings.push({
+      id: "loop-guardrail-shard-reset-warning",
+      module: "loop",
+      kind: "warning",
+      title: "Spend tracked shards before reset",
+      subtitle: `${formatShardNumber(currentShards)} shards currently tracked`,
+      score: 0,
+      confidence: 0.68,
+      whyNow: [
+        "Shards reset to 0 on Loop Prestige in the grounded shard sources.",
+        shardSpend?.why || "Early shard guidance explicitly says to spend shards before loop resets."
+      ],
+      assumptions: [
+        "This warning does not claim a best milestone target.",
+        "Shard affordability and ranking remain disabled."
+      ],
+      warnings: [
+        "Do not carry tracked shards into a reset expecting them to persist.",
+        "Use the shard workflow cards to inspect grounded unlocks and thresholds before spending."
+      ],
+      notes: "Reset warning only; no shard ROI is implied."
+    });
+  }
+
+  return warnings;
 }
 
 function buildGroundedShardRecommendations() {
@@ -1858,11 +2122,7 @@ function renderShardMilestoneDirectory() {
 
 function runGemOptimization() {
   const mode = $("#gemBudgetMode")?.value ?? "strict";
-  const budget = Number(
-    state.playerProfile.externalModels.experimental.gemNodes.budget
-    || state.playerProfile.compatibility.unresolvedProfileFields.gemDust
-    || 0
-  );
+  const budget = getGemPlannerBudget();
   return [...state.snapshot.gemNodes].map((node) => {
     const affordability = node.cost <= budget ? 1 : mode === "stretch" ? 0.8 : 0.35;
     return {
@@ -1875,6 +2135,10 @@ function runGemOptimization() {
   }).sort((left, right) => right.score - left.score);
 }
 
+function getGemPlannerBudget() {
+  return Number(state.playerProfile.externalModels.experimental.gemNodes.budget || 0);
+}
+
 function runValidationCases() {
   const current = {
     ship: runShipOptimization()[0]?.title ?? "None",
@@ -1885,8 +2149,61 @@ function runValidationCases() {
     title: item.title,
     expected: item.expected,
     actual: current[item.module],
-    pass: item.expected === current[item.module]
+    pass: item.expected === current[item.module],
+    scope: NON_MVP_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
   }));
+}
+
+function renderOverviewSupportSummary(supportValidation) {
+  if (!supportValidation.length) {
+    return "";
+  }
+
+  const passing = supportValidation.filter((item) => item.pass).length;
+  return `
+    <article class="validation-card warn">
+      <strong>Support surfaces stay out of the MVP feed</strong>
+      <p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>
+      <p class="meta">Ship planner and Gem Nodes remain available for compatibility and experimentation, but they do not count as grounded MVP recommendations.</p>
+    </article>
+  `;
+}
+
+function renderSupportSurfaceNotice(title, lines) {
+  return `
+    <article class="validation-card warn">
+      <strong>${escapeHtml(title)}</strong>
+      ${lines.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}
+    </article>
+  `;
+}
+
+function renderValidationSection(title, description, results) {
+  if (!results.length) {
+    return "";
+  }
+
+  return `
+    <section class="meta-stack">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Validation scope</p>
+          <h3>${escapeHtml(title)}</h3>
+        </div>
+      </div>
+      <p class="meta">${escapeHtml(description)}</p>
+      <div class="validation-grid">
+        ${results.map((item) => `
+          <article class="validation-card ${item.pass ? "pass" : "warn"}">
+            <strong>${item.title}</strong>
+            <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : "| grounded MVP surface"}</p>
+            <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
+            <p class="meta">${item.actual}</p>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
 }
 
 function previewImport() {
@@ -2315,6 +2632,10 @@ function getPrimaryShardObservation() {
     }))[0] ?? null;
 }
 
+function getObservedBehaviorById(id) {
+  return (state.shardGrounding?.observedBehaviors?.observations ?? []).find((observation) => observation.id === id) || null;
+}
+
 function getObservationTitle(observation) {
   const playerState = observation?.playerState ?? {};
   return playerState.run_type
@@ -2357,6 +2678,16 @@ function getProfileCompletion(profile) {
     .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
   const fields = Object.keys(CANONICAL_PROFILE_FIELD_PATHS);
   return Math.round((filled / fields.length) * 100);
+}
+
+function getPlannerHelperCompletion(profile) {
+  const plannerPaths = [
+    ["planning", "shards", "ratePerHour"],
+    ["planning", "shards", "totalMilestoneLevels"]
+  ];
+  const filled = plannerPaths
+    .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
+  return Math.round((filled / plannerPaths.length) * 100);
 }
 
 function makeRecommendationCard(item, module) {

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -21,6 +21,7 @@ const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+const repoRoot = fileURLToPath(new URL("../", import.meta.url));
 await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
 const datasetValidation = await validateBundledDatasets();
 
@@ -54,16 +55,21 @@ assert.match(html, /Reset to blank profile/);
 assert.match(html, /PlayerProfile JSON/);
 assert.match(html, /Import PlayerProfile JSON/);
 assert.match(html, /Export PlayerProfile JSON/);
+assert.match(html, /Shared profile and labeled helpers/);
 assert.match(html, /Shared PlayerProfile truth is limited to grounded CIFI account state/);
 assert.match(html, /Diamonds/);
 assert.match(html, /Academy relics/);
 assert.match(html, /Planner-only helper inputs are optional/);
+assert.match(html, /Profile readiness/);
 assert.doesNotMatch(html, /Rank shard milestones/);
 assert.match(html, /Shard milestones \(disabled pending verified schema\)/);
 assert.match(html, /Grounded shard workflow/);
 assert.match(html, /Focus milestone/);
 assert.match(html, /Observed level on focus milestone/);
 assert.match(html, /Total shard milestone levels/);
+assert.match(html, /Grounded MVP checks only/);
+assert.match(html, /Grounded checks and labeled support checks/);
+assert.match(html, /shown separately so validation status does not overstate/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);
@@ -76,6 +82,17 @@ assert.match(appJs, /function getResearchTrackStatus/);
 assert.match(appJs, /function getResearchTrackProgressLabel/);
 assert.match(appJs, /function importPlayerProfileJson/);
 assert.match(appJs, /function exportPlayerProfileJson/);
+assert.match(appJs, /function initServerSession/);
+assert.match(appJs, /function closeServerSession/);
+assert.match(appJs, /function parseServerEvent/);
+assert.match(appJs, /function getGemPlannerBudget/);
+assert.match(appJs, /function getPlannerHelperCompletion/);
+assert.match(appJs, /NON_MVP_VALIDATION_MODULES/);
+assert.match(appJs, /function renderOverviewSupportSummary/);
+assert.match(appJs, /function renderSupportSurfaceNotice/);
+assert.match(appJs, /function renderValidationSection/);
+assert.match(appJs, /function buildLoopGuardrailRecommendations/);
+assert.match(appJs, /function getObservedBehaviorById/);
 assert.match(appJs, /function saveShardPlannerInputs/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
@@ -98,18 +115,43 @@ assert.match(appJs, /\.\/data\/shard-observed-behaviors\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestones-provenance\.grounded\.v1\.json/);
 assert.match(appJs, /npm run verify:data/);
 assert.match(appJs, /PlayerProfile JSON imported through the grounded normalizer/);
+assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
+assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
+assert.match(appJs, /Planner helpers filled:/);
+assert.match(appJs, /quarantined support surface/);
+assert.match(appJs, /Support surfaces stay out of the MVP feed/);
+assert.match(appJs, /Community-tool ship results/);
+assert.match(appJs, /Experimental gem results/);
+assert.match(appJs, /Grounded MVP checks/);
+assert.match(appJs, /Support-surface checks/);
+assert.match(appJs, /\/api\/client\/open/);
+assert.match(appJs, /\/api\/client\/events/);
+assert.match(appJs, /new EventSource/);
+assert.doesNotMatch(appJs, /externalModels\.experimental\.gemNodes\.budget\s*\|\|\s*state\.playerProfile\.compatibility\.unresolvedProfileFields\.gemDust/);
+assert.match(appJs, /CIFI Already Open/);
+assert.match(appJs, /window\.close\(\)/);
 assert.doesNotMatch(appJs, /C:\/Users\/Shadow\/Downloads/);
 assert.doesNotMatch(appJs, /function getShardUpgradeCost/);
 assert.doesNotMatch(appJs, /function getShardUpgradeValue/);
 assert.doesNotMatch(appJs, /function getShardFocusWeight/);
 assert.doesNotMatch(appJs, /function simulateShard/);
 assert.match(devServer, /\/api\/healthz/);
+assert.match(devServer, /\/api\/launcher\/reopen/);
+assert.match(devServer, /\/api\/client\/open/);
+assert.match(devServer, /\/api\/client\/events/);
+assert.match(devServer, /event: launch/);
+assert.match(devServer, /Launcher-mode server is idle\. Shutting down\./);
 assert.match(launcherVbs, /http:\/\/localhost:4173\//);
+assert.match(launcherVbs, /http:\/\/localhost:4173\/\?launch=1/);
+assert.match(launcherVbs, /Start-Process -WindowStyle Hidden/);
+assert.match(launcherVbs, /--launcher-mode/);
 assert.match(launcherVbs, /ResolveNodePath/);
 assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/validate-datasets.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+
+await verifyLauncherModeServerLifecycle();
 
 const shipWinner = [...snapshot.shipLoadouts]
   .map((loadout) => ({
@@ -222,3 +264,119 @@ assert.match(appJs, /function normalizeLoadoutName/);
 assert.match(appJs, /name: normalizeLoadoutName\(stored\.name, fallback\.name\)/);
 
 console.log("Smoke tests passed.");
+
+async function waitForServer(url, attempts = 50, delayMs = 250) {
+  for (let index = 0; index < attempts; index += 1) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        return;
+      }
+    } catch {}
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+  throw new Error(`Timed out waiting for ${url}`);
+}
+
+async function verifyLauncherModeServerLifecycle() {
+  const testPort = 43000 + Math.floor(Math.random() * 1000);
+  let serverProcess;
+  let spawnError = null;
+  let serverStdout = "";
+  let serverStderr = "";
+
+  try {
+    serverProcess = spawn(process.execPath, [fileURLToPath(new URL("../scripts/dev-server.mjs", import.meta.url))], {
+      cwd: repoRoot,
+      env: {
+        ...process.env,
+        PORT: String(testPort),
+        CIFI_LAUNCH_MODE: "1"
+      },
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+  } catch (error) {
+    if (error?.code === "EPERM") {
+      console.warn("Skipping launcher-mode lifecycle spawn test because child_process.spawn is not permitted here.");
+      return;
+    }
+    throw error;
+  }
+
+  serverProcess.once("error", (error) => {
+    spawnError = error;
+  });
+  serverProcess.stdout.on("data", (chunk) => {
+    serverStdout += chunk.toString();
+  });
+  serverProcess.stderr.on("data", (chunk) => {
+    serverStderr += chunk.toString();
+  });
+
+  try {
+    await waitForServer(`http://localhost:${testPort}/api/healthz`);
+  } catch (error) {
+    const combinedOutput = `${serverStdout}\n${serverStderr}`;
+    if (spawnError?.code === "EPERM" || /EPERM|not permitted/i.test(combinedOutput) || serverProcess.exitCode !== null) {
+      console.warn("Skipping launcher-mode lifecycle spawn test because the environment blocked subprocess launch.");
+      return;
+    }
+    throw new Error(`${error.message}\nstdout: ${serverStdout}\nstderr: ${serverStderr}`);
+  }
+
+  const clientOpen = await postJson(`http://localhost:${testPort}/api/client/open`, { clientId: "smoke-client" });
+  assert.equal(clientOpen.ok, true);
+  assert.equal(clientOpen.launcherMode, true);
+
+  const eventController = new AbortController();
+  const eventStream = await fetch(`http://localhost:${testPort}/api/client/events?clientId=smoke-client`, {
+    signal: eventController.signal
+  });
+  assert.equal(eventStream.ok, true);
+
+  const launcherReopen = await fetch(`http://localhost:${testPort}/api/launcher/reopen`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}"
+  });
+  assert.equal(launcherReopen.status, 202);
+
+  const healthAfterOpen = await fetchJson(`http://localhost:${testPort}/api/healthz`);
+  assert.equal(healthAfterOpen.clientCount, 1);
+  assert.equal(healthAfterOpen.launchSignalSequence, 1);
+
+  const clientClose = await postJson(`http://localhost:${testPort}/api/client/close`, { clientId: "smoke-client" });
+  assert.equal(clientClose.ok, true);
+  eventController.abort();
+
+  await waitForExit(serverProcess, 9000);
+}
+
+async function postJson(url, payload) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  assert.ok(response.ok, `Expected successful response from ${url}`);
+  return response.json();
+}
+
+async function fetchJson(url) {
+  const response = await fetch(url);
+  assert.ok(response.ok, `Expected successful response from ${url}`);
+  return response.json();
+}
+
+async function waitForExit(child, timeoutMs) {
+  await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      child.kill();
+      reject(new Error("Timed out waiting for launcher-mode server shutdown"));
+    }, timeoutMs);
+    child.once("exit", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  });
+}

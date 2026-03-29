@@ -57,7 +57,7 @@
           <article class="panel stat-panel">
             <span class="snapshot-title">Validation benchmark</span>
             <strong class="snapshot-value" id="validationStatusValue">0/0</strong>
-            <p class="meta">Known-case checks proving current outputs still match trusted expectations.</p>
+            <p class="meta">Grounded MVP checks only. Quarantined support-surface checks stay labeled on the Validation page.</p>
           </article>
         </div>
         <div class="overview-grid overview-grid-wide">
@@ -91,7 +91,7 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Player Data</p>
-            <h2>Shared profile and calibration</h2>
+            <h2>Shared profile and labeled helpers</h2>
           </div>
           <button id="saveProfileBtn" class="button button-primary">Save profile</button>
         </div>
@@ -407,11 +407,12 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Validation</p>
-            <h2>Match then improve</h2>
+            <h2>Grounded checks and labeled support checks</h2>
           </div>
           <button id="runValidationSuite" class="button button-primary">Run validation suite</button>
         </div>
         <section class="panel">
+          <p class="meta">Grounded MVP checks and quarantined support-surface checks are shown separately so validation status does not overstate what is currently first-class product truth.</p>
           <div id="validationResults" class="validation-grid"></div>
         </section>
       </section>

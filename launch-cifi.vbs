@@ -1,6 +1,6 @@
 Option Explicit
 
-Dim shell, fso, scriptDir, nodePath, appUrl, healthUrl
+Dim shell, fso, scriptDir, nodePath, launchUrl, healthUrl
 Dim startedServer
 
 Set shell = CreateObject("WScript.Shell")
@@ -8,7 +8,7 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
 nodePath = ResolveNodePath()
-appUrl = "http://localhost:4173/"
+launchUrl = "http://localhost:4173/?launch=1"
 healthUrl = "http://localhost:4173/api/healthz"
 startedServer = False
 
@@ -21,7 +21,7 @@ If nodePath = "" Then
 End If
 
 If Not IsServerRunning(healthUrl) Then
-  shell.Run "powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""Set-Location -LiteralPath '" & Replace(scriptDir, "'", "''") & "'; & '" & Replace(nodePath, "'", "''") & "' '.\scripts\dev-server.mjs'""", 0, False
+  shell.Run "powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""Start-Process -WindowStyle Hidden -WorkingDirectory '" & Replace(scriptDir, "'", "''") & "' -FilePath '" & Replace(nodePath, "'", "''") & "' -ArgumentList '.\scripts\dev-server.mjs','--launcher-mode'""", 0, False
   startedServer = True
 End If
 
@@ -34,7 +34,7 @@ If startedServer Then
   End If
 End If
 
-shell.Run appUrl, 1, False
+shell.Run launchUrl, 1, False
 
 Function ResolveNodePath()
   Dim candidates, candidate, resolved

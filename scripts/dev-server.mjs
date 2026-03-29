@@ -7,6 +7,12 @@ import { spawn } from "node:child_process";
 
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
+const launcherMode = process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
+const clientLeaseTtlMs = 60000;
+const launcherIdleCheckMs = 2000;
+const clientSessions = new Map();
+let launcherSignalSequence = 0;
+let launcherSawClient = false;
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -24,7 +30,38 @@ const server = createServer(async (request, response) => {
   const requestUrl = new URL(request.url || "/", `http://${request.headers.host || `localhost:${port}`}`);
 
   if (request.method === "GET" && requestUrl.pathname === "/api/healthz") {
-    writeJson(response, 200, { ok: true, port });
+    writeJson(response, 200, {
+      ok: true,
+      port,
+      launcherMode,
+      clientCount: getActiveClientCount(),
+      launchSignalSequence
+    });
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/client/open") {
+    await handleClientSessionTouch(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/client/heartbeat") {
+    await handleClientSessionTouch(request, response);
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/client/events") {
+    handleClientEvents(request, response, requestUrl);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/client/close") {
+    await handleClientSessionClose(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/launcher/reopen") {
+    handleLauncherReopen(response);
     return;
   }
 
@@ -101,6 +138,103 @@ async function handleGeneratorOcr(request, response) {
   }
 }
 
+async function handleClientSessionTouch(request, response) {
+  try {
+    const payload = await readJsonBody(request);
+    const clientId = String(payload?.clientId || "").trim();
+    if (!clientId) {
+      writeJson(response, 400, { error: "clientId is required." });
+      return;
+    }
+
+    launcherSawClient = true;
+    const existingSession = clientSessions.get(clientId) || {};
+    clientSessions.set(clientId, {
+      ...existingSession,
+      clientId,
+      lastSeenAt: Date.now()
+    });
+    writeJson(response, 200, {
+      ok: true,
+      launcherMode,
+      launchSignalSequence
+    });
+  } catch (error) {
+    writeJson(response, 500, { error: error instanceof Error ? error.message : String(error) });
+  }
+}
+
+async function handleClientSessionClose(request, response) {
+  try {
+    const payload = await readJsonBody(request);
+    const clientId = String(payload?.clientId || "").trim();
+    if (clientId) {
+      const session = clientSessions.get(clientId);
+      if (session?.stream) {
+        try {
+          session.stream.end();
+        } catch {}
+      }
+      clientSessions.delete(clientId);
+    }
+    writeJson(response, 200, {
+      ok: true,
+      remainingClients: getActiveClientCount()
+    });
+  } catch (error) {
+    writeJson(response, 500, { error: error instanceof Error ? error.message : String(error) });
+  }
+}
+
+function handleLauncherReopen(response) {
+  if (!getActiveClientCount()) {
+    writeJson(response, 409, { ok: false, reason: "no-active-clients" });
+    return;
+  }
+
+  launcherSignalSequence += 1;
+  broadcastLauncherEvent({
+    type: "launcher-reopen",
+    launchSignalSequence
+  });
+  writeJson(response, 202, {
+    ok: true,
+    launchSignalSequence
+  });
+}
+
+function handleClientEvents(request, response, requestUrl) {
+  const clientId = String(requestUrl.searchParams.get("clientId") || "").trim();
+  if (!clientId) {
+    writeJson(response, 400, { error: "clientId is required." });
+    return;
+  }
+
+  launcherSawClient = true;
+  response.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive"
+  });
+  response.write(`event: ready\ndata: ${JSON.stringify({ launchSignalSequence })}\n\n`);
+
+  const existingSession = clientSessions.get(clientId) || {};
+  clientSessions.set(clientId, {
+    ...existingSession,
+    clientId,
+    lastSeenAt: Date.now(),
+    stream: response
+  });
+
+  request.on("close", () => {
+    const session = clientSessions.get(clientId);
+    if (session?.stream === response) {
+      clientSessions.delete(clientId);
+      checkLauncherIdleState();
+    }
+  });
+}
+
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -163,6 +297,46 @@ function writeJson(response, status, payload) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   response.end(JSON.stringify(payload));
 }
+
+function getActiveClientCount() {
+  const cutoff = Date.now() - clientLeaseTtlMs;
+  let count = 0;
+  for (const session of clientSessions.values()) {
+    const hasLiveStream = session?.stream && !session.stream.destroyed && !session.stream.writableEnded;
+    const hasRecentHeartbeat = Number(session?.lastSeenAt || 0) >= cutoff;
+    if (hasLiveStream || hasRecentHeartbeat) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+function broadcastLauncherEvent(payload) {
+  const message = `event: launch\ndata: ${JSON.stringify(payload)}\n\n`;
+  for (const [clientId, session] of clientSessions.entries()) {
+    const stream = session?.stream;
+    if (!stream || stream.destroyed || stream.writableEnded) {
+      clientSessions.delete(clientId);
+      continue;
+    }
+    stream.write(message);
+  }
+}
+
+function checkLauncherIdleState() {
+  if (!launcherMode || !launcherSawClient || getActiveClientCount() > 0) {
+    return;
+  }
+
+  console.log("Launcher-mode server is idle. Shutting down.");
+  idleTimer && clearInterval(idleTimer);
+  server.close(() => {
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(0), 2000).unref();
+}
+
+const idleTimer = launcherMode ? setInterval(checkLauncherIdleState, launcherIdleCheckMs) : null;
 
 server.listen(port, () => {
   console.log(`CIFI Optimization Suite running at http://localhost:${port}`);
