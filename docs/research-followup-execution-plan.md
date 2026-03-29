@@ -230,6 +230,11 @@ Use the extracted token-shop and multiverse-market data to build the MVP spend-p
 **Tasks**
 
 - verify the in-game placement, owner, spend lane, and owned-state inputs for each spend system before any planner UI is added
+- document adjacent owner families or UI shells a spend system depends on when the extracted owner is not enough to explain labels, gating, or save-state inputs
+- recover one adjacent owner lane at a time where possible, starting with TokenShop-connected token-bank cap, fill, claim, and daily tokenium state
+- treat Daily Tokenium as a candidate Academy or Farm Mission reward lane when the evidence points there, instead of assuming TokenShop owns the whole mechanic
+- eliminate false formula leads early when extracted names are only resource assets, so later integration work stays focused on real owners and handlers
+- close slices by resolving at least one concrete owner, handler, or saved-state question instead of only broadening dependency notes
 - remap extracted spend data into grounded player-facing labels only where the mapping is evidenced
 - define what the MVP spend planner is allowed to recommend today after systems pass the mapping gate
 - separate verified cost/value facts from heuristics and user preference inputs

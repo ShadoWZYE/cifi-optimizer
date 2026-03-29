@@ -183,13 +183,20 @@
       "title": "Spend planner from extracted token and market data",
       "status": "active",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Document the spend-system integration gate so TokenShop and MultiverseMarket cannot be wired into the app before currencies, labels, and owned-state inputs are verified.",
+      "currentSlice": "Treat Daily Tokenium as an Academy or Farm Mission reward lane that TokenShop, LoopModifiers, and the Collector pack all touch, then chase the gameplay owner and saved-state inputs for that lane instead of treating it as TokenShop-only.",
       "completedSteps": [
         "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
-        "Document the spend-system integration gate and current verified versus unresolved app-integration facts."
+        "Document the spend-system integration gate and current verified versus unresolved app-integration facts.",
+        "Document the TokenShop-connected token-bank state lane and the adjacent mission, chest, and IAP systems it signals for later mapping.",
+        "Document that OR_TokenBankCap and OR_TokensFromChests currently behave like asset-label clues, not recovered formula owners.",
+        "Recover the current token-bank handler split: TokenShop for claim actions, BigStatisticPrefab.TokenBankCap for cap display, and TextHandlerLoopMods.SetLM244BonusText for one daily-tokenium mission text path.",
+        "Close the LM244 question by documenting it as a loop-mod text hook rather than a recovered gameplay owner.",
+        "Document Daily Tokenium as an Academy or Farm Mission reward lane with TokenShop, LoopModifiers, and the Collector pack acting as modifier families around it."
       ],
       "nextSteps": [
         "Verify the token-shop cost lane against canonical token or tokenium naming from the available assets.",
+        "Recover the saved-state owner or formula source behind token-bank cap, fill-speed, and claimable bank tokens from TokenShop or nearby level0 handlers rather than OR_* resource names.",
+        "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
         "Verify the multiverse-market currency and player-owned state inputs from the available assets instead of inferring them from diamonds.",
         "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."
       ]
