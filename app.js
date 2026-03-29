@@ -22,7 +22,7 @@ const APP_LAUNCH_KEYS = {
 
 const APP_LAUNCH_CHANNEL = "cifi-suite-launch";
 const APP_LAUNCH_HEARTBEAT_MS = 4000;
-const APP_LAUNCH_STALE_MS = 15000;
+const APP_LAUNCH_STALE_MS = 60000;
 const SERVER_SESSION_ENDPOINTS = {
   open: "/api/client/open",
   heartbeat: "/api/client/heartbeat",
@@ -702,12 +702,13 @@ function clearLaunchQueryFlag() {
 }
 
 function renderPassiveLaunchScreen() {
+  document.title = "CIFI Already Open";
   document.body.innerHTML = `
     <main class="launch-passive-shell">
       <section class="launch-passive-card">
         <p class="eyebrow">CIFI Already Open</p>
         <h1>Using the existing app tab.</h1>
-        <p class="meta">The launcher signaled the active CIFI tab to refresh. This window stays idle so you do not end up with two competing app instances.</p>
+        <p class="meta">Another launcher instance was triggered while CIFI is already open. This tab will try to close itself so the existing app tab stays primary.</p>
         <button class="button button-primary" id="passiveLaunchCloseBtn">Close this window</button>
       </section>
     </main>
@@ -716,6 +717,10 @@ function renderPassiveLaunchScreen() {
   document.getElementById("passiveLaunchCloseBtn")?.addEventListener("click", () => {
     window.close();
   });
+
+  window.setTimeout(() => {
+    window.close();
+  }, 1200);
 }
 
 function persistPlayerProfile() {

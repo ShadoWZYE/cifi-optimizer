@@ -1,6 +1,6 @@
 Option Explicit
 
-Dim shell, fso, scriptDir, nodePath, appUrl, healthUrl, reopenUrl
+Dim shell, fso, scriptDir, nodePath, launchUrl, healthUrl
 Dim startedServer
 
 Set shell = CreateObject("WScript.Shell")
@@ -8,9 +8,8 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
 nodePath = ResolveNodePath()
-appUrl = "http://localhost:4173/"
+launchUrl = "http://localhost:4173/?launch=1"
 healthUrl = "http://localhost:4173/api/healthz"
-reopenUrl = "http://localhost:4173/api/launcher/reopen"
 startedServer = False
 
 If nodePath = "" Then
@@ -35,13 +34,7 @@ If startedServer Then
   End If
 End If
 
-If Not startedServer Then
-  If NotifyExistingClient(reopenUrl) Then
-    WScript.Quit 0
-  End If
-End If
-
-shell.Run appUrl, 1, False
+shell.Run launchUrl, 1, False
 
 Function ResolveNodePath()
   Dim candidates, candidate, resolved
@@ -116,17 +109,4 @@ Function WaitForServer(url, attempts, delayMs)
     WScript.Sleep delayMs
   Next
   WaitForServer = False
-End Function
-
-Function NotifyExistingClient(url)
-  On Error Resume Next
-  Dim http
-  Set http = CreateObject("MSXML2.XMLHTTP")
-  http.open "POST", url, False
-  http.setRequestHeader "Content-Type", "application/json"
-  http.send "{}"
-  NotifyExistingClient = (Err.Number = 0 And http.Status = 202)
-  Set http = Nothing
-  Err.Clear
-  On Error GoTo 0
 End Function
