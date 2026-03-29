@@ -67,9 +67,15 @@ These values are preserved only for migration compatibility:
 - Canonical renames:
   - `gems` -> `player.resources.diamonds`
   - `relics` -> `player.resources.academyRelics`
+- Existing planner-helper aliases also migrate into the labeled shard-planning namespace:
+  - `shardRatePerHour` or `systems.shards.ratePerHour` -> `planning.shards.ratePerHour`
+  - `totalShardMilestoneLevels` or `systems.shards.totalMilestoneLevels` -> `planning.shards.totalMilestoneLevels`
+  - `shardFocusMilestoneId` or `systems.shards.focusMilestoneId` -> `planning.shards.focusMilestoneId`
+  - `shardFocusMilestoneLevel` or `systems.shards.focusMilestoneLevel` -> `planning.shards.focusMilestoneLevel`
 - Removed visible fields are not discarded; they move into `externalModels` or `compatibility`.
 - `externalModels.shipPlanner.communityToolState` is always preserved during migration.
 - Imported objects for real-but-unmapped systems should be preserved under `compatibility.unmappedSystemState` instead of being collapsed into canonical or planner namespaces.
+- Invalid numeric planner-helper values normalize to `null` instead of silently becoming canonical state.
 
 ## UI rule
 

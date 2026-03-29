@@ -204,11 +204,13 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   ]));
   normalized.planning.shards.focusMilestoneId = coerceNullableString(readFirst(source, [
     ["planning", "shards", "focusMilestoneId"],
+    ["systems", "shards", "focusMilestoneId"],
     ["planning", "shardFocusMilestoneId"],
     ["shardFocusMilestoneId"]
   ]));
   normalized.planning.shards.focusMilestoneLevel = coerceNullableNumber(readFirst(source, [
     ["planning", "shards", "focusMilestoneLevel"],
+    ["systems", "shards", "focusMilestoneLevel"],
     ["planning", "shardFocusMilestoneLevel"],
     ["shardFocusMilestoneLevel"]
   ]));

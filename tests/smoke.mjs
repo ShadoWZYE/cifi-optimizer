@@ -142,6 +142,9 @@ const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-
 assert.ok(feedTrack, "expected unified feed track");
 assert.equal(feedTrack.status, "active");
 assert.match(feedTrack.currentSlice, /Validate representative shard and loop action fixtures through the shared recommendation contract/);
+const profileTrack = snapshot.researchTracks.find((track) => track.id === "playerprofile-boundary-and-imports");
+assert.ok(profileTrack, "expected player profile track");
+assert.match(profileTrack.currentSlice, /Harden PlayerProfile migration checks and alias mapping for shard helper inputs/);
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
 assert.match(agentsMd, /available but unmapped/);
@@ -465,6 +468,9 @@ const migratedLegacyProfile = normalizePlayerProfile({
   relics: "12",
   shards: "9000",
   shardRatePerHour: "80",
+  totalShardMilestoneLevels: "17",
+  shardFocusMilestoneId: "milestone_alpha",
+  shardFocusMilestoneLevel: "12",
   power: "7",
   speed: "2.5",
   cargo: "19",
@@ -486,6 +492,9 @@ assert.equal(migratedLegacyProfile.player.resources.tokens, 120);
 assert.equal(migratedLegacyProfile.player.resources.academyRelics, 12);
 assert.equal(migratedLegacyProfile.player.resources.shards, 9000);
 assert.equal(migratedLegacyProfile.planning.shards.ratePerHour, 80);
+assert.equal(migratedLegacyProfile.planning.shards.totalMilestoneLevels, 17);
+assert.equal(migratedLegacyProfile.planning.shards.focusMilestoneId, "milestone_alpha");
+assert.equal(migratedLegacyProfile.planning.shards.focusMilestoneLevel, 12);
 assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.power, 7);
 assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.speed, 2.5);
 assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.cargo, 19);
@@ -545,6 +554,15 @@ assert.equal(migratedNestedProfile.externalModels.shipPlanner.communityToolState
 const migratedUnmappedSystemsProfile = normalizePlayerProfile({
   profileName: "Unmapped systems",
   systems: {
+    loop: {
+      loopReset: "73"
+    },
+    shards: {
+      ratePerHour: "44",
+      totalMilestoneLevels: "21",
+      focusMilestoneId: "omega_watch",
+      focusMilestoneLevel: "6"
+    },
     shardMilestones: {
       selectedMilestone: "alpha",
       observedLevel: 12
@@ -559,6 +577,11 @@ const migratedUnmappedSystemsProfile = normalizePlayerProfile({
 });
 
 assert.equal(migratedUnmappedSystemsProfile.meta.profileName, "Unmapped systems");
+assert.equal(migratedUnmappedSystemsProfile.player.loop.loopReset, 73);
+assert.equal(migratedUnmappedSystemsProfile.planning.shards.ratePerHour, 44);
+assert.equal(migratedUnmappedSystemsProfile.planning.shards.totalMilestoneLevels, 21);
+assert.equal(migratedUnmappedSystemsProfile.planning.shards.focusMilestoneId, "omega_watch");
+assert.equal(migratedUnmappedSystemsProfile.planning.shards.focusMilestoneLevel, 6);
 assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestones, {
   selectedMilestone: "alpha",
   observedLevel: 12
@@ -570,6 +593,22 @@ assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemStat
   inscription51Level: 2
 });
 assert.equal(migratedUnmappedSystemsProfile.player.resources.tokens, null);
+
+const migratedInvalidShardHelpers = normalizePlayerProfile({
+  planning: {
+    shards: {
+      ratePerHour: "not-a-number",
+      totalMilestoneLevels: "",
+      focusMilestoneId: "   ",
+      focusMilestoneLevel: "NaN"
+    }
+  }
+});
+
+assert.equal(migratedInvalidShardHelpers.planning.shards.ratePerHour, null);
+assert.equal(migratedInvalidShardHelpers.planning.shards.totalMilestoneLevels, null);
+assert.equal(migratedInvalidShardHelpers.planning.shards.focusMilestoneId, null);
+assert.equal(migratedInvalidShardHelpers.planning.shards.focusMilestoneLevel, null);
 
 assert.match(appJs, /function normalizeLoadoutName/);
 assert.match(appJs, /name: normalizeLoadoutName\(stored\.name, fallback\.name\)/);
