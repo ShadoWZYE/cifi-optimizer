@@ -42,6 +42,30 @@
       ]
     },
     {
+      "id": "shard-asset-grounding",
+      "label": "Shard asset grounding",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-asset-grounding.v1.json"
+      ]
+    },
+    {
+      "id": "extraction-candidate-families",
+      "label": "Extraction candidate families",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/extraction-candidate-families.v1.json"
+      ]
+    },
+    {
+      "id": "extraction-candidate-ranking",
+      "label": "Extraction candidate ranking",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/extraction-candidate-ranking.v1.json"
+      ]
+    },
+    {
       "id": "token-shop",
       "label": "Token shop extract",
       "classification": "extracted-mechanics",

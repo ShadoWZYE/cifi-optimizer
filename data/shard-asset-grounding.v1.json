@@ -1,0 +1,56 @@
+{
+  "dataset": "shard-asset-grounding.v1",
+  "generatedAt": "2026-03-29",
+  "sourceReport": "docs/systems/shards/shard-grounding-boundary.md",
+  "sourceArtifacts": [
+    "workbench/unity/joined/level0",
+    "workbench/unity/joined/sharedassets0.assets",
+    "docs/unity/unity-mechanics-pass.md"
+  ],
+  "classification": "extracted-mechanics",
+  "system": {
+    "id": "shards-and-loop-shell",
+    "label": "Shard milestones and loop-reset shell"
+  },
+  "groundedShellIdentifiers": [
+    "LoopResetStage1",
+    "LoopResetStage2",
+    "LoopResetStage3",
+    "LoopResetStage4",
+    "LoopResetStage5",
+    "ShardMilestones-64",
+    "ShardMilestones-256",
+    "MilestoneBonusesPerLevel",
+    "Milestones, Assembly-CSharp",
+    "SpaceShip-ShardMining-LV1",
+    "SpaceShip-ShardMining-LV2",
+    "SpaceShip-ShardMining-LV3",
+    "SpaceShip-ShardMining-LV4"
+  ],
+  "groundedFacts": [
+    "Shard and loop milestone shell content exists in shipped Unity assets.",
+    "Loop-reset stage identifiers exist in shipped Unity assets.",
+    "Shard progression is connected to the Demeter and shard-mining family in shipped Unity assets.",
+    "The strongest shard-specific owner trail now runs through ShardMining for scene control and ShardUpgradeInfo for shard milestone or upgrade data clues."
+  ],
+  "appSafeUses": [
+    "warning-oriented shard and loop guidance",
+    "descriptive shard grounding copy",
+    "APK-grounding validation cards"
+  ],
+  "blockedUses": [
+    "milestone ranking",
+    "ROI or ETA math",
+    "affordability estimates",
+    "best-upgrade recommendations",
+    "owner-grounded milestone import"
+  ],
+  "unresolvedGaps": [
+    "exact milestone data object or serialized row payload",
+    "player-owned milestone save-state inputs",
+    "asset-grounded milestone labels and row mapping",
+    "asset-grounded bonus tables",
+    "asset-grounded per-level shard costs"
+  ],
+  "integrationStatus": "available-but-unmapped"
+}

@@ -22,10 +22,14 @@ const snapshot = JSON.parse(await readFile(new URL("../data/game-data.snapshot.v
 const groundedShardMilestones = JSON.parse(await readFile(new URL("../data/shard-milestones.grounded.v1.json", import.meta.url), "utf8"));
 const groundedShardObserved = JSON.parse(await readFile(new URL("../data/shard-observed-behaviors.grounded.v1.json", import.meta.url), "utf8"));
 const groundedShardProvenance = JSON.parse(await readFile(new URL("../data/shard-milestones-provenance.grounded.v1.json", import.meta.url), "utf8"));
+const shardAssetGrounding = JSON.parse(await readFile(new URL("../data/shard-asset-grounding.v1.json", import.meta.url), "utf8"));
+const extractionCandidateFamilies = JSON.parse(await readFile(new URL("../data/extraction-candidate-families.v1.json", import.meta.url), "utf8"));
+const extractionCandidateRanking = JSON.parse(await readFile(new URL("../data/extraction-candidate-ranking.v1.json", import.meta.url), "utf8"));
 const bundledDatasetContract = JSON.parse(await readFile(new URL("../data/bundled-dataset-contract.v1.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const agentsMd = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8");
+const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 const groundingPlan = await readFile(new URL("../docs/cifi_grounding_plan.md", import.meta.url), "utf8");
 const unityAuditPlaybook = await readFile(new URL("../docs/unity/unity-audit-playbook.md", import.meta.url), "utf8");
 const ownerMap = await readFile(new URL("../docs/unity/unity-owner-map.md", import.meta.url), "utf8");
@@ -38,6 +42,20 @@ const multiverseMarketMetadataNeighborhoodDoc = await readFile(new URL("../docs/
 const recommendationContractModule = await readFile(new URL("../recommendation-contract.js", import.meta.url), "utf8");
 const recommendationFixtures = JSON.parse(await readFile(new URL("./fixtures/recommendation-actions.fixtures.json", import.meta.url), "utf8"));
 const shardVerificationDoc = await readFile(new URL("../docs/systems/shards/shard-system-verification.md", import.meta.url), "utf8");
+const shardGroundingBoundaryDoc = await readFile(new URL("../docs/systems/shards/shard-grounding-boundary.md", import.meta.url), "utf8");
+const shardExtractionCandidatesDoc = await readFile(new URL("../docs/systems/shards/shard-extraction-candidates.md", import.meta.url), "utf8");
+const shardOwnerFamilyDoc = await readFile(new URL("../docs/systems/shards/shard-owner-family-verification.md", import.meta.url), "utf8");
+const shardOwnerFamilyProbe = JSON.parse(await readFile(new URL("../data/shard-owner-family-probe.v1.json", import.meta.url), "utf8"));
+const shardVsConstructionOwnerProbe = JSON.parse(await readFile(new URL("../data/shard-vs-construction-owner-probe.v1.json", import.meta.url), "utf8"));
+const shardMetadataNeighborhoodDoc = await readFile(new URL("../docs/systems/shards/shard-metadata-neighborhood.md", import.meta.url), "utf8");
+const shardBonusMetadataNeighborhoodDoc = await readFile(new URL("../docs/systems/shards/shard-bonus-metadata-neighborhood.md", import.meta.url), "utf8");
+const shardminingMetadataNeighborhoodDoc = await readFile(new URL("../docs/systems/shards/shardmining-metadata-neighborhood.md", import.meta.url), "utf8");
+const shardUpgradeInfoMetadataNeighborhoodDoc = await readFile(new URL("../docs/systems/shards/shardupgradeinfo-metadata-neighborhood.md", import.meta.url), "utf8");
+const shardMetadataNeighborhood = JSON.parse(await readFile(new URL("../data/shard-metadata-neighborhood.v1.json", import.meta.url), "utf8"));
+const shardBonusMetadataNeighborhood = JSON.parse(await readFile(new URL("../data/shard-bonus-metadata-neighborhood.v1.json", import.meta.url), "utf8"));
+const shardminingMetadataNeighborhood = JSON.parse(await readFile(new URL("../data/shardmining-metadata-neighborhood.v1.json", import.meta.url), "utf8"));
+const shardUpgradeInfoMetadataNeighborhood = JSON.parse(await readFile(new URL("../data/shardupgradeinfo-metadata-neighborhood.v1.json", import.meta.url), "utf8"));
+const extractionRankingDoc = await readFile(new URL("../docs/unity/extraction-candidate-ranking.md", import.meta.url), "utf8");
 const playerProfileSchemaDoc = await readFile(new URL("../docs/contracts/player-profile-schema.md", import.meta.url), "utf8");
 const importMappingDoc = await readFile(new URL("../docs/contracts/import-mapping.md", import.meta.url), "utf8");
 const playerProfileAliasAuditDoc = await readFile(new URL("../docs/contracts/player-profile-import-aliases.md", import.meta.url), "utf8");
@@ -105,11 +123,11 @@ assert.deepEqual(
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.id),
-  ["snapshot", "shards", "token-shop", "multiverse-market"]
+  ["snapshot", "shards", "shard-asset-grounding", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market"]
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.classification),
-  ["canonical-app-snapshot", "grounded-descriptive", "extracted-mechanics", "extracted-mechanics"]
+  ["canonical-app-snapshot", "grounded-descriptive", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics"]
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.find((entry) => entry.id === "shards")?.files,
@@ -162,12 +180,35 @@ assert.ok(snapshot.validationCases.some((item) => item.expected === "Add current
 assert.ok(groundedShardMilestones.milestones.length >= 20, "expected grounded shard milestone dataset");
 assert.ok(groundedShardObserved.observations.length >= 4, "expected grounded shard behavior examples");
 assert.ok(groundedShardProvenance.uncertaintyLog.length >= 2, "expected grounded shard provenance notes");
+assert.equal(shardAssetGrounding.dataset, "shard-asset-grounding.v1");
+assert.equal(shardAssetGrounding.integrationStatus, "available-but-unmapped");
+assert.ok(shardAssetGrounding.groundedShellIdentifiers.includes("LoopResetStage1"));
+assert.ok(shardAssetGrounding.groundedShellIdentifiers.includes("MilestoneBonusesPerLevel"));
+assert.ok(shardAssetGrounding.groundedFacts.some((fact) => /ShardUpgradeInfo/.test(fact)));
+assert.ok(shardAssetGrounding.unresolvedGaps.length >= 4, "expected shard asset grounding gaps");
+assert.ok(shardAssetGrounding.unresolvedGaps.includes("exact milestone data object or serialized row payload"));
+assert.equal(extractionCandidateFamilies.dataset, "extraction-candidate-families.v1");
+assert.ok(extractionCandidateFamilies.families.length >= 8, "expected seeded extraction candidate families");
+assert.ok(extractionCandidateFamilies.families.some((family) => family.id === "shards.milestone-owner-family"));
+assert.ok(extractionCandidateFamilies.families.some((family) => family.id === "spend.multiverse-market-owner-family"));
+assert.equal(extractionCandidateRanking.dataset, "extraction-candidate-ranking.v1");
+assert.equal(extractionCandidateRanking.sourceConfig, "data/extraction-candidate-families.v1.json");
+assert.equal(extractionCandidateRanking.topCandidate.id, "spend.multiverse-market-owner-family");
+assert.equal(extractionCandidateRanking.topCandidate.track, "spend-planner-from-extracted-data");
+assert.ok(Array.isArray(extractionCandidateRanking.familyFilter));
+assert.equal(extractionCandidateRanking.familyFilter.length, 0);
+const topShardCandidate = extractionCandidateRanking.candidates.find((candidate) => candidate.track === "shards-and-loop-guardrails");
+assert.ok(topShardCandidate, "expected a PR2-local shard candidate");
+assert.equal(topShardCandidate.id, "shards.milestone-owner-family");
+assert.ok(topShardCandidate.heuristicScore >= 500);
+assert.ok(topShardCandidate.binaryFileCoverage.includes("workbench/unity/joined/level0"));
+assert.ok(topShardCandidate.binaryFileCoverage.includes("workbench/apk/base/global-metadata.dat"));
 assert.equal(groundedShardMilestones.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.equal(groundedShardObserved.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.equal(groundedShardProvenance.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
-  ["snapshot", "shards", "token-shop", "multiverse-market"]
+  ["snapshot", "shards", "shard-asset-grounding", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market"]
 );
 assert.deepEqual(
   datasetValidation.map((entry) => entry.classification),
@@ -201,8 +242,11 @@ assert.deepEqual(
 );
 const shardTrack = snapshot.researchTracks.find((track) => track.id === "shards-and-loop-guardrails");
 assert.ok(shardTrack, "expected shard workflow track");
+assert.equal(shardTrack.status, "active");
 assert.match(shardTrack.goal, /Keep shard guidance truthful/);
-assert.match(shardTrack.currentSlice, /Audit the current shard workflow against the stricter system-mapping gate/);
+assert.match(shardTrack.currentSlice, /ShardMining screen-controller plus ShardUpgradeInfo data-carrying trail/);
+assert.match(shardTrack.currentSlice, /ConstructionMilestones as a downgraded generic milestone lead/);
+assert.ok(shardTrack.nextSteps.length >= 3, "expected remaining shard extraction steps");
 const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
 assert.ok(spendTrack, "expected spend workflow track");
 assert.equal(spendTrack.status, "queued");
@@ -233,6 +277,16 @@ assert.match(groundingPlan, /Presence of extracted data is not enough/);
 assert.match(groundingPlan, /Even when a system is known to exist in CIFI/);
 assert.match(unityAuditPlaybook, /## Integration readiness gate/);
 assert.match(unityAuditPlaybook, /MultiverseMarket/);
+assert.match(unityAuditPlaybook, /Current narrowed but unresolved owner family/);
+assert.match(unityAuditPlaybook, /shard milestones \/ loop-reset shell/);
+assert.match(unityAuditPlaybook, /LoopResetStage1/);
+assert.match(unityAuditPlaybook, /ShardMining, Assembly-CSharp/);
+assert.match(unityAuditPlaybook, /ShardUpgradeInfo/);
+assert.match(unityAuditPlaybook, /TotalMilestoneLevels/);
+assert.match(unityAuditPlaybook, /FinalSU\*Bonus\*/);
+assert.match(unityAuditPlaybook, /ConstructionMilestones, Assembly-CSharp/);
+assert.match(unityAuditPlaybook, /generic or academy-side milestone family/);
+assert.match(unityAuditPlaybook, /Recommended next unresolved extraction target after PR2/);
 assert.match(unityAuditPlaybook, /narrowed persistence search toward `PlayerProfileData`/);
 assert.match(unityAuditPlaybook, /exact metadata field clues such as `InscryptionsDone` and nearby `IS\*Level`/);
 assert.match(unityAuditPlaybook, /broader progression-style field run that continues into trade counters and `Mech\*` fields/);
@@ -261,6 +315,20 @@ assert.match(ownerMap, /token-bank cap \/ fill \/ claim owner and save-state inp
 assert.match(ownerMap, /Academy or Farm Mission gameplay owner and saved-state inputs for Daily Tokenium/);
 assert.match(ownerMap, /`DiamondBoost` relation to the wider diamond-upgrade domain/);
 assert.match(ownerMap, /downstream effect owners for generators, token chests, diamond chests, cells, mod points, shards, research points, academy points, hunt loot, campaign fragments, and Ouroboros orbs/);
+assert.match(ownerMap, /Narrowed but not yet planner-ready owner families/);
+assert.match(ownerMap, /shard milestones \/ loop-reset shell/);
+assert.match(ownerMap, /LoopResetStage1/);
+assert.match(ownerMap, /ShardMilestones-64/);
+assert.match(ownerMap, /MilestoneBonusesPerLevel/);
+assert.match(ownerMap, /SpaceShip-ShardMining-LV1/);
+assert.match(ownerMap, /ShardMining, Assembly-CSharp/);
+assert.match(ownerMap, /ShardUpgradeInfo/);
+assert.match(ownerMap, /TotalMilestoneLevels/);
+assert.match(ownerMap, /get_SU1FinalUnlockReq/);
+assert.match(ownerMap, /FinalSU1Bonus1/);
+assert.match(ownerMap, /ConstructionMilestones, Assembly-CSharp/);
+assert.match(ownerMap, /generic or academy-side milestone family/);
+assert.match(ownerMap, /keep planner behavior blocked/);
 assert.match(spendVerificationDoc, /# Spend System Verification Gate/);
 assert.match(spendVerificationDoc, /available but unmapped/);
 assert.match(spendVerificationDoc, /Adjacent systems this signals/);
@@ -332,6 +400,82 @@ assert.match(dailyTokeniumMissionDoc, /grounded as a premium modifier family on 
 assert.match(shardVerificationDoc, /# Shard System Verification Gate/);
 assert.match(shardVerificationDoc, /community-grounded descriptive data/);
 assert.match(shardVerificationDoc, /not yet mapped enough from shipped-game assets/);
+assert.match(shardVerificationDoc, /Boundary reference:/);
+assert.match(shardVerificationDoc, /Asset-grounded shell evidence/);
+assert.match(shardVerificationDoc, /Owner-family evidence/);
+assert.match(shardVerificationDoc, /ShardMining, Assembly-CSharp/);
+assert.match(shardVerificationDoc, /ShardUpgradeInfo/);
+assert.match(shardVerificationDoc, /TotalMilestoneLevels/);
+assert.match(shardVerificationDoc, /FinalSU\*Bonus\*/);
+assert.match(shardVerificationDoc, /ConstructionMilestones/);
+assert.match(shardVerificationDoc, /academy-side/);
+assert.match(shardVerificationDoc, /LoopResetStage1/);
+assert.match(shardVerificationDoc, /MilestoneBonusesPerLevel/);
+assert.match(shardVerificationDoc, /asset-grounded milestone row order and milestone-number mapping/);
+assert.match(shardVerificationDoc, /The app may reference the asset-grounded shard shell only to justify warning-oriented shard and loop surfaces/);
+assert.match(shardGroundingBoundaryDoc, /# Shard Grounding Boundary/);
+assert.match(shardGroundingBoundaryDoc, /data\/shard-asset-grounding\.v1\.json/);
+assert.match(shardGroundingBoundaryDoc, /shard-extraction-candidates\.md/);
+assert.match(shardGroundingBoundaryDoc, /shard-owner-family-verification\.md/);
+assert.match(shardGroundingBoundaryDoc, /data\/extraction-candidate-ranking\.v1\.json/);
+assert.match(shardGroundingBoundaryDoc, /APK or Unity-grounded now/);
+assert.match(shardGroundingBoundaryDoc, /Descriptive-only for now/);
+assert.match(shardGroundingBoundaryDoc, /Owner-family split recovered now/);
+assert.match(shardGroundingBoundaryDoc, /ConstructionMilestones, Assembly-CSharp/);
+assert.match(shardGroundingBoundaryDoc, /ShardMining, Assembly-CSharp/);
+assert.match(shardGroundingBoundaryDoc, /ShardUpgradeInfo/);
+assert.match(shardGroundingBoundaryDoc, /TotalMilestoneLevels/);
+assert.match(shardGroundingBoundaryDoc, /FinalSU\*Bonus\*/);
+assert.match(shardGroundingBoundaryDoc, /generic or academy-side milestone family/);
+assert.match(shardGroundingBoundaryDoc, /LoopResetStage1/);
+assert.match(shardGroundingBoundaryDoc, /Milestones, Assembly-CSharp/);
+assert.match(shardGroundingBoundaryDoc, /ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked/i);
+assert.match(shardExtractionCandidatesDoc, /# Shard Extraction Candidates/);
+assert.match(shardExtractionCandidatesDoc, /shards\.milestone-owner-family/);
+assert.match(shardExtractionCandidatesDoc, /loop-reset stage family/i);
+assert.match(shardExtractionCandidatesDoc, /heuristic, not mechanic truth/i);
+assert.match(shardExtractionCandidatesDoc, /repo-wide default top unknown extraction candidate/i);
+assert.match(shardExtractionCandidatesDoc, /best next shard-planner extraction candidate/i);
+assert.match(shardOwnerFamilyDoc, /# Shard Owner-Family Verification/);
+assert.match(shardOwnerFamilyDoc, /ConstructionMilestones, Assembly-CSharp/);
+assert.match(shardOwnerFamilyDoc, /ShardMining, Assembly-CSharp/);
+assert.match(shardOwnerFamilyDoc, /ShardMining\|ShardUpgradeInfo/);
+assert.match(shardOwnerFamilyDoc, /FastBuyButtonMethodShards/);
+assert.match(shardOwnerFamilyDoc, /blueprint hold strings/);
+assert.match(shardOwnerFamilyDoc, /StartMilestone\*Hold/);
+assert.match(shardOwnerFamilyDoc, /TotalMilestoneLevels/);
+assert.match(shardOwnerFamilyDoc, /FinalSU1Bonus1/);
+assert.match(shardOwnerFamilyDoc, /FinalSU29Bonus2/);
+assert.match(shardOwnerFamilyDoc, /generic or academy-side milestone family/);
+assert.equal(shardOwnerFamilyProbe[0].file, "workbench\\unity\\joined\\level0");
+assert.ok(shardOwnerFamilyProbe.some((entry) => entry.match_count > 0), "expected shard owner-family probe matches");
+assert.equal(shardVsConstructionOwnerProbe[0].file, "workbench\\unity\\joined\\level0");
+assert.ok(
+  shardVsConstructionOwnerProbe.some(
+    (entry) =>
+      entry.matches?.some((match) => match.value === "ConstructionMilestones, Assembly-CSharp") &&
+      entry.matches?.some((match) => match.value === "ShardMining, Assembly-CSharp")
+  ),
+  "expected side-by-side shard vs construction owner probe hits"
+);
+assert.equal(shardMetadataNeighborhood.metadata, "workbench\\apk\\base\\global-metadata.dat");
+assert.equal(shardBonusMetadataNeighborhood.metadata, "workbench\\apk\\base\\global-metadata.dat");
+assert.equal(shardminingMetadataNeighborhood.metadata, "workbench\\apk\\base\\global-metadata.dat");
+assert.equal(shardUpgradeInfoMetadataNeighborhood.metadata, "workbench\\apk\\base\\global-metadata.dat");
+assert.match(shardMetadataNeighborhoodDoc, /ConstructionMilestonesSum/);
+assert.match(shardMetadataNeighborhoodDoc, /get_MilestoneMaxLevel/);
+assert.match(shardMetadataNeighborhoodDoc, /ClaimDiamondMilestone/);
+assert.match(shardBonusMetadataNeighborhoodDoc, /FinalMilestone1Bonus1/);
+assert.match(shardBonusMetadataNeighborhoodDoc, /FinalMilestone10Bonus/);
+assert.match(shardBonusMetadataNeighborhoodDoc, /BuyMilestone57/);
+assert.match(shardminingMetadataNeighborhoodDoc, /ShardUpgradeInfo/);
+assert.match(shardminingMetadataNeighborhoodDoc, /TotalMilestoneLevels/);
+assert.match(shardminingMetadataNeighborhoodDoc, /get_SU1FinalUnlockReq/);
+assert.match(shardUpgradeInfoMetadataNeighborhoodDoc, /FinalSU29Bonus2/);
+assert.match(shardUpgradeInfoMetadataNeighborhoodDoc, /<FastBuyEnum>d__1429/);
+assert.match(extractionRankingDoc, /# Extraction Candidate Ranking/);
+assert.match(extractionRankingDoc, /spend\.multiverse-market-owner-family/);
+assert.match(extractionRankingDoc, /filter by track or family id/i);
 assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState/);
 assert.match(playerProfileSchemaDoc, /## Experimental support-surface helpers/);
 assert.match(playerProfileSchemaDoc, /systems\.metaProgression\.hunterLevel/);
@@ -402,6 +546,8 @@ assert.match(appJs, /function renderShardWorkflowReference/);
 assert.match(appJs, /function renderResearchTrackSupport/);
 assert.match(appJs, /function renderResearchTrackProgress/);
 assert.match(appJs, /function getResearchTrackOrder/);
+assert.match(appJs, /function getResearchTrackLane/);
+assert.match(appJs, /if \(track\.status === "completed"\) \{\s*return "Completed";\s*\}/);
 assert.match(appJs, /function getResearchTrackStatus/);
 assert.match(appJs, /function getResearchTrackProgressLabel/);
 assert.match(appJs, /from "\.\/recommendation-contract\.js"/);
@@ -463,6 +609,8 @@ assert.match(appJs, /Shard milestone manual import stays disabled; this build on
 assert.match(appJs, /\.\/data\/shard-milestones\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-observed-behaviors\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestones-provenance\.grounded\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-asset-grounding\.v1\.json/);
+assert.match(appJs, /\.\/data\/extraction-candidate-ranking\.v1\.json/);
 assert.match(appJs, /npm run verify:data/);
 assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(appJs, /PlayerProfile JSON imported through the grounded normalizer/);
@@ -482,7 +630,19 @@ assert.match(appJs, /Grounding checks stay separate from MVP behavior/);
 assert.match(appJs, /TokenShop owner payload/);
 assert.match(appJs, /MultiverseMarket owner payload/);
 assert.match(appJs, /Shard milestone mapping gate/);
+assert.match(appJs, /Shard shell grounding payload/);
+assert.match(appJs, /Grounded shard shell evidence available/);
+assert.match(appJs, /Repo-wide default unknown candidate/);
+assert.match(appJs, /Top PR2-local shard candidate/);
+assert.match(appJs, /Why next:/);
 assert.match(appJs, /Available but unmapped/);
+assert.match(appJs, /Shard operations have built-in pacing/);
+assert.match(appJs, /Grounded shard anchors can support loop warnings even while milestone rows remain descriptive-only/);
+assert.match(appJs, /APK-grounded shard shell/);
+assert.match(appJs, /repo-local Unity shell evidence for shard and loop milestone families/);
+assert.match(appJs, /bonus labels, or cost notes here as shipped-game extracted truth/);
+assert.match(appJs, /MilestoneBonusesPerLevel/);
+assert.match(appJs, /Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked/);
 assert.match(appJs, /These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels/);
 assert.match(appJs, /Canonical ship system, provisional implementation/);
 assert.match(appJs, /Experimental gem results/);
@@ -528,9 +688,13 @@ assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
 assert.match(importMappingDoc, /compatibility-only fields/i);
 const datasetContractsDoc = await readFile(new URL("../docs/contracts/dataset-contracts.md", import.meta.url), "utf8");
 assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-asset-grounding\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/extraction-candidate-families\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/extraction-candidate-ranking\.v1\.json/);
 assert.match(datasetContractsDoc, /docs\/contracts\/dataset-refresh-checklist\.md/);
 assert.match(datasetContractsDoc, /Source-priority metadata/);
 assert.match(datasetContractsDoc, /APK\/Unity artifacts and repo extraction outputs first/);
+assert.match(datasetContractsDoc, /shard-asset-grounding, extraction-candidate-families, extraction-candidate-ranking, token-shop, and multiverse-market datasets/);
 assert.match(datasetContractsDoc, /editing `data\/bundled-dataset-contract\.v1\.json`/);
 assert.match(datasetRefreshChecklistDoc, /# Dataset Refresh Checklist/);
 assert.match(datasetRefreshChecklistDoc, /Record the shipped dataset in `data\/bundled-dataset-contract\.v1\.json`/);
@@ -543,6 +707,9 @@ assert.match(researchNoteTemplateDoc, /Recommended next step/);
 assert.match(shardResearchNote, /## Repo-local intake metadata/);
 assert.match(shardResearchNote, /APK\/Unity path checked first: no/);
 assert.match(shardResearchNote, /community-grounded descriptive input/);
+assert.match(readme, /data\/shard-asset-grounding\.v1\.json/);
+assert.match(readme, /data\/extraction-candidate-families\.v1\.json/);
+assert.match(readme, /data\/extraction-candidate-ranking\.v1\.json/);
 
 await verifyLauncherModeServerLifecycle();
 

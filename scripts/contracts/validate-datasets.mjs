@@ -164,6 +164,103 @@ function validateMultiverseMarket(multiverseMarket) {
   };
 }
 
+function validateShardAssetGrounding(assetGrounding) {
+  expectNonEmptyString(assetGrounding.dataset, "shard asset grounding dataset id must be present");
+  expectNonEmptyString(assetGrounding.generatedAt, "shard asset grounding generatedAt must be present");
+  expectNonEmptyString(assetGrounding.sourceReport, "shard asset grounding sourceReport must be present");
+  expectArray(assetGrounding.sourceArtifacts, "shard asset grounding sourceArtifacts must be an array");
+  assert.ok(assetGrounding.sourceArtifacts.length >= 2, "shard asset grounding should keep source artifact references");
+  expectNonEmptyString(assetGrounding.classification, "shard asset grounding classification must be present");
+  expectRecord(assetGrounding.system, "shard asset grounding system must be an object");
+  expectNonEmptyString(assetGrounding.system.id, "shard asset grounding system.id must be present");
+  expectNonEmptyString(assetGrounding.system.label, "shard asset grounding system.label must be present");
+  expectArray(assetGrounding.groundedShellIdentifiers, "shard asset grounding groundedShellIdentifiers must be an array");
+  assert.ok(assetGrounding.groundedShellIdentifiers.length >= 8, "shard asset grounding should include the recovered shell identifiers");
+  expectArray(assetGrounding.groundedFacts, "shard asset grounding groundedFacts must be an array");
+  expectArray(assetGrounding.appSafeUses, "shard asset grounding appSafeUses must be an array");
+  expectArray(assetGrounding.blockedUses, "shard asset grounding blockedUses must be an array");
+  expectArray(assetGrounding.unresolvedGaps, "shard asset grounding unresolvedGaps must be an array");
+  expectNonEmptyString(assetGrounding.integrationStatus, "shard asset grounding integrationStatus must be present");
+  assert.ok(
+    assetGrounding.groundedShellIdentifiers.includes("LoopResetStage1") &&
+    assetGrounding.groundedShellIdentifiers.includes("MilestoneBonusesPerLevel"),
+    "shard asset grounding should preserve key loop and milestone shell identifiers"
+  );
+  assert.equal(
+    assetGrounding.integrationStatus,
+    "available-but-unmapped",
+    "shard asset grounding must stay available-but-unmapped until owner recovery"
+  );
+  return {
+    id: "shard-asset-grounding",
+    label: "Shard asset grounding",
+    classification: "extracted-mechanics",
+    stats: [
+      `${assetGrounding.groundedShellIdentifiers.length} shell identifiers`,
+      `${assetGrounding.unresolvedGaps.length} unresolved gaps`
+    ]
+  };
+}
+
+function validateExtractionCandidateRanking(ranking) {
+  expectNonEmptyString(ranking.dataset, "extraction candidate ranking dataset id must be present");
+  expectNonEmptyString(ranking.generatedAt, "extraction candidate ranking generatedAt must be present");
+  expectNonEmptyString(ranking.sourceConfig, "extraction candidate ranking sourceConfig must be present");
+  expectArray(ranking.binaryFiles, "extraction candidate ranking binaryFiles must be an array");
+  expectArray(ranking.textFiles, "extraction candidate ranking textFiles must be an array");
+  expectArray(ranking.candidates, "extraction candidate ranking candidates must be an array");
+  assert.ok(ranking.candidates.length >= 4, "extraction candidate ranking should include the seeded families");
+  expectRecord(ranking.topCandidate, "extraction candidate ranking topCandidate must be an object");
+  expectNonEmptyString(ranking.topCandidate.id, "extraction candidate ranking topCandidate.id must be present");
+  expectNonEmptyString(ranking.topCandidate.label, "extraction candidate ranking topCandidate.label must be present");
+  ranking.candidates.forEach((candidate, index) => {
+    expectNonEmptyString(candidate.id, `extraction candidate ${index} id must be present`);
+    expectNonEmptyString(candidate.label, `extraction candidate ${index} label must be present`);
+    expectArray(candidate.anchors, `extraction candidate ${index} anchors must be an array`);
+    assert.equal(typeof candidate.heuristicScore, "number", `extraction candidate ${index} heuristicScore must be numeric`);
+    assert.equal(typeof candidate.unresolvedMentionCount, "number", `extraction candidate ${index} unresolvedMentionCount must be numeric`);
+  });
+  return {
+    id: "extraction-candidate-ranking",
+    label: "Extraction candidate ranking",
+    classification: "extracted-mechanics",
+    stats: [
+      `${ranking.candidates.length} candidate families`,
+      `${ranking.topCandidate.label} top default target`
+    ]
+  };
+}
+
+function validateExtractionCandidateFamilies(config) {
+  expectNonEmptyString(config.dataset, "extraction candidate family config dataset id must be present");
+  expectNonEmptyString(config.generatedAt, "extraction candidate family config generatedAt must be present");
+  expectArray(config.binaryFiles, "extraction candidate family config binaryFiles must be an array");
+  expectArray(config.textFiles, "extraction candidate family config textFiles must be an array");
+  expectArray(config.globalContextTerms, "extraction candidate family config globalContextTerms must be an array");
+  expectArray(config.unresolvedMarkers, "extraction candidate family config unresolvedMarkers must be an array");
+  expectArray(config.families, "extraction candidate family config families must be an array");
+  assert.ok(config.families.length >= 6, "extraction candidate family config should include the seeded family set");
+  config.families.forEach((family, index) => {
+    expectNonEmptyString(family.id, `extraction candidate family ${index} id must be present`);
+    expectNonEmptyString(family.label, `extraction candidate family ${index} label must be present`);
+    expectNonEmptyString(family.track, `extraction candidate family ${index} track must be present`);
+    expectArray(family.terms, `extraction candidate family ${index} terms must be an array`);
+    expectArray(family.anchors, `extraction candidate family ${index} anchors must be an array`);
+    assert.ok(family.terms.length >= 1, `extraction candidate family ${index} should keep at least one search term`);
+    assert.ok(family.anchors.length >= 1, `extraction candidate family ${index} should keep at least one anchor`);
+  });
+  return {
+    id: "extraction-candidate-families",
+    label: "Extraction candidate families",
+    classification: "extracted-mechanics",
+    stats: [
+      `${config.families.length} configured families`,
+      `${config.binaryFiles.length} binary artifacts`,
+      `${config.textFiles.length} text sources`
+    ]
+  };
+}
+
 async function validateBundledDatasetContract(contract) {
   expectNonEmptyString(contract.contractVersion, "bundled dataset contract version must be present");
   expectNonEmptyString(contract.updatedAt, "bundled dataset contract updatedAt must be present");
@@ -190,7 +287,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 4, "bundled dataset contract must track the four shipped dataset groups");
+  assert.equal(contract.datasets.length, 7, "bundled dataset contract must track the seven shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -236,12 +333,18 @@ export async function validateBundledDatasets() {
   const shardMilestones = await readJson("../../data/shard-milestones.grounded.v1.json");
   const shardObserved = await readJson("../../data/shard-observed-behaviors.grounded.v1.json");
   const shardProvenance = await readJson("../../data/shard-milestones-provenance.grounded.v1.json");
+  const shardAssetGrounding = await readJson("../../data/shard-asset-grounding.v1.json");
+  const extractionCandidateFamilies = await readJson("../../data/extraction-candidate-families.v1.json");
+  const extractionCandidateRanking = await readJson("../../data/extraction-candidate-ranking.v1.json");
   const tokenShop = await readJson("../../data/token-shop-values.json");
   const multiverseMarket = await readJson("../../data/multiverse-market-values.json");
 
   const summaries = [
     validateSnapshot(snapshot),
     validateShardDatasets(shardMilestones, shardObserved, shardProvenance),
+    validateShardAssetGrounding(shardAssetGrounding),
+    validateExtractionCandidateFamilies(extractionCandidateFamilies),
+    validateExtractionCandidateRanking(extractionCandidateRanking),
     validateTokenShop(tokenShop),
     validateMultiverseMarket(multiverseMarket)
   ];

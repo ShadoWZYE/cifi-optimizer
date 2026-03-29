@@ -1,0 +1,3591 @@
+{
+  "metadata": "workbench\\apk\\base\\global-metadata.dat",
+  "anchor_count": 13,
+  "context": 14,
+  "results": [
+    {
+      "anchor": "ShardUpgradeInfo",
+      "matches": [
+        {
+          "anchor": "ShardUpgradeInfo",
+          "match_index": 67964,
+          "match_offset": 1887211,
+          "match_value": "ShardUpgradeInfo",
+          "context": [
+            {
+              "offset": 1886995,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus2"
+            },
+            {
+              "offset": 1887011,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus3"
+            },
+            {
+              "offset": 1887027,
+              "encoding": "ascii",
+              "value": "OverLevel100Exponent"
+            },
+            {
+              "offset": 1887048,
+              "encoding": "ascii",
+              "value": "OverLevel200Exponent"
+            },
+            {
+              "offset": 1887069,
+              "encoding": "ascii",
+              "value": "OverLevel300Exponent"
+            },
+            {
+              "offset": 1887090,
+              "encoding": "ascii",
+              "value": "OverLevel400Exponent"
+            },
+            {
+              "offset": 1887111,
+              "encoding": "ascii",
+              "value": "TotalMilestoneLevels"
+            },
+            {
+              "offset": 1887132,
+              "encoding": "ascii",
+              "value": "Phase1Tick"
+            },
+            {
+              "offset": 1887143,
+              "encoding": "ascii",
+              "value": "Phase2Tick"
+            },
+            {
+              "offset": 1887154,
+              "encoding": "ascii",
+              "value": "Phase3Tick"
+            },
+            {
+              "offset": 1887165,
+              "encoding": "ascii",
+              "value": "Phase4Tick"
+            },
+            {
+              "offset": 1887176,
+              "encoding": "ascii",
+              "value": "Phase5Tick"
+            },
+            {
+              "offset": 1887187,
+              "encoding": "ascii",
+              "value": "Phase6Tick"
+            },
+            {
+              "offset": 1887198,
+              "encoding": "ascii",
+              "value": "CooldownTick"
+            },
+            {
+              "offset": 1887211,
+              "encoding": "ascii",
+              "value": "ShardUpgradeInfo"
+            },
+            {
+              "offset": 1887228,
+              "encoding": "ascii",
+              "value": "get_IsUnlocked"
+            },
+            {
+              "offset": 1887243,
+              "encoding": "ascii",
+              "value": "set_IsUnlocked"
+            },
+            {
+              "offset": 1887258,
+              "encoding": "ascii",
+              "value": "<IsUnlocked>k__BackingField"
+            },
+            {
+              "offset": 1887286,
+              "encoding": "ascii",
+              "value": "upgrade"
+            },
+            {
+              "offset": 1887294,
+              "encoding": "ascii",
+              "value": "<SortCostAndBools>b__1266_0"
+            },
+            {
+              "offset": 1887322,
+              "encoding": "ascii",
+              "value": "<>9__1266_0"
+            },
+            {
+              "offset": 1887334,
+              "encoding": "ascii",
+              "value": "<FastBuyEnum>d__1429"
+            },
+            {
+              "offset": 1887355,
+              "encoding": "ascii",
+              "value": "TechUpgrades"
+            },
+            {
+              "offset": 1887368,
+              "encoding": "ascii",
+              "value": "get_TotalHardwareMult"
+            },
+            {
+              "offset": 1887390,
+              "encoding": "ascii",
+              "value": "get_TotalSoftwareMult"
+            },
+            {
+              "offset": 1887412,
+              "encoding": "ascii",
+              "value": "get_TU1Bonus"
+            },
+            {
+              "offset": 1887425,
+              "encoding": "ascii",
+              "value": "get_TU1BonusNext"
+            },
+            {
+              "offset": 1887442,
+              "encoding": "ascii",
+              "value": "get_TU2Bonus"
+            },
+            {
+              "offset": 1887455,
+              "encoding": "ascii",
+              "value": "get_TU2BonusNext"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardUpgradeInfo",
+          "match_index": 154967,
+          "match_offset": 7597670,
+          "match_value": "ShardMining|ShardUpgradeInfo",
+          "context": [
+            {
+              "offset": 7597365,
+              "encoding": "ascii",
+              "value": "|Ozzy"
+            },
+            {
+              "offset": 7597375,
+              "encoding": "ascii",
+              "value": "|OzzyEnemy"
+            },
+            {
+              "offset": 7597390,
+              "encoding": "ascii",
+              "value": "|OzzyUpgrades"
+            },
+            {
+              "offset": 7597408,
+              "encoding": "ascii",
+              "value": "|MultiverseMarket"
+            },
+            {
+              "offset": 7597429,
+              "encoding": "ascii",
+              "value": "'MultiverseMarket|InscryptionTupleObject"
+            },
+            {
+              "offset": 7597474,
+              "encoding": "ascii",
+              "value": "MultiverseMarket|Inscryption"
+            },
+            {
+              "offset": 7597507,
+              "encoding": "ascii",
+              "value": "|NecrumExchange"
+            },
+            {
+              "offset": 7597527,
+              "encoding": "ascii",
+              "value": "|OuroborosResetter"
+            },
+            {
+              "offset": 7597550,
+              "encoding": "ascii",
+              "value": "|TraitSpheres"
+            },
+            {
+              "offset": 7597568,
+              "encoding": "ascii",
+              "value": "|ZeimarrNautallium"
+            },
+            {
+              "offset": 7597591,
+              "encoding": "ascii",
+              "value": "|ResearchLaboratory"
+            },
+            {
+              "offset": 7597615,
+              "encoding": "ascii",
+              "value": "|ResearchUltimas"
+            },
+            {
+              "offset": 7597636,
+              "encoding": "ascii",
+              "value": "|RewardLanes"
+            },
+            {
+              "offset": 7597653,
+              "encoding": "ascii",
+              "value": "|ShardMining"
+            },
+            {
+              "offset": 7597670,
+              "encoding": "ascii",
+              "value": "ShardMining|ShardUpgradeInfo"
+            },
+            {
+              "offset": 7597703,
+              "encoding": "ascii",
+              "value": "|TechUpgrades"
+            },
+            {
+              "offset": 7597721,
+              "encoding": "ascii",
+              "value": "|Colors"
+            },
+            {
+              "offset": 7598377,
+              "encoding": "ascii",
+              "value": "ticks"
+            },
+            {
+              "offset": 7598383,
+              "encoding": "ascii",
+              "value": "dateData"
+            },
+            {
+              "offset": 7598418,
+              "encoding": "ascii",
+              "value": " \"$&("
+            },
+            {
+              "offset": 7598442,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJL"
+            },
+            {
+              "offset": 7598648,
+              "encoding": "ascii",
+              "value": "&6@BDFHJLNPRTVXZ\\^`bdfhjlnpr"
+            },
+            {
+              "offset": 7598955,
+              "encoding": "ascii",
+              "value": "[yy?"
+            },
+            {
+              "offset": 7599031,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bd"
+            },
+            {
+              "offset": 7599082,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bdH1A5E0066-58DC-428A-B21C-0AD6CDAE2789"
+            },
+            {
+              "offset": 7599165,
+              "encoding": "ascii",
+              "value": " *48@BDFJLNV"
+            },
+            {
+              "offset": 7599178,
+              "encoding": "ascii",
+              "value": "&(,.026HPRTXZ\\^`jlnprtv"
+            },
+            {
+              "offset": 7599234,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@B"
+            },
+            {
+              "offset": 7599268,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "TotalMilestoneLevels",
+      "matches": [
+        {
+          "anchor": "TotalMilestoneLevels",
+          "match_index": 66955,
+          "match_offset": 1870740,
+          "match_value": "get_TotalMilestoneLevels",
+          "context": [
+            {
+              "offset": 1870495,
+              "encoding": "ascii",
+              "value": "get_SU23Cost"
+            },
+            {
+              "offset": 1870508,
+              "encoding": "ascii",
+              "value": "get_SU24Cost"
+            },
+            {
+              "offset": 1870521,
+              "encoding": "ascii",
+              "value": "get_SU25Cost"
+            },
+            {
+              "offset": 1870534,
+              "encoding": "ascii",
+              "value": "get_SU26Cost"
+            },
+            {
+              "offset": 1870547,
+              "encoding": "ascii",
+              "value": "get_SU27Cost"
+            },
+            {
+              "offset": 1870560,
+              "encoding": "ascii",
+              "value": "get_SU28Cost"
+            },
+            {
+              "offset": 1870573,
+              "encoding": "ascii",
+              "value": "get_SU29Cost"
+            },
+            {
+              "offset": 1870586,
+              "encoding": "ascii",
+              "value": "InitializeMaxLevelBools"
+            },
+            {
+              "offset": 1870610,
+              "encoding": "ascii",
+              "value": "UpdateMaxedMilestonesList"
+            },
+            {
+              "offset": 1870636,
+              "encoding": "ascii",
+              "value": "UpdateUnlockedMilestonesList"
+            },
+            {
+              "offset": 1870665,
+              "encoding": "ascii",
+              "value": "SortCostAndBools"
+            },
+            {
+              "offset": 1870682,
+              "encoding": "ascii",
+              "value": "CountAffordableShard"
+            },
+            {
+              "offset": 1870703,
+              "encoding": "ascii",
+              "value": "UpdateShardCostList"
+            },
+            {
+              "offset": 1870723,
+              "encoding": "ascii",
+              "value": "GetShardCostList"
+            },
+            {
+              "offset": 1870740,
+              "encoding": "ascii",
+              "value": "get_TotalMilestoneLevels"
+            },
+            {
+              "offset": 1870765,
+              "encoding": "ascii",
+              "value": "InitializeShards"
+            },
+            {
+              "offset": 1870782,
+              "encoding": "ascii",
+              "value": "CheckOuroObjects"
+            },
+            {
+              "offset": 1870799,
+              "encoding": "ascii",
+              "value": "CheckAllPhaseFills"
+            },
+            {
+              "offset": 1870818,
+              "encoding": "ascii",
+              "value": "CheckAllMilestoneLevelFills"
+            },
+            {
+              "offset": 1870846,
+              "encoding": "ascii",
+              "value": "CheckMilestone0ProgressFill"
+            },
+            {
+              "offset": 1870874,
+              "encoding": "ascii",
+              "value": "CheckMilestone1ProgressFill"
+            },
+            {
+              "offset": 1870902,
+              "encoding": "ascii",
+              "value": "CheckMilestone2ProgressFill"
+            },
+            {
+              "offset": 1870930,
+              "encoding": "ascii",
+              "value": "CheckMilestone3ProgressFill"
+            },
+            {
+              "offset": 1870958,
+              "encoding": "ascii",
+              "value": "CheckMilestone4ProgressFill"
+            },
+            {
+              "offset": 1870986,
+              "encoding": "ascii",
+              "value": "CheckMilestone5ProgressFill"
+            },
+            {
+              "offset": 1871014,
+              "encoding": "ascii",
+              "value": "CheckMilestone6ProgressFill"
+            },
+            {
+              "offset": 1871042,
+              "encoding": "ascii",
+              "value": "CheckMilestone7ProgressFill"
+            },
+            {
+              "offset": 1871070,
+              "encoding": "ascii",
+              "value": "CheckMilestone8ProgressFill"
+            },
+            {
+              "offset": 1871098,
+              "encoding": "ascii",
+              "value": "CheckMilestone9ProgressFill"
+            }
+          ]
+        },
+        {
+          "anchor": "TotalMilestoneLevels",
+          "match_index": 67956,
+          "match_offset": 1887111,
+          "match_value": "TotalMilestoneLevels",
+          "context": [
+            {
+              "offset": 1886867,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus5"
+            },
+            {
+              "offset": 1886883,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus1"
+            },
+            {
+              "offset": 1886899,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus2"
+            },
+            {
+              "offset": 1886915,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus3"
+            },
+            {
+              "offset": 1886931,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus1"
+            },
+            {
+              "offset": 1886947,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus2"
+            },
+            {
+              "offset": 1886963,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus3"
+            },
+            {
+              "offset": 1886979,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus1"
+            },
+            {
+              "offset": 1886995,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus2"
+            },
+            {
+              "offset": 1887011,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus3"
+            },
+            {
+              "offset": 1887027,
+              "encoding": "ascii",
+              "value": "OverLevel100Exponent"
+            },
+            {
+              "offset": 1887048,
+              "encoding": "ascii",
+              "value": "OverLevel200Exponent"
+            },
+            {
+              "offset": 1887069,
+              "encoding": "ascii",
+              "value": "OverLevel300Exponent"
+            },
+            {
+              "offset": 1887090,
+              "encoding": "ascii",
+              "value": "OverLevel400Exponent"
+            },
+            {
+              "offset": 1887111,
+              "encoding": "ascii",
+              "value": "TotalMilestoneLevels"
+            },
+            {
+              "offset": 1887132,
+              "encoding": "ascii",
+              "value": "Phase1Tick"
+            },
+            {
+              "offset": 1887143,
+              "encoding": "ascii",
+              "value": "Phase2Tick"
+            },
+            {
+              "offset": 1887154,
+              "encoding": "ascii",
+              "value": "Phase3Tick"
+            },
+            {
+              "offset": 1887165,
+              "encoding": "ascii",
+              "value": "Phase4Tick"
+            },
+            {
+              "offset": 1887176,
+              "encoding": "ascii",
+              "value": "Phase5Tick"
+            },
+            {
+              "offset": 1887187,
+              "encoding": "ascii",
+              "value": "Phase6Tick"
+            },
+            {
+              "offset": 1887198,
+              "encoding": "ascii",
+              "value": "CooldownTick"
+            },
+            {
+              "offset": 1887211,
+              "encoding": "ascii",
+              "value": "ShardUpgradeInfo"
+            },
+            {
+              "offset": 1887228,
+              "encoding": "ascii",
+              "value": "get_IsUnlocked"
+            },
+            {
+              "offset": 1887243,
+              "encoding": "ascii",
+              "value": "set_IsUnlocked"
+            },
+            {
+              "offset": 1887258,
+              "encoding": "ascii",
+              "value": "<IsUnlocked>k__BackingField"
+            },
+            {
+              "offset": 1887286,
+              "encoding": "ascii",
+              "value": "upgrade"
+            },
+            {
+              "offset": 1887294,
+              "encoding": "ascii",
+              "value": "<SortCostAndBools>b__1266_0"
+            },
+            {
+              "offset": 1887322,
+              "encoding": "ascii",
+              "value": "<>9__1266_0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FinalSU1Bonus1",
+      "matches": [
+        {
+          "anchor": "FinalSU1Bonus1",
+          "match_index": 66807,
+          "match_offset": 1867997,
+          "match_value": "get_FinalSU1Bonus1",
+          "context": [
+            {
+              "offset": 1867662,
+              "encoding": "ascii",
+              "value": "set_FinalMissionMaterialBonus"
+            },
+            {
+              "offset": 1867692,
+              "encoding": "ascii",
+              "value": "OnShardPurchase"
+            },
+            {
+              "offset": 1867708,
+              "encoding": "ascii",
+              "value": "get_FinalAdditiveCellsPerOperationBonus"
+            },
+            {
+              "offset": 1867748,
+              "encoding": "ascii",
+              "value": "get_FinalCellsPerOperationBonus"
+            },
+            {
+              "offset": 1867780,
+              "encoding": "ascii",
+              "value": "get_FinalAdditiveShardsPerOperationBonus"
+            },
+            {
+              "offset": 1867821,
+              "encoding": "ascii",
+              "value": "get_BoosterAdShardBonus"
+            },
+            {
+              "offset": 1867845,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus1"
+            },
+            {
+              "offset": 1867864,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus2"
+            },
+            {
+              "offset": 1867883,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus3"
+            },
+            {
+              "offset": 1867902,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus4"
+            },
+            {
+              "offset": 1867921,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus5"
+            },
+            {
+              "offset": 1867940,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus6"
+            },
+            {
+              "offset": 1867959,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus7"
+            },
+            {
+              "offset": 1867978,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus8"
+            },
+            {
+              "offset": 1867997,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus1"
+            },
+            {
+              "offset": 1868016,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus2"
+            },
+            {
+              "offset": 1868035,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus3"
+            },
+            {
+              "offset": 1868054,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus1"
+            },
+            {
+              "offset": 1868073,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus2"
+            },
+            {
+              "offset": 1868092,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus3"
+            },
+            {
+              "offset": 1868111,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus1"
+            },
+            {
+              "offset": 1868130,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus2"
+            },
+            {
+              "offset": 1868149,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus3"
+            },
+            {
+              "offset": 1868168,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus1"
+            },
+            {
+              "offset": 1868187,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus2"
+            },
+            {
+              "offset": 1868206,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus3"
+            },
+            {
+              "offset": 1868225,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus4"
+            },
+            {
+              "offset": 1868244,
+              "encoding": "ascii",
+              "value": "get_FinalSU5Bonus1"
+            },
+            {
+              "offset": 1868263,
+              "encoding": "ascii",
+              "value": "get_FinalSU5Bonus2"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalSU1Bonus1",
+          "match_index": 67845,
+          "match_offset": 1885346,
+          "match_value": "FinalSU1Bonus1",
+          "context": [
+            {
+              "offset": 1885066,
+              "encoding": "ascii",
+              "value": "FinalOPBonus"
+            },
+            {
+              "offset": 1885079,
+              "encoding": "ascii",
+              "value": "FinalMissionMaterialBonus"
+            },
+            {
+              "offset": 1885105,
+              "encoding": "ascii",
+              "value": "FinalAdditiveCellsPerOperationBonus"
+            },
+            {
+              "offset": 1885141,
+              "encoding": "ascii",
+              "value": "FinalCellsPerOperationBonus"
+            },
+            {
+              "offset": 1885169,
+              "encoding": "ascii",
+              "value": "FinalAdditiveShardsPerOperationBonus"
+            },
+            {
+              "offset": 1885206,
+              "encoding": "ascii",
+              "value": "BoosterAdShardBonus"
+            },
+            {
+              "offset": 1885226,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus1"
+            },
+            {
+              "offset": 1885241,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus2"
+            },
+            {
+              "offset": 1885256,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus3"
+            },
+            {
+              "offset": 1885271,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus4"
+            },
+            {
+              "offset": 1885286,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus5"
+            },
+            {
+              "offset": 1885301,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus6"
+            },
+            {
+              "offset": 1885316,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus7"
+            },
+            {
+              "offset": 1885331,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus8"
+            },
+            {
+              "offset": 1885346,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus1"
+            },
+            {
+              "offset": 1885361,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus2"
+            },
+            {
+              "offset": 1885376,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus3"
+            },
+            {
+              "offset": 1885391,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus1"
+            },
+            {
+              "offset": 1885406,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus2"
+            },
+            {
+              "offset": 1885421,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus3"
+            },
+            {
+              "offset": 1885436,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus1"
+            },
+            {
+              "offset": 1885451,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus2"
+            },
+            {
+              "offset": 1885466,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus3"
+            },
+            {
+              "offset": 1885481,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus1"
+            },
+            {
+              "offset": 1885496,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus2"
+            },
+            {
+              "offset": 1885511,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus3"
+            },
+            {
+              "offset": 1885526,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus4"
+            },
+            {
+              "offset": 1885541,
+              "encoding": "ascii",
+              "value": "FinalSU5Bonus1"
+            },
+            {
+              "offset": 1885556,
+              "encoding": "ascii",
+              "value": "FinalSU5Bonus2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FinalSU1Bonus2",
+      "matches": [
+        {
+          "anchor": "FinalSU1Bonus2",
+          "match_index": 66808,
+          "match_offset": 1868016,
+          "match_value": "get_FinalSU1Bonus2",
+          "context": [
+            {
+              "offset": 1867692,
+              "encoding": "ascii",
+              "value": "OnShardPurchase"
+            },
+            {
+              "offset": 1867708,
+              "encoding": "ascii",
+              "value": "get_FinalAdditiveCellsPerOperationBonus"
+            },
+            {
+              "offset": 1867748,
+              "encoding": "ascii",
+              "value": "get_FinalCellsPerOperationBonus"
+            },
+            {
+              "offset": 1867780,
+              "encoding": "ascii",
+              "value": "get_FinalAdditiveShardsPerOperationBonus"
+            },
+            {
+              "offset": 1867821,
+              "encoding": "ascii",
+              "value": "get_BoosterAdShardBonus"
+            },
+            {
+              "offset": 1867845,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus1"
+            },
+            {
+              "offset": 1867864,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus2"
+            },
+            {
+              "offset": 1867883,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus3"
+            },
+            {
+              "offset": 1867902,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus4"
+            },
+            {
+              "offset": 1867921,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus5"
+            },
+            {
+              "offset": 1867940,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus6"
+            },
+            {
+              "offset": 1867959,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus7"
+            },
+            {
+              "offset": 1867978,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus8"
+            },
+            {
+              "offset": 1867997,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus1"
+            },
+            {
+              "offset": 1868016,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus2"
+            },
+            {
+              "offset": 1868035,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus3"
+            },
+            {
+              "offset": 1868054,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus1"
+            },
+            {
+              "offset": 1868073,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus2"
+            },
+            {
+              "offset": 1868092,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus3"
+            },
+            {
+              "offset": 1868111,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus1"
+            },
+            {
+              "offset": 1868130,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus2"
+            },
+            {
+              "offset": 1868149,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus3"
+            },
+            {
+              "offset": 1868168,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus1"
+            },
+            {
+              "offset": 1868187,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus2"
+            },
+            {
+              "offset": 1868206,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus3"
+            },
+            {
+              "offset": 1868225,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus4"
+            },
+            {
+              "offset": 1868244,
+              "encoding": "ascii",
+              "value": "get_FinalSU5Bonus1"
+            },
+            {
+              "offset": 1868263,
+              "encoding": "ascii",
+              "value": "get_FinalSU5Bonus2"
+            },
+            {
+              "offset": 1868282,
+              "encoding": "ascii",
+              "value": "get_FinalSU5Bonus3"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalSU1Bonus2",
+          "match_index": 67846,
+          "match_offset": 1885361,
+          "match_value": "FinalSU1Bonus2",
+          "context": [
+            {
+              "offset": 1885079,
+              "encoding": "ascii",
+              "value": "FinalMissionMaterialBonus"
+            },
+            {
+              "offset": 1885105,
+              "encoding": "ascii",
+              "value": "FinalAdditiveCellsPerOperationBonus"
+            },
+            {
+              "offset": 1885141,
+              "encoding": "ascii",
+              "value": "FinalCellsPerOperationBonus"
+            },
+            {
+              "offset": 1885169,
+              "encoding": "ascii",
+              "value": "FinalAdditiveShardsPerOperationBonus"
+            },
+            {
+              "offset": 1885206,
+              "encoding": "ascii",
+              "value": "BoosterAdShardBonus"
+            },
+            {
+              "offset": 1885226,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus1"
+            },
+            {
+              "offset": 1885241,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus2"
+            },
+            {
+              "offset": 1885256,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus3"
+            },
+            {
+              "offset": 1885271,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus4"
+            },
+            {
+              "offset": 1885286,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus5"
+            },
+            {
+              "offset": 1885301,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus6"
+            },
+            {
+              "offset": 1885316,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus7"
+            },
+            {
+              "offset": 1885331,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus8"
+            },
+            {
+              "offset": 1885346,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus1"
+            },
+            {
+              "offset": 1885361,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus2"
+            },
+            {
+              "offset": 1885376,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus3"
+            },
+            {
+              "offset": 1885391,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus1"
+            },
+            {
+              "offset": 1885406,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus2"
+            },
+            {
+              "offset": 1885421,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus3"
+            },
+            {
+              "offset": 1885436,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus1"
+            },
+            {
+              "offset": 1885451,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus2"
+            },
+            {
+              "offset": 1885466,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus3"
+            },
+            {
+              "offset": 1885481,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus1"
+            },
+            {
+              "offset": 1885496,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus2"
+            },
+            {
+              "offset": 1885511,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus3"
+            },
+            {
+              "offset": 1885526,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus4"
+            },
+            {
+              "offset": 1885541,
+              "encoding": "ascii",
+              "value": "FinalSU5Bonus1"
+            },
+            {
+              "offset": 1885556,
+              "encoding": "ascii",
+              "value": "FinalSU5Bonus2"
+            },
+            {
+              "offset": 1885571,
+              "encoding": "ascii",
+              "value": "FinalSU5Bonus3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FinalSU2Bonus1",
+      "matches": [
+        {
+          "anchor": "FinalSU2Bonus1",
+          "match_index": 66810,
+          "match_offset": 1868054,
+          "match_value": "get_FinalSU2Bonus1",
+          "context": [
+            {
+              "offset": 1867748,
+              "encoding": "ascii",
+              "value": "get_FinalCellsPerOperationBonus"
+            },
+            {
+              "offset": 1867780,
+              "encoding": "ascii",
+              "value": "get_FinalAdditiveShardsPerOperationBonus"
+            },
+            {
+              "offset": 1867821,
+              "encoding": "ascii",
+              "value": "get_BoosterAdShardBonus"
+            },
+            {
+              "offset": 1867845,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus1"
+            },
+            {
+              "offset": 1867864,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus2"
+            },
+            {
+              "offset": 1867883,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus3"
+            },
+            {
+              "offset": 1867902,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus4"
+            },
+            {
+              "offset": 1867921,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus5"
+            },
+            {
+              "offset": 1867940,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus6"
+            },
+            {
+              "offset": 1867959,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus7"
+            },
+            {
+              "offset": 1867978,
+              "encoding": "ascii",
+              "value": "get_FinalSU0Bonus8"
+            },
+            {
+              "offset": 1867997,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus1"
+            },
+            {
+              "offset": 1868016,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus2"
+            },
+            {
+              "offset": 1868035,
+              "encoding": "ascii",
+              "value": "get_FinalSU1Bonus3"
+            },
+            {
+              "offset": 1868054,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus1"
+            },
+            {
+              "offset": 1868073,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus2"
+            },
+            {
+              "offset": 1868092,
+              "encoding": "ascii",
+              "value": "get_FinalSU2Bonus3"
+            },
+            {
+              "offset": 1868111,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus1"
+            },
+            {
+              "offset": 1868130,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus2"
+            },
+            {
+              "offset": 1868149,
+              "encoding": "ascii",
+              "value": "get_FinalSU3Bonus3"
+            },
+            {
+              "offset": 1868168,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus1"
+            },
+            {
+              "offset": 1868187,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus2"
+            },
+            {
+              "offset": 1868206,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus3"
+            },
+            {
+              "offset": 1868225,
+              "encoding": "ascii",
+              "value": "get_FinalSU4Bonus4"
+            },
+            {
+              "offset": 1868244,
+              "encoding": "ascii",
+              "value": "get_FinalSU5Bonus1"
+            },
+            {
+              "offset": 1868263,
+              "encoding": "ascii",
+              "value": "get_FinalSU5Bonus2"
+            },
+            {
+              "offset": 1868282,
+              "encoding": "ascii",
+              "value": "get_FinalSU5Bonus3"
+            },
+            {
+              "offset": 1868301,
+              "encoding": "ascii",
+              "value": "get_FinalSU6Bonus1"
+            },
+            {
+              "offset": 1868320,
+              "encoding": "ascii",
+              "value": "get_FinalSU6Bonus2"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalSU2Bonus1",
+          "match_index": 67848,
+          "match_offset": 1885391,
+          "match_value": "FinalSU2Bonus1",
+          "context": [
+            {
+              "offset": 1885141,
+              "encoding": "ascii",
+              "value": "FinalCellsPerOperationBonus"
+            },
+            {
+              "offset": 1885169,
+              "encoding": "ascii",
+              "value": "FinalAdditiveShardsPerOperationBonus"
+            },
+            {
+              "offset": 1885206,
+              "encoding": "ascii",
+              "value": "BoosterAdShardBonus"
+            },
+            {
+              "offset": 1885226,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus1"
+            },
+            {
+              "offset": 1885241,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus2"
+            },
+            {
+              "offset": 1885256,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus3"
+            },
+            {
+              "offset": 1885271,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus4"
+            },
+            {
+              "offset": 1885286,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus5"
+            },
+            {
+              "offset": 1885301,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus6"
+            },
+            {
+              "offset": 1885316,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus7"
+            },
+            {
+              "offset": 1885331,
+              "encoding": "ascii",
+              "value": "FinalSU0Bonus8"
+            },
+            {
+              "offset": 1885346,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus1"
+            },
+            {
+              "offset": 1885361,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus2"
+            },
+            {
+              "offset": 1885376,
+              "encoding": "ascii",
+              "value": "FinalSU1Bonus3"
+            },
+            {
+              "offset": 1885391,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus1"
+            },
+            {
+              "offset": 1885406,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus2"
+            },
+            {
+              "offset": 1885421,
+              "encoding": "ascii",
+              "value": "FinalSU2Bonus3"
+            },
+            {
+              "offset": 1885436,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus1"
+            },
+            {
+              "offset": 1885451,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus2"
+            },
+            {
+              "offset": 1885466,
+              "encoding": "ascii",
+              "value": "FinalSU3Bonus3"
+            },
+            {
+              "offset": 1885481,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus1"
+            },
+            {
+              "offset": 1885496,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus2"
+            },
+            {
+              "offset": 1885511,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus3"
+            },
+            {
+              "offset": 1885526,
+              "encoding": "ascii",
+              "value": "FinalSU4Bonus4"
+            },
+            {
+              "offset": 1885541,
+              "encoding": "ascii",
+              "value": "FinalSU5Bonus1"
+            },
+            {
+              "offset": 1885556,
+              "encoding": "ascii",
+              "value": "FinalSU5Bonus2"
+            },
+            {
+              "offset": 1885571,
+              "encoding": "ascii",
+              "value": "FinalSU5Bonus3"
+            },
+            {
+              "offset": 1885586,
+              "encoding": "ascii",
+              "value": "FinalSU6Bonus1"
+            },
+            {
+              "offset": 1885601,
+              "encoding": "ascii",
+              "value": "FinalSU6Bonus2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FinalSU10Bonus1",
+      "matches": [
+        {
+          "anchor": "FinalSU10Bonus1",
+          "match_index": 66838,
+          "match_offset": 1868586,
+          "match_value": "get_FinalSU10Bonus1",
+          "context": [
+            {
+              "offset": 1868320,
+              "encoding": "ascii",
+              "value": "get_FinalSU6Bonus2"
+            },
+            {
+              "offset": 1868339,
+              "encoding": "ascii",
+              "value": "get_FinalSU6Bonus3"
+            },
+            {
+              "offset": 1868358,
+              "encoding": "ascii",
+              "value": "get_FinalSU7Bonus1"
+            },
+            {
+              "offset": 1868377,
+              "encoding": "ascii",
+              "value": "get_FinalSU7Bonus2"
+            },
+            {
+              "offset": 1868396,
+              "encoding": "ascii",
+              "value": "get_FinalSU7Bonus3"
+            },
+            {
+              "offset": 1868415,
+              "encoding": "ascii",
+              "value": "get_FinalSU7Bonus4"
+            },
+            {
+              "offset": 1868434,
+              "encoding": "ascii",
+              "value": "get_FinalSU8Bonus1"
+            },
+            {
+              "offset": 1868453,
+              "encoding": "ascii",
+              "value": "get_FinalSU8Bonus2"
+            },
+            {
+              "offset": 1868472,
+              "encoding": "ascii",
+              "value": "get_FinalSU8Bonus3"
+            },
+            {
+              "offset": 1868491,
+              "encoding": "ascii",
+              "value": "get_FinalSU8Bonus4"
+            },
+            {
+              "offset": 1868510,
+              "encoding": "ascii",
+              "value": "get_FinalSU8Bonus5"
+            },
+            {
+              "offset": 1868529,
+              "encoding": "ascii",
+              "value": "get_FinalSU9Bonus1"
+            },
+            {
+              "offset": 1868548,
+              "encoding": "ascii",
+              "value": "get_FinalSU9Bonus2"
+            },
+            {
+              "offset": 1868567,
+              "encoding": "ascii",
+              "value": "get_FinalSU9Bonus3"
+            },
+            {
+              "offset": 1868586,
+              "encoding": "ascii",
+              "value": "get_FinalSU10Bonus1"
+            },
+            {
+              "offset": 1868606,
+              "encoding": "ascii",
+              "value": "get_FinalSU10Bonus2"
+            },
+            {
+              "offset": 1868626,
+              "encoding": "ascii",
+              "value": "get_FinalSU10Bonus3"
+            },
+            {
+              "offset": 1868646,
+              "encoding": "ascii",
+              "value": "get_FinalSU11Bonus1"
+            },
+            {
+              "offset": 1868666,
+              "encoding": "ascii",
+              "value": "get_FinalSU11Bonus2"
+            },
+            {
+              "offset": 1868686,
+              "encoding": "ascii",
+              "value": "get_FinalSU11Bonus3"
+            },
+            {
+              "offset": 1868706,
+              "encoding": "ascii",
+              "value": "get_FinalSU11Bonus4"
+            },
+            {
+              "offset": 1868726,
+              "encoding": "ascii",
+              "value": "get_FinalSU12Bonus1"
+            },
+            {
+              "offset": 1868746,
+              "encoding": "ascii",
+              "value": "get_FinalSU12Bonus2"
+            },
+            {
+              "offset": 1868766,
+              "encoding": "ascii",
+              "value": "get_FinalSU12Bonus3"
+            },
+            {
+              "offset": 1868786,
+              "encoding": "ascii",
+              "value": "get_FinalSU12Bonus4"
+            },
+            {
+              "offset": 1868806,
+              "encoding": "ascii",
+              "value": "get_FinalSU12Bonus5"
+            },
+            {
+              "offset": 1868826,
+              "encoding": "ascii",
+              "value": "get_FinalSU13Bonus1"
+            },
+            {
+              "offset": 1868846,
+              "encoding": "ascii",
+              "value": "get_FinalSU13Bonus2"
+            },
+            {
+              "offset": 1868866,
+              "encoding": "ascii",
+              "value": "get_FinalSU13Bonus3"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalSU10Bonus1",
+          "match_index": 67876,
+          "match_offset": 1885811,
+          "match_value": "FinalSU10Bonus1",
+          "context": [
+            {
+              "offset": 1885601,
+              "encoding": "ascii",
+              "value": "FinalSU6Bonus2"
+            },
+            {
+              "offset": 1885616,
+              "encoding": "ascii",
+              "value": "FinalSU6Bonus3"
+            },
+            {
+              "offset": 1885631,
+              "encoding": "ascii",
+              "value": "FinalSU7Bonus1"
+            },
+            {
+              "offset": 1885646,
+              "encoding": "ascii",
+              "value": "FinalSU7Bonus2"
+            },
+            {
+              "offset": 1885661,
+              "encoding": "ascii",
+              "value": "FinalSU7Bonus3"
+            },
+            {
+              "offset": 1885676,
+              "encoding": "ascii",
+              "value": "FinalSU7Bonus4"
+            },
+            {
+              "offset": 1885691,
+              "encoding": "ascii",
+              "value": "FinalSU8Bonus1"
+            },
+            {
+              "offset": 1885706,
+              "encoding": "ascii",
+              "value": "FinalSU8Bonus2"
+            },
+            {
+              "offset": 1885721,
+              "encoding": "ascii",
+              "value": "FinalSU8Bonus3"
+            },
+            {
+              "offset": 1885736,
+              "encoding": "ascii",
+              "value": "FinalSU8Bonus4"
+            },
+            {
+              "offset": 1885751,
+              "encoding": "ascii",
+              "value": "FinalSU8Bonus5"
+            },
+            {
+              "offset": 1885766,
+              "encoding": "ascii",
+              "value": "FinalSU9Bonus1"
+            },
+            {
+              "offset": 1885781,
+              "encoding": "ascii",
+              "value": "FinalSU9Bonus2"
+            },
+            {
+              "offset": 1885796,
+              "encoding": "ascii",
+              "value": "FinalSU9Bonus3"
+            },
+            {
+              "offset": 1885811,
+              "encoding": "ascii",
+              "value": "FinalSU10Bonus1"
+            },
+            {
+              "offset": 1885827,
+              "encoding": "ascii",
+              "value": "FinalSU10Bonus2"
+            },
+            {
+              "offset": 1885843,
+              "encoding": "ascii",
+              "value": "FinalSU10Bonus3"
+            },
+            {
+              "offset": 1885859,
+              "encoding": "ascii",
+              "value": "FinalSU11Bonus1"
+            },
+            {
+              "offset": 1885875,
+              "encoding": "ascii",
+              "value": "FinalSU11Bonus2"
+            },
+            {
+              "offset": 1885891,
+              "encoding": "ascii",
+              "value": "FinalSU11Bonus3"
+            },
+            {
+              "offset": 1885907,
+              "encoding": "ascii",
+              "value": "FinalSU11Bonus4"
+            },
+            {
+              "offset": 1885923,
+              "encoding": "ascii",
+              "value": "FinalSU12Bonus1"
+            },
+            {
+              "offset": 1885939,
+              "encoding": "ascii",
+              "value": "FinalSU12Bonus2"
+            },
+            {
+              "offset": 1885955,
+              "encoding": "ascii",
+              "value": "FinalSU12Bonus3"
+            },
+            {
+              "offset": 1885971,
+              "encoding": "ascii",
+              "value": "FinalSU12Bonus4"
+            },
+            {
+              "offset": 1885987,
+              "encoding": "ascii",
+              "value": "FinalSU12Bonus5"
+            },
+            {
+              "offset": 1886003,
+              "encoding": "ascii",
+              "value": "FinalSU13Bonus1"
+            },
+            {
+              "offset": 1886019,
+              "encoding": "ascii",
+              "value": "FinalSU13Bonus2"
+            },
+            {
+              "offset": 1886035,
+              "encoding": "ascii",
+              "value": "FinalSU13Bonus3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FinalSU29Bonus2",
+      "matches": [
+        {
+          "anchor": "FinalSU29Bonus2",
+          "match_index": 66912,
+          "match_offset": 1870066,
+          "match_value": "get_FinalSU29Bonus2",
+          "context": [
+            {
+              "offset": 1869786,
+              "encoding": "ascii",
+              "value": "get_FinalSU25Bonus2"
+            },
+            {
+              "offset": 1869806,
+              "encoding": "ascii",
+              "value": "get_FinalSU25Bonus3"
+            },
+            {
+              "offset": 1869826,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus1"
+            },
+            {
+              "offset": 1869846,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus2"
+            },
+            {
+              "offset": 1869866,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus3"
+            },
+            {
+              "offset": 1869886,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus4"
+            },
+            {
+              "offset": 1869906,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus5"
+            },
+            {
+              "offset": 1869926,
+              "encoding": "ascii",
+              "value": "get_FinalSU27Bonus1"
+            },
+            {
+              "offset": 1869946,
+              "encoding": "ascii",
+              "value": "get_FinalSU27Bonus2"
+            },
+            {
+              "offset": 1869966,
+              "encoding": "ascii",
+              "value": "get_FinalSU27Bonus3"
+            },
+            {
+              "offset": 1869986,
+              "encoding": "ascii",
+              "value": "get_FinalSU28Bonus1"
+            },
+            {
+              "offset": 1870006,
+              "encoding": "ascii",
+              "value": "get_FinalSU28Bonus2"
+            },
+            {
+              "offset": 1870026,
+              "encoding": "ascii",
+              "value": "get_FinalSU28Bonus3"
+            },
+            {
+              "offset": 1870046,
+              "encoding": "ascii",
+              "value": "get_FinalSU29Bonus1"
+            },
+            {
+              "offset": 1870066,
+              "encoding": "ascii",
+              "value": "get_FinalSU29Bonus2"
+            },
+            {
+              "offset": 1870086,
+              "encoding": "ascii",
+              "value": "get_FinalSU29Bonus3"
+            },
+            {
+              "offset": 1870106,
+              "encoding": "ascii",
+              "value": "get_OverLevel100Exponent"
+            },
+            {
+              "offset": 1870131,
+              "encoding": "ascii",
+              "value": "get_OverLevel200Exponent"
+            },
+            {
+              "offset": 1870156,
+              "encoding": "ascii",
+              "value": "get_OverLevel300Exponent"
+            },
+            {
+              "offset": 1870181,
+              "encoding": "ascii",
+              "value": "get_OverLevel400Exponent"
+            },
+            {
+              "offset": 1870206,
+              "encoding": "ascii",
+              "value": "get_SU0Cost"
+            },
+            {
+              "offset": 1870218,
+              "encoding": "ascii",
+              "value": "get_SU1Cost"
+            },
+            {
+              "offset": 1870230,
+              "encoding": "ascii",
+              "value": "get_SU2Cost"
+            },
+            {
+              "offset": 1870242,
+              "encoding": "ascii",
+              "value": "get_SU3Cost"
+            },
+            {
+              "offset": 1870254,
+              "encoding": "ascii",
+              "value": "get_SU4Cost"
+            },
+            {
+              "offset": 1870266,
+              "encoding": "ascii",
+              "value": "get_SU5Cost"
+            },
+            {
+              "offset": 1870278,
+              "encoding": "ascii",
+              "value": "get_SU6Cost"
+            },
+            {
+              "offset": 1870290,
+              "encoding": "ascii",
+              "value": "get_SU7Cost"
+            },
+            {
+              "offset": 1870302,
+              "encoding": "ascii",
+              "value": "get_SU8Cost"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalSU29Bonus2",
+          "match_index": 67950,
+          "match_offset": 1886995,
+          "match_value": "FinalSU29Bonus2",
+          "context": [
+            {
+              "offset": 1886771,
+              "encoding": "ascii",
+              "value": "FinalSU25Bonus2"
+            },
+            {
+              "offset": 1886787,
+              "encoding": "ascii",
+              "value": "FinalSU25Bonus3"
+            },
+            {
+              "offset": 1886803,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus1"
+            },
+            {
+              "offset": 1886819,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus2"
+            },
+            {
+              "offset": 1886835,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus3"
+            },
+            {
+              "offset": 1886851,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus4"
+            },
+            {
+              "offset": 1886867,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus5"
+            },
+            {
+              "offset": 1886883,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus1"
+            },
+            {
+              "offset": 1886899,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus2"
+            },
+            {
+              "offset": 1886915,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus3"
+            },
+            {
+              "offset": 1886931,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus1"
+            },
+            {
+              "offset": 1886947,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus2"
+            },
+            {
+              "offset": 1886963,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus3"
+            },
+            {
+              "offset": 1886979,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus1"
+            },
+            {
+              "offset": 1886995,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus2"
+            },
+            {
+              "offset": 1887011,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus3"
+            },
+            {
+              "offset": 1887027,
+              "encoding": "ascii",
+              "value": "OverLevel100Exponent"
+            },
+            {
+              "offset": 1887048,
+              "encoding": "ascii",
+              "value": "OverLevel200Exponent"
+            },
+            {
+              "offset": 1887069,
+              "encoding": "ascii",
+              "value": "OverLevel300Exponent"
+            },
+            {
+              "offset": 1887090,
+              "encoding": "ascii",
+              "value": "OverLevel400Exponent"
+            },
+            {
+              "offset": 1887111,
+              "encoding": "ascii",
+              "value": "TotalMilestoneLevels"
+            },
+            {
+              "offset": 1887132,
+              "encoding": "ascii",
+              "value": "Phase1Tick"
+            },
+            {
+              "offset": 1887143,
+              "encoding": "ascii",
+              "value": "Phase2Tick"
+            },
+            {
+              "offset": 1887154,
+              "encoding": "ascii",
+              "value": "Phase3Tick"
+            },
+            {
+              "offset": 1887165,
+              "encoding": "ascii",
+              "value": "Phase4Tick"
+            },
+            {
+              "offset": 1887176,
+              "encoding": "ascii",
+              "value": "Phase5Tick"
+            },
+            {
+              "offset": 1887187,
+              "encoding": "ascii",
+              "value": "Phase6Tick"
+            },
+            {
+              "offset": 1887198,
+              "encoding": "ascii",
+              "value": "CooldownTick"
+            },
+            {
+              "offset": 1887211,
+              "encoding": "ascii",
+              "value": "ShardUpgradeInfo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FinalSU29Bonus3",
+      "matches": [
+        {
+          "anchor": "FinalSU29Bonus3",
+          "match_index": 66913,
+          "match_offset": 1870086,
+          "match_value": "get_FinalSU29Bonus3",
+          "context": [
+            {
+              "offset": 1869806,
+              "encoding": "ascii",
+              "value": "get_FinalSU25Bonus3"
+            },
+            {
+              "offset": 1869826,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus1"
+            },
+            {
+              "offset": 1869846,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus2"
+            },
+            {
+              "offset": 1869866,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus3"
+            },
+            {
+              "offset": 1869886,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus4"
+            },
+            {
+              "offset": 1869906,
+              "encoding": "ascii",
+              "value": "get_FinalSU26Bonus5"
+            },
+            {
+              "offset": 1869926,
+              "encoding": "ascii",
+              "value": "get_FinalSU27Bonus1"
+            },
+            {
+              "offset": 1869946,
+              "encoding": "ascii",
+              "value": "get_FinalSU27Bonus2"
+            },
+            {
+              "offset": 1869966,
+              "encoding": "ascii",
+              "value": "get_FinalSU27Bonus3"
+            },
+            {
+              "offset": 1869986,
+              "encoding": "ascii",
+              "value": "get_FinalSU28Bonus1"
+            },
+            {
+              "offset": 1870006,
+              "encoding": "ascii",
+              "value": "get_FinalSU28Bonus2"
+            },
+            {
+              "offset": 1870026,
+              "encoding": "ascii",
+              "value": "get_FinalSU28Bonus3"
+            },
+            {
+              "offset": 1870046,
+              "encoding": "ascii",
+              "value": "get_FinalSU29Bonus1"
+            },
+            {
+              "offset": 1870066,
+              "encoding": "ascii",
+              "value": "get_FinalSU29Bonus2"
+            },
+            {
+              "offset": 1870086,
+              "encoding": "ascii",
+              "value": "get_FinalSU29Bonus3"
+            },
+            {
+              "offset": 1870106,
+              "encoding": "ascii",
+              "value": "get_OverLevel100Exponent"
+            },
+            {
+              "offset": 1870131,
+              "encoding": "ascii",
+              "value": "get_OverLevel200Exponent"
+            },
+            {
+              "offset": 1870156,
+              "encoding": "ascii",
+              "value": "get_OverLevel300Exponent"
+            },
+            {
+              "offset": 1870181,
+              "encoding": "ascii",
+              "value": "get_OverLevel400Exponent"
+            },
+            {
+              "offset": 1870206,
+              "encoding": "ascii",
+              "value": "get_SU0Cost"
+            },
+            {
+              "offset": 1870218,
+              "encoding": "ascii",
+              "value": "get_SU1Cost"
+            },
+            {
+              "offset": 1870230,
+              "encoding": "ascii",
+              "value": "get_SU2Cost"
+            },
+            {
+              "offset": 1870242,
+              "encoding": "ascii",
+              "value": "get_SU3Cost"
+            },
+            {
+              "offset": 1870254,
+              "encoding": "ascii",
+              "value": "get_SU4Cost"
+            },
+            {
+              "offset": 1870266,
+              "encoding": "ascii",
+              "value": "get_SU5Cost"
+            },
+            {
+              "offset": 1870278,
+              "encoding": "ascii",
+              "value": "get_SU6Cost"
+            },
+            {
+              "offset": 1870290,
+              "encoding": "ascii",
+              "value": "get_SU7Cost"
+            },
+            {
+              "offset": 1870302,
+              "encoding": "ascii",
+              "value": "get_SU8Cost"
+            },
+            {
+              "offset": 1870314,
+              "encoding": "ascii",
+              "value": "get_SU9Cost"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalSU29Bonus3",
+          "match_index": 67951,
+          "match_offset": 1887011,
+          "match_value": "FinalSU29Bonus3",
+          "context": [
+            {
+              "offset": 1886787,
+              "encoding": "ascii",
+              "value": "FinalSU25Bonus3"
+            },
+            {
+              "offset": 1886803,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus1"
+            },
+            {
+              "offset": 1886819,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus2"
+            },
+            {
+              "offset": 1886835,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus3"
+            },
+            {
+              "offset": 1886851,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus4"
+            },
+            {
+              "offset": 1886867,
+              "encoding": "ascii",
+              "value": "FinalSU26Bonus5"
+            },
+            {
+              "offset": 1886883,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus1"
+            },
+            {
+              "offset": 1886899,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus2"
+            },
+            {
+              "offset": 1886915,
+              "encoding": "ascii",
+              "value": "FinalSU27Bonus3"
+            },
+            {
+              "offset": 1886931,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus1"
+            },
+            {
+              "offset": 1886947,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus2"
+            },
+            {
+              "offset": 1886963,
+              "encoding": "ascii",
+              "value": "FinalSU28Bonus3"
+            },
+            {
+              "offset": 1886979,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus1"
+            },
+            {
+              "offset": 1886995,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus2"
+            },
+            {
+              "offset": 1887011,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus3"
+            },
+            {
+              "offset": 1887027,
+              "encoding": "ascii",
+              "value": "OverLevel100Exponent"
+            },
+            {
+              "offset": 1887048,
+              "encoding": "ascii",
+              "value": "OverLevel200Exponent"
+            },
+            {
+              "offset": 1887069,
+              "encoding": "ascii",
+              "value": "OverLevel300Exponent"
+            },
+            {
+              "offset": 1887090,
+              "encoding": "ascii",
+              "value": "OverLevel400Exponent"
+            },
+            {
+              "offset": 1887111,
+              "encoding": "ascii",
+              "value": "TotalMilestoneLevels"
+            },
+            {
+              "offset": 1887132,
+              "encoding": "ascii",
+              "value": "Phase1Tick"
+            },
+            {
+              "offset": 1887143,
+              "encoding": "ascii",
+              "value": "Phase2Tick"
+            },
+            {
+              "offset": 1887154,
+              "encoding": "ascii",
+              "value": "Phase3Tick"
+            },
+            {
+              "offset": 1887165,
+              "encoding": "ascii",
+              "value": "Phase4Tick"
+            },
+            {
+              "offset": 1887176,
+              "encoding": "ascii",
+              "value": "Phase5Tick"
+            },
+            {
+              "offset": 1887187,
+              "encoding": "ascii",
+              "value": "Phase6Tick"
+            },
+            {
+              "offset": 1887198,
+              "encoding": "ascii",
+              "value": "CooldownTick"
+            },
+            {
+              "offset": 1887211,
+              "encoding": "ascii",
+              "value": "ShardUpgradeInfo"
+            },
+            {
+              "offset": 1887228,
+              "encoding": "ascii",
+              "value": "get_IsUnlocked"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "get_IsUnlocked",
+      "matches": [
+        {
+          "anchor": "get_IsUnlocked",
+          "match_index": 2268,
+          "match_offset": 610859,
+          "match_value": "get_isUnlocked",
+          "context": [
+            {
+              "offset": 610559,
+              "encoding": "ascii",
+              "value": "get_finalSetValue"
+            },
+            {
+              "offset": 610577,
+              "encoding": "ascii",
+              "value": "set_finalSetValue"
+            },
+            {
+              "offset": 610595,
+              "encoding": "ascii",
+              "value": "get_color"
+            },
+            {
+              "offset": 610605,
+              "encoding": "ascii",
+              "value": "set_color"
+            },
+            {
+              "offset": 610615,
+              "encoding": "ascii",
+              "value": "get_unlockConditionText"
+            },
+            {
+              "offset": 610639,
+              "encoding": "ascii",
+              "value": "set_unlockConditionText"
+            },
+            {
+              "offset": 610663,
+              "encoding": "ascii",
+              "value": "get_conditionTargetAmount"
+            },
+            {
+              "offset": 610689,
+              "encoding": "ascii",
+              "value": "set_conditionTargetAmount"
+            },
+            {
+              "offset": 610715,
+              "encoding": "ascii",
+              "value": "get_conditionProgress"
+            },
+            {
+              "offset": 610737,
+              "encoding": "ascii",
+              "value": "set_conditionProgress"
+            },
+            {
+              "offset": 610759,
+              "encoding": "ascii",
+              "value": "get_unlockConditionDestination"
+            },
+            {
+              "offset": 610790,
+              "encoding": "ascii",
+              "value": "set_unlockConditionDestination"
+            },
+            {
+              "offset": 610821,
+              "encoding": "ascii",
+              "value": "get_requirementMet"
+            },
+            {
+              "offset": 610840,
+              "encoding": "ascii",
+              "value": "set_requirementMet"
+            },
+            {
+              "offset": 610859,
+              "encoding": "ascii",
+              "value": "get_isUnlocked"
+            },
+            {
+              "offset": 610874,
+              "encoding": "ascii",
+              "value": "set_isUnlocked"
+            },
+            {
+              "offset": 610889,
+              "encoding": "ascii",
+              "value": "CalculateAndSetUpgradeCalculations"
+            },
+            {
+              "offset": 610924,
+              "encoding": "ascii",
+              "value": "BuyAndApplyUpgrade"
+            },
+            {
+              "offset": 610943,
+              "encoding": "ascii",
+              "value": "UnlockUpgrade"
+            },
+            {
+              "offset": 610957,
+              "encoding": "ascii",
+              "value": "<index>k__BackingField"
+            },
+            {
+              "offset": 610980,
+              "encoding": "ascii",
+              "value": "<level>k__BackingField"
+            },
+            {
+              "offset": 611003,
+              "encoding": "ascii",
+              "value": "<upgradeName>k__BackingField"
+            },
+            {
+              "offset": 611032,
+              "encoding": "ascii",
+              "value": "<description>k__BackingField"
+            },
+            {
+              "offset": 611061,
+              "encoding": "ascii",
+              "value": "<cost>k__BackingField"
+            },
+            {
+              "offset": 611083,
+              "encoding": "ascii",
+              "value": "<costExponent>k__BackingField"
+            },
+            {
+              "offset": 611113,
+              "encoding": "ascii",
+              "value": "<additiveIncrease>k__BackingField"
+            },
+            {
+              "offset": 611147,
+              "encoding": "ascii",
+              "value": "<arcadeGame>k__BackingField"
+            },
+            {
+              "offset": 611175,
+              "encoding": "ascii",
+              "value": "<calculationsType>k__BackingField"
+            },
+            {
+              "offset": 611209,
+              "encoding": "ascii",
+              "value": "<upgradeType>k__BackingField"
+            }
+          ]
+        },
+        {
+          "anchor": "get_IsUnlocked",
+          "match_index": 67965,
+          "match_offset": 1887228,
+          "match_value": "get_IsUnlocked",
+          "context": [
+            {
+              "offset": 1887011,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus3"
+            },
+            {
+              "offset": 1887027,
+              "encoding": "ascii",
+              "value": "OverLevel100Exponent"
+            },
+            {
+              "offset": 1887048,
+              "encoding": "ascii",
+              "value": "OverLevel200Exponent"
+            },
+            {
+              "offset": 1887069,
+              "encoding": "ascii",
+              "value": "OverLevel300Exponent"
+            },
+            {
+              "offset": 1887090,
+              "encoding": "ascii",
+              "value": "OverLevel400Exponent"
+            },
+            {
+              "offset": 1887111,
+              "encoding": "ascii",
+              "value": "TotalMilestoneLevels"
+            },
+            {
+              "offset": 1887132,
+              "encoding": "ascii",
+              "value": "Phase1Tick"
+            },
+            {
+              "offset": 1887143,
+              "encoding": "ascii",
+              "value": "Phase2Tick"
+            },
+            {
+              "offset": 1887154,
+              "encoding": "ascii",
+              "value": "Phase3Tick"
+            },
+            {
+              "offset": 1887165,
+              "encoding": "ascii",
+              "value": "Phase4Tick"
+            },
+            {
+              "offset": 1887176,
+              "encoding": "ascii",
+              "value": "Phase5Tick"
+            },
+            {
+              "offset": 1887187,
+              "encoding": "ascii",
+              "value": "Phase6Tick"
+            },
+            {
+              "offset": 1887198,
+              "encoding": "ascii",
+              "value": "CooldownTick"
+            },
+            {
+              "offset": 1887211,
+              "encoding": "ascii",
+              "value": "ShardUpgradeInfo"
+            },
+            {
+              "offset": 1887228,
+              "encoding": "ascii",
+              "value": "get_IsUnlocked"
+            },
+            {
+              "offset": 1887243,
+              "encoding": "ascii",
+              "value": "set_IsUnlocked"
+            },
+            {
+              "offset": 1887258,
+              "encoding": "ascii",
+              "value": "<IsUnlocked>k__BackingField"
+            },
+            {
+              "offset": 1887286,
+              "encoding": "ascii",
+              "value": "upgrade"
+            },
+            {
+              "offset": 1887294,
+              "encoding": "ascii",
+              "value": "<SortCostAndBools>b__1266_0"
+            },
+            {
+              "offset": 1887322,
+              "encoding": "ascii",
+              "value": "<>9__1266_0"
+            },
+            {
+              "offset": 1887334,
+              "encoding": "ascii",
+              "value": "<FastBuyEnum>d__1429"
+            },
+            {
+              "offset": 1887355,
+              "encoding": "ascii",
+              "value": "TechUpgrades"
+            },
+            {
+              "offset": 1887368,
+              "encoding": "ascii",
+              "value": "get_TotalHardwareMult"
+            },
+            {
+              "offset": 1887390,
+              "encoding": "ascii",
+              "value": "get_TotalSoftwareMult"
+            },
+            {
+              "offset": 1887412,
+              "encoding": "ascii",
+              "value": "get_TU1Bonus"
+            },
+            {
+              "offset": 1887425,
+              "encoding": "ascii",
+              "value": "get_TU1BonusNext"
+            },
+            {
+              "offset": 1887442,
+              "encoding": "ascii",
+              "value": "get_TU2Bonus"
+            },
+            {
+              "offset": 1887455,
+              "encoding": "ascii",
+              "value": "get_TU2BonusNext"
+            },
+            {
+              "offset": 1887472,
+              "encoding": "ascii",
+              "value": "get_TU3Bonus"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "set_IsUnlocked",
+      "matches": [
+        {
+          "anchor": "set_IsUnlocked",
+          "match_index": 2269,
+          "match_offset": 610874,
+          "match_value": "set_isUnlocked",
+          "context": [
+            {
+              "offset": 610577,
+              "encoding": "ascii",
+              "value": "set_finalSetValue"
+            },
+            {
+              "offset": 610595,
+              "encoding": "ascii",
+              "value": "get_color"
+            },
+            {
+              "offset": 610605,
+              "encoding": "ascii",
+              "value": "set_color"
+            },
+            {
+              "offset": 610615,
+              "encoding": "ascii",
+              "value": "get_unlockConditionText"
+            },
+            {
+              "offset": 610639,
+              "encoding": "ascii",
+              "value": "set_unlockConditionText"
+            },
+            {
+              "offset": 610663,
+              "encoding": "ascii",
+              "value": "get_conditionTargetAmount"
+            },
+            {
+              "offset": 610689,
+              "encoding": "ascii",
+              "value": "set_conditionTargetAmount"
+            },
+            {
+              "offset": 610715,
+              "encoding": "ascii",
+              "value": "get_conditionProgress"
+            },
+            {
+              "offset": 610737,
+              "encoding": "ascii",
+              "value": "set_conditionProgress"
+            },
+            {
+              "offset": 610759,
+              "encoding": "ascii",
+              "value": "get_unlockConditionDestination"
+            },
+            {
+              "offset": 610790,
+              "encoding": "ascii",
+              "value": "set_unlockConditionDestination"
+            },
+            {
+              "offset": 610821,
+              "encoding": "ascii",
+              "value": "get_requirementMet"
+            },
+            {
+              "offset": 610840,
+              "encoding": "ascii",
+              "value": "set_requirementMet"
+            },
+            {
+              "offset": 610859,
+              "encoding": "ascii",
+              "value": "get_isUnlocked"
+            },
+            {
+              "offset": 610874,
+              "encoding": "ascii",
+              "value": "set_isUnlocked"
+            },
+            {
+              "offset": 610889,
+              "encoding": "ascii",
+              "value": "CalculateAndSetUpgradeCalculations"
+            },
+            {
+              "offset": 610924,
+              "encoding": "ascii",
+              "value": "BuyAndApplyUpgrade"
+            },
+            {
+              "offset": 610943,
+              "encoding": "ascii",
+              "value": "UnlockUpgrade"
+            },
+            {
+              "offset": 610957,
+              "encoding": "ascii",
+              "value": "<index>k__BackingField"
+            },
+            {
+              "offset": 610980,
+              "encoding": "ascii",
+              "value": "<level>k__BackingField"
+            },
+            {
+              "offset": 611003,
+              "encoding": "ascii",
+              "value": "<upgradeName>k__BackingField"
+            },
+            {
+              "offset": 611032,
+              "encoding": "ascii",
+              "value": "<description>k__BackingField"
+            },
+            {
+              "offset": 611061,
+              "encoding": "ascii",
+              "value": "<cost>k__BackingField"
+            },
+            {
+              "offset": 611083,
+              "encoding": "ascii",
+              "value": "<costExponent>k__BackingField"
+            },
+            {
+              "offset": 611113,
+              "encoding": "ascii",
+              "value": "<additiveIncrease>k__BackingField"
+            },
+            {
+              "offset": 611147,
+              "encoding": "ascii",
+              "value": "<arcadeGame>k__BackingField"
+            },
+            {
+              "offset": 611175,
+              "encoding": "ascii",
+              "value": "<calculationsType>k__BackingField"
+            },
+            {
+              "offset": 611209,
+              "encoding": "ascii",
+              "value": "<upgradeType>k__BackingField"
+            },
+            {
+              "offset": 611238,
+              "encoding": "ascii",
+              "value": "<destination>k__BackingField"
+            }
+          ]
+        },
+        {
+          "anchor": "set_IsUnlocked",
+          "match_index": 67966,
+          "match_offset": 1887243,
+          "match_value": "set_IsUnlocked",
+          "context": [
+            {
+              "offset": 1887027,
+              "encoding": "ascii",
+              "value": "OverLevel100Exponent"
+            },
+            {
+              "offset": 1887048,
+              "encoding": "ascii",
+              "value": "OverLevel200Exponent"
+            },
+            {
+              "offset": 1887069,
+              "encoding": "ascii",
+              "value": "OverLevel300Exponent"
+            },
+            {
+              "offset": 1887090,
+              "encoding": "ascii",
+              "value": "OverLevel400Exponent"
+            },
+            {
+              "offset": 1887111,
+              "encoding": "ascii",
+              "value": "TotalMilestoneLevels"
+            },
+            {
+              "offset": 1887132,
+              "encoding": "ascii",
+              "value": "Phase1Tick"
+            },
+            {
+              "offset": 1887143,
+              "encoding": "ascii",
+              "value": "Phase2Tick"
+            },
+            {
+              "offset": 1887154,
+              "encoding": "ascii",
+              "value": "Phase3Tick"
+            },
+            {
+              "offset": 1887165,
+              "encoding": "ascii",
+              "value": "Phase4Tick"
+            },
+            {
+              "offset": 1887176,
+              "encoding": "ascii",
+              "value": "Phase5Tick"
+            },
+            {
+              "offset": 1887187,
+              "encoding": "ascii",
+              "value": "Phase6Tick"
+            },
+            {
+              "offset": 1887198,
+              "encoding": "ascii",
+              "value": "CooldownTick"
+            },
+            {
+              "offset": 1887211,
+              "encoding": "ascii",
+              "value": "ShardUpgradeInfo"
+            },
+            {
+              "offset": 1887228,
+              "encoding": "ascii",
+              "value": "get_IsUnlocked"
+            },
+            {
+              "offset": 1887243,
+              "encoding": "ascii",
+              "value": "set_IsUnlocked"
+            },
+            {
+              "offset": 1887258,
+              "encoding": "ascii",
+              "value": "<IsUnlocked>k__BackingField"
+            },
+            {
+              "offset": 1887286,
+              "encoding": "ascii",
+              "value": "upgrade"
+            },
+            {
+              "offset": 1887294,
+              "encoding": "ascii",
+              "value": "<SortCostAndBools>b__1266_0"
+            },
+            {
+              "offset": 1887322,
+              "encoding": "ascii",
+              "value": "<>9__1266_0"
+            },
+            {
+              "offset": 1887334,
+              "encoding": "ascii",
+              "value": "<FastBuyEnum>d__1429"
+            },
+            {
+              "offset": 1887355,
+              "encoding": "ascii",
+              "value": "TechUpgrades"
+            },
+            {
+              "offset": 1887368,
+              "encoding": "ascii",
+              "value": "get_TotalHardwareMult"
+            },
+            {
+              "offset": 1887390,
+              "encoding": "ascii",
+              "value": "get_TotalSoftwareMult"
+            },
+            {
+              "offset": 1887412,
+              "encoding": "ascii",
+              "value": "get_TU1Bonus"
+            },
+            {
+              "offset": 1887425,
+              "encoding": "ascii",
+              "value": "get_TU1BonusNext"
+            },
+            {
+              "offset": 1887442,
+              "encoding": "ascii",
+              "value": "get_TU2Bonus"
+            },
+            {
+              "offset": 1887455,
+              "encoding": "ascii",
+              "value": "get_TU2BonusNext"
+            },
+            {
+              "offset": 1887472,
+              "encoding": "ascii",
+              "value": "get_TU3Bonus"
+            },
+            {
+              "offset": 1887485,
+              "encoding": "ascii",
+              "value": "get_TU3BonusNext"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "get_SU1FinalUnlockReq",
+      "matches": [
+        {
+          "anchor": "get_SU1FinalUnlockReq",
+          "match_index": 66634,
+          "match_offset": 1864455,
+          "match_value": "get_SU1FinalUnlockReq",
+          "context": [
+            {
+              "offset": 1864304,
+              "encoding": "ascii",
+              "value": "Elysium49"
+            },
+            {
+              "offset": 1864314,
+              "encoding": "ascii",
+              "value": "Elysium54"
+            },
+            {
+              "offset": 1864324,
+              "encoding": "ascii",
+              "value": "Elysium59"
+            },
+            {
+              "offset": 1864334,
+              "encoding": "ascii",
+              "value": "Hyperion9"
+            },
+            {
+              "offset": 1864344,
+              "encoding": "ascii",
+              "value": "Hyperion19"
+            },
+            {
+              "offset": 1864355,
+              "encoding": "ascii",
+              "value": "Hyperion24"
+            },
+            {
+              "offset": 1864366,
+              "encoding": "ascii",
+              "value": "Hyperion29"
+            },
+            {
+              "offset": 1864377,
+              "encoding": "ascii",
+              "value": "Hyperion34"
+            },
+            {
+              "offset": 1864388,
+              "encoding": "ascii",
+              "value": "Hyperion39"
+            },
+            {
+              "offset": 1864399,
+              "encoding": "ascii",
+              "value": "Hyperion44"
+            },
+            {
+              "offset": 1864410,
+              "encoding": "ascii",
+              "value": "Hyperion49"
+            },
+            {
+              "offset": 1864421,
+              "encoding": "ascii",
+              "value": "Hyperion54"
+            },
+            {
+              "offset": 1864432,
+              "encoding": "ascii",
+              "value": "Hyperion59"
+            },
+            {
+              "offset": 1864443,
+              "encoding": "ascii",
+              "value": "ShardMining"
+            },
+            {
+              "offset": 1864455,
+              "encoding": "ascii",
+              "value": "get_SU1FinalUnlockReq"
+            },
+            {
+              "offset": 1864477,
+              "encoding": "ascii",
+              "value": "get_SU2FinalUnlockReq"
+            },
+            {
+              "offset": 1864499,
+              "encoding": "ascii",
+              "value": "get_SU3FinalUnlockReq"
+            },
+            {
+              "offset": 1864521,
+              "encoding": "ascii",
+              "value": "get_SU4FinalUnlockReq"
+            },
+            {
+              "offset": 1864543,
+              "encoding": "ascii",
+              "value": "get_SU5FinalUnlockReq"
+            },
+            {
+              "offset": 1864565,
+              "encoding": "ascii",
+              "value": "get_SU6FinalUnlockReq"
+            },
+            {
+              "offset": 1864587,
+              "encoding": "ascii",
+              "value": "get_SU7FinalUnlockReq"
+            },
+            {
+              "offset": 1864609,
+              "encoding": "ascii",
+              "value": "get_SU8FinalUnlockReq"
+            },
+            {
+              "offset": 1864631,
+              "encoding": "ascii",
+              "value": "get_SU9FinalUnlockReq"
+            },
+            {
+              "offset": 1864653,
+              "encoding": "ascii",
+              "value": "get_SU10FinalUnlockReq"
+            },
+            {
+              "offset": 1864676,
+              "encoding": "ascii",
+              "value": "get_SU11FinalUnlockReq"
+            },
+            {
+              "offset": 1864699,
+              "encoding": "ascii",
+              "value": "get_SU12FinalUnlockReq"
+            },
+            {
+              "offset": 1864722,
+              "encoding": "ascii",
+              "value": "get_SU13FinalUnlockReq"
+            },
+            {
+              "offset": 1864745,
+              "encoding": "ascii",
+              "value": "get_SU14FinalUnlockReq"
+            },
+            {
+              "offset": 1864768,
+              "encoding": "ascii",
+              "value": "get_SU15FinalUnlockReq"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "get_SU29FinalUnlockReq",
+      "matches": [
+        {
+          "anchor": "get_SU29FinalUnlockReq",
+          "match_index": 66662,
+          "match_offset": 1865090,
+          "match_value": "get_SU29FinalUnlockReq",
+          "context": [
+            {
+              "offset": 1864768,
+              "encoding": "ascii",
+              "value": "get_SU15FinalUnlockReq"
+            },
+            {
+              "offset": 1864791,
+              "encoding": "ascii",
+              "value": "get_SU16FinalUnlockReq"
+            },
+            {
+              "offset": 1864814,
+              "encoding": "ascii",
+              "value": "get_SU17FinalUnlockReq"
+            },
+            {
+              "offset": 1864837,
+              "encoding": "ascii",
+              "value": "get_SU18FinalUnlockReq"
+            },
+            {
+              "offset": 1864860,
+              "encoding": "ascii",
+              "value": "get_SU19FinalUnlockReq"
+            },
+            {
+              "offset": 1864883,
+              "encoding": "ascii",
+              "value": "get_SU20FinalUnlockReq"
+            },
+            {
+              "offset": 1864906,
+              "encoding": "ascii",
+              "value": "get_SU21FinalUnlockReq"
+            },
+            {
+              "offset": 1864929,
+              "encoding": "ascii",
+              "value": "get_SU22FinalUnlockReq"
+            },
+            {
+              "offset": 1864952,
+              "encoding": "ascii",
+              "value": "get_SU23FinalUnlockReq"
+            },
+            {
+              "offset": 1864975,
+              "encoding": "ascii",
+              "value": "get_SU24FinalUnlockReq"
+            },
+            {
+              "offset": 1864998,
+              "encoding": "ascii",
+              "value": "get_SU25FinalUnlockReq"
+            },
+            {
+              "offset": 1865021,
+              "encoding": "ascii",
+              "value": "get_SU26FinalUnlockReq"
+            },
+            {
+              "offset": 1865044,
+              "encoding": "ascii",
+              "value": "get_SU27FinalUnlockReq"
+            },
+            {
+              "offset": 1865067,
+              "encoding": "ascii",
+              "value": "get_SU28FinalUnlockReq"
+            },
+            {
+              "offset": 1865090,
+              "encoding": "ascii",
+              "value": "get_SU29FinalUnlockReq"
+            },
+            {
+              "offset": 1865113,
+              "encoding": "ascii",
+              "value": "get_SU1Bonus1Calc"
+            },
+            {
+              "offset": 1865131,
+              "encoding": "ascii",
+              "value": "get_SU1Bonus2Calc"
+            },
+            {
+              "offset": 1865149,
+              "encoding": "ascii",
+              "value": "get_SU1Bonus3Calc"
+            },
+            {
+              "offset": 1865167,
+              "encoding": "ascii",
+              "value": "get_SU2Bonus1Calc"
+            },
+            {
+              "offset": 1865185,
+              "encoding": "ascii",
+              "value": "get_SU2Bonus2Calc"
+            },
+            {
+              "offset": 1865203,
+              "encoding": "ascii",
+              "value": "get_SU2Bonus3Calc"
+            },
+            {
+              "offset": 1865221,
+              "encoding": "ascii",
+              "value": "get_SU3Bonus1Calc"
+            },
+            {
+              "offset": 1865239,
+              "encoding": "ascii",
+              "value": "get_SU3Bonus2Calc"
+            },
+            {
+              "offset": 1865257,
+              "encoding": "ascii",
+              "value": "get_SU3Bonus3Calc"
+            },
+            {
+              "offset": 1865275,
+              "encoding": "ascii",
+              "value": "get_SU4Bonus1Calc"
+            },
+            {
+              "offset": 1865293,
+              "encoding": "ascii",
+              "value": "get_SU4Bonus2Calc"
+            },
+            {
+              "offset": 1865311,
+              "encoding": "ascii",
+              "value": "get_SU4Bonus3Calc"
+            },
+            {
+              "offset": 1865329,
+              "encoding": "ascii",
+              "value": "get_SU5Bonus1Calc"
+            },
+            {
+              "offset": 1865347,
+              "encoding": "ascii",
+              "value": "get_SU5Bonus2Calc"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "<FastBuyEnum>d__1429",
+      "matches": [
+        {
+          "anchor": "<FastBuyEnum>d__1429",
+          "match_index": 67971,
+          "match_offset": 1887334,
+          "match_value": "<FastBuyEnum>d__1429",
+          "context": [
+            {
+              "offset": 1887132,
+              "encoding": "ascii",
+              "value": "Phase1Tick"
+            },
+            {
+              "offset": 1887143,
+              "encoding": "ascii",
+              "value": "Phase2Tick"
+            },
+            {
+              "offset": 1887154,
+              "encoding": "ascii",
+              "value": "Phase3Tick"
+            },
+            {
+              "offset": 1887165,
+              "encoding": "ascii",
+              "value": "Phase4Tick"
+            },
+            {
+              "offset": 1887176,
+              "encoding": "ascii",
+              "value": "Phase5Tick"
+            },
+            {
+              "offset": 1887187,
+              "encoding": "ascii",
+              "value": "Phase6Tick"
+            },
+            {
+              "offset": 1887198,
+              "encoding": "ascii",
+              "value": "CooldownTick"
+            },
+            {
+              "offset": 1887211,
+              "encoding": "ascii",
+              "value": "ShardUpgradeInfo"
+            },
+            {
+              "offset": 1887228,
+              "encoding": "ascii",
+              "value": "get_IsUnlocked"
+            },
+            {
+              "offset": 1887243,
+              "encoding": "ascii",
+              "value": "set_IsUnlocked"
+            },
+            {
+              "offset": 1887258,
+              "encoding": "ascii",
+              "value": "<IsUnlocked>k__BackingField"
+            },
+            {
+              "offset": 1887286,
+              "encoding": "ascii",
+              "value": "upgrade"
+            },
+            {
+              "offset": 1887294,
+              "encoding": "ascii",
+              "value": "<SortCostAndBools>b__1266_0"
+            },
+            {
+              "offset": 1887322,
+              "encoding": "ascii",
+              "value": "<>9__1266_0"
+            },
+            {
+              "offset": 1887334,
+              "encoding": "ascii",
+              "value": "<FastBuyEnum>d__1429"
+            },
+            {
+              "offset": 1887355,
+              "encoding": "ascii",
+              "value": "TechUpgrades"
+            },
+            {
+              "offset": 1887368,
+              "encoding": "ascii",
+              "value": "get_TotalHardwareMult"
+            },
+            {
+              "offset": 1887390,
+              "encoding": "ascii",
+              "value": "get_TotalSoftwareMult"
+            },
+            {
+              "offset": 1887412,
+              "encoding": "ascii",
+              "value": "get_TU1Bonus"
+            },
+            {
+              "offset": 1887425,
+              "encoding": "ascii",
+              "value": "get_TU1BonusNext"
+            },
+            {
+              "offset": 1887442,
+              "encoding": "ascii",
+              "value": "get_TU2Bonus"
+            },
+            {
+              "offset": 1887455,
+              "encoding": "ascii",
+              "value": "get_TU2BonusNext"
+            },
+            {
+              "offset": 1887472,
+              "encoding": "ascii",
+              "value": "get_TU3Bonus"
+            },
+            {
+              "offset": 1887485,
+              "encoding": "ascii",
+              "value": "get_TU3BonusNext"
+            },
+            {
+              "offset": 1887502,
+              "encoding": "ascii",
+              "value": "get_TU4Bonus"
+            },
+            {
+              "offset": 1887515,
+              "encoding": "ascii",
+              "value": "get_TU4BonusNext"
+            },
+            {
+              "offset": 1887532,
+              "encoding": "ascii",
+              "value": "get_TU5Bonus"
+            },
+            {
+              "offset": 1887545,
+              "encoding": "ascii",
+              "value": "get_TU5BonusNext"
+            },
+            {
+              "offset": 1887562,
+              "encoding": "ascii",
+              "value": "get_TU6Bonus"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
