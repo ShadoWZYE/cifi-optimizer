@@ -9,6 +9,7 @@ Separate from those snapshot imports, the Profile page may accept a single Playe
 Status:
 - MVP-safe guided/manual import support
 - import must run through the PlayerProfile normalizer, not direct assignment
+- the Profile page should show where imported values landed: canonical, planner-only, external-model, or compatibility
 
 Accepted shapes:
 - current nested PlayerProfile schema

@@ -144,12 +144,13 @@
     {
       "id": "playerprofile-boundary-and-imports",
       "title": "PlayerProfile boundary and import cleanup",
-      "status": "queued",
+      "status": "active",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Tighten which downstream modules are allowed to read non-canonical PlayerProfile fields.",
+      "currentSlice": "Make PlayerProfile imports visibly show which values landed as canonical truth, planner helpers, external-model state, or compatibility leftovers.",
       "completedSteps": [
         "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
-        "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile."
+        "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
+        "Show the current PlayerProfile boundary summary in the guided import flow so imported values are visibly classified by namespace."
       ],
       "nextSteps": [
         "Audit current PlayerProfile fields against MVP-only CIFI concepts.",

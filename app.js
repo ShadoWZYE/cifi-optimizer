@@ -943,6 +943,7 @@ function renderAll() {
   renderNavigation();
   renderQuickPanels();
   renderOverview();
+  renderPlayerProfileBoundarySummary();
   renderShipPlayerState();
   renderSourceRegistry();
   renderGeneratorOcrFileList();
@@ -1583,6 +1584,74 @@ function exportPlayerProfileJson() {
   link.click();
   URL.revokeObjectURL(link.href);
   setStatus("playerProfileImportStatus", "Exported PlayerProfile JSON.", "success");
+}
+
+function renderPlayerProfileBoundarySummary() {
+  const groups = [
+    {
+      title: "Canonical shared truth",
+      note: "Grounded account state and metadata that the shared MVP profile can treat as first-class truth.",
+      items: [
+        ["Profile name", state.playerProfile.meta.profileName],
+        ["Data confidence", state.playerProfile.meta.dataConfidence],
+        ["Current LR", state.playerProfile.player.loop.loopReset],
+        ["Diamonds", state.playerProfile.player.resources.diamonds],
+        ["Tokens", state.playerProfile.player.resources.tokens],
+        ["Academy relics", state.playerProfile.player.resources.academyRelics],
+        ["Current shards", state.playerProfile.player.resources.shards],
+        ["Profile notes", state.playerProfile.notes.profile]
+      ]
+    },
+    {
+      title: "Planner-only helpers",
+      note: "Manual helper inputs used by descriptive planners, not canonical account truth.",
+      items: [
+        ["Shard income / hour", state.playerProfile.planning.shards.ratePerHour],
+        ["Total shard milestone levels", state.playerProfile.planning.shards.totalMilestoneLevels],
+        ["Focus milestone", state.playerProfile.planning.shards.focusMilestoneId],
+        ["Focus milestone level", state.playerProfile.planning.shards.focusMilestoneLevel]
+      ]
+    },
+    {
+      title: "External-model implementation state",
+      note: "Current implementation data that stays isolated from shared profile truth.",
+      items: [
+        ["Ship planner power", state.playerProfile.externalModels.shipPlanner.summary.power],
+        ["Ship planner speed", state.playerProfile.externalModels.shipPlanner.summary.speed],
+        ["Ship planner cargo", state.playerProfile.externalModels.shipPlanner.summary.cargo],
+        ["Ship calibration groups", Object.keys(state.playerProfile.externalModels.shipPlanner.communityToolState || {}).length],
+        ["Gem-node budget", state.playerProfile.externalModels.experimental.gemNodes.budget],
+        ["Primary farming focus", state.playerProfile.externalModels.experimental.profileHints.primaryFarmingFocus],
+        ["Research hours", state.playerProfile.externalModels.experimental.profileHints.researchHours]
+      ]
+    },
+    {
+      title: "Compatibility leftovers",
+      note: "Preserved migration values that are not treated as active shared truth.",
+      items: [
+        ["Legacy highest ship unlocked", state.playerProfile.compatibility.legacyStage.highestShipUnlocked],
+        ["Legacy manual phase", state.playerProfile.compatibility.legacyStage.manualPhase],
+        ["Legacy gemDust", state.playerProfile.compatibility.unresolvedProfileFields.gemDust],
+        ["Legacy hunter level", state.playerProfile.compatibility.unresolvedProfileFields.hunterLevel],
+        ["Legacy trait sphere count", state.playerProfile.compatibility.unresolvedProfileFields.traitSphereCount],
+        ["Legacy mech parts", state.playerProfile.compatibility.unresolvedProfileFields.mechParts]
+      ]
+    }
+  ];
+
+  $("#playerProfileImportSummary").innerHTML = groups.map((group) => {
+    const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value));
+    return `
+      <article class="preview-card">
+        <strong>${escapeHtml(group.title)}</strong>
+        <p class="meta">${escapeHtml(group.note)}</p>
+        <p class="meta">${populated.length}/${group.items.length} populated</p>
+        ${populated.length
+          ? `<div class="meta-stack">${populated.map(([label, value]) => `<p class="meta">${escapeHtml(label)}: ${escapeHtml(formatBoundaryValue(value))}</p>`).join("")}</div>`
+          : `<p class="meta">No populated fields in this namespace.</p>`}
+      </article>
+    `;
+  }).join("");
 }
 
 function applyInstallTap(installIndex, direction = 1) {
@@ -2693,6 +2762,32 @@ function formatOptionalNumber(value) {
   return value === null || value === undefined || value === "" || Number.isNaN(Number(value))
     ? "Not tracked"
     : formatShardNumber(value);
+}
+
+function isBoundaryValuePresent(value) {
+  if (value === null || value === undefined) {
+    return false;
+  }
+  if (typeof value === "string") {
+    return value.trim() !== "";
+  }
+  if (typeof value === "number") {
+    return Number.isFinite(value);
+  }
+  if (typeof value === "object") {
+    return Object.keys(value).length > 0;
+  }
+  return Boolean(value);
+}
+
+function formatBoundaryValue(value) {
+  if (typeof value === "number") {
+    return formatShardNumber(value);
+  }
+  if (typeof value === "object" && value !== null) {
+    return `${Object.keys(value).length} groups`;
+  }
+  return String(value);
 }
 
 function getProfileCompletion(profile) {
