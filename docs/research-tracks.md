@@ -22,6 +22,8 @@ Use source priority in this order:
 
 Before a research track is promoted into roadmap work, it should explicitly record whether the APK/Unity path was checked, what it produced, and what gaps remain.
 
+For new notes, use `docs/research-note-template.md`.
+
 ---
 
 ## Promotion rule
@@ -138,5 +140,7 @@ Any research result added to the repo should include:
 - data classification
 - implementation relevance
 - recommended next step
+
+For research that may promote shipped data, also follow `docs/dataset-refresh-checklist.md`.
 
 If uncertainty remains high, the correct outcome is a better research note, not product code.

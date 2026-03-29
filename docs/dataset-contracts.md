@@ -18,6 +18,10 @@ The checked-in source of truth for this contract is:
 
 Use the manifest when adding, removing, or reclassifying bundled datasets. The prose below explains the intent of that manifest and the minimum expectations for each shipped dataset group.
 
+For the operator path that goes with this contract, use:
+
+- `docs/dataset-refresh-checklist.md`
+
 ## Classification labels
 
 Use one of these labels when describing a bundled dataset:

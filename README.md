@@ -108,6 +108,8 @@ Numeric UX should follow CIFI-style conventions where possible, while keeping pa
 - `docs/cifi_grounding_plan.md` — grounding migration plan
 - `docs/cifi_sources.md` — public source list
 - `docs/dataset-contracts.md` — bundled dataset contract, manifest, and validation path
+- `docs/dataset-refresh-checklist.md` — promotion checklist for shipped dataset refreshes
+- `docs/research-note-template.md` — APK-first template for new research notes
 - `data/bundled-dataset-contract.v1.json` — checked-in contract manifest for shipped JSON assets and source-priority order
 - `docs/unity-audit-playbook.md` — repeatable Unity/IL2CPP mechanic extraction workflow
 - `docs/unity-owner-map.md` — grounded mechanic owner index
