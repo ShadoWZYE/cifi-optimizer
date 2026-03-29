@@ -179,6 +179,31 @@ For every current field ask:
 
 ---
 
+## System integration gate
+
+Before any system moves from research or extraction work into app recommendations, verify:
+
+1. the in-game location and role of the system
+2. the real owner object or code-side owner in the Unity/APK assets
+3. the currency lane and player-owned state the system consumes
+4. the difference between verified player-facing labels, serialized field ids, and community-tool labels
+5. what remains unresolved enough that the app must stay descriptive or blocked
+
+Fail this gate if any of the above are inferred rather than evidenced.
+
+Acceptable next work after a failed gate:
+- parser improvements
+- owner-map and verification docs
+- PlayerProfile contract planning
+- labeled descriptive placeholders
+
+Not acceptable after a failed gate:
+- budget mapping by guesswork
+- recommendation cards that treat one system's currency as another system's currency
+- optimistic UI that implies the planner understands a system it has not yet grounded
+
+---
+
 ## Codex execution guidance
 
 Codex should be used to do the bulk repo work, but with this sequence:

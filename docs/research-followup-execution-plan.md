@@ -225,6 +225,7 @@ Use the extracted token-shop and multiverse-market data to build the MVP spend-p
 - initial spend recommendations with explicit confidence and assumptions
 - tests covering planner input parsing and output contract shape
 - verification notes that pin token-shop and multiverse-market currencies, labels, and owned-level inputs to APK or Unity evidence before planner UI is introduced
+- a documented integration gate that blocks planner wiring until system placement, owner, currency lane, and owned-state inputs are all verified
 
 **Dependencies**
 

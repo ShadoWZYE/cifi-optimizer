@@ -18,6 +18,13 @@ const groundedShardObserved = JSON.parse(await readFile(new URL("../data/shard-o
 const groundedShardProvenance = JSON.parse(await readFile(new URL("../data/shard-milestones-provenance.grounded.v1.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const agentsMd = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8");
+const groundingPlan = await readFile(new URL("../docs/cifi_grounding_plan.md", import.meta.url), "utf8");
+const unityAuditPlaybook = await readFile(new URL("../docs/unity-audit-playbook.md", import.meta.url), "utf8");
+const ownerMap = await readFile(new URL("../docs/unity-owner-map.md", import.meta.url), "utf8");
+const spendVerificationDoc = await readFile(new URL("../docs/spend-system-verification.md", import.meta.url), "utf8");
+const tokenShopDoc = await readFile(new URL("../docs/token-shop-values.md", import.meta.url), "utf8");
+const multiverseMarketDoc = await readFile(new URL("../docs/multiverse-market-values.md", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
@@ -42,6 +49,20 @@ assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
   ["snapshot", "shards", "token-shop", "multiverse-market"]
 );
+assert.match(agentsMd, /## System Integration Gate/);
+assert.match(agentsMd, /Before integrating any game system into the app/);
+assert.match(groundingPlan, /## System integration gate/);
+assert.match(groundingPlan, /Fail this gate if any of the above are inferred rather than evidenced/);
+assert.match(unityAuditPlaybook, /## Integration readiness gate/);
+assert.match(unityAuditPlaybook, /MultiverseMarket/);
+assert.match(ownerMap, /integration status: owner and serialized constants verified/);
+assert.match(ownerMap, /integration status: owner and partial row constants verified/);
+assert.match(spendVerificationDoc, /# Spend System Verification Gate/);
+assert.match(spendVerificationDoc, /It is not safe to map its spend lane to diamonds, tokens, or any other player resource without direct evidence/);
+assert.match(tokenShopDoc, /## Integration status/);
+assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
+assert.match(multiverseMarketDoc, /## Integration status/);
+assert.match(multiverseMarketDoc, /the actual spend currency lane/);
 
 assert.match(html, /Player Data/);
 assert.match(html, /Game Data/);

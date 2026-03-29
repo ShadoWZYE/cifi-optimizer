@@ -180,9 +180,10 @@
       "title": "Spend planner from extracted token and market data",
       "status": "active",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Verify token-shop and multiverse-market currencies, labels, and ownership inputs from Unity/APK assets before surfacing any spend recommendations in the app.",
+      "currentSlice": "Document the spend-system integration gate so TokenShop and MultiverseMarket cannot be wired into the app before currencies, labels, and owned-state inputs are verified.",
       "completedSteps": [
-        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts."
+        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
+        "Document the spend-system integration gate and current verified versus unresolved app-integration facts."
       ],
       "nextSteps": [
         "Verify the token-shop cost lane against canonical token or tokenium naming from the available assets.",

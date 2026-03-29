@@ -9,6 +9,19 @@ Source: serialized `TokenShop` MonoBehaviour payload in [`_unity_joined/level0`]
 - Tier-1 generator token boosts use `FillMaxLevel` instead of plain `MaxLevel`.
 - Late token upgrades `ATU24` through `ATU28` are also serialized in the same object.
 
+## Integration status
+
+Verified enough for repo truth:
+
+- `TokenShop` is a real owner for token-bank mechanics.
+- Early and late token-upgrade constants are directly serialized.
+
+Not yet verified enough for app recommendations:
+
+- current player-owned levels for these upgrades
+- final remap from serialized ids to grounded player-facing labels
+- full next-purchase logic beyond extracted constants
+
 ## Selected values
 
 - `TokenBoost`: `StartCost=20`, `AdditiveCost=5`, `Bonus=0.2`, `MaxLevel=20`

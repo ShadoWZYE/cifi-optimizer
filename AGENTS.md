@@ -39,7 +39,22 @@ If uncertain:
 - avoid invented precision
 - prefer descriptive behavior over fake optimizer confidence
 
----
+## System Integration Gate
+
+Before integrating any game system into the app, agents must verify all of the following from repo docs and available Unity/APK assets:
+
+1. where the system lives in-game
+2. what the real system owner is in the extracted assets
+3. which currencies or player-owned inputs the system actually uses
+4. which labels are verified in-game labels versus serialized ids or community-tool names
+5. which parts are verified facts versus unresolved assumptions
+
+If any of those remain unresolved:
+- do not wire the system into recommendations as if it were understood
+- keep the work in documentation, extraction, verification, or descriptive-mode surfaces
+- explicitly record the unresolved integration gap before moving on
+
+--- 
 
 ## Explicit Non-Goals (for now)
 

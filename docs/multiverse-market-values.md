@@ -10,6 +10,20 @@ Source: serialized `MultiverseMarket` MonoBehaviour payload in [`_unity_joined/l
 - These rows are not serialized in inscription-ID order; they appear to be a display/order list rather than a plain `IS50..IS71` sequence.
 - The visible screenshot row `Inscription #51` is present in this block with direct extracted constants.
 
+## Integration status
+
+Verified enough for repo truth:
+
+- `MultiverseMarket` is a real owner for Chrystos Emporium / Inscryptions data.
+- The validated late block exposes direct serialized constants for part of the system.
+
+Not yet verified enough for app recommendations:
+
+- the actual spend currency lane
+- player-owned current inscription levels or equivalent state
+- full row coverage beyond the current validated block
+- final remap from serialized ids to grounded player-facing labels
+
 ## Extracted late-block rows
 
 - `IS50`: `MaxLevel=8`; `Bonus=1.0`; `StartCost=1`; `CostExponent=2.3`; `ProgressObjects=10`; `MaxLevelObjects=10`
