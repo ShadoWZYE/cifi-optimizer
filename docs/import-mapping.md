@@ -1,50 +1,55 @@
 # Import Mapping
 
-The Data page accepts CSV or JSON arrays and normalizes them into the active app snapshot.
+The Data page imports CSV or JSON arrays into the app snapshot. The Profile page imports one PlayerProfile JSON document and normalizes it into `state.playerProfile`.
 
-Separate from those snapshot imports, the Profile page may accept a single PlayerProfile JSON document. That path must normalize into `state.playerProfile` and keep canonical, planner-only, external-model, and compatibility fields labeled.
+## PlayerProfile import rules
 
-## PlayerProfile JSON import
-
-Status:
-- MVP-safe guided/manual import support
-- import must run through the PlayerProfile normalizer, not direct assignment
-- the Profile page should show where imported values landed: canonical, planner-only, external-model, or compatibility
+- guided/manual import is MVP-safe
+- import must run through the PlayerProfile normalizer
+- the Profile page should show where values landed: canonical, planner-only, external-model, or compatibility
 
 Accepted shapes:
+
 - current nested PlayerProfile schema
-- legacy flat fields already supported by `normalizePlayerProfile`
+- legacy shapes still listed in `PLAYER_PROFILE_IMPORT_ALIASES`
 
 Alias inventory:
-- the supported legacy and nested alias groups are centrally defined in `PLAYER_PROFILE_IMPORT_ALIASES` within [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
-- the current checked-in alias audit is recorded in [`docs/player-profile-import-aliases.md`](C:\Users\Shadow\Desktop\CiFi\docs\player-profile-import-aliases.md) and [`data/player-profile-import-aliases.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\player-profile-import-aliases.v1.json)
-- future alias changes should update that inventory, the docs here, and the migration smoke checks together
 
-Grounding rules:
-- canonical shared truth stays under `player` and `meta`
-- planner-only values stay under `planning`
-- external/community-tool state stays under `externalModels`
-- unresolved legacy values stay under `compatibility`
-- imported blobs for real-but-unmapped systems stay under `compatibility.unmappedSystemState`
+- source: [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
+- checked-in audit:
+  - [`docs/player-profile-import-aliases.md`](C:\Users\Shadow\Desktop\CiFi\docs\player-profile-import-aliases.md)
+  - [`data/player-profile-import-aliases.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\player-profile-import-aliases.v1.json)
 
-Boundary note:
-- legacy `gemDust` may be preserved under `compatibility.unresolvedProfileFields.gemDust`
-- it must not be treated as the active experimental gem-node budget unless a user explicitly maps it into `externalModels.experimental.gemNodes.budget`
-- experimental helper imports now require explicit `externalModels.experimental.*` paths; old `planning.resourceFocus`, `planning.researchHours`, `planning.gemNodeBudget`, and flat helper aliases are retired
-- shard helper aliases such as `shardRatePerHour`, `totalShardMilestoneLevels`, `shardFocusMilestoneId`, `shardFocusMilestoneLevel`, and their `systems.shards.*` forms should normalize into `planning.shards.*`
-- those shard helper fields stay planner-only; importing them does not promote shard milestone math into canonical game truth
-- legacy `stage.highestShipUnlocked`, `stage.manualPhase`, and `systems.metaProgression.*` aliases should normalize into compatibility-only fields, not into canonical or planner namespaces
-- preserving those compatibility aliases is migration safety only; it does not make hunter, mech, or stage terms active MVP profile truth
-- flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired; imports must use explicit compatibility paths or the still-namespaced legacy forms
+Future alias changes should update the inventory, the audit artifacts, and migration smoke checks together.
+
+## Boundary summary
+
+- canonical shared truth lives under `player` and `meta`
+- planner-only values live under `planning`
+- external/community-tool state lives under `externalModels`
+- unresolved legacy values live under `compatibility`
+- imported blobs for real-but-unmapped systems live under `compatibility.unmappedSystemState`
+
+## Important migration notes
+
+- legacy `gemDust` may still be preserved under `compatibility.unresolvedProfileFields.gemDust`
+- it must not be treated as an active gem-node budget unless explicitly mapped into `externalModels.experimental.gemNodes.budget`
+- experimental helper imports now require explicit `externalModels.experimental.*` paths
+- shard helper aliases such as `shardRatePerHour`, `totalShardMilestoneLevels`, `shardFocusMilestoneId`, `shardFocusMilestoneLevel`, and their `systems.shards.*` forms still normalize into `planning.shards.*`
+- those shard helper fields stay planner-only; importing them does not promote shard milestone math into canonical truth
+- `stage.highestShipUnlocked`, `stage.manualPhase`, and `systems.metaProgression.*` aliases should normalize into compatibility-only fields
+- preserving those aliases is migration safety only; it does not make hunter, mech, or stage terms active MVP truth
+- flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired
 - ship implementation imports now require `systems.ship.*` or `externalModels.shipPlanner.*`; top-level `power`, `speed`, and `cargo` are retired
 - imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`
 - preserving those objects does not make the system planner-ready or canonical
 
-## Supported datasets
+## Snapshot dataset imports
 
 ### `shipLoadouts`
 
-Expected columns:
+Columns:
+
 - `id`
 - `name`
 - `resourceBias`
@@ -56,21 +61,21 @@ Expected columns:
 
 ### `shardMilestones`
 
-Current status:
-- import is disabled pending a verified-safe shard milestone schema
+Status:
+
+- import is disabled pending a verified-safe schema
 - do not treat cost, value, growth, breakpoint, or ROI-style fields as grounded input
 
-Future shard milestone imports should only be re-enabled once the repo has:
-- verified source provenance
-- a reviewed descriptive or verified-safe record shape
-- clear labeling for any non-canonical fields
+Re-enable only after verified provenance, reviewed descriptive or verified-safe shape, and clear non-canonical labeling.
 
 ### `gemNodes`
 
 Status:
+
 - experimental / non-MVP
 
-Expected columns:
+Columns:
+
 - `id`
 - `label`
 - `level`
@@ -83,7 +88,8 @@ Expected columns:
 
 ### `validationCases`
 
-Expected columns:
+Columns:
+
 - `id`
 - `module`
 - `title`
@@ -93,9 +99,11 @@ Expected columns:
 ### `researchTracks`
 
 Status:
+
 - non-MVP research only
 
-Expected columns:
+Columns:
+
 - `id`
 - `title`
 - `goal`

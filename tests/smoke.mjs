@@ -530,7 +530,7 @@ const datasetContractsDoc = await readFile(new URL("../docs/dataset-contracts.md
 assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(datasetContractsDoc, /docs\/dataset-refresh-checklist\.md/);
 assert.match(datasetContractsDoc, /Source-priority metadata/);
-assert.match(datasetContractsDoc, /APK\/Unity artifacts and the repo's extraction outputs first/);
+assert.match(datasetContractsDoc, /APK\/Unity artifacts and repo extraction outputs first/);
 assert.match(datasetContractsDoc, /editing `data\/bundled-dataset-contract\.v1\.json`/);
 assert.match(datasetRefreshChecklistDoc, /# Dataset Refresh Checklist/);
 assert.match(datasetRefreshChecklistDoc, /Record the shipped dataset in `data\/bundled-dataset-contract\.v1\.json`/);

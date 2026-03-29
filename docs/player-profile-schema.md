@@ -1,122 +1,122 @@
 # PlayerProfile Schema
 
-This document defines the grounded boundary for `state.playerProfile`.
+Defines the grounded boundary for `state.playerProfile`.
 
-Reference:
-- the repo-local alias inventory now lives in `PLAYER_PROFILE_IMPORT_ALIASES` within [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
-- the checked-in alias audit artifact lives in [`docs/player-profile-import-aliases.md`](C:\Users\Shadow\Desktop\CiFi\docs\player-profile-import-aliases.md) and [`data/player-profile-import-aliases.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\player-profile-import-aliases.v1.json)
+References:
+
+- `PLAYER_PROFILE_IMPORT_ALIASES` in [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
+- checked-in audit artifacts:
+  - [`docs/player-profile-import-aliases.md`](C:\Users\Shadow\Desktop\CiFi\docs\player-profile-import-aliases.md)
+  - [`data/player-profile-import-aliases.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\player-profile-import-aliases.v1.json)
 
 ## Classification rule
 
-Only place a field in canonical shared player truth when it is both:
+Only place a field in canonical shared truth when it is both:
 
-1. a real CIFI account or progression concept, and
-2. useful to the MVP surfaces currently shipped in this repo.
+1. a real CIFI account or progression concept
+2. useful to shipped MVP surfaces
 
-If a field fails either test, it must be moved under a labeled non-canonical namespace or removed from the active form.
+Otherwise move it under a labeled non-canonical namespace or remove it from the active form.
 
 ## Canonical shared truth
 
-These fields are the active shared PlayerProfile surface:
+Active shared fields:
 
-| Field | Path | Classification | Notes |
-|---|---|---|---|
-| Profile name | `meta.profileName` | metadata | App label, not gameplay state. |
-| Data confidence | `meta.dataConfidence` | metadata | Tracks how trustworthy the entered values are. |
-| Current LR | `player.loop.loopReset` | canonical in-game state | Grounded loop-reset context for shard and warning flows. |
-| Diamonds | `player.resources.diamonds` | canonical in-game state | Legacy `gems` values migrate here. |
-| Tokens | `player.resources.tokens` | canonical in-game state | Kept for MVP spend planning. |
-| Academy relics | `player.resources.academyRelics` | canonical in-game state | Legacy `relics` values migrate here. |
-| Current shards | `player.resources.shards` | canonical in-game state | Grounded shard workflow input. |
-| Profile notes | `notes.profile` | metadata | Manual context and import notes. |
+| Field | Path | Notes |
+|---|---|---|
+| Profile name | `meta.profileName` | metadata, not gameplay state |
+| Data confidence | `meta.dataConfidence` | import trust label |
+| Current LR | `player.loop.loopReset` | loop guardrail and shard context |
+| Diamonds | `player.resources.diamonds` | legacy `gems` migrate here |
+| Tokens | `player.resources.tokens` | spend-planner input |
+| Academy relics | `player.resources.academyRelics` | legacy `relics` migrate here |
+| Current shards | `player.resources.shards` | shard workflow input |
+| Profile notes | `notes.profile` | manual context |
 
 ## Planner-only inputs
 
-These fields may be stored in `state.playerProfile`, but they are not canonical game truth:
+Stored in `state.playerProfile`, but not canonical truth:
 
-| Field | Path | Classification | Notes |
-|---|---|---|---|
-| Shard income / hour | `planning.shards.ratePerHour` | planner-only input | Manual helper for descriptive shard planning. |
-| Total shard milestone levels | `planning.shards.totalMilestoneLevels` | planner-only input | Manual helper for grounded unlock-watch cards, not canonical account truth. |
+| Field | Path | Notes |
+|---|---|---|
+| Shard income / hour | `planning.shards.ratePerHour` | descriptive helper |
+| Total shard milestone levels | `planning.shards.totalMilestoneLevels` | unlock-watch helper |
+| Focus milestone | `planning.shards.focusMilestoneId` | manual target |
+| Focus milestone level | `planning.shards.focusMilestoneLevel` | manual target |
 
 ## External-model implementation state
 
-These fields stay isolated from canonical truth, but still belong to a canonical system implementation surface:
+Canonical-system implementation state kept separate from shared truth:
 
-| Field | Path | Classification | Notes |
-|---|---|---|---|
-| Ship planner summary | `externalModels.shipPlanner.summary.*` | external-model implementation state | Current ship-planner summary values for a canonical system, pending grounded terminology/data remap. |
-| Ship planner calibration | `externalModels.shipPlanner.communityToolState` | external-model implementation state | Current ship-planner calibration payload, kept separate from shared PlayerProfile truth. |
+| Field | Path | Notes |
+|---|---|---|
+| Ship planner summary | `externalModels.shipPlanner.summary.*` | provisional implementation state |
+| Ship planner calibration | `externalModels.shipPlanner.communityToolState` | preserved community-tool payload |
 
 Import rule:
-- ship implementation imports must now use explicit `systems.ship.*` or `externalModels.shipPlanner.*` paths
-- loose top-level ship calibration numbers like `power`, `speed`, or `cargo` are no longer accepted by the PlayerProfile normalizer
+
+- use explicit `systems.ship.*` or `externalModels.shipPlanner.*`
+- top-level `power`, `speed`, and `cargo` no longer migrate
 
 ## Experimental support-surface helpers
 
-These fields stay isolated from canonical truth and should not be presented as active MVP profile truth:
+Non-MVP support helpers:
 
-| Field | Path | Classification | Notes |
-|---|---|---|---|
-| Gem node budget | `externalModels.experimental.gemNodes.budget` | planner-only / experimental | Experimental gem-node helper, not shared account truth. |
-| Primary farming focus | `externalModels.experimental.profileHints.primaryFarmingFocus` | planner-only / experimental | Old prototype focus toggle, not canonical game state. |
-| Research hours | `externalModels.experimental.profileHints.researchHours` | planner-only / experimental | App-side planning helper, not a real CIFI field. |
-
-Import rule:
-- experimental helper imports must now use explicit `externalModels.experimental.*` paths
-- old `planning.gemNodeBudget`, `planning.resourceFocus`, `planning.researchHours`, and their flat helper forms are retired to keep planner-only shard inputs separate from experimental support-surface state
-
-## Unresolved compatibility fields
-
-These values are preserved only for migration compatibility:
-
-| Legacy field | Path | Classification | Why not canonical |
-|---|---|---|---|
-| Gem dust | `compatibility.unresolvedProfileFields.gemDust` | unresolved | Current research baseline does not verify it as active shared MVP profile truth. |
-| Hunter level | `compatibility.unresolvedProfileFields.hunterLevel` | unresolved | Hunter terms are real, but this exact shared field is not yet grounded enough for MVP schema truth. |
-| Trait spheres unlocked | `compatibility.unresolvedProfileFields.traitSphereCount` | unresolved | Real term, unresolved shared-profile role. |
-| Mech parts | `compatibility.unresolvedProfileFields.mechParts` | unresolved | Real term family remains research-track territory. |
-| Highest ship unlocked / manual phase | `compatibility.legacyStage.*` | unresolved | Preserved from earlier schema drafts, but not active grounded profile truth. |
-| Unmapped system state blobs | `compatibility.unmappedSystemState.*` | unresolved / quarantined | Preserved imported objects for real-but-unmapped systems such as shard milestones, TokenShop, or MultiverseMarket. These blobs must not be treated as canonical fields or planner-ready state until system mapping is completed. |
+| Field | Path | Notes |
+|---|---|---|
+| Gem node budget | `externalModels.experimental.gemNodes.budget` | experimental only |
+| Primary farming focus | `externalModels.experimental.profileHints.primaryFarmingFocus` | prototype helper |
+| Research hours | `externalModels.experimental.profileHints.researchHours` | app-side helper |
 
 Import rule:
-- compatibility migration now prefers explicit `compatibility.*` paths or the still-namespaced legacy sources such as `stage.*` and `systems.metaProgression.*`
-- loose top-level unresolved fields like `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are no longer accepted as automatic migration aliases
+
+- use explicit `externalModels.experimental.*`
+- `planning.gemNodeBudget`, `planning.resourceFocus`, `planning.researchHours`, and their flat helper forms are retired
+
+## Compatibility and quarantined state
+
+Migration-only values:
+
+| Field | Path | Notes |
+|---|---|---|
+| Gem dust | `compatibility.unresolvedProfileFields.gemDust` | unresolved MVP role |
+| Hunter level | `compatibility.unresolvedProfileFields.hunterLevel` | real term, unresolved shared-profile role |
+| Trait sphere count | `compatibility.unresolvedProfileFields.traitSphereCount` | unresolved shared-profile role |
+| Mech parts | `compatibility.unresolvedProfileFields.mechParts` | research-track territory |
+| Legacy stage fields | `compatibility.legacyStage.*` | old schema compatibility only |
+| Unmapped system blobs | `compatibility.unmappedSystemState.*` | shard milestones, TokenShop, MultiverseMarket, etc. |
+
+Import rule:
+
+- prefer explicit `compatibility.*` paths or namespaced legacy sources such as `stage.*` and `systems.metaProgression.*`
+- flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
 
 ## Migration policy
 
-- Legacy flat profile fields migrate into the version 2 schema.
-- Old nested prototype fields also migrate into version 2.
-- Canonical renames:
+Still accepted:
+
+- canonical renames:
   - `gems` -> `player.resources.diamonds`
   - `relics` -> `player.resources.academyRelics`
-- Existing planner-helper aliases also migrate into the labeled shard-planning namespace:
-  - `shardRatePerHour` or `systems.shards.ratePerHour` -> `planning.shards.ratePerHour`
-  - `totalShardMilestoneLevels` or `systems.shards.totalMilestoneLevels` -> `planning.shards.totalMilestoneLevels`
-  - `shardFocusMilestoneId` or `systems.shards.focusMilestoneId` -> `planning.shards.focusMilestoneId`
-  - `shardFocusMilestoneLevel` or `systems.shards.focusMilestoneLevel` -> `planning.shards.focusMilestoneLevel`
-- Compatibility-only aliases remain migration sinks, not active MVP profile fields:
-  - `stage.highestShipUnlocked` -> `compatibility.legacyStage.highestShipUnlocked`
-  - `stage.manualPhase` -> `compatibility.legacyStage.manualPhase`
-  - `systems.metaProgression.hunterLevel` -> `compatibility.unresolvedProfileFields.hunterLevel`
-  - `systems.metaProgression.traitSphereCount` -> `compatibility.unresolvedProfileFields.traitSphereCount`
-  - `systems.metaProgression.mechParts` -> `compatibility.unresolvedProfileFields.mechParts`
-  - `resources.gemDust` remains a compatibility-only migration sink
-- Retired loose aliases:
-  - top-level `power`, `speed`, and `cargo` no longer migrate into ship implementation state
-  - `planning.gemNodeBudget`, `planning.resourceFocus`, `planning.researchHours`, and their flat helper forms no longer migrate into `externalModels.experimental.*`
-  - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
-- Removed visible fields are not discarded; they move into `externalModels` or `compatibility`.
-- `externalModels.shipPlanner.communityToolState` is always preserved during migration.
-- Imported objects for real-but-unmapped systems should be preserved under `compatibility.unmappedSystemState` instead of being collapsed into canonical or planner namespaces.
-- Invalid numeric planner-helper values normalize to `null` instead of silently becoming canonical state.
-- The alias inventory is grouped on purpose:
-  - `meta` and `canonical` for active MVP shared truth
-  - `planner` for shard helper inputs
-  - `externalModel` for ship-planner implementation state
-  - `experimental` for non-MVP support helpers
-  - `compatibility` for migration-only legacy sinks
-  - `shipCalibration` for preserved community-tool payloads
+- shard helper aliases:
+  - `shardRatePerHour` or `systems.shards.ratePerHour`
+  - `totalShardMilestoneLevels` or `systems.shards.totalMilestoneLevels`
+  - `shardFocusMilestoneId` or `systems.shards.focusMilestoneId`
+  - `shardFocusMilestoneLevel` or `systems.shards.focusMilestoneLevel`
+- compatibility migration sinks:
+  - `stage.highestShipUnlocked`
+  - `stage.manualPhase`
+  - `systems.metaProgression.hunterLevel`
+  - `systems.metaProgression.traitSphereCount`
+  - `systems.metaProgression.mechParts`
+  - `resources.gemDust`
+
+Always true:
+
+- removed visible fields move into `externalModels` or `compatibility`, not silent deletion
+- `externalModels.shipPlanner.communityToolState` is always preserved
+- imported objects for real-but-unmapped systems belong under `compatibility.unmappedSystemState`
+- invalid numeric planner helpers normalize to `null`
 
 ## UI rule
 
@@ -126,9 +126,4 @@ The active Profile form should show:
 - metadata
 - clearly labeled planner-only helpers
 
-It should not present external-model or unresolved compatibility fields as raw CIFI account state.
-
-External-model calibration should stay with the module implementation that uses it.
-In the current app, ship-planner calibration belongs on the Ship Planner page, not on the shared Profile page, even though the underlying ship system is canonical.
-
-Experimental support-surface helpers should remain visibly separate from both canonical shared truth and canonical-system implementation state.
+It should not present external-model or compatibility fields as raw CIFI account state. Ship calibration belongs on the Ship Planner page, not the shared Profile page.
