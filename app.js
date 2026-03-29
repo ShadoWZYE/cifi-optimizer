@@ -742,6 +742,23 @@ function bindProfileActions() {
     renderAll();
   });
 
+  $("#playerProfileImportFile").addEventListener("change", async (event) => {
+    const [file] = event.target.files ?? [];
+    if (!file) {
+      return;
+    }
+    $("#playerProfileImportText").value = await file.text();
+    setStatus("playerProfileImportStatus", `Loaded ${file.name}. Review the JSON, then import it.`, "success");
+  });
+
+  $("#importPlayerProfileBtn").addEventListener("click", () => {
+    importPlayerProfileJson();
+  });
+
+  $("#exportPlayerProfileBtn").addEventListener("click", () => {
+    exportPlayerProfileJson();
+  });
+
   $("#saveShipStateBtn").addEventListener("click", () => {
     const inputs = $$("#shipPlayerStatePanel [data-ship-group][data-ship-field]");
     const shipPlayerState = getShipCommunityToolState();
@@ -1205,17 +1222,56 @@ function renderResearch() {
           <strong>${escapeHtml(track.title)}</strong>
         </div>
         <div class="pill-row">
+          <span class="pill">${escapeHtml(getResearchTrackStatus(track))}</span>
+          <span class="pill">${escapeHtml(getResearchTrackProgressLabel(track))}</span>
           <span class="pill">${escapeHtml(getResearchTrackPhase(track))}</span>
           <span class="pill">${escapeHtml(getResearchTrackSource(track))}</span>
         </div>
       </div>
       <p class="meta">${escapeHtml(track.goal)}</p>
+      ${renderResearchTrackProgress(track)}
+      ${renderResearchTrackSupport(track)}
       <div class="meta-stack">
-        <p class="snapshot-title">Next to-do</p>
+        <p class="snapshot-title">Remaining work</p>
         <ul class="research-step-list">${track.nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>
       </div>
     </article>
   `).join("");
+}
+
+function renderResearchTrackProgress(track) {
+  const completedSteps = Array.isArray(track.completedSteps) ? track.completedSteps : [];
+  const remainingSteps = Array.isArray(track.nextSteps) ? track.nextSteps : [];
+  const totalSteps = completedSteps.length + remainingSteps.length;
+  const percent = totalSteps ? Math.round((completedSteps.length / totalSteps) * 100) : 0;
+
+  return `
+    <div class="meta-stack">
+      <p class="snapshot-title">Track status</p>
+      <p class="meta">${escapeHtml(track.currentSlice || "Current slice not recorded yet.")}</p>
+      <p class="meta">${completedSteps.length} done | ${remainingSteps.length} left | ${percent}% complete</p>
+      ${completedSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Done in repo</p><ul class="research-step-list">${completedSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+    </div>
+  `;
+}
+
+function renderResearchTrackSupport(track) {
+  if (track.id !== "data-contracts-and-apk-pipeline") {
+    return "";
+  }
+
+  return `
+    <div class="meta-stack">
+      <p class="snapshot-title">Validation path</p>
+      <p class="meta">Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
+      <div class="pill-row">
+        <span class="pill">Snapshot</span>
+        <span class="pill">Shards</span>
+        <span class="pill">Token shop</span>
+        <span class="pill">Multiverse market</span>
+      </div>
+    </div>
+  `;
 }
 
 function getResearchTrackLane(track) {
@@ -1234,6 +1290,22 @@ function getResearchTrackLane(track) {
     return "Next Up";
   }
   return "Queue";
+}
+
+function getResearchTrackStatus(track) {
+  const statusById = {
+    active: "Active",
+    queued: "Queued",
+    completed: "Completed"
+  };
+  return statusById[track.status] || "Queued";
+}
+
+function getResearchTrackProgressLabel(track) {
+  const completedSteps = Array.isArray(track.completedSteps) ? track.completedSteps.length : 0;
+  const remainingSteps = Array.isArray(track.nextSteps) ? track.nextSteps.length : 0;
+  const totalSteps = completedSteps + remainingSteps;
+  return `${completedSteps}/${totalSteps} done`;
 }
 
 function getResearchTrackPhase(track) {
@@ -1277,6 +1349,40 @@ function fillProfileForm() {
       input.value = getProfileValue(path) ?? "";
     }
   });
+}
+
+function importPlayerProfileJson() {
+  const raw = $("#playerProfileImportText").value.trim();
+  if (!raw) {
+    setStatus("playerProfileImportStatus", "Paste PlayerProfile JSON or choose a file first.", "warning");
+    return;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    const sourceProfile = parsed?.playerProfile ?? parsed;
+    state.playerProfile = normalizePlayerProfile(sourceProfile, createDefaultShipPlayerState(state.shipBaseline));
+    persistPlayerProfile();
+    fillProfileForm();
+    renderAll();
+    setStatus("playerProfileImportStatus", "PlayerProfile JSON imported through the grounded normalizer.", "success");
+  } catch (error) {
+    setStatus("playerProfileImportStatus", `PlayerProfile import failed: ${error.message}`, "warning");
+  }
+}
+
+function exportPlayerProfileJson() {
+  state.playerProfile = collectProfileForm();
+  persistPlayerProfile();
+  const payload = JSON.stringify(state.playerProfile, null, 2);
+  $("#playerProfileImportText").value = payload;
+  const blob = new Blob([payload], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "cifi-player-profile.json";
+  link.click();
+  URL.revokeObjectURL(link.href);
+  setStatus("playerProfileImportStatus", "Exported PlayerProfile JSON.", "success");
 }
 
 function applyInstallTap(installIndex, direction = 1) {

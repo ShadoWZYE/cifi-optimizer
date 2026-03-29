@@ -46,6 +46,9 @@ Every track should answer:
 
 - what system is being researched
 - why it matters
+- what is already done in the repo
+- what work is still left
+- what the current implementation slice is
 - what sources exist
 - whether the APK/Unity package path was checked first
 - what is verified

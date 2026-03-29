@@ -128,18 +128,30 @@
     {
       "id": "data-contracts-and-apk-pipeline",
       "title": "Data contracts and APK-first grounding",
+      "status": "active",
       "goal": "Lock dataset contracts and make the APK or Unity extraction path the default starting point for new grounded data work.",
+      "currentSlice": "Broaden the contract as new shipped datasets are promoted, instead of letting one-off file shapes drift.",
+      "completedSteps": [
+        "Document the bundled dataset contract for snapshot, shard, token-shop, and multiverse-market JSON assets.",
+        "Add local validation for the shipped snapshot, shard, token-shop, and multiverse-market datasets."
+      ],
       "nextSteps": [
-        "Define one metadata envelope for shipped JSON datasets.",
-        "Add local validation for snapshot, shard, token-shop, and multiverse-market data.",
+        "Run npm run verify:data before promoting new bundled dataset changes.",
+        "Keep one documented contract for shipped snapshot, shard, token-shop, and multiverse-market JSON assets.",
         "Apply the source-priority rule to every new research note: APK first, corroboration second, community gap-filling last."
       ]
     },
     {
       "id": "playerprofile-boundary-and-imports",
       "title": "PlayerProfile boundary and import cleanup",
+      "status": "active",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
+      "currentSlice": "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
+      "completedSteps": [
+        "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer."
+      ],
       "nextSteps": [
+        "Import and export PlayerProfile JSON through a grounded normalization path.",
         "Audit current PlayerProfile fields against MVP-only CIFI concepts.",
         "Clean up import mapping so new modules read from state.playerProfile first.",
         "Add migration checks for loop reset, diamonds, tokens, relics, shards, and shard helper inputs."
@@ -148,7 +160,12 @@
     {
       "id": "shards-and-loop-guardrails",
       "title": "Shard workflow and loop guardrails",
+      "status": "queued",
       "goal": "Strengthen shard guidance now, then add loop warnings without drifting into speculative simulation.",
+      "currentSlice": "Add the first warning-oriented loop-reset guardrails after the profile/input boundary is clearer.",
+      "completedSteps": [
+        "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled."
+      ],
       "nextSteps": [
         "Tighten shard card wording against the grounded milestone, observed-behavior, and provenance datasets.",
         "Define the minimum inputs needed for loop-reset warnings.",
@@ -158,7 +175,12 @@
     {
       "id": "spend-planner-from-extracted-data",
       "title": "Spend planner from extracted token and market data",
+      "status": "queued",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
+      "currentSlice": "Normalize extracted spend facts only after data contracts and PlayerProfile inputs are stable.",
+      "completedSteps": [
+        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts."
+      ],
       "nextSteps": [
         "Normalize token-shop and multiverse-market values into planner-ready structures.",
         "Separate grounded spend facts from planner assumptions.",
@@ -168,7 +190,10 @@
     {
       "id": "unified-feed-and-hardening",
       "title": "Unified recommendation feed and test hardening",
+      "status": "queued",
       "goal": "Converge shard, spend, and warning outputs into one explainable feed and make contract drift fail fast.",
+      "currentSlice": "Wait for at least one more active MVP module before integrating the feed.",
+      "completedSteps": [],
       "nextSteps": [
         "Map the output adapters needed so shard, spend, and loop all render through one contract.",
         "Expand smoke coverage toward dataset and recommendation contract checks.",
