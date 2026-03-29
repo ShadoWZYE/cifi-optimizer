@@ -1324,7 +1324,26 @@ function renderProgressionResults(results) {
 }
 
 function renderGemResults(results) {
-  $("#gemResults").innerHTML = results.map((item) => makeRecommendationCard(item, "gem")).join("");
+  const budget = getGemPlannerBudget();
+  const legacyGemDust = state.playerProfile.compatibility.unresolvedProfileFields.gemDust;
+  const boundaryNotes = [];
+
+  if (budget === 0) {
+    boundaryNotes.push("Gem-node rankings are using a zero planner budget until you enter an experimental gem-node budget in PlayerProfile JSON.");
+  }
+  if (legacyGemDust != null) {
+    boundaryNotes.push(`Legacy gemDust is preserved under compatibility (${formatOptionalNumber(legacyGemDust)}) and is not used as active planner budget.`);
+  }
+
+  $("#gemResults").innerHTML = `
+    ${boundaryNotes.length ? `
+      <article class="validation-card warn">
+        <strong>Experimental budget boundary</strong>
+        ${boundaryNotes.map((note) => `<p class="meta">${escapeHtml(note)}</p>`).join("")}
+      </article>
+    ` : ""}
+    <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, "gem")).join("")}</div>
+  `;
 }
 
 function renderValidationResults() {
@@ -2069,11 +2088,7 @@ function renderShardMilestoneDirectory() {
 
 function runGemOptimization() {
   const mode = $("#gemBudgetMode")?.value ?? "strict";
-  const budget = Number(
-    state.playerProfile.externalModels.experimental.gemNodes.budget
-    || state.playerProfile.compatibility.unresolvedProfileFields.gemDust
-    || 0
-  );
+  const budget = getGemPlannerBudget();
   return [...state.snapshot.gemNodes].map((node) => {
     const affordability = node.cost <= budget ? 1 : mode === "stretch" ? 0.8 : 0.35;
     return {
@@ -2084,6 +2099,10 @@ function runGemOptimization() {
       notes: node.tags.join(" | ")
     };
   }).sort((left, right) => right.score - left.score);
+}
+
+function getGemPlannerBudget() {
+  return Number(state.playerProfile.externalModels.experimental.gemNodes.budget || 0);
 }
 
 function runValidationCases() {

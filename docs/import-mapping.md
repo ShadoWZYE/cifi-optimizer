@@ -20,6 +20,10 @@ Grounding rules:
 - external/community-tool state stays under `externalModels`
 - unresolved legacy values stay under `compatibility`
 
+Boundary note:
+- legacy `gemDust` may be preserved under `compatibility.unresolvedProfileFields.gemDust`
+- it must not be treated as the active experimental gem-node budget unless a user explicitly maps it into `externalModels.experimental.gemNodes.budget`
+
 ## Supported datasets
 
 ### `shipLoadouts`
