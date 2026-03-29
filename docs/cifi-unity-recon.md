@@ -47,6 +47,21 @@ Findings from the first APK probe:
   - `FinalShardBonus`
   - `DiamondUltimaBonus`
 
+MultiverseMarket-specific save-side narrowing from repo-local metadata:
+
+- `Assets\Scripts\Data&Saving\Nakama\PlayerProfile\PlayerProfileData.cs`
+- `FillPlayerProfileData`
+- `GetPlayerProfileData`
+- `CloudSavePlayerProfile`
+- `AchievementInscryptionsReward`
+- `<FinalISShardsBonus>k__BackingField`
+
+Current conclusion:
+
+- the Emporium owner is still `MultiverseMarket`
+- the `Inscryptions Done` purchase lane is grounded from the scene/UI side
+- the saved-state search is now better narrowed toward the broader player-profile persistence family, while `AchievementInscryptionsReward` and `FinalIS*` symbols remain effect/reward clues rather than recovered saved-balance fields
+
 Generated artifacts:
 - `scripts/unity_apk_probe.py`
 - `scripts/unity_textasset_dump.py`

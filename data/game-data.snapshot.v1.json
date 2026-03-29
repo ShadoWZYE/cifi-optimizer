@@ -183,7 +183,7 @@
       "title": "Spend planner from extracted token and market data",
       "status": "active",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Ground the MultiverseMarket spend-lane shell around Inscryptions Done from repo-local Unity evidence, then keep planner wiring blocked until the saved-state owner and current owned levels are recovered.",
+      "currentSlice": "Narrow the MultiverseMarket saved-state search toward the repo-local PlayerProfileData persistence family, while keeping planner wiring blocked until the exact balance and owned-level fields are recovered.",
       "completedSteps": [
         "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
         "Document the spend-system integration gate and current verified versus unresolved app-integration facts.",
@@ -199,6 +199,7 @@
         "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
         "Recover the saved-state owner and current balance field behind the MultiverseMarket Inscryptions Done lane.",
         "Recover player-owned inscription levels or equivalent next-buy state from the available assets.",
+        "Inspect PlayerProfileData-side field neighborhoods before assuming any FinalIS or achievement symbol is the saved balance field.",
         "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."
       ]
     },

@@ -79,6 +79,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - Grounded outputs:
   - [`docs/multiverse-market-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-values.md)
   - [`docs/multiverse-market-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-verification.md)
+  - [`docs/multiverse-market-state-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-state-verification.md)
   - [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
 - Verified extracted fields in the validated late block include:
   - `ID`
@@ -91,6 +92,11 @@ These are not yet planner-ready integrations. They are dependency notes so futur
   - `CostBox-InscryptionsDone`
   - `AchievementBar-Inscryptions`
   - `MultiverseMarket, Assembly-CSharp` buy handlers such as `BuyIS47`, `BuyIS64`, `BuyIS73`, `BuyIS13`, and `BuyIS105`
+- Verified saved-state narrowing now includes:
+  - `Assets\Scripts\Data&Saving\Nakama\PlayerProfile\PlayerProfileData.cs`
+  - `FillPlayerProfileData`
+  - `GetPlayerProfileData`
+  - `CloudSavePlayerProfile`
 
 ### Not yet verified enough for app recommendations
 
@@ -104,6 +110,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - It is safe to treat MultiverseMarket as a real system with partially grounded extracted constants.
 - It is safe to stop inferring its spend lane from diamonds, tokens, or other unrelated player resources.
 - It is not yet safe to treat `Inscryptions Done` as an import-ready player field until its saved-state owner is recovered.
+- The current best repo-local saved-state path is the broader `PlayerProfileData` persistence family, not the raw `MultiverseMarket` owner object by itself.
 
 ## Next allowed slice
 
@@ -113,6 +120,6 @@ Priority order:
 
 1. verify the token-shop spend lane and player-owned current-level inputs
 2. map the TokenShop-connected token-bank cap, fill, claim, and Academy or Farm Mission Daily Tokenium lane strongly enough to identify their saved-state inputs
-3. recover the saved-state owner and owned-state inputs behind the multiverse-market `Inscryptions Done` lane
+3. inspect `PlayerProfileData`-side fields to recover the saved-state owner and owned-state inputs behind the multiverse-market `Inscryptions Done` lane
 4. remap serialized ids to grounded player-facing labels
 5. only then add spend recommendations with explicit assumptions

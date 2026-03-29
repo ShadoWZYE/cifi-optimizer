@@ -14,6 +14,7 @@ It exists because the repo had already proven the `MultiverseMarket` owner and l
   - [`_unity_joined/level0`](C:\Users\Shadow\Desktop\CiFi\_unity_joined\level0)
   - [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
   - [`data/lm244-targeted-probe.json`](C:\Users\Shadow\Desktop\CiFi\data\lm244-targeted-probe.json)
+  - [`docs/multiverse-market-state-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-state-verification.md)
   - [`docs/unity-audit-playbook.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity-audit-playbook.md)
 
 ## Spend-lane shell recovered from this pass
@@ -60,6 +61,15 @@ Current grounded conclusion:
 - full row coverage outside the currently validated late block
 - exact row-by-row remap from serialized `IS*` ids and prefab identities to final in-game labels
 
+## Saved-state narrowing from this pass
+
+- Repo-local metadata now narrows the persistence search toward `PlayerProfileData`, `FillPlayerProfileData`, and `GetPlayerProfileData`.
+- Repo-local metadata also shows Inscryptions-adjacent reward/effect symbols such as `AchievementInscryptionsReward` and `<FinalISShardsBonus>k__BackingField`.
+- Current grounded conclusion:
+  - `MultiverseMarket` remains the mechanic owner
+  - the likely saved-state search path now runs through the broader player-profile persistence family
+  - effect/reward symbols should not be treated as recovered saved-balance fields
+
 ## Current app implication
 
 - It is safe to treat `MultiverseMarket` as a real Emporium owner with a grounded `Inscryptions Done` cost-lane shell.
@@ -69,8 +79,8 @@ Current grounded conclusion:
 
 ## Next allowed slice
 
-1. recover the saved-state owner or runtime field for the `Inscryptions Done` balance
-2. recover player-owned inscription levels or equivalent next-purchase state
+1. inspect `PlayerProfileData`-side field neighborhoods to recover the exact saved-state field for the `Inscryptions Done` balance
+2. recover player-owned inscription levels or equivalent next-purchase state from that same persistence family if present
 3. extend parsing past the current validated late block
 4. finish the inscription-number and prefab-to-label remap
 5. only then add spend-planner recommendations
