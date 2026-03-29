@@ -25,6 +25,7 @@ Grounding rules:
 Boundary note:
 - legacy `gemDust` may be preserved under `compatibility.unresolvedProfileFields.gemDust`
 - it must not be treated as the active experimental gem-node budget unless a user explicitly maps it into `externalModels.experimental.gemNodes.budget`
+- legacy aliases such as `resourceFocus`, `researchHours`, and `gemNodeBudget` may still normalize into `externalModels.experimental.*`, but they remain experimental support-surface helpers rather than shared MVP profile truth
 - shard helper aliases such as `shardRatePerHour`, `totalShardMilestoneLevels`, `shardFocusMilestoneId`, `shardFocusMilestoneLevel`, and their `systems.shards.*` forms should normalize into `planning.shards.*`
 - those shard helper fields stay planner-only; importing them does not promote shard milestone math into canonical game truth
 - imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`

@@ -146,7 +146,7 @@
       "title": "PlayerProfile boundary and import cleanup",
       "status": "active",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Harden PlayerProfile migration checks and alias mapping for shard helper inputs before more modules depend on them.",
+      "currentSlice": "Separate canonical-system implementation state from experimental support-surface helpers in the PlayerProfile boundary and import summary.",
       "completedSteps": [
         "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
         "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
@@ -156,7 +156,7 @@
       ],
       "nextSteps": [
         "Audit current PlayerProfile fields against MVP-only CIFI concepts.",
-        "Clean up import mapping so new modules read from state.playerProfile first.",
+        "Clean up import mapping so new modules read from state.playerProfile first and keep experimental support-surface aliases visibly labeled.",
         "Extend migration coverage to any remaining legacy profile aliases that still feed active MVP modules."
       ]
     },

@@ -1662,12 +1662,18 @@ function renderPlayerProfileBoundarySummary() {
     },
     {
       title: "External-model implementation state",
-      note: "Current implementation data that stays isolated from shared profile truth.",
+      note: "Current implementation data for canonical systems that stays isolated from shared profile truth.",
       items: [
         ["Ship planner power", shipPlanner.summary.power],
         ["Ship planner speed", shipPlanner.summary.speed],
         ["Ship planner cargo", shipPlanner.summary.cargo],
-        ["Ship calibration groups", Object.keys(shipPlanner.calibration || {}).length],
+        ["Ship calibration groups", Object.keys(shipPlanner.calibration || {}).length]
+      ]
+    },
+    {
+      title: "Experimental support-surface helpers",
+      note: "Non-MVP experimental or prototype helpers that stay outside canonical shared truth and outside canonical-system implementation state.",
+      items: [
         ["Gem-node budget", experimental.gemNodeBudget],
         ["Primary farming focus", experimental.primaryFarmingFocus],
         ["Research hours", experimental.researchHours]

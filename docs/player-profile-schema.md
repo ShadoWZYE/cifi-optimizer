@@ -35,14 +35,21 @@ These fields may be stored in `state.playerProfile`, but they are not canonical 
 | Shard income / hour | `planning.shards.ratePerHour` | planner-only input | Manual helper for descriptive shard planning. |
 | Total shard milestone levels | `planning.shards.totalMilestoneLevels` | planner-only input | Manual helper for grounded unlock-watch cards, not canonical account truth. |
 
-## External or experimental model state
+## External-model implementation state
 
-These fields stay isolated from canonical truth:
+These fields stay isolated from canonical truth, but still belong to a canonical system implementation surface:
 
 | Field | Path | Classification | Notes |
 |---|---|---|---|
 | Ship planner summary | `externalModels.shipPlanner.summary.*` | external-model implementation state | Current ship-planner summary values for a canonical system, pending grounded terminology/data remap. |
 | Ship planner calibration | `externalModels.shipPlanner.communityToolState` | external-model implementation state | Current ship-planner calibration payload, kept separate from shared PlayerProfile truth. |
+
+## Experimental support-surface helpers
+
+These fields stay isolated from canonical truth and should not be presented as active MVP profile truth:
+
+| Field | Path | Classification | Notes |
+|---|---|---|---|
 | Gem node budget | `externalModels.experimental.gemNodes.budget` | planner-only / experimental | Experimental gem-node helper, not shared account truth. |
 | Primary farming focus | `externalModels.experimental.profileHints.primaryFarmingFocus` | planner-only / experimental | Old prototype focus toggle, not canonical game state. |
 | Research hours | `externalModels.experimental.profileHints.researchHours` | planner-only / experimental | App-side planning helper, not a real CIFI field. |
@@ -89,3 +96,5 @@ It should not present external-model or unresolved compatibility fields as raw C
 
 External-model calibration should stay with the module implementation that uses it.
 In the current app, ship-planner calibration belongs on the Ship Planner page, not on the shared Profile page, even though the underlying ship system is canonical.
+
+Experimental support-surface helpers should remain visibly separate from both canonical shared truth and canonical-system implementation state.
