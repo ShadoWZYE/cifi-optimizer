@@ -1,4 +1,50 @@
 export const PLAYER_PROFILE_SCHEMA_VERSION = 2;
+export const PLAYER_PROFILE_IMPORT_ALIASES = {
+  meta: {
+    profileName: [["meta", "profileName"], ["profileName"]],
+    updatedAt: [["meta", "updatedAt"]],
+    dataConfidence: [["meta", "dataConfidence"], ["confidence"], ["automationConfidence"]]
+  },
+  canonical: {
+    loopReset: [["player", "loop", "loopReset"], ["systems", "loop", "loopReset"], ["loopReset"]],
+    diamonds: [["player", "resources", "diamonds"], ["resources", "diamonds"], ["resources", "gems"], ["gems"]],
+    tokens: [["player", "resources", "tokens"], ["resources", "tokens"], ["tokens"]],
+    academyRelics: [["player", "resources", "academyRelics"], ["resources", "academyRelics"], ["resources", "relics"], ["relics"]],
+    shards: [["player", "resources", "shards"], ["resources", "shards"], ["shards"]],
+    notes: [["notes", "profile"], ["notes"]]
+  },
+  planner: {
+    shardRatePerHour: [["planning", "shards", "ratePerHour"], ["systems", "shards", "ratePerHour"], ["shardRatePerHour"]],
+    totalShardMilestoneLevels: [["planning", "shards", "totalMilestoneLevels"], ["systems", "shards", "totalMilestoneLevels"], ["totalShardMilestoneLevels"]],
+    shardFocusMilestoneId: [["planning", "shards", "focusMilestoneId"], ["systems", "shards", "focusMilestoneId"], ["planning", "shardFocusMilestoneId"], ["shardFocusMilestoneId"]],
+    shardFocusMilestoneLevel: [["planning", "shards", "focusMilestoneLevel"], ["systems", "shards", "focusMilestoneLevel"], ["planning", "shardFocusMilestoneLevel"], ["shardFocusMilestoneLevel"]]
+  },
+  externalModel: {
+    shipPower: [["externalModels", "shipPlanner", "summary", "power"], ["systems", "ship", "power"], ["power"]],
+    shipSpeed: [["externalModels", "shipPlanner", "summary", "speed"], ["systems", "ship", "speed"], ["speed"]],
+    shipCargo: [["externalModels", "shipPlanner", "summary", "cargo"], ["systems", "ship", "cargo"], ["cargo"]]
+  },
+  experimental: {
+    gemNodeBudget: [["externalModels", "experimental", "gemNodes", "budget"], ["planning", "gemNodeBudget"], ["gemNodeBudget"]],
+    primaryFarmingFocus: [["externalModels", "experimental", "profileHints", "primaryFarmingFocus"], ["planning", "resourceFocus"], ["resourceFocus"]],
+    researchHours: [["externalModels", "experimental", "profileHints", "researchHours"], ["planning", "researchHours"], ["researchHours"]]
+  },
+  compatibility: {
+    highestShipUnlocked: [["compatibility", "legacyStage", "highestShipUnlocked"], ["stage", "highestShipUnlocked"]],
+    manualPhase: [["compatibility", "legacyStage", "manualPhase"], ["stage", "manualPhase"]],
+    gemDust: [["compatibility", "unresolvedProfileFields", "gemDust"], ["resources", "gemDust"], ["gemDust"]],
+    hunterLevel: [["compatibility", "unresolvedProfileFields", "hunterLevel"], ["systems", "metaProgression", "hunterLevel"], ["hunterLevel"]],
+    traitSphereCount: [["compatibility", "unresolvedProfileFields", "traitSphereCount"], ["systems", "metaProgression", "traitSphereCount"], ["traitSphereCount"]],
+    mechParts: [["compatibility", "unresolvedProfileFields", "mechParts"], ["systems", "metaProgression", "mechParts"], ["mechParts"]],
+    shardMilestones: [["compatibility", "unmappedSystemState", "shardMilestones"], ["systems", "shardMilestones"]],
+    tokenShop: [["compatibility", "unmappedSystemState", "tokenShop"], ["systems", "tokenShop"]],
+    multiverseMarket: [["compatibility", "unmappedSystemState", "multiverseMarket"], ["systems", "multiverseMarket"]]
+  },
+  shipCalibration: {
+    communityToolState: [["externalModels", "shipPlanner", "communityToolState"]],
+    legacyShipPlayerState: [["systems", "ship", "playerState"]]
+  }
+};
 
 const PROFILE_CONFIDENCE_VALUES = new Set(["manual", "mixed", "verified"]);
 const FARMING_FOCUS_VALUES = new Set(["credits", "alloy", "research", "shards"]);
@@ -146,166 +192,61 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   const source = isRecord(profile) ? profile : {};
   const normalized = createDefaultPlayerProfile(baselineShipPlayerState);
 
-  normalized.meta.profileName = coerceNullableString(readFirst(source, [
-    ["meta", "profileName"],
-    ["profileName"]
-  ]));
-  normalized.meta.updatedAt = coerceNullableString(readFirst(source, [
-    ["meta", "updatedAt"]
-  ]));
+  normalized.meta.profileName = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.meta.profileName));
+  normalized.meta.updatedAt = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.meta.updatedAt));
   normalized.meta.dataConfidence = coerceEnum(
-    readFirst(source, [
-      ["meta", "dataConfidence"],
-      ["confidence"],
-      ["automationConfidence"]
-    ]),
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.meta.dataConfidence),
     PROFILE_CONFIDENCE_VALUES,
     normalized.meta.dataConfidence
   );
 
-  normalized.player.loop.loopReset = coerceNullableNumber(readFirst(source, [
-    ["player", "loop", "loopReset"],
-    ["systems", "loop", "loopReset"],
-    ["loopReset"]
-  ]));
+  normalized.player.loop.loopReset = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.loopReset));
+  normalized.player.resources.diamonds = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.diamonds));
+  normalized.player.resources.tokens = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.tokens));
+  normalized.player.resources.academyRelics = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.academyRelics));
+  normalized.player.resources.shards = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.shards));
 
-  normalized.player.resources.diamonds = coerceNullableNumber(readFirst(source, [
-    ["player", "resources", "diamonds"],
-    ["resources", "diamonds"],
-    ["resources", "gems"],
-    ["gems"]
-  ]));
-  normalized.player.resources.tokens = coerceNullableNumber(readFirst(source, [
-    ["player", "resources", "tokens"],
-    ["resources", "tokens"],
-    ["tokens"]
-  ]));
-  normalized.player.resources.academyRelics = coerceNullableNumber(readFirst(source, [
-    ["player", "resources", "academyRelics"],
-    ["resources", "academyRelics"],
-    ["resources", "relics"],
-    ["relics"]
-  ]));
-  normalized.player.resources.shards = coerceNullableNumber(readFirst(source, [
-    ["player", "resources", "shards"],
-    ["resources", "shards"],
-    ["shards"]
-  ]));
+  normalized.planning.shards.ratePerHour = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardRatePerHour));
+  normalized.planning.shards.totalMilestoneLevels = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.totalShardMilestoneLevels));
+  normalized.planning.shards.focusMilestoneId = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneId));
+  normalized.planning.shards.focusMilestoneLevel = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel));
 
-  normalized.planning.shards.ratePerHour = coerceNullableNumber(readFirst(source, [
-    ["planning", "shards", "ratePerHour"],
-    ["systems", "shards", "ratePerHour"],
-    ["shardRatePerHour"]
-  ]));
-  normalized.planning.shards.totalMilestoneLevels = coerceNullableNumber(readFirst(source, [
-    ["planning", "shards", "totalMilestoneLevels"],
-    ["systems", "shards", "totalMilestoneLevels"],
-    ["totalShardMilestoneLevels"]
-  ]));
-  normalized.planning.shards.focusMilestoneId = coerceNullableString(readFirst(source, [
-    ["planning", "shards", "focusMilestoneId"],
-    ["systems", "shards", "focusMilestoneId"],
-    ["planning", "shardFocusMilestoneId"],
-    ["shardFocusMilestoneId"]
-  ]));
-  normalized.planning.shards.focusMilestoneLevel = coerceNullableNumber(readFirst(source, [
-    ["planning", "shards", "focusMilestoneLevel"],
-    ["systems", "shards", "focusMilestoneLevel"],
-    ["planning", "shardFocusMilestoneLevel"],
-    ["shardFocusMilestoneLevel"]
-  ]));
+  normalized.notes.profile = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.notes));
 
-  normalized.notes.profile = coerceNullableString(readFirst(source, [
-    ["notes", "profile"],
-    ["notes"]
-  ]));
+  normalized.externalModels.shipPlanner.summary.power = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipPower));
+  normalized.externalModels.shipPlanner.summary.speed = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipSpeed));
+  normalized.externalModels.shipPlanner.summary.cargo = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipCargo));
 
-  normalized.externalModels.shipPlanner.summary.power = coerceNullableNumber(readFirst(source, [
-    ["externalModels", "shipPlanner", "summary", "power"],
-    ["systems", "ship", "power"],
-    ["power"]
-  ]));
-  normalized.externalModels.shipPlanner.summary.speed = coerceNullableNumber(readFirst(source, [
-    ["externalModels", "shipPlanner", "summary", "speed"],
-    ["systems", "ship", "speed"],
-    ["speed"]
-  ]));
-  normalized.externalModels.shipPlanner.summary.cargo = coerceNullableNumber(readFirst(source, [
-    ["externalModels", "shipPlanner", "summary", "cargo"],
-    ["systems", "ship", "cargo"],
-    ["cargo"]
-  ]));
+  normalized.externalModels.experimental.gemNodes.budget = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.gemNodeBudget));
+  normalized.externalModels.experimental.profileHints.primaryFarmingFocus = coerceEnum(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.primaryFarmingFocus),
+    FARMING_FOCUS_VALUES
+  );
+  normalized.externalModels.experimental.profileHints.researchHours = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.researchHours));
 
-  normalized.externalModels.experimental.gemNodes.budget = coerceNullableNumber(readFirst(source, [
-    ["externalModels", "experimental", "gemNodes", "budget"],
-    ["planning", "gemNodeBudget"],
-    ["gemNodeBudget"]
-  ]));
-  normalized.externalModels.experimental.profileHints.primaryFarmingFocus = coerceEnum(readFirst(source, [
-    ["externalModels", "experimental", "profileHints", "primaryFarmingFocus"],
-    ["planning", "resourceFocus"],
-    ["resourceFocus"]
-  ]), FARMING_FOCUS_VALUES);
-  normalized.externalModels.experimental.profileHints.researchHours = coerceNullableNumber(readFirst(source, [
-    ["externalModels", "experimental", "profileHints", "researchHours"],
-    ["planning", "researchHours"],
-    ["researchHours"]
-  ]));
-
-  normalized.compatibility.legacyStage.highestShipUnlocked = coerceNullableString(readFirst(source, [
-    ["compatibility", "legacyStage", "highestShipUnlocked"],
-    ["stage", "highestShipUnlocked"]
-  ]));
-  normalized.compatibility.legacyStage.manualPhase = coerceNullableString(readFirst(source, [
-    ["compatibility", "legacyStage", "manualPhase"],
-    ["stage", "manualPhase"]
-  ]));
-  normalized.compatibility.unresolvedProfileFields.gemDust = coerceNullableNumber(readFirst(source, [
-    ["compatibility", "unresolvedProfileFields", "gemDust"],
-    ["resources", "gemDust"],
-    ["gemDust"]
-  ]));
-  normalized.compatibility.unresolvedProfileFields.hunterLevel = coerceNullableNumber(readFirst(source, [
-    ["compatibility", "unresolvedProfileFields", "hunterLevel"],
-    ["systems", "metaProgression", "hunterLevel"],
-    ["hunterLevel"]
-  ]));
-  normalized.compatibility.unresolvedProfileFields.traitSphereCount = coerceNullableNumber(readFirst(source, [
-    ["compatibility", "unresolvedProfileFields", "traitSphereCount"],
-    ["systems", "metaProgression", "traitSphereCount"],
-    ["traitSphereCount"]
-  ]));
-  normalized.compatibility.unresolvedProfileFields.mechParts = coerceNullableNumber(readFirst(source, [
-    ["compatibility", "unresolvedProfileFields", "mechParts"],
-    ["systems", "metaProgression", "mechParts"],
-    ["mechParts"]
-  ]));
-  normalized.compatibility.unmappedSystemState.shardMilestones = coerceRecordOrNull(readFirst(source, [
-    ["compatibility", "unmappedSystemState", "shardMilestones"],
-    ["systems", "shardMilestones"]
-  ]));
-  normalized.compatibility.unmappedSystemState.tokenShop = coerceRecordOrNull(readFirst(source, [
-    ["compatibility", "unmappedSystemState", "tokenShop"],
-    ["systems", "tokenShop"]
-  ]));
-  normalized.compatibility.unmappedSystemState.multiverseMarket = coerceRecordOrNull(readFirst(source, [
-    ["compatibility", "unmappedSystemState", "multiverseMarket"],
-    ["systems", "multiverseMarket"]
-  ]));
+  normalized.compatibility.legacyStage.highestShipUnlocked = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.highestShipUnlocked));
+  normalized.compatibility.legacyStage.manualPhase = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.manualPhase));
+  normalized.compatibility.unresolvedProfileFields.gemDust = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.gemDust));
+  normalized.compatibility.unresolvedProfileFields.hunterLevel = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel));
+  normalized.compatibility.unresolvedProfileFields.traitSphereCount = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.traitSphereCount));
+  normalized.compatibility.unresolvedProfileFields.mechParts = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.mechParts));
+  normalized.compatibility.unmappedSystemState.shardMilestones = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestones));
+  normalized.compatibility.unmappedSystemState.tokenShop = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop));
+  normalized.compatibility.unmappedSystemState.multiverseMarket = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarket));
 
   const mergedShipToolState = mergeDeep(
     baselineShipPlayerState,
     mergeDeep(
-      readFirst(source, [
-        ["systems", "ship", "playerState"]
-      ]) ?? {},
-      readFirst(source, [
-        ["externalModels", "shipPlanner", "communityToolState"]
-      ]) ?? {}
+      readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.legacyShipPlayerState) ?? {},
+      readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState) ?? {}
     )
   );
   normalized.externalModels.shipPlanner.communityToolState = mergedShipToolState;
   normalized.meta.schemaVersion = PLAYER_PROFILE_SCHEMA_VERSION;
 
   return normalized;
+}
+
+function readAliasedValue(source, aliases) {
+  return readFirst(source, aliases);
 }

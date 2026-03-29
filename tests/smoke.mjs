@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import {
+  PLAYER_PROFILE_IMPORT_ALIASES,
   PLAYER_PROFILE_SCHEMA_VERSION,
   createDefaultPlayerProfile,
   normalizePlayerProfile
@@ -90,6 +91,15 @@ const sortedFixtureActions = sortRecommendationFeed(normalizedFixtureActions);
 const defaultProfile = createDefaultPlayerProfile();
 
 assert.equal(snapshot.snapshotVersion, "v1.0.0-alpha");
+assert.deepEqual(
+  Object.keys(PLAYER_PROFILE_IMPORT_ALIASES),
+  ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
+);
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.canonical.diamonds.some((path) => path.join(".") === "gems"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel.some((path) => path.join(".") === "systems.shards.focusMilestoneLevel"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.experimental.primaryFarmingFocus.some((path) => path.join(".") === "resourceFocus"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel.some((path) => path.join(".") === "systems.metaProgression.hunterLevel"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
 assert.ok(snapshot.shipLoadouts.length >= 4, "expected ship loadouts");
 assert.deepEqual(snapshot.shardMilestones, [], "expected shard milestones to stay quarantined until verified");
 assert.ok(snapshot.gemNodes.length >= 4, "expected gem nodes");
@@ -144,7 +154,7 @@ assert.equal(feedTrack.status, "active");
 assert.match(feedTrack.currentSlice, /Validate representative shard and loop action fixtures through the shared recommendation contract/);
 const profileTrack = snapshot.researchTracks.find((track) => track.id === "playerprofile-boundary-and-imports");
 assert.ok(profileTrack, "expected player profile track");
-assert.match(profileTrack.currentSlice, /Lock compatibility-only aliases like stage and metaProgression imports to migration-only paths/);
+assert.match(profileTrack.currentSlice, /Centralize the surviving PlayerProfile alias inventory in one classified map/);
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
 assert.match(agentsMd, /available but unmapped/);

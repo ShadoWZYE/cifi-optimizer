@@ -2,6 +2,9 @@
 
 This document defines the grounded boundary for `state.playerProfile`.
 
+Reference:
+- the repo-local alias inventory now lives in `PLAYER_PROFILE_IMPORT_ALIASES` within [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
+
 ## Classification rule
 
 Only place a field in canonical shared player truth when it is both:
@@ -90,6 +93,13 @@ These values are preserved only for migration compatibility:
 - `externalModels.shipPlanner.communityToolState` is always preserved during migration.
 - Imported objects for real-but-unmapped systems should be preserved under `compatibility.unmappedSystemState` instead of being collapsed into canonical or planner namespaces.
 - Invalid numeric planner-helper values normalize to `null` instead of silently becoming canonical state.
+- The alias inventory is grouped on purpose:
+  - `meta` and `canonical` for active MVP shared truth
+  - `planner` for shard helper inputs
+  - `externalModel` for ship-planner implementation state
+  - `experimental` for non-MVP support helpers
+  - `compatibility` for migration-only legacy sinks
+  - `shipCalibration` for preserved community-tool payloads
 
 ## UI rule
 

@@ -15,6 +15,10 @@ Accepted shapes:
 - current nested PlayerProfile schema
 - legacy flat fields already supported by `normalizePlayerProfile`
 
+Alias inventory:
+- the supported legacy and nested alias groups are centrally defined in `PLAYER_PROFILE_IMPORT_ALIASES` within [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
+- future alias changes should update that inventory, the docs here, and the migration smoke checks together
+
 Grounding rules:
 - canonical shared truth stays under `player` and `meta`
 - planner-only values stay under `planning`
