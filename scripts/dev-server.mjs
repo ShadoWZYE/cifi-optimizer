@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
 const launcherMode = process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
+const clientLeaseTtlMs = 60000;
 const launcherIdleCheckMs = 2000;
 const clientSessions = new Map();
 let launcherSignalSequence = 0;
@@ -150,7 +151,8 @@ async function handleClientSessionTouch(request, response) {
     const existingSession = clientSessions.get(clientId) || {};
     clientSessions.set(clientId, {
       ...existingSession,
-      clientId
+      clientId,
+      lastSeenAt: Date.now()
     });
     writeJson(response, 200, {
       ok: true,
@@ -220,6 +222,7 @@ function handleClientEvents(request, response, requestUrl) {
   clientSessions.set(clientId, {
     ...existingSession,
     clientId,
+    lastSeenAt: Date.now(),
     stream: response
   });
 
@@ -296,9 +299,12 @@ function writeJson(response, status, payload) {
 }
 
 function getActiveClientCount() {
+  const cutoff = Date.now() - clientLeaseTtlMs;
   let count = 0;
   for (const session of clientSessions.values()) {
-    if (session?.stream && !session.stream.destroyed && !session.stream.writableEnded) {
+    const hasLiveStream = session?.stream && !session.stream.destroyed && !session.stream.writableEnded;
+    const hasRecentHeartbeat = Number(session?.lastSeenAt || 0) >= cutoff;
+    if (hasLiveStream || hasRecentHeartbeat) {
       count += 1;
     }
   }

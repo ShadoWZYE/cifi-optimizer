@@ -497,6 +497,7 @@ async function initServerSession() {
   const session = {
     id: `client-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     events: null,
+    heartbeatId: null,
     launchSignalSequence: 0,
     enabled: false
   };
@@ -509,6 +510,9 @@ async function initServerSession() {
 
   session.enabled = true;
   session.launchSignalSequence = Number(opened.launchSignalSequence || 0);
+  session.heartbeatId = window.setInterval(() => {
+    postServerSession(SERVER_SESSION_ENDPOINTS.heartbeat, session.id);
+  }, APP_LAUNCH_HEARTBEAT_MS);
   session.events = new EventSource(`${SERVER_SESSION_ENDPOINTS.events}?clientId=${encodeURIComponent(session.id)}`);
   session.events.addEventListener("ready", (event) => {
     const payload = parseServerEvent(event);
@@ -567,6 +571,11 @@ function closeServerSession(session = state.serverSession) {
   if (session.events) {
     session.events.close();
     session.events = null;
+  }
+
+  if (session.heartbeatId) {
+    window.clearInterval(session.heartbeatId);
+    session.heartbeatId = null;
   }
 
   session.enabled = false;
