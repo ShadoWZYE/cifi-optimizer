@@ -14,7 +14,7 @@ import {
   sortRecommendationFeed,
   toRecommendationAction
 } from "../recommendation-contract.js";
-import { validateBundledDatasets } from "../scripts/validate-datasets.mjs";
+import { validateBundledDatasets } from "../scripts/contracts/validate-datasets.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -27,27 +27,27 @@ const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const agentsMd = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8");
 const groundingPlan = await readFile(new URL("../docs/cifi_grounding_plan.md", import.meta.url), "utf8");
-const unityAuditPlaybook = await readFile(new URL("../docs/unity-audit-playbook.md", import.meta.url), "utf8");
-const ownerMap = await readFile(new URL("../docs/unity-owner-map.md", import.meta.url), "utf8");
-const spendVerificationDoc = await readFile(new URL("../docs/spend-system-verification.md", import.meta.url), "utf8");
-const tokenBankStateDoc = await readFile(new URL("../docs/token-bank-state-verification.md", import.meta.url), "utf8");
-const dailyTokeniumMissionDoc = await readFile(new URL("../docs/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
-const multiverseMarketVerificationDoc = await readFile(new URL("../docs/multiverse-market-verification.md", import.meta.url), "utf8");
-const multiverseMarketStateDoc = await readFile(new URL("../docs/multiverse-market-state-verification.md", import.meta.url), "utf8");
-const multiverseMarketMetadataNeighborhoodDoc = await readFile(new URL("../docs/multiverse-market-metadata-neighborhood.md", import.meta.url), "utf8");
+const unityAuditPlaybook = await readFile(new URL("../docs/unity/unity-audit-playbook.md", import.meta.url), "utf8");
+const ownerMap = await readFile(new URL("../docs/unity/unity-owner-map.md", import.meta.url), "utf8");
+const spendVerificationDoc = await readFile(new URL("../docs/systems/spend/spend-system-verification.md", import.meta.url), "utf8");
+const tokenBankStateDoc = await readFile(new URL("../docs/systems/spend/token-bank-state-verification.md", import.meta.url), "utf8");
+const dailyTokeniumMissionDoc = await readFile(new URL("../docs/systems/spend/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
+const multiverseMarketVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-verification.md", import.meta.url), "utf8");
+const multiverseMarketStateDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-state-verification.md", import.meta.url), "utf8");
+const multiverseMarketMetadataNeighborhoodDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-metadata-neighborhood.md", import.meta.url), "utf8");
 const recommendationContractModule = await readFile(new URL("../recommendation-contract.js", import.meta.url), "utf8");
 const recommendationFixtures = JSON.parse(await readFile(new URL("./fixtures/recommendation-actions.fixtures.json", import.meta.url), "utf8"));
-const shardVerificationDoc = await readFile(new URL("../docs/shard-system-verification.md", import.meta.url), "utf8");
-const playerProfileSchemaDoc = await readFile(new URL("../docs/player-profile-schema.md", import.meta.url), "utf8");
-const importMappingDoc = await readFile(new URL("../docs/import-mapping.md", import.meta.url), "utf8");
-const playerProfileAliasAuditDoc = await readFile(new URL("../docs/player-profile-import-aliases.md", import.meta.url), "utf8");
+const shardVerificationDoc = await readFile(new URL("../docs/systems/shards/shard-system-verification.md", import.meta.url), "utf8");
+const playerProfileSchemaDoc = await readFile(new URL("../docs/contracts/player-profile-schema.md", import.meta.url), "utf8");
+const importMappingDoc = await readFile(new URL("../docs/contracts/import-mapping.md", import.meta.url), "utf8");
+const playerProfileAliasAuditDoc = await readFile(new URL("../docs/contracts/player-profile-import-aliases.md", import.meta.url), "utf8");
 const playerProfileAliasAuditData = JSON.parse(await readFile(new URL("../data/player-profile-import-aliases.v1.json", import.meta.url), "utf8"));
-const datasetRefreshChecklistDoc = await readFile(new URL("../docs/dataset-refresh-checklist.md", import.meta.url), "utf8");
-const researchNoteTemplateDoc = await readFile(new URL("../docs/research-note-template.md", import.meta.url), "utf8");
+const datasetRefreshChecklistDoc = await readFile(new URL("../docs/contracts/dataset-refresh-checklist.md", import.meta.url), "utf8");
+const researchNoteTemplateDoc = await readFile(new URL("../docs/contracts/research-note-template.md", import.meta.url), "utf8");
 const shardResearchNote = await readFile(new URL("../docs/research/shard-milestones-grounded-2026-03-28.md", import.meta.url), "utf8");
-const tokenShopDoc = await readFile(new URL("../docs/token-shop-values.md", import.meta.url), "utf8");
-const multiverseMarketDoc = await readFile(new URL("../docs/multiverse-market-values.md", import.meta.url), "utf8");
-const shardIngestDoc = await readFile(new URL("../docs/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
+const tokenShopDoc = await readFile(new URL("../docs/systems/spend/token-shop-values.md", import.meta.url), "utf8");
+const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-values.md", import.meta.url), "utf8");
+const shardIngestDoc = await readFile(new URL("../docs/systems/shards/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
@@ -523,19 +523,19 @@ assert.match(launcherVbs, /--launcher-mode/);
 assert.match(launcherVbs, /ResolveNodePath/);
 assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
-assert.equal(pkg.scripts["verify:data"], "node ./scripts/validate-datasets.mjs");
+assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
 assert.match(importMappingDoc, /compatibility-only fields/i);
-const datasetContractsDoc = await readFile(new URL("../docs/dataset-contracts.md", import.meta.url), "utf8");
+const datasetContractsDoc = await readFile(new URL("../docs/contracts/dataset-contracts.md", import.meta.url), "utf8");
 assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);
-assert.match(datasetContractsDoc, /docs\/dataset-refresh-checklist\.md/);
+assert.match(datasetContractsDoc, /docs\/contracts\/dataset-refresh-checklist\.md/);
 assert.match(datasetContractsDoc, /Source-priority metadata/);
 assert.match(datasetContractsDoc, /APK\/Unity artifacts and repo extraction outputs first/);
 assert.match(datasetContractsDoc, /editing `data\/bundled-dataset-contract\.v1\.json`/);
 assert.match(datasetRefreshChecklistDoc, /# Dataset Refresh Checklist/);
 assert.match(datasetRefreshChecklistDoc, /Record the shipped dataset in `data\/bundled-dataset-contract\.v1\.json`/);
 assert.match(datasetRefreshChecklistDoc, /Run `npm run verify:data`/);
-assert.match(datasetRefreshChecklistDoc, /Use `docs\/research-note-template\.md` for new notes/);
+assert.match(datasetRefreshChecklistDoc, /Use `docs\/contracts\/research-note-template\.md` for new notes/);
 assert.match(researchNoteTemplateDoc, /# Research Note Template/);
 assert.match(researchNoteTemplateDoc, /APK\/Unity path checked first/);
 assert.match(researchNoteTemplateDoc, /Data classification/);
@@ -901,3 +901,4 @@ async function waitForExit(child, timeoutMs) {
     });
   });
 }
+

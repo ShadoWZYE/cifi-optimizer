@@ -17,9 +17,9 @@ Do not treat output as game-accurate unless the module identifies its source and
 Core references:
 
 - `AGENTS.md`
-- `docs/pr-roadmap.md`
-- `docs/research-followup-execution-plan.md`
-- `docs/research-tracks.md`
+- `docs/roadmap/pr-roadmap.md`
+- `docs/roadmap/research-followup-execution-plan.md`
+- `docs/roadmap/research-tracks.md`
 
 ## Grounding rules
 
@@ -58,8 +58,8 @@ If a feature enters research, the APK/Unity path should be checked first and doc
 
 Optional tooling:
 
-- `.NET 6 Runtime` for `tools/UABEA/UABEAvalonia.exe`
-- `.NET 8 SDK` if rebuilding `tools/CifiAssetProbe`
+- `.NET 6 Runtime` for `tools/unity/UABEA/UABEAvalonia.exe`
+- `.NET 8 SDK` if rebuilding `tools/unity/CifiAssetProbe`
 - LDPlayer only when recreating emulator-side extracts
 
 ## Key files
@@ -68,27 +68,32 @@ Optional tooling:
 - `player-profile.js` — PlayerProfile schema and normalization
 - `data/game-data.snapshot.v1.json` — app-owned snapshot and research track status
 - `data/bundled-dataset-contract.v1.json` — shipped dataset manifest
-- `docs/dataset-contracts.md` — dataset contract
-- `docs/dataset-refresh-checklist.md` — dataset promotion checklist
-- `docs/research-note-template.md` — APK-first note template
-- `docs/player-profile-schema.md` — PlayerProfile boundary
-- `docs/import-mapping.md` — supported import shapes
-- `docs/unity-audit-playbook.md` — repeatable Unity extraction workflow
-- `docs/unity-owner-map.md` — grounded mechanic owner index
+- `docs/contracts/dataset-contracts.md` — dataset contract
+- `docs/contracts/dataset-refresh-checklist.md` — dataset promotion checklist
+- `docs/contracts/research-note-template.md` — APK-first note template
+- `docs/contracts/player-profile-schema.md` — PlayerProfile boundary
+- `docs/contracts/import-mapping.md` — supported import shapes
+- `docs/roadmap/` — roadmap, execution plan, and Research-tab intake docs
+- `docs/systems/` — system-specific verification and extracted-mechanics notes
+- `docs/unity/unity-audit-playbook.md` — repeatable Unity extraction workflow
+- `docs/unity/unity-owner-map.md` — grounded mechanic owner index
+- `workbench/` — cloned APK, Unity, extract, and emulator workbench artifacts
+- `tools/unity/` — Unity desktop tooling
+- `.deps/` — checked-in Python dependency bundle for Unity helpers
 
 ## Unity extraction resume
 
 Start with:
 
-- [`docs/unity-audit-playbook.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity-audit-playbook.md)
-- [`docs/unity-owner-map.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity-owner-map.md)
+- [`docs/unity/unity-audit-playbook.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity\unity-audit-playbook.md)
+- [`docs/unity/unity-owner-map.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity\unity-owner-map.md)
 
 Re-run:
 
-- `python scripts/token_shop_parse.py`
-- `python scripts/multiverse_market_parse.py`
+- `python scripts/unity/token_shop_parse.py`
+- `python scripts/unity/multiverse_market_parse.py`
 
-Those scripts assume the local Unity inputs exist under `_cifi_apk` and `_unity_joined`.
+Those scripts assume the local Unity inputs exist under `workbench/apk/base` and `workbench/unity/joined`.
 
 ## Current status
 
@@ -124,4 +129,5 @@ Current canonical shared fields:
 
 Reference:
 
-- `docs/player-profile-schema.md`
+- `docs/contracts/player-profile-schema.md`
+
