@@ -49,12 +49,18 @@ assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
   ["snapshot", "shards", "token-shop", "multiverse-market"]
 );
+const shardTrack = snapshot.researchTracks.find((track) => track.id === "shards-and-loop-guardrails");
+assert.ok(shardTrack, "expected shard workflow track");
+assert.match(shardTrack.goal, /Keep shard guidance truthful/);
+assert.match(shardTrack.currentSlice, /Audit the current shard workflow against the stricter system-mapping gate/);
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
 assert.match(agentsMd, /available but unmapped/);
+assert.match(agentsMd, /not build-ready until its owner, data shape, labels, currencies, and required player-state inputs are mapped/);
 assert.match(groundingPlan, /## System integration gate/);
 assert.match(groundingPlan, /Fail this gate if any of the above are inferred rather than evidenced/);
 assert.match(groundingPlan, /Presence of extracted data is not enough/);
+assert.match(groundingPlan, /Even when a system is known to exist in CIFI/);
 assert.match(unityAuditPlaybook, /## Integration readiness gate/);
 assert.match(unityAuditPlaybook, /MultiverseMarket/);
 assert.match(ownerMap, /integration status: owner and serialized constants verified/);

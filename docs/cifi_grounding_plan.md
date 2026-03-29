@@ -197,6 +197,8 @@ Treat that state as:
 - not recommendation-ready
 - still blocked on mapping currencies, owned-state inputs, or player-facing labels
 
+Even when a system is known to exist in CIFI, it should remain blocked for app integration until the repo understands how it exists in the shipped game and what fields and currencies actually drive it.
+
 Acceptable next work after a failed gate:
 - parser improvements
 - owner-map and verification docs

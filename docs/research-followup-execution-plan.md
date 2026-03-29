@@ -32,6 +32,7 @@ In practice, this means:
 - token and multiverse data can inform planner structure, but not pretend to be complete optimizer truth
 - non-MVP surfaces such as OCR, gem nodes, and research UI stay deprioritized unless required as supporting cleanup
 - canonical systems with provisional external-model implementations should be labeled as such, not collapsed into speculative support-surface status
+- a system being known to exist in CIFI is still not enough for planner implementation; owner mapping, currencies, labels, and required player-state inputs must be grounded from assets before integration work starts
 
 ### Source priority rule
 
@@ -64,11 +65,22 @@ Add schema and validation around the shipped datasets so future planner work has
 
 This stage assumes the preferred raw input path is the checked-in APK/Unity package set, processed through the repo's parser and normalization scripts before anything is promoted into shipped JSON.
 
-### Stage 2: Land MVP planner slices
+### Stage 2: Map systems before planner slices
 
-Build shard workflow improvements, then token/diamond spend planning, then loop guardrails, then unify their outputs into the recommendation feed.
+For each planned system, first confirm:
 
-### Stage 3: Harden delivery
+- the real in-game placement and role
+- the Unity/APK owner
+- the currencies and player-owned inputs it consumes
+- the mapping from serialized ids or community names to grounded in-game labels
+
+Only after that should the repo land planner slices.
+
+### Stage 3: Land MVP planner slices
+
+Build planner behavior only for systems that have passed the mapping gate, then unify their outputs into the recommendation feed.
+
+### Stage 4: Harden delivery
 
 Add better tests, lightweight CI, and doc updates so future data drops do not silently regress the app.
 
@@ -160,7 +172,7 @@ Tighten the boundary between canonical player state, planning helpers, and exter
 
 **Goal**
 
-Keep shards as a grounded MVP feature without drifting back into invented optimizer math.
+Keep shards in truthful descriptive mode until the game-side shard system is mapped well enough for stronger app behavior.
 
 **Primary files**
 
@@ -173,6 +185,7 @@ Keep shards as a grounded MVP feature without drifting back into invented optimi
 
 **Tasks**
 
+- verify how much of the current shard workflow is grounded from shipped-game evidence versus community/descriptive sources
 - review the shard workflow UI and recommendation output against the grounded datasets
 - improve explainability, uncertainty labels, and manual workflow guidance
 - keep disabled functionality clearly disabled where numeric truth is still missing
@@ -180,6 +193,7 @@ Keep shards as a grounded MVP feature without drifting back into invented optimi
 
 **Deliverables**
 
+- a written boundary between game-side-grounded shard facts and descriptive/community-backed shard guidance
 - grounded shard recommendations that are explicit about assumptions
 - updated shard workflow documentation
 - tests for shard recommendation contract shape and guardrails
@@ -214,10 +228,11 @@ Use the extracted token-shop and multiverse-market data to build the MVP spend-p
 
 **Tasks**
 
-- normalize the extracted spend datasets into a planner-friendly shape
-- define what the MVP spend planner is allowed to recommend today
+- verify the in-game placement, owner, spend lane, and owned-state inputs for each spend system before any planner UI is added
+- remap extracted spend data into grounded player-facing labels only where the mapping is evidenced
+- define what the MVP spend planner is allowed to recommend today after systems pass the mapping gate
 - separate verified cost/value facts from heuristics and user preference inputs
-- add a first pass of token and diamond planning UI/recommendation logic
+- add planning UI only for systems that have passed the mapping gate
 
 **Deliverables**
 

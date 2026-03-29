@@ -57,6 +57,7 @@ If any of those remain unresolved:
 Important:
 - extracted data being present in the repo does not mean the system is mapped enough to integrate
 - treat systems as `available but unmapped` until currencies, owned-state inputs, and labels are all verified well enough for app use
+- a real in-game system should still be treated as not build-ready until its owner, data shape, labels, currencies, and required player-state inputs are mapped clearly enough to support truthful app behavior
 
 --- 
 

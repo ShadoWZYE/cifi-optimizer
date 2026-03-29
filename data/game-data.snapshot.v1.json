@@ -163,8 +163,8 @@
       "id": "shards-and-loop-guardrails",
       "title": "Shard workflow and loop guardrails",
       "status": "active",
-      "goal": "Strengthen shard guidance now, then add loop warnings without drifting into speculative simulation.",
-      "currentSlice": "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes so the cards show source-linked caution instead of generic fallback copy.",
+      "goal": "Keep shard guidance truthful while the repo verifies how much of the shard system is grounded from shipped-game evidence versus descriptive/community sources.",
+      "currentSlice": "Audit the current shard workflow against the stricter system-mapping gate and document which shard facts are game-side grounded versus still descriptive-only.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
@@ -172,7 +172,9 @@
         "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes."
       ],
       "nextSteps": [
-        "Carry the same recommendation contract discipline into future spend-planner slices."
+        "Document the current boundary between asset-grounded shard facts and descriptive/community-backed shard guidance.",
+        "Verify whether the current shard milestone layer is grounded enough to stay in MVP-facing workflow copy.",
+        "Only expand shard recommendations after the system-mapping gate is satisfied."
       ]
     },
     {
