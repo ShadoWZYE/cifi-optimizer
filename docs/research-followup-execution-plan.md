@@ -143,6 +143,7 @@ Tighten the boundary between canonical player state, planning helpers, and exter
 - tests for normalization and legacy migration edge cases
 - overview, validation, and support-surface copy that keeps external/community-tool outputs visibly outside grounded MVP truth
 - page structure that keeps external-model calibration attached to its module implementation instead of the shared Profile surface
+- module access patterns that read canonical, planner-only, external-model, and compatibility state through labeled accessors instead of ad hoc nested field reads
 
 **Dependencies**
 

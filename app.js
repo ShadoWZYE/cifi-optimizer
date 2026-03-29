@@ -739,6 +739,51 @@ function getShipCommunityToolState() {
   return state.playerProfile.externalModels.shipPlanner.communityToolState;
 }
 
+function getCanonicalProfileState() {
+  return {
+    profileName: state.playerProfile.meta.profileName,
+    dataConfidence: state.playerProfile.meta.dataConfidence,
+    loopReset: state.playerProfile.player.loop.loopReset,
+    diamonds: state.playerProfile.player.resources.diamonds,
+    tokens: state.playerProfile.player.resources.tokens,
+    academyRelics: state.playerProfile.player.resources.academyRelics,
+    shards: state.playerProfile.player.resources.shards,
+    notes: state.playerProfile.notes.profile
+  };
+}
+
+function getShardPlannerState() {
+  return {
+    currentShards: state.playerProfile.player.resources.shards,
+    ratePerHour: state.playerProfile.planning.shards.ratePerHour,
+    totalMilestoneLevels: state.playerProfile.planning.shards.totalMilestoneLevels,
+    focusMilestoneId: state.playerProfile.planning.shards.focusMilestoneId,
+    focusMilestoneLevel: state.playerProfile.planning.shards.focusMilestoneLevel
+  };
+}
+
+function getShipPlannerState() {
+  return {
+    summary: state.playerProfile.externalModels.shipPlanner.summary,
+    calibration: state.playerProfile.externalModels.shipPlanner.communityToolState
+  };
+}
+
+function getExperimentalProfileState() {
+  return {
+    gemNodeBudget: state.playerProfile.externalModels.experimental.gemNodes.budget,
+    primaryFarmingFocus: state.playerProfile.externalModels.experimental.profileHints.primaryFarmingFocus,
+    researchHours: state.playerProfile.externalModels.experimental.profileHints.researchHours
+  };
+}
+
+function getCompatibilityProfileState() {
+  return {
+    legacyStage: state.playerProfile.compatibility.legacyStage,
+    unresolved: state.playerProfile.compatibility.unresolvedProfileFields
+  };
+}
+
 function getProfileValue(path) {
   return path.reduce((current, key) => current?.[key], state.playerProfile);
 }
@@ -861,15 +906,16 @@ function bindProfileActions() {
 
   $("#saveSnapshotBtn").addEventListener("click", () => {
     state.playerProfile = collectProfileForm();
+    const canonical = getCanonicalProfileState();
     const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
     snapshots.unshift({
       savedAt: new Date().toISOString(),
-      loopReset: state.playerProfile.player.loop.loopReset,
+      loopReset: canonical.loopReset,
       playerProfile: structuredClone(state.playerProfile)
     });
     saveStoredJson(STORAGE_KEYS.snapshots, snapshots.slice(0, 12));
     persistPlayerProfile();
-    setStatus("profileStatus", `Saved LR snapshot for LR ${state.playerProfile.player.loop.loopReset}.`, "success");
+    setStatus("profileStatus", `Saved LR snapshot for LR ${canonical.loopReset}.`, "success");
     renderAll();
   });
 
@@ -1368,7 +1414,7 @@ function renderProgressionResults(results) {
 
 function renderGemResults(results) {
   const budget = getGemPlannerBudget();
-  const legacyGemDust = state.playerProfile.compatibility.unresolvedProfileFields.gemDust;
+  const legacyGemDust = getCompatibilityProfileState().unresolved.gemDust;
   const boundaryNotes = [];
 
   if (budget === 0) {
@@ -1587,54 +1633,59 @@ function exportPlayerProfileJson() {
 }
 
 function renderPlayerProfileBoundarySummary() {
+  const canonical = getCanonicalProfileState();
+  const shardPlanner = getShardPlannerState();
+  const shipPlanner = getShipPlannerState();
+  const experimental = getExperimentalProfileState();
+  const compatibility = getCompatibilityProfileState();
   const groups = [
     {
       title: "Canonical shared truth",
       note: "Grounded account state and metadata that the shared MVP profile can treat as first-class truth.",
       items: [
-        ["Profile name", state.playerProfile.meta.profileName],
-        ["Data confidence", state.playerProfile.meta.dataConfidence],
-        ["Current LR", state.playerProfile.player.loop.loopReset],
-        ["Diamonds", state.playerProfile.player.resources.diamonds],
-        ["Tokens", state.playerProfile.player.resources.tokens],
-        ["Academy relics", state.playerProfile.player.resources.academyRelics],
-        ["Current shards", state.playerProfile.player.resources.shards],
-        ["Profile notes", state.playerProfile.notes.profile]
+        ["Profile name", canonical.profileName],
+        ["Data confidence", canonical.dataConfidence],
+        ["Current LR", canonical.loopReset],
+        ["Diamonds", canonical.diamonds],
+        ["Tokens", canonical.tokens],
+        ["Academy relics", canonical.academyRelics],
+        ["Current shards", canonical.shards],
+        ["Profile notes", canonical.notes]
       ]
     },
     {
       title: "Planner-only helpers",
       note: "Manual helper inputs used by descriptive planners, not canonical account truth.",
       items: [
-        ["Shard income / hour", state.playerProfile.planning.shards.ratePerHour],
-        ["Total shard milestone levels", state.playerProfile.planning.shards.totalMilestoneLevels],
-        ["Focus milestone", state.playerProfile.planning.shards.focusMilestoneId],
-        ["Focus milestone level", state.playerProfile.planning.shards.focusMilestoneLevel]
+        ["Shard income / hour", shardPlanner.ratePerHour],
+        ["Total shard milestone levels", shardPlanner.totalMilestoneLevels],
+        ["Focus milestone", shardPlanner.focusMilestoneId],
+        ["Focus milestone level", shardPlanner.focusMilestoneLevel]
       ]
     },
     {
       title: "External-model implementation state",
       note: "Current implementation data that stays isolated from shared profile truth.",
       items: [
-        ["Ship planner power", state.playerProfile.externalModels.shipPlanner.summary.power],
-        ["Ship planner speed", state.playerProfile.externalModels.shipPlanner.summary.speed],
-        ["Ship planner cargo", state.playerProfile.externalModels.shipPlanner.summary.cargo],
-        ["Ship calibration groups", Object.keys(state.playerProfile.externalModels.shipPlanner.communityToolState || {}).length],
-        ["Gem-node budget", state.playerProfile.externalModels.experimental.gemNodes.budget],
-        ["Primary farming focus", state.playerProfile.externalModels.experimental.profileHints.primaryFarmingFocus],
-        ["Research hours", state.playerProfile.externalModels.experimental.profileHints.researchHours]
+        ["Ship planner power", shipPlanner.summary.power],
+        ["Ship planner speed", shipPlanner.summary.speed],
+        ["Ship planner cargo", shipPlanner.summary.cargo],
+        ["Ship calibration groups", Object.keys(shipPlanner.calibration || {}).length],
+        ["Gem-node budget", experimental.gemNodeBudget],
+        ["Primary farming focus", experimental.primaryFarmingFocus],
+        ["Research hours", experimental.researchHours]
       ]
     },
     {
       title: "Compatibility leftovers",
       note: "Preserved migration values that are not treated as active shared truth.",
       items: [
-        ["Legacy highest ship unlocked", state.playerProfile.compatibility.legacyStage.highestShipUnlocked],
-        ["Legacy manual phase", state.playerProfile.compatibility.legacyStage.manualPhase],
-        ["Legacy gemDust", state.playerProfile.compatibility.unresolvedProfileFields.gemDust],
-        ["Legacy hunter level", state.playerProfile.compatibility.unresolvedProfileFields.hunterLevel],
-        ["Legacy trait sphere count", state.playerProfile.compatibility.unresolvedProfileFields.traitSphereCount],
-        ["Legacy mech parts", state.playerProfile.compatibility.unresolvedProfileFields.mechParts]
+        ["Legacy highest ship unlocked", compatibility.legacyStage.highestShipUnlocked],
+        ["Legacy manual phase", compatibility.legacyStage.manualPhase],
+        ["Legacy gemDust", compatibility.unresolved.gemDust],
+        ["Legacy hunter level", compatibility.unresolved.hunterLevel],
+        ["Legacy trait sphere count", compatibility.unresolved.traitSphereCount],
+        ["Legacy mech parts", compatibility.unresolved.mechParts]
       ]
     }
   ];
@@ -1802,7 +1853,7 @@ function rankShipTargets() {
 }
 
 function runShipOptimization() {
-  const ship = state.playerProfile.externalModels.shipPlanner.summary;
+  const ship = getShipPlannerState().summary;
   return [...state.snapshot.shipLoadouts].map((loadout) => ({
     title: loadout.name,
     subtitle: loadout.notes,
@@ -1848,8 +1899,9 @@ function runProgressionOptimization() {
 }
 
 function buildLoopGuardrailRecommendations() {
-  const loopReset = Number(state.playerProfile.player.loop.loopReset || 0);
-  const currentShards = Number(state.playerProfile.player.resources.shards || 0);
+  const canonical = getCanonicalProfileState();
+  const loopReset = Number(canonical.loopReset || 0);
+  const currentShards = Number(canonical.shards || 0);
   const antiBricking = getObservedBehaviorById("PPX_EARLY_LR_ANTIBRICKING");
   const shardSpend = getObservedBehaviorById("PPX_SHARDS_EARLY_DISTRIBUTION");
   const zeusWarning = getObservedBehaviorById("PPX_ZEUS_E1000_RESOURCE_PRIO_AND_LR_TARGETS");
@@ -1939,11 +1991,12 @@ function buildGroundedShardRecommendations() {
     return [];
   }
 
-  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
-  const currentShards = state.playerProfile.player.resources.shards;
-  const shardRate = state.playerProfile.planning.shards.ratePerHour;
+  const shardPlanner = getShardPlannerState();
+  const totalLevels = Number(shardPlanner.totalMilestoneLevels || 0);
+  const currentShards = shardPlanner.currentShards;
+  const shardRate = shardPlanner.ratePerHour;
   const focusMilestone = getShardFocusMilestone();
-  const focusLevel = Number(state.playerProfile.planning.shards.focusMilestoneLevel || 0);
+  const focusLevel = Number(shardPlanner.focusMilestoneLevel || 0);
   const nextUnlock = getNextShardUnlockMilestone(totalLevels, milestones);
   const nextThreshold = getNextShardThreshold(focusMilestone, focusLevel, mechanics);
   const nextCostBump = getNextShardCostBump(focusLevel);
@@ -2048,6 +2101,7 @@ function saveShardPlannerInputs() {
 
 function renderShardPlannerControls() {
   const milestones = getGroundedShardMilestones();
+  const shardPlanner = getShardPlannerState();
   const select = formControl("shardFocusMilestoneId");
   const input = formControl("shardFocusMilestoneLevel");
   if (!select || !input || !milestones.length) {
@@ -2058,20 +2112,21 @@ function renderShardPlannerControls() {
     <option value="${escapeHtml(String(milestone.id))}">${escapeHtml(`${milestone.name} (${formatShardRarity(milestone.rarity)})`)}</option>
   `).join("");
   select.value = selectedId;
-  input.value = state.playerProfile.planning.shards.focusMilestoneLevel ?? "";
+  input.value = shardPlanner.focusMilestoneLevel ?? "";
 }
 
 function renderShardWorkflowSnapshot() {
   const mechanicsBundle = state.shardGrounding?.milestones?.canonicalMechanics ?? {};
   const milestones = getGroundedShardMilestones();
-  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
+  const shardPlanner = getShardPlannerState();
+  const totalLevels = Number(shardPlanner.totalMilestoneLevels || 0);
   const nextUnlock = getNextShardUnlockMilestone(totalLevels, milestones);
   return `
     <div class="page-grid">
       <article class="snapshot-card">
         <span class="snapshot-title">Shard workflow snapshot</span>
         <strong>${escapeHtml(nextUnlock ? nextUnlock.name : "All unlock gates covered")}</strong>
-        <p class="meta">Current shards: ${formatOptionalNumber(state.playerProfile.player.resources.shards)} | Shard income / hour: ${formatOptionalNumber(state.playerProfile.planning.shards.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(state.playerProfile.planning.shards.totalMilestoneLevels)}</p>
+        <p class="meta">Current shards: ${formatOptionalNumber(shardPlanner.currentShards)} | Shard income / hour: ${formatOptionalNumber(shardPlanner.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(shardPlanner.totalMilestoneLevels)}</p>
         <div class="meta-stack">
           <p class="snapshot-title">Grounded mechanics</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.unlock_condition?.description || "Shard unlock condition unavailable.")}</p>
@@ -2227,7 +2282,7 @@ function runGemOptimization() {
 }
 
 function getGemPlannerBudget() {
-  return Number(state.playerProfile.externalModels.experimental.gemNodes.budget || 0);
+  return Number(getExperimentalProfileState().gemNodeBudget || 0);
 }
 
 function runValidationCases() {
@@ -2639,7 +2694,7 @@ function getGroundedShardMechanics() {
 }
 
 function getSelectedShardMilestoneId() {
-  return state.playerProfile.planning.shards.focusMilestoneId
+  return getShardPlannerState().focusMilestoneId
     || getDefaultShardFocusMilestoneId(getGroundedShardMilestones())
     || "";
 }
@@ -2648,7 +2703,7 @@ function getDefaultShardFocusMilestoneId(milestones) {
   if (!milestones.length) {
     return "";
   }
-  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
+  const totalLevels = Number(getShardPlannerState().totalMilestoneLevels || 0);
   return getNextShardUnlockMilestone(totalLevels, milestones)?.id || milestones[0].id;
 }
 

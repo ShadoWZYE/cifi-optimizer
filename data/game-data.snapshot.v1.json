@@ -146,11 +146,12 @@
       "title": "PlayerProfile boundary and import cleanup",
       "status": "active",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Make PlayerProfile imports visibly show which values landed as canonical truth, planner helpers, external-model state, or compatibility leftovers.",
+      "currentSlice": "Move main ship, shard, loop, and gem reads onto labeled PlayerProfile accessors instead of raw nested field access.",
       "completedSteps": [
         "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
         "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
-        "Show the current PlayerProfile boundary summary in the guided import flow so imported values are visibly classified by namespace."
+        "Show the current PlayerProfile boundary summary in the guided import flow so imported values are visibly classified by namespace.",
+        "Route main ship, shard, loop, and gem reads through labeled PlayerProfile accessor helpers instead of direct nested field access."
       ],
       "nextSteps": [
         "Audit current PlayerProfile fields against MVP-only CIFI concepts.",
