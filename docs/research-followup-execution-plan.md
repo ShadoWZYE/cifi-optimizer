@@ -140,6 +140,7 @@ Tighten the boundary between canonical player state, planning helpers, and exter
 - clarified schema boundary
 - doc updates for import and profile rules
 - tests for normalization and legacy migration edge cases
+- overview, validation, and support-surface copy that keeps external/community-tool outputs visibly outside grounded MVP truth
 
 **Dependencies**
 

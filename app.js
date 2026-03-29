@@ -983,28 +983,31 @@ function renderQuickPanels() {
 function renderOverview() {
   $("#profileCompletionValue").textContent = `${getProfileCompletion(state.playerProfile)}%`;
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
-  const validation = runValidationCases().filter((item) => item.scope === "MVP");
-  $("#validationStatusValue").textContent = `${validation.filter((item) => item.pass).length}/${validation.length}`;
+  const validation = runValidationCases();
+  const mvpValidation = validation.filter((item) => item.scope === "MVP");
+  const supportValidation = validation.filter((item) => item.scope === "Support");
+  $("#validationStatusValue").textContent = `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
   $("#overviewHighlights").innerHTML = [
     makeRecommendationCard(runProgressionOptimization()[0], "shards"),
     makeRecommendationCard({
-      id: "non-mvp-modules-warning",
+      id: "profile-boundary-status",
       module: "warning",
       kind: "warning",
-      title: "Non-MVP modules are quarantined",
-      subtitle: "Community-tool and experimental surfaces",
+      title: "Profile boundary stays grounded",
+      subtitle: "Canonical truth and labeled helpers",
       score: 0,
-      confidence: 0.84,
+      confidence: 0.86,
       whyNow: [
-        "Gem Nodes, Research, and OCR remain available only as non-MVP support surfaces.",
-        "Ship planner calibration is preserved, but labeled as community-tool state rather than raw in-game state."
+        "Shared PlayerProfile truth is limited to canonical MVP fields plus labeled planner helpers.",
+        "Community-tool and experimental state remain isolated instead of being promoted into raw CIFI truth."
       ],
       warnings: [
-        "These modules are not part of the grounded MVP path.",
-        "Do not treat them as verified CIFI recommendations."
+        "Do not treat ship planner, gem nodes, research intake, or OCR as grounded MVP recommendations.",
+        "Legacy compatibility fields are preserved for migration, not treated as active planning truth."
       ],
       notes: "The primary MVP flow centers on PlayerProfile, imports, shard safety, validation, and explainable recommendations."
-    }, "warning")
+    }, "warning"),
+    renderOverviewSupportSummary(supportValidation)
   ].join("");
 }
 
@@ -1317,7 +1320,16 @@ function renderShipActions() {
       notes: `Adds ${bestInstall.delta} point(s) on ${state.shipConfig.loadouts[state.shipConfig.activeLoadoutIndex].name}.`
   } : null;
 
-  $("#shipResults").innerHTML = [leadCard, ...shipRankings.slice(0, 3)].filter(Boolean).map((item) => makeRecommendationCard(item, "ship")).join("");
+  $("#shipResults").innerHTML = `
+    ${renderSupportSurfaceNotice(
+      "Community-tool ship results",
+      [
+        "These cards come from the quarantined ship planner and preserved community-tool calibration.",
+        "Treat them as labeled support output, not grounded MVP recommendations."
+      ]
+    )}
+    ${[leadCard, ...shipRankings.slice(0, 3)].filter(Boolean).map((item) => makeRecommendationCard(item, "ship")).join("")}
+  `;
 }
 
 function renderProgressionResults(results) {
@@ -1344,6 +1356,13 @@ function renderGemResults(results) {
   }
 
   $("#gemResults").innerHTML = `
+    ${renderSupportSurfaceNotice(
+      "Experimental gem results",
+      [
+        "Gem-node rankings remain an experimental support surface outside the grounded MVP path.",
+        "Use them only as labeled helper output, not as verified CIFI recommendation truth."
+      ]
+    )}
     ${boundaryNotes.length ? `
       <article class="validation-card warn">
         <strong>Experimental budget boundary</strong>
@@ -1356,14 +1375,20 @@ function renderGemResults(results) {
 
 function renderValidationResults() {
   const results = runValidationCases();
-  $("#validationResults").innerHTML = results.map((item) => `
-    <article class="validation-card ${item.pass ? "pass" : "warn"}">
-      <strong>${item.title}</strong>
-      <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : "| grounded MVP surface"}</p>
-      <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
-      <p class="meta">${item.actual}</p>
-    </article>
-  `).join("");
+  const mvpResults = results.filter((item) => item.scope === "MVP");
+  const supportResults = results.filter((item) => item.scope === "Support");
+  $("#validationResults").innerHTML = [
+    renderValidationSection(
+      "Grounded MVP checks",
+      "These checks contribute to the overview benchmark and track current grounded MVP behavior.",
+      mvpResults
+    ),
+    renderValidationSection(
+      "Support-surface checks",
+      "These checks cover quarantined ship and gem surfaces. Keep them labeled, but do not treat them as MVP truth.",
+      supportResults
+    )
+  ].join("");
 }
 
 function renderResearch() {
@@ -2127,6 +2152,58 @@ function runValidationCases() {
     pass: item.expected === current[item.module],
     scope: NON_MVP_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
   }));
+}
+
+function renderOverviewSupportSummary(supportValidation) {
+  if (!supportValidation.length) {
+    return "";
+  }
+
+  const passing = supportValidation.filter((item) => item.pass).length;
+  return `
+    <article class="validation-card warn">
+      <strong>Support surfaces stay out of the MVP feed</strong>
+      <p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>
+      <p class="meta">Ship planner and Gem Nodes remain available for compatibility and experimentation, but they do not count as grounded MVP recommendations.</p>
+    </article>
+  `;
+}
+
+function renderSupportSurfaceNotice(title, lines) {
+  return `
+    <article class="validation-card warn">
+      <strong>${escapeHtml(title)}</strong>
+      ${lines.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}
+    </article>
+  `;
+}
+
+function renderValidationSection(title, description, results) {
+  if (!results.length) {
+    return "";
+  }
+
+  return `
+    <section class="meta-stack">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Validation scope</p>
+          <h3>${escapeHtml(title)}</h3>
+        </div>
+      </div>
+      <p class="meta">${escapeHtml(description)}</p>
+      <div class="validation-grid">
+        ${results.map((item) => `
+          <article class="validation-card ${item.pass ? "pass" : "warn"}">
+            <strong>${item.title}</strong>
+            <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : "| grounded MVP surface"}</p>
+            <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
+            <p class="meta">${item.actual}</p>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
 }
 
 function previewImport() {
