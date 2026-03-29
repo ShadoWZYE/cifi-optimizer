@@ -73,11 +73,12 @@ That result does not override current roadmap scope. It is the default cross-tra
 
 ## Current conclusion
 
-The best next PR2 extraction candidate is still the milestone owner family:
+The best next shard-planner extraction candidate is still the milestone payload behind the narrowed shard-specific trail:
 
 - `Milestones, Assembly-CSharp`
 - `MilestoneBonusesPerLevel`
 - `ShardMilestones-64`
 - `ShardMilestones-256`
+- `ShardMining|ShardUpgradeInfo`
 
-The loop-reset stage family remains the best secondary path if the milestone owner family stalls.
+The loop-reset stage family remains the best secondary path if the milestone payload trail stalls.

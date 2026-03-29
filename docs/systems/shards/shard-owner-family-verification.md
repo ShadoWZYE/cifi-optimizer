@@ -1,0 +1,111 @@
+# Shard Owner-Family Verification
+
+This note records the strongest repo-local owner-family evidence for the shard milestone screen from committed Unity artifacts.
+
+Inputs:
+
+- [data/shard-owner-family-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-owner-family-probe.v1.json)
+- [data/shard-vs-construction-owner-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-vs-construction-owner-probe.v1.json)
+- [data/shardmining-metadata-neighborhood.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shardmining-metadata-neighborhood.v1.json)
+- [data/shardupgradeinfo-metadata-neighborhood.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shardupgradeinfo-metadata-neighborhood.v1.json)
+- [data/shard-metadata-neighborhood.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-metadata-neighborhood.v1.json)
+- [workbench/unity/joined/level0](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
+- [workbench/apk/base/global-metadata.dat](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\global-metadata.dat)
+
+## Current conclusion
+
+The shard milestone trail is no longer best described as a fully unknown owner.
+
+The strongest shard-specific repo-local evidence currently points to:
+
+- `ShardMining, Assembly-CSharp` as the shard milestone screen controller family
+- `ShardMining|ShardUpgradeInfo` as the strongest current shard-specific data carrier candidate
+
+This is stronger than the earlier `ConstructionMilestones` lead because it is shard-specific in both scene and metadata naming.
+
+## Strongest shard-specific evidence
+
+### `ShardMining, Assembly-CSharp`
+
+The committed probe output places `ShardMining, Assembly-CSharp` directly beside shard milestone UI and fast-buy control hooks in `level0`.
+
+Recovered adjacent strings include:
+
+- `CheckFirstTimeShardMilestoneOpened`
+- `AttachFastBuyButton`
+- `FastBuyButtonMethodShards`
+- `StartFastBuyButtonHold`
+
+This is the strongest current repo-local evidence for the shard milestone screen controller family.
+
+### `ShardMining|ShardUpgradeInfo`
+
+The committed metadata neighborhoods tie `ShardUpgradeInfo` directly to the `ShardMining` family.
+
+Recovered metadata clues include:
+
+- `ShardMining|ShardUpgradeInfo`
+- `TotalMilestoneLevels`
+- `get_IsUnlocked`
+- `set_IsUnlocked`
+- `<IsUnlocked>k__BackingField`
+- `get_SU1FinalUnlockReq` through at least `get_SU29FinalUnlockReq`
+- `FinalSU1Bonus1`
+- `FinalSU1Bonus2`
+- `FinalSU2Bonus1`
+- `FinalSU29Bonus2`
+- `FinalSU29Bonus3`
+- `OverLevel100Exponent` through `OverLevel400Exponent`
+- `<FastBuyEnum>d__1429`
+
+This is the strongest current repo-local evidence that shard milestone or shard-upgrade state and bonus fields likely live under a shard-specific data object, not only under generic milestone handlers.
+
+## Why `ConstructionMilestones` was downgraded
+
+`ConstructionMilestones, Assembly-CSharp` is still present in the repo-local evidence, but it is now treated as a parallel generic or academy-side milestone family, not the current best shard owner claim.
+
+Why it was downgraded:
+
+- the metadata path is explicitly `Assets\Scripts\Upgrades\AcademyData\ConstructionMilestones.cs`
+- the class naming is academy-side rather than shard-specific
+- the side-by-side owner probe places `ConstructionMilestones, Assembly-CSharp` around blueprint hold strings rather than shard-specific owner labels
+- its milestone buy and bonus fields may describe a broader or different milestone family
+
+It still matters as a cautionary nearby lead because it carries:
+
+- `InitializeMilestones`
+- `BuyMilestone1` through `BuyMilestone57`
+- `SubtractMilestone1`
+- `StartMilestone*Hold` and `StopMilestone*Hold`
+- `ConstructionMilestonesSum`
+- `get_MilestoneMaxLevel`
+- `ClaimDiamondMilestone`
+- `FinalMilestone*Bonus*`
+
+But the repo should not currently treat that family as the shard milestone owner without stronger shard-specific linkage.
+
+## Boundary impact
+
+What is safe to say now:
+
+- the shard milestone screen is tied to a recovered `ShardMining` family
+- shard-specific milestone or upgrade data likely passes through `ShardUpgradeInfo`
+- the app's current descriptive shard workflow is grounded against real shard-specific owner-family clues, not only loose shell strings
+
+What still stays blocked:
+
+- exact mapping between `ShardUpgradeInfo` fields and player-facing shard milestone rows
+- planner-style shard ranking
+- milestone affordability or ETA claims
+- owner-grounded milestone import
+- canonical shard milestone fields in `state.playerProfile`
+
+## Current implication
+
+This pass narrows the owner trail further, but it does not close the remaining shard extraction gap.
+
+Future shard planner work still depends on a later extraction pass that recovers:
+
+- which `SU*` rows correspond to the current descriptive shard milestone set
+- player-owned shard milestone or shard-upgrade state
+- verified player-facing labels for the recovered `FinalSU*Bonus*` fields

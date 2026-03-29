@@ -30,7 +30,8 @@
   "groundedFacts": [
     "Shard and loop milestone shell content exists in shipped Unity assets.",
     "Loop-reset stage identifiers exist in shipped Unity assets.",
-    "Shard progression is connected to the Demeter and shard-mining family in shipped Unity assets."
+    "Shard progression is connected to the Demeter and shard-mining family in shipped Unity assets.",
+    "The strongest shard-specific owner trail now runs through ShardMining for scene control and ShardUpgradeInfo for shard milestone or upgrade data clues."
   ],
   "appSafeUses": [
     "warning-oriented shard and loop guidance",
@@ -45,7 +46,7 @@
     "owner-grounded milestone import"
   ],
   "unresolvedGaps": [
-    "concrete shard milestone owner object",
+    "exact milestone data object or serialized row payload",
     "player-owned milestone save-state inputs",
     "asset-grounded milestone labels and row mapping",
     "asset-grounded bonus tables",

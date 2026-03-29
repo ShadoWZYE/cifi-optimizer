@@ -1536,11 +1536,13 @@ function renderResearchTrackSupport(track) {
     if (!localTopCandidate) {
       return "";
     }
+    const title = track.status === "completed" ? "Future planner unblocker" : "Next extraction target";
+    const localLabel = track.status === "completed" ? "Top shard planner follow-up" : "Top PR2-local shard candidate";
     return `
       <div class="meta-stack">
-        <p class="snapshot-title">Next extraction target</p>
+        <p class="snapshot-title">${title}</p>
         ${globalTopCandidate ? `<p class="meta">Repo-wide default unknown candidate: <code>${escapeHtml(globalTopCandidate.label)}</code> (${escapeHtml(globalTopCandidate.track || "research")} | ${formatShardNumber(globalTopCandidate.heuristicScore)} heuristic score).</p>` : ""}
-        <p class="meta">Top PR2-local shard candidate: <code>${escapeHtml(localTopCandidate.label)}</code> (${formatShardNumber(localTopCandidate.heuristicScore)} heuristic score).</p>
+        <p class="meta">${localLabel}: <code>${escapeHtml(localTopCandidate.label)}</code> (${formatShardNumber(localTopCandidate.heuristicScore)} heuristic score).</p>
         <p class="meta">Coverage: ${escapeHtml((localTopCandidate.binaryFileCoverage || []).join(" | "))}</p>
         <p class="meta">Why next: ${formatShardNumber(localTopCandidate.unresolvedMentionCount)} unresolved mentions, ${formatShardNumber(localTopCandidate.anchorHitCount)} anchor hits, ${formatShardNumber(localTopCandidate.binaryFilesWithAnchorHits)} binary files, ${formatShardNumber(localTopCandidate.nearbyContextTermCount)} nearby context terms.</p>
       </div>

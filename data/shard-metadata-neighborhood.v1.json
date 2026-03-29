@@ -1,0 +1,3106 @@
+{
+  "metadata": "workbench\\apk\\base\\global-metadata.dat",
+  "anchor_count": 10,
+  "context": 10,
+  "results": [
+    {
+      "anchor": "ConstructionMilestones",
+      "matches": [
+        {
+          "anchor": "ConstructionMilestones",
+          "match_index": 16750,
+          "match_offset": 866439,
+          "match_value": "get_ConstructionMilestonesSum",
+          "context": [
+            {
+              "offset": 866182,
+              "encoding": "ascii",
+              "value": "EsotericDisplayCoroutine"
+            },
+            {
+              "offset": 866207,
+              "encoding": "ascii",
+              "value": "BrincksDisplayCoroutine"
+            },
+            {
+              "offset": 866231,
+              "encoding": "ascii",
+              "value": "NautalliumDisplayCoroutine"
+            },
+            {
+              "offset": 866258,
+              "encoding": "ascii",
+              "value": "NecrumDisplayCoroutine"
+            },
+            {
+              "offset": 866281,
+              "encoding": "ascii",
+              "value": "<DisplayTextBrincks>d__26"
+            },
+            {
+              "offset": 866307,
+              "encoding": "ascii",
+              "value": "<DisplayTextEmporium>d__22"
+            },
+            {
+              "offset": 866334,
+              "encoding": "ascii",
+              "value": "<DisplayTextEsoteric>d__24"
+            },
+            {
+              "offset": 866361,
+              "encoding": "ascii",
+              "value": "<DisplayTextNautallium>d__28"
+            },
+            {
+              "offset": 866390,
+              "encoding": "ascii",
+              "value": "<DisplayTextNecrum>d__30"
+            },
+            {
+              "offset": 866415,
+              "encoding": "ascii",
+              "value": "MasterManagerConversion"
+            },
+            {
+              "offset": 866439,
+              "encoding": "ascii",
+              "value": "get_ConstructionMilestonesSum"
+            },
+            {
+              "offset": 866469,
+              "encoding": "ascii",
+              "value": "get_ZagreusRU"
+            },
+            {
+              "offset": 866483,
+              "encoding": "ascii",
+              "value": "get_GalvariumTrinketLevels"
+            },
+            {
+              "offset": 866510,
+              "encoding": "ascii",
+              "value": "get_ExodusGemUpgradeLevels"
+            },
+            {
+              "offset": 866537,
+              "encoding": "ascii",
+              "value": "get_EvolutionGemUpgradeLevels"
+            },
+            {
+              "offset": 866567,
+              "encoding": "ascii",
+              "value": "get_TemporalGemUpgradeLevels"
+            },
+            {
+              "offset": 866596,
+              "encoding": "ascii",
+              "value": "get_InnovationGemUpgradeLevels"
+            },
+            {
+              "offset": 866627,
+              "encoding": "ascii",
+              "value": "get_PowerGemUpgradeLevels"
+            },
+            {
+              "offset": 866653,
+              "encoding": "ascii",
+              "value": "get_AttractionGemUpgradeLevels"
+            },
+            {
+              "offset": 866684,
+              "encoding": "ascii",
+              "value": "get_CreationGemUpgradeLevels"
+            },
+            {
+              "offset": 866713,
+              "encoding": "ascii",
+              "value": "ConstructionMilestonesSum"
+            }
+          ]
+        },
+        {
+          "anchor": "ConstructionMilestones",
+          "match_index": 16760,
+          "match_offset": 866713,
+          "match_value": "ConstructionMilestonesSum",
+          "context": [
+            {
+              "offset": 866439,
+              "encoding": "ascii",
+              "value": "get_ConstructionMilestonesSum"
+            },
+            {
+              "offset": 866469,
+              "encoding": "ascii",
+              "value": "get_ZagreusRU"
+            },
+            {
+              "offset": 866483,
+              "encoding": "ascii",
+              "value": "get_GalvariumTrinketLevels"
+            },
+            {
+              "offset": 866510,
+              "encoding": "ascii",
+              "value": "get_ExodusGemUpgradeLevels"
+            },
+            {
+              "offset": 866537,
+              "encoding": "ascii",
+              "value": "get_EvolutionGemUpgradeLevels"
+            },
+            {
+              "offset": 866567,
+              "encoding": "ascii",
+              "value": "get_TemporalGemUpgradeLevels"
+            },
+            {
+              "offset": 866596,
+              "encoding": "ascii",
+              "value": "get_InnovationGemUpgradeLevels"
+            },
+            {
+              "offset": 866627,
+              "encoding": "ascii",
+              "value": "get_PowerGemUpgradeLevels"
+            },
+            {
+              "offset": 866653,
+              "encoding": "ascii",
+              "value": "get_AttractionGemUpgradeLevels"
+            },
+            {
+              "offset": 866684,
+              "encoding": "ascii",
+              "value": "get_CreationGemUpgradeLevels"
+            },
+            {
+              "offset": 866713,
+              "encoding": "ascii",
+              "value": "ConstructionMilestonesSum"
+            },
+            {
+              "offset": 866739,
+              "encoding": "ascii",
+              "value": "ZagreusRU"
+            },
+            {
+              "offset": 866749,
+              "encoding": "ascii",
+              "value": "GalvariumTrinketLevels"
+            },
+            {
+              "offset": 866772,
+              "encoding": "ascii",
+              "value": "Converter"
+            },
+            {
+              "offset": 866782,
+              "encoding": "ascii",
+              "value": "get_Instance"
+            },
+            {
+              "offset": 866795,
+              "encoding": "ascii",
+              "value": "valueToConvert"
+            },
+            {
+              "offset": 866810,
+              "encoding": "ascii",
+              "value": "doubleValue"
+            },
+            {
+              "offset": 866822,
+              "encoding": "ascii",
+              "value": "GetNumberIntoString"
+            },
+            {
+              "offset": 866842,
+              "encoding": "ascii",
+              "value": "GetNumberIntoStringThreeDecimals"
+            },
+            {
+              "offset": 866875,
+              "encoding": "ascii",
+              "value": "engNotationBool"
+            },
+            {
+              "offset": 866891,
+              "encoding": "ascii",
+              "value": "instance"
+            }
+          ]
+        },
+        {
+          "anchor": "ConstructionMilestones",
+          "match_index": 30388,
+          "match_offset": 1160038,
+          "match_value": "ConstructionMilestones",
+          "context": [
+            {
+              "offset": 1159831,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge3Bonus"
+            },
+            {
+              "offset": 1159852,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge4Bonus"
+            },
+            {
+              "offset": 1159873,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge5Bonus"
+            },
+            {
+              "offset": 1159894,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge6Bonus"
+            },
+            {
+              "offset": 1159915,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge7Bonus1"
+            },
+            {
+              "offset": 1159937,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge7Bonus2"
+            },
+            {
+              "offset": 1159959,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge8Bonus"
+            },
+            {
+              "offset": 1159980,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge9Bonus"
+            },
+            {
+              "offset": 1160001,
+              "encoding": "ascii",
+              "value": "FinalDarkBadge10Bonus"
+            },
+            {
+              "offset": 1160023,
+              "encoding": "ascii",
+              "value": "BadgesAcquired"
+            },
+            {
+              "offset": 1160038,
+              "encoding": "ascii",
+              "value": "ConstructionMilestones"
+            },
+            {
+              "offset": 1160061,
+              "encoding": "ascii",
+              "value": "get_FinalShip1RankPointsBonus"
+            },
+            {
+              "offset": 1160091,
+              "encoding": "ascii",
+              "value": "get_FinalShip2RankPointsBonus"
+            },
+            {
+              "offset": 1160121,
+              "encoding": "ascii",
+              "value": "get_FinalShip3RankPointsBonus"
+            },
+            {
+              "offset": 1160151,
+              "encoding": "ascii",
+              "value": "get_FinalShip5RankPointsBonus"
+            },
+            {
+              "offset": 1160181,
+              "encoding": "ascii",
+              "value": "get_FinalShip6RankPointsBonus"
+            },
+            {
+              "offset": 1160211,
+              "encoding": "ascii",
+              "value": "get_FinalShip7RankPointsBonus"
+            },
+            {
+              "offset": 1160241,
+              "encoding": "ascii",
+              "value": "get_FinalMilestone1Bonus1"
+            },
+            {
+              "offset": 1160267,
+              "encoding": "ascii",
+              "value": "get_FinalMilestone1Bonus2"
+            },
+            {
+              "offset": 1160293,
+              "encoding": "ascii",
+              "value": "get_FinalMilestone2Bonus1"
+            },
+            {
+              "offset": 1160319,
+              "encoding": "ascii",
+              "value": "get_FinalMilestone3Bonus1"
+            }
+          ]
+        },
+        {
+          "anchor": "ConstructionMilestones",
+          "match_index": 154302,
+          "match_offset": 7568372,
+          "match_value": ">\\Assets\\Scripts\\Upgrades\\AcademyData\\ConstructionMilestones.cs",
+          "context": [
+            {
+              "offset": 7567829,
+              "encoding": "ascii",
+              "value": "?\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerTraitsSpheres.cs"
+            },
+            {
+              "offset": 7567900,
+              "encoding": "ascii",
+              "value": "C\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerZeimarrNautallium.cs"
+            },
+            {
+              "offset": 7567975,
+              "encoding": "ascii",
+              "value": "#\\Assets\\Scripts\\Text\\TextHandler.cs"
+            },
+            {
+              "offset": 7568018,
+              "encoding": "ascii",
+              "value": "+\\Assets\\Scripts\\Text\\TextHandlerLoadouts.cs"
+            },
+            {
+              "offset": 7568069,
+              "encoding": "ascii",
+              "value": "+\\Assets\\Scripts\\Text\\TextHandlerLoopMods.cs"
+            },
+            {
+              "offset": 7568120,
+              "encoding": "ascii",
+              "value": ")\\Assets\\Scripts\\Text\\TextHandlerRelics.cs"
+            },
+            {
+              "offset": 7568169,
+              "encoding": "ascii",
+              "value": "+\\Assets\\Scripts\\Text\\TextHandlerResearch.cs"
+            },
+            {
+              "offset": 7568220,
+              "encoding": "ascii",
+              "value": "/\\Assets\\Scripts\\Text\\TextHandlerSpaceAcademy.cs"
+            },
+            {
+              "offset": 7568275,
+              "encoding": "ascii",
+              "value": "#\\Assets\\Scripts\\TrailerAnimation.cs"
+            },
+            {
+              "offset": 7568318,
+              "encoding": "ascii",
+              "value": ".\\Assets\\Scripts\\Upgrades\\AcademyData\\Badges.cs"
+            },
+            {
+              "offset": 7568372,
+              "encoding": "ascii",
+              "value": ">\\Assets\\Scripts\\Upgrades\\AcademyData\\ConstructionMilestones.cs"
+            },
+            {
+              "offset": 7568442,
+              "encoding": "ascii",
+              "value": "<\\Assets\\Scripts\\Upgrades\\AcademyData\\ConstructionProjects.cs"
+            },
+            {
+              "offset": 7568510,
+              "encoding": "ascii",
+              "value": ",\\Assets\\Scripts\\Upgrades\\AcademyData\\Gear.cs"
+            },
+            {
+              "offset": 7568562,
+              "encoding": "ascii",
+              "value": "1\\Assets\\Scripts\\Upgrades\\AcademyData\\Inventory.cs"
+            },
+            {
+              "offset": 7568619,
+              "encoding": "ascii",
+              "value": "6\\Assets\\Scripts\\Upgrades\\AcademyData\\MissionRewards.cs"
+            },
+            {
+              "offset": 7568681,
+              "encoding": "ascii",
+              "value": "0\\Assets\\Scripts\\Upgrades\\AcademyData\\Missions.cs"
+            },
+            {
+              "offset": 7568737,
+              "encoding": "ascii",
+              "value": "2\\Assets\\Scripts\\Upgrades\\AcademyData\\OuroRelics.cs"
+            },
+            {
+              "offset": 7568795,
+              "encoding": "ascii",
+              "value": "1\\Assets\\Scripts\\Upgrades\\AcademyData\\Personnel.cs"
+            },
+            {
+              "offset": 7568852,
+              "encoding": "ascii",
+              "value": "8\\Assets\\Scripts\\Upgrades\\AcademyData\\SpaceAcademyMain.cs"
+            },
+            {
+              "offset": 7568916,
+              "encoding": "ascii",
+              "value": ".\\Assets\\Scripts\\Upgrades\\AchievementManager.cs"
+            },
+            {
+              "offset": 7568970,
+              "encoding": "ascii",
+              "value": "-\\Assets\\Scripts\\Upgrades\\AutomationManager.cs"
+            }
+          ]
+        },
+        {
+          "anchor": "ConstructionMilestones",
+          "match_index": 154795,
+          "match_offset": 7590911,
+          "match_value": "|ConstructionMilestones",
+          "context": [
+            {
+              "offset": 7590669,
+              "encoding": "ascii",
+              "value": "|TextHandlerTraitsSpheres"
+            },
+            {
+              "offset": 7590699,
+              "encoding": "ascii",
+              "value": "|TextHandlerZeimarrNautallium"
+            },
+            {
+              "offset": 7590733,
+              "encoding": "ascii",
+              "value": "|TextHandler"
+            },
+            {
+              "offset": 7590750,
+              "encoding": "ascii",
+              "value": "|TextHandlerLoadouts"
+            },
+            {
+              "offset": 7590775,
+              "encoding": "ascii",
+              "value": "|TextHandlerLoopMods"
+            },
+            {
+              "offset": 7590800,
+              "encoding": "ascii",
+              "value": "|TextHandlerRelics"
+            },
+            {
+              "offset": 7590823,
+              "encoding": "ascii",
+              "value": "|TextHandlerResearch"
+            },
+            {
+              "offset": 7590848,
+              "encoding": "ascii",
+              "value": "|TextHandlerSpaceAcademy"
+            },
+            {
+              "offset": 7590877,
+              "encoding": "ascii",
+              "value": "|TrailerAnimation"
+            },
+            {
+              "offset": 7590899,
+              "encoding": "ascii",
+              "value": "|Badges"
+            },
+            {
+              "offset": 7590911,
+              "encoding": "ascii",
+              "value": "|ConstructionMilestones"
+            },
+            {
+              "offset": 7590939,
+              "encoding": "ascii",
+              "value": "|ConstructionProjects"
+            },
+            {
+              "offset": 7590965,
+              "encoding": "ascii",
+              "value": "|Gear"
+            },
+            {
+              "offset": 7590975,
+              "encoding": "ascii",
+              "value": "|Inventory"
+            },
+            {
+              "offset": 7590990,
+              "encoding": "ascii",
+              "value": "|MissionRewards"
+            },
+            {
+              "offset": 7591010,
+              "encoding": "ascii",
+              "value": "|Missions"
+            },
+            {
+              "offset": 7591024,
+              "encoding": "ascii",
+              "value": "|OuroRelics"
+            },
+            {
+              "offset": 7591040,
+              "encoding": "ascii",
+              "value": "|Personnel"
+            },
+            {
+              "offset": 7591055,
+              "encoding": "ascii",
+              "value": "|SpaceAcademyMain"
+            },
+            {
+              "offset": 7591077,
+              "encoding": "ascii",
+              "value": "|AchievementManager"
+            },
+            {
+              "offset": 7591101,
+              "encoding": "ascii",
+              "value": "|AutomationManager"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "ShardMining",
+      "matches": [
+        {
+          "anchor": "ShardMining",
+          "match_index": 16530,
+          "match_offset": 862128,
+          "match_value": "ShardMiningOverlay",
+          "context": [
+            {
+              "offset": 861954,
+              "encoding": "ascii",
+              "value": "NavConsoleOverlay"
+            },
+            {
+              "offset": 861972,
+              "encoding": "ascii",
+              "value": "NavConsoleButton"
+            },
+            {
+              "offset": 861989,
+              "encoding": "ascii",
+              "value": "UpgConsoleOverlay"
+            },
+            {
+              "offset": 862007,
+              "encoding": "ascii",
+              "value": "UpgConsoleButton"
+            },
+            {
+              "offset": 862024,
+              "encoding": "ascii",
+              "value": "FleetConsoleOverlay"
+            },
+            {
+              "offset": 862044,
+              "encoding": "ascii",
+              "value": "FleetConsoleButton"
+            },
+            {
+              "offset": 862063,
+              "encoding": "ascii",
+              "value": "GenOverlay"
+            },
+            {
+              "offset": 862074,
+              "encoding": "ascii",
+              "value": "TechUpgradesOverlay"
+            },
+            {
+              "offset": 862094,
+              "encoding": "ascii",
+              "value": "LoopModsOverlay"
+            },
+            {
+              "offset": 862110,
+              "encoding": "ascii",
+              "value": "AutomationOverlay"
+            },
+            {
+              "offset": 862128,
+              "encoding": "ascii",
+              "value": "ShardMiningOverlay"
+            },
+            {
+              "offset": 862147,
+              "encoding": "ascii",
+              "value": "ResearchCenterOverlay"
+            },
+            {
+              "offset": 862169,
+              "encoding": "ascii",
+              "value": "AcademyOverlay"
+            },
+            {
+              "offset": 862184,
+              "encoding": "ascii",
+              "value": "OuroborosOverlay"
+            },
+            {
+              "offset": 862201,
+              "encoding": "ascii",
+              "value": "BoosterAdShardOverlay"
+            },
+            {
+              "offset": 862223,
+              "encoding": "ascii",
+              "value": "BoosterAdResearchOverlay"
+            },
+            {
+              "offset": 862248,
+              "encoding": "ascii",
+              "value": "DisableTutorialBox"
+            },
+            {
+              "offset": 862267,
+              "encoding": "ascii",
+              "value": "MK1Overlay"
+            },
+            {
+              "offset": 862278,
+              "encoding": "ascii",
+              "value": "MK1TechUpgradeOverlay"
+            },
+            {
+              "offset": 862300,
+              "encoding": "ascii",
+              "value": "Ship1CrewMK1Button"
+            },
+            {
+              "offset": 862319,
+              "encoding": "ascii",
+              "value": "Ship1CrewBuyButton"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardMining",
+          "match_index": 66633,
+          "match_offset": 1864443,
+          "match_value": "ShardMining",
+          "context": [
+            {
+              "offset": 1864334,
+              "encoding": "ascii",
+              "value": "Hyperion9"
+            },
+            {
+              "offset": 1864344,
+              "encoding": "ascii",
+              "value": "Hyperion19"
+            },
+            {
+              "offset": 1864355,
+              "encoding": "ascii",
+              "value": "Hyperion24"
+            },
+            {
+              "offset": 1864366,
+              "encoding": "ascii",
+              "value": "Hyperion29"
+            },
+            {
+              "offset": 1864377,
+              "encoding": "ascii",
+              "value": "Hyperion34"
+            },
+            {
+              "offset": 1864388,
+              "encoding": "ascii",
+              "value": "Hyperion39"
+            },
+            {
+              "offset": 1864399,
+              "encoding": "ascii",
+              "value": "Hyperion44"
+            },
+            {
+              "offset": 1864410,
+              "encoding": "ascii",
+              "value": "Hyperion49"
+            },
+            {
+              "offset": 1864421,
+              "encoding": "ascii",
+              "value": "Hyperion54"
+            },
+            {
+              "offset": 1864432,
+              "encoding": "ascii",
+              "value": "Hyperion59"
+            },
+            {
+              "offset": 1864443,
+              "encoding": "ascii",
+              "value": "ShardMining"
+            },
+            {
+              "offset": 1864455,
+              "encoding": "ascii",
+              "value": "get_SU1FinalUnlockReq"
+            },
+            {
+              "offset": 1864477,
+              "encoding": "ascii",
+              "value": "get_SU2FinalUnlockReq"
+            },
+            {
+              "offset": 1864499,
+              "encoding": "ascii",
+              "value": "get_SU3FinalUnlockReq"
+            },
+            {
+              "offset": 1864521,
+              "encoding": "ascii",
+              "value": "get_SU4FinalUnlockReq"
+            },
+            {
+              "offset": 1864543,
+              "encoding": "ascii",
+              "value": "get_SU5FinalUnlockReq"
+            },
+            {
+              "offset": 1864565,
+              "encoding": "ascii",
+              "value": "get_SU6FinalUnlockReq"
+            },
+            {
+              "offset": 1864587,
+              "encoding": "ascii",
+              "value": "get_SU7FinalUnlockReq"
+            },
+            {
+              "offset": 1864609,
+              "encoding": "ascii",
+              "value": "get_SU8FinalUnlockReq"
+            },
+            {
+              "offset": 1864631,
+              "encoding": "ascii",
+              "value": "get_SU9FinalUnlockReq"
+            },
+            {
+              "offset": 1864653,
+              "encoding": "ascii",
+              "value": "get_SU10FinalUnlockReq"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardMining",
+          "match_index": 154469,
+          "match_offset": 7582938,
+          "match_value": "'\\Assets\\Scripts\\Upgrades\\ShardMining.cs",
+          "context": [
+            {
+              "offset": 7582351,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Upgrades\\Ouroboros\\Hunters\\OzzyEnemy.cs"
+            },
+            {
+              "offset": 7582414,
+              "encoding": "ascii",
+              "value": ":\\Assets\\Scripts\\Upgrades\\Ouroboros\\Hunters\\OzzyUpgrades.cs"
+            },
+            {
+              "offset": 7582480,
+              "encoding": "ascii",
+              "value": "6\\Assets\\Scripts\\Upgrades\\Ouroboros\\MultiverseMarket.cs"
+            },
+            {
+              "offset": 7582542,
+              "encoding": "ascii",
+              "value": "4\\Assets\\Scripts\\Upgrades\\Ouroboros\\NecrumExchange.cs"
+            },
+            {
+              "offset": 7582602,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Upgrades\\Ouroboros\\OuroborosResetter.cs"
+            },
+            {
+              "offset": 7582665,
+              "encoding": "ascii",
+              "value": "2\\Assets\\Scripts\\Upgrades\\Ouroboros\\TraitSpheres.cs"
+            },
+            {
+              "offset": 7582723,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Upgrades\\Ouroboros\\ZeimarrNautallium.cs"
+            },
+            {
+              "offset": 7582786,
+              "encoding": "ascii",
+              "value": ".\\Assets\\Scripts\\Upgrades\\ResearchLaboratory.cs"
+            },
+            {
+              "offset": 7582840,
+              "encoding": "ascii",
+              "value": "+\\Assets\\Scripts\\Upgrades\\ResearchUltimas.cs"
+            },
+            {
+              "offset": 7582891,
+              "encoding": "ascii",
+              "value": "'\\Assets\\Scripts\\Upgrades\\RewardLanes.cs"
+            },
+            {
+              "offset": 7582938,
+              "encoding": "ascii",
+              "value": "'\\Assets\\Scripts\\Upgrades\\ShardMining.cs"
+            },
+            {
+              "offset": 7582985,
+              "encoding": "ascii",
+              "value": "(\\Assets\\Scripts\\Upgrades\\TechUpgrades.cs"
+            },
+            {
+              "offset": 7583033,
+              "encoding": "ascii",
+              "value": "#\\Assets\\Scripts\\Utilities\\Colors.cs"
+            },
+            {
+              "offset": 7583143,
+              "encoding": "ascii",
+              "value": "?333333"
+            },
+            {
+              "offset": 7583183,
+              "encoding": "ascii",
+              "value": "?333333"
+            },
+            {
+              "offset": 7583191,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583255,
+              "encoding": "ascii",
+              "value": "?333333"
+            },
+            {
+              "offset": 7583375,
+              "encoding": "ascii",
+              "value": "?333333"
+            },
+            {
+              "offset": 7583383,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583391,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583408,
+              "encoding": "ascii",
+              "value": "333333"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardMining",
+          "match_index": 154966,
+          "match_offset": 7597653,
+          "match_value": "|ShardMining",
+          "context": [
+            {
+              "offset": 7597408,
+              "encoding": "ascii",
+              "value": "|MultiverseMarket"
+            },
+            {
+              "offset": 7597429,
+              "encoding": "ascii",
+              "value": "'MultiverseMarket|InscryptionTupleObject"
+            },
+            {
+              "offset": 7597474,
+              "encoding": "ascii",
+              "value": "MultiverseMarket|Inscryption"
+            },
+            {
+              "offset": 7597507,
+              "encoding": "ascii",
+              "value": "|NecrumExchange"
+            },
+            {
+              "offset": 7597527,
+              "encoding": "ascii",
+              "value": "|OuroborosResetter"
+            },
+            {
+              "offset": 7597550,
+              "encoding": "ascii",
+              "value": "|TraitSpheres"
+            },
+            {
+              "offset": 7597568,
+              "encoding": "ascii",
+              "value": "|ZeimarrNautallium"
+            },
+            {
+              "offset": 7597591,
+              "encoding": "ascii",
+              "value": "|ResearchLaboratory"
+            },
+            {
+              "offset": 7597615,
+              "encoding": "ascii",
+              "value": "|ResearchUltimas"
+            },
+            {
+              "offset": 7597636,
+              "encoding": "ascii",
+              "value": "|RewardLanes"
+            },
+            {
+              "offset": 7597653,
+              "encoding": "ascii",
+              "value": "|ShardMining"
+            },
+            {
+              "offset": 7597670,
+              "encoding": "ascii",
+              "value": "ShardMining|ShardUpgradeInfo"
+            },
+            {
+              "offset": 7597703,
+              "encoding": "ascii",
+              "value": "|TechUpgrades"
+            },
+            {
+              "offset": 7597721,
+              "encoding": "ascii",
+              "value": "|Colors"
+            },
+            {
+              "offset": 7598377,
+              "encoding": "ascii",
+              "value": "ticks"
+            },
+            {
+              "offset": 7598383,
+              "encoding": "ascii",
+              "value": "dateData"
+            },
+            {
+              "offset": 7598418,
+              "encoding": "ascii",
+              "value": " \"$&("
+            },
+            {
+              "offset": 7598442,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJL"
+            },
+            {
+              "offset": 7598648,
+              "encoding": "ascii",
+              "value": "&6@BDFHJLNPRTVXZ\\^`bdfhjlnpr"
+            },
+            {
+              "offset": 7598955,
+              "encoding": "ascii",
+              "value": "[yy?"
+            },
+            {
+              "offset": 7599031,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bd"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardMining",
+          "match_index": 154967,
+          "match_offset": 7597670,
+          "match_value": "ShardMining|ShardUpgradeInfo",
+          "context": [
+            {
+              "offset": 7597429,
+              "encoding": "ascii",
+              "value": "'MultiverseMarket|InscryptionTupleObject"
+            },
+            {
+              "offset": 7597474,
+              "encoding": "ascii",
+              "value": "MultiverseMarket|Inscryption"
+            },
+            {
+              "offset": 7597507,
+              "encoding": "ascii",
+              "value": "|NecrumExchange"
+            },
+            {
+              "offset": 7597527,
+              "encoding": "ascii",
+              "value": "|OuroborosResetter"
+            },
+            {
+              "offset": 7597550,
+              "encoding": "ascii",
+              "value": "|TraitSpheres"
+            },
+            {
+              "offset": 7597568,
+              "encoding": "ascii",
+              "value": "|ZeimarrNautallium"
+            },
+            {
+              "offset": 7597591,
+              "encoding": "ascii",
+              "value": "|ResearchLaboratory"
+            },
+            {
+              "offset": 7597615,
+              "encoding": "ascii",
+              "value": "|ResearchUltimas"
+            },
+            {
+              "offset": 7597636,
+              "encoding": "ascii",
+              "value": "|RewardLanes"
+            },
+            {
+              "offset": 7597653,
+              "encoding": "ascii",
+              "value": "|ShardMining"
+            },
+            {
+              "offset": 7597670,
+              "encoding": "ascii",
+              "value": "ShardMining|ShardUpgradeInfo"
+            },
+            {
+              "offset": 7597703,
+              "encoding": "ascii",
+              "value": "|TechUpgrades"
+            },
+            {
+              "offset": 7597721,
+              "encoding": "ascii",
+              "value": "|Colors"
+            },
+            {
+              "offset": 7598377,
+              "encoding": "ascii",
+              "value": "ticks"
+            },
+            {
+              "offset": 7598383,
+              "encoding": "ascii",
+              "value": "dateData"
+            },
+            {
+              "offset": 7598418,
+              "encoding": "ascii",
+              "value": " \"$&("
+            },
+            {
+              "offset": 7598442,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJL"
+            },
+            {
+              "offset": 7598648,
+              "encoding": "ascii",
+              "value": "&6@BDFHJLNPRTVXZ\\^`bdfhjlnpr"
+            },
+            {
+              "offset": 7598955,
+              "encoding": "ascii",
+              "value": "[yy?"
+            },
+            {
+              "offset": 7599031,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bd"
+            },
+            {
+              "offset": 7599082,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bdH1A5E0066-58DC-428A-B21C-0AD6CDAE2789"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "InitializeMilestones",
+      "matches": [
+        {
+          "anchor": "InitializeMilestones",
+          "match_index": 2751,
+          "match_offset": 619692,
+          "match_value": "InitializeMilestones",
+          "context": [
+            {
+              "offset": 619459,
+              "encoding": "ascii",
+              "value": "get_FinalTier6TokensOuro"
+            },
+            {
+              "offset": 619484,
+              "encoding": "ascii",
+              "value": "get_FinalTier7TokensOuro"
+            },
+            {
+              "offset": 619509,
+              "encoding": "ascii",
+              "value": "get_FinalTier1Diamonds"
+            },
+            {
+              "offset": 619532,
+              "encoding": "ascii",
+              "value": "get_FinalTier2Diamonds"
+            },
+            {
+              "offset": 619555,
+              "encoding": "ascii",
+              "value": "get_FinalTier3Diamonds"
+            },
+            {
+              "offset": 619578,
+              "encoding": "ascii",
+              "value": "get_FinalTier4Diamonds"
+            },
+            {
+              "offset": 619601,
+              "encoding": "ascii",
+              "value": "get_FinalTier5Diamonds"
+            },
+            {
+              "offset": 619624,
+              "encoding": "ascii",
+              "value": "get_FinalTier6Diamonds"
+            },
+            {
+              "offset": 619647,
+              "encoding": "ascii",
+              "value": "get_FinalTier7Diamonds"
+            },
+            {
+              "offset": 619670,
+              "encoding": "ascii",
+              "value": "get_MilestoneMaxLevel"
+            },
+            {
+              "offset": 619692,
+              "encoding": "ascii",
+              "value": "InitializeMilestones"
+            },
+            {
+              "offset": 619716,
+              "encoding": "ascii",
+              "value": "ClaimDiamondMilestone"
+            },
+            {
+              "offset": 619738,
+              "encoding": "ascii",
+              "value": "tier"
+            },
+            {
+              "offset": 619743,
+              "encoding": "ascii",
+              "value": "GetMilestoneDiamondValue"
+            },
+            {
+              "offset": 619768,
+              "encoding": "ascii",
+              "value": "KillEvent"
+            },
+            {
+              "offset": 619778,
+              "encoding": "ascii",
+              "value": "GetMilestoneTokenValue"
+            },
+            {
+              "offset": 619801,
+              "encoding": "ascii",
+              "value": "Initialize"
+            },
+            {
+              "offset": 619812,
+              "encoding": "ascii",
+              "value": "OnMilestoneReturnButton"
+            },
+            {
+              "offset": 619836,
+              "encoding": "ascii",
+              "value": "CheckEventButton"
+            },
+            {
+              "offset": 619853,
+              "encoding": "ascii",
+              "value": "GetClaimedMilestonesAmount"
+            },
+            {
+              "offset": 619880,
+              "encoding": "ascii",
+              "value": "SetAllMilestoneTexts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "CheckFirstTimeShardMilestoneOpened",
+      "matches": [
+        {
+          "anchor": "CheckFirstTimeShardMilestoneOpened",
+          "match_index": 16017,
+          "match_offset": 851852,
+          "match_value": "CheckFirstTimeShardMilestoneOpened",
+          "context": [
+            {
+              "offset": 851606,
+              "encoding": "ascii",
+              "value": "ChangeMK9State"
+            },
+            {
+              "offset": 851621,
+              "encoding": "ascii",
+              "value": "ChangeMK10State"
+            },
+            {
+              "offset": 851637,
+              "encoding": "ascii",
+              "value": "CheckTechUpgFirstTime"
+            },
+            {
+              "offset": 851659,
+              "encoding": "ascii",
+              "value": "CheckLoopModFirstTime"
+            },
+            {
+              "offset": 851681,
+              "encoding": "ascii",
+              "value": "CheckFirstPlayerMenuTime"
+            },
+            {
+              "offset": 851706,
+              "encoding": "ascii",
+              "value": "CheckFirstTokenMenuTime"
+            },
+            {
+              "offset": 851730,
+              "encoding": "ascii",
+              "value": "CheckFirstDiamondShopTime"
+            },
+            {
+              "offset": 851756,
+              "encoding": "ascii",
+              "value": "CheckFirstTimeAutomationOpened"
+            },
+            {
+              "offset": 851787,
+              "encoding": "ascii",
+              "value": "CheckFirstTimeShardMainOpened"
+            },
+            {
+              "offset": 851817,
+              "encoding": "ascii",
+              "value": "CheckFirstTimeShardOperationOpened"
+            },
+            {
+              "offset": 851852,
+              "encoding": "ascii",
+              "value": "CheckFirstTimeShardMilestoneOpened"
+            },
+            {
+              "offset": 851887,
+              "encoding": "ascii",
+              "value": "CheckFirstArcadeLM"
+            },
+            {
+              "offset": 851906,
+              "encoding": "ascii",
+              "value": "CheckFirstArcadeShopOpen"
+            },
+            {
+              "offset": 851931,
+              "encoding": "ascii",
+              "value": "CheckFirstFleetMain"
+            },
+            {
+              "offset": 851951,
+              "encoding": "ascii",
+              "value": "CheckFirstFleetUpgrades"
+            },
+            {
+              "offset": 851975,
+              "encoding": "ascii",
+              "value": "CheckFirstFleetEvolve"
+            },
+            {
+              "offset": 851997,
+              "encoding": "ascii",
+              "value": "FirstResearchVisit"
+            },
+            {
+              "offset": 852016,
+              "encoding": "ascii",
+              "value": "FirstAcademyVisit"
+            },
+            {
+              "offset": 852034,
+              "encoding": "ascii",
+              "value": "AcademyMilestonesButtonCheck"
+            },
+            {
+              "offset": 852063,
+              "encoding": "ascii",
+              "value": "AcademyBadgeButtonCheck"
+            },
+            {
+              "offset": 852087,
+              "encoding": "ascii",
+              "value": "AcademyAutomationCenterCheck"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "BackupNewMilestone",
+      "matches": [
+        {
+          "anchor": "BackupNewMilestone",
+          "match_index": 10709,
+          "match_offset": 763266,
+          "match_value": "BackupNewMilestone",
+          "context": [
+            {
+              "offset": 763129,
+              "encoding": "ascii",
+              "value": "mode"
+            },
+            {
+              "offset": 763134,
+              "encoding": "ascii",
+              "value": "maxTimeSpan"
+            },
+            {
+              "offset": 763146,
+              "encoding": "ascii",
+              "value": "ProcessBackup"
+            },
+            {
+              "offset": 763160,
+              "encoding": "ascii",
+              "value": "GrabBackupStorage"
+            },
+            {
+              "offset": 763178,
+              "encoding": "ascii",
+              "value": "cloudData"
+            },
+            {
+              "offset": 763188,
+              "encoding": "ascii",
+              "value": "maxTimeLimit"
+            },
+            {
+              "offset": 763201,
+              "encoding": "ascii",
+              "value": "IsTimeToBackup"
+            },
+            {
+              "offset": 763216,
+              "encoding": "ascii",
+              "value": "onSuccess"
+            },
+            {
+              "offset": 763226,
+              "encoding": "ascii",
+              "value": "onFailure"
+            },
+            {
+              "offset": 763236,
+              "encoding": "ascii",
+              "value": "CheckActiveHoursBackupStorage"
+            },
+            {
+              "offset": 763266,
+              "encoding": "ascii",
+              "value": "BackupNewMilestone"
+            },
+            {
+              "offset": 763285,
+              "encoding": "ascii",
+              "value": "backupType"
+            },
+            {
+              "offset": 763296,
+              "encoding": "ascii",
+              "value": "cloudSaveType"
+            },
+            {
+              "offset": 763310,
+              "encoding": "ascii",
+              "value": "LogAndBackup"
+            },
+            {
+              "offset": 763323,
+              "encoding": "ascii",
+              "value": "saveMode"
+            },
+            {
+              "offset": 763332,
+              "encoding": "ascii",
+              "value": "BackupSave"
+            },
+            {
+              "offset": 763343,
+              "encoding": "ascii",
+              "value": "currentActiveHours"
+            },
+            {
+              "offset": 763362,
+              "encoding": "ascii",
+              "value": "ActiveHoursBackupSave"
+            },
+            {
+              "offset": 763388,
+              "encoding": "ascii",
+              "value": "ProcessBackupSave"
+            },
+            {
+              "offset": 763406,
+              "encoding": "ascii",
+              "value": "seconds"
+            },
+            {
+              "offset": 763414,
+              "encoding": "ascii",
+              "value": "ConvertSecondsToHours"
+            }
+          ]
+        },
+        {
+          "anchor": "BackupNewMilestone",
+          "match_index": 10736,
+          "match_offset": 763654,
+          "match_value": "<BackupNewMilestone>d__21",
+          "context": [
+            {
+              "offset": 763516,
+              "encoding": "ascii",
+              "value": "Backup5Exists"
+            },
+            {
+              "offset": 763530,
+              "encoding": "ascii",
+              "value": "BackupData"
+            },
+            {
+              "offset": 763541,
+              "encoding": "ascii",
+              "value": "data"
+            },
+            {
+              "offset": 763546,
+              "encoding": "ascii",
+              "value": "timestamp"
+            },
+            {
+              "offset": 763556,
+              "encoding": "ascii",
+              "value": "BackupActiveHoursData"
+            },
+            {
+              "offset": 763578,
+              "encoding": "ascii",
+              "value": "activeHours"
+            },
+            {
+              "offset": 763590,
+              "encoding": "ascii",
+              "value": "BackUpStorage"
+            },
+            {
+              "offset": 763604,
+              "encoding": "ascii",
+              "value": "exists"
+            },
+            {
+              "offset": 763611,
+              "encoding": "ascii",
+              "value": "storageObject"
+            },
+            {
+              "offset": 763625,
+              "encoding": "ascii",
+              "value": "<ActiveHoursBackupSave>d__26"
+            },
+            {
+              "offset": 763654,
+              "encoding": "ascii",
+              "value": "<BackupNewMilestone>d__21"
+            },
+            {
+              "offset": 763680,
+              "encoding": "ascii",
+              "value": "<BackupSave>d__25"
+            },
+            {
+              "offset": 763698,
+              "encoding": "ascii",
+              "value": "<CheckActiveHoursBackupStorage>d__20"
+            },
+            {
+              "offset": 763735,
+              "encoding": "ascii",
+              "value": "<currentActiveHours>5__2"
+            },
+            {
+              "offset": 763760,
+              "encoding": "ascii",
+              "value": "<>u__2"
+            },
+            {
+              "offset": 763767,
+              "encoding": "ascii",
+              "value": "<CheckBackup>d__16"
+            },
+            {
+              "offset": 763786,
+              "encoding": "ascii",
+              "value": "<collectionBackup>5__2"
+            },
+            {
+              "offset": 763809,
+              "encoding": "ascii",
+              "value": "<Backup1>5__3"
+            },
+            {
+              "offset": 763823,
+              "encoding": "ascii",
+              "value": "<Backup2>5__4"
+            },
+            {
+              "offset": 763837,
+              "encoding": "ascii",
+              "value": "<Backup3>5__5"
+            },
+            {
+              "offset": 763851,
+              "encoding": "ascii",
+              "value": "<Backup4>5__6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "<BuyMilestone1Enum>d__1109",
+      "matches": [
+        {
+          "anchor": "<BuyMilestone1Enum>d__1109",
+          "match_index": 31544,
+          "match_offset": 1183642,
+          "match_value": "<BuyMilestone1Enum>d__1109",
+          "context": [
+            {
+              "offset": 1183362,
+              "encoding": "ascii",
+              "value": "<BuyMilestone10Enum>d__1118"
+            },
+            {
+              "offset": 1183390,
+              "encoding": "ascii",
+              "value": "<BuyMilestone11Enum>d__1119"
+            },
+            {
+              "offset": 1183418,
+              "encoding": "ascii",
+              "value": "<BuyMilestone12Enum>d__1120"
+            },
+            {
+              "offset": 1183446,
+              "encoding": "ascii",
+              "value": "<BuyMilestone13Enum>d__1121"
+            },
+            {
+              "offset": 1183474,
+              "encoding": "ascii",
+              "value": "<BuyMilestone14Enum>d__1122"
+            },
+            {
+              "offset": 1183502,
+              "encoding": "ascii",
+              "value": "<BuyMilestone15Enum>d__1123"
+            },
+            {
+              "offset": 1183530,
+              "encoding": "ascii",
+              "value": "<BuyMilestone16Enum>d__1124"
+            },
+            {
+              "offset": 1183558,
+              "encoding": "ascii",
+              "value": "<BuyMilestone17Enum>d__1125"
+            },
+            {
+              "offset": 1183586,
+              "encoding": "ascii",
+              "value": "<BuyMilestone18Enum>d__1126"
+            },
+            {
+              "offset": 1183614,
+              "encoding": "ascii",
+              "value": "<BuyMilestone19Enum>d__1127"
+            },
+            {
+              "offset": 1183642,
+              "encoding": "ascii",
+              "value": "<BuyMilestone1Enum>d__1109"
+            },
+            {
+              "offset": 1183669,
+              "encoding": "ascii",
+              "value": "<BuyMilestone20Enum>d__1128"
+            },
+            {
+              "offset": 1183697,
+              "encoding": "ascii",
+              "value": "<BuyMilestone21Enum>d__1129"
+            },
+            {
+              "offset": 1183725,
+              "encoding": "ascii",
+              "value": "<BuyMilestone22Enum>d__1130"
+            },
+            {
+              "offset": 1183753,
+              "encoding": "ascii",
+              "value": "<BuyMilestone23Enum>d__1131"
+            },
+            {
+              "offset": 1183781,
+              "encoding": "ascii",
+              "value": "<BuyMilestone24Enum>d__1132"
+            },
+            {
+              "offset": 1183809,
+              "encoding": "ascii",
+              "value": "<BuyMilestone25Enum>d__1133"
+            },
+            {
+              "offset": 1183837,
+              "encoding": "ascii",
+              "value": "<BuyMilestone26Enum>d__1134"
+            },
+            {
+              "offset": 1183865,
+              "encoding": "ascii",
+              "value": "<BuyMilestone27Enum>d__1135"
+            },
+            {
+              "offset": 1183893,
+              "encoding": "ascii",
+              "value": "<BuyMilestone28Enum>d__1136"
+            },
+            {
+              "offset": 1183921,
+              "encoding": "ascii",
+              "value": "<BuyMilestone29Enum>d__1137"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "<BuyMilestone55Enum>d__1163",
+      "matches": [
+        {
+          "anchor": "<BuyMilestone55Enum>d__1163",
+          "match_index": 31583,
+          "match_offset": 1184730,
+          "match_value": "<BuyMilestone55Enum>d__1163",
+          "context": [
+            {
+              "offset": 1184451,
+              "encoding": "ascii",
+              "value": "<BuyMilestone46Enum>d__1154"
+            },
+            {
+              "offset": 1184479,
+              "encoding": "ascii",
+              "value": "<BuyMilestone47Enum>d__1155"
+            },
+            {
+              "offset": 1184507,
+              "encoding": "ascii",
+              "value": "<BuyMilestone48Enum>d__1156"
+            },
+            {
+              "offset": 1184535,
+              "encoding": "ascii",
+              "value": "<BuyMilestone49Enum>d__1157"
+            },
+            {
+              "offset": 1184563,
+              "encoding": "ascii",
+              "value": "<BuyMilestone4Enum>d__1112"
+            },
+            {
+              "offset": 1184590,
+              "encoding": "ascii",
+              "value": "<BuyMilestone50Enum>d__1158"
+            },
+            {
+              "offset": 1184618,
+              "encoding": "ascii",
+              "value": "<BuyMilestone51Enum>d__1159"
+            },
+            {
+              "offset": 1184646,
+              "encoding": "ascii",
+              "value": "<BuyMilestone52Enum>d__1160"
+            },
+            {
+              "offset": 1184674,
+              "encoding": "ascii",
+              "value": "<BuyMilestone53Enum>d__1161"
+            },
+            {
+              "offset": 1184702,
+              "encoding": "ascii",
+              "value": "<BuyMilestone54Enum>d__1162"
+            },
+            {
+              "offset": 1184730,
+              "encoding": "ascii",
+              "value": "<BuyMilestone55Enum>d__1163"
+            },
+            {
+              "offset": 1184758,
+              "encoding": "ascii",
+              "value": "<BuyMilestone56Enum>d__1164"
+            },
+            {
+              "offset": 1184786,
+              "encoding": "ascii",
+              "value": "<BuyMilestone57Enum>d__1165"
+            },
+            {
+              "offset": 1184814,
+              "encoding": "ascii",
+              "value": "<BuyMilestone5Enum>d__1113"
+            },
+            {
+              "offset": 1184841,
+              "encoding": "ascii",
+              "value": "<BuyMilestone6Enum>d__1114"
+            },
+            {
+              "offset": 1184868,
+              "encoding": "ascii",
+              "value": "<BuyMilestone7Enum>d__1115"
+            },
+            {
+              "offset": 1184895,
+              "encoding": "ascii",
+              "value": "<BuyMilestone8Enum>d__1116"
+            },
+            {
+              "offset": 1184922,
+              "encoding": "ascii",
+              "value": "<BuyMilestone9Enum>d__1117"
+            },
+            {
+              "offset": 1184949,
+              "encoding": "ascii",
+              "value": "ConstructionProjects"
+            },
+            {
+              "offset": 1184970,
+              "encoding": "ascii",
+              "value": "get_ProjectTimeDivision"
+            },
+            {
+              "offset": 1184994,
+              "encoding": "ascii",
+              "value": "get_ProjectCostDivision"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "IncrementMilestone1",
+      "matches": []
+    },
+    {
+      "anchor": "SubtractMilestone1",
+      "matches": [
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30714,
+          "match_offset": 1167581,
+          "match_value": "SubtractMilestone1",
+          "context": [
+            {
+              "offset": 1167431,
+              "encoding": "ascii",
+              "value": "BuyMilestone48"
+            },
+            {
+              "offset": 1167446,
+              "encoding": "ascii",
+              "value": "BuyMilestone49"
+            },
+            {
+              "offset": 1167461,
+              "encoding": "ascii",
+              "value": "BuyMilestone50"
+            },
+            {
+              "offset": 1167476,
+              "encoding": "ascii",
+              "value": "BuyMilestone51"
+            },
+            {
+              "offset": 1167491,
+              "encoding": "ascii",
+              "value": "BuyMilestone52"
+            },
+            {
+              "offset": 1167506,
+              "encoding": "ascii",
+              "value": "BuyMilestone53"
+            },
+            {
+              "offset": 1167521,
+              "encoding": "ascii",
+              "value": "BuyMilestone54"
+            },
+            {
+              "offset": 1167536,
+              "encoding": "ascii",
+              "value": "BuyMilestone55"
+            },
+            {
+              "offset": 1167551,
+              "encoding": "ascii",
+              "value": "BuyMilestone56"
+            },
+            {
+              "offset": 1167566,
+              "encoding": "ascii",
+              "value": "BuyMilestone57"
+            },
+            {
+              "offset": 1167581,
+              "encoding": "ascii",
+              "value": "SubtractMilestone1"
+            },
+            {
+              "offset": 1167600,
+              "encoding": "ascii",
+              "value": "SubtractMilestone2"
+            },
+            {
+              "offset": 1167619,
+              "encoding": "ascii",
+              "value": "SubtractMilestone3"
+            },
+            {
+              "offset": 1167638,
+              "encoding": "ascii",
+              "value": "SubtractMilestone4"
+            },
+            {
+              "offset": 1167657,
+              "encoding": "ascii",
+              "value": "SubtractMilestone5"
+            },
+            {
+              "offset": 1167676,
+              "encoding": "ascii",
+              "value": "SubtractMilestone6"
+            },
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30723,
+          "match_offset": 1167752,
+          "match_value": "SubtractMilestone10",
+          "context": [
+            {
+              "offset": 1167566,
+              "encoding": "ascii",
+              "value": "BuyMilestone57"
+            },
+            {
+              "offset": 1167581,
+              "encoding": "ascii",
+              "value": "SubtractMilestone1"
+            },
+            {
+              "offset": 1167600,
+              "encoding": "ascii",
+              "value": "SubtractMilestone2"
+            },
+            {
+              "offset": 1167619,
+              "encoding": "ascii",
+              "value": "SubtractMilestone3"
+            },
+            {
+              "offset": 1167638,
+              "encoding": "ascii",
+              "value": "SubtractMilestone4"
+            },
+            {
+              "offset": 1167657,
+              "encoding": "ascii",
+              "value": "SubtractMilestone5"
+            },
+            {
+              "offset": 1167676,
+              "encoding": "ascii",
+              "value": "SubtractMilestone6"
+            },
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30724,
+          "match_offset": 1167772,
+          "match_value": "SubtractMilestone11",
+          "context": [
+            {
+              "offset": 1167581,
+              "encoding": "ascii",
+              "value": "SubtractMilestone1"
+            },
+            {
+              "offset": 1167600,
+              "encoding": "ascii",
+              "value": "SubtractMilestone2"
+            },
+            {
+              "offset": 1167619,
+              "encoding": "ascii",
+              "value": "SubtractMilestone3"
+            },
+            {
+              "offset": 1167638,
+              "encoding": "ascii",
+              "value": "SubtractMilestone4"
+            },
+            {
+              "offset": 1167657,
+              "encoding": "ascii",
+              "value": "SubtractMilestone5"
+            },
+            {
+              "offset": 1167676,
+              "encoding": "ascii",
+              "value": "SubtractMilestone6"
+            },
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30725,
+          "match_offset": 1167792,
+          "match_value": "SubtractMilestone12",
+          "context": [
+            {
+              "offset": 1167600,
+              "encoding": "ascii",
+              "value": "SubtractMilestone2"
+            },
+            {
+              "offset": 1167619,
+              "encoding": "ascii",
+              "value": "SubtractMilestone3"
+            },
+            {
+              "offset": 1167638,
+              "encoding": "ascii",
+              "value": "SubtractMilestone4"
+            },
+            {
+              "offset": 1167657,
+              "encoding": "ascii",
+              "value": "SubtractMilestone5"
+            },
+            {
+              "offset": 1167676,
+              "encoding": "ascii",
+              "value": "SubtractMilestone6"
+            },
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            },
+            {
+              "offset": 1167992,
+              "encoding": "ascii",
+              "value": "SubtractMilestone22"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30726,
+          "match_offset": 1167812,
+          "match_value": "SubtractMilestone13",
+          "context": [
+            {
+              "offset": 1167619,
+              "encoding": "ascii",
+              "value": "SubtractMilestone3"
+            },
+            {
+              "offset": 1167638,
+              "encoding": "ascii",
+              "value": "SubtractMilestone4"
+            },
+            {
+              "offset": 1167657,
+              "encoding": "ascii",
+              "value": "SubtractMilestone5"
+            },
+            {
+              "offset": 1167676,
+              "encoding": "ascii",
+              "value": "SubtractMilestone6"
+            },
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            },
+            {
+              "offset": 1167992,
+              "encoding": "ascii",
+              "value": "SubtractMilestone22"
+            },
+            {
+              "offset": 1168012,
+              "encoding": "ascii",
+              "value": "SubtractMilestone23"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30727,
+          "match_offset": 1167832,
+          "match_value": "SubtractMilestone14",
+          "context": [
+            {
+              "offset": 1167638,
+              "encoding": "ascii",
+              "value": "SubtractMilestone4"
+            },
+            {
+              "offset": 1167657,
+              "encoding": "ascii",
+              "value": "SubtractMilestone5"
+            },
+            {
+              "offset": 1167676,
+              "encoding": "ascii",
+              "value": "SubtractMilestone6"
+            },
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            },
+            {
+              "offset": 1167992,
+              "encoding": "ascii",
+              "value": "SubtractMilestone22"
+            },
+            {
+              "offset": 1168012,
+              "encoding": "ascii",
+              "value": "SubtractMilestone23"
+            },
+            {
+              "offset": 1168032,
+              "encoding": "ascii",
+              "value": "SubtractMilestone24"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30728,
+          "match_offset": 1167852,
+          "match_value": "SubtractMilestone15",
+          "context": [
+            {
+              "offset": 1167657,
+              "encoding": "ascii",
+              "value": "SubtractMilestone5"
+            },
+            {
+              "offset": 1167676,
+              "encoding": "ascii",
+              "value": "SubtractMilestone6"
+            },
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            },
+            {
+              "offset": 1167992,
+              "encoding": "ascii",
+              "value": "SubtractMilestone22"
+            },
+            {
+              "offset": 1168012,
+              "encoding": "ascii",
+              "value": "SubtractMilestone23"
+            },
+            {
+              "offset": 1168032,
+              "encoding": "ascii",
+              "value": "SubtractMilestone24"
+            },
+            {
+              "offset": 1168052,
+              "encoding": "ascii",
+              "value": "SubtractMilestone25"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30729,
+          "match_offset": 1167872,
+          "match_value": "SubtractMilestone16",
+          "context": [
+            {
+              "offset": 1167676,
+              "encoding": "ascii",
+              "value": "SubtractMilestone6"
+            },
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            },
+            {
+              "offset": 1167992,
+              "encoding": "ascii",
+              "value": "SubtractMilestone22"
+            },
+            {
+              "offset": 1168012,
+              "encoding": "ascii",
+              "value": "SubtractMilestone23"
+            },
+            {
+              "offset": 1168032,
+              "encoding": "ascii",
+              "value": "SubtractMilestone24"
+            },
+            {
+              "offset": 1168052,
+              "encoding": "ascii",
+              "value": "SubtractMilestone25"
+            },
+            {
+              "offset": 1168072,
+              "encoding": "ascii",
+              "value": "SubtractMilestone26"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30730,
+          "match_offset": 1167892,
+          "match_value": "SubtractMilestone17",
+          "context": [
+            {
+              "offset": 1167695,
+              "encoding": "ascii",
+              "value": "SubtractMilestone7"
+            },
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            },
+            {
+              "offset": 1167992,
+              "encoding": "ascii",
+              "value": "SubtractMilestone22"
+            },
+            {
+              "offset": 1168012,
+              "encoding": "ascii",
+              "value": "SubtractMilestone23"
+            },
+            {
+              "offset": 1168032,
+              "encoding": "ascii",
+              "value": "SubtractMilestone24"
+            },
+            {
+              "offset": 1168052,
+              "encoding": "ascii",
+              "value": "SubtractMilestone25"
+            },
+            {
+              "offset": 1168072,
+              "encoding": "ascii",
+              "value": "SubtractMilestone26"
+            },
+            {
+              "offset": 1168092,
+              "encoding": "ascii",
+              "value": "SubtractMilestone27"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30731,
+          "match_offset": 1167912,
+          "match_value": "SubtractMilestone18",
+          "context": [
+            {
+              "offset": 1167714,
+              "encoding": "ascii",
+              "value": "SubtractMilestone8"
+            },
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            },
+            {
+              "offset": 1167992,
+              "encoding": "ascii",
+              "value": "SubtractMilestone22"
+            },
+            {
+              "offset": 1168012,
+              "encoding": "ascii",
+              "value": "SubtractMilestone23"
+            },
+            {
+              "offset": 1168032,
+              "encoding": "ascii",
+              "value": "SubtractMilestone24"
+            },
+            {
+              "offset": 1168052,
+              "encoding": "ascii",
+              "value": "SubtractMilestone25"
+            },
+            {
+              "offset": 1168072,
+              "encoding": "ascii",
+              "value": "SubtractMilestone26"
+            },
+            {
+              "offset": 1168092,
+              "encoding": "ascii",
+              "value": "SubtractMilestone27"
+            },
+            {
+              "offset": 1168112,
+              "encoding": "ascii",
+              "value": "SubtractMilestone28"
+            }
+          ]
+        },
+        {
+          "anchor": "SubtractMilestone1",
+          "match_index": 30732,
+          "match_offset": 1167932,
+          "match_value": "SubtractMilestone19",
+          "context": [
+            {
+              "offset": 1167733,
+              "encoding": "ascii",
+              "value": "SubtractMilestone9"
+            },
+            {
+              "offset": 1167752,
+              "encoding": "ascii",
+              "value": "SubtractMilestone10"
+            },
+            {
+              "offset": 1167772,
+              "encoding": "ascii",
+              "value": "SubtractMilestone11"
+            },
+            {
+              "offset": 1167792,
+              "encoding": "ascii",
+              "value": "SubtractMilestone12"
+            },
+            {
+              "offset": 1167812,
+              "encoding": "ascii",
+              "value": "SubtractMilestone13"
+            },
+            {
+              "offset": 1167832,
+              "encoding": "ascii",
+              "value": "SubtractMilestone14"
+            },
+            {
+              "offset": 1167852,
+              "encoding": "ascii",
+              "value": "SubtractMilestone15"
+            },
+            {
+              "offset": 1167872,
+              "encoding": "ascii",
+              "value": "SubtractMilestone16"
+            },
+            {
+              "offset": 1167892,
+              "encoding": "ascii",
+              "value": "SubtractMilestone17"
+            },
+            {
+              "offset": 1167912,
+              "encoding": "ascii",
+              "value": "SubtractMilestone18"
+            },
+            {
+              "offset": 1167932,
+              "encoding": "ascii",
+              "value": "SubtractMilestone19"
+            },
+            {
+              "offset": 1167952,
+              "encoding": "ascii",
+              "value": "SubtractMilestone20"
+            },
+            {
+              "offset": 1167972,
+              "encoding": "ascii",
+              "value": "SubtractMilestone21"
+            },
+            {
+              "offset": 1167992,
+              "encoding": "ascii",
+              "value": "SubtractMilestone22"
+            },
+            {
+              "offset": 1168012,
+              "encoding": "ascii",
+              "value": "SubtractMilestone23"
+            },
+            {
+              "offset": 1168032,
+              "encoding": "ascii",
+              "value": "SubtractMilestone24"
+            },
+            {
+              "offset": 1168052,
+              "encoding": "ascii",
+              "value": "SubtractMilestone25"
+            },
+            {
+              "offset": 1168072,
+              "encoding": "ascii",
+              "value": "SubtractMilestone26"
+            },
+            {
+              "offset": 1168092,
+              "encoding": "ascii",
+              "value": "SubtractMilestone27"
+            },
+            {
+              "offset": 1168112,
+              "encoding": "ascii",
+              "value": "SubtractMilestone28"
+            },
+            {
+              "offset": 1168132,
+              "encoding": "ascii",
+              "value": "SubtractMilestone29"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "MilestoneBonusesPerLevel",
+      "matches": []
+    }
+  ]
+}

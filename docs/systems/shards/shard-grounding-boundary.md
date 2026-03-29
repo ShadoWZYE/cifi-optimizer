@@ -9,6 +9,7 @@ Use it with:
 - [unity-owner-map.md](C:\Users\Shadow\Desktop\CiFi\docs\unity\unity-owner-map.md)
 - [data/shard-asset-grounding.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-asset-grounding.v1.json)
 - [shard-extraction-candidates.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-extraction-candidates.md)
+- [shard-owner-family-verification.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-owner-family-verification.md)
 
 ## Integration status
 
@@ -18,11 +19,12 @@ What passes now:
 
 - system existence
 - shard and loop shell presence in shipped assets
+- shard milestone owner-family split
 - system-level shard anchors that support descriptive warnings
 
 What still fails:
 
-- shard milestone owner recovery
+- exact milestone row payload recovery
 - asset-grounded milestone labels and row mapping
 - asset-grounded bonus tables and per-level costs
 - player-owned milestone save-state inputs for truthful planner logic
@@ -85,6 +87,23 @@ The repo can display those as:
 
 The repo should not promote them to stronger planner truth until the owner mapping is completed.
 
+## Owner-family split recovered now
+
+The current repo-local evidence is strong enough to narrow the shard milestone owner path into a shard-specific controller/data trail plus one parallel generic milestone lead:
+
+- `ShardMining, Assembly-CSharp`
+  - current role evidence: `CheckFirstTimeShardMilestoneOpened`, `AttachFastBuyButton`, `FastBuyButtonMethodShards`, `StartFastBuyButtonHold`
+  - metadata tie-in: `ShardMining|ShardUpgradeInfo`
+- `ShardUpgradeInfo`
+  - current role evidence: `TotalMilestoneLevels`, `get_IsUnlocked`, `get_SU*FinalUnlockReq`, `FinalSU*Bonus*`, over-level exponent fields, and `<FastBuyEnum>d__1429`
+- `ConstructionMilestones, Assembly-CSharp`
+  - current role evidence: `InitializeMilestones`, `BuyMilestone1` through `BuyMilestone57`, `ConstructionMilestonesSum`, `get_MilestoneMaxLevel`, and `FinalMilestone*Bonus*`
+  - current interpretation: generic or academy-side milestone family, not the preferred shard-specific owner claim
+
+This is enough to treat the shard workflow as a real shipped-game owner-family split for descriptive MVP work.
+
+It is not enough to claim a full extracted milestone planner, because the recovered `FinalSU*Bonus*` family is still not mapped back to verified player-facing shard rows.
+
 ## Current app-safe boundary
 
 Safe in the app now:
@@ -107,7 +126,7 @@ In short: ranking, ROI, ETA, affordability, and best-upgrade claims remain block
 
 ## Next allowed shard step
 
-The next shard pass should recover the concrete shipped-game milestone owner or owner family behind the `ShardMilestones-*` / `Milestones, Assembly-CSharp` shell and compare that extracted layer against the current descriptive dataset before any planner expansion.
+The next shard planner pass should recover the exact serialized milestone row payload or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail and compare that extracted layer against the current descriptive dataset before any planner expansion.
 
 Current heuristic ranking for that work:
 

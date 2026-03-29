@@ -164,7 +164,7 @@
       "title": "Shard workflow and loop guardrails",
       "status": "active",
       "goal": "Keep shard guidance truthful while the repo verifies how much of the shard system is grounded from shipped-game evidence versus descriptive/community sources.",
-      "currentSlice": "Use the repo-wide extraction-candidate ranking as the default unknown-target scorer, then filter it to PR2 and keep the shard milestone owner family as the current shard follow-up.",
+      "currentSlice": "Narrow the shard milestone owner path to a ShardMining screen-controller plus ShardUpgradeInfo data-carrying trail, while treating ConstructionMilestones as a downgraded generic milestone lead, then keep chasing the exact milestone payload.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
@@ -173,10 +173,12 @@
         "Document that the current shard milestone dataset is community-grounded descriptive data, not shipped-game owner-grounded milestone data.",
         "Document the current boundary between APK or Unity-grounded shard shell evidence and the still-descriptive community milestone layer in docs and progression UI.",
         "Ship a small shard asset-grounding dataset so APK-grounding validation and progression boundary copy no longer depend on markdown-only notes.",
-        "Add a repo-local extraction-candidate ranking path so unknown extraction work is ranked from unresolved mention density plus anchor strength across committed extracted-data artifacts, then filter that ranking back to the active roadmap track."
+        "Add a repo-local extraction-candidate ranking path so unknown extraction work is ranked from unresolved mention density plus anchor strength across committed extracted-data artifacts, then filter that ranking back to the active roadmap track.",
+        "Narrow the shard milestone owner path to a ShardMining screen-controller plus ShardUpgradeInfo data-carrying trail while downgrading ConstructionMilestones to a generic milestone lead."
       ],
       "nextSteps": [
-        "Use the ranked milestone-owner family path first, then fall back to the loop-reset stage family if the owner trail stalls.",
+        "Recover the exact serialized milestone row payload or save-side state from the narrowed ShardMining and ShardUpgradeInfo trail.",
+        "Map the recovered FinalSU bonus-field family back to verified player-facing shard milestone rows.",
         "Verify shard milestone owner mapping from shipped-game assets before promoting milestone names and rows as stronger repo truth.",
         "Only expand shard recommendations after the system-mapping gate is satisfied."
       ]

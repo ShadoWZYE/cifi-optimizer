@@ -8,7 +8,7 @@ This document captures the current extraction pathway for grounded CIFI mechanic
 - Current proven owners:
   - `TokenShop` in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
   - `MultiverseMarket` in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-- Current unresolved owner family:
+- Current narrowed but unresolved owner family:
   - shard milestones / loop-reset shell in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0) and [`workbench/unity/joined/sharedassets0.assets`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\sharedassets0.assets)
 - Current non-goal: full save-file decoding. The external save/export blobs are still opaque and should not block mechanic extraction.
 
@@ -95,7 +95,7 @@ The currently validated serialized late block yields 22 structurally valid rows 
 
 ### Shard milestone shell
 
-The repo now has grounded shell-level shard evidence, but not a recovered owner yet. Current recovered identifiers include:
+The repo now has grounded shell-level shard evidence and a narrowed owner-family split. Current recovered identifiers include:
 
 - `LoopResetStage1` through `LoopResetStage5`
 - `ShardMilestones-64`
@@ -106,6 +106,17 @@ The repo now has grounded shell-level shard evidence, but not a recovered owner 
 - `SpaceShip-ShardMining-LV1` through `SpaceShip-ShardMining-LV4`
 
 This is enough to justify descriptive shard and loop warnings. It is not enough to claim that the shipped app already exposes a verified milestone row map, bonus table, or cost table.
+
+Current narrowed owner-family split:
+
+- `ShardMining, Assembly-CSharp`
+  - current role evidence: `CheckFirstTimeShardMilestoneOpened`, `AttachFastBuyButton`, `FastBuyButtonMethodShards`, `StartFastBuyButtonHold`
+  - metadata tie-in: `ShardMining|ShardUpgradeInfo`
+- `ShardUpgradeInfo`
+  - current role evidence: `TotalMilestoneLevels`, `get_IsUnlocked`, `get_SU*FinalUnlockReq`, `FinalSU*Bonus*`, and `<FastBuyEnum>d__1429`
+- `ConstructionMilestones, Assembly-CSharp`
+  - current role evidence: `InitializeMilestones`, `BuyMilestone1` through `BuyMilestone57`, `ConstructionMilestonesSum`, `get_MilestoneMaxLevel`, and `FinalMilestone*Bonus*`
+  - current interpretation: generic or academy-side milestone family, not the preferred shard-specific owner claim
 
 ## Resume Path
 
@@ -119,9 +130,9 @@ If resuming on another machine:
 4. inspect the grounded outputs in `docs/` and `data/`
 5. continue by targeting the next unresolved owner object, not by returning to broad string scraping
 
-Recommended next unresolved owner for PR2 work:
+Recommended next unresolved extraction target after PR2:
 
-- the shard milestone owner behind the `ShardMilestones-*` / `Milestones, Assembly-CSharp` shell
+- the exact serialized shard milestone row or save-side state behind the narrowed `ShardMining` / `ShardUpgradeInfo` trail
 
 The current repo-local candidate ranking for that step is recorded in:
 
