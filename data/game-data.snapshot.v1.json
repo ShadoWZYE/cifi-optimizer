@@ -164,14 +164,14 @@
       "title": "Shard workflow and loop guardrails",
       "status": "active",
       "goal": "Strengthen shard guidance now, then add loop warnings without drifting into speculative simulation.",
-      "currentSlice": "Normalize shard and loop outputs through the shared recommendation action contract so the feed can trust their shape.",
+      "currentSlice": "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes so the cards show source-linked caution instead of generic fallback copy.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
-        "Normalize shard and loop module outputs through the shared recommendation action contract."
+        "Normalize shard and loop module outputs through the shared recommendation action contract.",
+        "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes."
       ],
       "nextSteps": [
-        "Tighten shard card wording against the grounded milestone, observed-behavior, and provenance datasets.",
         "Carry the same recommendation contract discipline into future spend-planner slices."
       ]
     },

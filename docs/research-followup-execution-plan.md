@@ -184,6 +184,7 @@ Keep shards as a grounded MVP feature without drifting back into invented optimi
 - updated shard workflow documentation
 - tests for shard recommendation contract shape and guardrails
 - shard and loop module outputs normalized through the shared recommendation action contract before they reach rendering
+- shard and loop wording that points back to grounded source titles and provenance conflicts instead of generic caution text
 
 **Dependencies**
 

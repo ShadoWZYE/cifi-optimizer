@@ -1905,6 +1905,8 @@ function buildLoopGuardrailRecommendations() {
   const antiBricking = getObservedBehaviorById("PPX_EARLY_LR_ANTIBRICKING");
   const shardSpend = getObservedBehaviorById("PPX_SHARDS_EARLY_DISTRIBUTION");
   const zeusWarning = getObservedBehaviorById("PPX_ZEUS_E1000_RESOURCE_PRIO_AND_LR_TARGETS");
+  const antiBrickingSource = getSourceTitlesForIds(antiBricking?.sourceIds).join(" | ");
+  const shardSpendSource = getSourceTitlesForIds(shardSpend?.sourceIds).join(" | ");
 
   if (!loopReset) {
     return [{
@@ -1925,7 +1927,9 @@ function buildLoopGuardrailRecommendations() {
       warnings: [
         "Without current LR, the app cannot show the anti-bricking pacing notes captured in the research bundle."
       ],
-      notes: "Loop guardrails remain descriptive and source-linked."
+      notes: antiBrickingSource
+        ? `Loop guardrails remain descriptive and source-linked (${antiBrickingSource}).`
+        : "Loop guardrails remain descriptive and source-linked."
     }];
   }
 
@@ -1952,7 +1956,9 @@ function buildLoopGuardrailRecommendations() {
         "Use buffer / instant loop checks before pushing LR higher.",
         zeusWarning?.priorities?.[1] || "High LR progression can become 'playing with fire' in guide-side progression notes."
       ],
-      notes: "Guardrail based on grounded community guide examples, not simulated reset math."
+      notes: antiBrickingSource
+        ? `Guardrail based on grounded guide examples from ${antiBrickingSource}, not simulated reset math.`
+        : "Guardrail based on grounded community guide examples, not simulated reset math."
     });
   }
 
@@ -1977,7 +1983,9 @@ function buildLoopGuardrailRecommendations() {
         "Do not carry tracked shards into a reset expecting them to persist.",
         "Use the shard workflow cards to inspect grounded unlocks and thresholds before spending."
       ],
-      notes: "Reset warning only; no shard ROI is implied."
+      notes: shardSpendSource
+        ? `Reset warning only; no shard ROI is implied. Spending note sourced from ${shardSpendSource}.`
+        : "Reset warning only; no shard ROI is implied."
     });
   }
 
@@ -2001,6 +2009,8 @@ function buildGroundedShardRecommendations() {
   const nextThreshold = getNextShardThreshold(focusMilestone, focusLevel, mechanics);
   const nextCostBump = getNextShardCostBump(focusLevel);
   const observation = getPrimaryShardObservation();
+  const conflictNote = getProvenanceConflictNote();
+  const sourceLabel = getMilestoneSourceLabel(nextUnlock || focusMilestone);
 
   return [
     {
@@ -2028,11 +2038,14 @@ function buildGroundedShardRecommendations() {
       ],
       warnings: [
         "No shard milestone ranking, ROI, ETA, or cost simulation is active in this workflow.",
+        conflictNote || "Shard milestone sources include unresolved discrepancies that keep this workflow descriptive.",
         nextUnlock
           ? `${Math.max(getShardUnlockRequirement(nextUnlock) - totalLevels, 0)} additional total shard milestone levels are needed for this unlock.`
           : "Unlocked does not mean affordable; shard cost data is still unavailable."
       ],
-      notes: "This card watches grounded unlock gates only."
+      notes: sourceLabel
+        ? `This card watches grounded unlock gates only (${sourceLabel}).`
+        : "This card watches grounded unlock gates only."
     },
     {
       id: "shard-module-next-threshold-watch",
@@ -2058,9 +2071,12 @@ function buildGroundedShardRecommendations() {
       ],
       warnings: [
         focusMilestone?.uncertaintyNotes?.[0] || "Unknown/Unkown source values remain preserved where the source was incomplete.",
+        conflictNote || "Threshold wording stays descriptive because milestone sources conflict across accessible snapshots.",
         nextThreshold ? `You need ${Math.max(nextThreshold - focusLevel, 0)} more levels on the selected milestone to reach this threshold.` : "Threshold watch ends here unless you switch milestones."
       ],
-      notes: "Threshold guidance is milestone-specific and descriptive only."
+      notes: sourceLabel
+        ? `Threshold guidance is milestone-specific and descriptive only (${sourceLabel}).`
+        : "Threshold guidance is milestone-specific and descriptive only."
     },
     {
       id: "shard-module-cost-bump-watch",
@@ -2082,9 +2098,12 @@ function buildGroundedShardRecommendations() {
       ],
       warnings: [
         "Cost bumps are warning zones only; the app does not estimate shard affordability.",
+        conflictNote || "Cost wording stays generic until a single authoritative milestone list and cost table exist.",
         focusMilestone?.costProgression?.notes || "No per-level shard costs were found in accessible sources."
       ],
-      notes: "Use this to avoid false precision near known cost-bump levels."
+      notes: sourceLabel
+        ? `Use this to avoid false precision near known cost-bump levels (${sourceLabel}).`
+        : "Use this to avoid false precision near known cost-bump levels."
     }
   ];
 }
@@ -2780,6 +2799,22 @@ function getPrimaryShardObservation() {
 
 function getObservedBehaviorById(id) {
   return (state.shardGrounding?.observedBehaviors?.observations ?? []).find((observation) => observation.id === id) || null;
+}
+
+function getSourceTitlesForIds(sourceIds = []) {
+  const sourceMap = state.shardGrounding?.provenance?.sources ?? {};
+  return sourceIds
+    .map((sourceId) => sourceMap[sourceId]?.title)
+    .filter(Boolean);
+}
+
+function getMilestoneSourceLabel(milestone) {
+  const titles = getSourceTitlesForIds(milestone?.sourceIds || []);
+  return titles.length ? titles.join(" | ") : "";
+}
+
+function getProvenanceConflictNote() {
+  return (state.shardGrounding?.provenance?.uncertaintyLog ?? []).find((entry) => entry.status === "conflict_detected")?.what_is_missing || "";
 }
 
 function getObservationTitle(observation) {
