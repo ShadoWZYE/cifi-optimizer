@@ -191,6 +191,12 @@ Before any system moves from research or extraction work into app recommendation
 
 Fail this gate if any of the above are inferred rather than evidenced.
 
+Presence of extracted data is not enough. A system can be available in committed assets and still remain unmapped for app purposes.
+Treat that state as:
+- available but unmapped
+- not recommendation-ready
+- still blocked on mapping currencies, owned-state inputs, or player-facing labels
+
 Acceptable next work after a failed gate:
 - parser improvements
 - owner-map and verification docs

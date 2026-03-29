@@ -54,6 +54,10 @@ If any of those remain unresolved:
 - keep the work in documentation, extraction, verification, or descriptive-mode surfaces
 - explicitly record the unresolved integration gap before moving on
 
+Important:
+- extracted data being present in the repo does not mean the system is mapped enough to integrate
+- treat systems as `available but unmapped` until currencies, owned-state inputs, and labels are all verified well enough for app use
+
 --- 
 
 ## Explicit Non-Goals (for now)

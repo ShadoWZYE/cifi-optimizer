@@ -4,6 +4,8 @@ This document records what is currently verified about the spend-planner track a
 
 It exists to enforce the repo rule that systems must be understood in-game and in the extracted assets before they are integrated into recommendations.
 
+Data being present in the repo is not enough. These systems should be treated as available but unmapped until their currencies, owned-state inputs, and player-facing labels are verified well enough for app integration.
+
 ## Integration rule
 
 Do not add spend-planner UI or recommendation logic until each system below has:

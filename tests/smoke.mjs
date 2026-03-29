@@ -51,14 +51,17 @@ assert.deepEqual(
 );
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
+assert.match(agentsMd, /available but unmapped/);
 assert.match(groundingPlan, /## System integration gate/);
 assert.match(groundingPlan, /Fail this gate if any of the above are inferred rather than evidenced/);
+assert.match(groundingPlan, /Presence of extracted data is not enough/);
 assert.match(unityAuditPlaybook, /## Integration readiness gate/);
 assert.match(unityAuditPlaybook, /MultiverseMarket/);
 assert.match(ownerMap, /integration status: owner and serialized constants verified/);
 assert.match(ownerMap, /integration status: owner and partial row constants verified/);
 assert.match(spendVerificationDoc, /# Spend System Verification Gate/);
 assert.match(spendVerificationDoc, /It is not safe to map its spend lane to diamonds, tokens, or any other player resource without direct evidence/);
+assert.match(spendVerificationDoc, /available but unmapped/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(multiverseMarketDoc, /## Integration status/);
