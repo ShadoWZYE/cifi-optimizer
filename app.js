@@ -1868,13 +1868,13 @@ function runShipOptimization() {
 }
 
 function runProgressionOptimization() {
-  const groundedResults = buildGroundedShardRecommendations();
-  const loopWarnings = buildLoopGuardrailRecommendations();
+  const groundedResults = buildGroundedShardRecommendations().map((item) => toRecommendationAction(item, "shards"));
+  const loopWarnings = buildLoopGuardrailRecommendations().map((item) => toRecommendationAction(item, "loop"));
   if (groundedResults.length) {
     return [...groundedResults, ...loopWarnings];
   }
 
-  return [{
+  return [toRecommendationAction({
     id: "shard-module-grounding-warning",
     module: "shards",
     kind: "warning",
@@ -1895,7 +1895,7 @@ function runProgressionOptimization() {
       "Import verified shard milestone data before re-enabling optimizer behavior."
     ],
     notes: "Grounded fallback mode avoids fake optimizer precision."
-  }, ...loopWarnings];
+  }, "shards"), ...loopWarnings];
 }
 
 function buildLoopGuardrailRecommendations() {
@@ -2850,6 +2850,31 @@ function getProfileCompletion(profile) {
     .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
   const fields = Object.keys(CANONICAL_PROFILE_FIELD_PATHS);
   return Math.round((filled / fields.length) * 100);
+}
+
+function toRecommendationAction(item, fallbackModule) {
+  return {
+    id: String(item?.id || `${fallbackModule || "module"}-${Math.random().toString(36).slice(2, 8)}`),
+    module: String(item?.module || fallbackModule || "module"),
+    kind: item?.kind === "upgrade" ? "upgrade" : "warning",
+    title: String(item?.title || "Untitled recommendation"),
+    score: Number.isFinite(Number(item?.score)) ? Number(item.score) : 0,
+    confidence: Number.isFinite(Number(item?.confidence)) ? Number(item.confidence) : 0,
+    cost: item?.cost,
+    eta: item?.eta,
+    benefit: sanitizeRecommendationLines(item?.benefit),
+    whyNow: sanitizeRecommendationLines(item?.whyNow),
+    assumptions: sanitizeRecommendationLines(item?.assumptions),
+    warnings: sanitizeRecommendationLines(item?.warnings),
+    subtitle: item?.subtitle ?? null,
+    notes: item?.notes ?? null
+  };
+}
+
+function sanitizeRecommendationLines(value) {
+  return Array.isArray(value)
+    ? value.map((entry) => String(entry || "").trim()).filter(Boolean)
+    : [];
 }
 
 function getPlannerHelperCompletion(profile) {

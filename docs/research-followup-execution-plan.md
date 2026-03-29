@@ -183,6 +183,7 @@ Keep shards as a grounded MVP feature without drifting back into invented optimi
 - grounded shard recommendations that are explicit about assumptions
 - updated shard workflow documentation
 - tests for shard recommendation contract shape and guardrails
+- shard and loop module outputs normalized through the shared recommendation action contract before they reach rendering
 
 **Dependencies**
 
