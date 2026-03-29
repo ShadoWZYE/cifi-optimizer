@@ -224,6 +224,8 @@ Use the extracted token-shop and multiverse-market data to build the MVP spend-p
 - documented spend-planner data model
 - initial spend recommendations with explicit confidence and assumptions
 - tests covering planner input parsing and output contract shape
+- normalized token-shop and multiverse-market first-buy structures that keep extracted facts separate from owned-level assumptions
+- a first spend-planner UI slice that uses tracked tokens and diamonds as labeled budget inputs while leaving provisional market-currency mapping explicit
 
 **Dependencies**
 

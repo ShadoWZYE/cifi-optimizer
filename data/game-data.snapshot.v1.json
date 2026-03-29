@@ -178,16 +178,18 @@
     {
       "id": "spend-planner-from-extracted-data",
       "title": "Spend planner from extracted token and market data",
-      "status": "queued",
+      "status": "active",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Normalize extracted spend facts only after data contracts and PlayerProfile inputs are stable.",
+      "currentSlice": "Use normalized extracted first-buy spend facts to produce labeled token and diamond recommendation windows without pretending to know owned upgrade levels or full ROI truth.",
       "completedSteps": [
-        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts."
+        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
+        "Normalize token-shop and multiverse-market values into planner-ready first-buy structures.",
+        "Define the first shippable token and diamond recommendation slice with explicit confidence and source labeling."
       ],
       "nextSteps": [
-        "Normalize token-shop and multiverse-market values into planner-ready structures.",
-        "Separate grounded spend facts from planner assumptions.",
-        "Define the first shippable token and diamond recommendation slice with explicit confidence and source labeling."
+        "Separate grounded spend facts from planner assumptions and provisional budget-lane mappings more explicitly.",
+        "Import current owned shop and market levels before moving from first-buy windows to true next-purchase planning.",
+        "Remap serialized ids and inscription numbers to grounded in-game labels and currency names."
       ]
     },
     {

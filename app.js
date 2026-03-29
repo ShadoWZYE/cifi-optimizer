@@ -350,6 +350,7 @@ const state = {
   shipBaseline: null,
   shipTemplates: null,
   shardGrounding: null,
+  spendPlannerData: null,
   playerProfile: null,
   shipConfig: null,
   launchCoordinator: null,
@@ -373,12 +374,14 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
     fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
-    fetchJson("./data/shard-milestones-provenance.grounded.v1.json")
+    fetchJson("./data/shard-milestones-provenance.grounded.v1.json"),
+    fetchJson("./data/token-shop-values.json"),
+    fetchJson("./data/multiverse-market-values.json")
   ]);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
@@ -393,6 +396,10 @@ async function bootstrap() {
     milestones: groundedShardMilestones,
     observedBehaviors: groundedShardObservedBehaviors,
     provenance: groundedShardProvenance
+  };
+  state.spendPlannerData = {
+    tokenShop: normalizeTokenShopEntries(tokenShopValues),
+    multiverseMarket: normalizeMultiverseMarketEntries(multiverseMarketValues)
   };
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile,
@@ -1033,9 +1040,11 @@ function renderOverview() {
   const validation = runValidationCases();
   const mvpValidation = validation.filter((item) => item.scope === "MVP");
   const supportValidation = validation.filter((item) => item.scope === "Support");
+  const spendHighlights = runSpendPlanner().slice(0, 2).map((item) => makeRecommendationCard(item, "spend"));
   $("#validationStatusValue").textContent = `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
   $("#overviewHighlights").innerHTML = [
     makeRecommendationCard(runProgressionOptimization()[0], "shards"),
+    ...spendHighlights,
     makeRecommendationCard({
       id: "profile-boundary-status",
       module: "warning",
@@ -1402,13 +1411,30 @@ function renderShipActions() {
 }
 
 function renderProgressionResults(results) {
+  const spendResults = runSpendPlanner();
   renderShardPlannerControls();
   $("#progressionResults").innerHTML = `
+    ${renderSpendPlannerSection(spendResults)}
     <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
     ${renderShardWorkflowSnapshot()}
     ${renderShardWorkflowReference()}
     ${renderObservedShardBehaviors()}
     ${renderShardMilestoneDirectory()}
+  `;
+}
+
+function renderSpendPlannerSection(results) {
+  return `
+    <article class="snapshot-card">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Spend planner foundation</p>
+          <h3>Extracted token and market windows</h3>
+        </div>
+      </div>
+      <p class="meta">These cards use extracted first-buy facts only. They do not assume current owned shop levels, complete market coverage, or cross-system ROI truth.</p>
+      <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, "spend")).join("")}</div>
+    </article>
   `;
 }
 
@@ -2302,6 +2328,200 @@ function runGemOptimization() {
 
 function getGemPlannerBudget() {
   return Number(getExperimentalProfileState().gemNodeBudget || 0);
+}
+
+function runSpendPlanner() {
+  const canonical = getCanonicalProfileState();
+  const tokenBudget = Number(canonical.tokens || 0);
+  const diamondBudget = Number(canonical.diamonds || 0);
+  return [
+    buildTokenSpendRecommendation(tokenBudget),
+    buildDiamondSpendRecommendation(diamondBudget)
+  ].filter(Boolean);
+}
+
+function buildTokenSpendRecommendation(tokenBudget) {
+  const entries = state.spendPlannerData?.tokenShop ?? [];
+  if (!entries.length) {
+    return null;
+  }
+
+  const affordable = entries.filter((entry) => entry.startCost <= tokenBudget);
+  const nextLocked = entries.find((entry) => entry.startCost > tokenBudget) ?? null;
+  const affordablePreview = affordable.slice(0, 4).map((entry) => `${entry.label} (${formatOptionalNumber(entry.startCost)})`);
+  const entryCostRange = `${formatOptionalNumber(entries[0]?.startCost)}-${formatOptionalNumber(entries[entries.length - 1]?.startCost)} tokens`;
+
+  if (tokenBudget <= 0) {
+    return toRecommendationAction({
+      id: "token-budget-missing",
+      module: "spend",
+      kind: "warning",
+      title: "Add tracked tokens for the spend planner",
+      subtitle: "Token-shop first-buy window unavailable",
+      score: 0,
+      confidence: 0.72,
+      whyNow: [
+        "The extracted TokenShop payload already exposes grounded StartCost, AdditiveCost, Bonus, and level-cap fields.",
+        `The current extracted first-buy cost range is ${entryCostRange}.`
+      ],
+      assumptions: [
+        "This slice compares extracted first-buy facts only.",
+        "Current owned token-shop levels are not yet part of PlayerProfile."
+      ],
+      warnings: [
+        "No token recommendation is shown until tracked tokens are filled in on the Profile page.",
+        "Serialized field labels remain provisional until the repo remaps them to grounded in-game names."
+      ],
+      notes: "Grounded source: TokenShop scene object in the extracted APK bundle."
+    }, "spend");
+  }
+
+  return toRecommendationAction({
+    id: "token-shop-first-buy-window",
+    module: "spend",
+    kind: affordable.length ? "upgrade" : "warning",
+    title: affordable.length ? "Token shop first-buy window" : "No extracted token-shop first buys fit budget",
+    subtitle: `${formatOptionalNumber(tokenBudget)} tokens tracked`,
+    score: affordable.length,
+    confidence: affordable.length ? 0.69 : 0.55,
+    cost: entryCostRange,
+    whyNow: [
+      `${affordable.length} extracted token-shop entries currently fit the tracked token budget.`,
+      nextLocked
+        ? `The next extracted cost gate is ${nextLocked.label} at ${formatOptionalNumber(nextLocked.startCost)} tokens.`
+        : "Tracked tokens already cover the first-buy cost on every extracted token-shop entry."
+    ],
+    assumptions: [
+      "The planner only compares extracted first-buy costs until owned shop levels are tracked.",
+      "Field ids such as TokenBoost and DiamondBoost are still serialized labels, not fully remapped player-facing names."
+    ],
+    warnings: [
+      "This is not cross-upgrade ROI or long-run shop sequencing.",
+      "Later-level token costs need grounded current-level inputs before they can be recommended truthfully."
+    ],
+    notes: affordablePreview.length
+      ? `Affordable now: ${affordablePreview.join(" | ")}.`
+      : "No extracted first-buy token-shop option fits the tracked budget yet."
+  }, "spend");
+}
+
+function buildDiamondSpendRecommendation(diamondBudget) {
+  const entries = state.spendPlannerData?.multiverseMarket ?? [];
+  if (!entries.length) {
+    return null;
+  }
+
+  const affordable = entries.filter((entry) => entry.startCost <= diamondBudget);
+  const nextLocked = entries.find((entry) => entry.startCost > diamondBudget) ?? null;
+  const affordablePreview = affordable.slice(0, 4).map((entry) => `${entry.label} (${formatOptionalNumber(entry.startCost)})`);
+  const entryCostRange = `${formatOptionalNumber(entries[0]?.startCost)}-${formatOptionalNumber(entries[entries.length - 1]?.startCost)} provisional budget units`;
+
+  if (diamondBudget <= 0) {
+    return toRecommendationAction({
+      id: "diamond-budget-missing",
+      module: "spend",
+      kind: "warning",
+      title: "Add tracked diamonds for market planning",
+      subtitle: "Multiverse-market first-buy window unavailable",
+      score: 0,
+      confidence: 0.58,
+      whyNow: [
+        "The extracted MultiverseMarket rows expose grounded StartCost, CostExponent, Bonus, and MaxLevel fields for a validated late block.",
+        "This gives the app a real market-entry cost window even before owned inscription levels are imported."
+      ],
+      assumptions: [
+        "This slice maps the market budget lane to tracked diamonds until the market currency label is extracted more directly.",
+        "Current inscription levels are not yet part of PlayerProfile."
+      ],
+      warnings: [
+        "The extracted market bundle currently covers a validated late block, not the full market.",
+        "Do not treat inscription ids as final player-facing labels."
+      ],
+      notes: "Grounded source: MultiverseMarket scene object late-block rows."
+    }, "spend");
+  }
+
+  return toRecommendationAction({
+    id: "multiverse-market-first-buy-window",
+    module: "spend",
+    kind: affordable.length ? "upgrade" : "warning",
+    title: affordable.length ? "Multiverse market first-buy window" : "No extracted market first buys fit budget",
+    subtitle: `${formatOptionalNumber(diamondBudget)} diamonds tracked`,
+    score: affordable.length,
+    confidence: affordable.length ? 0.61 : 0.48,
+    cost: entryCostRange,
+    whyNow: [
+      `${affordable.length} extracted market rows currently fit the tracked budget lane.`,
+      nextLocked
+        ? `The next extracted market gate is ${nextLocked.label} at ${formatOptionalNumber(nextLocked.startCost)} start cost.`
+        : "Tracked budget already covers the first-buy cost on every extracted market row in the validated block."
+    ],
+    assumptions: [
+      "This recommendation compares extracted start-cost rows only, not owned inscription levels or later-level scaling.",
+      "The current market slice is intentionally limited to the validated late block already grounded in repo data."
+    ],
+    warnings: [
+      "This is a budget window, not a proven best-inscription ranking.",
+      "The budget-to-diamond mapping remains explicitly provisional until the market currency label is grounded more directly."
+    ],
+    notes: affordablePreview.length
+      ? `Affordable extracted rows: ${affordablePreview.join(" | ")}.`
+      : "No extracted market row fits the tracked budget lane yet."
+  }, "spend");
+}
+
+function normalizeTokenShopEntries(bundle) {
+  const grouped = new Map();
+  const pattern = /^([A-Za-z0-9]+?)(StartCost|AdditiveCost|Bonus|Bonus[1-5]|MaxLevel|FillMaxLevel)$/;
+
+  for (const field of bundle?.fields ?? []) {
+    if (field?.kind !== "number") {
+      continue;
+    }
+    const match = pattern.exec(String(field.field || ""));
+    if (!match) {
+      continue;
+    }
+    const [, rawId, metric] = match;
+    const current = grouped.get(rawId) ?? { id: rawId, label: formatSerializedSpendLabel(rawId) };
+    current[metric] = Number(field.value);
+    grouped.set(rawId, current);
+  }
+
+  return [...grouped.values()]
+    .filter((entry) => Number.isFinite(entry.StartCost))
+    .map((entry) => ({
+      id: entry.id,
+      label: entry.label,
+      startCost: Number(entry.StartCost),
+      additiveCost: Number.isFinite(entry.AdditiveCost) ? Number(entry.AdditiveCost) : null,
+      bonus: Number.isFinite(entry.Bonus) ? Number(entry.Bonus) : null,
+      maxLevel: Number.isFinite(entry.MaxLevel) ? Number(entry.MaxLevel) : Number(entry.FillMaxLevel),
+      hasMultiBonus: ["Bonus1", "Bonus2", "Bonus3", "Bonus4", "Bonus5"].some((key) => Number.isFinite(entry[key]))
+    }))
+    .sort((left, right) => left.startCost - right.startCost);
+}
+
+function normalizeMultiverseMarketEntries(bundle) {
+  return [...(bundle?.records ?? [])]
+    .map((record) => ({
+      id: `IS${record.inscription_id}`,
+      label: `Inscription #${record.inscription_id}`,
+      inscriptionId: Number(record.inscription_id),
+      startCost: Number(record.start_cost),
+      costExponent: Number(record.cost_exponent),
+      maxLevel: Number(record.max_level),
+      bonus: Number(record.bonus_value)
+    }))
+    .filter((entry) => Number.isFinite(entry.startCost))
+    .sort((left, right) => left.startCost - right.startCost || left.inscriptionId - right.inscriptionId);
+}
+
+function formatSerializedSpendLabel(value) {
+  return String(value || "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+    .trim();
 }
 
 function runValidationCases() {
