@@ -180,16 +180,14 @@
       "title": "Spend planner from extracted token and market data",
       "status": "active",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Use normalized extracted first-buy spend facts to produce labeled token and diamond recommendation windows without pretending to know owned upgrade levels or full ROI truth.",
+      "currentSlice": "Verify token-shop and multiverse-market currencies, labels, and ownership inputs from Unity/APK assets before surfacing any spend recommendations in the app.",
       "completedSteps": [
-        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
-        "Normalize token-shop and multiverse-market values into planner-ready first-buy structures.",
-        "Define the first shippable token and diamond recommendation slice with explicit confidence and source labeling."
+        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts."
       ],
       "nextSteps": [
-        "Separate grounded spend facts from planner assumptions and provisional budget-lane mappings more explicitly.",
-        "Import current owned shop and market levels before moving from first-buy windows to true next-purchase planning.",
-        "Remap serialized ids and inscription numbers to grounded in-game labels and currency names."
+        "Verify the token-shop cost lane against canonical token or tokenium naming from the available assets.",
+        "Verify the multiverse-market currency and player-owned state inputs from the available assets instead of inferring them from diamonds.",
+        "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."
       ]
     },
     {
