@@ -135,8 +135,8 @@ Current status:
   - verified: real owner, serialized cost fields, bonus fields, and level-cap fields
   - not yet verified enough for app planning: full player-owned current-level inputs and final remap from serialized field ids to player-facing labels
 - `MultiverseMarket`
-  - verified: real owner, validated inscription rows, and direct serialized constants for part of the system
-  - not yet verified enough for app planning: complete row coverage, player-owned current-level inputs, and the actual spend currency lane
+  - verified: real owner, validated inscription rows, direct serialized constants for part of the system, and an Emporium spend-lane shell labeled around `Inscryptions Done`
+  - not yet verified enough for app planning: complete row coverage, player-owned current-level inputs, and the saved-state owner behind the `Inscryptions Done` balance
 
 If those gaps remain open, keep the system in extraction and verification docs rather than recommendation UI.
 

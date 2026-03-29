@@ -78,6 +78,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
   - [`_unity_joined/level0`](C:\Users\Shadow\Desktop\CiFi\_unity_joined\level0)
 - Grounded outputs:
   - [`docs/multiverse-market-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-values.md)
+  - [`docs/multiverse-market-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-verification.md)
   - [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
 - Verified extracted fields in the validated late block include:
   - `ID`
@@ -85,10 +86,15 @@ These are not yet planner-ready integrations. They are dependency notes so futur
   - `CostExponent`
   - `Bonus`
   - `MaxLevel`
+- Verified spend-lane shell evidence now includes:
+  - `CurrencyBox` pointers beside validated inscription rows in the serialized owner payload
+  - `CostBox-InscryptionsDone`
+  - `AchievementBar-Inscryptions`
+  - `MultiverseMarket, Assembly-CSharp` buy handlers such as `BuyIS47`, `BuyIS64`, `BuyIS73`, `BuyIS13`, and `BuyIS105`
 
 ### Not yet verified enough for app recommendations
 
-- the actual spend currency lane for these market purchases
+- the saved-state owner or runtime balance field behind the `Inscryptions Done` spend lane
 - player-owned current inscription levels or equivalent ownership state
 - full row coverage beyond the currently validated late block
 - final remap from ids like `IS51` to grounded player-facing labels
@@ -96,7 +102,8 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 ### Current app implication
 
 - It is safe to treat MultiverseMarket as a real system with partially grounded extracted constants.
-- It is not safe to map its spend lane to diamonds, tokens, or any other player resource without direct evidence.
+- It is safe to stop inferring its spend lane from diamonds, tokens, or other unrelated player resources.
+- It is not yet safe to treat `Inscryptions Done` as an import-ready player field until its saved-state owner is recovered.
 
 ## Next allowed slice
 
@@ -106,6 +113,6 @@ Priority order:
 
 1. verify the token-shop spend lane and player-owned current-level inputs
 2. map the TokenShop-connected token-bank cap, fill, claim, and Academy or Farm Mission Daily Tokenium lane strongly enough to identify their saved-state inputs
-3. verify the multiverse-market spend currency and owned-state inputs
+3. recover the saved-state owner and owned-state inputs behind the multiverse-market `Inscryptions Done` lane
 4. remap serialized ids to grounded player-facing labels
 5. only then add spend recommendations with explicit assumptions

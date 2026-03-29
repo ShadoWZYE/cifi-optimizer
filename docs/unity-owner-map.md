@@ -31,7 +31,14 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
   - system: Chrystos Emporium / Inscryptions
   - source owner: [`_unity_joined/level0`](C:\Users\Shadow\Desktop\CiFi\_unity_joined\level0)
   - parser: [`scripts/multiverse_market_parse.py`](C:\Users\Shadow\Desktop\CiFi\scripts\multiverse_market_parse.py)
-  - outputs: [`docs/multiverse-market-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-values.md), [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
-  - integration status: owner and partial row constants verified; spend currency, player-owned current levels, and full row coverage still required before planner UI
+  - outputs: [`docs/multiverse-market-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-values.md), [`docs/multiverse-market-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-verification.md), [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
+  - integration status: owner, partial row constants, and `Inscryptions Done` spend-lane shell verified; saved-state balance owner, player-owned current levels, and full row coverage still required before planner UI
+  - recovered adjacent handlers:
+    - `BuyIS47` -> `MultiverseMarket, Assembly-CSharp`
+    - `BuyIS64` -> `MultiverseMarket, Assembly-CSharp`
+    - `BuyIS73` -> `MultiverseMarket, Assembly-CSharp`
+  - recovered currency-shell evidence:
+    - `CostBox-InscryptionsDone`
+    - `AchievementBar-Inscryptions`
 
 Next likely targets should follow the same pattern: find the real owner object first, then parse the serialized payload directly when typetree tooling fails.

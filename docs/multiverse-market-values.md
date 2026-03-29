@@ -16,10 +16,11 @@ Verified enough for repo truth:
 
 - `MultiverseMarket` is a real owner for Chrystos Emporium / Inscryptions data.
 - The validated late block exposes direct serialized constants for part of the system.
+- The serialized rows include concrete `CurrencyBox` pointers, and existing targeted probes recover Emporium cost-shell names such as `CostBox-InscryptionsDone`.
 
 Not yet verified enough for app recommendations:
 
-- the actual spend currency lane
+- the saved-state owner or runtime balance field behind the `Inscryptions Done` cost lane
 - player-owned current inscription levels or equivalent state
 - full row coverage beyond the current validated block
 - final remap from serialized ids to grounded player-facing labels
@@ -54,3 +55,10 @@ Not yet verified enough for app recommendations:
 - `Inscription #51` in the provided Emporium screenshot matches a serialized row with `MaxLevel=10`, `Bonus=8`, `StartCost=2`, and `CostExponent=2.5`.
 - The same row still points to concrete scene UI objects for its `BuyButton`, `CurrencyBox`, and `MaxOverlay`, confirming this is the real Emporium upgrade block rather than a detached text table.
 - `FinalIS*Cost` and `FinalIS*Bonus` are still present in metadata as code-side outputs, but they do not appear as a simple trailing serialized array in this validated block.
+
+## Handler and currency-shell evidence
+
+- Existing targeted repo-local probes recover `CostBox-InscryptionsDone` and `AchievementBar-Inscryptions` alongside Emporium UI shell names.
+- Existing targeted repo-local probes also recover direct owner-to-handler links such as `MultiverseMarket, Assembly-CSharp` -> `BuyIS47`, `BuyIS64`, `BuyIS73`, `BuyIS13`, and `BuyIS105`.
+- This is enough to ground the Emporium purchase lane around `Inscryptions Done` as a player-facing cost shell.
+- This is not yet enough to recover the saved-state balance field or full recommendation-ready player input shape.

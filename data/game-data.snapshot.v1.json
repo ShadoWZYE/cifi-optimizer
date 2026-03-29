@@ -183,7 +183,7 @@
       "title": "Spend planner from extracted token and market data",
       "status": "active",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Treat Daily Tokenium as an Academy or Farm Mission reward lane that TokenShop, LoopModifiers, and the Collector pack all touch, then chase the gameplay owner and saved-state inputs for that lane instead of treating it as TokenShop-only.",
+      "currentSlice": "Ground the MultiverseMarket spend-lane shell around Inscryptions Done from repo-local Unity evidence, then keep planner wiring blocked until the saved-state owner and current owned levels are recovered.",
       "completedSteps": [
         "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
         "Document the spend-system integration gate and current verified versus unresolved app-integration facts.",
@@ -197,7 +197,8 @@
         "Verify the token-shop cost lane against canonical token or tokenium naming from the available assets.",
         "Recover the saved-state owner or formula source behind token-bank cap, fill-speed, and claimable bank tokens from TokenShop or nearby level0 handlers rather than OR_* resource names.",
         "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
-        "Verify the multiverse-market currency and player-owned state inputs from the available assets instead of inferring them from diamonds.",
+        "Recover the saved-state owner and current balance field behind the MultiverseMarket Inscryptions Done lane.",
+        "Recover player-owned inscription levels or equivalent next-buy state from the available assets.",
         "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."
       ]
     },
