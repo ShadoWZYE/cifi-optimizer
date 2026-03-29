@@ -166,6 +166,29 @@
         <section class="panel">
           <div class="panel-header">
             <div>
+              <p class="eyebrow">Guided Import</p>
+              <h2>PlayerProfile JSON</h2>
+            </div>
+            <button id="exportPlayerProfileBtn" class="button">Export PlayerProfile JSON</button>
+          </div>
+          <p class="meta">Import a saved PlayerProfile JSON document through the grounded normalizer. Canonical values, planner-only helpers, external-model state, and compatibility fields stay labeled instead of being merged as raw game truth.</p>
+          <div class="field-group">
+            <label for="playerProfileImportFile">Upload PlayerProfile JSON</label>
+            <input id="playerProfileImportFile" type="file" accept=".json,.txt,application/json">
+          </div>
+          <div class="field-group">
+            <label for="playerProfileImportText">Or paste PlayerProfile JSON</label>
+            <textarea id="playerProfileImportText" rows="8" placeholder='{"player":{"resources":{"diamonds":1000,"tokens":50}}}'></textarea>
+          </div>
+          <div class="profile-actions">
+            <button id="importPlayerProfileBtn" class="button button-primary">Import PlayerProfile JSON</button>
+          </div>
+          <div id="playerProfileImportStatus" class="status-line"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
               <p class="eyebrow">Community-tool Ship Calibration</p>
               <h2>External model inputs preserved outside raw game state</h2>
             </div>

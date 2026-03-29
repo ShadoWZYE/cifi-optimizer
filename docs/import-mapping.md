@@ -2,6 +2,24 @@
 
 The Data page accepts CSV or JSON arrays and normalizes them into the active app snapshot.
 
+Separate from those snapshot imports, the Profile page may accept a single PlayerProfile JSON document. That path must normalize into `state.playerProfile` and keep canonical, planner-only, external-model, and compatibility fields labeled.
+
+## PlayerProfile JSON import
+
+Status:
+- MVP-safe guided/manual import support
+- import must run through the PlayerProfile normalizer, not direct assignment
+
+Accepted shapes:
+- current nested PlayerProfile schema
+- legacy flat fields already supported by `normalizePlayerProfile`
+
+Grounding rules:
+- canonical shared truth stays under `player` and `meta`
+- planner-only values stay under `planning`
+- external/community-tool state stays under `externalModels`
+- unresolved legacy values stay under `compatibility`
+
 ## Supported datasets
 
 ### `shipLoadouts`
