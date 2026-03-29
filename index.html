@@ -98,7 +98,7 @@
 
         <section class="panel">
           <form id="profileForm" class="profile-form">
-            <p class="meta">Shared PlayerProfile truth is limited to grounded CIFI account state. Planner-only helpers and community-tool calibration stay labeled as non-canonical.</p>
+            <p class="meta">Shared PlayerProfile truth is limited to grounded CIFI account state. Planner-only helpers stay labeled, and ship calibration remains outside shared profile truth as external-model implementation data.</p>
             <div class="field-group">
               <label for="profileName">Profile name</label>
               <input id="profileName" name="profileName" type="text" placeholder="Main account">
@@ -316,12 +316,12 @@
       <section class="page" data-page="ship">
         <div class="page-header">
           <div>
-            <p class="eyebrow">Community-tool Ship Planner</p>
-            <h2>Quarantined calibration and loadout editor</h2>
+            <p class="eyebrow">Ship Planner</p>
+            <h2>Canonical ship system with provisional implementation labels</h2>
           </div>
           <button id="saveShipConfigBtn" class="button button-primary">Save ship planner state</button>
         </div>
-          <p class="meta">This planner remains available for compatibility, but it is not a first-class MVP system and its calibration data is labeled as community-tool state.</p>
+          <p class="meta">This planner represents a real ship system. The current implementation still uses community-tool calibration and provisional labels until the repo finishes its grounded data remap.</p>
           <section class="panel">
             <div class="panel-header">
               <div>
@@ -330,7 +330,7 @@
               </div>
               <button id="saveShipStateBtn" class="button">Save calibration</button>
             </div>
-            <p class="meta">These fields stay attached to the quarantined ship planner surface. They are preserved as external-model calibration, not shared PlayerProfile truth.</p>
+            <p class="meta">These fields stay attached to the ship planner implementation layer. They are preserved as external-model calibration, not shared PlayerProfile truth.</p>
             <div id="shipPlayerStateStatus" class="status-line"></div>
             <div id="shipPlayerStatePanel" class="page-grid"></div>
           </section>
@@ -411,7 +411,7 @@
           <button id="runValidationSuite" class="button button-primary">Run validation suite</button>
         </div>
         <section class="panel">
-          <p class="meta">Grounded MVP checks and quarantined support-surface checks are shown separately so validation status does not overstate what is currently first-class product truth.</p>
+          <p class="meta">Grounded MVP checks and quarantined support-surface checks are shown separately so validation status does not overstate what is currently first-class product truth. Ship checks stay in the grounded section because the system is canonical even while its implementation wiring is still being remapped.</p>
           <div id="validationResults" class="validation-grid"></div>
         </section>
       </section>

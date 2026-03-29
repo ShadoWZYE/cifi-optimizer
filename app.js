@@ -47,7 +47,7 @@ const PROFILE_FORM_FIELD_PATHS = {
   totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"]
 };
 
-const NON_MVP_VALIDATION_MODULES = new Set(["ship", "gem"]);
+const SUPPORT_SURFACE_VALIDATION_MODULES = new Set(["gem"]);
 
 function createDefaultShipPlayerState(baseline) {
   return {
@@ -999,14 +999,36 @@ function renderOverview() {
       confidence: 0.86,
       whyNow: [
         "Shared PlayerProfile truth is limited to canonical MVP fields plus labeled planner helpers.",
-        "Community-tool and experimental state remain isolated instead of being promoted into raw CIFI truth."
+        "Ship calibration remains isolated as external-model state even though the ship system itself is canonical."
       ],
       warnings: [
-        "Do not treat ship planner, gem nodes, research intake, or OCR as grounded MVP recommendations.",
+        "Do not treat gem nodes, research intake, or OCR as grounded MVP recommendations.",
         "Legacy compatibility fields are preserved for migration, not treated as active planning truth."
       ],
       notes: "The primary MVP flow centers on PlayerProfile, imports, shard safety, validation, and explainable recommendations."
     }, "warning"),
+    makeRecommendationCard({
+      id: "ship-system-bridge-status",
+      module: "ship",
+      kind: "warning",
+      title: "Ship planner is a canonical system with provisional tool wiring",
+      subtitle: "Grounding remap still in progress",
+      score: 0,
+      confidence: 0.78,
+      whyNow: [
+        "The ship loadout optimizer is modeling a real game system, not a speculative support feature.",
+        "Current labels and calibration still come through the community-tool implementation until grounded naming and extracted data are mapped in-repo."
+      ],
+      assumptions: [
+        "Ship calibration remains labeled as external-model state until extracted game data replaces or remaps those fields.",
+        "This does not promote tool-specific labels into canonical PlayerProfile truth."
+      ],
+      warnings: [
+        "Treat current ship labels as provisional where the repo has not yet remapped them to grounded in-game terminology.",
+        "Gem Nodes, OCR, and Research Intake remain outside the grounded MVP recommendation path."
+      ],
+      notes: "Next ship-focused work should remap names and extracted data, not discard the system."
+    }, "ship"),
     renderOverviewSupportSummary(supportValidation)
   ].join("");
 }
@@ -1074,7 +1096,7 @@ function renderSourceRegistry() {
       $("#shipWeightsPanel").innerHTML = `
         <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
           <span class="snapshot-title">Resource priority weights</span>
-        <p class="meta">These community-tool weights drive the quarantined ship planner recommendation and highlighted next best install.</p>
+        <p class="meta">These weights drive the current ship-planner implementation while the repo remaps tool labels to grounded in-game terminology.</p>
         <div class="mini-grid">
           ${Object.entries(state.shipConfig.weights).map(([key, value]) => `
             <label class="mini-field">
@@ -1086,7 +1108,7 @@ function renderSourceRegistry() {
         </article>
           <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
             <span class="snapshot-title">Ship optimizer toggles</span>
-          <p class="meta">These toggles affect only the community-tool ship planner. <code>softCap</code> keeps filtered resource lanes in play at a tiny flat priority of <code>0.01</code>.</p>
+          <p class="meta">These toggles affect the current ship-planner implementation. <code>softCap</code> keeps filtered resource lanes in play at a tiny flat priority of <code>0.01</code>.</p>
           <div class="mini-grid">
             <label class="mini-field">
               <span>softCap</span>
@@ -1294,7 +1316,7 @@ function renderShipActions() {
       const action = button.dataset.shipAction;
       if (action === "apply") {
         persistShipConfig();
-        setStatus("shipConfigStatus", "Applied community-tool ship planner changes.", "success");
+        setStatus("shipConfigStatus", "Applied ship planner changes.", "success");
       }
       if (action === "undo") {
         undoLoadoutChange();
@@ -1322,10 +1344,10 @@ function renderShipActions() {
 
   $("#shipResults").innerHTML = `
     ${renderSupportSurfaceNotice(
-      "Community-tool ship results",
+      "Canonical ship system, provisional implementation",
       [
-        "These cards come from the quarantined ship planner and preserved community-tool calibration.",
-        "Treat them as labeled support output, not grounded MVP recommendations."
+        "These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels.",
+        "Treat the ship output as canonical-domain planning with external-model wiring still being remapped."
       ]
     )}
     ${[leadCard, ...shipRankings.slice(0, 3)].filter(Boolean).map((item) => makeRecommendationCard(item, "ship")).join("")}
@@ -1385,7 +1407,7 @@ function renderValidationResults() {
     ),
     renderValidationSection(
       "Support-surface checks",
-      "These checks cover quarantined ship and gem surfaces. Keep them labeled, but do not treat them as MVP truth.",
+      "These checks cover quarantined support surfaces such as Gem Nodes. Keep them labeled, but do not treat them as MVP truth.",
       supportResults
     )
   ].join("");
@@ -2150,7 +2172,7 @@ function runValidationCases() {
     expected: item.expected,
     actual: current[item.module],
     pass: item.expected === current[item.module],
-    scope: NON_MVP_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
+    scope: SUPPORT_SURFACE_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
   }));
 }
 
@@ -2164,7 +2186,7 @@ function renderOverviewSupportSummary(supportValidation) {
     <article class="validation-card warn">
       <strong>Support surfaces stay out of the MVP feed</strong>
       <p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>
-      <p class="meta">Ship planner and Gem Nodes remain available for compatibility and experimentation, but they do not count as grounded MVP recommendations.</p>
+      <p class="meta">Gem Nodes remain a labeled experimental support surface. Ship planning is tracked separately as a canonical system with provisional implementation wiring.</p>
     </article>
   `;
 }

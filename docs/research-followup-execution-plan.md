@@ -31,6 +31,7 @@ In practice, this means:
 - shard work remains descriptive and grounded until verified numeric modeling exists
 - token and multiverse data can inform planner structure, but not pretend to be complete optimizer truth
 - non-MVP surfaces such as OCR, gem nodes, and research UI stay deprioritized unless required as supporting cleanup
+- canonical systems with provisional external-model implementations should be labeled as such, not collapsed into speculative support-surface status
 
 ### Source priority rule
 
@@ -141,7 +142,7 @@ Tighten the boundary between canonical player state, planning helpers, and exter
 - doc updates for import and profile rules
 - tests for normalization and legacy migration edge cases
 - overview, validation, and support-surface copy that keeps external/community-tool outputs visibly outside grounded MVP truth
-- page structure that keeps external-model calibration attached to its quarantined module instead of the shared Profile surface
+- page structure that keeps external-model calibration attached to its module implementation instead of the shared Profile surface
 
 **Dependencies**
 

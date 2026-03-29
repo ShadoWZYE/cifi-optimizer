@@ -41,8 +41,8 @@ These fields stay isolated from canonical truth:
 
 | Field | Path | Classification | Notes |
 |---|---|---|---|
-| Ship planner summary | `externalModels.shipPlanner.summary.*` | external/community-tool state | Preserves old `power` / `speed` / `cargo` values without treating them as raw CIFI state. |
-| Ship planner calibration | `externalModels.shipPlanner.communityToolState` | external/community-tool state | Desmos/community-tool calibration payload. |
+| Ship planner summary | `externalModels.shipPlanner.summary.*` | external-model implementation state | Current ship-planner summary values for a canonical system, pending grounded terminology/data remap. |
+| Ship planner calibration | `externalModels.shipPlanner.communityToolState` | external-model implementation state | Current ship-planner calibration payload, kept separate from shared PlayerProfile truth. |
 | Gem node budget | `externalModels.experimental.gemNodes.budget` | planner-only / experimental | Experimental gem-node helper, not shared account truth. |
 | Primary farming focus | `externalModels.experimental.profileHints.primaryFarmingFocus` | planner-only / experimental | Old prototype focus toggle, not canonical game state. |
 | Research hours | `externalModels.experimental.profileHints.researchHours` | planner-only / experimental | App-side planning helper, not a real CIFI field. |
@@ -79,5 +79,5 @@ The active Profile form should show:
 
 It should not present external-model or unresolved compatibility fields as raw CIFI account state.
 
-External/community-tool calibration should stay with the quarantined module that uses it.
-In the current app, ship-planner calibration belongs on the Ship Planner page, not on the shared Profile page.
+External-model calibration should stay with the module implementation that uses it.
+In the current app, ship-planner calibration belongs on the Ship Planner page, not on the shared Profile page, even though the underlying ship system is canonical.
