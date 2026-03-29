@@ -1,0 +1,1804 @@
+{
+  "metadata": "_cifi_apk\\global-metadata.dat",
+  "anchor_count": 6,
+  "context": 8,
+  "results": [
+    {
+      "anchor": "PlayerProfileData",
+      "matches": [
+        {
+          "anchor": "PlayerProfileData",
+          "match_index": 11347,
+          "match_offset": 774426,
+          "match_value": "PlayerProfileData",
+          "context": [
+            {
+              "offset": 774303,
+              "encoding": "ascii",
+              "value": "Mask"
+            },
+            {
+              "offset": 774308,
+              "encoding": "ascii",
+              "value": "Sources"
+            },
+            {
+              "offset": 774316,
+              "encoding": "ascii",
+              "value": "badwords"
+            },
+            {
+              "offset": 774325,
+              "encoding": "ascii",
+              "value": "blackList"
+            },
+            {
+              "offset": 774335,
+              "encoding": "ascii",
+              "value": "<>c__DisplayClass15_0"
+            },
+            {
+              "offset": 774357,
+              "encoding": "ascii",
+              "value": "blacklistedWord"
+            },
+            {
+              "offset": 774373,
+              "encoding": "ascii",
+              "value": "<IsNewNameAppropriate>b__0"
+            },
+            {
+              "offset": 774400,
+              "encoding": "ascii",
+              "value": "<OnSetUsernameClick>d__13"
+            },
+            {
+              "offset": 774426,
+              "encoding": "ascii",
+              "value": "PlayerProfileData"
+            },
+            {
+              "offset": 774444,
+              "encoding": "ascii",
+              "value": "AccountCreated"
+            },
+            {
+              "offset": 774459,
+              "encoding": "ascii",
+              "value": "Timestamp"
+            },
+            {
+              "offset": 774469,
+              "encoding": "ascii",
+              "value": "PlayerName"
+            },
+            {
+              "offset": 774480,
+              "encoding": "ascii",
+              "value": "Ship1Evo"
+            },
+            {
+              "offset": 774489,
+              "encoding": "ascii",
+              "value": "Ship2Evo"
+            },
+            {
+              "offset": 774498,
+              "encoding": "ascii",
+              "value": "Ship3Evo"
+            },
+            {
+              "offset": 774507,
+              "encoding": "ascii",
+              "value": "Ship4Evo"
+            },
+            {
+              "offset": 774516,
+              "encoding": "ascii",
+              "value": "Ship5Evo"
+            }
+          ]
+        },
+        {
+          "anchor": "PlayerProfileData",
+          "match_index": 11428,
+          "match_offset": 775486,
+          "match_value": "GetPlayerProfileData",
+          "context": [
+            {
+              "offset": 775339,
+              "encoding": "ascii",
+              "value": "get_CellData"
+            },
+            {
+              "offset": 775352,
+              "encoding": "ascii",
+              "value": "get_ModPointData"
+            },
+            {
+              "offset": 775369,
+              "encoding": "ascii",
+              "value": "get_ShardData"
+            },
+            {
+              "offset": 775383,
+              "encoding": "ascii",
+              "value": "get_ResearchPointData"
+            },
+            {
+              "offset": 775405,
+              "encoding": "ascii",
+              "value": "get_AcademyPointData"
+            },
+            {
+              "offset": 775426,
+              "encoding": "ascii",
+              "value": "get_BlueprintsThisTR"
+            },
+            {
+              "offset": 775447,
+              "encoding": "ascii",
+              "value": "get_ManualGensThisLR"
+            },
+            {
+              "offset": 775468,
+              "encoding": "ascii",
+              "value": "get_TechUpsThisLR"
+            },
+            {
+              "offset": 775486,
+              "encoding": "ascii",
+              "value": "GetPlayerProfileData"
+            },
+            {
+              "offset": 775507,
+              "encoding": "ascii",
+              "value": "SetPlayerProfileTexts"
+            },
+            {
+              "offset": 775529,
+              "encoding": "ascii",
+              "value": "playerData"
+            },
+            {
+              "offset": 775540,
+              "encoding": "ascii",
+              "value": "lastCloudSaveDate"
+            },
+            {
+              "offset": 775558,
+              "encoding": "ascii",
+              "value": "ConvertSaveDataToProfileData"
+            },
+            {
+              "offset": 775587,
+              "encoding": "ascii",
+              "value": "UpdatePlayerProfile"
+            },
+            {
+              "offset": 775607,
+              "encoding": "ascii",
+              "value": "isSave"
+            },
+            {
+              "offset": 775614,
+              "encoding": "ascii",
+              "value": "isLocalPP"
+            },
+            {
+              "offset": 775624,
+              "encoding": "ascii",
+              "value": "playerID"
+            }
+          ]
+        },
+        {
+          "anchor": "PlayerProfileData",
+          "match_index": 11437,
+          "match_offset": 775633,
+          "match_value": "FillPlayerProfileData",
+          "context": [
+            {
+              "offset": 775507,
+              "encoding": "ascii",
+              "value": "SetPlayerProfileTexts"
+            },
+            {
+              "offset": 775529,
+              "encoding": "ascii",
+              "value": "playerData"
+            },
+            {
+              "offset": 775540,
+              "encoding": "ascii",
+              "value": "lastCloudSaveDate"
+            },
+            {
+              "offset": 775558,
+              "encoding": "ascii",
+              "value": "ConvertSaveDataToProfileData"
+            },
+            {
+              "offset": 775587,
+              "encoding": "ascii",
+              "value": "UpdatePlayerProfile"
+            },
+            {
+              "offset": 775607,
+              "encoding": "ascii",
+              "value": "isSave"
+            },
+            {
+              "offset": 775614,
+              "encoding": "ascii",
+              "value": "isLocalPP"
+            },
+            {
+              "offset": 775624,
+              "encoding": "ascii",
+              "value": "playerID"
+            },
+            {
+              "offset": 775633,
+              "encoding": "ascii",
+              "value": "FillPlayerProfileData"
+            },
+            {
+              "offset": 775655,
+              "encoding": "ascii",
+              "value": "formatNumber"
+            },
+            {
+              "offset": 775668,
+              "encoding": "ascii",
+              "value": "defaultValue"
+            },
+            {
+              "offset": 775681,
+              "encoding": "ascii",
+              "value": "SafeParseInt"
+            },
+            {
+              "offset": 775694,
+              "encoding": "ascii",
+              "value": "SafeParseBool"
+            },
+            {
+              "offset": 775708,
+              "encoding": "ascii",
+              "value": "fragmentValue"
+            },
+            {
+              "offset": 775722,
+              "encoding": "ascii",
+              "value": "getDecimalPlace"
+            },
+            {
+              "offset": 775738,
+              "encoding": "ascii",
+              "value": "evoLevel"
+            },
+            {
+              "offset": 775747,
+              "encoding": "ascii",
+              "value": "unlocked"
+            }
+          ]
+        },
+        {
+          "anchor": "PlayerProfileData",
+          "match_index": 11463,
+          "match_offset": 775969,
+          "match_value": "<FillPlayerProfileData>d__45",
+          "context": [
+            {
+              "offset": 775860,
+              "encoding": "ascii",
+              "value": "CellData"
+            },
+            {
+              "offset": 775869,
+              "encoding": "ascii",
+              "value": "ModPointData"
+            },
+            {
+              "offset": 775882,
+              "encoding": "ascii",
+              "value": "ShardData"
+            },
+            {
+              "offset": 775892,
+              "encoding": "ascii",
+              "value": "ResearchPointData"
+            },
+            {
+              "offset": 775910,
+              "encoding": "ascii",
+              "value": "AcademyPointData"
+            },
+            {
+              "offset": 775927,
+              "encoding": "ascii",
+              "value": "BlueprintsThisTR"
+            },
+            {
+              "offset": 775944,
+              "encoding": "ascii",
+              "value": "GemNodeActive"
+            },
+            {
+              "offset": 775962,
+              "encoding": "ascii",
+              "value": "Active"
+            },
+            {
+              "offset": 775969,
+              "encoding": "ascii",
+              "value": "<FillPlayerProfileData>d__45"
+            },
+            {
+              "offset": 775998,
+              "encoding": "ascii",
+              "value": "<UpdatePlayerProfile>d__44"
+            },
+            {
+              "offset": 776025,
+              "encoding": "ascii",
+              "value": "PlayerProfileUI"
+            },
+            {
+              "offset": 776041,
+              "encoding": "ascii",
+              "value": "get_Gem1"
+            },
+            {
+              "offset": 776050,
+              "encoding": "ascii",
+              "value": "get_Gem2"
+            },
+            {
+              "offset": 776059,
+              "encoding": "ascii",
+              "value": "get_Gem3"
+            },
+            {
+              "offset": 776068,
+              "encoding": "ascii",
+              "value": "get_Gem4"
+            },
+            {
+              "offset": 776077,
+              "encoding": "ascii",
+              "value": "get_Gem5"
+            },
+            {
+              "offset": 776086,
+              "encoding": "ascii",
+              "value": "get_Gem6"
+            }
+          ]
+        },
+        {
+          "anchor": "PlayerProfileData",
+          "match_index": 154199,
+          "match_offset": 7562530,
+          "match_value": "E\\Assets\\Scripts\\Data&Saving\\Nakama\\PlayerProfile\\PlayerProfileData.cs",
+          "context": [
+            {
+              "offset": 7561947,
+              "encoding": "ascii",
+              "value": "J\\Assets\\Scripts\\Data&Saving\\Nakama\\Leaderboards\\DataModel\\ResearchPoint.cs"
+            },
+            {
+              "offset": 7562029,
+              "encoding": "ascii",
+              "value": "B\\Assets\\Scripts\\Data&Saving\\Nakama\\Leaderboards\\DataModel\\Shard.cs"
+            },
+            {
+              "offset": 7562103,
+              "encoding": "ascii",
+              "value": "E\\Assets\\Scripts\\Data&Saving\\Nakama\\Leaderboards\\LeaderboardHandler.cs"
+            },
+            {
+              "offset": 7562180,
+              "encoding": "ascii",
+              "value": "I\\Assets\\Scripts\\Data&Saving\\Nakama\\Leaderboards\\UI\\LeaderboardTop200UI.cs"
+            },
+            {
+              "offset": 7562261,
+              "encoding": "ascii",
+              "value": "C\\Assets\\Scripts\\Data&Saving\\Nakama\\Leaderboards\\UI\\LeaderboardUI.cs"
+            },
+            {
+              "offset": 7562336,
+              "encoding": "ascii",
+              "value": "G\\Assets\\Scripts\\Data&Saving\\Nakama\\Leaderboards\\UI\\ScoreboardElement.cs"
+            },
+            {
+              "offset": 7562415,
+              "encoding": "ascii",
+              "value": "3\\Assets\\Scripts\\Data&Saving\\Nakama\\NakamaManager.cs"
+            },
+            {
+              "offset": 7562474,
+              "encoding": "ascii",
+              "value": "0\\Assets\\Scripts\\Data&Saving\\Nakama\\NameChange.cs"
+            },
+            {
+              "offset": 7562530,
+              "encoding": "ascii",
+              "value": "E\\Assets\\Scripts\\Data&Saving\\Nakama\\PlayerProfile\\PlayerProfileData.cs"
+            },
+            {
+              "offset": 7562607,
+              "encoding": "ascii",
+              "value": "H\\Assets\\Scripts\\Data&Saving\\Nakama\\PlayerProfile\\PlayerProfileHandler.cs"
+            },
+            {
+              "offset": 7562687,
+              "encoding": "ascii",
+              "value": "C\\Assets\\Scripts\\Data&Saving\\Nakama\\PlayerProfile\\PlayerProfileUI.cs"
+            },
+            {
+              "offset": 7562762,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Data&Saving\\Nakama\\TempOnlineHandler.cs"
+            },
+            {
+              "offset": 7562825,
+              "encoding": "ascii",
+              "value": "-\\Assets\\Scripts\\Data&Saving\\Nakama\\Tracker.cs"
+            },
+            {
+              "offset": 7562878,
+              "encoding": "ascii",
+              "value": "8\\Assets\\Scripts\\Data&Saving\\Nakama\\Utilities\\CallBack.cs"
+            },
+            {
+              "offset": 7562942,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Data&Saving\\Nakama\\Utilities\\LBCodes.cs"
+            },
+            {
+              "offset": 7563005,
+              "encoding": "ascii",
+              "value": "<\\Assets\\Scripts\\Data&Saving\\Nakama\\Utilities\\NakamaConfig.cs"
+            },
+            {
+              "offset": 7563073,
+              "encoding": "ascii",
+              "value": "?\\Assets\\Scripts\\Data&Saving\\Nakama\\Utilities\\NakamaResources.cs"
+            }
+          ]
+        },
+        {
+          "anchor": "PlayerProfileData",
+          "match_index": 154677,
+          "match_offset": 7588078,
+          "match_value": "|PlayerProfileData",
+          "context": [
+            {
+              "offset": 7587856,
+              "encoding": "ascii",
+              "value": "$LeaderboardHandler|LastSelectedCombo"
+            },
+            {
+              "offset": 7587897,
+              "encoding": "ascii",
+              "value": ",LeaderboardHandler|LeaderboardSelectionCombo"
+            },
+            {
+              "offset": 7587947,
+              "encoding": "ascii",
+              "value": "|LeaderboardTop200UI"
+            },
+            {
+              "offset": 7587972,
+              "encoding": "ascii",
+              "value": "|LeaderboardUI"
+            },
+            {
+              "offset": 7587991,
+              "encoding": "ascii",
+              "value": "LeaderboardUI|MenuButton"
+            },
+            {
+              "offset": 7588020,
+              "encoding": "ascii",
+              "value": "|ScoreboardElement"
+            },
+            {
+              "offset": 7588043,
+              "encoding": "ascii",
+              "value": "|NakamaManager"
+            },
+            {
+              "offset": 7588062,
+              "encoding": "ascii",
+              "value": "|NameChange"
+            },
+            {
+              "offset": 7588078,
+              "encoding": "ascii",
+              "value": "|PlayerProfileData"
+            },
+            {
+              "offset": 7588101,
+              "encoding": "ascii",
+              "value": "PlayerProfileData|GemData"
+            },
+            {
+              "offset": 7588131,
+              "encoding": "ascii",
+              "value": "PlayerProfileData|GemNodeCombo"
+            },
+            {
+              "offset": 7588166,
+              "encoding": "ascii",
+              "value": "|PlayerProfileHandler"
+            },
+            {
+              "offset": 7588191,
+              "encoding": "ascii",
+              "value": "\"PlayerProfileHandler|GemNodeActive"
+            },
+            {
+              "offset": 7588231,
+              "encoding": "ascii",
+              "value": "|PlayerProfileUI"
+            },
+            {
+              "offset": 7588252,
+              "encoding": "ascii",
+              "value": "PlayerProfileUI|GemUI"
+            },
+            {
+              "offset": 7588278,
+              "encoding": "ascii",
+              "value": "PlayerProfileUI|GemUIMainPair"
+            },
+            {
+              "offset": 7588312,
+              "encoding": "ascii",
+              "value": "|TempOnlineHandler"
+            }
+          ]
+        },
+        {
+          "anchor": "PlayerProfileData",
+          "match_index": 154678,
+          "match_offset": 7588101,
+          "match_value": "PlayerProfileData|GemData",
+          "context": [
+            {
+              "offset": 7587897,
+              "encoding": "ascii",
+              "value": ",LeaderboardHandler|LeaderboardSelectionCombo"
+            },
+            {
+              "offset": 7587947,
+              "encoding": "ascii",
+              "value": "|LeaderboardTop200UI"
+            },
+            {
+              "offset": 7587972,
+              "encoding": "ascii",
+              "value": "|LeaderboardUI"
+            },
+            {
+              "offset": 7587991,
+              "encoding": "ascii",
+              "value": "LeaderboardUI|MenuButton"
+            },
+            {
+              "offset": 7588020,
+              "encoding": "ascii",
+              "value": "|ScoreboardElement"
+            },
+            {
+              "offset": 7588043,
+              "encoding": "ascii",
+              "value": "|NakamaManager"
+            },
+            {
+              "offset": 7588062,
+              "encoding": "ascii",
+              "value": "|NameChange"
+            },
+            {
+              "offset": 7588078,
+              "encoding": "ascii",
+              "value": "|PlayerProfileData"
+            },
+            {
+              "offset": 7588101,
+              "encoding": "ascii",
+              "value": "PlayerProfileData|GemData"
+            },
+            {
+              "offset": 7588131,
+              "encoding": "ascii",
+              "value": "PlayerProfileData|GemNodeCombo"
+            },
+            {
+              "offset": 7588166,
+              "encoding": "ascii",
+              "value": "|PlayerProfileHandler"
+            },
+            {
+              "offset": 7588191,
+              "encoding": "ascii",
+              "value": "\"PlayerProfileHandler|GemNodeActive"
+            },
+            {
+              "offset": 7588231,
+              "encoding": "ascii",
+              "value": "|PlayerProfileUI"
+            },
+            {
+              "offset": 7588252,
+              "encoding": "ascii",
+              "value": "PlayerProfileUI|GemUI"
+            },
+            {
+              "offset": 7588278,
+              "encoding": "ascii",
+              "value": "PlayerProfileUI|GemUIMainPair"
+            },
+            {
+              "offset": 7588312,
+              "encoding": "ascii",
+              "value": "|TempOnlineHandler"
+            },
+            {
+              "offset": 7588335,
+              "encoding": "ascii",
+              "value": "|Tracker"
+            }
+          ]
+        },
+        {
+          "anchor": "PlayerProfileData",
+          "match_index": 154679,
+          "match_offset": 7588131,
+          "match_value": "PlayerProfileData|GemNodeCombo",
+          "context": [
+            {
+              "offset": 7587947,
+              "encoding": "ascii",
+              "value": "|LeaderboardTop200UI"
+            },
+            {
+              "offset": 7587972,
+              "encoding": "ascii",
+              "value": "|LeaderboardUI"
+            },
+            {
+              "offset": 7587991,
+              "encoding": "ascii",
+              "value": "LeaderboardUI|MenuButton"
+            },
+            {
+              "offset": 7588020,
+              "encoding": "ascii",
+              "value": "|ScoreboardElement"
+            },
+            {
+              "offset": 7588043,
+              "encoding": "ascii",
+              "value": "|NakamaManager"
+            },
+            {
+              "offset": 7588062,
+              "encoding": "ascii",
+              "value": "|NameChange"
+            },
+            {
+              "offset": 7588078,
+              "encoding": "ascii",
+              "value": "|PlayerProfileData"
+            },
+            {
+              "offset": 7588101,
+              "encoding": "ascii",
+              "value": "PlayerProfileData|GemData"
+            },
+            {
+              "offset": 7588131,
+              "encoding": "ascii",
+              "value": "PlayerProfileData|GemNodeCombo"
+            },
+            {
+              "offset": 7588166,
+              "encoding": "ascii",
+              "value": "|PlayerProfileHandler"
+            },
+            {
+              "offset": 7588191,
+              "encoding": "ascii",
+              "value": "\"PlayerProfileHandler|GemNodeActive"
+            },
+            {
+              "offset": 7588231,
+              "encoding": "ascii",
+              "value": "|PlayerProfileUI"
+            },
+            {
+              "offset": 7588252,
+              "encoding": "ascii",
+              "value": "PlayerProfileUI|GemUI"
+            },
+            {
+              "offset": 7588278,
+              "encoding": "ascii",
+              "value": "PlayerProfileUI|GemUIMainPair"
+            },
+            {
+              "offset": 7588312,
+              "encoding": "ascii",
+              "value": "|TempOnlineHandler"
+            },
+            {
+              "offset": 7588335,
+              "encoding": "ascii",
+              "value": "|Tracker"
+            },
+            {
+              "offset": 7588348,
+              "encoding": "ascii",
+              "value": "Tracker|TrackerDetails"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FillPlayerProfileData",
+      "matches": [
+        {
+          "anchor": "FillPlayerProfileData",
+          "match_index": 11437,
+          "match_offset": 775633,
+          "match_value": "FillPlayerProfileData",
+          "context": [
+            {
+              "offset": 775507,
+              "encoding": "ascii",
+              "value": "SetPlayerProfileTexts"
+            },
+            {
+              "offset": 775529,
+              "encoding": "ascii",
+              "value": "playerData"
+            },
+            {
+              "offset": 775540,
+              "encoding": "ascii",
+              "value": "lastCloudSaveDate"
+            },
+            {
+              "offset": 775558,
+              "encoding": "ascii",
+              "value": "ConvertSaveDataToProfileData"
+            },
+            {
+              "offset": 775587,
+              "encoding": "ascii",
+              "value": "UpdatePlayerProfile"
+            },
+            {
+              "offset": 775607,
+              "encoding": "ascii",
+              "value": "isSave"
+            },
+            {
+              "offset": 775614,
+              "encoding": "ascii",
+              "value": "isLocalPP"
+            },
+            {
+              "offset": 775624,
+              "encoding": "ascii",
+              "value": "playerID"
+            },
+            {
+              "offset": 775633,
+              "encoding": "ascii",
+              "value": "FillPlayerProfileData"
+            },
+            {
+              "offset": 775655,
+              "encoding": "ascii",
+              "value": "formatNumber"
+            },
+            {
+              "offset": 775668,
+              "encoding": "ascii",
+              "value": "defaultValue"
+            },
+            {
+              "offset": 775681,
+              "encoding": "ascii",
+              "value": "SafeParseInt"
+            },
+            {
+              "offset": 775694,
+              "encoding": "ascii",
+              "value": "SafeParseBool"
+            },
+            {
+              "offset": 775708,
+              "encoding": "ascii",
+              "value": "fragmentValue"
+            },
+            {
+              "offset": 775722,
+              "encoding": "ascii",
+              "value": "getDecimalPlace"
+            },
+            {
+              "offset": 775738,
+              "encoding": "ascii",
+              "value": "evoLevel"
+            },
+            {
+              "offset": 775747,
+              "encoding": "ascii",
+              "value": "unlocked"
+            }
+          ]
+        },
+        {
+          "anchor": "FillPlayerProfileData",
+          "match_index": 11463,
+          "match_offset": 775969,
+          "match_value": "<FillPlayerProfileData>d__45",
+          "context": [
+            {
+              "offset": 775860,
+              "encoding": "ascii",
+              "value": "CellData"
+            },
+            {
+              "offset": 775869,
+              "encoding": "ascii",
+              "value": "ModPointData"
+            },
+            {
+              "offset": 775882,
+              "encoding": "ascii",
+              "value": "ShardData"
+            },
+            {
+              "offset": 775892,
+              "encoding": "ascii",
+              "value": "ResearchPointData"
+            },
+            {
+              "offset": 775910,
+              "encoding": "ascii",
+              "value": "AcademyPointData"
+            },
+            {
+              "offset": 775927,
+              "encoding": "ascii",
+              "value": "BlueprintsThisTR"
+            },
+            {
+              "offset": 775944,
+              "encoding": "ascii",
+              "value": "GemNodeActive"
+            },
+            {
+              "offset": 775962,
+              "encoding": "ascii",
+              "value": "Active"
+            },
+            {
+              "offset": 775969,
+              "encoding": "ascii",
+              "value": "<FillPlayerProfileData>d__45"
+            },
+            {
+              "offset": 775998,
+              "encoding": "ascii",
+              "value": "<UpdatePlayerProfile>d__44"
+            },
+            {
+              "offset": 776025,
+              "encoding": "ascii",
+              "value": "PlayerProfileUI"
+            },
+            {
+              "offset": 776041,
+              "encoding": "ascii",
+              "value": "get_Gem1"
+            },
+            {
+              "offset": 776050,
+              "encoding": "ascii",
+              "value": "get_Gem2"
+            },
+            {
+              "offset": 776059,
+              "encoding": "ascii",
+              "value": "get_Gem3"
+            },
+            {
+              "offset": 776068,
+              "encoding": "ascii",
+              "value": "get_Gem4"
+            },
+            {
+              "offset": 776077,
+              "encoding": "ascii",
+              "value": "get_Gem5"
+            },
+            {
+              "offset": 776086,
+              "encoding": "ascii",
+              "value": "get_Gem6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "GetPlayerProfileData",
+      "matches": [
+        {
+          "anchor": "GetPlayerProfileData",
+          "match_index": 11428,
+          "match_offset": 775486,
+          "match_value": "GetPlayerProfileData",
+          "context": [
+            {
+              "offset": 775339,
+              "encoding": "ascii",
+              "value": "get_CellData"
+            },
+            {
+              "offset": 775352,
+              "encoding": "ascii",
+              "value": "get_ModPointData"
+            },
+            {
+              "offset": 775369,
+              "encoding": "ascii",
+              "value": "get_ShardData"
+            },
+            {
+              "offset": 775383,
+              "encoding": "ascii",
+              "value": "get_ResearchPointData"
+            },
+            {
+              "offset": 775405,
+              "encoding": "ascii",
+              "value": "get_AcademyPointData"
+            },
+            {
+              "offset": 775426,
+              "encoding": "ascii",
+              "value": "get_BlueprintsThisTR"
+            },
+            {
+              "offset": 775447,
+              "encoding": "ascii",
+              "value": "get_ManualGensThisLR"
+            },
+            {
+              "offset": 775468,
+              "encoding": "ascii",
+              "value": "get_TechUpsThisLR"
+            },
+            {
+              "offset": 775486,
+              "encoding": "ascii",
+              "value": "GetPlayerProfileData"
+            },
+            {
+              "offset": 775507,
+              "encoding": "ascii",
+              "value": "SetPlayerProfileTexts"
+            },
+            {
+              "offset": 775529,
+              "encoding": "ascii",
+              "value": "playerData"
+            },
+            {
+              "offset": 775540,
+              "encoding": "ascii",
+              "value": "lastCloudSaveDate"
+            },
+            {
+              "offset": 775558,
+              "encoding": "ascii",
+              "value": "ConvertSaveDataToProfileData"
+            },
+            {
+              "offset": 775587,
+              "encoding": "ascii",
+              "value": "UpdatePlayerProfile"
+            },
+            {
+              "offset": 775607,
+              "encoding": "ascii",
+              "value": "isSave"
+            },
+            {
+              "offset": 775614,
+              "encoding": "ascii",
+              "value": "isLocalPP"
+            },
+            {
+              "offset": 775624,
+              "encoding": "ascii",
+              "value": "playerID"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "AchievementInscryptionsReward",
+      "matches": [
+        {
+          "anchor": "AchievementInscryptionsReward",
+          "match_index": 23431,
+          "match_offset": 1015675,
+          "match_value": "AchievementInscryptionsReward",
+          "context": [
+            {
+              "offset": 1015449,
+              "encoding": "ascii",
+              "value": "AchievementRelicLevelsReward"
+            },
+            {
+              "offset": 1015478,
+              "encoding": "ascii",
+              "value": "AchievementMeltdownReward"
+            },
+            {
+              "offset": 1015504,
+              "encoding": "ascii",
+              "value": "AchievementAntimatterCoresReward"
+            },
+            {
+              "offset": 1015537,
+              "encoding": "ascii",
+              "value": "AchievementTraitSpheresReward"
+            },
+            {
+              "offset": 1015567,
+              "encoding": "ascii",
+              "value": "AchievementGemNodesReward"
+            },
+            {
+              "offset": 1015593,
+              "encoding": "ascii",
+              "value": "AchievementBorgeStageReward"
+            },
+            {
+              "offset": 1015621,
+              "encoding": "ascii",
+              "value": "AchievementOzzyStageReward"
+            },
+            {
+              "offset": 1015648,
+              "encoding": "ascii",
+              "value": "AchievementKnoxStageReward"
+            },
+            {
+              "offset": 1015675,
+              "encoding": "ascii",
+              "value": "AchievementInscryptionsReward"
+            },
+            {
+              "offset": 1015705,
+              "encoding": "ascii",
+              "value": "AchievementCellEnhancersReward"
+            },
+            {
+              "offset": 1015736,
+              "encoding": "ascii",
+              "value": "AchievementMatEnhancersReward"
+            },
+            {
+              "offset": 1015766,
+              "encoding": "ascii",
+              "value": "AchievementMechsReward"
+            },
+            {
+              "offset": 1015789,
+              "encoding": "ascii",
+              "value": "AchievementMechMissionsReward"
+            },
+            {
+              "offset": 1015819,
+              "encoding": "ascii",
+              "value": "AchievementTrinketTierLevelsReward"
+            },
+            {
+              "offset": 1015854,
+              "encoding": "ascii",
+              "value": "AchievementTrinketLevelsReward"
+            },
+            {
+              "offset": 1015885,
+              "encoding": "ascii",
+              "value": "AchievementGadgetsUnlockedReward"
+            },
+            {
+              "offset": 1015918,
+              "encoding": "ascii",
+              "value": "AchievementGadgetLevelsReward"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FinalISShardsBonus",
+      "matches": [
+        {
+          "anchor": "FinalISShardsBonus",
+          "match_index": 59413,
+          "match_offset": 1747193,
+          "match_value": "get_FinalISShardsBonus",
+          "context": [
+            {
+              "offset": 1747011,
+              "encoding": "ascii",
+              "value": "get_FinalISFreeKoiosRanks"
+            },
+            {
+              "offset": 1747037,
+              "encoding": "ascii",
+              "value": "set_FinalISFreeKoiosRanks"
+            },
+            {
+              "offset": 1747063,
+              "encoding": "ascii",
+              "value": "get_FinalISCellsBonus"
+            },
+            {
+              "offset": 1747085,
+              "encoding": "ascii",
+              "value": "set_FinalISCellsBonus"
+            },
+            {
+              "offset": 1747107,
+              "encoding": "ascii",
+              "value": "get_FinalISAllGensBonus"
+            },
+            {
+              "offset": 1747131,
+              "encoding": "ascii",
+              "value": "set_FinalISAllGensBonus"
+            },
+            {
+              "offset": 1747155,
+              "encoding": "ascii",
+              "value": "get_FinalISMPBonus"
+            },
+            {
+              "offset": 1747174,
+              "encoding": "ascii",
+              "value": "set_FinalISMPBonus"
+            },
+            {
+              "offset": 1747193,
+              "encoding": "ascii",
+              "value": "get_FinalISShardsBonus"
+            },
+            {
+              "offset": 1747216,
+              "encoding": "ascii",
+              "value": "set_FinalISShardsBonus"
+            },
+            {
+              "offset": 1747239,
+              "encoding": "ascii",
+              "value": "get_FinalISRPBonus"
+            },
+            {
+              "offset": 1747258,
+              "encoding": "ascii",
+              "value": "set_FinalISRPBonus"
+            },
+            {
+              "offset": 1747277,
+              "encoding": "ascii",
+              "value": "get_FinalISOuroOrbsBonus"
+            },
+            {
+              "offset": 1747302,
+              "encoding": "ascii",
+              "value": "set_FinalISOuroOrbsBonus"
+            },
+            {
+              "offset": 1747327,
+              "encoding": "ascii",
+              "value": "get_FinalOzzyMaxHPBonus"
+            },
+            {
+              "offset": 1747351,
+              "encoding": "ascii",
+              "value": "set_FinalOzzyMaxHPBonus"
+            },
+            {
+              "offset": 1747375,
+              "encoding": "ascii",
+              "value": "get_FinalOzzyDamageBonus"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalISShardsBonus",
+          "match_index": 59414,
+          "match_offset": 1747216,
+          "match_value": "set_FinalISShardsBonus",
+          "context": [
+            {
+              "offset": 1747037,
+              "encoding": "ascii",
+              "value": "set_FinalISFreeKoiosRanks"
+            },
+            {
+              "offset": 1747063,
+              "encoding": "ascii",
+              "value": "get_FinalISCellsBonus"
+            },
+            {
+              "offset": 1747085,
+              "encoding": "ascii",
+              "value": "set_FinalISCellsBonus"
+            },
+            {
+              "offset": 1747107,
+              "encoding": "ascii",
+              "value": "get_FinalISAllGensBonus"
+            },
+            {
+              "offset": 1747131,
+              "encoding": "ascii",
+              "value": "set_FinalISAllGensBonus"
+            },
+            {
+              "offset": 1747155,
+              "encoding": "ascii",
+              "value": "get_FinalISMPBonus"
+            },
+            {
+              "offset": 1747174,
+              "encoding": "ascii",
+              "value": "set_FinalISMPBonus"
+            },
+            {
+              "offset": 1747193,
+              "encoding": "ascii",
+              "value": "get_FinalISShardsBonus"
+            },
+            {
+              "offset": 1747216,
+              "encoding": "ascii",
+              "value": "set_FinalISShardsBonus"
+            },
+            {
+              "offset": 1747239,
+              "encoding": "ascii",
+              "value": "get_FinalISRPBonus"
+            },
+            {
+              "offset": 1747258,
+              "encoding": "ascii",
+              "value": "set_FinalISRPBonus"
+            },
+            {
+              "offset": 1747277,
+              "encoding": "ascii",
+              "value": "get_FinalISOuroOrbsBonus"
+            },
+            {
+              "offset": 1747302,
+              "encoding": "ascii",
+              "value": "set_FinalISOuroOrbsBonus"
+            },
+            {
+              "offset": 1747327,
+              "encoding": "ascii",
+              "value": "get_FinalOzzyMaxHPBonus"
+            },
+            {
+              "offset": 1747351,
+              "encoding": "ascii",
+              "value": "set_FinalOzzyMaxHPBonus"
+            },
+            {
+              "offset": 1747375,
+              "encoding": "ascii",
+              "value": "get_FinalOzzyDamageBonus"
+            },
+            {
+              "offset": 1747400,
+              "encoding": "ascii",
+              "value": "set_FinalOzzyDamageBonus"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalISShardsBonus",
+          "match_index": 61062,
+          "match_offset": 1774472,
+          "match_value": "<FinalISShardsBonus>k__BackingField",
+          "context": [
+            {
+              "offset": 1774166,
+              "encoding": "ascii",
+              "value": "<FinalISFreeHephaestusRanks>k__BackingField"
+            },
+            {
+              "offset": 1774210,
+              "encoding": "ascii",
+              "value": "<FinalISFreeDemeterCrew>k__BackingField"
+            },
+            {
+              "offset": 1774250,
+              "encoding": "ascii",
+              "value": "<FinalISFreeDemeterRanks>k__BackingField"
+            },
+            {
+              "offset": 1774291,
+              "encoding": "ascii",
+              "value": "<FinalISFreeKoiosCrew>k__BackingField"
+            },
+            {
+              "offset": 1774329,
+              "encoding": "ascii",
+              "value": "<FinalISFreeKoiosRanks>k__BackingField"
+            },
+            {
+              "offset": 1774368,
+              "encoding": "ascii",
+              "value": "<FinalISCellsBonus>k__BackingField"
+            },
+            {
+              "offset": 1774403,
+              "encoding": "ascii",
+              "value": "<FinalISAllGensBonus>k__BackingField"
+            },
+            {
+              "offset": 1774440,
+              "encoding": "ascii",
+              "value": "<FinalISMPBonus>k__BackingField"
+            },
+            {
+              "offset": 1774472,
+              "encoding": "ascii",
+              "value": "<FinalISShardsBonus>k__BackingField"
+            },
+            {
+              "offset": 1774508,
+              "encoding": "ascii",
+              "value": "<FinalISRPBonus>k__BackingField"
+            },
+            {
+              "offset": 1774540,
+              "encoding": "ascii",
+              "value": "<FinalISOuroOrbsBonus>k__BackingField"
+            },
+            {
+              "offset": 1774578,
+              "encoding": "ascii",
+              "value": "<FinalOzzyMaxHPBonus>k__BackingField"
+            },
+            {
+              "offset": 1774615,
+              "encoding": "ascii",
+              "value": "<FinalOzzyDamageBonus>k__BackingField"
+            },
+            {
+              "offset": 1774653,
+              "encoding": "ascii",
+              "value": "<FinalOzzyDamageReductionBonus>k__BackingField"
+            },
+            {
+              "offset": 1774700,
+              "encoding": "ascii",
+              "value": "<FinalOzzyCritChangeBonus>k__BackingField"
+            },
+            {
+              "offset": 1774742,
+              "encoding": "ascii",
+              "value": "<FinalOzzyEffectChangeBonus>k__BackingField"
+            },
+            {
+              "offset": 1774786,
+              "encoding": "ascii",
+              "value": "<FinalOzzyAtkSpeedBonus>k__BackingField"
+            }
+          ]
+        },
+        {
+          "anchor": "FinalISShardsBonus",
+          "match_index": 61243,
+          "match_offset": 1777984,
+          "match_value": "FinalISShardsBonus",
+          "context": [
+            {
+              "offset": 1777814,
+              "encoding": "ascii",
+              "value": "FinalISFreeHephaestusRanks"
+            },
+            {
+              "offset": 1777841,
+              "encoding": "ascii",
+              "value": "FinalISFreeDemeterCrew"
+            },
+            {
+              "offset": 1777864,
+              "encoding": "ascii",
+              "value": "FinalISFreeDemeterRanks"
+            },
+            {
+              "offset": 1777888,
+              "encoding": "ascii",
+              "value": "FinalISFreeKoiosCrew"
+            },
+            {
+              "offset": 1777909,
+              "encoding": "ascii",
+              "value": "FinalISFreeKoiosRanks"
+            },
+            {
+              "offset": 1777931,
+              "encoding": "ascii",
+              "value": "FinalISCellsBonus"
+            },
+            {
+              "offset": 1777949,
+              "encoding": "ascii",
+              "value": "FinalISAllGensBonus"
+            },
+            {
+              "offset": 1777969,
+              "encoding": "ascii",
+              "value": "FinalISMPBonus"
+            },
+            {
+              "offset": 1777984,
+              "encoding": "ascii",
+              "value": "FinalISShardsBonus"
+            },
+            {
+              "offset": 1778003,
+              "encoding": "ascii",
+              "value": "FinalISRPBonus"
+            },
+            {
+              "offset": 1778018,
+              "encoding": "ascii",
+              "value": "FinalISOuroOrbsBonus"
+            },
+            {
+              "offset": 1778039,
+              "encoding": "ascii",
+              "value": "FinalOzzyMaxHPBonus"
+            },
+            {
+              "offset": 1778059,
+              "encoding": "ascii",
+              "value": "FinalOzzyDamageBonus"
+            },
+            {
+              "offset": 1778080,
+              "encoding": "ascii",
+              "value": "FinalOzzyDamageReductionBonus"
+            },
+            {
+              "offset": 1778110,
+              "encoding": "ascii",
+              "value": "FinalOzzyCritChangeBonus"
+            },
+            {
+              "offset": 1778135,
+              "encoding": "ascii",
+              "value": "FinalOzzyEffectChangeBonus"
+            },
+            {
+              "offset": 1778162,
+              "encoding": "ascii",
+              "value": "FinalOzzyAtkSpeedBonus"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "InscryptionsDone",
+      "matches": [
+        {
+          "anchor": "InscryptionsDone",
+          "match_index": 9739,
+          "match_offset": 746056,
+          "match_value": "InscryptionsDone",
+          "context": [
+            {
+              "offset": 745968,
+              "encoding": "ascii",
+              "value": "IS103Level"
+            },
+            {
+              "offset": 745979,
+              "encoding": "ascii",
+              "value": "IS104Level"
+            },
+            {
+              "offset": 745990,
+              "encoding": "ascii",
+              "value": "IS105Level"
+            },
+            {
+              "offset": 746001,
+              "encoding": "ascii",
+              "value": "IS106Level"
+            },
+            {
+              "offset": 746012,
+              "encoding": "ascii",
+              "value": "IS107Level"
+            },
+            {
+              "offset": 746023,
+              "encoding": "ascii",
+              "value": "IS108Level"
+            },
+            {
+              "offset": 746034,
+              "encoding": "ascii",
+              "value": "IS109Level"
+            },
+            {
+              "offset": 746045,
+              "encoding": "ascii",
+              "value": "IS110Level"
+            },
+            {
+              "offset": 746056,
+              "encoding": "ascii",
+              "value": "InscryptionsDone"
+            },
+            {
+              "offset": 746073,
+              "encoding": "ascii",
+              "value": "EsotericR1Trades"
+            },
+            {
+              "offset": 746090,
+              "encoding": "ascii",
+              "value": "EsotericR2Trades"
+            },
+            {
+              "offset": 746107,
+              "encoding": "ascii",
+              "value": "EsotericR3Trades"
+            },
+            {
+              "offset": 746124,
+              "encoding": "ascii",
+              "value": "EsotericR4Trades"
+            },
+            {
+              "offset": 746141,
+              "encoding": "ascii",
+              "value": "EsotericR5Trades"
+            },
+            {
+              "offset": 746158,
+              "encoding": "ascii",
+              "value": "EsotericR6Trades"
+            },
+            {
+              "offset": 746175,
+              "encoding": "ascii",
+              "value": "EsotericR7Trades"
+            },
+            {
+              "offset": 746192,
+              "encoding": "ascii",
+              "value": "EsotericR8Trades"
+            }
+          ]
+        },
+        {
+          "anchor": "InscryptionsDone",
+          "match_index": 11589,
+          "match_offset": 777824,
+          "match_value": "InscryptionsDoneText",
+          "context": [
+            {
+              "offset": 777698,
+              "encoding": "ascii",
+              "value": "TopStats"
+            },
+            {
+              "offset": 777707,
+              "encoding": "ascii",
+              "value": "OuroBox"
+            },
+            {
+              "offset": 777715,
+              "encoding": "ascii",
+              "value": "OuroBoxLocked"
+            },
+            {
+              "offset": 777729,
+              "encoding": "ascii",
+              "value": "TraversalsText"
+            },
+            {
+              "offset": 777744,
+              "encoding": "ascii",
+              "value": "AllTimeOrbsText"
+            },
+            {
+              "offset": 777760,
+              "encoding": "ascii",
+              "value": "TimeInTraversalText"
+            },
+            {
+              "offset": 777780,
+              "encoding": "ascii",
+              "value": "NextOrbsAccumulatedText"
+            },
+            {
+              "offset": 777804,
+              "encoding": "ascii",
+              "value": "HighestMeltdownText"
+            },
+            {
+              "offset": 777824,
+              "encoding": "ascii",
+              "value": "InscryptionsDoneText"
+            },
+            {
+              "offset": 777845,
+              "encoding": "ascii",
+              "value": "MechsOwnedText"
+            },
+            {
+              "offset": 777860,
+              "encoding": "ascii",
+              "value": "GadgetLevelsText"
+            },
+            {
+              "offset": 777877,
+              "encoding": "ascii",
+              "value": "BottomStats"
+            },
+            {
+              "offset": 777889,
+              "encoding": "ascii",
+              "value": "NewLP1Text"
+            },
+            {
+              "offset": 777900,
+              "encoding": "ascii",
+              "value": "NewLP2Text"
+            },
+            {
+              "offset": 777911,
+              "encoding": "ascii",
+              "value": "NewLP3Text"
+            },
+            {
+              "offset": 777922,
+              "encoding": "ascii",
+              "value": "NewLP4Text"
+            },
+            {
+              "offset": 777933,
+              "encoding": "ascii",
+              "value": "NewLP5Text"
+            }
+          ]
+        },
+        {
+          "anchor": "InscryptionsDone",
+          "match_index": 20671,
+          "match_offset": 959782,
+          "match_value": "SetInscryptionsDoneText",
+          "context": [
+            {
+              "offset": 959563,
+              "encoding": "ascii",
+              "value": "<>c__DisplayClass1205_0"
+            },
+            {
+              "offset": 959587,
+              "encoding": "ascii",
+              "value": "<SetKnoxStatisticsXPAverageText>b__1"
+            },
+            {
+              "offset": 959624,
+              "encoding": "ascii",
+              "value": "<>c__DisplayClass1655_0"
+            },
+            {
+              "offset": 959648,
+              "encoding": "ascii",
+              "value": "<SetIntStatisticsAverageTexts>b__1"
+            },
+            {
+              "offset": 959683,
+              "encoding": "ascii",
+              "value": "<>c__DisplayClass1656_0"
+            },
+            {
+              "offset": 959707,
+              "encoding": "ascii",
+              "value": "<SetDoubleStatisticsAverageTexts>b__1"
+            },
+            {
+              "offset": 959745,
+              "encoding": "ascii",
+              "value": "TextHandlerMarkets"
+            },
+            {
+              "offset": 959764,
+              "encoding": "ascii",
+              "value": "SetAllMarketTexts"
+            },
+            {
+              "offset": 959782,
+              "encoding": "ascii",
+              "value": "SetInscryptionsDoneText"
+            },
+            {
+              "offset": 959806,
+              "encoding": "ascii",
+              "value": "SetHellishBioMatterText"
+            },
+            {
+              "offset": 959830,
+              "encoding": "ascii",
+              "value": "SetAllChrystosEmporiumTexts"
+            },
+            {
+              "offset": 959858,
+              "encoding": "ascii",
+              "value": "SetIS1CostText"
+            },
+            {
+              "offset": 959873,
+              "encoding": "ascii",
+              "value": "SetIS2CostText"
+            },
+            {
+              "offset": 959888,
+              "encoding": "ascii",
+              "value": "SetIS3CostText"
+            },
+            {
+              "offset": 959903,
+              "encoding": "ascii",
+              "value": "SetIS4CostText"
+            },
+            {
+              "offset": 959918,
+              "encoding": "ascii",
+              "value": "SetIS5CostText"
+            },
+            {
+              "offset": 959933,
+              "encoding": "ascii",
+              "value": "SetIS6CostText"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

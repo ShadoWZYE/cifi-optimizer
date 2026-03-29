@@ -1,5 +1,13 @@
 # Grounded Shard Milestone Mechanics and Player Progression for CIFI
 
+## Repo-local intake metadata
+
+- Data classification: `grounded-descriptive`
+- Implementation relevance: descriptive shard workflow support only; not safe for shard cost simulation or ROI ranking
+- Current confidence: medium for milestone names, threshold behavior, and community-reported workflow guidance; low for owner-grounded in-game shard milestone mapping
+- APK/Unity path checked first: no; this note predates the repo's current APK-first intake rule and should be treated as community-grounded descriptive input rather than asset-grounded planner truth
+- Recommended next step: keep using this note only as descriptive support until shard milestone owner mapping is recovered from repo-local APK or Unity artifacts
+
 ## Scope and evidence policy
 
 This report builds a **grounded, dataset-oriented** reference for **Cell: Idle Factory Incremental (CIFI)** shard milestones and shard-related player progression behaviors, using **only mechanics that are directly stated in trusted community references** (wiki pages and guides explicitly sourced from the Official CIFI Discord in several cases), plus what is directly observable in those sources. citeturn13view0turn14view0turn27view0turn28view0turn29view0

@@ -128,36 +128,36 @@
     {
       "id": "data-contracts-and-apk-pipeline",
       "title": "Data contracts and APK-first grounding",
-      "status": "active",
+      "status": "completed",
       "goal": "Lock dataset contracts and make the APK or Unity extraction path the default starting point for new grounded data work.",
-      "currentSlice": "Broaden the contract as new shipped datasets are promoted, instead of letting one-off file shapes drift.",
+      "currentSlice": "Completed: the repo now has a checked-in bundled-dataset contract manifest, an enforced verify:data gate, a dataset refresh checklist, and an APK-first research-note template.",
       "completedSteps": [
         "Document the bundled dataset contract for snapshot, shard, token-shop, and multiverse-market JSON assets.",
-        "Add local validation for the shipped snapshot, shard, token-shop, and multiverse-market datasets."
+        "Add local validation for the shipped snapshot, shard, token-shop, and multiverse-market datasets.",
+        "Ship a checked-in bundled-dataset contract manifest for the current shipped dataset set.",
+        "Record the APK-first source-priority order inside the checked-in dataset contract so future promotions cannot drift silently.",
+        "Add a repo-local refresh checklist and research-note template so future grounded data promotions follow the same contract and source-priority path."
       ],
-      "nextSteps": [
-        "Run npm run verify:data before promoting new bundled dataset changes.",
-        "Keep one documented contract for shipped snapshot, shard, token-shop, and multiverse-market JSON assets.",
-        "Apply the source-priority rule to every new research note: APK first, corroboration second, community gap-filling last."
-      ]
+      "nextSteps": []
     },
     {
       "id": "playerprofile-boundary-and-imports",
       "title": "PlayerProfile boundary and import cleanup",
-      "status": "active",
+      "status": "completed",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Move main ship, shard, loop, and gem reads onto labeled PlayerProfile accessors instead of raw nested field access.",
+      "currentSlice": "Completed: PlayerProfile imports now run through a classified alias inventory, a checked-in alias audit, boundary summary copy, and a reduced non-canonical migration surface.",
       "completedSteps": [
         "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
         "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
         "Show the current PlayerProfile boundary summary in the guided import flow so imported values are visibly classified by namespace.",
-        "Route main ship, shard, loop, and gem reads through labeled PlayerProfile accessor helpers instead of direct nested field access."
+        "Route main ship, shard, loop, and gem reads through labeled PlayerProfile accessor helpers instead of direct nested field access.",
+        "Add executable migration coverage for shard helper aliases, including systems.shards focus fields and invalid helper-value normalization.",
+        "Document and test compatibility-only aliases so stage and metaProgression imports remain migration-only sinks.",
+        "Centralize the surviving alias inventory in one classified map inside the normalizer.",
+        "Ship a checked-in PlayerProfile alias audit artifact and validation path so the import boundary is inspectable and cannot drift silently.",
+        "Retire loose non-canonical aliases so experimental, compatibility, and ship-implementation imports require explicit namespaced paths."
       ],
-      "nextSteps": [
-        "Audit current PlayerProfile fields against MVP-only CIFI concepts.",
-        "Clean up import mapping so new modules read from state.playerProfile first.",
-        "Add migration checks for loop reset, diamonds, tokens, relics, shards, and shard helper inputs."
-      ]
+      "nextSteps": []
     },
     {
       "id": "shards-and-loop-guardrails",
@@ -181,9 +181,9 @@
     {
       "id": "spend-planner-from-extracted-data",
       "title": "Spend planner from extracted token and market data",
-      "status": "active",
+      "status": "queued",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Treat Daily Tokenium as an Academy or Farm Mission reward lane that TokenShop, LoopModifiers, and the Collector pack all touch, then chase the gameplay owner and saved-state inputs for that lane instead of treating it as TokenShop-only.",
+      "currentSlice": "Use the recovered progression-field block around InscryptionsDone, IS*Level, trade counters, and nearby mech fields to determine the declaring save model before planner wiring.",
       "completedSteps": [
         "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
         "Document the spend-system integration gate and current verified versus unresolved app-integration facts.",
@@ -197,7 +197,9 @@
         "Verify the token-shop cost lane against canonical token or tokenium naming from the available assets.",
         "Recover the saved-state owner or formula source behind token-bank cap, fill-speed, and claimable bank tokens from TokenShop or nearby level0 handlers rather than OR_* resource names.",
         "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
-        "Verify the multiverse-market currency and player-owned state inputs from the available assets instead of inferring them from diamonds.",
+        "Confirm whether the recovered InscryptionsDone, IS*Level, trade-counter, and nearby mech fields are declared directly on PlayerProfileData or on another progression sub-model.",
+        "Determine which recovered IS*Level range maps to the currently validated MultiverseMarket rows and which remain outside the validated block.",
+        "Inspect the same save-side neighborhood before assuming any FinalIS or achievement symbol is the saved balance field.",
         "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."
       ]
     },
@@ -206,14 +208,16 @@
       "title": "Unified recommendation feed and test hardening",
       "status": "active",
       "goal": "Converge active MVP-safe module outputs into one explainable feed and make contract drift fail fast.",
-      "currentSlice": "Rank shard and loop warning outputs in one visible feed now, then extend the same contract when spend planning becomes build-ready.",
+      "currentSlice": "Validate representative shard and loop action fixtures through the shared recommendation contract before spend joins the feed.",
       "completedSteps": [
         "Normalize active shard and loop outputs through one ranked recommendation feed.",
-        "Treat feed scores as trust-oriented UI priority rather than as optimizer ROI."
+        "Treat feed scores as trust-oriented UI priority rather than as optimizer ROI.",
+        "Extract recommendation-action normalization and sorting into a shared pure module that app code and tests can both exercise.",
+        "Add checked-in representative shard and loop action fixtures so smoke tests exercise realistic feed payloads."
       ],
       "nextSteps": [
         "Extend the same feed contract to spend recommendations after TokenShop and MultiverseMarket pass their integration gates.",
-        "Expand smoke coverage toward dataset and recommendation contract checks.",
+        "Expand fixture coverage from representative shard and loop actions toward broader module output permutations.",
         "Define the hardening path for future dataset refreshes."
       ]
     }

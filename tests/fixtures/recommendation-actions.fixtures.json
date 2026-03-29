@@ -1,0 +1,49 @@
+{
+  "source": "Representative shard and loop action shapes copied from the active MVP-safe module outputs in app.js.",
+  "actions": [
+    {
+      "id": "loop-guardrail-input-warning",
+      "module": "loop",
+      "kind": "warning",
+      "title": "Add current LR for loop guardrails",
+      "subtitle": "Minimum loop-warning input missing",
+      "score": 96,
+      "confidence": 0.63,
+      "whyNow": [
+        "Current LR is the minimum grounded input needed for loop-reset guardrails in this build.",
+        "Grounded loop guidance depends on pacing examples tied to specific LR transitions."
+      ],
+      "assumptions": [
+        "This module is warning-oriented only and does not simulate best reset timing."
+      ],
+      "warnings": [
+        "Without current LR, the app cannot show the anti-bricking pacing notes captured in the research bundle."
+      ],
+      "notes": "Loop guardrails remain descriptive and source-linked."
+    },
+    {
+      "id": "shard-module-next-unlock-watch",
+      "module": "shards",
+      "kind": "warning",
+      "title": "Next shard unlock to watch",
+      "subtitle": "All imported unlock requirements are covered",
+      "score": 46,
+      "confidence": 0.7,
+      "whyNow": [
+        "Tracked total shard milestone levels already cover all imported unlock requirements.",
+        "Add total shard milestone levels in Player Data to track unlock pacing more precisely.",
+        "Current shards and shard income remain optional manual inputs."
+      ],
+      "assumptions": [
+        "Unlock sequencing is descriptive only and does not imply best spend order.",
+        "Shard optimization math remains disabled while per-level shard costs are unknown."
+      ],
+      "warnings": [
+        "No shard milestone ranking, ROI, ETA, or cost simulation is active in this workflow.",
+        "Shard milestone sources include unresolved discrepancies that keep this workflow descriptive.",
+        "Unlocked does not mean affordable; shard cost data is still unavailable."
+      ],
+      "notes": "This card watches descriptive unlock gates only."
+    }
+  ]
+}

@@ -3,6 +3,11 @@ import {
   createDefaultPlayerProfile,
   normalizePlayerProfile
 } from "./player-profile.js";
+import {
+  sanitizeRecommendationLines as sanitizeNormalizedRecommendationLines,
+  sortRecommendationFeed as sortNormalizedRecommendationFeed,
+  toRecommendationAction as normalizeRecommendationAction
+} from "./recommendation-contract.js";
 
 const STORAGE_KEYS = {
   playerProfile: "cifi-suite.player-profile",
@@ -1445,7 +1450,10 @@ function renderValidationResults() {
 }
 
 function renderResearch() {
-  $("#researchResults").innerHTML = state.snapshot.researchTracks.map((track) => `
+  const orderedTracks = [...state.snapshot.researchTracks].sort(
+    (left, right) => getResearchTrackOrder(left) - getResearchTrackOrder(right)
+  );
+  $("#researchResults").innerHTML = orderedTracks.map((track) => `
     <article class="research-card">
       <div class="research-card-head">
         <div>
@@ -1468,6 +1476,18 @@ function renderResearch() {
       </div>
     </article>
   `).join("");
+}
+
+function getResearchTrackOrder(track) {
+  const order = [
+    "data-contracts-and-apk-pipeline",
+    "playerprofile-boundary-and-imports",
+    "shards-and-loop-guardrails",
+    "unified-feed-and-hardening",
+    "spend-planner-from-extracted-data"
+  ];
+  const index = order.indexOf(track.id);
+  return index === -1 ? order.length : index;
 }
 
 function renderResearchTrackProgress(track) {
@@ -1494,7 +1514,7 @@ function renderResearchTrackSupport(track) {
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Validation path</p>
-      <p class="meta">Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
+      <p class="meta">The checked-in contract lives in <code>data/bundled-dataset-contract.v1.json</code>. Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
       <div class="pill-row">
         <span class="pill">Snapshot</span>
         <span class="pill">Shards</span>
@@ -1506,18 +1526,11 @@ function renderResearchTrackSupport(track) {
 }
 
 function getResearchTrackLane(track) {
-  const order = [
-    "data-contracts-and-apk-pipeline",
-    "playerprofile-boundary-and-imports",
-    "shards-and-loop-guardrails",
-    "spend-planner-from-extracted-data",
-    "unified-feed-and-hardening"
-  ];
-  const index = order.indexOf(track.id);
+  const index = getResearchTrackOrder(track);
   if (index === 0) {
     return "Start Here";
   }
-  if (index > 0 && index < 3) {
+  if (index > 0 && index < 4) {
     return "Next Up";
   }
   return "Queue";
@@ -1544,8 +1557,8 @@ function getResearchTrackPhase(track) {
     "data-contracts-and-apk-pipeline": "PR 1",
     "playerprofile-boundary-and-imports": "PR 1",
     "shards-and-loop-guardrails": "PR 2",
-    "spend-planner-from-extracted-data": "PR 3",
-    "unified-feed-and-hardening": "PR 3+"
+    "unified-feed-and-hardening": "PR 3",
+    "spend-planner-from-extracted-data": "PR 4"
   };
   return phaseById[track.id] || "Research";
 }
@@ -1649,12 +1662,18 @@ function renderPlayerProfileBoundarySummary() {
     },
     {
       title: "External-model implementation state",
-      note: "Current implementation data that stays isolated from shared profile truth.",
+      note: "Current implementation data for canonical systems that stays isolated from shared profile truth. Imports must use explicit systems.ship or externalModels.shipPlanner paths.",
       items: [
         ["Ship planner power", shipPlanner.summary.power],
         ["Ship planner speed", shipPlanner.summary.speed],
         ["Ship planner cargo", shipPlanner.summary.cargo],
-        ["Ship calibration groups", Object.keys(shipPlanner.calibration || {}).length],
+        ["Ship calibration groups", Object.keys(shipPlanner.calibration || {}).length]
+      ]
+    },
+    {
+      title: "Experimental support-surface helpers",
+      note: "Non-MVP experimental or prototype helpers that stay outside canonical shared truth and outside canonical-system implementation state. Loose planning and flat helper aliases are retired.",
+      items: [
         ["Gem-node budget", experimental.gemNodeBudget],
         ["Primary farming focus", experimental.primaryFarmingFocus],
         ["Research hours", experimental.researchHours]
@@ -1662,7 +1681,7 @@ function renderPlayerProfileBoundarySummary() {
     },
     {
       title: "Compatibility leftovers",
-      note: "Preserved migration values and quarantined unmapped system blobs that are not treated as active shared truth.",
+      note: "Preserved migration values and quarantined unmapped system blobs that are not treated as active shared truth. Loose top-level compatibility aliases are retired in favor of explicit compatibility or namespaced legacy paths.",
       items: [
         ["Legacy highest ship unlocked", compatibility.legacyStage.highestShipUnlocked],
         ["Legacy manual phase", compatibility.legacyStage.manualPhase],
@@ -2431,25 +2450,7 @@ function getActiveMvpRecommendationFeed() {
 }
 
 function sortRecommendationFeed(items) {
-  return [...items].sort((left, right) => {
-    const kindRank = getRecommendationKindRank(right.kind) - getRecommendationKindRank(left.kind);
-    if (kindRank !== 0) {
-      return kindRank;
-    }
-    const scoreDiff = Number(right.score || 0) - Number(left.score || 0);
-    if (scoreDiff !== 0) {
-      return scoreDiff;
-    }
-    const confidenceDiff = Number(right.confidence || 0) - Number(left.confidence || 0);
-    if (confidenceDiff !== 0) {
-      return confidenceDiff;
-    }
-    return String(left.title || "").localeCompare(String(right.title || ""));
-  });
-}
-
-function getRecommendationKindRank(kind) {
-  return kind === "warning" ? 2 : 1;
+  return sortNormalizedRecommendationFeed(items);
 }
 
 function renderRecommendationFeedSummary(results, surface) {
@@ -3023,28 +3024,11 @@ function getProfileCompletion(profile) {
 }
 
 function toRecommendationAction(item, fallbackModule) {
-  return {
-    id: String(item?.id || `${fallbackModule || "module"}-${Math.random().toString(36).slice(2, 8)}`),
-    module: String(item?.module || fallbackModule || "module"),
-    kind: item?.kind === "upgrade" ? "upgrade" : "warning",
-    title: String(item?.title || "Untitled recommendation"),
-    score: Number.isFinite(Number(item?.score)) ? Number(item.score) : 0,
-    confidence: Number.isFinite(Number(item?.confidence)) ? Number(item.confidence) : 0,
-    cost: item?.cost,
-    eta: item?.eta,
-    benefit: sanitizeRecommendationLines(item?.benefit),
-    whyNow: sanitizeRecommendationLines(item?.whyNow),
-    assumptions: sanitizeRecommendationLines(item?.assumptions),
-    warnings: sanitizeRecommendationLines(item?.warnings),
-    subtitle: item?.subtitle ?? null,
-    notes: item?.notes ?? null
-  };
+  return normalizeRecommendationAction(item, fallbackModule);
 }
 
 function sanitizeRecommendationLines(value) {
-  return Array.isArray(value)
-    ? value.map((entry) => String(entry || "").trim()).filter(Boolean)
-    : [];
+  return sanitizeNormalizedRecommendationLines(value);
 }
 
 function getPlannerHelperCompletion(profile) {

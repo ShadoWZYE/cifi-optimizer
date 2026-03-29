@@ -1,0 +1,61 @@
+{
+  "contractVersion": "v1",
+  "updatedAt": "2026-03-29",
+  "validationCommand": "npm run verify:data",
+  "sourcePriority": [
+    {
+      "rank": 1,
+      "id": "apk-unity-artifacts",
+      "label": "APK/Unity artifacts first",
+      "description": "Start with repo-local APK and Unity package artifacts plus the extraction outputs committed from them."
+    },
+    {
+      "rank": 2,
+      "id": "official-public-corroboration",
+      "label": "Official/public corroboration second",
+      "description": "Use official or public game-facing sources to verify terminology, labels, and player-facing presentation."
+    },
+    {
+      "rank": 3,
+      "id": "community-gap-filling",
+      "label": "Community gap-filling last",
+      "description": "Use community sources only to fill documented gaps or support clearly labeled external-model behavior."
+    }
+  ],
+  "datasets": [
+    {
+      "id": "snapshot",
+      "label": "App snapshot",
+      "classification": "canonical-app-snapshot",
+      "files": [
+        "data/game-data.snapshot.v1.json"
+      ]
+    },
+    {
+      "id": "shards",
+      "label": "Grounded shard bundle",
+      "classification": "grounded-descriptive",
+      "files": [
+        "data/shard-milestones.grounded.v1.json",
+        "data/shard-observed-behaviors.grounded.v1.json",
+        "data/shard-milestones-provenance.grounded.v1.json"
+      ]
+    },
+    {
+      "id": "token-shop",
+      "label": "Token shop extract",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-values.json"
+      ]
+    },
+    {
+      "id": "multiverse-market",
+      "label": "Multiverse market extract",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-values.json"
+      ]
+    }
+  ]
+}
