@@ -12,6 +12,12 @@ The contract exists to prevent:
 - accidental promotion of speculative data
 - app logic depending on undocumented file shapes
 
+The checked-in source of truth for this contract is:
+
+- `data/bundled-dataset-contract.v1.json`
+
+Use the manifest when adding, removing, or reclassifying bundled datasets. The prose below explains the intent of that manifest and the minimum expectations for each shipped dataset group.
+
 ## Classification labels
 
 Use one of these labels when describing a bundled dataset:
@@ -76,17 +82,27 @@ Use one of these labels when describing a bundled dataset:
   - useful for planner foundation work
   - partial extraction remains partial and must stay labeled that way
 
+## Source-priority metadata
+
+The bundled dataset contract manifest also records the repo's source-priority rule. Every new grounded data note or bundled dataset promotion should keep this order explicit:
+
+1. APK/Unity artifacts and the repo's extraction outputs first
+2. official/public game-facing corroboration second
+3. community gap-filling last
+
+If a future dataset refresh or research note cannot point back to that priority order, it is not ready to be promoted as shipped repo truth.
+
 ## Local validation path
 
 Run:
 
 - `npm run verify:data`
 
-This command validates the current bundled contracts for:
+This command validates the checked-in manifest plus the current bundled contracts for:
 
 - app snapshot
 - grounded shard bundle
 - token shop extract
 - multiverse market extract
 
-Use it before promoting new grounded data or changing shipped dataset shapes.
+Use it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.

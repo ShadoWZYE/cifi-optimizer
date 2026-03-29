@@ -49,7 +49,8 @@ The next work is not "fix the broken app." The next work is to tighten contracts
 ### Changes
 
 - document the dataset contract for shipped JSON assets
-- validate snapshot, shard, token-shop, and multiverse-market datasets
+- ship one checked-in bundled-dataset contract manifest for the shipped JSON asset set
+- validate snapshot, shard, token-shop, and multiverse-market datasets against that manifest
 - tighten `PlayerProfile` and import mapping docs
 - expand tests around normalization and contract shape
 

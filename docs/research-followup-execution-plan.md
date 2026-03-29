@@ -105,14 +105,16 @@ Define the contract for shipped datasets and make validation part of the local w
 
 **Tasks**
 
-- define a shared dataset metadata envelope for shipped JSON assets
+- define a shared checked-in dataset metadata envelope for shipped JSON assets
 - document which datasets are canonical, grounded-descriptive, extracted, or community-derived
 - add validation coverage for snapshot, shard, token-shop, and multiverse-market datasets
 - add a single local command for dataset verification
+- keep the source-priority rule in the checked-in contract so future promotions cannot silently drift away from APK-first grounding
 
 **Deliverables**
 
 - documented dataset contract
+- checked-in bundled-dataset contract manifest
 - validation script or test coverage for shipped datasets
 - updated contributor guidance for adding or refreshing data assets
 

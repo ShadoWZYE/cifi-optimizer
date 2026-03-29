@@ -128,16 +128,17 @@
     {
       "id": "data-contracts-and-apk-pipeline",
       "title": "Data contracts and APK-first grounding",
-      "status": "queued",
+      "status": "active",
       "goal": "Lock dataset contracts and make the APK or Unity extraction path the default starting point for new grounded data work.",
-      "currentSlice": "Broaden the contract as new shipped datasets are promoted, instead of letting one-off file shapes drift.",
+      "currentSlice": "Ship a checked-in bundled-dataset contract manifest and make npm run verify:data enforce dataset membership, classification, and source-priority metadata against it.",
       "completedSteps": [
         "Document the bundled dataset contract for snapshot, shard, token-shop, and multiverse-market JSON assets.",
-        "Add local validation for the shipped snapshot, shard, token-shop, and multiverse-market datasets."
+        "Add local validation for the shipped snapshot, shard, token-shop, and multiverse-market datasets.",
+        "Ship a checked-in bundled-dataset contract manifest for the current shipped dataset set.",
+        "Record the APK-first source-priority order inside the checked-in dataset contract so future promotions cannot drift silently."
       ],
       "nextSteps": [
-        "Run npm run verify:data before promoting new bundled dataset changes.",
-        "Keep one documented contract for shipped snapshot, shard, token-shop, and multiverse-market JSON assets.",
+        "Use npm run verify:data and the checked-in manifest as the promotion gate for every future bundled dataset change.",
         "Apply the source-priority rule to every new research note: APK first, corroboration second, community gap-filling last."
       ]
     },

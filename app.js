@@ -1514,7 +1514,7 @@ function renderResearchTrackSupport(track) {
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Validation path</p>
-      <p class="meta">Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
+      <p class="meta">The checked-in contract lives in <code>data/bundled-dataset-contract.v1.json</code>. Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
       <div class="pill-row">
         <span class="pill">Snapshot</span>
         <span class="pill">Shards</span>

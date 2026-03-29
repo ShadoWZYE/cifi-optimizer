@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 async function readJson(relativePath) {
@@ -18,6 +18,11 @@ function expectNonEmptyString(value, message) {
 
 function expectArray(value, message) {
   assert.ok(Array.isArray(value), message);
+}
+
+function expectPositiveInteger(value, message) {
+  assert.equal(typeof value, "number", message);
+  assert.ok(Number.isInteger(value) && value > 0, message);
 }
 
 function expectSourceIds(sourceIds, knownSources, message) {
@@ -159,7 +164,74 @@ function validateMultiverseMarket(multiverseMarket) {
   };
 }
 
+async function validateBundledDatasetContract(contract) {
+  expectNonEmptyString(contract.contractVersion, "bundled dataset contract version must be present");
+  expectNonEmptyString(contract.updatedAt, "bundled dataset contract updatedAt must be present");
+  expectNonEmptyString(contract.validationCommand, "bundled dataset contract validationCommand must be present");
+  assert.equal(
+    contract.validationCommand,
+    "npm run verify:data",
+    "bundled dataset contract must keep npm run verify:data as the validation command"
+  );
+
+  expectArray(contract.sourcePriority, "bundled dataset contract sourcePriority must be an array");
+  assert.equal(contract.sourcePriority.length, 3, "bundled dataset contract must define the three source-priority tiers");
+  contract.sourcePriority.forEach((entry, index) => {
+    expectPositiveInteger(entry.rank, `sourcePriority[${index}].rank must be a positive integer`);
+    expectNonEmptyString(entry.id, `sourcePriority[${index}].id must be present`);
+    expectNonEmptyString(entry.label, `sourcePriority[${index}].label must be present`);
+    expectNonEmptyString(entry.description, `sourcePriority[${index}].description must be present`);
+    assert.equal(entry.rank, index + 1, `sourcePriority[${index}].rank must stay in source-priority order`);
+  });
+  assert.deepEqual(
+    contract.sourcePriority.map((entry) => entry.id),
+    ["apk-unity-artifacts", "official-public-corroboration", "community-gap-filling"],
+    "bundled dataset contract sourcePriority ids drifted"
+  );
+
+  expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
+  assert.equal(contract.datasets.length, 4, "bundled dataset contract must track the four shipped dataset groups");
+
+  for (const [index, dataset] of contract.datasets.entries()) {
+    expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
+    expectNonEmptyString(dataset.label, `datasets[${index}].label must be present`);
+    expectNonEmptyString(dataset.classification, `datasets[${index}].classification must be present`);
+    expectArray(dataset.files, `datasets[${index}].files must be an array`);
+    assert.ok(dataset.files.length >= 1, `datasets[${index}].files must not be empty`);
+    for (const [fileIndex, relativePath] of dataset.files.entries()) {
+      expectNonEmptyString(relativePath, `datasets[${index}].files[${fileIndex}] must be present`);
+      const fileUrl = new URL(`../${relativePath}`, import.meta.url);
+      await access(fileUrl);
+    }
+  }
+
+  return contract;
+}
+
+function assertContractMatchesValidation(contract, summaries) {
+  const contractById = new Map(contract.datasets.map((dataset) => [dataset.id, dataset]));
+  assert.deepEqual(
+    summaries.map((entry) => entry.id),
+    contract.datasets.map((dataset) => dataset.id),
+    "bundled dataset validation order must match the checked-in contract manifest"
+  );
+
+  summaries.forEach((summary) => {
+    const expected = contractById.get(summary.id);
+    assert.ok(expected, `bundled dataset contract is missing ${summary.id}`);
+    assert.equal(summary.label, expected.label, `bundled dataset label drifted for ${summary.id}`);
+    assert.equal(
+      summary.classification,
+      expected.classification,
+      `bundled dataset classification drifted for ${summary.id}`
+    );
+  });
+}
+
 export async function validateBundledDatasets() {
+  const bundledDatasetContract = await validateBundledDatasetContract(
+    await readJson("../data/bundled-dataset-contract.v1.json")
+  );
   const snapshot = await readJson("../data/game-data.snapshot.v1.json");
   const shardMilestones = await readJson("../data/shard-milestones.grounded.v1.json");
   const shardObserved = await readJson("../data/shard-observed-behaviors.grounded.v1.json");
@@ -167,17 +239,27 @@ export async function validateBundledDatasets() {
   const tokenShop = await readJson("../data/token-shop-values.json");
   const multiverseMarket = await readJson("../data/multiverse-market-values.json");
 
-  return [
+  const summaries = [
     validateSnapshot(snapshot),
     validateShardDatasets(shardMilestones, shardObserved, shardProvenance),
     validateTokenShop(tokenShop),
     validateMultiverseMarket(multiverseMarket)
   ];
+
+  assertContractMatchesValidation(bundledDatasetContract, summaries);
+  return summaries;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const bundledDatasetContract = await readJson("../data/bundled-dataset-contract.v1.json");
   const summaries = await validateBundledDatasets();
-  console.log("Bundled dataset contracts validated:");
+  console.log(`Bundled dataset contracts validated against ${bundledDatasetContract.contractVersion}:`);
+  console.log(`- Validation command: ${bundledDatasetContract.validationCommand}`);
+  console.log(
+    `- Source priority: ${bundledDatasetContract.sourcePriority
+      .map((entry) => `${entry.rank}. ${entry.label}`)
+      .join(" | ")}`
+  );
   summaries.forEach((entry) => {
     console.log(`- ${entry.label} [${entry.classification}]`);
     entry.stats.forEach((stat) => console.log(`  - ${stat}`));

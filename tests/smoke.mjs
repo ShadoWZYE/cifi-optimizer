@@ -22,6 +22,7 @@ const snapshot = JSON.parse(await readFile(new URL("../data/game-data.snapshot.v
 const groundedShardMilestones = JSON.parse(await readFile(new URL("../data/shard-milestones.grounded.v1.json", import.meta.url), "utf8"));
 const groundedShardObserved = JSON.parse(await readFile(new URL("../data/shard-observed-behaviors.grounded.v1.json", import.meta.url), "utf8"));
 const groundedShardProvenance = JSON.parse(await readFile(new URL("../data/shard-milestones-provenance.grounded.v1.json", import.meta.url), "utf8"));
+const bundledDatasetContract = JSON.parse(await readFile(new URL("../data/bundled-dataset-contract.v1.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const agentsMd = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8");
@@ -93,6 +94,28 @@ const sortedFixtureActions = sortRecommendationFeed(normalizedFixtureActions);
 const defaultProfile = createDefaultPlayerProfile();
 
 assert.equal(snapshot.snapshotVersion, "v1.0.0-alpha");
+assert.equal(bundledDatasetContract.contractVersion, "v1");
+assert.equal(bundledDatasetContract.validationCommand, "npm run verify:data");
+assert.deepEqual(
+  bundledDatasetContract.sourcePriority.map((entry) => entry.id),
+  ["apk-unity-artifacts", "official-public-corroboration", "community-gap-filling"]
+);
+assert.deepEqual(
+  bundledDatasetContract.datasets.map((entry) => entry.id),
+  ["snapshot", "shards", "token-shop", "multiverse-market"]
+);
+assert.deepEqual(
+  bundledDatasetContract.datasets.map((entry) => entry.classification),
+  ["canonical-app-snapshot", "grounded-descriptive", "extracted-mechanics", "extracted-mechanics"]
+);
+assert.deepEqual(
+  bundledDatasetContract.datasets.find((entry) => entry.id === "shards")?.files,
+  [
+    "data/shard-milestones.grounded.v1.json",
+    "data/shard-observed-behaviors.grounded.v1.json",
+    "data/shard-milestones-provenance.grounded.v1.json"
+  ]
+);
 assert.deepEqual(
   Object.keys(PLAYER_PROFILE_IMPORT_ALIASES),
   ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
@@ -104,7 +127,7 @@ assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel.some((path) =>
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
 assert.equal(playerProfileAliasAuditData.version, "v1");
 assert.equal(playerProfileAliasAuditData.groupCount, 7);
-assert.equal(playerProfileAliasAuditData.aliasCount, 29);
+assert.equal(playerProfileAliasAuditData.aliasCount, 30);
 assert.deepEqual(
   playerProfileAliasAuditData.groups.map((group) => group.id),
   ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
@@ -126,6 +149,10 @@ assert.equal(groundedShardProvenance.sourceReport, "docs/research/shard-mileston
 assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
   ["snapshot", "shards", "token-shop", "multiverse-market"]
+);
+assert.deepEqual(
+  datasetValidation.map((entry) => entry.classification),
+  bundledDatasetContract.datasets.map((entry) => entry.classification)
 );
 assert.equal(normalizedFeedAction.id, "shard-threshold");
 assert.equal(normalizedFeedAction.kind, "upgrade");
@@ -168,6 +195,11 @@ assert.match(feedTrack.currentSlice, /Validate representative shard and loop act
 const profileTrack = snapshot.researchTracks.find((track) => track.id === "playerprofile-boundary-and-imports");
 assert.ok(profileTrack, "expected player profile track");
 assert.match(profileTrack.currentSlice, /Ship a checked-in PlayerProfile alias audit artifact and validation path/);
+const datasetContractTrack = snapshot.researchTracks.find((track) => track.id === "data-contracts-and-apk-pipeline");
+assert.ok(datasetContractTrack, "expected dataset contract track");
+assert.equal(datasetContractTrack.status, "active");
+assert.match(datasetContractTrack.currentSlice, /Ship a checked-in bundled-dataset contract manifest/);
+assert.match(datasetContractTrack.currentSlice, /source-priority metadata/);
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
 assert.match(agentsMd, /available but unmapped/);
@@ -404,6 +436,7 @@ assert.match(appJs, /\.\/data\/shard-milestones\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-observed-behaviors\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestones-provenance\.grounded\.v1\.json/);
 assert.match(appJs, /npm run verify:data/);
+assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(appJs, /PlayerProfile JSON imported through the grounded normalizer/);
 assert.match(appJs, /Canonical shared truth/);
 assert.match(appJs, /Planner-only helpers/);
@@ -464,6 +497,12 @@ assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/validate-datasets.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+assert.match(importMappingDoc, /compatibility-only fields/i);
+const datasetContractsDoc = await readFile(new URL("../docs/dataset-contracts.md", import.meta.url), "utf8");
+assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);
+assert.match(datasetContractsDoc, /Source-priority metadata/);
+assert.match(datasetContractsDoc, /APK\/Unity artifacts and the repo's extraction outputs first/);
+assert.match(datasetContractsDoc, /editing `data\/bundled-dataset-contract\.v1\.json`/);
 
 await verifyLauncherModeServerLifecycle();
 
