@@ -33,6 +33,7 @@ These fields may be stored in `state.playerProfile`, but they are not canonical 
 | Field | Path | Classification | Notes |
 |---|---|---|---|
 | Shard income / hour | `planning.shards.ratePerHour` | planner-only input | Manual helper for descriptive shard planning. |
+| Total shard milestone levels | `planning.shards.totalMilestoneLevels` | planner-only input | Manual helper for grounded unlock-watch cards, not canonical account truth. |
 
 ## External or experimental model state
 

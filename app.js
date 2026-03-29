@@ -38,9 +38,13 @@ const CANONICAL_PROFILE_FIELD_PATHS = {
   tokens: ["player", "resources", "tokens"],
   academyRelics: ["player", "resources", "academyRelics"],
   shards: ["player", "resources", "shards"],
-  shardRatePerHour: ["planning", "shards", "ratePerHour"],
-  totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"],
   notes: ["notes", "profile"]
+};
+
+const PROFILE_FORM_FIELD_PATHS = {
+  ...CANONICAL_PROFILE_FIELD_PATHS,
+  shardRatePerHour: ["planning", "shards", "ratePerHour"],
+  totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"]
 };
 
 function createDefaultShipPlayerState(baseline) {
@@ -960,6 +964,7 @@ function renderNavigation() {
 function renderQuickPanels() {
   const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
   const completion = getProfileCompletion(state.playerProfile);
+  const helperCompletion = getPlannerHelperCompletion(state.playerProfile);
   $("#snapshotSummary").innerHTML = `
     <span class="snapshot-title">Active snapshot</span>
     <strong class="snapshot-value">${state.snapshot.snapshotVersion}</strong>
@@ -969,6 +974,7 @@ function renderQuickPanels() {
     <span class="snapshot-title">Quick status</span>
     <strong class="snapshot-value">${completion}%</strong>
     <p class="meta">${snapshots.length} LR snapshots saved locally.</p>
+    <p class="meta">Planner helpers filled: ${helperCompletion}%.</p>
   `;
 }
 
@@ -1477,7 +1483,7 @@ function getResearchTrackSource(track) {
 function collectProfileForm() {
   const entries = Object.fromEntries(new FormData($("#profileForm")).entries());
   const nextProfile = structuredClone(state.playerProfile);
-  Object.entries(CANONICAL_PROFILE_FIELD_PATHS).forEach(([field, path]) => {
+  Object.entries(PROFILE_FORM_FIELD_PATHS).forEach(([field, path]) => {
     if (field in entries) {
       setProfileValue(path, coerceInputValue(entries[field]), nextProfile);
     }
@@ -1487,7 +1493,7 @@ function collectProfileForm() {
 }
 
 function fillProfileForm() {
-  Object.entries(CANONICAL_PROFILE_FIELD_PATHS).forEach(([key, path]) => {
+  Object.entries(PROFILE_FORM_FIELD_PATHS).forEach(([key, path]) => {
     const input = formControl(key);
     if (input) {
       input.value = getProfileValue(path) ?? "";
@@ -2591,6 +2597,16 @@ function getProfileCompletion(profile) {
     .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
   const fields = Object.keys(CANONICAL_PROFILE_FIELD_PATHS);
   return Math.round((filled / fields.length) * 100);
+}
+
+function getPlannerHelperCompletion(profile) {
+  const plannerPaths = [
+    ["planning", "shards", "ratePerHour"],
+    ["planning", "shards", "totalMilestoneLevels"]
+  ];
+  const filled = plannerPaths
+    .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
+  return Math.round((filled / plannerPaths.length) * 100);
 }
 
 function makeRecommendationCard(item, module) {
