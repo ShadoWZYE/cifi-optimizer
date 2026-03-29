@@ -78,3 +78,6 @@ The active Profile form should show:
 - clearly labeled planner-only helpers
 
 It should not present external-model or unresolved compatibility fields as raw CIFI account state.
+
+External/community-tool calibration should stay with the quarantined module that uses it.
+In the current app, ship-planner calibration belongs on the Ship Planner page, not on the shared Profile page.

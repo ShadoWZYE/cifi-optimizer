@@ -141,6 +141,7 @@ Tighten the boundary between canonical player state, planning helpers, and exter
 - doc updates for import and profile rules
 - tests for normalization and legacy migration edge cases
 - overview, validation, and support-surface copy that keeps external/community-tool outputs visibly outside grounded MVP truth
+- page structure that keeps external-model calibration attached to its quarantined module instead of the shared Profile surface
 
 **Dependencies**
 

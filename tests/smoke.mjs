@@ -57,6 +57,8 @@ assert.match(html, /Import PlayerProfile JSON/);
 assert.match(html, /Export PlayerProfile JSON/);
 assert.match(html, /Shared profile and labeled helpers/);
 assert.match(html, /Shared PlayerProfile truth is limited to grounded CIFI account state/);
+assert.match(html, /Community-tool Calibration/);
+assert.match(html, /External model inputs preserved with the ship planner/);
 assert.match(html, /Diamonds/);
 assert.match(html, /Academy relics/);
 assert.match(html, /Planner-only helper inputs are optional/);
@@ -70,6 +72,7 @@ assert.match(html, /Total shard milestone levels/);
 assert.match(html, /Grounded MVP checks only/);
 assert.match(html, /Grounded checks and labeled support checks/);
 assert.match(html, /shown separately so validation status does not overstate/);
+assert.doesNotMatch(html, /External model inputs preserved outside raw game state/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);

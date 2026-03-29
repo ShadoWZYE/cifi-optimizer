@@ -185,19 +185,6 @@
           </div>
           <div id="playerProfileImportStatus" class="status-line"></div>
         </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Community-tool Ship Calibration</p>
-              <h2>External model inputs preserved outside raw game state</h2>
-            </div>
-            <button id="saveShipStateBtn" class="button button-primary">Save community-tool calibration</button>
-          </div>
-          <p class="meta">These fields support the quarantined ship planner and community-tool calibration flows. They are not treated as raw in-game CIFI state.</p>
-          <div id="shipPlayerStateStatus" class="status-line"></div>
-          <div id="shipPlayerStatePanel" class="page-grid"></div>
-        </section>
       </section>
 
       <section class="page" data-page="data">
@@ -335,6 +322,18 @@
           <button id="saveShipConfigBtn" class="button button-primary">Save ship planner state</button>
         </div>
           <p class="meta">This planner remains available for compatibility, but it is not a first-class MVP system and its calibration data is labeled as community-tool state.</p>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Community-tool Calibration</p>
+                <h2>External model inputs preserved with the ship planner</h2>
+              </div>
+              <button id="saveShipStateBtn" class="button">Save calibration</button>
+            </div>
+            <p class="meta">These fields stay attached to the quarantined ship planner surface. They are preserved as external-model calibration, not shared PlayerProfile truth.</p>
+            <div id="shipPlayerStateStatus" class="status-line"></div>
+            <div id="shipPlayerStatePanel" class="page-grid"></div>
+          </section>
           <section class="panel">
             <div id="shipConfigStatus" class="status-line"></div>
             <div class="ship-workbench">
