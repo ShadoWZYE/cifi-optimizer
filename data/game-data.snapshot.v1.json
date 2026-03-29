@@ -144,12 +144,14 @@
     {
       "id": "playerprofile-boundary-and-imports",
       "title": "PlayerProfile boundary and import cleanup",
-      "status": "queued",
+      "status": "active",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Tighten which downstream modules are allowed to read non-canonical PlayerProfile fields.",
+      "currentSlice": "Move main ship, shard, loop, and gem reads onto labeled PlayerProfile accessors instead of raw nested field access.",
       "completedSteps": [
         "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
-        "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile."
+        "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
+        "Show the current PlayerProfile boundary summary in the guided import flow so imported values are visibly classified by namespace.",
+        "Route main ship, shard, loop, and gem reads through labeled PlayerProfile accessor helpers instead of direct nested field access."
       ],
       "nextSteps": [
         "Audit current PlayerProfile fields against MVP-only CIFI concepts.",
@@ -161,30 +163,42 @@
       "id": "shards-and-loop-guardrails",
       "title": "Shard workflow and loop guardrails",
       "status": "active",
-      "goal": "Strengthen shard guidance now, then add loop warnings without drifting into speculative simulation.",
-      "currentSlice": "Add the first warning-oriented loop-reset guardrails using only current LR, tracked shards, and grounded guide notes.",
+      "goal": "Keep shard guidance truthful while the repo verifies how much of the shard system is grounded from shipped-game evidence versus descriptive/community sources.",
+      "currentSlice": "Audit the current shard workflow against the stricter system-mapping gate and document which shard facts are game-side grounded versus still descriptive-only.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
-        "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior."
+        "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
+        "Normalize shard and loop module outputs through the shared recommendation action contract.",
+        "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes.",
+        "Document that the current shard milestone dataset is community-grounded descriptive data, not shipped-game owner-grounded milestone data."
       ],
       "nextSteps": [
-        "Tighten shard card wording against the grounded milestone, observed-behavior, and provenance datasets.",
-        "Make shard and loop outputs conform to the shared recommendation action contract."
+        "Document the current boundary between asset-grounded shard facts and descriptive/community-backed shard guidance.",
+        "Verify shard milestone owner mapping from shipped-game assets before promoting milestone names and rows as stronger repo truth.",
+        "Only expand shard recommendations after the system-mapping gate is satisfied."
       ]
     },
     {
       "id": "spend-planner-from-extracted-data",
       "title": "Spend planner from extracted token and market data",
-      "status": "queued",
+      "status": "active",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Normalize extracted spend facts only after data contracts and PlayerProfile inputs are stable.",
+      "currentSlice": "Treat Daily Tokenium as an Academy or Farm Mission reward lane that TokenShop, LoopModifiers, and the Collector pack all touch, then chase the gameplay owner and saved-state inputs for that lane instead of treating it as TokenShop-only.",
       "completedSteps": [
-        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts."
+        "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
+        "Document the spend-system integration gate and current verified versus unresolved app-integration facts.",
+        "Document the TokenShop-connected token-bank state lane and the adjacent mission, chest, and IAP systems it signals for later mapping.",
+        "Document that OR_TokenBankCap and OR_TokensFromChests currently behave like asset-label clues, not recovered formula owners.",
+        "Recover the current token-bank handler split: TokenShop for claim actions, BigStatisticPrefab.TokenBankCap for cap display, and TextHandlerLoopMods.SetLM244BonusText for one daily-tokenium mission text path.",
+        "Close the LM244 question by documenting it as a loop-mod text hook rather than a recovered gameplay owner.",
+        "Document Daily Tokenium as an Academy or Farm Mission reward lane with TokenShop, LoopModifiers, and the Collector pack acting as modifier families around it."
       ],
       "nextSteps": [
-        "Normalize token-shop and multiverse-market values into planner-ready structures.",
-        "Separate grounded spend facts from planner assumptions.",
-        "Define the first shippable token and diamond recommendation slice with explicit confidence and source labeling."
+        "Verify the token-shop cost lane against canonical token or tokenium naming from the available assets.",
+        "Recover the saved-state owner or formula source behind token-bank cap, fill-speed, and claimable bank tokens from TokenShop or nearby level0 handlers rather than OR_* resource names.",
+        "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
+        "Verify the multiverse-market currency and player-owned state inputs from the available assets instead of inferring them from diamonds.",
+        "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."
       ]
     },
     {

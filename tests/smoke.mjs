@@ -18,6 +18,19 @@ const groundedShardObserved = JSON.parse(await readFile(new URL("../data/shard-o
 const groundedShardProvenance = JSON.parse(await readFile(new URL("../data/shard-milestones-provenance.grounded.v1.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const agentsMd = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8");
+const groundingPlan = await readFile(new URL("../docs/cifi_grounding_plan.md", import.meta.url), "utf8");
+const unityAuditPlaybook = await readFile(new URL("../docs/unity-audit-playbook.md", import.meta.url), "utf8");
+const ownerMap = await readFile(new URL("../docs/unity-owner-map.md", import.meta.url), "utf8");
+const spendVerificationDoc = await readFile(new URL("../docs/spend-system-verification.md", import.meta.url), "utf8");
+const tokenBankStateDoc = await readFile(new URL("../docs/token-bank-state-verification.md", import.meta.url), "utf8");
+const dailyTokeniumMissionDoc = await readFile(new URL("../docs/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
+const shardVerificationDoc = await readFile(new URL("../docs/shard-system-verification.md", import.meta.url), "utf8");
+const playerProfileSchemaDoc = await readFile(new URL("../docs/player-profile-schema.md", import.meta.url), "utf8");
+const importMappingDoc = await readFile(new URL("../docs/import-mapping.md", import.meta.url), "utf8");
+const tokenShopDoc = await readFile(new URL("../docs/token-shop-values.md", import.meta.url), "utf8");
+const multiverseMarketDoc = await readFile(new URL("../docs/multiverse-market-values.md", import.meta.url), "utf8");
+const shardIngestDoc = await readFile(new URL("../docs/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
@@ -42,6 +55,91 @@ assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
   ["snapshot", "shards", "token-shop", "multiverse-market"]
 );
+const shardTrack = snapshot.researchTracks.find((track) => track.id === "shards-and-loop-guardrails");
+assert.ok(shardTrack, "expected shard workflow track");
+assert.match(shardTrack.goal, /Keep shard guidance truthful/);
+assert.match(shardTrack.currentSlice, /Audit the current shard workflow against the stricter system-mapping gate/);
+const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
+assert.ok(spendTrack, "expected spend workflow track");
+assert.match(spendTrack.currentSlice, /Treat Daily Tokenium as an Academy or Farm Mission reward lane/);
+assert.match(agentsMd, /## System Integration Gate/);
+assert.match(agentsMd, /Before integrating any game system into the app/);
+assert.match(agentsMd, /available but unmapped/);
+assert.match(agentsMd, /not build-ready until its owner, data shape, labels, currencies, and required player-state inputs are mapped/);
+assert.match(groundingPlan, /## System integration gate/);
+assert.match(groundingPlan, /Fail this gate if any of the above are inferred rather than evidenced/);
+assert.match(groundingPlan, /Presence of extracted data is not enough/);
+assert.match(groundingPlan, /Even when a system is known to exist in CIFI/);
+assert.match(unityAuditPlaybook, /## Integration readiness gate/);
+assert.match(unityAuditPlaybook, /MultiverseMarket/);
+assert.match(ownerMap, /integration status: owner and serialized constants verified/);
+assert.match(ownerMap, /Daily Tokenium lane is now better grounded as an Academy or Farm Mission reward family/);
+assert.match(ownerMap, /OR_TokenBankCap/);
+assert.match(ownerMap, /integration status: owner and partial row constants verified/);
+assert.match(ownerMap, /recovered adjacent handlers/);
+assert.match(ownerMap, /ClaimBankedTokens` -> `TokenShop, Assembly-CSharp/);
+assert.match(ownerMap, /token-bank cap display -> `BigStatisticPrefab\.TokenBankCap`/);
+assert.match(ownerMap, /daily-tokenium mission text path -> `TextHandlerLoopMods\.SetLM244BonusText`/);
+assert.match(ownerMap, /recovered owner-family split/);
+assert.match(ownerMap, /underlying Daily Tokenium lane -> `SpaceAcademy` \/ `FarmMissions` family in `level0`/);
+assert.match(ownerMap, /Collector pack -> premium modifier family on that lane through Academy-menu Daily Tokenium cap text/);
+assert.match(ownerMap, /ruled-out owner shortcut/);
+assert.match(ownerMap, /LM244` is currently grounded as a text-handler path, not as the recovered gameplay owner of daily tokenium/);
+assert.match(ownerMap, /adjacent systems still to map/);
+assert.match(ownerMap, /token-bank cap \/ fill \/ claim owner and save-state inputs/);
+assert.match(ownerMap, /Academy or Farm Mission gameplay owner and saved-state inputs for Daily Tokenium/);
+assert.match(ownerMap, /`DiamondBoost` relation to the wider diamond-upgrade domain/);
+assert.match(ownerMap, /downstream effect owners for generators, token chests, diamond chests, cells, mod points, shards, research points, academy points, hunt loot, campaign fragments, and Ouroboros orbs/);
+assert.match(spendVerificationDoc, /# Spend System Verification Gate/);
+assert.match(spendVerificationDoc, /It is not safe to map its spend lane to diamonds, tokens, or any other player resource without direct evidence/);
+assert.match(spendVerificationDoc, /available but unmapped/);
+assert.match(spendVerificationDoc, /Adjacent systems this signals/);
+assert.match(spendVerificationDoc, /Meltdown-linked gating objects/);
+assert.match(spendVerificationDoc, /downstream effect domains touched by TokenShop upgrades/);
+assert.match(spendVerificationDoc, /token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped`/);
+assert.match(spendVerificationDoc, /OR_TokenBankCap` and `OR_TokensFromChests` should currently be treated as grounded asset labels/);
+assert.match(spendVerificationDoc, /claim actions resolve through `TokenShop`, token-bank cap display resolves through `BigStatisticPrefab\.TokenBankCap`, and at least one daily-tokenium text path resolves through `TextHandlerLoopMods\.SetLM244BonusText`/);
+assert.match(spendVerificationDoc, /LM244` should currently be treated as a loop-mod text or explanation hook for daily tokenium, not as the recovered gameplay owner of that lane/);
+assert.match(spendVerificationDoc, /Daily Tokenium is now better grounded as an Academy or Farm Mission reward lane that `TokenShop`, `LoopModifiers`, and the Collector pack all touch/);
+assert.match(tokenBankStateDoc, /# Token Bank State Verification Gate/);
+assert.match(tokenBankStateDoc, /ClaimBankedTokens/);
+assert.match(tokenBankStateDoc, /FinalTokenBankFillSpeed/);
+assert.match(tokenBankStateDoc, /0 \/ 2000 Daily Tokenium \(from blue farm missions\)/);
+assert.match(tokenBankStateDoc, /## Source narrowing from this pass/);
+assert.match(tokenBankStateDoc, /do not treat `OR_TokenBankCap` or `OR_TokensFromChests` as recovered formulas/);
+assert.match(tokenBankStateDoc, /## Handler split recovered from this pass/);
+assert.match(tokenBankStateDoc, /ClaimBankedTokens` appears directly beside `TokenShop, Assembly-CSharp`/);
+assert.match(tokenBankStateDoc, /BigStatisticPrefab\.TokenBankCap/);
+assert.match(tokenBankStateDoc, /TextHandlerLoopMods, Assembly-CSharp` -> `SetLM244BonusText/);
+assert.match(tokenBankStateDoc, /## LM244 conclusion from this pass/);
+assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
+assert.match(tokenBankStateDoc, /## Daily Tokenium lane correction/);
+assert.match(tokenBankStateDoc, /Daily Tokenium currently belongs to an Academy or Farm Mission lane that multiple systems touch/);
+assert.match(tokenBankStateDoc, /Mission \/ farm mission rewards/);
+assert.match(tokenBankStateDoc, /IAP \/ permanent pack modifiers/);
+assert.match(dailyTokeniumMissionDoc, /# Daily Tokenium Mission Lane Verification/);
+assert.match(dailyTokeniumMissionDoc, /Daily Tokenium currently belongs to the Academy or Farm Mission reward family/);
+assert.match(dailyTokeniumMissionDoc, /Modifier-family split recovered from this pass/);
+assert.match(dailyTokeniumMissionDoc, /grounded as one modifier family on the lane because a TokenShop upgrade text explicitly increases the Daily Tokenium cap/);
+assert.match(dailyTokeniumMissionDoc, /grounded as a premium modifier family on the lane because its description explicitly increases Mission Materials and the Daily Tokenium cap in the Academy menu/);
+assert.match(shardVerificationDoc, /# Shard System Verification Gate/);
+assert.match(shardVerificationDoc, /community-grounded descriptive data/);
+assert.match(shardVerificationDoc, /not yet mapped enough from shipped-game assets/);
+assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState/);
+assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
+assert.match(tokenShopDoc, /## Integration status/);
+assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
+assert.match(tokenShopDoc, /## Adjacent systems still to map/);
+assert.match(tokenShopDoc, /Academy \/ farm mission tokenium lane/);
+assert.match(tokenShopDoc, /Diamond-related upgrade lane inside TokenShop/);
+assert.match(tokenShopDoc, /## Future mapping signals/);
+assert.match(tokenShopDoc, /gameplay owner and saved-state family for the Academy or Farm Mission Daily Tokenium lane/);
+assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to affect/);
+assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
+assert.match(multiverseMarketDoc, /## Integration status/);
+assert.match(multiverseMarketDoc, /the actual spend currency lane/);
+assert.match(shardIngestDoc, /community-grounded descriptive data/);
+assert.match(shardIngestDoc, /not yet shipped-game owner-grounded data/);
 
 assert.match(html, /Player Data/);
 assert.match(html, /Game Data/);
@@ -55,21 +153,28 @@ assert.match(html, /Reset to blank profile/);
 assert.match(html, /PlayerProfile JSON/);
 assert.match(html, /Import PlayerProfile JSON/);
 assert.match(html, /Export PlayerProfile JSON/);
+assert.match(html, /playerProfileImportSummary/);
 assert.match(html, /Shared profile and labeled helpers/);
 assert.match(html, /Shared PlayerProfile truth is limited to grounded CIFI account state/);
+assert.match(html, /ship calibration remains outside shared profile truth as external-model implementation data/);
+assert.match(html, /Community-tool Calibration/);
+assert.match(html, /External model inputs preserved with the ship planner/);
 assert.match(html, /Diamonds/);
 assert.match(html, /Academy relics/);
 assert.match(html, /Planner-only helper inputs are optional/);
 assert.match(html, /Profile readiness/);
 assert.doesNotMatch(html, /Rank shard milestones/);
 assert.match(html, /Shard milestones \(disabled pending verified schema\)/);
-assert.match(html, /Grounded shard workflow/);
+assert.match(html, /Descriptive shard workflow/);
 assert.match(html, /Focus milestone/);
 assert.match(html, /Observed level on focus milestone/);
 assert.match(html, /Total shard milestone levels/);
 assert.match(html, /Grounded MVP checks only/);
-assert.match(html, /Grounded checks and labeled support checks/);
-assert.match(html, /shown separately so validation status does not overstate/);
+assert.match(html, /Grounded checks, APK grounding, and support checks/);
+assert.match(html, /APK-grounding checks/);
+assert.match(html, /Ship checks stay in the grounded section because the system is canonical/);
+assert.match(html, /validation can catch behavior drift and extracted-data mixing without overstating/);
+assert.doesNotMatch(html, /External model inputs preserved outside raw game state/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);
@@ -82,15 +187,29 @@ assert.match(appJs, /function getResearchTrackStatus/);
 assert.match(appJs, /function getResearchTrackProgressLabel/);
 assert.match(appJs, /function importPlayerProfileJson/);
 assert.match(appJs, /function exportPlayerProfileJson/);
+assert.match(appJs, /function renderPlayerProfileBoundarySummary/);
+assert.match(appJs, /function isBoundaryValuePresent/);
+assert.match(appJs, /function formatBoundaryValue/);
+assert.match(appJs, /function getCanonicalProfileState/);
+assert.match(appJs, /function getShardPlannerState/);
+assert.match(appJs, /function getShipPlannerState/);
+assert.match(appJs, /function getExperimentalProfileState/);
+assert.match(appJs, /function getCompatibilityProfileState/);
 assert.match(appJs, /function initServerSession/);
 assert.match(appJs, /function closeServerSession/);
 assert.match(appJs, /function parseServerEvent/);
 assert.match(appJs, /function getGemPlannerBudget/);
 assert.match(appJs, /function getPlannerHelperCompletion/);
-assert.match(appJs, /NON_MVP_VALIDATION_MODULES/);
+assert.match(appJs, /SUPPORT_SURFACE_VALIDATION_MODULES/);
+assert.match(appJs, /function buildApkGroundingValidationCases/);
 assert.match(appJs, /function renderOverviewSupportSummary/);
 assert.match(appJs, /function renderSupportSurfaceNotice/);
 assert.match(appJs, /function renderValidationSection/);
+assert.match(appJs, /function toRecommendationAction/);
+assert.match(appJs, /function sanitizeRecommendationLines/);
+assert.match(appJs, /function getSourceTitlesForIds/);
+assert.match(appJs, /function getMilestoneSourceLabel/);
+assert.match(appJs, /function getProvenanceConflictNote/);
 assert.match(appJs, /function buildLoopGuardrailRecommendations/);
 assert.match(appJs, /function getObservedBehaviorById/);
 assert.match(appJs, /function saveShardPlannerInputs/);
@@ -115,15 +234,38 @@ assert.match(appJs, /\.\/data\/shard-observed-behaviors\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestones-provenance\.grounded\.v1\.json/);
 assert.match(appJs, /npm run verify:data/);
 assert.match(appJs, /PlayerProfile JSON imported through the grounded normalizer/);
+assert.match(appJs, /Canonical shared truth/);
+assert.match(appJs, /Planner-only helpers/);
+assert.match(appJs, /External-model implementation state/);
+assert.match(appJs, /Compatibility leftovers/);
+assert.match(appJs, /Unmapped shard milestone state/);
+assert.match(appJs, /Unmapped TokenShop state/);
+assert.match(appJs, /Unmapped MultiverseMarket state/);
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
 assert.match(appJs, /quarantined support surface/);
-assert.match(appJs, /Support surfaces stay out of the MVP feed/);
-assert.match(appJs, /Community-tool ship results/);
+assert.match(appJs, /Grounding checks stay separate from MVP behavior/);
+assert.match(appJs, /TokenShop owner payload/);
+assert.match(appJs, /MultiverseMarket owner payload/);
+assert.match(appJs, /Shard milestone mapping gate/);
+assert.match(appJs, /Available but unmapped/);
+assert.match(appJs, /Ship planner is a canonical system with provisional tool wiring/);
+assert.match(appJs, /Canonical ship system, provisional implementation/);
 assert.match(appJs, /Experimental gem results/);
 assert.match(appJs, /Grounded MVP checks/);
+assert.match(appJs, /APK-grounding checks/);
 assert.match(appJs, /Support-surface checks/);
+assert.match(appJs, /Loop guardrails remain descriptive and source-linked/);
+assert.match(appJs, /This card watches descriptive unlock gates only/);
+assert.match(appJs, /Shard milestone mapping status/);
+assert.match(appJs, /community-grounded descriptive data/);
+assert.match(appJs, /Grounded shard anchors/);
+assert.match(appJs, /Descriptive directory/);
+assert.match(appJs, /Threshold guidance is milestone-specific and descriptive only/);
+assert.match(appJs, /Use this to avoid false precision near known cost-bump levels/);
+assert.match(appJs, /buildGroundedShardRecommendations\(\)\.map\(\(item\) => toRecommendationAction\(item, "shards"\)\)/);
+assert.match(appJs, /buildLoopGuardrailRecommendations\(\)\.map\(\(item\) => toRecommendationAction\(item, "loop"\)\)/);
 assert.match(appJs, /\/api\/client\/open/);
 assert.match(appJs, /\/api\/client\/events/);
 assert.match(appJs, /new EventSource/);
@@ -259,6 +401,35 @@ assert.equal(migratedNestedProfile.player.resources.diamonds, 900);
 assert.equal(migratedNestedProfile.planning.shards.ratePerHour, 110);
 assert.equal(migratedNestedProfile.notes.profile, "nested");
 assert.equal(migratedNestedProfile.externalModels.shipPlanner.communityToolState.technical.Meltdown, 12);
+
+const migratedUnmappedSystemsProfile = normalizePlayerProfile({
+  profileName: "Unmapped systems",
+  systems: {
+    shardMilestones: {
+      selectedMilestone: "alpha",
+      observedLevel: 12
+    },
+    tokenShop: {
+      tokenBoostLevel: 4
+    },
+    multiverseMarket: {
+      inscription51Level: 2
+    }
+  }
+});
+
+assert.equal(migratedUnmappedSystemsProfile.meta.profileName, "Unmapped systems");
+assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestones, {
+  selectedMilestone: "alpha",
+  observedLevel: 12
+});
+assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.tokenShop, {
+  tokenBoostLevel: 4
+});
+assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.multiverseMarket, {
+  inscription51Level: 2
+});
+assert.equal(migratedUnmappedSystemsProfile.player.resources.tokens, null);
 
 assert.match(appJs, /function normalizeLoadoutName/);
 assert.match(appJs, /name: normalizeLoadoutName\(stored\.name, fallback\.name\)/);

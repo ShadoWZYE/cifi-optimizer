@@ -47,7 +47,7 @@ const PROFILE_FORM_FIELD_PATHS = {
   totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"]
 };
 
-const NON_MVP_VALIDATION_MODULES = new Set(["ship", "gem"]);
+const SUPPORT_SURFACE_VALIDATION_MODULES = new Set(["gem"]);
 
 function createDefaultShipPlayerState(baseline) {
   return {
@@ -350,6 +350,7 @@ const state = {
   shipBaseline: null,
   shipTemplates: null,
   shardGrounding: null,
+  extractedMechanics: null,
   playerProfile: null,
   shipConfig: null,
   launchCoordinator: null,
@@ -373,12 +374,14 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
     fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
-    fetchJson("./data/shard-milestones-provenance.grounded.v1.json")
+    fetchJson("./data/shard-milestones-provenance.grounded.v1.json"),
+    fetchJson("./data/token-shop-values.json"),
+    fetchJson("./data/multiverse-market-values.json")
   ]);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
@@ -393,6 +396,10 @@ async function bootstrap() {
     milestones: groundedShardMilestones,
     observedBehaviors: groundedShardObservedBehaviors,
     provenance: groundedShardProvenance
+  };
+  state.extractedMechanics = {
+    tokenShop: tokenShopValues,
+    multiverseMarket: multiverseMarketValues
   };
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile,
@@ -739,6 +746,52 @@ function getShipCommunityToolState() {
   return state.playerProfile.externalModels.shipPlanner.communityToolState;
 }
 
+function getCanonicalProfileState() {
+  return {
+    profileName: state.playerProfile.meta.profileName,
+    dataConfidence: state.playerProfile.meta.dataConfidence,
+    loopReset: state.playerProfile.player.loop.loopReset,
+    diamonds: state.playerProfile.player.resources.diamonds,
+    tokens: state.playerProfile.player.resources.tokens,
+    academyRelics: state.playerProfile.player.resources.academyRelics,
+    shards: state.playerProfile.player.resources.shards,
+    notes: state.playerProfile.notes.profile
+  };
+}
+
+function getShardPlannerState() {
+  return {
+    currentShards: state.playerProfile.player.resources.shards,
+    ratePerHour: state.playerProfile.planning.shards.ratePerHour,
+    totalMilestoneLevels: state.playerProfile.planning.shards.totalMilestoneLevels,
+    focusMilestoneId: state.playerProfile.planning.shards.focusMilestoneId,
+    focusMilestoneLevel: state.playerProfile.planning.shards.focusMilestoneLevel
+  };
+}
+
+function getShipPlannerState() {
+  return {
+    summary: state.playerProfile.externalModels.shipPlanner.summary,
+    calibration: state.playerProfile.externalModels.shipPlanner.communityToolState
+  };
+}
+
+function getExperimentalProfileState() {
+  return {
+    gemNodeBudget: state.playerProfile.externalModels.experimental.gemNodes.budget,
+    primaryFarmingFocus: state.playerProfile.externalModels.experimental.profileHints.primaryFarmingFocus,
+    researchHours: state.playerProfile.externalModels.experimental.profileHints.researchHours
+  };
+}
+
+function getCompatibilityProfileState() {
+  return {
+    legacyStage: state.playerProfile.compatibility.legacyStage,
+    unresolved: state.playerProfile.compatibility.unresolvedProfileFields,
+    unmappedSystems: state.playerProfile.compatibility.unmappedSystemState
+  };
+}
+
 function getProfileValue(path) {
   return path.reduce((current, key) => current?.[key], state.playerProfile);
 }
@@ -861,15 +914,16 @@ function bindProfileActions() {
 
   $("#saveSnapshotBtn").addEventListener("click", () => {
     state.playerProfile = collectProfileForm();
+    const canonical = getCanonicalProfileState();
     const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
     snapshots.unshift({
       savedAt: new Date().toISOString(),
-      loopReset: state.playerProfile.player.loop.loopReset,
+      loopReset: canonical.loopReset,
       playerProfile: structuredClone(state.playerProfile)
     });
     saveStoredJson(STORAGE_KEYS.snapshots, snapshots.slice(0, 12));
     persistPlayerProfile();
-    setStatus("profileStatus", `Saved LR snapshot for LR ${state.playerProfile.player.loop.loopReset}.`, "success");
+    setStatus("profileStatus", `Saved LR snapshot for LR ${canonical.loopReset}.`, "success");
     renderAll();
   });
 
@@ -943,6 +997,7 @@ function renderAll() {
   renderNavigation();
   renderQuickPanels();
   renderOverview();
+  renderPlayerProfileBoundarySummary();
   renderShipPlayerState();
   renderSourceRegistry();
   renderGeneratorOcrFileList();
@@ -985,6 +1040,7 @@ function renderOverview() {
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
   const validation = runValidationCases();
   const mvpValidation = validation.filter((item) => item.scope === "MVP");
+  const apkValidation = validation.filter((item) => item.scope === "APK");
   const supportValidation = validation.filter((item) => item.scope === "Support");
   $("#validationStatusValue").textContent = `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
   $("#overviewHighlights").innerHTML = [
@@ -999,15 +1055,37 @@ function renderOverview() {
       confidence: 0.86,
       whyNow: [
         "Shared PlayerProfile truth is limited to canonical MVP fields plus labeled planner helpers.",
-        "Community-tool and experimental state remain isolated instead of being promoted into raw CIFI truth."
+        "Ship calibration remains isolated as external-model state even though the ship system itself is canonical."
       ],
       warnings: [
-        "Do not treat ship planner, gem nodes, research intake, or OCR as grounded MVP recommendations.",
+        "Do not treat gem nodes, research intake, or OCR as grounded MVP recommendations.",
         "Legacy compatibility fields are preserved for migration, not treated as active planning truth."
       ],
       notes: "The primary MVP flow centers on PlayerProfile, imports, shard safety, validation, and explainable recommendations."
     }, "warning"),
-    renderOverviewSupportSummary(supportValidation)
+    makeRecommendationCard({
+      id: "ship-system-bridge-status",
+      module: "ship",
+      kind: "warning",
+      title: "Ship planner is a canonical system with provisional tool wiring",
+      subtitle: "Grounding remap still in progress",
+      score: 0,
+      confidence: 0.78,
+      whyNow: [
+        "The ship loadout optimizer is modeling a real game system, not a speculative support feature.",
+        "Current labels and calibration still come through the community-tool implementation until grounded naming and extracted data are mapped in-repo."
+      ],
+      assumptions: [
+        "Ship calibration remains labeled as external-model state until extracted game data replaces or remaps those fields.",
+        "This does not promote tool-specific labels into canonical PlayerProfile truth."
+      ],
+      warnings: [
+        "Treat current ship labels as provisional where the repo has not yet remapped them to grounded in-game terminology.",
+        "Gem Nodes, OCR, and Research Intake remain outside the grounded MVP recommendation path."
+      ],
+      notes: "Next ship-focused work should remap names and extracted data, not discard the system."
+    }, "ship"),
+    renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
 }
 
@@ -1074,7 +1152,7 @@ function renderSourceRegistry() {
       $("#shipWeightsPanel").innerHTML = `
         <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
           <span class="snapshot-title">Resource priority weights</span>
-        <p class="meta">These community-tool weights drive the quarantined ship planner recommendation and highlighted next best install.</p>
+        <p class="meta">These weights drive the current ship-planner implementation while the repo remaps tool labels to grounded in-game terminology.</p>
         <div class="mini-grid">
           ${Object.entries(state.shipConfig.weights).map(([key, value]) => `
             <label class="mini-field">
@@ -1086,7 +1164,7 @@ function renderSourceRegistry() {
         </article>
           <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
             <span class="snapshot-title">Ship optimizer toggles</span>
-          <p class="meta">These toggles affect only the community-tool ship planner. <code>softCap</code> keeps filtered resource lanes in play at a tiny flat priority of <code>0.01</code>.</p>
+          <p class="meta">These toggles affect the current ship-planner implementation. <code>softCap</code> keeps filtered resource lanes in play at a tiny flat priority of <code>0.01</code>.</p>
           <div class="mini-grid">
             <label class="mini-field">
               <span>softCap</span>
@@ -1294,7 +1372,7 @@ function renderShipActions() {
       const action = button.dataset.shipAction;
       if (action === "apply") {
         persistShipConfig();
-        setStatus("shipConfigStatus", "Applied community-tool ship planner changes.", "success");
+        setStatus("shipConfigStatus", "Applied ship planner changes.", "success");
       }
       if (action === "undo") {
         undoLoadoutChange();
@@ -1322,10 +1400,10 @@ function renderShipActions() {
 
   $("#shipResults").innerHTML = `
     ${renderSupportSurfaceNotice(
-      "Community-tool ship results",
+      "Canonical ship system, provisional implementation",
       [
-        "These cards come from the quarantined ship planner and preserved community-tool calibration.",
-        "Treat them as labeled support output, not grounded MVP recommendations."
+        "These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels.",
+        "Treat the ship output as canonical-domain planning with external-model wiring still being remapped."
       ]
     )}
     ${[leadCard, ...shipRankings.slice(0, 3)].filter(Boolean).map((item) => makeRecommendationCard(item, "ship")).join("")}
@@ -1335,6 +1413,11 @@ function renderShipActions() {
 function renderProgressionResults(results) {
   renderShardPlannerControls();
   $("#progressionResults").innerHTML = `
+    <article class="validation-card warn">
+      <strong>Shard milestone mapping status</strong>
+      <p class="meta">System-level shard anchors are grounded enough for repo truth, but the current milestone list is still community-grounded descriptive data.</p>
+      <p class="meta">Do not treat milestone names, unlock rows, or bonus labels here as shipped-game extracted truth until shard owner mapping is completed.</p>
+    </article>
     <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
     ${renderShardWorkflowSnapshot()}
     ${renderShardWorkflowReference()}
@@ -1345,7 +1428,7 @@ function renderProgressionResults(results) {
 
 function renderGemResults(results) {
   const budget = getGemPlannerBudget();
-  const legacyGemDust = state.playerProfile.compatibility.unresolvedProfileFields.gemDust;
+  const legacyGemDust = getCompatibilityProfileState().unresolved.gemDust;
   const boundaryNotes = [];
 
   if (budget === 0) {
@@ -1376,6 +1459,7 @@ function renderGemResults(results) {
 function renderValidationResults() {
   const results = runValidationCases();
   const mvpResults = results.filter((item) => item.scope === "MVP");
+  const apkResults = results.filter((item) => item.scope === "APK");
   const supportResults = results.filter((item) => item.scope === "Support");
   $("#validationResults").innerHTML = [
     renderValidationSection(
@@ -1384,8 +1468,13 @@ function renderValidationResults() {
       mvpResults
     ),
     renderValidationSection(
+      "APK-grounding checks",
+      "These checks confirm extracted mechanic bundles and explicit mapping gates so available-but-unmapped systems do not get mixed into app truth.",
+      apkResults
+    ),
+    renderValidationSection(
       "Support-surface checks",
-      "These checks cover quarantined ship and gem surfaces. Keep them labeled, but do not treat them as MVP truth.",
+      "These checks cover quarantined support surfaces such as Gem Nodes. Keep them labeled, but do not treat them as MVP truth.",
       supportResults
     )
   ].join("");
@@ -1563,6 +1652,82 @@ function exportPlayerProfileJson() {
   setStatus("playerProfileImportStatus", "Exported PlayerProfile JSON.", "success");
 }
 
+function renderPlayerProfileBoundarySummary() {
+  const canonical = getCanonicalProfileState();
+  const shardPlanner = getShardPlannerState();
+  const shipPlanner = getShipPlannerState();
+  const experimental = getExperimentalProfileState();
+  const compatibility = getCompatibilityProfileState();
+  const groups = [
+    {
+      title: "Canonical shared truth",
+      note: "Grounded account state and metadata that the shared MVP profile can treat as first-class truth.",
+      items: [
+        ["Profile name", canonical.profileName],
+        ["Data confidence", canonical.dataConfidence],
+        ["Current LR", canonical.loopReset],
+        ["Diamonds", canonical.diamonds],
+        ["Tokens", canonical.tokens],
+        ["Academy relics", canonical.academyRelics],
+        ["Current shards", canonical.shards],
+        ["Profile notes", canonical.notes]
+      ]
+    },
+    {
+      title: "Planner-only helpers",
+      note: "Manual helper inputs used by descriptive planners, not canonical account truth.",
+      items: [
+        ["Shard income / hour", shardPlanner.ratePerHour],
+        ["Total shard milestone levels", shardPlanner.totalMilestoneLevels],
+        ["Focus milestone", shardPlanner.focusMilestoneId],
+        ["Focus milestone level", shardPlanner.focusMilestoneLevel]
+      ]
+    },
+    {
+      title: "External-model implementation state",
+      note: "Current implementation data that stays isolated from shared profile truth.",
+      items: [
+        ["Ship planner power", shipPlanner.summary.power],
+        ["Ship planner speed", shipPlanner.summary.speed],
+        ["Ship planner cargo", shipPlanner.summary.cargo],
+        ["Ship calibration groups", Object.keys(shipPlanner.calibration || {}).length],
+        ["Gem-node budget", experimental.gemNodeBudget],
+        ["Primary farming focus", experimental.primaryFarmingFocus],
+        ["Research hours", experimental.researchHours]
+      ]
+    },
+    {
+      title: "Compatibility leftovers",
+      note: "Preserved migration values and quarantined unmapped system blobs that are not treated as active shared truth.",
+      items: [
+        ["Legacy highest ship unlocked", compatibility.legacyStage.highestShipUnlocked],
+        ["Legacy manual phase", compatibility.legacyStage.manualPhase],
+        ["Legacy gemDust", compatibility.unresolved.gemDust],
+        ["Legacy hunter level", compatibility.unresolved.hunterLevel],
+        ["Legacy trait sphere count", compatibility.unresolved.traitSphereCount],
+        ["Legacy mech parts", compatibility.unresolved.mechParts],
+        ["Unmapped shard milestone state", compatibility.unmappedSystems.shardMilestones],
+        ["Unmapped TokenShop state", compatibility.unmappedSystems.tokenShop],
+        ["Unmapped MultiverseMarket state", compatibility.unmappedSystems.multiverseMarket]
+      ]
+    }
+  ];
+
+  $("#playerProfileImportSummary").innerHTML = groups.map((group) => {
+    const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value));
+    return `
+      <article class="preview-card">
+        <strong>${escapeHtml(group.title)}</strong>
+        <p class="meta">${escapeHtml(group.note)}</p>
+        <p class="meta">${populated.length}/${group.items.length} populated</p>
+        ${populated.length
+          ? `<div class="meta-stack">${populated.map(([label, value]) => `<p class="meta">${escapeHtml(label)}: ${escapeHtml(formatBoundaryValue(value))}</p>`).join("")}</div>`
+          : `<p class="meta">No populated fields in this namespace.</p>`}
+      </article>
+    `;
+  }).join("");
+}
+
 function applyInstallTap(installIndex, direction = 1) {
   const loadout = getActiveLoadout();
   const shipKey = state.shipConfig.selectedShipKey;
@@ -1711,7 +1876,7 @@ function rankShipTargets() {
 }
 
 function runShipOptimization() {
-  const ship = state.playerProfile.externalModels.shipPlanner.summary;
+  const ship = getShipPlannerState().summary;
   return [...state.snapshot.shipLoadouts].map((loadout) => ({
     title: loadout.name,
     subtitle: loadout.notes,
@@ -1726,13 +1891,13 @@ function runShipOptimization() {
 }
 
 function runProgressionOptimization() {
-  const groundedResults = buildGroundedShardRecommendations();
-  const loopWarnings = buildLoopGuardrailRecommendations();
+  const groundedResults = buildGroundedShardRecommendations().map((item) => toRecommendationAction(item, "shards"));
+  const loopWarnings = buildLoopGuardrailRecommendations().map((item) => toRecommendationAction(item, "loop"));
   if (groundedResults.length) {
     return [...groundedResults, ...loopWarnings];
   }
 
-  return [{
+  return [toRecommendationAction({
     id: "shard-module-grounding-warning",
     module: "shards",
     kind: "warning",
@@ -1752,16 +1917,19 @@ function runProgressionOptimization() {
       "No shard milestone recommendations are being ranked in this build.",
       "Import verified shard milestone data before re-enabling optimizer behavior."
     ],
-    notes: "Grounded fallback mode avoids fake optimizer precision."
-  }, ...loopWarnings];
+    notes: "Descriptive fallback mode avoids fake optimizer precision."
+  }, "shards"), ...loopWarnings];
 }
 
 function buildLoopGuardrailRecommendations() {
-  const loopReset = Number(state.playerProfile.player.loop.loopReset || 0);
-  const currentShards = Number(state.playerProfile.player.resources.shards || 0);
+  const canonical = getCanonicalProfileState();
+  const loopReset = Number(canonical.loopReset || 0);
+  const currentShards = Number(canonical.shards || 0);
   const antiBricking = getObservedBehaviorById("PPX_EARLY_LR_ANTIBRICKING");
   const shardSpend = getObservedBehaviorById("PPX_SHARDS_EARLY_DISTRIBUTION");
   const zeusWarning = getObservedBehaviorById("PPX_ZEUS_E1000_RESOURCE_PRIO_AND_LR_TARGETS");
+  const antiBrickingSource = getSourceTitlesForIds(antiBricking?.sourceIds).join(" | ");
+  const shardSpendSource = getSourceTitlesForIds(shardSpend?.sourceIds).join(" | ");
 
   if (!loopReset) {
     return [{
@@ -1782,7 +1950,9 @@ function buildLoopGuardrailRecommendations() {
       warnings: [
         "Without current LR, the app cannot show the anti-bricking pacing notes captured in the research bundle."
       ],
-      notes: "Loop guardrails remain descriptive and source-linked."
+      notes: antiBrickingSource
+        ? `Loop guardrails remain descriptive and source-linked (${antiBrickingSource}).`
+        : "Loop guardrails remain descriptive and source-linked."
     }];
   }
 
@@ -1809,7 +1979,9 @@ function buildLoopGuardrailRecommendations() {
         "Use buffer / instant loop checks before pushing LR higher.",
         zeusWarning?.priorities?.[1] || "High LR progression can become 'playing with fire' in guide-side progression notes."
       ],
-      notes: "Guardrail based on grounded community guide examples, not simulated reset math."
+      notes: antiBrickingSource
+        ? `Guardrail based on grounded guide examples from ${antiBrickingSource}, not simulated reset math.`
+        : "Guardrail based on grounded community guide examples, not simulated reset math."
     });
   }
 
@@ -1834,7 +2006,9 @@ function buildLoopGuardrailRecommendations() {
         "Do not carry tracked shards into a reset expecting them to persist.",
         "Use the shard workflow cards to inspect grounded unlocks and thresholds before spending."
       ],
-      notes: "Reset warning only; no shard ROI is implied."
+      notes: shardSpendSource
+        ? `Reset warning only; no shard ROI is implied. Spending note sourced from ${shardSpendSource}.`
+        : "Reset warning only; no shard ROI is implied."
     });
   }
 
@@ -1848,15 +2022,18 @@ function buildGroundedShardRecommendations() {
     return [];
   }
 
-  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
-  const currentShards = state.playerProfile.player.resources.shards;
-  const shardRate = state.playerProfile.planning.shards.ratePerHour;
+  const shardPlanner = getShardPlannerState();
+  const totalLevels = Number(shardPlanner.totalMilestoneLevels || 0);
+  const currentShards = shardPlanner.currentShards;
+  const shardRate = shardPlanner.ratePerHour;
   const focusMilestone = getShardFocusMilestone();
-  const focusLevel = Number(state.playerProfile.planning.shards.focusMilestoneLevel || 0);
+  const focusLevel = Number(shardPlanner.focusMilestoneLevel || 0);
   const nextUnlock = getNextShardUnlockMilestone(totalLevels, milestones);
   const nextThreshold = getNextShardThreshold(focusMilestone, focusLevel, mechanics);
   const nextCostBump = getNextShardCostBump(focusLevel);
   const observation = getPrimaryShardObservation();
+  const conflictNote = getProvenanceConflictNote();
+  const sourceLabel = getMilestoneSourceLabel(nextUnlock || focusMilestone);
 
   return [
     {
@@ -1884,11 +2061,14 @@ function buildGroundedShardRecommendations() {
       ],
       warnings: [
         "No shard milestone ranking, ROI, ETA, or cost simulation is active in this workflow.",
+        conflictNote || "Shard milestone sources include unresolved discrepancies that keep this workflow descriptive.",
         nextUnlock
           ? `${Math.max(getShardUnlockRequirement(nextUnlock) - totalLevels, 0)} additional total shard milestone levels are needed for this unlock.`
           : "Unlocked does not mean affordable; shard cost data is still unavailable."
       ],
-      notes: "This card watches grounded unlock gates only."
+      notes: sourceLabel
+        ? `This card watches descriptive unlock gates only (${sourceLabel}).`
+        : "This card watches descriptive unlock gates only."
     },
     {
       id: "shard-module-next-threshold-watch",
@@ -1914,9 +2094,12 @@ function buildGroundedShardRecommendations() {
       ],
       warnings: [
         focusMilestone?.uncertaintyNotes?.[0] || "Unknown/Unkown source values remain preserved where the source was incomplete.",
+        conflictNote || "Threshold wording stays descriptive because milestone sources conflict across accessible snapshots.",
         nextThreshold ? `You need ${Math.max(nextThreshold - focusLevel, 0)} more levels on the selected milestone to reach this threshold.` : "Threshold watch ends here unless you switch milestones."
       ],
-      notes: "Threshold guidance is milestone-specific and descriptive only."
+      notes: sourceLabel
+        ? `Threshold guidance is milestone-specific and descriptive only (${sourceLabel}).`
+        : "Threshold guidance is milestone-specific and descriptive only."
     },
     {
       id: "shard-module-cost-bump-watch",
@@ -1938,9 +2121,12 @@ function buildGroundedShardRecommendations() {
       ],
       warnings: [
         "Cost bumps are warning zones only; the app does not estimate shard affordability.",
+        conflictNote || "Cost wording stays generic until a single authoritative milestone list and cost table exist.",
         focusMilestone?.costProgression?.notes || "No per-level shard costs were found in accessible sources."
       ],
-      notes: "Use this to avoid false precision near known cost-bump levels."
+      notes: sourceLabel
+        ? `Use this to avoid false precision near known cost-bump levels (${sourceLabel}).`
+        : "Use this to avoid false precision near known cost-bump levels."
     }
   ];
 }
@@ -1957,6 +2143,7 @@ function saveShardPlannerInputs() {
 
 function renderShardPlannerControls() {
   const milestones = getGroundedShardMilestones();
+  const shardPlanner = getShardPlannerState();
   const select = formControl("shardFocusMilestoneId");
   const input = formControl("shardFocusMilestoneLevel");
   if (!select || !input || !milestones.length) {
@@ -1967,22 +2154,23 @@ function renderShardPlannerControls() {
     <option value="${escapeHtml(String(milestone.id))}">${escapeHtml(`${milestone.name} (${formatShardRarity(milestone.rarity)})`)}</option>
   `).join("");
   select.value = selectedId;
-  input.value = state.playerProfile.planning.shards.focusMilestoneLevel ?? "";
+  input.value = shardPlanner.focusMilestoneLevel ?? "";
 }
 
 function renderShardWorkflowSnapshot() {
   const mechanicsBundle = state.shardGrounding?.milestones?.canonicalMechanics ?? {};
   const milestones = getGroundedShardMilestones();
-  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
+  const shardPlanner = getShardPlannerState();
+  const totalLevels = Number(shardPlanner.totalMilestoneLevels || 0);
   const nextUnlock = getNextShardUnlockMilestone(totalLevels, milestones);
   return `
     <div class="page-grid">
       <article class="snapshot-card">
         <span class="snapshot-title">Shard workflow snapshot</span>
         <strong>${escapeHtml(nextUnlock ? nextUnlock.name : "All unlock gates covered")}</strong>
-        <p class="meta">Current shards: ${formatOptionalNumber(state.playerProfile.player.resources.shards)} | Shard income / hour: ${formatOptionalNumber(state.playerProfile.planning.shards.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(state.playerProfile.planning.shards.totalMilestoneLevels)}</p>
+        <p class="meta">Current shards: ${formatOptionalNumber(shardPlanner.currentShards)} | Shard income / hour: ${formatOptionalNumber(shardPlanner.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(shardPlanner.totalMilestoneLevels)}</p>
         <div class="meta-stack">
-          <p class="snapshot-title">Grounded mechanics</p>
+          <p class="snapshot-title">Grounded shard anchors</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.unlock_condition?.description || "Shard unlock condition unavailable.")}</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.how_acquired?.description || "Shard acquisition note unavailable.")}</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.reset_behavior?.description || "Loop-reset behavior note unavailable.")}</p>
@@ -2063,6 +2251,7 @@ function renderObservedShardBehaviors() {
       <article class="snapshot-card">
         <span class="snapshot-title">Provenance hygiene</span>
         <p class="meta">Source report: ${escapeHtml(provenance?.sourceReport || "docs/research/shard-milestones-grounded-2026-03-28.md")}</p>
+        <p class="meta">Milestone rows in this workflow are community-grounded descriptive data, not shipped-game owner-mapped shard milestone data.</p>
         <div class="meta-stack">
           <p class="snapshot-title">Review sources</p>
           ${Object.values(provenance?.sources || {}).slice(0, 5).map((source) => `
@@ -2079,8 +2268,9 @@ function renderShardMilestoneDirectory() {
   const milestones = getMilestonesForDisplay();
   return `
     <div class="meta-stack">
-      <p class="eyebrow">Grounded directory</p>
+      <p class="eyebrow">Descriptive directory</p>
       <h3>Shard milestones</h3>
+      <p class="meta">These milestone rows are sourced from named community references with preserved uncertainty and conflicts. They are not yet mapped from shipped-game shard milestone owners.</p>
       <div class="preview-stack">
         ${milestones.map((milestone) => `
           <details class="snapshot-card shard-milestone-card" ${milestone.id === getSelectedShardMilestoneId() ? "open" : ""}>
@@ -2136,7 +2326,7 @@ function runGemOptimization() {
 }
 
 function getGemPlannerBudget() {
-  return Number(state.playerProfile.externalModels.experimental.gemNodes.budget || 0);
+  return Number(getExperimentalProfileState().gemNodeBudget || 0);
 }
 
 function runValidationCases() {
@@ -2145,26 +2335,88 @@ function runValidationCases() {
     progression: runProgressionOptimization()[0]?.title ?? "None",
     gem: runGemOptimization()[0]?.title ?? "None"
   };
-  return state.snapshot.validationCases.map((item) => ({
+  const appCases = state.snapshot.validationCases.map((item) => ({
     title: item.title,
     expected: item.expected,
     actual: current[item.module],
     pass: item.expected === current[item.module],
-    scope: NON_MVP_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
+    scope: SUPPORT_SURFACE_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
   }));
+
+  return [...appCases, ...buildApkGroundingValidationCases()];
 }
 
-function renderOverviewSupportSummary(supportValidation) {
-  if (!supportValidation.length) {
+function buildApkGroundingValidationCases() {
+  const tokenShop = state.extractedMechanics?.tokenShop;
+  const multiverseMarket = state.extractedMechanics?.multiverseMarket;
+  const shardMilestones = state.shardGrounding?.milestones;
+  const cases = [];
+
+  if (tokenShop) {
+    const numericTable = tokenShop.numeric_table ?? {};
+    cases.push({
+      title: "TokenShop owner payload",
+      expected: "Grounded TokenShop constants available",
+      actual: tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost
+        ? "Grounded TokenShop constants available"
+        : "Missing expected TokenShop constants",
+      pass: Boolean(tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost),
+      scope: "APK"
+    });
+    cases.push({
+      title: "TokenShop mapping gate",
+      expected: "Available but unmapped",
+      actual: "Available but unmapped",
+      pass: true,
+      scope: "APK"
+    });
+  }
+
+  if (multiverseMarket) {
+    const records = Array.isArray(multiverseMarket.records) ? multiverseMarket.records : [];
+    const hasAnchor = records.some((record) => Number(record.inscription_id) === 51 && Number(record.start_cost) === 2);
+    cases.push({
+      title: "MultiverseMarket owner payload",
+      expected: "Validated late-block constants available",
+      actual: hasAnchor ? "Validated late-block constants available" : "Missing validated late-block anchor",
+      pass: hasAnchor,
+      scope: "APK"
+    });
+    cases.push({
+      title: "MultiverseMarket mapping gate",
+      expected: "Available but unmapped",
+      actual: "Available but unmapped",
+      pass: true,
+      scope: "APK"
+    });
+  }
+
+  if (shardMilestones) {
+    cases.push({
+      title: "Shard milestone mapping gate",
+      expected: "Community-grounded descriptive dataset",
+      actual: "Community-grounded descriptive dataset",
+      pass: true,
+      scope: "APK"
+    });
+  }
+
+  return cases;
+}
+
+function renderOverviewSupportSummary(apkValidation, supportValidation) {
+  if (!apkValidation.length && !supportValidation.length) {
     return "";
   }
 
+  const apkPassing = apkValidation.filter((item) => item.pass).length;
   const passing = supportValidation.filter((item) => item.pass).length;
   return `
     <article class="validation-card warn">
-      <strong>Support surfaces stay out of the MVP feed</strong>
-      <p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>
-      <p class="meta">Ship planner and Gem Nodes remain available for compatibility and experimentation, but they do not count as grounded MVP recommendations.</p>
+      <strong>Grounding checks stay separate from MVP behavior</strong>
+      ${apkValidation.length ? `<p class="meta">${apkPassing}/${apkValidation.length} APK-grounding checks currently pass.</p>` : ""}
+      ${supportValidation.length ? `<p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>` : ""}
+      <p class="meta">APK-grounding checks confirm extracted mechanic bundles and mapping gates so available-but-unmapped systems do not get mixed into app truth. Shard milestone rows currently remain descriptive community-grounded data until game-side owner mapping exists.</p>
     </article>
   `;
 }
@@ -2196,7 +2448,7 @@ function renderValidationSection(title, description, results) {
         ${results.map((item) => `
           <article class="validation-card ${item.pass ? "pass" : "warn"}">
             <strong>${item.title}</strong>
-            <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : "| grounded MVP surface"}</p>
+            <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : item.scope === "APK" ? "| extracted grounding gate" : "| grounded MVP surface"}</p>
             <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
             <p class="meta">${item.actual}</p>
           </article>
@@ -2548,7 +2800,7 @@ function getGroundedShardMechanics() {
 }
 
 function getSelectedShardMilestoneId() {
-  return state.playerProfile.planning.shards.focusMilestoneId
+  return getShardPlannerState().focusMilestoneId
     || getDefaultShardFocusMilestoneId(getGroundedShardMilestones())
     || "";
 }
@@ -2557,7 +2809,7 @@ function getDefaultShardFocusMilestoneId(milestones) {
   if (!milestones.length) {
     return "";
   }
-  const totalLevels = Number(state.playerProfile.planning.shards.totalMilestoneLevels || 0);
+  const totalLevels = Number(getShardPlannerState().totalMilestoneLevels || 0);
   return getNextShardUnlockMilestone(totalLevels, milestones)?.id || milestones[0].id;
 }
 
@@ -2636,6 +2888,22 @@ function getObservedBehaviorById(id) {
   return (state.shardGrounding?.observedBehaviors?.observations ?? []).find((observation) => observation.id === id) || null;
 }
 
+function getSourceTitlesForIds(sourceIds = []) {
+  const sourceMap = state.shardGrounding?.provenance?.sources ?? {};
+  return sourceIds
+    .map((sourceId) => sourceMap[sourceId]?.title)
+    .filter(Boolean);
+}
+
+function getMilestoneSourceLabel(milestone) {
+  const titles = getSourceTitlesForIds(milestone?.sourceIds || []);
+  return titles.length ? titles.join(" | ") : "";
+}
+
+function getProvenanceConflictNote() {
+  return (state.shardGrounding?.provenance?.uncertaintyLog ?? []).find((entry) => entry.status === "conflict_detected")?.what_is_missing || "";
+}
+
 function getObservationTitle(observation) {
   const playerState = observation?.playerState ?? {};
   return playerState.run_type
@@ -2673,11 +2941,62 @@ function formatOptionalNumber(value) {
     : formatShardNumber(value);
 }
 
+function isBoundaryValuePresent(value) {
+  if (value === null || value === undefined) {
+    return false;
+  }
+  if (typeof value === "string") {
+    return value.trim() !== "";
+  }
+  if (typeof value === "number") {
+    return Number.isFinite(value);
+  }
+  if (typeof value === "object") {
+    return Object.keys(value).length > 0;
+  }
+  return Boolean(value);
+}
+
+function formatBoundaryValue(value) {
+  if (typeof value === "number") {
+    return formatShardNumber(value);
+  }
+  if (typeof value === "object" && value !== null) {
+    return `${Object.keys(value).length} groups`;
+  }
+  return String(value);
+}
+
 function getProfileCompletion(profile) {
   const filled = Object.values(CANONICAL_PROFILE_FIELD_PATHS)
     .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
   const fields = Object.keys(CANONICAL_PROFILE_FIELD_PATHS);
   return Math.round((filled / fields.length) * 100);
+}
+
+function toRecommendationAction(item, fallbackModule) {
+  return {
+    id: String(item?.id || `${fallbackModule || "module"}-${Math.random().toString(36).slice(2, 8)}`),
+    module: String(item?.module || fallbackModule || "module"),
+    kind: item?.kind === "upgrade" ? "upgrade" : "warning",
+    title: String(item?.title || "Untitled recommendation"),
+    score: Number.isFinite(Number(item?.score)) ? Number(item.score) : 0,
+    confidence: Number.isFinite(Number(item?.confidence)) ? Number(item.confidence) : 0,
+    cost: item?.cost,
+    eta: item?.eta,
+    benefit: sanitizeRecommendationLines(item?.benefit),
+    whyNow: sanitizeRecommendationLines(item?.whyNow),
+    assumptions: sanitizeRecommendationLines(item?.assumptions),
+    warnings: sanitizeRecommendationLines(item?.warnings),
+    subtitle: item?.subtitle ?? null,
+    notes: item?.notes ?? null
+  };
+}
+
+function sanitizeRecommendationLines(value) {
+  return Array.isArray(value)
+    ? value.map((entry) => String(entry || "").trim()).filter(Boolean)
+    : [];
 }
 
 function getPlannerHelperCompletion(profile) {

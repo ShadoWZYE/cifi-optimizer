@@ -117,6 +117,29 @@ The project can now be reworked around owner-based extraction rather than screen
 - persist grounded outputs as small parser scripts plus checked-in JSON/markdown summaries
 - keep `state.playerProfile` and recommendation logic strictly downstream from verified extracted mechanics
 
+## Integration readiness gate
+
+Owner recovery alone is not enough to wire a system into the app.
+
+Before app integration, confirm from the available assets and docs:
+
+1. the in-game system identity
+2. the concrete owner object
+3. the player-owned inputs needed for recommendations
+4. the currency or budget lane the system actually spends
+5. whether the visible labels are grounded in-game labels or only serialized ids
+
+Current status:
+
+- `TokenShop`
+  - verified: real owner, serialized cost fields, bonus fields, and level-cap fields
+  - not yet verified enough for app planning: full player-owned current-level inputs and final remap from serialized field ids to player-facing labels
+- `MultiverseMarket`
+  - verified: real owner, validated inscription rows, and direct serialized constants for part of the system
+  - not yet verified enough for app planning: complete row coverage, player-owned current-level inputs, and the actual spend currency lane
+
+If those gaps remain open, keep the system in extraction and verification docs rather than recommendation UI.
+
 ## Known Limits
 
 - Full save/export decoding is still unresolved.

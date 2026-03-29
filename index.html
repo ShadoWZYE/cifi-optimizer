@@ -98,7 +98,7 @@
 
         <section class="panel">
           <form id="profileForm" class="profile-form">
-            <p class="meta">Shared PlayerProfile truth is limited to grounded CIFI account state. Planner-only helpers and community-tool calibration stay labeled as non-canonical.</p>
+            <p class="meta">Shared PlayerProfile truth is limited to grounded CIFI account state. Planner-only helpers stay labeled, and ship calibration remains outside shared profile truth as external-model implementation data.</p>
             <div class="field-group">
               <label for="profileName">Profile name</label>
               <input id="profileName" name="profileName" type="text" placeholder="Main account">
@@ -171,7 +171,7 @@
             </div>
             <button id="exportPlayerProfileBtn" class="button">Export PlayerProfile JSON</button>
           </div>
-          <p class="meta">Import a saved PlayerProfile JSON document through the grounded normalizer. Canonical values, planner-only helpers, external-model state, and compatibility fields stay labeled instead of being merged as raw game truth.</p>
+          <p class="meta">Import a saved PlayerProfile JSON document through the grounded normalizer. Canonical values, planner-only helpers, external-model state, compatibility fields, and any real-but-unmapped system blobs stay labeled instead of being merged as raw game truth.</p>
           <div class="field-group">
             <label for="playerProfileImportFile">Upload PlayerProfile JSON</label>
             <input id="playerProfileImportFile" type="file" accept=".json,.txt,application/json">
@@ -184,19 +184,7 @@
             <button id="importPlayerProfileBtn" class="button button-primary">Import PlayerProfile JSON</button>
           </div>
           <div id="playerProfileImportStatus" class="status-line"></div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Community-tool Ship Calibration</p>
-              <h2>External model inputs preserved outside raw game state</h2>
-            </div>
-            <button id="saveShipStateBtn" class="button button-primary">Save community-tool calibration</button>
-          </div>
-          <p class="meta">These fields support the quarantined ship planner and community-tool calibration flows. They are not treated as raw in-game CIFI state.</p>
-          <div id="shipPlayerStateStatus" class="status-line"></div>
-          <div id="shipPlayerStatePanel" class="page-grid"></div>
+          <div id="playerProfileImportSummary" class="preview-stack"></div>
         </section>
       </section>
 
@@ -329,12 +317,24 @@
       <section class="page" data-page="ship">
         <div class="page-header">
           <div>
-            <p class="eyebrow">Community-tool Ship Planner</p>
-            <h2>Quarantined calibration and loadout editor</h2>
+            <p class="eyebrow">Ship Planner</p>
+            <h2>Canonical ship system with provisional implementation labels</h2>
           </div>
           <button id="saveShipConfigBtn" class="button button-primary">Save ship planner state</button>
         </div>
-          <p class="meta">This planner remains available for compatibility, but it is not a first-class MVP system and its calibration data is labeled as community-tool state.</p>
+          <p class="meta">This planner represents a real ship system. The current implementation still uses community-tool calibration and provisional labels until the repo finishes its grounded data remap.</p>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Community-tool Calibration</p>
+                <h2>External model inputs preserved with the ship planner</h2>
+              </div>
+              <button id="saveShipStateBtn" class="button">Save calibration</button>
+            </div>
+            <p class="meta">These fields stay attached to the ship planner implementation layer. They are preserved as external-model calibration, not shared PlayerProfile truth.</p>
+            <div id="shipPlayerStateStatus" class="status-line"></div>
+            <div id="shipPlayerStatePanel" class="page-grid"></div>
+          </section>
           <section class="panel">
             <div id="shipConfigStatus" class="status-line"></div>
             <div class="ship-workbench">
@@ -352,7 +352,7 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Progression</p>
-            <h2>Grounded shard workflow</h2>
+            <h2>Descriptive shard workflow</h2>
           </div>
         </div>
         <section class="panel">
@@ -363,7 +363,7 @@
             </div>
             <button id="saveShardPlannerBtn" class="button button-primary">Save shard workflow inputs</button>
           </div>
-          <p class="meta">This workflow is descriptive only. Track a focus milestone and level to inspect grounded unlocks, thresholds, and guardrails without any shard cost math.</p>
+          <p class="meta">This workflow is descriptive only. System-level shard anchors are grounded enough for repo truth, but the current milestone list is still community-grounded descriptive data rather than shipped-game owner-mapped milestone data. Track a focus milestone and level to inspect descriptive unlocks, thresholds, and guardrails without shard cost math.</p>
           <div class="module-controls">
             <div class="field-group">
               <label for="shardFocusMilestoneId">Focus milestone</label>
@@ -407,12 +407,12 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Validation</p>
-            <h2>Grounded checks and labeled support checks</h2>
+            <h2>Grounded checks, APK grounding, and support checks</h2>
           </div>
           <button id="runValidationSuite" class="button button-primary">Run validation suite</button>
         </div>
         <section class="panel">
-          <p class="meta">Grounded MVP checks and quarantined support-surface checks are shown separately so validation status does not overstate what is currently first-class product truth.</p>
+          <p class="meta">Grounded MVP checks, APK-grounding checks, and quarantined support-surface checks are shown separately so validation can catch behavior drift and extracted-data mixing without overstating what is currently first-class product truth. Ship checks stay in the grounded section because the system is canonical even while its implementation wiring is still being remapped.</p>
           <div id="validationResults" class="validation-grid"></div>
         </section>
       </section>

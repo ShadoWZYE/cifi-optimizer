@@ -1,0 +1,5674 @@
+[
+  {
+    "file": "_unity_joined\\level0",
+    "string_count": 203009,
+    "match_count": 14,
+    "matches": [
+      {
+        "offset": 10769388,
+        "kind": "ascii",
+        "value": "AvailableTokensBar",
+        "matched_terms": [
+          "availabletokensbar"
+        ],
+        "entry_context": [
+          {
+            "offset": 10768632,
+            "kind": "ascii",
+            "value": "BackdropImpactEffect"
+          },
+          {
+            "offset": 10768704,
+            "kind": "ascii",
+            "value": "Shadow"
+          },
+          {
+            "offset": 10768780,
+            "kind": "ascii",
+            "value": "InputField (Legacy)"
+          },
+          {
+            "offset": 10768888,
+            "kind": "ascii",
+            "value": "ValueText"
+          },
+          {
+            "offset": 10768960,
+            "kind": "ascii",
+            "value": "SkeletonAnimated2"
+          },
+          {
+            "offset": 10769028,
+            "kind": "ascii",
+            "value": "Row4-Shards"
+          },
+          {
+            "offset": 10769116,
+            "kind": "ascii",
+            "value": "TheCollectorDeviceNotPurchased"
+          },
+          {
+            "offset": 10769212,
+            "kind": "ascii",
+            "value": "NextButton"
+          },
+          {
+            "offset": 10769256,
+            "kind": "ascii",
+            "value": "Emblem.Zag"
+          },
+          {
+            "offset": 10769304,
+            "kind": "ascii",
+            "value": "PAGE_Player.Menu"
+          },
+          {
+            "offset": 10769388,
+            "kind": "ascii",
+            "value": "AvailableTokensBar"
+          },
+          {
+            "offset": 10769472,
+            "kind": "ascii",
+            "value": "Background"
+          },
+          {
+            "offset": 10769536,
+            "kind": "ascii",
+            "value": "EnemyShadow"
+          },
+          {
+            "offset": 10769576,
+            "kind": "ascii",
+            "value": "Frame"
+          },
+          {
+            "offset": 10769648,
+            "kind": "ascii",
+            "value": "SkeletonAnimated4"
+          },
+          {
+            "offset": 10769752,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10769848,
+            "kind": "ascii",
+            "value": "PercentIncreaseText.DarkInnoCores.TR"
+          },
+          {
+            "offset": 10769936,
+            "kind": "ascii",
+            "value": "Line"
+          },
+          {
+            "offset": 10770000,
+            "kind": "ascii",
+            "value": "CostBox"
+          },
+          {
+            "offset": 10770064,
+            "kind": "ascii",
+            "value": "AssignPersonnelBox"
+          },
+          {
+            "offset": 10770144,
+            "kind": "ascii",
+            "value": "MenuBG"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 10766352,
+            "kind": "ascii",
+            "value": "PageCounter"
+          },
+          {
+            "offset": 10766392,
+            "kind": "ascii",
+            "value": "// MULTIVERSE MARKET/N"
+          },
+          {
+            "offset": 10766476,
+            "kind": "ascii",
+            "value": "VE-TrinketsButton"
+          },
+          {
+            "offset": 10766560,
+            "kind": "ascii",
+            "value": "ButtonText"
+          },
+          {
+            "offset": 10766648,
+            "kind": "ascii",
+            "value": "TitleText"
+          },
+          {
+            "offset": 10766720,
+            "kind": "ascii",
+            "value": "MainCard"
+          },
+          {
+            "offset": 10766784,
+            "kind": "ascii",
+            "value": "Skeleton-PathofMephisto12"
+          },
+          {
+            "offset": 10766864,
+            "kind": "ascii",
+            "value": "ResourceAmountText"
+          },
+          {
+            "offset": 10766968,
+            "kind": "ascii",
+            "value": "StatisticText"
+          },
+          {
+            "offset": 10767052,
+            "kind": "ascii",
+            "value": "Snek.Button"
+          },
+          {
+            "offset": 10767120,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 10767184,
+            "kind": "ascii",
+            "value": "ShortenText"
+          },
+          {
+            "offset": 10767248,
+            "kind": "ascii",
+            "value": "Text"
+          },
+          {
+            "offset": 10767312,
+            "kind": "ascii",
+            "value": "StatisticBox"
+          },
+          {
+            "offset": 10767376,
+            "kind": "ascii",
+            "value": "ImpactEffectIcon3"
+          },
+          {
+            "offset": 10767456,
+            "kind": "ascii",
+            "value": "Content"
+          },
+          {
+            "offset": 10767520,
+            "kind": "ascii",
+            "value": "Graphic"
+          },
+          {
+            "offset": 10767584,
+            "kind": "ascii",
+            "value": "Evo2.BG"
+          },
+          {
+            "offset": 10767648,
+            "kind": "ascii",
+            "value": "ToggleON"
+          },
+          {
+            "offset": 10767736,
+            "kind": "ascii",
+            "value": "NavigationScrollview"
+          },
+          {
+            "offset": 10767832,
+            "kind": "ascii",
+            "value": "TitleText"
+          },
+          {
+            "offset": 10767880,
+            "kind": "ascii",
+            "value": "BackdropImpactEffect"
+          },
+          {
+            "offset": 10767928,
+            "kind": "ascii",
+            "value": "DescriptionBox-LogOut?"
+          },
+          {
+            "offset": 10768016,
+            "kind": "ascii",
+            "value": "ButtonText"
+          },
+          {
+            "offset": 10768092,
+            "kind": "ascii",
+            "value": "NoButton"
+          },
+          {
+            "offset": 10768172,
+            "kind": "ascii",
+            "value": "Pong.Button"
+          },
+          {
+            "offset": 10768264,
+            "kind": "ascii",
+            "value": "TitleText"
+          },
+          {
+            "offset": 10768360,
+            "kind": "ascii",
+            "value": "OzzyTop.Menu"
+          },
+          {
+            "offset": 10768432,
+            "kind": "ascii",
+            "value": "Handle"
+          },
+          {
+            "offset": 10768484,
+            "kind": "ascii",
+            "value": "ZeimarrsNautallium"
+          },
+          {
+            "offset": 10768584,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 10768632,
+            "kind": "ascii",
+            "value": "BackdropImpactEffect"
+          },
+          {
+            "offset": 10768704,
+            "kind": "ascii",
+            "value": "Shadow"
+          },
+          {
+            "offset": 10768780,
+            "kind": "ascii",
+            "value": "InputField (Legacy)"
+          },
+          {
+            "offset": 10768888,
+            "kind": "ascii",
+            "value": "ValueText"
+          },
+          {
+            "offset": 10768960,
+            "kind": "ascii",
+            "value": "SkeletonAnimated2"
+          },
+          {
+            "offset": 10769028,
+            "kind": "ascii",
+            "value": "Row4-Shards"
+          },
+          {
+            "offset": 10769116,
+            "kind": "ascii",
+            "value": "TheCollectorDeviceNotPurchased"
+          },
+          {
+            "offset": 10769212,
+            "kind": "ascii",
+            "value": "NextButton"
+          },
+          {
+            "offset": 10769256,
+            "kind": "ascii",
+            "value": "Emblem.Zag"
+          },
+          {
+            "offset": 10769304,
+            "kind": "ascii",
+            "value": "PAGE_Player.Menu"
+          },
+          {
+            "offset": 10769388,
+            "kind": "ascii",
+            "value": "AvailableTokensBar"
+          },
+          {
+            "offset": 10769472,
+            "kind": "ascii",
+            "value": "Background"
+          },
+          {
+            "offset": 10769536,
+            "kind": "ascii",
+            "value": "EnemyShadow"
+          },
+          {
+            "offset": 10769576,
+            "kind": "ascii",
+            "value": "Frame"
+          },
+          {
+            "offset": 10769648,
+            "kind": "ascii",
+            "value": "SkeletonAnimated4"
+          },
+          {
+            "offset": 10769752,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10769848,
+            "kind": "ascii",
+            "value": "PercentIncreaseText.DarkInnoCores.TR"
+          },
+          {
+            "offset": 10769936,
+            "kind": "ascii",
+            "value": "Line"
+          },
+          {
+            "offset": 10770000,
+            "kind": "ascii",
+            "value": "CostBox"
+          },
+          {
+            "offset": 10770064,
+            "kind": "ascii",
+            "value": "AssignPersonnelBox"
+          },
+          {
+            "offset": 10770144,
+            "kind": "ascii",
+            "value": "MenuBG"
+          },
+          {
+            "offset": 10770220,
+            "kind": "ascii",
+            "value": "PopUp"
+          },
+          {
+            "offset": 10770264,
+            "kind": "ascii",
+            "value": "CloudLoadBox"
+          },
+          {
+            "offset": 10770348,
+            "kind": "ascii",
+            "value": "Stage101-199Enemy"
+          },
+          {
+            "offset": 10770432,
+            "kind": "ascii",
+            "value": "Evo1.BG"
+          },
+          {
+            "offset": 10770520,
+            "kind": "ascii",
+            "value": "NewCloudCanvas"
+          },
+          {
+            "offset": 10770592,
+            "kind": "ascii",
+            "value": "KeptBar2"
+          },
+          {
+            "offset": 10770668,
+            "kind": "ascii",
+            "value": "Cradle.Icon"
+          },
+          {
+            "offset": 10770736,
+            "kind": "ascii",
+            "value": "Shadow"
+          },
+          {
+            "offset": 10770800,
+            "kind": "ascii",
+            "value": "Text"
+          },
+          {
+            "offset": 10770864,
+            "kind": "ascii",
+            "value": "Diamonds4"
+          },
+          {
+            "offset": 10770904,
+            "kind": "ascii",
+            "value": "Emblem.Creation"
+          },
+          {
+            "offset": 10770976,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10771028,
+            "kind": "ascii",
+            "value": "Row19-Darkseid"
+          },
+          {
+            "offset": 10771104,
+            "kind": "ascii",
+            "value": "Overlay"
+          },
+          {
+            "offset": 10771168,
+            "kind": "ascii",
+            "value": "Evo0.BG"
+          },
+          {
+            "offset": 10771244,
+            "kind": "ascii",
+            "value": "Title"
+          },
+          {
+            "offset": 10771312,
+            "kind": "ascii",
+            "value": "LockIcon"
+          },
+          {
+            "offset": 10771388,
+            "kind": "ascii",
+            "value": "PurchaseText"
+          },
+          {
+            "offset": 10771456,
+            "kind": "ascii",
+            "value": "DescriptionText"
+          },
+          {
+            "offset": 10771512,
+            "kind": "ascii",
+            "value": "Menu"
+          },
+          {
+            "offset": 10771568,
+            "kind": "ascii",
+            "value": "SkillNotification"
+          },
+          {
+            "offset": 10771636,
+            "kind": "ascii",
+            "value": "StatRow3"
+          },
+          {
+            "offset": 10771720,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10771792,
+            "kind": "ascii",
+            "value": "SkeletonAnimated2"
+          },
+          {
+            "offset": 10771884,
+            "kind": "ascii",
+            "value": "Title"
+          },
+          {
+            "offset": 10771952,
+            "kind": "ascii",
+            "value": "SkeletonAnimated1"
+          },
+          {
+            "offset": 10772008,
+            "kind": "ascii",
+            "value": "TopArea"
+          },
+          {
+            "offset": 10772104,
+            "kind": "ascii",
+            "value": "StatisticText"
+          },
+          {
+            "offset": 10772176,
+            "kind": "ascii",
+            "value": "Line (1)"
+          },
+          {
+            "offset": 10772264,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 10772320,
+            "kind": "ascii",
+            "value": "ResearchOverlayBox"
+          },
+          {
+            "offset": 10772400,
+            "kind": "ascii",
+            "value": "Bullet"
+          },
+          {
+            "offset": 10772452,
+            "kind": "ascii",
+            "value": "AutomationOverlay"
+          }
+        ]
+      },
+      {
+        "offset": 10931484,
+        "kind": "ascii",
+        "value": "AvailableTokensBar",
+        "matched_terms": [
+          "availabletokensbar"
+        ],
+        "entry_context": [
+          {
+            "offset": 10930616,
+            "kind": "ascii",
+            "value": "Circle quarter rotating 1"
+          },
+          {
+            "offset": 10930716,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_1"
+          },
+          {
+            "offset": 10930812,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_2"
+          },
+          {
+            "offset": 10930908,
+            "kind": "ascii",
+            "value": "ScrollbarVertical"
+          },
+          {
+            "offset": 10930992,
+            "kind": "ascii",
+            "value": "Box2-Default"
+          },
+          {
+            "offset": 10931080,
+            "kind": "ascii",
+            "value": "Button"
+          },
+          {
+            "offset": 10931188,
+            "kind": "ascii",
+            "value": "LootStashButton"
+          },
+          {
+            "offset": 10931288,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 10931344,
+            "kind": "ascii",
+            "value": "StatisticBox"
+          },
+          {
+            "offset": 10931408,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 10931484,
+            "kind": "ascii",
+            "value": "AvailableTokensBar"
+          },
+          {
+            "offset": 10931544,
+            "kind": "ascii",
+            "value": "CurrencyBox"
+          },
+          {
+            "offset": 10931616,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10931680,
+            "kind": "ascii",
+            "value": "Border2"
+          },
+          {
+            "offset": 10931720,
+            "kind": "ascii",
+            "value": "Title"
+          },
+          {
+            "offset": 10931792,
+            "kind": "ascii",
+            "value": "SelectedHighlight"
+          },
+          {
+            "offset": 10931884,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_2"
+          },
+          {
+            "offset": 10931980,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_1"
+          },
+          {
+            "offset": 10932040,
+            "kind": "ascii",
+            "value": "Circle quarter rotating 1"
+          },
+          {
+            "offset": 10932152,
+            "kind": "ascii",
+            "value": "TextPropmtBox"
+          },
+          {
+            "offset": 10932236,
+            "kind": "ascii",
+            "value": "ClaimNotification"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 10928416,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 10928504,
+            "kind": "ascii",
+            "value": "ReqText"
+          },
+          {
+            "offset": 10928576,
+            "kind": "ascii",
+            "value": "Dots"
+          },
+          {
+            "offset": 10928628,
+            "kind": "ascii",
+            "value": "Skeleton.OuroNode_Attraction3"
+          },
+          {
+            "offset": 10928708,
+            "kind": "ascii",
+            "value": "InventoryRow8"
+          },
+          {
+            "offset": 10928796,
+            "kind": "ascii",
+            "value": "ResourceAmountText"
+          },
+          {
+            "offset": 10928880,
+            "kind": "ascii",
+            "value": "LineDampener (7)"
+          },
+          {
+            "offset": 10928960,
+            "kind": "ascii",
+            "value": "Milestone26CompletedIcon"
+          },
+          {
+            "offset": 10929040,
+            "kind": "ascii",
+            "value": "RankText"
+          },
+          {
+            "offset": 10929128,
+            "kind": "ascii",
+            "value": "TitleText"
+          },
+          {
+            "offset": 10929212,
+            "kind": "ascii",
+            "value": "MediumDealButtonStep1"
+          },
+          {
+            "offset": 10929272,
+            "kind": "ascii",
+            "value": "Emblem.Zag"
+          },
+          {
+            "offset": 10929344,
+            "kind": "ascii",
+            "value": "ToggleOFF"
+          },
+          {
+            "offset": 10929432,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10929504,
+            "kind": "ascii",
+            "value": "Shadow"
+          },
+          {
+            "offset": 10929556,
+            "kind": "ascii",
+            "value": "OVERLAY-LM8Needed"
+          },
+          {
+            "offset": 10929644,
+            "kind": "ascii",
+            "value": "GeneratorsOwnedText"
+          },
+          {
+            "offset": 10929740,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 10929820,
+            "kind": "ascii",
+            "value": "NameText"
+          },
+          {
+            "offset": 10929888,
+            "kind": "ascii",
+            "value": "ShardMilestones"
+          },
+          {
+            "offset": 10929980,
+            "kind": "ascii",
+            "value": "UnspentRankUpgradesText (1)"
+          },
+          {
+            "offset": 10930076,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 10930144,
+            "kind": "ascii",
+            "value": "NameText"
+          },
+          {
+            "offset": 10930232,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10930304,
+            "kind": "ascii",
+            "value": "StatisticBox"
+          },
+          {
+            "offset": 10930368,
+            "kind": "ascii",
+            "value": "OVERLAY"
+          },
+          {
+            "offset": 10930444,
+            "kind": "ascii",
+            "value": "Button"
+          },
+          {
+            "offset": 10930512,
+            "kind": "ascii",
+            "value": "Content"
+          },
+          {
+            "offset": 10930576,
+            "kind": "ascii",
+            "value": "Background"
+          },
+          {
+            "offset": 10930616,
+            "kind": "ascii",
+            "value": "Circle quarter rotating 1"
+          },
+          {
+            "offset": 10930716,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_1"
+          },
+          {
+            "offset": 10930812,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_2"
+          },
+          {
+            "offset": 10930908,
+            "kind": "ascii",
+            "value": "ScrollbarVertical"
+          },
+          {
+            "offset": 10930992,
+            "kind": "ascii",
+            "value": "Box2-Default"
+          },
+          {
+            "offset": 10931080,
+            "kind": "ascii",
+            "value": "Button"
+          },
+          {
+            "offset": 10931188,
+            "kind": "ascii",
+            "value": "LootStashButton"
+          },
+          {
+            "offset": 10931288,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 10931344,
+            "kind": "ascii",
+            "value": "StatisticBox"
+          },
+          {
+            "offset": 10931408,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 10931484,
+            "kind": "ascii",
+            "value": "AvailableTokensBar"
+          },
+          {
+            "offset": 10931544,
+            "kind": "ascii",
+            "value": "CurrencyBox"
+          },
+          {
+            "offset": 10931616,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10931680,
+            "kind": "ascii",
+            "value": "Border2"
+          },
+          {
+            "offset": 10931720,
+            "kind": "ascii",
+            "value": "Title"
+          },
+          {
+            "offset": 10931792,
+            "kind": "ascii",
+            "value": "SelectedHighlight"
+          },
+          {
+            "offset": 10931884,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_2"
+          },
+          {
+            "offset": 10931980,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_1"
+          },
+          {
+            "offset": 10932040,
+            "kind": "ascii",
+            "value": "Circle quarter rotating 1"
+          },
+          {
+            "offset": 10932152,
+            "kind": "ascii",
+            "value": "TextPropmtBox"
+          },
+          {
+            "offset": 10932236,
+            "kind": "ascii",
+            "value": "ClaimNotification"
+          },
+          {
+            "offset": 10932344,
+            "kind": "ascii",
+            "value": "StatisticText"
+          },
+          {
+            "offset": 10932440,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 10932512,
+            "kind": "ascii",
+            "value": "StudiesThisRunBox"
+          },
+          {
+            "offset": 10932672,
+            "kind": "ascii",
+            "value": "PopUp"
+          },
+          {
+            "offset": 10932736,
+            "kind": "ascii",
+            "value": "LineDampener (14)"
+          },
+          {
+            "offset": 10932816,
+            "kind": "ascii",
+            "value": "LevelBox"
+          },
+          {
+            "offset": 10932892,
+            "kind": "ascii",
+            "value": "MenuButtonWithIcon (3)"
+          },
+          {
+            "offset": 10932976,
+            "kind": "ascii",
+            "value": "PopUp"
+          },
+          {
+            "offset": 10933064,
+            "kind": "ascii",
+            "value": "Image"
+          },
+          {
+            "offset": 10933148,
+            "kind": "ascii",
+            "value": "MaximizeButton"
+          },
+          {
+            "offset": 10933216,
+            "kind": "ascii",
+            "value": "PopUp"
+          },
+          {
+            "offset": 10933280,
+            "kind": "ascii",
+            "value": "TopMenu"
+          },
+          {
+            "offset": 10933356,
+            "kind": "ascii",
+            "value": "Title"
+          },
+          {
+            "offset": 10933448,
+            "kind": "ascii",
+            "value": "ValueText"
+          },
+          {
+            "offset": 10933532,
+            "kind": "ascii",
+            "value": "ScrollbarVertical"
+          },
+          {
+            "offset": 10933640,
+            "kind": "ascii",
+            "value": "ValueText"
+          },
+          {
+            "offset": 10933736,
+            "kind": "ascii",
+            "value": "AutobuyDesc"
+          },
+          {
+            "offset": 10933832,
+            "kind": "ascii",
+            "value": "GemIcon"
+          },
+          {
+            "offset": 10933904,
+            "kind": "ascii",
+            "value": "LineDampener (25)"
+          },
+          {
+            "offset": 10933960,
+            "kind": "ascii",
+            "value": "Circle quarter rotating 1"
+          },
+          {
+            "offset": 10934060,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_2"
+          },
+          {
+            "offset": 10934156,
+            "kind": "ascii",
+            "value": "circle_quarter_rotating_1_1"
+          },
+          {
+            "offset": 10934252,
+            "kind": "ascii",
+            "value": "InfoText"
+          },
+          {
+            "offset": 10934332,
+            "kind": "ascii",
+            "value": "Viewport"
+          },
+          {
+            "offset": 10934400,
+            "kind": "ascii",
+            "value": "SkillButton.CheatDeath"
+          },
+          {
+            "offset": 10934504,
+            "kind": "ascii",
+            "value": "ScrollView-PL (1)"
+          }
+        ]
+      },
+      {
+        "offset": 13251564,
+        "kind": "ascii",
+        "value": "BigStatisticPrefab.TokenBankCap",
+        "matched_terms": [
+          "tokenbankcap"
+        ],
+        "entry_context": [
+          {
+            "offset": 13250768,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13250832,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13250912,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13250988,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK8Cost"
+          },
+          {
+            "offset": 13251084,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MPPersonnel2"
+          },
+          {
+            "offset": 13251168,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13251232,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13251308,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK3Cost"
+          },
+          {
+            "offset": 13251392,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13251468,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MPPersonnel4"
+          },
+          {
+            "offset": 13251564,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.TokenBankCap"
+          },
+          {
+            "offset": 13251648,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13251728,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13251792,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13251872,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13251952,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13252028,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK3Output"
+          },
+          {
+            "offset": 13252112,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13252192,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13252256,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13252336,
+            "kind": "ascii",
+            "value": "Icon"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 13248544,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13248608,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13248672,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13248752,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13248816,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13248880,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13248956,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK7Output"
+          },
+          {
+            "offset": 13249040,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13249104,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13249168,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13249260,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.Crew2Cost"
+          },
+          {
+            "offset": 13249344,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13249408,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13249484,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.Crew3Cost"
+          },
+          {
+            "offset": 13249568,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13249632,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13249696,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13249760,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13249836,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.Crew6Cost"
+          },
+          {
+            "offset": 13249920,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13250000,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13250080,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13250144,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13250208,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13250284,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.PhaseTicksRemoved"
+          },
+          {
+            "offset": 13250384,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13250460,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK4Output"
+          },
+          {
+            "offset": 13250544,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13250624,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13250688,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13250768,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13250832,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13250912,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13250988,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK8Cost"
+          },
+          {
+            "offset": 13251084,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MPPersonnel2"
+          },
+          {
+            "offset": 13251168,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13251232,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13251308,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK3Cost"
+          },
+          {
+            "offset": 13251392,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13251468,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MPPersonnel4"
+          },
+          {
+            "offset": 13251564,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.TokenBankCap"
+          },
+          {
+            "offset": 13251648,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13251728,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13251792,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13251872,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13251952,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13252028,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK3Output"
+          },
+          {
+            "offset": 13252112,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13252192,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13252256,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13252336,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13252400,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13252476,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.Crew3Cost"
+          },
+          {
+            "offset": 13252560,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13252640,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13252704,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13252768,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13252844,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.Crew2Cost"
+          },
+          {
+            "offset": 13252928,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13253004,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK5Output"
+          },
+          {
+            "offset": 13253088,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13253180,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.Crew4Cost"
+          },
+          {
+            "offset": 13253264,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13253340,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.AP"
+          },
+          {
+            "offset": 13253436,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.Exchange3"
+          },
+          {
+            "offset": 13253520,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13253584,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13253648,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13253712,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13253776,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13253840,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13253920,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13254000,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13254064,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 13254128,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13254208,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13254288,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13254352,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 13254416,
+            "kind": "ascii",
+            "value": "TotalBonusText"
+          },
+          {
+            "offset": 13254508,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.TokenExponent"
+          },
+          {
+            "offset": 13254604,
+            "kind": "ascii",
+            "value": "BigStatisticPrefab.MK4Cost"
+          }
+        ]
+      },
+      {
+        "offset": 14012828,
+        "kind": "ascii",
+        "value": "AvailableTokensBar",
+        "matched_terms": [
+          "availabletokensbar"
+        ],
+        "entry_context": [
+          {
+            "offset": 14012160,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012224,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012288,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012352,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012416,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012480,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012544,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012608,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012672,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012748,
+            "kind": "ascii",
+            "value": "PurchaseText"
+          },
+          {
+            "offset": 14012828,
+            "kind": "ascii",
+            "value": "AvailableTokensBar"
+          },
+          {
+            "offset": 14012912,
+            "kind": "ascii",
+            "value": "GemBox"
+          },
+          {
+            "offset": 14013000,
+            "kind": "ascii",
+            "value": "OperationsDoneText"
+          },
+          {
+            "offset": 14013084,
+            "kind": "ascii",
+            "value": "EvolveButton"
+          },
+          {
+            "offset": 14013164,
+            "kind": "ascii",
+            "value": "EvolveButton"
+          },
+          {
+            "offset": 14013244,
+            "kind": "ascii",
+            "value": "EvolveButton"
+          },
+          {
+            "offset": 14013324,
+            "kind": "ascii",
+            "value": "EvolveButton"
+          },
+          {
+            "offset": 14013392,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013456,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013520,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013584,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 14009792,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14009856,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14009920,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14009984,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010048,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010112,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010176,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010240,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010304,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010368,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010432,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010496,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010560,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010624,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010688,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010752,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010816,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010880,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14010944,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011008,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011072,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011136,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011200,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011264,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011328,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011392,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011456,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011520,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011584,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011648,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011712,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011776,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011840,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011904,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14011968,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012032,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012096,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012160,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012224,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012288,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012352,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012416,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012480,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012544,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012608,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012672,
+            "kind": "ascii",
+            "value": "Border"
+          },
+          {
+            "offset": 14012748,
+            "kind": "ascii",
+            "value": "PurchaseText"
+          },
+          {
+            "offset": 14012828,
+            "kind": "ascii",
+            "value": "AvailableTokensBar"
+          },
+          {
+            "offset": 14012912,
+            "kind": "ascii",
+            "value": "GemBox"
+          },
+          {
+            "offset": 14013000,
+            "kind": "ascii",
+            "value": "OperationsDoneText"
+          },
+          {
+            "offset": 14013084,
+            "kind": "ascii",
+            "value": "EvolveButton"
+          },
+          {
+            "offset": 14013164,
+            "kind": "ascii",
+            "value": "EvolveButton"
+          },
+          {
+            "offset": 14013244,
+            "kind": "ascii",
+            "value": "EvolveButton"
+          },
+          {
+            "offset": 14013324,
+            "kind": "ascii",
+            "value": "EvolveButton"
+          },
+          {
+            "offset": 14013392,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013456,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013520,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013584,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013648,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013712,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013776,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013840,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013904,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14013968,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014032,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014096,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014160,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014224,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014288,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014352,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014416,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014480,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014544,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014608,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014672,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014736,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014800,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014864,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014928,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14014992,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14015056,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14015120,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14015184,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14015248,
+            "kind": "ascii",
+            "value": "BonusBar2"
+          },
+          {
+            "offset": 14015312,
+            "kind": "ascii",
+            "value": "Fill"
+          },
+          {
+            "offset": 14015400,
+            "kind": "ascii",
+            "value": "ReturnButton"
+          },
+          {
+            "offset": 14015496,
+            "kind": "ascii",
+            "value": "ReturnButton"
+          },
+          {
+            "offset": 14015592,
+            "kind": "ascii",
+            "value": "ReturnButton"
+          },
+          {
+            "offset": 14015688,
+            "kind": "ascii",
+            "value": "ReturnButton"
+          },
+          {
+            "offset": 14015784,
+            "kind": "ascii",
+            "value": "ReturnButton"
+          },
+          {
+            "offset": 14015880,
+            "kind": "ascii",
+            "value": "ReturnButton"
+          }
+        ]
+      },
+      {
+        "offset": 15456592,
+        "kind": "ascii",
+        "value": "AchievementBar-BankedTokens",
+        "matched_terms": [
+          "achievementbar-bankedtokens"
+        ],
+        "entry_context": [
+          {
+            "offset": 15455696,
+            "kind": "ascii",
+            "value": "AchievementBar-OuroborosPoints"
+          },
+          {
+            "offset": 15455792,
+            "kind": "ascii",
+            "value": "AchievementBar-TotalLoopMods"
+          },
+          {
+            "offset": 15455872,
+            "kind": "ascii",
+            "value": "AchievementBar-GearLevels"
+          },
+          {
+            "offset": 15455952,
+            "kind": "ascii",
+            "value": "AchievementBar-Cellmas"
+          },
+          {
+            "offset": 15456032,
+            "kind": "ascii",
+            "value": "AchievementBar-ModPointsGained"
+          },
+          {
+            "offset": 15456128,
+            "kind": "ascii",
+            "value": "AchievementBar-EnemiesEliminated"
+          },
+          {
+            "offset": 15456224,
+            "kind": "ascii",
+            "value": "AchievementBar-CellEnhancersOwned"
+          },
+          {
+            "offset": 15456320,
+            "kind": "ascii",
+            "value": "AchievementBar-VexinHighestStage"
+          },
+          {
+            "offset": 15456416,
+            "kind": "ascii",
+            "value": "AchievementBar-TraitSpheresActive"
+          },
+          {
+            "offset": 15456512,
+            "kind": "ascii",
+            "value": "AchievementBar-Inscryptions"
+          },
+          {
+            "offset": 15456592,
+            "kind": "ascii",
+            "value": "AchievementBar-BankedTokens"
+          },
+          {
+            "offset": 15456672,
+            "kind": "ascii",
+            "value": "AchievementBar-MeltdownReached"
+          },
+          {
+            "offset": 15456768,
+            "kind": "ascii",
+            "value": "AchievementBar-ShardsGained"
+          },
+          {
+            "offset": 15456848,
+            "kind": "ascii",
+            "value": "AchievementBar-TotalOperations"
+          },
+          {
+            "offset": 15456944,
+            "kind": "ascii",
+            "value": "AchievementBar-TotalAutomationsPurchased"
+          },
+          {
+            "offset": 15457040,
+            "kind": "ascii",
+            "value": "AchievementBar-TrinketLevels"
+          },
+          {
+            "offset": 15457120,
+            "kind": "ascii",
+            "value": "AchievementBar-GemNodesAcquired"
+          },
+          {
+            "offset": 15457216,
+            "kind": "ascii",
+            "value": "AchievementBar-PerformLoopResets"
+          },
+          {
+            "offset": 15457312,
+            "kind": "ascii",
+            "value": "AchievementBar-FragmentsFarmed"
+          },
+          {
+            "offset": 15457408,
+            "kind": "ascii",
+            "value": "AchievementBar-GadgetsLevels-NEW"
+          },
+          {
+            "offset": 15457504,
+            "kind": "ascii",
+            "value": "AchievementBar-AntimatterCores"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 15453548,
+            "kind": "ascii",
+            "value": "Toggle"
+          },
+          {
+            "offset": 15453628,
+            "kind": "ascii",
+            "value": "Toggle"
+          },
+          {
+            "offset": 15453708,
+            "kind": "ascii",
+            "value": "Toggle"
+          },
+          {
+            "offset": 15453788,
+            "kind": "ascii",
+            "value": "Toggle"
+          },
+          {
+            "offset": 15453868,
+            "kind": "ascii",
+            "value": "Toggle"
+          },
+          {
+            "offset": 15453960,
+            "kind": "ascii",
+            "value": "Icon3"
+          },
+          {
+            "offset": 15454032,
+            "kind": "ascii",
+            "value": "CostText (1)"
+          },
+          {
+            "offset": 15454144,
+            "kind": "ascii",
+            "value": "AchievementBar-RelicLevels"
+          },
+          {
+            "offset": 15454224,
+            "kind": "ascii",
+            "value": "AchievementBar-MechsOwned"
+          },
+          {
+            "offset": 15454304,
+            "kind": "ascii",
+            "value": "AchievementBar-TotalTechUpgLevels"
+          },
+          {
+            "offset": 15454400,
+            "kind": "ascii",
+            "value": "AchievementBar-KnoxHighestStage-NEW"
+          },
+          {
+            "offset": 15454496,
+            "kind": "ascii",
+            "value": "AchievementBar-AchievementsClaimed"
+          },
+          {
+            "offset": 15454592,
+            "kind": "ascii",
+            "value": "AchievementBar-MatsEnhancersOwned-NEW"
+          },
+          {
+            "offset": 15454688,
+            "kind": "ascii",
+            "value": "AchievementBar-ResearchPoints"
+          },
+          {
+            "offset": 15454784,
+            "kind": "ascii",
+            "value": "AchievementBar-OzzyHighestStage"
+          },
+          {
+            "offset": 15454880,
+            "kind": "ascii",
+            "value": "AchievementBar-BossesDefeated"
+          },
+          {
+            "offset": 15454976,
+            "kind": "ascii",
+            "value": "AchievementBar-TrinketTierLevels"
+          },
+          {
+            "offset": 15455072,
+            "kind": "ascii",
+            "value": "AchievementBar-AcademyPoints"
+          },
+          {
+            "offset": 15455152,
+            "kind": "ascii",
+            "value": "AchievementBar-PlayerLevel"
+          },
+          {
+            "offset": 15455232,
+            "kind": "ascii",
+            "value": "AchievementBar-BorgeHighestStage"
+          },
+          {
+            "offset": 15455328,
+            "kind": "ascii",
+            "value": "AchievementBar-TotalManualGenLevels"
+          },
+          {
+            "offset": 15455424,
+            "kind": "ascii",
+            "value": "AchievementBar-CellsGained"
+          },
+          {
+            "offset": 15455504,
+            "kind": "ascii",
+            "value": "AchievementBar-TraversalsDone"
+          },
+          {
+            "offset": 15455600,
+            "kind": "ascii",
+            "value": "AchievementBar-MechMissionsCompleted"
+          },
+          {
+            "offset": 15455696,
+            "kind": "ascii",
+            "value": "AchievementBar-OuroborosPoints"
+          },
+          {
+            "offset": 15455792,
+            "kind": "ascii",
+            "value": "AchievementBar-TotalLoopMods"
+          },
+          {
+            "offset": 15455872,
+            "kind": "ascii",
+            "value": "AchievementBar-GearLevels"
+          },
+          {
+            "offset": 15455952,
+            "kind": "ascii",
+            "value": "AchievementBar-Cellmas"
+          },
+          {
+            "offset": 15456032,
+            "kind": "ascii",
+            "value": "AchievementBar-ModPointsGained"
+          },
+          {
+            "offset": 15456128,
+            "kind": "ascii",
+            "value": "AchievementBar-EnemiesEliminated"
+          },
+          {
+            "offset": 15456224,
+            "kind": "ascii",
+            "value": "AchievementBar-CellEnhancersOwned"
+          },
+          {
+            "offset": 15456320,
+            "kind": "ascii",
+            "value": "AchievementBar-VexinHighestStage"
+          },
+          {
+            "offset": 15456416,
+            "kind": "ascii",
+            "value": "AchievementBar-TraitSpheresActive"
+          },
+          {
+            "offset": 15456512,
+            "kind": "ascii",
+            "value": "AchievementBar-Inscryptions"
+          },
+          {
+            "offset": 15456592,
+            "kind": "ascii",
+            "value": "AchievementBar-BankedTokens"
+          },
+          {
+            "offset": 15456672,
+            "kind": "ascii",
+            "value": "AchievementBar-MeltdownReached"
+          },
+          {
+            "offset": 15456768,
+            "kind": "ascii",
+            "value": "AchievementBar-ShardsGained"
+          },
+          {
+            "offset": 15456848,
+            "kind": "ascii",
+            "value": "AchievementBar-TotalOperations"
+          },
+          {
+            "offset": 15456944,
+            "kind": "ascii",
+            "value": "AchievementBar-TotalAutomationsPurchased"
+          },
+          {
+            "offset": 15457040,
+            "kind": "ascii",
+            "value": "AchievementBar-TrinketLevels"
+          },
+          {
+            "offset": 15457120,
+            "kind": "ascii",
+            "value": "AchievementBar-GemNodesAcquired"
+          },
+          {
+            "offset": 15457216,
+            "kind": "ascii",
+            "value": "AchievementBar-PerformLoopResets"
+          },
+          {
+            "offset": 15457312,
+            "kind": "ascii",
+            "value": "AchievementBar-FragmentsFarmed"
+          },
+          {
+            "offset": 15457408,
+            "kind": "ascii",
+            "value": "AchievementBar-GadgetsLevels-NEW"
+          },
+          {
+            "offset": 15457504,
+            "kind": "ascii",
+            "value": "AchievementBar-AntimatterCores"
+          },
+          {
+            "offset": 15457600,
+            "kind": "ascii",
+            "value": "AchievementBar-AcademyProjects"
+          },
+          {
+            "offset": 15457696,
+            "kind": "ascii",
+            "value": "AchievementBar-GadgetsUnlocked-NEW"
+          },
+          {
+            "offset": 15457792,
+            "kind": "ascii",
+            "value": "AchievementBar-HunterLevels"
+          },
+          {
+            "offset": 15457872,
+            "kind": "ascii",
+            "value": "AchievementBar-TicksDone"
+          },
+          {
+            "offset": 15457952,
+            "kind": "ascii",
+            "value": "LevelText"
+          },
+          {
+            "offset": 15458016,
+            "kind": "ascii",
+            "value": "OuroborosGemUpgrade8"
+          },
+          {
+            "offset": 15458096,
+            "kind": "ascii",
+            "value": "OuroborosGemUpgrade8"
+          },
+          {
+            "offset": 15458176,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 15458240,
+            "kind": "ascii",
+            "value": "LevelText"
+          },
+          {
+            "offset": 15458304,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 15458368,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 15458432,
+            "kind": "ascii",
+            "value": "LevelText"
+          },
+          {
+            "offset": 15458496,
+            "kind": "ascii",
+            "value": "OuroborosGemUpgrade8"
+          },
+          {
+            "offset": 15458576,
+            "kind": "ascii",
+            "value": "OuroborosGemUpgrade8"
+          },
+          {
+            "offset": 15458656,
+            "kind": "ascii",
+            "value": "LevelText"
+          },
+          {
+            "offset": 15458720,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 15458784,
+            "kind": "ascii",
+            "value": "OuroborosGemUpgrade8"
+          },
+          {
+            "offset": 15458864,
+            "kind": "ascii",
+            "value": "LevelText"
+          },
+          {
+            "offset": 15458928,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 15458992,
+            "kind": "ascii",
+            "value": "Icon"
+          },
+          {
+            "offset": 15459056,
+            "kind": "ascii",
+            "value": "LevelText"
+          },
+          {
+            "offset": 15459120,
+            "kind": "ascii",
+            "value": "OuroborosGemUpgrade8"
+          },
+          {
+            "offset": 15459200,
+            "kind": "ascii",
+            "value": "StarBox"
+          },
+          {
+            "offset": 15459264,
+            "kind": "ascii",
+            "value": "StarBox"
+          },
+          {
+            "offset": 15459328,
+            "kind": "ascii",
+            "value": "StarBox"
+          },
+          {
+            "offset": 15459416,
+            "kind": "ascii",
+            "value": "DescText"
+          },
+          {
+            "offset": 15459488,
+            "kind": "ascii",
+            "value": "OuroOverlay"
+          },
+          {
+            "offset": 15459552,
+            "kind": "ascii",
+            "value": "OuroOverlay"
+          },
+          {
+            "offset": 15459616,
+            "kind": "ascii",
+            "value": "OuroOverlay"
+          }
+        ]
+      },
+      {
+        "offset": 30771204,
+        "kind": "ascii",
+        "value": "INCREASE TOKENS PER TOKENIUM-553",
+        "matched_terms": [
+          "tokenium-553"
+        ],
+        "entry_context": [
+          {
+            "offset": 30769816,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 30769828,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 30769844,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 30769856,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 30769868,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 30769912,
+            "kind": "ascii",
+            "value": "OuroborosResetter, Assembly-CSharp"
+          },
+          {
+            "offset": 30769952,
+            "kind": "ascii",
+            "value": "OnClickToggle3"
+          },
+          {
+            "offset": 30769988,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 30770900,
+            "kind": "ascii",
+            "value": "PREVIOUS"
+          },
+          {
+            "offset": 30770909,
+            "kind": "ascii",
+            "value": "LOOP RESETS"
+          },
+          {
+            "offset": 30771204,
+            "kind": "ascii",
+            "value": "INCREASE TOKENS PER TOKENIUM-553"
+          },
+          {
+            "offset": 30771460,
+            "kind": "ascii",
+            "value": "VECTID SCOUT"
+          },
+          {
+            "offset": 30771790,
+            "kind": "ascii",
+            "value": "l? tC?"
+          },
+          {
+            "offset": 30772164,
+            "kind": "ascii",
+            "value": "Every time you complete a Step, the UPG POW will increase with +0.01.  This means your upgrades slowly regain their rightful power."
+          },
+          {
+            "offset": 30772516,
+            "kind": "ascii",
+            "value": "(General Info)"
+          },
+          {
+            "offset": 30773022,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 30773284,
+            "kind": "ascii",
+            "value": "LOOP MOD REQUIRED..."
+          },
+          {
+            "offset": 30773630,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 30774100,
+            "kind": "ascii",
+            "value": "COST / 1e25"
+          },
+          {
+            "offset": 30774388,
+            "kind": "ascii",
+            "value": "Reactivates when you have re-unlocked your MK8 gens."
+          },
+          {
+            "offset": 30775960,
+            "kind": "ascii",
+            "value": "Normal"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 30768148,
+            "kind": "ascii",
+            "value": "+344%"
+          },
+          {
+            "offset": 30768401,
+            "kind": "ascii",
+            "value": "i7?#Wn?j"
+          },
+          {
+            "offset": 30768644,
+            "kind": "ascii",
+            "value": "OUROBOROS CONSOLE"
+          },
+          {
+            "offset": 30769816,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 30769828,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 30769844,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 30769856,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 30769868,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 30769912,
+            "kind": "ascii",
+            "value": "OuroborosResetter, Assembly-CSharp"
+          },
+          {
+            "offset": 30769952,
+            "kind": "ascii",
+            "value": "OnClickToggle3"
+          },
+          {
+            "offset": 30769988,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 30770900,
+            "kind": "ascii",
+            "value": "PREVIOUS"
+          },
+          {
+            "offset": 30770909,
+            "kind": "ascii",
+            "value": "LOOP RESETS"
+          },
+          {
+            "offset": 30771204,
+            "kind": "ascii",
+            "value": "INCREASE TOKENS PER TOKENIUM-553"
+          },
+          {
+            "offset": 30771460,
+            "kind": "ascii",
+            "value": "VECTID SCOUT"
+          },
+          {
+            "offset": 30771790,
+            "kind": "ascii",
+            "value": "l? tC?"
+          },
+          {
+            "offset": 30772164,
+            "kind": "ascii",
+            "value": "Every time you complete a Step, the UPG POW will increase with +0.01.  This means your upgrades slowly regain their rightful power."
+          },
+          {
+            "offset": 30772516,
+            "kind": "ascii",
+            "value": "(General Info)"
+          },
+          {
+            "offset": 30773022,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 30773284,
+            "kind": "ascii",
+            "value": "LOOP MOD REQUIRED..."
+          },
+          {
+            "offset": 30773630,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 30774100,
+            "kind": "ascii",
+            "value": "COST / 1e25"
+          }
+        ]
+      },
+      {
+        "offset": 32248868,
+        "kind": "ascii",
+        "value": "Tokenium-553 is a highly valued material used for all sorts of luxuries.",
+        "matched_terms": [
+          "tokenium-553"
+        ],
+        "entry_context": [
+          {
+            "offset": 32248100,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 32248116,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 32248128,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 32248140,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 32248184,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 32248220,
+            "kind": "ascii",
+            "value": "PlayOpenMenuSound"
+          },
+          {
+            "offset": 32248260,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 32248328,
+            "kind": "ascii",
+            "value": "StartGameSetter, Assembly-CSharp"
+          },
+          {
+            "offset": 32248364,
+            "kind": "ascii",
+            "value": "OnDimButton"
+          },
+          {
+            "offset": 32248396,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 32248868,
+            "kind": "ascii",
+            "value": "Tokenium-553 is a highly valued material used for all sorts of luxuries."
+          },
+          {
+            "offset": 32248942,
+            "kind": "ascii",
+            "value": "I'll take it off your hands. You'll be compensated."
+          },
+          {
+            "offset": 32249572,
+            "kind": "ascii",
+            "value": "Your: "
+          },
+          {
+            "offset": 32249579,
+            "kind": "ascii",
+            "value": "1. MK1 Output"
+          },
+          {
+            "offset": 32249593,
+            "kind": "ascii",
+            "value": "2. Mod Points Gained,"
+          },
+          {
+            "offset": 32249615,
+            "kind": "ascii",
+            "value": "3. Shards Gained,"
+          },
+          {
+            "offset": 32249633,
+            "kind": "ascii",
+            "value": "4. Research Points Gained,"
+          },
+          {
+            "offset": 32249660,
+            "kind": "ascii",
+            "value": "5. Academy Points Gained,"
+          },
+          {
+            "offset": 32249686,
+            "kind": "ascii",
+            "value": "6. Mission Materaials Gained,"
+          },
+          {
+            "offset": 32249716,
+            "kind": "ascii",
+            "value": "7. Token Upgrades Power,  "
+          },
+          {
+            "offset": 32249743,
+            "kind": "ascii",
+            "value": "8. Permanent Daily Rewards Power,"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 32246116,
+            "kind": "ascii",
+            "value": "0 / 2800"
+          },
+          {
+            "offset": 32246302,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 32246980,
+            "kind": "ascii",
+            "value": "YOU NEED TO \"FILL\" MORE LOOPS BEFORE YOU CAN PERFORM A RESET"
+          },
+          {
+            "offset": 32247454,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 32247844,
+            "kind": "ascii",
+            "value": "REVIVING..."
+          },
+          {
+            "offset": 32248088,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 32248100,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 32248116,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 32248128,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 32248140,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 32248184,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 32248220,
+            "kind": "ascii",
+            "value": "PlayOpenMenuSound"
+          },
+          {
+            "offset": 32248260,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 32248328,
+            "kind": "ascii",
+            "value": "StartGameSetter, Assembly-CSharp"
+          },
+          {
+            "offset": 32248364,
+            "kind": "ascii",
+            "value": "OnDimButton"
+          },
+          {
+            "offset": 32248396,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 32248868,
+            "kind": "ascii",
+            "value": "Tokenium-553 is a highly valued material used for all sorts of luxuries."
+          },
+          {
+            "offset": 32248942,
+            "kind": "ascii",
+            "value": "I'll take it off your hands. You'll be compensated."
+          },
+          {
+            "offset": 32249572,
+            "kind": "ascii",
+            "value": "Your: "
+          },
+          {
+            "offset": 32249579,
+            "kind": "ascii",
+            "value": "1. MK1 Output"
+          },
+          {
+            "offset": 32249593,
+            "kind": "ascii",
+            "value": "2. Mod Points Gained,"
+          },
+          {
+            "offset": 32249615,
+            "kind": "ascii",
+            "value": "3. Shards Gained,"
+          },
+          {
+            "offset": 32249633,
+            "kind": "ascii",
+            "value": "4. Research Points Gained,"
+          },
+          {
+            "offset": 32249660,
+            "kind": "ascii",
+            "value": "5. Academy Points Gained,"
+          },
+          {
+            "offset": 32249686,
+            "kind": "ascii",
+            "value": "6. Mission Materaials Gained,"
+          },
+          {
+            "offset": 32249716,
+            "kind": "ascii",
+            "value": "7. Token Upgrades Power,  "
+          },
+          {
+            "offset": 32249743,
+            "kind": "ascii",
+            "value": "8. Permanent Daily Rewards Power,"
+          },
+          {
+            "offset": 32249778,
+            "kind": "ascii",
+            "value": "are all partially offline and therefore reduced significantly!"
+          },
+          {
+            "offset": 32249842,
+            "kind": "ascii",
+            "value": "Above this panel, you'll see a \"Meltdown Overview\" Box. This box shows us how much power we've regained to our systems!"
+          },
+          {
+            "offset": 32250644,
+            "kind": "ascii",
+            "value": "250 / 250"
+          },
+          {
+            "offset": 32251556,
+            "kind": "ascii",
+            "value": "HIGHEST STAGE"
+          },
+          {
+            "offset": 32251570,
+            "kind": "ascii",
+            "value": "(RUN AVERAGE)"
+          },
+          {
+            "offset": 32251924,
+            "kind": "ascii",
+            "value": "For every Level in Farahyte Trinkets, increase MP gained from the Daily MP Reward by x1.005"
+          }
+        ]
+      },
+      {
+        "offset": 33279830,
+        "kind": "ascii",
+        "value": "(x2 Daily Tokenium Max Cap)",
+        "matched_terms": [
+          "daily tokenium"
+        ],
+        "entry_context": [
+          {
+            "offset": 33278432,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 33278472,
+            "kind": "ascii",
+            "value": "LM124Recolor"
+          },
+          {
+            "offset": 33278504,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 33278572,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 33278608,
+            "kind": "ascii",
+            "value": "PlayOpenTooltipSound"
+          },
+          {
+            "offset": 33278648,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 33279422,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 33279748,
+            "kind": "ascii",
+            "value": "YOU HAVE ACQUIRED THE COLLECTORS PACK"
+          },
+          {
+            "offset": 33279787,
+            "kind": "ascii",
+            "value": "(2000 Diamonds)"
+          },
+          {
+            "offset": 33279803,
+            "kind": "ascii",
+            "value": "(x1.5 Mission Mats Gained)"
+          },
+          {
+            "offset": 33279830,
+            "kind": "ascii",
+            "value": "(x2 Daily Tokenium Max Cap)"
+          },
+          {
+            "offset": 33281236,
+            "kind": "ascii",
+            "value": "ATK SPEED"
+          },
+          {
+            "offset": 33281524,
+            "kind": "ascii",
+            "value": "LOADOUT"
+          },
+          {
+            "offset": 33281684,
+            "kind": "ascii",
+            "value": "REACH LVL 2"
+          },
+          {
+            "offset": 33282142,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 33283240,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 33283252,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 33283268,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 33283280,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 33283292,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 33283336,
+            "kind": "ascii",
+            "value": "ArcadeManager, Assembly-CSharp"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 33277288,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 33277300,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 33277316,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 33277328,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 33277340,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 33277384,
+            "kind": "ascii",
+            "value": "ConstructionProjects, Assembly-CSharp"
+          },
+          {
+            "offset": 33277428,
+            "kind": "ascii",
+            "value": "ToggleLootReportsAutomation"
+          },
+          {
+            "offset": 33277476,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 33278056,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 33278068,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 33278084,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 33278096,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 33278108,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 33278152,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 33278192,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 33278224,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 33278292,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 33278332,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 33278364,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 33278432,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 33278472,
+            "kind": "ascii",
+            "value": "LM124Recolor"
+          },
+          {
+            "offset": 33278504,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 33278572,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 33278608,
+            "kind": "ascii",
+            "value": "PlayOpenTooltipSound"
+          },
+          {
+            "offset": 33278648,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 33279422,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          },
+          {
+            "offset": 33279748,
+            "kind": "ascii",
+            "value": "YOU HAVE ACQUIRED THE COLLECTORS PACK"
+          },
+          {
+            "offset": 33279787,
+            "kind": "ascii",
+            "value": "(2000 Diamonds)"
+          },
+          {
+            "offset": 33279803,
+            "kind": "ascii",
+            "value": "(x1.5 Mission Mats Gained)"
+          },
+          {
+            "offset": 33279830,
+            "kind": "ascii",
+            "value": "(x2 Daily Tokenium Max Cap)"
+          },
+          {
+            "offset": 33281236,
+            "kind": "ascii",
+            "value": "ATK SPEED"
+          },
+          {
+            "offset": 33281524,
+            "kind": "ascii",
+            "value": "LOADOUT"
+          },
+          {
+            "offset": 33281684,
+            "kind": "ascii",
+            "value": "REACH LVL 2"
+          },
+          {
+            "offset": 33282142,
+            "kind": "ascii",
+            "value": "7?M1I?"
+          }
+        ]
+      },
+      {
+        "offset": 34179332,
+        "kind": "ascii",
+        "value": "0 / 2000 Daily Tokenium (from blue farm missions)",
+        "matched_terms": [
+          "daily tokenium"
+        ],
+        "entry_context": [
+          {
+            "offset": 34178492,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34178560,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 34178600,
+            "kind": "ascii",
+            "value": "LM244Recolor"
+          },
+          {
+            "offset": 34178632,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34178700,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 34178736,
+            "kind": "ascii",
+            "value": "PlayOpenTooltipSound"
+          },
+          {
+            "offset": 34178776,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34178844,
+            "kind": "ascii",
+            "value": "TextHandlerLoopMods, Assembly-CSharp"
+          },
+          {
+            "offset": 34178884,
+            "kind": "ascii",
+            "value": "SetLM244BonusText"
+          },
+          {
+            "offset": 34178924,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34179332,
+            "kind": "ascii",
+            "value": "0 / 2000 Daily Tokenium (from blue farm missions)"
+          },
+          {
+            "offset": 34179908,
+            "kind": "ascii",
+            "value": "0.07"
+          },
+          {
+            "offset": 34180296,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 34180308,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 34180324,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 34180336,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 34180348,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 34180392,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 34180432,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 34180464,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34180532,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 34176292,
+            "kind": "ascii",
+            "value": "333@"
+          },
+          {
+            "offset": 34176536,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 34176548,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 34176564,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 34176576,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 34176588,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 34176632,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 34176672,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 34176704,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34176772,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 34176812,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 34176844,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34176912,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 34176952,
+            "kind": "ascii",
+            "value": "LM19Recolor"
+          },
+          {
+            "offset": 34176984,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34177052,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 34177088,
+            "kind": "ascii",
+            "value": "PlayOpenTooltipSound"
+          },
+          {
+            "offset": 34177128,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34178184,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 34178196,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 34178212,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 34178224,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 34178236,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 34178280,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 34178320,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 34178352,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34178420,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 34178460,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 34178492,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34178560,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 34178600,
+            "kind": "ascii",
+            "value": "LM244Recolor"
+          },
+          {
+            "offset": 34178632,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34178700,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 34178736,
+            "kind": "ascii",
+            "value": "PlayOpenTooltipSound"
+          },
+          {
+            "offset": 34178776,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34178844,
+            "kind": "ascii",
+            "value": "TextHandlerLoopMods, Assembly-CSharp"
+          },
+          {
+            "offset": 34178884,
+            "kind": "ascii",
+            "value": "SetLM244BonusText"
+          },
+          {
+            "offset": 34178924,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34179332,
+            "kind": "ascii",
+            "value": "0 / 2000 Daily Tokenium (from blue farm missions)"
+          },
+          {
+            "offset": 34179908,
+            "kind": "ascii",
+            "value": "0.07"
+          },
+          {
+            "offset": 34180296,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 34180308,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 34180324,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 34180336,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 34180348,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 34180392,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 34180432,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 34180464,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34180532,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 34180572,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 34180604,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34180672,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 34180712,
+            "kind": "ascii",
+            "value": "LM61Recolor"
+          },
+          {
+            "offset": 34180744,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34180812,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 34180848,
+            "kind": "ascii",
+            "value": "PlayOpenTooltipSound"
+          },
+          {
+            "offset": 34180888,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34180956,
+            "kind": "ascii",
+            "value": "TextHandlerLoopMods, Assembly-CSharp"
+          },
+          {
+            "offset": 34180996,
+            "kind": "ascii",
+            "value": "SetLM61BonusText"
+          },
+          {
+            "offset": 34181032,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 34182148,
+            "kind": "ascii",
+            "value": "MK 10 GENERATORS"
+          },
+          {
+            "offset": 34182165,
+            "kind": "ascii",
+            "value": "OWNED:"
+          }
+        ]
+      },
+      {
+        "offset": 35860884,
+        "kind": "ascii",
+        "value": "TOKENIUM-553",
+        "matched_terms": [
+          "tokenium-553"
+        ],
+        "entry_context": [
+          {
+            "offset": 35859284,
+            "kind": "ascii",
+            "value": "DIFAR STONE"
+          },
+          {
+            "offset": 35859444,
+            "kind": "ascii",
+            "value": "MOSKOM ORE"
+          },
+          {
+            "offset": 35859604,
+            "kind": "ascii",
+            "value": "EXON CRYSTAL"
+          },
+          {
+            "offset": 35859764,
+            "kind": "ascii",
+            "value": "TORKINSTONE"
+          },
+          {
+            "offset": 35859924,
+            "kind": "ascii",
+            "value": "CHROMIUM"
+          },
+          {
+            "offset": 35860084,
+            "kind": "ascii",
+            "value": "ORGANIUM ORE"
+          },
+          {
+            "offset": 35860244,
+            "kind": "ascii",
+            "value": "DARKSEID ORE"
+          },
+          {
+            "offset": 35860404,
+            "kind": "ascii",
+            "value": "ADAMORPHIUM"
+          },
+          {
+            "offset": 35860564,
+            "kind": "ascii",
+            "value": "HARBULARIUM"
+          },
+          {
+            "offset": 35860724,
+            "kind": "ascii",
+            "value": "DUNE GRANITE"
+          },
+          {
+            "offset": 35860884,
+            "kind": "ascii",
+            "value": "TOKENIUM-553"
+          },
+          {
+            "offset": 35861044,
+            "kind": "ascii",
+            "value": "TOKENIUM-553"
+          },
+          {
+            "offset": 35910516,
+            "kind": "ascii",
+            "value": "REACH LV. 75"
+          },
+          {
+            "offset": 35911700,
+            "kind": "ascii",
+            "value": "0 / 1"
+          },
+          {
+            "offset": 35912292,
+            "kind": "ascii",
+            "value": "AUTOCLICKER:"
+          },
+          {
+            "offset": 35912452,
+            "kind": "ascii",
+            "value": "EXTENSION:"
+          },
+          {
+            "offset": 35912612,
+            "kind": "ascii",
+            "value": "CRADLER-UNIT MK1"
+          },
+          {
+            "offset": 35923124,
+            "kind": "ascii",
+            "value": "Cells Gained x1e+15"
+          },
+          {
+            "offset": 35923300,
+            "kind": "ascii",
+            "value": "Cells Gained x1e+15"
+          },
+          {
+            "offset": 35923479,
+            "kind": "ascii",
+            "value": " Ouroboros Orbs Gained x1.1"
+          },
+          {
+            "offset": 35923752,
+            "kind": "ascii",
+            "value": "Normal"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 35857860,
+            "kind": "ascii",
+            "value": "To unlock you must max the Special Upgrade:"
+          },
+          {
+            "offset": 35857953,
+            "kind": "ascii",
+            "value": "1)?0"
+          },
+          {
+            "offset": 35858052,
+            "kind": "ascii",
+            "value": "To unlock you must max the Special Upgrade:"
+          },
+          {
+            "offset": 35858145,
+            "kind": "ascii",
+            "value": "1)?0"
+          },
+          {
+            "offset": 35858244,
+            "kind": "ascii",
+            "value": "To unlock you must max the Special Upgrade:"
+          },
+          {
+            "offset": 35858337,
+            "kind": "ascii",
+            "value": "1)?0"
+          },
+          {
+            "offset": 35858436,
+            "kind": "ascii",
+            "value": "To unlock you must first max the Special Upgrade:"
+          },
+          {
+            "offset": 35858644,
+            "kind": "ascii",
+            "value": "DESERT BLOOD"
+          },
+          {
+            "offset": 35858804,
+            "kind": "ascii",
+            "value": "GIGANTIUM"
+          },
+          {
+            "offset": 35858964,
+            "kind": "ascii",
+            "value": "KENTO ORE"
+          },
+          {
+            "offset": 35859124,
+            "kind": "ascii",
+            "value": "PYTOXENE"
+          },
+          {
+            "offset": 35859284,
+            "kind": "ascii",
+            "value": "DIFAR STONE"
+          },
+          {
+            "offset": 35859444,
+            "kind": "ascii",
+            "value": "MOSKOM ORE"
+          },
+          {
+            "offset": 35859604,
+            "kind": "ascii",
+            "value": "EXON CRYSTAL"
+          },
+          {
+            "offset": 35859764,
+            "kind": "ascii",
+            "value": "TORKINSTONE"
+          },
+          {
+            "offset": 35859924,
+            "kind": "ascii",
+            "value": "CHROMIUM"
+          },
+          {
+            "offset": 35860084,
+            "kind": "ascii",
+            "value": "ORGANIUM ORE"
+          },
+          {
+            "offset": 35860244,
+            "kind": "ascii",
+            "value": "DARKSEID ORE"
+          },
+          {
+            "offset": 35860404,
+            "kind": "ascii",
+            "value": "ADAMORPHIUM"
+          },
+          {
+            "offset": 35860564,
+            "kind": "ascii",
+            "value": "HARBULARIUM"
+          },
+          {
+            "offset": 35860724,
+            "kind": "ascii",
+            "value": "DUNE GRANITE"
+          },
+          {
+            "offset": 35860884,
+            "kind": "ascii",
+            "value": "TOKENIUM-553"
+          },
+          {
+            "offset": 35861044,
+            "kind": "ascii",
+            "value": "TOKENIUM-553"
+          }
+        ]
+      },
+      {
+        "offset": 35861044,
+        "kind": "ascii",
+        "value": "TOKENIUM-553",
+        "matched_terms": [
+          "tokenium-553"
+        ],
+        "entry_context": [
+          {
+            "offset": 35859444,
+            "kind": "ascii",
+            "value": "MOSKOM ORE"
+          },
+          {
+            "offset": 35859604,
+            "kind": "ascii",
+            "value": "EXON CRYSTAL"
+          },
+          {
+            "offset": 35859764,
+            "kind": "ascii",
+            "value": "TORKINSTONE"
+          },
+          {
+            "offset": 35859924,
+            "kind": "ascii",
+            "value": "CHROMIUM"
+          },
+          {
+            "offset": 35860084,
+            "kind": "ascii",
+            "value": "ORGANIUM ORE"
+          },
+          {
+            "offset": 35860244,
+            "kind": "ascii",
+            "value": "DARKSEID ORE"
+          },
+          {
+            "offset": 35860404,
+            "kind": "ascii",
+            "value": "ADAMORPHIUM"
+          },
+          {
+            "offset": 35860564,
+            "kind": "ascii",
+            "value": "HARBULARIUM"
+          },
+          {
+            "offset": 35860724,
+            "kind": "ascii",
+            "value": "DUNE GRANITE"
+          },
+          {
+            "offset": 35860884,
+            "kind": "ascii",
+            "value": "TOKENIUM-553"
+          },
+          {
+            "offset": 35861044,
+            "kind": "ascii",
+            "value": "TOKENIUM-553"
+          },
+          {
+            "offset": 35910516,
+            "kind": "ascii",
+            "value": "REACH LV. 75"
+          },
+          {
+            "offset": 35911700,
+            "kind": "ascii",
+            "value": "0 / 1"
+          },
+          {
+            "offset": 35912292,
+            "kind": "ascii",
+            "value": "AUTOCLICKER:"
+          },
+          {
+            "offset": 35912452,
+            "kind": "ascii",
+            "value": "EXTENSION:"
+          },
+          {
+            "offset": 35912612,
+            "kind": "ascii",
+            "value": "CRADLER-UNIT MK1"
+          },
+          {
+            "offset": 35923124,
+            "kind": "ascii",
+            "value": "Cells Gained x1e+15"
+          },
+          {
+            "offset": 35923300,
+            "kind": "ascii",
+            "value": "Cells Gained x1e+15"
+          },
+          {
+            "offset": 35923479,
+            "kind": "ascii",
+            "value": " Ouroboros Orbs Gained x1.1"
+          },
+          {
+            "offset": 35923752,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 35923764,
+            "kind": "ascii",
+            "value": "Highlighted"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 35858052,
+            "kind": "ascii",
+            "value": "To unlock you must max the Special Upgrade:"
+          },
+          {
+            "offset": 35858145,
+            "kind": "ascii",
+            "value": "1)?0"
+          },
+          {
+            "offset": 35858244,
+            "kind": "ascii",
+            "value": "To unlock you must max the Special Upgrade:"
+          },
+          {
+            "offset": 35858337,
+            "kind": "ascii",
+            "value": "1)?0"
+          },
+          {
+            "offset": 35858436,
+            "kind": "ascii",
+            "value": "To unlock you must first max the Special Upgrade:"
+          },
+          {
+            "offset": 35858644,
+            "kind": "ascii",
+            "value": "DESERT BLOOD"
+          },
+          {
+            "offset": 35858804,
+            "kind": "ascii",
+            "value": "GIGANTIUM"
+          },
+          {
+            "offset": 35858964,
+            "kind": "ascii",
+            "value": "KENTO ORE"
+          },
+          {
+            "offset": 35859124,
+            "kind": "ascii",
+            "value": "PYTOXENE"
+          },
+          {
+            "offset": 35859284,
+            "kind": "ascii",
+            "value": "DIFAR STONE"
+          },
+          {
+            "offset": 35859444,
+            "kind": "ascii",
+            "value": "MOSKOM ORE"
+          },
+          {
+            "offset": 35859604,
+            "kind": "ascii",
+            "value": "EXON CRYSTAL"
+          },
+          {
+            "offset": 35859764,
+            "kind": "ascii",
+            "value": "TORKINSTONE"
+          },
+          {
+            "offset": 35859924,
+            "kind": "ascii",
+            "value": "CHROMIUM"
+          },
+          {
+            "offset": 35860084,
+            "kind": "ascii",
+            "value": "ORGANIUM ORE"
+          },
+          {
+            "offset": 35860244,
+            "kind": "ascii",
+            "value": "DARKSEID ORE"
+          },
+          {
+            "offset": 35860404,
+            "kind": "ascii",
+            "value": "ADAMORPHIUM"
+          },
+          {
+            "offset": 35860564,
+            "kind": "ascii",
+            "value": "HARBULARIUM"
+          },
+          {
+            "offset": 35860724,
+            "kind": "ascii",
+            "value": "DUNE GRANITE"
+          },
+          {
+            "offset": 35860884,
+            "kind": "ascii",
+            "value": "TOKENIUM-553"
+          },
+          {
+            "offset": 35861044,
+            "kind": "ascii",
+            "value": "TOKENIUM-553"
+          }
+        ]
+      },
+      {
+        "offset": 41461016,
+        "kind": "ascii",
+        "value": "ClaimBankedTokens",
+        "matched_terms": [
+          "claimbankedtokens"
+        ],
+        "entry_context": [
+          {
+            "offset": 41449076,
+            "kind": "ascii",
+            "value": "At Exodus Quality 2:"
+          },
+          {
+            "offset": 41457164,
+            "kind": "ascii",
+            "value": "\"5A?\"5A?\"5A?"
+          },
+          {
+            "offset": 41457268,
+            "kind": "ascii",
+            "value": "x1.05"
+          },
+          {
+            "offset": 41458813,
+            "kind": "ascii",
+            "value": "x+?Q"
+          },
+          {
+            "offset": 41460888,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 41460900,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 41460916,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 41460928,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 41460940,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 41460984,
+            "kind": "ascii",
+            "value": "TokenShop, Assembly-CSharp"
+          },
+          {
+            "offset": 41461016,
+            "kind": "ascii",
+            "value": "ClaimBankedTokens"
+          },
+          {
+            "offset": 41461056,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 41468916,
+            "kind": "ascii",
+            "value": "0/batch"
+          },
+          {
+            "offset": 41469076,
+            "kind": "ascii",
+            "value": "0/batch"
+          },
+          {
+            "offset": 41469236,
+            "kind": "ascii",
+            "value": "0/batch"
+          },
+          {
+            "offset": 41469396,
+            "kind": "ascii",
+            "value": "0/batch"
+          },
+          {
+            "offset": 41469556,
+            "kind": "ascii",
+            "value": "5/Next Operation"
+          },
+          {
+            "offset": 41469732,
+            "kind": "ascii",
+            "value": "0/tick"
+          },
+          {
+            "offset": 41469892,
+            "kind": "ascii",
+            "value": "0/batch"
+          },
+          {
+            "offset": 41470116,
+            "kind": "ascii",
+            "value": "123.52m"
+          },
+          {
+            "offset": 41472308,
+            "kind": "ascii",
+            "value": "We've located a potential candidate planet for mining and harvesting rare trinkets and minerals."
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 41458813,
+            "kind": "ascii",
+            "value": "x+?Q"
+          },
+          {
+            "offset": 41460888,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 41460900,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 41460916,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 41460928,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 41460940,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 41460984,
+            "kind": "ascii",
+            "value": "TokenShop, Assembly-CSharp"
+          },
+          {
+            "offset": 41461016,
+            "kind": "ascii",
+            "value": "ClaimBankedTokens"
+          },
+          {
+            "offset": 41461056,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          }
+        ]
+      },
+      {
+        "offset": 45543940,
+        "kind": "ascii",
+        "value": "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+        "matched_terms": [
+          "tokenium-553",
+          "daily tokenium"
+        ],
+        "entry_context": [
+          {
+            "offset": 45542480,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 45542516,
+            "kind": "ascii",
+            "value": "PlayCloseTooltipSound"
+          },
+          {
+            "offset": 45542560,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45542628,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 45542668,
+            "kind": "ascii",
+            "value": "CheckAllCostIndicators"
+          },
+          {
+            "offset": 45542712,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45543204,
+            "kind": "ascii",
+            "value": "Instantly grants you 1000 diamonds."
+          },
+          {
+            "offset": 45543240,
+            "kind": "ascii",
+            "value": "(Does not get reset when performing an Ouroboros Reset)"
+          },
+          {
+            "offset": 45543406,
+            "kind": "ascii",
+            "value": "h>f.->"
+          },
+          {
+            "offset": 45543720,
+            "kind": "ascii",
+            "value": "OUTPUT"
+          },
+          {
+            "offset": 45543940,
+            "kind": "ascii",
+            "value": "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
+          },
+          {
+            "offset": 45544372,
+            "kind": "ascii",
+            "value": "MISSION MATERIALS GAINED"
+          },
+          {
+            "offset": 45544510,
+            "kind": "ascii",
+            "value": "h>f.->"
+          },
+          {
+            "offset": 45545108,
+            "kind": "ascii",
+            "value": "This upgrade grants +1 LP per level, as well as a 100% increase to Cells Gained."
+          },
+          {
+            "offset": 45545436,
+            "kind": "ascii",
+            "value": "M0^?M0^?M0^?"
+          },
+          {
+            "offset": 45545576,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 45545588,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 45545604,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 45545616,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 45545628,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 45545672,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 45541332,
+            "kind": "ascii",
+            "value": "BIO-SCIENTIST OUTPUT MODIFICATION MODULE"
+          },
+          {
+            "offset": 45541964,
+            "kind": "ascii",
+            "value": "M0^?M0^?M0^?"
+          },
+          {
+            "offset": 45542104,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 45542116,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 45542132,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 45542144,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 45542156,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 45542200,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45542240,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45542272,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45542340,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45542380,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45542412,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45542480,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 45542516,
+            "kind": "ascii",
+            "value": "PlayCloseTooltipSound"
+          },
+          {
+            "offset": 45542560,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45542628,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 45542668,
+            "kind": "ascii",
+            "value": "CheckAllCostIndicators"
+          },
+          {
+            "offset": 45542712,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45543204,
+            "kind": "ascii",
+            "value": "Instantly grants you 1000 diamonds."
+          },
+          {
+            "offset": 45543240,
+            "kind": "ascii",
+            "value": "(Does not get reset when performing an Ouroboros Reset)"
+          },
+          {
+            "offset": 45543406,
+            "kind": "ascii",
+            "value": "h>f.->"
+          },
+          {
+            "offset": 45543720,
+            "kind": "ascii",
+            "value": "OUTPUT"
+          },
+          {
+            "offset": 45543940,
+            "kind": "ascii",
+            "value": "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
+          },
+          {
+            "offset": 45544372,
+            "kind": "ascii",
+            "value": "MISSION MATERIALS GAINED"
+          },
+          {
+            "offset": 45544510,
+            "kind": "ascii",
+            "value": "h>f.->"
+          },
+          {
+            "offset": 45545108,
+            "kind": "ascii",
+            "value": "This upgrade grants +1 LP per level, as well as a 100% increase to Cells Gained."
+          },
+          {
+            "offset": 45545436,
+            "kind": "ascii",
+            "value": "M0^?M0^?M0^?"
+          },
+          {
+            "offset": 45545576,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 45545588,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 45545604,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 45545616,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 45545628,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 45545672,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45545712,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45545744,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45545812,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45545852,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45545884,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45545952,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 45545988,
+            "kind": "ascii",
+            "value": "PlayCloseTooltipSound"
+          },
+          {
+            "offset": 45546032,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45546100,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 45546140,
+            "kind": "ascii",
+            "value": "CheckAllCostIndicators"
+          },
+          {
+            "offset": 45546184,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45546388,
+            "kind": "ascii",
+            "value": "MK5 GEN PRODUCTION COST"
+          },
+          {
+            "offset": 45546412,
+            "kind": "ascii",
+            "value": "MODIFICATION MODULE"
+          },
+          {
+            "offset": 45546644,
+            "kind": "ascii",
+            "value": "This upgrade increases the amount of automated loadout installs the Koios Ship will attempt to purchase with every tick."
+          },
+          {
+            "offset": 45546878,
+            "kind": "ascii",
+            "value": "h>f.->"
+          }
+        ]
+      },
+      {
+        "offset": 45659844,
+        "kind": "ascii",
+        "value": "TOKENIUM-553 DAILY",
+        "matched_terms": [
+          "tokenium-553"
+        ],
+        "entry_context": [
+          {
+            "offset": 45657892,
+            "kind": "ascii",
+            "value": "PlayCloseTooltipSound"
+          },
+          {
+            "offset": 45657936,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45658004,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 45658044,
+            "kind": "ascii",
+            "value": "CheckAllCostIndicators"
+          },
+          {
+            "offset": 45658088,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45658356,
+            "kind": "ascii",
+            "value": "MINING POD MODIFICATIONS"
+          },
+          {
+            "offset": 45658430,
+            "kind": "ascii",
+            "value": "h>f.->"
+          },
+          {
+            "offset": 45658676,
+            "kind": "ascii",
+            "value": "x1.10"
+          },
+          {
+            "offset": 45659044,
+            "kind": "ascii",
+            "value": "This upgrade provides a 3% increase to Research Points Gained."
+          },
+          {
+            "offset": 45659684,
+            "kind": "ascii",
+            "value": "1000"
+          },
+          {
+            "offset": 45659844,
+            "kind": "ascii",
+            "value": "TOKENIUM-553 DAILY"
+          },
+          {
+            "offset": 45659863,
+            "kind": "ascii",
+            "value": "CAPACITY MODULE"
+          },
+          {
+            "offset": 45660044,
+            "kind": "ascii",
+            "value": "M0^?M0^?M0^?"
+          },
+          {
+            "offset": 45660184,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 45660196,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 45660212,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 45660224,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 45660236,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 45660280,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45660320,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45660352,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 45657340,
+            "kind": "ascii",
+            "value": "M0^?M0^?M0^?"
+          },
+          {
+            "offset": 45657480,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 45657492,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 45657508,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 45657520,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 45657532,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 45657576,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45657616,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45657648,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45657716,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45657756,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45657788,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45657856,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 45657892,
+            "kind": "ascii",
+            "value": "PlayCloseTooltipSound"
+          },
+          {
+            "offset": 45657936,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45658004,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 45658044,
+            "kind": "ascii",
+            "value": "CheckAllCostIndicators"
+          },
+          {
+            "offset": 45658088,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45658356,
+            "kind": "ascii",
+            "value": "MINING POD MODIFICATIONS"
+          },
+          {
+            "offset": 45658430,
+            "kind": "ascii",
+            "value": "h>f.->"
+          },
+          {
+            "offset": 45658676,
+            "kind": "ascii",
+            "value": "x1.10"
+          },
+          {
+            "offset": 45659044,
+            "kind": "ascii",
+            "value": "This upgrade provides a 3% increase to Research Points Gained."
+          },
+          {
+            "offset": 45659684,
+            "kind": "ascii",
+            "value": "1000"
+          },
+          {
+            "offset": 45659844,
+            "kind": "ascii",
+            "value": "TOKENIUM-553 DAILY"
+          },
+          {
+            "offset": 45659863,
+            "kind": "ascii",
+            "value": "CAPACITY MODULE"
+          },
+          {
+            "offset": 45660044,
+            "kind": "ascii",
+            "value": "M0^?M0^?M0^?"
+          },
+          {
+            "offset": 45660184,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 45660196,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 45660212,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 45660224,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 45660236,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 45660280,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45660320,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45660352,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45660420,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45660460,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45660492,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45660560,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 45660596,
+            "kind": "ascii",
+            "value": "PlayCloseTooltipSound"
+          },
+          {
+            "offset": 45660640,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45660708,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 45660748,
+            "kind": "ascii",
+            "value": "CheckAllCostIndicators"
+          },
+          {
+            "offset": 45660792,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45661204,
+            "kind": "ascii",
+            "value": "MULTIPLICATOR FACILITY BRANCH"
+          },
+          {
+            "offset": 45661340,
+            "kind": "ascii",
+            "value": "M0^?M0^?M0^?"
+          },
+          {
+            "offset": 45661480,
+            "kind": "ascii",
+            "value": "Normal"
+          },
+          {
+            "offset": 45661492,
+            "kind": "ascii",
+            "value": "Highlighted"
+          },
+          {
+            "offset": 45661508,
+            "kind": "ascii",
+            "value": "Pressed"
+          },
+          {
+            "offset": 45661520,
+            "kind": "ascii",
+            "value": "Selected"
+          },
+          {
+            "offset": 45661532,
+            "kind": "ascii",
+            "value": "Disabled"
+          },
+          {
+            "offset": 45661576,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45661616,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45661648,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45661716,
+            "kind": "ascii",
+            "value": "UnityEngine.GameObject, UnityEngine"
+          },
+          {
+            "offset": 45661756,
+            "kind": "ascii",
+            "value": "SetActive"
+          },
+          {
+            "offset": 45661788,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45661856,
+            "kind": "ascii",
+            "value": "SoundManager, Assembly-CSharp"
+          },
+          {
+            "offset": 45661892,
+            "kind": "ascii",
+            "value": "PlayCloseTooltipSound"
+          },
+          {
+            "offset": 45661936,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45662004,
+            "kind": "ascii",
+            "value": "ButtonRecoloring, Assembly-CSharp"
+          },
+          {
+            "offset": 45662044,
+            "kind": "ascii",
+            "value": "CheckAllCostIndicators"
+          },
+          {
+            "offset": 45662088,
+            "kind": "ascii",
+            "value": "UnityEngine.Object, UnityEngine"
+          },
+          {
+            "offset": 45662500,
+            "kind": "ascii",
+            "value": "INSTANT DIAMOND TRANSMISSION MODULE C"
+          },
+          {
+            "offset": 45662780,
+            "kind": "ascii",
+            "value": "M0^?M0^?M0^?"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file": "_unity_joined\\sharedassets0.assets",
+    "string_count": 2485711,
+    "match_count": 2,
+    "matches": [
+      {
+        "offset": 52455284,
+        "kind": "ascii",
+        "value": "OR_TokenBankCap",
+        "matched_terms": [
+          "tokenbankcap"
+        ],
+        "entry_context": [
+          {
+            "offset": 52450583,
+            "kind": "ascii",
+            "value": "SRJjIo"
+          },
+          {
+            "offset": 52450600,
+            "kind": "ascii",
+            "value": "TJJIo"
+          },
+          {
+            "offset": 52450642,
+            "kind": "ascii",
+            "value": "$L3(0"
+          },
+          {
+            "offset": 52450898,
+            "kind": "ascii",
+            "value": "HI))%"
+          },
+          {
+            "offset": 52450951,
+            "kind": "ascii",
+            "value": "S`J*"
+          },
+          {
+            "offset": 52450967,
+            "kind": "ascii",
+            "value": "RRJJIo"
+          },
+          {
+            "offset": 52450983,
+            "kind": "ascii",
+            "value": "SRJJIo"
+          },
+          {
+            "offset": 52451305,
+            "kind": "ascii",
+            "value": "TKIo"
+          },
+          {
+            "offset": 52452018,
+            "kind": "ascii",
+            "value": "$L3(0"
+          },
+          {
+            "offset": 52452327,
+            "kind": "ascii",
+            "value": "S`J*"
+          },
+          {
+            "offset": 52455284,
+            "kind": "ascii",
+            "value": "OR_TokenBankCap"
+          },
+          {
+            "offset": 52461297,
+            "kind": "ascii",
+            "value": "q<+f"
+          },
+          {
+            "offset": 52462807,
+            "kind": "ascii",
+            "value": "UUUU"
+          },
+          {
+            "offset": 52465388,
+            "kind": "ascii",
+            "value": "Qpl]"
+          },
+          {
+            "offset": 52465395,
+            "kind": "ascii",
+            "value": "#+XG"
+          },
+          {
+            "offset": 52465411,
+            "kind": "ascii",
+            "value": "`Z@|"
+          },
+          {
+            "offset": 52466591,
+            "kind": "ascii",
+            "value": "_aq<"
+          },
+          {
+            "offset": 52466619,
+            "kind": "ascii",
+            "value": "zUUU"
+          },
+          {
+            "offset": 52466698,
+            "kind": "ascii",
+            "value": "(L]s"
+          },
+          {
+            "offset": 52466797,
+            "kind": "ascii",
+            "value": "@$IQi>"
+          },
+          {
+            "offset": 52467960,
+            "kind": "ascii",
+            "value": "zUUU"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 52452327,
+            "kind": "ascii",
+            "value": "S`J*"
+          },
+          {
+            "offset": 52455284,
+            "kind": "ascii",
+            "value": "OR_TokenBankCap"
+          }
+        ]
+      },
+      {
+        "offset": 282850740,
+        "kind": "ascii",
+        "value": "OR_TokenBankCap",
+        "matched_terms": [
+          "tokenbankcap"
+        ],
+        "entry_context": [
+          {
+            "offset": 282849828,
+            "kind": "ascii",
+            "value": "0_Badge@0.5x"
+          },
+          {
+            "offset": 282850190,
+            "kind": "ascii",
+            "value": "5?q=J"
+          },
+          {
+            "offset": 282850478,
+            "kind": "ascii",
+            "value": "p?p="
+          },
+          {
+            "offset": 282850494,
+            "kind": "ascii",
+            "value": "u?)\\"
+          },
+          {
+            "offset": 282850515,
+            "kind": "ascii",
+            "value": ">p=J?)\\"
+          },
+          {
+            "offset": 282850541,
+            "kind": "ascii",
+            "value": "Ga>33s?"
+          },
+          {
+            "offset": 282850569,
+            "kind": "ascii",
+            "value": "Ga?\\"
+          },
+          {
+            "offset": 282850585,
+            "kind": "ascii",
+            "value": "p=?p=J"
+          },
+          {
+            "offset": 282850693,
+            "kind": "ascii",
+            "value": "Q8>33s"
+          },
+          {
+            "offset": 282850711,
+            "kind": "ascii",
+            "value": "?p=J"
+          },
+          {
+            "offset": 282850740,
+            "kind": "ascii",
+            "value": "OR_TokenBankCap"
+          },
+          {
+            "offset": 282850940,
+            "kind": "utf16",
+            "value": "320102.01/0.(/.-(.,(-+(,*(+)(*%()'(%&'%$&%#$%\"$#"
+          },
+          {
+            "offset": 282851038,
+            "kind": "utf16",
+            "value": "\"#!\""
+          },
+          {
+            "offset": 282851467,
+            "kind": "ascii",
+            "value": "?33s"
+          },
+          {
+            "offset": 282851852,
+            "kind": "ascii",
+            "value": "q=J?"
+          },
+          {
+            "offset": 282852459,
+            "kind": "ascii",
+            "value": "?33s"
+          },
+          {
+            "offset": 282852467,
+            "kind": "ascii",
+            "value": "?)\\O"
+          },
+          {
+            "offset": 282852695,
+            "kind": "ascii",
+            "value": "@333?"
+          },
+          {
+            "offset": 282852812,
+            "kind": "ascii",
+            "value": "33s?"
+          },
+          {
+            "offset": 282852822,
+            "kind": "ascii",
+            "value": "c?33"
+          },
+          {
+            "offset": 282852828,
+            "kind": "ascii",
+            "value": "p=J?"
+          }
+        ],
+        "byte_context": [
+          {
+            "offset": 282847876,
+            "kind": "ascii",
+            "value": "21_5"
+          },
+          {
+            "offset": 282847943,
+            "kind": "ascii",
+            "value": "c61AF"
+          },
+          {
+            "offset": 282848739,
+            "kind": "ascii",
+            "value": "?333?"
+          },
+          {
+            "offset": 282848862,
+            "kind": "ascii",
+            "value": "#=)\\"
+          },
+          {
+            "offset": 282848964,
+            "kind": "ascii",
+            "value": "SCIENTIST96_2"
+          },
+          {
+            "offset": 282849774,
+            "kind": "ascii",
+            "value": "#<p="
+          },
+          {
+            "offset": 282849828,
+            "kind": "ascii",
+            "value": "0_Badge@0.5x"
+          },
+          {
+            "offset": 282850190,
+            "kind": "ascii",
+            "value": "5?q=J"
+          },
+          {
+            "offset": 282850478,
+            "kind": "ascii",
+            "value": "p?p="
+          },
+          {
+            "offset": 282850494,
+            "kind": "ascii",
+            "value": "u?)\\"
+          },
+          {
+            "offset": 282850515,
+            "kind": "ascii",
+            "value": ">p=J?)\\"
+          },
+          {
+            "offset": 282850541,
+            "kind": "ascii",
+            "value": "Ga>33s?"
+          },
+          {
+            "offset": 282850569,
+            "kind": "ascii",
+            "value": "Ga?\\"
+          },
+          {
+            "offset": 282850585,
+            "kind": "ascii",
+            "value": "p=?p=J"
+          },
+          {
+            "offset": 282850693,
+            "kind": "ascii",
+            "value": "Q8>33s"
+          },
+          {
+            "offset": 282850711,
+            "kind": "ascii",
+            "value": "?p=J"
+          },
+          {
+            "offset": 282850740,
+            "kind": "ascii",
+            "value": "OR_TokenBankCap"
+          },
+          {
+            "offset": 282850940,
+            "kind": "utf16",
+            "value": "320102.01/0.(/.-(.,(-+(,*(+)(*%()'(%&'%$&%#$%\"$#"
+          },
+          {
+            "offset": 282851038,
+            "kind": "utf16",
+            "value": "\"#!\""
+          },
+          {
+            "offset": 282851467,
+            "kind": "ascii",
+            "value": "?33s"
+          },
+          {
+            "offset": 282851852,
+            "kind": "ascii",
+            "value": "q=J?"
+          },
+          {
+            "offset": 282852459,
+            "kind": "ascii",
+            "value": "?33s"
+          },
+          {
+            "offset": 282852467,
+            "kind": "ascii",
+            "value": "?)\\O"
+          },
+          {
+            "offset": 282852695,
+            "kind": "ascii",
+            "value": "@333?"
+          },
+          {
+            "offset": 282852812,
+            "kind": "ascii",
+            "value": "33s?"
+          },
+          {
+            "offset": 282852822,
+            "kind": "ascii",
+            "value": "c?33"
+          },
+          {
+            "offset": 282852828,
+            "kind": "ascii",
+            "value": "p=J?"
+          },
+          {
+            "offset": 282853163,
+            "kind": "ascii",
+            "value": "?33s?"
+          },
+          {
+            "offset": 282853173,
+            "kind": "ascii",
+            "value": "Qx?)\\"
+          },
+          {
+            "offset": 282853396,
+            "kind": "ascii",
+            "value": "Hunt_Insectoid_Boss_05"
+          },
+          {
+            "offset": 282853612,
+            "kind": "utf16",
+            "value": "&'%&"
+          }
+        ]
+      }
+    ]
+  }
+]
