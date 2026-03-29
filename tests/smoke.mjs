@@ -79,6 +79,7 @@ assert.match(appJs, /function importPlayerProfileJson/);
 assert.match(appJs, /function exportPlayerProfileJson/);
 assert.match(appJs, /function initServerSession/);
 assert.match(appJs, /function closeServerSession/);
+assert.match(appJs, /function parseServerEvent/);
 assert.match(appJs, /function buildLoopGuardrailRecommendations/);
 assert.match(appJs, /function getObservedBehaviorById/);
 assert.match(appJs, /function saveShardPlannerInputs/);
@@ -105,6 +106,8 @@ assert.match(appJs, /npm run verify:data/);
 assert.match(appJs, /PlayerProfile JSON imported through the grounded normalizer/);
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /\/api\/client\/open/);
+assert.match(appJs, /\/api\/client\/events/);
+assert.match(appJs, /new EventSource/);
 assert.doesNotMatch(appJs, /C:\/Users\/Shadow\/Downloads/);
 assert.doesNotMatch(appJs, /function getShardUpgradeCost/);
 assert.doesNotMatch(appJs, /function getShardUpgradeValue/);
@@ -113,10 +116,13 @@ assert.doesNotMatch(appJs, /function simulateShard/);
 assert.match(devServer, /\/api\/healthz/);
 assert.match(devServer, /\/api\/launcher\/reopen/);
 assert.match(devServer, /\/api\/client\/open/);
+assert.match(devServer, /\/api\/client\/events/);
+assert.match(devServer, /event: launch/);
 assert.match(devServer, /Launcher-mode server is idle\. Shutting down\./);
 assert.match(launcherVbs, /http:\/\/localhost:4173\//);
 assert.match(launcherVbs, /http:\/\/localhost:4173\/api\/launcher\/reopen/);
-assert.match(launcherVbs, /CIFI_LAUNCH_MODE='1'/);
+assert.match(launcherVbs, /Start-Process -WindowStyle Hidden/);
+assert.match(launcherVbs, /--launcher-mode/);
 assert.match(launcherVbs, /Function NotifyExistingClient/);
 assert.match(launcherVbs, /ResolveNodePath/);
 assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
@@ -301,6 +307,12 @@ async function verifyLauncherModeServerLifecycle() {
   assert.equal(clientOpen.ok, true);
   assert.equal(clientOpen.launcherMode, true);
 
+  const eventController = new AbortController();
+  const eventStream = await fetch(`http://localhost:${testPort}/api/client/events?clientId=smoke-client`, {
+    signal: eventController.signal
+  });
+  assert.equal(eventStream.ok, true);
+
   const launcherReopen = await fetch(`http://localhost:${testPort}/api/launcher/reopen`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -314,6 +326,7 @@ async function verifyLauncherModeServerLifecycle() {
 
   const clientClose = await postJson(`http://localhost:${testPort}/api/client/close`, { clientId: "smoke-client" });
   assert.equal(clientClose.ok, true);
+  eventController.abort();
 
   await waitForExit(serverProcess, 9000);
 }

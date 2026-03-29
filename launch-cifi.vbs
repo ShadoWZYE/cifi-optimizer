@@ -22,7 +22,7 @@ If nodePath = "" Then
 End If
 
 If Not IsServerRunning(healthUrl) Then
-  shell.Run "powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""Set-Location -LiteralPath '" & Replace(scriptDir, "'", "''") & "'; $env:CIFI_LAUNCH_MODE='1'; & '" & Replace(nodePath, "'", "''") & "' '.\scripts\dev-server.mjs'""", 0, False
+  shell.Run "powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""Start-Process -WindowStyle Hidden -WorkingDirectory '" & Replace(scriptDir, "'", "''") & "' -FilePath '" & Replace(nodePath, "'", "''") & "' -ArgumentList '.\scripts\dev-server.mjs','--launcher-mode'""", 0, False
   startedServer = True
 End If
 

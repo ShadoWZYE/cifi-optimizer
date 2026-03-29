@@ -26,7 +26,8 @@ const APP_LAUNCH_STALE_MS = 15000;
 const SERVER_SESSION_ENDPOINTS = {
   open: "/api/client/open",
   heartbeat: "/api/client/heartbeat",
-  close: "/api/client/close"
+  close: "/api/client/close",
+  events: "/api/client/events"
 };
 
 const CANONICAL_PROFILE_FIELD_PATHS = {
@@ -495,7 +496,7 @@ async function initServerSession() {
 
   const session = {
     id: `client-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    heartbeatId: null,
+    events: null,
     launchSignalSequence: 0,
     enabled: false
   };
@@ -508,22 +509,35 @@ async function initServerSession() {
 
   session.enabled = true;
   session.launchSignalSequence = Number(opened.launchSignalSequence || 0);
-  session.heartbeatId = window.setInterval(async () => {
-    const heartbeat = await postServerSession(SERVER_SESSION_ENDPOINTS.heartbeat, session.id);
-    if (!heartbeat) {
+  session.events = new EventSource(`${SERVER_SESSION_ENDPOINTS.events}?clientId=${encodeURIComponent(session.id)}`);
+  session.events.addEventListener("ready", (event) => {
+    const payload = parseServerEvent(event);
+    if (!payload) {
       return;
     }
-
-    const nextSequence = Number(heartbeat.launchSignalSequence || 0);
+    session.launchSignalSequence = Number(payload.launchSignalSequence || session.launchSignalSequence || 0);
+  });
+  session.events.addEventListener("launch", (event) => {
+    const payload = parseServerEvent(event);
+    if (!payload) {
+      return;
+    }
+    const nextSequence = Number(payload.launchSignalSequence || 0);
     if (nextSequence > session.launchSignalSequence) {
       session.launchSignalSequence = nextSequence;
       if (state.launchCoordinator?.isPrimary) {
         handlePrimaryReopen();
       }
     }
-  }, APP_LAUNCH_HEARTBEAT_MS);
+  });
 
   window.addEventListener("pagehide", () => {
+    closeServerSession(session);
+  });
+  window.addEventListener("beforeunload", () => {
+    closeServerSession(session);
+  });
+  window.addEventListener("unload", () => {
     closeServerSession(session);
   });
 }
@@ -550,9 +564,9 @@ function closeServerSession(session = state.serverSession) {
     return;
   }
 
-  if (session.heartbeatId) {
-    window.clearInterval(session.heartbeatId);
-    session.heartbeatId = null;
+  if (session.events) {
+    session.events.close();
+    session.events = null;
   }
 
   session.enabled = false;
@@ -568,6 +582,14 @@ function closeServerSession(session = state.serverSession) {
     body: payload,
     keepalive: true
   }).catch(() => {});
+}
+
+function parseServerEvent(event) {
+  try {
+    return JSON.parse(event.data);
+  } catch {
+    return null;
+  }
 }
 
 function getActivePrimaryLease() {

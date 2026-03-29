@@ -7,9 +7,8 @@ import { spawn } from "node:child_process";
 
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
-const launcherMode = process.env.CIFI_LAUNCH_MODE === "1";
-const clientLeaseTtlMs = 15000;
-const launcherIdleCheckMs = 5000;
+const launcherMode = process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
+const launcherIdleCheckMs = 2000;
 const clientSessions = new Map();
 let launcherSignalSequence = 0;
 let launcherSawClient = false;
@@ -47,6 +46,11 @@ const server = createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/client/heartbeat") {
     await handleClientSessionTouch(request, response);
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/client/events") {
+    handleClientEvents(request, response, requestUrl);
     return;
   }
 
@@ -143,7 +147,11 @@ async function handleClientSessionTouch(request, response) {
     }
 
     launcherSawClient = true;
-    clientSessions.set(clientId, Date.now());
+    const existingSession = clientSessions.get(clientId) || {};
+    clientSessions.set(clientId, {
+      ...existingSession,
+      clientId
+    });
     writeJson(response, 200, {
       ok: true,
       launcherMode,
@@ -159,6 +167,12 @@ async function handleClientSessionClose(request, response) {
     const payload = await readJsonBody(request);
     const clientId = String(payload?.clientId || "").trim();
     if (clientId) {
+      const session = clientSessions.get(clientId);
+      if (session?.stream) {
+        try {
+          session.stream.end();
+        } catch {}
+      }
       clientSessions.delete(clientId);
     }
     writeJson(response, 200, {
@@ -177,9 +191,44 @@ function handleLauncherReopen(response) {
   }
 
   launcherSignalSequence += 1;
+  broadcastLauncherEvent({
+    type: "launcher-reopen",
+    launchSignalSequence
+  });
   writeJson(response, 202, {
     ok: true,
     launchSignalSequence
+  });
+}
+
+function handleClientEvents(request, response, requestUrl) {
+  const clientId = String(requestUrl.searchParams.get("clientId") || "").trim();
+  if (!clientId) {
+    writeJson(response, 400, { error: "clientId is required." });
+    return;
+  }
+
+  launcherSawClient = true;
+  response.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive"
+  });
+  response.write(`event: ready\ndata: ${JSON.stringify({ launchSignalSequence })}\n\n`);
+
+  const existingSession = clientSessions.get(clientId) || {};
+  clientSessions.set(clientId, {
+    ...existingSession,
+    clientId,
+    stream: response
+  });
+
+  request.on("close", () => {
+    const session = clientSessions.get(clientId);
+    if (session?.stream === response) {
+      clientSessions.delete(clientId);
+      checkLauncherIdleState();
+    }
   });
 }
 
@@ -246,18 +295,26 @@ function writeJson(response, status, payload) {
   response.end(JSON.stringify(payload));
 }
 
-function pruneClientSessions() {
-  const cutoff = Date.now() - clientLeaseTtlMs;
-  for (const [clientId, lastSeenAt] of clientSessions.entries()) {
-    if (lastSeenAt < cutoff) {
-      clientSessions.delete(clientId);
+function getActiveClientCount() {
+  let count = 0;
+  for (const session of clientSessions.values()) {
+    if (session?.stream && !session.stream.destroyed && !session.stream.writableEnded) {
+      count += 1;
     }
   }
+  return count;
 }
 
-function getActiveClientCount() {
-  pruneClientSessions();
-  return clientSessions.size;
+function broadcastLauncherEvent(payload) {
+  const message = `event: launch\ndata: ${JSON.stringify(payload)}\n\n`;
+  for (const [clientId, session] of clientSessions.entries()) {
+    const stream = session?.stream;
+    if (!stream || stream.destroyed || stream.writableEnded) {
+      clientSessions.delete(clientId);
+      continue;
+    }
+    stream.write(message);
+  }
 }
 
 function checkLauncherIdleState() {
