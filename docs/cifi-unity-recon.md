@@ -61,6 +61,8 @@ MultiverseMarket-specific save-side narrowing from repo-local metadata:
 - `IS73Level`
 - `IS110Level`
 - `EsotericR1Trades` through `EsotericR8Trades`
+- `NecrumR1Trades` through `NecrumR9Trades`
+- `Mech1Unlocked`, `Mech1Units`, `Mech1Upg1Level`, `Mech1Upg2Level`, `Mech1MissionsProgress`, `Mech1MissionsCompleted`
 - `AchievementInscryptionsReward`
 - `<FinalISShardsBonus>k__BackingField`
 
@@ -70,6 +72,7 @@ Current conclusion:
 - the `Inscryptions Done` purchase lane is grounded from the scene/UI side
 - the saved-state search is now better narrowed toward the broader player-profile persistence family
 - exact metadata field names now exist for `InscryptionsDone` and nearby `IS*Level`, but the declaring save model still needs confirmation
+- the surrounding field run now looks like a broader progression-state block rather than an isolated achievement or reward symbol family
 - `AchievementInscryptionsReward` and `FinalIS*` symbols remain effect/reward clues rather than recovered saved-balance fields
 
 Generated artifacts:

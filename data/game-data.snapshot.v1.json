@@ -183,7 +183,7 @@
       "title": "Spend planner from extracted token and market data",
       "status": "active",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Use the recovered metadata field cluster around InscryptionsDone and IS*Level to determine the declaring save model and authoritative owned-level range before planner wiring.",
+      "currentSlice": "Use the recovered progression-field block around InscryptionsDone, IS*Level, trade counters, and nearby mech fields to determine the declaring save model before planner wiring.",
       "completedSteps": [
         "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
         "Document the spend-system integration gate and current verified versus unresolved app-integration facts.",
@@ -197,7 +197,7 @@
         "Verify the token-shop cost lane against canonical token or tokenium naming from the available assets.",
         "Recover the saved-state owner or formula source behind token-bank cap, fill-speed, and claimable bank tokens from TokenShop or nearby level0 handlers rather than OR_* resource names.",
         "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
-        "Confirm whether the recovered InscryptionsDone and IS*Level fields are declared directly on PlayerProfileData or on another progression sub-model.",
+        "Confirm whether the recovered InscryptionsDone, IS*Level, trade-counter, and nearby mech fields are declared directly on PlayerProfileData or on another progression sub-model.",
         "Determine which recovered IS*Level range maps to the currently validated MultiverseMarket rows and which remain outside the validated block.",
         "Inspect the same save-side neighborhood before assuming any FinalIS or achievement symbol is the saved balance field.",
         "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."

@@ -47,6 +47,30 @@ Current grounded conclusion:
 - nearby `IS*Level` strings make it credible that player-owned inscription levels are persisted somewhere in the same broader save-side neighborhood
 - the repo still does not have the exact declaring type or serialized object layout that owns those fields at runtime
 
+## Broader progression-field block recovered from this pass
+
+The repo-local metadata neighborhood around `InscryptionsDone` now shows a longer contiguous field run rather than only isolated Emporium strings:
+
+- preceding inscription-level block:
+  - `IS25Level` through `IS110Level`
+- immediate trade counters:
+  - `EsotericR1Trades` through `EsotericR9Trades`
+  - `NecrumR1Trades` through `NecrumR9Trades`
+- immediately following progression fields:
+  - `Mech1Unlocked`
+  - `Mech1Units`
+  - `Mech1Upg1Level`
+  - `Mech1Upg2Level`
+  - `Mech1MissionsProgress`
+  - `Mech1MissionsCompleted`
+  - `Mech2Unlocked`
+
+Current grounded conclusion:
+
+- `InscryptionsDone` sits inside a broader player-progression field cluster rather than beside the separate `AchievementInscryptionsReward` or `FinalIS*` reward/effect symbols
+- this is stronger evidence that the Emporium lane belongs to a saved progression model or sub-structure, not to a UI-only text path
+- this still does not identify whether the containing save structure is `PlayerProfileData` directly or a nested progression object serialized through that family
+
 ## Adjacent non-save signals that should not be mistaken for saved-state recovery
 
 Repo-local metadata also exposes Inscryptions-adjacent symbols such as:
@@ -76,11 +100,13 @@ Current grounded conclusion:
 
 - the exact declaring save model that owns `InscryptionsDone`
 - the authoritative saved-state field range or list for owned inscription levels
+- whether the contiguous `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / `Mech*` run belongs directly to `PlayerProfileData` or to a nested progression payload
 - whether the nearby `IS*Level` and `EsotericR*Trades` strings belong to direct profile fields, nested achievement/progression records, or another serialized sub-structure inside `PlayerProfileData`
 
 ## Current app implication
 
 - It is still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state.playerProfile`.
 - It is now safe to treat `InscryptionsDone` and nearby `IS*Level` strings as grounded metadata field clues for future save-side mapping work.
+- It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
 - It is now safe to treat the save-side search as narrowed to the player-profile persistence family instead of the raw Emporium owner alone.
 - The next spend-track slice should determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` cluster before any planner UI is added.

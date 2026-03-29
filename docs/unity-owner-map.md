@@ -53,5 +53,11 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
     - `IS73Level`
     - `IS110Level`
     - `EsotericR1Trades`
+  - recovered broader progression-field neighborhood:
+    - `IS25Level` through `IS110Level`
+    - `EsotericR1Trades` through `EsotericR9Trades`
+    - `NecrumR1Trades` through `NecrumR9Trades`
+    - `Mech1Unlocked`
+    - `Mech1Upg1Level`
 
 Next likely targets should follow the same pattern: find the real owner object first, then parse the serialized payload directly when typetree tooling fails.

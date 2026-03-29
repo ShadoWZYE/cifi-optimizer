@@ -98,6 +98,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
   - `GetPlayerProfileData`
   - `CloudSavePlayerProfile`
   - exact Emporium-adjacent metadata field clues such as `InscryptionsDone`, `IS1Level`, `IS50Level`, `IS51Level`, `IS64Level`, `IS73Level`, `IS110Level`, and `EsotericR1Trades`
+  - a broader progression-style field block around `InscryptionsDone` that also includes `EsotericR*Trades`, `NecrumR*Trades`, and early `Mech*` fields
 
 ### Not yet verified enough for app recommendations
 
@@ -113,6 +114,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - It is not yet safe to treat `Inscryptions Done` as an import-ready player field until its declaring save model is recovered.
 - The current best repo-local saved-state path is the broader `PlayerProfileData` persistence family, not the raw `MultiverseMarket` owner object by itself.
 - The repo now has exact metadata field names for this lane, but not the import-ready save contract for `state.playerProfile`.
+- The recovered neighborhood now behaves like a wider progression-state field block, which further rules out treating nearby `AchievementInscryptionsReward` or `FinalIS*` symbols as the saved balance owner.
 
 ## Next allowed slice
 
