@@ -128,7 +128,7 @@
     {
       "id": "data-contracts-and-apk-pipeline",
       "title": "Data contracts and APK-first grounding",
-      "status": "active",
+      "status": "queued",
       "goal": "Lock dataset contracts and make the APK or Unity extraction path the default starting point for new grounded data work.",
       "currentSlice": "Broaden the contract as new shipped datasets are promoted, instead of letting one-off file shapes drift.",
       "completedSteps": [
@@ -181,7 +181,7 @@
     {
       "id": "spend-planner-from-extracted-data",
       "title": "Spend planner from extracted token and market data",
-      "status": "active",
+      "status": "queued",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
       "currentSlice": "Use the recovered progression-field block around InscryptionsDone, IS*Level, trade counters, and nearby mech fields to determine the declaring save model before planner wiring.",
       "completedSteps": [

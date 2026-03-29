@@ -1445,7 +1445,10 @@ function renderValidationResults() {
 }
 
 function renderResearch() {
-  $("#researchResults").innerHTML = state.snapshot.researchTracks.map((track) => `
+  const orderedTracks = [...state.snapshot.researchTracks].sort(
+    (left, right) => getResearchTrackOrder(left) - getResearchTrackOrder(right)
+  );
+  $("#researchResults").innerHTML = orderedTracks.map((track) => `
     <article class="research-card">
       <div class="research-card-head">
         <div>
@@ -1468,6 +1471,18 @@ function renderResearch() {
       </div>
     </article>
   `).join("");
+}
+
+function getResearchTrackOrder(track) {
+  const order = [
+    "data-contracts-and-apk-pipeline",
+    "playerprofile-boundary-and-imports",
+    "shards-and-loop-guardrails",
+    "unified-feed-and-hardening",
+    "spend-planner-from-extracted-data"
+  ];
+  const index = order.indexOf(track.id);
+  return index === -1 ? order.length : index;
 }
 
 function renderResearchTrackProgress(track) {
@@ -1506,18 +1521,11 @@ function renderResearchTrackSupport(track) {
 }
 
 function getResearchTrackLane(track) {
-  const order = [
-    "data-contracts-and-apk-pipeline",
-    "playerprofile-boundary-and-imports",
-    "shards-and-loop-guardrails",
-    "spend-planner-from-extracted-data",
-    "unified-feed-and-hardening"
-  ];
-  const index = order.indexOf(track.id);
+  const index = getResearchTrackOrder(track);
   if (index === 0) {
     return "Start Here";
   }
-  if (index > 0 && index < 3) {
+  if (index > 0 && index < 4) {
     return "Next Up";
   }
   return "Queue";
@@ -1544,8 +1552,8 @@ function getResearchTrackPhase(track) {
     "data-contracts-and-apk-pipeline": "PR 1",
     "playerprofile-boundary-and-imports": "PR 1",
     "shards-and-loop-guardrails": "PR 2",
-    "spend-planner-from-extracted-data": "PR 3",
-    "unified-feed-and-hardening": "PR 3+"
+    "unified-feed-and-hardening": "PR 3",
+    "spend-planner-from-extracted-data": "PR 4"
   };
   return phaseById[track.id] || "Research";
 }
