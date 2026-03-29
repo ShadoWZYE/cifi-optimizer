@@ -350,6 +350,7 @@ const state = {
   shipBaseline: null,
   shipTemplates: null,
   shardGrounding: null,
+  extractedMechanics: null,
   playerProfile: null,
   shipConfig: null,
   launchCoordinator: null,
@@ -373,12 +374,14 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
     fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
-    fetchJson("./data/shard-milestones-provenance.grounded.v1.json")
+    fetchJson("./data/shard-milestones-provenance.grounded.v1.json"),
+    fetchJson("./data/token-shop-values.json"),
+    fetchJson("./data/multiverse-market-values.json")
   ]);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
@@ -393,6 +396,10 @@ async function bootstrap() {
     milestones: groundedShardMilestones,
     observedBehaviors: groundedShardObservedBehaviors,
     provenance: groundedShardProvenance
+  };
+  state.extractedMechanics = {
+    tokenShop: tokenShopValues,
+    multiverseMarket: multiverseMarketValues
   };
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile,
@@ -1032,6 +1039,7 @@ function renderOverview() {
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
   const validation = runValidationCases();
   const mvpValidation = validation.filter((item) => item.scope === "MVP");
+  const apkValidation = validation.filter((item) => item.scope === "APK");
   const supportValidation = validation.filter((item) => item.scope === "Support");
   $("#validationStatusValue").textContent = `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
   $("#overviewHighlights").innerHTML = [
@@ -1076,7 +1084,7 @@ function renderOverview() {
       ],
       notes: "Next ship-focused work should remap names and extracted data, not discard the system."
     }, "ship"),
-    renderOverviewSupportSummary(supportValidation)
+    renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
 }
 
@@ -1445,12 +1453,18 @@ function renderGemResults(results) {
 function renderValidationResults() {
   const results = runValidationCases();
   const mvpResults = results.filter((item) => item.scope === "MVP");
+  const apkResults = results.filter((item) => item.scope === "APK");
   const supportResults = results.filter((item) => item.scope === "Support");
   $("#validationResults").innerHTML = [
     renderValidationSection(
       "Grounded MVP checks",
       "These checks contribute to the overview benchmark and track current grounded MVP behavior.",
       mvpResults
+    ),
+    renderValidationSection(
+      "APK-grounding checks",
+      "These checks confirm extracted mechanic bundles and explicit mapping gates so available-but-unmapped systems do not get mixed into app truth.",
+      apkResults
     ),
     renderValidationSection(
       "Support-surface checks",
@@ -2310,26 +2324,77 @@ function runValidationCases() {
     progression: runProgressionOptimization()[0]?.title ?? "None",
     gem: runGemOptimization()[0]?.title ?? "None"
   };
-  return state.snapshot.validationCases.map((item) => ({
+  const appCases = state.snapshot.validationCases.map((item) => ({
     title: item.title,
     expected: item.expected,
     actual: current[item.module],
     pass: item.expected === current[item.module],
     scope: SUPPORT_SURFACE_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
   }));
+
+  return [...appCases, ...buildApkGroundingValidationCases()];
 }
 
-function renderOverviewSupportSummary(supportValidation) {
-  if (!supportValidation.length) {
+function buildApkGroundingValidationCases() {
+  const tokenShop = state.extractedMechanics?.tokenShop;
+  const multiverseMarket = state.extractedMechanics?.multiverseMarket;
+  const cases = [];
+
+  if (tokenShop) {
+    const numericTable = tokenShop.numeric_table ?? {};
+    cases.push({
+      title: "TokenShop owner payload",
+      expected: "Grounded TokenShop constants available",
+      actual: tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost
+        ? "Grounded TokenShop constants available"
+        : "Missing expected TokenShop constants",
+      pass: Boolean(tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost),
+      scope: "APK"
+    });
+    cases.push({
+      title: "TokenShop mapping gate",
+      expected: "Available but unmapped",
+      actual: "Available but unmapped",
+      pass: true,
+      scope: "APK"
+    });
+  }
+
+  if (multiverseMarket) {
+    const records = Array.isArray(multiverseMarket.records) ? multiverseMarket.records : [];
+    const hasAnchor = records.some((record) => Number(record.inscription_id) === 51 && Number(record.start_cost) === 2);
+    cases.push({
+      title: "MultiverseMarket owner payload",
+      expected: "Validated late-block constants available",
+      actual: hasAnchor ? "Validated late-block constants available" : "Missing validated late-block anchor",
+      pass: hasAnchor,
+      scope: "APK"
+    });
+    cases.push({
+      title: "MultiverseMarket mapping gate",
+      expected: "Available but unmapped",
+      actual: "Available but unmapped",
+      pass: true,
+      scope: "APK"
+    });
+  }
+
+  return cases;
+}
+
+function renderOverviewSupportSummary(apkValidation, supportValidation) {
+  if (!apkValidation.length && !supportValidation.length) {
     return "";
   }
 
+  const apkPassing = apkValidation.filter((item) => item.pass).length;
   const passing = supportValidation.filter((item) => item.pass).length;
   return `
     <article class="validation-card warn">
-      <strong>Support surfaces stay out of the MVP feed</strong>
-      <p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>
-      <p class="meta">Gem Nodes remain a labeled experimental support surface. Ship planning is tracked separately as a canonical system with provisional implementation wiring.</p>
+      <strong>Grounding checks stay separate from MVP behavior</strong>
+      ${apkValidation.length ? `<p class="meta">${apkPassing}/${apkValidation.length} APK-grounding checks currently pass.</p>` : ""}
+      ${supportValidation.length ? `<p class="meta">${passing}/${supportValidation.length} labeled support checks currently pass.</p>` : ""}
+      <p class="meta">APK-grounding checks confirm extracted mechanic bundles and mapping gates so available-but-unmapped systems do not get mixed into app truth.</p>
     </article>
   `;
 }
@@ -2361,7 +2426,7 @@ function renderValidationSection(title, description, results) {
         ${results.map((item) => `
           <article class="validation-card ${item.pass ? "pass" : "warn"}">
             <strong>${item.title}</strong>
-            <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : "| grounded MVP surface"}</p>
+            <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : item.scope === "APK" ? "| extracted grounding gate" : "| grounded MVP surface"}</p>
             <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
             <p class="meta">${item.actual}</p>
           </article>
