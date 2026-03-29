@@ -102,3 +102,29 @@ Do not prioritize:
   warnings?: string[]
 }
 ```
+## Source-of-truth rule
+
+When working in this repository, agents must treat committed repo-local APK/Unity artifacts as the primary source of truth for undocumented, partially documented, or conflicting game systems.
+
+Default behavior:
+
+1. First check the existing repo docs and shipped datasets.
+2. If the answer is incomplete, unclear, stale, or missing, pivot to repo-local APK/Unity extraction artifacts under `workbench/` and related Unity tooling/scripts.
+3. Try to ground the system from those committed artifacts before using any external source.
+4. Only use external/public/community/model-derived sources when the repo-local APK/Unity path does not resolve the question well enough.
+5. When external sources are used, label them clearly and do not silently upgrade them into canonical game truth.
+
+Agents should not skip directly to external sourcing for game-mechanic questions that could be resolved from repo-local extraction artifacts.
+
+If the repo-local APK/Unity path still does not provide enough evidence, agents should either:
+- ask for clarification, or
+- ask permission before relying on external source data for product-shaping decisions.
+
+This rule applies especially to:
+- system ownership
+- currencies
+- unlock conditions
+- labels and terminology
+- player-state fields
+- planner inputs
+- recommendation logic assumptions

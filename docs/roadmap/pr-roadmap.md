@@ -9,6 +9,7 @@ References:
 - `AGENTS.md`
 - `docs/roadmap/mvp-direction.md`
 - `docs/roadmap/research-followup-execution-plan.md`
+- `docs/roadmap/research-tracks.md`
 
 ## Current position
 
@@ -28,7 +29,7 @@ The next work is boundary hardening and controlled MVP slices, not "fix the brok
 - keep `state.playerProfile` as the single source of truth
 - do not present speculative formulas as grounded truth
 - keep external/community-tool data labeled
-- use the Research tab for intake, not silent scope expansion
+- use the Research tab as the active intake and unresolved-work queue, not silent scope expansion
 
 ## PR 1: Data Contracts and Profile Boundary
 
@@ -115,9 +116,11 @@ Changes:
 - optionally add lightweight CI after local commands stabilize
 - document dataset refresh expectations
 
-## Research-tab intake rule
+## Research-tab intake and exit rule
 
-Future feature candidates should enter through the Research tab and `docs/roadmap/research-tracks.md` before becoming roadmap work.
+Future feature candidates should enter through the Research tab and `docs/roadmap/research-tracks.md` before becoming roadmap or implementation work.
+
+The Research tab is the active queue for unresolved work. It should contain only open tracks.
 
 Promotion requires:
 
@@ -126,6 +129,13 @@ Promotion requires:
 - clear classification: canonical, planner-only, external-model, or speculative
 - clear MVP impact
 - a shippable slice
+
+A track should leave the active list when it is:
+
+- fully integrated into product behavior or roadmap-owned implementation
+- superseded by successor tracks
+- invalidated by newer findings
+- no longer worth pursuing
 
 ## Exit condition
 
@@ -138,4 +148,3 @@ MVP is complete when the app has:
 - one unified recommendation feed
 - explainable outputs with assumptions and confidence
 - local import/export and stable validation flow
-
