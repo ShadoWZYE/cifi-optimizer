@@ -144,14 +144,14 @@
     {
       "id": "playerprofile-boundary-and-imports",
       "title": "PlayerProfile boundary and import cleanup",
-      "status": "active",
+      "status": "queued",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
+      "currentSlice": "Tighten which downstream modules are allowed to read non-canonical PlayerProfile fields.",
       "completedSteps": [
-        "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer."
+        "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
+        "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile."
       ],
       "nextSteps": [
-        "Import and export PlayerProfile JSON through a grounded normalization path.",
         "Audit current PlayerProfile fields against MVP-only CIFI concepts.",
         "Clean up import mapping so new modules read from state.playerProfile first.",
         "Add migration checks for loop reset, diamonds, tokens, relics, shards, and shard helper inputs."
@@ -160,15 +160,15 @@
     {
       "id": "shards-and-loop-guardrails",
       "title": "Shard workflow and loop guardrails",
-      "status": "queued",
+      "status": "active",
       "goal": "Strengthen shard guidance now, then add loop warnings without drifting into speculative simulation.",
-      "currentSlice": "Add the first warning-oriented loop-reset guardrails after the profile/input boundary is clearer.",
+      "currentSlice": "Add the first warning-oriented loop-reset guardrails using only current LR, tracked shards, and grounded guide notes.",
       "completedSteps": [
-        "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled."
+        "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
+        "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior."
       ],
       "nextSteps": [
         "Tighten shard card wording against the grounded milestone, observed-behavior, and provenance datasets.",
-        "Define the minimum inputs needed for loop-reset warnings.",
         "Make shard and loop outputs conform to the shared recommendation action contract."
       ]
     },

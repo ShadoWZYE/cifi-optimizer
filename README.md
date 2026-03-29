@@ -71,8 +71,10 @@ This app can still be opened directly in a browser, but it also includes a tiny 
 Use `launch-cifi.vbs` for normal desktop use.
 
 - If the local server is already running, it is reused.
+- If the launcher can see an active CIFI browser tab, it signals that tab instead of opening another one.
 - If the local server is not running, the launcher starts it and waits for readiness.
-- The launcher opens the default browser to `http://localhost:4173/?launch=1`.
+- When the launcher starts the hidden local server, that launcher-owned server exits after the last connected app tab closes.
+- The launcher opens the default browser to `http://localhost:4173/` only when a new tab is actually needed.
 
 ## Developer flow
 

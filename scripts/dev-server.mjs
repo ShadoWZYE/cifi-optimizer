@@ -7,6 +7,12 @@ import { spawn } from "node:child_process";
 
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
+const launcherMode = process.env.CIFI_LAUNCH_MODE === "1";
+const clientLeaseTtlMs = 15000;
+const launcherIdleCheckMs = 5000;
+const clientSessions = new Map();
+let launcherSignalSequence = 0;
+let launcherSawClient = false;
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -24,7 +30,33 @@ const server = createServer(async (request, response) => {
   const requestUrl = new URL(request.url || "/", `http://${request.headers.host || `localhost:${port}`}`);
 
   if (request.method === "GET" && requestUrl.pathname === "/api/healthz") {
-    writeJson(response, 200, { ok: true, port });
+    writeJson(response, 200, {
+      ok: true,
+      port,
+      launcherMode,
+      clientCount: getActiveClientCount(),
+      launchSignalSequence
+    });
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/client/open") {
+    await handleClientSessionTouch(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/client/heartbeat") {
+    await handleClientSessionTouch(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/client/close") {
+    await handleClientSessionClose(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/launcher/reopen") {
+    handleLauncherReopen(response);
     return;
   }
 
@@ -101,6 +133,56 @@ async function handleGeneratorOcr(request, response) {
   }
 }
 
+async function handleClientSessionTouch(request, response) {
+  try {
+    const payload = await readJsonBody(request);
+    const clientId = String(payload?.clientId || "").trim();
+    if (!clientId) {
+      writeJson(response, 400, { error: "clientId is required." });
+      return;
+    }
+
+    launcherSawClient = true;
+    clientSessions.set(clientId, Date.now());
+    writeJson(response, 200, {
+      ok: true,
+      launcherMode,
+      launchSignalSequence
+    });
+  } catch (error) {
+    writeJson(response, 500, { error: error instanceof Error ? error.message : String(error) });
+  }
+}
+
+async function handleClientSessionClose(request, response) {
+  try {
+    const payload = await readJsonBody(request);
+    const clientId = String(payload?.clientId || "").trim();
+    if (clientId) {
+      clientSessions.delete(clientId);
+    }
+    writeJson(response, 200, {
+      ok: true,
+      remainingClients: getActiveClientCount()
+    });
+  } catch (error) {
+    writeJson(response, 500, { error: error instanceof Error ? error.message : String(error) });
+  }
+}
+
+function handleLauncherReopen(response) {
+  if (!getActiveClientCount()) {
+    writeJson(response, 409, { ok: false, reason: "no-active-clients" });
+    return;
+  }
+
+  launcherSignalSequence += 1;
+  writeJson(response, 202, {
+    ok: true,
+    launchSignalSequence
+  });
+}
+
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -163,6 +245,35 @@ function writeJson(response, status, payload) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   response.end(JSON.stringify(payload));
 }
+
+function pruneClientSessions() {
+  const cutoff = Date.now() - clientLeaseTtlMs;
+  for (const [clientId, lastSeenAt] of clientSessions.entries()) {
+    if (lastSeenAt < cutoff) {
+      clientSessions.delete(clientId);
+    }
+  }
+}
+
+function getActiveClientCount() {
+  pruneClientSessions();
+  return clientSessions.size;
+}
+
+function checkLauncherIdleState() {
+  if (!launcherMode || !launcherSawClient || getActiveClientCount() > 0) {
+    return;
+  }
+
+  console.log("Launcher-mode server is idle. Shutting down.");
+  idleTimer && clearInterval(idleTimer);
+  server.close(() => {
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(0), 2000).unref();
+}
+
+const idleTimer = launcherMode ? setInterval(checkLauncherIdleState, launcherIdleCheckMs) : null;
 
 server.listen(port, () => {
   console.log(`CIFI Optimization Suite running at http://localhost:${port}`);

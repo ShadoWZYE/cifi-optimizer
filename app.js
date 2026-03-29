@@ -23,6 +23,11 @@ const APP_LAUNCH_KEYS = {
 const APP_LAUNCH_CHANNEL = "cifi-suite-launch";
 const APP_LAUNCH_HEARTBEAT_MS = 4000;
 const APP_LAUNCH_STALE_MS = 15000;
+const SERVER_SESSION_ENDPOINTS = {
+  open: "/api/client/open",
+  heartbeat: "/api/client/heartbeat",
+  close: "/api/client/close"
+};
 
 const CANONICAL_PROFILE_FIELD_PATHS = {
   profileName: ["meta", "profileName"],
@@ -342,6 +347,7 @@ const state = {
   shipConfig: null,
   launchCoordinator: null,
   launchNoticeTimer: null,
+  serverSession: null,
   pendingLaunchRefresh: false,
   importPreview: [],
   generatorOcrImages: [],
@@ -401,6 +407,7 @@ async function bootstrap() {
 
   fillProfileForm();
   renderAll();
+  initServerSession();
 
   if (state.pendingLaunchRefresh) {
     refreshFromPersistentState();
@@ -479,6 +486,88 @@ function initLaunchCoordinator() {
   }, APP_LAUNCH_HEARTBEAT_MS);
   clearLaunchQueryFlag();
   return coordinator;
+}
+
+async function initServerSession() {
+  if (!window.location.origin.startsWith("http")) {
+    return;
+  }
+
+  const session = {
+    id: `client-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    heartbeatId: null,
+    launchSignalSequence: 0,
+    enabled: false
+  };
+  state.serverSession = session;
+
+  const opened = await postServerSession(SERVER_SESSION_ENDPOINTS.open, session.id);
+  if (!opened) {
+    return;
+  }
+
+  session.enabled = true;
+  session.launchSignalSequence = Number(opened.launchSignalSequence || 0);
+  session.heartbeatId = window.setInterval(async () => {
+    const heartbeat = await postServerSession(SERVER_SESSION_ENDPOINTS.heartbeat, session.id);
+    if (!heartbeat) {
+      return;
+    }
+
+    const nextSequence = Number(heartbeat.launchSignalSequence || 0);
+    if (nextSequence > session.launchSignalSequence) {
+      session.launchSignalSequence = nextSequence;
+      if (state.launchCoordinator?.isPrimary) {
+        handlePrimaryReopen();
+      }
+    }
+  }, APP_LAUNCH_HEARTBEAT_MS);
+
+  window.addEventListener("pagehide", () => {
+    closeServerSession(session);
+  });
+}
+
+async function postServerSession(endpoint, clientId) {
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId }),
+      keepalive: true
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return response.json();
+  } catch {
+    return null;
+  }
+}
+
+function closeServerSession(session = state.serverSession) {
+  if (!session?.enabled) {
+    return;
+  }
+
+  if (session.heartbeatId) {
+    window.clearInterval(session.heartbeatId);
+    session.heartbeatId = null;
+  }
+
+  session.enabled = false;
+  const payload = JSON.stringify({ clientId: session.id });
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon(SERVER_SESSION_ENDPOINTS.close, new Blob([payload], { type: "application/json" }));
+    return;
+  }
+
+  fetch(SERVER_SESSION_ENDPOINTS.close, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true
+  }).catch(() => {});
 }
 
 function getActivePrimaryLease() {
@@ -1190,7 +1279,7 @@ function renderShipActions() {
 function renderProgressionResults(results) {
   renderShardPlannerControls();
   $("#progressionResults").innerHTML = `
-    <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, "shards")).join("")}</div>
+    <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
     ${renderShardWorkflowSnapshot()}
     ${renderShardWorkflowReference()}
     ${renderObservedShardBehaviors()}
@@ -1549,8 +1638,9 @@ function runShipOptimization() {
 
 function runProgressionOptimization() {
   const groundedResults = buildGroundedShardRecommendations();
+  const loopWarnings = buildLoopGuardrailRecommendations();
   if (groundedResults.length) {
-    return groundedResults;
+    return [...groundedResults, ...loopWarnings];
   }
 
   return [{
@@ -1574,7 +1664,92 @@ function runProgressionOptimization() {
       "Import verified shard milestone data before re-enabling optimizer behavior."
     ],
     notes: "Grounded fallback mode avoids fake optimizer precision."
-  }];
+  }, ...loopWarnings];
+}
+
+function buildLoopGuardrailRecommendations() {
+  const loopReset = Number(state.playerProfile.player.loop.loopReset || 0);
+  const currentShards = Number(state.playerProfile.player.resources.shards || 0);
+  const antiBricking = getObservedBehaviorById("PPX_EARLY_LR_ANTIBRICKING");
+  const shardSpend = getObservedBehaviorById("PPX_SHARDS_EARLY_DISTRIBUTION");
+  const zeusWarning = getObservedBehaviorById("PPX_ZEUS_E1000_RESOURCE_PRIO_AND_LR_TARGETS");
+
+  if (!loopReset) {
+    return [{
+      id: "loop-guardrail-input-warning",
+      module: "loop",
+      kind: "warning",
+      title: "Add current LR for loop guardrails",
+      subtitle: "Minimum loop-warning input missing",
+      score: 0,
+      confidence: 0.63,
+      whyNow: [
+        "Current LR is the minimum grounded input needed for loop-reset guardrails in this build.",
+        antiBricking?.why || "Grounded loop guidance depends on pacing examples tied to specific LR transitions."
+      ],
+      assumptions: [
+        "This module is warning-oriented only and does not simulate best reset timing."
+      ],
+      warnings: [
+        "Without current LR, the app cannot show the anti-bricking pacing notes captured in the research bundle."
+      ],
+      notes: "Loop guardrails remain descriptive and source-linked."
+    }];
+  }
+
+  const warnings = [];
+
+  if (loopReset >= 5) {
+    warnings.push({
+      id: "loop-guardrail-rising-requirements-warning",
+      module: "loop",
+      kind: "warning",
+      title: "Loop requirement pacing warning",
+      subtitle: `Current LR ${formatShardNumber(loopReset)}`,
+      score: 0,
+      confidence: 0.71,
+      whyNow: [
+        antiBricking?.why || "Guide examples warn that pushing LR too quickly can raise loop requirements faster than the account can clear them.",
+        "Grounded examples show LR 5 -> 6 requiring 7 loops and LR 6 -> 7 requiring 8 loops."
+      ],
+      assumptions: [
+        "This is a caution zone, not an optimizer target.",
+        "The app does not estimate whether your account can safely push the next LR."
+      ],
+      warnings: [
+        "Use buffer / instant loop checks before pushing LR higher.",
+        zeusWarning?.priorities?.[1] || "High LR progression can become 'playing with fire' in guide-side progression notes."
+      ],
+      notes: "Guardrail based on grounded community guide examples, not simulated reset math."
+    });
+  }
+
+  if (currentShards > 0) {
+    warnings.push({
+      id: "loop-guardrail-shard-reset-warning",
+      module: "loop",
+      kind: "warning",
+      title: "Spend tracked shards before reset",
+      subtitle: `${formatShardNumber(currentShards)} shards currently tracked`,
+      score: 0,
+      confidence: 0.68,
+      whyNow: [
+        "Shards reset to 0 on Loop Prestige in the grounded shard sources.",
+        shardSpend?.why || "Early shard guidance explicitly says to spend shards before loop resets."
+      ],
+      assumptions: [
+        "This warning does not claim a best milestone target.",
+        "Shard affordability and ranking remain disabled."
+      ],
+      warnings: [
+        "Do not carry tracked shards into a reset expecting them to persist.",
+        "Use the shard workflow cards to inspect grounded unlocks and thresholds before spending."
+      ],
+      notes: "Reset warning only; no shard ROI is implied."
+    });
+  }
+
+  return warnings;
 }
 
 function buildGroundedShardRecommendations() {
@@ -2313,6 +2488,10 @@ function getPrimaryShardObservation() {
       ...observation,
       title: getObservationTitle(observation)
     }))[0] ?? null;
+}
+
+function getObservedBehaviorById(id) {
+  return (state.shardGrounding?.observedBehaviors?.observations ?? []).find((observation) => observation.id === id) || null;
 }
 
 function getObservationTitle(observation) {

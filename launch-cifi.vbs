@@ -1,6 +1,6 @@
 Option Explicit
 
-Dim shell, fso, scriptDir, nodePath, appUrl, healthUrl
+Dim shell, fso, scriptDir, nodePath, appUrl, healthUrl, reopenUrl
 Dim startedServer
 
 Set shell = CreateObject("WScript.Shell")
@@ -10,6 +10,7 @@ scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
 nodePath = ResolveNodePath()
 appUrl = "http://localhost:4173/"
 healthUrl = "http://localhost:4173/api/healthz"
+reopenUrl = "http://localhost:4173/api/launcher/reopen"
 startedServer = False
 
 If nodePath = "" Then
@@ -21,7 +22,7 @@ If nodePath = "" Then
 End If
 
 If Not IsServerRunning(healthUrl) Then
-  shell.Run "powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""Set-Location -LiteralPath '" & Replace(scriptDir, "'", "''") & "'; & '" & Replace(nodePath, "'", "''") & "' '.\scripts\dev-server.mjs'""", 0, False
+  shell.Run "powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""Set-Location -LiteralPath '" & Replace(scriptDir, "'", "''") & "'; $env:CIFI_LAUNCH_MODE='1'; & '" & Replace(nodePath, "'", "''") & "' '.\scripts\dev-server.mjs'""", 0, False
   startedServer = True
 End If
 
@@ -31,6 +32,12 @@ If startedServer Then
       "Resolved Node.js path:" & vbCrLf & nodePath & vbCrLf & vbCrLf & _
       "Try launch-cifi.bat to see debug output.", vbExclamation, "CIFI Launcher"
     WScript.Quit 1
+  End If
+End If
+
+If Not startedServer Then
+  If NotifyExistingClient(reopenUrl) Then
+    WScript.Quit 0
   End If
 End If
 
@@ -109,4 +116,17 @@ Function WaitForServer(url, attempts, delayMs)
     WScript.Sleep delayMs
   Next
   WaitForServer = False
+End Function
+
+Function NotifyExistingClient(url)
+  On Error Resume Next
+  Dim http
+  Set http = CreateObject("MSXML2.XMLHTTP")
+  http.open "POST", url, False
+  http.setRequestHeader "Content-Type", "application/json"
+  http.send "{}"
+  NotifyExistingClient = (Err.Number = 0 And http.Status = 202)
+  Set http = Nothing
+  Err.Clear
+  On Error GoTo 0
 End Function
