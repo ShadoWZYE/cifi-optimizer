@@ -55,6 +55,7 @@ assert.match(html, /Reset to blank profile/);
 assert.match(html, /PlayerProfile JSON/);
 assert.match(html, /Import PlayerProfile JSON/);
 assert.match(html, /Export PlayerProfile JSON/);
+assert.match(html, /Shared profile and labeled helpers/);
 assert.match(html, /Shared PlayerProfile truth is limited to grounded CIFI account state/);
 assert.match(html, /Diamonds/);
 assert.match(html, /Academy relics/);

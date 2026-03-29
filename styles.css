@@ -43,6 +43,12 @@ body {
   gap: 18px;
 }
 
+.sidebar {
+  align-content: start;
+  align-self: start;
+  grid-auto-rows: max-content;
+}
+
 .workspace {
   align-content: start;
 }
@@ -62,8 +68,10 @@ body {
 }
 
 .brand-card {
+  display: grid;
   padding: 16px 18px;
   gap: 8px;
+  align-self: start;
 }
 
 .brand-card h1 {
