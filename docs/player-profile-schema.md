@@ -79,6 +79,13 @@ These values are preserved only for migration compatibility:
   - `totalShardMilestoneLevels` or `systems.shards.totalMilestoneLevels` -> `planning.shards.totalMilestoneLevels`
   - `shardFocusMilestoneId` or `systems.shards.focusMilestoneId` -> `planning.shards.focusMilestoneId`
   - `shardFocusMilestoneLevel` or `systems.shards.focusMilestoneLevel` -> `planning.shards.focusMilestoneLevel`
+- Compatibility-only aliases remain migration sinks, not active MVP profile fields:
+  - `stage.highestShipUnlocked` -> `compatibility.legacyStage.highestShipUnlocked`
+  - `stage.manualPhase` -> `compatibility.legacyStage.manualPhase`
+  - `systems.metaProgression.hunterLevel` -> `compatibility.unresolvedProfileFields.hunterLevel`
+  - `systems.metaProgression.traitSphereCount` -> `compatibility.unresolvedProfileFields.traitSphereCount`
+  - `systems.metaProgression.mechParts` -> `compatibility.unresolvedProfileFields.mechParts`
+  - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` remain compatibility-only unless a future grounded MVP surface promotes them
 - Removed visible fields are not discarded; they move into `externalModels` or `compatibility`.
 - `externalModels.shipPlanner.communityToolState` is always preserved during migration.
 - Imported objects for real-but-unmapped systems should be preserved under `compatibility.unmappedSystemState` instead of being collapsed into canonical or planner namespaces.

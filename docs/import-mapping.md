@@ -28,6 +28,8 @@ Boundary note:
 - legacy aliases such as `resourceFocus`, `researchHours`, and `gemNodeBudget` may still normalize into `externalModels.experimental.*`, but they remain experimental support-surface helpers rather than shared MVP profile truth
 - shard helper aliases such as `shardRatePerHour`, `totalShardMilestoneLevels`, `shardFocusMilestoneId`, `shardFocusMilestoneLevel`, and their `systems.shards.*` forms should normalize into `planning.shards.*`
 - those shard helper fields stay planner-only; importing them does not promote shard milestone math into canonical game truth
+- legacy `stage.highestShipUnlocked`, `stage.manualPhase`, and `systems.metaProgression.*` aliases should normalize into compatibility-only fields, not into canonical or planner namespaces
+- preserving those compatibility aliases is migration safety only; it does not make hunter, mech, or stage terms active MVP profile truth
 - imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`
 - preserving those objects does not make the system planner-ready or canonical
 

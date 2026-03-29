@@ -144,7 +144,7 @@ assert.equal(feedTrack.status, "active");
 assert.match(feedTrack.currentSlice, /Validate representative shard and loop action fixtures through the shared recommendation contract/);
 const profileTrack = snapshot.researchTracks.find((track) => track.id === "playerprofile-boundary-and-imports");
 assert.ok(profileTrack, "expected player profile track");
-assert.match(profileTrack.currentSlice, /Separate canonical-system implementation state from experimental support-surface helpers/);
+assert.match(profileTrack.currentSlice, /Lock compatibility-only aliases like stage and metaProgression imports to migration-only paths/);
 assert.match(agentsMd, /## System Integration Gate/);
 assert.match(agentsMd, /Before integrating any game system into the app/);
 assert.match(agentsMd, /available but unmapped/);
@@ -256,8 +256,11 @@ assert.match(shardVerificationDoc, /community-grounded descriptive data/);
 assert.match(shardVerificationDoc, /not yet mapped enough from shipped-game assets/);
 assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState/);
 assert.match(playerProfileSchemaDoc, /## Experimental support-surface helpers/);
+assert.match(playerProfileSchemaDoc, /systems\.metaProgression\.hunterLevel/);
+assert.match(playerProfileSchemaDoc, /stage\.highestShipUnlocked/);
 assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
 assert.match(importMappingDoc, /resourceFocus`, `researchHours`, and `gemNodeBudget` may still normalize into `externalModels\.experimental\.\*`/);
+assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(tokenShopDoc, /## Adjacent systems still to map/);
@@ -553,6 +556,27 @@ assert.equal(migratedNestedProfile.player.resources.diamonds, 900);
 assert.equal(migratedNestedProfile.planning.shards.ratePerHour, 110);
 assert.equal(migratedNestedProfile.notes.profile, "nested");
 assert.equal(migratedNestedProfile.externalModels.shipPlanner.communityToolState.technical.Meltdown, 12);
+
+const migratedCompatibilityAliasProfile = normalizePlayerProfile({
+  stage: {
+    highestShipUnlocked: "K",
+    manualPhase: "post-koios"
+  },
+  systems: {
+    metaProgression: {
+      hunterLevel: "18",
+      traitSphereCount: "7",
+      mechParts: "11"
+    }
+  }
+});
+
+assert.equal(migratedCompatibilityAliasProfile.compatibility.legacyStage.highestShipUnlocked, "K");
+assert.equal(migratedCompatibilityAliasProfile.compatibility.legacyStage.manualPhase, "post-koios");
+assert.equal(migratedCompatibilityAliasProfile.compatibility.unresolvedProfileFields.hunterLevel, 18);
+assert.equal(migratedCompatibilityAliasProfile.compatibility.unresolvedProfileFields.traitSphereCount, 7);
+assert.equal(migratedCompatibilityAliasProfile.compatibility.unresolvedProfileFields.mechParts, 11);
+assert.equal(migratedCompatibilityAliasProfile.player.resources.tokens, null);
 
 const migratedUnmappedSystemsProfile = normalizePlayerProfile({
   profileName: "Unmapped systems",
