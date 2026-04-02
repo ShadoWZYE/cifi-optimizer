@@ -355,6 +355,7 @@ const state = {
   shipBaseline: null,
   shipTemplates: null,
   shardGrounding: null,
+  extractionCandidateRanking: null,
   extractedMechanics: null,
   playerProfile: null,
   shipConfig: null,
@@ -379,12 +380,14 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, extractionCandidateRanking, tokenShopValues, multiverseMarketValues] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
     fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
     fetchJson("./data/shard-milestones-provenance.grounded.v1.json"),
+    fetchJson("./data/shard-asset-grounding.v1.json"),
+    fetchJson("./data/extraction-candidate-ranking.v1.json"),
     fetchJson("./data/token-shop-values.json"),
     fetchJson("./data/multiverse-market-values.json")
   ]);
@@ -400,8 +403,10 @@ async function bootstrap() {
   state.shardGrounding = {
     milestones: groundedShardMilestones,
     observedBehaviors: groundedShardObservedBehaviors,
-    provenance: groundedShardProvenance
+    provenance: groundedShardProvenance,
+    assetGrounding: shardAssetGrounding
   };
+  state.extractionCandidateRanking = extractionCandidateRanking;
   state.extractedMechanics = {
     tokenShop: tokenShopValues,
     multiverseMarket: multiverseMarketValues
@@ -1383,13 +1388,14 @@ function renderProgressionResults(results) {
   $("#progressionResults").innerHTML = `
     <article class="validation-card warn">
       <strong>Shard milestone mapping status</strong>
-      <p class="meta">System-level shard anchors are grounded enough for repo truth, but the current milestone list is still community-grounded descriptive data.</p>
-      <p class="meta">Do not treat milestone names, unlock rows, or bonus labels here as shipped-game extracted truth until shard owner mapping is completed.</p>
+      <p class="meta">System-level shard anchors now include repo-local Unity shell evidence for shard and loop milestone families, but the current milestone list is still community-grounded descriptive data.</p>
+      <p class="meta">Do not treat milestone names, unlock rows, bonus labels, or cost notes here as shipped-game extracted truth until shard owner mapping is completed.</p>
     </article>
     ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
     <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
     ${renderShardGroundingBoundary()}
     ${renderShardWorkflowSnapshot()}
+    ${renderShardGroundingBoundary()}
     ${renderShardWorkflowReference()}
     ${renderObservedShardBehaviors()}
     ${renderShardMilestoneDirectory()}
@@ -1683,10 +1689,12 @@ function renderResearchTrackSupport(track) {
     return `
       <div class="meta-stack">
         <p class="snapshot-title">Validation path</p>
-        <p class="meta">The checked-in contract lives in <code>data/bundled-dataset-contract.v1.json</code>. Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
+        <p class="meta">The checked-in contract lives in <code>data/bundled-dataset-contract.v1.json</code>. Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, shard-grounding, extraction-ranking, token-shop, or multiverse-market dataset changes.</p>
         <div class="pill-row">
           <span class="pill">Snapshot</span>
           <span class="pill">Shards</span>
+          <span class="pill">Shard grounding</span>
+          <span class="pill">Extraction ranking</span>
           <span class="pill">Token shop</span>
           <span class="pill">Multiverse market</span>
         </div>
@@ -1706,6 +1714,25 @@ function renderResearchTrackSupport(track) {
           <span class="pill">No planner cards yet</span>
         </div>
         ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">First planner unlock path</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+      </div>
+    `;
+  }
+
+  if (track.id === "shards-and-loop-guardrails") {
+    const globalTopCandidate = state.extractionCandidateRanking?.topCandidate;
+    const localTopCandidate = getTopExtractionCandidate(track.id);
+    if (!localTopCandidate) {
+      return "";
+    }
+    const title = track.status === "completed" ? "Future planner unblocker" : "Next extraction target";
+    const localLabel = track.status === "completed" ? "Top shard planner follow-up" : "Top PR2-local shard candidate";
+    return `
+      <div class="meta-stack">
+        <p class="snapshot-title">${title}</p>
+        ${globalTopCandidate ? `<p class="meta">Repo-wide default unknown candidate: <code>${escapeHtml(globalTopCandidate.label)}</code> (${escapeHtml(globalTopCandidate.track || "research")} | ${formatShardNumber(globalTopCandidate.heuristicScore)} heuristic score).</p>` : ""}
+        <p class="meta">${localLabel}: <code>${escapeHtml(localTopCandidate.label)}</code> (${formatShardNumber(localTopCandidate.heuristicScore)} heuristic score).</p>
+        <p class="meta">Coverage: ${escapeHtml((localTopCandidate.binaryFileCoverage || []).join(" | "))}</p>
+        <p class="meta">Why next: ${formatShardNumber(localTopCandidate.unresolvedMentionCount)} unresolved mentions, ${formatShardNumber(localTopCandidate.anchorHitCount)} anchor hits, ${formatShardNumber(localTopCandidate.binaryFilesWithAnchorHits)} binary files, ${formatShardNumber(localTopCandidate.nearbyContextTermCount)} nearby context terms.</p>
       </div>
     `;
   }
@@ -1738,6 +1765,16 @@ function renderResearchTrackSupport(track) {
     ${uncertain.length ? `<div class="meta-stack"><p class="snapshot-title">Still uncertain</p><ul class="research-step-list">${uncertain.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
     ${track.smallestShippableSlice ? `<div class="meta-stack"><p class="snapshot-title">Smallest shippable slice</p><p class="meta">${escapeHtml(track.smallestShippableSlice)}</p></div>` : ""}
   `;
+}
+
+function getTopExtractionCandidate(trackId = null) {
+  const candidates = Array.isArray(state.extractionCandidateRanking?.candidates)
+    ? state.extractionCandidateRanking.candidates
+    : [];
+  if (!trackId) {
+    return candidates[0] || null;
+  }
+  return candidates.find((candidate) => candidate.track === trackId) || null;
 }
 
 function getResearchTrackLane(track) {
@@ -2181,6 +2218,7 @@ function buildLoopGuardrailRecommendations() {
   const canonical = getCanonicalProfileState();
   const loopReset = Number(canonical.loopReset || 0);
   const currentShards = Number(canonical.shards || 0);
+  const mechanics = getGroundedShardMechanics();
   const antiBricking = getObservedBehaviorById("PPX_EARLY_LR_ANTIBRICKING");
   const earlyLoop = getObservedBehaviorById("PPX_EARLY_LR1_MP78");
   const shortRuns = getObservedBehaviorById("PPX_SHORT_MP_RUNS");
@@ -2254,6 +2292,39 @@ function buildLoopGuardrailRecommendations() {
       ? `Run-cadence reference only (${runCadenceSource}).`
       : "Run-cadence reference only."
   });
+
+  const operationTicks = mechanics?.operations?.ticks_per_operation;
+  const resetTimer = mechanics?.shardMiningMenu?.unreducible_timer_between_operations?.value;
+  if (operationTicks?.initial_ticks_including_reset || operationTicks?.minimum_ticks_with_loop_mods || resetTimer) {
+    warnings.push({
+      id: "loop-guardrail-operations-pacing-warning",
+      module: "loop",
+      kind: "warning",
+      title: "Shard operations have built-in pacing",
+      subtitle: "Grounded shard-loop linkage",
+      score: loopReset <= 4 ? 74 : 54,
+      confidence: 0.62,
+      whyNow: [
+        operationTicks?.initial_ticks_including_reset
+          ? `Grounded shard notes record ${formatShardNumber(operationTicks.initial_ticks_including_reset)} ticks per operation initially, including reset time.`
+          : "Grounded shard notes show Operations have a fixed pacing layer.",
+        operationTicks?.minimum_ticks_with_loop_mods
+          ? `The same notes record a minimum of ${formatShardNumber(operationTicks.minimum_ticks_with_loop_mods)} ticks with loop mods.`
+          : "Loop mods can change pacing, but this build does not simulate the exact result.",
+        resetTimer
+          ? `${formatShardNumber(resetTimer)} reset ticks between operations are currently documented as unreducible.`
+          : "A reset timer between operations is documented in the shard-mining notes."
+      ],
+      assumptions: [
+        "This is a pacing boundary reminder, not a best-reset calculator."
+      ],
+      warnings: [
+        "Do not read fast reset pushing as proof that shard-side pacing constraints disappeared.",
+        "Operation timing notes are grounded reference points only; they are not personalized run advice."
+      ],
+      notes: "Grounded shard anchors can support loop warnings even while milestone rows remain descriptive-only."
+    });
+  }
 
   if (loopReset >= 5) {
     warnings.push({
@@ -2493,6 +2564,9 @@ function renderShardGroundingBoundary() {
   const uncertaintyLog = provenance?.uncertaintyLog ?? [];
   const conflictCount = uncertaintyLog.filter((item) => item.status === "conflict_detected").length;
   const missingCount = uncertaintyLog.filter((item) => item.status !== "conflict_detected").length;
+  const assetGrounding = state.shardGrounding?.assetGrounding;
+  const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers) ? assetGrounding.groundedShellIdentifiers.slice(0, 5) : [];
+  const blockedUses = Array.isArray(assetGrounding?.blockedUses) ? assetGrounding.blockedUses : [];
   return `
     <div class="page-grid">
       <article class="snapshot-card">
@@ -2503,6 +2577,8 @@ function renderShardGroundingBoundary() {
           <p class="meta">Shards are a real CIFI resource tied to Operations and the Shard Mining Menu.</p>
           <p class="meta">Shards reset on Loop Prestige, so warning-oriented reset guardrails are safe to show.</p>
           <p class="meta">The app can use descriptive unlock-watch cards, threshold-watch cards, and loop warnings around those anchors.</p>
+          <p class="meta">${escapeHtml(assetGrounding?.groundedFacts?.[0] || "Repo-local Unity assets already ground shard and loop shell identifiers.")}</p>
+          <p class="meta">Key shell identifiers: ${identifiers.map((entry) => `<code>${escapeHtml(entry)}</code>`).join(", ") || "<code>LoopResetStage1</code>, <code>ShardMilestones-64</code>, <code>MilestoneBonusesPerLevel</code>"}</p>
         </div>
       </article>
       <article class="snapshot-card">
@@ -2511,6 +2587,7 @@ function renderShardGroundingBoundary() {
         <div class="meta-stack">
           <p class="meta">Milestone names, unlock tables, effect lists, and threshold wording currently come from named community references with preserved uncertainty.</p>
           <p class="meta">They are not yet mapped from shipped-game shard milestone owners, so the app keeps them descriptive and does not rank spend order, ROI, ETA, or per-level affordability.</p>
+          <p class="meta">${escapeHtml(blockedUses.length ? `${blockedUses.join(", ")} remain blocked until shard owner mapping and save-state inputs are recovered.` : "Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until shard owner mapping and save-state inputs are recovered.")}</p>
           <p class="meta">Current provenance load: ${conflictCount} conflict note${conflictCount === 1 ? "" : "s"} and ${missingCount} missing-data note${missingCount === 1 ? "" : "s"}.</p>
         </div>
       </article>
@@ -2688,7 +2765,27 @@ function buildApkGroundingValidationCases() {
   const tokenShop = state.extractedMechanics?.tokenShop;
   const multiverseMarket = state.extractedMechanics?.multiverseMarket;
   const shardMilestones = state.shardGrounding?.milestones;
+  const shardAssetGrounding = state.shardGrounding?.assetGrounding;
   const cases = [];
+
+  if (shardAssetGrounding) {
+    const identifiers = Array.isArray(shardAssetGrounding.groundedShellIdentifiers) ? shardAssetGrounding.groundedShellIdentifiers : [];
+    const hasShellEvidence = identifiers.includes("LoopResetStage1") && identifiers.includes("MilestoneBonusesPerLevel");
+    cases.push({
+      title: "Shard shell grounding payload",
+      expected: "Grounded shard shell evidence available",
+      actual: hasShellEvidence ? "Grounded shard shell evidence available" : "Missing expected shard shell anchors",
+      pass: hasShellEvidence,
+      scope: "APK"
+    });
+    cases.push({
+      title: "Shard milestone mapping gate",
+      expected: "Available but unmapped",
+      actual: shardAssetGrounding.integrationStatus === "available-but-unmapped" ? "Available but unmapped" : "Unexpected shard integration status",
+      pass: shardAssetGrounding.integrationStatus === "available-but-unmapped",
+      scope: "APK"
+    });
+  }
 
   if (tokenShop) {
     const numericTable = tokenShop.numeric_table ?? {};

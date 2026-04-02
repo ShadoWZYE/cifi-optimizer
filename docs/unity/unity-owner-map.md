@@ -67,3 +67,38 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
 
 Next likely targets should follow the same pattern: find the real owner object first, then parse the serialized payload directly when typetree tooling fails.
 
+Narrowed but not yet planner-ready owner families:
+
+- shard milestones / loop-reset shell
+  - system: shard workflow and loop-reset progression shell
+  - current source evidence:
+    - [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
+    - [`workbench/unity/joined/sharedassets0.assets`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\sharedassets0.assets)
+    - [`docs/unity/unity-mechanics-pass.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity\unity-mechanics-pass.md)
+    - [`docs/systems/shards/shard-owner-family-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-owner-family-verification.md)
+  - recovered shell identifiers:
+    - `LoopResetStage1` through `LoopResetStage5`
+    - `ShardMilestones-64`
+    - `ShardMilestones-256`
+    - `MilestoneBonusesPerLevel`
+    - `Milestone1` through at least `Milestone57`
+    - `Milestones, Assembly-CSharp`
+    - `SpaceShip-ShardMining-LV1` through `SpaceShip-ShardMining-LV4`
+  - narrowed shard-specific trail:
+    - shard milestone screen controller or fast-buy flow -> `ShardMining, Assembly-CSharp`
+    - shard data carrier candidate -> `ShardMining|ShardUpgradeInfo`
+  - recovered shard metadata clues:
+    - `TotalMilestoneLevels`
+    - `get_IsUnlocked`
+    - `get_SU1FinalUnlockReq`
+    - `get_SU29FinalUnlockReq`
+    - `FinalSU1Bonus1`
+    - `FinalSU1Bonus2`
+    - `FinalSU29Bonus2`
+    - `FinalSU29Bonus3`
+  - downgraded parallel lead:
+    - `ConstructionMilestones, Assembly-CSharp` remains a generic or academy-side milestone family and should not currently be treated as the shard owner without stronger shard-specific linkage
+  - integration status: shard-specific controller and bonus-field clues are grounded enough for truthful shard workflow copy, but the exact serialized milestone payload, player-owned milestone state, and player-facing milestone label mapping are still unresolved; keep planner behavior blocked
+  - next extraction target:
+    - recover the exact serialized milestone row or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail before promoting milestone rows, labels, or costs as game-side truth
+
