@@ -4,6 +4,14 @@ Local-first CIFI planning app. The repo mixes grounded MVP work, extracted mecha
 
 Do not treat output as game-accurate unless the module identifies its source and confidence.
 
+## Doc map
+
+- `README.md` = entrypoint
+- `AGENTS.md` = repo rules
+- `CODEX_BRIEF.md` = compact Codex context
+- `docs/roadmap/mvp-plan.md` = MVP plan
+- `docs/roadmap/research-tracks.md` = active unresolved queue
+
 ## MVP
 
 - `state.playerProfile` as the single source of truth
@@ -17,8 +25,8 @@ Do not treat output as game-accurate unless the module identifies its source and
 Core references:
 
 - `AGENTS.md`
-- `docs/roadmap/pr-roadmap.md`
-- `docs/roadmap/research-followup-execution-plan.md`
+- `CODEX_BRIEF.md`
+- `docs/roadmap/mvp-plan.md`
 - `docs/roadmap/research-tracks.md`
 
 ## Grounding rules
