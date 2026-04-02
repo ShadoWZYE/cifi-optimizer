@@ -15,6 +15,7 @@ Verified enough for repo truth:
 
 - `TokenShop` is a real owner for token-bank mechanics.
 - Early and late token-upgrade constants are directly serialized.
+- The extracted cost lane is now grounded as a token or tokenium lane, not as diamonds, shards, or another borrowed currency lane.
 
 Not yet verified enough for app recommendations:
 
@@ -46,6 +47,22 @@ The extracted `TokenShop` payload is not isolated. Its field names and nearby Un
   - Why it matters: these fields suggest there is separate unlock or notification logic around the shop, and that logic may expose missing owned-state inputs or gating conditions.
 
 These adjacent systems should be treated as mapping dependencies, not as verified mechanics. Their presence is useful because it tells the repo which owner families and UI shells must be audited next.
+
+## Currency-lane grounding
+
+The repo can now make one narrower naming claim about the TokenShop spend lane without overselling planner readiness:
+
+- `TokenShop` upgrade rows sit beside explicit token or tokenium naming evidence in shipped assets.
+- The strongest current evidence is:
+  - resource icons: `resourceicons/resource_tokenium` and `resourceicons/resource_tokenium_cap`
+  - controller labels: `TokenBankDescriptionText`, `get_TokenBankCap`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`
+  - mission-lane strings that stay adjacent but separate: `0 / 2000 Daily Tokenium (from blue farm missions)` and `This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)`
+- Safe repo conclusion:
+  - base TokenShop costs should currently be described as a token-bank token or tokenium spend lane
+  - Daily Tokenium should stay separated as the Academy or Farm Mission reward lane that TokenShop modifies
+  - this does not yet recover the final player-facing label for every upgrade row, nor the saved owned-state needed for next-buy planning
+
+This closes one specific ambiguity from earlier passes: the repo should stop treating TokenShop costs as an unnamed generic spend pool.
 
 ## Future mapping signals
 

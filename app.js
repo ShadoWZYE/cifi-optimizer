@@ -1130,7 +1130,7 @@ function renderSourceRegistry() {
         </div>
         </article>
           <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
-            <span class="snapshot-title">Ship optimizer toggles</span>
+            <span class="snapshot-title">Ship planner toggles</span>
           <p class="meta">These toggles affect the current ship-planner implementation. <code>softCap</code> keeps filtered resource lanes in play at a tiny flat priority of <code>0.01</code>.</p>
           <div class="mini-grid">
             <label class="mini-field">
@@ -1388,6 +1388,7 @@ function renderProgressionResults(results) {
     </article>
     ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
     <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
+    ${renderShardGroundingBoundary()}
     ${renderShardWorkflowSnapshot()}
     ${renderShardWorkflowReference()}
     ${renderObservedShardBehaviors()}
@@ -1431,6 +1432,8 @@ function renderValidationResults() {
   const apkResults = results.filter((item) => item.scope === "APK");
   const supportResults = results.filter((item) => item.scope === "Support");
   $("#validationResults").innerHTML = [
+    renderDatasetRefreshHardening(),
+    renderSpendPlannerBoundary(),
     renderValidationSection(
       "Grounded MVP checks",
       "These checks contribute to the overview benchmark and track current grounded MVP behavior.",
@@ -1453,7 +1456,9 @@ function renderResearch() {
   const orderedTracks = [...state.snapshot.researchTracks].sort(
     (left, right) => getResearchTrackOrder(left) - getResearchTrackOrder(right)
   );
-  $("#researchResults").innerHTML = orderedTracks.map((track) => `
+  $("#researchResults").innerHTML = [
+    renderResearchGuidance(),
+    ...orderedTracks.map((track) => `
     <article class="research-card">
       <div class="research-card-head">
         <div>
@@ -1475,7 +1480,154 @@ function renderResearch() {
         <ul class="research-step-list">${track.nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>
       </div>
     </article>
-  `).join("");
+  `)
+  ].join("");
+}
+
+function renderDatasetRefreshHardening() {
+  const contract = state.snapshot ? {
+    validationCommand: "npm run verify:data",
+    sourcePriority: [
+      "APK/Unity artifacts and repo extraction outputs first",
+      "Official/public corroboration second",
+      "Community gap-filling last"
+    ],
+    classifications: [
+      "canonical-app-snapshot",
+      "grounded-descriptive",
+      "extracted-mechanics",
+      "community-derived"
+    ]
+  } : null;
+
+  if (!contract) {
+    return "";
+  }
+
+  return `
+    <article class="validation-card warn">
+      <strong>Dataset refresh hardening path</strong>
+      <p class="validation-status">Use this before promoting new bundled data or refreshing shipped JSON assets.</p>
+      <p class="meta">Future asset recoveries should not go straight into app truth. First update the supporting research note, keep classification truthful, update track status if the current slice changed, then rerun the repo-local gates.</p>
+      <div class="meta-stack">
+        <p class="snapshot-title">Refresh checklist</p>
+        <p class="meta">1. Make source priority explicit.</p>
+        <p class="meta">2. Update or add the supporting research note.</p>
+        <p class="meta">3. Record the shipped dataset in <code>data/bundled-dataset-contract.v1.json</code>.</p>
+        <p class="meta">4. Keep the dataset classification truthful.</p>
+        <p class="meta">5. Update roadmap or research-track status if the slice changed.</p>
+        <p class="meta">6. Run <code>npm run verify:data</code>, <code>npm test</code>, and <code>node --check app.js</code> when app-facing behavior changed.</p>
+      </div>
+      <div class="pill-row">
+        ${contract.sourcePriority.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")}
+      </div>
+      <div class="pill-row">
+        ${contract.classifications.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderSpendPlannerBoundary() {
+  const tokenShop = state.extractedMechanics?.tokenShop ?? {};
+  const multiverseMarket = state.extractedMechanics?.multiverseMarket ?? {};
+  const compatibility = getCompatibilityProfileState();
+  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-planner-from-extracted-data");
+  const nextUnlockSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
+  const importedTokenShopState = compatibility.unmappedSystems?.tokenShop;
+  const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
+  const hasImportedTokenShopState = isBoundaryValuePresent(importedTokenShopState);
+  const hasImportedMarketState = isBoundaryValuePresent(importedMarketState);
+  const numericGroupCount = Object.keys(tokenShop.numeric_table ?? {}).length;
+  const validatedRows = Array.isArray(multiverseMarket.records) ? multiverseMarket.records.length : 0;
+  const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
+  const hasTokeniumShell =
+    resourceIcons.includes("resourceicons/resource_tokenium")
+    && resourceIcons.includes("resourceicons/resource_tokenium_cap");
+
+  if (!numericGroupCount && !validatedRows) {
+    return "";
+  }
+
+  return `
+    <article class="validation-card warn">
+      <strong>Spend planner boundary</strong>
+      <p class="validation-status">Extracted spend data is grounded enough for boundary notes, but still blocked for planner cards.</p>
+      <div class="meta-stack">
+        <p class="snapshot-title">Safe grounded truths now</p>
+        <p class="meta">TokenShop is grounded as a token or tokenium spend lane through recovered constants, token-bank labels, and shipped resource icons.</p>
+        <p class="meta">MultiverseMarket has a validated late-block row set and an <code>Inscryptions Done</code> cost-lane shell, but not a recovered player-owned balance field yet.</p>
+        <p class="meta">Recovered handler split stays explicit: TokenShop handles claim actions, <code>BigStatisticPrefab.TokenBankCap</code> covers cap display, and <code>TextHandlerLoopMods.SetLM244BonusText</code> is only a daily-tokenium text hook.</p>
+      </div>
+      <div class="meta-stack">
+        <p class="snapshot-title">Still blocked before planner behavior</p>
+        <p class="meta">Player-owned current levels for TokenShop rows are not recovered.</p>
+        <p class="meta">Token-bank cap, fill-speed, and claimable-token save-state owners are still unmapped.</p>
+        <p class="meta">The Academy or Farm Mission Daily Tokenium lane is separated from TokenShop, but its gameplay owner and saved-state fields are still unresolved.</p>
+        <p class="meta"><code>Inscryptions Done</code> and <code>IS*Level</code> are not yet safe canonical PlayerProfile inputs, so MultiverseMarket recommendations remain blocked.</p>
+      </div>
+      <div class="meta-stack">
+        <p class="snapshot-title">Imported spend payload watch</p>
+        <p class="meta">${hasImportedTokenShopState ? `Quarantined TokenShop payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedTokenShopState))}).` : "No quarantined TokenShop payload is present in the imported PlayerProfile."}</p>
+        <p class="meta">${hasImportedMarketState ? `Quarantined MultiverseMarket payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedMarketState))}).` : "No quarantined MultiverseMarket payload is present in the imported PlayerProfile."}</p>
+        <p class="meta">These imported blobs stay under <code>compatibility.unmappedSystemState</code> until spend owners, saved-state inputs, and grounded labels are recovered.</p>
+      </div>
+      ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">First safe spend unlock path</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+      <div class="pill-row">
+        <span class="pill">${numericGroupCount} TokenShop numeric groups</span>
+        <span class="pill">${validatedRows} validated market rows</span>
+        <span class="pill">${hasTokeniumShell ? "Tokenium shell grounded" : "Tokenium shell incomplete"}</span>
+        <span class="pill">${hasImportedTokenShopState || hasImportedMarketState ? "Imported spend payload quarantined" : "No imported spend payload yet"}</span>
+        <span class="pill">No spend recommendations yet</span>
+      </div>
+    </article>
+  `;
+}
+
+function renderResearchGuidance() {
+  return `
+    <article class="research-card">
+      <div class="research-card-head">
+        <div>
+          <p class="eyebrow">Research contract</p>
+          <strong>Tracks stay in intake until they are mature enough for roadmap work</strong>
+        </div>
+        <div class="pill-row">
+          <span class="pill">Not a product commitment</span>
+          <span class="pill">APK/Unity first</span>
+          <span class="pill">Shippable chunk required</span>
+        </div>
+      </div>
+      <p class="meta">Research tracks hold grounded findings, uncertainty, and candidate implementation paths. If a track cannot show grounded terminology, documented sources, checked APK or Unity evidence, explicit confidence and uncertainty, and a small shippable slice, it stays in research.</p>
+      <div class="meta-stack">
+        <p class="snapshot-title">Promotion rule</p>
+        <ul class="research-step-list">
+          <li>Grounded CIFI terminology is documented.</li>
+          <li>Source list and APK or Unity path checks are recorded.</li>
+          <li>Confidence, uncertainty, and classification are explicit.</li>
+          <li>MVP or post-MVP value is clear.</li>
+          <li>The next slice is small enough to ship safely.</li>
+        </ul>
+      </div>
+      <div class="meta-stack">
+        <p class="snapshot-title">Track categories</p>
+        <ul class="research-step-list">
+          <li>Candidate MVP-adjacent: spend-planner refinements, loop-warning refinements, import improvements, and recommendation-feed explainability work.</li>
+          <li>Post-MVP candidates: ship optimizer reintegration, hunter planning, mech planning, academy or Zeus-adjacent systems, and broader external-model integrations.</li>
+          <li>Deferred infrastructure: OCR or image-assisted input, deeper automation, full save parsing, and broad simulation architecture.</li>
+        </ul>
+      </div>
+      <div class="meta-stack">
+        <p class="snapshot-title">Current research rules</p>
+        <ul class="research-step-list">
+          <li>Hunter planning stays in research until the repo can separate real hunter state from planning metadata.</li>
+          <li>Mech planning stays in research until terminology, unlock structure, and MVP relevance are grounded.</li>
+          <li>Input automation stays in research until manual friction is proven high enough that guided import is not sufficient.</li>
+          <li>External-model integration stays in research until tool trust, field labeling, and recommendation boundaries are explicit.</li>
+        </ul>
+      </div>
+    </article>
+  `;
 }
 
 function getResearchTrackOrder(track) {
@@ -1484,10 +1636,29 @@ function getResearchTrackOrder(track) {
     "playerprofile-boundary-and-imports",
     "shards-and-loop-guardrails",
     "unified-feed-and-hardening",
-    "spend-planner-from-extracted-data"
+    "spend-planner-from-extracted-data",
+    "hunter-related-planning",
+    "mech-related-planning",
+    "input-automation-intake",
+    "external-model-integration-intake"
   ];
   const index = order.indexOf(track.id);
   return index === -1 ? order.length : index;
+}
+
+function getResearchTrackSequenceLabel(track) {
+  const labelsById = {
+    "data-contracts-and-apk-pipeline": "Sequence 1/5",
+    "playerprofile-boundary-and-imports": "Sequence 1/5",
+    "shards-and-loop-guardrails": "Sequence 2/5",
+    "unified-feed-and-hardening": "Sequence 3/5",
+    "spend-planner-from-extracted-data": "Sequence 4/5",
+    "hunter-related-planning": "Research intake",
+    "mech-related-planning": "Research intake",
+    "input-automation-intake": "Research intake",
+    "external-model-integration-intake": "Research intake"
+  };
+  return labelsById[track.id] || "Research";
 }
 
 function renderResearchTrackProgress(track) {
@@ -1500,6 +1671,7 @@ function renderResearchTrackProgress(track) {
     <div class="meta-stack">
       <p class="snapshot-title">Track status</p>
       <p class="meta">${escapeHtml(track.currentSlice || "Current slice not recorded yet.")}</p>
+      <p class="meta">${escapeHtml(getResearchTrackSequenceLabel(track))} | ${escapeHtml(getResearchTrackPhase(track))}</p>
       <p class="meta">${completedSteps.length} done | ${remainingSteps.length} left | ${percent}% complete</p>
       ${completedSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Done in repo</p><ul class="research-step-list">${completedSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
     </div>
@@ -1507,42 +1679,85 @@ function renderResearchTrackProgress(track) {
 }
 
 function renderResearchTrackSupport(track) {
-  if (track.id !== "data-contracts-and-apk-pipeline") {
+  if (track.id === "data-contracts-and-apk-pipeline") {
+    return `
+      <div class="meta-stack">
+        <p class="snapshot-title">Validation path</p>
+        <p class="meta">The checked-in contract lives in <code>data/bundled-dataset-contract.v1.json</code>. Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
+        <div class="pill-row">
+          <span class="pill">Snapshot</span>
+          <span class="pill">Shards</span>
+          <span class="pill">Token shop</span>
+          <span class="pill">Multiverse market</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (track.id === "spend-planner-from-extracted-data") {
+    const nextUnlockSteps = Array.isArray(track.nextSteps) ? track.nextSteps.slice(0, 3) : [];
+    return `
+      <div class="meta-stack">
+        <p class="snapshot-title">Grounded boundary</p>
+        <p class="meta">TokenShop is now grounded as a token or tokenium spend lane through token-bank labels and shipped resource icons. Daily Tokenium still stays separate as the Academy or Farm Mission reward lane that TokenShop modifies, so the planner remains blocked on saved-state recovery.</p>
+        <div class="pill-row">
+          <span class="pill">Token or tokenium lane</span>
+          <span class="pill">Daily Tokenium stays unmapped</span>
+          <span class="pill">No planner cards yet</span>
+        </div>
+        ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">First planner unlock path</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+      </div>
+    `;
+  }
+
+  const metaBits = [];
+  if (track.classification) {
+    metaBits.push(`<span class="pill">${escapeHtml(track.classification)}</span>`);
+  }
+  if (track.implementationRelevance) {
+    metaBits.push(`<span class="pill">${escapeHtml(track.implementationRelevance)}</span>`);
+  }
+  if (typeof track.apkUnityPathChecked === "boolean") {
+    metaBits.push(`<span class="pill">${track.apkUnityPathChecked ? "APK/Unity checked" : "APK/Unity not checked yet"}</span>`);
+  }
+
+  const sources = Array.isArray(track.sources) ? track.sources : [];
+  const artifacts = Array.isArray(track.artifacts) ? track.artifacts : [];
+  const verified = Array.isArray(track.verified) ? track.verified : [];
+  const uncertain = Array.isArray(track.uncertain) ? track.uncertain : [];
+
+  if (!metaBits.length && !sources.length && !artifacts.length && !verified.length && !uncertain.length && !track.smallestShippableSlice) {
     return "";
   }
 
   return `
-    <div class="meta-stack">
-      <p class="snapshot-title">Validation path</p>
-      <p class="meta">The checked-in contract lives in <code>data/bundled-dataset-contract.v1.json</code>. Run <code>npm run verify:data</code> before promoting bundled snapshot, shard, token-shop, or multiverse-market dataset changes.</p>
-      <div class="pill-row">
-        <span class="pill">Snapshot</span>
-        <span class="pill">Shards</span>
-        <span class="pill">Token shop</span>
-        <span class="pill">Multiverse market</span>
-      </div>
-    </div>
+    ${metaBits.length ? `<div class="pill-row">${metaBits.join("")}</div>` : ""}
+    ${sources.length ? `<div class="meta-stack"><p class="snapshot-title">Sources</p><ul class="research-step-list">${sources.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${artifacts.length ? `<div class="meta-stack"><p class="snapshot-title">Repo artifacts</p><ul class="research-step-list">${artifacts.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${verified.length ? `<div class="meta-stack"><p class="snapshot-title">Verified now</p><ul class="research-step-list">${verified.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${uncertain.length ? `<div class="meta-stack"><p class="snapshot-title">Still uncertain</p><ul class="research-step-list">${uncertain.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${track.smallestShippableSlice ? `<div class="meta-stack"><p class="snapshot-title">Smallest shippable slice</p><p class="meta">${escapeHtml(track.smallestShippableSlice)}</p></div>` : ""}
   `;
 }
 
 function getResearchTrackLane(track) {
-  const index = getResearchTrackOrder(track);
-  if (index === 0) {
-    return "Start Here";
+  if (track.status === "completed") {
+    return "Completed foundation";
   }
-  if (index > 0 && index < 4) {
-    return "Next Up";
+  if (track.status === "active") {
+    return "Active roadmap slice";
   }
-  return "Queue";
+  return "Queued behind mapping gate";
 }
 
 function getResearchTrackStatus(track) {
   const statusById = {
     active: "Active",
-    queued: "Queued",
+    queued: "Queued after gate",
+    research: "In research",
     completed: "Completed"
   };
-  return statusById[track.status] || "Queued";
+  return statusById[track.status] || "Queued after gate";
 }
 
 function getResearchTrackProgressLabel(track) {
@@ -1557,19 +1772,27 @@ function getResearchTrackPhase(track) {
     "data-contracts-and-apk-pipeline": "PR 1",
     "playerprofile-boundary-and-imports": "PR 1",
     "shards-and-loop-guardrails": "PR 2",
-    "unified-feed-and-hardening": "PR 3",
-    "spend-planner-from-extracted-data": "PR 4"
+    "unified-feed-and-hardening": "PR 3 then PR 5 hardening",
+    "spend-planner-from-extracted-data": "PR 4",
+    "hunter-related-planning": "Research intake only",
+    "mech-related-planning": "Research intake only",
+    "input-automation-intake": "Research intake only",
+    "external-model-integration-intake": "Research intake only"
   };
   return phaseById[track.id] || "Research";
 }
 
 function getResearchTrackSource(track) {
   const sourceById = {
-    "data-contracts-and-apk-pipeline": "APK-first",
-    "playerprofile-boundary-and-imports": "Schema",
-    "shards-and-loop-guardrails": "Grounded data",
-    "spend-planner-from-extracted-data": "Extracted data",
-    "unified-feed-and-hardening": "Integration"
+    "data-contracts-and-apk-pipeline": "APK/Unity first",
+    "playerprofile-boundary-and-imports": "Schema boundary",
+    "shards-and-loop-guardrails": "Grounded shard data",
+    "spend-planner-from-extracted-data": "Extracted spend data",
+    "unified-feed-and-hardening": "Integration contract",
+    "hunter-related-planning": "Research intake",
+    "mech-related-planning": "Research intake",
+    "input-automation-intake": "Research intake",
+    "external-model-integration-intake": "Research intake"
   };
   return sourceById[track.id] || "Research";
 }
@@ -1609,7 +1832,7 @@ function importPlayerProfileJson() {
     persistPlayerProfile();
     fillProfileForm();
     renderAll();
-    setStatus("playerProfileImportStatus", "PlayerProfile JSON imported through the grounded normalizer.", "success");
+    setStatus("playerProfileImportStatus", "PlayerProfile JSON imported through the grounded normalizer. Review the boundary audit before using recommendations.", "success");
   } catch (error) {
     setStatus("playerProfileImportStatus", `PlayerProfile import failed: ${error.message}`, "warning");
   }
@@ -1695,6 +1918,10 @@ function renderPlayerProfileBoundarySummary() {
       ]
     }
   ];
+  const audit = getPlayerProfileBoundaryAudit(groups, {
+    shipPlanner,
+    compatibility
+  });
 
   $("#playerProfileImportSummary").innerHTML = groups.map((group) => {
     const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value));
@@ -1709,6 +1936,52 @@ function renderPlayerProfileBoundarySummary() {
       </article>
     `;
   }).join("");
+
+  $("#playerProfileImportSummary").innerHTML = `
+    <article class="preview-card">
+      <strong>Import boundary audit</strong>
+      <p class="meta">Normalization keeps imported values in labeled namespaces instead of flattening them into raw game truth.</p>
+      <div class="pill-row">
+        ${audit.counts.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")}
+      </div>
+      <div class="meta-stack">
+        ${audit.notes.map((item) => `<p class="meta">${escapeHtml(item)}</p>`).join("")}
+      </div>
+    </article>
+    ${$("#playerProfileImportSummary").innerHTML}
+  `;
+}
+
+function getPlayerProfileBoundaryAudit(groups, context) {
+  const counts = groups.map((group) => {
+    const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value)).length;
+    return `${group.title}: ${populated}/${group.items.length}`;
+  });
+  const unmappedSystemEntries = Object.entries(context.compatibility.unmappedSystems || {})
+    .filter(([, value]) => isBoundaryValuePresent(value))
+    .map(([key]) => key);
+  const unresolvedEntries = Object.entries(context.compatibility.unresolved || {})
+    .filter(([, value]) => isBoundaryValuePresent(value))
+    .map(([key]) => key);
+  const notes = [];
+
+  if (unmappedSystemEntries.length) {
+    notes.push(`Quarantined unmapped system blobs preserved: ${unmappedSystemEntries.join(", ")}. Keep these descriptive until owner mapping and player-owned inputs are grounded.`);
+  } else {
+    notes.push("No quarantined unmapped system blobs are present in this import.");
+  }
+
+  if (Object.values(context.shipPlanner.summary || {}).some((value) => isBoundaryValuePresent(value))) {
+    notes.push("Ship planner values are preserved as external-model implementation state, not as canonical shared profile truth.");
+  }
+
+  if (unresolvedEntries.length) {
+    notes.push(`Compatibility-only leftovers preserved: ${unresolvedEntries.join(", ")}. These remain migration sinks, not active recommendation inputs.`);
+  } else {
+    notes.push("No compatibility-only leftover fields were populated by this import.");
+  }
+
+  return { counts, notes };
 }
 
 function applyInstallTap(installIndex, direction = 1) {
@@ -1898,9 +2171,9 @@ function runProgressionOptimization() {
     ],
     warnings: [
       "No shard milestone recommendations are being ranked in this build.",
-      "Import verified shard milestone data before re-enabling optimizer behavior."
+      "Import verified shard milestone data before re-enabling upgrade-style planner behavior."
     ],
-    notes: "Descriptive fallback mode avoids fake optimizer precision."
+    notes: "Descriptive fallback mode avoids fake planner precision."
   }, "shards"), ...loopWarnings]);
 }
 
@@ -1996,7 +2269,7 @@ function buildLoopGuardrailRecommendations() {
         "Grounded examples show LR 5 -> 6 requiring 7 loops and LR 6 -> 7 requiring 8 loops."
       ],
       assumptions: [
-        "This is a caution zone, not an optimizer target.",
+        "This is a caution zone, not a target recommendation.",
         "The app does not estimate whether your account can safely push the next LR."
       ],
       warnings: [
@@ -2141,7 +2414,7 @@ function buildGroundedShardRecommendations() {
       ],
       assumptions: [
         "The dataset provides breakpoint notes, not numeric shard costs.",
-        observation ? `${observation.title}: ${observation.why}` : "Observed examples are shown separately and do not become optimizer truths."
+        observation ? `${observation.title}: ${observation.why}` : "Observed examples are shown separately and do not become planner truth."
       ],
       warnings: [
         "Cost bumps are warning zones only; the app does not estimate shard affordability.",
@@ -2215,6 +2488,45 @@ function renderShardWorkflowSnapshot() {
   `;
 }
 
+function renderShardGroundingBoundary() {
+  const provenance = state.shardGrounding?.provenance;
+  const uncertaintyLog = provenance?.uncertaintyLog ?? [];
+  const conflictCount = uncertaintyLog.filter((item) => item.status === "conflict_detected").length;
+  const missingCount = uncertaintyLog.filter((item) => item.status !== "conflict_detected").length;
+  return `
+    <div class="page-grid">
+      <article class="snapshot-card">
+        <span class="snapshot-title">Grounded shard boundary</span>
+        <strong>Safe repo truths vs descriptive milestone data</strong>
+        <div class="meta-stack">
+          <p class="snapshot-title">Safe repo truths now</p>
+          <p class="meta">Shards are a real CIFI resource tied to Operations and the Shard Mining Menu.</p>
+          <p class="meta">Shards reset on Loop Prestige, so warning-oriented reset guardrails are safe to show.</p>
+          <p class="meta">The app can use descriptive unlock-watch cards, threshold-watch cards, and loop warnings around those anchors.</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Descriptive-only layer</span>
+        <strong>Community-grounded milestone rows</strong>
+        <div class="meta-stack">
+          <p class="meta">Milestone names, unlock tables, effect lists, and threshold wording currently come from named community references with preserved uncertainty.</p>
+          <p class="meta">They are not yet mapped from shipped-game shard milestone owners, so the app keeps them descriptive and does not rank spend order, ROI, ETA, or per-level affordability.</p>
+          <p class="meta">Current provenance load: ${conflictCount} conflict note${conflictCount === 1 ? "" : "s"} and ${missingCount} missing-data note${missingCount === 1 ? "" : "s"}.</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Still blocked</span>
+        <strong>What must be grounded before stronger behavior</strong>
+        <div class="meta-stack">
+          <p class="meta">Shipped-game owner mapping for shard milestones themselves.</p>
+          <p class="meta">Asset-grounded milestone labels, bonus tables, unlock lists, and per-level shard costs.</p>
+          <p class="meta">A single authoritative milestone list across conflicting community snapshots.</p>
+        </div>
+      </article>
+    </div>
+  `;
+}
+
 function renderShardWorkflowReference() {
   const mechanics = getGroundedShardMechanics();
   const provenance = state.shardGrounding?.provenance;
@@ -2276,6 +2588,7 @@ function renderObservedShardBehaviors() {
         <span class="snapshot-title">Provenance hygiene</span>
         <p class="meta">Source report: ${escapeHtml(provenance?.sourceReport || "docs/research/shard-milestones-grounded-2026-03-28.md")}</p>
         <p class="meta">Milestone rows in this workflow are community-grounded descriptive data, not shipped-game owner-mapped shard milestone data.</p>
+        <p class="meta">If uncertainty remains high, the correct output is a better research note, not stronger planner behavior.</p>
         <div class="meta-stack">
           <p class="snapshot-title">Review sources</p>
           ${Object.values(provenance?.sources || {}).slice(0, 5).map((source) => `
@@ -2310,6 +2623,7 @@ function renderShardMilestoneDirectory() {
               <p class="meta">Unlock condition: ${escapeHtml(describeUnlockCondition(milestone.unlockCondition))}</p>
               <p class="meta">Threshold schedule: ${escapeHtml(formatThresholdLevels(getThresholdScheduleForMilestone(milestone, mechanics)))}</p>
               <p class="meta">${escapeHtml(milestone.costProgression?.notes || "No cost progression note available.")}</p>
+              <p class="meta">Source footing: ${escapeHtml(getMilestoneSourceLabel(milestone) || "Named community reference; shipped-game owner mapping not yet recovered.")}</p>
             </div>
             <div class="shard-bonus-list">
               ${(milestone.bonuses || []).map((bonus) => `
@@ -2378,6 +2692,17 @@ function buildApkGroundingValidationCases() {
 
   if (tokenShop) {
     const numericTable = tokenShop.numeric_table ?? {};
+    const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
+    const tokenShopFields = Array.isArray(tokenShop.fields) ? tokenShop.fields : [];
+    const tokenShopFieldNames = new Set(tokenShopFields.map((entry) => entry.field));
+    const hasTokeniumCurrencyShell =
+      resourceIcons.includes("resourceicons/resource_tokenium")
+      && resourceIcons.includes("resourceicons/resource_tokenium_cap")
+      && Boolean(numericTable.TokenBoost);
+    const hasTokenBankAnchors =
+      tokenShopFieldNames.has("BankFill")
+      && tokenShopFieldNames.has("TokenBankDescriptionText")
+      && Boolean(numericTable.TokenBoost);
     cases.push({
       title: "TokenShop owner payload",
       expected: "Grounded TokenShop constants available",
@@ -2394,16 +2719,48 @@ function buildApkGroundingValidationCases() {
       pass: true,
       scope: "APK"
     });
+    cases.push({
+      title: "TokenShop token-bank anchors",
+      expected: "Recovered token-bank controller anchors available",
+      actual: hasTokenBankAnchors
+        ? "Recovered token-bank controller anchors available"
+        : "Missing token-bank controller anchors",
+      pass: hasTokenBankAnchors,
+      scope: "APK"
+    });
+    cases.push({
+      title: "TokenShop currency shell",
+      expected: "Token or tokenium spend lane grounded",
+      actual: hasTokeniumCurrencyShell
+        ? "Token or tokenium spend lane grounded"
+        : "Missing tokenium currency-shell evidence",
+      pass: hasTokeniumCurrencyShell,
+      scope: "APK"
+    });
   }
 
   if (multiverseMarket) {
     const records = Array.isArray(multiverseMarket.records) ? multiverseMarket.records : [];
+    const validatedIds = Array.isArray(multiverseMarket.source?.validated_ids) ? multiverseMarket.source.validated_ids : [];
     const hasAnchor = records.some((record) => Number(record.inscription_id) === 51 && Number(record.start_cost) === 2);
+    const hasLateBlockCoverage =
+      validatedIds.length === 22
+      && validatedIds.includes(50)
+      && validatedIds.includes(59)
+      && validatedIds.includes(63)
+      && validatedIds.includes(74);
     cases.push({
       title: "MultiverseMarket owner payload",
       expected: "Validated late-block constants available",
       actual: hasAnchor ? "Validated late-block constants available" : "Missing validated late-block anchor",
       pass: hasAnchor,
+      scope: "APK"
+    });
+    cases.push({
+      title: "MultiverseMarket late-block coverage",
+      expected: "Validated id coverage snapshot available",
+      actual: hasLateBlockCoverage ? "Validated id coverage snapshot available" : "Missing validated id coverage snapshot",
+      pass: hasLateBlockCoverage,
       scope: "APK"
     });
     cases.push({
@@ -2460,14 +2817,47 @@ function renderRecommendationFeedSummary(results, surface) {
 
   const loopCount = results.filter((item) => item.module === "loop").length;
   const shardCount = results.filter((item) => item.module === "shards").length;
+  const explainability = getRecommendationExplainabilitySummary(results);
   return `
     <article class="validation-card warn">
       <strong>${surface === "overview" ? "Active MVP recommendation feed" : "Progression feed status"}</strong>
-      <p class="meta">The current feed ranks trust-oriented warning urgency for the active shard and loop modules. These scores are UI priority, not optimizer ROI.</p>
+      <p class="meta">The current feed ranks trust-oriented warning urgency for the active shard and loop modules. These scores are UI priority, not ROI math.</p>
       <p class="meta">Visible feed items: ${results.length}. Loop guardrails: ${loopCount}. Shard workflow cards: ${shardCount}.</p>
+      <p class="meta">Explainability coverage: Why now ${explainability.withWhyNow}/${results.length} | Assumptions ${explainability.withAssumptions}/${results.length} | Warnings ${explainability.withWarnings}/${results.length} | Source notes ${explainability.withNotes}/${results.length}.</p>
+      <p class="meta">Average confidence: ${explainability.averageConfidence}% | Items with all explainability fields: ${explainability.withFullContext}/${results.length}.</p>
+      <p class="meta">Explainability audit: Complete context ${explainability.withFullContext}/${results.length} | Partial context ${explainability.partialContext}/${results.length} | Missing source notes ${explainability.missingSourceNotes}/${results.length}.</p>
       <p class="meta">Spend-planner recommendations are still blocked by system-mapping gaps, so this feed currently covers the MVP-safe guidance surfaces only.</p>
     </article>
   `;
+}
+
+function getRecommendationExplainabilitySummary(results) {
+  const withWhyNow = results.filter((item) => Array.isArray(item.whyNow) && item.whyNow.length).length;
+  const withAssumptions = results.filter((item) => Array.isArray(item.assumptions) && item.assumptions.length).length;
+  const withWarnings = results.filter((item) => Array.isArray(item.warnings) && item.warnings.length).length;
+  const withNotes = results.filter((item) => String(item.notes || "").trim()).length;
+  const withFullContext = results.filter((item) =>
+    Array.isArray(item.whyNow) && item.whyNow.length
+    && Array.isArray(item.assumptions) && item.assumptions.length
+    && Array.isArray(item.warnings) && item.warnings.length
+    && String(item.notes || "").trim()
+  ).length;
+  const averageConfidence = Math.round(
+    (results.reduce((sum, item) => sum + Number(item.confidence || 0), 0) / results.length) * 100
+  );
+  const partialContext = results.length - withFullContext;
+  const missingSourceNotes = results.length - withNotes;
+
+  return {
+    withWhyNow,
+    withAssumptions,
+    withWarnings,
+    withNotes,
+    withFullContext,
+    averageConfidence,
+    partialContext,
+    missingSourceNotes
+  };
 }
 
 function renderSupportSurfaceNotice(title, lines) {
@@ -3045,6 +3435,7 @@ function makeRecommendationCard(item, module) {
   if (!item) {
     return "";
   }
+  const explainabilityAudit = getRecommendationExplainabilityAudit(item);
   const detailLines = [
     item.cost ? `<span class="pill">cost ${escapeHtml(item.cost)}</span>` : "",
     item.eta ? `<span class="pill">eta ${escapeHtml(item.eta)}</span>` : ""
@@ -3058,6 +3449,14 @@ function makeRecommendationCard(item, module) {
   const warnings = Array.isArray(item.warnings) && item.warnings.length
     ? `<div class="meta-stack"><p class="snapshot-title">Warnings</p>${item.warnings.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
     : "";
+  const explainability = `
+    <div class="meta-stack">
+      <p class="snapshot-title">Explainability audit</p>
+      <p class="meta">Status: ${escapeHtml(explainabilityAudit.status)}.</p>
+      <p class="meta">Source note: ${escapeHtml(explainabilityAudit.sourceNoteStatus)}.</p>
+      <p class="meta">${escapeHtml(explainabilityAudit.missingLine)}</p>
+    </div>
+  `;
   return `
     <article class="recommendation-card">
       <div class="recommendation-head">
@@ -3073,11 +3472,34 @@ function makeRecommendationCard(item, module) {
         ${detailLines}
       </div>
       <p class="meta">${item.notes ?? ""}</p>
+      ${explainability}
       ${whyNow}
       ${assumptions}
       ${warnings}
     </article>
   `;
+}
+
+function getRecommendationExplainabilityAudit(item) {
+  const missing = [];
+  if (!Array.isArray(item.whyNow) || !item.whyNow.length) {
+    missing.push("Why now");
+  }
+  if (!Array.isArray(item.assumptions) || !item.assumptions.length) {
+    missing.push("Assumptions");
+  }
+  if (!Array.isArray(item.warnings) || !item.warnings.length) {
+    missing.push("Warnings");
+  }
+  if (!String(item.notes || "").trim()) {
+    missing.push("Source note");
+  }
+
+  return {
+    status: missing.length ? "Partial context" : "Complete context",
+    sourceNoteStatus: String(item.notes || "").trim() ? "Present" : "Missing",
+    missingLine: missing.length ? `Missing: ${missing.join(", ")}.` : "Missing: none."
+  };
 }
 
 function normalizeShardBreakpoints(value) {

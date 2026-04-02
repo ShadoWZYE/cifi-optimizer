@@ -2,26 +2,39 @@
 
 ## Purpose
 
-Evolve this repo from prototype to MVP without adding speculative behavior.
+Evolve this repo toward a grounded MVP without speculative behavior or large rewrites.
 
-Priorities:
+## Working rules
 
-- small, safe, incremental changes
-- MVP alignment
-- reuse over rewrite
-- truth over placeholder sophistication
+- make small, safe, incremental changes
+- prefer extraction and cleanup over redesign
+- preserve local-first browser behavior
+- keep diffs focused
+- prefer truth over placeholder sophistication
 
 ## MVP scope
 
-First-class MVP systems only:
+First-class MVP systems:
 
-- PlayerProfile
+- `state.playerProfile`
 - guided/manual player import
 - shard milestone workflow
-- diamond/token spend planner
+- token/diamond spend planner
 - loop-reset guardrails
 - unified recommendation feed
 - explainable recommendations
+
+## Non-goals
+
+Do not prioritize:
+
+- OCR
+- full save parsing
+- generic progression tables
+- Gem Nodes
+- research UI expansion as product surface
+- broad simulation architecture
+- late-game full optimization systems
 
 ## Grounding rule
 
@@ -34,57 +47,49 @@ If uncertain:
 
 - preserve structure
 - document assumptions
-- avoid invented precision
-- prefer descriptive behavior over fake confidence
+- keep uncertainty visible
+- prefer descriptive behavior over invented precision
 
-## System Integration Gate
+## Source priority
 
-Before integrating any game system into the app, verify from repo docs and available Unity/APK assets:
+Use this order:
 
-1. where it lives in-game
-2. what the real owner is
-3. which currencies or player-owned inputs it uses
-4. which labels are verified in-game labels versus serialized ids or community-tool names
-5. which parts are verified fact versus unresolved assumption
+1. repo docs and shipped datasets
+2. committed APK/Unity artifacts and extraction outputs under `workbench/`
+3. official/public corroboration
+4. community or external-model support
 
-If any item fails:
+Do not silently upgrade fallback sources into canonical game truth.
 
-- do not wire the system into recommendations
-- keep the work in docs, extraction, verification, mapping, or descriptive-mode surfaces
+## Integration gate
+
+Before integrating a system into app behavior, verify:
+
+1. in-game system identity
+2. real owner object
+3. currencies or budget lane
+4. required player-owned inputs
+5. grounded labels vs serialized ids/community names
+6. verified facts vs unresolved assumptions
+
+If any item is unresolved:
+
+- do not wire it into recommendations
+- keep it in docs, extraction, mapping, validation, or descriptive-mode surfaces
 - record the unresolved gap
-
-Important:
-
-- extracted data being present in the repo does not mean the system is mapped enough to integrate
-- treat systems as `available but unmapped` until currencies, owned-state inputs, and labels are verified
-- a real in-game system is still not build-ready until its owner, data shape, labels, currencies, and required player-state inputs are mapped clearly enough for truthful app behavior
-
-## Non-goals
-
-Do not prioritize:
-
-- OCR
-- full save parsing
-- generic progression tables
-- Gem-node optimizer
-- Research-tracks UI
-- broad simulation architectures
-- late-game full optimization systems
 
 ## Architecture rules
 
-1. No large rewrites
-   Work incrementally within existing files unless explicit refactoring is required.
-2. Prefer extraction over redesign
-   If code is messy, extract functions or modules instead of introducing new frameworks.
-3. Keep local-first behavior
-   The app must work fully in-browser.
-4. Single source of truth
-   All player state must converge into `state.playerProfile`.
-5. Separate truth from models
-   Do not silently mix verified in-game state, derived values, external-model fields, or placeholders.
-6. Recommendation system contract
-   All modules should ultimately emit:
+1. no large rewrites
+2. prefer extraction over redesign
+3. keep `state.playerProfile` as the shared state boundary
+4. separate canonical state, planning helpers, external models, and compatibility data
+5. keep recommendation outputs explainable
+6. keep verified mechanics separate from heuristics
+
+## Recommendation contract
+
+All recommendation modules should converge on:
 
 ```js
 {
@@ -101,4 +106,3 @@ Do not prioritize:
   assumptions?: string[],
   warnings?: string[]
 }
-```

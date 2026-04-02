@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CIFI Optimization Suite</title>
+  <title>CIFI Grounded MVP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,9 +13,9 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand-card">
-        <p class="eyebrow">Unified CIFI Optimization Suite</p>
-        <h1>One profile, one data backbone, many optimizers.</h1>
-        <p class="meta">Refactors the current Desmos and spreadsheet stack into a modular web app with importable sheet data and shared player calibration.</p>
+        <p class="eyebrow">Local-first CIFI MVP</p>
+        <h1>One profile, one data backbone, one explainable recommendation feed.</h1>
+        <p class="meta">Grounded local-first planning app focused on verified player state, bundled evidence, and explainable next-step guidance instead of broad optimizer sprawl.</p>
       </div>
 
       <nav class="page-nav" id="pageNav">
@@ -24,8 +24,8 @@
         <button class="nav-link" data-page="data">Data</button>
         <button class="nav-link" data-page="progression">Progression</button>
         <button class="nav-link" data-page="validation">Validation</button>
-        <button class="nav-link" data-page="ship">Ship Planner (Community-tool)</button>
-        <button class="nav-link" data-page="gem">Gem Nodes (Experimental)</button>
+        <button class="nav-link" data-page="ship">Ship Planner (External-model)</button>
+        <button class="nav-link" data-page="gem">Gem Nodes (Quarantined)</button>
         <button class="nav-link" data-page="research">Research Intake</button>
       </nav>
 
@@ -40,7 +40,7 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Overview</p>
-            <h2>Suite status</h2>
+            <h2>MVP status</h2>
           </div>
         </div>
         <div class="overview-grid">
@@ -64,8 +64,8 @@
           <article class="panel">
             <div class="panel-header">
               <div>
-                <p class="eyebrow">Next Recommended Actions</p>
-                <h2>Cross-module highlights</h2>
+                <p class="eyebrow">Unified Recommendation Feed</p>
+                <h2>Grounded next-step highlights</h2>
               </div>
             </div>
             <div id="overviewHighlights" class="recommendation-list"></div>
@@ -74,14 +74,14 @@
             <div class="panel-header">
               <div>
                 <p class="eyebrow">Import Workflow</p>
-                <h2>How to feed sheet data into the suite</h2>
+                <h2>How to load labeled data into the app</h2>
               </div>
             </div>
             <div class="meta-stack">
-              <p class="meta">1. Export a sheet tab as CSV or JSON.</p>
+              <p class="meta">1. Prepare a labeled CSV export or JSON payload.</p>
               <p class="meta">2. Go to the Data page and choose the matching dataset type.</p>
               <p class="meta">3. Preview and import the rows into the active snapshot.</p>
-              <p class="meta">4. Re-run validation to confirm the imported data still matches known cases.</p>
+              <p class="meta">4. Re-run validation to confirm the imported data still matches grounded checks.</p>
             </div>
           </article>
         </div>
@@ -201,7 +201,7 @@
               <div class="panel-header">
                 <div>
                   <p class="eyebrow">Import Data</p>
-                <h2>Sheet ingestion</h2>
+                <h2>Labeled data intake</h2>
               </div>
             </div>
 
@@ -225,7 +225,7 @@
               </div>
               <div class="field-group">
                 <label for="importSource">Source label</label>
-                <input id="importSource" type="text" placeholder="Gem node sheet tab export">
+                <input id="importSource" type="text" placeholder="Source note or export label">
               </div>
             </div>
 
@@ -383,7 +383,7 @@
       <section class="page" data-page="gem">
         <div class="page-header">
           <div>
-            <p class="eyebrow">Gem Nodes (Experimental)</p>
+            <p class="eyebrow">Gem Nodes (Quarantined)</p>
             <h2>Non-MVP gem planner</h2>
           </div>
         </div>
@@ -409,7 +409,7 @@
             <p class="eyebrow">Validation</p>
             <h2>Grounded checks, APK grounding, and support checks</h2>
           </div>
-          <button id="runValidationSuite" class="button button-primary">Run validation suite</button>
+          <button id="runValidationSuite" class="button button-primary">Run validation checks</button>
         </div>
         <section class="panel">
           <p class="meta">Grounded MVP checks, APK-grounding checks, and quarantined support-surface checks are shown separately so validation can catch behavior drift and extracted-data mixing without overstating what is currently first-class product truth. Ship checks stay in the grounded section because the system is canonical even while its implementation wiring is still being remapped.</p>

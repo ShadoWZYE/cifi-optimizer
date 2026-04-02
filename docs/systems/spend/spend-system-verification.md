@@ -38,6 +38,10 @@ If any item is missing, the allowed work stays in docs, parser scripts, owner ma
   - `Bonus`
   - `MaxLevel`
   - `FillMaxLevel`
+- Verified currency-shell evidence now includes:
+  - `resourceicons/resource_tokenium`
+  - `resourceicons/resource_tokenium_cap`
+  - token-bank controller labels such as `TokenBankDescriptionText` and `FinalTokenBankCap`
 
 ### Not yet verified enough for app recommendations
 
@@ -61,6 +65,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 ### Current app implication
 
 - It is safe to treat TokenShop as a real system with grounded extracted constants.
+- It is safe to describe its cost lane as token-bank token or tokenium spending, rather than as an unnamed generic spend pool.
 - It is not yet safe to generate next-buy recommendations from player token budgets alone.
 - TokenShop-connected token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped` until saved-state owners are recovered.
 - `OR_TokenBankCap` and `OR_TokensFromChests` should currently be treated as grounded asset labels, not as recovered formula sources.
@@ -122,7 +127,7 @@ The next spend-track slice should verify missing integration inputs, not produce
 
 Priority order:
 
-1. verify the token-shop spend lane and player-owned current-level inputs
+1. recover player-owned current-level inputs for TokenShop upgrade rows now that the cost lane is grounded as token or tokenium spending
 2. map the TokenShop-connected token-bank cap, fill, claim, and Academy or Farm Mission Daily Tokenium lane strongly enough to identify their saved-state inputs
 3. use the recovered `InscryptionsDone` and `IS*Level` metadata cluster to determine the declaring save model and authoritative owned-state range behind the multiverse-market lane
 4. remap serialized ids to grounded player-facing labels
