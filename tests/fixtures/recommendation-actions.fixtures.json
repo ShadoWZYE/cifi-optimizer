@@ -22,6 +22,28 @@
       "notes": "Loop guardrails remain descriptive and source-linked."
     },
     {
+      "id": "loop-guardrail-rising-requirements-warning",
+      "module": "loop",
+      "kind": "warning",
+      "title": "Loop requirement pacing warning",
+      "subtitle": "Current LR 6",
+      "score": 88,
+      "confidence": 0.71,
+      "whyNow": [
+        "Guide examples warn that pushing LR too quickly can raise loop requirements faster than the account can clear them.",
+        "Grounded examples show LR 5 -> 6 requiring 7 loops and LR 6 -> 7 requiring 8 loops."
+      ],
+      "assumptions": [
+        "This is a caution zone, not a target recommendation.",
+        "The app does not estimate whether your account can safely push the next LR."
+      ],
+      "warnings": [
+        "Use buffer / instant loop checks before pushing LR higher.",
+        "High LR progression can become 'playing with fire' in guide-side progression notes."
+      ],
+      "notes": "Guardrail based on grounded guide examples, not simulated reset math."
+    },
+    {
       "id": "shard-module-next-unlock-watch",
       "module": "shards",
       "kind": "warning",
@@ -44,6 +66,88 @@
         "Unlocked does not mean affordable; shard cost data is still unavailable."
       ],
       "notes": "This card watches descriptive unlock gates only."
+    },
+    {
+      "id": "shard-module-next-threshold-watch",
+      "module": "shards",
+      "kind": "warning",
+      "title": "Next shard threshold to watch",
+      "subtitle": "Alpha Milestone",
+      "score": 52,
+      "confidence": 0.64,
+      "whyNow": [
+        "Focus milestone rarity: Common. Threshold schedule: 1 | 25 | 50.",
+        "Next bonus threshold is level 25 from tracked level 20."
+      ],
+      "assumptions": [
+        "Boosts Cells gained, MK5 output, and Shards gained at milestone level thresholds.",
+        "Besides thresholds, incremental level increases the effect of each bonus (multiplicatively)."
+      ],
+      "warnings": [
+        "Name/bonus mismatch versus older Game-Vault snapshot (Aqua vs Alpha; MK5 Output vs Mod Points at level 25).",
+        "Threshold wording stays descriptive because milestone sources conflict across accessible snapshots.",
+        "You need 5 more levels on the selected milestone to reach this threshold."
+      ],
+      "notes": "Threshold guidance is milestone-specific and descriptive only."
+    },
+    {
+      "id": "shard-module-cost-bump-watch",
+      "module": "shards",
+      "kind": "warning",
+      "title": "Shard cost bump watch",
+      "subtitle": "Alpha Milestone",
+      "score": 47,
+      "confidence": 0.59,
+      "whyNow": [
+        "Shard Milestones experience a cost bump every 100 levels (Large cost bump at level 100 and 400 and small cost bump at level 200 and 300, Larger Bumps every 100 afterwards).",
+        "From tracked level 20, the next noted cost bump is level 100 (large)."
+      ],
+      "assumptions": [
+        "The dataset provides breakpoint notes, not numeric shard costs.",
+        "Observed examples are shown separately and do not become planner truth."
+      ],
+      "warnings": [
+        "Cost bumps are warning zones only; the app does not estimate shard affordability.",
+        "Cost wording stays generic until a single authoritative milestone list and cost table exist.",
+        "No per-level shard costs provided; only global cost-bump statements exist."
+      ],
+      "notes": "Use this to avoid false precision near known cost-bump levels."
+    },
+    {
+      "id": "loop-guardrail-buffer-check-warning",
+      "module": "loop",
+      "kind": "warning",
+      "title": "Buffer check before pushing LR",
+      "subtitle": "Current LR 7",
+      "score": 61,
+      "confidence": 0.55,
+      "whyNow": [
+        "Higher LR examples stay risky without a buffer for failed clears or longer reset pacing."
+      ],
+      "assumptions": [],
+      "warnings": [
+        "Treat this as a caution prompt only until stronger loop owner data is grounded."
+      ],
+      "notes": "Representative partial-context warning with no explicit assumption text yet."
+    },
+    {
+      "id": "shard-module-threshold-mismatch-watch",
+      "module": "shards",
+      "kind": "warning",
+      "title": "Milestone threshold mismatch watch",
+      "subtitle": "Conflicting milestone wording",
+      "score": 44,
+      "confidence": 0.51,
+      "whyNow": [
+        "Accessible milestone snapshots disagree on the next named threshold for this row."
+      ],
+      "assumptions": [
+        "This remains descriptive until owner mapping and a single authoritative milestone list are grounded."
+      ],
+      "warnings": [
+        "Do not treat this as spend order or ROI guidance."
+      ],
+      "notes": null
     }
   ]
 }

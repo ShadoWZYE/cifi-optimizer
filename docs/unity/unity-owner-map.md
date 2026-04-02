@@ -7,11 +7,16 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
   - source owner: [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
   - parser: [`scripts/unity/token_shop_parse.py`](C:\Users\Shadow\Desktop\CiFi\scripts\unity\token_shop_parse.py)
   - outputs: [`docs/systems/spend/token-shop-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\token-shop-values.md), [`docs/systems/spend/token-bank-state-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\token-bank-state-verification.md), [`data/token-shop-values.json`](C:\Users\Shadow\Desktop\CiFi\data\token-shop-values.json)
-  - integration status: owner and serialized constants verified; token-bank state lane verified at the controller level; the Daily Tokenium lane is now better grounded as an Academy or Farm Mission reward family that TokenShop modifies; `OR_TokenBankCap` and `OR_TokensFromChests` narrowed to asset-label clues rather than proven formula owners; player-owned current levels and final player-facing label remap still required before planner UI
+  - integration status: owner and serialized constants verified; token-bank state lane verified at the controller level; the base spend lane is now grounded as token or tokenium spending through token-bank labels and resource icons; the Daily Tokenium lane is now better grounded as an Academy or Farm Mission reward family that TokenShop modifies; `OR_TokenBankCap` and `OR_TokensFromChests` narrowed to asset-label clues rather than proven formula owners; player-owned current levels and final player-facing label remap still required before planner UI
   - recovered adjacent handlers:
     - `ClaimBankedTokens` -> `TokenShop, Assembly-CSharp`
     - token-bank cap display -> `BigStatisticPrefab.TokenBankCap`
     - daily-tokenium mission text path -> `TextHandlerLoopMods.SetLM244BonusText`
+  - recovered currency-shell evidence:
+    - `resourceicons/resource_tokenium`
+    - `resourceicons/resource_tokenium_cap`
+    - `TokenBankDescriptionText`
+    - `FinalTokenBankCap`
   - recovered owner-family split:
     - underlying Daily Tokenium lane -> `SpaceAcademy` / `FarmMissions` family in `level0`
     - TokenShop -> modifier family on that lane through Daily Tokenium cap upgrade text

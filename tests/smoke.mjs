@@ -26,6 +26,7 @@ const shardAssetGrounding = JSON.parse(await readFile(new URL("../data/shard-ass
 const extractionCandidateFamilies = JSON.parse(await readFile(new URL("../data/extraction-candidate-families.v1.json", import.meta.url), "utf8"));
 const extractionCandidateRanking = JSON.parse(await readFile(new URL("../data/extraction-candidate-ranking.v1.json", import.meta.url), "utf8"));
 const bundledDatasetContract = JSON.parse(await readFile(new URL("../data/bundled-dataset-contract.v1.json", import.meta.url), "utf8"));
+const tokenShopData = JSON.parse(await readFile(new URL("../data/token-shop-values.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const agentsMd = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8");
@@ -72,6 +73,95 @@ const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
 await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
 const datasetValidation = await validateBundledDatasets();
+assert.match(appJs, /TokenShop currency shell/);
+assert.match(appJs, /Token or tokenium spend lane grounded/);
+assert.match(appJs, /Daily Tokenium still stays separate as the Academy or Farm Mission reward lane that TokenShop modifies/);
+assert.match(appJs, /Completed foundation/);
+assert.match(appJs, /Active roadmap slice/);
+assert.match(appJs, /Queued behind mapping gate/);
+assert.match(appJs, /Queued after gate/);
+assert.match(appJs, /Sequence 1\/5/);
+assert.match(appJs, /Sequence 4\/5/);
+assert.match(appJs, /PR 3 then PR 5 hardening/);
+assert.match(appJs, /APK\/Unity first/);
+assert.match(appJs, /Integration contract/);
+assert.match(appJs, /In research/);
+assert.match(appJs, /APK\/Unity not checked yet/);
+assert.match(appJs, /APK\/Unity checked/);
+assert.match(appJs, /Sources/);
+assert.match(appJs, /Repo artifacts/);
+assert.match(appJs, /Verified now/);
+assert.match(appJs, /Still uncertain/);
+assert.match(appJs, /Smallest shippable slice/);
+assert.match(appJs, /Research intake only/);
+assert.match(appJs, /"hunter-related-planning"/);
+assert.match(appJs, /"mech-related-planning"/);
+assert.match(appJs, /"input-automation-intake"/);
+assert.match(appJs, /"external-model-integration-intake"/);
+assert.match(appJs, /function renderResearchGuidance/);
+assert.match(appJs, /Tracks stay in intake until they are mature enough for roadmap work/);
+assert.match(appJs, /Not a product commitment/);
+assert.match(appJs, /Promotion rule/);
+assert.match(appJs, /Track categories/);
+assert.match(appJs, /Candidate MVP-adjacent/);
+assert.match(appJs, /Post-MVP candidates/);
+assert.match(appJs, /Deferred infrastructure/);
+assert.match(appJs, /Current research rules/);
+assert.match(appJs, /Hunter planning stays in research/);
+assert.match(appJs, /Mech planning stays in research/);
+assert.match(appJs, /Input automation stays in research/);
+assert.match(appJs, /External-model integration stays in research/);
+assert.match(appJs, /function renderShardGroundingBoundary/);
+assert.match(appJs, /Grounded shard boundary/);
+assert.match(appJs, /Safe repo truths vs descriptive milestone data/);
+assert.match(appJs, /Community-grounded milestone rows/);
+assert.match(appJs, /What must be grounded before stronger behavior/);
+assert.match(appJs, /If uncertainty remains high, the correct output is a better research note, not stronger planner behavior/);
+assert.match(appJs, /function renderDatasetRefreshHardening/);
+assert.match(appJs, /Dataset refresh hardening path/);
+assert.match(appJs, /Use this before promoting new bundled data or refreshing shipped JSON assets/);
+assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
+assert.match(appJs, /canonical-app-snapshot/);
+assert.match(appJs, /community-derived/);
+assert.match(appJs, /function renderSpendPlannerBoundary/);
+assert.match(appJs, /Spend planner boundary/);
+assert.match(appJs, /Extracted spend data is grounded enough for boundary notes, but still blocked for planner cards/);
+assert.match(appJs, /Safe grounded truths now/);
+assert.match(appJs, /Still blocked before planner behavior/);
+assert.match(appJs, /Imported spend payload watch/);
+assert.match(appJs, /compatibility\.unmappedSystemState/);
+assert.match(appJs, /No quarantined TokenShop payload is present in the imported PlayerProfile/);
+assert.match(appJs, /No quarantined MultiverseMarket payload is present in the imported PlayerProfile/);
+assert.match(appJs, /First safe spend unlock path/);
+assert.match(appJs, /First planner unlock path/);
+assert.match(appJs, /No spend recommendations yet/);
+assert.match(appJs, /TokenShop token-bank anchors/);
+assert.match(appJs, /Recovered token-bank controller anchors available/);
+assert.match(appJs, /MultiverseMarket late-block coverage/);
+assert.match(appJs, /Validated id coverage snapshot available/);
+assert.match(appJs, /BigStatisticPrefab\.TokenBankCap/);
+assert.match(appJs, /TextHandlerLoopMods\.SetLM244BonusText/);
+assert.match(appJs, /Inscryptions Done/);
+assert.match(appJs, /function getRecommendationExplainabilitySummary/);
+assert.match(appJs, /function getRecommendationExplainabilityAudit/);
+assert.match(appJs, /Explainability coverage: Why now/);
+assert.match(appJs, /Average confidence:/);
+assert.match(appJs, /Items with all explainability fields:/);
+assert.match(appJs, /Explainability audit: Complete context/);
+assert.match(appJs, /Partial context/);
+assert.match(appJs, /Missing source notes/);
+assert.match(appJs, /Explainability audit/);
+assert.match(appJs, /Status: \$\{escapeHtml\(explainabilityAudit\.status\)\}\./);
+assert.match(appJs, /Source note: \$\{escapeHtml\(explainabilityAudit\.sourceNoteStatus\)\}\./);
+assert.match(appJs, /Missing: none\./);
+assert.match(appJs, /Partial context/);
+assert.match(appJs, /Complete context/);
+assert.match(appJs, /function getPlayerProfileBoundaryAudit/);
+assert.match(appJs, /Import boundary audit/);
+assert.match(appJs, /Normalization keeps imported values in labeled namespaces instead of flattening them into raw game truth/);
+assert.match(appJs, /Quarantined unmapped system blobs preserved:/);
+assert.match(appJs, /Compatibility-only leftovers preserved:/);
+assert.match(appJs, /Review the boundary audit before using recommendations/);
 const normalizedFeedAction = toRecommendationAction({
   id: " shard-threshold ",
   module: "shards",
@@ -210,6 +300,11 @@ assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
   ["snapshot", "shards", "shard-asset-grounding", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market"]
 );
+assert.ok(snapshot.researchTracks.length >= 9, "expected intake and roadmap research tracks");
+assert.deepEqual(
+  tokenShopData.resource_icons,
+  ["resourceicons/resource_tokenium", "resourceicons/resource_tokenium_cap"]
+);
 assert.deepEqual(
   datasetValidation.map((entry) => entry.classification),
   bundledDatasetContract.datasets.map((entry) => entry.classification)
@@ -227,18 +322,34 @@ assert.equal(fallbackFeedAction.confidence, 0);
 assert.deepEqual(sortedFeedFixture.map((item) => item.id), ["warning-high", "warning-low", "upgrade-high"]);
 assert.equal(getRecommendationContractIssues(normalizedFeedAction).length, 0);
 assert.ok(invalidFeedIssues.length >= 4, "expected multiple recommendation contract issues");
-assert.equal(recommendationFixtures.actions.length, 2);
+assert.equal(recommendationFixtures.actions.length, 7);
 assert.deepEqual(
   recommendationFixtures.actions.map((item) => item.module),
-  ["loop", "shards"]
+  ["loop", "loop", "shards", "shards", "shards", "loop", "shards"]
 );
 assert.ok(
   normalizedFixtureActions.every((item) => getRecommendationContractIssues(item).length === 0),
   "expected representative shard and loop fixtures to satisfy the recommendation contract"
 );
+assert.ok(
+  normalizedFixtureActions.some((item) => item.assumptions.length === 0),
+  "expected fixture coverage for partial-context warnings with missing assumptions"
+);
+assert.ok(
+  normalizedFixtureActions.some((item) => item.notes === null),
+  "expected fixture coverage for partial-context warnings with missing source notes"
+);
 assert.deepEqual(
   sortedFixtureActions.map((item) => item.id),
-  ["loop-guardrail-input-warning", "shard-module-next-unlock-watch"]
+  [
+    "loop-guardrail-input-warning",
+    "loop-guardrail-rising-requirements-warning",
+    "loop-guardrail-buffer-check-warning",
+    "shard-module-next-threshold-watch",
+    "shard-module-cost-bump-watch",
+    "shard-module-next-unlock-watch",
+    "shard-module-threshold-mismatch-watch"
+  ]
 );
 const shardTrack = snapshot.researchTracks.find((track) => track.id === "shards-and-loop-guardrails");
 assert.ok(shardTrack, "expected shard workflow track");
@@ -250,11 +361,67 @@ assert.ok(shardTrack.nextSteps.length >= 3, "expected remaining shard extraction
 const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
 assert.ok(spendTrack, "expected spend workflow track");
 assert.equal(spendTrack.status, "queued");
-assert.match(spendTrack.currentSlice, /Use the recovered progression-field block around InscryptionsDone, IS\*Level, trade counters, and nearby mech fields/);
+assert.match(spendTrack.currentSlice, /TokenShop cost lane as grounded token or tokenium spending/);
+assert.match(spendTrack.currentSlice, /keep that boundary visible in-app before any spend cards land/);
+assert.match(spendTrack.currentSlice, /make extracted spend anchors fail fast in APK validation/);
+assert.match(spendTrack.currentSlice, /show the first safe spend-unlock path directly in the app/);
+assert.match(spendTrack.currentSlice, /surface imported spend payloads as quarantined compatibility state rather than planner inputs/);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /TokenShop cost lane as token or tokenium spending/.test(step)),
+  "expected spend track to record TokenShop currency-lane grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Show the spend-planner boundary in-app/.test(step)),
+  "expected spend track to record the in-app spend boundary slice"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Make recovered TokenShop token-bank anchors and MultiverseMarket late-block coverage fail fast in APK validation/.test(step)),
+  "expected spend track to record spend APK hardening"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Show the first safe spend-unlock path in-app/.test(step)),
+  "expected spend track to record the spend unlock-path slice"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Surface imported TokenShop and MultiverseMarket payloads as quarantined compatibility state/.test(step)),
+  "expected spend track to record quarantined spend-payload visibility"
+);
+assert.ok(
+  spendTrack.nextSteps.some((step) => /player-owned current levels for TokenShop upgrade rows/.test(step)),
+  "expected spend track to move on to TokenShop owned-state recovery"
+);
 const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-feed-and-hardening");
 assert.ok(feedTrack, "expected unified feed track");
 assert.equal(feedTrack.status, "active");
-assert.match(feedTrack.currentSlice, /Validate representative shard and loop action fixtures through the shared recommendation contract/);
+assert.match(feedTrack.currentSlice, /Expand representative shard and loop action fixtures toward partial-context warning shapes/);
+assert.ok(
+  feedTrack.completedSteps.some((step) => /Show the bundled dataset refresh hardening path inside the validation surface/.test(step)),
+  "expected unified feed track to record in-app refresh hardening"
+);
+assert.ok(
+  feedTrack.completedSteps.some((step) => /Show feed-level explainability coverage counts/.test(step)),
+  "expected unified feed track to record explainability coverage work"
+);
+assert.ok(
+  feedTrack.completedSteps.some((step) => /Show per-card explainability audit status/.test(step)),
+  "expected unified feed track to record per-card explainability audit work"
+);
+assert.ok(
+  feedTrack.completedSteps.some((step) => /Show feed-level complete-versus-partial explainability audit counts/.test(step)),
+  "expected unified feed track to record feed-level explainability audit counts"
+);
+assert.ok(
+  feedTrack.completedSteps.some((step) => /Expand representative shard and loop fixtures toward partial-context warning shapes/.test(step)),
+  "expected unified feed track to record partial-context fixture coverage"
+);
+assert.ok(
+  feedTrack.nextSteps.some((step) => /Apply the same refresh discipline when new asset-grounded datasets or owner recoveries are promoted/.test(step)),
+  "expected unified feed track to keep refresh discipline as remaining work"
+);
+assert.ok(
+  feedTrack.nextSteps.some((step) => /Keep strengthening explainability coverage as new recommendation modules join the feed/.test(step)),
+  "expected unified feed track to keep explainability hardening open"
+);
 const profileTrack = snapshot.researchTracks.find((track) => track.id === "playerprofile-boundary-and-imports");
 assert.ok(profileTrack, "expected player profile track");
 assert.equal(profileTrack.status, "completed");
@@ -267,10 +434,33 @@ assert.equal(datasetContractTrack.status, "completed");
 assert.match(datasetContractTrack.currentSlice, /checked-in bundled-dataset contract manifest/);
 assert.match(datasetContractTrack.currentSlice, /dataset refresh checklist/);
 assert.equal(datasetContractTrack.nextSteps.length, 0);
+const hunterTrack = snapshot.researchTracks.find((track) => track.id === "hunter-related-planning");
+assert.ok(hunterTrack, "expected hunter intake track");
+assert.equal(hunterTrack.status, "research");
+assert.equal(hunterTrack.classification, "speculative");
+assert.equal(hunterTrack.apkUnityPathChecked, false);
+assert.match(hunterTrack.currentSlice, /separate real hunter state from planning metadata/);
+const mechTrack = snapshot.researchTracks.find((track) => track.id === "mech-related-planning");
+assert.ok(mechTrack, "expected mech intake track");
+assert.equal(mechTrack.status, "research");
+assert.equal(mechTrack.apkUnityPathChecked, true);
+assert.match(mechTrack.currentSlice, /uses recovered metadata clues only to narrow persistence neighborhoods/);
+const automationTrack = snapshot.researchTracks.find((track) => track.id === "input-automation-intake");
+assert.ok(automationTrack, "expected automation intake track");
+assert.equal(automationTrack.status, "research");
+assert.equal(automationTrack.category, "deferred-infrastructure");
+assert.match(automationTrack.currentSlice, /guided import is insufficient without OCR/);
+const externalModelTrack = snapshot.researchTracks.find((track) => track.id === "external-model-integration-intake");
+assert.ok(externalModelTrack, "expected external-model intake track");
+assert.equal(externalModelTrack.status, "research");
+assert.equal(externalModelTrack.classification, "external-model");
+assert.match(externalModelTrack.currentSlice, /avoid mixing app truth with model assumptions/);
 assert.match(agentsMd, /## System Integration Gate/);
-assert.match(agentsMd, /Before integrating any game system into the app/);
-assert.match(agentsMd, /available but unmapped/);
-assert.match(agentsMd, /not build-ready until its owner, data shape, labels, currencies, and required player-state inputs are mapped/);
+assert.match(agentsMd, /## Source-of-truth rule/);
+assert.match(agentsMd, /Before integrating any game system into the app, verify/);
+assert.match(agentsMd, /do not wire the system into recommendations/);
+assert.match(agentsMd, /keep the work in docs, extraction, verification, mapping, or descriptive-mode surfaces/);
+assert.match(agentsMd, /record the unresolved gap/);
 assert.match(groundingPlan, /## System integration gate/);
 assert.match(groundingPlan, /Fail this gate if any of the above are inferred rather than evidenced/);
 assert.match(groundingPlan, /Presence of extracted data is not enough/);
@@ -291,8 +481,14 @@ assert.match(unityAuditPlaybook, /narrowed persistence search toward `PlayerProf
 assert.match(unityAuditPlaybook, /exact metadata field clues such as `InscryptionsDone` and nearby `IS\*Level`/);
 assert.match(unityAuditPlaybook, /broader progression-style field run that continues into trade counters and `Mech\*` fields/);
 assert.match(ownerMap, /integration status: owner and serialized constants verified/);
+assert.match(ownerMap, /base spend lane is now grounded as token or tokenium spending/);
 assert.match(ownerMap, /Daily Tokenium lane is now better grounded as an Academy or Farm Mission reward family/);
 assert.match(ownerMap, /OR_TokenBankCap/);
+assert.match(ownerMap, /recovered currency-shell evidence/);
+assert.match(ownerMap, /resourceicons\/resource_tokenium/);
+assert.match(ownerMap, /resourceicons\/resource_tokenium_cap/);
+assert.match(ownerMap, /TokenBankDescriptionText/);
+assert.match(ownerMap, /FinalTokenBankCap/);
 assert.match(ownerMap, /integration status: owner, partial row constants, and `Inscryptions Done` spend-lane shell verified/);
 assert.match(ownerMap, /Inscryptions Done/);
 assert.match(ownerMap, /InscryptionsDone/);
@@ -331,9 +527,13 @@ assert.match(ownerMap, /generic or academy-side milestone family/);
 assert.match(ownerMap, /keep planner behavior blocked/);
 assert.match(spendVerificationDoc, /# Spend System Verification Gate/);
 assert.match(spendVerificationDoc, /available but unmapped/);
+assert.match(spendVerificationDoc, /Verified currency-shell evidence now includes/);
+assert.match(spendVerificationDoc, /resourceicons\/resource_tokenium/);
+assert.match(spendVerificationDoc, /resourceicons\/resource_tokenium_cap/);
 assert.match(spendVerificationDoc, /Adjacent systems this signals/);
 assert.match(spendVerificationDoc, /Meltdown-linked gating objects/);
 assert.match(spendVerificationDoc, /downstream effect domains touched by TokenShop upgrades/);
+assert.match(spendVerificationDoc, /It is safe to describe its cost lane as token-bank token or tokenium spending/);
 assert.match(spendVerificationDoc, /token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped`/);
 assert.match(spendVerificationDoc, /OR_TokenBankCap` and `OR_TokensFromChests` should currently be treated as grounded asset labels/);
 assert.match(spendVerificationDoc, /claim actions resolve through `TokenShop`, token-bank cap display resolves through `BigStatisticPrefab\.TokenBankCap`, and at least one daily-tokenium text path resolves through `TextHandlerLoopMods\.SetLM244BonusText`/);
@@ -397,6 +597,11 @@ assert.match(dailyTokeniumMissionDoc, /Daily Tokenium currently belongs to the A
 assert.match(dailyTokeniumMissionDoc, /Modifier-family split recovered from this pass/);
 assert.match(dailyTokeniumMissionDoc, /grounded as one modifier family on the lane because a TokenShop upgrade text explicitly increases the Daily Tokenium cap/);
 assert.match(dailyTokeniumMissionDoc, /grounded as a premium modifier family on the lane because its description explicitly increases Mission Materials and the Daily Tokenium cap in the Academy menu/);
+assert.match(tokenShopDoc, /## Currency-lane grounding/);
+assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
+assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
+assert.match(tokenShopDoc, /base TokenShop costs should currently be described as a token-bank token or tokenium spend lane/);
+assert.match(tokenShopDoc, /Daily Tokenium should stay separated as the Academy or Farm Mission reward lane that TokenShop modifies/);
 assert.match(shardVerificationDoc, /# Shard System Verification Gate/);
 assert.match(shardVerificationDoc, /community-grounded descriptive data/);
 assert.match(shardVerificationDoc, /not yet mapped enough from shipped-game assets/);
@@ -505,11 +710,16 @@ assert.match(shardIngestDoc, /not yet shipped-game owner-grounded data/);
 
 assert.match(html, /Player Data/);
 assert.match(html, /Game Data/);
-assert.match(html, /Ship Planner \(Community-tool\)/);
-assert.match(html, /Gem Nodes \(Experimental\)/);
+assert.match(html, /Local-first CIFI MVP/);
+assert.match(html, /one explainable recommendation feed/i);
+assert.match(html, /Ship Planner \(External-model\)/);
+assert.match(html, /Gem Nodes \(Quarantined\)/);
 assert.match(html, /Research Intake/);
 assert.match(html, /Candidate tracks and grounded findings/);
 assert.match(html, /bundled data changes should pass local contract validation first/);
+assert.match(html, /Grounded next-step highlights/);
+assert.match(html, /How to load labeled data into the app/);
+assert.match(html, /Prepare a labeled CSV export or JSON payload/);
 assert.match(html, /Apply to active snapshot/);
 assert.match(html, /Reset to blank profile/);
 assert.match(html, /PlayerProfile JSON/);
@@ -533,6 +743,7 @@ assert.match(html, /Observed level on focus milestone/);
 assert.match(html, /Total shard milestone levels/);
 assert.match(html, /Grounded MVP checks only/);
 assert.match(html, /Grounded checks, APK grounding, and support checks/);
+assert.match(html, /Run validation checks/);
 assert.match(html, /APK-grounding checks/);
 assert.match(html, /Ship checks stay in the grounded section because the system is canonical/);
 assert.match(html, /validation can catch behavior drift and extracted-data mixing without overstating/);
@@ -547,11 +758,11 @@ assert.match(appJs, /function renderResearchTrackSupport/);
 assert.match(appJs, /function renderResearchTrackProgress/);
 assert.match(appJs, /function getResearchTrackOrder/);
 assert.match(appJs, /function getResearchTrackLane/);
-assert.match(appJs, /if \(track\.status === "completed"\) \{\s*return "Completed";\s*\}/);
+assert.match(appJs, /if \(track\.status === "completed"\) \{\s*return "Completed foundation";\s*\}/);
 assert.match(appJs, /function getResearchTrackStatus/);
 assert.match(appJs, /function getResearchTrackProgressLabel/);
 assert.match(appJs, /from "\.\/recommendation-contract\.js"/);
-assert.match(appJs, /"unified-feed-and-hardening": "PR 3"/);
+assert.match(appJs, /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/);
 assert.match(appJs, /"spend-planner-from-extracted-data": "PR 4"/);
 assert.match(appJs, /function importPlayerProfileJson/);
 assert.match(appJs, /function exportPlayerProfileJson/);
@@ -638,9 +849,9 @@ assert.match(appJs, /Why next:/);
 assert.match(appJs, /Available but unmapped/);
 assert.match(appJs, /Shard operations have built-in pacing/);
 assert.match(appJs, /Grounded shard anchors can support loop warnings even while milestone rows remain descriptive-only/);
-assert.match(appJs, /APK-grounded shard shell/);
-assert.match(appJs, /repo-local Unity shell evidence for shard and loop milestone families/);
-assert.match(appJs, /bonus labels, or cost notes here as shipped-game extracted truth/);
+assert.match(appJs, /Grounded shard boundary/);
+assert.match(appJs, /Repo-local Unity assets already ground shard and loop shell identifiers/);
+assert.match(appJs, /They are not yet mapped from shipped-game shard milestone owners/);
 assert.match(appJs, /MilestoneBonusesPerLevel/);
 assert.match(appJs, /Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked/);
 assert.match(appJs, /These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels/);
