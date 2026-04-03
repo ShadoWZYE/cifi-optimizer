@@ -4209,12 +4209,27 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
       return {
         rowId,
         level,
-        maxLevel: Number.isFinite(maxLevel) ? maxLevel : null
+        maxLevel: Number.isFinite(maxLevel) ? maxLevel : null,
+        completionPercent: Number.isFinite(maxLevel) && maxLevel > 0
+          ? Math.min(100, Math.round((level / maxLevel) * 100))
+          : null
       };
     })
     .filter(Boolean)
     .sort((left, right) => left.rowId - right.rowId);
-  const previewRows = importedValidatedRows.slice(0, 4);
+  const previewRows = importedValidatedRows.slice(0, 8);
+  const importedValidatedIds = new Set(importedValidatedRows.map((entry) => entry.rowId));
+  const missingValidatedRows = validatedRecords
+    .map((record) => Number(record?.inscription_id))
+    .filter((rowId) => Number.isFinite(rowId) && !importedValidatedIds.has(rowId));
+  const averageCompletion = importedValidatedRows.length
+    ? Math.round(
+      importedValidatedRows
+        .filter((entry) => Number.isFinite(entry.completionPercent))
+        .reduce((total, entry) => total + Number(entry.completionPercent || 0), 0)
+        / Math.max(importedValidatedRows.filter((entry) => Number.isFinite(entry.completionPercent)).length, 1)
+    )
+    : null;
 
   return {
     hasImportedBalance,
@@ -4224,6 +4239,9 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     validatedRowCount: validatedRecords.length,
     validatedRangeLabel: validatedCoverage.rangeLabel || "50-59 and 63-74",
     maxedCount: importedValidatedRows.filter((entry) => Number.isFinite(entry.maxLevel) && entry.level >= entry.maxLevel).length,
+    averageCompletion,
+    previewRows,
+    missingValidatedRows,
     sampleLine: previewRows.length
       ? previewRows.map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}${Number.isFinite(entry.maxLevel) ? `/${formatShardNumber(entry.maxLevel)}` : ""}`).join(" | ")
       : ""
@@ -4243,10 +4261,18 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
         <span class="pill">${preview.hasImportedBalance ? `InscryptionsDone ${escapeHtml(preview.balanceLabel)}` : "No imported InscryptionsDone"}</span>
         <span class="pill">${preview.hasValidatedLevelPreview ? `${preview.importedValidatedRowCount}/${preview.validatedRowCount} validated rows` : "No validated Emporium levels"}</span>
         ${preview.hasValidatedLevelPreview ? `<span class="pill">${preview.maxedCount} maxed imported rows</span>` : ""}
+        ${preview.hasValidatedLevelPreview && Number.isFinite(preview.averageCompletion) ? `<span class="pill">${preview.averageCompletion}% avg validated completion</span>` : ""}
       </div>
       <div class="meta-stack">
         <p class="meta">${preview.hasValidatedLevelPreview ? `Imported current levels are present for validated rows ${escapeHtml(preview.validatedRangeLabel)}.` : "Imported current levels are not present for the validated Emporium row block."}</p>
-        <p class="meta">${preview.hasValidatedLevelPreview ? `Sample: ${escapeHtml(preview.sampleLine)}.` : "When imported IS*Level fields exist, this preview only surfaces the validated Emporium block and leaves the rest quarantined."}</p>
+        <p class="meta">${preview.hasValidatedLevelPreview ? `Missing validated imports: ${preview.missingValidatedRows.length ? escapeHtml(preview.missingValidatedRows.map((rowId) => `IS${rowId}`).join(", ")) : "none"}.` : "When imported IS*Level fields exist, this preview only surfaces the validated Emporium block and leaves the rest quarantined."}</p>
+        ${preview.hasValidatedLevelPreview ? `<div class="preview-stack">${preview.previewRows.map((entry) => `
+          <article class="preview-card">
+            <strong>IS${escapeHtml(String(entry.rowId))}</strong>
+            <p class="meta">Imported level ${escapeHtml(formatShardNumber(entry.level))}${Number.isFinite(entry.maxLevel) ? ` / recovered max ${escapeHtml(formatShardNumber(entry.maxLevel))}` : ""}</p>
+            <p class="meta">${Number.isFinite(entry.completionPercent) ? `${escapeHtml(String(entry.completionPercent))}% of recovered max` : "Recovered max not available in this build"}</p>
+          </article>
+        `).join("")}</div>` : ""}
       </div>
     </article>
   `;
