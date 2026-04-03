@@ -36,6 +36,7 @@ const multiverseMarketRowTextCoverageData = JSON.parse(await readFile(new URL(".
 const tokenShopCostLanesData = JSON.parse(await readFile(new URL("../data/token-shop-cost-lanes.json", import.meta.url), "utf8"));
 const spendActionLaneCluesData = JSON.parse(await readFile(new URL("../data/spend-action-lane-clues.json", import.meta.url), "utf8"));
 const multiverseMarketActionShellData = JSON.parse(await readFile(new URL("../data/multiverse-market-action-shell.json", import.meta.url), "utf8"));
+const multiverseMarketOwnerFamilyData = JSON.parse(await readFile(new URL("../data/multiverse-market-owner-family.json", import.meta.url), "utf8"));
 const tokenShopOwnerShellData = JSON.parse(await readFile(new URL("../data/token-shop-owner-shell.json", import.meta.url), "utf8"));
 const tokenShopSaveBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-save-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8"));
@@ -88,7 +89,7 @@ await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.
 const datasetValidation = await validateBundledDatasets();
 assert.match(appJs, /TokenShop currency shell/);
 assert.match(appJs, /Token or tokenium spend lane grounded/);
-assert.match(appJs, /Daily Tokenium still stays separate as the Academy or Farm Mission reward lane that TokenShop modifies/);
+assert.match(appJs, /Player-facing strings still frame Daily Tokenium as a farm-mission or Academy Menu reward lane that TokenShop and the Collector pack modify/);
 assert.match(appJs, /Completed foundation/);
 assert.match(appJs, /Active roadmap slice/);
 assert.match(appJs, /Queued behind mapping gate/);
@@ -99,8 +100,8 @@ assert.match(appJs, /PR 3 then PR 5 hardening/);
 assert.match(appJs, /APK\/Unity first/);
 assert.match(appJs, /Integration contract/);
 assert.match(appJs, /In research/);
-assert.match(appJs, /APK\/Unity not checked yet/);
-assert.match(appJs, /APK\/Unity checked/);
+assert.match(appJs, /checked APK or Unity evidence/);
+assert.match(appJs, /Confidence, uncertainty, and classification are explicit/);
 assert.match(appJs, /Sources/);
 assert.match(appJs, /Repo artifacts/);
 assert.match(appJs, /Verified now/);
@@ -146,12 +147,11 @@ assert.match(appJs, /compatibility\.unmappedSystemState/);
 assert.match(appJs, /No quarantined TokenShop payload is present in the imported PlayerProfile/);
 assert.match(appJs, /No quarantined MultiverseMarket payload is present in the imported PlayerProfile/);
 assert.match(appJs, /First safe spend unlock path/);
-assert.match(appJs, /First planner unlock path/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /TokenShop token-bank anchors/);
 assert.match(appJs, /Recovered token-bank controller anchors available/);
-assert.match(appJs, /MultiverseMarket late-block coverage/);
-assert.match(appJs, /Validated id coverage snapshot available/);
+assert.match(appJs, /Validated late-block constants available/);
+assert.match(appJs, /validated late-block row set/);
 assert.match(appJs, /BigStatisticPrefab\.TokenBankCap/);
 assert.match(appJs, /TextHandlerLoopMods\.SetLM244BonusText/);
 assert.match(appJs, /Inscryptions Done/);
@@ -226,11 +226,11 @@ assert.deepEqual(
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.id),
-  ["snapshot", "shards", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "token-bank-controller-shell"]
+  ["snapshot", "shards", "shard-asset-grounding", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "token-bank-controller-shell"]
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.classification),
-  ["canonical-app-snapshot", "grounded-descriptive", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics"]
+  ["canonical-app-snapshot", "grounded-descriptive", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics"]
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.find((entry) => entry.id === "shards")?.files,
@@ -311,7 +311,7 @@ assert.equal(groundedShardObserved.sourceReport, "docs/research/shard-milestones
 assert.equal(groundedShardProvenance.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
-  ["snapshot", "shards", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "token-bank-controller-shell"]
+  ["snapshot", "shards", "shard-asset-grounding", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "token-bank-controller-shell"]
 );
 assert.deepEqual(
   datasetValidation.map((entry) => entry.classification),
@@ -342,6 +342,23 @@ const multiverseMarketCloudSaveEntry = multiverseMarketMetadataNeighborhoodData.
 const multiverseMarketCloudSaveStrings = (multiverseMarketCloudSaveEntry?.matches ?? []).flatMap((match) => [match.match_value, ...((match.context ?? []).map((item) => item.value))]);
 assert.ok(multiverseMarketCloudSaveStrings.some((value) => String(value).includes("CloudSavePlayerProfile")));
 assert.ok(multiverseMarketCloudSaveStrings.some((value) => String(value).includes("GetPlayerProfileInfo")));
+assert.deepEqual(
+  multiverseMarketOwnerFamilyData.ownerAnchors,
+  ["MultiverseMarket, Assembly-CSharp", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts", "SetInscryptionsDoneText", "Inscryptions"]
+);
+assert.deepEqual(
+  multiverseMarketOwnerFamilyData.costLaneAnchors,
+  ["ResourceAmountText.InscryptionsDone", "AchievementBar-Inscryptions", "CostBox-InscryptionsDone"]
+);
+assert.deepEqual(multiverseMarketOwnerFamilyData.currencyBoxRange, { start: 1, end: 110, count: 110 });
+assert.deepEqual(
+  multiverseMarketOwnerFamilyData.validatedCurrencyBoxes,
+  ["IS50CurrencyBox", "IS59CurrencyBox", "IS63CurrencyBox", "IS74CurrencyBox"]
+);
+assert.deepEqual(
+  multiverseMarketOwnerFamilyData.sampleBuyHooks,
+  ["BuyIS47", "BuyIS64", "BuyIS73", "BuyIS105"]
+);
 assert.deepEqual(tokeniumNamingCluesData.assetNames.resourceIcons, ["Resource_Tokenium", "Resource_Tokenium_Cap_0"]);
 assert.deepEqual(tokeniumNamingCluesData.assetNames.academySprites, ["Aca.Tokenium553"]);
 assert.ok(tokeniumNamingCluesData.level0Shells.includes("CostBox-Tokens"));
@@ -1134,6 +1151,7 @@ assert.match(appJs, /\.\/data\/multiverse-market-row-text-coverage\.json/);
 assert.match(appJs, /\.\/data\/token-shop-cost-lanes\.json/);
 assert.match(appJs, /\.\/data\/spend-action-lane-clues\.json/);
 assert.match(appJs, /\.\/data\/multiverse-market-action-shell\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-owner-family\.json/);
 assert.match(appJs, /\.\/data\/token-shop-owner-shell\.json/);
 assert.match(appJs, /\.\/data\/token-shop-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
@@ -1182,6 +1200,12 @@ assert.match(appJs, /MultiverseMarket action shell/);
 assert.match(appJs, /Context-derived BuyIS1-110 and SetIS1-110CostText shell preserved while only rows 50-59 and 63-74 stay validated/);
 assert.match(appJs, /The same checked action shell context reaches \${multiverseMarketActionShellSummary\.buyRangeLabel} plus \${multiverseMarketActionShellSummary\.costTextRangeLabel}, while only \${multiverseMarketActionShellSummary\.validatedRangeLabel} stays numerically validated/);
 assert.match(appJs, /That broader action shell is useful for mapping and UI recovery, but it should not be promoted as full numeric validation or saved-state coverage/);
+assert.match(appJs, /function getMultiverseMarketOwnerFamilySummary/);
+assert.match(appJs, /MultiverseMarket owner family/);
+assert.match(appJs, /MultiverseMarket, Inscryptions, and IS1-110 CurrencyBox shell preserved without implying saved-state ownership/);
+assert.match(appJs, /MultiverseMarket owner-family clues now preserve \${multiverseMarketOwnerFamilySummary\.ownerAnchor}, \${multiverseMarketOwnerFamilySummary\.inscryptionsLabel}, \${multiverseMarketOwnerFamilySummary\.textHandler}, \${multiverseMarketOwnerFamilySummary\.batcher}, and \${multiverseMarketOwnerFamilySummary\.costBox}/);
+assert.match(appJs, /The same checked shell also preserves \${multiverseMarketOwnerFamilySummary\.resourceText}, \${multiverseMarketOwnerFamilySummary\.achievementBar}, and \${multiverseMarketOwnerFamilySummary\.currencyRangeLabel}, with validated samples such as \${multiverseMarketOwnerFamilySummary\.firstValidatedCurrencyBox} and \${multiverseMarketOwnerFamilySummary\.lastValidatedCurrencyBox}/);
+assert.match(appJs, /That is enough to keep the Emporium owner-family and Inscryptions cost-lane shell grounded, but not enough to recover player-owned balance fields or current row levels/);
 assert.match(appJs, /function getTokenShopOwnerShellSummary/);
 assert.match(appJs, /TokenShop owner shell/);
 assert.match(appJs, /TokenShop, ClaimBankedTokens, CheckTokenClaimNotification, and BuyAutoTokenClicker preserved as one local owner shell/);

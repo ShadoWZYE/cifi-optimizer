@@ -116,6 +116,105 @@ function validateShardDatasets(milestones, observed, provenance) {
   };
 }
 
+function validateShardAssetGrounding(grounding) {
+  expectNonEmptyString(grounding.dataset, "shard asset grounding dataset id must be present");
+  expectNonEmptyString(grounding.generatedAt, "shard asset grounding generatedAt must be present");
+  expectNonEmptyString(grounding.sourceReport, "shard asset grounding sourceReport must be present");
+  expectArray(grounding.sourceArtifacts, "shard asset grounding sourceArtifacts must be an array");
+  expectNonEmptyString(grounding.classification, "shard asset grounding classification must be present");
+  expectRecord(grounding.system, "shard asset grounding system must be an object");
+  expectNonEmptyString(grounding.system.id, "shard asset grounding system.id must be present");
+  expectNonEmptyString(grounding.system.label, "shard asset grounding system.label must be present");
+  expectArray(grounding.groundedShellIdentifiers, "shard asset grounding groundedShellIdentifiers must be an array");
+  expectArray(grounding.groundedFacts, "shard asset grounding groundedFacts must be an array");
+  expectArray(grounding.appSafeUses, "shard asset grounding appSafeUses must be an array");
+  expectArray(grounding.blockedUses, "shard asset grounding blockedUses must be an array");
+  expectArray(grounding.unresolvedGaps, "shard asset grounding unresolvedGaps must be an array");
+  expectNonEmptyString(grounding.integrationStatus, "shard asset grounding integrationStatus must be present");
+  assert.ok(grounding.groundedShellIdentifiers.includes("LoopResetStage1"), "shard asset grounding must preserve LoopResetStage1");
+  assert.ok(grounding.groundedShellIdentifiers.includes("MilestoneBonusesPerLevel"), "shard asset grounding must preserve MilestoneBonusesPerLevel");
+  assert.ok(grounding.groundedFacts.some((fact) => String(fact).includes("ShardUpgradeInfo")), "shard asset grounding must mention ShardUpgradeInfo");
+  assert.ok(grounding.unresolvedGaps.includes("exact milestone data object or serialized row payload"), "shard asset grounding must preserve the unresolved milestone payload gap");
+  assert.equal(grounding.integrationStatus, "available-but-unmapped", "shard asset grounding must stay available-but-unmapped");
+
+  return {
+    id: "shard-asset-grounding",
+    label: "Shard asset grounding",
+    classification: "extracted-mechanics",
+    stats: [
+      `${grounding.groundedShellIdentifiers.length} grounded shell identifiers`,
+      `${grounding.groundedFacts.length} grounded facts`,
+      `${grounding.integrationStatus} integration status`
+    ]
+  };
+}
+
+function validateExtractionCandidateFamilies(families) {
+  expectNonEmptyString(families.dataset, "extraction candidate families dataset id must be present");
+  expectNonEmptyString(families.generatedAt, "extraction candidate families generatedAt must be present");
+  expectArray(families.binaryFiles, "extraction candidate families binaryFiles must be an array");
+  expectArray(families.textFiles, "extraction candidate families textFiles must be an array");
+  expectArray(families.globalContextTerms, "extraction candidate families globalContextTerms must be an array");
+  expectArray(families.unresolvedMarkers, "extraction candidate families unresolvedMarkers must be an array");
+  expectArray(families.families, "extraction candidate families families must be an array");
+  assert.ok(families.families.length >= 8, "extraction candidate families must preserve the seeded family set");
+  families.families.forEach((entry, index) => {
+    expectNonEmptyString(entry.id, `extraction candidate families[${index}].id must be present`);
+    expectNonEmptyString(entry.label, `extraction candidate families[${index}].label must be present`);
+    expectNonEmptyString(entry.track, `extraction candidate families[${index}].track must be present`);
+    expectArray(entry.terms, `extraction candidate families[${index}].terms must be an array`);
+    expectArray(entry.anchors, `extraction candidate families[${index}].anchors must be an array`);
+  });
+  assert.ok(families.families.some((entry) => entry.id === "shards.milestone-owner-family"), "extraction candidate families must preserve the shard milestone owner family");
+  assert.ok(families.families.some((entry) => entry.id === "spend.multiverse-market-owner-family"), "extraction candidate families must preserve the MultiverseMarket owner family");
+
+  return {
+    id: "extraction-candidate-families",
+    label: "Extraction candidate families",
+    classification: "extracted-mechanics",
+    stats: [
+      `${families.families.length} candidate families`,
+      `${families.binaryFiles.length} binary files`,
+      `${families.textFiles.length} text files`
+    ]
+  };
+}
+
+function validateExtractionCandidateRanking(ranking) {
+  expectNonEmptyString(ranking.dataset, "extraction candidate ranking dataset id must be present");
+  expectNonEmptyString(ranking.generatedAt, "extraction candidate ranking generatedAt must be present");
+  expectNonEmptyString(ranking.sourceConfig, "extraction candidate ranking sourceConfig must be present");
+  expectPositiveInteger(ranking.byteRadius, "extraction candidate ranking byteRadius must be positive");
+  expectArray(ranking.globalContextTerms, "extraction candidate ranking globalContextTerms must be an array");
+  expectArray(ranking.unresolvedMarkers, "extraction candidate ranking unresolvedMarkers must be an array");
+  expectArray(ranking.binaryFiles, "extraction candidate ranking binaryFiles must be an array");
+  expectArray(ranking.textFiles, "extraction candidate ranking textFiles must be an array");
+  expectArray(ranking.familyFilter, "extraction candidate ranking familyFilter must be an array");
+  expectRecord(ranking.topCandidate, "extraction candidate ranking topCandidate must be an object");
+  expectArray(ranking.candidates, "extraction candidate ranking candidates must be an array");
+  assert.ok(ranking.candidates.length >= 8, "extraction candidate ranking must preserve the scored candidate set");
+  expectNonEmptyString(ranking.topCandidate.id, "extraction candidate ranking topCandidate.id must be present");
+  expectNonEmptyString(ranking.topCandidate.track, "extraction candidate ranking topCandidate.track must be present");
+  assert.equal(typeof ranking.topCandidate.heuristicScore, "number", "extraction candidate ranking topCandidate.heuristicScore must be numeric");
+  assert.equal(ranking.topCandidate.id, "spend.multiverse-market-owner-family", "extraction candidate ranking topCandidate.id drifted");
+  assert.equal(ranking.topCandidate.track, "spend-planner-from-extracted-data", "extraction candidate ranking topCandidate.track drifted");
+  const shardCandidate = ranking.candidates.find((entry) => entry.track === "shards-and-loop-guardrails");
+  assert.ok(shardCandidate, "extraction candidate ranking must preserve a shard-local candidate");
+  assert.equal(shardCandidate.id, "shards.milestone-owner-family", "extraction candidate ranking top shard candidate drifted");
+  assert.ok(shardCandidate.heuristicScore >= 500, "extraction candidate ranking top shard candidate heuristicScore regressed");
+
+  return {
+    id: "extraction-candidate-ranking",
+    label: "Extraction candidate ranking",
+    classification: "extracted-mechanics",
+    stats: [
+      `${ranking.candidates.length} ranked candidates`,
+      `${ranking.topCandidate.id} top candidate`,
+      `${ranking.topCandidate.heuristicScore} top heuristic score`
+    ]
+  };
+}
+
 function validateTokenShop(tokenShop) {
   expectRecord(tokenShop.source, "token shop source must be an object");
   expectNonEmptyString(tokenShop.source.metadata, "token shop metadata path must be present");
@@ -621,6 +720,47 @@ function validateMultiverseMarketActionShell(shell) {
   };
 }
 
+function validateMultiverseMarketOwnerFamily(family) {
+  expectNonEmptyString(family.generatedAt, "multiverse market owner family generatedAt must be present");
+  expectRecord(family.sources, "multiverse market owner family sources must be an object");
+  ["probe", "metadata", "level0", "validatedRows"].forEach((field) => {
+    expectNonEmptyString(family.sources[field], `multiverse market owner family sources.${field} must be present`);
+  });
+  expectArray(family.ownerAnchors, "multiverse market owner family ownerAnchors must be an array");
+  expectArray(family.costLaneAnchors, "multiverse market owner family costLaneAnchors must be an array");
+  expectRecord(family.currencyBoxRange, "multiverse market owner family currencyBoxRange must be an object");
+  expectArray(family.validatedCurrencyBoxes, "multiverse market owner family validatedCurrencyBoxes must be an array");
+  expectArray(family.sampleBuyHooks, "multiverse market owner family sampleBuyHooks must be an array");
+  expectArray(family.currentBoundary, "multiverse market owner family currentBoundary must be an array");
+
+  ["MultiverseMarket, Assembly-CSharp", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts", "SetInscryptionsDoneText", "Inscryptions"].forEach((name) => {
+    assert.ok(family.ownerAnchors.includes(name), `multiverse market owner family missing ${name}`);
+  });
+  ["ResourceAmountText.InscryptionsDone", "AchievementBar-Inscryptions", "CostBox-InscryptionsDone"].forEach((name) => {
+    assert.ok(family.costLaneAnchors.includes(name), `multiverse market owner family missing ${name}`);
+  });
+  assert.equal(family.currencyBoxRange.start, 1, "multiverse market owner family currencyBoxRange.start drifted");
+  assert.equal(family.currencyBoxRange.end, 110, "multiverse market owner family currencyBoxRange.end drifted");
+  assert.equal(family.currencyBoxRange.count, 110, "multiverse market owner family currencyBoxRange.count drifted");
+  ["IS50CurrencyBox", "IS59CurrencyBox", "IS63CurrencyBox", "IS74CurrencyBox"].forEach((name) => {
+    assert.ok(family.validatedCurrencyBoxes.includes(name), `multiverse market owner family missing ${name}`);
+  });
+  ["BuyIS47", "BuyIS64", "BuyIS73", "BuyIS105"].forEach((name) => {
+    assert.ok(family.sampleBuyHooks.includes(name), `multiverse market owner family missing ${name}`);
+  });
+
+  return {
+    id: "multiverse-market-owner-family",
+    label: "Multiverse market owner family",
+    classification: "extracted-mechanics",
+    stats: [
+      `${family.ownerAnchors.length} owner-family anchors`,
+      `${family.currencyBoxRange.count} IS*CurrencyBox shells`,
+      "MultiverseMarket owner-family and cost-lane shell stay separate from save recovery"
+    ]
+  };
+}
+
 function validateTokenShopOwnerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token shop owner shell generatedAt must be present");
   expectRecord(shell.sources, "token shop owner shell sources must be an object");
@@ -803,7 +943,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 18, "bundled dataset contract must track the eighteen shipped dataset groups");
+  assert.equal(contract.datasets.length, 22, "bundled dataset contract must track the twenty-two shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -864,6 +1004,7 @@ export async function validateBundledDatasets() {
   const tokenShopCostLanes = await readJson("../../data/token-shop-cost-lanes.json");
   const spendActionLaneClues = await readJson("../../data/spend-action-lane-clues.json");
   const multiverseMarketActionShell = await readJson("../../data/multiverse-market-action-shell.json");
+  const multiverseMarketOwnerFamily = await readJson("../../data/multiverse-market-owner-family.json");
   const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
@@ -887,6 +1028,7 @@ export async function validateBundledDatasets() {
     validateTokenShopCostLanes(tokenShopCostLanes),
     validateSpendActionLaneClues(spendActionLaneClues),
     validateMultiverseMarketActionShell(multiverseMarketActionShell),
+    validateMultiverseMarketOwnerFamily(multiverseMarketOwnerFamily),
     validateTokenShopOwnerShell(tokenShopOwnerShell),
     validateTokenShopSaveBoundary(tokenShopSaveBoundary),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),

@@ -162,6 +162,14 @@
       ]
     },
     {
+      "id": "multiverse-market-owner-family",
+      "label": "Multiverse market owner family",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-owner-family.json"
+      ]
+    },
+    {
       "id": "token-shop-owner-shell",
       "label": "Token shop owner shell",
       "classification": "extracted-mechanics",

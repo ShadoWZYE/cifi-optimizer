@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "probe": "tmp-multiverse-owner-family-probe.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
+    "validatedRows": "data/multiverse-market-values.json"
+  },
+  "ownerAnchors": [
+    "MultiverseMarket, Assembly-CSharp",
+    "TextHandlerMarkets",
+    "SetAllChrystosEmporiumTexts",
+    "SetInscryptionsDoneText",
+    "Inscryptions"
+  ],
+  "costLaneAnchors": [
+    "ResourceAmountText.InscryptionsDone",
+    "AchievementBar-Inscryptions",
+    "CostBox-InscryptionsDone"
+  ],
+  "currencyBoxRange": {
+    "start": 1,
+    "end": 110,
+    "count": 110
+  },
+  "validatedCurrencyBoxes": [
+    "IS50CurrencyBox",
+    "IS59CurrencyBox",
+    "IS63CurrencyBox",
+    "IS74CurrencyBox"
+  ],
+  "sampleBuyHooks": [
+    "BuyIS47",
+    "BuyIS64",
+    "BuyIS73",
+    "BuyIS105"
+  ],
+  "currentBoundary": [
+    "The checked owner-family shell now preserves MultiverseMarket, Inscryptions, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and SetInscryptionsDoneText as one local owner and cost-lane family.",
+    "The same checked shell also preserves player-facing cost-lane anchors ResourceAmountText.InscryptionsDone, AchievementBar-Inscryptions, and CostBox-InscryptionsDone plus a broader IS1CurrencyBox through IS110CurrencyBox UI shell.",
+    "This is enough to keep the MultiverseMarket owner-family and cost-lane shell grounded for future mapping work, but not enough to recover player-owned Inscryptions balance fields, current row levels, or the declaring save model."
+  ]
+}

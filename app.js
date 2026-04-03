@@ -380,7 +380,7 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
@@ -400,6 +400,7 @@ async function bootstrap() {
     fetchJson("./data/token-shop-cost-lanes.json"),
     fetchJson("./data/spend-action-lane-clues.json"),
     fetchJson("./data/multiverse-market-action-shell.json"),
+    fetchJson("./data/multiverse-market-owner-family.json"),
     fetchJson("./data/token-shop-owner-shell.json"),
     fetchJson("./data/token-shop-save-boundary.json"),
     fetchJson("./data/multiverse-market-save-boundary.json"),
@@ -434,6 +435,7 @@ async function bootstrap() {
     tokenShopCostLanes,
     spendActionLaneClues,
     multiverseMarketActionShell,
+    multiverseMarketOwnerFamily,
     tokenShopOwnerShell,
     tokenShopSaveBoundary,
     multiverseMarketSaveBoundary,
@@ -1502,6 +1504,7 @@ function renderSpendSaveSideBoundary() {
   const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenBankFormulaBoundary);
   const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(multiverseMarketRangeBoundary);
   const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(multiverseMarketRowTextCoverage);
+  const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(state.extractedMechanics?.multiverseMarketOwnerFamily);
   return `
     <section class="meta-stack">
       <div class="panel-header">
@@ -1538,6 +1541,11 @@ function renderSpendSaveSideBoundary() {
           <strong>Validated row text coverage</strong>
           <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? `TextHandlerMarkets now preserves ${multiverseMarketRowTextSummary.coveredCount} direct SetIS*CostText hooks for validated rows ${multiverseMarketRowTextSummary.validatedRangeLabel}.` : "Validated-row cost-text coverage is incomplete in the checked-in text-coverage bundle."}</p>
           <p class="meta">${multiverseMarketRowTextSummary.hasBuyHookSamples ? `Sample buy hooks such as ${multiverseMarketRowTextSummary.firstBuyHook} and ${multiverseMarketRowTextSummary.lastBuyHook} are also present in the same checked local coverage path.` : "Validated-row buy-hook samples are incomplete in the checked-in text-coverage bundle."}</p>
+        </article>
+        <article class="validation-card ${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? "pass" : "warn"}">
+          <strong>MultiverseMarket owner family</strong>
+          <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? `${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, and ${multiverseMarketOwnerFamilySummary.batcher} now appear in one checked owner-family shell.` : "MultiverseMarket owner-family clues are incomplete in the checked-in shell bundle."}</p>
+          <p class="meta">${multiverseMarketOwnerFamilySummary.hasCurrencyShell ? `The same shell also preserves ${multiverseMarketOwnerFamilySummary.resourceText}, ${multiverseMarketOwnerFamilySummary.achievementBar}, ${multiverseMarketOwnerFamilySummary.costBox}, and ${multiverseMarketOwnerFamilySummary.currencyRangeLabel}.` : "The checked owner-family shell does not yet preserve the expected Inscryptions cost-lane UI anchors."}</p>
         </article>
         <article class="validation-card ${dailyTokeniumSummary.hasOwnerFamilyClues ? "pass" : "warn"}">
           <strong>Daily Tokenium owner family</strong>
@@ -1798,6 +1806,7 @@ function renderResearchTrackSupport(track) {
     const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(state.extractedMechanics?.tokenShopCostLanes);
     const spendActionLaneSummary = getSpendActionLaneSummary(state.extractedMechanics?.spendActionLaneClues);
     const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(state.extractedMechanics?.multiverseMarketActionShell);
+    const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(state.extractedMechanics?.multiverseMarketOwnerFamily);
     const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(state.extractedMechanics?.tokenShopOwnerShell);
     const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(state.extractedMechanics?.tokenShopSaveBoundary);
     const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(state.extractedMechanics?.multiverseMarketSaveBoundary);
@@ -1830,6 +1839,9 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? "That is row-label coverage for the validated block, not saved-state coverage, so it should not be used as proof of player-owned current levels." : "Validated-row text coverage is incomplete, so row-label support remains partially grounded."}</p>
         <p class="meta">${multiverseMarketActionShellSummary.hasActionShell ? `The same checked action shell context reaches ${multiverseMarketActionShellSummary.buyRangeLabel} plus ${multiverseMarketActionShellSummary.costTextRangeLabel}, while only ${multiverseMarketActionShellSummary.validatedRangeLabel} stays numerically validated.` : "MultiverseMarket action-shell coverage is not available in this build."}</p>
         <p class="meta">${multiverseMarketActionShellSummary.hasActionShell ? "That broader action shell is useful for mapping and UI recovery, but it should not be promoted as full numeric validation or saved-state coverage." : "The broader MultiverseMarket action shell is incomplete, so validated-row behavior should stay the narrower implementation boundary."}</p>
+        <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? `MultiverseMarket owner-family clues now preserve ${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, ${multiverseMarketOwnerFamilySummary.batcher}, and ${multiverseMarketOwnerFamilySummary.costBox}.` : "MultiverseMarket owner-family clues are not available in this build."}</p>
+        <p class="meta">${multiverseMarketOwnerFamilySummary.hasCurrencyShell ? `The same checked shell also preserves ${multiverseMarketOwnerFamilySummary.resourceText}, ${multiverseMarketOwnerFamilySummary.achievementBar}, and ${multiverseMarketOwnerFamilySummary.currencyRangeLabel}, with validated samples such as ${multiverseMarketOwnerFamilySummary.firstValidatedCurrencyBox} and ${multiverseMarketOwnerFamilySummary.lastValidatedCurrencyBox}.` : "MultiverseMarket cost-lane UI shell clues are incomplete in this build."}</p>
+        <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? "That is enough to keep the Emporium owner-family and Inscryptions cost-lane shell grounded, but not enough to recover player-owned balance fields or current row levels." : "The current build does not yet preserve a grounded MultiverseMarket owner-family shell."}</p>
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary still keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}.` : "MultiverseMarket save-boundary clues are not available in this build."}</p>
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? "That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet." : "The current build does not yet preserve a clean separation boundary between MultiverseMarket action-shell recovery and save-family recovery."}</p>
         <p class="meta">This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs.</p>
@@ -2651,6 +2663,8 @@ function renderShardGroundingBoundary() {
   const assetGrounding = state.shardGrounding?.assetGrounding;
   const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers) ? assetGrounding.groundedShellIdentifiers.slice(0, 5) : [];
   const blockedUses = Array.isArray(assetGrounding?.blockedUses) ? assetGrounding.blockedUses : [];
+  const repoWideCandidate = getTopExtractionCandidate();
+  const shardCandidate = getTopExtractionCandidate("shards-and-loop-guardrails");
   return `
     <div class="page-grid">
       <article class="snapshot-card">
@@ -2682,6 +2696,19 @@ function renderShardGroundingBoundary() {
           <p class="meta">Shipped-game owner mapping for shard milestones themselves.</p>
           <p class="meta">Asset-grounded milestone labels, bonus tables, unlock lists, and per-level shard costs.</p>
           <p class="meta">A single authoritative milestone list across conflicting community snapshots.</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Extraction ranking</span>
+        <strong>Repo-wide default unknown candidate</strong>
+        <div class="meta-stack">
+          <p class="meta">${repoWideCandidate ? `<code>${escapeHtml(repoWideCandidate.id)}</code> leads the current repo-wide unknown ranking.` : "Repo-wide extraction ranking is unavailable in this build."}</p>
+          <p class="meta">${repoWideCandidate ? `Why next: ${escapeHtml(repoWideCandidate.label)} currently has the strongest unresolved cross-track grounding footprint.` : "Why next: no repo-wide candidate summary is available yet."}</p>
+        </div>
+        <div class="meta-stack">
+          <p class="snapshot-title">Top PR2-local shard candidate</p>
+          <p class="meta">${shardCandidate ? `<code>${escapeHtml(shardCandidate.id)}</code> is the current shard-local extraction target.` : "No shard-local extraction candidate is available in this build."}</p>
+          <p class="meta">${shardCandidate ? `Why next: ${escapeHtml(shardCandidate.label)} is the best current shard-specific path toward owner mapping.` : "Why next: shard-local extraction ranking is not available."}</p>
         </div>
       </article>
     </div>
@@ -2858,6 +2885,7 @@ function buildApkGroundingValidationCases() {
   const tokenShopCostLanes = state.extractedMechanics?.tokenShopCostLanes;
   const spendActionLaneClues = state.extractedMechanics?.spendActionLaneClues;
   const multiverseMarketActionShell = state.extractedMechanics?.multiverseMarketActionShell;
+  const multiverseMarketOwnerFamily = state.extractedMechanics?.multiverseMarketOwnerFamily;
   const tokenShopOwnerShell = state.extractedMechanics?.tokenShopOwnerShell;
   const tokenShopSaveBoundary = state.extractedMechanics?.tokenShopSaveBoundary;
   const multiverseMarketSaveBoundary = state.extractedMechanics?.multiverseMarketSaveBoundary;
@@ -3153,6 +3181,19 @@ function buildApkGroundingValidationCases() {
     });
   }
 
+  if (multiverseMarketOwnerFamily) {
+    const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(multiverseMarketOwnerFamily);
+    cases.push({
+      title: "MultiverseMarket owner family",
+      expected: "MultiverseMarket, Inscryptions, and IS1-110 CurrencyBox shell preserved without implying saved-state ownership",
+      actual: multiverseMarketOwnerFamilySummary.hasOwnerFamily
+        ? `${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, and ${multiverseMarketOwnerFamilySummary.currencyRangeLabel} preserved with ${multiverseMarketOwnerFamilySummary.firstValidatedCurrencyBox} through ${multiverseMarketOwnerFamilySummary.lastValidatedCurrencyBox} samples`
+        : "Missing MultiverseMarket owner-family shell",
+      pass: multiverseMarketOwnerFamilySummary.hasOwnerFamily && multiverseMarketOwnerFamilySummary.hasCurrencyShell,
+      scope: "APK"
+    });
+  }
+
   if (multiverseMarketSaveBoundary) {
     const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(multiverseMarketSaveBoundary);
     cases.push({
@@ -3410,6 +3451,44 @@ function getMultiverseMarketActionShellSummary(shell) {
     buyRangeLabel: "BuyIS1-110",
     costTextRangeLabel: "SetIS1-110CostText",
     validatedRangeLabel: validatedBuyHookRanges.join(" and ") || "50-59 and 63-74"
+  };
+}
+
+function getMultiverseMarketOwnerFamilySummary(family) {
+  const ownerAnchors = Array.isArray(family?.ownerAnchors) ? family.ownerAnchors : [];
+  const costLaneAnchors = Array.isArray(family?.costLaneAnchors) ? family.costLaneAnchors : [];
+  const validatedCurrencyBoxes = Array.isArray(family?.validatedCurrencyBoxes) ? family.validatedCurrencyBoxes : [];
+  const sampleBuyHooks = Array.isArray(family?.sampleBuyHooks) ? family.sampleBuyHooks : [];
+  const currencyBoxRange = typeof family?.currencyBoxRange === "object" && family.currencyBoxRange ? family.currencyBoxRange : {};
+
+  return {
+    hasOwnerFamily:
+      ownerAnchors.includes("MultiverseMarket, Assembly-CSharp")
+      && ownerAnchors.includes("TextHandlerMarkets")
+      && ownerAnchors.includes("SetAllChrystosEmporiumTexts")
+      && ownerAnchors.includes("SetInscryptionsDoneText")
+      && ownerAnchors.includes("Inscryptions")
+      && costLaneAnchors.includes("ResourceAmountText.InscryptionsDone")
+      && costLaneAnchors.includes("AchievementBar-Inscryptions")
+      && costLaneAnchors.includes("CostBox-InscryptionsDone")
+      && currencyBoxRange.start === 1
+      && currencyBoxRange.end === 110
+      && currencyBoxRange.count === 110
+      && sampleBuyHooks.includes("BuyIS64")
+      && sampleBuyHooks.includes("BuyIS105"),
+    hasCurrencyShell:
+      validatedCurrencyBoxes.includes("IS50CurrencyBox")
+      && validatedCurrencyBoxes.includes("IS74CurrencyBox"),
+    ownerAnchor: "MultiverseMarket",
+    inscryptionsLabel: "Inscryptions",
+    textHandler: "TextHandlerMarkets",
+    batcher: "SetAllChrystosEmporiumTexts",
+    resourceText: "ResourceAmountText.InscryptionsDone",
+    achievementBar: "AchievementBar-Inscryptions",
+    costBox: "CostBox-InscryptionsDone",
+    currencyRangeLabel: "IS1-110 CurrencyBox shell",
+    firstValidatedCurrencyBox: "IS50CurrencyBox",
+    lastValidatedCurrencyBox: "IS74CurrencyBox"
   };
 }
 
