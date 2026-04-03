@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "validatedRows": "data/multiverse-market-values.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json"
+  },
+  "validatedRowIds": [
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+  ],
+  "validatedRowRanges": [
+    "50-59",
+    "63-74"
+  ],
+  "metadataIsLevels": [
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110
+  ],
+  "metadataIsRangeLabel": "IS99Level through IS110Level",
+  "overlapIds": [],
+  "currentBoundary": [
+    "The checked-in validated MultiverseMarket row block currently covers ids 50-59 and 63-74.",
+    "The checked-in save-side metadata neighborhood currently recovers IS99Level through IS110Level beside InscryptionsDone.",
+    "There is no direct overlap between the recovered save-side IS*Level run and the currently validated market row block.",
+    "This is enough to block any assumption that the current metadata run explains owned-state inputs for the validated rows."
+  ]
+}

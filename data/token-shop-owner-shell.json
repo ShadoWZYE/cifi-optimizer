@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "probe": "tmp-token-shop-owner-shell-probe.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0"
+  },
+  "ownerAnchors": [
+    "TokenShop",
+    "InitializeTokenShop",
+    "SetAllTokenShopTexts"
+  ],
+  "tokenBankMethods": [
+    "get_TokenBankCap",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens",
+    "ClaimBankedTokens",
+    "SetBankFill"
+  ],
+  "notificationHooks": [
+    "CheckTokenClaimNotification",
+    "TokenShopButtonNotification",
+    "BankedDescriptionTextIncrease"
+  ],
+  "adjacentDeviceHooks": [
+    "BuyAutoTokenClicker",
+    "BuyAutoDiamondClicker",
+    "BuyChestSpeedster"
+  ],
+  "uiShells": [
+    "TokenBankDescriptionText",
+    "TokenShopCanvas",
+    "TokenShopMenu",
+    "TokenShopOverlay",
+    "TokenShopRecoloring"
+  ],
+  "sourcePresence": {
+    "metadata": {
+      "TokenShop": 1,
+      "get_TokenBankCap": 1,
+      "get_ClaimableBankTokens": 1,
+      "IncreaseBankedTokens": 1,
+      "ClaimBankedTokens": 1,
+      "CheckTokenClaimNotification": 1,
+      "TokenShopButtonNotification": 1,
+      "BankedDescriptionTextIncrease": 1,
+      "BuyAutoTokenClicker": 1,
+      "BuyAutoDiamondClicker": 1,
+      "BuyChestSpeedster": 1
+    },
+    "level0": {
+      "TokenShop": 1,
+      "ClaimBankedTokens": 1,
+      "BankedDescriptionTextIncrease": 1,
+      "BuyAutoTokenClicker": 1,
+      "BuyAutoDiamondClicker": 1,
+      "BuyChestSpeedster": 1
+    }
+  },
+  "currentBoundary": [
+    "The checked APK and Unity probe now preserves a local TokenShop owner shell through TokenShop, InitializeTokenShop, SetAllTokenShopTexts, token-bank controller methods, and nearby TokenShopButtonNotification or CheckTokenClaimNotification hooks.",
+    "The same owner shell also keeps BuyAutoTokenClicker, BuyAutoDiamondClicker, and BuyChestSpeedster adjacent to TokenShop instead of mixing them into token-bank saved-state truth.",
+    "This is enough to preserve TokenShop-side ownership and notification boundaries in repo-local grounding, but not enough to recover player-owned bank values or the declaring save model behind those values."
+  ]
+}

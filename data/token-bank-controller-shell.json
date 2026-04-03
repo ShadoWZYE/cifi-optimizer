@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "probe": "tmp-token-bank-formula-probe.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0"
+  },
+  "controllerAnchors": [
+    "TokenShop",
+    "ClaimBankedTokens",
+    "SetBankFill",
+    "BankFill",
+    "TokenBankDescriptionText",
+    "CheckTokenClaimNotification",
+    "TokenShopButtonNotification"
+  ],
+  "adjacentControllerMethods": [
+    "get_TokenBankCap",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens"
+  ],
+  "sourcePresence": {
+    "metadata": {
+      "TokenShop": 1,
+      "ClaimBankedTokens": 1,
+      "SetBankFill": 1,
+      "BankFill": 1,
+      "TokenBankDescriptionText": 1,
+      "CheckTokenClaimNotification": 1,
+      "TokenShopButtonNotification": 1,
+      "get_TokenBankCap": 1,
+      "get_ClaimableBankTokens": 1,
+      "IncreaseBankedTokens": 1
+    },
+    "level0": {
+      "ClaimBankedTokens": 1,
+      "BankedDescriptionTextIncrease": 1
+    }
+  },
+  "currentBoundary": [
+    "The checked APK probe preserves a narrow token-bank controller shell around ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, CheckTokenClaimNotification, and TokenShopButtonNotification inside the broader TokenShop owner surface.",
+    "The same probe also keeps get_TokenBankCap, get_ClaimableBankTokens, and IncreaseBankedTokens adjacent to that controller shell instead of leaving them as disconnected symbols.",
+    "This is enough to preserve a repo-local token-bank controller shell for future mapping work, but not enough to recover saved bank values or formula ownership."
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "actionShellProbe": "tmp-multiverse-row-text-probe.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0"
+  },
+  "actionShellTermsChecked": [
+    "TextHandlerMarkets",
+    "SetAllChrystosEmporiumTexts",
+    "SetInscryptionsDoneText"
+  ],
+  "saveFamilyTermsChecked": [
+    "PlayerProfileData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "CloudSavePlayerProfile"
+  ],
+  "probeResults": {
+    "actionShellWithSaveOverlapCount": 0,
+    "metadataNeighborhoodHasActionTerms": true,
+    "metadataNeighborhoodHasSaveTerms": true,
+    "metadataProbeHasSaveTerms": false,
+    "level0ProbeHasSaveTerms": false
+  },
+  "currentBoundary": [
+    "The checked MultiverseMarket action-shell probe now preserves TextHandlerMarkets, SetAllChrystosEmporiumTexts, and SetInscryptionsDoneText while separately confirming zero direct overlap with the current PlayerProfileData or CloudSavePlayerProfile save-family clues.",
+    "The checked metadata-neighborhood dataset still preserves both the action-side anchors and the save-family anchors, but the narrowed action-shell probe itself does not recover save-family terms in either global-metadata.dat action contexts or level0.",
+    "This is enough to keep the MultiverseMarket action shell and save-family recovery separated in repo-local grounding, but not enough to recover declaring save ownership or player-owned row levels."
+  ]
+}

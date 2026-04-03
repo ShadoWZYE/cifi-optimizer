@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "probe": "tmp-multiverse-row-text-probe.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "validatedRows": "data/multiverse-market-values.json"
+  },
+  "textHandlerAnchors": [
+    "TextHandlerMarkets",
+    "SetAllChrystosEmporiumTexts"
+  ],
+  "contextDerivedBuyHookRange": {
+    "start": 1,
+    "end": 110,
+    "count": 110
+  },
+  "contextDerivedCostTextRange": {
+    "start": 1,
+    "end": 110,
+    "count": 110
+  },
+  "validatedBuyHookRanges": [
+    "50-59",
+    "63-74"
+  ],
+  "validatedBuyHooks": [
+    "BuyIS50",
+    "BuyIS51",
+    "BuyIS52",
+    "BuyIS53",
+    "BuyIS54",
+    "BuyIS55",
+    "BuyIS56",
+    "BuyIS57",
+    "BuyIS58",
+    "BuyIS59",
+    "BuyIS63",
+    "BuyIS64",
+    "BuyIS65",
+    "BuyIS66",
+    "BuyIS67",
+    "BuyIS68",
+    "BuyIS69",
+    "BuyIS70",
+    "BuyIS71",
+    "BuyIS72",
+    "BuyIS73",
+    "BuyIS74"
+  ],
+  "validatedCostTexts": [
+    "SetIS50CostText",
+    "SetIS51CostText",
+    "SetIS52CostText",
+    "SetIS53CostText",
+    "SetIS54CostText",
+    "SetIS55CostText",
+    "SetIS56CostText",
+    "SetIS57CostText",
+    "SetIS58CostText",
+    "SetIS59CostText",
+    "SetIS63CostText",
+    "SetIS64CostText",
+    "SetIS65CostText",
+    "SetIS66CostText",
+    "SetIS67CostText",
+    "SetIS68CostText",
+    "SetIS69CostText",
+    "SetIS70CostText",
+    "SetIS71CostText",
+    "SetIS72CostText",
+    "SetIS73CostText",
+    "SetIS74CostText"
+  ],
+  "currentBoundary": [
+    "The checked APK probe preserves a broader TextHandlerMarkets or SetAllChrystosEmporiumTexts action shell that contextually reaches BuyIS1 through BuyIS110 and SetIS1CostText through SetIS110CostText.",
+    "The currently validated MultiverseMarket numeric row block still only covers rows 50-59 and 63-74 inside that broader action shell.",
+    "This is enough to preserve a grounded action-shell boundary for future mapping work, but not enough to treat the entire 1-110 action shell as numerically validated or saved-state mapped."
+  ]
+}

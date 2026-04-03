@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
+    "probe": "tmp-token-bank-state-probe.json"
+  },
+  "tokenShopMethods": [
+    "get_TokenBankCap",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens",
+    "ClaimBankedTokens",
+    "CheckTokenClaimNotification",
+    "SetBankFill"
+  ],
+  "tokenShopControllerRefs": [
+    "BankFill",
+    "TokenBankDescriptionText"
+  ],
+  "displayOrHandlerClues": [
+    "BigStatisticPrefab.TokenBankCap",
+    "TextHandlerLoopMods",
+    "SetLM244BonusText"
+  ],
+  "derivedOutputs": [
+    "get_FinalTokenBankFillSpeed",
+    "set_FinalTokenBankFillSpeed",
+    "<FinalTokenBankFillSpeed>k__BackingField",
+    "FinalTokenBankFillSpeed"
+  ],
+  "currentBoundary": [
+    "TokenShop is the strongest controller-side owner for token-bank cap, claimable, fill, and claim behavior.",
+    "BigStatisticPrefab.TokenBankCap is a separate statistic-display shell for bank-cap presentation.",
+    "TextHandlerLoopMods and SetLM244BonusText are still presentation-side daily-tokenium hooks, not recovered gameplay owners.",
+    "This is enough to ground the controller or display split, but not enough to recover saved-state fields or final formula owners."
+  ]
+}

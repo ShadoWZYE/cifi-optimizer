@@ -164,6 +164,614 @@ function validateMultiverseMarket(multiverseMarket) {
   };
 }
 
+function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
+  expectNonEmptyString(neighborhood.metadata, "multiverse metadata neighborhood path must be present");
+  expectPositiveInteger(neighborhood.anchor_count, "multiverse metadata neighborhood anchor_count must be positive");
+  expectPositiveInteger(neighborhood.context, "multiverse metadata neighborhood context must be positive");
+  expectArray(neighborhood.results, "multiverse metadata neighborhood results must be an array");
+  assert.ok(neighborhood.results.length >= 7, "multiverse metadata neighborhood should preserve the narrowed anchor set");
+
+  const anchors = neighborhood.results.map((entry) => entry.anchor);
+  ["CloudSavePlayerProfile", "PlayerProfileData", "FillPlayerProfileData", "GetPlayerProfileData", "InscryptionsDone", "SetAllChrystosEmporiumTexts", "Mech1Unlocked"].forEach((anchor) => {
+    assert.ok(anchors.includes(anchor), `multiverse metadata neighborhood missing ${anchor} anchor`);
+  });
+
+  const cloudSaveMatches = neighborhood.results.find((entry) => entry.anchor === "CloudSavePlayerProfile")?.matches ?? [];
+  const cloudSaveStrings = cloudSaveMatches.flatMap((entry) => [
+    entry.match_value,
+    ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
+  ]);
+  assert.ok(
+    cloudSaveStrings.some((value) => String(value).includes("CloudSavePlayerProfile")),
+    "multiverse metadata neighborhood must preserve CloudSavePlayerProfile clues"
+  );
+  assert.ok(
+    cloudSaveStrings.some((value) => String(value).includes("GetPlayerProfileInfo")),
+    "multiverse metadata neighborhood must preserve GetPlayerProfileInfo clues"
+  );
+
+  const playerProfileMatches = neighborhood.results.find((entry) => entry.anchor === "PlayerProfileData")?.matches ?? [];
+  const playerProfileStrings = playerProfileMatches.flatMap((entry) => [
+    entry.match_value,
+    ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
+  ]);
+  assert.ok(
+    playerProfileStrings.some((value) => String(value).includes("PlayerProfileData.cs")),
+    "multiverse metadata neighborhood must preserve PlayerProfileData.cs path clues"
+  );
+  assert.ok(
+    playerProfileStrings.some((value) => String(value).includes("GetPlayerProfileData")),
+    "multiverse metadata neighborhood must preserve GetPlayerProfileData clues"
+  );
+  assert.ok(
+    playerProfileStrings.some((value) => String(value).includes("FillPlayerProfileData")),
+    "multiverse metadata neighborhood must preserve FillPlayerProfileData clues"
+  );
+
+  const inscryptionsMatches = neighborhood.results.find((entry) => entry.anchor === "InscryptionsDone")?.matches ?? [];
+  const inscryptionsStrings = inscryptionsMatches.flatMap((entry) => [
+    entry.match_value,
+    ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
+  ]);
+  assert.ok(
+    inscryptionsStrings.some((value) => String(value).includes("InscryptionsDone")),
+    "multiverse metadata neighborhood must preserve InscryptionsDone clues"
+  );
+  assert.ok(
+    inscryptionsStrings.some((value) => String(value).includes("EsotericR1Trades")),
+    "multiverse metadata neighborhood must preserve EsotericR1Trades clues"
+  );
+  assert.ok(
+    inscryptionsStrings.some((value) => String(value).includes("SetAllChrystosEmporiumTexts")),
+    "multiverse metadata neighborhood must preserve SetAllChrystosEmporiumTexts clues"
+  );
+
+  const mechMatches = neighborhood.results.find((entry) => entry.anchor === "Mech1Unlocked")?.matches ?? [];
+  const mechStrings = mechMatches.flatMap((entry) => [
+    entry.match_value,
+    ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
+  ]);
+  assert.ok(
+    mechStrings.some((value) => String(value).includes("Mech1Unlocked")),
+    "multiverse metadata neighborhood must preserve Mech1Unlocked clues"
+  );
+
+  return {
+    id: "multiverse-market-metadata-neighborhood",
+    label: "Multiverse market metadata neighborhood",
+    classification: "extracted-mechanics",
+    stats: [
+      `${neighborhood.anchor_count} probe anchors`,
+      `${neighborhood.results.length} tracked anchor groups`,
+      "CloudSavePlayerProfile, PlayerProfileData, and InscryptionsDone save-side clues"
+    ]
+  };
+}
+
+function validateTokeniumNamingClues(clues) {
+  expectNonEmptyString(clues.generatedAt, "tokenium naming clues generatedAt must be present");
+  expectRecord(clues.sources, "tokenium naming clues sources must be an object");
+  expectNonEmptyString(clues.sources.metadata, "tokenium naming clues metadata path must be present");
+  expectNonEmptyString(clues.sources.level0, "tokenium naming clues level0 path must be present");
+  expectArray(clues.sources.assetNames, "tokenium naming clues sources.assetNames must be an array");
+  expectRecord(clues.assetNames, "tokenium naming clues assetNames must be an object");
+  expectArray(clues.assetNames.resourceIcons, "tokenium naming clues resourceIcons must be an array");
+  expectArray(clues.assetNames.academySprites, "tokenium naming clues academySprites must be an array");
+  expectArray(clues.level0Shells, "tokenium naming clues level0Shells must be an array");
+  expectArray(clues.metadataStrings, "tokenium naming clues metadataStrings must be an array");
+  expectArray(clues.currentBoundary, "tokenium naming clues currentBoundary must be an array");
+
+  ["Resource_Tokenium", "Resource_Tokenium_Cap_0"].forEach((name) => {
+    assert.ok(clues.assetNames.resourceIcons.includes(name), `tokenium naming clues missing ${name}`);
+  });
+  assert.ok(clues.assetNames.academySprites.includes("Aca.Tokenium553"), "tokenium naming clues missing Aca.Tokenium553");
+  ["AvailableTokensBar", "CostBox-Tokens", "CostBox-Tokenium"].forEach((name) => {
+    assert.ok(clues.level0Shells.includes(name), `tokenium naming clues missing ${name}`);
+  });
+  ["Daily Tokenium (from blue farm missions)", "Mission Materials", "INCREASE TOKENS PER TOKENIUM-553"].forEach((value) => {
+    assert.ok(clues.metadataStrings.includes(value), `tokenium naming clues missing ${value}`);
+  });
+
+  return {
+    id: "tokenium-naming-clues",
+    label: "Tokenium naming clues",
+    classification: "extracted-mechanics",
+    stats: [
+      `${clues.assetNames.resourceIcons.length} tokenium icon names`,
+      `${clues.level0Shells.length} token or tokenium cost shells`,
+      "Tokenium, Tokenium553, and CostBox naming clues"
+    ]
+  };
+}
+
+function validateTokenBankStateClues(clues) {
+  expectNonEmptyString(clues.generatedAt, "token-bank state clues generatedAt must be present");
+  expectRecord(clues.sources, "token-bank state clues sources must be an object");
+  expectNonEmptyString(clues.sources.metadata, "token-bank state clues metadata path must be present");
+  expectNonEmptyString(clues.sources.level0, "token-bank state clues level0 path must be present");
+  expectNonEmptyString(clues.sources.probe, "token-bank state clues probe path must be present");
+  expectArray(clues.tokenShopMethods, "token-bank state clues tokenShopMethods must be an array");
+  expectArray(clues.tokenShopControllerRefs, "token-bank state clues tokenShopControllerRefs must be an array");
+  expectArray(clues.displayOrHandlerClues, "token-bank state clues displayOrHandlerClues must be an array");
+  expectArray(clues.derivedOutputs, "token-bank state clues derivedOutputs must be an array");
+  expectArray(clues.currentBoundary, "token-bank state clues currentBoundary must be an array");
+
+  ["get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "SetBankFill"].forEach((name) => {
+    assert.ok(clues.tokenShopMethods.includes(name), `token-bank state clues missing ${name}`);
+  });
+  ["BankFill", "TokenBankDescriptionText"].forEach((name) => {
+    assert.ok(clues.tokenShopControllerRefs.includes(name), `token-bank state clues missing ${name}`);
+  });
+  ["BigStatisticPrefab.TokenBankCap", "TextHandlerLoopMods", "SetLM244BonusText"].forEach((name) => {
+    assert.ok(clues.displayOrHandlerClues.includes(name), `token-bank state clues missing ${name}`);
+  });
+  ["FinalTokenBankFillSpeed", "<FinalTokenBankFillSpeed>k__BackingField"].forEach((name) => {
+    assert.ok(clues.derivedOutputs.includes(name), `token-bank state clues missing ${name}`);
+  });
+
+  return {
+    id: "token-bank-state-clues",
+    label: "Token-bank state clues",
+    classification: "extracted-mechanics",
+    stats: [
+      `${clues.tokenShopMethods.length} token-bank controller methods`,
+      `${clues.displayOrHandlerClues.length} display or handler clues`,
+      "TokenShop, TokenBankCap, and LM244 split clues"
+    ]
+  };
+}
+
+function validateDailyTokeniumLaneClues(clues) {
+  expectNonEmptyString(clues.generatedAt, "daily tokenium lane clues generatedAt must be present");
+  expectRecord(clues.sources, "daily tokenium lane clues sources must be an object");
+  ["metadata", "level0", "iapCatalog", "probe", "academySprite"].forEach((field) => {
+    expectNonEmptyString(clues.sources[field], `daily tokenium lane clues sources.${field} must be present`);
+  });
+  expectArray(clues.ownerFamilyClues, "daily tokenium lane clues ownerFamilyClues must be an array");
+  expectArray(clues.modifierClues, "daily tokenium lane clues modifierClues must be an array");
+  expectArray(clues.premiumModifierClues, "daily tokenium lane clues premiumModifierClues must be an array");
+  expectArray(clues.playerFacingStrings, "daily tokenium lane clues playerFacingStrings must be an array");
+  expectArray(clues.currentBoundary, "daily tokenium lane clues currentBoundary must be an array");
+
+  ["SpaceAcademy", "SpaceAcademyMain", "TextHandlerSpaceAcademy", "FarmMissions"].forEach((name) => {
+    assert.ok(clues.ownerFamilyClues.includes(name), `daily tokenium lane clues missing ${name}`);
+  });
+  ["SetLM244BonusText", "BuyLM244", "FinalDailyTokenBonus", "FinalFragmentsGainedFromFarmMissions"].forEach((name) => {
+    assert.ok(clues.modifierClues.includes(name), `daily tokenium lane clues missing ${name}`);
+  });
+  ["BuyCollectorDevice", "CollectorCapBonus", "CollectorMatsBonus", "SetCollectorDeviceTexts"].forEach((name) => {
+    assert.ok(clues.premiumModifierClues.includes(name), `daily tokenium lane clues missing ${name}`);
+  });
+  [
+    "0 / 2000 Daily Tokenium (from blue farm missions)",
+    "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+    "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+  ].forEach((value) => {
+    assert.ok(clues.playerFacingStrings.includes(value), `daily tokenium lane clues missing ${value}`);
+  });
+
+  return {
+    id: "daily-tokenium-lane-clues",
+    label: "Daily Tokenium lane clues",
+    classification: "extracted-mechanics",
+    stats: [
+      `${clues.ownerFamilyClues.length} academy or mission owner clues`,
+      `${clues.modifierClues.length} lane modifier clues`,
+      "SpaceAcademy, FarmMissions, and Collector pack lane clues"
+    ]
+  };
+}
+
+function validateTokenBankFormulaBoundary(clues) {
+  expectNonEmptyString(clues.generatedAt, "token-bank formula boundary generatedAt must be present");
+  expectRecord(clues.sources, "token-bank formula boundary sources must be an object");
+  ["metadata", "level0", "probe"].forEach((field) => {
+    expectNonEmptyString(clues.sources[field], `token-bank formula boundary sources.${field} must be present`);
+  });
+  expectArray(clues.derivedOutputCluster, "token-bank formula boundary derivedOutputCluster must be an array");
+  expectArray(clues.controllerSideAnchors, "token-bank formula boundary controllerSideAnchors must be an array");
+  expectArray(clues.saveFamilyCluesChecked, "token-bank formula boundary saveFamilyCluesChecked must be an array");
+  expectArray(clues.saveFamilyCluesInDerivedContext, "token-bank formula boundary saveFamilyCluesInDerivedContext must be an array");
+  expectArray(clues.currentBoundary, "token-bank formula boundary currentBoundary must be an array");
+
+  [
+    "get_FinalTokenBankCap",
+    "set_FinalTokenBankCap",
+    "get_FinalTokenBankFillSpeed",
+    "set_FinalTokenBankFillSpeed",
+    "<FinalTokenBankCap>k__BackingField",
+    "<FinalTokenBankFillSpeed>k__BackingField",
+    "FinalTokenBankCap",
+    "FinalTokenBankFillSpeed"
+  ].forEach((name) => {
+    assert.ok(clues.derivedOutputCluster.includes(name), `token-bank formula boundary missing ${name}`);
+  });
+  ["TokenShop", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "SetBankFill"].forEach((name) => {
+    assert.ok(clues.controllerSideAnchors.includes(name), `token-bank formula boundary missing ${name}`);
+  });
+  ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"].forEach((name) => {
+    assert.ok(clues.saveFamilyCluesChecked.includes(name), `token-bank formula boundary missing ${name}`);
+  });
+  assert.equal(
+    clues.saveFamilyCluesInDerivedContext.length,
+    0,
+    "token-bank formula boundary should preserve the current lack of save-family joins in the derived-output context"
+  );
+
+  return {
+    id: "token-bank-formula-boundary",
+    label: "Token-bank formula boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${clues.derivedOutputCluster.length} derived-output symbols`,
+      `${clues.controllerSideAnchors.length} controller-side anchors`,
+      "FinalTokenBank outputs remain separate from checked save-family clues"
+    ]
+  };
+}
+
+function validateMultiverseMarketRangeBoundary(boundary) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market range boundary generatedAt must be present");
+  expectRecord(boundary.sources, "multiverse market range boundary sources must be an object");
+  expectNonEmptyString(boundary.sources.validatedRows, "multiverse market range boundary validatedRows source must be present");
+  expectNonEmptyString(boundary.sources.metadataNeighborhood, "multiverse market range boundary metadataNeighborhood source must be present");
+  expectArray(boundary.validatedRowIds, "multiverse market range boundary validatedRowIds must be an array");
+  expectArray(boundary.validatedRowRanges, "multiverse market range boundary validatedRowRanges must be an array");
+  expectArray(boundary.metadataIsLevels, "multiverse market range boundary metadataIsLevels must be an array");
+  expectNonEmptyString(boundary.metadataIsRangeLabel, "multiverse market range boundary metadataIsRangeLabel must be present");
+  expectArray(boundary.overlapIds, "multiverse market range boundary overlapIds must be an array");
+  expectArray(boundary.currentBoundary, "multiverse market range boundary currentBoundary must be an array");
+
+  assert.deepEqual(boundary.validatedRowRanges, ["50-59", "63-74"], "multiverse market range boundary validatedRowRanges drifted");
+  assert.deepEqual(boundary.metadataIsLevels, [99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110], "multiverse market range boundary metadataIsLevels drifted");
+  assert.equal(boundary.metadataIsRangeLabel, "IS99Level through IS110Level", "multiverse market range boundary metadataIsRangeLabel drifted");
+  assert.equal(boundary.overlapIds.length, 0, "multiverse market range boundary should preserve the current zero-overlap result");
+
+  return {
+    id: "multiverse-market-range-boundary",
+    label: "Multiverse market range boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.validatedRowIds.length} validated row ids`,
+      `${boundary.metadataIsLevels.length} recovered metadata IS levels`,
+      "Validated row block and recovered IS run do not currently overlap"
+    ]
+  };
+}
+
+function validateMultiverseMarketRowTextCoverage(coverage) {
+  expectNonEmptyString(coverage.generatedAt, "multiverse market row text coverage generatedAt must be present");
+  expectRecord(coverage.sources, "multiverse market row text coverage sources must be an object");
+  ["metadata", "level0", "probe", "validatedRows"].forEach((field) => {
+    expectNonEmptyString(coverage.sources[field], `multiverse market row text coverage sources.${field} must be present`);
+  });
+  expectArray(coverage.textHandlerAnchors, "multiverse market row text coverage textHandlerAnchors must be an array");
+  expectArray(coverage.validatedRowCostTexts, "multiverse market row text coverage validatedRowCostTexts must be an array");
+  expectArray(coverage.sampleBuyHooks, "multiverse market row text coverage sampleBuyHooks must be an array");
+  expectArray(coverage.currentBoundary, "multiverse market row text coverage currentBoundary must be an array");
+
+  ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts"].forEach((name) => {
+    assert.ok(coverage.textHandlerAnchors.includes(name), `multiverse market row text coverage missing ${name}`);
+  });
+  ["SetIS50CostText", "SetIS59CostText", "SetIS63CostText", "SetIS74CostText"].forEach((name) => {
+    assert.ok(coverage.validatedRowCostTexts.includes(name), `multiverse market row text coverage missing ${name}`);
+  });
+  assert.equal(coverage.validatedRowCostTexts.length, 22, "multiverse market row text coverage should preserve 22 validated row cost texts");
+  ["BuyIS50", "BuyIS74"].forEach((name) => {
+    assert.ok(coverage.sampleBuyHooks.includes(name), `multiverse market row text coverage missing ${name}`);
+  });
+
+  return {
+    id: "multiverse-market-row-text-coverage",
+    label: "Multiverse market row text coverage",
+    classification: "extracted-mechanics",
+    stats: [
+      `${coverage.validatedRowCostTexts.length} validated row cost texts`,
+      `${coverage.textHandlerAnchors.length} text-handler anchors`,
+      "Validated MultiverseMarket rows now have direct TextHandlerMarkets cost-text coverage"
+    ]
+  };
+}
+
+function validateTokenShopCostLanes(lanes) {
+  expectNonEmptyString(lanes.generatedAt, "token shop cost lanes generatedAt must be present");
+  expectRecord(lanes.sources, "token shop cost lanes sources must be an object");
+  ["tokenShopExtract", "level0", "probe"].forEach((field) => {
+    expectNonEmptyString(lanes.sources[field], `token shop cost lanes sources.${field} must be present`);
+  });
+  expectArray(lanes.tokenSpendGroups, "token shop cost lanes tokenSpendGroups must be an array");
+  expectArray(lanes.dailyTokeniumModifierGroups, "token shop cost lanes dailyTokeniumModifierGroups must be an array");
+  expectArray(lanes.diamondGroups, "token shop cost lanes diamondGroups must be an array");
+  expectArray(lanes.playerFacingClues, "token shop cost lanes playerFacingClues must be an array");
+  expectArray(lanes.currentBoundary, "token shop cost lanes currentBoundary must be an array");
+
+  ["TokenBoost", "TokenBoostT2", "TokenBoostT3", "Tier2Token", "Tier5Token", "MK8TokenBoost"].forEach((name) => {
+    assert.ok(lanes.tokenSpendGroups.includes(name), `token shop cost lanes missing ${name}`);
+  });
+  ["TokenDailiesT2", "TokenDailiesT3"].forEach((name) => {
+    assert.ok(lanes.dailyTokeniumModifierGroups.includes(name), `token shop cost lanes missing ${name}`);
+  });
+  assert.deepEqual(lanes.diamondGroups, ["DiamondBoost"], "token shop cost lanes diamondGroups drifted");
+  ["CostBox-Tokens", "CostBox-Tokenium", "Tokens Booster T1", "Tokens Booster T2", "Mission Materials Booster"].forEach((name) => {
+    assert.ok(lanes.playerFacingClues.includes(name), `token shop cost lanes missing ${name}`);
+  });
+
+  return {
+    id: "token-shop-cost-lanes",
+    label: "Token shop cost lanes",
+    classification: "extracted-mechanics",
+    stats: [
+      `${lanes.tokenSpendGroups.length} token spend groups`,
+      `${lanes.dailyTokeniumModifierGroups.length} Daily Tokenium modifier groups`,
+      "TokenBoost, DiamondBoost, and TokenDailies stay on separate grounded cost lanes"
+    ]
+  };
+}
+
+function validateSpendActionLaneClues(clues) {
+  expectNonEmptyString(clues.generatedAt, "spend action lane clues generatedAt must be present");
+  expectRecord(clues.sources, "spend action lane clues sources must be an object");
+  ["probe", "metadata", "level0", "tokenShopExtract", "iapCatalog"].forEach((field) => {
+    expectNonEmptyString(clues.sources[field], `spend action lane clues sources.${field} must be present`);
+  });
+  expectArray(clues.tokenDirectBuyHooks, "spend action lane clues tokenDirectBuyHooks must be an array");
+  expectArray(clues.tokenHoldHooks, "spend action lane clues tokenHoldHooks must be an array");
+  expectArray(clues.diamondDirectBuyHooks, "spend action lane clues diamondDirectBuyHooks must be an array");
+  expectArray(clues.diamondHoldHooks, "spend action lane clues diamondHoldHooks must be an array");
+  expectArray(clues.dailyTokeniumModifierHooks, "spend action lane clues dailyTokeniumModifierHooks must be an array");
+  expectArray(clues.tokenSupportingShells, "spend action lane clues tokenSupportingShells must be an array");
+  expectArray(clues.dailyTokeniumSupportingShells, "spend action lane clues dailyTokeniumSupportingShells must be an array");
+  expectRecord(clues.searchResults, "spend action lane clues searchResults must be an object");
+  expectRecord(clues.searchResults.metadata, "spend action lane clues searchResults.metadata must be an object");
+  expectRecord(clues.searchResults.level0, "spend action lane clues searchResults.level0 must be an object");
+  expectArray(clues.currentBoundary, "spend action lane clues currentBoundary must be an array");
+
+  ["BuyTokenBoost", "BuyMK1TokenBoost", "BuyMK8TokenBoost"].forEach((name) => {
+    assert.ok(clues.tokenDirectBuyHooks.includes(name), `spend action lane clues missing ${name}`);
+  });
+  ["StartTokenBoostHold", "StopTokenBoostHold"].forEach((name) => {
+    assert.ok(clues.tokenHoldHooks.includes(name), `spend action lane clues missing ${name}`);
+  });
+  assert.deepEqual(clues.diamondDirectBuyHooks, ["BuyDiamondBoost"], "spend action lane clues diamondDirectBuyHooks drifted");
+  ["StartDiamondBoostHold", "StopDiamondBoostHold"].forEach((name) => {
+    assert.ok(clues.diamondHoldHooks.includes(name), `spend action lane clues missing ${name}`);
+  });
+  ["BuyLM244", "BuyCollectorDevice"].forEach((name) => {
+    assert.ok(clues.dailyTokeniumModifierHooks.includes(name), `spend action lane clues missing ${name}`);
+  });
+  assert.ok(clues.tokenSupportingShells.includes("CostBox-Tokens"), "spend action lane clues missing CostBox-Tokens");
+  ["CostBox-Tokenium", "Mission Materials Booster", "COLLECTERS PACK"].forEach((name) => {
+    assert.ok(clues.dailyTokeniumSupportingShells.includes(name), `spend action lane clues missing ${name}`);
+  });
+  assert.ok(clues.searchResults.metadata.BuyTokenBoost > 0, "spend action lane clues must preserve metadata BuyTokenBoost matches");
+  assert.ok(clues.searchResults.metadata.BuyDiamondBoost > 0, "spend action lane clues must preserve metadata BuyDiamondBoost matches");
+  assert.ok(clues.searchResults.metadata.BuyLM244 > 0, "spend action lane clues must preserve metadata BuyLM244 matches");
+  assert.ok(clues.searchResults.metadata.BuyCollectorDevice > 0, "spend action lane clues must preserve metadata BuyCollectorDevice matches");
+  assert.equal(clues.searchResults.metadata.BuyTokenDailiesT2, 0, "spend action lane clues metadata BuyTokenDailiesT2 should stay unresolved");
+  assert.equal(clues.searchResults.metadata.BuyTokenDailiesT3, 0, "spend action lane clues metadata BuyTokenDailiesT3 should stay unresolved");
+  assert.ok(clues.searchResults.level0.BuyTokenBoost > 0, "spend action lane clues must preserve level0 BuyTokenBoost matches");
+  assert.ok(clues.searchResults.level0.BuyDiamondBoost > 0, "spend action lane clues must preserve level0 BuyDiamondBoost matches");
+  assert.ok(clues.searchResults.level0.BuyLM244 > 0, "spend action lane clues must preserve level0 BuyLM244 matches");
+  assert.ok(clues.searchResults.level0.BuyCollectorDevice > 0, "spend action lane clues must preserve level0 BuyCollectorDevice matches");
+  assert.equal(clues.searchResults.level0.BuyTokenDailiesT2, 0, "spend action lane clues level0 BuyTokenDailiesT2 should stay unresolved");
+  assert.equal(clues.searchResults.level0.BuyTokenDailiesT3, 0, "spend action lane clues level0 BuyTokenDailiesT3 should stay unresolved");
+  assert.ok(clues.searchResults.level0["CostBox-Tokens"] > 0, "spend action lane clues must preserve CostBox-Tokens shells");
+  assert.ok(clues.searchResults.level0["CostBox-Tokenium"] > 0, "spend action lane clues must preserve CostBox-Tokenium shells");
+  assert.ok(clues.searchResults.level0["Mission Materials Booster"] > 0, "spend action lane clues must preserve Mission Materials Booster shells");
+
+  return {
+    id: "spend-action-lane-clues",
+    label: "Spend action lane clues",
+    classification: "extracted-mechanics",
+    stats: [
+      `${clues.tokenDirectBuyHooks.length} token direct buy hooks`,
+      `${clues.dailyTokeniumModifierHooks.length} Daily Tokenium modifier hooks`,
+      "Token and diamond buy hooks stay separate from unresolved TokenDailies direct actions"
+    ]
+  };
+}
+
+function validateMultiverseMarketActionShell(shell) {
+  expectNonEmptyString(shell.generatedAt, "multiverse market action shell generatedAt must be present");
+  expectRecord(shell.sources, "multiverse market action shell sources must be an object");
+  ["probe", "metadata", "validatedRows"].forEach((field) => {
+    expectNonEmptyString(shell.sources[field], `multiverse market action shell sources.${field} must be present`);
+  });
+  expectArray(shell.textHandlerAnchors, "multiverse market action shell textHandlerAnchors must be an array");
+  expectRecord(shell.contextDerivedBuyHookRange, "multiverse market action shell contextDerivedBuyHookRange must be an object");
+  expectRecord(shell.contextDerivedCostTextRange, "multiverse market action shell contextDerivedCostTextRange must be an object");
+  expectArray(shell.validatedBuyHookRanges, "multiverse market action shell validatedBuyHookRanges must be an array");
+  expectArray(shell.validatedBuyHooks, "multiverse market action shell validatedBuyHooks must be an array");
+  expectArray(shell.validatedCostTexts, "multiverse market action shell validatedCostTexts must be an array");
+  expectArray(shell.currentBoundary, "multiverse market action shell currentBoundary must be an array");
+
+  ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts"].forEach((name) => {
+    assert.ok(shell.textHandlerAnchors.includes(name), `multiverse market action shell missing ${name}`);
+  });
+  assert.equal(shell.contextDerivedBuyHookRange.start, 1, "multiverse market action shell buy range start drifted");
+  assert.equal(shell.contextDerivedBuyHookRange.end, 110, "multiverse market action shell buy range end drifted");
+  assert.equal(shell.contextDerivedBuyHookRange.count, 110, "multiverse market action shell buy range count drifted");
+  assert.equal(shell.contextDerivedCostTextRange.start, 1, "multiverse market action shell cost-text range start drifted");
+  assert.equal(shell.contextDerivedCostTextRange.end, 110, "multiverse market action shell cost-text range end drifted");
+  assert.equal(shell.contextDerivedCostTextRange.count, 110, "multiverse market action shell cost-text range count drifted");
+  assert.deepEqual(shell.validatedBuyHookRanges, ["50-59", "63-74"], "multiverse market action shell validatedBuyHookRanges drifted");
+  ["BuyIS50", "BuyIS59", "BuyIS63", "BuyIS74"].forEach((name) => {
+    assert.ok(shell.validatedBuyHooks.includes(name), `multiverse market action shell missing ${name}`);
+  });
+  ["SetIS50CostText", "SetIS59CostText", "SetIS63CostText", "SetIS74CostText"].forEach((name) => {
+    assert.ok(shell.validatedCostTexts.includes(name), `multiverse market action shell missing ${name}`);
+  });
+  assert.equal(shell.validatedBuyHooks.length, 22, "multiverse market action shell should preserve 22 validated buy hooks");
+  assert.equal(shell.validatedCostTexts.length, 22, "multiverse market action shell should preserve 22 validated cost texts");
+
+  return {
+    id: "multiverse-market-action-shell",
+    label: "Multiverse market action shell",
+    classification: "extracted-mechanics",
+    stats: [
+      `${shell.contextDerivedBuyHookRange.count} context-derived BuyIS hooks`,
+      `${shell.validatedBuyHooks.length} validated BuyIS hooks`,
+      "Broader MultiverseMarket action shell stays separate from numerically validated rows"
+    ]
+  };
+}
+
+function validateTokenShopOwnerShell(shell) {
+  expectNonEmptyString(shell.generatedAt, "token shop owner shell generatedAt must be present");
+  expectRecord(shell.sources, "token shop owner shell sources must be an object");
+  ["probe", "metadata", "level0"].forEach((field) => {
+    expectNonEmptyString(shell.sources[field], `token shop owner shell sources.${field} must be present`);
+  });
+  expectArray(shell.ownerAnchors, "token shop owner shell ownerAnchors must be an array");
+  expectArray(shell.tokenBankMethods, "token shop owner shell tokenBankMethods must be an array");
+  expectArray(shell.notificationHooks, "token shop owner shell notificationHooks must be an array");
+  expectArray(shell.adjacentDeviceHooks, "token shop owner shell adjacentDeviceHooks must be an array");
+  expectArray(shell.uiShells, "token shop owner shell uiShells must be an array");
+  expectRecord(shell.sourcePresence, "token shop owner shell sourcePresence must be an object");
+  expectRecord(shell.sourcePresence.metadata, "token shop owner shell sourcePresence.metadata must be an object");
+  expectRecord(shell.sourcePresence.level0, "token shop owner shell sourcePresence.level0 must be an object");
+  expectArray(shell.currentBoundary, "token shop owner shell currentBoundary must be an array");
+
+  ["TokenShop", "InitializeTokenShop", "SetAllTokenShopTexts"].forEach((name) => {
+    assert.ok(shell.ownerAnchors.includes(name), `token shop owner shell missing ${name}`);
+  });
+  ["get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "SetBankFill"].forEach((name) => {
+    assert.ok(shell.tokenBankMethods.includes(name), `token shop owner shell missing ${name}`);
+  });
+  ["CheckTokenClaimNotification", "TokenShopButtonNotification", "BankedDescriptionTextIncrease"].forEach((name) => {
+    assert.ok(shell.notificationHooks.includes(name), `token shop owner shell missing ${name}`);
+  });
+  ["BuyAutoTokenClicker", "BuyAutoDiamondClicker", "BuyChestSpeedster"].forEach((name) => {
+    assert.ok(shell.adjacentDeviceHooks.includes(name), `token shop owner shell missing ${name}`);
+  });
+  ["TokenBankDescriptionText", "TokenShopCanvas", "TokenShopMenu", "TokenShopOverlay", "TokenShopRecoloring"].forEach((name) => {
+    assert.ok(shell.uiShells.includes(name), `token shop owner shell missing ${name}`);
+  });
+  ["TokenShop", "get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "CheckTokenClaimNotification", "TokenShopButtonNotification", "BankedDescriptionTextIncrease", "BuyAutoTokenClicker", "BuyAutoDiamondClicker", "BuyChestSpeedster"].forEach((name) => {
+    assert.equal(shell.sourcePresence.metadata[name], 1, `token shop owner shell metadata presence drifted for ${name}`);
+  });
+  ["TokenShop", "ClaimBankedTokens", "BankedDescriptionTextIncrease", "BuyAutoTokenClicker", "BuyAutoDiamondClicker", "BuyChestSpeedster"].forEach((name) => {
+    assert.equal(shell.sourcePresence.level0[name], 1, `token shop owner shell level0 presence drifted for ${name}`);
+  });
+
+  return {
+    id: "token-shop-owner-shell",
+    label: "Token shop owner shell",
+    classification: "extracted-mechanics",
+    stats: [
+      `${shell.tokenBankMethods.length} token-bank methods`,
+      `${shell.adjacentDeviceHooks.length} adjacent device hooks`,
+      "TokenShop owner shell keeps bank controls separate from unresolved save ownership"
+    ]
+  };
+}
+
+function validateTokenShopSaveBoundary(boundary) {
+  expectNonEmptyString(boundary.generatedAt, "token shop save boundary generatedAt must be present");
+  expectRecord(boundary.sources, "token shop save boundary sources must be an object");
+  ["probe", "metadata", "level0"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `token shop save boundary sources.${field} must be present`);
+  });
+  expectArray(boundary.ownerShellTermsChecked, "token shop save boundary ownerShellTermsChecked must be an array");
+  expectArray(boundary.saveFamilyTermsChecked, "token shop save boundary saveFamilyTermsChecked must be an array");
+  expectRecord(boundary.probeResults, "token shop save boundary probeResults must be an object");
+  expectArray(boundary.currentBoundary, "token shop save boundary currentBoundary must be an array");
+
+  ["TokenShop", "InitializeTokenShop", "ClaimBankedTokens", "BuyAutoTokenClicker"].forEach((name) => {
+    assert.ok(boundary.ownerShellTermsChecked.includes(name), `token shop save boundary missing ${name}`);
+  });
+  ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"].forEach((name) => {
+    assert.ok(boundary.saveFamilyTermsChecked.includes(name), `token shop save boundary missing ${name}`);
+  });
+  assert.equal(boundary.probeResults.metadataHasSaveTerms, true, "token shop save boundary metadataHasSaveTerms drifted");
+  assert.equal(boundary.probeResults.level0HasSaveTerms, false, "token shop save boundary level0HasSaveTerms drifted");
+  assert.equal(boundary.probeResults.ownerShellWithSaveOverlapCount, 0, "token shop save boundary overlap count drifted");
+  assert.equal(boundary.probeResults.directTokenShopPlayerProfileContext, false, "token shop save boundary directTokenShopPlayerProfileContext drifted");
+
+  return {
+    id: "token-shop-save-boundary",
+    label: "Token shop save boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.ownerShellTermsChecked.length} owner-shell terms checked`,
+      `${boundary.saveFamilyTermsChecked.length} save-family terms checked`,
+      "TokenShop owner shell still stays separate from recovered save-family clues"
+    ]
+  };
+}
+
+function validateMultiverseMarketSaveBoundary(boundary) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market save boundary generatedAt must be present");
+  expectRecord(boundary.sources, "multiverse market save boundary sources must be an object");
+  ["actionShellProbe", "metadataNeighborhood", "metadata", "level0"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market save boundary sources.${field} must be present`);
+  });
+  expectArray(boundary.actionShellTermsChecked, "multiverse market save boundary actionShellTermsChecked must be an array");
+  expectArray(boundary.saveFamilyTermsChecked, "multiverse market save boundary saveFamilyTermsChecked must be an array");
+  expectRecord(boundary.probeResults, "multiverse market save boundary probeResults must be an object");
+  expectArray(boundary.currentBoundary, "multiverse market save boundary currentBoundary must be an array");
+
+  ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts", "SetInscryptionsDoneText"].forEach((name) => {
+    assert.ok(boundary.actionShellTermsChecked.includes(name), `multiverse market save boundary missing ${name}`);
+  });
+  ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"].forEach((name) => {
+    assert.ok(boundary.saveFamilyTermsChecked.includes(name), `multiverse market save boundary missing ${name}`);
+  });
+  assert.equal(boundary.probeResults.actionShellWithSaveOverlapCount, 0, "multiverse market save boundary overlap count drifted");
+  assert.equal(boundary.probeResults.metadataNeighborhoodHasActionTerms, true, "multiverse market save boundary metadataNeighborhoodHasActionTerms drifted");
+  assert.equal(boundary.probeResults.metadataNeighborhoodHasSaveTerms, true, "multiverse market save boundary metadataNeighborhoodHasSaveTerms drifted");
+  assert.equal(boundary.probeResults.metadataProbeHasSaveTerms, false, "multiverse market save boundary metadataProbeHasSaveTerms drifted");
+  assert.equal(boundary.probeResults.level0ProbeHasSaveTerms, false, "multiverse market save boundary level0ProbeHasSaveTerms drifted");
+
+  return {
+    id: "multiverse-market-save-boundary",
+    label: "Multiverse market save boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.actionShellTermsChecked.length} action-shell terms checked`,
+      `${boundary.saveFamilyTermsChecked.length} save-family terms checked`,
+      "MultiverseMarket action shell still stays separate from recovered save-family clues"
+    ]
+  };
+}
+
+function validateTokenBankControllerShell(shell) {
+  expectNonEmptyString(shell.generatedAt, "token-bank controller shell generatedAt must be present");
+  expectRecord(shell.sources, "token-bank controller shell sources must be an object");
+  ["probe", "metadata", "level0"].forEach((field) => {
+    expectNonEmptyString(shell.sources[field], `token-bank controller shell sources.${field} must be present`);
+  });
+  expectArray(shell.controllerAnchors, "token-bank controller shell controllerAnchors must be an array");
+  expectArray(shell.adjacentControllerMethods, "token-bank controller shell adjacentControllerMethods must be an array");
+  expectRecord(shell.sourcePresence, "token-bank controller shell sourcePresence must be an object");
+  expectRecord(shell.sourcePresence.metadata, "token-bank controller shell sourcePresence.metadata must be an object");
+  expectRecord(shell.sourcePresence.level0, "token-bank controller shell sourcePresence.level0 must be an object");
+  expectArray(shell.currentBoundary, "token-bank controller shell currentBoundary must be an array");
+
+  ["TokenShop", "ClaimBankedTokens", "SetBankFill", "BankFill", "TokenBankDescriptionText", "CheckTokenClaimNotification", "TokenShopButtonNotification"].forEach((name) => {
+    assert.ok(shell.controllerAnchors.includes(name), `token-bank controller shell missing ${name}`);
+  });
+  ["get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens"].forEach((name) => {
+    assert.ok(shell.adjacentControllerMethods.includes(name), `token-bank controller shell missing ${name}`);
+  });
+  ["TokenShop", "ClaimBankedTokens", "SetBankFill", "BankFill", "TokenBankDescriptionText", "CheckTokenClaimNotification", "TokenShopButtonNotification", "get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens"].forEach((name) => {
+    assert.equal(shell.sourcePresence.metadata[name], 1, `token-bank controller shell metadata presence drifted for ${name}`);
+  });
+  assert.equal(shell.sourcePresence.level0.ClaimBankedTokens, 1, "token-bank controller shell level0 ClaimBankedTokens drifted");
+  assert.equal(shell.sourcePresence.level0.BankedDescriptionTextIncrease, 1, "token-bank controller shell level0 BankedDescriptionTextIncrease drifted");
+
+  return {
+    id: "token-bank-controller-shell",
+    label: "Token-bank controller shell",
+    classification: "extracted-mechanics",
+    stats: [
+      `${shell.controllerAnchors.length} controller anchors`,
+      `${shell.adjacentControllerMethods.length} adjacent controller methods`,
+      "Token-bank controller shell now preserves its narrow TokenShop-side cluster"
+    ]
+  };
+}
+
 async function validateBundledDatasetContract(contract) {
   expectNonEmptyString(contract.contractVersion, "bundled dataset contract version must be present");
   expectNonEmptyString(contract.updatedAt, "bundled dataset contract updatedAt must be present");
@@ -190,7 +798,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 4, "bundled dataset contract must track the four shipped dataset groups");
+  assert.equal(contract.datasets.length, 18, "bundled dataset contract must track the eighteen shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -238,12 +846,40 @@ export async function validateBundledDatasets() {
   const shardProvenance = await readJson("../../data/shard-milestones-provenance.grounded.v1.json");
   const tokenShop = await readJson("../../data/token-shop-values.json");
   const multiverseMarket = await readJson("../../data/multiverse-market-values.json");
+  const multiverseMarketMetadataNeighborhood = await readJson("../../data/multiverse-market-metadata-neighborhood.json");
+  const tokeniumNamingClues = await readJson("../../data/tokenium-naming-clues.json");
+  const tokenBankStateClues = await readJson("../../data/token-bank-state-clues.json");
+  const dailyTokeniumLaneClues = await readJson("../../data/daily-tokenium-lane-clues.json");
+  const tokenBankFormulaBoundary = await readJson("../../data/token-bank-formula-boundary.json");
+  const multiverseMarketRangeBoundary = await readJson("../../data/multiverse-market-range-boundary.json");
+  const multiverseMarketRowTextCoverage = await readJson("../../data/multiverse-market-row-text-coverage.json");
+  const tokenShopCostLanes = await readJson("../../data/token-shop-cost-lanes.json");
+  const spendActionLaneClues = await readJson("../../data/spend-action-lane-clues.json");
+  const multiverseMarketActionShell = await readJson("../../data/multiverse-market-action-shell.json");
+  const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
+  const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
+  const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
+  const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
 
   const summaries = [
     validateSnapshot(snapshot),
     validateShardDatasets(shardMilestones, shardObserved, shardProvenance),
     validateTokenShop(tokenShop),
-    validateMultiverseMarket(multiverseMarket)
+    validateMultiverseMarket(multiverseMarket),
+    validateMultiverseMarketMetadataNeighborhood(multiverseMarketMetadataNeighborhood),
+    validateTokeniumNamingClues(tokeniumNamingClues),
+    validateTokenBankStateClues(tokenBankStateClues),
+    validateDailyTokeniumLaneClues(dailyTokeniumLaneClues),
+    validateTokenBankFormulaBoundary(tokenBankFormulaBoundary),
+    validateMultiverseMarketRangeBoundary(multiverseMarketRangeBoundary),
+    validateMultiverseMarketRowTextCoverage(multiverseMarketRowTextCoverage),
+    validateTokenShopCostLanes(tokenShopCostLanes),
+    validateSpendActionLaneClues(spendActionLaneClues),
+    validateMultiverseMarketActionShell(multiverseMarketActionShell),
+    validateTokenShopOwnerShell(tokenShopOwnerShell),
+    validateTokenShopSaveBoundary(tokenShopSaveBoundary),
+    validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
+    validateTokenBankControllerShell(tokenBankControllerShell)
   ];
 
   assertContractMatchesValidation(bundledDatasetContract, summaries);

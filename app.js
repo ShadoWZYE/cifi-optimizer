@@ -379,14 +379,28 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
     fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
     fetchJson("./data/shard-milestones-provenance.grounded.v1.json"),
     fetchJson("./data/token-shop-values.json"),
-    fetchJson("./data/multiverse-market-values.json")
+    fetchJson("./data/multiverse-market-values.json"),
+    fetchJson("./data/multiverse-market-metadata-neighborhood.json"),
+    fetchJson("./data/tokenium-naming-clues.json"),
+    fetchJson("./data/token-bank-state-clues.json"),
+    fetchJson("./data/daily-tokenium-lane-clues.json"),
+    fetchJson("./data/token-bank-formula-boundary.json"),
+    fetchJson("./data/multiverse-market-range-boundary.json"),
+    fetchJson("./data/multiverse-market-row-text-coverage.json"),
+    fetchJson("./data/token-shop-cost-lanes.json"),
+    fetchJson("./data/spend-action-lane-clues.json"),
+    fetchJson("./data/multiverse-market-action-shell.json"),
+    fetchJson("./data/token-shop-owner-shell.json"),
+    fetchJson("./data/token-shop-save-boundary.json"),
+    fetchJson("./data/multiverse-market-save-boundary.json"),
+    fetchJson("./data/token-bank-controller-shell.json")
   ]);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
@@ -404,7 +418,21 @@ async function bootstrap() {
   };
   state.extractedMechanics = {
     tokenShop: tokenShopValues,
-    multiverseMarket: multiverseMarketValues
+    multiverseMarket: multiverseMarketValues,
+    multiverseMarketMetadataNeighborhood,
+    tokeniumNamingClues,
+    tokenBankStateClues,
+    dailyTokeniumLaneClues,
+    tokenBankFormulaBoundary,
+    multiverseMarketRangeBoundary,
+    multiverseMarketRowTextCoverage,
+    tokenShopCostLanes,
+    spendActionLaneClues,
+    multiverseMarketActionShell,
+    tokenShopOwnerShell,
+    tokenShopSaveBoundary,
+    multiverseMarketSaveBoundary,
+    tokenBankControllerShell
   };
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile,
@@ -1431,6 +1459,7 @@ function renderValidationResults() {
   const apkResults = results.filter((item) => item.scope === "APK");
   const supportResults = results.filter((item) => item.scope === "Support");
   $("#validationResults").innerHTML = [
+    renderSpendSaveSideBoundary(),
     renderValidationSection(
       "Grounded MVP checks",
       "These checks contribute to the overview benchmark and track current grounded MVP behavior.",
@@ -1447,6 +1476,79 @@ function renderValidationResults() {
       supportResults
     )
   ].join("");
+}
+
+function renderSpendSaveSideBoundary() {
+  const multiverseMarket = state.extractedMechanics?.multiverseMarket;
+  const multiverseMarketMetadataNeighborhood = state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
+  const dailyTokeniumLaneClues = state.extractedMechanics?.dailyTokeniumLaneClues;
+  const tokenBankFormulaBoundary = state.extractedMechanics?.tokenBankFormulaBoundary;
+  const multiverseMarketRangeBoundary = state.extractedMechanics?.multiverseMarketRangeBoundary;
+  const multiverseMarketRowTextCoverage = state.extractedMechanics?.multiverseMarketRowTextCoverage;
+  if (!multiverseMarket && !multiverseMarketMetadataNeighborhood) {
+    return "";
+  }
+
+  const summary = getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood);
+  const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
+  const dailyTokeniumSummary = getDailyTokeniumLaneSummary(dailyTokeniumLaneClues);
+  const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenBankFormulaBoundary);
+  const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(multiverseMarketRangeBoundary);
+  const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(multiverseMarketRowTextCoverage);
+  return `
+    <section class="meta-stack">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Spend integration boundary</p>
+          <h3>Spend save-side narrowing</h3>
+        </div>
+      </div>
+      <p class="meta">Repo-local metadata now narrows MultiverseMarket saved-state work toward the broader PlayerProfileData persistence family instead of treating MultiverseMarket itself as the recovered save owner.</p>
+      <div class="validation-grid">
+        <article class="validation-card ${summary.hasSaveFamilyClues ? "pass" : "warn"}">
+          <strong>Likely persistence family</strong>
+          <p class="meta">${summary.hasSaveFamilyClues ? "PlayerProfileData.cs, GetPlayerProfileData, and FillPlayerProfileData are all present in the checked-in metadata neighborhood." : "PlayerProfileData persistence clues are incomplete in the checked-in metadata neighborhood."}</p>
+        </article>
+        <article class="validation-card ${summary.hasCloudSavePathClues ? "pass" : "warn"}">
+          <strong>Cloud-save profile path</strong>
+          <p class="meta">${summary.hasCloudSavePathClues ? "CloudSavePlayerProfile and GetPlayerProfileInfo now appear in the same checked-in save-path neighborhood, which strengthens the PlayerProfile-based persistence search." : "Cloud-save profile path clues are incomplete in the checked-in metadata neighborhood."}</p>
+        </article>
+        <article class="validation-card ${summary.hasProgressionFieldCluster ? "pass" : "warn"}">
+          <strong>Grounded field-cluster clues</strong>
+          <p class="meta">${summary.hasProgressionFieldCluster ? "InscryptionsDone now sits beside nearby IS*Level entries and trade counters such as EsotericR1Trades in repo-local metadata." : "The checked-in metadata neighborhood does not yet preserve the expected InscryptionsDone progression-field cluster."}</p>
+        </article>
+        <article class="validation-card ${validatedCoverage.hasValidatedRows ? "pass" : "warn"}">
+          <strong>Validated row block vs broader field run</strong>
+          <p class="meta">${validatedCoverage.hasValidatedRows ? `The checked-in MultiverseMarket extract currently validates ${validatedCoverage.count} rows across ids ${validatedCoverage.rangeLabel}.` : "The checked-in MultiverseMarket extract does not yet expose a validated row block."}</p>
+          <p class="meta">${summary.recoveredIsRangeLabel ? `The save-side metadata neighborhood already reaches ${summary.recoveredIsRangeLabel}, which is broader than the currently validated row block.` : "The save-side metadata neighborhood does not yet expose a broad IS*Level run."}</p>
+        </article>
+        <article class="validation-card ${multiverseMarketRangeSummary.hasExplicitZeroOverlap ? "pass" : "warn"}">
+          <strong>Validated rows vs recovered IS run</strong>
+          <p class="meta">${multiverseMarketRangeSummary.hasValidatedRows ? `The checked-in row block still covers ids ${multiverseMarketRangeSummary.validatedRangeLabel}.` : "Validated row coverage is incomplete in the checked-in range boundary bundle."}</p>
+          <p class="meta">${multiverseMarketRangeSummary.hasExplicitZeroOverlap ? `The separate metadata run ${multiverseMarketRangeSummary.metadataRangeLabel} currently has no direct overlap with that validated block.` : "The checked-in range boundary no longer preserves the current zero-overlap result."}</p>
+        </article>
+        <article class="validation-card ${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? "pass" : "warn"}">
+          <strong>Validated row text coverage</strong>
+          <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? `TextHandlerMarkets now preserves ${multiverseMarketRowTextSummary.coveredCount} direct SetIS*CostText hooks for validated rows ${multiverseMarketRowTextSummary.validatedRangeLabel}.` : "Validated-row cost-text coverage is incomplete in the checked-in text-coverage bundle."}</p>
+          <p class="meta">${multiverseMarketRowTextSummary.hasBuyHookSamples ? `Sample buy hooks such as ${multiverseMarketRowTextSummary.firstBuyHook} and ${multiverseMarketRowTextSummary.lastBuyHook} are also present in the same checked local coverage path.` : "Validated-row buy-hook samples are incomplete in the checked-in text-coverage bundle."}</p>
+        </article>
+        <article class="validation-card ${dailyTokeniumSummary.hasOwnerFamilyClues ? "pass" : "warn"}">
+          <strong>Daily Tokenium owner family</strong>
+          <p class="meta">${dailyTokeniumSummary.hasOwnerFamilyClues ? "SpaceAcademy, SpaceAcademyMain, TextHandlerSpaceAcademy, and FarmMissions now appear in a checked-in lane clue bundle." : "Daily Tokenium owner-family clues are incomplete in the checked-in lane clue bundle."}</p>
+          <p class="meta">${dailyTokeniumSummary.hasModifierBoundary ? "LM244 hooks, BuyLM244, FinalDailyTokenBonus, and Collector-pack copy still behave like modifier-family clues around the lane, not recovered saved-state owners." : "Daily Tokenium modifier-family clues are incomplete in the checked-in lane clue bundle."}</p>
+        </article>
+        <article class="validation-card ${tokenBankFormulaSummary.hasDerivedOutputBoundary ? "pass" : "warn"}">
+          <strong>Token-bank derived output boundary</strong>
+          <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? "FinalTokenBankCap and FinalTokenBankFillSpeed now appear in a checked-in accessor and backing-field cluster." : "Token-bank derived-output clues are incomplete in the checked-in boundary bundle."}</p>
+          <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "The same checked local context still does not expose PlayerProfileData or CloudSavePlayerProfile beside those outputs." : "The checked derived-output context now overlaps a broader save-family clue and needs review."}</p>
+        </article>
+        <article class="validation-card warn">
+          <strong>Still blocked for planner wiring</strong>
+          <p class="meta">Do not promote FinalIS or achievement symbols into canonical player state yet. Current evidence only narrows the search; it does not identify the declaring save model or which recovered IS*Level subset actually maps to the validated MultiverseMarket rows.</p>
+        </article>
+      </div>
+    </section>
+  `;
 }
 
 function renderResearch() {
@@ -1507,6 +1609,58 @@ function renderResearchTrackProgress(track) {
 }
 
 function renderResearchTrackSupport(track) {
+  if (track.id === "spend-planner-from-extracted-data") {
+    const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
+    const validatedCoverage = getMultiverseMarketValidatedCoverage(state.extractedMechanics?.multiverseMarket);
+    const metadataSummary = getMultiverseMarketMetadataSummary(state.extractedMechanics?.multiverseMarketMetadataNeighborhood);
+    const tokeniumNamingSummary = getTokeniumNamingSummary(state.extractedMechanics?.tokeniumNamingClues);
+    const tokenBankStateSummary = getTokenBankStateSummary(state.extractedMechanics?.tokenBankStateClues);
+    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(state.extractedMechanics?.dailyTokeniumLaneClues);
+    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(state.extractedMechanics?.tokenBankFormulaBoundary);
+    const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(state.extractedMechanics?.multiverseMarketRangeBoundary);
+    const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(state.extractedMechanics?.multiverseMarketRowTextCoverage);
+    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(state.extractedMechanics?.tokenShopCostLanes);
+    const spendActionLaneSummary = getSpendActionLaneSummary(state.extractedMechanics?.spendActionLaneClues);
+    const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(state.extractedMechanics?.multiverseMarketActionShell);
+    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(state.extractedMechanics?.tokenShopOwnerShell);
+    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(state.extractedMechanics?.tokenShopSaveBoundary);
+    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(state.extractedMechanics?.multiverseMarketSaveBoundary);
+    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(state.extractedMechanics?.tokenBankControllerShell);
+    return `
+      <div class="meta-stack">
+        <p class="snapshot-title">Grounded spend inputs</p>
+        <p class="meta">${tokenShopCoverage.hasCoverage ? `TokenShop currently exposes ${tokenShopCoverage.numericGroupCount} extracted numeric families across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.` : "TokenShop extracted family coverage is not available in this build."}</p>
+        <p class="meta">${tokenShopCoverage.hasControllerAnchors ? "The checked-in TokenShop payload also preserves direct controller anchors such as BankFill and TokenBankDescriptionText for the token-bank lane." : "The checked-in TokenShop payload does not yet preserve the expected token-bank controller anchors."}</p>
+        <p class="meta">${tokeniumNamingSummary.hasNamingClues ? `Shipped assets now preserve ${tokeniumNamingSummary.resourceLabel} plus ${tokeniumNamingSummary.academyLabel}, and level0 keeps both ${tokeniumNamingSummary.tokenShellLabel} and ${tokeniumNamingSummary.tokeniumShellLabel}.` : "Token or tokenium naming clues are not available in this build."}</p>
+        <p class="meta">${tokenShopCostLaneSummary.hasLaneSplit ? `TokenShop cost-lane clues now preserve ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.tokensShellLabel}, and ${tokenShopCostLaneSummary.tokeniumShellLabel}.` : "TokenShop cost-lane clues are not available in this build."}</p>
+        <p class="meta">${tokenShopCostLaneSummary.keepsDailyTokeniumSeparate ? "This keeps TokenDailies on the Daily Tokenium modifier lane instead of mixing it into generic token spend rows." : "The current build does not yet preserve a grounded split between TokenDailies and generic token spend rows."}</p>
+        <p class="meta">${spendActionLaneSummary.hasActionSplit ? `Spend action-lane clues now preserve ${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, and ${spendActionLaneSummary.premiumModifierHook}.` : "Spend action-lane clues are not available in this build."}</p>
+        <p class="meta">${spendActionLaneSummary.keepsDailyDirectHooksUnrecovered ? `The checked APK and Unity probe still returns zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} matches, so Daily Tokenium remains a modifier-side action lane rather than a recovered direct TokenShop purchase action.` : "The current build does not yet preserve the direct-hook gap between TokenDailies and other spend lanes."}</p>
+        <p class="meta">${tokenShopOwnerShellSummary.hasOwnerShell ? `TokenShop owner-shell clues now preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook}.` : "TokenShop owner-shell clues are not available in this build."}</p>
+        <p class="meta">${tokenShopOwnerShellSummary.hasOwnerShell ? "That local TokenShop shell is enough to keep bank controls and adjacent device hooks grouped together, but not enough to promote player-owned bank values into planner state." : "The current build does not yet preserve a grounded TokenShop owner shell around the token-bank lane."}</p>
+        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary still keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.` : "TokenShop save-boundary clues are not available in this build."}</p>
+        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary ? "That means TokenShop ownership and PlayerProfile save recovery remain separate tasks, so the app should not infer saved bank values from owner-shell clues yet." : "The current build does not yet preserve a clean separation boundary between TokenShop ownership and PlayerProfile save recovery."}</p>
+        <p class="meta">${tokenBankControllerShellSummary.hasControllerShell ? `Token-bank controller shell now preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.` : "Token-bank controller-shell clues are not available in this build."}</p>
+        <p class="meta">${tokenBankControllerShellSummary.hasControllerShell ? "That keeps the narrow bank controller cluster together without promoting it into saved-state ownership or formula truth." : "The current build does not yet preserve a narrow token-bank controller shell."}</p>
+        <p class="meta">${tokenBankStateSummary.hasControllerSplit ? `Token-bank controller clues now preserve ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHandler}.` : "Token-bank controller or display split clues are not available in this build."}</p>
+        <p class="meta">${dailyTokeniumSummary.hasOwnerFamilyClues ? `Daily Tokenium lane clues now preserve ${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.premiumPack}.` : "Daily Tokenium owner-family clues are not available in this build."}</p>
+        <p class="meta">${dailyTokeniumSummary.hasPlayerFacingBoundary ? "Player-facing strings still frame Daily Tokenium as a farm-mission or Academy Menu reward lane that TokenShop and the Collector pack modify, not as a TokenShop-only budget lane." : "Player-facing Daily Tokenium lane strings are incomplete in this build."}</p>
+        <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? `Token-bank formula clues now preserve ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} as a derived-output cluster.` : "Token-bank derived-output clues are not available in this build."}</p>
+        <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "That checked local cluster still does not join the current PlayerProfile save-family path, so FinalTokenBank outputs remain output-side clues rather than recovered saved-state fields." : "The checked derived-output cluster now overlaps the broader save-family search and needs review."}</p>
+        <p class="meta">${validatedCoverage.hasValidatedRows ? `MultiverseMarket currently has ${validatedCoverage.count} validated rows across ids ${validatedCoverage.rangeLabel}.` : "MultiverseMarket validated row coverage is not available in this build."}</p>
+        <p class="meta">${metadataSummary.recoveredIsRangeLabel ? `The checked-in save-side field run currently reaches ${metadataSummary.recoveredIsRangeLabel}, which is broader than the validated MultiverseMarket row block.` : "The checked-in save-side field run is not available in this build."}</p>
+        <p class="meta">${multiverseMarketRangeSummary.hasExplicitZeroOverlap ? `The checked range boundary now preserves a zero-overlap result between validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} and the recovered metadata run ${multiverseMarketRangeSummary.metadataRangeLabel}.` : "The checked range boundary between validated rows and the recovered metadata run is not available in this build."}</p>
+        <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? `The validated row block also has direct text-handler coverage through ${multiverseMarketRowTextSummary.textHandler}, ${multiverseMarketRowTextSummary.textBatcher}, and ${multiverseMarketRowTextSummary.coveredCount} SetIS*CostText hooks.` : "Validated-row text-handler coverage is not available in this build."}</p>
+        <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? "That is row-label coverage for the validated block, not saved-state coverage, so it should not be used as proof of player-owned current levels." : "Validated-row text coverage is incomplete, so row-label support remains partially grounded."}</p>
+        <p class="meta">${multiverseMarketActionShellSummary.hasActionShell ? `The same checked action shell context reaches ${multiverseMarketActionShellSummary.buyRangeLabel} plus ${multiverseMarketActionShellSummary.costTextRangeLabel}, while only ${multiverseMarketActionShellSummary.validatedRangeLabel} stays numerically validated.` : "MultiverseMarket action-shell coverage is not available in this build."}</p>
+        <p class="meta">${multiverseMarketActionShellSummary.hasActionShell ? "That broader action shell is useful for mapping and UI recovery, but it should not be promoted as full numeric validation or saved-state coverage." : "The broader MultiverseMarket action shell is incomplete, so validated-row behavior should stay the narrower implementation boundary."}</p>
+        <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary still keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}.` : "MultiverseMarket save-boundary clues are not available in this build."}</p>
+        <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? "That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet." : "The current build does not yet preserve a clean separation boundary between MultiverseMarket action-shell recovery and save-family recovery."}</p>
+        <p class="meta">This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs.</p>
+      </div>
+    `;
+  }
+
   if (track.id !== "data-contracts-and-apk-pipeline") {
     return "";
   }
@@ -2373,11 +2527,26 @@ function runValidationCases() {
 function buildApkGroundingValidationCases() {
   const tokenShop = state.extractedMechanics?.tokenShop;
   const multiverseMarket = state.extractedMechanics?.multiverseMarket;
+  const multiverseMarketMetadataNeighborhood = state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
+  const tokeniumNamingClues = state.extractedMechanics?.tokeniumNamingClues;
+  const tokenBankStateClues = state.extractedMechanics?.tokenBankStateClues;
+  const dailyTokeniumLaneClues = state.extractedMechanics?.dailyTokeniumLaneClues;
+  const tokenBankFormulaBoundary = state.extractedMechanics?.tokenBankFormulaBoundary;
+  const multiverseMarketRangeBoundary = state.extractedMechanics?.multiverseMarketRangeBoundary;
+  const multiverseMarketRowTextCoverage = state.extractedMechanics?.multiverseMarketRowTextCoverage;
+  const tokenShopCostLanes = state.extractedMechanics?.tokenShopCostLanes;
+  const spendActionLaneClues = state.extractedMechanics?.spendActionLaneClues;
+  const multiverseMarketActionShell = state.extractedMechanics?.multiverseMarketActionShell;
+  const tokenShopOwnerShell = state.extractedMechanics?.tokenShopOwnerShell;
+  const tokenShopSaveBoundary = state.extractedMechanics?.tokenShopSaveBoundary;
+  const multiverseMarketSaveBoundary = state.extractedMechanics?.multiverseMarketSaveBoundary;
+  const tokenBankControllerShell = state.extractedMechanics?.tokenBankControllerShell;
   const shardMilestones = state.shardGrounding?.milestones;
   const cases = [];
 
   if (tokenShop) {
     const numericTable = tokenShop.numeric_table ?? {};
+    const tokenShopCoverage = getTokenShopCoverageSummary(tokenShop);
     cases.push({
       title: "TokenShop owner payload",
       expected: "Grounded TokenShop constants available",
@@ -2385,6 +2554,18 @@ function buildApkGroundingValidationCases() {
         ? "Grounded TokenShop constants available"
         : "Missing expected TokenShop constants",
       pass: Boolean(tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost),
+      scope: "APK"
+    });
+    cases.push({
+      title: "TokenShop extracted family coverage",
+      expected: "32 numeric groups with TokenBoost, DiamondBoost, and TokenDailiesT2 plus token-bank controller anchors",
+      actual: tokenShopCoverage.hasCoverage
+        ? `${tokenShopCoverage.numericGroupCount} numeric groups with ${tokenShopCoverage.namedLaneLabel}${tokenShopCoverage.hasControllerAnchors ? " plus token-bank controller anchors" : " but missing token-bank controller anchors"}`
+        : "Missing TokenShop extracted family coverage",
+      pass:
+        tokenShopCoverage.numericGroupCount === 32
+        && tokenShopCoverage.hasControllerAnchors
+        && tokenShopCoverage.hasNamedLanes,
       scope: "APK"
     });
     cases.push({
@@ -2399,6 +2580,7 @@ function buildApkGroundingValidationCases() {
   if (multiverseMarket) {
     const records = Array.isArray(multiverseMarket.records) ? multiverseMarket.records : [];
     const hasAnchor = records.some((record) => Number(record.inscription_id) === 51 && Number(record.start_cost) === 2);
+    const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
     cases.push({
       title: "MultiverseMarket owner payload",
       expected: "Validated late-block constants available",
@@ -2407,10 +2589,219 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
     cases.push({
+      title: "MultiverseMarket validated row coverage",
+      expected: "22 validated rows across ids 50-59 and 63-74",
+      actual: validatedCoverage.hasValidatedRows
+        ? `${validatedCoverage.count} validated rows across ids ${validatedCoverage.rangeLabel}`
+        : "Missing validated row coverage",
+      pass: validatedCoverage.count === 22 && validatedCoverage.rangeLabel === "50-59 and 63-74",
+      scope: "APK"
+    });
+    cases.push({
       title: "MultiverseMarket mapping gate",
       expected: "Available but unmapped",
       actual: "Available but unmapped",
       pass: true,
+      scope: "APK"
+    });
+  }
+
+  if (multiverseMarketMetadataNeighborhood) {
+    const { hasCloudSavePathClues, hasSaveFamilyClues, hasProgressionFieldCluster } = getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood);
+    cases.push({
+      title: "MultiverseMarket save-family clues",
+      expected: "PlayerProfileData persistence clues available",
+      actual: hasSaveFamilyClues
+        ? "PlayerProfileData persistence clues available"
+        : "Missing PlayerProfileData persistence clues",
+      pass: hasSaveFamilyClues,
+      scope: "APK"
+    });
+    cases.push({
+      title: "MultiverseMarket cloud-save path clues",
+      expected: "CloudSavePlayerProfile path clues available",
+      actual: hasCloudSavePathClues
+        ? "CloudSavePlayerProfile path clues available"
+        : "Missing CloudSavePlayerProfile path clues",
+      pass: hasCloudSavePathClues,
+      scope: "APK"
+    });
+    cases.push({
+      title: "MultiverseMarket progression-field cluster",
+      expected: "InscryptionsDone trade-counter cluster available",
+      actual: hasProgressionFieldCluster
+        ? "InscryptionsDone trade-counter cluster available"
+        : "Missing InscryptionsDone trade-counter cluster",
+      pass: hasProgressionFieldCluster,
+      scope: "APK"
+    });
+  }
+
+  if (tokeniumNamingClues) {
+    const tokeniumNamingSummary = getTokeniumNamingSummary(tokeniumNamingClues);
+    cases.push({
+      title: "Spend tokenium naming clues",
+      expected: "Resource_Tokenium, Aca.Tokenium553, CostBox-Tokens, and CostBox-Tokenium available",
+      actual: tokeniumNamingSummary.hasNamingClues
+        ? `${tokeniumNamingSummary.resourceLabel}, ${tokeniumNamingSummary.academyLabel}, ${tokeniumNamingSummary.tokenShellLabel}, and ${tokeniumNamingSummary.tokeniumShellLabel} available`
+        : "Missing token or tokenium naming clues",
+      pass: tokeniumNamingSummary.hasNamingClues,
+      scope: "APK"
+    });
+  }
+
+  if (tokenShopCostLanes) {
+    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShopCostLanes);
+    cases.push({
+      title: "TokenShop cost-lane split",
+      expected: "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox-Tokens, and CostBox-Tokenium available",
+      actual: tokenShopCostLaneSummary.hasLaneSplit
+        ? `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.tokensShellLabel}, and ${tokenShopCostLaneSummary.tokeniumShellLabel} available`
+        : "Missing TokenShop cost-lane split clues",
+      pass: tokenShopCostLaneSummary.hasLaneSplit && tokenShopCostLaneSummary.keepsDailyTokeniumSeparate,
+      scope: "APK"
+    });
+  }
+
+  if (spendActionLaneClues) {
+    const spendActionLaneSummary = getSpendActionLaneSummary(spendActionLaneClues);
+    cases.push({
+      title: "Spend action-lane split",
+      expected: "BuyTokenBoost, BuyDiamondBoost, BuyLM244, BuyCollectorDevice, and zero BuyTokenDailies hooks preserved",
+      actual: spendActionLaneSummary.hasActionSplit
+        ? `${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, ${spendActionLaneSummary.premiumModifierHook}, and zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} hooks preserved`
+        : "Missing spend action-lane clues",
+      pass: spendActionLaneSummary.hasActionSplit && spendActionLaneSummary.keepsDailyDirectHooksUnrecovered,
+      scope: "APK"
+    });
+  }
+
+  if (tokenShopOwnerShell) {
+    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShopOwnerShell);
+    cases.push({
+      title: "TokenShop owner shell",
+      expected: "TokenShop, ClaimBankedTokens, CheckTokenClaimNotification, and BuyAutoTokenClicker preserved as one local owner shell",
+      actual: tokenShopOwnerShellSummary.hasOwnerShell
+        ? `${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} preserved as one local owner shell`
+        : "Missing TokenShop owner-shell clues",
+      pass: tokenShopOwnerShellSummary.hasOwnerShell,
+      scope: "APK"
+    });
+  }
+
+  if (tokenShopSaveBoundary) {
+    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShopSaveBoundary);
+    cases.push({
+      title: "TokenShop save boundary",
+      expected: "TokenShop owner shell and PlayerProfileData save-family clues stay separate with zero overlap",
+      actual: tokenShopSaveBoundarySummary.hasSeparationBoundary
+        ? `${tokenShopSaveBoundarySummary.ownerAnchor} and ${tokenShopSaveBoundarySummary.saveAnchor} stay separate with ${tokenShopSaveBoundarySummary.overlapLabel}`
+        : "Missing TokenShop save-boundary clues",
+      pass: tokenShopSaveBoundarySummary.hasSeparationBoundary,
+      scope: "APK"
+    });
+  }
+
+  if (tokenBankControllerShell) {
+    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenBankControllerShell);
+    cases.push({
+      title: "Token-bank controller shell",
+      expected: "ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and CheckTokenClaimNotification preserved",
+      actual: tokenBankControllerShellSummary.hasControllerShell
+        ? `${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook} preserved`
+        : "Missing token-bank controller-shell clues",
+      pass: tokenBankControllerShellSummary.hasControllerShell,
+      scope: "APK"
+    });
+  }
+
+  if (tokenBankStateClues) {
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenBankStateClues);
+    cases.push({
+      title: "Token-bank controller split clues",
+      expected: "ClaimBankedTokens, get_TokenBankCap, BigStatisticPrefab.TokenBankCap, and SetLM244BonusText available",
+      actual: tokenBankStateSummary.hasControllerSplit
+        ? `${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook} available`
+        : "Missing token-bank controller split clues",
+      pass: tokenBankStateSummary.hasControllerSplit,
+      scope: "APK"
+    });
+  }
+
+  if (dailyTokeniumLaneClues) {
+    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(dailyTokeniumLaneClues);
+    cases.push({
+      title: "Daily Tokenium owner-family clues",
+      expected: "SpaceAcademy, FarmMissions, SetLM244BonusText, BuyLM244, and BuyCollectorDevice available",
+      actual: dailyTokeniumSummary.hasOwnerFamilyClues
+        ? `${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.purchaseOwner} available`
+        : "Missing Daily Tokenium owner-family clues",
+      pass: dailyTokeniumSummary.hasOwnerFamilyClues && dailyTokeniumSummary.hasModifierBoundary,
+      scope: "APK"
+    });
+  }
+
+  if (tokenBankFormulaBoundary) {
+    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenBankFormulaBoundary);
+    cases.push({
+      title: "Token-bank derived output boundary",
+      expected: "FinalTokenBankCap and FinalTokenBankFillSpeed cluster without PlayerProfileData or CloudSavePlayerProfile joins",
+      actual: tokenBankFormulaSummary.hasDerivedOutputBoundary
+        ? `${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} cluster${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? " without save-family joins" : " with save-family overlap"}.`
+        : "Missing token-bank derived output boundary clues",
+      pass: tokenBankFormulaSummary.hasDerivedOutputBoundary && tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext,
+      scope: "APK"
+    });
+  }
+
+  if (multiverseMarketRangeBoundary) {
+    const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(multiverseMarketRangeBoundary);
+    cases.push({
+      title: "MultiverseMarket row-range boundary",
+      expected: "Validated rows 50-59 and 63-74 do not overlap the recovered IS99-110 metadata run",
+      actual: multiverseMarketRangeSummary.hasExplicitZeroOverlap
+        ? `Validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} do not overlap ${multiverseMarketRangeSummary.metadataRangeLabel}`
+        : "Missing validated-row versus metadata-run boundary",
+      pass: multiverseMarketRangeSummary.hasExplicitZeroOverlap,
+      scope: "APK"
+    });
+  }
+
+  if (multiverseMarketRowTextCoverage) {
+    const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(multiverseMarketRowTextCoverage);
+    cases.push({
+      title: "MultiverseMarket validated row text coverage",
+      expected: "TextHandlerMarkets and SetAllChrystosEmporiumTexts cover SetIS50-59 and 63-74 cost texts",
+      actual: multiverseMarketRowTextSummary.hasValidatedTextCoverage
+        ? `${multiverseMarketRowTextSummary.textHandler} and ${multiverseMarketRowTextSummary.textBatcher} cover ${multiverseMarketRowTextSummary.coveredCount} SetIS*CostText hooks for ${multiverseMarketRowTextSummary.validatedRangeLabel}`
+        : "Missing validated MultiverseMarket row text coverage",
+      pass: multiverseMarketRowTextSummary.hasValidatedTextCoverage && multiverseMarketRowTextSummary.hasBuyHookSamples,
+      scope: "APK"
+    });
+  }
+
+  if (multiverseMarketActionShell) {
+    const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(multiverseMarketActionShell);
+    cases.push({
+      title: "MultiverseMarket action shell",
+      expected: "Context-derived BuyIS1-110 and SetIS1-110CostText shell preserved while only rows 50-59 and 63-74 stay validated",
+      actual: multiverseMarketActionShellSummary.hasActionShell
+        ? `${multiverseMarketActionShellSummary.buyRangeLabel} and ${multiverseMarketActionShellSummary.costTextRangeLabel} preserved while ${multiverseMarketActionShellSummary.validatedRangeLabel} stays validated`
+        : "Missing MultiverseMarket action-shell boundary",
+      pass: multiverseMarketActionShellSummary.hasActionShell,
+      scope: "APK"
+    });
+  }
+
+  if (multiverseMarketSaveBoundary) {
+    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(multiverseMarketSaveBoundary);
+    cases.push({
+      title: "MultiverseMarket save boundary",
+      expected: "MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap",
+      actual: multiverseMarketSaveBoundarySummary.hasSeparationBoundary
+        ? `${multiverseMarketSaveBoundarySummary.actionAnchor} and ${multiverseMarketSaveBoundarySummary.saveAnchor} stay separate with ${multiverseMarketSaveBoundarySummary.overlapLabel}`
+        : "Missing MultiverseMarket save-boundary clues",
+      pass: multiverseMarketSaveBoundarySummary.hasSeparationBoundary,
       scope: "APK"
     });
   }
@@ -2426,6 +2817,390 @@ function buildApkGroundingValidationCases() {
   }
 
   return cases;
+}
+
+function getTokenShopCoverageSummary(tokenShop) {
+  const numericTable = tokenShop?.numeric_table ?? {};
+  const numericKeys = Object.keys(numericTable);
+  const fields = Array.isArray(tokenShop?.fields) ? tokenShop.fields : [];
+  const controllerFieldNames = new Set(fields.filter((entry) => entry.group === "controller").map((entry) => entry.field));
+  const groups = [...new Set(
+    numericKeys
+      .map((key) => numericTable[key]?.group)
+      .filter((value) => typeof value === "string" && value.length)
+  )].sort();
+  const namedLanes = ["TokenBoost", "DiamondBoost", "TokenDailiesT2"].filter((key) => key in numericTable);
+
+  return {
+    hasCoverage: numericKeys.length > 0,
+    numericGroupCount: numericKeys.length,
+    hasNamedLanes: namedLanes.length === 3,
+    namedLaneLabel: namedLanes.join(", "),
+    tierLabel: groups.join(", "),
+    hasControllerAnchors:
+      controllerFieldNames.has("BankFill")
+      && controllerFieldNames.has("TokenBankDescriptionText")
+  };
+}
+
+function getTokeniumNamingSummary(clues) {
+  const resourceIcons = Array.isArray(clues?.assetNames?.resourceIcons) ? clues.assetNames.resourceIcons : [];
+  const academySprites = Array.isArray(clues?.assetNames?.academySprites) ? clues.assetNames.academySprites : [];
+  const level0Shells = Array.isArray(clues?.level0Shells) ? clues.level0Shells : [];
+
+  return {
+    hasNamingClues:
+      resourceIcons.includes("Resource_Tokenium")
+      && academySprites.includes("Aca.Tokenium553")
+      && level0Shells.includes("CostBox-Tokens")
+      && level0Shells.includes("CostBox-Tokenium"),
+    resourceLabel: resourceIcons.find((value) => value === "Resource_Tokenium") || "Resource_Tokenium",
+    academyLabel: academySprites.find((value) => value === "Aca.Tokenium553") || "Aca.Tokenium553",
+    tokenShellLabel: level0Shells.find((value) => value === "CostBox-Tokens") || "CostBox-Tokens",
+    tokeniumShellLabel: level0Shells.find((value) => value === "CostBox-Tokenium") || "CostBox-Tokenium"
+  };
+}
+
+function getTokenShopCostLaneSummary(clues) {
+  const tokenSpendGroups = Array.isArray(clues?.tokenSpendGroups) ? clues.tokenSpendGroups : [];
+  const dailyTokeniumModifierGroups = Array.isArray(clues?.dailyTokeniumModifierGroups) ? clues.dailyTokeniumModifierGroups : [];
+  const diamondGroups = Array.isArray(clues?.diamondGroups) ? clues.diamondGroups : [];
+  const playerFacingClues = Array.isArray(clues?.playerFacingClues) ? clues.playerFacingClues : [];
+
+  return {
+    hasLaneSplit:
+      tokenSpendGroups.includes("TokenBoost")
+      && diamondGroups.includes("DiamondBoost")
+      && dailyTokeniumModifierGroups.includes("TokenDailiesT2")
+      && playerFacingClues.includes("CostBox-Tokens")
+      && playerFacingClues.includes("CostBox-Tokenium"),
+    keepsDailyTokeniumSeparate:
+      dailyTokeniumModifierGroups.includes("TokenDailiesT2")
+      && dailyTokeniumModifierGroups.includes("TokenDailiesT3")
+      && playerFacingClues.includes("Mission Materials Booster"),
+    tokenLaneLabel: "TokenBoost",
+    diamondLaneLabel: "DiamondBoost",
+    dailyLaneLabel: "TokenDailiesT2",
+    tokensShellLabel: "CostBox-Tokens",
+    tokeniumShellLabel: "CostBox-Tokenium"
+  };
+}
+
+function getSpendActionLaneSummary(clues) {
+  const tokenDirectBuyHooks = Array.isArray(clues?.tokenDirectBuyHooks) ? clues.tokenDirectBuyHooks : [];
+  const diamondDirectBuyHooks = Array.isArray(clues?.diamondDirectBuyHooks) ? clues.diamondDirectBuyHooks : [];
+  const dailyTokeniumModifierHooks = Array.isArray(clues?.dailyTokeniumModifierHooks) ? clues.dailyTokeniumModifierHooks : [];
+  const searchMetadata = typeof clues?.searchResults?.metadata === "object" && clues.searchResults.metadata
+    ? clues.searchResults.metadata
+    : {};
+  const searchLevel0 = typeof clues?.searchResults?.level0 === "object" && clues.searchResults.level0
+    ? clues.searchResults.level0
+    : {};
+
+  return {
+    hasActionSplit:
+      tokenDirectBuyHooks.includes("BuyTokenBoost")
+      && diamondDirectBuyHooks.includes("BuyDiamondBoost")
+      && dailyTokeniumModifierHooks.includes("BuyLM244")
+      && dailyTokeniumModifierHooks.includes("BuyCollectorDevice"),
+    keepsDailyDirectHooksUnrecovered:
+      searchMetadata.BuyTokenDailiesT2 === 0
+      && searchMetadata.BuyTokenDailiesT3 === 0
+      && searchLevel0.BuyTokenDailiesT2 === 0
+      && searchLevel0.BuyTokenDailiesT3 === 0,
+    tokenHook: "BuyTokenBoost",
+    diamondHook: "BuyDiamondBoost",
+    loopModifierHook: "BuyLM244",
+    premiumModifierHook: "BuyCollectorDevice",
+    dailyHookT2: "BuyTokenDailiesT2",
+    dailyHookT3: "BuyTokenDailiesT3"
+  };
+}
+
+function getTokenBankStateSummary(clues) {
+  const tokenShopMethods = Array.isArray(clues?.tokenShopMethods) ? clues.tokenShopMethods : [];
+  const displayOrHandlerClues = Array.isArray(clues?.displayOrHandlerClues) ? clues.displayOrHandlerClues : [];
+
+  return {
+    hasControllerSplit:
+      tokenShopMethods.includes("ClaimBankedTokens")
+      && tokenShopMethods.includes("get_TokenBankCap")
+      && displayOrHandlerClues.includes("BigStatisticPrefab.TokenBankCap")
+      && displayOrHandlerClues.includes("SetLM244BonusText"),
+    claimMethod: "ClaimBankedTokens",
+    capMethod: "get_TokenBankCap",
+    displayShell: "BigStatisticPrefab.TokenBankCap",
+    loopHandler: "TextHandlerLoopMods",
+    loopHook: "SetLM244BonusText"
+  };
+}
+
+function getDailyTokeniumLaneSummary(clues) {
+  const ownerFamilyClues = Array.isArray(clues?.ownerFamilyClues) ? clues.ownerFamilyClues : [];
+  const modifierClues = Array.isArray(clues?.modifierClues) ? clues.modifierClues : [];
+  const premiumModifierClues = Array.isArray(clues?.premiumModifierClues) ? clues.premiumModifierClues : [];
+  const playerFacingStrings = Array.isArray(clues?.playerFacingStrings) ? clues.playerFacingStrings : [];
+
+  return {
+    hasOwnerFamilyClues:
+      ownerFamilyClues.includes("SpaceAcademy")
+      && ownerFamilyClues.includes("SpaceAcademyMain")
+      && ownerFamilyClues.includes("TextHandlerSpaceAcademy")
+      && ownerFamilyClues.includes("FarmMissions"),
+    hasModifierBoundary:
+      modifierClues.includes("SetLM244BonusText")
+      && modifierClues.includes("BuyLM244")
+      && modifierClues.includes("FinalDailyTokenBonus")
+      && premiumModifierClues.includes("BuyCollectorDevice")
+      && premiumModifierClues.includes("CollectorCapBonus")
+      && premiumModifierClues.includes("CollectorMatsBonus"),
+    hasPlayerFacingBoundary:
+      playerFacingStrings.includes("0 / 2000 Daily Tokenium (from blue farm missions)")
+      && playerFacingStrings.includes("This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)")
+      && playerFacingStrings.includes("The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"),
+    ownerFamilyLabel: "SpaceAcademy",
+    missionFamilyLabel: "FarmMissions",
+    academyController: "SpaceAcademyMain",
+    textHandler: "TextHandlerSpaceAcademy",
+    loopHook: "SetLM244BonusText",
+    purchaseHook: "BuyLM244",
+    purchaseOwner: "BuyCollectorDevice",
+    premiumPack: "COLLECTERS PACK"
+  };
+}
+
+function getTokenBankFormulaBoundarySummary(clues) {
+  const derivedOutputCluster = Array.isArray(clues?.derivedOutputCluster) ? clues.derivedOutputCluster : [];
+  const saveFamilyCluesInDerivedContext = Array.isArray(clues?.saveFamilyCluesInDerivedContext)
+    ? clues.saveFamilyCluesInDerivedContext
+    : [];
+
+  return {
+    hasDerivedOutputBoundary:
+      derivedOutputCluster.includes("get_FinalTokenBankCap")
+      && derivedOutputCluster.includes("get_FinalTokenBankFillSpeed")
+      && derivedOutputCluster.includes("<FinalTokenBankCap>k__BackingField")
+      && derivedOutputCluster.includes("<FinalTokenBankFillSpeed>k__BackingField"),
+    hasNoSaveJoinInDerivedContext: saveFamilyCluesInDerivedContext.length === 0,
+    capAccessor: "get_FinalTokenBankCap",
+    fillAccessor: "get_FinalTokenBankFillSpeed",
+    capField: "<FinalTokenBankCap>k__BackingField",
+    fillField: "<FinalTokenBankFillSpeed>k__BackingField"
+  };
+}
+
+function getMultiverseMarketRangeBoundarySummary(boundary) {
+  const validatedRowRanges = Array.isArray(boundary?.validatedRowRanges) ? boundary.validatedRowRanges : [];
+  const overlapIds = Array.isArray(boundary?.overlapIds) ? boundary.overlapIds : [];
+  const metadataIsRangeLabel = typeof boundary?.metadataIsRangeLabel === "string" ? boundary.metadataIsRangeLabel : "";
+
+  return {
+    hasValidatedRows: validatedRowRanges.length > 0,
+    hasExplicitZeroOverlap: validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0 && overlapIds.length === 0,
+    validatedRangeLabel: validatedRowRanges.join(" and "),
+    metadataRangeLabel: metadataIsRangeLabel
+  };
+}
+
+function getMultiverseMarketRowTextCoverageSummary(coverage) {
+  const textHandlerAnchors = Array.isArray(coverage?.textHandlerAnchors) ? coverage.textHandlerAnchors : [];
+  const validatedRowCostTexts = Array.isArray(coverage?.validatedRowCostTexts) ? coverage.validatedRowCostTexts : [];
+  const sampleBuyHooks = Array.isArray(coverage?.sampleBuyHooks) ? coverage.sampleBuyHooks : [];
+
+  return {
+    hasValidatedTextCoverage:
+      textHandlerAnchors.includes("TextHandlerMarkets")
+      && textHandlerAnchors.includes("SetAllChrystosEmporiumTexts")
+      && validatedRowCostTexts.length === 22
+      && validatedRowCostTexts.includes("SetIS50CostText")
+      && validatedRowCostTexts.includes("SetIS74CostText"),
+    hasBuyHookSamples:
+      sampleBuyHooks.includes("BuyIS50")
+      && sampleBuyHooks.includes("BuyIS74"),
+    coveredCount: validatedRowCostTexts.length,
+    validatedRangeLabel: "50-59 and 63-74",
+    textHandler: "TextHandlerMarkets",
+    textBatcher: "SetAllChrystosEmporiumTexts",
+    firstBuyHook: "BuyIS50",
+    lastBuyHook: "BuyIS74"
+  };
+}
+
+function getMultiverseMarketActionShellSummary(shell) {
+  const textHandlerAnchors = Array.isArray(shell?.textHandlerAnchors) ? shell.textHandlerAnchors : [];
+  const validatedBuyHookRanges = Array.isArray(shell?.validatedBuyHookRanges) ? shell.validatedBuyHookRanges : [];
+  const validatedBuyHooks = Array.isArray(shell?.validatedBuyHooks) ? shell.validatedBuyHooks : [];
+  const validatedCostTexts = Array.isArray(shell?.validatedCostTexts) ? shell.validatedCostTexts : [];
+  const buyRange = shell?.contextDerivedBuyHookRange ?? {};
+  const costTextRange = shell?.contextDerivedCostTextRange ?? {};
+
+  return {
+    hasActionShell:
+      textHandlerAnchors.includes("TextHandlerMarkets")
+      && textHandlerAnchors.includes("SetAllChrystosEmporiumTexts")
+      && buyRange.start === 1
+      && buyRange.end === 110
+      && buyRange.count === 110
+      && costTextRange.start === 1
+      && costTextRange.end === 110
+      && costTextRange.count === 110
+      && validatedBuyHookRanges.join(" and ") === "50-59 and 63-74"
+      && validatedBuyHooks.length === 22
+      && validatedCostTexts.length === 22,
+    buyRangeLabel: "BuyIS1-110",
+    costTextRangeLabel: "SetIS1-110CostText",
+    validatedRangeLabel: validatedBuyHookRanges.join(" and ") || "50-59 and 63-74"
+  };
+}
+
+function getTokenShopOwnerShellSummary(shell) {
+  const ownerAnchors = Array.isArray(shell?.ownerAnchors) ? shell.ownerAnchors : [];
+  const tokenBankMethods = Array.isArray(shell?.tokenBankMethods) ? shell.tokenBankMethods : [];
+  const notificationHooks = Array.isArray(shell?.notificationHooks) ? shell.notificationHooks : [];
+  const adjacentDeviceHooks = Array.isArray(shell?.adjacentDeviceHooks) ? shell.adjacentDeviceHooks : [];
+
+  return {
+    hasOwnerShell:
+      ownerAnchors.includes("TokenShop")
+      && ownerAnchors.includes("InitializeTokenShop")
+      && tokenBankMethods.includes("ClaimBankedTokens")
+      && notificationHooks.includes("CheckTokenClaimNotification")
+      && adjacentDeviceHooks.includes("BuyAutoTokenClicker"),
+    ownerAnchor: "TokenShop",
+    bankMethod: "ClaimBankedTokens",
+    notificationHook: "CheckTokenClaimNotification",
+    deviceHook: "BuyAutoTokenClicker"
+  };
+}
+
+function getTokenShopSaveBoundarySummary(boundary) {
+  const ownerShellTermsChecked = Array.isArray(boundary?.ownerShellTermsChecked) ? boundary.ownerShellTermsChecked : [];
+  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked) ? boundary.saveFamilyTermsChecked : [];
+  const probeResults = typeof boundary?.probeResults === "object" && boundary.probeResults ? boundary.probeResults : {};
+
+  return {
+    hasSeparationBoundary:
+      ownerShellTermsChecked.includes("TokenShop")
+      && saveFamilyTermsChecked.includes("PlayerProfileData")
+      && probeResults.metadataHasSaveTerms === true
+      && probeResults.level0HasSaveTerms === false
+      && probeResults.ownerShellWithSaveOverlapCount === 0
+      && probeResults.directTokenShopPlayerProfileContext === false,
+    ownerAnchor: "TokenShop",
+    saveAnchor: "PlayerProfileData",
+    overlapLabel: "zero overlap"
+  };
+}
+
+function getTokenBankControllerShellSummary(shell) {
+  const controllerAnchors = Array.isArray(shell?.controllerAnchors) ? shell.controllerAnchors : [];
+  const adjacentControllerMethods = Array.isArray(shell?.adjacentControllerMethods) ? shell.adjacentControllerMethods : [];
+
+  return {
+    hasControllerShell:
+      controllerAnchors.includes("ClaimBankedTokens")
+      && controllerAnchors.includes("SetBankFill")
+      && controllerAnchors.includes("BankFill")
+      && controllerAnchors.includes("TokenBankDescriptionText")
+      && controllerAnchors.includes("CheckTokenClaimNotification")
+      && controllerAnchors.includes("TokenShopButtonNotification")
+      && adjacentControllerMethods.includes("get_TokenBankCap")
+      && adjacentControllerMethods.includes("get_ClaimableBankTokens")
+      && adjacentControllerMethods.includes("IncreaseBankedTokens"),
+    claimMethod: "ClaimBankedTokens",
+    fillMethod: "SetBankFill",
+    fillField: "BankFill",
+    descriptionShell: "TokenBankDescriptionText",
+    notificationHook: "CheckTokenClaimNotification"
+  };
+}
+
+function getMultiverseMarketSaveBoundarySummary(boundary) {
+  const actionShellTermsChecked = Array.isArray(boundary?.actionShellTermsChecked) ? boundary.actionShellTermsChecked : [];
+  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked) ? boundary.saveFamilyTermsChecked : [];
+  const probeResults = typeof boundary?.probeResults === "object" && boundary.probeResults ? boundary.probeResults : {};
+
+  return {
+    hasSeparationBoundary:
+      actionShellTermsChecked.includes("TextHandlerMarkets")
+      && saveFamilyTermsChecked.includes("PlayerProfileData")
+      && probeResults.actionShellWithSaveOverlapCount === 0
+      && probeResults.metadataNeighborhoodHasActionTerms === true
+      && probeResults.metadataNeighborhoodHasSaveTerms === true
+      && probeResults.metadataProbeHasSaveTerms === false
+      && probeResults.level0ProbeHasSaveTerms === false,
+    actionAnchor: "TextHandlerMarkets",
+    saveAnchor: "PlayerProfileData",
+    overlapLabel: "zero overlap"
+  };
+}
+
+function getMultiverseMarketMetadataSummary(neighborhood) {
+  const results = Array.isArray(neighborhood?.results) ? neighborhood.results : [];
+  const findAnchor = (anchor) => results.find((entry) => entry.anchor === anchor);
+  const flattenStrings = (matches = []) => matches.flatMap((entry) => [
+    entry.match_value,
+    ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
+  ]);
+  const cloudSaveStrings = flattenStrings(findAnchor("CloudSavePlayerProfile")?.matches ?? []);
+  const playerProfileStrings = flattenStrings(findAnchor("PlayerProfileData")?.matches ?? []);
+  const inscryptionsStrings = flattenStrings(findAnchor("InscryptionsDone")?.matches ?? []);
+  const recoveredIsLevels = [...new Set(
+    inscryptionsStrings
+      .flatMap((value) => Array.from(String(value).matchAll(/IS(\d+)Level/g), (match) => Number(match[1])))
+      .filter((value) => Number.isFinite(value))
+      .sort((left, right) => left - right)
+  )];
+
+  return {
+    hasCloudSavePathClues:
+      cloudSaveStrings.some((value) => String(value).includes("CloudSavePlayerProfile"))
+      && cloudSaveStrings.some((value) => String(value).includes("GetPlayerProfileInfo")),
+    hasSaveFamilyClues:
+      playerProfileStrings.some((value) => String(value).includes("PlayerProfileData.cs"))
+      && playerProfileStrings.some((value) => String(value).includes("GetPlayerProfileData"))
+      && playerProfileStrings.some((value) => String(value).includes("FillPlayerProfileData")),
+    hasProgressionFieldCluster:
+      inscryptionsStrings.some((value) => String(value).includes("InscryptionsDone"))
+      && inscryptionsStrings.some((value) => String(value).includes("EsotericR1Trades")),
+    recoveredIsRangeLabel: recoveredIsLevels.length
+      ? `IS${recoveredIsLevels[0]}Level through IS${recoveredIsLevels[recoveredIsLevels.length - 1]}Level`
+      : ""
+  };
+}
+
+function getMultiverseMarketValidatedCoverage(multiverseMarket) {
+  const validatedIds = Array.isArray(multiverseMarket?.source?.validated_ids)
+    ? [...new Set(multiverseMarket.source.validated_ids.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
+    : [];
+  const ranges = [];
+  let rangeStart = null;
+  let previous = null;
+
+  validatedIds.forEach((value) => {
+    if (rangeStart === null) {
+      rangeStart = value;
+      previous = value;
+      return;
+    }
+    if (value === previous + 1) {
+      previous = value;
+      return;
+    }
+    ranges.push(rangeStart === previous ? `${rangeStart}` : `${rangeStart}-${previous}`);
+    rangeStart = value;
+    previous = value;
+  });
+
+  if (rangeStart !== null) {
+    ranges.push(rangeStart === previous ? `${rangeStart}` : `${rangeStart}-${previous}`);
+  }
+
+  return {
+    hasValidatedRows: validatedIds.length > 0,
+    count: validatedIds.length,
+    rangeLabel: ranges.join(" and ")
+  };
 }
 
 function renderOverviewSupportSummary(apkValidation, supportValidation) {
