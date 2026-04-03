@@ -392,7 +392,7 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
@@ -423,6 +423,7 @@ async function bootstrap() {
     fetchJson("./data/token-shop-owner-shell.json"),
     fetchJson("./data/token-shop-save-boundary.json"),
     fetchJson("./data/multiverse-market-save-boundary.json"),
+    fetchJson("./data/multiverse-market-market-member-boundary.json"),
     fetchJson("./data/token-bank-controller-shell.json")
   ]);
 
@@ -465,6 +466,7 @@ async function bootstrap() {
     tokenShopOwnerShell,
     tokenShopSaveBoundary,
     multiverseMarketSaveBoundary,
+    multiverseMarketMarketMemberBoundary,
     tokenBankControllerShell
   };
   state.playerProfile = normalizePlayerProfile(
@@ -1757,7 +1759,7 @@ function renderSpendPlannerBoundary() {
   const tokenShop = state.extractedMechanics?.tokenShop ?? {};
   const multiverseMarket = state.extractedMechanics?.multiverseMarket ?? {};
   const compatibility = getCompatibilityProfileState();
-  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-planner-from-extracted-data");
+  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-multiverse-save-model-recovery");
   const nextUnlockSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
   const importedTokenShopState = compatibility.unmappedSystems?.tokenShop;
   const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
@@ -1767,6 +1769,7 @@ function renderSpendPlannerBoundary() {
   const validatedRows = Array.isArray(multiverseMarket.records) ? multiverseMarket.records.length : 0;
   const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
   const importedMarketPreview = getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket);
+  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
   const hasTokeniumShell =
     resourceIcons.includes("resourceicons/resource_tokenium")
     && resourceIcons.includes("resourceicons/resource_tokenium_cap");
@@ -1793,6 +1796,12 @@ function renderSpendPlannerBoundary() {
         <p class="meta"><code>Inscryptions Done</code> and <code>IS*Level</code> are not yet safe canonical PlayerProfile inputs, so MultiverseMarket recommendations remain blocked.</p>
       </div>
       <div class="meta-stack">
+        <p class="snapshot-title">Active Emporium save-model narrowing</p>
+        <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
+        <p class="meta">${marketMemberSummary.hasCloudBridge ? `The same narrowed path still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps this lane tied to repo-local player-profile recovery instead of UI-only text handlers.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the Emporium save-model path."}</p>
+        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the next safe step is still save-model recovery rather than planner logic.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save-model path and needs review."}</p>
+      </div>
+      <div class="meta-stack">
         <p class="snapshot-title">Imported spend payload watch</p>
         <p class="meta">${hasImportedTokenShopState ? `Quarantined TokenShop payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedTokenShopState))}).` : "No quarantined TokenShop payload is present in the imported PlayerProfile."}</p>
         <p class="meta">${hasImportedMarketState ? `Quarantined MultiverseMarket payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedMarketState))}).` : "No quarantined MultiverseMarket payload is present in the imported PlayerProfile."}</p>
@@ -1806,13 +1815,14 @@ function renderSpendPlannerBoundary() {
         <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Preview sample: ${escapeHtml(importedMarketPreview.sampleLine)}.` : "When imported <code>IS*Level</code> fields are present, this build will surface only the validated row block and keep everything else quarantined."}</p>
         <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.maxedCount} imported validated rows are already at their recovered max level.` : "This preview stays descriptive only and does not unlock spend recommendations or canonical PlayerProfile fields."}</p>
       </div>
-      ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">First safe spend unlock path</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+      ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Active Emporium next steps</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
       <div class="pill-row">
         <span class="pill">${numericGroupCount} TokenShop numeric groups</span>
         <span class="pill">${validatedRows} validated market rows</span>
         <span class="pill">${hasTokeniumShell ? "Tokenium shell grounded" : "Tokenium shell incomplete"}</span>
         <span class="pill">${hasImportedTokenShopState || hasImportedMarketState ? "Imported spend payload quarantined" : "No imported spend payload yet"}</span>
         <span class="pill">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.importedValidatedRowCount} validated Emporium levels previewed` : "No Emporium level preview yet"}</span>
+        <span class="pill">${marketMemberSummary.hasBoundary ? "Emporium save path narrowed" : "Emporium save path unresolved"}</span>
         <span class="pill">No spend recommendations yet</span>
       </div>
     </article>
@@ -1873,7 +1883,7 @@ function getResearchTrackOrder(track) {
     "shard-milestone-payload-recovery",
     "shards-and-loop-guardrails",
     "unified-feed-and-hardening",
-    "spend-planner-from-extracted-data",
+    "spend-multiverse-save-model-recovery",
     "hunter-related-planning",
     "mech-related-planning",
     "input-automation-intake",
@@ -1890,7 +1900,7 @@ function getResearchTrackSequenceLabel(track) {
     "shard-milestone-payload-recovery": "Sequence 2/5",
     "shards-and-loop-guardrails": "Sequence 2/5",
     "unified-feed-and-hardening": "Sequence 3/5",
-    "spend-planner-from-extracted-data": "Sequence 4/5",
+    "spend-multiverse-save-model-recovery": "Sequence 4/5",
     "hunter-related-planning": "Research intake",
     "mech-related-planning": "Research intake",
     "input-automation-intake": "Research intake",
@@ -1985,10 +1995,11 @@ function renderResearchTrackSupport(track) {
     `;
   }
 
-  if (track.id === "spend-planner-from-extracted-data") {
+  if (track.id === "spend-multiverse-save-model-recovery") {
     const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
     const validatedCoverage = getMultiverseMarketValidatedCoverage(state.extractedMechanics?.multiverseMarket);
     const metadataSummary = getMultiverseMarketMetadataSummary(state.extractedMechanics?.multiverseMarketMetadataNeighborhood);
+    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
     const tokeniumNamingSummary = getTokeniumNamingSummary(state.extractedMechanics?.tokeniumNamingClues);
     const tokenBankStateSummary = getTokenBankStateSummary(state.extractedMechanics?.tokenBankStateClues);
     const dailyTokeniumSummary = getDailyTokeniumLaneSummary(state.extractedMechanics?.dailyTokeniumLaneClues);
@@ -2036,6 +2047,9 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? "That is enough to keep the Emporium owner-family and Inscryptions cost-lane shell grounded, but not enough to recover player-owned balance fields or current row levels." : "The current build does not yet preserve a grounded MultiverseMarket owner-family shell."}</p>
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary still keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}.` : "MultiverseMarket save-boundary clues are not available in this build."}</p>
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? "That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet." : "The current build does not yet preserve a clean separation boundary between MultiverseMarket action-shell recovery and save-family recovery."}</p>
+        <p class="meta">${marketMemberSummary.hasBoundary ? `The newer checked market-member boundary now preserves ${marketMemberSummary.accessorLabel}, ${marketMemberSummary.memberLabel}, and nearby profile-side member shells such as ${marketMemberSummary.memberShellLabel}.` : "The newer checked market-member boundary is not available in this build."}</p>
+        <p class="meta">${marketMemberSummary.hasCloudBridge ? `That same narrowed handoff still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which makes a direct PlayerProfile-side market member or wrapper handoff more credible than the older broad family guess.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
+        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so this track remains a save-model recovery lane rather than a planner implementation lane.` : "The current build no longer preserves the expected direct-type-map gap for the market-member boundary and needs review."}</p>
         <p class="meta">This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs.</p>
       </div>
     `;
@@ -2088,7 +2102,7 @@ function getResearchTrackPhase(track) {
     "shard-milestone-payload-recovery": "PR 2 successor",
     "shards-and-loop-guardrails": "PR 2",
     "unified-feed-and-hardening": "PR 3 then PR 5 hardening",
-    "spend-planner-from-extracted-data": "PR 4",
+    "spend-multiverse-save-model-recovery": "PR 4 successor",
     "hunter-related-planning": "Research intake only",
     "mech-related-planning": "Research intake only",
     "input-automation-intake": "Research intake only",
@@ -2103,7 +2117,7 @@ function getResearchTrackSource(track) {
     "playerprofile-boundary-and-imports": "Schema boundary",
     "shard-milestone-payload-recovery": "Grounded shard data",
     "shards-and-loop-guardrails": "Grounded shard data",
-    "spend-planner-from-extracted-data": "Extracted spend data",
+    "spend-multiverse-save-model-recovery": "Extracted Emporium save-side data",
     "unified-feed-and-hardening": "Integration contract",
     "hunter-related-planning": "Research intake",
     "mech-related-planning": "Research intake",
@@ -4119,6 +4133,35 @@ function getMultiverseMarketSaveBoundarySummary(boundary) {
     actionAnchor: "TextHandlerMarkets",
     saveAnchor: "PlayerProfileData",
     overlapLabel: "zero overlap"
+  };
+}
+
+function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
+  const accessorClues = Array.isArray(boundary?.playerProfileAccessorClues) ? boundary.playerProfileAccessorClues : [];
+  const memberShellClues = Array.isArray(boundary?.playerProfileMemberShellClues) ? boundary.playerProfileMemberShellClues : [];
+  const cloudSaveBridgeClues = Array.isArray(boundary?.cloudSaveBridgeClues) ? boundary.cloudSaveBridgeClues : [];
+  const missingDirectTypeMapClues = Array.isArray(boundary?.missingDirectTypeMapClues) ? boundary.missingDirectTypeMapClues : [];
+
+  return {
+    hasBoundary:
+      accessorClues.includes("get_Market")
+      && memberShellClues.includes("Market")
+      && memberShellClues.includes("ShardData")
+      && memberShellClues.includes("ResearchPointData"),
+    hasCloudBridge:
+      cloudSaveBridgeClues.includes("CloudSavePlayerProfile")
+      && cloudSaveBridgeClues.includes("GetPlayerProfileInfo")
+      && cloudSaveBridgeClues.includes("CloudLoad"),
+    hasMissingDirectTypeMap:
+      missingDirectTypeMapClues.includes("PlayerProfileData|Market")
+      && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption")
+      && missingDirectTypeMapClues.includes("PlayerProfileData|MultiverseMarket"),
+    accessorLabel: "get_Market",
+    memberLabel: "Market",
+    memberShellLabel: "Relics, ShardData, ResearchPointData, and AcademyPointData",
+    cloudSaveLabel: "CloudSavePlayerProfile",
+    profileInfoLabel: "GetPlayerProfileInfo",
+    missingTypeMapLabel: "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket"
   };
 }
 
