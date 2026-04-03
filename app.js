@@ -1625,7 +1625,9 @@ function renderResearch() {
   $("#researchResults").innerHTML = [
     renderResearchGuidance(),
     renderResearchViewSelector(orderedTracks),
-    ...visibleTracks.map((track) => `
+    ...visibleTracks.map((track) => {
+      const nextSteps = Array.isArray(track.nextSteps) ? track.nextSteps : [];
+      return `
     <article class="research-card">
       <div class="research-card-head">
         <div>
@@ -1643,13 +1645,14 @@ function renderResearch() {
       ${renderResearchTrackProgress(track)}
       ${renderResearchTrackSupport(track)}
       <div class="meta-stack">
-        <p class="snapshot-title">${track.nextSteps.length ? "Remaining work" : "Archive note"}</p>
-        ${track.nextSteps.length
-          ? `<ul class="research-step-list">${track.nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>`
+        <p class="snapshot-title">${nextSteps.length ? "Remaining work" : "Archive note"}</p>
+        ${nextSteps.length
+          ? `<ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>`
           : `<p class="meta">No active remaining work. This card stays here only as delivered foundation context for later roadmap slices.</p>`}
       </div>
     </article>
-  `),
+  `;
+    }),
     !visibleTracks.length
       ? `
     <article class="research-card">
@@ -1763,6 +1766,7 @@ function renderSpendPlannerBoundary() {
   const numericGroupCount = Object.keys(tokenShop.numeric_table ?? {}).length;
   const validatedRows = Array.isArray(multiverseMarket.records) ? multiverseMarket.records.length : 0;
   const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
+  const importedMarketPreview = getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket);
   const hasTokeniumShell =
     resourceIcons.includes("resourceicons/resource_tokenium")
     && resourceIcons.includes("resourceicons/resource_tokenium_cap");
@@ -1795,12 +1799,20 @@ function renderSpendPlannerBoundary() {
         <p class="meta">These imported blobs stay under <code>compatibility.unmappedSystemState</code> until spend owners, saved-state inputs, and grounded labels are recovered.</p>
         <p class="meta">The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap</code>, <code>ClaimableBankTokens</code>, <code>InscryptionsDone</code>, and top-level <code>IS*Level</code> fields instead of dropping them.</p>
       </div>
+      <div class="meta-stack">
+        <p class="snapshot-title">Partial Emporium import preview</p>
+        <p class="meta">${importedMarketPreview.hasImportedBalance ? `Imported <code>InscryptionsDone</code>: ${escapeHtml(importedMarketPreview.balanceLabel)}.` : "No imported <code>InscryptionsDone</code> balance is available yet."}</p>
+        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Current imported levels are available for ${importedMarketPreview.importedValidatedRowCount}/${importedMarketPreview.validatedRowCount} validated Emporium rows (${escapeHtml(importedMarketPreview.validatedRangeLabel)}).` : "No imported current levels are available yet for the validated Emporium rows."}</p>
+        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Preview sample: ${escapeHtml(importedMarketPreview.sampleLine)}.` : "When imported <code>IS*Level</code> fields are present, this build will surface only the validated row block and keep everything else quarantined."}</p>
+        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.maxedCount} imported validated rows are already at their recovered max level.` : "This preview stays descriptive only and does not unlock spend recommendations or canonical PlayerProfile fields."}</p>
+      </div>
       ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">First safe spend unlock path</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
       <div class="pill-row">
         <span class="pill">${numericGroupCount} TokenShop numeric groups</span>
         <span class="pill">${validatedRows} validated market rows</span>
         <span class="pill">${hasTokeniumShell ? "Tokenium shell grounded" : "Tokenium shell incomplete"}</span>
         <span class="pill">${hasImportedTokenShopState || hasImportedMarketState ? "Imported spend payload quarantined" : "No imported spend payload yet"}</span>
+        <span class="pill">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.importedValidatedRowCount} validated Emporium levels previewed` : "No Emporium level preview yet"}</span>
         <span class="pill">No spend recommendations yet</span>
       </div>
     </article>
@@ -4170,6 +4182,46 @@ function getMultiverseMarketValidatedCoverage(multiverseMarket) {
     hasValidatedRows: validatedIds.length > 0,
     count: validatedIds.length,
     rangeLabel: ranges.join(" and ")
+  };
+}
+
+function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket) {
+  const validatedRecords = Array.isArray(multiverseMarket?.records) ? multiverseMarket.records : [];
+  const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
+  const importedState = typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
+  const rawBalance = importedState.InscryptionsDone;
+  const hasImportedBalance = isBoundaryValuePresent(rawBalance);
+  const balanceLabel = hasImportedBalance ? formatBoundaryValue(rawBalance) : "Not imported";
+  const importedValidatedRows = validatedRecords
+    .map((record) => {
+      const rowId = Number(record?.inscription_id);
+      const maxLevel = Number(record?.max_level);
+      const rawLevel = importedState[`IS${rowId}Level`];
+      const level = Number(rawLevel);
+      if (!Number.isFinite(rowId) || !Number.isFinite(level)) {
+        return null;
+      }
+      return {
+        rowId,
+        level,
+        maxLevel: Number.isFinite(maxLevel) ? maxLevel : null
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.rowId - right.rowId);
+  const previewRows = importedValidatedRows.slice(0, 4);
+
+  return {
+    hasImportedBalance,
+    balanceLabel,
+    hasValidatedLevelPreview: importedValidatedRows.length > 0,
+    importedValidatedRowCount: importedValidatedRows.length,
+    validatedRowCount: validatedRecords.length,
+    validatedRangeLabel: validatedCoverage.rangeLabel || "50-59 and 63-74",
+    maxedCount: importedValidatedRows.filter((entry) => Number.isFinite(entry.maxLevel) && entry.level >= entry.maxLevel).length,
+    sampleLine: previewRows.length
+      ? previewRows.map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}${Number.isFinite(entry.maxLevel) ? `/${formatShardNumber(entry.maxLevel)}` : ""}`).join(" | ")
+      : ""
   };
 }
 
