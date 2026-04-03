@@ -4,6 +4,7 @@ import {
   normalizePlayerProfile
 } from "./player-profile.js";
 import {
+  getRecommendationContractIssues as getNormalizedRecommendationContractIssues,
   sanitizeRecommendationLines as sanitizeNormalizedRecommendationLines,
   sortRecommendationFeed as sortNormalizedRecommendationFeed,
   toRecommendationAction as normalizeRecommendationAction
@@ -28,12 +29,17 @@ const APP_LAUNCH_KEYS = {
 const APP_LAUNCH_CHANNEL = "cifi-suite-launch";
 const APP_LAUNCH_HEARTBEAT_MS = 4000;
 const APP_LAUNCH_STALE_MS = 60000;
+const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
+  sessionApi: false,
+  launcherMode: false
+});
 const SERVER_SESSION_ENDPOINTS = {
   open: "/api/client/open",
   heartbeat: "/api/client/heartbeat",
   close: "/api/client/close",
   events: "/api/client/events"
 };
+const SERVER_CAPABILITIES = getServerCapabilities();
 
 const CANONICAL_PROFILE_FIELD_PATHS = {
   profileName: ["meta", "profileName"],
@@ -46,9 +52,14 @@ const CANONICAL_PROFILE_FIELD_PATHS = {
   notes: ["notes", "profile"]
 };
 
-const PROFILE_FORM_FIELD_PATHS = {
-  ...CANONICAL_PROFILE_FIELD_PATHS,
-  shardRatePerHour: ["planning", "shards", "ratePerHour"],
+const ACTIVE_PROFILE_FORM_FIELD_PATHS = {
+  profileName: CANONICAL_PROFILE_FIELD_PATHS.profileName,
+  loopReset: CANONICAL_PROFILE_FIELD_PATHS.loopReset,
+  dataConfidence: CANONICAL_PROFILE_FIELD_PATHS.dataConfidence,
+  diamonds: CANONICAL_PROFILE_FIELD_PATHS.diamonds,
+  tokens: CANONICAL_PROFILE_FIELD_PATHS.tokens,
+  shards: CANONICAL_PROFILE_FIELD_PATHS.shards,
+  notes: CANONICAL_PROFILE_FIELD_PATHS.notes,
   totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"]
 };
 
@@ -368,6 +379,7 @@ const state = {
   generatorOcrParsed: null,
   generatorOcrBusy: false,
   sourceRegistry: [],
+  researchView: "active",
   route: "overview"
 };
 
@@ -380,13 +392,17 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardSaveBoundary, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
     fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
     fetchJson("./data/shard-milestones-provenance.grounded.v1.json"),
     fetchJson("./data/shard-asset-grounding.v1.json"),
+    fetchJson("./data/shard-owner-family-boundary.v1.json"),
+    fetchJson("./data/shard-finalsu-bonus-boundary.v1.json"),
+    fetchJson("./data/shard-milestone-payload-boundary.v1.json"),
+    fetchJson("./data/shard-save-boundary.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
     fetchJson("./data/token-shop-values.json"),
     fetchJson("./data/multiverse-market-values.json"),
@@ -397,6 +413,7 @@ async function bootstrap() {
     fetchJson("./data/token-bank-formula-boundary.json"),
     fetchJson("./data/multiverse-market-range-boundary.json"),
     fetchJson("./data/multiverse-market-row-text-coverage.json"),
+    fetchJson("./data/multiverse-market-prefab-remap-boundary.json"),
     fetchJson("./data/token-shop-cost-lanes.json"),
     fetchJson("./data/spend-action-lane-clues.json"),
     fetchJson("./data/multiverse-market-action-shell.json"),
@@ -419,7 +436,11 @@ async function bootstrap() {
     milestones: groundedShardMilestones,
     observedBehaviors: groundedShardObservedBehaviors,
     provenance: groundedShardProvenance,
-    assetGrounding: shardAssetGrounding
+    assetGrounding: shardAssetGrounding,
+    ownerFamilyBoundary: shardOwnerFamilyBoundary,
+    finalSuBonusBoundary: shardFinalSuBonusBoundary,
+    milestonePayloadBoundary: shardMilestonePayloadBoundary,
+    saveBoundary: shardSaveBoundary
   };
   state.extractionCandidateRanking = extractionCandidateRanking;
   state.extractedMechanics = {
@@ -432,6 +453,7 @@ async function bootstrap() {
     tokenBankFormulaBoundary,
     multiverseMarketRangeBoundary,
     multiverseMarketRowTextCoverage,
+    multiverseMarketPrefabRemapBoundary,
     tokenShopCostLanes,
     spendActionLaneClues,
     multiverseMarketActionShell,
@@ -543,7 +565,7 @@ function initLaunchCoordinator() {
 }
 
 async function initServerSession() {
-  if (!window.location.origin.startsWith("http")) {
+  if (!window.location.origin.startsWith("http") || !SERVER_CAPABILITIES.sessionApi) {
     return;
   }
 
@@ -644,6 +666,18 @@ function closeServerSession(session = state.serverSession) {
     body: payload,
     keepalive: true
   }).catch(() => {});
+}
+
+function getServerCapabilities() {
+  const raw = window.__CIFI_SERVER_CAPABILITIES__;
+  if (!raw || typeof raw !== "object") {
+    return { ...DEFAULT_SERVER_CAPABILITIES };
+  }
+
+  return {
+    sessionApi: raw.sessionApi === true,
+    launcherMode: raw.launcherMode === true
+  };
 }
 
 function parseServerEvent(event) {
@@ -1083,9 +1117,11 @@ function renderOverview() {
   const apkValidation = validation.filter((item) => item.scope === "APK");
   const supportValidation = validation.filter((item) => item.scope === "Support");
   const recommendationFeed = getActiveMvpRecommendationFeed();
+  const recommendationFeedSupport = getActiveMvpRecommendationFeedSupport();
   $("#validationStatusValue").textContent = `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
   $("#overviewHighlights").innerHTML = [
     renderRecommendationFeedSummary(recommendationFeed, "overview"),
+    renderRecommendationFeedSupportNotice(recommendationFeedSupport, "overview"),
     ...recommendationFeed.slice(0, 3).map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : item.module)),
     renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
@@ -1414,6 +1450,7 @@ function renderShipActions() {
 
 function renderProgressionResults(results) {
   const recommendationFeed = getActiveMvpRecommendationFeed();
+  const recommendationFeedSupport = getActiveMvpRecommendationFeedSupport();
   renderShardPlannerControls();
   $("#progressionResults").innerHTML = `
     <article class="validation-card warn">
@@ -1422,7 +1459,8 @@ function renderProgressionResults(results) {
       <p class="meta">Do not treat milestone names, unlock rows, bonus labels, or cost notes here as shipped-game extracted truth until shard owner mapping is completed.</p>
     </article>
     ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
-    <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
+    ${renderRecommendationFeedSupportNotice(recommendationFeedSupport, "progression")}
+    <div class="recommendation-list">${recommendationFeed.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
     ${renderShardGroundingBoundary()}
     ${renderShardWorkflowSnapshot()}
     ${renderShardGroundingBoundary()}
@@ -1494,6 +1532,7 @@ function renderSpendSaveSideBoundary() {
   const tokenBankFormulaBoundary = state.extractedMechanics?.tokenBankFormulaBoundary;
   const multiverseMarketRangeBoundary = state.extractedMechanics?.multiverseMarketRangeBoundary;
   const multiverseMarketRowTextCoverage = state.extractedMechanics?.multiverseMarketRowTextCoverage;
+  const multiverseMarketPrefabRemapBoundary = state.extractedMechanics?.multiverseMarketPrefabRemapBoundary;
   if (!multiverseMarket && !multiverseMarketMetadataNeighborhood) {
     return "";
   }
@@ -1504,6 +1543,7 @@ function renderSpendSaveSideBoundary() {
   const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenBankFormulaBoundary);
   const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(multiverseMarketRangeBoundary);
   const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(multiverseMarketRowTextCoverage);
+  const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(multiverseMarketPrefabRemapBoundary);
   const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(state.extractedMechanics?.multiverseMarketOwnerFamily);
   return `
     <section class="meta-stack">
@@ -1542,6 +1582,11 @@ function renderSpendSaveSideBoundary() {
           <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? `TextHandlerMarkets now preserves ${multiverseMarketRowTextSummary.coveredCount} direct SetIS*CostText hooks for validated rows ${multiverseMarketRowTextSummary.validatedRangeLabel}.` : "Validated-row cost-text coverage is incomplete in the checked-in text-coverage bundle."}</p>
           <p class="meta">${multiverseMarketRowTextSummary.hasBuyHookSamples ? `Sample buy hooks such as ${multiverseMarketRowTextSummary.firstBuyHook} and ${multiverseMarketRowTextSummary.lastBuyHook} are also present in the same checked local coverage path.` : "Validated-row buy-hook samples are incomplete in the checked-in text-coverage bundle."}</p>
         </article>
+        <article class="validation-card ${multiverseMarketPrefabRemapSummary.hasOverrideBoundary ? "pass" : "warn"}">
+          <strong>Prefab remap boundary</strong>
+          <p class="meta">${multiverseMarketPrefabRemapSummary.hasDirectMatchBand ? `The checked prefab shell now keeps direct ChrystosEmporiumUpgrade names through ${multiverseMarketPrefabRemapSummary.lastDirectPrefab}.` : "Direct ChrystosEmporiumUpgrade name coverage is incomplete in the checked-in prefab-remap bundle."}</p>
+          <p class="meta">${multiverseMarketPrefabRemapSummary.hasOverrideBoundary ? `The same asset then switches to ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}, so validated ids ${multiverseMarketPrefabRemapSummary.validatedMismatchLabel} still do not have direct prefab-number label matches.` : "The checked prefab-remap bundle no longer preserves the expected 69-74 override band."}</p>
+        </article>
         <article class="validation-card ${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? "pass" : "warn"}">
           <strong>MultiverseMarket owner family</strong>
           <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? `${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, and ${multiverseMarketOwnerFamilySummary.batcher} now appear in one checked owner-family shell.` : "MultiverseMarket owner-family clues are incomplete in the checked-in shell bundle."}</p>
@@ -1570,9 +1615,13 @@ function renderResearch() {
   const orderedTracks = [...state.snapshot.researchTracks].sort(
     (left, right) => getResearchTrackOrder(left) - getResearchTrackOrder(right)
   );
+  const visibleTracks = orderedTracks.filter((track) =>
+    state.researchView === "archived" ? track.status === "archived" : track.status !== "archived"
+  );
   $("#researchResults").innerHTML = [
     renderResearchGuidance(),
-    ...orderedTracks.map((track) => `
+    renderResearchViewSelector(orderedTracks),
+    ...visibleTracks.map((track) => `
     <article class="research-card">
       <div class="research-card-head">
         <div>
@@ -1590,12 +1639,67 @@ function renderResearch() {
       ${renderResearchTrackProgress(track)}
       ${renderResearchTrackSupport(track)}
       <div class="meta-stack">
-        <p class="snapshot-title">Remaining work</p>
-        <ul class="research-step-list">${track.nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>
+        <p class="snapshot-title">${track.nextSteps.length ? "Remaining work" : "Archive note"}</p>
+        ${track.nextSteps.length
+          ? `<ul class="research-step-list">${track.nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>`
+          : `<p class="meta">No active remaining work. This card stays here only as delivered foundation context for later roadmap slices.</p>`}
       </div>
     </article>
-  `)
+  `),
+    !visibleTracks.length
+      ? `
+    <article class="research-card">
+      <div class="research-card-head">
+        <div>
+          <p class="eyebrow">${escapeHtml(state.researchView === "archived" ? "Foundation archive" : "Active research")}</p>
+          <strong>${escapeHtml(state.researchView === "archived" ? "No archived foundation cards" : "No active research tracks")}</strong>
+        </div>
+      </div>
+      <p class="meta">${escapeHtml(state.researchView === "archived"
+        ? "Archived research foundations will appear here when the repo keeps delivered context cards in the snapshot."
+        : "No open research cards match the current filter. Switch to Archived to review delivered foundation context.")}</p>
+    </article>
+  `
+      : ""
   ].join("");
+
+  bindResearchViewSelector();
+}
+
+function renderResearchViewSelector(tracks) {
+  const activeCount = tracks.filter((track) => track.status !== "archived").length;
+  const archivedCount = tracks.filter((track) => track.status === "archived").length;
+  return `
+    <article class="research-card research-selector-card">
+      <div class="research-card-head">
+        <div>
+          <p class="eyebrow">Track view</p>
+          <strong>Switch between active work and archived foundations</strong>
+        </div>
+        <div class="pill-row">
+          <span class="pill">${activeCount} active</span>
+          <span class="pill">${archivedCount} archived</span>
+        </div>
+      </div>
+      <div class="research-view-toggle" id="researchViewToggle" role="tablist" aria-label="Research track view">
+        <button class="button${state.researchView === "active" ? " is-active" : ""}" type="button" data-research-view="active" role="tab" aria-selected="${state.researchView === "active"}">Active</button>
+        <button class="button${state.researchView === "archived" ? " is-active" : ""}" type="button" data-research-view="archived" role="tab" aria-selected="${state.researchView === "archived"}">Archived</button>
+      </div>
+    </article>
+  `;
+}
+
+function bindResearchViewSelector() {
+  $$("#researchViewToggle [data-research-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextView = button.dataset.researchView === "archived" ? "archived" : "active";
+      if (state.researchView === nextView) {
+        return;
+      }
+      state.researchView = nextView;
+      renderResearch();
+    });
+  });
 }
 
 function renderDatasetRefreshHardening() {
@@ -1713,6 +1817,7 @@ function renderResearchGuidance() {
         </div>
       </div>
       <p class="meta">Research tracks hold grounded findings, uncertainty, and candidate implementation paths. If a track cannot show grounded terminology, documented sources, checked APK or Unity evidence, explicit confidence and uncertainty, and a small shippable slice, it stays in research.</p>
+      <p class="meta">Archived foundation cards may still appear here as historical context, but they are not part of the active research queue and should not carry open next-step expectations.</p>
       <div class="meta-stack">
         <p class="snapshot-title">Promotion rule</p>
         <ul class="research-step-list">
@@ -1793,6 +1898,29 @@ function renderResearchTrackProgress(track) {
 }
 
 function renderResearchTrackSupport(track) {
+  if (track.id === "shards-and-loop-guardrails") {
+    const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
+    const finalSuBoundary = getShardFinalSuBonusBoundarySummary(state.shardGrounding?.finalSuBonusBoundary);
+    const payloadBoundary = getShardMilestonePayloadBoundarySummary(state.shardGrounding?.milestonePayloadBoundary);
+    const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
+    return `
+      <div class="meta-stack">
+        <p class="snapshot-title">Repo-local owner-family narrowing</p>
+        <p class="meta">${ownerBoundary.hasBoundary ? `The checked shard owner-family boundary now keeps ${ownerBoundary.screenController} as the strongest screen-controller family and ${ownerBoundary.dataCarrier} as the strongest shard-specific data-carrier trail.` : "Shard owner-family boundary clues are not available in this build."}</p>
+        <p class="meta">${ownerBoundary.hasFastBuyHooks ? `Fast-buy and first-open hooks such as ${ownerBoundary.fastBuyHooksLabel} stay attached to that shard-specific controller shell.` : "Expected shard-specific fast-buy hooks are incomplete in this build."}</p>
+        <p class="meta">${ownerBoundary.hasBonusAnchors ? `The same narrowed trail preserves bonus-field anchors such as ${ownerBoundary.bonusAnchorLabel}, which keeps FinalSU-style fields tied to the shard-specific carrier candidate instead of a generic milestone lead.` : "Expected FinalSU bonus-field anchors are incomplete in this build."}</p>
+        <p class="meta">${ownerBoundary.hasDowngradedGenericLead ? `${ownerBoundary.genericLead} stays downgraded to a nearby generic milestone family because ${ownerBoundary.genericLeadReason}.` : "The generic ConstructionMilestones comparison lead is incomplete in this build."}</p>
+        <p class="meta">${finalSuBoundary.hasBoundary ? `A checked FinalSU boundary now keeps ${finalSuBoundary.unlockRangeLabel}, ${finalSuBoundary.bonusFieldLabel}, and ${finalSuBoundary.bonusAccessorLabel} attached to ${finalSuBoundary.dataCarrier}.` : "Shard FinalSU bonus-field boundary clues are not available in this build."}</p>
+        <p class="meta">${finalSuBoundary.hasBoundary ? "That narrows the shard-specific field family further, but it still does not map those fields back to verified player-facing milestone rows." : "The current build does not yet preserve a checked FinalSU bonus-field boundary."}</p>
+        <p class="meta">${payloadBoundary.hasBoundary ? `A checked payload-watch boundary now keeps ${payloadBoundary.milestoneStateLabel} attached to ${payloadBoundary.dataCarrier}, with cost-list hooks such as ${payloadBoundary.costAccessorLabel}.` : "Shard milestone payload-watch boundary clues are not available in this build."}</p>
+        <p class="meta">${payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields ? `The same shard-specific trail also keeps ${payloadBoundary.progressHookLabel} plus ${payloadBoundary.tickFieldLabel} grouped with ${payloadBoundary.costHookLabel}.` : "Expected shard payload-watch hooks are incomplete in this build."}</p>
+        <p class="meta">${saveBoundary.hasSeparationBoundary ? `A checked shard save boundary now keeps ${saveBoundary.ownerAnchor} separate from ${saveBoundary.saveAnchor} and ${saveBoundary.cloudSaveAnchor}, with ${saveBoundary.overlapLabel}.` : "Shard save-boundary clues are not available in this build."}</p>
+        <p class="meta">${saveBoundary.hasSeparationBoundary ? "That keeps shard owner-family narrowing and save-side recovery as separate tasks, so the app should not infer player-owned shard milestone state from the current owner trail yet." : "The current build does not yet preserve a clean shard save-boundary separation."}</p>
+        <p class="meta">This improves the shard mapping gate, but it still does not recover player-owned shard milestone rows, player-facing labels, or planner-safe affordability inputs.</p>
+      </div>
+    `;
+  }
+
   if (track.id === "spend-planner-from-extracted-data") {
     const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
     const validatedCoverage = getMultiverseMarketValidatedCoverage(state.extractedMechanics?.multiverseMarket);
@@ -1853,6 +1981,18 @@ function renderResearchTrackSupport(track) {
     return "";
   }
 
+  const sources = Array.isArray(track.sources) ? track.sources : [];
+  const artifacts = Array.isArray(track.artifacts) ? track.artifacts : [];
+  const verified = Array.isArray(track.verified) ? track.verified : [];
+  const uncertain = Array.isArray(track.uncertain) ? track.uncertain : [];
+  const metaBits = [
+    track.classification ? `<span class="pill">${escapeHtml(track.classification)}</span>` : "",
+    track.implementationRelevance ? `<span class="pill">${escapeHtml(track.implementationRelevance)}</span>` : "",
+    typeof track.apkUnityPathChecked === "boolean"
+      ? `<span class="pill">${escapeHtml(track.apkUnityPathChecked ? "APK/Unity first" : "APK/Unity not yet checked")}</span>`
+      : ""
+  ].filter(Boolean);
+
   return `
     ${metaBits.length ? `<div class="pill-row">${metaBits.join("")}</div>` : ""}
     ${sources.length ? `<div class="meta-stack"><p class="snapshot-title">Sources</p><ul class="research-step-list">${sources.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
@@ -1874,8 +2014,8 @@ function getTopExtractionCandidate(trackId = null) {
 }
 
 function getResearchTrackLane(track) {
-  if (track.status === "completed") {
-    return "Completed foundation";
+  if (track.status === "archived") {
+    return "Foundation archive";
   }
   if (track.status === "active") {
     return "Active roadmap slice";
@@ -1888,7 +2028,7 @@ function getResearchTrackStatus(track) {
     active: "Active",
     queued: "Queued after gate",
     research: "In research",
-    completed: "Completed"
+    archived: "Archived"
   };
   return statusById[track.status] || "Queued after gate";
 }
@@ -1933,7 +2073,7 @@ function getResearchTrackSource(track) {
 function collectProfileForm() {
   const entries = Object.fromEntries(new FormData($("#profileForm")).entries());
   const nextProfile = structuredClone(state.playerProfile);
-  Object.entries(PROFILE_FORM_FIELD_PATHS).forEach(([field, path]) => {
+  Object.entries(ACTIVE_PROFILE_FORM_FIELD_PATHS).forEach(([field, path]) => {
     if (field in entries) {
       setProfileValue(path, coerceInputValue(entries[field]), nextProfile);
     }
@@ -1943,7 +2083,7 @@ function collectProfileForm() {
 }
 
 function fillProfileForm() {
-  Object.entries(PROFILE_FORM_FIELD_PATHS).forEach(([key, path]) => {
+  Object.entries(ACTIVE_PROFILE_FORM_FIELD_PATHS).forEach(([key, path]) => {
     const input = formControl(key);
     if (input) {
       input.value = getProfileValue(path) ?? "";
@@ -2001,16 +2141,21 @@ function renderPlayerProfileBoundarySummary() {
         ["Current LR", canonical.loopReset],
         ["Diamonds", canonical.diamonds],
         ["Tokens", canonical.tokens],
-        ["Academy relics", canonical.academyRelics],
         ["Current shards", canonical.shards],
         ["Profile notes", canonical.notes]
       ]
     },
     {
-      title: "Planner-only helpers",
-      note: "Manual helper inputs used by descriptive planners, not canonical account truth.",
+      title: "Import-only or aggregated profile fields",
+      note: "Real profile values that are not currently direct active-form inputs because they are aggregated, derived, or not quickly readable in-game.",
       items: [
-        ["Shard income / hour", shardPlanner.ratePerHour],
+        ["Academy relics", canonical.academyRelics]
+      ]
+    },
+    {
+      title: "Planner-only helpers",
+      note: "Manual helper inputs used by descriptive planners, not canonical account truth. Derived values that are not directly visible in game stay out of the active form.",
+      items: [
         ["Total shard milestone levels", shardPlanner.totalMilestoneLevels],
         ["Focus milestone", shardPlanner.focusMilestoneId],
         ["Focus milestone level", shardPlanner.focusMilestoneLevel]
@@ -2294,6 +2439,9 @@ function runProgressionOptimization() {
     subtitle: "Descriptive mode",
     score: 40,
     confidence: 0.24,
+    benefit: [
+      "Keeps shard guidance visible without implying extracted milestone planner math."
+    ],
     whyNow: [
       "Shard Milestones are a real CIFI system, but this repo does not yet ship a verified milestone table.",
       "The previous shard ranking path relied on unsourced milestone identities, cost curves, and value scoring."
@@ -2338,6 +2486,9 @@ function buildLoopGuardrailRecommendations() {
       subtitle: "Minimum loop-warning input missing",
       score: 96,
       confidence: 0.63,
+      benefit: [
+        "Unlocks the current loop-warning layer so the app can show grounded anti-bricking guidance."
+      ],
       whyNow: [
         "Current LR is the minimum grounded input needed for loop-reset guardrails in this build.",
         antiBricking?.why || "Grounded loop guidance depends on pacing examples tied to specific LR transitions."
@@ -2364,6 +2515,9 @@ function buildLoopGuardrailRecommendations() {
     subtitle: `Current LR ${formatShardNumber(loopReset)}`,
     score: loopReset <= 4 ? 78 : 62,
     confidence: 0.66,
+    benefit: [
+      "Clarifies whether the next run should bias toward loop-mod momentum or shard-and-cell pacing."
+    ],
     whyNow: [
       earlyLoop?.playerState?.mod_points_gained_on_first_lr
         ? `One grounded early-loop example shows LR 1 earning ${formatShardNumber(earlyLoop.playerState.mod_points_gained_on_first_lr)} MP on the first reset.`
@@ -2400,6 +2554,9 @@ function buildLoopGuardrailRecommendations() {
       subtitle: "Grounded shard-loop linkage",
       score: loopReset <= 4 ? 74 : 54,
       confidence: 0.62,
+      benefit: [
+        "Prevents over-reading fast resets by keeping shard-operation timing constraints visible."
+      ],
       whyNow: [
         operationTicks?.initial_ticks_including_reset
           ? `Grounded shard notes record ${formatShardNumber(operationTicks.initial_ticks_including_reset)} ticks per operation initially, including reset time.`
@@ -2431,6 +2588,9 @@ function buildLoopGuardrailRecommendations() {
       subtitle: `Current LR ${formatShardNumber(loopReset)}`,
       score: 88,
       confidence: 0.71,
+      benefit: [
+        "Flags when pushing LR higher is more likely to raise clear requirements than help progress."
+      ],
       whyNow: [
         antiBricking?.why || "Guide examples warn that pushing LR too quickly can raise loop requirements faster than the account can clear them.",
         "Grounded examples show LR 5 -> 6 requiring 7 loops and LR 6 -> 7 requiring 8 loops."
@@ -2458,6 +2618,9 @@ function buildLoopGuardrailRecommendations() {
       subtitle: `${formatShardNumber(currentShards)} shards currently tracked`,
       score: 92,
       confidence: 0.68,
+      benefit: [
+        "Protects currently tracked shard value from being wiped by the next reset."
+      ],
       whyNow: [
         "Shards reset to 0 on Loop Prestige in the grounded shard sources.",
         shardSpend?.why || "Early shard guidance explicitly says to spend shards before loop resets."
@@ -2508,6 +2671,11 @@ function buildGroundedShardRecommendations() {
       subtitle: nextUnlock ? nextUnlock.name : "All imported unlock requirements are covered",
       score: nextUnlock ? 58 : 46,
       confidence: 0.7,
+      benefit: [
+        nextUnlock
+          ? "Shows the next descriptive shard unlock gate worth tracking."
+          : "Confirms the imported descriptive unlock gates are already covered."
+      ],
       whyNow: [
         nextUnlock
           ? `${nextUnlock.name} unlocks at ${formatShardNumber(getShardUnlockRequirement(nextUnlock))} total shard milestone levels.`
@@ -2542,6 +2710,11 @@ function buildGroundedShardRecommendations() {
       subtitle: focusMilestone ? focusMilestone.name : "Select a focus milestone",
       score: focusMilestone ? 52 : 34,
       confidence: 0.64,
+      benefit: [
+        focusMilestone
+          ? "Shows the next grounded threshold breakpoint on the selected milestone."
+          : "Explains which focus input is missing before threshold tracking can become useful."
+      ],
       whyNow: [
         focusMilestone
           ? `Focus milestone rarity: ${formatShardRarity(focusMilestone.rarity)}. Threshold schedule: ${formatThresholdLevels(getThresholdScheduleForMilestone(focusMilestone, mechanics))}.`
@@ -2573,6 +2746,9 @@ function buildGroundedShardRecommendations() {
       subtitle: focusMilestone ? focusMilestone.name : "Global shard milestone rules",
       score: focusMilestone ? 47 : 30,
       confidence: 0.59,
+      benefit: [
+        "Keeps known shard cost-bump zones visible without pretending the app knows affordability."
+      ],
       whyNow: [
         mechanics.cost_breakpoints_observed?.breakpoints_statement || "Cost bump notes are descriptive only.",
         nextCostBump
@@ -2661,6 +2837,10 @@ function renderShardGroundingBoundary() {
   const conflictCount = uncertaintyLog.filter((item) => item.status === "conflict_detected").length;
   const missingCount = uncertaintyLog.filter((item) => item.status !== "conflict_detected").length;
   const assetGrounding = state.shardGrounding?.assetGrounding;
+  const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
+  const finalSuBoundary = getShardFinalSuBonusBoundarySummary(state.shardGrounding?.finalSuBonusBoundary);
+  const payloadBoundary = getShardMilestonePayloadBoundarySummary(state.shardGrounding?.milestonePayloadBoundary);
+  const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
   const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers) ? assetGrounding.groundedShellIdentifiers.slice(0, 5) : [];
   const blockedUses = Array.isArray(assetGrounding?.blockedUses) ? assetGrounding.blockedUses : [];
   const repoWideCandidate = getTopExtractionCandidate();
@@ -2687,6 +2867,44 @@ function renderShardGroundingBoundary() {
           <p class="meta">They are not yet mapped from shipped-game shard milestone owners, so the app keeps them descriptive and does not rank spend order, ROI, ETA, or per-level affordability.</p>
           <p class="meta">${escapeHtml(blockedUses.length ? `${blockedUses.join(", ")} remain blocked until shard owner mapping and save-state inputs are recovered.` : "Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until shard owner mapping and save-state inputs are recovered.")}</p>
           <p class="meta">Current provenance load: ${conflictCount} conflict note${conflictCount === 1 ? "" : "s"} and ${missingCount} missing-data note${missingCount === 1 ? "" : "s"}.</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Owner-family narrowing</span>
+        <strong>Shard-specific trail beats the generic milestone lead</strong>
+        <div class="meta-stack">
+          <p class="meta">${ownerBoundary.hasBoundary ? `${ownerBoundary.screenController} is the strongest current shard milestone screen-controller family, and ${ownerBoundary.dataCarrier} is the strongest shard-specific data-carrier candidate.` : "Shard owner-family boundary clues are not available in this build."}</p>
+          <p class="meta">${ownerBoundary.hasFastBuyHooks ? `Recovered controller hooks include ${ownerBoundary.fastBuyHooksLabel}.` : "Expected shard-specific controller hooks are incomplete in this build."}</p>
+          <p class="meta">${ownerBoundary.hasBonusAnchors ? `Recovered data-carrier anchors include ${ownerBoundary.bonusAnchorLabel}.` : "Expected FinalSU-style bonus anchors are incomplete in this build."}</p>
+          <p class="meta">${ownerBoundary.hasDowngradedGenericLead ? `${ownerBoundary.genericLead} remains downgraded because ${ownerBoundary.genericLeadReason}.` : "ConstructionMilestones comparison evidence is incomplete in this build."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">FinalSU field boundary</span>
+        <strong>ShardUpgradeInfo keeps the bonus-field family local</strong>
+        <div class="meta-stack">
+          <p class="meta">${finalSuBoundary.hasBoundary ? `${finalSuBoundary.dataCarrier} now preserves ${finalSuBoundary.unlockRangeLabel} plus ${finalSuBoundary.bonusFieldLabel} and ${finalSuBoundary.bonusAccessorLabel}.` : "Shard FinalSU bonus-field boundary clues are not available in this build."}</p>
+          <p class="meta">${finalSuBoundary.hasAdjacentFields ? `Adjacent shard-specific fields still include ${finalSuBoundary.adjacentFieldLabel}.` : "Expected adjacent ShardUpgradeInfo fields are incomplete in this build."}</p>
+          <p class="meta">${finalSuBoundary.hasBoundary ? "This is enough to keep the recovered FinalSU family tied to the shard-specific carrier trail, but not enough to claim verified player-facing row mapping." : "The current build does not yet preserve a checked FinalSU bonus-field boundary."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Payload-watch boundary</span>
+        <strong>ShardUpgradeInfo keeps the milestone payload trail local</strong>
+        <div class="meta-stack">
+          <p class="meta">${payloadBoundary.hasBoundary ? `${payloadBoundary.dataCarrier} now preserves ${payloadBoundary.milestoneStateLabel}.` : "Shard milestone payload-watch boundary clues are not available in this build."}</p>
+          <p class="meta">${payloadBoundary.hasCostAndListHooks ? `Cost-list hooks currently include ${payloadBoundary.costHookLabel}.` : "Expected shard cost-list hooks are incomplete in this build."}</p>
+          <p class="meta">${payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields ? `Progress and timing hooks still include ${payloadBoundary.progressHookLabel} plus ${payloadBoundary.tickFieldLabel}.` : "Expected shard progress-fill and phase-tick hooks are incomplete in this build."}</p>
+          <p class="meta">${payloadBoundary.hasBoundary ? "This keeps the current milestone payload search attached to the shard-specific carrier trail, but it still does not recover saved player-owned milestone rows or verified row labels." : "The current build does not yet preserve a checked shard milestone payload-watch boundary."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Save-side separation</span>
+        <strong>Shard owner trail stays separate from PlayerProfile save clues</strong>
+        <div class="meta-stack">
+          <p class="meta">${saveBoundary.hasSeparationBoundary ? `${saveBoundary.ownerAnchor} currently stays separate from ${saveBoundary.saveAnchor} and ${saveBoundary.cloudSaveAnchor}.` : "Shard save-boundary clues are not available in this build."}</p>
+          <p class="meta">${saveBoundary.hasSeparationBoundary ? `The current repo-local result is ${saveBoundary.overlapLabel} across the narrowed shard-local contexts.` : "The current build does not yet preserve a checked zero-overlap result for shard save-side narrowing."}</p>
+          <p class="meta">${saveBoundary.hasSeparationBoundary ? "This is enough to block save-side assumptions while the exact shard row payload is still unresolved." : "Without this separation boundary, shard owner-family evidence could be over-read as recovered save-state truth."}</p>
         </div>
       </article>
       <article class="snapshot-card">
@@ -2856,9 +3074,13 @@ function getGemPlannerBudget() {
 }
 
 function runValidationCases() {
+  const activeFeedContract = getRecommendationContractSummary(getActiveMvpRecommendationFeedPartition().all);
   const current = {
     ship: runShipOptimization()[0]?.title ?? "None",
     progression: runProgressionOptimization()[0]?.title ?? "None",
+    recommendationFeed: activeFeedContract.invalidCount === 0
+      ? "All active feed items satisfy shared recommendation contract"
+      : "Contract gaps in active feed",
     gem: runGemOptimization()[0]?.title ?? "None"
   };
   const appCases = state.snapshot.validationCases.map((item) => ({
@@ -2892,6 +3114,10 @@ function buildApkGroundingValidationCases() {
   const tokenBankControllerShell = state.extractedMechanics?.tokenBankControllerShell;
   const shardMilestones = state.shardGrounding?.milestones;
   const shardAssetGrounding = state.shardGrounding?.assetGrounding;
+  const shardOwnerFamilyBoundary = state.shardGrounding?.ownerFamilyBoundary;
+  const shardFinalSuBonusBoundary = state.shardGrounding?.finalSuBonusBoundary;
+  const shardMilestonePayloadBoundary = state.shardGrounding?.milestonePayloadBoundary;
+  const shardSaveBoundary = state.shardGrounding?.saveBoundary;
   const cases = [];
 
   if (shardAssetGrounding) {
@@ -2912,10 +3138,62 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
+  if (shardOwnerFamilyBoundary) {
+    const ownerBoundary = getShardOwnerFamilyBoundarySummary(shardOwnerFamilyBoundary);
+    cases.push({
+      title: "Shard owner-family boundary",
+      expected: "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded",
+      actual: ownerBoundary.hasBoundary && ownerBoundary.hasDowngradedGenericLead
+        ? "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded"
+        : "Shard owner-family boundary drifted",
+      pass: ownerBoundary.hasBoundary && ownerBoundary.hasDowngradedGenericLead,
+      scope: "APK"
+    });
+  }
+  if (shardFinalSuBonusBoundary) {
+    const finalSuBoundary = getShardFinalSuBonusBoundarySummary(shardFinalSuBonusBoundary);
+    cases.push({
+      title: "Shard FinalSU bonus boundary",
+      expected: "ShardUpgradeInfo preserves SU final-unlock and FinalSU bonus-field families without row mapping claims",
+      actual: finalSuBoundary.hasBoundary
+        ? `ShardUpgradeInfo preserves ${finalSuBoundary.unlockRangeLabel} plus ${finalSuBoundary.bonusFieldLabel}`
+        : "Shard FinalSU bonus-field boundary drifted",
+      pass: finalSuBoundary.hasBoundary && finalSuBoundary.hasAdjacentFields,
+      scope: "APK"
+    });
+  }
+  if (shardMilestonePayloadBoundary) {
+    const payloadBoundary = getShardMilestonePayloadBoundarySummary(shardMilestonePayloadBoundary);
+    cases.push({
+      title: "Shard milestone payload boundary",
+      expected: "ShardUpgradeInfo preserves milestone-total, cost-list, progress-fill, and phase-tick hooks without claiming saved player rows",
+      actual: payloadBoundary.hasBoundary && payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields
+        ? `ShardUpgradeInfo preserves ${payloadBoundary.milestoneStateLabel} plus ${payloadBoundary.costAccessorLabel}`
+        : "Shard milestone payload-watch boundary drifted",
+      pass: payloadBoundary.hasBoundary && payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields && payloadBoundary.hasCostAccessorSamples,
+      scope: "APK"
+    });
+  }
+  if (shardSaveBoundary) {
+    const saveBoundary = getShardSaveBoundarySummary(shardSaveBoundary);
+    cases.push({
+      title: "Shard save-side separation",
+      expected: "Shard owner trail and PlayerProfileData save-family clues stay separate with zero overlap",
+      actual: saveBoundary.hasSeparationBoundary
+        ? "Shard owner trail and PlayerProfileData save-family clues stay separate with zero overlap"
+        : "Shard save-boundary separation drifted",
+      pass: saveBoundary.hasSeparationBoundary,
+      scope: "APK"
+    });
+  }
 
   if (tokenShop) {
     const numericTable = tokenShop.numeric_table ?? {};
     const tokenShopCoverage = getTokenShopCoverageSummary(tokenShop);
+    const tokeniumNamingSummary = getTokeniumNamingSummary(tokeniumNamingClues);
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenBankStateClues);
+    const hasTokeniumCurrencyShell = tokeniumNamingSummary.hasNamingClues;
+    const hasTokenBankAnchors = tokenBankStateSummary.hasControllerSplit;
     cases.push({
       title: "TokenShop owner payload",
       expected: "Grounded TokenShop constants available",
@@ -3168,6 +3446,19 @@ function buildApkGroundingValidationCases() {
     });
   }
 
+  if (state.extractedMechanics?.multiverseMarketPrefabRemapBoundary) {
+    const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(state.extractedMechanics.multiverseMarketPrefabRemapBoundary);
+    cases.push({
+      title: "MultiverseMarket prefab remap boundary",
+      expected: "Validated ids 69-74 still do not have direct ChrystosEmporiumUpgrade number matches",
+      actual: multiverseMarketPrefabRemapSummary.hasOverrideBoundary
+        ? `${multiverseMarketPrefabRemapSummary.lastDirectPrefab} is the last direct band before ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}`
+        : "Missing MultiverseMarket prefab-remap boundary",
+      pass: multiverseMarketPrefabRemapSummary.hasOverrideBoundary,
+      scope: "APK"
+    });
+  }
+
   if (multiverseMarketActionShell) {
     const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(multiverseMarketActionShell);
     cases.push({
@@ -3241,6 +3532,98 @@ function getTokenShopCoverageSummary(tokenShop) {
     hasControllerAnchors:
       controllerFieldNames.has("BankFill")
       && controllerFieldNames.has("TokenBankDescriptionText")
+  };
+}
+
+function getShardOwnerFamilyBoundarySummary(boundary) {
+  const screenControllers = Array.isArray(boundary?.screenControllerFamilies) ? boundary.screenControllerFamilies : [];
+  const dataCarriers = Array.isArray(boundary?.dataCarrierCandidates) ? boundary.dataCarrierCandidates : [];
+  const fastBuyHooks = Array.isArray(boundary?.screenControlAnchors) ? boundary.screenControlAnchors : [];
+  const bonusAnchors = Array.isArray(boundary?.bonusFieldAnchors) ? boundary.bonusFieldAnchors : [];
+  const genericLead = boundary?.downgradedGenericLead ?? {};
+  const genericLeadReasons = Array.isArray(genericLead.reasons) ? genericLead.reasons : [];
+  return {
+    hasBoundary: screenControllers.includes("ShardMining, Assembly-CSharp") && dataCarriers.includes("ShardMining|ShardUpgradeInfo"),
+    hasFastBuyHooks: ["CheckFirstTimeShardMilestoneOpened", "AttachFastBuyButton", "FastBuyButtonMethodShards", "StartFastBuyButtonHold"]
+      .every((name) => fastBuyHooks.includes(name)),
+    hasBonusAnchors: ["TotalMilestoneLevels", "get_IsUnlocked", "FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"]
+      .every((name) => bonusAnchors.includes(name)),
+    hasDowngradedGenericLead: genericLead.family === "ConstructionMilestones, Assembly-CSharp" && genericLeadReasons.length > 0,
+    screenController: screenControllers[0] || "ShardMining, Assembly-CSharp",
+    dataCarrier: dataCarriers[0] || "ShardMining|ShardUpgradeInfo",
+    fastBuyHooksLabel: fastBuyHooks.slice(0, 4).join(", "),
+    bonusAnchorLabel: bonusAnchors.filter((name) => ["TotalMilestoneLevels", "get_IsUnlocked", "FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].includes(name)).join(", "),
+    genericLead: genericLead.family || "ConstructionMilestones, Assembly-CSharp",
+    genericLeadReason: genericLeadReasons[0] || "its current evidence is still generic rather than shard-specific"
+  };
+}
+
+function getShardFinalSuBonusBoundarySummary(boundary) {
+  const unlockRequirementAccessors = Array.isArray(boundary?.unlockRequirementAccessors) ? boundary.unlockRequirementAccessors : [];
+  const bonusFieldSamples = Array.isArray(boundary?.bonusFieldSamples) ? boundary.bonusFieldSamples : [];
+  const bonusAccessorSamples = Array.isArray(boundary?.bonusAccessorSamples) ? boundary.bonusAccessorSamples : [];
+  const adjacentFields = Array.isArray(boundary?.adjacentFields) ? boundary.adjacentFields : [];
+  return {
+    hasBoundary:
+      boundary?.dataCarrier === "ShardUpgradeInfo"
+      && boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo"
+      && ["get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq"].every((name) => unlockRequirementAccessors.includes(name))
+      && ["FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].every((name) => bonusFieldSamples.includes(name))
+      && ["get_FinalSU1Bonus1", "get_FinalSU29Bonus2", "get_FinalSU29Bonus3"].every((name) => bonusAccessorSamples.includes(name)),
+    hasAdjacentFields: ["TotalMilestoneLevels", "get_IsUnlocked", "OverLevel100Exponent", "OverLevel400Exponent", "<FastBuyEnum>d__1429"]
+      .every((name) => adjacentFields.includes(name)),
+    dataCarrier: boundary?.dataCarrier || "ShardUpgradeInfo",
+    unlockRangeLabel: unlockRequirementAccessors.join(", "),
+    bonusFieldLabel: bonusFieldSamples.join(", "),
+    bonusAccessorLabel: bonusAccessorSamples.join(", "),
+    adjacentFieldLabel: adjacentFields.join(", ")
+  };
+}
+
+function getShardMilestonePayloadBoundarySummary(boundary) {
+  const milestoneStateFields = Array.isArray(boundary?.milestoneStateFields) ? boundary.milestoneStateFields : [];
+  const costAndListHooks = Array.isArray(boundary?.costAndListHooks) ? boundary.costAndListHooks : [];
+  const progressFillHooks = Array.isArray(boundary?.progressFillHooks) ? boundary.progressFillHooks : [];
+  const tickFields = Array.isArray(boundary?.tickFields) ? boundary.tickFields : [];
+  const sampleCostAccessors = Array.isArray(boundary?.sampleCostAccessors) ? boundary.sampleCostAccessors : [];
+  return {
+    hasBoundary:
+      boundary?.dataCarrier === "ShardUpgradeInfo"
+      && boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo"
+      && ["TotalMilestoneLevels", "get_IsUnlocked", "set_IsUnlocked", "<IsUnlocked>k__BackingField"]
+        .every((name) => milestoneStateFields.includes(name)),
+    hasCostAndListHooks: ["get_TotalMilestoneLevels", "UpdateShardCostList", "GetShardCostList", "CountAffordableShard", "InitializeShards"]
+      .every((name) => costAndListHooks.includes(name)),
+    hasProgressFillHooks: ["CheckAllMilestoneLevelFills", "CheckMilestone0ProgressFill", "CheckMilestone1ProgressFill", "CheckMilestone9ProgressFill"]
+      .every((name) => progressFillHooks.includes(name)),
+    hasTickFields: ["Phase1Tick", "Phase6Tick", "CooldownTick"].every((name) => tickFields.includes(name)),
+    hasCostAccessorSamples: ["get_SU23Cost", "get_SU29Cost"].every((name) => sampleCostAccessors.includes(name)),
+    dataCarrier: boundary?.dataCarrier || "ShardUpgradeInfo",
+    milestoneStateLabel: milestoneStateFields.join(", "),
+    costHookLabel: costAndListHooks.join(", "),
+    progressHookLabel: progressFillHooks.join(", "),
+    tickFieldLabel: tickFields.join(", "),
+    costAccessorLabel: sampleCostAccessors.join(", ")
+  };
+}
+
+function getShardSaveBoundarySummary(boundary) {
+  const ownerShellTermsChecked = Array.isArray(boundary?.ownerShellTermsChecked) ? boundary.ownerShellTermsChecked : [];
+  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked) ? boundary.saveFamilyTermsChecked : [];
+  const probeResults = typeof boundary?.probeResults === "object" && boundary.probeResults ? boundary.probeResults : {};
+  return {
+    hasSeparationBoundary:
+      probeResults.metadataNeighborhoodHasSaveTerms === false
+      && probeResults.level0HasSaveTerms === false
+      && probeResults.ownerShellWithSaveOverlapCount === 0
+      && probeResults.directShardPlayerProfileContext === false
+      && saveFamilyTermsChecked.includes("PlayerProfileData")
+      && saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
+    ownerAnchor: "ShardMining / ShardUpgradeInfo",
+    saveAnchor: "PlayerProfileData",
+    cloudSaveAnchor: "CloudSavePlayerProfile",
+    overlapLabel: "zero direct overlap",
+    ownerTermCount: ownerShellTermsChecked.length
   };
 }
 
@@ -3454,6 +3837,25 @@ function getMultiverseMarketActionShellSummary(shell) {
   };
 }
 
+function getMultiverseMarketPrefabRemapBoundarySummary(boundary) {
+  const directPrefabNumberMatches = Array.isArray(boundary?.directPrefabNumberMatches) ? boundary.directPrefabNumberMatches : [];
+  const explicitPrefabIdOverrides = Array.isArray(boundary?.explicitPrefabIdOverrides) ? boundary.explicitPrefabIdOverrides : [];
+  const validatedIdsWithoutDirectPrefabName = Array.isArray(boundary?.validatedIdsWithoutDirectPrefabName) ? boundary.validatedIdsWithoutDirectPrefabName : [];
+
+  return {
+    hasDirectMatchBand:
+      directPrefabNumberMatches.includes(50)
+      && directPrefabNumberMatches.includes(68),
+    hasOverrideBoundary:
+      explicitPrefabIdOverrides.map((entry) => `${entry.prefabNumber}->${entry.serializedId}`).join(",") === "69->57,70->58,71->59,72->60,73->61,74->62"
+      && validatedIdsWithoutDirectPrefabName.join(",") === "69,70,71,72,73,74",
+    lastDirectPrefab: "ChrystosEmporiumUpgrade68",
+    firstOverride: "ChrystosEmporiumUpgrade69-ID57",
+    lastOverride: "ChrystosEmporiumUpgrade74-ID62",
+    validatedMismatchLabel: "69-74"
+  };
+}
+
 function getMultiverseMarketOwnerFamilySummary(family) {
   const ownerAnchors = Array.isArray(family?.ownerAnchors) ? family.ownerAnchors : [];
   const costLaneAnchors = Array.isArray(family?.costLaneAnchors) ? family.costLaneAnchors : [];
@@ -3660,7 +4062,25 @@ function renderOverviewSupportSummary(apkValidation, supportValidation) {
 }
 
 function getActiveMvpRecommendationFeed() {
-  return runProgressionOptimization().filter((item) => item.module === "shards" || item.module === "loop");
+  return getActiveMvpRecommendationFeedPartition().valid;
+}
+
+function getActiveMvpRecommendationFeedSupport() {
+  return getActiveMvpRecommendationFeedPartition().invalid;
+}
+
+function getActiveMvpRecommendationFeedPartition() {
+  const all = runProgressionOptimization().filter((item) => item.module === "shards" || item.module === "loop");
+  const valid = [];
+  const invalid = [];
+  all.forEach((item) => {
+    if (getNormalizedRecommendationContractIssues(item).length) {
+      invalid.push(item);
+      return;
+    }
+    valid.push(item);
+  });
+  return { all, valid, invalid };
 }
 
 function sortRecommendationFeed(items) {
@@ -3675,17 +4095,35 @@ function renderRecommendationFeedSummary(results, surface) {
   const loopCount = results.filter((item) => item.module === "loop").length;
   const shardCount = results.filter((item) => item.module === "shards").length;
   const explainability = getRecommendationExplainabilitySummary(results);
+  const contractAudit = getRecommendationContractSummary(results);
   return `
     <article class="validation-card warn">
       <strong>${surface === "overview" ? "Active MVP recommendation feed" : "Progression feed status"}</strong>
       <p class="meta">The current feed ranks trust-oriented warning urgency for the active shard and loop modules. These scores are UI priority, not ROI math.</p>
       <p class="meta">Visible feed items: ${results.length}. Loop guardrails: ${loopCount}. Shard workflow cards: ${shardCount}.</p>
+      <p class="meta">Contract audit: Valid ${contractAudit.validCount}/${results.length} | Contract gaps ${contractAudit.invalidCount}/${results.length} | ${escapeHtml(contractAudit.topIssueLine)}.</p>
       <p class="meta">Explainability coverage: Why now ${explainability.withWhyNow}/${results.length} | Assumptions ${explainability.withAssumptions}/${results.length} | Warnings ${explainability.withWarnings}/${results.length} | Source notes ${explainability.withNotes}/${results.length}.</p>
       <p class="meta">Average confidence: ${explainability.averageConfidence}% | Items with all explainability fields: ${explainability.withFullContext}/${results.length}.</p>
       <p class="meta">Explainability audit: Complete context ${explainability.withFullContext}/${results.length} | Partial context ${explainability.partialContext}/${results.length} | Missing source notes ${explainability.missingSourceNotes}/${results.length}.</p>
       <p class="meta">Spend-planner recommendations are still blocked by system-mapping gaps, so this feed currently covers the MVP-safe guidance surfaces only.</p>
     </article>
   `;
+}
+
+function renderRecommendationFeedSupportNotice(results, surface) {
+  if (!results.length) {
+    return "";
+  }
+
+  const titles = results.map((item) => item.title).filter(Boolean);
+  return renderSupportSurfaceNotice(
+    surface === "overview" ? "Quarantined feed items" : "Quarantined progression items",
+    [
+      `${results.length} recommendation item${results.length === 1 ? "" : "s"} failed the shared recommendation contract and were removed from the main feed.`,
+      titles.length ? `Quarantined titles: ${titles.join(", ")}.` : "Quarantined items are missing expected titles.",
+      "Use the contract audit details to repair those cards before treating them as player-facing guidance."
+    ]
+  );
 }
 
 function getRecommendationExplainabilitySummary(results) {
@@ -3714,6 +4152,31 @@ function getRecommendationExplainabilitySummary(results) {
     averageConfidence,
     partialContext,
     missingSourceNotes
+  };
+}
+
+function getRecommendationContractSummary(results) {
+  const issueCounts = new Map();
+  let invalidCount = 0;
+
+  results.forEach((item) => {
+    const issues = getNormalizedRecommendationContractIssues(item);
+    if (!issues.length) {
+      return;
+    }
+    invalidCount += 1;
+    issues.forEach((issue) => {
+      issueCounts.set(issue, (issueCounts.get(issue) || 0) + 1);
+    });
+  });
+
+  const sortedIssues = [...issueCounts.entries()].sort((left, right) => right[1] - left[1]);
+  return {
+    validCount: results.length - invalidCount,
+    invalidCount,
+    topIssueLine: sortedIssues.length
+      ? `${sortedIssues[0][0]} (${sortedIssues[0][1]} item${sortedIssues[0][1] === 1 ? "" : "s"})`
+      : "No contract gaps in the active feed"
   };
 }
 
@@ -4264,9 +4727,9 @@ function formatBoundaryValue(value) {
 }
 
 function getProfileCompletion(profile) {
-  const filled = Object.values(CANONICAL_PROFILE_FIELD_PATHS)
+  const filled = Object.values(ACTIVE_PROFILE_FORM_FIELD_PATHS)
     .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
-  const fields = Object.keys(CANONICAL_PROFILE_FIELD_PATHS);
+  const fields = Object.keys(ACTIVE_PROFILE_FORM_FIELD_PATHS);
   return Math.round((filled / fields.length) * 100);
 }
 
@@ -4280,7 +4743,6 @@ function sanitizeRecommendationLines(value) {
 
 function getPlannerHelperCompletion(profile) {
   const plannerPaths = [
-    ["planning", "shards", "ratePerHour"],
     ["planning", "shards", "totalMilestoneLevels"]
   ];
   const filled = plannerPaths
@@ -4293,12 +4755,16 @@ function makeRecommendationCard(item, module) {
     return "";
   }
   const explainabilityAudit = getRecommendationExplainabilityAudit(item);
+  const contractIssues = getNormalizedRecommendationContractIssues(item);
   const detailLines = [
     item.cost ? `<span class="pill">cost ${escapeHtml(item.cost)}</span>` : "",
     item.eta ? `<span class="pill">eta ${escapeHtml(item.eta)}</span>` : ""
   ].filter(Boolean).join("");
   const whyNow = Array.isArray(item.whyNow) && item.whyNow.length
     ? `<div class="meta-stack"><p class="snapshot-title">Why now</p>${item.whyNow.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
+    : "";
+  const benefit = Array.isArray(item.benefit) && item.benefit.length
+    ? `<div class="meta-stack"><p class="snapshot-title">Player value</p>${item.benefit.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
     : "";
   const assumptions = Array.isArray(item.assumptions) && item.assumptions.length
     ? `<div class="meta-stack"><p class="snapshot-title">Assumptions</p>${item.assumptions.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
@@ -4312,6 +4778,21 @@ function makeRecommendationCard(item, module) {
       <p class="meta">Status: ${escapeHtml(explainabilityAudit.status)}.</p>
       <p class="meta">Source note: ${escapeHtml(explainabilityAudit.sourceNoteStatus)}.</p>
       <p class="meta">${escapeHtml(explainabilityAudit.missingLine)}</p>
+    </div>
+  `;
+  const contractAudit = contractIssues.length
+    ? `
+    <div class="meta-stack">
+      <p class="snapshot-title">Contract audit</p>
+      <p class="meta">Status: Contract gaps.</p>
+      <p class="meta">${escapeHtml(contractIssues.join(" | "))}</p>
+    </div>
+  `
+    : `
+    <div class="meta-stack">
+      <p class="snapshot-title">Contract audit</p>
+      <p class="meta">Status: Valid.</p>
+      <p class="meta">The current card satisfies the shared recommendation contract.</p>
     </div>
   `;
   return `
@@ -4329,7 +4810,9 @@ function makeRecommendationCard(item, module) {
         ${detailLines}
       </div>
       <p class="meta">${item.notes ?? ""}</p>
+      ${contractAudit}
       ${explainability}
+      ${benefit}
       ${whyNow}
       ${assumptions}
       ${warnings}
@@ -4381,7 +4864,12 @@ function normalizeShardBreakpoints(value) {
 }
 
 function formatShardNumber(value) {
-  return Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(Number(value || 0)));
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    const text = String(value ?? "").trim();
+    return text || "0";
+  }
+  return Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(numericValue));
 }
 
 function formatDurationHours(hours) {

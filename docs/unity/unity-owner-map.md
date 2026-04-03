@@ -96,6 +96,8 @@ Narrowed but not yet planner-ready owner families:
     - `FinalSU1Bonus2`
     - `FinalSU29Bonus2`
     - `FinalSU29Bonus3`
+  - current save-boundary result:
+    - the narrowed shard-local contexts currently preserve zero checked overlap with `PlayerProfileData`, `GetPlayerProfileData`, `FillPlayerProfileData`, or `CloudSavePlayerProfile`
   - downgraded parallel lead:
     - `ConstructionMilestones, Assembly-CSharp` remains a generic or academy-side milestone family and should not currently be treated as the shard owner without stronger shard-specific linkage
   - integration status: shard-specific controller and bonus-field clues are grounded enough for truthful shard workflow copy, but the exact serialized milestone payload, player-owned milestone state, and player-facing milestone label mapping are still unresolved; keep planner behavior blocked

@@ -48,6 +48,34 @@ Prevent:
 - must contain source artifact references, recovered shard or loop shell identifiers, app-safe uses, blocked uses, unresolved gaps, and the current integration status
 - useful for APK-grounding validation and truthful shard-boundary UI, not itself a milestone planner
 
+### Shard owner-family boundary
+
+- file: `data/shard-owner-family-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain source paths, the narrowed shard screen-controller family, shard-specific data-carrier candidates, the downgraded generic milestone lead, and explicit blocked-use framing
+- useful for shard owner-mapping prep and fail-fast validation, not itself a player-owned milestone payload
+
+### Shard FinalSU bonus boundary
+
+- file: `data/shard-finalsu-bonus-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the shard-specific FinalSU bonus-field family, SU final-unlock accessor anchors, adjacent ShardUpgradeInfo fields, and explicit blocked-use framing
+- useful for shard row-mapping prep and fail-fast validation, not itself a verified player-facing milestone table
+
+### Shard milestone payload boundary
+
+- file: `data/shard-milestone-payload-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the current shard-specific payload-watch cluster around milestone totals, cost-list hooks, progress-fill hooks, and phase-tick fields tied to `ShardUpgradeInfo`
+- useful for narrowing the exact serialized shard payload search and fail-fast validation, not itself a recovered player-owned milestone row payload
+
+### Shard save boundary
+
+- file: `data/shard-save-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the narrowed shard-specific owner-shell terms, the checked save-family terms, and an explicit zero-overlap result across the current shard-local contexts
+- useful for keeping shard owner-family evidence separate from save-side recovery, not itself a recovered shard save model
+
 ### Extraction candidate families
 
 - file: `data/extraction-candidate-families.v1.json`
@@ -76,6 +104,29 @@ Prevent:
 - must contain extraction source metadata, validated inscription ids, and extracted records
 - useful for planner foundation work, but partial extraction must stay labeled as partial
 
+### Spend boundary bundles
+
+- files:
+  - `data/multiverse-market-metadata-neighborhood.json`
+  - `data/multiverse-market-range-boundary.json`
+  - `data/multiverse-market-row-text-coverage.json`
+  - `data/multiverse-market-prefab-remap-boundary.json`
+  - `data/multiverse-market-action-shell.json`
+  - `data/multiverse-market-owner-family.json`
+  - `data/multiverse-market-save-boundary.json`
+  - `data/tokenium-naming-clues.json`
+  - `data/token-bank-state-clues.json`
+  - `data/daily-tokenium-lane-clues.json`
+  - `data/token-bank-formula-boundary.json`
+  - `data/token-shop-cost-lanes.json`
+  - `data/spend-action-lane-clues.json`
+  - `data/token-shop-owner-shell.json`
+  - `data/token-shop-save-boundary.json`
+  - `data/token-bank-controller-shell.json`
+- classification: `extracted-mechanics`
+- must contain source paths, explicit grounded boundaries, and unresolved-gap-safe framing
+- useful for planner-prep and validation surfaces, not themselves planner-ready owned-state truth
+
 ## Source-priority metadata
 
 Every grounded data note or dataset promotion should keep this order explicit:
@@ -92,5 +143,5 @@ Run:
 
 - `npm run verify:data`
 
-This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, extraction-candidate-families, extraction-candidate-ranking, token-shop, and multiverse-market datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
+This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, shard-owner-family-boundary, shard-finalsu-bonus-boundary, shard-milestone-payload-boundary, shard-save-boundary, extraction-candidate-families, extraction-candidate-ranking, token-shop, multiverse-market, and spend-boundary datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
 

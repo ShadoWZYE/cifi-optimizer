@@ -18,6 +18,15 @@ Only place a field in canonical shared truth when it is both:
 
 Otherwise move it under a labeled non-canonical namespace or remove it from the active form.
 
+## Active form rule
+
+The active manual Profile form should only show values a typical player can quickly provide from the game without deriving or summing them first.
+
+That means:
+
+- direct visible values such as current LR, diamonds, tokens, and current shards belong in the active form
+- aggregated or derived values such as total academy relic levels or shard income per hour do not belong in the active form, even if they may still exist as import-only or helper state
+
 ## Canonical shared truth
 
 Active shared fields:
@@ -29,9 +38,14 @@ Active shared fields:
 | Current LR | `player.loop.loopReset` | loop guardrail and shard context |
 | Diamonds | `player.resources.diamonds` | legacy `gems` migrate here |
 | Tokens | `player.resources.tokens` | spend-planner input |
-| Academy relics | `player.resources.academyRelics` | legacy `relics` migrate here |
 | Current shards | `player.resources.shards` | shard workflow input |
 | Profile notes | `notes.profile` | manual context |
+
+Import-only or currently hidden canonical aggregates:
+
+| Field | Path | Notes |
+|---|---|---|
+| Academy relics | `player.resources.academyRelics` | real profile aggregate, but not a direct active-form input because the game shows multiple relic levels instead of one fast total |
 
 ## Planner-only inputs
 
@@ -39,10 +53,15 @@ Stored in `state.playerProfile`, but not canonical truth:
 
 | Field | Path | Notes |
 |---|---|---|
-| Shard income / hour | `planning.shards.ratePerHour` | descriptive helper |
 | Total shard milestone levels | `planning.shards.totalMilestoneLevels` | unlock-watch helper |
 | Focus milestone | `planning.shards.focusMilestoneId` | manual target |
 | Focus milestone level | `planning.shards.focusMilestoneLevel` | manual target |
+
+Import-only or retired active helpers:
+
+| Field | Path | Notes |
+|---|---|---|
+| Shard income / hour | `planning.shards.ratePerHour` | descriptive derived helper, not directly visible in game, so removed from the active form |
 
 ## External-model implementation state
 
@@ -124,7 +143,7 @@ The active Profile form should show:
 
 - canonical shared truth
 - metadata
-- clearly labeled planner-only helpers
+- only directly visible in-game planner helpers
 
 It should not present external-model or compatibility fields as raw CIFI account state. Ship calibration belongs on the Ship Planner page, not the shared Profile page.
 

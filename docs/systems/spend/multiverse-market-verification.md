@@ -52,6 +52,7 @@ Current grounded conclusion:
 
 - the system exposes real inscription-number labels and prefab identities in the shipped assets
 - the late serialized block is still not stored in plain inscription-ID order
+- the checked prefab shell now stays direct through `ChrystosEmporiumUpgrade68` but switches to explicit overrides `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
 - label remap remains partial until the row-order and ID mapping are closed more completely
 
 ## Still unresolved
@@ -77,6 +78,7 @@ Current grounded conclusion:
 ## Current app implication
 
 - It is safe to treat `MultiverseMarket` as a real Emporium owner with a grounded `Inscryptions Done` cost-lane shell.
+- It is safe to treat the `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` override band as a real prefab-remap boundary that blocks naive label assumptions for validated ids `69-74`.
 - It is not safe to generate spend recommendations yet.
 - The spend-planner track should stop inferring this lane from diamonds or tokens.
 - `MultiverseMarket` remains `available but unmapped` until the owned-state and saved-balance inputs are recovered.
@@ -86,6 +88,6 @@ Current grounded conclusion:
 1. determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` fields
 2. recover player-owned inscription levels or equivalent next-purchase state from that same save-side neighborhood
 3. extend parsing past the current validated late block
-4. finish the inscription-number and prefab-to-label remap
+4. finish the inscription-number and prefab-to-label remap, especially across the `69-74` prefab override band
 5. only then add spend-planner recommendations
 

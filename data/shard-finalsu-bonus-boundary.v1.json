@@ -1,0 +1,47 @@
+{
+  "dataset": "shard-finalsu-bonus-boundary.v1",
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "shardUpgradeInfoMetadataNeighborhood": "data/shardupgradeinfo-metadata-neighborhood.v1.json",
+    "shardMiningMetadataNeighborhood": "data/shardmining-metadata-neighborhood.v1.json",
+    "ownerFamilyVerification": "docs/systems/shards/shard-owner-family-verification.md",
+    "systemVerification": "docs/systems/shards/shard-system-verification.md",
+    "globalMetadata": "workbench/apk/base/global-metadata.dat"
+  },
+  "dataCarrier": "ShardUpgradeInfo",
+  "dataCarrierTieIn": "ShardMining|ShardUpgradeInfo",
+  "unlockRequirementAccessors": [
+    "get_SU1FinalUnlockReq",
+    "get_SU29FinalUnlockReq"
+  ],
+  "bonusFieldSamples": [
+    "FinalSU1Bonus1",
+    "FinalSU1Bonus2",
+    "FinalSU2Bonus1",
+    "FinalSU29Bonus2",
+    "FinalSU29Bonus3"
+  ],
+  "bonusAccessorSamples": [
+    "get_FinalSU1Bonus1",
+    "get_FinalSU1Bonus2",
+    "get_FinalSU2Bonus1",
+    "get_FinalSU29Bonus2",
+    "get_FinalSU29Bonus3"
+  ],
+  "adjacentFields": [
+    "TotalMilestoneLevels",
+    "get_IsUnlocked",
+    "set_IsUnlocked",
+    "<IsUnlocked>k__BackingField",
+    "OverLevel100Exponent",
+    "OverLevel200Exponent",
+    "OverLevel300Exponent",
+    "OverLevel400Exponent",
+    "<FastBuyEnum>d__1429"
+  ],
+  "currentBoundary": [
+    "Treat FinalSU bonus and SU final-unlock accessors as a shard-specific bonus-field family carried by ShardUpgradeInfo.",
+    "Use this boundary to keep recovered FinalSU fields attached to the shard-specific carrier trail instead of generic milestone families.",
+    "Do not map FinalSU fields directly to player-facing shard milestone rows, labels, rarity groups, or planner math until the exact serialized milestone payload is recovered."
+  ]
+}

@@ -109,3 +109,21 @@ Future shard planner work still depends on a later extraction pass that recovers
 - which `SU*` rows correspond to the current descriptive shard milestone set
 - player-owned shard milestone or shard-upgrade state
 - verified player-facing labels for the recovered `FinalSU*Bonus*` fields
+- the exact serialized row payload or save-side owner behind the current `get_TotalMilestoneLevels`, `UpdateShardCostList`, `GetShardCostList`, and `CheckMilestone*ProgressFill` cluster
+
+## Shipped boundary artifact
+
+This narrowed owner-family result is now also preserved as:
+
+- [data/shard-owner-family-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-owner-family-boundary.v1.json)
+
+That bundle is the fail-fast repo contract for the current shard-specific owner trail. It is safe for validation and truthful UI boundary copy, but not for canonical shard milestone imports or planner math.
+
+The next shard-local fail-fast bundle is now also preserved as:
+
+- [data/shard-milestone-payload-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-payload-boundary.v1.json)
+- [data/shard-save-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-save-boundary.v1.json)
+
+That payload boundary keeps the current milestone-total, cost-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail, but it still does not recover player-owned row payloads.
+
+The shard save boundary separately keeps the narrowed shard-local owner trail and the broader `PlayerProfileData` / `CloudSavePlayerProfile` save-family path from being treated as the same recovered context.

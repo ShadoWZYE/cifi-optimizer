@@ -2,39 +2,63 @@
 
 ## Goal
 
-Move from prototype-era grounding work to a stable, grounded MVP through small shippable slices.
+Build a grounded MVP core that can expand into a unified replacement for fragmented external CiFi tools.
+
+## North star
+
+Build one centralized local-first CIFI toolkit that gradually absorbs external tools by unifying player state, grounded data, planning workflows, and high-value decision support.
+
+## Current phase
+
+The current phase is not full tool replacement. It is to build the grounded MVP core that makes later consolidation credible:
+
+- one canonical `state.playerProfile`
+- grounded shard workflow
+- MVP-safe token/diamond planning
+- loop-reset guardrails
+- explainable recommendation/planning outputs
+- clear separation between game truth, planner helpers, and external/community compatibility inputs
 
 ## Product direction
 
-Build a local-first CIFI assistant that answers:
+Build a local-first CIFI toolkit whose first product surfaces help players answer:
 
 > What should I do next, and why?
 
-The MVP is an explainable recommendation tool, not a full simulator.
+The MVP is not a full simulator and does not assume all systems should converge into one surface up front.
+
+## Local-first meaning
+
+Local-first means the core app works from locally controlled player state and shipped repo data by default.
+
+Player state may be:
+- entered manually
+- guided through the UI
+- imported from helper flows
+- later assisted by OCR or similar tooling
+
+The requirement is that canonical state lands in the app’s local model and remains user-controlled.
 
 ## MVP scope
 
 Core inputs:
-
 - manual or guided player profile entry
 - bundled grounded datasets
-- labeled planner-only helper inputs where needed
-- optional clearly labeled external/community-derived inputs
+- planner-only helper inputs where needed
+- clearly labeled external/community-derived inputs where needed
 
 Core outputs:
-
 - upgrades
 - warnings
 - tradeoffs
 - assumptions
 - confidence
 
-Core modules:
-
+Core MVP modules:
 1. shard workflow
-2. token/diamond spend planning
+2. token/diamond planning
 3. loop-reset guardrails
-4. unified recommendation feed
+4. explainable recommendation/planning outputs
 
 ## Working rules
 
@@ -47,14 +71,30 @@ Core modules:
 
 ## Source priority
 
-Use this order:
-
 1. committed repo docs and shipped datasets
 2. committed APK/Unity artifacts and extraction outputs
 3. official/public corroboration
 4. community or labeled external-model support
 
 If the APK/Unity path has not been checked for an unresolved mechanic, it should not leave research status.
+
+## Expansion rule
+
+A system should move from research into implementation only when it has:
+- grounded terminology
+- verified owner and currencies
+- mapped player-owned inputs
+- a clear boundary into `state.playerProfile`, `planning`, `externalModels`, or `compatibility`
+- a meaningful path toward improving a real player painpoint or replacing part of an external-tool workflow
+
+## Product test
+
+Prioritize roadmap work that does at least one of:
+- strengthens the shared player-state backbone
+- improves a major player painpoint better than current community tooling
+- replaces a repeated external-tool workflow
+- increases grounded recommendation or planning coverage
+- reduces fragmentation without forcing premature UI unification
 
 ## Sequence
 
@@ -64,83 +104,41 @@ If the APK/Unity path has not been checked for an unresolved mechanic, it should
    - validate shipped datasets and keep classifications truthful
 3. Map systems before planner slices
    - confirm owner, labels, currencies, and player-owned inputs
-4. Land MVP-safe planner slices
-   - only on systems that passed the integration gate
+4. Land MVP-safe slices
+   - implement grounded improvements that solve real player painpoints
 5. Harden delivery
    - expand tests and make dataset drift fail fast
 
-## PR order
+## Current milestone priorities
 
-### PR 1 — Data contracts and PlayerProfile boundary
-
+### 1. Data contracts and PlayerProfile boundary
 Goals:
 - lock state boundaries
 - make shipped datasets trustworthy
 
-Outputs:
-- stable dataset boundary
-- stable profile boundary
-
-### PR 2 — Shard workflow and loop guardrails
-
+### 2. Shard workflow and loop guardrails
 Goals:
 - strengthen grounded shard guidance
 - add warning-first loop guidance
 
-Outputs:
-- grounded shard recommendations
-- trust-building warning layer
-
-### PR 3 — Unified recommendation feed
-
-Goals:
-- converge active MVP-safe outputs into one explainable feed
-
-Outputs:
-- one recommendation surface
-- clearer ranking and rendering contract
-
-### PR 4 — Spend planner foundation
-
+### 3. Spend planner foundation
 Goals:
 - ship first MVP-safe token/diamond planning once spend systems pass mapping gates
 
-Outputs:
-- practical spend-planner foundation
-
-### PR 5 — Test and delivery hardening
-
+### 4. Explainability and delivery hardening
 Goals:
+- improve clarity of outputs
 - catch dataset drift and contract regressions early
 
-Outputs:
-- safer future feature work
-- clearer verification path
+## Surface rule
 
-## Module rules
-
-### Shards
-- keep descriptive until numeric truth is grounded
-- keep provenance and uncertainty visible
-
-### Spend
-- separate verified extracted values from heuristics
-- do not pretend partial extraction is complete planner truth
-
-### Loop guardrails
-- warning-first, not simulator-first
-- no fake ROI or prestige certainty
-
-### Unified feed
-- use one recommendation contract
-- clearly distinguish upgrades from warnings
+Recommendation and planning surfaces should converge only where that clearly improves user value, reduces fragmentation, or absorbs an external-tool workflow more cleanly than keeping a separate surface.
 
 ## Research-track rule
 
-`docs/roadmap/research-tracks.md` is the intake and staging lane for unresolved work.
+`docs/roadmap/research-tracks.md` is the staging lane for unresolved extraction, mapping, validation, and implementation-prep work.
 
-A track can move into roadmap or implementation only when:
-
+A track can move into implementation only when:
 - terminology is grounded
 - source quality is documented
 - APK/Unity path was checked
@@ -152,11 +150,18 @@ A track can move into roadmap or implementation only when:
 ## Definition of done
 
 The next milestone is complete when the app has:
-
 - one unambiguous `PlayerProfile`
 - grounded shard workflow
 - MVP-safe token/diamond planning
 - loop-reset warnings
-- one unified recommendation feed
-- explainable outputs with assumptions and confidence
+- explainable decision-support outputs
 - stable local validation flow
+
+## After MVP
+
+After the grounded MVP core is stable, expand by absorbing the highest-value external-tool workflows first, prioritizing those that:
+- reuse the canonical player-state backbone
+- have grounded data paths
+- solve major player painpoints
+- reduce fragmentation
+- fit the local-first model without requiring a hosted backend

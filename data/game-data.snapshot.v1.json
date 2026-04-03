@@ -117,6 +117,13 @@
       "description": "The ranked progression feed should surface missing LR guardrail input before lower-priority descriptive shard watch cards."
     },
     {
+      "id": "recommendation-feed-contract",
+      "module": "recommendationFeed",
+      "title": "Recommendation feed contract integrity",
+      "expected": "All active feed items satisfy shared recommendation contract",
+      "description": "The active shard and loop recommendation feed should normalize into contract-valid actions so malformed cards fail visibly before broader module expansion."
+    },
+    {
       "id": "gem-node-roi",
       "module": "gem",
       "title": "Low-level node catchup",
@@ -128,9 +135,9 @@
     {
       "id": "data-contracts-and-apk-pipeline",
       "title": "Data contracts and APK-first grounding",
-      "status": "completed",
+      "status": "archived",
       "goal": "Lock dataset contracts and make the APK or Unity extraction path the default starting point for new grounded data work.",
-      "currentSlice": "Completed: the repo now has a checked-in bundled-dataset contract manifest, an enforced verify:data gate, a dataset refresh checklist, and an APK-first research-note template.",
+      "currentSlice": "Archived foundation: the repo now has a checked-in bundled-dataset contract manifest, an enforced verify:data gate, a dataset refresh checklist, and an APK-first research-note template.",
       "completedSteps": [
         "Document the bundled dataset contract for snapshot, shard, token-shop, and multiverse-market JSON assets.",
         "Add local validation for the shipped snapshot, shard, token-shop, and multiverse-market datasets.",
@@ -143,9 +150,9 @@
     {
       "id": "playerprofile-boundary-and-imports",
       "title": "PlayerProfile boundary and import cleanup",
-      "status": "completed",
+      "status": "archived",
       "goal": "Tighten canonical player state, planner-only inputs, and external-model separation before more recommendation logic lands.",
-      "currentSlice": "Completed: PlayerProfile imports now run through a classified alias inventory, a checked-in alias audit, boundary summary copy, and a reduced non-canonical migration surface.",
+      "currentSlice": "Archived foundation: PlayerProfile imports now run through a classified alias inventory, a checked-in alias audit, boundary summary copy, and a reduced non-canonical migration surface.",
       "completedSteps": [
         "Ground the canonical PlayerProfile namespaces and migration behavior in the schema docs and normalization layer.",
         "Add a guided PlayerProfile JSON import and export path that normalizes incoming data into state.playerProfile.",
@@ -164,7 +171,7 @@
       "title": "Shard workflow and loop guardrails",
       "status": "active",
       "goal": "Keep shard guidance truthful while the repo verifies how much of the shard system is grounded from shipped-game evidence versus descriptive/community sources.",
-      "currentSlice": "Narrow the shard milestone owner path to a ShardMining screen-controller plus ShardUpgradeInfo data-carrying trail, while treating ConstructionMilestones as a downgraded generic milestone lead, then keep chasing the exact milestone payload.",
+      "currentSlice": "The repo now preserves a checked shard owner-family boundary, a checked FinalSU bonus-field boundary, a checked milestone payload-watch boundary, and a checked shard save-boundary separation around ShardUpgradeInfo, so the next slice is still the exact serialized row payload or save-side owner behind that narrowed shard-specific trail.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
@@ -174,7 +181,11 @@
         "Document the current boundary between APK or Unity-grounded shard shell evidence and the still-descriptive community milestone layer in docs and progression UI.",
         "Ship a small shard asset-grounding dataset so APK-grounding validation and progression boundary copy no longer depend on markdown-only notes.",
         "Add a repo-local extraction-candidate ranking path so unknown extraction work is ranked from unresolved mention density plus anchor strength across committed extracted-data artifacts, then filter that ranking back to the active roadmap track.",
-        "Narrow the shard milestone owner path to a ShardMining screen-controller plus ShardUpgradeInfo data-carrying trail while downgrading ConstructionMilestones to a generic milestone lead."
+        "Narrow the shard milestone owner path to a ShardMining screen-controller plus ShardUpgradeInfo data-carrying trail while downgrading ConstructionMilestones to a generic milestone lead.",
+        "Promote the narrowed shard owner-family result into a checked-in boundary dataset so shard-track validation and UI can fail fast if the current shard-specific owner trail drifts.",
+        "Promote the recovered FinalSU bonus-field and SU final-unlock family into a checked shard boundary dataset so shard-track validation and UI can fail fast if that shard-specific field family drifts.",
+        "Promote the current ShardUpgradeInfo milestone payload-watch cluster into a checked shard boundary dataset so milestone totals, cost-list hooks, progress-fill hooks, and phase ticks stay tied to the shard-specific carrier trail without over-claiming saved player rows.",
+        "Promote a shard save-boundary dataset so shard-track work can rely on an explicit zero-overlap result between the narrowed shard-specific owner trail and the current PlayerProfileData or CloudSavePlayerProfile save-family clues instead of implicitly mixing owner-family evidence with save recovery."
       ],
       "nextSteps": [
         "Recover the exact serialized milestone row payload or save-side state from the narrowed ShardMining and ShardUpgradeInfo trail.",
@@ -188,7 +199,7 @@
       "title": "Spend planner from extracted token and market data",
       "status": "queued",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Use APK and Unity extraction to harden spend-lane naming, TokenShop cost-lane, action-lane, owner-shell, and save-boundary splits, Daily Tokenium owner-family clues, token-bank controller and formula boundaries, and save-model boundaries before planner wiring, including checked-in token versus tokenium naming clues, TokenBoost or DiamondBoost or TokenDailies lane splits, BuyTokenBoost or BuyDiamondBoost or BuyLM244 action-family splits, TokenShop or InitializeTokenShop or ClaimBankedTokens owner-shell clues, an explicit no-overlap boundary between the narrowed TokenShop owner shell and current PlayerProfileData or CloudSavePlayerProfile save-family clues, a narrow token-bank controller shell around ClaimBankedTokens or SetBankFill or BankFill or TokenBankDescriptionText or TokenShopButtonNotification, SpaceAcademy or FarmMissions or Collector-pack lane clues, TokenShop or TokenBankCap or LM244 split clues, a checked FinalTokenBankCap or FinalTokenBankFillSpeed output boundary, a checked zero-overlap boundary between validated MultiverseMarket rows and the current recovered IS99-110 metadata run, a checked broader BuyIS1-110 or SetIS1-110CostText action shell around the validated 50-59 and 63-74 row block, a checked MultiverseMarket owner-family shell around MultiverseMarket or Inscryptions or ResourceAmountText.InscryptionsDone or IS1-110 CurrencyBox UI anchors, an explicit no-overlap boundary between the narrowed MultiverseMarket action shell and current PlayerProfileData or CloudSavePlayerProfile save-family clues, and the strengthened MultiverseMarket CloudSave or PlayerProfile persistence path.",
+      "currentSlice": "Use APK and Unity extraction to harden spend-lane naming, TokenShop cost-lane, action-lane, owner-shell, and save-boundary splits, Daily Tokenium owner-family clues, token-bank controller and formula boundaries, MultiverseMarket prefab-remap boundaries, and save-model boundaries before planner wiring, including checked-in token versus tokenium naming clues, TokenBoost or DiamondBoost or TokenDailies lane splits, BuyTokenBoost or BuyDiamondBoost or BuyLM244 action-family splits, TokenShop or InitializeTokenShop or ClaimBankedTokens owner-shell clues, an explicit no-overlap boundary between the narrowed TokenShop owner shell and current PlayerProfileData or CloudSavePlayerProfile save-family clues, a narrow token-bank controller shell around ClaimBankedTokens or SetBankFill or BankFill or TokenBankDescriptionText or TokenShopButtonNotification, SpaceAcademy or FarmMissions or Collector-pack lane clues, TokenShop or TokenBankCap or LM244 split clues, a checked FinalTokenBankCap or FinalTokenBankFillSpeed output boundary, a checked zero-overlap boundary between validated MultiverseMarket rows and the current recovered IS99-110 metadata run, a checked broader BuyIS1-110 or SetIS1-110CostText action shell around the validated 50-59 and 63-74 row block, a checked MultiverseMarket owner-family shell around MultiverseMarket or Inscryptions or ResourceAmountText.InscryptionsDone or IS1-110 CurrencyBox UI anchors, a checked prefab-name override band from ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 that blocks naive row-label remaps for validated ids 69-74, an explicit no-overlap boundary between the narrowed MultiverseMarket action shell and current PlayerProfileData or CloudSavePlayerProfile save-family clues, and the strengthened MultiverseMarket CloudSave or PlayerProfile persistence path.",
       "completedSteps": [
         "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
         "Document the spend-system integration gate and current verified versus unresolved app-integration facts.",
@@ -210,6 +221,7 @@
         "Promote a token-bank formula boundary from APK metadata so spend-track work can rely on get_FinalTokenBankCap, get_FinalTokenBankFillSpeed, and their backing-field cluster as derived outputs that still do not join the checked PlayerProfile save-family path.",
         "Promote a MultiverseMarket range boundary into a checked-in dataset so spend-track work can rely on the current zero-overlap result between validated rows 50-59 or 63-74 and the recovered metadata run IS99Level through IS110Level.",
         "Promote validated-row text coverage from APK and Unity artifacts into a checked-in dataset so spend-track work can rely on TextHandlerMarkets, SetAllChrystosEmporiumTexts, and SetIS50-59 or 63-74 cost-text hooks for the validated block without confusing that with saved-state coverage.",
+        "Promote a MultiverseMarket prefab-remap boundary into a checked-in dataset so spend-track work can rely on the direct ChrystosEmporiumUpgrade50-68 shell, the explicit ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 override band, and the fact that validated ids 69-74 still do not have direct prefab-number label matches.",
         "Promote a TokenShop cost-lane boundary into a checked-in dataset so spend-track work can rely on TokenBoost or DiamondBoost or TokenDailies families, plus CostBox-Tokens and CostBox-Tokenium text, as grounded lane splits instead of treating the whole owner payload as one spend currency lane.",
         "Promote a spend action-lane boundary into a checked-in dataset so spend-track work can rely on BuyTokenBoost or BuyDiamondBoost direct hooks, BuyLM244 or BuyCollectorDevice modifier hooks, and the current zero-match result for BuyTokenDailies direct hooks instead of treating all spend rows as one recovered purchase-action family.",
         "Promote a MultiverseMarket action-shell boundary into a checked-in dataset so spend-track work can rely on a broader context-derived BuyIS1-110 or SetIS1-110CostText shell while keeping only rows 50-59 and 63-74 treated as numerically validated.",
@@ -224,8 +236,9 @@
         "Recover the saved-state owner or formula source behind token-bank cap, fill-speed, and claimable bank tokens from TokenShop or nearby level0 handlers rather than OR_* resource names.",
         "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
         "Confirm whether the recovered InscryptionsDone, IS*Level, trade-counter, and nearby mech fields are declared directly on PlayerProfileData or on another progression sub-model.",
-        "Determine which recovered IS*Level range maps to the currently validated MultiverseMarket rows and which remain outside the validated block.",
+        "Determine which recovered IS*Level range maps to the currently validated MultiverseMarket rows and which remain outside the validated block, now that the prefab shell explicitly breaks one-to-one row-number assumptions at 69-74.",
         "Inspect the same save-side neighborhood before assuming any FinalIS or achievement symbol is the saved balance field.",
+        "Close the remaining prefab-to-label remap for validated ids 69-74 without assuming the ChrystosEmporiumUpgrade override band is already the final player-facing numbering.",
         "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."
       ]
     },
@@ -234,7 +247,7 @@
       "title": "Unified recommendation feed and test hardening",
       "status": "active",
       "goal": "Converge active MVP-safe module outputs into one explainable feed and make contract drift fail fast.",
-      "currentSlice": "Expand representative shard and loop action fixtures toward partial-context warning shapes, keep the dataset refresh hardening path visible in-app, and show explainability coverage plus complete-versus-partial audit status inside the active feed before future systems join it.",
+      "currentSlice": "Keep the dataset refresh hardening path visible in-app, show explainability plus recommendation-contract audit status inside the active feed, and quarantine contract-bad shard or loop cards out of the main player feed before future systems join it.",
       "completedSteps": [
         "Normalize active shard and loop outputs through one ranked recommendation feed.",
         "Treat feed scores as trust-oriented UI priority rather than as optimizer ROI.",
@@ -244,7 +257,11 @@
         "Show feed-level explainability coverage counts so warning cards can be audited before broader system expansion.",
         "Show per-card explainability audit status so missing why-now, assumption, warning, or source-note context stays visible inside the feed.",
         "Show feed-level complete-versus-partial explainability audit counts so missing context stays visible before broader module expansion.",
-        "Expand representative shard and loop fixtures toward partial-context warning shapes so explainability audits are exercised against missing context."
+        "Expand representative shard and loop fixtures toward partial-context warning shapes so explainability audits are exercised against missing context.",
+        "Show feed-level recommendation contract audit status and per-card contract validity so malformed future actions fail visibly instead of blending into trustworthy guidance.",
+        "Promote recommendation-contract integrity into a shipped validation case so the active feed must stay contract-clean at runtime.",
+        "Make the live shard and loop feed satisfy the shared recommendation contract by preserving explicit player-value benefit lines on active cards.",
+        "Quarantine contract-bad shard or loop cards into a labeled support notice so malformed future actions do not blend into the main player feed."
       ],
       "nextSteps": [
         "Extend the same feed contract to spend recommendations after TokenShop and MultiverseMarket pass their integration gates.",

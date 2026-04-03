@@ -1,0 +1,103 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "level0": "workbench/unity/joined/level0",
+    "validatedRows": "data/multiverse-market-values.json"
+  },
+  "validatedSerializedIds": [
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+  ],
+  "directPrefabNumberMatches": [
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68
+  ],
+  "explicitPrefabIdOverrides": [
+    {
+      "prefabNumber": 69,
+      "serializedId": 57,
+      "prefabName": "ChrystosEmporiumUpgrade69-ID57"
+    },
+    {
+      "prefabNumber": 70,
+      "serializedId": 58,
+      "prefabName": "ChrystosEmporiumUpgrade70-ID58"
+    },
+    {
+      "prefabNumber": 71,
+      "serializedId": 59,
+      "prefabName": "ChrystosEmporiumUpgrade71-ID59"
+    },
+    {
+      "prefabNumber": 72,
+      "serializedId": 60,
+      "prefabName": "ChrystosEmporiumUpgrade72-ID60"
+    },
+    {
+      "prefabNumber": 73,
+      "serializedId": 61,
+      "prefabName": "ChrystosEmporiumUpgrade73-ID61"
+    },
+    {
+      "prefabNumber": 74,
+      "serializedId": 62,
+      "prefabName": "ChrystosEmporiumUpgrade74-ID62"
+    }
+  ],
+  "validatedIdsWithoutDirectPrefabName": [
+    69,
+    70,
+    71,
+    72,
+    73,
+    74
+  ],
+  "overrideSerializedIdsOutsideValidatedBlock": [
+    60,
+    61,
+    62
+  ],
+  "currentBoundary": [
+    "The checked level0 asset preserves direct ChrystosEmporiumUpgrade50 through ChrystosEmporiumUpgrade68 names, then switches to explicit override names ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62.",
+    "That means the current prefab-number shell is not a one-to-one player-facing remap for serialized ids 69 through 74 in the validated MultiverseMarket block.",
+    "The same override band also points part of the visible 69-74 prefab run at serialized ids 60 through 62, which are not in the currently validated late block.",
+    "This is enough to block any assumption that validated rows 69 through 74 already have final grounded upgrade-number labels just because adjacent ChrystosEmporiumUpgrade prefab names exist."
+  ]
+}
