@@ -128,6 +128,7 @@ Prevent:
   - `data/multiverse-market-action-shell.json`
   - `data/multiverse-market-owner-family.json`
   - `data/multiverse-market-save-boundary.json`
+  - `data/multiverse-market-market-member-boundary.json`
   - `data/tokenium-naming-clues.json`
   - `data/token-bank-state-clues.json`
   - `data/daily-tokenium-lane-clues.json`

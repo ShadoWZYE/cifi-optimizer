@@ -180,3 +180,36 @@ When updating this file:
 The goal is not to minimize the number of tracks.
 
 The goal is to keep each track small enough that progress means a real unlock, not just a better description of blockage.
+
+---
+
+## Active Queue
+
+The repo's active unresolved queue currently lives in [`data/game-data.snapshot.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\game-data.snapshot.v1.json) and should stay mirrored here at a high level.
+
+Current active or queued tracks:
+
+- `shard-milestone-payload-recovery`
+  - status: `active`
+  - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
+- `spend-multiverse-save-model-recovery`
+  - status: `active`
+  - goal: recover the declaring save model behind `InscryptionsDone` and the nearby `IS*Level` cluster so Emporium state can move toward truthful import-ready mapping
+- `spend-token-shop-row-level-recovery`
+  - status: `queued`
+  - goal: recover player-owned current TokenShop row levels now that the spend lane is grounded
+- `spend-token-bank-state-owner`
+  - status: `queued`
+  - goal: recover the saved-state owner behind token-bank cap, fill, and claimable state without guessing from derived `OR_*` labels
+- `spend-daily-tokenium-save-owner`
+  - status: `queued`
+  - goal: recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane
+- `spend-multiverse-row-label-remap`
+  - status: `queued`
+  - goal: finish the validated-row id and label remap after the Emporium save-model track names the owned-state side
+
+Superseded parent:
+
+- `spend-planner-from-extracted-data`
+  - status: `archived`
+  - reason: it mixed multiple independent spend blockers that now have distinct exit conditions and should no longer share one queue item

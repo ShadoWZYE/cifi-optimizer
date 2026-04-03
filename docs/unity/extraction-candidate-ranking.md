@@ -22,12 +22,17 @@ It ranks candidate families by unresolved mention density plus binary anchor str
 
 The current default top unknown extraction target is:
 
-1. `spend.multiverse-market-owner-family`
+1. `shards.milestone-owner-family`
 
 Why:
 
-- it is the most repeatedly unresolved candidate in the current extracted-data notes
-- it also has strong grounded binary anchors such as `MultiverseMarket, Assembly-CSharp`, `BuyIS47`, and `CostBox-InscryptionsDone`
+- it still has the strongest remaining mix of unresolved text mentions and binary anchor density across the current extracted-data surface
+- the shard payload-recovery lane remains the repo-wide default unknown even after the spend-side family set was narrowed to unresolved candidates
+
+Current roadmap-first spend follow-up is narrower than the raw scorer result:
+
+- `spend-multiverse-save-model-recovery`
+  - reason: it is the strongest spend-side path into truthful `state.playerProfile` expansion and future external-tool replacement, even though the repo-wide scorer still sees broader Daily Tokenium uncertainty volume
 
 ## Targeted use
 

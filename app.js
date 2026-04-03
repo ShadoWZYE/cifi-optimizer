@@ -392,7 +392,7 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
@@ -423,6 +423,7 @@ async function bootstrap() {
     fetchJson("./data/token-shop-owner-shell.json"),
     fetchJson("./data/token-shop-save-boundary.json"),
     fetchJson("./data/multiverse-market-save-boundary.json"),
+    fetchJson("./data/multiverse-market-market-member-boundary.json"),
     fetchJson("./data/token-bank-controller-shell.json")
   ]);
 
@@ -465,6 +466,7 @@ async function bootstrap() {
     tokenShopOwnerShell,
     tokenShopSaveBoundary,
     multiverseMarketSaveBoundary,
+    multiverseMarketMarketMemberBoundary,
     tokenBankControllerShell
   };
   state.playerProfile = normalizePlayerProfile(
@@ -1625,7 +1627,9 @@ function renderResearch() {
   $("#researchResults").innerHTML = [
     renderResearchGuidance(),
     renderResearchViewSelector(orderedTracks),
-    ...visibleTracks.map((track) => `
+    ...visibleTracks.map((track) => {
+      const nextSteps = Array.isArray(track.nextSteps) ? track.nextSteps : [];
+      return `
     <article class="research-card">
       <div class="research-card-head">
         <div>
@@ -1643,13 +1647,14 @@ function renderResearch() {
       ${renderResearchTrackProgress(track)}
       ${renderResearchTrackSupport(track)}
       <div class="meta-stack">
-        <p class="snapshot-title">${track.nextSteps.length ? "Remaining work" : "Archive note"}</p>
-        ${track.nextSteps.length
-          ? `<ul class="research-step-list">${track.nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>`
+        <p class="snapshot-title">${nextSteps.length ? "Remaining work" : "Archive note"}</p>
+        ${nextSteps.length
+          ? `<ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>`
           : `<p class="meta">No active remaining work. This card stays here only as delivered foundation context for later roadmap slices.</p>`}
       </div>
     </article>
-  `),
+  `;
+    }),
     !visibleTracks.length
       ? `
     <article class="research-card">
@@ -1754,7 +1759,7 @@ function renderSpendPlannerBoundary() {
   const tokenShop = state.extractedMechanics?.tokenShop ?? {};
   const multiverseMarket = state.extractedMechanics?.multiverseMarket ?? {};
   const compatibility = getCompatibilityProfileState();
-  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-planner-from-extracted-data");
+  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-multiverse-save-model-recovery");
   const nextUnlockSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
   const importedTokenShopState = compatibility.unmappedSystems?.tokenShop;
   const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
@@ -1763,6 +1768,8 @@ function renderSpendPlannerBoundary() {
   const numericGroupCount = Object.keys(tokenShop.numeric_table ?? {}).length;
   const validatedRows = Array.isArray(multiverseMarket.records) ? multiverseMarket.records.length : 0;
   const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
+  const importedMarketPreview = getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket);
+  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
   const hasTokeniumShell =
     resourceIcons.includes("resourceicons/resource_tokenium")
     && resourceIcons.includes("resourceicons/resource_tokenium_cap");
@@ -1789,18 +1796,34 @@ function renderSpendPlannerBoundary() {
         <p class="meta"><code>Inscryptions Done</code> and <code>IS*Level</code> are not yet safe canonical PlayerProfile inputs, so MultiverseMarket recommendations remain blocked.</p>
       </div>
       <div class="meta-stack">
+        <p class="snapshot-title">Active Emporium save-model narrowing</p>
+        <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
+        <p class="meta">${marketMemberSummary.hasCloudBridge ? `The same narrowed path still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps this lane tied to repo-local player-profile recovery instead of UI-only text handlers.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the Emporium save-model path."}</p>
+        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the next safe step is still save-model recovery rather than planner logic.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save-model path and needs review."}</p>
+      </div>
+      <div class="meta-stack">
         <p class="snapshot-title">Imported spend payload watch</p>
         <p class="meta">${hasImportedTokenShopState ? `Quarantined TokenShop payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedTokenShopState))}).` : "No quarantined TokenShop payload is present in the imported PlayerProfile."}</p>
         <p class="meta">${hasImportedMarketState ? `Quarantined MultiverseMarket payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedMarketState))}).` : "No quarantined MultiverseMarket payload is present in the imported PlayerProfile."}</p>
         <p class="meta">These imported blobs stay under <code>compatibility.unmappedSystemState</code> until spend owners, saved-state inputs, and grounded labels are recovered.</p>
         <p class="meta">The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap</code>, <code>ClaimableBankTokens</code>, <code>InscryptionsDone</code>, and top-level <code>IS*Level</code> fields instead of dropping them.</p>
       </div>
-      ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">First safe spend unlock path</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+      <div class="meta-stack">
+        <p class="snapshot-title">Partial Emporium import preview</p>
+        <p class="meta">${importedMarketPreview.hasImportedBalance ? `Imported <code>InscryptionsDone</code>: ${escapeHtml(importedMarketPreview.balanceLabel)}.` : "No imported <code>InscryptionsDone</code> balance is available yet."}</p>
+        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Current imported levels are available for ${importedMarketPreview.importedValidatedRowCount}/${importedMarketPreview.validatedRowCount} validated Emporium rows (${escapeHtml(importedMarketPreview.validatedRangeLabel)}).` : "No imported current levels are available yet for the validated Emporium rows."}</p>
+        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Preview sample: ${escapeHtml(importedMarketPreview.sampleLine)}.` : "When imported <code>IS*Level</code> fields are present, this build will surface only the validated row block and keep everything else quarantined."}</p>
+        <p class="meta">${importedMarketPreview.extraImportedRows.length ? `Additional imported <code>IS*Level</code> rows stay quarantined outside the grounded validated block: ${escapeHtml(importedMarketPreview.extraImportedLabel)}${importedMarketPreview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported <code>IS*Level</code> rows were found outside the grounded validated block."}</p>
+        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.maxedCount} imported validated rows are already at their recovered max level.` : "This preview stays descriptive only and does not unlock spend recommendations or canonical PlayerProfile fields."}</p>
+      </div>
+      ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Active Emporium next steps</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
       <div class="pill-row">
         <span class="pill">${numericGroupCount} TokenShop numeric groups</span>
         <span class="pill">${validatedRows} validated market rows</span>
         <span class="pill">${hasTokeniumShell ? "Tokenium shell grounded" : "Tokenium shell incomplete"}</span>
         <span class="pill">${hasImportedTokenShopState || hasImportedMarketState ? "Imported spend payload quarantined" : "No imported spend payload yet"}</span>
+        <span class="pill">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.importedValidatedRowCount} validated Emporium levels previewed` : "No Emporium level preview yet"}</span>
+        <span class="pill">${marketMemberSummary.hasBoundary ? "Emporium save path narrowed" : "Emporium save path unresolved"}</span>
         <span class="pill">No spend recommendations yet</span>
       </div>
     </article>
@@ -1861,7 +1884,7 @@ function getResearchTrackOrder(track) {
     "shard-milestone-payload-recovery",
     "shards-and-loop-guardrails",
     "unified-feed-and-hardening",
-    "spend-planner-from-extracted-data",
+    "spend-multiverse-save-model-recovery",
     "hunter-related-planning",
     "mech-related-planning",
     "input-automation-intake",
@@ -1878,7 +1901,7 @@ function getResearchTrackSequenceLabel(track) {
     "shard-milestone-payload-recovery": "Sequence 2/5",
     "shards-and-loop-guardrails": "Sequence 2/5",
     "unified-feed-and-hardening": "Sequence 3/5",
-    "spend-planner-from-extracted-data": "Sequence 4/5",
+    "spend-multiverse-save-model-recovery": "Sequence 4/5",
     "hunter-related-planning": "Research intake",
     "mech-related-planning": "Research intake",
     "input-automation-intake": "Research intake",
@@ -1973,10 +1996,11 @@ function renderResearchTrackSupport(track) {
     `;
   }
 
-  if (track.id === "spend-planner-from-extracted-data") {
+  if (track.id === "spend-multiverse-save-model-recovery") {
     const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
     const validatedCoverage = getMultiverseMarketValidatedCoverage(state.extractedMechanics?.multiverseMarket);
     const metadataSummary = getMultiverseMarketMetadataSummary(state.extractedMechanics?.multiverseMarketMetadataNeighborhood);
+    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
     const tokeniumNamingSummary = getTokeniumNamingSummary(state.extractedMechanics?.tokeniumNamingClues);
     const tokenBankStateSummary = getTokenBankStateSummary(state.extractedMechanics?.tokenBankStateClues);
     const dailyTokeniumSummary = getDailyTokeniumLaneSummary(state.extractedMechanics?.dailyTokeniumLaneClues);
@@ -2024,6 +2048,9 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? "That is enough to keep the Emporium owner-family and Inscryptions cost-lane shell grounded, but not enough to recover player-owned balance fields or current row levels." : "The current build does not yet preserve a grounded MultiverseMarket owner-family shell."}</p>
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary still keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}.` : "MultiverseMarket save-boundary clues are not available in this build."}</p>
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? "That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet." : "The current build does not yet preserve a clean separation boundary between MultiverseMarket action-shell recovery and save-family recovery."}</p>
+        <p class="meta">${marketMemberSummary.hasBoundary ? `The newer checked market-member boundary now preserves ${marketMemberSummary.accessorLabel}, ${marketMemberSummary.memberLabel}, and nearby profile-side member shells such as ${marketMemberSummary.memberShellLabel}.` : "The newer checked market-member boundary is not available in this build."}</p>
+        <p class="meta">${marketMemberSummary.hasCloudBridge ? `That same narrowed handoff still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which makes a direct PlayerProfile-side market member or wrapper handoff more credible than the older broad family guess.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
+        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so this track remains a save-model recovery lane rather than a planner implementation lane.` : "The current build no longer preserves the expected direct-type-map gap for the market-member boundary and needs review."}</p>
         <p class="meta">This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs.</p>
       </div>
     `;
@@ -2076,7 +2103,7 @@ function getResearchTrackPhase(track) {
     "shard-milestone-payload-recovery": "PR 2 successor",
     "shards-and-loop-guardrails": "PR 2",
     "unified-feed-and-hardening": "PR 3 then PR 5 hardening",
-    "spend-planner-from-extracted-data": "PR 4",
+    "spend-multiverse-save-model-recovery": "PR 4 successor",
     "hunter-related-planning": "Research intake only",
     "mech-related-planning": "Research intake only",
     "input-automation-intake": "Research intake only",
@@ -2091,7 +2118,7 @@ function getResearchTrackSource(track) {
     "playerprofile-boundary-and-imports": "Schema boundary",
     "shard-milestone-payload-recovery": "Grounded shard data",
     "shards-and-loop-guardrails": "Grounded shard data",
-    "spend-planner-from-extracted-data": "Extracted spend data",
+    "spend-multiverse-save-model-recovery": "Extracted Emporium save-side data",
     "unified-feed-and-hardening": "Integration contract",
     "hunter-related-planning": "Research intake",
     "mech-related-planning": "Research intake",
@@ -2231,6 +2258,10 @@ function renderPlayerProfileBoundarySummary() {
     shipPlanner,
     compatibility
   });
+  const importedMultiverseMarketPreview = getImportedMultiverseMarketPreview(
+    compatibility.unmappedSystems?.multiverseMarket,
+    state.extractedMechanics?.multiverseMarket
+  );
 
   $("#playerProfileImportSummary").innerHTML = groups.map((group) => {
     const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value));
@@ -2257,6 +2288,7 @@ function renderPlayerProfileBoundarySummary() {
         ${audit.notes.map((item) => `<p class="meta">${escapeHtml(item)}</p>`).join("")}
       </div>
     </article>
+    ${renderImportedMultiverseMarketPreviewCard(importedMultiverseMarketPreview)}
     ${$("#playerProfileImportSummary").innerHTML}
   `;
 }
@@ -4105,6 +4137,35 @@ function getMultiverseMarketSaveBoundarySummary(boundary) {
   };
 }
 
+function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
+  const accessorClues = Array.isArray(boundary?.playerProfileAccessorClues) ? boundary.playerProfileAccessorClues : [];
+  const memberShellClues = Array.isArray(boundary?.playerProfileMemberShellClues) ? boundary.playerProfileMemberShellClues : [];
+  const cloudSaveBridgeClues = Array.isArray(boundary?.cloudSaveBridgeClues) ? boundary.cloudSaveBridgeClues : [];
+  const missingDirectTypeMapClues = Array.isArray(boundary?.missingDirectTypeMapClues) ? boundary.missingDirectTypeMapClues : [];
+
+  return {
+    hasBoundary:
+      accessorClues.includes("get_Market")
+      && memberShellClues.includes("Market")
+      && memberShellClues.includes("ShardData")
+      && memberShellClues.includes("ResearchPointData"),
+    hasCloudBridge:
+      cloudSaveBridgeClues.includes("CloudSavePlayerProfile")
+      && cloudSaveBridgeClues.includes("GetPlayerProfileInfo")
+      && cloudSaveBridgeClues.includes("CloudLoad"),
+    hasMissingDirectTypeMap:
+      missingDirectTypeMapClues.includes("PlayerProfileData|Market")
+      && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption")
+      && missingDirectTypeMapClues.includes("PlayerProfileData|MultiverseMarket"),
+    accessorLabel: "get_Market",
+    memberLabel: "Market",
+    memberShellLabel: "Relics, ShardData, ResearchPointData, and AcademyPointData",
+    cloudSaveLabel: "CloudSavePlayerProfile",
+    profileInfoLabel: "GetPlayerProfileInfo",
+    missingTypeMapLabel: "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket"
+  };
+}
+
 function getMultiverseMarketMetadataSummary(neighborhood) {
   const results = Array.isArray(neighborhood?.results) ? neighborhood.results : [];
   const findAnchor = (anchor) => results.find((entry) => entry.anchor === anchor);
@@ -4171,6 +4232,115 @@ function getMultiverseMarketValidatedCoverage(multiverseMarket) {
     count: validatedIds.length,
     rangeLabel: ranges.join(" and ")
   };
+}
+
+function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket) {
+  const validatedRecords = Array.isArray(multiverseMarket?.records) ? multiverseMarket.records : [];
+  const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
+  const importedState = typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
+  const rawBalance = importedState.InscryptionsDone;
+  const hasImportedBalance = isBoundaryValuePresent(rawBalance);
+  const balanceLabel = hasImportedBalance ? formatBoundaryValue(rawBalance) : "Not imported";
+  const importedValidatedRows = validatedRecords
+    .map((record) => {
+      const rowId = Number(record?.inscription_id);
+      const maxLevel = Number(record?.max_level);
+      const rawLevel = importedState[`IS${rowId}Level`];
+      const level = Number(rawLevel);
+      if (!Number.isFinite(rowId) || !Number.isFinite(level)) {
+        return null;
+      }
+      return {
+        rowId,
+        level,
+        maxLevel: Number.isFinite(maxLevel) ? maxLevel : null,
+        completionPercent: Number.isFinite(maxLevel) && maxLevel > 0
+          ? Math.min(100, Math.round((level / maxLevel) * 100))
+          : null
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.rowId - right.rowId);
+  const previewRows = importedValidatedRows.slice(0, 8);
+  const importedValidatedIds = new Set(importedValidatedRows.map((entry) => entry.rowId));
+  const missingValidatedRows = validatedRecords
+    .map((record) => Number(record?.inscription_id))
+    .filter((rowId) => Number.isFinite(rowId) && !importedValidatedIds.has(rowId));
+  const extraImportedRows = Object.entries(importedState)
+    .map(([key, value]) => {
+      const match = /^IS(\d+)Level$/u.exec(String(key));
+      if (!match) {
+        return null;
+      }
+      const rowId = Number(match[1]);
+      const level = Number(value);
+      if (!Number.isFinite(rowId) || !Number.isFinite(level) || importedValidatedIds.has(rowId)) {
+        return null;
+      }
+      return { rowId, level };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.rowId - right.rowId);
+  const averageCompletion = importedValidatedRows.length
+    ? Math.round(
+      importedValidatedRows
+        .filter((entry) => Number.isFinite(entry.completionPercent))
+        .reduce((total, entry) => total + Number(entry.completionPercent || 0), 0)
+        / Math.max(importedValidatedRows.filter((entry) => Number.isFinite(entry.completionPercent)).length, 1)
+    )
+    : null;
+
+  return {
+    hasImportedBalance,
+    balanceLabel,
+    hasValidatedLevelPreview: importedValidatedRows.length > 0,
+    importedValidatedRowCount: importedValidatedRows.length,
+    validatedRowCount: validatedRecords.length,
+    validatedRangeLabel: validatedCoverage.rangeLabel || "50-59 and 63-74",
+    maxedCount: importedValidatedRows.filter((entry) => Number.isFinite(entry.maxLevel) && entry.level >= entry.maxLevel).length,
+    averageCompletion,
+    previewRows,
+    missingValidatedRows,
+    extraImportedRows,
+    extraImportedLabel: extraImportedRows.length
+      ? extraImportedRows.slice(0, 8).map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}`).join(", ")
+      : "",
+    sampleLine: previewRows.length
+      ? previewRows.map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}${Number.isFinite(entry.maxLevel) ? `/${formatShardNumber(entry.maxLevel)}` : ""}`).join(" | ")
+      : ""
+  };
+}
+
+function renderImportedMultiverseMarketPreviewCard(preview) {
+  if (!preview.hasImportedBalance && !preview.hasValidatedLevelPreview) {
+    return "";
+  }
+
+  return `
+    <article class="preview-card">
+      <strong>Emporium import preview</strong>
+      <p class="meta">This is a descriptive preview of quarantined Emporium state for the validated row block only. It does not promote these values into canonical PlayerProfile truth or spend recommendations.</p>
+      <div class="pill-row">
+        <span class="pill">${preview.hasImportedBalance ? `InscryptionsDone ${escapeHtml(preview.balanceLabel)}` : "No imported InscryptionsDone"}</span>
+        <span class="pill">${preview.hasValidatedLevelPreview ? `${preview.importedValidatedRowCount}/${preview.validatedRowCount} validated rows` : "No validated Emporium levels"}</span>
+        ${preview.hasValidatedLevelPreview ? `<span class="pill">${preview.maxedCount} maxed imported rows</span>` : ""}
+        ${preview.hasValidatedLevelPreview && Number.isFinite(preview.averageCompletion) ? `<span class="pill">${preview.averageCompletion}% avg validated completion</span>` : ""}
+        ${preview.extraImportedRows.length ? `<span class="pill">${preview.extraImportedRows.length} extra imported rows quarantined</span>` : ""}
+      </div>
+      <div class="meta-stack">
+        <p class="meta">${preview.hasValidatedLevelPreview ? `Imported current levels are present for validated rows ${escapeHtml(preview.validatedRangeLabel)}.` : "Imported current levels are not present for the validated Emporium row block."}</p>
+        <p class="meta">${preview.hasValidatedLevelPreview ? `Missing validated imports: ${preview.missingValidatedRows.length ? escapeHtml(preview.missingValidatedRows.map((rowId) => `IS${rowId}`).join(", ")) : "none"}.` : "When imported IS*Level fields exist, this preview only surfaces the validated Emporium block and leaves the rest quarantined."}</p>
+        <p class="meta">${preview.extraImportedRows.length ? `Extra imported rows outside the grounded validated block stay quarantined: ${escapeHtml(preview.extraImportedLabel)}${preview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported rows were found outside the grounded validated block."}</p>
+        ${preview.hasValidatedLevelPreview ? `<div class="preview-stack">${preview.previewRows.map((entry) => `
+          <article class="preview-card">
+            <strong>IS${escapeHtml(String(entry.rowId))}</strong>
+            <p class="meta">Imported level ${escapeHtml(formatShardNumber(entry.level))}${Number.isFinite(entry.maxLevel) ? ` / recovered max ${escapeHtml(formatShardNumber(entry.maxLevel))}` : ""}</p>
+            <p class="meta">${Number.isFinite(entry.completionPercent) ? `${escapeHtml(String(entry.completionPercent))}% of recovered max` : "Recovered max not available in this build"}</p>
+          </article>
+        `).join("")}</div>` : ""}
+      </div>
+    </article>
+  `;
 }
 
 function renderOverviewSupportSummary(apkValidation, supportValidation) {

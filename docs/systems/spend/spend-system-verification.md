@@ -127,9 +127,10 @@ The next spend-track slice should verify missing integration inputs, not produce
 
 Priority order:
 
-1. recover player-owned current-level inputs for TokenShop upgrade rows now that the cost lane is grounded as token or tokenium spending
-2. map the TokenShop-connected token-bank cap, fill, claim, and Academy or Farm Mission Daily Tokenium lane strongly enough to identify their saved-state inputs
-3. use the recovered `InscryptionsDone` and `IS*Level` metadata cluster to determine the declaring save model and authoritative owned-state range behind the multiverse-market lane
-4. remap serialized ids to grounded player-facing labels
-5. only then add spend recommendations with explicit assumptions
+1. use the recovered `InscryptionsDone` and `IS*Level` metadata cluster to determine the declaring save model behind the multiverse-market lane, and prove whether it lives directly on `PlayerProfileData` or on a nested progression payload
+2. if that save owner is recovered, map which owned `IS*Level` range actually covers the currently validated Emporium rows before promoting any import-ready state shape
+3. recover player-owned current-level inputs for TokenShop upgrade rows now that the cost lane is grounded as token or tokenium spending
+4. recover the saved-state owners behind token-bank cap, fill, claim, and the Academy or Farm Mission Daily Tokenium lane
+5. remap serialized ids to grounded player-facing labels
+6. only then add spend recommendations with explicit assumptions
 

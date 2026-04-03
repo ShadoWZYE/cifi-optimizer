@@ -12,12 +12,79 @@ Repo-local metadata already shows a concrete persistence family outside the raw 
 - `FillPlayerProfileData`
 - `GetPlayerProfileData`
 - `CloudSavePlayerProfile`
+- `get_Market`
 
 Current grounded conclusion:
 
 - saved player-owned progression is likely serialized through the broader `PlayerProfileData` family rather than being owned directly by `MultiverseMarket`
 - this is enough to narrow future saved-state recovery toward the profile/save path instead of continuing to treat the Emporium owner object as the only place to search
 - this is not enough to name the exact declaring save model for current `Inscryptions Done` balance or owned inscription levels
+
+## PlayerProfile market-member clue recovered from this pass
+
+The deeper repo-local metadata probe now preserves one stronger clue inside the same PlayerProfile persistence neighborhood:
+
+- `get_Market`
+
+The same probe also still preserves type-map style strings such as:
+
+- `|PlayerProfileData`
+- `PlayerProfileData|GemData`
+- `PlayerProfileData|GemNodeCombo`
+- `|MultiverseMarket`
+- `MultiverseMarket|InscryptionTupleObject`
+- `MultiverseMarket|Inscryption`
+
+Current grounded conclusion:
+
+- the PlayerProfile persistence family now exposes a direct `get_Market` accessor clue beside other profile-side accessors such as `get_ShardData`, `get_ResearchPointData`, and `get_AcademyPointData`
+- this is stronger than the earlier broad `PlayerProfileData` family narrowing because it suggests the Emporium lane may hang off a profile-side `Market` member or related sub-structure
+- the current repo-local metadata still does not expose a direct `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` type-map clue
+- this keeps the declaring owner unresolved, but it narrows the remaining question from "somewhere in the PlayerProfile family" toward "likely a profile-side market member or nested progression payload"
+
+## Market-member versus wrapper boundary
+
+The checked boundary artifact for this handoff now preserves the stronger repo-local split:
+
+- PlayerProfile-side member clue:
+  - `get_Market`
+- PlayerProfile-side member-shell clues:
+  - `Market`
+  - `Relics`
+  - `CellData`
+  - `ModPointData`
+  - `ShardData`
+  - `ResearchPointData`
+  - `AcademyPointData`
+  - `BlueprintsThisTR`
+- cloud-save bridge clues:
+  - `CloudSavePlayerProfile`
+  - `GetCurrentSaveFileInfo`
+  - `GetPlayerProfileInfo`
+  - `CloudLoad`
+- still-missing direct type-map clues:
+  - `PlayerProfileData|Market`
+  - `PlayerProfileData|Inscryption`
+  - `PlayerProfileData|MultiverseMarket`
+- nearest recovered market-wrapper family:
+  - `MultiverseMarket`
+  - `MultiverseMarket|InscryptionTupleObject`
+  - `MultiverseMarket|Inscryption`
+  - `NecrumExchange`
+  - `OuroborosResetter`
+  - `TraitSpheres`
+  - `ZeimarrNautallium`
+  - `ResearchLaboratory`
+  - `ResearchUltimas`
+  - `RewardLanes`
+  - `ShardMining`
+
+Current grounded conclusion:
+
+- the strongest current repo-local handoff is no longer just "PlayerProfile family somewhere"
+- the stronger boundary is now "direct PlayerProfileData member shell or broader wrapper family" versus direct `MultiverseMarket` ownership on `PlayerProfileData`
+- the bare `Market` member-shell clue makes a direct PlayerProfile-side handoff more credible than the earlier accessor-only evidence
+- this is useful because it narrows the next recovery step toward the declaring member or nested payload without pretending the Emporium state is already import-ready
 
 ## Exact metadata field cluster recovered from this pass
 
@@ -94,12 +161,13 @@ Current grounded conclusion:
   - `AchievementBar-Inscryptions`
   - `BuyIS*` handlers
 - likely persistence search family:
-  - `PlayerProfileData` / `FillPlayerProfileData` / `GetPlayerProfileData`
+  - `PlayerProfileData` / `FillPlayerProfileData` / `GetPlayerProfileData` / `get_Market`
 
 ## What remains unresolved
 
 - the exact declaring save model that owns `InscryptionsDone`
 - the authoritative saved-state field range or list for owned inscription levels
+- whether the `get_Market` accessor resolves to the declaring Emporium state owner or only to a broader market wrapper
 - whether the contiguous `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / `Mech*` run belongs directly to `PlayerProfileData` or to a nested progression payload
 - whether the nearby `IS*Level` and `EsotericR*Trades` strings belong to direct profile fields, nested achievement/progression records, or another serialized sub-structure inside `PlayerProfileData`
 
@@ -108,6 +176,6 @@ Current grounded conclusion:
 - It is still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state.playerProfile`.
 - It is now safe to treat `InscryptionsDone` and nearby `IS*Level` strings as grounded metadata field clues for future save-side mapping work.
 - It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
-- It is now safe to treat the save-side search as narrowed to the player-profile persistence family instead of the raw Emporium owner alone.
+- It is now safe to treat the save-side search as narrowed to the PlayerProfile persistence family and a direct PlayerProfile-side market member shell or broader wrapper handoff instead of the raw Emporium owner alone.
 - The next spend-track slice should determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` cluster before any planner UI is added.
 
