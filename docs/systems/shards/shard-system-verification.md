@@ -8,6 +8,9 @@ Boundary reference:
 
 - [shard-grounding-boundary.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-grounding-boundary.md)
 - [shard-owner-family-verification.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-owner-family-verification.md)
+- [data/shard-finalsu-bonus-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-finalsu-bonus-boundary.v1.json)
+- [data/shard-milestone-payload-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-payload-boundary.v1.json)
+- [data/shard-save-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-save-boundary.v1.json)
 
 ## Current status
 
@@ -51,11 +54,14 @@ Repo-local owner-family evidence now narrows the milestone shell further:
 - `ShardMining, Assembly-CSharp` sits beside `CheckFirstTimeShardMilestoneOpened`, `AttachFastBuyButton`, `FastBuyButtonMethodShards`, and `StartFastBuyButtonHold`
 - metadata ties `ShardMining` to `ShardUpgradeInfo`
 - `ShardUpgradeInfo` sits beside `TotalMilestoneLevels`, `get_IsUnlocked`, `get_SU*FinalUnlockReq`, `FinalSU*Bonus*`, and over-level exponent fields
+- the same shard-specific trail now also preserves a checked payload-watch cluster around `get_TotalMilestoneLevels`, `InitializeShards`, `UpdateShardCostList`, `GetShardCostList`, `CheckAllMilestoneLevelFills`, `CheckMilestone*ProgressFill`, `Phase1Tick` through `Phase6Tick`, and `CooldownTick`
+- the current narrowed shard-local contexts still preserve zero checked overlap with `PlayerProfileData`, `GetPlayerProfileData`, `FillPlayerProfileData`, or `CloudSavePlayerProfile`
 - `ConstructionMilestones` still exists as a parallel generic milestone family, but it is no longer the preferred shard-owner interpretation because its metadata path is academy-side
+- the recovered `FinalSU*Bonus*` plus `get_SU*FinalUnlockReq` family is now preserved in a checked shard boundary bundle tied to `ShardUpgradeInfo`
 
 This is enough to stop treating the shard milestone owner as wholly unknown for descriptive workflow work.
 
-It is still not enough to promote milestone rows, labels, or costs as extracted gameplay truth.
+It is still not enough to promote milestone rows, labels, costs, or saved player-owned shard milestone state as extracted gameplay truth.
 
 ### Current milestone dataset status
 

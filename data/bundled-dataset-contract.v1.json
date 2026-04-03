@@ -50,6 +50,38 @@
       ]
     },
     {
+      "id": "shard-owner-family-boundary",
+      "label": "Shard owner-family boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-owner-family-boundary.v1.json"
+      ]
+    },
+    {
+      "id": "shard-finalsu-bonus-boundary",
+      "label": "Shard FinalSU bonus boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-finalsu-bonus-boundary.v1.json"
+      ]
+    },
+    {
+      "id": "shard-milestone-payload-boundary",
+      "label": "Shard milestone payload boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-milestone-payload-boundary.v1.json"
+      ]
+    },
+    {
+      "id": "shard-save-boundary",
+      "label": "Shard save boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-save-boundary.v1.json"
+      ]
+    },
+    {
       "id": "extraction-candidate-families",
       "label": "Extraction candidate families",
       "classification": "extracted-mechanics",
@@ -138,6 +170,14 @@
       ]
     },
     {
+      "id": "multiverse-market-prefab-remap-boundary",
+      "label": "Multiverse market prefab remap boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-prefab-remap-boundary.json"
+      ]
+    },
+    {
       "id": "token-shop-cost-lanes",
       "label": "Token shop cost lanes",
       "classification": "extracted-mechanics",
@@ -159,6 +199,14 @@
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-action-shell.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-owner-family",
+      "label": "Multiverse market owner family",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-owner-family.json"
       ]
     },
     {

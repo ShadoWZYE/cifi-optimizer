@@ -25,6 +25,10 @@ const mimeTypes = {
   ".jpeg": "image/jpeg",
   ".webp": "image/webp"
 };
+const serverCapabilitiesScript = `<script>window.__CIFI_SERVER_CAPABILITIES__ = ${JSON.stringify({
+  sessionApi: true,
+  launcherMode
+})};</script>`;
 
 const server = createServer(async (request, response) => {
   const requestUrl = new URL(request.url || "/", `http://${request.headers.host || `localhost:${port}`}`);
@@ -75,7 +79,18 @@ const server = createServer(async (request, response) => {
   const filePath = join(root, safePath);
 
   try {
-    const body = await readFile(filePath);
+    let body = await readFile(filePath);
+    if (extname(filePath) === ".html") {
+      body = Buffer.from(
+        body
+          .toString("utf8")
+          .replace(
+            /<script>\s*window\.__CIFI_SERVER_CAPABILITIES__\s*=\s*\{[\s\S]*?\};\s*<\/script>/,
+            serverCapabilitiesScript
+          ),
+        "utf8"
+      );
+    }
     const contentType = mimeTypes[extname(filePath)] || "application/octet-stream";
     response.writeHead(200, { "Content-Type": contentType });
     response.end(body);

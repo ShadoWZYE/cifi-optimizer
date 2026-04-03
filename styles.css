@@ -110,6 +110,7 @@ body {
 .ship-actions,
 .loadout-switches,
 .tap-switches,
+.research-view-toggle,
 .ship-chip-row,
 .install-grid {
   display: grid;
@@ -256,6 +257,20 @@ textarea {
   background: rgba(255, 255, 255, 0.82);
   cursor: pointer;
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.research-view-toggle {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.research-view-toggle .button {
+  justify-content: center;
+}
+
+.research-view-toggle .button.is-active {
+  background: linear-gradient(135deg, var(--accent-soft) 0%, rgba(229, 139, 60, 0.22) 100%);
+  color: var(--accent-strong);
+  border-color: rgba(215, 100, 42, 0.24);
 }
 
 .button:disabled {

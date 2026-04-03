@@ -98,7 +98,7 @@
 
         <section class="panel">
           <form id="profileForm" class="profile-form">
-            <p class="meta">Shared PlayerProfile truth is limited to grounded CIFI account state. Planner-only helpers stay labeled, and ship calibration remains outside shared profile truth as external-model implementation data.</p>
+            <p class="meta">Shared PlayerProfile truth is limited to grounded CIFI account state. The active form only shows values a typical player can quickly provide from the game without derivation or manual rollups; aggregated or derived values stay out of this manual flow. Planner-only helpers stay labeled, and ship calibration remains outside shared profile truth as external-model implementation data.</p>
             <div class="field-group">
               <label for="profileName">Profile name</label>
               <input id="profileName" name="profileName" type="text" placeholder="Main account">
@@ -107,7 +107,7 @@
             <div class="field-grid">
               <div class="field-group">
                 <label for="loopReset">Current LR</label>
-                <input id="loopReset" name="loopReset" type="number" min="0" step="1">
+                <input id="loopReset" name="loopReset" type="text" inputmode="decimal" placeholder="41">
               </div>
               <div class="field-group">
                 <label for="dataConfidence">Data confidence</label>
@@ -118,35 +118,28 @@
                 </select>
               </div>
             </div>
+            <p class="meta">Manual profile inputs should come from values a typical player can quickly read in game. Accepted number formats: <code>5800</code>, <code>5.8k</code>, <code>9.8t</code>, <code>7.15e549</code>.</p>
 
             <div class="field-grid">
               <div class="field-group">
                 <label for="diamonds">Diamonds</label>
-                <input id="diamonds" name="diamonds" type="number" min="0" step="1">
+                <input id="diamonds" name="diamonds" type="text" inputmode="decimal" placeholder="5.8k">
               </div>
               <div class="field-group">
                 <label for="tokens">Tokens</label>
-                <input id="tokens" name="tokens" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
-                <label for="academyRelics">Academy relics</label>
-                <input id="academyRelics" name="academyRelics" type="number" min="0" step="1">
+                <input id="tokens" name="tokens" type="text" inputmode="decimal" placeholder="320">
               </div>
               <div class="field-group">
                 <label for="shards">Current shards</label>
-                <input id="shards" name="shards" type="number" min="0" step="1">
+                <input id="shards" name="shards" type="text" inputmode="decimal" placeholder="7.15e549">
               </div>
             </div>
 
-            <p class="meta">Planner-only helper inputs are optional. They support descriptive planning surfaces but are not treated as raw in-game account truth.</p>
+            <p class="meta">Planner-only helper inputs are optional. Only helpers a typical player can still read quickly in game belong here; derived rates such as shard income per hour stay out of the active form.</p>
             <div class="field-grid">
               <div class="field-group">
-                <label for="shardRatePerHour">Shard income / hour</label>
-                <input id="shardRatePerHour" name="shardRatePerHour" type="number" min="0" step="1">
-              </div>
-              <div class="field-group">
                 <label for="totalShardMilestoneLevels">Total shard milestone levels</label>
-                <input id="totalShardMilestoneLevels" name="totalShardMilestoneLevels" type="number" min="0" step="1">
+                <input id="totalShardMilestoneLevels" name="totalShardMilestoneLevels" type="text" inputmode="decimal" placeholder="245">
               </div>
             </div>
 
@@ -432,6 +425,12 @@
     </main>
   </div>
 
+  <script>
+    window.__CIFI_SERVER_CAPABILITIES__ = {
+      sessionApi: false,
+      launcherMode: false
+    };
+  </script>
   <script src="./app.js" type="module"></script>
 </body>
 </html>

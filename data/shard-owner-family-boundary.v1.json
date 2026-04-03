@@ -1,0 +1,60 @@
+{
+  "dataset": "shard-owner-family-boundary.v1",
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "ownerProbe": "data/shard-owner-family-probe.v1.json",
+    "constructionComparisonProbe": "data/shard-vs-construction-owner-probe.v1.json",
+    "shardMiningMetadataNeighborhood": "data/shardmining-metadata-neighborhood.v1.json",
+    "shardUpgradeInfoMetadataNeighborhood": "data/shardupgradeinfo-metadata-neighborhood.v1.json",
+    "level0": "workbench/unity/joined/level0",
+    "globalMetadata": "workbench/apk/base/global-metadata.dat"
+  },
+  "screenControllerFamilies": [
+    "ShardMining, Assembly-CSharp"
+  ],
+  "dataCarrierCandidates": [
+    "ShardMining|ShardUpgradeInfo",
+    "ShardUpgradeInfo"
+  ],
+  "screenControlAnchors": [
+    "CheckFirstTimeShardMilestoneOpened",
+    "AttachFastBuyButton",
+    "FastBuyButtonMethodShards",
+    "StartFastBuyButtonHold"
+  ],
+  "bonusFieldAnchors": [
+    "TotalMilestoneLevels",
+    "get_IsUnlocked",
+    "set_IsUnlocked",
+    "<IsUnlocked>k__BackingField",
+    "get_SU1FinalUnlockReq",
+    "get_SU29FinalUnlockReq",
+    "FinalSU1Bonus1",
+    "FinalSU1Bonus2",
+    "FinalSU29Bonus2",
+    "FinalSU29Bonus3",
+    "<FastBuyEnum>d__1429"
+  ],
+  "downgradedGenericLead": {
+    "family": "ConstructionMilestones, Assembly-CSharp",
+    "anchors": [
+      "InitializeMilestones",
+      "BuyMilestone1",
+      "BuyMilestone57",
+      "ClaimDiamondMilestone",
+      "FinalMilestone1Bonus1",
+      "ConstructionMilestonesSum"
+    ],
+    "reasons": [
+      "The metadata path is academy-side rather than shard-specific.",
+      "The side-by-side owner probe places ConstructionMilestones around blueprint hold strings rather than shard-specific owner labels.",
+      "It remains a nearby generic milestone lead, not the current best shard owner claim."
+    ]
+  },
+  "currentBoundary": [
+    "Treat ShardMining as the strongest current shard milestone screen-controller family.",
+    "Treat ShardUpgradeInfo as the strongest current shard-specific data-carrier candidate for shard milestone or upgrade state and FinalSU bonus fields.",
+    "Keep ConstructionMilestones downgraded to a nearby generic milestone family until stronger shard-specific linkage is recovered.",
+    "Do not promote player-facing milestone labels, per-level costs, affordability, ROI, ETA, or canonical milestone import from this boundary alone."
+  ]
+}

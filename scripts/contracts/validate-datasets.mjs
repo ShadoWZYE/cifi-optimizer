@@ -116,6 +116,275 @@ function validateShardDatasets(milestones, observed, provenance) {
   };
 }
 
+function validateShardAssetGrounding(grounding) {
+  expectNonEmptyString(grounding.dataset, "shard asset grounding dataset id must be present");
+  expectNonEmptyString(grounding.generatedAt, "shard asset grounding generatedAt must be present");
+  expectNonEmptyString(grounding.sourceReport, "shard asset grounding sourceReport must be present");
+  expectArray(grounding.sourceArtifacts, "shard asset grounding sourceArtifacts must be an array");
+  expectNonEmptyString(grounding.classification, "shard asset grounding classification must be present");
+  expectRecord(grounding.system, "shard asset grounding system must be an object");
+  expectNonEmptyString(grounding.system.id, "shard asset grounding system.id must be present");
+  expectNonEmptyString(grounding.system.label, "shard asset grounding system.label must be present");
+  expectArray(grounding.groundedShellIdentifiers, "shard asset grounding groundedShellIdentifiers must be an array");
+  expectArray(grounding.groundedFacts, "shard asset grounding groundedFacts must be an array");
+  expectArray(grounding.appSafeUses, "shard asset grounding appSafeUses must be an array");
+  expectArray(grounding.blockedUses, "shard asset grounding blockedUses must be an array");
+  expectArray(grounding.unresolvedGaps, "shard asset grounding unresolvedGaps must be an array");
+  expectNonEmptyString(grounding.integrationStatus, "shard asset grounding integrationStatus must be present");
+  assert.ok(grounding.groundedShellIdentifiers.includes("LoopResetStage1"), "shard asset grounding must preserve LoopResetStage1");
+  assert.ok(grounding.groundedShellIdentifiers.includes("MilestoneBonusesPerLevel"), "shard asset grounding must preserve MilestoneBonusesPerLevel");
+  assert.ok(grounding.groundedFacts.some((fact) => String(fact).includes("ShardUpgradeInfo")), "shard asset grounding must mention ShardUpgradeInfo");
+  assert.ok(grounding.unresolvedGaps.includes("exact milestone data object or serialized row payload"), "shard asset grounding must preserve the unresolved milestone payload gap");
+  assert.equal(grounding.integrationStatus, "available-but-unmapped", "shard asset grounding must stay available-but-unmapped");
+
+  return {
+    id: "shard-asset-grounding",
+    label: "Shard asset grounding",
+    classification: "extracted-mechanics",
+    stats: [
+      `${grounding.groundedShellIdentifiers.length} grounded shell identifiers`,
+      `${grounding.groundedFacts.length} grounded facts`,
+      `${grounding.integrationStatus} integration status`
+    ]
+  };
+}
+
+function validateShardOwnerFamilyBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard owner-family boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard owner-family boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard owner-family boundary sources must be an object");
+  ["ownerProbe", "constructionComparisonProbe", "shardMiningMetadataNeighborhood", "shardUpgradeInfoMetadataNeighborhood", "level0", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard owner-family boundary sources.${field} must be present`);
+  });
+  expectArray(boundary.screenControllerFamilies, "shard owner-family boundary screenControllerFamilies must be an array");
+  expectArray(boundary.dataCarrierCandidates, "shard owner-family boundary dataCarrierCandidates must be an array");
+  expectArray(boundary.screenControlAnchors, "shard owner-family boundary screenControlAnchors must be an array");
+  expectArray(boundary.bonusFieldAnchors, "shard owner-family boundary bonusFieldAnchors must be an array");
+  expectRecord(boundary.downgradedGenericLead, "shard owner-family boundary downgradedGenericLead must be an object");
+  expectNonEmptyString(boundary.downgradedGenericLead.family, "shard owner-family boundary downgradedGenericLead.family must be present");
+  expectArray(boundary.downgradedGenericLead.anchors, "shard owner-family boundary downgradedGenericLead.anchors must be an array");
+  expectArray(boundary.downgradedGenericLead.reasons, "shard owner-family boundary downgradedGenericLead.reasons must be an array");
+  expectArray(boundary.currentBoundary, "shard owner-family boundary currentBoundary must be an array");
+
+  assert.ok(boundary.screenControllerFamilies.includes("ShardMining, Assembly-CSharp"), "shard owner-family boundary must preserve ShardMining, Assembly-CSharp");
+  assert.ok(boundary.dataCarrierCandidates.includes("ShardMining|ShardUpgradeInfo"), "shard owner-family boundary must preserve ShardMining|ShardUpgradeInfo");
+  assert.ok(boundary.dataCarrierCandidates.includes("ShardUpgradeInfo"), "shard owner-family boundary must preserve ShardUpgradeInfo");
+  ["CheckFirstTimeShardMilestoneOpened", "AttachFastBuyButton", "FastBuyButtonMethodShards", "StartFastBuyButtonHold"].forEach((name) => {
+    assert.ok(boundary.screenControlAnchors.includes(name), `shard owner-family boundary missing ${name}`);
+  });
+  ["TotalMilestoneLevels", "get_IsUnlocked", "get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq", "FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3", "<FastBuyEnum>d__1429"].forEach((name) => {
+    assert.ok(boundary.bonusFieldAnchors.includes(name), `shard owner-family boundary missing ${name}`);
+  });
+  assert.equal(boundary.downgradedGenericLead.family, "ConstructionMilestones, Assembly-CSharp", "shard owner-family boundary generic lead drifted");
+  ["InitializeMilestones", "BuyMilestone1", "BuyMilestone57", "ClaimDiamondMilestone", "ConstructionMilestonesSum"].forEach((name) => {
+    assert.ok(boundary.downgradedGenericLead.anchors.includes(name), `shard owner-family boundary generic lead anchors missing ${name}`);
+  });
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not promote player-facing milestone labels")), "shard owner-family boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-owner-family-boundary",
+    label: "Shard owner-family boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.screenControllerFamilies.length} shard screen-controller family`,
+      `${boundary.bonusFieldAnchors.length} shard bonus-field anchors`,
+      "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded"
+    ]
+  };
+}
+
+function validateShardFinalSuBonusBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard FinalSU bonus boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard FinalSU bonus boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard FinalSU bonus boundary sources must be an object");
+  ["shardUpgradeInfoMetadataNeighborhood", "shardMiningMetadataNeighborhood", "ownerFamilyVerification", "systemVerification", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard FinalSU bonus boundary sources.${field} must be present`);
+  });
+  expectNonEmptyString(boundary.dataCarrier, "shard FinalSU bonus boundary dataCarrier must be present");
+  expectNonEmptyString(boundary.dataCarrierTieIn, "shard FinalSU bonus boundary dataCarrierTieIn must be present");
+  expectArray(boundary.unlockRequirementAccessors, "shard FinalSU bonus boundary unlockRequirementAccessors must be an array");
+  expectArray(boundary.bonusFieldSamples, "shard FinalSU bonus boundary bonusFieldSamples must be an array");
+  expectArray(boundary.bonusAccessorSamples, "shard FinalSU bonus boundary bonusAccessorSamples must be an array");
+  expectArray(boundary.adjacentFields, "shard FinalSU bonus boundary adjacentFields must be an array");
+  expectArray(boundary.currentBoundary, "shard FinalSU bonus boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataCarrier, "ShardUpgradeInfo", "shard FinalSU bonus boundary dataCarrier drifted");
+  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard FinalSU bonus boundary dataCarrierTieIn drifted");
+  ["get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq"].forEach((name) => {
+    assert.ok(boundary.unlockRequirementAccessors.includes(name), `shard FinalSU bonus boundary missing ${name}`);
+  });
+  ["FinalSU1Bonus1", "FinalSU1Bonus2", "FinalSU2Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].forEach((name) => {
+    assert.ok(boundary.bonusFieldSamples.includes(name), `shard FinalSU bonus boundary missing ${name}`);
+  });
+  ["get_FinalSU1Bonus1", "get_FinalSU1Bonus2", "get_FinalSU2Bonus1", "get_FinalSU29Bonus2", "get_FinalSU29Bonus3"].forEach((name) => {
+    assert.ok(boundary.bonusAccessorSamples.includes(name), `shard FinalSU bonus boundary missing ${name}`);
+  });
+  ["TotalMilestoneLevels", "get_IsUnlocked", "OverLevel100Exponent", "OverLevel400Exponent", "<FastBuyEnum>d__1429"].forEach((name) => {
+    assert.ok(boundary.adjacentFields.includes(name), `shard FinalSU bonus boundary missing ${name}`);
+  });
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not map FinalSU fields directly")), "shard FinalSU bonus boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-finalsu-bonus-boundary",
+    label: "Shard FinalSU bonus boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.unlockRequirementAccessors.length} shard unlock accessors`,
+      `${boundary.bonusFieldSamples.length} shard bonus-field samples`,
+      "FinalSU bonus and SU unlock fields stay tied to ShardUpgradeInfo until row mapping is recovered"
+    ]
+  };
+}
+
+function validateShardMilestonePayloadBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard milestone payload boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard milestone payload boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard milestone payload boundary sources must be an object");
+  ["shardMiningMetadataNeighborhood", "shardUpgradeInfoMetadataNeighborhood", "ownerFamilyBoundary", "finalSuBonusBoundary", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard milestone payload boundary sources.${field} must be present`);
+  });
+  expectNonEmptyString(boundary.dataCarrier, "shard milestone payload boundary dataCarrier must be present");
+  expectNonEmptyString(boundary.dataCarrierTieIn, "shard milestone payload boundary dataCarrierTieIn must be present");
+  expectArray(boundary.milestoneStateFields, "shard milestone payload boundary milestoneStateFields must be an array");
+  expectArray(boundary.costAndListHooks, "shard milestone payload boundary costAndListHooks must be an array");
+  expectArray(boundary.progressFillHooks, "shard milestone payload boundary progressFillHooks must be an array");
+  expectArray(boundary.tickFields, "shard milestone payload boundary tickFields must be an array");
+  expectArray(boundary.sampleCostAccessors, "shard milestone payload boundary sampleCostAccessors must be an array");
+  expectArray(boundary.currentBoundary, "shard milestone payload boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataCarrier, "ShardUpgradeInfo", "shard milestone payload boundary dataCarrier drifted");
+  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard milestone payload boundary dataCarrierTieIn drifted");
+  ["TotalMilestoneLevels", "get_IsUnlocked", "set_IsUnlocked", "<IsUnlocked>k__BackingField"].forEach((name) => {
+    assert.ok(boundary.milestoneStateFields.includes(name), `shard milestone payload boundary missing ${name}`);
+  });
+  ["get_TotalMilestoneLevels", "InitializeMaxLevelBools", "UpdateMaxedMilestonesList", "UpdateUnlockedMilestonesList", "SortCostAndBools", "CountAffordableShard", "UpdateShardCostList", "GetShardCostList", "InitializeShards"].forEach((name) => {
+    assert.ok(boundary.costAndListHooks.includes(name), `shard milestone payload boundary missing ${name}`);
+  });
+  ["CheckAllMilestoneLevelFills", "CheckMilestone0ProgressFill", "CheckMilestone1ProgressFill", "CheckMilestone9ProgressFill"].forEach((name) => {
+    assert.ok(boundary.progressFillHooks.includes(name), `shard milestone payload boundary missing ${name}`);
+  });
+  ["Phase1Tick", "Phase2Tick", "Phase3Tick", "Phase4Tick", "Phase5Tick", "Phase6Tick", "CooldownTick"].forEach((name) => {
+    assert.ok(boundary.tickFields.includes(name), `shard milestone payload boundary missing ${name}`);
+  });
+  ["get_SU23Cost", "get_SU24Cost", "get_SU25Cost", "get_SU26Cost", "get_SU27Cost", "get_SU28Cost", "get_SU29Cost"].forEach((name) => {
+    assert.ok(boundary.sampleCostAccessors.includes(name), `shard milestone payload boundary missing ${name}`);
+  });
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat these hooks as recovered serialized player-owned milestone rows")), "shard milestone payload boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-milestone-payload-boundary",
+    label: "Shard milestone payload boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.milestoneStateFields.length} shard milestone-state fields`,
+      `${boundary.costAndListHooks.length} shard cost-list hooks`,
+      "Shard payload-watch hooks stay tied to ShardUpgradeInfo until saved player rows are recovered"
+    ]
+  };
+}
+
+function validateShardSaveBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard save boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard save boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard save boundary sources must be an object");
+  ["shardMiningMetadataNeighborhood", "shardUpgradeInfoMetadataNeighborhood", "shardMetadataNeighborhood", "ownerFamilyBoundary", "payloadBoundary", "globalMetadata", "level0"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard save boundary sources.${field} must be present`);
+  });
+  expectArray(boundary.ownerShellTermsChecked, "shard save boundary ownerShellTermsChecked must be an array");
+  expectArray(boundary.saveFamilyTermsChecked, "shard save boundary saveFamilyTermsChecked must be an array");
+  expectRecord(boundary.probeResults, "shard save boundary probeResults must be an object");
+  expectArray(boundary.currentBoundary, "shard save boundary currentBoundary must be an array");
+
+  ["ShardMining", "ShardUpgradeInfo", "TotalMilestoneLevels", "UpdateShardCostList", "GetShardCostList", "CheckAllMilestoneLevelFills", "get_SU1FinalUnlockReq", "FinalSU29Bonus2"].forEach((name) => {
+    assert.ok(boundary.ownerShellTermsChecked.includes(name), `shard save boundary missing ${name}`);
+  });
+  ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"].forEach((name) => {
+    assert.ok(boundary.saveFamilyTermsChecked.includes(name), `shard save boundary missing ${name}`);
+  });
+  assert.equal(boundary.probeResults.metadataNeighborhoodHasSaveTerms, false, "shard save boundary metadataNeighborhoodHasSaveTerms drifted");
+  assert.equal(boundary.probeResults.level0HasSaveTerms, false, "shard save boundary level0HasSaveTerms drifted");
+  assert.equal(boundary.probeResults.ownerShellWithSaveOverlapCount, 0, "shard save boundary ownerShellWithSaveOverlapCount drifted");
+  assert.equal(boundary.probeResults.directShardPlayerProfileContext, false, "shard save boundary directShardPlayerProfileContext drifted");
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("zero checked overlap")), "shard save boundary must preserve zero-overlap framing");
+
+  return {
+    id: "shard-save-boundary",
+    label: "Shard save boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.ownerShellTermsChecked.length} shard owner-shell terms checked`,
+      `${boundary.saveFamilyTermsChecked.length} save-family terms checked`,
+      "Shard owner trail still stays separate from recovered save-family clues"
+    ]
+  };
+}
+
+function validateExtractionCandidateFamilies(families) {
+  expectNonEmptyString(families.dataset, "extraction candidate families dataset id must be present");
+  expectNonEmptyString(families.generatedAt, "extraction candidate families generatedAt must be present");
+  expectArray(families.binaryFiles, "extraction candidate families binaryFiles must be an array");
+  expectArray(families.textFiles, "extraction candidate families textFiles must be an array");
+  expectArray(families.globalContextTerms, "extraction candidate families globalContextTerms must be an array");
+  expectArray(families.unresolvedMarkers, "extraction candidate families unresolvedMarkers must be an array");
+  expectArray(families.families, "extraction candidate families families must be an array");
+  assert.ok(families.families.length >= 8, "extraction candidate families must preserve the seeded family set");
+  families.families.forEach((entry, index) => {
+    expectNonEmptyString(entry.id, `extraction candidate families[${index}].id must be present`);
+    expectNonEmptyString(entry.label, `extraction candidate families[${index}].label must be present`);
+    expectNonEmptyString(entry.track, `extraction candidate families[${index}].track must be present`);
+    expectArray(entry.terms, `extraction candidate families[${index}].terms must be an array`);
+    expectArray(entry.anchors, `extraction candidate families[${index}].anchors must be an array`);
+  });
+  assert.ok(families.families.some((entry) => entry.id === "shards.milestone-owner-family"), "extraction candidate families must preserve the shard milestone owner family");
+  assert.ok(families.families.some((entry) => entry.id === "spend.multiverse-market-owner-family"), "extraction candidate families must preserve the MultiverseMarket owner family");
+
+  return {
+    id: "extraction-candidate-families",
+    label: "Extraction candidate families",
+    classification: "extracted-mechanics",
+    stats: [
+      `${families.families.length} candidate families`,
+      `${families.binaryFiles.length} binary files`,
+      `${families.textFiles.length} text files`
+    ]
+  };
+}
+
+function validateExtractionCandidateRanking(ranking) {
+  expectNonEmptyString(ranking.dataset, "extraction candidate ranking dataset id must be present");
+  expectNonEmptyString(ranking.generatedAt, "extraction candidate ranking generatedAt must be present");
+  expectNonEmptyString(ranking.sourceConfig, "extraction candidate ranking sourceConfig must be present");
+  expectPositiveInteger(ranking.byteRadius, "extraction candidate ranking byteRadius must be positive");
+  expectArray(ranking.globalContextTerms, "extraction candidate ranking globalContextTerms must be an array");
+  expectArray(ranking.unresolvedMarkers, "extraction candidate ranking unresolvedMarkers must be an array");
+  expectArray(ranking.binaryFiles, "extraction candidate ranking binaryFiles must be an array");
+  expectArray(ranking.textFiles, "extraction candidate ranking textFiles must be an array");
+  expectArray(ranking.familyFilter, "extraction candidate ranking familyFilter must be an array");
+  expectRecord(ranking.topCandidate, "extraction candidate ranking topCandidate must be an object");
+  expectArray(ranking.candidates, "extraction candidate ranking candidates must be an array");
+  assert.ok(ranking.candidates.length >= 8, "extraction candidate ranking must preserve the scored candidate set");
+  expectNonEmptyString(ranking.topCandidate.id, "extraction candidate ranking topCandidate.id must be present");
+  expectNonEmptyString(ranking.topCandidate.track, "extraction candidate ranking topCandidate.track must be present");
+  assert.equal(typeof ranking.topCandidate.heuristicScore, "number", "extraction candidate ranking topCandidate.heuristicScore must be numeric");
+  assert.equal(ranking.topCandidate.id, "spend.multiverse-market-owner-family", "extraction candidate ranking topCandidate.id drifted");
+  assert.equal(ranking.topCandidate.track, "spend-planner-from-extracted-data", "extraction candidate ranking topCandidate.track drifted");
+  const shardCandidate = ranking.candidates.find((entry) => entry.track === "shards-and-loop-guardrails");
+  assert.ok(shardCandidate, "extraction candidate ranking must preserve a shard-local candidate");
+  assert.equal(shardCandidate.id, "shards.milestone-owner-family", "extraction candidate ranking top shard candidate drifted");
+  assert.ok(shardCandidate.heuristicScore >= 500, "extraction candidate ranking top shard candidate heuristicScore regressed");
+
+  return {
+    id: "extraction-candidate-ranking",
+    label: "Extraction candidate ranking",
+    classification: "extracted-mechanics",
+    stats: [
+      `${ranking.candidates.length} ranked candidates`,
+      `${ranking.topCandidate.id} top candidate`,
+      `${ranking.topCandidate.heuristicScore} top heuristic score`
+    ]
+  };
+}
+
 function validateTokenShop(tokenShop) {
   expectRecord(tokenShop.source, "token shop source must be an object");
   expectNonEmptyString(tokenShop.source.metadata, "token shop metadata path must be present");
@@ -621,6 +890,93 @@ function validateMultiverseMarketActionShell(shell) {
   };
 }
 
+function validateMultiverseMarketPrefabRemapBoundary(boundary) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market prefab remap boundary generatedAt must be present");
+  expectRecord(boundary.sources, "multiverse market prefab remap boundary sources must be an object");
+  expectNonEmptyString(boundary.sources.level0, "multiverse market prefab remap boundary sources.level0 must be present");
+  expectNonEmptyString(boundary.sources.validatedRows, "multiverse market prefab remap boundary sources.validatedRows must be present");
+  expectArray(boundary.validatedSerializedIds, "multiverse market prefab remap boundary validatedSerializedIds must be an array");
+  expectArray(boundary.directPrefabNumberMatches, "multiverse market prefab remap boundary directPrefabNumberMatches must be an array");
+  expectArray(boundary.explicitPrefabIdOverrides, "multiverse market prefab remap boundary explicitPrefabIdOverrides must be an array");
+  expectArray(boundary.validatedIdsWithoutDirectPrefabName, "multiverse market prefab remap boundary validatedIdsWithoutDirectPrefabName must be an array");
+  expectArray(boundary.overrideSerializedIdsOutsideValidatedBlock, "multiverse market prefab remap boundary overrideSerializedIdsOutsideValidatedBlock must be an array");
+  expectArray(boundary.currentBoundary, "multiverse market prefab remap boundary currentBoundary must be an array");
+
+  assert.deepEqual(
+    boundary.validatedIdsWithoutDirectPrefabName,
+    [69, 70, 71, 72, 73, 74],
+    "multiverse market prefab remap boundary validatedIdsWithoutDirectPrefabName drifted"
+  );
+  assert.deepEqual(
+    boundary.overrideSerializedIdsOutsideValidatedBlock,
+    [60, 61, 62],
+    "multiverse market prefab remap boundary overrideSerializedIdsOutsideValidatedBlock drifted"
+  );
+  [50, 59, 63, 68].forEach((id) => {
+    assert.ok(
+      boundary.directPrefabNumberMatches.includes(id),
+      `multiverse market prefab remap boundary missing direct prefab match ${id}`
+    );
+  });
+  assert.deepEqual(
+    boundary.explicitPrefabIdOverrides.map((entry) => `${entry.prefabNumber}->${entry.serializedId}`),
+    ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"],
+    "multiverse market prefab remap boundary explicitPrefabIdOverrides drifted"
+  );
+
+  return {
+    id: "multiverse-market-prefab-remap-boundary",
+    label: "Multiverse market prefab remap boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.directPrefabNumberMatches.length} direct prefab-number matches`,
+      `${boundary.explicitPrefabIdOverrides.length} explicit prefab-id overrides`,
+      "Validated ids 69-74 still do not have direct prefab-number label matches"
+    ]
+  };
+}
+
+function validateMultiverseMarketOwnerFamily(family) {
+  expectNonEmptyString(family.generatedAt, "multiverse market owner family generatedAt must be present");
+  expectRecord(family.sources, "multiverse market owner family sources must be an object");
+  ["probe", "metadata", "level0", "validatedRows"].forEach((field) => {
+    expectNonEmptyString(family.sources[field], `multiverse market owner family sources.${field} must be present`);
+  });
+  expectArray(family.ownerAnchors, "multiverse market owner family ownerAnchors must be an array");
+  expectArray(family.costLaneAnchors, "multiverse market owner family costLaneAnchors must be an array");
+  expectRecord(family.currencyBoxRange, "multiverse market owner family currencyBoxRange must be an object");
+  expectArray(family.validatedCurrencyBoxes, "multiverse market owner family validatedCurrencyBoxes must be an array");
+  expectArray(family.sampleBuyHooks, "multiverse market owner family sampleBuyHooks must be an array");
+  expectArray(family.currentBoundary, "multiverse market owner family currentBoundary must be an array");
+
+  ["MultiverseMarket, Assembly-CSharp", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts", "SetInscryptionsDoneText", "Inscryptions"].forEach((name) => {
+    assert.ok(family.ownerAnchors.includes(name), `multiverse market owner family missing ${name}`);
+  });
+  ["ResourceAmountText.InscryptionsDone", "AchievementBar-Inscryptions", "CostBox-InscryptionsDone"].forEach((name) => {
+    assert.ok(family.costLaneAnchors.includes(name), `multiverse market owner family missing ${name}`);
+  });
+  assert.equal(family.currencyBoxRange.start, 1, "multiverse market owner family currencyBoxRange.start drifted");
+  assert.equal(family.currencyBoxRange.end, 110, "multiverse market owner family currencyBoxRange.end drifted");
+  assert.equal(family.currencyBoxRange.count, 110, "multiverse market owner family currencyBoxRange.count drifted");
+  ["IS50CurrencyBox", "IS59CurrencyBox", "IS63CurrencyBox", "IS74CurrencyBox"].forEach((name) => {
+    assert.ok(family.validatedCurrencyBoxes.includes(name), `multiverse market owner family missing ${name}`);
+  });
+  ["BuyIS47", "BuyIS64", "BuyIS73", "BuyIS105"].forEach((name) => {
+    assert.ok(family.sampleBuyHooks.includes(name), `multiverse market owner family missing ${name}`);
+  });
+
+  return {
+    id: "multiverse-market-owner-family",
+    label: "Multiverse market owner family",
+    classification: "extracted-mechanics",
+    stats: [
+      `${family.ownerAnchors.length} owner-family anchors`,
+      `${family.currencyBoxRange.count} IS*CurrencyBox shells`,
+      "MultiverseMarket owner-family and cost-lane shell stay separate from save recovery"
+    ]
+  };
+}
+
 function validateTokenShopOwnerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token shop owner shell generatedAt must be present");
   expectRecord(shell.sources, "token shop owner shell sources must be an object");
@@ -803,7 +1159,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 18, "bundled dataset contract must track the eighteen shipped dataset groups");
+  assert.equal(contract.datasets.length, 27, "bundled dataset contract must track the twenty-seven shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -850,6 +1206,10 @@ export async function validateBundledDatasets() {
   const shardObserved = await readJson("../../data/shard-observed-behaviors.grounded.v1.json");
   const shardProvenance = await readJson("../../data/shard-milestones-provenance.grounded.v1.json");
   const shardAssetGrounding = await readJson("../../data/shard-asset-grounding.v1.json");
+  const shardOwnerFamilyBoundary = await readJson("../../data/shard-owner-family-boundary.v1.json");
+  const shardFinalSuBonusBoundary = await readJson("../../data/shard-finalsu-bonus-boundary.v1.json");
+  const shardMilestonePayloadBoundary = await readJson("../../data/shard-milestone-payload-boundary.v1.json");
+  const shardSaveBoundary = await readJson("../../data/shard-save-boundary.v1.json");
   const extractionCandidateFamilies = await readJson("../../data/extraction-candidate-families.v1.json");
   const extractionCandidateRanking = await readJson("../../data/extraction-candidate-ranking.v1.json");
   const tokenShop = await readJson("../../data/token-shop-values.json");
@@ -861,9 +1221,11 @@ export async function validateBundledDatasets() {
   const tokenBankFormulaBoundary = await readJson("../../data/token-bank-formula-boundary.json");
   const multiverseMarketRangeBoundary = await readJson("../../data/multiverse-market-range-boundary.json");
   const multiverseMarketRowTextCoverage = await readJson("../../data/multiverse-market-row-text-coverage.json");
+  const multiverseMarketPrefabRemapBoundary = await readJson("../../data/multiverse-market-prefab-remap-boundary.json");
   const tokenShopCostLanes = await readJson("../../data/token-shop-cost-lanes.json");
   const spendActionLaneClues = await readJson("../../data/spend-action-lane-clues.json");
   const multiverseMarketActionShell = await readJson("../../data/multiverse-market-action-shell.json");
+  const multiverseMarketOwnerFamily = await readJson("../../data/multiverse-market-owner-family.json");
   const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
@@ -873,6 +1235,10 @@ export async function validateBundledDatasets() {
     validateSnapshot(snapshot),
     validateShardDatasets(shardMilestones, shardObserved, shardProvenance),
     validateShardAssetGrounding(shardAssetGrounding),
+    validateShardOwnerFamilyBoundary(shardOwnerFamilyBoundary),
+    validateShardFinalSuBonusBoundary(shardFinalSuBonusBoundary),
+    validateShardMilestonePayloadBoundary(shardMilestonePayloadBoundary),
+    validateShardSaveBoundary(shardSaveBoundary),
     validateExtractionCandidateFamilies(extractionCandidateFamilies),
     validateExtractionCandidateRanking(extractionCandidateRanking),
     validateTokenShop(tokenShop),
@@ -884,9 +1250,11 @@ export async function validateBundledDatasets() {
     validateTokenBankFormulaBoundary(tokenBankFormulaBoundary),
     validateMultiverseMarketRangeBoundary(multiverseMarketRangeBoundary),
     validateMultiverseMarketRowTextCoverage(multiverseMarketRowTextCoverage),
+    validateMultiverseMarketPrefabRemapBoundary(multiverseMarketPrefabRemapBoundary),
     validateTokenShopCostLanes(tokenShopCostLanes),
     validateSpendActionLaneClues(spendActionLaneClues),
     validateMultiverseMarketActionShell(multiverseMarketActionShell),
+    validateMultiverseMarketOwnerFamily(multiverseMarketOwnerFamily),
     validateTokenShopOwnerShell(tokenShopOwnerShell),
     validateTokenShopSaveBoundary(tokenShopSaveBoundary),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),

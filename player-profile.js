@@ -48,6 +48,19 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
 
 const PROFILE_CONFIDENCE_VALUES = new Set(["manual", "mixed", "verified"]);
 const FARMING_FOCUS_VALUES = new Set(["credits", "alloy", "research", "shards"]);
+const CI_SUFFIX_EXPONENTS = {
+  k: 3,
+  m: 6,
+  b: 9,
+  t: 12,
+  qa: 15,
+  qi: 18,
+  sx: 21,
+  sp: 24,
+  oc: 27,
+  no: 30,
+  dc: 33
+};
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -97,8 +110,79 @@ function coerceNullableNumber(value) {
     return null;
   }
 
+  const normalized = normalizeCiNumberValue(value);
+  if (typeof normalized === "number") {
+    return Number.isFinite(normalized) ? normalized : null;
+  }
+  if (typeof normalized === "string") {
+    return normalized;
+  }
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+function normalizeCiNumberValue(value) {
+  if (typeof value === "number") {
+    return value;
+  }
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const raw = value.trim();
+  if (!raw) {
+    return null;
+  }
+
+  const normalized = raw.replace(/,/g, "").toLowerCase();
+  const sciMatch = normalized.match(/^([+-]?\d*\.?\d+)\s*e\s*([+-]?\d+)$/);
+  if (sciMatch) {
+    return formatCiNormalizedNumber(Number(sciMatch[1]), Number(sciMatch[2]));
+  }
+
+  const suffixMatch = normalized.match(/^([+-]?\d*\.?\d+)\s*([a-z]{1,2})$/);
+  if (suffixMatch) {
+    const suffixExponent = CI_SUFFIX_EXPONENTS[suffixMatch[2]];
+    if (suffixExponent !== undefined) {
+      return formatCiNormalizedNumber(Number(suffixMatch[1]), suffixExponent);
+    }
+  }
+
+  const plainNumber = Number(normalized);
+  return Number.isNaN(plainNumber) ? null : plainNumber;
+}
+
+function formatCiNormalizedNumber(mantissa, exponent) {
+  if (!Number.isFinite(mantissa) || !Number.isFinite(exponent)) {
+    return null;
+  }
+  if (mantissa === 0) {
+    return 0;
+  }
+
+  let nextMantissa = mantissa;
+  let nextExponent = exponent;
+  while (Math.abs(nextMantissa) >= 10) {
+    nextMantissa /= 10;
+    nextExponent += 1;
+  }
+  while (Math.abs(nextMantissa) > 0 && Math.abs(nextMantissa) < 1) {
+    nextMantissa *= 10;
+    nextExponent -= 1;
+  }
+
+  if (nextExponent >= -6 && nextExponent <= 12) {
+    const numericValue = nextMantissa * Math.pow(10, nextExponent);
+    if (Number.isFinite(numericValue)) {
+      return numericValue;
+    }
+  }
+
+  return `${trimTrailingZeros(nextMantissa.toFixed(6))}e${nextExponent}`;
+}
+
+function trimTrailingZeros(value) {
+  return String(value).replace(/(\.\d*?[1-9])0+$/u, "$1").replace(/\.0+$/u, "");
 }
 
 function coerceNullableString(value) {
