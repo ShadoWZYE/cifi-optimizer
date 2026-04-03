@@ -2243,6 +2243,10 @@ function renderPlayerProfileBoundarySummary() {
     shipPlanner,
     compatibility
   });
+  const importedMultiverseMarketPreview = getImportedMultiverseMarketPreview(
+    compatibility.unmappedSystems?.multiverseMarket,
+    state.extractedMechanics?.multiverseMarket
+  );
 
   $("#playerProfileImportSummary").innerHTML = groups.map((group) => {
     const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value));
@@ -2269,6 +2273,7 @@ function renderPlayerProfileBoundarySummary() {
         ${audit.notes.map((item) => `<p class="meta">${escapeHtml(item)}</p>`).join("")}
       </div>
     </article>
+    ${renderImportedMultiverseMarketPreviewCard(importedMultiverseMarketPreview)}
     ${$("#playerProfileImportSummary").innerHTML}
   `;
 }
@@ -4223,6 +4228,28 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
       ? previewRows.map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}${Number.isFinite(entry.maxLevel) ? `/${formatShardNumber(entry.maxLevel)}` : ""}`).join(" | ")
       : ""
   };
+}
+
+function renderImportedMultiverseMarketPreviewCard(preview) {
+  if (!preview.hasImportedBalance && !preview.hasValidatedLevelPreview) {
+    return "";
+  }
+
+  return `
+    <article class="preview-card">
+      <strong>Emporium import preview</strong>
+      <p class="meta">This is a descriptive preview of quarantined Emporium state for the validated row block only. It does not promote these values into canonical PlayerProfile truth or spend recommendations.</p>
+      <div class="pill-row">
+        <span class="pill">${preview.hasImportedBalance ? `InscryptionsDone ${escapeHtml(preview.balanceLabel)}` : "No imported InscryptionsDone"}</span>
+        <span class="pill">${preview.hasValidatedLevelPreview ? `${preview.importedValidatedRowCount}/${preview.validatedRowCount} validated rows` : "No validated Emporium levels"}</span>
+        ${preview.hasValidatedLevelPreview ? `<span class="pill">${preview.maxedCount} maxed imported rows</span>` : ""}
+      </div>
+      <div class="meta-stack">
+        <p class="meta">${preview.hasValidatedLevelPreview ? `Imported current levels are present for validated rows ${escapeHtml(preview.validatedRangeLabel)}.` : "Imported current levels are not present for the validated Emporium row block."}</p>
+        <p class="meta">${preview.hasValidatedLevelPreview ? `Sample: ${escapeHtml(preview.sampleLine)}.` : "When imported IS*Level fields exist, this preview only surfaces the validated Emporium block and leaves the rest quarantined."}</p>
+      </div>
+    </article>
+  `;
 }
 
 function renderOverviewSupportSummary(apkValidation, supportValidation) {
