@@ -41,6 +41,27 @@ Prevent:
 - must contain generated date, source report, grounded mechanics notes, descriptive milestones, observed behaviors, and provenance/uncertainty
 - safe for descriptive shard guidance, not shard cost simulation or ROI ranking
 
+### Shard asset grounding
+
+- file: `data/shard-asset-grounding.v1.json`
+- classification: `extracted-mechanics`
+- must contain source artifact references, recovered shard or loop shell identifiers, app-safe uses, blocked uses, unresolved gaps, and the current integration status
+- useful for APK-grounding validation and truthful shard-boundary UI, not itself a milestone planner
+
+### Extraction candidate families
+
+- file: `data/extraction-candidate-families.v1.json`
+- classification: `extracted-mechanics`
+- must contain the configured family ids, track ids, search terms, anchor terms, and repo-local source-file lists used by the scorer
+- useful for repeatable targeted probes and filtered follow-up, not itself a claim that the ranked families are integrated mechanics
+
+### Extraction candidate ranking
+
+- file: `data/extraction-candidate-ranking.v1.json`
+- classification: `extracted-mechanics`
+- must contain the repo-wide default unknown-target ranking, source-file lists, and per-family heuristic summaries
+- useful for choosing the next extraction target from existing repo-local evidence; roadmap work should still filter it to the active track instead of blindly following the global top result
+
 ### Token shop extract
 
 - file: `data/token-shop-values.json`
@@ -71,5 +92,5 @@ Run:
 
 - `npm run verify:data`
 
-This validates the manifest plus the shipped snapshot, shard, token-shop, and multiverse-market datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
+This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, extraction-candidate-families, extraction-candidate-ranking, token-shop, and multiverse-market datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
 

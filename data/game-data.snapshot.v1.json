@@ -164,16 +164,21 @@
       "title": "Shard workflow and loop guardrails",
       "status": "active",
       "goal": "Keep shard guidance truthful while the repo verifies how much of the shard system is grounded from shipped-game evidence versus descriptive/community sources.",
-      "currentSlice": "Audit the current shard workflow against the stricter system-mapping gate and document which shard facts are game-side grounded versus still descriptive-only.",
+      "currentSlice": "Narrow the shard milestone owner path to a ShardMining screen-controller plus ShardUpgradeInfo data-carrying trail, while treating ConstructionMilestones as a downgraded generic milestone lead, then keep chasing the exact milestone payload.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
         "Normalize shard and loop module outputs through the shared recommendation action contract.",
         "Tighten shard and loop wording against grounded milestone, observed-behavior, and provenance notes.",
-        "Document that the current shard milestone dataset is community-grounded descriptive data, not shipped-game owner-grounded milestone data."
+        "Document that the current shard milestone dataset is community-grounded descriptive data, not shipped-game owner-grounded milestone data.",
+        "Document the current boundary between APK or Unity-grounded shard shell evidence and the still-descriptive community milestone layer in docs and progression UI.",
+        "Ship a small shard asset-grounding dataset so APK-grounding validation and progression boundary copy no longer depend on markdown-only notes.",
+        "Add a repo-local extraction-candidate ranking path so unknown extraction work is ranked from unresolved mention density plus anchor strength across committed extracted-data artifacts, then filter that ranking back to the active roadmap track.",
+        "Narrow the shard milestone owner path to a ShardMining screen-controller plus ShardUpgradeInfo data-carrying trail while downgrading ConstructionMilestones to a generic milestone lead."
       ],
       "nextSteps": [
-        "Document the current boundary between asset-grounded shard facts and descriptive/community-backed shard guidance.",
+        "Recover the exact serialized milestone row payload or save-side state from the narrowed ShardMining and ShardUpgradeInfo trail.",
+        "Map the recovered FinalSU bonus-field family back to verified player-facing shard milestone rows.",
         "Verify shard milestone owner mapping from shipped-game assets before promoting milestone names and rows as stronger repo truth.",
         "Only expand shard recommendations after the system-mapping gate is satisfied."
       ]
@@ -214,7 +219,7 @@
         "Promote a token-bank controller-shell dataset so spend-track work can rely on a narrow ClaimBankedTokens or SetBankFill or BankFill or TokenBankDescriptionText or TokenShopButtonNotification cluster instead of treating those controller clues as disconnected symbols."
       ],
       "nextSteps": [
-        "Verify the token-shop cost lane against canonical token or tokenium naming from the available assets.",
+        "Recover player-owned current levels for TokenShop upgrade rows now that the base cost lane is grounded.",
         "Recover the saved-state owner or formula source behind token-bank cap, fill-speed, and claimable bank tokens from TokenShop or nearby level0 handlers rather than OR_* resource names.",
         "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
         "Confirm whether the recovered InscryptionsDone, IS*Level, trade-counter, and nearby mech fields are declared directly on PlayerProfileData or on another progression sub-model.",
@@ -228,18 +233,180 @@
       "title": "Unified recommendation feed and test hardening",
       "status": "active",
       "goal": "Converge active MVP-safe module outputs into one explainable feed and make contract drift fail fast.",
-      "currentSlice": "Validate representative shard and loop action fixtures through the shared recommendation contract before spend joins the feed.",
+      "currentSlice": "Expand representative shard and loop action fixtures toward partial-context warning shapes, keep the dataset refresh hardening path visible in-app, and show explainability coverage plus complete-versus-partial audit status inside the active feed before future systems join it.",
       "completedSteps": [
         "Normalize active shard and loop outputs through one ranked recommendation feed.",
         "Treat feed scores as trust-oriented UI priority rather than as optimizer ROI.",
         "Extract recommendation-action normalization and sorting into a shared pure module that app code and tests can both exercise.",
-        "Add checked-in representative shard and loop action fixtures so smoke tests exercise realistic feed payloads."
+        "Add checked-in representative shard and loop action fixtures so smoke tests exercise realistic feed payloads.",
+        "Show the bundled dataset refresh hardening path inside the validation surface so future recovered assets pass through the same promotion checklist.",
+        "Show feed-level explainability coverage counts so warning cards can be audited before broader system expansion.",
+        "Show per-card explainability audit status so missing why-now, assumption, warning, or source-note context stays visible inside the feed.",
+        "Show feed-level complete-versus-partial explainability audit counts so missing context stays visible before broader module expansion.",
+        "Expand representative shard and loop fixtures toward partial-context warning shapes so explainability audits are exercised against missing context."
       ],
       "nextSteps": [
         "Extend the same feed contract to spend recommendations after TokenShop and MultiverseMarket pass their integration gates.",
         "Expand fixture coverage from representative shard and loop actions toward broader module output permutations.",
-        "Define the hardening path for future dataset refreshes."
+        "Apply the same refresh discipline when new asset-grounded datasets or owner recoveries are promoted.",
+        "Keep strengthening explainability coverage as new recommendation modules join the feed."
       ]
+    },
+    {
+      "id": "hunter-related-planning",
+      "title": "Hunter-related planning intake",
+      "status": "research",
+      "goal": "Determine whether hunter planning has enough grounded state and terminology to justify a first descriptive slice.",
+      "category": "post-mvp-candidate",
+      "classification": "speculative",
+      "implementationRelevance": "Post-MVP candidate",
+      "apkUnityPathChecked": false,
+      "currentSlice": "Keep hunter planning in research until the repo can separate real hunter state from planning metadata and define whether a first slice would stay descriptive only.",
+      "completedSteps": [
+        "Preserve legacy hunter-level imports only under compatibility sinks instead of promoting them into canonical PlayerProfile truth.",
+        "Record the current research rule that hunter planning must stay in intake until state ownership and slice boundaries are grounded."
+      ],
+      "nextSteps": [
+        "Recover hunter owner objects and saved-state fields from committed APK or Unity artifacts.",
+        "Determine which current hunter-related values are real player-owned state versus planning metadata or helper inputs.",
+        "Decide whether a first slice would be descriptive-only or should stay deferred."
+      ],
+      "sources": [
+        "docs/roadmap/research-tracks.md",
+        "docs/contracts/player-profile-schema.md",
+        "data/player-profile-import-aliases.v1.json"
+      ],
+      "artifacts": [
+        "docs/roadmap/research-tracks.md",
+        "docs/contracts/player-profile-schema.md",
+        "docs/contracts/import-mapping.md"
+      ],
+      "verified": [
+        "The repo currently preserves hunter-related legacy fields only as compatibility or unresolved imports.",
+        "No canonical hunter planning contract exists in state.playerProfile."
+      ],
+      "uncertain": [
+        "Which hunter fields are real player-owned state.",
+        "Whether a truthful first slice would be descriptive-only."
+      ],
+      "smallestShippableSlice": "A research note that names the real hunter owner and the minimum descriptive state needed for a non-canonical preview."
+    },
+    {
+      "id": "mech-related-planning",
+      "title": "Mech-related planning intake",
+      "status": "research",
+      "goal": "Determine whether mech systems have grounded terminology, unlock structure, and MVP relevance strong enough for any future planning surface.",
+      "category": "post-mvp-candidate",
+      "classification": "speculative",
+      "implementationRelevance": "Post-MVP candidate",
+      "apkUnityPathChecked": true,
+      "currentSlice": "Keep mech planning in research while the repo uses recovered metadata clues only to narrow persistence neighborhoods, not to create mech recommendations.",
+      "completedSteps": [
+        "Recover mech-adjacent metadata clues near the MultiverseMarket persistence neighborhood.",
+        "Record the current research rule that mech planning stays in intake until terminology, unlock structure, and MVP relevance are grounded."
+      ],
+      "nextSteps": [
+        "Confirm which recovered mech symbols represent real gameplay systems versus adjacent persistence fields.",
+        "Map grounded mech terminology and unlock structure from committed APK or Unity evidence.",
+        "Decide whether mech work belongs in a future roadmap slice or remains deferred."
+      ],
+      "sources": [
+        "docs/roadmap/research-tracks.md",
+        "docs/systems/spend/multiverse-market-state-verification.md",
+        "data/game-data.snapshot.v1.json"
+      ],
+      "artifacts": [
+        "docs/systems/spend/multiverse-market-state-verification.md",
+        "docs/systems/spend/multiverse-market-metadata-neighborhood.md",
+        "data/multiverse-market-metadata-neighborhood.json"
+      ],
+      "verified": [
+        "Mech-adjacent fields exist in the recovered broader progression-style metadata block.",
+        "Those clues are not yet sufficient to justify mech planning behavior."
+      ],
+      "uncertain": [
+        "Grounded mech terminology and unlock structure.",
+        "Whether mech planning has MVP relevance at all."
+      ],
+      "smallestShippableSlice": "A mech research note that distinguishes metadata clues from real mech owners and decides whether the lane is post-MVP or deferred."
+    },
+    {
+      "id": "input-automation-intake",
+      "title": "Input automation intake",
+      "status": "research",
+      "goal": "Measure whether manual or guided import still leaves enough friction to justify any automation beyond the current local-first import flow.",
+      "category": "deferred-infrastructure",
+      "classification": "planner-only",
+      "implementationRelevance": "Deferred infrastructure",
+      "apkUnityPathChecked": false,
+      "currentSlice": "Keep automation in research until the repo can show which manual inputs are high-friction and whether guided import is insufficient without OCR.",
+      "completedSteps": [
+        "Ship guided PlayerProfile JSON import and export through the grounded normalizer.",
+        "Keep OCR quarantined from the MVP path as an experimental support surface."
+      ],
+      "nextSteps": [
+        "List the highest-friction manual inputs still required by active MVP surfaces.",
+        "Compare guided import coverage against those inputs before proposing automation.",
+        "Only then decide whether any local-first automation slice is justified without OCR."
+      ],
+      "sources": [
+        "docs/roadmap/research-tracks.md",
+        "README.md",
+        "AGENTS.md"
+      ],
+      "artifacts": [
+        "player-profile.js",
+        "app.js",
+        "docs/contracts/player-profile-schema.md"
+      ],
+      "verified": [
+        "Guided/manual import is an active MVP surface.",
+        "OCR remains explicitly quarantined from the MVP path."
+      ],
+      "uncertain": [
+        "Which manual inputs are still too high-friction.",
+        "Whether guided import is sufficient without any added automation."
+      ],
+      "smallestShippableSlice": "A friction audit that names the remaining painful inputs and either closes automation as unnecessary or defines one safe local-first helper."
+    },
+    {
+      "id": "external-model-integration-intake",
+      "title": "External-model integration intake",
+      "status": "research",
+      "goal": "Decide how far the repo can keep external-model or community-tool support without mixing those assumptions into canonical app truth.",
+      "category": "post-mvp-candidate",
+      "classification": "external-model",
+      "implementationRelevance": "Post-MVP candidate",
+      "apkUnityPathChecked": false,
+      "currentSlice": "Keep external-model integration in research until tool trust, field labeling, and recommendation boundaries are explicit enough to avoid mixing app truth with model assumptions.",
+      "completedSteps": [
+        "Keep ship calibration attached to the external-model implementation layer rather than shared PlayerProfile truth.",
+        "Document source-priority and labeling rules that prevent external or community support from being promoted silently."
+      ],
+      "nextSteps": [
+        "Document which current external-model inputs are trustworthy enough to preserve.",
+        "Define how those fields stay labeled in the UI and import flow.",
+        "Show how future recommendations would avoid mixing canonical truth with model assumptions."
+      ],
+      "sources": [
+        "docs/roadmap/research-tracks.md",
+        "README.md",
+        "docs/contracts/player-profile-schema.md"
+      ],
+      "artifacts": [
+        "app.js",
+        "player-profile.js",
+        "docs/contracts/import-mapping.md"
+      ],
+      "verified": [
+        "The ship planner currently stays labeled as an external-model implementation surface.",
+        "The repo already distinguishes canonical, planner-only, compatibility, and external-model state boundaries."
+      ],
+      "uncertain": [
+        "Which external tools are trustworthy enough for future retained support.",
+        "How far external-model outputs can go without contaminating canonical recommendations."
+      ],
+      "smallestShippableSlice": "A boundary note that names trusted external-model inputs, labels them in-app, and blocks any recommendation mixing until assumptions stay visible."
     }
   ]
 }

@@ -4,6 +4,14 @@ Local-first CIFI planning app. The repo mixes grounded MVP work, extracted mecha
 
 Do not treat output as game-accurate unless the module identifies its source and confidence.
 
+## Doc map
+
+- `README.md` = entrypoint
+- `AGENTS.md` = repo rules
+- `CODEX_BRIEF.md` = compact Codex context
+- `docs/roadmap/mvp-plan.md` = MVP plan
+- `docs/roadmap/research-tracks.md` = active unresolved queue
+
 ## MVP
 
 - `state.playerProfile` as the single source of truth
@@ -17,8 +25,8 @@ Do not treat output as game-accurate unless the module identifies its source and
 Core references:
 
 - `AGENTS.md`
-- `docs/roadmap/pr-roadmap.md`
-- `docs/roadmap/research-followup-execution-plan.md`
+- `CODEX_BRIEF.md`
+- `docs/roadmap/mvp-plan.md`
 - `docs/roadmap/research-tracks.md`
 
 ## Grounding rules
@@ -68,12 +76,15 @@ Optional tooling:
 - `player-profile.js` — PlayerProfile schema and normalization
 - `data/game-data.snapshot.v1.json` — app-owned snapshot and research track status
 - `data/bundled-dataset-contract.v1.json` — shipped dataset manifest
+- `data/shard-asset-grounding.v1.json` — APK/Unity-grounded shard shell summary for validation and boundary UI
+- `data/extraction-candidate-families.v1.json` — configured unknown-target families for repo-wide and filtered extraction scoring
+- `data/extraction-candidate-ranking.v1.json` — generated default ranking of unresolved extraction targets across committed extracted-data surfaces
 - `docs/contracts/dataset-contracts.md` — dataset contract
 - `docs/contracts/dataset-refresh-checklist.md` — dataset promotion checklist
 - `docs/contracts/research-note-template.md` — APK-first note template
 - `docs/contracts/player-profile-schema.md` — PlayerProfile boundary
 - `docs/contracts/import-mapping.md` — supported import shapes
-- `docs/roadmap/` — roadmap, execution plan, and Research-tab intake docs
+- `docs/roadmap/` — roadmap, execution plan, and active Research-tab queue docs
 - `docs/systems/` — system-specific verification and extracted-mechanics notes
 - `docs/unity/unity-audit-playbook.md` — repeatable Unity extraction workflow
 - `docs/unity/unity-owner-map.md` — grounded mechanic owner index
@@ -110,6 +121,8 @@ Current non-MVP or quarantined surfaces:
 - Gem Nodes and OCR are non-MVP support surfaces
 - ship planner calibration is community-tool state, not raw in-game state
 
+The Research tab should act as an active queue of unresolved tracks. Tracks should be removed from the active list once fully integrated, superseded, invalidated, or no longer worth pursuing.
+
 ## PlayerProfile boundary
 
 `state.playerProfile` is split into:
@@ -131,3 +144,17 @@ Reference:
 
 - `docs/contracts/player-profile-schema.md`
 
+## Grounding and extraction default
+
+This repo is APK/Unity-first.
+
+If a game system is not yet well documented, not yet extracted, or appears to conflict with existing docs, the default next step is to inspect the committed repo-local APK/Unity artifacts and extraction tooling before using external sources.
+
+Default order of operations:
+
+1. existing repo docs and shipped datasets
+2. committed APK/Unity artifacts under `workbench/` and related extraction tooling
+3. official/public corroboration
+4. community or labeled external-model support
+
+External data should only fill gaps that the repo-local APK/Unity path could not resolve. It must remain clearly labeled and should not be silently treated as canonical game truth.

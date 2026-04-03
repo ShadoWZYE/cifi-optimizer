@@ -1,0 +1,1886 @@
+{
+  "metadata": "workbench\\apk\\base\\global-metadata.dat",
+  "anchor_count": 9,
+  "context": 14,
+  "results": [
+    {
+      "anchor": "ShardMining",
+      "matches": [
+        {
+          "anchor": "ShardMining",
+          "match_index": 16530,
+          "match_offset": 862128,
+          "match_value": "ShardMiningOverlay",
+          "context": [
+            {
+              "offset": 861911,
+              "encoding": "ascii",
+              "value": "UnlockMK7"
+            },
+            {
+              "offset": 861921,
+              "encoding": "ascii",
+              "value": "UnlockMK8"
+            },
+            {
+              "offset": 861931,
+              "encoding": "ascii",
+              "value": "GemUnlockMK9"
+            },
+            {
+              "offset": 861944,
+              "encoding": "ascii",
+              "value": "UnlockMK9"
+            },
+            {
+              "offset": 861954,
+              "encoding": "ascii",
+              "value": "NavConsoleOverlay"
+            },
+            {
+              "offset": 861972,
+              "encoding": "ascii",
+              "value": "NavConsoleButton"
+            },
+            {
+              "offset": 861989,
+              "encoding": "ascii",
+              "value": "UpgConsoleOverlay"
+            },
+            {
+              "offset": 862007,
+              "encoding": "ascii",
+              "value": "UpgConsoleButton"
+            },
+            {
+              "offset": 862024,
+              "encoding": "ascii",
+              "value": "FleetConsoleOverlay"
+            },
+            {
+              "offset": 862044,
+              "encoding": "ascii",
+              "value": "FleetConsoleButton"
+            },
+            {
+              "offset": 862063,
+              "encoding": "ascii",
+              "value": "GenOverlay"
+            },
+            {
+              "offset": 862074,
+              "encoding": "ascii",
+              "value": "TechUpgradesOverlay"
+            },
+            {
+              "offset": 862094,
+              "encoding": "ascii",
+              "value": "LoopModsOverlay"
+            },
+            {
+              "offset": 862110,
+              "encoding": "ascii",
+              "value": "AutomationOverlay"
+            },
+            {
+              "offset": 862128,
+              "encoding": "ascii",
+              "value": "ShardMiningOverlay"
+            },
+            {
+              "offset": 862147,
+              "encoding": "ascii",
+              "value": "ResearchCenterOverlay"
+            },
+            {
+              "offset": 862169,
+              "encoding": "ascii",
+              "value": "AcademyOverlay"
+            },
+            {
+              "offset": 862184,
+              "encoding": "ascii",
+              "value": "OuroborosOverlay"
+            },
+            {
+              "offset": 862201,
+              "encoding": "ascii",
+              "value": "BoosterAdShardOverlay"
+            },
+            {
+              "offset": 862223,
+              "encoding": "ascii",
+              "value": "BoosterAdResearchOverlay"
+            },
+            {
+              "offset": 862248,
+              "encoding": "ascii",
+              "value": "DisableTutorialBox"
+            },
+            {
+              "offset": 862267,
+              "encoding": "ascii",
+              "value": "MK1Overlay"
+            },
+            {
+              "offset": 862278,
+              "encoding": "ascii",
+              "value": "MK1TechUpgradeOverlay"
+            },
+            {
+              "offset": 862300,
+              "encoding": "ascii",
+              "value": "Ship1CrewMK1Button"
+            },
+            {
+              "offset": 862319,
+              "encoding": "ascii",
+              "value": "Ship1CrewBuyButton"
+            },
+            {
+              "offset": 862338,
+              "encoding": "ascii",
+              "value": "MK2Overlay"
+            },
+            {
+              "offset": 862349,
+              "encoding": "ascii",
+              "value": "MK2TechUpgradeOverlay"
+            },
+            {
+              "offset": 862371,
+              "encoding": "ascii",
+              "value": "MK3Overlay"
+            },
+            {
+              "offset": 862382,
+              "encoding": "ascii",
+              "value": "MK3TechUpgradeOverlay"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardMining",
+          "match_index": 66633,
+          "match_offset": 1864443,
+          "match_value": "ShardMining",
+          "context": [
+            {
+              "offset": 1864294,
+              "encoding": "ascii",
+              "value": "Elysium44"
+            },
+            {
+              "offset": 1864304,
+              "encoding": "ascii",
+              "value": "Elysium49"
+            },
+            {
+              "offset": 1864314,
+              "encoding": "ascii",
+              "value": "Elysium54"
+            },
+            {
+              "offset": 1864324,
+              "encoding": "ascii",
+              "value": "Elysium59"
+            },
+            {
+              "offset": 1864334,
+              "encoding": "ascii",
+              "value": "Hyperion9"
+            },
+            {
+              "offset": 1864344,
+              "encoding": "ascii",
+              "value": "Hyperion19"
+            },
+            {
+              "offset": 1864355,
+              "encoding": "ascii",
+              "value": "Hyperion24"
+            },
+            {
+              "offset": 1864366,
+              "encoding": "ascii",
+              "value": "Hyperion29"
+            },
+            {
+              "offset": 1864377,
+              "encoding": "ascii",
+              "value": "Hyperion34"
+            },
+            {
+              "offset": 1864388,
+              "encoding": "ascii",
+              "value": "Hyperion39"
+            },
+            {
+              "offset": 1864399,
+              "encoding": "ascii",
+              "value": "Hyperion44"
+            },
+            {
+              "offset": 1864410,
+              "encoding": "ascii",
+              "value": "Hyperion49"
+            },
+            {
+              "offset": 1864421,
+              "encoding": "ascii",
+              "value": "Hyperion54"
+            },
+            {
+              "offset": 1864432,
+              "encoding": "ascii",
+              "value": "Hyperion59"
+            },
+            {
+              "offset": 1864443,
+              "encoding": "ascii",
+              "value": "ShardMining"
+            },
+            {
+              "offset": 1864455,
+              "encoding": "ascii",
+              "value": "get_SU1FinalUnlockReq"
+            },
+            {
+              "offset": 1864477,
+              "encoding": "ascii",
+              "value": "get_SU2FinalUnlockReq"
+            },
+            {
+              "offset": 1864499,
+              "encoding": "ascii",
+              "value": "get_SU3FinalUnlockReq"
+            },
+            {
+              "offset": 1864521,
+              "encoding": "ascii",
+              "value": "get_SU4FinalUnlockReq"
+            },
+            {
+              "offset": 1864543,
+              "encoding": "ascii",
+              "value": "get_SU5FinalUnlockReq"
+            },
+            {
+              "offset": 1864565,
+              "encoding": "ascii",
+              "value": "get_SU6FinalUnlockReq"
+            },
+            {
+              "offset": 1864587,
+              "encoding": "ascii",
+              "value": "get_SU7FinalUnlockReq"
+            },
+            {
+              "offset": 1864609,
+              "encoding": "ascii",
+              "value": "get_SU8FinalUnlockReq"
+            },
+            {
+              "offset": 1864631,
+              "encoding": "ascii",
+              "value": "get_SU9FinalUnlockReq"
+            },
+            {
+              "offset": 1864653,
+              "encoding": "ascii",
+              "value": "get_SU10FinalUnlockReq"
+            },
+            {
+              "offset": 1864676,
+              "encoding": "ascii",
+              "value": "get_SU11FinalUnlockReq"
+            },
+            {
+              "offset": 1864699,
+              "encoding": "ascii",
+              "value": "get_SU12FinalUnlockReq"
+            },
+            {
+              "offset": 1864722,
+              "encoding": "ascii",
+              "value": "get_SU13FinalUnlockReq"
+            },
+            {
+              "offset": 1864745,
+              "encoding": "ascii",
+              "value": "get_SU14FinalUnlockReq"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardMining",
+          "match_index": 154469,
+          "match_offset": 7582938,
+          "match_value": "'\\Assets\\Scripts\\Upgrades\\ShardMining.cs",
+          "context": [
+            {
+              "offset": 7582099,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Upgrades\\Ouroboros\\Hunters\\KnoxEnemy.cs"
+            },
+            {
+              "offset": 7582162,
+              "encoding": "ascii",
+              "value": ":\\Assets\\Scripts\\Upgrades\\Ouroboros\\Hunters\\KnoxUpgrades.cs"
+            },
+            {
+              "offset": 7582228,
+              "encoding": "ascii",
+              "value": "9\\Assets\\Scripts\\Upgrades\\Ouroboros\\Hunters\\LootManager.cs"
+            },
+            {
+              "offset": 7582293,
+              "encoding": "ascii",
+              "value": "2\\Assets\\Scripts\\Upgrades\\Ouroboros\\Hunters\\Ozzy.cs"
+            },
+            {
+              "offset": 7582351,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Upgrades\\Ouroboros\\Hunters\\OzzyEnemy.cs"
+            },
+            {
+              "offset": 7582414,
+              "encoding": "ascii",
+              "value": ":\\Assets\\Scripts\\Upgrades\\Ouroboros\\Hunters\\OzzyUpgrades.cs"
+            },
+            {
+              "offset": 7582480,
+              "encoding": "ascii",
+              "value": "6\\Assets\\Scripts\\Upgrades\\Ouroboros\\MultiverseMarket.cs"
+            },
+            {
+              "offset": 7582542,
+              "encoding": "ascii",
+              "value": "4\\Assets\\Scripts\\Upgrades\\Ouroboros\\NecrumExchange.cs"
+            },
+            {
+              "offset": 7582602,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Upgrades\\Ouroboros\\OuroborosResetter.cs"
+            },
+            {
+              "offset": 7582665,
+              "encoding": "ascii",
+              "value": "2\\Assets\\Scripts\\Upgrades\\Ouroboros\\TraitSpheres.cs"
+            },
+            {
+              "offset": 7582723,
+              "encoding": "ascii",
+              "value": "7\\Assets\\Scripts\\Upgrades\\Ouroboros\\ZeimarrNautallium.cs"
+            },
+            {
+              "offset": 7582786,
+              "encoding": "ascii",
+              "value": ".\\Assets\\Scripts\\Upgrades\\ResearchLaboratory.cs"
+            },
+            {
+              "offset": 7582840,
+              "encoding": "ascii",
+              "value": "+\\Assets\\Scripts\\Upgrades\\ResearchUltimas.cs"
+            },
+            {
+              "offset": 7582891,
+              "encoding": "ascii",
+              "value": "'\\Assets\\Scripts\\Upgrades\\RewardLanes.cs"
+            },
+            {
+              "offset": 7582938,
+              "encoding": "ascii",
+              "value": "'\\Assets\\Scripts\\Upgrades\\ShardMining.cs"
+            },
+            {
+              "offset": 7582985,
+              "encoding": "ascii",
+              "value": "(\\Assets\\Scripts\\Upgrades\\TechUpgrades.cs"
+            },
+            {
+              "offset": 7583033,
+              "encoding": "ascii",
+              "value": "#\\Assets\\Scripts\\Utilities\\Colors.cs"
+            },
+            {
+              "offset": 7583143,
+              "encoding": "ascii",
+              "value": "?333333"
+            },
+            {
+              "offset": 7583183,
+              "encoding": "ascii",
+              "value": "?333333"
+            },
+            {
+              "offset": 7583191,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583255,
+              "encoding": "ascii",
+              "value": "?333333"
+            },
+            {
+              "offset": 7583375,
+              "encoding": "ascii",
+              "value": "?333333"
+            },
+            {
+              "offset": 7583383,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583391,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583408,
+              "encoding": "ascii",
+              "value": "333333"
+            },
+            {
+              "offset": 7583415,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583455,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583463,
+              "encoding": "ascii",
+              "value": "?ffffff"
+            },
+            {
+              "offset": 7583485,
+              "encoding": "ascii",
+              "value": "|MissionsSO"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardMining",
+          "match_index": 154966,
+          "match_offset": 7597653,
+          "match_value": "|ShardMining",
+          "context": [
+            {
+              "offset": 7597348,
+              "encoding": "ascii",
+              "value": "|LootManager"
+            },
+            {
+              "offset": 7597365,
+              "encoding": "ascii",
+              "value": "|Ozzy"
+            },
+            {
+              "offset": 7597375,
+              "encoding": "ascii",
+              "value": "|OzzyEnemy"
+            },
+            {
+              "offset": 7597390,
+              "encoding": "ascii",
+              "value": "|OzzyUpgrades"
+            },
+            {
+              "offset": 7597408,
+              "encoding": "ascii",
+              "value": "|MultiverseMarket"
+            },
+            {
+              "offset": 7597429,
+              "encoding": "ascii",
+              "value": "'MultiverseMarket|InscryptionTupleObject"
+            },
+            {
+              "offset": 7597474,
+              "encoding": "ascii",
+              "value": "MultiverseMarket|Inscryption"
+            },
+            {
+              "offset": 7597507,
+              "encoding": "ascii",
+              "value": "|NecrumExchange"
+            },
+            {
+              "offset": 7597527,
+              "encoding": "ascii",
+              "value": "|OuroborosResetter"
+            },
+            {
+              "offset": 7597550,
+              "encoding": "ascii",
+              "value": "|TraitSpheres"
+            },
+            {
+              "offset": 7597568,
+              "encoding": "ascii",
+              "value": "|ZeimarrNautallium"
+            },
+            {
+              "offset": 7597591,
+              "encoding": "ascii",
+              "value": "|ResearchLaboratory"
+            },
+            {
+              "offset": 7597615,
+              "encoding": "ascii",
+              "value": "|ResearchUltimas"
+            },
+            {
+              "offset": 7597636,
+              "encoding": "ascii",
+              "value": "|RewardLanes"
+            },
+            {
+              "offset": 7597653,
+              "encoding": "ascii",
+              "value": "|ShardMining"
+            },
+            {
+              "offset": 7597670,
+              "encoding": "ascii",
+              "value": "ShardMining|ShardUpgradeInfo"
+            },
+            {
+              "offset": 7597703,
+              "encoding": "ascii",
+              "value": "|TechUpgrades"
+            },
+            {
+              "offset": 7597721,
+              "encoding": "ascii",
+              "value": "|Colors"
+            },
+            {
+              "offset": 7598377,
+              "encoding": "ascii",
+              "value": "ticks"
+            },
+            {
+              "offset": 7598383,
+              "encoding": "ascii",
+              "value": "dateData"
+            },
+            {
+              "offset": 7598418,
+              "encoding": "ascii",
+              "value": " \"$&("
+            },
+            {
+              "offset": 7598442,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJL"
+            },
+            {
+              "offset": 7598648,
+              "encoding": "ascii",
+              "value": "&6@BDFHJLNPRTVXZ\\^`bdfhjlnpr"
+            },
+            {
+              "offset": 7598955,
+              "encoding": "ascii",
+              "value": "[yy?"
+            },
+            {
+              "offset": 7599031,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bd"
+            },
+            {
+              "offset": 7599082,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bdH1A5E0066-58DC-428A-B21C-0AD6CDAE2789"
+            },
+            {
+              "offset": 7599165,
+              "encoding": "ascii",
+              "value": " *48@BDFJLNV"
+            },
+            {
+              "offset": 7599178,
+              "encoding": "ascii",
+              "value": "&(,.026HPRTXZ\\^`jlnprtv"
+            },
+            {
+              "offset": 7599234,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@B"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardMining",
+          "match_index": 154967,
+          "match_offset": 7597670,
+          "match_value": "ShardMining|ShardUpgradeInfo",
+          "context": [
+            {
+              "offset": 7597365,
+              "encoding": "ascii",
+              "value": "|Ozzy"
+            },
+            {
+              "offset": 7597375,
+              "encoding": "ascii",
+              "value": "|OzzyEnemy"
+            },
+            {
+              "offset": 7597390,
+              "encoding": "ascii",
+              "value": "|OzzyUpgrades"
+            },
+            {
+              "offset": 7597408,
+              "encoding": "ascii",
+              "value": "|MultiverseMarket"
+            },
+            {
+              "offset": 7597429,
+              "encoding": "ascii",
+              "value": "'MultiverseMarket|InscryptionTupleObject"
+            },
+            {
+              "offset": 7597474,
+              "encoding": "ascii",
+              "value": "MultiverseMarket|Inscryption"
+            },
+            {
+              "offset": 7597507,
+              "encoding": "ascii",
+              "value": "|NecrumExchange"
+            },
+            {
+              "offset": 7597527,
+              "encoding": "ascii",
+              "value": "|OuroborosResetter"
+            },
+            {
+              "offset": 7597550,
+              "encoding": "ascii",
+              "value": "|TraitSpheres"
+            },
+            {
+              "offset": 7597568,
+              "encoding": "ascii",
+              "value": "|ZeimarrNautallium"
+            },
+            {
+              "offset": 7597591,
+              "encoding": "ascii",
+              "value": "|ResearchLaboratory"
+            },
+            {
+              "offset": 7597615,
+              "encoding": "ascii",
+              "value": "|ResearchUltimas"
+            },
+            {
+              "offset": 7597636,
+              "encoding": "ascii",
+              "value": "|RewardLanes"
+            },
+            {
+              "offset": 7597653,
+              "encoding": "ascii",
+              "value": "|ShardMining"
+            },
+            {
+              "offset": 7597670,
+              "encoding": "ascii",
+              "value": "ShardMining|ShardUpgradeInfo"
+            },
+            {
+              "offset": 7597703,
+              "encoding": "ascii",
+              "value": "|TechUpgrades"
+            },
+            {
+              "offset": 7597721,
+              "encoding": "ascii",
+              "value": "|Colors"
+            },
+            {
+              "offset": 7598377,
+              "encoding": "ascii",
+              "value": "ticks"
+            },
+            {
+              "offset": 7598383,
+              "encoding": "ascii",
+              "value": "dateData"
+            },
+            {
+              "offset": 7598418,
+              "encoding": "ascii",
+              "value": " \"$&("
+            },
+            {
+              "offset": 7598442,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJL"
+            },
+            {
+              "offset": 7598648,
+              "encoding": "ascii",
+              "value": "&6@BDFHJLNPRTVXZ\\^`bdfhjlnpr"
+            },
+            {
+              "offset": 7598955,
+              "encoding": "ascii",
+              "value": "[yy?"
+            },
+            {
+              "offset": 7599031,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bd"
+            },
+            {
+              "offset": 7599082,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bdH1A5E0066-58DC-428A-B21C-0AD6CDAE2789"
+            },
+            {
+              "offset": 7599165,
+              "encoding": "ascii",
+              "value": " *48@BDFJLNV"
+            },
+            {
+              "offset": 7599178,
+              "encoding": "ascii",
+              "value": "&(,.026HPRTXZ\\^`jlnprtv"
+            },
+            {
+              "offset": 7599234,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@B"
+            },
+            {
+              "offset": 7599268,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "ShardUpgradeInfo",
+      "matches": [
+        {
+          "anchor": "ShardUpgradeInfo",
+          "match_index": 67964,
+          "match_offset": 1887211,
+          "match_value": "ShardUpgradeInfo",
+          "context": [
+            {
+              "offset": 1886995,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus2"
+            },
+            {
+              "offset": 1887011,
+              "encoding": "ascii",
+              "value": "FinalSU29Bonus3"
+            },
+            {
+              "offset": 1887027,
+              "encoding": "ascii",
+              "value": "OverLevel100Exponent"
+            },
+            {
+              "offset": 1887048,
+              "encoding": "ascii",
+              "value": "OverLevel200Exponent"
+            },
+            {
+              "offset": 1887069,
+              "encoding": "ascii",
+              "value": "OverLevel300Exponent"
+            },
+            {
+              "offset": 1887090,
+              "encoding": "ascii",
+              "value": "OverLevel400Exponent"
+            },
+            {
+              "offset": 1887111,
+              "encoding": "ascii",
+              "value": "TotalMilestoneLevels"
+            },
+            {
+              "offset": 1887132,
+              "encoding": "ascii",
+              "value": "Phase1Tick"
+            },
+            {
+              "offset": 1887143,
+              "encoding": "ascii",
+              "value": "Phase2Tick"
+            },
+            {
+              "offset": 1887154,
+              "encoding": "ascii",
+              "value": "Phase3Tick"
+            },
+            {
+              "offset": 1887165,
+              "encoding": "ascii",
+              "value": "Phase4Tick"
+            },
+            {
+              "offset": 1887176,
+              "encoding": "ascii",
+              "value": "Phase5Tick"
+            },
+            {
+              "offset": 1887187,
+              "encoding": "ascii",
+              "value": "Phase6Tick"
+            },
+            {
+              "offset": 1887198,
+              "encoding": "ascii",
+              "value": "CooldownTick"
+            },
+            {
+              "offset": 1887211,
+              "encoding": "ascii",
+              "value": "ShardUpgradeInfo"
+            },
+            {
+              "offset": 1887228,
+              "encoding": "ascii",
+              "value": "get_IsUnlocked"
+            },
+            {
+              "offset": 1887243,
+              "encoding": "ascii",
+              "value": "set_IsUnlocked"
+            },
+            {
+              "offset": 1887258,
+              "encoding": "ascii",
+              "value": "<IsUnlocked>k__BackingField"
+            },
+            {
+              "offset": 1887286,
+              "encoding": "ascii",
+              "value": "upgrade"
+            },
+            {
+              "offset": 1887294,
+              "encoding": "ascii",
+              "value": "<SortCostAndBools>b__1266_0"
+            },
+            {
+              "offset": 1887322,
+              "encoding": "ascii",
+              "value": "<>9__1266_0"
+            },
+            {
+              "offset": 1887334,
+              "encoding": "ascii",
+              "value": "<FastBuyEnum>d__1429"
+            },
+            {
+              "offset": 1887355,
+              "encoding": "ascii",
+              "value": "TechUpgrades"
+            },
+            {
+              "offset": 1887368,
+              "encoding": "ascii",
+              "value": "get_TotalHardwareMult"
+            },
+            {
+              "offset": 1887390,
+              "encoding": "ascii",
+              "value": "get_TotalSoftwareMult"
+            },
+            {
+              "offset": 1887412,
+              "encoding": "ascii",
+              "value": "get_TU1Bonus"
+            },
+            {
+              "offset": 1887425,
+              "encoding": "ascii",
+              "value": "get_TU1BonusNext"
+            },
+            {
+              "offset": 1887442,
+              "encoding": "ascii",
+              "value": "get_TU2Bonus"
+            },
+            {
+              "offset": 1887455,
+              "encoding": "ascii",
+              "value": "get_TU2BonusNext"
+            }
+          ]
+        },
+        {
+          "anchor": "ShardUpgradeInfo",
+          "match_index": 154967,
+          "match_offset": 7597670,
+          "match_value": "ShardMining|ShardUpgradeInfo",
+          "context": [
+            {
+              "offset": 7597365,
+              "encoding": "ascii",
+              "value": "|Ozzy"
+            },
+            {
+              "offset": 7597375,
+              "encoding": "ascii",
+              "value": "|OzzyEnemy"
+            },
+            {
+              "offset": 7597390,
+              "encoding": "ascii",
+              "value": "|OzzyUpgrades"
+            },
+            {
+              "offset": 7597408,
+              "encoding": "ascii",
+              "value": "|MultiverseMarket"
+            },
+            {
+              "offset": 7597429,
+              "encoding": "ascii",
+              "value": "'MultiverseMarket|InscryptionTupleObject"
+            },
+            {
+              "offset": 7597474,
+              "encoding": "ascii",
+              "value": "MultiverseMarket|Inscryption"
+            },
+            {
+              "offset": 7597507,
+              "encoding": "ascii",
+              "value": "|NecrumExchange"
+            },
+            {
+              "offset": 7597527,
+              "encoding": "ascii",
+              "value": "|OuroborosResetter"
+            },
+            {
+              "offset": 7597550,
+              "encoding": "ascii",
+              "value": "|TraitSpheres"
+            },
+            {
+              "offset": 7597568,
+              "encoding": "ascii",
+              "value": "|ZeimarrNautallium"
+            },
+            {
+              "offset": 7597591,
+              "encoding": "ascii",
+              "value": "|ResearchLaboratory"
+            },
+            {
+              "offset": 7597615,
+              "encoding": "ascii",
+              "value": "|ResearchUltimas"
+            },
+            {
+              "offset": 7597636,
+              "encoding": "ascii",
+              "value": "|RewardLanes"
+            },
+            {
+              "offset": 7597653,
+              "encoding": "ascii",
+              "value": "|ShardMining"
+            },
+            {
+              "offset": 7597670,
+              "encoding": "ascii",
+              "value": "ShardMining|ShardUpgradeInfo"
+            },
+            {
+              "offset": 7597703,
+              "encoding": "ascii",
+              "value": "|TechUpgrades"
+            },
+            {
+              "offset": 7597721,
+              "encoding": "ascii",
+              "value": "|Colors"
+            },
+            {
+              "offset": 7598377,
+              "encoding": "ascii",
+              "value": "ticks"
+            },
+            {
+              "offset": 7598383,
+              "encoding": "ascii",
+              "value": "dateData"
+            },
+            {
+              "offset": 7598418,
+              "encoding": "ascii",
+              "value": " \"$&("
+            },
+            {
+              "offset": 7598442,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJL"
+            },
+            {
+              "offset": 7598648,
+              "encoding": "ascii",
+              "value": "&6@BDFHJLNPRTVXZ\\^`bdfhjlnpr"
+            },
+            {
+              "offset": 7598955,
+              "encoding": "ascii",
+              "value": "[yy?"
+            },
+            {
+              "offset": 7599031,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bd"
+            },
+            {
+              "offset": 7599082,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bdH1A5E0066-58DC-428A-B21C-0AD6CDAE2789"
+            },
+            {
+              "offset": 7599165,
+              "encoding": "ascii",
+              "value": " *48@BDFJLNV"
+            },
+            {
+              "offset": 7599178,
+              "encoding": "ascii",
+              "value": "&(,.026HPRTXZ\\^`jlnprtv"
+            },
+            {
+              "offset": 7599234,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@B"
+            },
+            {
+              "offset": 7599268,
+              "encoding": "ascii",
+              "value": " \"$&(*,.02468:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "get_SU1FinalUnlockReq",
+      "matches": [
+        {
+          "anchor": "get_SU1FinalUnlockReq",
+          "match_index": 66634,
+          "match_offset": 1864455,
+          "match_value": "get_SU1FinalUnlockReq",
+          "context": [
+            {
+              "offset": 1864304,
+              "encoding": "ascii",
+              "value": "Elysium49"
+            },
+            {
+              "offset": 1864314,
+              "encoding": "ascii",
+              "value": "Elysium54"
+            },
+            {
+              "offset": 1864324,
+              "encoding": "ascii",
+              "value": "Elysium59"
+            },
+            {
+              "offset": 1864334,
+              "encoding": "ascii",
+              "value": "Hyperion9"
+            },
+            {
+              "offset": 1864344,
+              "encoding": "ascii",
+              "value": "Hyperion19"
+            },
+            {
+              "offset": 1864355,
+              "encoding": "ascii",
+              "value": "Hyperion24"
+            },
+            {
+              "offset": 1864366,
+              "encoding": "ascii",
+              "value": "Hyperion29"
+            },
+            {
+              "offset": 1864377,
+              "encoding": "ascii",
+              "value": "Hyperion34"
+            },
+            {
+              "offset": 1864388,
+              "encoding": "ascii",
+              "value": "Hyperion39"
+            },
+            {
+              "offset": 1864399,
+              "encoding": "ascii",
+              "value": "Hyperion44"
+            },
+            {
+              "offset": 1864410,
+              "encoding": "ascii",
+              "value": "Hyperion49"
+            },
+            {
+              "offset": 1864421,
+              "encoding": "ascii",
+              "value": "Hyperion54"
+            },
+            {
+              "offset": 1864432,
+              "encoding": "ascii",
+              "value": "Hyperion59"
+            },
+            {
+              "offset": 1864443,
+              "encoding": "ascii",
+              "value": "ShardMining"
+            },
+            {
+              "offset": 1864455,
+              "encoding": "ascii",
+              "value": "get_SU1FinalUnlockReq"
+            },
+            {
+              "offset": 1864477,
+              "encoding": "ascii",
+              "value": "get_SU2FinalUnlockReq"
+            },
+            {
+              "offset": 1864499,
+              "encoding": "ascii",
+              "value": "get_SU3FinalUnlockReq"
+            },
+            {
+              "offset": 1864521,
+              "encoding": "ascii",
+              "value": "get_SU4FinalUnlockReq"
+            },
+            {
+              "offset": 1864543,
+              "encoding": "ascii",
+              "value": "get_SU5FinalUnlockReq"
+            },
+            {
+              "offset": 1864565,
+              "encoding": "ascii",
+              "value": "get_SU6FinalUnlockReq"
+            },
+            {
+              "offset": 1864587,
+              "encoding": "ascii",
+              "value": "get_SU7FinalUnlockReq"
+            },
+            {
+              "offset": 1864609,
+              "encoding": "ascii",
+              "value": "get_SU8FinalUnlockReq"
+            },
+            {
+              "offset": 1864631,
+              "encoding": "ascii",
+              "value": "get_SU9FinalUnlockReq"
+            },
+            {
+              "offset": 1864653,
+              "encoding": "ascii",
+              "value": "get_SU10FinalUnlockReq"
+            },
+            {
+              "offset": 1864676,
+              "encoding": "ascii",
+              "value": "get_SU11FinalUnlockReq"
+            },
+            {
+              "offset": 1864699,
+              "encoding": "ascii",
+              "value": "get_SU12FinalUnlockReq"
+            },
+            {
+              "offset": 1864722,
+              "encoding": "ascii",
+              "value": "get_SU13FinalUnlockReq"
+            },
+            {
+              "offset": 1864745,
+              "encoding": "ascii",
+              "value": "get_SU14FinalUnlockReq"
+            },
+            {
+              "offset": 1864768,
+              "encoding": "ascii",
+              "value": "get_SU15FinalUnlockReq"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "get_SU10FinalUnlockReq",
+      "matches": [
+        {
+          "anchor": "get_SU10FinalUnlockReq",
+          "match_index": 66643,
+          "match_offset": 1864653,
+          "match_value": "get_SU10FinalUnlockReq",
+          "context": [
+            {
+              "offset": 1864399,
+              "encoding": "ascii",
+              "value": "Hyperion44"
+            },
+            {
+              "offset": 1864410,
+              "encoding": "ascii",
+              "value": "Hyperion49"
+            },
+            {
+              "offset": 1864421,
+              "encoding": "ascii",
+              "value": "Hyperion54"
+            },
+            {
+              "offset": 1864432,
+              "encoding": "ascii",
+              "value": "Hyperion59"
+            },
+            {
+              "offset": 1864443,
+              "encoding": "ascii",
+              "value": "ShardMining"
+            },
+            {
+              "offset": 1864455,
+              "encoding": "ascii",
+              "value": "get_SU1FinalUnlockReq"
+            },
+            {
+              "offset": 1864477,
+              "encoding": "ascii",
+              "value": "get_SU2FinalUnlockReq"
+            },
+            {
+              "offset": 1864499,
+              "encoding": "ascii",
+              "value": "get_SU3FinalUnlockReq"
+            },
+            {
+              "offset": 1864521,
+              "encoding": "ascii",
+              "value": "get_SU4FinalUnlockReq"
+            },
+            {
+              "offset": 1864543,
+              "encoding": "ascii",
+              "value": "get_SU5FinalUnlockReq"
+            },
+            {
+              "offset": 1864565,
+              "encoding": "ascii",
+              "value": "get_SU6FinalUnlockReq"
+            },
+            {
+              "offset": 1864587,
+              "encoding": "ascii",
+              "value": "get_SU7FinalUnlockReq"
+            },
+            {
+              "offset": 1864609,
+              "encoding": "ascii",
+              "value": "get_SU8FinalUnlockReq"
+            },
+            {
+              "offset": 1864631,
+              "encoding": "ascii",
+              "value": "get_SU9FinalUnlockReq"
+            },
+            {
+              "offset": 1864653,
+              "encoding": "ascii",
+              "value": "get_SU10FinalUnlockReq"
+            },
+            {
+              "offset": 1864676,
+              "encoding": "ascii",
+              "value": "get_SU11FinalUnlockReq"
+            },
+            {
+              "offset": 1864699,
+              "encoding": "ascii",
+              "value": "get_SU12FinalUnlockReq"
+            },
+            {
+              "offset": 1864722,
+              "encoding": "ascii",
+              "value": "get_SU13FinalUnlockReq"
+            },
+            {
+              "offset": 1864745,
+              "encoding": "ascii",
+              "value": "get_SU14FinalUnlockReq"
+            },
+            {
+              "offset": 1864768,
+              "encoding": "ascii",
+              "value": "get_SU15FinalUnlockReq"
+            },
+            {
+              "offset": 1864791,
+              "encoding": "ascii",
+              "value": "get_SU16FinalUnlockReq"
+            },
+            {
+              "offset": 1864814,
+              "encoding": "ascii",
+              "value": "get_SU17FinalUnlockReq"
+            },
+            {
+              "offset": 1864837,
+              "encoding": "ascii",
+              "value": "get_SU18FinalUnlockReq"
+            },
+            {
+              "offset": 1864860,
+              "encoding": "ascii",
+              "value": "get_SU19FinalUnlockReq"
+            },
+            {
+              "offset": 1864883,
+              "encoding": "ascii",
+              "value": "get_SU20FinalUnlockReq"
+            },
+            {
+              "offset": 1864906,
+              "encoding": "ascii",
+              "value": "get_SU21FinalUnlockReq"
+            },
+            {
+              "offset": 1864929,
+              "encoding": "ascii",
+              "value": "get_SU22FinalUnlockReq"
+            },
+            {
+              "offset": 1864952,
+              "encoding": "ascii",
+              "value": "get_SU23FinalUnlockReq"
+            },
+            {
+              "offset": 1864975,
+              "encoding": "ascii",
+              "value": "get_SU24FinalUnlockReq"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "CheckFirstTimeShardMilestoneOpened",
+      "matches": [
+        {
+          "anchor": "CheckFirstTimeShardMilestoneOpened",
+          "match_index": 16017,
+          "match_offset": 851852,
+          "match_value": "CheckFirstTimeShardMilestoneOpened",
+          "context": [
+            {
+              "offset": 851546,
+              "encoding": "ascii",
+              "value": "ChangeMK5State"
+            },
+            {
+              "offset": 851561,
+              "encoding": "ascii",
+              "value": "ChangeMK6State"
+            },
+            {
+              "offset": 851576,
+              "encoding": "ascii",
+              "value": "ChangeMK7State"
+            },
+            {
+              "offset": 851591,
+              "encoding": "ascii",
+              "value": "ChangeMK8State"
+            },
+            {
+              "offset": 851606,
+              "encoding": "ascii",
+              "value": "ChangeMK9State"
+            },
+            {
+              "offset": 851621,
+              "encoding": "ascii",
+              "value": "ChangeMK10State"
+            },
+            {
+              "offset": 851637,
+              "encoding": "ascii",
+              "value": "CheckTechUpgFirstTime"
+            },
+            {
+              "offset": 851659,
+              "encoding": "ascii",
+              "value": "CheckLoopModFirstTime"
+            },
+            {
+              "offset": 851681,
+              "encoding": "ascii",
+              "value": "CheckFirstPlayerMenuTime"
+            },
+            {
+              "offset": 851706,
+              "encoding": "ascii",
+              "value": "CheckFirstTokenMenuTime"
+            },
+            {
+              "offset": 851730,
+              "encoding": "ascii",
+              "value": "CheckFirstDiamondShopTime"
+            },
+            {
+              "offset": 851756,
+              "encoding": "ascii",
+              "value": "CheckFirstTimeAutomationOpened"
+            },
+            {
+              "offset": 851787,
+              "encoding": "ascii",
+              "value": "CheckFirstTimeShardMainOpened"
+            },
+            {
+              "offset": 851817,
+              "encoding": "ascii",
+              "value": "CheckFirstTimeShardOperationOpened"
+            },
+            {
+              "offset": 851852,
+              "encoding": "ascii",
+              "value": "CheckFirstTimeShardMilestoneOpened"
+            },
+            {
+              "offset": 851887,
+              "encoding": "ascii",
+              "value": "CheckFirstArcadeLM"
+            },
+            {
+              "offset": 851906,
+              "encoding": "ascii",
+              "value": "CheckFirstArcadeShopOpen"
+            },
+            {
+              "offset": 851931,
+              "encoding": "ascii",
+              "value": "CheckFirstFleetMain"
+            },
+            {
+              "offset": 851951,
+              "encoding": "ascii",
+              "value": "CheckFirstFleetUpgrades"
+            },
+            {
+              "offset": 851975,
+              "encoding": "ascii",
+              "value": "CheckFirstFleetEvolve"
+            },
+            {
+              "offset": 851997,
+              "encoding": "ascii",
+              "value": "FirstResearchVisit"
+            },
+            {
+              "offset": 852016,
+              "encoding": "ascii",
+              "value": "FirstAcademyVisit"
+            },
+            {
+              "offset": 852034,
+              "encoding": "ascii",
+              "value": "AcademyMilestonesButtonCheck"
+            },
+            {
+              "offset": 852063,
+              "encoding": "ascii",
+              "value": "AcademyBadgeButtonCheck"
+            },
+            {
+              "offset": 852087,
+              "encoding": "ascii",
+              "value": "AcademyAutomationCenterCheck"
+            },
+            {
+              "offset": 852116,
+              "encoding": "ascii",
+              "value": "CheckOutpostTutorial"
+            },
+            {
+              "offset": 852137,
+              "encoding": "ascii",
+              "value": "CheckPersonnelTutorial"
+            },
+            {
+              "offset": 852160,
+              "encoding": "ascii",
+              "value": "CheckLootTutorial"
+            },
+            {
+              "offset": 852178,
+              "encoding": "ascii",
+              "value": "CheckGearTutorial"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "FastBuyButtonMethodShards",
+      "matches": [
+        {
+          "anchor": "FastBuyButtonMethodShards",
+          "match_index": 67096,
+          "match_offset": 1873623,
+          "match_value": "FastBuyButtonMethodShards",
+          "context": [
+            {
+              "offset": 1873361,
+              "encoding": "ascii",
+              "value": "UnlockMilestone20"
+            },
+            {
+              "offset": 1873379,
+              "encoding": "ascii",
+              "value": "UnlockMilestone21"
+            },
+            {
+              "offset": 1873397,
+              "encoding": "ascii",
+              "value": "UnlockMilestone22"
+            },
+            {
+              "offset": 1873415,
+              "encoding": "ascii",
+              "value": "UnlockMilestone23"
+            },
+            {
+              "offset": 1873433,
+              "encoding": "ascii",
+              "value": "UnlockMilestone24"
+            },
+            {
+              "offset": 1873451,
+              "encoding": "ascii",
+              "value": "UnlockMilestone25"
+            },
+            {
+              "offset": 1873469,
+              "encoding": "ascii",
+              "value": "UnlockMilestone26"
+            },
+            {
+              "offset": 1873487,
+              "encoding": "ascii",
+              "value": "UnlockMilestone27"
+            },
+            {
+              "offset": 1873505,
+              "encoding": "ascii",
+              "value": "UnlockMilestone28"
+            },
+            {
+              "offset": 1873523,
+              "encoding": "ascii",
+              "value": "UnlockMilestone29"
+            },
+            {
+              "offset": 1873541,
+              "encoding": "ascii",
+              "value": "AttachFastBuyButton"
+            },
+            {
+              "offset": 1873561,
+              "encoding": "ascii",
+              "value": "StartFastBuyButtonHold"
+            },
+            {
+              "offset": 1873584,
+              "encoding": "ascii",
+              "value": "FastBuyEnum"
+            },
+            {
+              "offset": 1873596,
+              "encoding": "ascii",
+              "value": "OuroborosOrbsBulkBuyToggle"
+            },
+            {
+              "offset": 1873623,
+              "encoding": "ascii",
+              "value": "FastBuyButtonMethodShards"
+            },
+            {
+              "offset": 1873649,
+              "encoding": "ascii",
+              "value": "BuyMilestone0"
+            },
+            {
+              "offset": 1873663,
+              "encoding": "ascii",
+              "value": "Milestone0TextChecker"
+            },
+            {
+              "offset": 1873685,
+              "encoding": "ascii",
+              "value": "Milestone1TextChecker"
+            },
+            {
+              "offset": 1873707,
+              "encoding": "ascii",
+              "value": "Milestone2TextChecker"
+            },
+            {
+              "offset": 1873729,
+              "encoding": "ascii",
+              "value": "Milestone3TextChecker"
+            },
+            {
+              "offset": 1873751,
+              "encoding": "ascii",
+              "value": "Milestone4TextChecker"
+            },
+            {
+              "offset": 1873773,
+              "encoding": "ascii",
+              "value": "Milestone5TextChecker"
+            },
+            {
+              "offset": 1873795,
+              "encoding": "ascii",
+              "value": "Milestone6TextChecker"
+            },
+            {
+              "offset": 1873817,
+              "encoding": "ascii",
+              "value": "Milestone7TextChecker"
+            },
+            {
+              "offset": 1873839,
+              "encoding": "ascii",
+              "value": "Milestone8TextChecker"
+            },
+            {
+              "offset": 1873861,
+              "encoding": "ascii",
+              "value": "Milestone9TextChecker"
+            },
+            {
+              "offset": 1873883,
+              "encoding": "ascii",
+              "value": "Milestone10TextChecker"
+            },
+            {
+              "offset": 1873906,
+              "encoding": "ascii",
+              "value": "Milestone11TextChecker"
+            },
+            {
+              "offset": 1873929,
+              "encoding": "ascii",
+              "value": "Milestone12TextChecker"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "StartFastBuyButtonHold",
+      "matches": [
+        {
+          "anchor": "StartFastBuyButtonHold",
+          "match_index": 67093,
+          "match_offset": 1873561,
+          "match_value": "StartFastBuyButtonHold",
+          "context": [
+            {
+              "offset": 1873307,
+              "encoding": "ascii",
+              "value": "UnlockMilestone17"
+            },
+            {
+              "offset": 1873325,
+              "encoding": "ascii",
+              "value": "UnlockMilestone18"
+            },
+            {
+              "offset": 1873343,
+              "encoding": "ascii",
+              "value": "UnlockMilestone19"
+            },
+            {
+              "offset": 1873361,
+              "encoding": "ascii",
+              "value": "UnlockMilestone20"
+            },
+            {
+              "offset": 1873379,
+              "encoding": "ascii",
+              "value": "UnlockMilestone21"
+            },
+            {
+              "offset": 1873397,
+              "encoding": "ascii",
+              "value": "UnlockMilestone22"
+            },
+            {
+              "offset": 1873415,
+              "encoding": "ascii",
+              "value": "UnlockMilestone23"
+            },
+            {
+              "offset": 1873433,
+              "encoding": "ascii",
+              "value": "UnlockMilestone24"
+            },
+            {
+              "offset": 1873451,
+              "encoding": "ascii",
+              "value": "UnlockMilestone25"
+            },
+            {
+              "offset": 1873469,
+              "encoding": "ascii",
+              "value": "UnlockMilestone26"
+            },
+            {
+              "offset": 1873487,
+              "encoding": "ascii",
+              "value": "UnlockMilestone27"
+            },
+            {
+              "offset": 1873505,
+              "encoding": "ascii",
+              "value": "UnlockMilestone28"
+            },
+            {
+              "offset": 1873523,
+              "encoding": "ascii",
+              "value": "UnlockMilestone29"
+            },
+            {
+              "offset": 1873541,
+              "encoding": "ascii",
+              "value": "AttachFastBuyButton"
+            },
+            {
+              "offset": 1873561,
+              "encoding": "ascii",
+              "value": "StartFastBuyButtonHold"
+            },
+            {
+              "offset": 1873584,
+              "encoding": "ascii",
+              "value": "FastBuyEnum"
+            },
+            {
+              "offset": 1873596,
+              "encoding": "ascii",
+              "value": "OuroborosOrbsBulkBuyToggle"
+            },
+            {
+              "offset": 1873623,
+              "encoding": "ascii",
+              "value": "FastBuyButtonMethodShards"
+            },
+            {
+              "offset": 1873649,
+              "encoding": "ascii",
+              "value": "BuyMilestone0"
+            },
+            {
+              "offset": 1873663,
+              "encoding": "ascii",
+              "value": "Milestone0TextChecker"
+            },
+            {
+              "offset": 1873685,
+              "encoding": "ascii",
+              "value": "Milestone1TextChecker"
+            },
+            {
+              "offset": 1873707,
+              "encoding": "ascii",
+              "value": "Milestone2TextChecker"
+            },
+            {
+              "offset": 1873729,
+              "encoding": "ascii",
+              "value": "Milestone3TextChecker"
+            },
+            {
+              "offset": 1873751,
+              "encoding": "ascii",
+              "value": "Milestone4TextChecker"
+            },
+            {
+              "offset": 1873773,
+              "encoding": "ascii",
+              "value": "Milestone5TextChecker"
+            },
+            {
+              "offset": 1873795,
+              "encoding": "ascii",
+              "value": "Milestone6TextChecker"
+            },
+            {
+              "offset": 1873817,
+              "encoding": "ascii",
+              "value": "Milestone7TextChecker"
+            },
+            {
+              "offset": 1873839,
+              "encoding": "ascii",
+              "value": "Milestone8TextChecker"
+            },
+            {
+              "offset": 1873861,
+              "encoding": "ascii",
+              "value": "Milestone9TextChecker"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "anchor": "MilestoneBonusesPerLevel",
+      "matches": []
+    },
+    {
+      "anchor": "Milestones, Assembly-CSharp",
+      "matches": []
+    }
+  ]
+}

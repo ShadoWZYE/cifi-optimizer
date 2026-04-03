@@ -122,9 +122,13 @@ function validateTokenShop(tokenShop) {
   expectNonEmptyString(tokenShop.source.level0, "token shop level0 path must be present");
   expectArray(tokenShop.fields, "token shop fields must be an array");
   expectRecord(tokenShop.numeric_table, "token shop numeric_table must be an object");
+  expectArray(tokenShop.resource_icons, "token shop resource_icons must be an array");
   assert.ok(tokenShop.fields.length >= 50, "token shop fields should include the extracted payload");
   ["TokenBoost", "DiamondBoost", "TokenBoostT2", "ATU25"].forEach((key) => {
     expectRecord(tokenShop.numeric_table[key], `token shop numeric_table.${key} must be present`);
+  });
+  ["resourceicons/resource_tokenium", "resourceicons/resource_tokenium_cap"].forEach((icon) => {
+    assert.ok(tokenShop.resource_icons.includes(icon), `token shop resource_icons must include ${icon}`);
   });
   return {
     id: "token-shop",
@@ -132,7 +136,8 @@ function validateTokenShop(tokenShop) {
     classification: "extracted-mechanics",
     stats: [
       `${tokenShop.fields.length} extracted fields`,
-      `${Object.keys(tokenShop.numeric_table).length} numeric groups`
+      `${Object.keys(tokenShop.numeric_table).length} numeric groups`,
+      `${tokenShop.resource_icons.length} resource icons`
     ]
   };
 }
@@ -844,6 +849,9 @@ export async function validateBundledDatasets() {
   const shardMilestones = await readJson("../../data/shard-milestones.grounded.v1.json");
   const shardObserved = await readJson("../../data/shard-observed-behaviors.grounded.v1.json");
   const shardProvenance = await readJson("../../data/shard-milestones-provenance.grounded.v1.json");
+  const shardAssetGrounding = await readJson("../../data/shard-asset-grounding.v1.json");
+  const extractionCandidateFamilies = await readJson("../../data/extraction-candidate-families.v1.json");
+  const extractionCandidateRanking = await readJson("../../data/extraction-candidate-ranking.v1.json");
   const tokenShop = await readJson("../../data/token-shop-values.json");
   const multiverseMarket = await readJson("../../data/multiverse-market-values.json");
   const multiverseMarketMetadataNeighborhood = await readJson("../../data/multiverse-market-metadata-neighborhood.json");
@@ -864,6 +872,9 @@ export async function validateBundledDatasets() {
   const summaries = [
     validateSnapshot(snapshot),
     validateShardDatasets(shardMilestones, shardObserved, shardProvenance),
+    validateShardAssetGrounding(shardAssetGrounding),
+    validateExtractionCandidateFamilies(extractionCandidateFamilies),
+    validateExtractionCandidateRanking(extractionCandidateRanking),
     validateTokenShop(tokenShop),
     validateMultiverseMarket(multiverseMarket),
     validateMultiverseMarketMetadataNeighborhood(multiverseMarketMetadataNeighborhood),
