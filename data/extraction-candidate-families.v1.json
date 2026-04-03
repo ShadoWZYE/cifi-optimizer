@@ -126,7 +126,7 @@
     {
       "id": "spend.token-bank-state-lane",
       "label": "Token-bank state lane",
-      "track": "spend-planner-from-extracted-data",
+      "track": "spend-token-bank-state-owner",
       "terms": [
         "token bank",
         "banked tokens",
@@ -144,7 +144,7 @@
     {
       "id": "spend.daily-tokenium-lane",
       "label": "Daily Tokenium lane",
-      "track": "spend-planner-from-extracted-data",
+      "track": "spend-daily-tokenium-save-owner",
       "terms": [
         "daily tokenium",
         "lm244",
@@ -161,27 +161,9 @@
       ]
     },
     {
-      "id": "spend.multiverse-market-owner-family",
-      "label": "MultiverseMarket owner family",
-      "track": "spend-planner-from-extracted-data",
-      "terms": [
-        "multiverse market",
-        "chrystos emporium",
-        "inscryptions",
-        "buyis"
-      ],
-      "anchors": [
-        "MultiverseMarket, Assembly-CSharp",
-        "BuyIS47",
-        "BuyIS64",
-        "BuyIS73",
-        "CostBox-InscryptionsDone"
-      ]
-    },
-    {
       "id": "spend.multiverse-market-save-model",
       "label": "MultiverseMarket save model",
-      "track": "spend-planner-from-extracted-data",
+      "track": "spend-multiverse-save-model-recovery",
       "terms": [
         "inscryptionsdone",
         "playerprofiledata",

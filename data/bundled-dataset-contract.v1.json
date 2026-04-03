@@ -250,6 +250,14 @@
       ]
     },
     {
+      "id": "multiverse-market-market-member-boundary",
+      "label": "Multiverse market market-member boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-market-member-boundary.json"
+      ]
+    },
+    {
       "id": "token-bank-controller-shell",
       "label": "Token-bank controller shell",
       "classification": "extracted-mechanics",

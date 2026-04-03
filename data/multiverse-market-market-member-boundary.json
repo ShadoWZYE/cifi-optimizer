@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-04-04",
+  "sources": {
+    "probeScript": "scripts/unity/metadata_neighborhood_probe.py",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "metadata": "workbench/apk/base/global-metadata.dat"
+  },
+  "playerProfileAccessorClues": [
+    "get_Market",
+    "get_ShardData",
+    "get_ResearchPointData",
+    "get_AcademyPointData"
+  ],
+  "playerProfileMemberShellClues": [
+    "Market",
+    "Relics",
+    "CellData",
+    "ModPointData",
+    "ShardData",
+    "ResearchPointData",
+    "AcademyPointData",
+    "BlueprintsThisTR"
+  ],
+  "cloudSaveBridgeClues": [
+    "CloudSavePlayerProfile",
+    "GetCurrentSaveFileInfo",
+    "GetPlayerProfileInfo",
+    "CloudLoad"
+  ],
+  "missingDirectTypeMapClues": [
+    "PlayerProfileData|Market",
+    "PlayerProfileData|Inscryption",
+    "PlayerProfileData|MultiverseMarket"
+  ],
+  "marketWrapperTypeClues": [
+    "MultiverseMarket",
+    "MultiverseMarket|InscryptionTupleObject",
+    "MultiverseMarket|Inscryption",
+    "NecrumExchange",
+    "OuroborosResetter",
+    "TraitSpheres",
+    "ZeimarrNautallium",
+    "ResearchLaboratory",
+    "ResearchUltimas",
+    "RewardLanes",
+    "ShardMining"
+  ],
+  "currentBoundary": [
+    "The checked PlayerProfile persistence neighborhood now preserves a direct get_Market accessor beside other profile-side accessors such as get_ShardData, get_ResearchPointData, and get_AcademyPointData.",
+    "The same PlayerProfileData neighborhood also preserves a bare Market member-shell clue beside other known profile-side members such as Relics, CellData, ModPointData, ShardData, ResearchPointData, AcademyPointData, and BlueprintsThisTR.",
+    "The adjacent cloud-save neighborhood still preserves CloudSavePlayerProfile plus GetCurrentSaveFileInfo, GetPlayerProfileInfo, and CloudLoad as the current repo-local bridge into PlayerProfile persistence recovery.",
+    "The same checked repo-local metadata still does not expose a direct PlayerProfileData|Market, PlayerProfileData|Inscryption, or PlayerProfileData|MultiverseMarket type-map clue.",
+    "The nearest recovered market-side type family still clusters MultiverseMarket with Inscryption tuple types plus adjacent Ouroboros market and progression systems such as NecrumExchange, OuroborosResetter, TraitSpheres, ZeimarrNautallium, ResearchLaboratory, RewardLanes, and ShardMining.",
+    "This is enough to narrow the remaining handoff from a broad PlayerProfile family guess to a stronger direct PlayerProfileData member-shell or broader wrapper hypothesis, but not enough to claim that MultiverseMarket itself is declared directly on PlayerProfileData."
+  ]
+}

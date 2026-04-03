@@ -59,45 +59,188 @@
   ],
   "familyFilter": [],
   "topCandidate": {
-    "id": "spend.multiverse-market-owner-family",
-    "label": "MultiverseMarket owner family",
-    "track": "spend-planner-from-extracted-data",
-    "heuristicScore": 734
+    "id": "shards.milestone-owner-family",
+    "label": "Milestone owner family",
+    "track": "shard-milestone-payload-recovery",
+    "heuristicScore": 750
   },
   "candidates": [
     {
-      "id": "spend.multiverse-market-owner-family",
-      "label": "MultiverseMarket owner family",
-      "track": "spend-planner-from-extracted-data",
+      "id": "shards.milestone-owner-family",
+      "label": "Milestone owner family",
+      "track": "shard-milestone-payload-recovery",
       "terms": [
-        "multiverse market",
-        "chrystos emporium",
-        "inscryptions",
-        "buyis"
+        "milestone owner",
+        "shard milestone",
+        "milestones, assembly-csharp",
+        "milestonebonusesperlevel",
+        "shardmilestones"
       ],
       "anchors": [
-        "MultiverseMarket, Assembly-CSharp",
-        "BuyIS47",
-        "BuyIS64",
-        "BuyIS73",
-        "CostBox-InscryptionsDone"
+        "Milestones, Assembly-CSharp",
+        "MilestoneBonusesPerLevel",
+        "ShardMilestones-64",
+        "ShardMilestones-256",
+        "Milestone1"
       ],
-      "textMentionCount": 29,
-      "unresolvedMentionCount": 9,
-      "textFilesWithMentions": 6,
-      "textFilesWithUnresolvedMentions": 6,
+      "textMentionCount": 25,
+      "unresolvedMentionCount": 8,
+      "textFilesWithMentions": 7,
+      "textFilesWithUnresolvedMentions": 7,
+      "unresolvedExcerpts": [
+        {
+          "file": "docs/systems/shards/shard-system-verification.md",
+          "excerpt": "This is enough to stop treating the shard milestone owner as wholly unknown for descriptive workflow work."
+        },
+        {
+          "file": "docs/systems/shards/shard-system-verification.md",
+          "excerpt": "It is still not enough to promote milestone rows, labels, costs, or saved player-owned shard milestone state as extracted gameplay truth."
+        },
+        {
+          "file": "docs/systems/shards/shard-grounding-boundary.md",
+          "excerpt": "- `ShardMining, Assembly-CSharp` - current role evidence: `CheckFirstTimeShardMilestoneOpened`, `AttachFastBuyButton`, `FastBuyButtonMethodShards`, `StartFastBuyButtonHold` - partial row-shell evidence: `UnlockMilestone17` through `UnlockMilestone29`, `BuyMile"
+        },
+        {
+          "file": "docs/systems/shards/shard-extraction-candidates.md",
+          "excerpt": "1. `shards.milestone-owner-family` - heuristic score: `560` - why it wins: - strongest shard-family anchor density across all three binary files - multiple unresolved mentions in the shard verification and owner-mapping surfaces - cross-file presence in both s"
+        },
+        {
+          "file": "docs/unity/unity-owner-map.md",
+          "excerpt": "- shard milestones / loop-reset shell - system: shard workflow and loop-reset progression shell - current source evidence: - [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0) - [`workbench/unity/joined/sharedassets0."
+        },
+        {
+          "file": "docs/unity/unity-audit-playbook.md",
+          "excerpt": "- Goal: recover grounded in-game mechanic owners, field names, and serialized constants from the shipped Unity/IL2CPP build. - Current proven owners: - `TokenShop` in [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0)"
+        }
+      ],
+      "anchorHitCount": 659,
+      "binaryFilesWithAnchorHits": 3,
+      "binaryFileCoverage": [
+        "workbench/apk/base/global-metadata.dat",
+        "workbench/unity/joined/level0",
+        "workbench/unity/joined/sharedassets0.assets"
+      ],
+      "uniqueAnchorTermsFound": 5,
+      "nearbyContextTermCount": 9,
+      "nearbyContextTerms": [
+        "academy",
+        "demeter",
+        "loopmod",
+        "loopreset",
+        "milestone",
+        "mining",
+        "operation",
+        "shard",
+        "token"
+      ],
+      "metadataAnchorHits": 318,
+      "sceneAnchorHits": 341,
+      "topAnchorHits": [
+        {
+          "file": "workbench/unity/joined/level0",
+          "offset": 9937408,
+          "kind": "ascii",
+          "value": "Milestone11CompletedIcon ",
+          "matchedAnchors": [
+            "milestone1"
+          ],
+          "nearbyContextExamples": [
+            "Milestone11CompletedIcon "
+          ]
+        },
+        {
+          "file": "workbench/unity/joined/level0",
+          "offset": 10024832,
+          "kind": "ascii",
+          "value": "Milestone17CompletedIcon",
+          "matchedAnchors": [
+            "milestone1"
+          ],
+          "nearbyContextExamples": [
+            "Milestone17CompletedIcon",
+            "Milestone24CompletedIcon"
+          ]
+        },
+        {
+          "file": "workbench/unity/joined/level0",
+          "offset": 10052976,
+          "kind": "ascii",
+          "value": "Milestone16CompletedIcon",
+          "matchedAnchors": [
+            "milestone1"
+          ],
+          "nearbyContextExamples": [
+            "Milestone16CompletedIcon",
+            "#LoopModScrollView"
+          ]
+        },
+        {
+          "file": "workbench/unity/joined/level0",
+          "offset": 10306928,
+          "kind": "ascii",
+          "value": "Milestone12CompletedIcon ",
+          "matchedAnchors": [
+            "milestone1"
+          ],
+          "nearbyContextExamples": [
+            "Milestone12CompletedIcon "
+          ]
+        },
+        {
+          "file": "workbench/unity/joined/level0",
+          "offset": 10349840,
+          "kind": "ascii",
+          "value": "Milestone13CompletedIcon ",
+          "matchedAnchors": [
+            "milestone1"
+          ],
+          "nearbyContextExamples": [
+            "Milestone13CompletedIcon "
+          ]
+        },
+        {
+          "file": "workbench/unity/joined/level0",
+          "offset": 10370160,
+          "kind": "ascii",
+          "value": "Milestone19CompletedIcon",
+          "matchedAnchors": [
+            "milestone1"
+          ],
+          "nearbyContextExamples": [
+            "PercentIncreaseText.Tokenium.LR",
+            "TokenAdBox",
+            "Milestone19CompletedIcon"
+          ]
+        }
+      ],
+      "heuristicScore": 750
+    },
+    {
+      "id": "spend.multiverse-market-save-model",
+      "label": "MultiverseMarket save model",
+      "track": "spend-multiverse-save-model-recovery",
+      "terms": [
+        "inscryptionsdone",
+        "playerprofiledata",
+        "is50level",
+        "trade counter",
+        "declaring save model"
+      ],
+      "anchors": [
+        "InscryptionsDone",
+        "PlayerProfileData",
+        "IS50Level",
+        "EsotericR1Trades",
+        "Mech1Unlocked"
+      ],
+      "textMentionCount": 22,
+      "unresolvedMentionCount": 8,
+      "textFilesWithMentions": 7,
+      "textFilesWithUnresolvedMentions": 5,
       "unresolvedExcerpts": [
         {
           "file": "docs/systems/spend/spend-system-verification.md",
           "excerpt": "- It is safe to treat MultiverseMarket as a real system with partially grounded extracted constants. - It is safe to stop inferring its spend lane from diamonds, tokens, or other unrelated player resources. - It is not yet safe to treat `Inscryptions Done` as "
-        },
-        {
-          "file": "docs/systems/spend/multiverse-market-verification.md",
-          "excerpt": "- the Emporium purchase flow is wired through a player-facing cost lane labeled around `Inscryptions Done` - this is strong enough to stop treating the MultiverseMarket spend lane as completely unknown - this is not yet strong enough to claim the saved runtime"
-        },
-        {
-          "file": "docs/systems/spend/multiverse-market-verification.md",
-          "excerpt": "- It is safe to treat `MultiverseMarket` as a real Emporium owner with a grounded `Inscryptions Done` cost-lane shell. - It is not safe to generate spend recommendations yet. - The spend-planner track should stop inferring this lane from diamonds or tokens. - "
         },
         {
           "file": "docs/systems/spend/multiverse-market-state-verification.md",
@@ -110,32 +253,60 @@
         {
           "file": "docs/systems/spend/multiverse-market-state-verification.md",
           "excerpt": "- It is still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state.playerProfile`. - It is now safe to treat `InscryptionsDone` and nearby `IS*Level` strings as grounded metadata field clues for future save-side mapping work. - I"
+        },
+        {
+          "file": "docs/unity/unity-owner-map.md",
+          "excerpt": "- `MultiverseMarket` - system: Chrystos Emporium / Inscryptions - source owner: [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0) - parser: [`scripts/unity/multiverse_market_parse.py`](C:\\Users\\Shadow\\Desktop\\CiFi\\sc"
+        },
+        {
+          "file": "docs/unity/unity-owner-map.md",
+          "excerpt": "- shard milestones / loop-reset shell - system: shard workflow and loop-reset progression shell - current source evidence: - [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0) - [`workbench/unity/joined/sharedassets0."
         }
       ],
-      "anchorHitCount": 120,
+      "anchorHitCount": 16,
       "binaryFilesWithAnchorHits": 2,
       "binaryFileCoverage": [
         "workbench/apk/base/global-metadata.dat",
         "workbench/unity/joined/level0"
       ],
       "uniqueAnchorTermsFound": 5,
-      "nearbyContextTermCount": 4,
+      "nearbyContextTermCount": 8,
       "nearbyContextTerms": [
+        "academy",
         "inscryptions",
         "loopmod",
+        "loopreset",
+        "milestone",
+        "playerprofiledata",
         "shard",
         "token"
       ],
-      "metadataAnchorHits": 3,
-      "sceneAnchorHits": 117,
+      "metadataAnchorHits": 14,
+      "sceneAnchorHits": 2,
       "topAnchorHits": [
+        {
+          "file": "workbench/unity/joined/level0",
+          "offset": 11590168,
+          "kind": "ascii",
+          "value": "ResourceAmountText.InscryptionsDone",
+          "matchedAnchors": [
+            "inscryptionsdone"
+          ],
+          "nearbyContextExamples": [
+            "ResourceAmountText.Tokens",
+            "ResourceAmountText.Tokenium",
+            "ResourceAmountText.Shards.TOTAL",
+            "ResourceAmountText.InscryptionsDone",
+            "ResourceAmountText.Tokens"
+          ]
+        },
         {
           "file": "workbench/unity/joined/level0",
           "offset": 15598528,
           "kind": "ascii",
           "value": "CostBox-InscryptionsDone",
           "matchedAnchors": [
-            "costbox-inscryptionsdone"
+            "inscryptionsdone"
           ],
           "nearbyContextExamples": [
             "CostBox-LoopMods",
@@ -146,62 +317,67 @@
           ]
         },
         {
-          "file": "workbench/unity/joined/level0",
-          "offset": 36623672,
+          "file": "workbench/apk/base/global-metadata.dat",
+          "offset": 745435,
           "kind": "ascii",
-          "value": "MultiverseMarket, Assembly-CSharp",
+          "value": "IS50Level",
           "matchedAnchors": [
-            "multiversemarket, assembly-csharp"
+            "is50level"
           ],
-          "nearbyContextExamples": []
+          "nearbyContextExamples": [
+            "LoopModsThisTraversal",
+            "LoopModsLastTraversal",
+            "ShardsThisTraversal",
+            "ShardsLastTraversal",
+            "OuroLoopModsProgress"
+          ]
         },
         {
-          "file": "workbench/unity/joined/level0",
-          "offset": 36623712,
+          "file": "workbench/apk/base/global-metadata.dat",
+          "offset": 746056,
           "kind": "ascii",
-          "value": "BuyIS47",
+          "value": "InscryptionsDone",
           "matchedAnchors": [
-            "buyis47"
+            "inscryptionsdone"
           ],
-          "nearbyContextExamples": []
+          "nearbyContextExamples": [
+            "OuroLoopModsProgress",
+            "InscryptionsDone"
+          ]
         },
         {
-          "file": "workbench/unity/joined/level0",
-          "offset": 36624120,
+          "file": "workbench/apk/base/global-metadata.dat",
+          "offset": 746073,
           "kind": "ascii",
-          "value": "MultiverseMarket, Assembly-CSharp",
+          "value": "EsotericR1Trades",
           "matchedAnchors": [
-            "multiversemarket, assembly-csharp"
+            "esotericr1trades"
           ],
-          "nearbyContextExamples": []
+          "nearbyContextExamples": [
+            "OuroLoopModsProgress",
+            "InscryptionsDone"
+          ]
         },
         {
-          "file": "workbench/unity/joined/level0",
-          "offset": 36624160,
+          "file": "workbench/apk/base/global-metadata.dat",
+          "offset": 746361,
           "kind": "ascii",
-          "value": "BuyIS64",
+          "value": "Mech1Unlocked",
           "matchedAnchors": [
-            "buyis64"
+            "mech1unlocked"
           ],
-          "nearbyContextExamples": []
-        },
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 36624568,
-          "kind": "ascii",
-          "value": "MultiverseMarket, Assembly-CSharp",
-          "matchedAnchors": [
-            "multiversemarket, assembly-csharp"
-          ],
-          "nearbyContextExamples": []
+          "nearbyContextExamples": [
+            "OuroLoopModsProgress",
+            "InscryptionsDone"
+          ]
         }
       ],
-      "heuristicScore": 734
+      "heuristicScore": 696
     },
     {
       "id": "spend.daily-tokenium-lane",
       "label": "Daily Tokenium lane",
-      "track": "spend-planner-from-extracted-data",
+      "track": "spend-daily-tokenium-save-owner",
       "terms": [
         "daily tokenium",
         "lm244",
@@ -223,7 +399,7 @@
       "unresolvedExcerpts": [
         {
           "file": "docs/systems/spend/spend-system-verification.md",
-          "excerpt": "- It is safe to treat TokenShop as a real system with grounded extracted constants. - It is not yet safe to generate next-buy recommendations from player token budgets alone. - TokenShop-connected token-bank cap, fill, claim, and daily tokenium state should re"
+          "excerpt": "- It is safe to treat TokenShop as a real system with grounded extracted constants. - It is safe to describe its cost lane as token-bank token or tokenium spending, rather than as an unnamed generic spend pool. - It is not yet safe to generate next-buy recomme"
         },
         {
           "file": "docs/systems/spend/token-bank-state-verification.md",
@@ -350,307 +526,6 @@
         }
       ],
       "heuristicScore": 688
-    },
-    {
-      "id": "spend.multiverse-market-save-model",
-      "label": "MultiverseMarket save model",
-      "track": "spend-planner-from-extracted-data",
-      "terms": [
-        "inscryptionsdone",
-        "playerprofiledata",
-        "is50level",
-        "trade counter",
-        "declaring save model"
-      ],
-      "anchors": [
-        "InscryptionsDone",
-        "PlayerProfileData",
-        "IS50Level",
-        "EsotericR1Trades",
-        "Mech1Unlocked"
-      ],
-      "textMentionCount": 20,
-      "unresolvedMentionCount": 7,
-      "textFilesWithMentions": 6,
-      "textFilesWithUnresolvedMentions": 5,
-      "unresolvedExcerpts": [
-        {
-          "file": "docs/systems/spend/spend-system-verification.md",
-          "excerpt": "- It is safe to treat MultiverseMarket as a real system with partially grounded extracted constants. - It is safe to stop inferring its spend lane from diamonds, tokens, or other unrelated player resources. - It is not yet safe to treat `Inscryptions Done` as "
-        },
-        {
-          "file": "docs/systems/spend/multiverse-market-state-verification.md",
-          "excerpt": "It now includes exact metadata field strings that sit around the Emporium state lane, but it still does not claim the exact declaring save model for the current `Inscryptions Done` balance. The current goal is narrower: identify which repo-local evidence meani"
-        },
-        {
-          "file": "docs/systems/spend/multiverse-market-state-verification.md",
-          "excerpt": "- saved player-owned progression is likely serialized through the broader `PlayerProfileData` family rather than being owned directly by `MultiverseMarket` - this is enough to narrow future saved-state recovery toward the profile/save path instead of continuin"
-        },
-        {
-          "file": "docs/systems/spend/multiverse-market-state-verification.md",
-          "excerpt": "- It is still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state.playerProfile`. - It is now safe to treat `InscryptionsDone` and nearby `IS*Level` strings as grounded metadata field clues for future save-side mapping work. - I"
-        },
-        {
-          "file": "docs/unity/unity-owner-map.md",
-          "excerpt": "- `MultiverseMarket` - system: Chrystos Emporium / Inscryptions - source owner: [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0) - parser: [`scripts/unity/multiverse_market_parse.py`](C:\\Users\\Shadow\\Desktop\\CiFi\\sc"
-        },
-        {
-          "file": "docs/unity/unity-audit-playbook.md",
-          "excerpt": "- `TokenShop` - verified: real owner, serialized cost fields, bonus fields, and level-cap fields - not yet verified enough for app planning: full player-owned current-level inputs and final remap from serialized field ids to player-facing labels - `MultiverseM"
-        }
-      ],
-      "anchorHitCount": 16,
-      "binaryFilesWithAnchorHits": 2,
-      "binaryFileCoverage": [
-        "workbench/apk/base/global-metadata.dat",
-        "workbench/unity/joined/level0"
-      ],
-      "uniqueAnchorTermsFound": 5,
-      "nearbyContextTermCount": 8,
-      "nearbyContextTerms": [
-        "academy",
-        "inscryptions",
-        "loopmod",
-        "loopreset",
-        "milestone",
-        "playerprofiledata",
-        "shard",
-        "token"
-      ],
-      "metadataAnchorHits": 14,
-      "sceneAnchorHits": 2,
-      "topAnchorHits": [
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 11590168,
-          "kind": "ascii",
-          "value": "ResourceAmountText.InscryptionsDone",
-          "matchedAnchors": [
-            "inscryptionsdone"
-          ],
-          "nearbyContextExamples": [
-            "ResourceAmountText.Tokens",
-            "ResourceAmountText.Tokenium",
-            "ResourceAmountText.Shards.TOTAL",
-            "ResourceAmountText.InscryptionsDone",
-            "ResourceAmountText.Tokens"
-          ]
-        },
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 15598528,
-          "kind": "ascii",
-          "value": "CostBox-InscryptionsDone",
-          "matchedAnchors": [
-            "inscryptionsdone"
-          ],
-          "nearbyContextExamples": [
-            "CostBox-LoopMods",
-            "CostBox-Shards",
-            "CostBox-Tokenium.LR",
-            "CostBox-Shards.TOTAL",
-            "CostBox-InscryptionsDone"
-          ]
-        },
-        {
-          "file": "workbench/apk/base/global-metadata.dat",
-          "offset": 745435,
-          "kind": "ascii",
-          "value": "IS50Level",
-          "matchedAnchors": [
-            "is50level"
-          ],
-          "nearbyContextExamples": [
-            "LoopModsThisTraversal",
-            "LoopModsLastTraversal",
-            "ShardsThisTraversal",
-            "ShardsLastTraversal",
-            "OuroLoopModsProgress"
-          ]
-        },
-        {
-          "file": "workbench/apk/base/global-metadata.dat",
-          "offset": 746056,
-          "kind": "ascii",
-          "value": "InscryptionsDone",
-          "matchedAnchors": [
-            "inscryptionsdone"
-          ],
-          "nearbyContextExamples": [
-            "OuroLoopModsProgress",
-            "InscryptionsDone"
-          ]
-        },
-        {
-          "file": "workbench/apk/base/global-metadata.dat",
-          "offset": 746073,
-          "kind": "ascii",
-          "value": "EsotericR1Trades",
-          "matchedAnchors": [
-            "esotericr1trades"
-          ],
-          "nearbyContextExamples": [
-            "OuroLoopModsProgress",
-            "InscryptionsDone"
-          ]
-        },
-        {
-          "file": "workbench/apk/base/global-metadata.dat",
-          "offset": 746361,
-          "kind": "ascii",
-          "value": "Mech1Unlocked",
-          "matchedAnchors": [
-            "mech1unlocked"
-          ],
-          "nearbyContextExamples": [
-            "OuroLoopModsProgress",
-            "InscryptionsDone"
-          ]
-        }
-      ],
-      "heuristicScore": 650
-    },
-    {
-      "id": "shards.milestone-owner-family",
-      "label": "Milestone owner family",
-      "track": "shard-milestone-payload-recovery",
-      "terms": [
-        "milestone owner",
-        "shard milestone",
-        "milestones, assembly-csharp",
-        "milestonebonusesperlevel",
-        "shardmilestones"
-      ],
-      "anchors": [
-        "Milestones, Assembly-CSharp",
-        "MilestoneBonusesPerLevel",
-        "ShardMilestones-64",
-        "ShardMilestones-256",
-        "Milestone1"
-      ],
-      "textMentionCount": 22,
-      "unresolvedMentionCount": 4,
-      "textFilesWithMentions": 7,
-      "textFilesWithUnresolvedMentions": 4,
-      "unresolvedExcerpts": [
-        {
-          "file": "docs/unity/unity-owner-map.md",
-          "excerpt": "- shard milestones / loop-reset shell - system: shard workflow and loop-reset progression shell - current source evidence: - [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0) - [`workbench/unity/joined/sharedassets0."
-        },
-        {
-          "file": "docs/unity/unity-audit-playbook.md",
-          "excerpt": "- Goal: recover grounded in-game mechanic owners, field names, and serialized constants from the shipped Unity/IL2CPP build. - Current proven owners: - `TokenShop` in [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0)"
-        },
-        {
-          "file": "data/game-data.snapshot.v1.json",
-          "excerpt": "{ \"snapshotVersion\": \"v1.0.0-alpha\", \"capturedAt\": \"2026-03-23\", \"sourceStrategy\": { \"mode\": \"hybrid-reference\", \"primarySources\": [ { \"label\": \"Verified CIFI reference spreadsheet\", \"url\": \"https://docs.google.com/spreadsheets/d/1joQbD-lI7EfU83LP9Yn73cLOX-iqy"
-        },
-        {
-          "file": "data/shard-asset-grounding.v1.json",
-          "excerpt": "{ \"dataset\": \"shard-asset-grounding.v1\", \"generatedAt\": \"2026-03-29\", \"sourceReport\": \"docs/systems/shards/shard-grounding-boundary.md\", \"sourceArtifacts\": [ \"workbench/unity/joined/level0\", \"workbench/unity/joined/sharedassets0.assets\", \"docs/unity/unity-mech"
-        }
-      ],
-      "anchorHitCount": 659,
-      "binaryFilesWithAnchorHits": 3,
-      "binaryFileCoverage": [
-        "workbench/apk/base/global-metadata.dat",
-        "workbench/unity/joined/level0",
-        "workbench/unity/joined/sharedassets0.assets"
-      ],
-      "uniqueAnchorTermsFound": 5,
-      "nearbyContextTermCount": 9,
-      "nearbyContextTerms": [
-        "academy",
-        "demeter",
-        "loopmod",
-        "loopreset",
-        "milestone",
-        "mining",
-        "operation",
-        "shard",
-        "token"
-      ],
-      "metadataAnchorHits": 318,
-      "sceneAnchorHits": 341,
-      "topAnchorHits": [
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 9937408,
-          "kind": "ascii",
-          "value": "Milestone11CompletedIcon ",
-          "matchedAnchors": [
-            "milestone1"
-          ],
-          "nearbyContextExamples": [
-            "Milestone11CompletedIcon "
-          ]
-        },
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 10024832,
-          "kind": "ascii",
-          "value": "Milestone17CompletedIcon",
-          "matchedAnchors": [
-            "milestone1"
-          ],
-          "nearbyContextExamples": [
-            "Milestone17CompletedIcon",
-            "Milestone24CompletedIcon"
-          ]
-        },
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 10052976,
-          "kind": "ascii",
-          "value": "Milestone16CompletedIcon",
-          "matchedAnchors": [
-            "milestone1"
-          ],
-          "nearbyContextExamples": [
-            "Milestone16CompletedIcon",
-            "#LoopModScrollView"
-          ]
-        },
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 10306928,
-          "kind": "ascii",
-          "value": "Milestone12CompletedIcon ",
-          "matchedAnchors": [
-            "milestone1"
-          ],
-          "nearbyContextExamples": [
-            "Milestone12CompletedIcon "
-          ]
-        },
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 10349840,
-          "kind": "ascii",
-          "value": "Milestone13CompletedIcon ",
-          "matchedAnchors": [
-            "milestone1"
-          ],
-          "nearbyContextExamples": [
-            "Milestone13CompletedIcon "
-          ]
-        },
-        {
-          "file": "workbench/unity/joined/level0",
-          "offset": 10370160,
-          "kind": "ascii",
-          "value": "Milestone19CompletedIcon",
-          "matchedAnchors": [
-            "milestone1"
-          ],
-          "nearbyContextExamples": [
-            "PercentIncreaseText.Tokenium.LR",
-            "TokenAdBox",
-            "Milestone19CompletedIcon"
-          ]
-        }
-      ],
-      "heuristicScore": 560
     },
     {
       "id": "shards.loop-reset-stage-family",
@@ -799,7 +674,7 @@
     {
       "id": "spend.token-bank-state-lane",
       "label": "Token-bank state lane",
-      "track": "spend-planner-from-extracted-data",
+      "track": "spend-token-bank-state-owner",
       "terms": [
         "token bank",
         "banked tokens",
@@ -813,14 +688,14 @@
         "FinalTokenBankFillSpeed",
         "OR_TokenBankCap"
       ],
-      "textMentionCount": 15,
-      "unresolvedMentionCount": 5,
-      "textFilesWithMentions": 5,
-      "textFilesWithUnresolvedMentions": 4,
+      "textMentionCount": 14,
+      "unresolvedMentionCount": 4,
+      "textFilesWithMentions": 4,
+      "textFilesWithUnresolvedMentions": 3,
       "unresolvedExcerpts": [
         {
           "file": "docs/systems/spend/spend-system-verification.md",
-          "excerpt": "- It is safe to treat TokenShop as a real system with grounded extracted constants. - It is not yet safe to generate next-buy recommendations from player token budgets alone. - TokenShop-connected token-bank cap, fill, claim, and daily tokenium state should re"
+          "excerpt": "- It is safe to treat TokenShop as a real system with grounded extracted constants. - It is safe to describe its cost lane as token-bank token or tokenium spending, rather than as an unnamed generic spend pool. - It is not yet safe to generate next-buy recomme"
         },
         {
           "file": "docs/systems/spend/token-bank-state-verification.md",
@@ -833,10 +708,6 @@
         {
           "file": "docs/unity/unity-owner-map.md",
           "excerpt": "- `TokenShop` - system: token bank / token upgrades - source owner: [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0) - parser: [`scripts/unity/token_shop_parse.py`](C:\\Users\\Shadow\\Desktop\\CiFi\\scripts\\unity\\token_s"
-        },
-        {
-          "file": "data/game-data.snapshot.v1.json",
-          "excerpt": "{ \"snapshotVersion\": \"v1.0.0-alpha\", \"capturedAt\": \"2026-03-23\", \"sourceStrategy\": { \"mode\": \"hybrid-reference\", \"primarySources\": [ { \"label\": \"Verified CIFI reference spreadsheet\", \"url\": \"https://docs.google.com/spreadsheets/d/1joQbD-lI7EfU83LP9Yn73cLOX-iqy"
         }
       ],
       "anchorHitCount": 15,
@@ -940,7 +811,7 @@
           ]
         }
       ],
-      "heuristicScore": 506
+      "heuristicScore": 446
     },
     {
       "id": "shards.shard-mining-ship-family",
@@ -958,10 +829,14 @@
         "SpaceShip-ShardMining-LV4"
       ],
       "textMentionCount": 8,
-      "unresolvedMentionCount": 2,
+      "unresolvedMentionCount": 3,
       "textFilesWithMentions": 6,
-      "textFilesWithUnresolvedMentions": 2,
+      "textFilesWithUnresolvedMentions": 3,
       "unresolvedExcerpts": [
+        {
+          "file": "docs/systems/shards/shard-extraction-candidates.md",
+          "excerpt": "1. `shards.milestone-owner-family` - heuristic score: `560` - why it wins: - strongest shard-family anchor density across all three binary files - multiple unresolved mentions in the shard verification and owner-mapping surfaces - cross-file presence in both s"
+        },
         {
           "file": "docs/unity/unity-owner-map.md",
           "excerpt": "- shard milestones / loop-reset shell - system: shard workflow and loop-reset progression shell - current source evidence: - [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0) - [`workbench/unity/joined/sharedassets0."
@@ -1058,7 +933,7 @@
           ]
         }
       ],
-      "heuristicScore": 298
+      "heuristicScore": 348
     },
     {
       "id": "shards.shard-text-handlers",

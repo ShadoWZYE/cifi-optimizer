@@ -9,6 +9,34 @@ Source: `workbench\apk\base\global-metadata.dat`
 - Match offset: `766325`
 - Match value: `CloudSavePlayerProfile`
 - Nearby strings:
+  - offset `765461` [ascii] `<BanPlayer>d__68`
+  - offset `765478` [ascii] `<BorgeAttributesCheck>d__45`
+  - offset `765506` [ascii] `<BorgeExploitCheck>d__58`
+  - offset `765531` [ascii] `<BorgeLevelChecks>d__37`
+  - offset `765555` [ascii] `<BorgeStageCheck>d__35`
+  - offset `765578` [ascii] `<BorgeTalentsCheck>d__40`
+  - offset `765603` [ascii] `<BorgeUpgradesCheck>d__43`
+  - offset `765629` [ascii] `<CheckExclusion>d__63`
+  - offset `765651` [ascii] `<>u__3`
+  - offset `765658` [ascii] `<CheckRoutine>d__59`
+  - offset `765678` [ascii] `<DarkInnovationCoresCheck>d__50`
+  - offset `765710` [ascii] `<DeleteLeaderboard>d__70`
+  - offset `765735` [ascii] `<DiamondCheck>d__48`
+  - offset `765755` [ascii] `<ExcludeRoutine>d__62`
+  - offset `765777` [ascii] `<KnoxAttributesCheck>d__47`
+  - offset `765804` [ascii] `<KnoxLevelChecks>d__39`
+  - offset `765827` [ascii] `<KnoxTalentsCheck>d__42`
+  - offset `765851` [ascii] `<MarkBanned>d__69`
+  - offset `765869` [ascii] `<MassivePackCheck>d__49`
+  - offset `765893` [ascii] `<OzzyAttributesCheck>d__46`
+  - offset `765920` [ascii] `<OzzyLevelChecks>d__38`
+  - offset `765943` [ascii] `<OzzyStageCheck>d__36`
+  - offset `765965` [ascii] `<OzzyTalentsCheck>d__41`
+  - offset `765989` [ascii] `<OzzyUpgradesCheck>d__44`
+  - offset `766014` [ascii] `<ResourceChecks>d__30`
+  - offset `766036` [ascii] `<ShipRankChecks>d__33`
+  - offset `766058` [ascii] `<TickChecks>d__31`
+  - offset `766076` [ascii] `<TokenCheck>d__32`
   - offset `766094` [ascii] `<markUnBanned>d__67`
   - offset `766114` [ascii] `<unbanPlayer>d__66`
   - offset `766133` [ascii] `get_AutoCloudCountdown`
@@ -34,12 +62,68 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `766520` [ascii] `DisplayErrorMessage`
   - offset `766540` [ascii] `formatJson`
   - offset `766551` [ascii] `<AutoCloudCountdown>k__BackingField`
+  - offset `766587` [ascii] `defaultCountdownValue`
+  - offset `766609` [ascii] `countCountdowns`
+  - offset `766625` [ascii] `AutoCloudCoroutine`
+  - offset `766644` [ascii] `AutoCloudCountdown`
+  - offset `766663` [ascii] `<AutoCloudRoutine>d__21`
+  - offset `766687` [ascii] `<CloudLoad>d__28`
+  - offset `766704` [ascii] `<key>5__2`
+  - offset `766714` [ascii] `<CloudSave>d__23`
+  - offset `766731` [ascii] `<CloudSavePlayerProfile>d__24`
+  - offset `766761` [ascii] `<GetCurrentSaveFileInfo>d__25`
+  - offset `766791` [ascii] `<saveData>5__2`
+  - offset `766806` [ascii] `<lastCloudSave>5__3`
+  - offset `766826` [ascii] `<collection>5__4`
+  - offset `766843` [ascii] `<key>5__5`
+  - offset `766853` [ascii] `<id>5__6`
+  - offset `766862` [ascii] `<retryCount>5__7`
+  - offset `766879` [ascii] `<GetPlayerProfileInfo>d__29`
+  - offset `766907` [ascii] `<retData>5__2`
+  - offset `766921` [ascii] `<collection>5__3`
+  - offset `766938` [ascii] `<key>5__4`
+  - offset `766948` [ascii] `<id>5__5`
+  - offset `766957` [ascii] `<retryCount>5__6`
+  - offset `766974` [ascii] `<IsCloudSaved>d__30`
+  - offset `766994` [ascii] `<collection>5__2`
+  - offset `767011` [ascii] `<key>5__3`
+  - offset `767021` [ascii] `<id>5__4`
+  - offset `767030` [ascii] `<retryCount>5__5`
+  - offset `767047` [ascii] `<OnCloudLoadClick>d__26`
 
 ### Match 2
 
 - Match offset: `766731`
 - Match value: `<CloudSavePlayerProfile>d__24`
 - Nearby strings:
+  - offset `765943` [ascii] `<OzzyStageCheck>d__36`
+  - offset `765965` [ascii] `<OzzyTalentsCheck>d__41`
+  - offset `765989` [ascii] `<OzzyUpgradesCheck>d__44`
+  - offset `766014` [ascii] `<ResourceChecks>d__30`
+  - offset `766036` [ascii] `<ShipRankChecks>d__33`
+  - offset `766058` [ascii] `<TickChecks>d__31`
+  - offset `766076` [ascii] `<TokenCheck>d__32`
+  - offset `766094` [ascii] `<markUnBanned>d__67`
+  - offset `766114` [ascii] `<unbanPlayer>d__66`
+  - offset `766133` [ascii] `get_AutoCloudCountdown`
+  - offset `766156` [ascii] `set_AutoCloudCountdown`
+  - offset `766179` [ascii] `CheckAutoBackupButton`
+  - offset `766201` [ascii] `SetDefaultAutocountValues`
+  - offset `766227` [ascii] `EnableAutoCloud`
+  - offset `766243` [ascii] `DisableAutoCloud`
+  - offset `766260` [ascii] `resetAutoCloudCountdown`
+  - offset `766284` [ascii] `AutoCloudRoutine`
+  - offset `766301` [ascii] `OnCloudSaveClick`
+  - offset `766318` [ascii] `isLoad`
+  - offset `766325` [ascii] `CloudSavePlayerProfile`
+  - offset `766348` [ascii] `GetCurrentSaveFileInfo`
+  - offset `766371` [ascii] `OnCloudLoadClick`
+  - offset `766388` [ascii] `OnCloudLoadExtraBackupClick`
+  - offset `766416` [ascii] `CloudLoad`
+  - offset `766426` [ascii] `GetPlayerProfileInfo`
+  - offset `766447` [ascii] `IsCloudSaved`
+  - offset `766460` [ascii] `DisplaySaveSuccess`
+  - offset `766479` [ascii] `DisplayLoadSuccess`
   - offset `766498` [ascii] `DisplaySuccessMessage`
   - offset `766520` [ascii] `DisplayErrorMessage`
   - offset `766540` [ascii] `formatJson`
@@ -65,6 +149,34 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `766921` [ascii] `<collection>5__3`
   - offset `766938` [ascii] `<key>5__4`
   - offset `766948` [ascii] `<id>5__5`
+  - offset `766957` [ascii] `<retryCount>5__6`
+  - offset `766974` [ascii] `<IsCloudSaved>d__30`
+  - offset `766994` [ascii] `<collection>5__2`
+  - offset `767011` [ascii] `<key>5__3`
+  - offset `767021` [ascii] `<id>5__4`
+  - offset `767030` [ascii] `<retryCount>5__5`
+  - offset `767047` [ascii] `<OnCloudLoadClick>d__26`
+  - offset `767071` [ascii] `<OnCloudLoadExtraBackupClick>d__27`
+  - offset `767106` [ascii] `<OnCloudSaveClick>d__22`
+  - offset `767130` [ascii] `EventMasterSwitch`
+  - offset `767148` [ascii] `get_GlobalVariableName`
+  - offset `767171` [ascii] `get_EventMasterSwitchData`
+  - offset `767197` [ascii] `get_BaseGVContent`
+  - offset `767215` [ascii] `OnCreateEventMasterSwitchClick`
+  - offset `767246` [ascii] `GetEventMasterSwitch`
+  - offset `767267` [ascii] `isActive`
+  - offset `767276` [ascii] `GlobalVariableName`
+  - offset `767295` [ascii] `EventMasterSwitchData`
+  - offset `767317` [ascii] `BaseGVContent`
+  - offset `767331` [ascii] `<GetEventMasterSwitch>d__13`
+  - offset `767359` [ascii] `<OnCreateEventMasterSwitchClick>d__12`
+  - offset `767397` [ascii] `GlobalVariable`
+  - offset `767412` [ascii] `rpcCall`
+  - offset `767420` [ascii] `UpdateOrCreateGlobalVariable`
+  - offset `767449` [ascii] `GlobalCollection`
+  - offset `767466` [ascii] `setGlobalVariableRpc`
+  - offset `767487` [ascii] `GlobalVariableObject`
+  - offset `767508` [ascii] `readPermission`
 
 ## PlayerProfileData
 
@@ -73,6 +185,34 @@ Source: `workbench\apk\base\global-metadata.dat`
 - Match offset: `774426`
 - Match value: `PlayerProfileData`
 - Nearby strings:
+  - offset `773700` [ascii] `config`
+  - offset `773707` [ascii] `client`
+  - offset `773714` [ascii] `session`
+  - offset `773722` [ascii] `isGoogle`
+  - offset `773731` [ascii] `isApple`
+  - offset `773739` [ascii] `isLoggedIn`
+  - offset `773750` [ascii] `AccountUsername`
+  - offset `773766` [ascii] `DeviceUsername`
+  - offset `773781` [ascii] `<AuthenicateGoogleWithNakama>d__23`
+  - offset `773816` [ascii] `<CheckCloudSave>d__29`
+  - offset `773838` [ascii] `<CheckServerUserInfo>d__27`
+  - offset `773865` [ascii] `<DeleteLeaderboardRecords>d__35`
+  - offset `773897` [ascii] `<EmailLogin>d__31`
+  - offset `773915` [ascii] `<FetchUserDetails>d__26`
+  - offset `773939` [ascii] `<userServerDetails>5__2`
+  - offset `773963` [ascii] `<OnClearLeaderboardClick>d__34`
+  - offset `773994` [ascii] `<OnEmailLoginClick>d__30`
+  - offset `774019` [ascii] `<RecoverNakamaSaveFile>d__32`
+  - offset `774048` [ascii] `<RecoverSave>d__33`
+  - offset `774067` [ascii] `<isSaveNowFound>5__2`
+  - offset `774088` [ascii] `<UpdateServerUserInfo>d__28`
+  - offset `774116` [ascii] `<UpdateUserNameInfo>d__24`
+  - offset `774142` [ascii] `<UpdateUserNameInfo>d__25`
+  - offset `774168` [ascii] `NameChange`
+  - offset `774179` [ascii] `OnNotNowButtonClick`
+  - offset `774199` [ascii] `OnSetUsernameClick`
+  - offset `774218` [ascii] `OpenNameChange`
+  - offset `774233` [ascii] `newName`
   - offset `774241` [ascii] `IsNewNameAppropriate`
   - offset `774262` [ascii] `InputUsernameCanvas`
   - offset `774282` [ascii] `TypedName`
@@ -98,12 +238,68 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `774534` [ascii] `Ship7Evo`
   - offset `774543` [ascii] `Ship8Evo`
   - offset `774552` [ascii] `Ship1Unlock`
+  - offset `774564` [ascii] `Ship2Unlock`
+  - offset `774576` [ascii] `Ship3Unlock`
+  - offset `774588` [ascii] `Ship4Unlock`
+  - offset `774600` [ascii] `Ship5Unlock`
+  - offset `774612` [ascii] `Ship6Unlock`
+  - offset `774624` [ascii] `Ship7Unlock`
+  - offset `774636` [ascii] `Ship8Unlock`
+  - offset `774648` [ascii] `Gem1`
+  - offset `774653` [ascii] `Gem2`
+  - offset `774658` [ascii] `Gem3`
+  - offset `774663` [ascii] `Gem4`
+  - offset `774668` [ascii] `Gem5`
+  - offset `774673` [ascii] `Gem6`
+  - offset `774678` [ascii] `Gem7`
+  - offset `774683` [ascii] `Orbs`
+  - offset `774688` [ascii] `Fragments`
+  - offset `774698` [ascii] `Hellish`
+  - offset `774706` [ascii] `Farahyte`
+  - offset `774715` [ascii] `Vectid`
+  - offset `774722` [ascii] `NautilusTeseract`
+  - offset `774739` [ascii] `Traversals`
+  - offset `774750` [ascii] `AllTimeOrbs`
+  - offset `774762` [ascii] `TimeInTraversal`
+  - offset `774778` [ascii] `NextOrbsAccumulated`
+  - offset `774798` [ascii] `MechsOwned`
+  - offset `774809` [ascii] `GadgetLevels`
+  - offset `774842` [ascii] `HighestCells`
+  - offset `774855` [ascii] `HighestManualGens`
 
 ### Match 2
 
 - Match offset: `775486`
 - Match value: `GetPlayerProfileData`
 - Nearby strings:
+  - offset `774873` [ascii] `HighestTechUpLevels`
+  - offset `774893` [ascii] `HighestMP`
+  - offset `774903` [ascii] `HighestLoopMods`
+  - offset `774919` [ascii] `HighestLoopResets`
+  - offset `774937` [ascii] `HighestShards`
+  - offset `774951` [ascii] `HighestMilestoneLevels`
+  - offset `774974` [ascii] `HighestRP`
+  - offset `774984` [ascii] `HighestResearch`
+  - offset `775000` [ascii] `HighestAP`
+  - offset `775010` [ascii] `HighestGearLevels`
+  - offset `775028` [ascii] `HighestProjects`
+  - offset `775044` [ascii] `HighestBlueprints`
+  - offset `775062` [ascii] `HighestFragments`
+  - offset `775079` [ascii] `HighestRelicLevels`
+  - offset `775098` [ascii] `HighestBorgeProgress`
+  - offset `775119` [ascii] `HighestOzzyProgress`
+  - offset `775139` [ascii] `HighestKnoxProgress`
+  - offset `775159` [ascii] `GemData`
+  - offset `775167` [ascii] `GemNumber`
+  - offset `775177` [ascii] `GemUnlocked`
+  - offset `775189` [ascii] `GemNodesList`
+  - offset `775202` [ascii] `GemNodeCombo`
+  - offset `775215` [ascii] `gemNodeNumber`
+  - offset `775229` [ascii] `gemNodeUnlocked`
+  - offset `775245` [ascii] `GemNodeNumber`
+  - offset `775259` [ascii] `GemNodeUnlocked`
+  - offset `775275` [ascii] `PlayerProfileHandler`
+  - offset `775296` [ascii] `get_Market`
   - offset `775307` [ascii] `get_BM`
   - offset `775314` [ascii] `get_ZN`
   - offset `775321` [ascii] `get_TU`
@@ -129,12 +325,68 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `775655` [ascii] `formatNumber`
   - offset `775668` [ascii] `defaultValue`
   - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+  - offset `775869` [ascii] `ModPointData`
+  - offset `775882` [ascii] `ShardData`
+  - offset `775892` [ascii] `ResearchPointData`
+  - offset `775910` [ascii] `AcademyPointData`
+  - offset `775927` [ascii] `BlueprintsThisTR`
+  - offset `775944` [ascii] `GemNodeActive`
+  - offset `775962` [ascii] `Active`
+  - offset `775969` [ascii] `<FillPlayerProfileData>d__45`
+  - offset `775998` [ascii] `<UpdatePlayerProfile>d__44`
+  - offset `776025` [ascii] `PlayerProfileUI`
+  - offset `776041` [ascii] `get_Gem1`
+  - offset `776050` [ascii] `get_Gem2`
+  - offset `776059` [ascii] `get_Gem3`
 
 ### Match 3
 
 - Match offset: `775633`
 - Match value: `FillPlayerProfileData`
 - Nearby strings:
+  - offset `775010` [ascii] `HighestGearLevels`
+  - offset `775028` [ascii] `HighestProjects`
+  - offset `775044` [ascii] `HighestBlueprints`
+  - offset `775062` [ascii] `HighestFragments`
+  - offset `775079` [ascii] `HighestRelicLevels`
+  - offset `775098` [ascii] `HighestBorgeProgress`
+  - offset `775119` [ascii] `HighestOzzyProgress`
+  - offset `775139` [ascii] `HighestKnoxProgress`
+  - offset `775159` [ascii] `GemData`
+  - offset `775167` [ascii] `GemNumber`
+  - offset `775177` [ascii] `GemUnlocked`
+  - offset `775189` [ascii] `GemNodesList`
+  - offset `775202` [ascii] `GemNodeCombo`
+  - offset `775215` [ascii] `gemNodeNumber`
+  - offset `775229` [ascii] `gemNodeUnlocked`
+  - offset `775245` [ascii] `GemNodeNumber`
+  - offset `775259` [ascii] `GemNodeUnlocked`
+  - offset `775275` [ascii] `PlayerProfileHandler`
+  - offset `775296` [ascii] `get_Market`
+  - offset `775307` [ascii] `get_BM`
+  - offset `775314` [ascii] `get_ZN`
+  - offset `775321` [ascii] `get_TU`
+  - offset `775328` [ascii] `get_Relics`
+  - offset `775339` [ascii] `get_CellData`
+  - offset `775352` [ascii] `get_ModPointData`
+  - offset `775369` [ascii] `get_ShardData`
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
   - offset `775426` [ascii] `get_BlueprintsThisTR`
   - offset `775447` [ascii] `get_ManualGensThisLR`
   - offset `775468` [ascii] `get_TechUpsThisLR`
@@ -160,12 +412,7 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `775771` [ascii] `ShipObject`
   - offset `775782` [ascii] `SetShipEvoObject`
   - offset `775799` [ascii] `dataNodes`
-
-### Match 4
-
-- Match offset: `775969`
-- Match value: `<FillPlayerProfileData>d__45`
-- Nearby strings:
+  - offset `775809` [ascii] `UIGem`
   - offset `775815` [ascii] `ProcessGem`
   - offset `775826` [ascii] `saveInfoCache`
   - offset `775840` [ascii] `Market`
@@ -191,12 +438,129 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `776104` [ascii] `ResetPlayerProfileTexts`
   - offset `776128` [ascii] `InitPlayerProfilePanel`
   - offset `776151` [ascii] `SetInventoryPanel`
+  - offset `776169` [ascii] `SetStatsPanel`
+  - offset `776183` [ascii] `SetNoncloudOptions`
+
+### Match 4
+
+- Match offset: `775969`
+- Match value: `<FillPlayerProfileData>d__45`
+- Nearby strings:
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
+  - offset `775426` [ascii] `get_BlueprintsThisTR`
+  - offset `775447` [ascii] `get_ManualGensThisLR`
+  - offset `775468` [ascii] `get_TechUpsThisLR`
+  - offset `775486` [ascii] `GetPlayerProfileData`
+  - offset `775507` [ascii] `SetPlayerProfileTexts`
+  - offset `775529` [ascii] `playerData`
+  - offset `775540` [ascii] `lastCloudSaveDate`
+  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
+  - offset `775587` [ascii] `UpdatePlayerProfile`
+  - offset `775607` [ascii] `isSave`
+  - offset `775614` [ascii] `isLocalPP`
+  - offset `775624` [ascii] `playerID`
+  - offset `775633` [ascii] `FillPlayerProfileData`
+  - offset `775655` [ascii] `formatNumber`
+  - offset `775668` [ascii] `defaultValue`
+  - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+  - offset `775869` [ascii] `ModPointData`
+  - offset `775882` [ascii] `ShardData`
+  - offset `775892` [ascii] `ResearchPointData`
+  - offset `775910` [ascii] `AcademyPointData`
+  - offset `775927` [ascii] `BlueprintsThisTR`
+  - offset `775944` [ascii] `GemNodeActive`
+  - offset `775962` [ascii] `Active`
+  - offset `775969` [ascii] `<FillPlayerProfileData>d__45`
+  - offset `775998` [ascii] `<UpdatePlayerProfile>d__44`
+  - offset `776025` [ascii] `PlayerProfileUI`
+  - offset `776041` [ascii] `get_Gem1`
+  - offset `776050` [ascii] `get_Gem2`
+  - offset `776059` [ascii] `get_Gem3`
+  - offset `776068` [ascii] `get_Gem4`
+  - offset `776077` [ascii] `get_Gem5`
+  - offset `776086` [ascii] `get_Gem6`
+  - offset `776095` [ascii] `get_Gem7`
+  - offset `776104` [ascii] `ResetPlayerProfileTexts`
+  - offset `776128` [ascii] `InitPlayerProfilePanel`
+  - offset `776151` [ascii] `SetInventoryPanel`
+  - offset `776169` [ascii] `SetStatsPanel`
+  - offset `776183` [ascii] `SetNoncloudOptions`
+  - offset `776202` [ascii] `SetCloudButtons`
+  - offset `776218` [ascii] `SetSaveTexts`
+  - offset `776231` [ascii] `SetLoadTexts`
+  - offset `776244` [ascii] `TimeStamp`
+  - offset `776254` [ascii] `SetCloudSubtitle`
+  - offset `776271` [ascii] `SetLeaderboardText`
+  - offset `776290` [ascii] `SetLocalPlayerProfileText`
+  - offset `776316` [ascii] `playerDisplayName`
+  - offset `776334` [ascii] `OnOpenPlayerProfile`
+  - offset `776354` [ascii] `OnLocalPlayerProfileClick`
+  - offset `776380` [ascii] `OnStatsButtonClick`
+  - offset `776399` [ascii] `OnInventoryButtonClick`
+  - offset `776422` [ascii] `OnCloudAcceptButton`
+  - offset `776442` [ascii] `DisableCloudToggle`
+  - offset `776461` [ascii] `OnCloudToggleClick`
+  - offset `776480` [ascii] `loadMode`
+  - offset `776489` [ascii] `LastSavedTimestamp`
+  - offset `776508` [ascii] `ExcludedFromLeaderboardsPanel`
+  - offset `776538` [ascii] `PlayerProfilePanel`
+  - offset `776557` [ascii] `PlayerProfileLoadingCircle`
+  - offset `776584` [ascii] `PlayerProfileDefaultLayout`
+  - offset `776611` [ascii] `PlayerProfileCloudLayout`
+  - offset `776636` [ascii] `PlayerProfileCloudToggle`
+  - offset `776661` [ascii] `PlayerProfileToggleText`
+  - offset `776685` [ascii] `PlayerProfileAcceptText`
+  - offset `776709` [ascii] `CloudInfoStatusText`
 
 ### Match 5
 
 - Match offset: `7562530`
 - Match value: `E\Assets\Scripts\Data&Saving\Nakama\PlayerProfile\PlayerProfileData.cs`
 - Nearby strings:
+  - offset `7559872` [ascii] `'\Assets\Scripts\Arcade\CameraChecker.cs`
+  - offset `7559919` [ascii] `/\Assets\Scripts\Arcade\CameraViewportHandler.cs`
+  - offset `7559974` [ascii] `)\Assets\Scripts\Arcade\Shop\ArcadeShop.cs`
+  - offset `7560023` [ascii] `+\Assets\Scripts\Arcade\Snek\Scripts\Food.cs`
+  - offset `7560074` [ascii] `3\Assets\Scripts\Arcade\Snek\Scripts\FoodCollider.cs`
+  - offset `7560133` [ascii] `,\Assets\Scripts\Arcade\Snek\Scripts\Snake.cs`
+  - offset `7560185` [ascii] `$\Assets\Scripts\Arcade\SpriteSize.cs`
+  - offset `7560229` [ascii] `)\Assets\Scripts\Arcade\ViewportHandler.cs`
+  - offset `7560278` [ascii] `,\Assets\Scripts\Data&Saving\CloudSaveIcon.cs`
+  - offset `7560330` [ascii] `1\Assets\Scripts\Data&Saving\Google\InAppUpdate.cs`
+  - offset `7560387` [ascii] `+\Assets\Scripts\Data&Saving\HardResetter.cs`
+  - offset `7560438` [ascii] `-\Assets\Scripts\Data&Saving\INtpConnection.cs`
+  - offset `7560491` [ascii] `4\Assets\Scripts\Data&Saving\LootLocker\JsonHelper.cs`
+  - offset `7560551` [ascii] `,\Assets\Scripts\Data&Saving\MasterManager.cs`
+  - offset `7560603` [ascii] `0\Assets\Scripts\Data&Saving\MasterManagerOuro.cs`
+  - offset `7560659` [ascii] `-\Assets\Scripts\Data&Saving\Nakama\Backups.cs`
+  - offset `7560712` [ascii] `*\Assets\Scripts\Data&Saving\Nakama\Bans.cs`
+  - offset `7560762` [ascii] `+\Assets\Scripts\Data&Saving\Nakama\Cloud.cs`
+  - offset `7560813` [ascii] `N\Assets\Scripts\Data&Saving\Nakama\GlobalVariables\Events\EventMasterSwitch.cs`
+  - offset `7560899` [ascii] `D\Assets\Scripts\Data&Saving\Nakama\GlobalVariables\GlobalVariable.cs`
+  - offset `7560975` [ascii] ``\Assets\Scripts\Data&Saving\Nakama\GlobalVariables\SimpleGlobalVariables\SimpleGlobalVariable.cs`
+  - offset `7561079` [ascii] `g\Assets\Scripts\Data&Saving\Nakama\GlobalVariables\SimpleGlobalVariables\SimpleGlobalVariableHandler.cs`
+  - offset `7561190` [ascii] `6\Assets\Scripts\Data&Saving\Nakama\GUI\AccountPanel.cs`
+  - offset `7561252` [ascii] `=\Assets\Scripts\Data&Saving\Nakama\GUI\NewCloudCanvasPanel.cs`
+  - offset `7561321` [ascii] `I\Assets\Scripts\Data&Saving\Nakama\Leaderboards\DataModel\AcademyPoint.cs`
+  - offset `7561402` [ascii] `A\Assets\Scripts\Data&Saving\Nakama\Leaderboards\DataModel\Cell.cs`
+  - offset `7561475` [ascii] `H\Assets\Scripts\Data&Saving\Nakama\Leaderboards\DataModel\HunterBorge.cs`
+  - offset `7561555` [ascii] `G\Assets\Scripts\Data&Saving\Nakama\Leaderboards\DataModel\HunterKnox.cs`
   - offset `7561634` [ascii] `G\Assets\Scripts\Data&Saving\Nakama\Leaderboards\DataModel\HunterOzzy.cs`
   - offset `7561713` [ascii] `H\Assets\Scripts\Data&Saving\Nakama\Leaderboards\DataModel\Leaderboard.cs`
   - offset `7561793` [ascii] `E\Assets\Scripts\Data&Saving\Nakama\Leaderboards\DataModel\ModPoint.cs`
@@ -222,12 +586,68 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `7563210` [ascii] `0\Assets\Scripts\Data&Saving\NavigationManager.cs`
   - offset `7563266` [ascii] `6\Assets\Scripts\Data&Saving\NavigationManagerArcade.cs`
   - offset `7563328` [ascii] `-\Assets\Scripts\Data&Saving\NetTimeRequest.cs`
+  - offset `7563381` [ascii] `;\Assets\Scripts\Data&Saving\NoNetworkOfflineCalculations.cs`
+  - offset `7563448` [ascii] `(\Assets\Scripts\Data&Saving\NtpClient.cs`
+  - offset `7563496` [ascii] `2\Assets\Scripts\Data&Saving\OfflineCalculations.cs`
+  - offset `7563554` [ascii] `1\Assets\Scripts\Data&Saving\OfflineManager_New.cs`
+  - offset `7563611` [ascii] `.\Assets\Scripts\Data&Saving\RandomExtension.cs`
+  - offset `7563665` [ascii] `'\Assets\Scripts\Data&Saving\SaveData.cs`
+  - offset `7563712` [ascii] `)\Assets\Scripts\Data&Saving\SaveSystem.cs`
+  - offset `7563761` [ascii] `2\Assets\Scripts\Data&Saving\SystemMonotonicTime.cs`
+  - offset `7563819` [ascii] `$\Assets\Scripts\Data&Saving\Utils.cs`
+  - offset `7563863` [ascii] `'\Assets\Scripts\Events\Eggster\EggSO.cs`
+  - offset `7563910` [ascii] `3\Assets\Scripts\Events\Eggster\Eggster-SpawnEggs.cs`
+  - offset `7563969` [ascii] `0\Assets\Scripts\Events\Eggster\EggsterManager.cs`
+  - offset `7564025` [ascii] `8\Assets\Scripts\Events\Eggster\EggsterPanelNavigation.cs`
+  - offset `7564089` [ascii] `*\Assets\Scripts\Events\Eggster\_EggMain.cs`
+  - offset `7564139` [ascii] `/\Assets\Scripts\Events\Eggster\_EggstoneMain.cs`
+  - offset `7564194` [ascii] `&\Assets\Scripts\Events\EventDecider.cs`
+  - offset `7564240` [ascii] `&\Assets\Scripts\ExternalConnections.cs`
+  - offset `7564286` [ascii] `=\Assets\Scripts\Gameplay\AcademyAutomationCenter_Personnel.cs`
+  - offset `7564355` [ascii] `7\Assets\Scripts\Gameplay\AcademyAutomationNavigation.cs`
+  - offset `7564418` [ascii] `4\Assets\Scripts\Gameplay\AutolootPrefabController.cs`
+  - offset `7564478` [ascii] `K\Assets\Scripts\Gameplay\BottomMenusNavigation\BottomMenuSceneNavigation.cs`
+  - offset `7564561` [ascii] `J\Assets\Scripts\Gameplay\BottomMenusNavigation\UpgradeConsoleNavigation.cs`
+  - offset `7564643` [ascii] `,\Assets\Scripts\Gameplay\ButtonRecoloring.cs`
+  - offset `7564695` [ascii] `3\Assets\Scripts\Gameplay\ButtonRecoloringAcademy.cs`
+  - offset `7564754` [ascii] `*\Assets\Scripts\Gameplay\ButtonWithHold.cs`
+  - offset `7564804` [ascii] `.\Assets\Scripts\Gameplay\CameraFixateObject.cs`
+  - offset `7564858` [ascii] `(\Assets\Scripts\Gameplay\DailyRewards.cs`
+  - offset `7564906` [ascii] `*\Assets\Scripts\Gameplay\DropDownButton.cs`
 
 ### Match 6
 
 - Match offset: `7588078`
 - Match value: `|PlayerProfileData`
 - Nearby strings:
+  - offset `7587165` [ascii] `|Backups`
+  - offset `7587178` [ascii] `Backups|BackupData`
+  - offset `7587201` [ascii] `Backups|BackupActiveHoursData`
+  - offset `7587235` [ascii] `Backups|BackUpStorage`
+  - offset `7587261` [ascii] `|Bans`
+  - offset `7587271` [ascii] `Bans|BanObject`
+  - offset `7587290` [ascii] `Bans|UnbanObject`
+  - offset `7587311` [ascii] `Bans|LeaderboardObject`
+  - offset `7587338` [ascii] `Bans|ExclusionObject`
+  - offset `7587363` [ascii] `Bans|BanReasonObject`
+  - offset `7587388` [ascii] `|Cloud`
+  - offset `7587399` [ascii] `|EventMasterSwitch`
+  - offset `7587422` [ascii] `|GlobalVariable`
+  - offset `7587441` [ascii] `#GlobalVariable|GlobalVariableObject`
+  - offset `7587482` [ascii] `GlobalVariable|DateObject`
+  - offset `7587512` [ascii] `|SimpleGlobalVariable`
+  - offset `7587537` [ascii] `'SimpleGlobalVariable|SimpleGVDataObject`
+  - offset `7587582` [ascii] `|SimpleGlobalVariableHandler`
+  - offset `7587615` [ascii] `|AccountPanel`
+  - offset `7587633` [ascii] `|NewCloudCanvasPanel`
+  - offset `7587658` [ascii] `|AcademyPoint`
+  - offset `7587676` [ascii] `|Cell`
+  - offset `7587686` [ascii] `|HunterBorge`
+  - offset `7587703` [ascii] `|HunterKnox`
+  - offset `7587719` [ascii] `|HunterOzzy`
+  - offset `7587735` [ascii] `|Leaderboard`
+  - offset `7587752` [ascii] `Leaderboard|Record`
+  - offset `7587775` [ascii] `|ModPoint`
   - offset `7587789` [ascii] `|OuroOrbs`
   - offset `7587803` [ascii] `|ResearchPoint`
   - offset `7587822` [ascii] `|Shard`
@@ -253,12 +673,68 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `7588348` [ascii] `Tracker|TrackerDetails`
   - offset `7588375` [ascii] `|CallBack`
   - offset `7588389` [ascii] `|LBCodes`
+  - offset `7588402` [ascii] `|NakamaConfig`
+  - offset `7588420` [ascii] `|NakamaResources`
+  - offset `7588441` [ascii] `|NakamaUtil`
+  - offset `7588457` [ascii] `NakamaUtil|CollectionKeyPath`
+  - offset `7588490` [ascii] `|NavigationManager`
+  - offset `7588513` [ascii] `|NavigationManagerArcade`
+  - offset `7588541` [ascii] `*NavigationManagerArcade|HighscoreTextClass`
+  - offset `7588589` [ascii] `|NetTimeRequest`
+  - offset `7588608` [ascii] `!NetTimeRequest|NakamaTimeResponse`
+  - offset `7588647` [ascii] `NetTimeRequest|SnowTimeResponse`
+  - offset `7588683` [ascii] `|NoNetworkOfflineCalculations`
+  - offset `7588717` [ascii] `|NtpClient`
+  - offset `7588732` [ascii] `|OfflineCalculations`
+  - offset `7588757` [ascii] `|OfflineManager_New`
+  - offset `7588781` [ascii] `|RandomExtension`
+  - offset `7588802` [ascii] `|SaveData`
+  - offset `7588816` [ascii] `|SaveSystem`
+  - offset `7588832` [ascii] `|SystemMonotonicTime`
+  - offset `7588857` [ascii] `|Utils`
+  - offset `7588868` [ascii] `|EggSO`
+  - offset `7588879` [ascii] `|EggsterSpawnEggs`
+  - offset `7588901` [ascii] `|EggsterManager`
+  - offset `7588921` [ascii] `|EggsterPanelNavigation`
+  - offset `7588949` [ascii] `|EggMain`
+  - offset `7588962` [ascii] `|EggstoneMain`
+  - offset `7588980` [ascii] `|EventDecider`
+  - offset `7588998` [ascii] `|External`
+  - offset `7589011` [ascii] `"|AcademyAutomationCenter_Personnel`
 
 ### Match 7
 
 - Match offset: `7588101`
 - Match value: `PlayerProfileData|GemData`
 - Nearby strings:
+  - offset `7587178` [ascii] `Backups|BackupData`
+  - offset `7587201` [ascii] `Backups|BackupActiveHoursData`
+  - offset `7587235` [ascii] `Backups|BackUpStorage`
+  - offset `7587261` [ascii] `|Bans`
+  - offset `7587271` [ascii] `Bans|BanObject`
+  - offset `7587290` [ascii] `Bans|UnbanObject`
+  - offset `7587311` [ascii] `Bans|LeaderboardObject`
+  - offset `7587338` [ascii] `Bans|ExclusionObject`
+  - offset `7587363` [ascii] `Bans|BanReasonObject`
+  - offset `7587388` [ascii] `|Cloud`
+  - offset `7587399` [ascii] `|EventMasterSwitch`
+  - offset `7587422` [ascii] `|GlobalVariable`
+  - offset `7587441` [ascii] `#GlobalVariable|GlobalVariableObject`
+  - offset `7587482` [ascii] `GlobalVariable|DateObject`
+  - offset `7587512` [ascii] `|SimpleGlobalVariable`
+  - offset `7587537` [ascii] `'SimpleGlobalVariable|SimpleGVDataObject`
+  - offset `7587582` [ascii] `|SimpleGlobalVariableHandler`
+  - offset `7587615` [ascii] `|AccountPanel`
+  - offset `7587633` [ascii] `|NewCloudCanvasPanel`
+  - offset `7587658` [ascii] `|AcademyPoint`
+  - offset `7587676` [ascii] `|Cell`
+  - offset `7587686` [ascii] `|HunterBorge`
+  - offset `7587703` [ascii] `|HunterKnox`
+  - offset `7587719` [ascii] `|HunterOzzy`
+  - offset `7587735` [ascii] `|Leaderboard`
+  - offset `7587752` [ascii] `Leaderboard|Record`
+  - offset `7587775` [ascii] `|ModPoint`
+  - offset `7587789` [ascii] `|OuroOrbs`
   - offset `7587803` [ascii] `|ResearchPoint`
   - offset `7587822` [ascii] `|Shard`
   - offset `7587833` [ascii] `|LeaderboardHandler`
@@ -284,12 +760,68 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `7588375` [ascii] `|CallBack`
   - offset `7588389` [ascii] `|LBCodes`
   - offset `7588402` [ascii] `|NakamaConfig`
+  - offset `7588420` [ascii] `|NakamaResources`
+  - offset `7588441` [ascii] `|NakamaUtil`
+  - offset `7588457` [ascii] `NakamaUtil|CollectionKeyPath`
+  - offset `7588490` [ascii] `|NavigationManager`
+  - offset `7588513` [ascii] `|NavigationManagerArcade`
+  - offset `7588541` [ascii] `*NavigationManagerArcade|HighscoreTextClass`
+  - offset `7588589` [ascii] `|NetTimeRequest`
+  - offset `7588608` [ascii] `!NetTimeRequest|NakamaTimeResponse`
+  - offset `7588647` [ascii] `NetTimeRequest|SnowTimeResponse`
+  - offset `7588683` [ascii] `|NoNetworkOfflineCalculations`
+  - offset `7588717` [ascii] `|NtpClient`
+  - offset `7588732` [ascii] `|OfflineCalculations`
+  - offset `7588757` [ascii] `|OfflineManager_New`
+  - offset `7588781` [ascii] `|RandomExtension`
+  - offset `7588802` [ascii] `|SaveData`
+  - offset `7588816` [ascii] `|SaveSystem`
+  - offset `7588832` [ascii] `|SystemMonotonicTime`
+  - offset `7588857` [ascii] `|Utils`
+  - offset `7588868` [ascii] `|EggSO`
+  - offset `7588879` [ascii] `|EggsterSpawnEggs`
+  - offset `7588901` [ascii] `|EggsterManager`
+  - offset `7588921` [ascii] `|EggsterPanelNavigation`
+  - offset `7588949` [ascii] `|EggMain`
+  - offset `7588962` [ascii] `|EggstoneMain`
+  - offset `7588980` [ascii] `|EventDecider`
+  - offset `7588998` [ascii] `|External`
+  - offset `7589011` [ascii] `"|AcademyAutomationCenter_Personnel`
+  - offset `7589051` [ascii] `|AcademyAutomationNavigation`
 
 ### Match 8
 
 - Match offset: `7588131`
 - Match value: `PlayerProfileData|GemNodeCombo`
 - Nearby strings:
+  - offset `7587201` [ascii] `Backups|BackupActiveHoursData`
+  - offset `7587235` [ascii] `Backups|BackUpStorage`
+  - offset `7587261` [ascii] `|Bans`
+  - offset `7587271` [ascii] `Bans|BanObject`
+  - offset `7587290` [ascii] `Bans|UnbanObject`
+  - offset `7587311` [ascii] `Bans|LeaderboardObject`
+  - offset `7587338` [ascii] `Bans|ExclusionObject`
+  - offset `7587363` [ascii] `Bans|BanReasonObject`
+  - offset `7587388` [ascii] `|Cloud`
+  - offset `7587399` [ascii] `|EventMasterSwitch`
+  - offset `7587422` [ascii] `|GlobalVariable`
+  - offset `7587441` [ascii] `#GlobalVariable|GlobalVariableObject`
+  - offset `7587482` [ascii] `GlobalVariable|DateObject`
+  - offset `7587512` [ascii] `|SimpleGlobalVariable`
+  - offset `7587537` [ascii] `'SimpleGlobalVariable|SimpleGVDataObject`
+  - offset `7587582` [ascii] `|SimpleGlobalVariableHandler`
+  - offset `7587615` [ascii] `|AccountPanel`
+  - offset `7587633` [ascii] `|NewCloudCanvasPanel`
+  - offset `7587658` [ascii] `|AcademyPoint`
+  - offset `7587676` [ascii] `|Cell`
+  - offset `7587686` [ascii] `|HunterBorge`
+  - offset `7587703` [ascii] `|HunterKnox`
+  - offset `7587719` [ascii] `|HunterOzzy`
+  - offset `7587735` [ascii] `|Leaderboard`
+  - offset `7587752` [ascii] `Leaderboard|Record`
+  - offset `7587775` [ascii] `|ModPoint`
+  - offset `7587789` [ascii] `|OuroOrbs`
+  - offset `7587803` [ascii] `|ResearchPoint`
   - offset `7587822` [ascii] `|Shard`
   - offset `7587833` [ascii] `|LeaderboardHandler`
   - offset `7587856` [ascii] `$LeaderboardHandler|LastSelectedCombo`
@@ -315,6 +847,34 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `7588389` [ascii] `|LBCodes`
   - offset `7588402` [ascii] `|NakamaConfig`
   - offset `7588420` [ascii] `|NakamaResources`
+  - offset `7588441` [ascii] `|NakamaUtil`
+  - offset `7588457` [ascii] `NakamaUtil|CollectionKeyPath`
+  - offset `7588490` [ascii] `|NavigationManager`
+  - offset `7588513` [ascii] `|NavigationManagerArcade`
+  - offset `7588541` [ascii] `*NavigationManagerArcade|HighscoreTextClass`
+  - offset `7588589` [ascii] `|NetTimeRequest`
+  - offset `7588608` [ascii] `!NetTimeRequest|NakamaTimeResponse`
+  - offset `7588647` [ascii] `NetTimeRequest|SnowTimeResponse`
+  - offset `7588683` [ascii] `|NoNetworkOfflineCalculations`
+  - offset `7588717` [ascii] `|NtpClient`
+  - offset `7588732` [ascii] `|OfflineCalculations`
+  - offset `7588757` [ascii] `|OfflineManager_New`
+  - offset `7588781` [ascii] `|RandomExtension`
+  - offset `7588802` [ascii] `|SaveData`
+  - offset `7588816` [ascii] `|SaveSystem`
+  - offset `7588832` [ascii] `|SystemMonotonicTime`
+  - offset `7588857` [ascii] `|Utils`
+  - offset `7588868` [ascii] `|EggSO`
+  - offset `7588879` [ascii] `|EggsterSpawnEggs`
+  - offset `7588901` [ascii] `|EggsterManager`
+  - offset `7588921` [ascii] `|EggsterPanelNavigation`
+  - offset `7588949` [ascii] `|EggMain`
+  - offset `7588962` [ascii] `|EggstoneMain`
+  - offset `7588980` [ascii] `|EventDecider`
+  - offset `7588998` [ascii] `|External`
+  - offset `7589011` [ascii] `"|AcademyAutomationCenter_Personnel`
+  - offset `7589051` [ascii] `|AcademyAutomationNavigation`
+  - offset `7589084` [ascii] `|AutoLootPrefabController`
 
 ## FillPlayerProfileData
 
@@ -323,70 +883,25 @@ Source: `workbench\apk\base\global-metadata.dat`
 - Match offset: `775633`
 - Match value: `FillPlayerProfileData`
 - Nearby strings:
-  - offset `775426` [ascii] `get_BlueprintsThisTR`
-  - offset `775447` [ascii] `get_ManualGensThisLR`
-  - offset `775468` [ascii] `get_TechUpsThisLR`
-  - offset `775486` [ascii] `GetPlayerProfileData`
-  - offset `775507` [ascii] `SetPlayerProfileTexts`
-  - offset `775529` [ascii] `playerData`
-  - offset `775540` [ascii] `lastCloudSaveDate`
-  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
-  - offset `775587` [ascii] `UpdatePlayerProfile`
-  - offset `775607` [ascii] `isSave`
-  - offset `775614` [ascii] `isLocalPP`
-  - offset `775624` [ascii] `playerID`
-  - offset `775633` [ascii] `FillPlayerProfileData`
-  - offset `775655` [ascii] `formatNumber`
-  - offset `775668` [ascii] `defaultValue`
-  - offset `775681` [ascii] `SafeParseInt`
-  - offset `775694` [ascii] `SafeParseBool`
-  - offset `775708` [ascii] `fragmentValue`
-  - offset `775722` [ascii] `getDecimalPlace`
-  - offset `775738` [ascii] `evoLevel`
-  - offset `775747` [ascii] `unlocked`
-  - offset `775756` [ascii] `ShipEvoObjects`
-  - offset `775771` [ascii] `ShipObject`
-  - offset `775782` [ascii] `SetShipEvoObject`
-  - offset `775799` [ascii] `dataNodes`
-
-### Match 2
-
-- Match offset: `775969`
-- Match value: `<FillPlayerProfileData>d__45`
-- Nearby strings:
-  - offset `775815` [ascii] `ProcessGem`
-  - offset `775826` [ascii] `saveInfoCache`
-  - offset `775840` [ascii] `Market`
-  - offset `775853` [ascii] `Relics`
-  - offset `775860` [ascii] `CellData`
-  - offset `775869` [ascii] `ModPointData`
-  - offset `775882` [ascii] `ShardData`
-  - offset `775892` [ascii] `ResearchPointData`
-  - offset `775910` [ascii] `AcademyPointData`
-  - offset `775927` [ascii] `BlueprintsThisTR`
-  - offset `775944` [ascii] `GemNodeActive`
-  - offset `775962` [ascii] `Active`
-  - offset `775969` [ascii] `<FillPlayerProfileData>d__45`
-  - offset `775998` [ascii] `<UpdatePlayerProfile>d__44`
-  - offset `776025` [ascii] `PlayerProfileUI`
-  - offset `776041` [ascii] `get_Gem1`
-  - offset `776050` [ascii] `get_Gem2`
-  - offset `776059` [ascii] `get_Gem3`
-  - offset `776068` [ascii] `get_Gem4`
-  - offset `776077` [ascii] `get_Gem5`
-  - offset `776086` [ascii] `get_Gem6`
-  - offset `776095` [ascii] `get_Gem7`
-  - offset `776104` [ascii] `ResetPlayerProfileTexts`
-  - offset `776128` [ascii] `InitPlayerProfilePanel`
-  - offset `776151` [ascii] `SetInventoryPanel`
-
-## GetPlayerProfileData
-
-### Match 1
-
-- Match offset: `775486`
-- Match value: `GetPlayerProfileData`
-- Nearby strings:
+  - offset `775010` [ascii] `HighestGearLevels`
+  - offset `775028` [ascii] `HighestProjects`
+  - offset `775044` [ascii] `HighestBlueprints`
+  - offset `775062` [ascii] `HighestFragments`
+  - offset `775079` [ascii] `HighestRelicLevels`
+  - offset `775098` [ascii] `HighestBorgeProgress`
+  - offset `775119` [ascii] `HighestOzzyProgress`
+  - offset `775139` [ascii] `HighestKnoxProgress`
+  - offset `775159` [ascii] `GemData`
+  - offset `775167` [ascii] `GemNumber`
+  - offset `775177` [ascii] `GemUnlocked`
+  - offset `775189` [ascii] `GemNodesList`
+  - offset `775202` [ascii] `GemNodeCombo`
+  - offset `775215` [ascii] `gemNodeNumber`
+  - offset `775229` [ascii] `gemNodeUnlocked`
+  - offset `775245` [ascii] `GemNodeNumber`
+  - offset `775259` [ascii] `GemNodeUnlocked`
+  - offset `775275` [ascii] `PlayerProfileHandler`
+  - offset `775296` [ascii] `get_Market`
   - offset `775307` [ascii] `get_BM`
   - offset `775314` [ascii] `get_ZN`
   - offset `775321` [ascii] `get_TU`
@@ -412,165 +927,219 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `775655` [ascii] `formatNumber`
   - offset `775668` [ascii] `defaultValue`
   - offset `775681` [ascii] `SafeParseInt`
-
-## AchievementInscryptionsReward
-
-### Match 1
-
-- Match offset: `1015675`
-- Match value: `AchievementInscryptionsReward`
-- Nearby strings:
-  - offset `1015340` [ascii] `AchievementsClaimedReward1`
-  - offset `1015367` [ascii] `AchievementsClaimedReward2`
-  - offset `1015394` [ascii] `AchievementLoopResetsReward`
-  - offset `1015422` [ascii] `AchievementFragmentsReward`
-  - offset `1015449` [ascii] `AchievementRelicLevelsReward`
-  - offset `1015478` [ascii] `AchievementMeltdownReward`
-  - offset `1015504` [ascii] `AchievementAntimatterCoresReward`
-  - offset `1015537` [ascii] `AchievementTraitSpheresReward`
-  - offset `1015567` [ascii] `AchievementGemNodesReward`
-  - offset `1015593` [ascii] `AchievementBorgeStageReward`
-  - offset `1015621` [ascii] `AchievementOzzyStageReward`
-  - offset `1015648` [ascii] `AchievementKnoxStageReward`
-  - offset `1015675` [ascii] `AchievementInscryptionsReward`
-  - offset `1015705` [ascii] `AchievementCellEnhancersReward`
-  - offset `1015736` [ascii] `AchievementMatEnhancersReward`
-  - offset `1015766` [ascii] `AchievementMechsReward`
-  - offset `1015789` [ascii] `AchievementMechMissionsReward`
-  - offset `1015819` [ascii] `AchievementTrinketTierLevelsReward`
-  - offset `1015854` [ascii] `AchievementTrinketLevelsReward`
-  - offset `1015885` [ascii] `AchievementGadgetsUnlockedReward`
-  - offset `1015918` [ascii] `AchievementGadgetLevelsReward`
-  - offset `1015948` [ascii] `AchievementPlayerLevelReward`
-  - offset `1015977` [ascii] `AchievementTickReward`
-  - offset `1015999` [ascii] `AchievementCellReward`
-  - offset `1016021` [ascii] `AchievementMPReward`
-
-## FinalISShardsBonus
-
-### Match 1
-
-- Match offset: `1747193`
-- Match value: `get_FinalISShardsBonus`
-- Nearby strings:
-  - offset `1746905` [ascii] `get_FinalISFreeDemeterRanks`
-  - offset `1746933` [ascii] `set_FinalISFreeDemeterRanks`
-  - offset `1746961` [ascii] `get_FinalISFreeKoiosCrew`
-  - offset `1746986` [ascii] `set_FinalISFreeKoiosCrew`
-  - offset `1747011` [ascii] `get_FinalISFreeKoiosRanks`
-  - offset `1747037` [ascii] `set_FinalISFreeKoiosRanks`
-  - offset `1747063` [ascii] `get_FinalISCellsBonus`
-  - offset `1747085` [ascii] `set_FinalISCellsBonus`
-  - offset `1747107` [ascii] `get_FinalISAllGensBonus`
-  - offset `1747131` [ascii] `set_FinalISAllGensBonus`
-  - offset `1747155` [ascii] `get_FinalISMPBonus`
-  - offset `1747174` [ascii] `set_FinalISMPBonus`
-  - offset `1747193` [ascii] `get_FinalISShardsBonus`
-  - offset `1747216` [ascii] `set_FinalISShardsBonus`
-  - offset `1747239` [ascii] `get_FinalISRPBonus`
-  - offset `1747258` [ascii] `set_FinalISRPBonus`
-  - offset `1747277` [ascii] `get_FinalISOuroOrbsBonus`
-  - offset `1747302` [ascii] `set_FinalISOuroOrbsBonus`
-  - offset `1747327` [ascii] `get_FinalOzzyMaxHPBonus`
-  - offset `1747351` [ascii] `set_FinalOzzyMaxHPBonus`
-  - offset `1747375` [ascii] `get_FinalOzzyDamageBonus`
-  - offset `1747400` [ascii] `set_FinalOzzyDamageBonus`
-  - offset `1747425` [ascii] `get_FinalOzzyDamageReductionBonus`
-  - offset `1747459` [ascii] `set_FinalOzzyDamageReductionBonus`
-  - offset `1747493` [ascii] `get_FinalOzzyCritChangeBonus`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+  - offset `775869` [ascii] `ModPointData`
+  - offset `775882` [ascii] `ShardData`
+  - offset `775892` [ascii] `ResearchPointData`
+  - offset `775910` [ascii] `AcademyPointData`
+  - offset `775927` [ascii] `BlueprintsThisTR`
+  - offset `775944` [ascii] `GemNodeActive`
+  - offset `775962` [ascii] `Active`
+  - offset `775969` [ascii] `<FillPlayerProfileData>d__45`
+  - offset `775998` [ascii] `<UpdatePlayerProfile>d__44`
+  - offset `776025` [ascii] `PlayerProfileUI`
+  - offset `776041` [ascii] `get_Gem1`
+  - offset `776050` [ascii] `get_Gem2`
+  - offset `776059` [ascii] `get_Gem3`
+  - offset `776068` [ascii] `get_Gem4`
+  - offset `776077` [ascii] `get_Gem5`
+  - offset `776086` [ascii] `get_Gem6`
+  - offset `776095` [ascii] `get_Gem7`
+  - offset `776104` [ascii] `ResetPlayerProfileTexts`
+  - offset `776128` [ascii] `InitPlayerProfilePanel`
+  - offset `776151` [ascii] `SetInventoryPanel`
+  - offset `776169` [ascii] `SetStatsPanel`
+  - offset `776183` [ascii] `SetNoncloudOptions`
 
 ### Match 2
 
-- Match offset: `1747216`
-- Match value: `set_FinalISShardsBonus`
+- Match offset: `775969`
+- Match value: `<FillPlayerProfileData>d__45`
 - Nearby strings:
-  - offset `1746933` [ascii] `set_FinalISFreeDemeterRanks`
-  - offset `1746961` [ascii] `get_FinalISFreeKoiosCrew`
-  - offset `1746986` [ascii] `set_FinalISFreeKoiosCrew`
-  - offset `1747011` [ascii] `get_FinalISFreeKoiosRanks`
-  - offset `1747037` [ascii] `set_FinalISFreeKoiosRanks`
-  - offset `1747063` [ascii] `get_FinalISCellsBonus`
-  - offset `1747085` [ascii] `set_FinalISCellsBonus`
-  - offset `1747107` [ascii] `get_FinalISAllGensBonus`
-  - offset `1747131` [ascii] `set_FinalISAllGensBonus`
-  - offset `1747155` [ascii] `get_FinalISMPBonus`
-  - offset `1747174` [ascii] `set_FinalISMPBonus`
-  - offset `1747193` [ascii] `get_FinalISShardsBonus`
-  - offset `1747216` [ascii] `set_FinalISShardsBonus`
-  - offset `1747239` [ascii] `get_FinalISRPBonus`
-  - offset `1747258` [ascii] `set_FinalISRPBonus`
-  - offset `1747277` [ascii] `get_FinalISOuroOrbsBonus`
-  - offset `1747302` [ascii] `set_FinalISOuroOrbsBonus`
-  - offset `1747327` [ascii] `get_FinalOzzyMaxHPBonus`
-  - offset `1747351` [ascii] `set_FinalOzzyMaxHPBonus`
-  - offset `1747375` [ascii] `get_FinalOzzyDamageBonus`
-  - offset `1747400` [ascii] `set_FinalOzzyDamageBonus`
-  - offset `1747425` [ascii] `get_FinalOzzyDamageReductionBonus`
-  - offset `1747459` [ascii] `set_FinalOzzyDamageReductionBonus`
-  - offset `1747493` [ascii] `get_FinalOzzyCritChangeBonus`
-  - offset `1747522` [ascii] `set_FinalOzzyCritChangeBonus`
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
+  - offset `775426` [ascii] `get_BlueprintsThisTR`
+  - offset `775447` [ascii] `get_ManualGensThisLR`
+  - offset `775468` [ascii] `get_TechUpsThisLR`
+  - offset `775486` [ascii] `GetPlayerProfileData`
+  - offset `775507` [ascii] `SetPlayerProfileTexts`
+  - offset `775529` [ascii] `playerData`
+  - offset `775540` [ascii] `lastCloudSaveDate`
+  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
+  - offset `775587` [ascii] `UpdatePlayerProfile`
+  - offset `775607` [ascii] `isSave`
+  - offset `775614` [ascii] `isLocalPP`
+  - offset `775624` [ascii] `playerID`
+  - offset `775633` [ascii] `FillPlayerProfileData`
+  - offset `775655` [ascii] `formatNumber`
+  - offset `775668` [ascii] `defaultValue`
+  - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+  - offset `775869` [ascii] `ModPointData`
+  - offset `775882` [ascii] `ShardData`
+  - offset `775892` [ascii] `ResearchPointData`
+  - offset `775910` [ascii] `AcademyPointData`
+  - offset `775927` [ascii] `BlueprintsThisTR`
+  - offset `775944` [ascii] `GemNodeActive`
+  - offset `775962` [ascii] `Active`
+  - offset `775969` [ascii] `<FillPlayerProfileData>d__45`
+  - offset `775998` [ascii] `<UpdatePlayerProfile>d__44`
+  - offset `776025` [ascii] `PlayerProfileUI`
+  - offset `776041` [ascii] `get_Gem1`
+  - offset `776050` [ascii] `get_Gem2`
+  - offset `776059` [ascii] `get_Gem3`
+  - offset `776068` [ascii] `get_Gem4`
+  - offset `776077` [ascii] `get_Gem5`
+  - offset `776086` [ascii] `get_Gem6`
+  - offset `776095` [ascii] `get_Gem7`
+  - offset `776104` [ascii] `ResetPlayerProfileTexts`
+  - offset `776128` [ascii] `InitPlayerProfilePanel`
+  - offset `776151` [ascii] `SetInventoryPanel`
+  - offset `776169` [ascii] `SetStatsPanel`
+  - offset `776183` [ascii] `SetNoncloudOptions`
+  - offset `776202` [ascii] `SetCloudButtons`
+  - offset `776218` [ascii] `SetSaveTexts`
+  - offset `776231` [ascii] `SetLoadTexts`
+  - offset `776244` [ascii] `TimeStamp`
+  - offset `776254` [ascii] `SetCloudSubtitle`
+  - offset `776271` [ascii] `SetLeaderboardText`
+  - offset `776290` [ascii] `SetLocalPlayerProfileText`
+  - offset `776316` [ascii] `playerDisplayName`
+  - offset `776334` [ascii] `OnOpenPlayerProfile`
+  - offset `776354` [ascii] `OnLocalPlayerProfileClick`
+  - offset `776380` [ascii] `OnStatsButtonClick`
+  - offset `776399` [ascii] `OnInventoryButtonClick`
+  - offset `776422` [ascii] `OnCloudAcceptButton`
+  - offset `776442` [ascii] `DisableCloudToggle`
+  - offset `776461` [ascii] `OnCloudToggleClick`
+  - offset `776480` [ascii] `loadMode`
+  - offset `776489` [ascii] `LastSavedTimestamp`
+  - offset `776508` [ascii] `ExcludedFromLeaderboardsPanel`
+  - offset `776538` [ascii] `PlayerProfilePanel`
+  - offset `776557` [ascii] `PlayerProfileLoadingCircle`
+  - offset `776584` [ascii] `PlayerProfileDefaultLayout`
+  - offset `776611` [ascii] `PlayerProfileCloudLayout`
+  - offset `776636` [ascii] `PlayerProfileCloudToggle`
+  - offset `776661` [ascii] `PlayerProfileToggleText`
+  - offset `776685` [ascii] `PlayerProfileAcceptText`
+  - offset `776709` [ascii] `CloudInfoStatusText`
 
-### Match 3
+## GetPlayerProfileData
 
-- Match offset: `1774472`
-- Match value: `<FinalISShardsBonus>k__BackingField`
+### Match 1
+
+- Match offset: `775486`
+- Match value: `GetPlayerProfileData`
 - Nearby strings:
-  - offset `1774001` [ascii] `<FinalISFreeAuxesiaRanks>k__BackingField`
-  - offset `1774042` [ascii] `<FinalISFreeZagreusCrew>k__BackingField`
-  - offset `1774082` [ascii] `<FinalISFreeZagreusRanks>k__BackingField`
-  - offset `1774123` [ascii] `<FinalISFreeHephaestusCrew>k__BackingField`
-  - offset `1774166` [ascii] `<FinalISFreeHephaestusRanks>k__BackingField`
-  - offset `1774210` [ascii] `<FinalISFreeDemeterCrew>k__BackingField`
-  - offset `1774250` [ascii] `<FinalISFreeDemeterRanks>k__BackingField`
-  - offset `1774291` [ascii] `<FinalISFreeKoiosCrew>k__BackingField`
-  - offset `1774329` [ascii] `<FinalISFreeKoiosRanks>k__BackingField`
-  - offset `1774368` [ascii] `<FinalISCellsBonus>k__BackingField`
-  - offset `1774403` [ascii] `<FinalISAllGensBonus>k__BackingField`
-  - offset `1774440` [ascii] `<FinalISMPBonus>k__BackingField`
-  - offset `1774472` [ascii] `<FinalISShardsBonus>k__BackingField`
-  - offset `1774508` [ascii] `<FinalISRPBonus>k__BackingField`
-  - offset `1774540` [ascii] `<FinalISOuroOrbsBonus>k__BackingField`
-  - offset `1774578` [ascii] `<FinalOzzyMaxHPBonus>k__BackingField`
-  - offset `1774615` [ascii] `<FinalOzzyDamageBonus>k__BackingField`
-  - offset `1774653` [ascii] `<FinalOzzyDamageReductionBonus>k__BackingField`
-  - offset `1774700` [ascii] `<FinalOzzyCritChangeBonus>k__BackingField`
-  - offset `1774742` [ascii] `<FinalOzzyEffectChangeBonus>k__BackingField`
-  - offset `1774786` [ascii] `<FinalOzzyAtkSpeedBonus>k__BackingField`
-  - offset `1774826` [ascii] `<FinalOzzyBaseLootRewardBonus>k__BackingField`
-  - offset `1774872` [ascii] `<FinalOzzyBaseEXPRewardBonus>k__BackingField`
-  - offset `1774917` [ascii] `InscryptionCostList`
-  - offset `1774937` [ascii] `InscryptionAndCostRelations`
-
-### Match 4
-
-- Match offset: `1777984`
-- Match value: `FinalISShardsBonus`
-- Nearby strings:
-  - offset `1777717` [ascii] `FinalISFreeAuxesiaRanks`
-  - offset `1777741` [ascii] `FinalISFreeZagreusCrew`
-  - offset `1777764` [ascii] `FinalISFreeZagreusRanks`
-  - offset `1777788` [ascii] `FinalISFreeHephaestusCrew`
-  - offset `1777814` [ascii] `FinalISFreeHephaestusRanks`
-  - offset `1777841` [ascii] `FinalISFreeDemeterCrew`
-  - offset `1777864` [ascii] `FinalISFreeDemeterRanks`
-  - offset `1777888` [ascii] `FinalISFreeKoiosCrew`
-  - offset `1777909` [ascii] `FinalISFreeKoiosRanks`
-  - offset `1777931` [ascii] `FinalISCellsBonus`
-  - offset `1777949` [ascii] `FinalISAllGensBonus`
-  - offset `1777969` [ascii] `FinalISMPBonus`
-  - offset `1777984` [ascii] `FinalISShardsBonus`
-  - offset `1778003` [ascii] `FinalISRPBonus`
-  - offset `1778018` [ascii] `FinalISOuroOrbsBonus`
-  - offset `1778039` [ascii] `FinalOzzyMaxHPBonus`
-  - offset `1778059` [ascii] `FinalOzzyDamageBonus`
-  - offset `1778080` [ascii] `FinalOzzyDamageReductionBonus`
-  - offset `1778110` [ascii] `FinalOzzyCritChangeBonus`
-  - offset `1778135` [ascii] `FinalOzzyEffectChangeBonus`
-  - offset `1778162` [ascii] `FinalOzzyAtkSpeedBonus`
-  - offset `1778185` [ascii] `FinalOzzyBaseLootRewardBonus`
-  - offset `1778214` [ascii] `FinalOzzyBaseEXPRewardBonus`
-  - offset `1778242` [ascii] `FinalIS1Bonus`
-  - offset `1778256` [ascii] `FinalIS2Bonus`
+  - offset `774873` [ascii] `HighestTechUpLevels`
+  - offset `774893` [ascii] `HighestMP`
+  - offset `774903` [ascii] `HighestLoopMods`
+  - offset `774919` [ascii] `HighestLoopResets`
+  - offset `774937` [ascii] `HighestShards`
+  - offset `774951` [ascii] `HighestMilestoneLevels`
+  - offset `774974` [ascii] `HighestRP`
+  - offset `774984` [ascii] `HighestResearch`
+  - offset `775000` [ascii] `HighestAP`
+  - offset `775010` [ascii] `HighestGearLevels`
+  - offset `775028` [ascii] `HighestProjects`
+  - offset `775044` [ascii] `HighestBlueprints`
+  - offset `775062` [ascii] `HighestFragments`
+  - offset `775079` [ascii] `HighestRelicLevels`
+  - offset `775098` [ascii] `HighestBorgeProgress`
+  - offset `775119` [ascii] `HighestOzzyProgress`
+  - offset `775139` [ascii] `HighestKnoxProgress`
+  - offset `775159` [ascii] `GemData`
+  - offset `775167` [ascii] `GemNumber`
+  - offset `775177` [ascii] `GemUnlocked`
+  - offset `775189` [ascii] `GemNodesList`
+  - offset `775202` [ascii] `GemNodeCombo`
+  - offset `775215` [ascii] `gemNodeNumber`
+  - offset `775229` [ascii] `gemNodeUnlocked`
+  - offset `775245` [ascii] `GemNodeNumber`
+  - offset `775259` [ascii] `GemNodeUnlocked`
+  - offset `775275` [ascii] `PlayerProfileHandler`
+  - offset `775296` [ascii] `get_Market`
+  - offset `775307` [ascii] `get_BM`
+  - offset `775314` [ascii] `get_ZN`
+  - offset `775321` [ascii] `get_TU`
+  - offset `775328` [ascii] `get_Relics`
+  - offset `775339` [ascii] `get_CellData`
+  - offset `775352` [ascii] `get_ModPointData`
+  - offset `775369` [ascii] `get_ShardData`
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
+  - offset `775426` [ascii] `get_BlueprintsThisTR`
+  - offset `775447` [ascii] `get_ManualGensThisLR`
+  - offset `775468` [ascii] `get_TechUpsThisLR`
+  - offset `775486` [ascii] `GetPlayerProfileData`
+  - offset `775507` [ascii] `SetPlayerProfileTexts`
+  - offset `775529` [ascii] `playerData`
+  - offset `775540` [ascii] `lastCloudSaveDate`
+  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
+  - offset `775587` [ascii] `UpdatePlayerProfile`
+  - offset `775607` [ascii] `isSave`
+  - offset `775614` [ascii] `isLocalPP`
+  - offset `775624` [ascii] `playerID`
+  - offset `775633` [ascii] `FillPlayerProfileData`
+  - offset `775655` [ascii] `formatNumber`
+  - offset `775668` [ascii] `defaultValue`
+  - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+  - offset `775869` [ascii] `ModPointData`
+  - offset `775882` [ascii] `ShardData`
+  - offset `775892` [ascii] `ResearchPointData`
+  - offset `775910` [ascii] `AcademyPointData`
+  - offset `775927` [ascii] `BlueprintsThisTR`
+  - offset `775944` [ascii] `GemNodeActive`
+  - offset `775962` [ascii] `Active`
+  - offset `775969` [ascii] `<FillPlayerProfileData>d__45`
+  - offset `775998` [ascii] `<UpdatePlayerProfile>d__44`
+  - offset `776025` [ascii] `PlayerProfileUI`
+  - offset `776041` [ascii] `get_Gem1`
+  - offset `776050` [ascii] `get_Gem2`
+  - offset `776059` [ascii] `get_Gem3`
 
 ## InscryptionsDone
 
@@ -579,6 +1148,34 @@ Source: `workbench\apk\base\global-metadata.dat`
 - Match offset: `746056`
 - Match value: `InscryptionsDone`
 - Nearby strings:
+  - offset `745645` [ascii] `IS71Level`
+  - offset `745655` [ascii] `IS72Level`
+  - offset `745665` [ascii] `IS73Level`
+  - offset `745675` [ascii] `IS74Level`
+  - offset `745685` [ascii] `IS75Level`
+  - offset `745695` [ascii] `IS76Level`
+  - offset `745705` [ascii] `IS77Level`
+  - offset `745715` [ascii] `IS78Level`
+  - offset `745725` [ascii] `IS79Level`
+  - offset `745735` [ascii] `IS80Level`
+  - offset `745745` [ascii] `IS81Level`
+  - offset `745755` [ascii] `IS82Level`
+  - offset `745765` [ascii] `IS83Level`
+  - offset `745775` [ascii] `IS84Level`
+  - offset `745785` [ascii] `IS85Level`
+  - offset `745795` [ascii] `IS86Level`
+  - offset `745805` [ascii] `IS87Level`
+  - offset `745815` [ascii] `IS88Level`
+  - offset `745825` [ascii] `IS89Level`
+  - offset `745835` [ascii] `IS90Level`
+  - offset `745845` [ascii] `IS91Level`
+  - offset `745855` [ascii] `IS92Level`
+  - offset `745865` [ascii] `IS93Level`
+  - offset `745875` [ascii] `IS94Level`
+  - offset `745885` [ascii] `IS95Level`
+  - offset `745895` [ascii] `IS96Level`
+  - offset `745905` [ascii] `IS97Level`
+  - offset `745915` [ascii] `IS98Level`
   - offset `745925` [ascii] `IS99Level`
   - offset `745935` [ascii] `IS100Level`
   - offset `745946` [ascii] `IS101Level`
@@ -604,12 +1201,68 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `746226` [ascii] `NecrumR1Trades`
   - offset `746241` [ascii] `NecrumR2Trades`
   - offset `746256` [ascii] `NecrumR3Trades`
+  - offset `746271` [ascii] `NecrumR4Trades`
+  - offset `746286` [ascii] `NecrumR5Trades`
+  - offset `746301` [ascii] `NecrumR6Trades`
+  - offset `746316` [ascii] `NecrumR7Trades`
+  - offset `746331` [ascii] `NecrumR8Trades`
+  - offset `746346` [ascii] `NecrumR9Trades`
+  - offset `746361` [ascii] `Mech1Unlocked`
+  - offset `746375` [ascii] `Mech1Units`
+  - offset `746386` [ascii] `Mech1Upg1Level`
+  - offset `746401` [ascii] `Mech1Upg2Level`
+  - offset `746416` [ascii] `Mech1MissionsProgress`
+  - offset `746438` [ascii] `FinalMech1MainBonus`
+  - offset `746458` [ascii] `Mech1MissionsCompleted`
+  - offset `746481` [ascii] `Mech2Unlocked`
+  - offset `746495` [ascii] `Mech2Units`
+  - offset `746506` [ascii] `Mech2Upg1Level`
+  - offset `746521` [ascii] `Mech2Upg2Level`
+  - offset `746536` [ascii] `Mech2MissionsProgress`
+  - offset `746558` [ascii] `FinalMech2MainBonus`
+  - offset `746578` [ascii] `Mech2MissionsCompleted`
+  - offset `746601` [ascii] `Mech3Unlocked`
+  - offset `746615` [ascii] `Mech3Units`
+  - offset `746626` [ascii] `Mech3Upg1Level`
+  - offset `746641` [ascii] `Mech3Upg2Level`
+  - offset `746656` [ascii] `Mech3MissionsProgress`
+  - offset `746678` [ascii] `FinalMech3MainBonus`
+  - offset `746698` [ascii] `Mech3MissionsCompleted`
+  - offset `746721` [ascii] `Mech4Unlocked`
 
 ### Match 2
 
 - Match offset: `777824`
 - Match value: `InscryptionsDoneText`
 - Nearby strings:
+  - offset `777278` [ascii] `BottomInventory`
+  - offset `777294` [ascii] `DiamondsText`
+  - offset `777307` [ascii] `TokensText`
+  - offset `777318` [ascii] `CellsText`
+  - offset `777328` [ascii] `MPText`
+  - offset `777335` [ascii] `ShardsText`
+  - offset `777346` [ascii] `RPText`
+  - offset `777353` [ascii] `APText`
+  - offset `777360` [ascii] `OrbsText`
+  - offset `777369` [ascii] `InnovationCoresText`
+  - offset `777389` [ascii] `BlueprintsText`
+  - offset `777404` [ascii] `DarkInnovationCoresText`
+  - offset `777428` [ascii] `FragmentsText`
+  - offset `777442` [ascii] `DifarText`
+  - offset `777452` [ascii] `KentoText`
+  - offset `777462` [ascii] `ChromiumText`
+  - offset `777475` [ascii] `ExonText`
+  - offset `777484` [ascii] `OrganiumText`
+  - offset `777497` [ascii] `AdamorphiumText`
+  - offset `777513` [ascii] `MoskomText`
+  - offset `777524` [ascii] `DarkseidText`
+  - offset `777537` [ascii] `TokeniumText`
+  - offset `777550` [ascii] `ObsidianText`
+  - offset `777563` [ascii] `BehliumText`
+  - offset `777575` [ascii] `HellishText`
+  - offset `777587` [ascii] `FarahyteText`
+  - offset `777600` [ascii] `GalvariumText`
+  - offset `777614` [ascii] `VectidText`
   - offset `777625` [ascii] `GlaciumText`
   - offset `777637` [ascii] `AquariusQuartzText`
   - offset `777656` [ascii] `NautilusTeseractText`
@@ -635,12 +1288,68 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `777958` [ascii] `HighestCellsText`
   - offset `777975` [ascii] `HighestManualGensText`
   - offset `777997` [ascii] `HighestTechUpLevelsText`
+  - offset `778021` [ascii] `HighestMPText`
+  - offset `778035` [ascii] `HighestLoopModsText`
+  - offset `778055` [ascii] `HighestLoopResetsText`
+  - offset `778077` [ascii] `HighestShardsText`
+  - offset `778095` [ascii] `HighestMilestoneLevelsText`
+  - offset `778122` [ascii] `HighestRPText`
+  - offset `778136` [ascii] `HighestResearchText`
+  - offset `778156` [ascii] `HighestAPText`
+  - offset `778170` [ascii] `HighestGearLevelsText`
+  - offset `778192` [ascii] `HighestProjectsText`
+  - offset `778212` [ascii] `HighestBlueprintsText`
+  - offset `778234` [ascii] `HighestFragmentsText`
+  - offset `778255` [ascii] `HighestRelicLevelsText`
+  - offset `778278` [ascii] `HighestBorgeProgressText`
+  - offset `778303` [ascii] `HighestOzzyProgressText`
+  - offset `778327` [ascii] `HighestKnoxProgressText`
+  - offset `778351` [ascii] `GemUI`
+  - offset `778357` [ascii] `GemNodeList`
+  - offset `778369` [ascii] `GemUIMainPair`
+  - offset `778383` [ascii] `gemObject`
+  - offset `778393` [ascii] `gemText`
+  - offset `778401` [ascii] `SetActive`
+  - offset `778411` [ascii] `normalNumber`
+  - offset `778424` [ascii] `SetText`
+  - offset `778432` [ascii] `ToRoman`
+  - offset `778440` [ascii] `GemObject`
+  - offset `778450` [ascii] `GemText`
+  - offset `778458` [ascii] `<OnOpenPlayerProfile>d__159`
 
 ### Match 3
 
 - Match offset: `959782`
 - Match value: `SetInscryptionsDoneText`
 - Nearby strings:
+  - offset `958472` [ascii] `<>c__DisplayClass1139_0`
+  - offset `958496` [ascii] `<SetOzzyStatisticsVectidAverageText>b__1`
+  - offset `958537` [ascii] `<>c__DisplayClass1142_0`
+  - offset `958561` [ascii] `<SetOzzyStatisticsXPAverageText>b__1`
+  - offset `958598` [ascii] `<>c__DisplayClass1147_0`
+  - offset `958622` [ascii] `<SetKnoxStatisticsKillsAverageTexts>b__1`
+  - offset `958663` [ascii] `<>c__DisplayClass1149_0`
+  - offset `958687` [ascii] `<SetKnoxStatisticsStageAverageTexts>b__1`
+  - offset `958728` [ascii] `<>c__DisplayClass1150_0`
+  - offset `958752` [ascii] `<SetKnoxStatisticsRunTimerAverageTexts>b__1`
+  - offset `958796` [ascii] `<>c__DisplayClass1158_0`
+  - offset `958820` [ascii] `<SetKnoxStatisticsDmgAverageTexts>b__1`
+  - offset `958859` [ascii] `<>c__DisplayClass1160_0`
+  - offset `958883` [ascii] `<SetKnoxStatisticsExtraSalvoHitsAverageTexts>b__1`
+  - offset `958933` [ascii] `<>c__DisplayClass1162_0`
+  - offset `958957` [ascii] `<SetKnoxStatisticsExtraSalvosDmgAverageTexts>b__1`
+  - offset `959007` [ascii] `<>c__DisplayClass1168_0`
+  - offset `959031` [ascii] `<SetKnoxStatisticsDmgTakenAverageTexts>b__1`
+  - offset `959075` [ascii] `<>c__DisplayClass1170_0`
+  - offset `959099` [ascii] `<SetKnoxStatisticsHpRegeneratedAverageTexts>b__1`
+  - offset `959148` [ascii] `<>c__DisplayClass1177_0`
+  - offset `959172` [ascii] `<SetKnoxStatisticsBlocksAverageTexts>b__1`
+  - offset `959214` [ascii] `<>c__DisplayClass1181_0`
+  - offset `959238` [ascii] `<SetKnoxStatisticsDmgReductionAverageTexts>b__1`
+  - offset `959286` [ascii] `<>c__DisplayClass1185_0`
+  - offset `959310` [ascii] `<SetKnoxStatisticsEffectsAverage>b__1`
+  - offset `959348` [ascii] `<>c__DisplayClass1196_0`
+  - offset `959372` [ascii] `<SetKnoxStatisticsGlaciumAverageText>b__1`
   - offset `959414` [ascii] `<>c__DisplayClass1199_0`
   - offset `959438` [ascii] `<SetKnoxStatisticsAquariusQuartzAverageText>b__1`
   - offset `959487` [ascii] `<>c__DisplayClass1202_0`
@@ -666,6 +1375,34 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `959963` [ascii] `SetIS8CostText`
   - offset `959978` [ascii] `SetIS9CostText`
   - offset `959993` [ascii] `SetIS10CostText`
+  - offset `960009` [ascii] `SetIS11CostText`
+  - offset `960025` [ascii] `SetIS12CostText`
+  - offset `960041` [ascii] `SetIS13CostText`
+  - offset `960057` [ascii] `SetIS14CostText`
+  - offset `960073` [ascii] `SetIS15CostText`
+  - offset `960089` [ascii] `SetIS16CostText`
+  - offset `960105` [ascii] `SetIS17CostText`
+  - offset `960121` [ascii] `SetIS18CostText`
+  - offset `960137` [ascii] `SetIS19CostText`
+  - offset `960153` [ascii] `SetIS20CostText`
+  - offset `960169` [ascii] `SetIS21CostText`
+  - offset `960185` [ascii] `SetIS22CostText`
+  - offset `960201` [ascii] `SetIS23CostText`
+  - offset `960217` [ascii] `SetIS24CostText`
+  - offset `960233` [ascii] `SetIS25CostText`
+  - offset `960249` [ascii] `SetIS26CostText`
+  - offset `960265` [ascii] `SetIS27CostText`
+  - offset `960281` [ascii] `SetIS28CostText`
+  - offset `960297` [ascii] `SetIS29CostText`
+  - offset `960313` [ascii] `SetIS30CostText`
+  - offset `960329` [ascii] `SetIS31CostText`
+  - offset `960345` [ascii] `SetIS32CostText`
+  - offset `960361` [ascii] `SetIS33CostText`
+  - offset `960377` [ascii] `SetIS34CostText`
+  - offset `960393` [ascii] `SetIS35CostText`
+  - offset `960409` [ascii] `SetIS36CostText`
+  - offset `960425` [ascii] `SetIS37CostText`
+  - offset `960441` [ascii] `SetIS38CostText`
 
 ## SetAllChrystosEmporiumTexts
 
@@ -674,6 +1411,34 @@ Source: `workbench\apk\base\global-metadata.dat`
 - Match offset: `959830`
 - Match value: `SetAllChrystosEmporiumTexts`
 - Nearby strings:
+  - offset `958537` [ascii] `<>c__DisplayClass1142_0`
+  - offset `958561` [ascii] `<SetOzzyStatisticsXPAverageText>b__1`
+  - offset `958598` [ascii] `<>c__DisplayClass1147_0`
+  - offset `958622` [ascii] `<SetKnoxStatisticsKillsAverageTexts>b__1`
+  - offset `958663` [ascii] `<>c__DisplayClass1149_0`
+  - offset `958687` [ascii] `<SetKnoxStatisticsStageAverageTexts>b__1`
+  - offset `958728` [ascii] `<>c__DisplayClass1150_0`
+  - offset `958752` [ascii] `<SetKnoxStatisticsRunTimerAverageTexts>b__1`
+  - offset `958796` [ascii] `<>c__DisplayClass1158_0`
+  - offset `958820` [ascii] `<SetKnoxStatisticsDmgAverageTexts>b__1`
+  - offset `958859` [ascii] `<>c__DisplayClass1160_0`
+  - offset `958883` [ascii] `<SetKnoxStatisticsExtraSalvoHitsAverageTexts>b__1`
+  - offset `958933` [ascii] `<>c__DisplayClass1162_0`
+  - offset `958957` [ascii] `<SetKnoxStatisticsExtraSalvosDmgAverageTexts>b__1`
+  - offset `959007` [ascii] `<>c__DisplayClass1168_0`
+  - offset `959031` [ascii] `<SetKnoxStatisticsDmgTakenAverageTexts>b__1`
+  - offset `959075` [ascii] `<>c__DisplayClass1170_0`
+  - offset `959099` [ascii] `<SetKnoxStatisticsHpRegeneratedAverageTexts>b__1`
+  - offset `959148` [ascii] `<>c__DisplayClass1177_0`
+  - offset `959172` [ascii] `<SetKnoxStatisticsBlocksAverageTexts>b__1`
+  - offset `959214` [ascii] `<>c__DisplayClass1181_0`
+  - offset `959238` [ascii] `<SetKnoxStatisticsDmgReductionAverageTexts>b__1`
+  - offset `959286` [ascii] `<>c__DisplayClass1185_0`
+  - offset `959310` [ascii] `<SetKnoxStatisticsEffectsAverage>b__1`
+  - offset `959348` [ascii] `<>c__DisplayClass1196_0`
+  - offset `959372` [ascii] `<SetKnoxStatisticsGlaciumAverageText>b__1`
+  - offset `959414` [ascii] `<>c__DisplayClass1199_0`
+  - offset `959438` [ascii] `<SetKnoxStatisticsAquariusQuartzAverageText>b__1`
   - offset `959487` [ascii] `<>c__DisplayClass1202_0`
   - offset `959511` [ascii] `<SetKnoxStatisticsNautilusTesseractAverageText>b__1`
   - offset `959563` [ascii] `<>c__DisplayClass1205_0`
@@ -699,6 +1464,34 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `959993` [ascii] `SetIS10CostText`
   - offset `960009` [ascii] `SetIS11CostText`
   - offset `960025` [ascii] `SetIS12CostText`
+  - offset `960041` [ascii] `SetIS13CostText`
+  - offset `960057` [ascii] `SetIS14CostText`
+  - offset `960073` [ascii] `SetIS15CostText`
+  - offset `960089` [ascii] `SetIS16CostText`
+  - offset `960105` [ascii] `SetIS17CostText`
+  - offset `960121` [ascii] `SetIS18CostText`
+  - offset `960137` [ascii] `SetIS19CostText`
+  - offset `960153` [ascii] `SetIS20CostText`
+  - offset `960169` [ascii] `SetIS21CostText`
+  - offset `960185` [ascii] `SetIS22CostText`
+  - offset `960201` [ascii] `SetIS23CostText`
+  - offset `960217` [ascii] `SetIS24CostText`
+  - offset `960233` [ascii] `SetIS25CostText`
+  - offset `960249` [ascii] `SetIS26CostText`
+  - offset `960265` [ascii] `SetIS27CostText`
+  - offset `960281` [ascii] `SetIS28CostText`
+  - offset `960297` [ascii] `SetIS29CostText`
+  - offset `960313` [ascii] `SetIS30CostText`
+  - offset `960329` [ascii] `SetIS31CostText`
+  - offset `960345` [ascii] `SetIS32CostText`
+  - offset `960361` [ascii] `SetIS33CostText`
+  - offset `960377` [ascii] `SetIS34CostText`
+  - offset `960393` [ascii] `SetIS35CostText`
+  - offset `960409` [ascii] `SetIS36CostText`
+  - offset `960425` [ascii] `SetIS37CostText`
+  - offset `960441` [ascii] `SetIS38CostText`
+  - offset `960457` [ascii] `SetIS39CostText`
+  - offset `960473` [ascii] `SetIS40CostText`
 
 ## Mech1Unlocked
 
@@ -707,6 +1500,34 @@ Source: `workbench\apk\base\global-metadata.dat`
 - Match offset: `746361`
 - Match value: `Mech1Unlocked`
 - Nearby strings:
+  - offset `745835` [ascii] `IS90Level`
+  - offset `745845` [ascii] `IS91Level`
+  - offset `745855` [ascii] `IS92Level`
+  - offset `745865` [ascii] `IS93Level`
+  - offset `745875` [ascii] `IS94Level`
+  - offset `745885` [ascii] `IS95Level`
+  - offset `745895` [ascii] `IS96Level`
+  - offset `745905` [ascii] `IS97Level`
+  - offset `745915` [ascii] `IS98Level`
+  - offset `745925` [ascii] `IS99Level`
+  - offset `745935` [ascii] `IS100Level`
+  - offset `745946` [ascii] `IS101Level`
+  - offset `745957` [ascii] `IS102Level`
+  - offset `745968` [ascii] `IS103Level`
+  - offset `745979` [ascii] `IS104Level`
+  - offset `745990` [ascii] `IS105Level`
+  - offset `746001` [ascii] `IS106Level`
+  - offset `746012` [ascii] `IS107Level`
+  - offset `746023` [ascii] `IS108Level`
+  - offset `746034` [ascii] `IS109Level`
+  - offset `746045` [ascii] `IS110Level`
+  - offset `746056` [ascii] `InscryptionsDone`
+  - offset `746073` [ascii] `EsotericR1Trades`
+  - offset `746090` [ascii] `EsotericR2Trades`
+  - offset `746107` [ascii] `EsotericR3Trades`
+  - offset `746124` [ascii] `EsotericR4Trades`
+  - offset `746141` [ascii] `EsotericR5Trades`
+  - offset `746158` [ascii] `EsotericR6Trades`
   - offset `746175` [ascii] `EsotericR7Trades`
   - offset `746192` [ascii] `EsotericR8Trades`
   - offset `746209` [ascii] `EsotericR9Trades`
@@ -732,3 +1553,2038 @@ Source: `workbench\apk\base\global-metadata.dat`
   - offset `746521` [ascii] `Mech2Upg2Level`
   - offset `746536` [ascii] `Mech2MissionsProgress`
   - offset `746558` [ascii] `FinalMech2MainBonus`
+  - offset `746578` [ascii] `Mech2MissionsCompleted`
+  - offset `746601` [ascii] `Mech3Unlocked`
+  - offset `746615` [ascii] `Mech3Units`
+  - offset `746626` [ascii] `Mech3Upg1Level`
+  - offset `746641` [ascii] `Mech3Upg2Level`
+  - offset `746656` [ascii] `Mech3MissionsProgress`
+  - offset `746678` [ascii] `FinalMech3MainBonus`
+  - offset `746698` [ascii] `Mech3MissionsCompleted`
+  - offset `746721` [ascii] `Mech4Unlocked`
+  - offset `746735` [ascii] `Mech4Units`
+  - offset `746746` [ascii] `Mech4Upg1Level`
+  - offset `746761` [ascii] `Mech4Upg2Level`
+  - offset `746776` [ascii] `Mech4MissionsProgress`
+  - offset `746798` [ascii] `FinalMech4MainBonus`
+  - offset `746818` [ascii] `Mech4MissionsCompleted`
+  - offset `746841` [ascii] `Mech5Unlocked`
+  - offset `746855` [ascii] `Mech5Units`
+  - offset `746866` [ascii] `Mech5Upg1Level`
+  - offset `746881` [ascii] `Mech5Upg2Level`
+  - offset `746896` [ascii] `Mech5MissionsProgress`
+  - offset `746918` [ascii] `FinalMech5MainBonus`
+  - offset `746938` [ascii] `Mech5MissionsCompleted`
+  - offset `746961` [ascii] `Mech6Unlocked`
+  - offset `746975` [ascii] `Mech6Units`
+  - offset `746986` [ascii] `Mech6Upg1Level`
+  - offset `747001` [ascii] `Mech6Upg2Level`
+  - offset `747016` [ascii] `Mech6MissionsProgress`
+  - offset `747038` [ascii] `FinalMech6MainBonus`
+
+## Market
+
+### Match 1
+
+- Match offset: `511647`
+- Match value: `] ]    Path []   HashCode []   Index []   Style Name [] Attempting to switch to a null material.] Family Name [] First character index: ] Glyph Adjustment Table.] Last character index: ] Property=[] The Materials array is empty.] Units Per EM set to ] and IgnoreType=[] and Style [] because its AtlasPopulationMode is set to Static.] because the provided Unicode list is Null or Empty.] because the provided character list is Null or Empty.] font asset.] index: ] is missing Units Per EM. Please select the 'Reset FaceInfo' menu item on Font Asset [] or any potential fallbacks. Switching Text Overflow mode to Truncate.] readable.] test duration : ] to ensure proper serialization.] to version ] trying to load the font at path []'s atlas texture. Please make the texture [])],], ], Joins=[], Leaves=[], MatchId='], RoomName='], State='],Usernames=[]-[].]. Cannot update lookup tables.]. Make sure "Include Font Data" is enabled in the Font Import Settings.]. Please make sure all types are declared ahead of time using [GeneratePropertyBagAttribute], [GeneratePropertyBagsForTypeAttribute] or [GeneratePropertyBagsForTypesQualifiedWithAttribute]]. The property will use the most derived Type=[]</color> ]V[][][_]\]]]]>^^((\d{4}[- ]?){3}\d{4})$^(?(")(".+?"@)|(([0-9a-zA-Z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-zA-Z])@))(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,6}))$^([0-9]{1,3}\.){3}[0-9]{1,3}$^([a-zA-Z]{1,8})(-[a-zA-Z0-9]{1,8})*$^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$^-?[_a-z][_a-z0-9-]*^.*\.[\w]+$^=^GET(.*)HTTP\/1\.1^[a-zA-Z]:^\s*\w+(?:\.\w+)+(\/.*)?$^instanceId:[-0-9]+$__0_0x00__AutoCreated_BackUpThisFolder_ButDontShipItWithYourGame_Bevel_BypassList_BypassOnLocal_ClipRect_CodeBase_Color_ColorInvert_ColorMask_ColorMatrix_ColorOffset_ColorSwapBlue_ColorSwapGreen_ColorSwapRed_Column_Cube_CullMode_CultureInfo_Data/_DefaultBoxGroup_DefaultHorizontalGroup_DefaultTabGroup_DefaultVerticalGroup_EnvMatrix_EnvMatrixRotation_FaceColor_FaceDilate_FaceShininess_FaceTex_Flags_GlowColor_GlowInner_GlowOffset_GlowOuter_GlowPower_GradBotLeftCol_GradBotRightCol_GradTopLeftCol_GradTopRightCol_GradientScale_GradientSettingsTex_HashAlgorithm_HashAlgorithmForControl_HashForControl_Id_IsoPerimeter_LightAngle_MainTex_MainTex_ST_MaskCoord_MaskSoftnessX_MaskSoftnessY_MaxXUV_MaxYUV_MinXUV_MinYUV_Name_ObjectPooler_Outline2Color_Outline2Width_OutlineColor_OutlineMode_OutlineOffset1_OutlineOffset2_OutlineOffset3_OutlineSoftness_OutlineTex_OutlineWidth_Padding_PerspectiveFilter_Pooler_ProxyAddress_PublicKey_PublicKeyToken_RandomSeed_RotateUvAmount_ScaleRatioA_ScaleRatioB_ScaleRatioC_ScaleX_ScaleY_ShaderFlags_ShaderInfoTex_Sharpness_Sigma_Softness_Stencil_StencilComp_StencilOp_StencilReadMask_StencilWriteMask_StrongNameKeyPair_Text_TextureHeight_TextureInfo_TextureWidth_Texture{0}_Tint_UIE_FORCE_GAMMA_UIE_OUTPUT_LINEAR_UIE_RENDER_TYPE_GRADIENT_UIE_RENDER_TYPE_SOLID_UIE_RENDER_TYPE_TEXT_UIE_RENDER_TYPE_TEXTURE_UIE_TEXTURE_SLOT_COUNT_1_UIE_TEXTURE_SLOT_COUNT_2_UIE_TEXTURE_SLOT_COUNT_4_UnderlayColor_UnderlayDilate_UnderlayIsoPerimeter_UnderlayOffset_UnderlayOffsetX_UnderlayOffsetY_UnderlaySoftness_UseClipRect_UseDefaultCredentials_UseRegistry_UseUIAlphaClip_Version_VersionCompatibility_VertexOffsetX_VertexOffsetY_WeightBold_WeightNormal_[Xx]([0-9a-fA-F]{4}|[0-9a-fA-F]{8})_____<__ActivationType__ActivationTypeName__Activator__Args__CallContext__CallSiteActivationAttributes__ContextProperties__CorrelationMgrSlotPresent__CrossContext__GenericArguments__HostContext__IOS_CLIENTID____InternalRegexIgnoreCase____MethodName__MethodSignature__OutArgs__RemotingData__Return__SecurityData__TypeName__Uri___AssemblyString_____a__add-button__aligned__arrow__b__background__background-fill__binding-callback__bound__button__c__cell__center-field__checkmark__checkmark-background__close-button__closeable__column__column-container__column-resize-handle__container__container-inner__container-outer__content__content-and-vertical-scroll-container__content-container__content-viewport__default-content__destroy-callback__drag-area__drag-container__drag-hover-bar__drag-hover-marker__drag-location-preview__drag-preview__dragger__dragger-border__empty-label__extents-field__fault__field__field-group__field-spacer__fill__foldout-header__footer__global_converters__header__header-container__high-button__horizontal__horizontal-scroller__icon__image__index-label__input__inspector-field__item__item-content__item-indent__item-indents__item-toggle__label__low-button__max-thumb__min-thumb__mixed-values__move-location-preview__move-preview__multiline-container__next-button__over-max-multi-edit-limit-label__position-field__previous-button__primitives_converters__progress__remove-button__reorderable__resize-handle-container__resize-preview__row-container__scroll-view__scroll-view--with-footer__selectable__separator__size-field__slider__sort-indicator__text__text-field__title__title-container__toggle__tracker__unbinding-callback__unity-additional-binding-object__unity-binding-request__unity-binding-request-object__unity-collection-view-internal-binding__unity-drag-and-drop__source-view__unity-multi-column-bindable-element__unity-multi-column-bound-column__vertical__vertical-scroller__visual__{0}___compareInfo_context(set):{0} userToken:{1}_context:{0}_fallback_ignoreCase_keyPairArray_keyPairContainer_keyPairExported_options_pool_publicKey_source_strDefault_text_timer_x_x0058__x0078__xmlC_xmlD_xmlI_xmlW_{0}`` and convert to `` could not be instantiated. A parameter-less constructor or an explicit construction method is required.` is not supported. This is an internal bug. Please report using `Help > Report a Bug...` ` registered. Are you missing a package?`. Value must be in range [`: The given type is not assignable to target type.aa lost name should not be null or empty, this probably points to an importer or serialization bugaaabcdaborting connectionabsoluteabsoluteParentPathabsoluteUriabstractacceptConnectionaccessacknowledgePurchaseactionactivateactivatedactiveactive enemies actkactkfileactkfileprefsadapteraddaddContentViewaddOnCompleteListeneraddOnFailureListeneraddOnSuccessListeneraddPackageadd_keysaddressadipiscingadjustedAscenderadjustedDescenderadjustedHorizontalAdvanceadvancedadvertisingDuration must be positiveaesaes128aes128wrapaes192aes192wrapaes256aes256wrapafaf-ZAalgorithmalgorithm="{0}", algorithmNamealicebluealignalign-contentalign-itemsalign-selfalignContentalignItemsalignSelfaliquamallall | <custom-ident>allIn1DefaultShaderallcapsallow-addallow-empty-selectionallow-removeallowAddallowAssetPackDeletionallowEmptySelectionallowRemoveallowSkipalphaalphaHitTestMinimumThreshold should not be modified on a texture not readeable or not using Crunch Compression.alternativeGlyphamam-ETametampancestorancestor-or-selfanchorMaxanchorMinandandroid.graphics.BitmapFactoryandroid.os.SystemClockandroid/util/LogandroidStoreangleangle={0} (rad), cos={1}, sin={2}annotationanonymousanonymous@antiquewhiteanyany elementany element in namespace '{0}'anyAtomicTypeanyAttributeanyOfanySimpleTypeanyTypeanyURIap. J.-C.aposappappUpdateInfoappUpdateOptionsappUpdateTypeappinfoapplehotspotapplicableapplicationapplication/channels/channel/clientProvidersapplication/channels/channel/serverProvidersapplication/jsonapplication/octet-streamaquaaquamarinearar-AEar-BHar-DZar-EGar-IQar-JOar-KWar-LBar-LYar-MAar-OMar-QAar-SAar-SYar-TNar-YEarabicareaNamearg0arg1arg2arg3arg4argsargs.LengthargumentTypeargumentsarnarn-CLarrayarray has less elements than passed count.array too small. numBytes/offset wrong.arrayIndexarrayIndex is equal to or greater than the length of array.arrayIndex is less than 0.arrayTypeasas-INasBytesascenderasciiaskForLoadFriendsResolutionasn1asnEncodedDataaspect-ratioaspectRatioassemassemblyassemblyFullNameassemblyNameassemblyName cannot have zero length.assemblyStringassemblyString cannot have zero lengthassetassetDatabaseInitRefreshassetExportassetImportassetImportStatusasyncResultattributeattributeFormDefaultattributeGroupattributeIndexattributeProviderattributeTypeattributeValueattributesauth-intauthenticating satoriauthoritative=autoauto | <ratio>auto-correctionauto-expandautoCorrectionautoExpandautoRenewingavailability={0} availableVersionCodeawaitableaxisazaz-Cyrl-AZaz-Latn-AZaz-cyrlaz-latnazurebbaba-RUbackground-colorbackground-imagebackground-positionbackground-position-xbackground-position-ybackground-repeatbackground-sizebackgroundColorbackgroundImagebackgroundPositionbackgroundPositionXbackgroundPositionYbackgroundRepeatbackgroundSizebad databad hash length for banUserbanreasonbasebase64base64BinarybaseLinebaseTypebaseUribaseUtcOffsetbasicbb4b2da1-71ba-429e-b5f3-36556abbf4c9bebe-BYbeforebefore=beginMethodbeigebest-fitbestFitbgbg-BGbi1 out of rangebi2 out of rangebigbig5bin.base64bin.hexbin/Data/binaryTypebindItembinderbinding-pathbinding-source-selection-modebindingFlagsbindingSourceSelectionModebisquebitMask={0}bitNum out of rangebitmapbitsblackblanchedalmondblockblockDefaultbluebluevioletblurblurRadiusbnbn-BDbn-INbobo-CNbodyboldbold-and-italicboolbool:bool: bool[]booleanbooleanValueborder-bottom-colorborder-bottom-left-radiusborder-bottom-right-radiusborder-bottom-widthborder-colorborder-left-colorborder-left-widthborder-radiusborder-right-colorborder-right-widthborder-top-colorborder-top-left-radiusborder-top-right-radiusborder-top-widthborder-widthborderBottomColorborderBottomLeftRadiusborderBottomRightRadiusborderBottomWidthborderColorborderLeftColorborderLeftWidthborderRadiusborderRightColorborderRightWidthborderTopColorborderTopLeftRadiusborderTopRightRadiusborderTopWidthborderWidthbotbottombottomLeftbottomRightboundsboxboxedbrbr-FRbrainpoolP160r1brainpoolP160t1brainpoolP192r1brainpoolP192t1brainpoolP224r1brainpoolP224t1brainpoolP256r1brainpoolP256t1brainpoolP320r1brainpoolP320t1brainpoolP384r1brainpoolP384t1brainpoolP512r1brainpoolP512t1breakbrgPlayerUsagebrgUsageEventbrownbsbs-Cyrl-BAbs-Latn-BAbs-cyrlbs-latnbufferbufferSizebufferWithArgsbuffersbuildburlywoodbuttonbyref delegatebytebyte:byteCountbyteIndexbyteValuebyte[byte[]byte[] examplebyte[]: {bytesbytes downloaded: {0} bytesDownloadedbytesUnknownccBoolcDatecDblcIntcStrcaca-EScachecacheable_cursor=cadetbluecalendarcallBackcallbackcallback parameter is nullcamcameracanGrabFocuscancellationTokencannot assign from the reduced node type to the original node typecannot export private keycanvascapacitycapacity must be more than 0capacity was less than the current size.casecatchcatch (catch({0}) [{1}->{2}]category_end=category_start=cbceilceilingcell-templatecellTemplatecentercertcertificatecertificatescertschallengechannelchannelInfochannelSinkProviderschannelSinkProviders/clientProviderschannelSinkProviders/serverProviderschannelschannels/channel/clientProviderschannels/channel/serverProviderscharcharCountcharIndexcharLeftOvercharSet length less than radixcharUnknownHighcharUnknownLowcharValuechar[]charactercharacterSetcharacterSpacingcharscharsRemainingcharsetchartreusecheckedchildchildCountchildkeychinesechnlchocolatechoicechoiceschoicesContentContainerchrystochunk size too long.chunkLengthchunkedcifisupport@octocubegames.comcjkCHScjkCHTcjkJAcjkKOclassclass clientclientProvidersclientVersionStalenessDaysclipclip | ellipsisclosecloseStatuscloseableclosedclosing control StreamclrcmdListPtrcn-big5cnonce="{0}", coco-FRcodecodePagecodepagecolcollabOperationcollapsecollation.cjkKOlv2.bincollation.core.bincollation.tailoring.bincollation.{0}.bincollectioncollection=collectionSelectorcolorcolorMultipliercolorscolumncolumn | row | column-reverse | row-reversecolumn-indexcolumn-namecolumn-reversecolumnIndexcolumnNamecolumnscolumns[{0}].{1}com.amazon.veneziacom.android.billingclient.api.AcknowledgePurchaseParamscom.android.billingclient.api.AcknowledgePurchaseResponseListenercom.android.billingclient.api.BillingClientcom.android.billingclient.api.BillingClientStateListenercom.android.billingclient.api.BillingFlowParamscom.android.billingclient.api.BillingFlowParams$ProductDetailsParamscom.android.billingclient.api.BillingFlowParams$SubscriptionUpdateParamscom.android.billingclient.api.ConsumeParamscom.android.billingclient.api.ConsumeResponseListenercom.android.billingclient.api.PendingPurchasesParamscom.android.billingclient.api.ProductDetailsResponseListenercom.android.billingclient.api.Purchase$PurchaseStatecom.android.billingclient.api.PurchasesResponseListenercom.android.billingclient.api.PurchasesUpdatedListenercom.android.billingclient.api.QueryProductDetailsParamscom.android.billingclient.api.QueryProductDetailsParams$Productcom.android.billingclient.api.QueryPurchasesParamscom.android.packageinstallercom.android.vendingcom.google.android.gms.common.api.ApiExceptioncom.google.android.gms.games.PlayGamescom.google.android.gms.games.PlayGamesSdkcom.google.android.gms.games.snapshot.SnapshotMetadataChange$Buildercom.google.android.gms.nearby.Nearbycom.google.android.gms.nearby.connection.AdvertisingOptions$Buildercom.google.android.gms.nearby.connection.DiscoveryOptions$Buildercom.google.android.gms.nearby.connection.Payloadcom.google.android.gms.nearby.connection.SERVICE_IDcom.google.android.gms.nearby.connection.Strategycom.google.android.gms.tasks.OnFailureListenercom.google.android.gms.tasks.OnSuccessListenercom.google.android.gms.tasks.Taskscom.google.android.packageinstallercom.google.android.play.core.appupdate.AppUpdateManagerFactorycom.google.android.play.core.appupdate.AppUpdateOptionscom.google.android.play.core.install.InstallStateUpdatedListenercom.google.android.play.core.tasks.OnFailureListenercom.google.android.play.core.tasks.OnSuccessListenercom.google.games.bridge.ConnectionLifecycleCallbackProxycom.google.games.bridge.EndpointDiscoveryCallbackProxycom.google.games.bridge.HelperFragmentcom.google.games.bridge.PayloadCallbackProxycom.huawei.appmarketcom.lofelt.haptics.HapticPatternscom.lofelt.haptics.LofeltHapticscom.octocubegames.cifi.anniversarycom.octocubegames.cifi.cellmascom.octocubegames.cifi.cellmas2025com.octocubegames.cifi.chestspeedstercom.octocubegames.cifi.collectorcom.octocubegames.cifi.diamondautocom.octocubegames.cifi.diamondshugepackagecom.octocubegames.cifi.diamondslargepackcom.octocubegames.cifi.diamondsmassivepackagecom.octocubegames.cifi.diamondssmallpackcom.octocubegames.cifi.elysiumcom.octocubegames.cifi.explorerpackagecom.octocubegames.cifi.fragmentpackagecom.octocubegames.cifi.generatorpackagecom.octocubegames.cifi.hyperioncom.octocubegames.cifi.looppackagecom.octocubegames.cifi.mediumsalecom.octocubegames.cifi.namechangecom.octocubegames.cifi.ouropackagecom.octocubegames.cifi.starterpackagecom.octocubegames.cifi.supportercom.octocubegames.cifi.tokenautocom.sec.android.app.samsungappscom.unitycom.unity.purchasingcom.unity.purchasing.amazon.AmazonPurchasingcom.unity.purchasing.common.IUnityCallbackcom.unity.services.core.analytics-user-idcom.unity.services.core.environment-namecom.unity3d.ads.IUnityAdsInitializationListenercom.unity3d.ads.IUnityAdsLoadListenercom.unity3d.ads.IUnityAdsShowListenercom.unity3d.ads.UnityAdscom.unity3d.ads.UnityAdsLoadOptionscom.unity3d.ads.UnityAdsShowOptionscom.unity3d.ads.metadata.MetaDatacom.unity3d.player.IAssetPackManagerDownloadStatusCallbackcom.unity3d.player.IAssetPackManagerMobileDataConfirmationCallbackcom.unity3d.player.IAssetPackManagerStatusQueryCallbackcom.unity3d.player.PlayAssetDeliveryUnityWrappercom.unity3d.player.UnityPlayercom.unity3d.services.banners.IUnityBannerListenercom.unity3d.services.banners.UnityBannerscom.unity3d.services.banners.view.BannerPositioncom/google/android/gms/tasks/OnCompleteListenercom/google/android/gms/tasks/OnFailureListenercom/google/android/gms/tasks/OnSuccessListenercom/google/games/bridge/ConnectionLifecycleCallbackProxy$Callbackcom/google/games/bridge/EndpointDiscoveryCallbackProxy$Callbackcom/google/games/bridge/PayloadCallbackProxy$Callbackcom/unity3d/player/ReflectionHelpercommandBuffercommentcommitcommitAndClosecommitAndClose.failed: commitAndClose.succeedcompareOptionscomparercomparisoncomparisonTypecompleteUpdatecomplexContentcomplexTypecomponentcomponentClasscomponentHashcomponentPackagecomponentPackageHashcomponentTypecomponentscompressedStreamconcatconcurrencyLevelconfidenceconfirm_subscription_price_changeconnectionconnectionGroupNameconnectionRequestCallbackconsectetuerconstconstraintconsumeAsynccontaincontainercontainscontentcontent-boxcontent-containercontent://contentContainercontentLengthcontentRectcontentTypecontentscontentsEnabledcontextcontext.currentElement != nullcontextTypecontinuationcontinuationActioncontinuationFunctioncontinuationOptionscontinuecontinue_promotional_purchasescontractcontrastconversionconversionTypeconverterconverterFunccookiecookieCollectioncookiescopycoralcornflowerbluecornsilkcoscouldn't compute signature verificationcountcovercp037cp1025cp1256cp290cp297cp367cp420cp423cp424cp437cp50227cp819cp850cp852cp855cp857cp858cp860cp861cp862cp863cp864cp865cp866cp869cp875cp880cratecreatecreate=createFunccreateInvocationErrorcreateValueCallbackcreationOptionscreatorcredentialscrimsoncrlcscs-CZcsASCIIcsEUCKRcsEUCPkdFmtJapanesecsGB2312csGB231280csIBM037csIBM1026csIBM273csIBM277csIBM278csIBM280csIBM284csIBM285csIBM290csIBM297csIBM420csIBM423csIBM424csIBM500csIBM870csIBM871csIBM880csIBM905csIBMThaicsISO2022JPcsISO2022KRcsISO58GB231280csISOLatin1csISOLatin2csISOLatin3csISOLatin4csISOLatin5csISOLatin9csISOLatinArabiccsISOLatinCyrilliccsISOLatinGreekcsISOLatinHebrewcsKOI8RcsKSC56011987csPC8CodePage437csShiftJIScsUnicode11UTF7csWindows31Jcsbig5cspacecullingEnabledculturecultureNamecurrencycurrentActivitycursorcursor=cursorIndexcursorPositioncustomcustom styles is nullcustomErrorscxcycy-GBcyancygwincyrillicczdd MMM yy H:m:sd MMM yyyy hh:mm:ss:fffd MMM yyyy hh:mm:ss:fffttd':'h':'mm':'ss'dada-DKdarkbluedarkcyandarkgoldenroddarkgraydarkgreendarkgreydarkkhakidarkmagentadarkolivegreendarkorangedarkorchiddarkreddarksalmondarkseagreendarkslatebluedarkslategraydarkslategreydarkturquoisedarkvioletdatdatadata cannot be emptydata cannot be longer than {0}data-sourcedata-source-pathdataItemdataSetdataSourcedataSourcePathdataTypedatatypedatedateDatadateEnddateStartdateTimedateTime.tzdateTimeOptiondaydayOfWeekdayTimeDurationdaylightDeltadaylightTransitionEnddayofweekdaysdc}dd.MM.yyyyddd MMM d HH:mm:ss yyyyddd, d MMM yyyy H:m:s zzzddd, dd MMM yyyy HH':'mm':'ss 'GMT'dddd, dd MMMM yyyydddd, dd'-'MMM'-'yy HH:mm:ss 'GMT'dede-ATde-CHde-DEde-LIde-LUdebugdecimaldecimal[]decimalsdeclaringTypedecodeByteArraydecoderFallbackdeeppinkdeepskybluedefaultdefault(defaultCursorIddefaultValuedefaultkeydeflatedegdelaydelayLoadAsClientChanneldelegatedelegateTypedelegatesFocusdelegatingTypedeletedeleteLeaderboarddelimiterdeltademoByteArraydemoColordemoColor32demoDoubledemoLongdemoQuaterniondemoRectdemoUintdemoVector2demoVector3dependencyComponentdependencyHashdependencyOptionaldependencyProvideddequeue_query_products_timedequeue_query_purchases_timederivedBydesdesc.depthStencilFormatdesc.graphicsFormatdesc.heightdesc.msaaSamplesdesc.volumeDepthdesc.widthdescendantdescendant-or-selfdescenderdescriptiondestdestDirNamedestFileNamedest_bufferdestinationdestination offset is beyond array sizedestinationArraydestinationIndexdestinationTimeZonedestinationTypedestroydestroyItemdeveloperPayloaddeviceMeetsMinimumRequirementsdeviceStatusdeviceiddexdiamdictdictionarydictionaryCreationThresholddictionaryTypediffgrdiffgramdigestdigest digitdigitsdimgraydimgreydirdirectiondirectorydisablePlayModeTintdisableddisabledColordisconnectFromEndpointdispatcher != nulldisplaydisplay-tooltip-when-elideddisplayTooltipWhenElideddivdlldl}dnQualifierdnQualifier=dodocTypeNamedocumentationdodgerbluedolordoloredonedonoctodoubledouble-click-selects-worddouble:double: doubleClickSelectsWorddoubleValuedouble[]downbuttondownloaded={0} dropPositionds_sqlXmlWraPPeRdsadsaSHA1dsbdsb-DEdstdstOffsetdtdttermdueTimedue_time_msdumbdummy.bundle.iddummy.service.iddurationdurationMillisecondsdvdv-MVdyMdynamicProvideree100e101e102e103e104e105e106e107e108e109e110e111e112e113e114e115e116e117e118e119e120e121e122e123e124e125e126e127e128e129e130e131e132e133e134e135e136e137e138e139e140e141e142e143e144e145e146e147e148e149e150e151e152e153e154e155e156e157e158e159e160e161e162e163e164e165e166e167e168e169e170e171e172e173e174e175e176e177e178e179e180e181e182e183e184e185e186e187e188e189e190e191e192e193e194e195e196e197e198e199e200e201e202e203e204e205e206e207e208e209e210e211e212e213e214e215e216e217e218e219e220e221e222e223e224e225e226e227e228e229e230e231e232e233e234e235e236e237e238e239e240e241e242e243e244e245e246e247e248e249e250e251e252e253e254e255e256e257e258e259e260e261e262e263e264e265e266e267e268e269e270e271e272e273e274e275e276e277e278e279e280e281e282e283e284e285e286e287e288e289e290e291e292e293e294e295e296e297e298e299e300e301e302e303e304e305e306e307e308e36e37e38e39e40e41e42e43e44e45e46e47e48e49e50e51e52e53e54e55e56e57e58e59e60e61e62e63e64e65e66e67e68e69e70e71e72e73e74e75e76e77e78e79e80e806f6e81e82e83e84e85e86e87e88e89e90e91e92e93e94e95e96e97e98e99easeease | ease-in | ease-out | ease-in-out | ease-in-sine | ease-out-sine | ease-in-out-sine | ease-in-cubic | ease-out-cubic | ease-in-out-cubic | ease-in-circ | ease-out-circ | ease-in-out-circ | ease-in-elastic | ease-out-elastic | ease-in-out-elastic | ease-in-back | ease-out-back | ease-in-out-back | ease-in-bounce | ease-out-bounce | ease-in-out-bounceease-inease-in-backease-in-bounceease-in-circease-in-cubicease-in-elasticease-in-outease-in-out-backease-in-out-bounceease-in-out-circease-in-out-cubicease-in-out-elasticease-in-out-sineease-in-sineease-outease-out-backease-out-bounceease-out-circease-out-cubicease-out-elasticease-out-sineeasing-functionebcdicebcdic-Latin9--euroebcdic-cp-ar1ebcdic-cp-beebcdic-cp-caebcdic-cp-chebcdic-cp-esebcdic-cp-fiebcdic-cp-frebcdic-cp-gbebcdic-cp-grebcdic-cp-heebcdic-cp-isebcdic-cp-itebcdic-cp-nlebcdic-cp-roeceebcdic-cp-seebcdic-cp-trebcdic-cp-usebcdic-cp-wtebcdic-cp-yuebcdic-de-273+euroebcdic-dk-277+euroebcdic-es-284+euroebcdic-fi-278+euroebcdic-fr-297+euroebcdic-gb-285+euroebcdic-international-500+euroebcdic-is-871+euroebcdic-it-280+euroebcdic-no-277+euroebcdic-se-278+euroebcdic-us-37+euroec192wapiediteditorStallMarkereditorStallSummaryelel-GRelapsedRealtimeelasticAnimationIntervalMselasticityeleelemelementelement-nameelementFormDefaultelementOnlyelementSelectorelementTypeelementValueelementVisitorelement_bufferelitellipsiselseeltOnlyemembedPackageemilosemoji-fallback-supportemojiFallbackSupportemptyenen-029en-AUen-BZen-CAen-GBen-IEen-INen-JMen-MYen-NZen-PHen-SGen-TTen-USen-ZAen-ZWenable-rich-textenableOneTimeProductsenablePendingPurchasesenableRichTextenabledenabledInHierarchyenabledSelfencodedDataencodedDistinguishedNameencoderFallbackencodingendendFunctionendIndexendIndex cannot be greater than startIndex.endMethodend_time=enhancedKeyUsagesentitiesentityentityTagentrySetenumenumTypeenumerableenumerationenvenvironmentNameenvoyInfoequalequalseraeraterrorerrorCodeerrorseses-ARes-BOes-CLes-COes-CRes-DOes-ECes-ESes-GTes-HNes-MXes-NIes-PAes-PEes-PRes-PYes-SVes-USes-UYes-VEes}etet-EEeueu-ESeuc-cneuc-jpeuc-kreuismodeu}evaluatoreventeventTypeevt.isPropagationStoppedexexceptionexceptionObjectexcludeFromFocusRing should only be set on composite roots.exclusionexeexpexp:{0} completedRequest:{1}expandedNameexpiry=explicitexpressionexpressionsextendsextensionextentsexternextra Life picked upextra points picked upextraPaddingeyezff)f, f0f1f2f3f4f5fIsMarshalledfafa-IRfacefacebook_ids=fadefadeDurationfailed a fake store purchasefakefalsefamilyfaultfault cannot be used with catch or finally clausesfetch_purchases_errorfetch_store_promotion_orderfetch_store_promotion_visibilityfifi-FIfieldfield or propertyfieldCountfieldInfofieldNamefilfil-PHfilefile:file:/file://file:///fileAccessfileNamefileTimefilenamefillfillAlphafilterfilter=finalfinalDefaultfinallyfindValuefirebrickfirstfixedfixed-item-heightfixed-pane-indexfixed-pane-initial-dimensionfixed.14.4fixedItemHeightfixedPaneIndexfixedPaneInitialDimensionfk_flagfldsflemmingflexflex | noneflex-basisflex-directionflex-endflex-growflex-shrinkflex-startflex-start | flex-end | center | space-between | space-around | space-evenlyflex-start | flex-end | center | stretch | autoflex-wrapflexBasisflexDirectionflexGrowflexShrinkflexWrapflexibleAllowed={0}floatfloat.ieee.754.32float.ieee.754.64float:float: floatValuefloat[]floorfloralwhitefl}fofo-FOfocusfocus-indexfocusIndexfocusablefollowingfollowing-siblingfontfont-sizefont-weightfontAssetfontSizefontStylefontWeightforfor foreachforestgreenformformatformatStringformatsformatterformatterConverterforward=fourCornersArrayfrfr-BEfr-CAfr-CHfr-FRfr-LUfr-MCfractionDigitsframeworkframeworkNamefreeTrialPeriodfreezefriendlyNamefromfromBytesftpfuchsiafuncfunctionfyfy-NLf{0}gg7g8923gnmzx02341jmdgsxxcgDaygMonthgMonthDaygYeargYearMonthgaga-IEgainsborogame savedgameCompletegb2312gdgenerationgeneric args after array spec or pointer typegenericArgumentsgenericClassDefinitiongenericInterfaceDefinitiongenericMethodgenericParameterDefinitiongenericTypegenericTypeDefinitiongetgetAccountIdentifiersgetAchievementIdgetAchievementsClientgetAppUpdateInfogetApplicationInfogetAssetPackStatesgetAverageSessionLengthgetBillingCycleCountgetBillingPeriodgetChurnProbabilitygetClassgetClipDurationgetComponentTypegetConflictgetConflictIdgetConflictingSnapshotgetConnectionStategetConnectionsClientgetConstructorIDgetControllerHandlegetCountgetCoverImageUrlgetCurrentPlayergetCurrentPlayerInfogetCurrentStepsgetDatagetDaysSinceLastPlayedgetDebugMessagegetDebugModegetDeclaringClassgetDecorViewgetDescriptiongetDisplayNamegetEndpointNamegetErrorCodegetEventIdgetEventsClientgetExceptiongetFieldIDgetFieldSignaturegetFormattedPricegetFriendStatusgetFriendsListVisibilityStatusgetGamesSignInClientgetHighSpenderProbabilitygetIconImageUrlgetInstancegetKeygetLastModifiedTimestampgetLastUpdatedTimestampgetLayoutParamsgetLeaderboardgetLeaderboardsClientgetLengthgetMessagegetMetadatagetMethodIDgetNamegetNumScoresgetNumberOfPurchasesgetNumberOfSessionsgetObfuscatedAccountIdgetObfuscatedProfileIdgetOfferTokengetOneTimePurchaseOfferDetailsgetOrderIdgetOriginalJsongetPackageManagergetPackageNamegetParentgetPlayedTimegetPlayerIdgetPlayerRankgetPlayerScoreTaggetPlayerStatsClientgetPlayersClientgetPriceAmountMicrosgetPriceCurrencyCodegetPricingPhaseListgetPricingPhasesgetProductDetailsListgetProductIdgetProductTypegetProductsgetPurchaseStategetPurchaseTokengetRankgetRawPlayerScoregetRawScoregetRecallClientgetRelationshipInfogetResolutiongetResolutionSnapshotContentsgetResponseCodegetResultgetRevealedImageUrlgetScoreHoldergetScoreTaggetScoresgetServiceIdgetSessionIdgetSessionPercentilegetSharedPreferencesgetSignaturegetSnapshotgetSnapshotContentsgetSnapshotIdgetSnapshotsClientgetSpendPercentilegetSpendProbabilitygetStackTraceStringgetStategetStatusgetStatusCodegetStringgetSubscriptionOfferDetailsgetTimestampMillisgetTitlegetTotalSpendNext28DaysgetTotalStepsgetTypegetUniqueNamegetUnlockedImageUrlgetValuegetVariantsgetVersiongetXpValueget_HasValueget_Itemget_Lengthget_Positionget_Valuegetterghostwhiteglgl-ESglobalglobal-metadataglobalUnscaledTimeglowRinggogoldgoldenrodgoogle.comgoogle204gophergotogradgradientgradientAssetgraphgraygrayscalegreekgreek8greengreenyellowgreygroupgroup_id=growFactorgswgsw-FRgtgugu-INguidgu}gzipgzip, deflatehh)h:mm tthaha-Latn-NGha-latnhandlehandlerhandlershas a nodehasChangeshasErrorshasNexthasPlayerInfohas_introductory_price_trialhashCodehehe-ILheaderheader cannot be emptyheader-templateheader-titleheaderTemplateheaderTitleheadershebrewheighthejhelloheroeshexhexBinaryhexStringhh:mm tthh:mm:ss:fffhh:mm:ss:ffftthh\:mmhh\:mm\:sshihi-INhiddenhide-mobile-inputhide-placeholder-on-focushideMobileInputhidePlaceholderOnFocushierarchyhierarchyFlattenedhierarchyPtrhigh-limithigh-valuehighLimithighLimit is smaller than lowLimithighResolutionImagehighSurrogatehighValuehighlightColorhighlightStatehighlightedColorhmacmd5hmacripemd160hmacsha1hmacsha256hmacsha384hmacsha512honeydewhorizontal movementhorizontal-page-sizehorizontal-scroller-visibilityhorizontal-scrollinghorizontalAlignmenthorizontalPageSizehorizontalScrollerVisibilityhorizontalScrollingEnabledhorizontalscrollbarhorizontalscrollbarleftbuttonhorizontalscrollbarrightbuttonhorizontalscrollbarthumbhorizontalsliderhorizontalsliderthumbhorizontalsliderthumbextenthosthostNamehostNameOrAddresshostnamehotpinkhotspothourshoverhrhr-BAhr-HRhrefhref=hsbhsb-DEhtmlhttphttp://http://james.newtonking.com/projects/jsonhttp://microsoft.com/wsdl/types/http://schemas.microsoft.com/clr/assem/http://schemas.microsoft.com/clr/ns/http://schemas.microsoft.com/clr/nsassem/http://schemas.microsoft.com/ws/2008/06/identity/claims/rolehttp://schemas.xmlsoap.org/soap/encoding/http://schemas.xmlsoap.org/ws/2005/05/identity/claims/namehttp://schemas.xmlsoap.org/wsdl/http://u@http://www.msftconnecttest.com/connecttest.txthttp://www.w3.org/http://www.w3.org/1999/XMLSchema-instancehttp://www.w3.org/2000/09/xmldsig#dsa-sha1http://www.w3.org/2000/09/xmldsig#hmac-sha1http://www.w3.org/2000/09/xmldsig#rsa-sha1http://www.w3.org/2000/09/xmldsig#sha1http://www.w3.org/2000/10/XMLSchema-instancehttp://www.w3.org/2000/xmlns/http://www.w3.org/2001/04/xmldsig-more#hmac-ripemd160http://www.w3.org/2001/04/xmldsig-more#hmac-sha256http://www.w3.org/2001/04/xmldsig-more#hmac-sha384http://www.w3.org/2001/04/xmldsig-more#hmac-sha512http://www.w3.org/2001/04/xmldsig-more#rsa-sha256http://www.w3.org/2001/04/xmldsig-more#rsa-sha384http://www.w3.org/2001/04/xmldsig-more#rsa-sha512http://www.w3.org/2001/04/xmldsig-more#sha384http://www.w3.org/2001/04/xmlenc#sha256http://www.w3.org/2001/04/xmlenc#sha512http://www.w3.org/2001/XMLSchemahttp://www.w3.org/2001/XMLSchema#stringhttp://www.w3.org/2001/XMLSchema-instancehttp://www.w3.org/2003/11/xpath-datatypeshttp://www.w3.org/XML/1998/namespacehttp_key=httpshttps://https://captive.apple.com/hotspot-detect.htmlhttps://clients3.google.com/generate_204https://google.comhttps://localhost/https://play.google.com/store/apps/details?id=com.OctocubeGamesCompany.CIFIhttps://play.google.com/store/apps/dev?id=7176931174042991537&hl=en-UShttps://snowbot-api.onrender.com/timehttps://www.discord.gg/octocubehuhu-HUhue-rotatehumanBoneId must be between 0 and hyhy-AMhz-gb-2312h{0} (refs#{1}), {2}ii1i2i4i8iOSiatibm737ibm775ibm819ibm850ibm852ibm857ibm861ibm869iconicon-imageiconImageicudt73lidid attribute is requiredid-IDid-smime-alg-3DESwrapidentityHashCodeidrefidrefsids=id{0}ififFalseifTrueigig-NGignorediiii-CNiidimageimmediateAllowed={0}implicitimportimpossible to convert valueinin closurein loop, index : inArrayinactiveinappincludeinclude-obsolete-valuesincrementindentindexindex + count > dest.Lengthindex + count > dest_buffer.Lengthindex + count must point inside the argument ascii stringindex + count must point inside the argument unicode stringindex + length > sizeindex < lower boundindex >= Countindex >= array.Lengthindex must be non-negative valueindex of {0} should be in the range of 0 and {1} inclusively.index1index2index3index={0}, generation={1}index={0}, world={1}, generation={2}indexAindexBindexerindexesindexes: indianredindicesindices' length ({0}) should be equal to or greater than the ToggleButtonGroupState's length ({1}).indigoinfinfinityinfoinfosinftynaeINFTYNAE0123456789.,-*/+%^()cosqrludxvRL=pP#inheritinit_purchaseinitialinitialCapacityinitialCountinitialValueinitializationListener is null, you will not receive any callbacksinitializeinitializersinnerExceptionInfosinnerExceptionsinnerListinnerStreaminputinputBufferinputContextinputCountinputOffsetinsertedinstallStatusinstanceinstanceDocumentinstanceTypeinstantiationintint:int: intValueint[]integerinterfaceinternalinteropXmlElementinteropXmlTypeinterruptedintervalintroductoryPriceintroductoryPriceAmountMicrosintroductoryPriceCyclesintroductoryPriceLocaleintroductoryPriceNumberOfPeriodsintroductoryPricePeriodinvalid EncryptedDatainvalid EncryptedPrivateKeyInfoinvalid MACinvalid MAC iterationinvalid PFX versioninvalid PKCS12 attributes idinvalid PrivateKeyInfoinvalid algorithminvalid attribute idinvalid attribute value idinvalid authenticated safeinvalid block lengthinvalid datainvalid encryptionAlgorithminvalid hash lengthinvalid iterationCountinvalid nameinvalid parametersinvalid private key formatinvalid safeBaginvalid safeBag attributes idinvalid safeBag idinvalid saltinvalid signature lengthinvalid size to resize.invalid versioninvertinvertedinvocationListipStringipsumiris-ansiirvisis-ISis-delayedis-multiple-selectionisAcknowledgedisArrayisAuthenticatedisCanceledisClosedisConflictisDelayedisElidedisFamilyShareableisInitializedisMultipleSelectionisPasswordisPasswordFieldisPlaceholderisPrimitiveisReadOnlyisResolutionRequiredisRightToLeftisSelectableisStaleisSuccessfulisUpdateTypeAllowedisUsingAlternateTypefaceisVisibleis_free_trialis_updatedisiXhosa (South Africa)isiZulu (South Africa)iso-10646-ucs-2iso-2022-jpiso-2022-jpeuciso-2022-kriso-2022-kr-7iso-2022-kr-7bitiso-2022-kr-8iso-2022-kr-8bitiso-8859-1iso-8859-11iso-8859-13iso-8859-15iso-8859-2iso-8859-3iso-8859-4iso-8859-5iso-8859-6iso-8859-7iso-8859-8iso-8859-8-iiso-8859-9iso-ir-100iso-ir-101iso-ir-109iso-ir-110iso-ir-126iso-ir-127iso-ir-138iso-ir-144iso-ir-148iso-ir-149iso-ir-58iso-ir-6iso8859-1iso8859-2isoCurrencyCodeiso_8859-1iso_8859-1:1987iso_8859-2iso_8859-2:1987itit-CHit-ITitalicitemitem picked upitem-heightitem-templateitemHeightitemTemplateitemTypeitemsSourceiterationsiteratoriuiu-Cans-CAiu-Latn-CAiu-cansiu-latnivivcivoryjjaja-JPjarjar:file://java.lang.Booleanjava.lang.Bytejava.lang.Characterjava.lang.Classjava.lang.Doublejava.lang.Floatjava.lang.Integerjava.lang.Longjava.lang.Shortjava.lang.Stringjava.lang.reflect.Arrayjava.util.ArrayListjava/lang/Booleanjava/lang/Bytejava/lang/Characterjava/lang/Doublejava/lang/Floatjava/lang/Integerjava/lang/Longjava/lang/Objectjava/lang/Runnablejava/lang/Shortjava/lang/Stringjava/lang/Systemjava/lang/Throwablejava/lang/reflect/Arrayjava/lang/reflect/FieldjavaTask must not be null.jsonjson:ArrayjsonSerializerjsonWriterjustify-contentjustifyContentkkMGTPEk_AppleReceiptKeyk_PKCS7Keyk_ReceiptBytesKeykaka-GEkeep-alivekeepAliveIntervalkeepAliveTimekeykey = key is nullkey was invalidkey=keySelectorkeyStrkeyValuekeyValuePairkeyboard-typekeyboardTypekeypairskeyrefkeyskeywordkhakikindkkkk-KZklkl-GLkmkm-KHknkn-INknownParameterskoko-KRkoikoi8koi8-rkoi8-rukoi8-ukoi8rkokkok-INkoreanks-c-5601ks-c5601ks_c_5601ks_c_5601-1987ks_c_5601-1989ks_c_5601_1987kyky-KGll1l2l3l4l5l9labellabel=labels=lambda_methodlanglang={0}&status={1}&token={2}lang_tag=languagelanguageDirectionlaoreetlastlatin1latin2latin3latin4latin5latin9launchBillingFlowlavenderlavenderblushlawngreenlaxlayerNameslayoutlblb-LUldapleaseManagerPollTimeleaseTimeleftleft joystickleftbuttonlegacylegacyStudiesAllTimelegacyStudiesLastLooplegacyStudiesSinceTR1legacyStudiesThisConstructionlegacyStudiesThisLooplemonchiffonlenlengthlength < 0length of {0} should be greater than or equal to 0 and less than or equal to {1}.length-percentagelength1length2lengthsletter-spacingletterSpacinglevellicense_errorlicense_initlifeBarlifetimelightbluelightcorallightcyanlightgoldenrodyellowlightgraylightgreenlightgreylightpinklightsalmonlightseagreenlightskybluelightslategraylightslategreylightsteelbluelightyellowlimelimegreenlimit=line line-feed (#xA) or tab (#x9) characters, leading or trailing spaces and sequences of one or more spaces (#x20) are not allowed in 'xs:token'.line-heightline-indentlineNumberlinePositionlineSpacinglinearlinear | <timing-function>linear-gradientlinenlinklinkIDlinuxlistlistenerlolo-LAloadloadBannerloadByIdsloadFactorloadFriendsloadListener is null, you will not receive any callbacksloadMoreFriendsloadMoreScoresloadPlayerloadPlayerCenteredScoresloadPlayerStatsloadTopScoreslocal-namelocalBoundlocalEPlocalNamelocalUserlocalhostlocalizedDescriptionlocalizedPricelocalizedPriceStringlocalizedTitlelocaltimelocklockTakenlockedlogErrorDelegatelogExceptionDelegatelogWarningDelegatelogged out of satorilogicallonglong:long: longValuelong[]looploop { ... }loopbackloremlow-limitlow-valuelowLimitlowLimit is greater than highLimitlowSurrogatelowValuelower-centerlower-leftlower-rightlowerBound={0}, upperBound={1}, isValid={2}lowerBoundslowercaseltlt-LTlvlv-LVmm_CachedPtrm_GateCount > 0m_GateDepth > 0m_MaxCapacitym_StringValuem_acctTypem_codePagem_currentThreadm_initializationState set to INITIALIZING. Initializing Builder next.m_initializationState: m_isAuthenticatedm_isReadOnlym_namem_serializedStatesm_typem_userTokenmacintoshmactripledesmagentamagnamailtomailto:majormakeFootermakeHeadermakeItemmakeNoneElementmanymarginmargin-bottommargin-leftmargin-rightmargin-topmarginBottommarginLeftmarginRightmarginTopmarkmaroonmask-charactermaskCharmaskCharactermatchmatchTimeoutmatch_id=materialmaterialReferenceIndexmaxmax-agemax-age=max-heightmax-lengthmax-stalemax-valuemax-widthmaxCapacitymaxCountmaxDisplayedSavedGames must be greater than 0maxExclusivemaxFontSizemaxHeightmaxInclusivemaxLengthmaxOccursmaxSizemaxStackSizemaxValuemaxWidthmax_size=maximum number of service points reachedmbmd2md2RSAmd4md4RSAmd5md5-sessmd5RSAmediumaquamarinemediumbluemediumorchidmediumpurplemediumseagreenmediumslatebluemediumspringgreenmediumturquoisemediumvioletredmembermemberInfomemberNamememberTypesmembersmembers=memory is not initializedmenumeshmeshesmessagemessage-typemessageIdmessageId must not be emptymessageTypemetaDatametadatametadata=methodmethod arguments are incompatiblemethod return type is incompatiblemethodInfomethodInstantiationmethodNamemethodName is null or emptymgf1mimi-NZmidmiddlemiddle-centermiddle-leftmiddle-rightmidnightbluemillisecondmillisecondsmillisecondsDelaymillisecondsTimeoutminmin-freshmin-fresh=min-heightmin-valuemin-widthminExclusiveminFontSizeminHeightminInclusiveminLengthminOccursminOccurs value cannot be greater than maxOccurs value.minSizeminValueminWidthmin_size=minimumLengthminormintcreamminutesmissing EncryptedContentInfomissing EncryptedContentInfo.ContentEncryptionAlgorithmIdentifiermissing EncryptedContentInfo.ContentTypemissing EncryptedContentInfo.EncryptedContentmissing MAC saltmissing algorithm OIDmissing versionmistyrosemixedmiyagimkmk-MKmlml-INmmsound.settingsmnmn-MNmn-Mong-CNmn-cyrlmn-mongmoccasinmodmodemode attribute is requiredmodelmodifiedmohmoh-CAmoneymono-io-layer-error ({0})monthmonthsmosaicKMandUpdSigmosaicUpdatedSigmousemouse-wheel-scroll-sizemouseWheelScrollSizemovemrmr-INmsms-BNms-MYms_Kanjimscorlibmscorlib.dllmsdatamsdata:UDTColumnValueWrappedmsdata:UseDataSetSchemaOnlymsftconnecttestmspacemstnsmstns:mtmt-MTmultilinemust be reducible nodemust-revalidatemykomyusernamennakama.sessionnamename cannot be emptyname=nameTablenamedParamsnames=namespacenamespace namespace-urinamespaceNamenamespaceResolvernamespaceUrinametablenamingStrategyTypenannanosecondsnative handle can not be nullnativePtrnativeTex can not be nullnavajowhitenavigation_gamebuild_infonavigation_navmesh_bakingnavigation_project_settings_infonavynbnb-NOnc={0:X8}, nene-NPnegative indexnegativeIntegernested-interaction-kindnestedInteractionKindnet.codestage.actk.androidnative.ACTkAndroidRoutinesnet.codestage.actk.androidnative.CodeHashCallbacknet.codestage.actk.androidnative.CodeHashGeneratornet.pipenet.tcpnet/snmpnet/snmp6net/tcpnet/tcp6net/udpnet/udp6net_ftpstatuscode_net_requestabortednet_webstatus_neutralnewnew new Colornew Color(new [] new {0}[{1}] {{ newAddressnewBuildernewElementnewErrornewItemsnewOutnewProxyInstancenewSizenew_sku_price_in_microsnewsnextnext_page_tokennfinibhnilnillablenistP192nistP224nksessionnlnl-BEnl-NLnmtokennmtokensnnnn-NOnntpnono colon foundno private key to exportno-cacheno-repeatno-storeno-transformno-wrapnoNamespaceSchemaLocationnobrnodenode cannot reduce to itself or nullnode=nodeChildrenPtrnodesnodetypenonNegativeIntegernonPositiveIntegernoncenonce="{0}", nonenone | <filter-function>+none | <number>{1,3}none | <single-transition-property>#none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]none | [ x | y | z | <number>{3} ] && <angle> | <angle>none | [<length> | <percentage>] [ [<length> | <percentage>] <length>? ]?none | [best-fit && <length-percentage>{2}]nonummynoparsenormalnormal | italic | bold | bold-and-italicnormal | nowrap | pre | pre-wrapnormalColornormalImagenormalize-spacenormalizedStringnotnot not a generic method definitionnot availablenot enough key parametersnotationnowrapnowrap | wrap | wrap-reversensnsmgrnsonso-ZAntlmnullnull Snapshot passed to AudioMixer.TransitionToSnapshot of AudioMixer 'null texture passed to GUI.DrawTexturenullableTypenum experiments is numBytesnumbernumberOfUnitsnv-constant-templatenv-emphasis-templatenv-pattern-templateoobjobjectobject object must be MarshalByRefobjectGeneratorobjectIDobjectID cannot be less than or equal to zero.objectInfo.objobjectNameobjectRequiredobjectToBeFixedobjectTypeobjectUriobjrefFlagsobscuredString value from inspector: ococ-FRoffoffsetoffset offset must be <= buffer.Lengthoffset must be >= 0offset1offset2offset={0}, blurRadius={1}, color={2}offsetInoffsetMaxoffsetMinoffsetOutoidoidValueoldItemsoldValueold_sku_period_stringold_sku_price_in_microsold_sku_remaining_secondsoldlaceoliveolivedrabononAddonAppReceiptRefreshFailedonAppReceiptRefreshedonEntitlementsRevokedonFetchStorePromotionOrderFailedonFetchStorePromotionOrderSucceededonFetchStorePromotionVisibilityFailedonFetchStorePromotionVisibilitySucceededonProductPurchaseDeferredonPromotionalPurchaseAttemptedonPurchaseFailedEvent({0})onRemoveonTransactionsRestoredFailonTransactionsRestoredSuccessoneonlineOfflineSecondsDifferenceonlineSecondsUtconly-if-cachedopopPoolop_Additionop_BitwiseAndop_BitwiseOrop_Decrementop_Divisionop_Equalityop_ExclusiveOrop_Explicitop_Exponentop_Exponentiationop_Falseop_GreaterThanop_GreaterThanOrEqualop_Implicitop_Incrementop_Inequalityop_LeftShiftop_LessThanop_LessThanOrEqualop_LogicalNotop_Modulusop_Multiplyop_OnesComplementop_RightShiftop_Subtractionop_Trueop_UnaryNegationop_UnaryPlusopacityopaqueopaque="{0}", openopen=operatoroptionaloptionsoror-INorangeorangeredorchidorderorderIdorderedorientationoriginoriginalRuleotherotherSimpleTypeoutoutArrayoutEventoutputoutputBufferoutputOffsetoverflowoverflowModeoverrideoverridingAddButtonBehaviorowner_ids=ppapa-INpackageDependenciespackageHashpackageManagerpackageNamepackageProviderpackage_init_timepackagespaddingpadding-bottompadding-boxpadding-box | content-boxpadding-leftpadding-rightpadding-toppaddingBottompaddingLeftpaddingRightpaddingToppage-sizepageSizepalegoldenrodpalegreenpaleturquoisepalevioletredpanelpanel.contextType == ContextType.EditorpapayawhipparagraphSpacingparallelOptionsparamparameterTypeparametersparameters.CountparamsparentparentIdparentkeyparse-escape-sequencesparseControlCharactersparseEscapeSequencesparse_receipt_transaction_errorparsing "{0}" - {1}partialpartialValidationTypeparticleparticlespartitionerOptionspasswordpathpath1path2path3pathLengthConstraintpathspatternpayload=payoutspeachpuffpenperiodpermessage-deflateperupipicking-modepickingModepinkpivotpixelsPerUnit must be set to a positive non-zero value.plpl-PLplaceholder-textplaceholderTextplacementId cannot be nil or emptyplacementId is emptyplacementsplanesplatformplayplayCoreApiMissingplayMaximumAmplitudePatternplayerplayer_profileplayerprofileplumpointSizepointerpointerEventpool.ntp.orgportpositionposition = position={0}, rotation={1}positionspositiveIntegerposixrulespowderblueprepre-wrappreLoadpreProcessFlagspreauthenticateprecedingpreceding-siblingpredicateprefixpresent_code_redemption_sheetpreservepreservePlayerPrefspressedColorpriceprice_amount_microsprice_currency_codeprimaryprimary-column-nameprimaryColumnNameprintpriority={0} privateprocessContentsprocessing-instructionproductIDproductIdproductId:productionprohibitedproppropertiespropertypropertyInfopropertyNameprotectedprotocolsprovidedArgsproviderproxyproxy-revalidateprsprs-AFpsps-AFpseudoclassptpt-BRpt-PTptrpubidpublicpublic keypublic key encryptedpurchaseInfopurchaseStatepurchaseTimepurchaseTokenpurpleputStringpxpypzqqaqopqop="{0}", ququalifiedqualifiedNamequantityquery=queryProductDetailsAsyncqueryPurchasesAsyncquery_async_sku_errorqueuequotqutqut-GTquzquz-BOquz-ECquz-PEq{0}rr4r8radradixrandomnumbergeneratorrangeranksratiorawrawDatarc2rc4readFullyreadTypereaderreadonlyrealmrealm="{0}", reasonrebeccapurplereceiptreceiveBufferSizerecord_deletion=redredefinereducible nodes must override Expression.Reduce()refref referreferencesrefresh_app_receiptregexInputregexPatternregisterListenerrejectConnectionrel_relationrelativerelative | absolutereleasereleaseCountrelic {0}, {1}remoteEPremoteonlyremovePackageremoveViewremove_keysrenderData should not be null when nestedRenderData is not nullrenderTexturerenderedWidth was not rounded: {0}rendererrenewOnCallTimereorder-modereorderModereorderablerepeatrepeat-xrepeat-x | repeat-y | [ repeat | space | round | no-repeat ]{1,2}repeat-yrepeatButtonrepeatCountreplacereplacementrequestrequest startedrequestConnectionrequestRecallAccessrequestServerSideAccessrequestUrirequestUriStringrequestingEndpointIdrequiredrequiredLengthresreset=resetToDefaultDependenciesresizableresize-previewresizePreviewresolveConflictresolveErrorUserActionresolvePackagesresolvedMapresolvedStyle.filter is not a List<FilterFunction>resourceNameresponse="{0}", restore_transactionrestrictionrestrictionsresultresultCallbackresultSelectorresultsretrieve_productsreturnreturnLabelreturnTypereturnValueAddressreturnalrevealrevisionrgbHashrgbIVrgbKeyrgbSignaturerichTextrightright joystickrightbuttonrijndaelripemd-160ripemd160rmrm-CHroro-ROrootrootTyperosybrownrotateroundroutine is nullrowrow-reverserowOrderroyalbluersaruru-RUruleruleIndexrunrunOnUiThreadrwrw-RWrxvtss (-0.30s max)s ATTACK SPEEDs)</size></color> and also grants Ozzy <b>-0.06s</b> <color=#646AFF>ATK Speed</color> <color=white><size=40>(-s)</size></color>.`
+- Nearby strings:
+  - offset `489318` [ascii] `Did you know that Exon-12's transformation from lush paradise to nightmarish realm was orchestrated by the Demonic Cult of Chrysto? IncredibleWelcome back, friend! It's good to see you once more.`
+  - offset `489515` [ascii] `But before we dive into our usual exchanges, how's your interpretation of Borge, the multiversal hunter, holding up?Welcome back, intrepid explorer! Delver here, your peculiar partner in the pursuit of multiversal minerals.`
+  - offset `489740` [ascii] `Within the Esoteric Exchange, we'll dig up more oddities than a three-headed space ostrich! Welcome back, seasoned traveler of the unknown!`
+  - offset `489881` [ascii] `Did Borge send you here to increase hit Loot Rewards ? Ha... Same old, same old.Welcome to the Necrum Exchange, Synthetic.`
+  - offset `490005` [ascii] `We specialize in everything dead! Ergo, minerals and materials! Welcome, Synthetic!`
+  - offset `490090` [ascii] `Fancy a tour of the underworld`
+  - offset `490123` [ascii] `s finest minerals? All gathered from places`
+  - offset `490169` [ascii] ` well, not exactly brimming with life!Welcome, Synthetic, bearer of Hellish Bio-Matter.`
+  - offset `490258` [ascii] ` In the name of Chrysto, creator of all, we craft runestones to empower you. Embrace His omnipresent influence and soar.Welcome, Synthetic, chosen child of Chrysto, the center of the universe and creator of all.`
+  - offset `490471` [ascii] `Your Hellish Bio-Matter shall be transformed into runestones under His watchful eye. Embrace His divine creation.Well done!Welsh (United Kingdom)WheatWhen called from '{0}', rewriting a node of type '{1}' must return a non-null value of the same type. Alternatively, override '{2}' and change it to not visit children of this type.When fully charged, Knox will fire a torpedo at {0} enemies! `
+  - offset `490865` [ascii] `This will deal {1} DMG to each enemy.When fully charged, this ability will make Knox instantly reload his weapon. `
+  - offset `490981` [ascii] `This will make Knox fire an extra full clip of bullets at the enemy!When group is redefined, the real value of both minOccurs and maxOccurs attribute must be 1 (or absent).When removing the first head command, the command before this one in the queue should belong to an other parentWhen supplying a FieldInfo for fixing up a nested type, a valid ID for that containing object must also be supplied.When supplying the ID of a containing object, the FieldInfo that identifies the current field within that object must also be supplied.When the order is many, the maxOccurs attribute must have a value of '*'.When the ref attribute is present, the type attribute and complexType, simpleType, key, keyref, and unique elements cannot be present.When you upgrade Software and Hardware Tech Upgrades, your Cells Gained will increase multiplicatively. The same thing happens to your Research Points Gained.When you upgrade Software and Hardware Tech Upgrades, your Shards Gained will increase multiplicatively. The same thing happens to every single generator you own.While setting the reader state back to current object an unexpected JsonType was encountered: {0}WhiteWhite space not allowed before '?', '*', or '+'.WhiteSmokeWhitespaceWhitespace is expected.Why are you clicking!? You can afford a new Wildcard '{0}' allows element '{1}', and causes the content model to become ambiguous. A content model must be formed such that during validation of an element information item sequence, the particle contained directly, indirectly or implicitly therein with which to attempt to validate each item in the sequence in turn can be uniquely determined without examining the content or attributes of that item, and without any information about the items in the remainder of the sequence.Wildcards '{0}' and '{1}' have not empty intersection, and causes the content model to become ambiguous. A content model must be formed such that during validation of an element information item sequence, the particle contained directly, indirectly or implicitly therein with which to attempt to validate each item in the sequence in turn can be uniquely determined without examining the content or attributes of that item, and without any information about the items in the remainder of the sequence.Win32 IO returned {0}. Path: {1}WinRTWindowWindowFrameWindowTextWindows-1254Winsock not initialisedWireframeBackWireframeCameraWireframeForeWith each enemy defeated, Knox has a chance of getting +1 stack to this buff. (+0.5% Atk Power / HP / Regen bonus)`
+  - offset `493519` [ascii] `Stacks: {0} (Max: {1})`
+  - offset `493542` [ascii] `Bonus: x{2}With the AllowHexSpecifier bit set in the enum bit field, the only other valid bits that can be combined into the enum value must be a subset of those in HexNumber.WobbleButtonWolof (Senegal)WorldDocumentRaycasterWrapped ICollection<T> does not support IndexOf.Wrapped ICollection<T> does not support Insert.Wrapped ICollection<T> does not support RemoveAt.Wrapped ICollection<T> does not support indexer.WrappedExceptionWriteWrite fault on path {0}Write lock may not be acquired with read lock held. This pattern is prone to deadlocks. Please ensure that read locks are released before taking a write lock. If an upgrade is necessary, use an upgrade lock in place of the read lock.Write operations are not allowed after the channel was shutdown.WriteByteWriteInternalWriteStartDocument cannot be called on writers created with ConformanceLevel.Fragment.WriteStartDocument needs to be the first call.Writing object reference Id '{0}' for {1}.Writing object reference to Id '{0}' for {1}.Writing type name '{0}' for {1}.Wrong TypeWrong XML version information. The XML must match production "VersionNum ::= '1.' [0-9]+".Wrong time detected (diff more than: {TimeCheatingDetector.Instance.wrongTimeThreshold} minutes)Wrong type.Wrong value for the XML declaration standalone attribute of '{0}'.XX-AspNet-VersionX-EBCDIC-KoreanExtendedX-Powered-ByX02X16X2X21AddressX4X509DateTimeX509KeyUsageFlagsX509RevocationModeX8XA XAA XAAT XAEA XAEAS XAIA XAIAS XAO XCXCA XDG_CONFIG_HOMEXDG_DATA_HOMEXDG_DESKTOP_DIRXDG_MUSIC_DIRXDG_PICTURES_DIRXDG_TEMPLATES_DIRXDG_VIDEOS_DIRXDRXEA XEAS XENA XLXML name start character is expected.XRA XTA XTXA Xbox Xform update roots`
+  - offset `495206` [ascii] `: Xform update total`
+  - offset `495227` [ascii] `: Xformed by bone`
+  - offset `495245` [ascii] `: Xformed by nudging`
+  - offset `495266` [ascii] `: Xformed by repaint`
+  - offset `495287` [ascii] `: Xformed by skipping`
+  - offset `495309` [ascii] `: Xml type 'List of {0}' does not support Clr type '{1}'.Xml type 'List of {0}' does not support a conversion from Clr type '{1}' to Clr type '{2}'.Xml type '{0}' cannot convert from Clr type '{1}' unless the destination type is String or XmlAtomicValue.Xml type '{0}' cannot convert to Clr type '{1}' unless the source value is a String or an XmlAtomicValue.Xml type '{0}' does not support Clr type '{1}'.Xml type '{0}' does not support a conversion from Clr type '{1}' to Clr type '{2}'.XmlAnyAttributeAttribute can only be applied to members of type XmlAttribute[] or XmlNode[]XmlAnyElementAttribute can only be applied to members of type XmlElement, XmlElement[] or XmlNode[]. The target object is {0}XmlArrayAttribute can be applied to members of array or collection type.XmlArrayAttribute cannot be used with members which also attributed with XmlElementAttribute or XmlTextAttribute.XmlArrayAttribute.Form must not be Unqualified when it has an explicit Namespace value.XmlArrayItemAttribute.Form must not be Unqualified when it has an explicit Namespace value.XmlAttributeAttribute and XmlElementAttribute cannot be applied to the same memberXmlChoiceIdentifierAttribute not supported in this context.XmlDiffGramXmlElementXmlNodeXmlNodeConverter can only convert JSON that begins with an object.XmlNodeConverter cannot convert JSON with an empty property name to XML.XmlNodeConverter only supports deserializing XDocument, XElement, XContainer, XNode or XObject.XmlNodeConverter only supports deserializing XmlDocument, XmlElement or XmlNode.XmlNodeType {0} is not supported for partial content parsing.XmlReaderSettings.XmlNameTable must be the same name table as in XmlParserContext.NameTable or XmlParserContext.NamespaceManager.NameTable, or it must be null.XmlResolverXmlResolver can be set only by fully trusted code.XmlRoot and XmlType attributes may not be specified for the type XmlSchemaXmlText cannot be used to encode complex typesXmlTextAttribute can only be applied once in a classXmlWriterSettings.{0} can contain only valid XML text content characters when XmlWriterSettings.CheckCharacters is true. {1}XmlWriterSettings.{0} can contain only valid XML white space characters when XmlWriterSettings.CheckCharacters and XmlWriterSettings.NewLineOnAttributes are true.YYOU ARE TRYING TO LOAD A SAVE WITH THE FOLLOWING PROGRESS:`
+  - offset `497659` [ascii] `ALL TIME CELLS: <color=#5AFFB4>YOU ARE TRYING TO LOAD A SAVE WITH THE FOLLOWING PROGRESS:`
+  - offset `497750` [ascii] `TRAVERSALS: <color=#9E58FF>{0}</color>`
+  - offset `497790` [ascii] `CELLS THIS TRAVERSAL: <color=#5AFFB4>{1}</color>`
+  - offset `497839` [ascii] `MP THIS TRAVERSAL: <color=#FF2020>{2}</color>`
+  - offset `497885` [ascii] ` LEVEL THIS TRAVERSAL: <color=#A75DC8>{3}</color>`
+  - offset `497936` [ascii] ` DO YOU STILL WANT TO LOAD IT?YOUR HUNTERS FACE PERIL? NAUTILUS TESSERACTS WILL DO THE TRICK!`
+  - offset `498031` [ascii] `Upgrade here, and soon, they`
+  - offset `498062` [ascii] `ll sail through enemies like ships on the high seas!YPosYakut (Russia)Year must be between 1 and 9999.Year, Month, and Day parameters describe an un-representable DateTime.Years value must be between +/-10000.YellowYellowGreenYi (PRC)Yipee!Yoruba (Nigeria)You are attempting to access UnityServices.State from a non-Unity Thread. UnityServices.State can only be accessed from Unity ThreadYou are attempting to initialize Operate Solution SDK with an option "You are attempting to initialize Unity Services from a non-Unity Thread. Unity Services can only be initialized from Unity ThreadYou are attempting to initialize Unity Services in Edit Mode. Unity Services can only be initialized in Play ModeYou are trying to create a SelectionGrid with zero or less elements to be displayed in the horizontal direction. Set itemsPerRow to a positive value.You can figure out where app was installed from using AppInstallationSourceValidatorThis can be used to detect unauthorized redistribution of your app.You can only call GUI functions from inside OnGUI.You can't add a NULL tween to a SequenceYou can't add a tween that is already nested into a Sequence to another SequenceYou can't add an inactive/killed tween to a SequenceYou can't add directly to this VisualElement. Use hierarchy.Add() if you know what you're doing.You can't add elements to a NULL SequenceYou can't add elements to an inactive/killed SequenceYou can't pass a NULL string to DOText: an empty string will be used instead to avoid errorsYou can't spell victory without You cannot change the values of a tween contained inside a SequenceYou know, geology is a grave profession`
+  - offset `499707` [ascii] ` and I would know!`
+  - offset `499727` [ascii] `But for a few resources, I can breathe new life into your materials.Figuratively, of course.You must call Initialize on this object instance before using it.You must either inherit from RenderPipelineAsset<TRenderPipeline> or override pipelineType property.You must either inherit from RenderPipelineAsset<TRenderPipeline> or override renderPipelineType propertyYou must implement a default accessor on You must specify bindItem if makeItem is specified.You must specify makeItem if bindItem is specified.You need to specify a crate index! Dialogue: {0}You need to specify a sprite index! Dialogue: {0}You shall not pass! Unless you have Hellish Bio-matter. In that case, you're more than welcome to look around, Synthetic.`
+  - offset `500452` [ascii] `Just don't break anything.You're leaving the LoopModMenuYou're trying to transition to state 'You've got the Orbs. The Your Ouroboros Orbs called. They said: Spend me on Your wallet called. It wants you to buy You`
+  - offset `500668` [ascii] `re here for the Material Enhancers? Good choice!`
+  - offset `500718` [ascii] `Dead men may tell no tales, but they sure know how to boost your mineral gains!ZZOOMED INZOOMED OUTZOOMED OUT X2ZOOMUV_ONZeroZero-sized array is not allowed.ZlZpZs[[ <length-percentage> ]{1,4}[ <length-percentage> | auto ]{1,2} | cover | contain[ <length-percentage> | auto ]{1,4}[ <length> | <percentage> | left | center | right | top | bottom ] | [ [ <length> | <percentage>  | left | center | right ] && [ <length> | <percentage>  | top | center | bottom ] ] <length>?[ ObscuredInt example ][ ObscuredString example ][ [ <resource> | <url> ] [ <integer> <integer> ]? ] | [ arrow | text | resize-vertical | resize-horizontal | link | slide-arrow | resize-up-right | resize-up-left | move-arrow | rotate-arrow | scale-arrow | arrow-plus | arrow-minus | pan | orbit | zoom | fps | split-resize-up-down | split-resize-left-right | not-allowed ][ [ left | center | right | top | bottom | <length-percentage> ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ] | [ center | [ left | right ] <length-percentage>? ] && [ center | [ top | bottom ] <length-percentage>? ] ][ center | [ [ left | right ]? <length-percentage>? ] ][ center | [ [ top | bottom ]? <length-percentage>? ] ][ none | <single-transition-property> ] || <time> || <easing-function> || <time>["['[*][,,,][,,][,][0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}[?!,.;:-]{{{0},}}[ACTk] [ACTk]  Couldn't initialize ObscuredFilePrefsAutoSaver. Are you using ObscuredFilePrefs from background thread but didn't call the UnityApiResultsHolder.InitForAsyncUsage()?`
+  - offset `502314` [ascii] `[ACTk]  Error while getting app installation source! See more info below.[ACTk] AppEventsDispatcher[ACTk] Can't initialize SpeedHackProofTime class since it requires running SpeedHackDetector instance but only idle instance was found. Did you started SpeedHackDetector before using SpeedHackProofTime?`
+  - offset `502616` [ascii] `SpeedHackProofTime will use unreliable vanilla Time.* APIs until you start SpeedHackDetector.[ACTk] Can't initialize SpeedHackProofTime class since it requires running SpeedHackDetector instance which was not found. Did you started SpeedHackDetector before using SpeedHackProofTime?`
+  - offset `502899` [ascii] `SpeedHackProofTime will use unreliable vanilla Time.* APIs until you start SpeedHackDetector.[ACTk] ContainerHolder: container created too early ([ACTk] Empty key can't be used for string encryption or decryption![ACTk] ForceLockToDeviceInit() is called, but device ID is already obtained![ACTk] Incorrect BinarySerializer version at the prefs dictionary data!Can't read data, something is wrong, please report.[ACTk] Injection Detector: is not supported on current platform! This message is harmless.[ACTk] Obscured Cheating Detector: Detector is not running, can't trigger detection.[ACTk] Obscured Cheating Detector: already running![ACTk] Obscured Cheating Detector: can't be started since it doesn't exists in scene or not yet initialized![ACTk] Obscured Cheating Detector: disabled but StartDetection still called from somewhere (see stack trace for this message)![ACTk] Obscured Cheating Detector: has properly configured Detection Event in the inspector or CheatDetected event subscriber, but still get started with Action callback.Action will be called at the same time with Detection Event or CheatDetected on detection.Are you sure you wish to do this?[ACTk] Obscured Cheating Detector: was started without Detection Event, Callback or CheatDetected event subscription.Cheat will not be detected until you subscribe to CheatDetected event.[ACTk] ObscuredFile: [ACTk] ObscuredFile: Can't access StreamingAssets data at the [ACTk] ObscuredFile: Can't read data since it is not locked to any device but current DeviceLockLevel is set to Strict.[ACTk] ObscuredFile: Couldn't read bytes because of CryptographicException! Are you trying to read plain file with ObscurationMode.Encrypted or vice versa?[ACTk] ObscuredFile: File [ACTk] ObscuredFile: Header is invalid. Looks like data is damaged, can't read it properly![ACTk] ObscuredFile: Please make sure to call DeviceIdHolder.ForceLockToDeviceInit() or UnityApiResultsHolder.InitForAsyncUsage(true) before using ObscuredFile or ObscuredFilePrefs from async context with Lock To Device feature enabled while keeping default DeviceIdHolder.DeviceId![ACTk] ObscuredFile: Please make sure to call UnityApiResultsHolder.InitForAsyncUsage() before using ObscuredFile or ObscuredFilePrefs from async context with ObscuredFileLocation.PersistentData LocationKind![ACTk] ObscuredFilePrefs: [ACTk] ObscuredFilePrefs: Already initialized![ACTk] ObscuredFilePrefs: Couldn't deserialize prefs![ACTk] ObscuredFilePrefs: Couldn't load prefs! Load operation result:`
+  - offset `505408` [ascii] `[ACTk] ObscuredFilePrefs: Couldn't load prefs: I'm already busy.[ACTk] ObscuredFilePrefs: Couldn't save prefs! See LastFileWriteResult for details.[ACTk] ObscuredFilePrefs: Couldn't save prefs: I'm already busy.[ACTk] ObscuredFilePrefs: Please call Init first![ACTk] ObscuredFilePrefs: Pref [ACTk] ObscuredPrefs: [ACTk] ObscuredPrefs: Are you trying to read regular PlayerPrefs data using ObscuredPrefs (key = [ACTk] ObscuredPrefs: Couldn't migrate [ACTk] ObscuredPrefs: Obscured pref [ACTk] Speed Hack Detector: Detector is not running, can't trigger detection.[ACTk] Speed Hack Detector: already running![ACTk] Speed Hack Detector: can't be started since it doesn't exists in scene or not yet initialized![ACTk] Speed Hack Detector: disabled but StartDetection still called from somewhere (see stack trace for this message)![ACTk] Speed Hack Detector: has properly configured Detection Event in the inspector or CheatDetected event subscriber, but still get started with Action callback.Action will be called at the same time with Detection Event or CheatDetected on detection.Are you sure you wish to do this?[ACTk] Speed Hack Detector: was started without Detection Event, Callback or CheatDetected event subscription.Cheat will not be detected until you subscribe to CheatDetected event.[ACTk] Time Cheating Detector: [ACTk] Time Cheating Detector:  Couldn't retrieve online time[ACTk] Time Cheating Detector: Can't force cheating check since another check is already in progress.[ACTk] Time Cheating Detector: Could not create URI from URL: [ACTk] Time Cheating Detector: Detector is not running, can't trigger detection.[ACTk] Time Cheating Detector: Detector should be started to use forced check.[ACTk] Time Cheating Detector: Online Time Retrieve error:`
+  - offset `507172` [ascii] `[ACTk] Time Cheating Detector: Please consider increasing realCheatThreshold to reduce false positives chance![ACTk] Time Cheating Detector: already running![ACTk] Time Cheating Detector: disabled but StartDetection still called from somewhere (see stack trace for this message)![ACTk] WallHack Detector: Detector is not running, can't trigger detection.[ACTk] WallHack Detector: already running![ACTk] WallHack Detector: can't be started since it doesn't exists in scene or not yet initialized![ACTk] WallHack Detector: can't detect wireframe cheats on this platform due to lack of needed shader support![ACTk] WallHack Detector: can't find 'Hidden/ACTk/WallHackTexture' shader!`
+  - offset `507852` [ascii] `Please make sure you have it included at the Anti-Cheat Toolkit Settings.[ACTk] WallHack Detector: disabled but StartDetection still called from somewhere (see stack trace for this message)![ACTk] WallHack Detector: has properly configured Detection Event in the inspector or CheatDetected event subscriber, but still get started with Action callback.Action will be called at the same time with Detection Event or CheatDetected on detection.Are you sure you wish to do this?[ACTk] WallHack Detector: was started without Detection Event, Callback or CheatDetected event subscription.Cheat will not be detected until you subscribe to CheatDetected event.[Achievement] id={0}, name={1}, desc={2}, type={3}, revealed={4}, unlocked={5}, steps={6}/{7}[Alert: {0}:{1}][BufferOffsetSize: {0} {1}][CDATA[[DEVLOG] [ACTk] ObscuredFile: [DISPID=0][DOTween][Eazy NetChecker] Initialization successful.[Eazy NetChecker] Internet check finished. Internet status: [Eazy NetChecker] Internet check started[Eazy NetChecker] Internet check timed out.[Eazy NetChecker] Method [Eazy NetChecker] Selected method: [Eazy NetChecker] The method [Eazy NetChecker] The method you are trying to add is null.[Eazy NetChecker] The method you are trying to use is null.[Eazy NetChecker] There is no selected method. The platform default will be used.[Event] Cellmas Time![Event] Eggster Time![Event] Global Event switch is false.[Event] No events currently active.[Extensions][Issuer][LeaderboardScoreData: mId={0},  mStatus={1}, mApproxCount={2}, mTitle={3}][MMFeedbackFlicker] The flicker feedback on [MMFeedbackMaterial on [MMGridGenerator] You're trying to convert a tilemap into a grid but didn't specify what tilemap to convert.[MMSaveLoadManager] Encryption key error: [MMScreenshot] Screenshot taken and saved at [MonoTlsConnectionInfo: {0}:{1}][MultipleObjectPooler] [Nakama Socket][Nakama][Not After][Not Before][ObjectPooler] [Player: '{0}' (id {1})][Private Key][Public Key][Serial Number][ServicesCore][Signature Algorithm][SimpleObjectPooler] [Singleton] Instance '{0}' already destroyed. Returning null.[Singleton] Instance '{0}' will be newly created.[StyleSelectorPart: value={0}, type={1}][Subject][TextAnimator] StyleSheetScriptable: duplicated style tag '[Thumbprint][UI Toolkit] Cannot add a UXML asset of type '[UI Toolkit] Cannot add a root UXML asset as a children of a UXML asset.[UI Toolkit] Could not bind '[UI Toolkit] Could not bind target of type '<b>{0}</b>' at path '<b>{1}</b>':[UI Toolkit] Could not register binding on element of type '[UI Toolkit] Could not retrieve the value at path '<b>{0}</b>' for source of type '<b>{1}</b>':[UI Toolkit] Could not set value for target of type '<b>[UI Toolkit] Could not set value for target of type '<b>{0}</b>' at path '<b>{1}</b>':[UI Toolkit] Could not set value on '[UI Toolkit] Internal group box error. Expected a radio button element. Please report this using Help -> Report a bug...[UI Toolkit] Trying to reorder ids that are not in the same tree.[UI Toolkit] Trying to set a binding on `[UI Toolkit] Unsupported primitive type[UIParticleRenderer] Combine Instance Mesh[Unknown][Version][WH Detector Service][Warning] [\u000A\u000B\u000C\u000D\u2028\u2029\u0085]+[][^\w\.@-][ext] [generated] UIParticle BakingCamera[generated] UIParticleRenderer[intId: {0}][stringId: {0}][tween target: {0}][x-y] range in reverse order.[{[{0}: {1}][{0}][{0}]:{1}[{0}][{1}][{2}].xml\\"\'\..\\/\/Date(\/\/\<\>\A[a-zA-Z0-9-._~]{1,100}\Z\P{_xmlC}\P{_xmlD}\P{_xmlI}\P{_xmlW}\[[0-9]+\]\\\\[\\u(?<Value>[a-zA-Z0-9]{4})\b\b\w*[A-Z`
+  - offset `511468` [ascii] `]{{{0},}}\w*\b\b{0,1}((ht|f)tp(s?)\:\/\/)?[\w\-\.\@]*[\.]\b{0,1}((ht|f)tp(s?)\:\/\/)?[\w\-\.\@]*[\.](\f\n\p{_xmlC}\p{_xmlD}\p{_xmlI}\p{_xmlW}\r\s+\t\u\u0085\u2028\u2029\x{0:X2}]]`
+  - offset `511647` [ascii] `] ]    Path []   HashCode []   Index []   Style Name [] Attempting to switch to a null material.] Family Name [] First character index: ] Glyph Adjustment Table.] Last character index: ] Property=[] The Materials array is empty.] Units Per EM set to ] and IgnoreType=[] and Style [] because its AtlasPopulationMode is set to Static.] because the provided Unicode list is Null or Empty.] because the provided character list is Null or Empty.] font asset.] index: ] is missing Units Per EM. Please select the 'Reset FaceInfo' menu item on Font Asset [] or any potential fallbacks. Switching Text Overflow mode to Truncate.] readable.] test duration : ] to ensure proper serialization.] to version ] trying to load the font at path []'s atlas texture. Please make the texture [])],], ], Joins=[], Leaves=[], MatchId='], RoomName='], State='],Usernames=[]-[].]. Cannot update lookup tables.]. Make sure "Include Font Data" is enabled in the Font Import Settings.]. Please make sure all types are declared ahead of time using [GeneratePropertyBagAttribute], [GeneratePropertyBagsForTypeAttribute] or [GeneratePropertyBagsForTypesQualifiedWithAttribute]]. The property will use the most derived Type=[]</color> ]V[][][_]\]]]]>^^((\d{4}[- ]?){3}\d{4})$^(?(")(".+?"@)|(([0-9a-zA-Z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-zA-Z])@))(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,6}))$^([0-9]{1,3}\.){3}[0-9]{1,3}$^([a-zA-Z]{1,8})(-[a-zA-Z0-9]{1,8})*$^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$^-?[_a-z][_a-z0-9-]*^.*\.[\w]+$^=^GET(.*)HTTP\/1\.1^[a-zA-Z]:^\s*\w+(?:\.\w+)+(\/.*)?$^instanceId:[-0-9]+$__0_0x00__AutoCreated_BackUpThisFolder_ButDontShipItWithYourGame_Bevel_BypassList_BypassOnLocal_ClipRect_CodeBase_Color_ColorInvert_ColorMask_ColorMatrix_ColorOffset_ColorSwapBlue_ColorSwapGreen_ColorSwapRed_Column_Cube_CullMode_CultureInfo_Data/_DefaultBoxGroup_DefaultHorizontalGroup_DefaultTabGroup_DefaultVerticalGroup_EnvMatrix_EnvMatrixRotation_FaceColor_FaceDilate_FaceShininess_FaceTex_Flags_GlowColor_GlowInner_GlowOffset_GlowOuter_GlowPower_GradBotLeftCol_GradBotRightCol_GradTopLeftCol_GradTopRightCol_GradientScale_GradientSettingsTex_HashAlgorithm_HashAlgorithmForControl_HashForControl_Id_IsoPerimeter_LightAngle_MainTex_MainTex_ST_MaskCoord_MaskSoftnessX_MaskSoftnessY_MaxXUV_MaxYUV_MinXUV_MinYUV_Name_ObjectPooler_Outline2Color_Outline2Width_OutlineColor_OutlineMode_OutlineOffset1_OutlineOffset2_OutlineOffset3_OutlineSoftness_OutlineTex_OutlineWidth_Padding_PerspectiveFilter_Pooler_ProxyAddress_PublicKey_PublicKeyToken_RandomSeed_RotateUvAmount_ScaleRatioA_ScaleRatioB_ScaleRatioC_ScaleX_ScaleY_ShaderFlags_ShaderInfoTex_Sharpness_Sigma_Softness_Stencil_StencilComp_StencilOp_StencilReadMask_StencilWriteMask_StrongNameKeyPair_Text_TextureHeight_TextureInfo_TextureWidth_Texture{0}_Tint_UIE_FORCE_GAMMA_UIE_OUTPUT_LINEAR_UIE_RENDER_TYPE_GRADIENT_UIE_RENDER_TYPE_SOLID_UIE_RENDER_TYPE_TEXT_UIE_RENDER_TYPE_TEXTURE_UIE_TEXTURE_SLOT_COUNT_1_UIE_TEXTURE_SLOT_COUNT_2_UIE_TEXTURE_SLOT_COUNT_4_UnderlayColor_UnderlayDilate_UnderlayIsoPerimeter_UnderlayOffset_UnderlayOffsetX_UnderlayOffsetY_UnderlaySoftness_UseClipRect_UseDefaultCredentials_UseRegistry_UseUIAlphaClip_Version_VersionCompatibility_VertexOffsetX_VertexOffsetY_WeightBold_WeightNormal_[Xx]([0-9a-fA-F]{4}|[0-9a-fA-F]{8})_____<__ActivationType__ActivationTypeName__Activator__Args__CallContext__CallSiteActivationAttributes__ContextProperties__CorrelationMgrSlotPresent__CrossContext__GenericArguments__HostContext__IOS_CLIENTID____InternalRegexIgnoreCase____MethodName__MethodSignature__OutArgs__RemotingData__Return__SecurityData__TypeName__Uri___AssemblyString_____a__add-button__aligned__arrow__b__background__background-fill__binding-callback__bound__button__c__cell__center-field__checkmark__checkmark-background__close-button__closeable__column__column-container__column-resize-handle__container__container-inner__container-outer__content__content-and-vertical-scroll-container__content-container__content-viewport__default-content__destroy-callback__drag-area__drag-container__drag-hover-bar__drag-hover-marker__drag-location-preview__drag-preview__dragger__dragger-border__empty-label__extents-field__fault__field__field-group__field-spacer__fill__foldout-header__footer__global_converters__header__header-container__high-button__horizontal__horizontal-scroller__icon__image__index-label__input__inspector-field__item__item-content__item-indent__item-indents__item-toggle__label__low-button__max-thumb__min-thumb__mixed-values__move-location-preview__move-preview__multiline-container__next-button__over-max-multi-edit-limit-label__position-field__previous-button__primitives_converters__progress__remove-button__reorderable__resize-handle-container__resize-preview__row-container__scroll-view__scroll-view--with-footer__selectable__separator__size-field__slider__sort-indicator__text__text-field__title__title-container__toggle__tracker__unbinding-callback__unity-additional-binding-object__unity-binding-request__unity-binding-request-object__unity-collection-view-internal-binding__unity-drag-and-drop__source-view__unity-multi-column-bindable-element__unity-multi-column-bound-column__vertical__vertical-scroller__visual__{0}___compareInfo_context(set):{0} userToken:{1}_context:{0}_fallback_ignoreCase_keyPairArray_keyPairContainer_keyPairExported_options_pool_publicKey_source_strDefault_text_timer_x_x0058__x0078__xmlC_xmlD_xmlI_xmlW_{0}`` and convert to `` could not be instantiated. A parameter-less constructor or an explicit construction method is required.` is not supported. This is an internal bug. Please report using `Help > Report a Bug...` ` registered. Are you missing a package?`. Value must be in range [`: The given type is not assignable to target type.aa lost name should not be null or empty, this probably points to an importer or serialization bugaaabcdaborting connectionabsoluteabsoluteParentPathabsoluteUriabstractacceptConnectionaccessacknowledgePurchaseactionactivateactivatedactiveactive enemies actkactkfileactkfileprefsadapteraddaddContentViewaddOnCompleteListeneraddOnFailureListeneraddOnSuccessListeneraddPackageadd_keysaddressadipiscingadjustedAscenderadjustedDescenderadjustedHorizontalAdvanceadvancedadvertisingDuration must be positiveaesaes128aes128wrapaes192aes192wrapaes256aes256wrapafaf-ZAalgorithmalgorithm="{0}", algorithmNamealicebluealignalign-contentalign-itemsalign-selfalignContentalignItemsalignSelfaliquamallall | <custom-ident>allIn1DefaultShaderallcapsallow-addallow-empty-selectionallow-removeallowAddallowAssetPackDeletionallowEmptySelectionallowRemoveallowSkipalphaalphaHitTestMinimumThreshold should not be modified on a texture not readeable or not using Crunch Compression.alternativeGlyphamam-ETametampancestorancestor-or-selfanchorMaxanchorMinandandroid.graphics.BitmapFactoryandroid.os.SystemClockandroid/util/LogandroidStoreangleangle={0} (rad), cos={1}, sin={2}annotationanonymousanonymous@antiquewhiteanyany elementany element in namespace '{0}'anyAtomicTypeanyAttributeanyOfanySimpleTypeanyTypeanyURIap. J.-C.aposappappUpdateInfoappUpdateOptionsappUpdateTypeappinfoapplehotspotapplicableapplicationapplication/channels/channel/clientProvidersapplication/channels/channel/serverProvidersapplication/jsonapplication/octet-streamaquaaquamarinearar-AEar-BHar-DZar-EGar-IQar-JOar-KWar-LBar-LYar-MAar-OMar-QAar-SAar-SYar-TNar-YEarabicareaNamearg0arg1arg2arg3arg4argsargs.LengthargumentTypeargumentsarnarn-CLarrayarray has less elements than passed count.array too small. numBytes/offset wrong.arrayIndexarrayIndex is equal to or greater than the length of array.arrayIndex is less than 0.arrayTypeasas-INasBytesascenderasciiaskForLoadFriendsResolutionasn1asnEncodedDataaspect-ratioaspectRatioassemassemblyassemblyFullNameassemblyNameassemblyName cannot have zero length.assemblyStringassemblyString cannot have zero lengthassetassetDatabaseInitRefreshassetExportassetImportassetImportStatusasyncResultattributeattributeFormDefaultattributeGroupattributeIndexattributeProviderattributeTypeattributeValueattributesauth-intauthenticating satoriauthoritative=autoauto | <ratio>auto-correctionauto-expandautoCorrectionautoExpandautoRenewingavailability={0} availableVersionCodeawaitableaxisazaz-Cyrl-AZaz-Latn-AZaz-cyrlaz-latnazurebbaba-RUbackground-colorbackground-imagebackground-positionbackground-position-xbackground-position-ybackground-repeatbackground-sizebackgroundColorbackgroundImagebackgroundPositionbackgroundPositionXbackgroundPositionYbackgroundRepeatbackgroundSizebad databad hash length for banUserbanreasonbasebase64base64BinarybaseLinebaseTypebaseUribaseUtcOffsetbasicbb4b2da1-71ba-429e-b5f3-36556abbf4c9bebe-BYbeforebefore=beginMethodbeigebest-fitbestFitbgbg-BGbi1 out of rangebi2 out of rangebigbig5bin.base64bin.hexbin/Data/binaryTypebindItembinderbinding-pathbinding-source-selection-modebindingFlagsbindingSourceSelectionModebisquebitMask={0}bitNum out of rangebitmapbitsblackblanchedalmondblockblockDefaultbluebluevioletblurblurRadiusbnbn-BDbn-INbobo-CNbodyboldbold-and-italicboolbool:bool: bool[]booleanbooleanValueborder-bottom-colorborder-bottom-left-radiusborder-bottom-right-radiusborder-bottom-widthborder-colorborder-left-colorborder-left-widthborder-radiusborder-right-colorborder-right-widthborder-top-colorborder-top-left-radiusborder-top-right-radiusborder-top-widthborder-widthborderBottomColorborderBottomLeftRadiusborderBottomRightRadiusborderBottomWidthborderColorborderLeftColorborderLeftWidthborderRadiusborderRightColorborderRightWidthborderTopColorborderTopLeftRadiusborderTopRightRadiusborderTopWidthborderWidthbotbottombottomLeftbottomRightboundsboxboxedbrbr-FRbrainpoolP160r1brainpoolP160t1brainpoolP192r1brainpoolP192t1brainpoolP224r1brainpoolP224t1brainpoolP256r1brainpoolP256t1brainpoolP320r1brainpoolP320t1brainpoolP384r1brainpoolP384t1brainpoolP512r1brainpoolP512t1breakbrgPlayerUsagebrgUsageEventbrownbsbs-Cyrl-BAbs-Latn-BAbs-cyrlbs-latnbufferbufferSizebufferWithArgsbuffersbuildburlywoodbuttonbyref delegatebytebyte:byteCountbyteIndexbyteValuebyte[byte[]byte[] examplebyte[]: {bytesbytes downloaded: {0} bytesDownloadedbytesUnknownccBoolcDatecDblcIntcStrcaca-EScachecacheable_cursor=cadetbluecalendarcallBackcallbackcallback parameter is nullcamcameracanGrabFocuscancellationTokencannot assign from the reduced node type to the original node typecannot export private keycanvascapacitycapacity must be more than 0capacity was less than the current size.casecatchcatch (catch({0}) [{1}->{2}]category_end=category_start=cbceilceilingcell-templatecellTemplatecentercertcertificatecertificatescertschallengechannelchannelInfochannelSinkProviderschannelSinkProviders/clientProviderschannelSinkProviders/serverProviderschannelschannels/channel/clientProviderschannels/channel/serverProviderscharcharCountcharIndexcharLeftOvercharSet length less than radixcharUnknownHighcharUnknownLowcharValuechar[]charactercharacterSetcharacterSpacingcharscharsRemainingcharsetchartreusecheckedchildchildCountchildkeychinesechnlchocolatechoicechoiceschoicesContentContainerchrystochunk size too long.chunkLengthchunkedcifisupport@octocubegames.comcjkCHScjkCHTcjkJAcjkKOclassclass clientclientProvidersclientVersionStalenessDaysclipclip | ellipsisclosecloseStatuscloseableclosedclosing control StreamclrcmdListPtrcn-big5cnonce="{0}", coco-FRcodecodePagecodepagecolcollabOperationcollapsecollation.cjkKOlv2.bincollation.core.bincollation.tailoring.bincollation.{0}.bincollectioncollection=collectionSelectorcolorcolorMultipliercolorscolumncolumn | row | column-reverse | row-reversecolumn-indexcolumn-namecolumn-reversecolumnIndexcolumnNamecolumnscolumns[{0}].{1}com.amazon.veneziacom.android.billingclient.api.AcknowledgePurchaseParamscom.android.billingclient.api.AcknowledgePurchaseResponseListenercom.android.billingclient.api.BillingClientcom.android.billingclient.api.BillingClientStateListenercom.android.billingclient.api.BillingFlowParamscom.android.billingclient.api.BillingFlowParams$ProductDetailsParamscom.android.billingclient.api.BillingFlowParams$SubscriptionUpdateParamscom.android.billingclient.api.ConsumeParamscom.android.billingclient.api.ConsumeResponseListenercom.android.billingclient.api.PendingPurchasesParamscom.android.billingclient.api.ProductDetailsResponseListenercom.android.billingclient.api.Purchase$PurchaseStatecom.android.billingclient.api.PurchasesResponseListenercom.android.billingclient.api.PurchasesUpdatedListenercom.android.billingclient.api.QueryProductDetailsParamscom.android.billingclient.api.QueryProductDetailsParams$Productcom.android.billingclient.api.QueryPurchasesParamscom.android.packageinstallercom.android.vendingcom.google.android.gms.common.api.ApiExceptioncom.google.android.gms.games.PlayGamescom.google.android.gms.games.PlayGamesSdkcom.google.android.gms.games.snapshot.SnapshotMetadataChange$Buildercom.google.android.gms.nearby.Nearbycom.google.android.gms.nearby.connection.AdvertisingOptions$Buildercom.google.android.gms.nearby.connection.DiscoveryOptions$Buildercom.google.android.gms.nearby.connection.Payloadcom.google.android.gms.nearby.connection.SERVICE_IDcom.google.android.gms.nearby.connection.Strategycom.google.android.gms.tasks.OnFailureListenercom.google.android.gms.tasks.OnSuccessListenercom.google.android.gms.tasks.Taskscom.google.android.packageinstallercom.google.android.play.core.appupdate.AppUpdateManagerFactorycom.google.android.play.core.appupdate.AppUpdateOptionscom.google.android.play.core.install.InstallStateUpdatedListenercom.google.android.play.core.tasks.OnFailureListenercom.google.android.play.core.tasks.OnSuccessListenercom.google.games.bridge.ConnectionLifecycleCallbackProxycom.google.games.bridge.EndpointDiscoveryCallbackProxycom.google.games.bridge.HelperFragmentcom.google.games.bridge.PayloadCallbackProxycom.huawei.appmarketcom.lofelt.haptics.HapticPatternscom.lofelt.haptics.LofeltHapticscom.octocubegames.cifi.anniversarycom.octocubegames.cifi.cellmascom.octocubegames.cifi.cellmas2025com.octocubegames.cifi.chestspeedstercom.octocubegames.cifi.collectorcom.octocubegames.cifi.diamondautocom.octocubegames.cifi.diamondshugepackagecom.octocubegames.cifi.diamondslargepackcom.octocubegames.cifi.diamondsmassivepackagecom.octocubegames.cifi.diamondssmallpackcom.octocubegames.cifi.elysiumcom.octocubegames.cifi.explorerpackagecom.octocubegames.cifi.fragmentpackagecom.octocubegames.cifi.generatorpackagecom.octocubegames.cifi.hyperioncom.octocubegames.cifi.looppackagecom.octocubegames.cifi.mediumsalecom.octocubegames.cifi.namechangecom.octocubegames.cifi.ouropackagecom.octocubegames.cifi.starterpackagecom.octocubegames.cifi.supportercom.octocubegames.cifi.tokenautocom.sec.android.app.samsungappscom.unitycom.unity.purchasingcom.unity.purchasing.amazon.AmazonPurchasingcom.unity.purchasing.common.IUnityCallbackcom.unity.services.core.analytics-user-idcom.unity.services.core.environment-namecom.unity3d.ads.IUnityAdsInitializationListenercom.unity3d.ads.IUnityAdsLoadListenercom.unity3d.ads.IUnityAdsShowListenercom.unity3d.ads.UnityAdscom.unity3d.ads.UnityAdsLoadOptionscom.unity3d.ads.UnityAdsShowOptionscom.unity3d.ads.metadata.MetaDatacom.unity3d.player.IAssetPackManagerDownloadStatusCallbackcom.unity3d.player.IAssetPackManagerMobileDataConfirmationCallbackcom.unity3d.player.IAssetPackManagerStatusQueryCallbackcom.unity3d.player.PlayAssetDeliveryUnityWrappercom.unity3d.player.UnityPlayercom.unity3d.services.banners.IUnityBannerListenercom.unity3d.services.banners.UnityBannerscom.unity3d.services.banners.view.BannerPositioncom/google/android/gms/tasks/OnCompleteListenercom/google/android/gms/tasks/OnFailureListenercom/google/android/gms/tasks/OnSuccessListenercom/google/games/bridge/ConnectionLifecycleCallbackProxy$Callbackcom/google/games/bridge/EndpointDiscoveryCallbackProxy$Callbackcom/google/games/bridge/PayloadCallbackProxy$Callbackcom/unity3d/player/ReflectionHelpercommandBuffercommentcommitcommitAndClosecommitAndClose.failed: commitAndClose.succeedcompareOptionscomparercomparisoncomparisonTypecompleteUpdatecomplexContentcomplexTypecomponentcomponentClasscomponentHashcomponentPackagecomponentPackageHashcomponentTypecomponentscompressedStreamconcatconcurrencyLevelconfidenceconfirm_subscription_price_changeconnectionconnectionGroupNameconnectionRequestCallbackconsectetuerconstconstraintconsumeAsynccontaincontainercontainscontentcontent-boxcontent-containercontent://contentContainercontentLengthcontentRectcontentTypecontentscontentsEnabledcontextcontext.currentElement != nullcontextTypecontinuationcontinuationActioncontinuationFunctioncontinuationOptionscontinuecontinue_promotional_purchasescontractcontrastconversionconversionTypeconverterconverterFunccookiecookieCollectioncookiescopycoralcornflowerbluecornsilkcoscouldn't compute signature verificationcountcovercp037cp1025cp1256cp290cp297cp367cp420cp423cp424cp437cp50227cp819cp850cp852cp855cp857cp858cp860cp861cp862cp863cp864cp865cp866cp869cp875cp880cratecreatecreate=createFunccreateInvocationErrorcreateValueCallbackcreationOptionscreatorcredentialscrimsoncrlcscs-CZcsASCIIcsEUCKRcsEUCPkdFmtJapanesecsGB2312csGB231280csIBM037csIBM1026csIBM273csIBM277csIBM278csIBM280csIBM284csIBM285csIBM290csIBM297csIBM420csIBM423csIBM424csIBM500csIBM870csIBM871csIBM880csIBM905csIBMThaicsISO2022JPcsISO2022KRcsISO58GB231280csISOLatin1csISOLatin2csISOLatin3csISOLatin4csISOLatin5csISOLatin9csISOLatinArabiccsISOLatinCyrilliccsISOLatinGreekcsISOLatinHebrewcsKOI8RcsKSC56011987csPC8CodePage437csShiftJIScsUnicode11UTF7csWindows31Jcsbig5cspacecullingEnabledculturecultureNamecurrencycurrentActivitycursorcursor=cursorIndexcursorPositioncustomcustom styles is nullcustomErrorscxcycy-GBcyancygwincyrillicczdd MMM yy H:m:sd MMM yyyy hh:mm:ss:fffd MMM yyyy hh:mm:ss:fffttd':'h':'mm':'ss'dada-DKdarkbluedarkcyandarkgoldenroddarkgraydarkgreendarkgreydarkkhakidarkmagentadarkolivegreendarkorangedarkorchiddarkreddarksalmondarkseagreendarkslatebluedarkslategraydarkslategreydarkturquoisedarkvioletdatdatadata cannot be emptydata cannot be longer than {0}data-sourcedata-source-pathdataItemdataSetdataSourcedataSourcePathdataTypedatatypedatedateDatadateEnddateStartdateTimedateTime.tzdateTimeOptiondaydayOfWeekdayTimeDurationdaylightDeltadaylightTransitionEnddayofweekdaysdc}dd.MM.yyyyddd MMM d HH:mm:ss yyyyddd, d MMM yyyy H:m:s zzzddd, dd MMM yyyy HH':'mm':'ss 'GMT'dddd, dd MMMM yyyydddd, dd'-'MMM'-'yy HH:mm:ss 'GMT'dede-ATde-CHde-DEde-LIde-LUdebugdecimaldecimal[]decimalsdeclaringTypedecodeByteArraydecoderFallbackdeeppinkdeepskybluedefaultdefault(defaultCursorIddefaultValuedefaultkeydeflatedegdelaydelayLoadAsClientChanneldelegatedelegateTypedelegatesFocusdelegatingTypedeletedeleteLeaderboarddelimiterdeltademoByteArraydemoColordemoColor32demoDoubledemoLongdemoQuaterniondemoRectdemoUintdemoVector2demoVector3dependencyComponentdependencyHashdependencyOptionaldependencyProvideddequeue_query_products_timedequeue_query_purchases_timederivedBydesdesc.depthStencilFormatdesc.graphicsFormatdesc.heightdesc.msaaSamplesdesc.volumeDepthdesc.widthdescendantdescendant-or-selfdescenderdescriptiondestdestDirNamedestFileNamedest_bufferdestinationdestination offset is beyond array sizedestinationArraydestinationIndexdestinationTimeZonedestinationTypedestroydestroyItemdeveloperPayloaddeviceMeetsMinimumRequirementsdeviceStatusdeviceiddexdiamdictdictionarydictionaryCreationThresholddictionaryTypediffgrdiffgramdigestdigest digitdigitsdimgraydimgreydirdirectiondirectorydisablePlayModeTintdisableddisabledColordisconnectFromEndpointdispatcher != nulldisplaydisplay-tooltip-when-elideddisplayTooltipWhenElideddivdlldl}dnQualifierdnQualifier=dodocTypeNamedocumentationdodgerbluedolordoloredonedonoctodoubledouble-click-selects-worddouble:double: doubleClickSelectsWorddoubleValuedouble[]downbuttondownloaded={0} dropPositionds_sqlXmlWraPPeRdsadsaSHA1dsbdsb-DEdstdstOffsetdtdttermdueTimedue_time_msdumbdummy.bundle.iddummy.service.iddurationdurationMillisecondsdvdv-MVdyMdynamicProvideree100e101e102e103e104e105e106e107e108e109e110e111e112e113e114e115e116e117e118e119e120e121e122e123e124e125e126e127e128e129e130e131e132e133e134e135e136e137e138e139e140e141e142e143e144e145e146e147e148e149e150e151e152e153e154e155e156e157e158e159e160e161e162e163e164e165e166e167e168e169e170e171e172e173e174e175e176e177e178e179e180e181e182e183e184e185e186e187e188e189e190e191e192e193e194e195e196e197e198e199e200e201e202e203e204e205e206e207e208e209e210e211e212e213e214e215e216e217e218e219e220e221e222e223e224e225e226e227e228e229e230e231e232e233e234e235e236e237e238e239e240e241e242e243e244e245e246e247e248e249e250e251e252e253e254e255e256e257e258e259e260e261e262e263e264e265e266e267e268e269e270e271e272e273e274e275e276e277e278e279e280e281e282e283e284e285e286e287e288e289e290e291e292e293e294e295e296e297e298e299e300e301e302e303e304e305e306e307e308e36e37e38e39e40e41e42e43e44e45e46e47e48e49e50e51e52e53e54e55e56e57e58e59e60e61e62e63e64e65e66e67e68e69e70e71e72e73e74e75e76e77e78e79e80e806f6e81e82e83e84e85e86e87e88e89e90e91e92e93e94e95e96e97e98e99easeease | ease-in | ease-out | ease-in-out | ease-in-sine | ease-out-sine | ease-in-out-sine | ease-in-cubic | ease-out-cubic | ease-in-out-cubic | ease-in-circ | ease-out-circ | ease-in-out-circ | ease-in-elastic | ease-out-elastic | ease-in-out-elastic | ease-in-back | ease-out-back | ease-in-out-back | ease-in-bounce | ease-out-bounce | ease-in-out-bounceease-inease-in-backease-in-bounceease-in-circease-in-cubicease-in-elasticease-in-outease-in-out-backease-in-out-bounceease-in-out-circease-in-out-cubicease-in-out-elasticease-in-out-sineease-in-sineease-outease-out-backease-out-bounceease-out-circease-out-cubicease-out-elasticease-out-sineeasing-functionebcdicebcdic-Latin9--euroebcdic-cp-ar1ebcdic-cp-beebcdic-cp-caebcdic-cp-chebcdic-cp-esebcdic-cp-fiebcdic-cp-frebcdic-cp-gbebcdic-cp-grebcdic-cp-heebcdic-cp-isebcdic-cp-itebcdic-cp-nlebcdic-cp-roeceebcdic-cp-seebcdic-cp-trebcdic-cp-usebcdic-cp-wtebcdic-cp-yuebcdic-de-273+euroebcdic-dk-277+euroebcdic-es-284+euroebcdic-fi-278+euroebcdic-fr-297+euroebcdic-gb-285+euroebcdic-international-500+euroebcdic-is-871+euroebcdic-it-280+euroebcdic-no-277+euroebcdic-se-278+euroebcdic-us-37+euroec192wapiediteditorStallMarkereditorStallSummaryelel-GRelapsedRealtimeelasticAnimationIntervalMselasticityeleelemelementelement-nameelementFormDefaultelementOnlyelementSelectorelementTypeelementValueelementVisitorelement_bufferelitellipsiselseeltOnlyemembedPackageemilosemoji-fallback-supportemojiFallbackSupportemptyenen-029en-AUen-BZen-CAen-GBen-IEen-INen-JMen-MYen-NZen-PHen-SGen-TTen-USen-ZAen-ZWenable-rich-textenableOneTimeProductsenablePendingPurchasesenableRichTextenabledenabledInHierarchyenabledSelfencodedDataencodedDistinguishedNameencoderFallbackencodingendendFunctionendIndexendIndex cannot be greater than startIndex.endMethodend_time=enhancedKeyUsagesentitiesentityentityTagentrySetenumenumTypeenumerableenumerationenvenvironmentNameenvoyInfoequalequalseraeraterrorerrorCodeerrorseses-ARes-BOes-CLes-COes-CRes-DOes-ECes-ESes-GTes-HNes-MXes-NIes-PAes-PEes-PRes-PYes-SVes-USes-UYes-VEes}etet-EEeueu-ESeuc-cneuc-jpeuc-kreuismodeu}evaluatoreventeventTypeevt.isPropagationStoppedexexceptionexceptionObjectexcludeFromFocusRing should only be set on composite roots.exclusionexeexpexp:{0} completedRequest:{1}expandedNameexpiry=explicitexpressionexpressionsextendsextensionextentsexternextra Life picked upextra points picked upextraPaddingeyezff)f, f0f1f2f3f4f5fIsMarshalledfafa-IRfacefacebook_ids=fadefadeDurationfailed a fake store purchasefakefalsefamilyfaultfault cannot be used with catch or finally clausesfetch_purchases_errorfetch_store_promotion_orderfetch_store_promotion_visibilityfifi-FIfieldfield or propertyfieldCountfieldInfofieldNamefilfil-PHfilefile:file:/file://file:///fileAccessfileNamefileTimefilenamefillfillAlphafilterfilter=finalfinalDefaultfinallyfindValuefirebrickfirstfixedfixed-item-heightfixed-pane-indexfixed-pane-initial-dimensionfixed.14.4fixedItemHeightfixedPaneIndexfixedPaneInitialDimensionfk_flagfldsflemmingflexflex | noneflex-basisflex-directionflex-endflex-growflex-shrinkflex-startflex-start | flex-end | center | space-between | space-around | space-evenlyflex-start | flex-end | center | stretch | autoflex-wrapflexBasisflexDirectionflexGrowflexShrinkflexWrapflexibleAllowed={0}floatfloat.ieee.754.32float.ieee.754.64float:float: floatValuefloat[]floorfloralwhitefl}fofo-FOfocusfocus-indexfocusIndexfocusablefollowingfollowing-siblingfontfont-sizefont-weightfontAssetfontSizefontStylefontWeightforfor foreachforestgreenformformatformatStringformatsformatterformatterConverterforward=fourCornersArrayfrfr-BEfr-CAfr-CHfr-FRfr-LUfr-MCfractionDigitsframeworkframeworkNamefreeTrialPeriodfreezefriendlyNamefromfromBytesftpfuchsiafuncfunctionfyfy-NLf{0}gg7g8923gnmzx02341jmdgsxxcgDaygMonthgMonthDaygYeargYearMonthgaga-IEgainsborogame savedgameCompletegb2312gdgenerationgeneric args after array spec or pointer typegenericArgumentsgenericClassDefinitiongenericInterfaceDefinitiongenericMethodgenericParameterDefinitiongenericTypegenericTypeDefinitiongetgetAccountIdentifiersgetAchievementIdgetAchievementsClientgetAppUpdateInfogetApplicationInfogetAssetPackStatesgetAverageSessionLengthgetBillingCycleCountgetBillingPeriodgetChurnProbabilitygetClassgetClipDurationgetComponentTypegetConflictgetConflictIdgetConflictingSnapshotgetConnectionStategetConnectionsClientgetConstructorIDgetControllerHandlegetCountgetCoverImageUrlgetCurrentPlayergetCurrentPlayerInfogetCurrentStepsgetDatagetDaysSinceLastPlayedgetDebugMessagegetDebugModegetDeclaringClassgetDecorViewgetDescriptiongetDisplayNamegetEndpointNamegetErrorCodegetEventIdgetEventsClientgetExceptiongetFieldIDgetFieldSignaturegetFormattedPricegetFriendStatusgetFriendsListVisibilityStatusgetGamesSignInClientgetHighSpenderProbabilitygetIconImageUrlgetInstancegetKeygetLastModifiedTimestampgetLastUpdatedTimestampgetLayoutParamsgetLeaderboardgetLeaderboardsClientgetLengthgetMessagegetMetadatagetMethodIDgetNamegetNumScoresgetNumberOfPurchasesgetNumberOfSessionsgetObfuscatedAccountIdgetObfuscatedProfileIdgetOfferTokengetOneTimePurchaseOfferDetailsgetOrderIdgetOriginalJsongetPackageManagergetPackageNamegetParentgetPlayedTimegetPlayerIdgetPlayerRankgetPlayerScoreTaggetPlayerStatsClientgetPlayersClientgetPriceAmountMicrosgetPriceCurrencyCodegetPricingPhaseListgetPricingPhasesgetProductDetailsListgetProductIdgetProductTypegetProductsgetPurchaseStategetPurchaseTokengetRankgetRawPlayerScoregetRawScoregetRecallClientgetRelationshipInfogetResolutiongetResolutionSnapshotContentsgetResponseCodegetResultgetRevealedImageUrlgetScoreHoldergetScoreTaggetScoresgetServiceIdgetSessionIdgetSessionPercentilegetSharedPreferencesgetSignaturegetSnapshotgetSnapshotContentsgetSnapshotIdgetSnapshotsClientgetSpendPercentilegetSpendProbabilitygetStackTraceStringgetStategetStatusgetStatusCodegetStringgetSubscriptionOfferDetailsgetTimestampMillisgetTitlegetTotalSpendNext28DaysgetTotalStepsgetTypegetUniqueNamegetUnlockedImageUrlgetValuegetVariantsgetVersiongetXpValueget_HasValueget_Itemget_Lengthget_Positionget_Valuegetterghostwhiteglgl-ESglobalglobal-metadataglobalUnscaledTimeglowRinggogoldgoldenrodgoogle.comgoogle204gophergotogradgradientgradientAssetgraphgraygrayscalegreekgreek8greengreenyellowgreygroupgroup_id=growFactorgswgsw-FRgtgugu-INguidgu}gzipgzip, deflatehh)h:mm tthaha-Latn-NGha-latnhandlehandlerhandlershas a nodehasChangeshasErrorshasNexthasPlayerInfohas_introductory_price_trialhashCodehehe-ILheaderheader cannot be emptyheader-templateheader-titleheaderTemplateheaderTitleheadershebrewheighthejhelloheroeshexhexBinaryhexStringhh:mm tthh:mm:ss:fffhh:mm:ss:ffftthh\:mmhh\:mm\:sshihi-INhiddenhide-mobile-inputhide-placeholder-on-focushideMobileInputhidePlaceholderOnFocushierarchyhierarchyFlattenedhierarchyPtrhigh-limithigh-valuehighLimithighLimit is smaller than lowLimithighResolutionImagehighSurrogatehighValuehighlightColorhighlightStatehighlightedColorhmacmd5hmacripemd160hmacsha1hmacsha256hmacsha384hmacsha512honeydewhorizontal movementhorizontal-page-sizehorizontal-scroller-visibilityhorizontal-scrollinghorizontalAlignmenthorizontalPageSizehorizontalScrollerVisibilityhorizontalScrollingEnabledhorizontalscrollbarhorizontalscrollbarleftbuttonhorizontalscrollbarrightbuttonhorizontalscrollbarthumbhorizontalsliderhorizontalsliderthumbhorizontalsliderthumbextenthosthostNamehostNameOrAddresshostnamehotpinkhotspothourshoverhrhr-BAhr-HRhrefhref=hsbhsb-DEhtmlhttphttp://http://james.newtonking.com/projects/jsonhttp://microsoft.com/wsdl/types/http://schemas.microsoft.com/clr/assem/http://schemas.microsoft.com/clr/ns/http://schemas.microsoft.com/clr/nsassem/http://schemas.microsoft.com/ws/2008/06/identity/claims/rolehttp://schemas.xmlsoap.org/soap/encoding/http://schemas.xmlsoap.org/ws/2005/05/identity/claims/namehttp://schemas.xmlsoap.org/wsdl/http://u@http://www.msftconnecttest.com/connecttest.txthttp://www.w3.org/http://www.w3.org/1999/XMLSchema-instancehttp://www.w3.org/2000/09/xmldsig#dsa-sha1http://www.w3.org/2000/09/xmldsig#hmac-sha1http://www.w3.org/2000/09/xmldsig#rsa-sha1http://www.w3.org/2000/09/xmldsig#sha1http://www.w3.org/2000/10/XMLSchema-instancehttp://www.w3.org/2000/xmlns/http://www.w3.org/2001/04/xmldsig-more#hmac-ripemd160http://www.w3.org/2001/04/xmldsig-more#hmac-sha256http://www.w3.org/2001/04/xmldsig-more#hmac-sha384http://www.w3.org/2001/04/xmldsig-more#hmac-sha512http://www.w3.org/2001/04/xmldsig-more#rsa-sha256http://www.w3.org/2001/04/xmldsig-more#rsa-sha384http://www.w3.org/2001/04/xmldsig-more#rsa-sha512http://www.w3.org/2001/04/xmldsig-more#sha384http://www.w3.org/2001/04/xmlenc#sha256http://www.w3.org/2001/04/xmlenc#sha512http://www.w3.org/2001/XMLSchemahttp://www.w3.org/2001/XMLSchema#stringhttp://www.w3.org/2001/XMLSchema-instancehttp://www.w3.org/2003/11/xpath-datatypeshttp://www.w3.org/XML/1998/namespacehttp_key=httpshttps://https://captive.apple.com/hotspot-detect.htmlhttps://clients3.google.com/generate_204https://google.comhttps://localhost/https://play.google.com/store/apps/details?id=com.OctocubeGamesCompany.CIFIhttps://play.google.com/store/apps/dev?id=7176931174042991537&hl=en-UShttps://snowbot-api.onrender.com/timehttps://www.discord.gg/octocubehuhu-HUhue-rotatehumanBoneId must be between 0 and hyhy-AMhz-gb-2312h{0} (refs#{1}), {2}ii1i2i4i8iOSiatibm737ibm775ibm819ibm850ibm852ibm857ibm861ibm869iconicon-imageiconImageicudt73lidid attribute is requiredid-IDid-smime-alg-3DESwrapidentityHashCodeidrefidrefsids=id{0}ififFalseifTrueigig-NGignorediiii-CNiidimageimmediateAllowed={0}implicitimportimpossible to convert valueinin closurein loop, index : inArrayinactiveinappincludeinclude-obsolete-valuesincrementindentindexindex + count > dest.Lengthindex + count > dest_buffer.Lengthindex + count must point inside the argument ascii stringindex + count must point inside the argument unicode stringindex + length > sizeindex < lower boundindex >= Countindex >= array.Lengthindex must be non-negative valueindex of {0} should be in the range of 0 and {1} inclusively.index1index2index3index={0}, generation={1}index={0}, world={1}, generation={2}indexAindexBindexerindexesindexes: indianredindicesindices' length ({0}) should be equal to or greater than the ToggleButtonGroupState's length ({1}).indigoinfinfinityinfoinfosinftynaeINFTYNAE0123456789.,-*/+%^()cosqrludxvRL=pP#inheritinit_purchaseinitialinitialCapacityinitialCountinitialValueinitializationListener is null, you will not receive any callbacksinitializeinitializersinnerExceptionInfosinnerExceptionsinnerListinnerStreaminputinputBufferinputContextinputCountinputOffsetinsertedinstallStatusinstanceinstanceDocumentinstanceTypeinstantiationintint:int: intValueint[]integerinterfaceinternalinteropXmlElementinteropXmlTypeinterruptedintervalintroductoryPriceintroductoryPriceAmountMicrosintroductoryPriceCyclesintroductoryPriceLocaleintroductoryPriceNumberOfPeriodsintroductoryPricePeriodinvalid EncryptedDatainvalid EncryptedPrivateKeyInfoinvalid MACinvalid MAC iterationinvalid PFX versioninvalid PKCS12 attributes idinvalid PrivateKeyInfoinvalid algorithminvalid attribute idinvalid attribute value idinvalid authenticated safeinvalid block lengthinvalid datainvalid encryptionAlgorithminvalid hash lengthinvalid iterationCountinvalid nameinvalid parametersinvalid private key formatinvalid safeBaginvalid safeBag attributes idinvalid safeBag idinvalid saltinvalid signature lengthinvalid size to resize.invalid versioninvertinvertedinvocationListipStringipsumiris-ansiirvisis-ISis-delayedis-multiple-selectionisAcknowledgedisArrayisAuthenticatedisCanceledisClosedisConflictisDelayedisElidedisFamilyShareableisInitializedisMultipleSelectionisPasswordisPasswordFieldisPlaceholderisPrimitiveisReadOnlyisResolutionRequiredisRightToLeftisSelectableisStaleisSuccessfulisUpdateTypeAllowedisUsingAlternateTypefaceisVisibleis_free_trialis_updatedisiXhosa (South Africa)isiZulu (South Africa)iso-10646-ucs-2iso-2022-jpiso-2022-jpeuciso-2022-kriso-2022-kr-7iso-2022-kr-7bitiso-2022-kr-8iso-2022-kr-8bitiso-8859-1iso-8859-11iso-8859-13iso-8859-15iso-8859-2iso-8859-3iso-8859-4iso-8859-5iso-8859-6iso-8859-7iso-8859-8iso-8859-8-iiso-8859-9iso-ir-100iso-ir-101iso-ir-109iso-ir-110iso-ir-126iso-ir-127iso-ir-138iso-ir-144iso-ir-148iso-ir-149iso-ir-58iso-ir-6iso8859-1iso8859-2isoCurrencyCodeiso_8859-1iso_8859-1:1987iso_8859-2iso_8859-2:1987itit-CHit-ITitalicitemitem picked upitem-heightitem-templateitemHeightitemTemplateitemTypeitemsSourceiterationsiteratoriuiu-Cans-CAiu-Latn-CAiu-cansiu-latnivivcivoryjjaja-JPjarjar:file://java.lang.Booleanjava.lang.Bytejava.lang.Characterjava.lang.Classjava.lang.Doublejava.lang.Floatjava.lang.Integerjava.lang.Longjava.lang.Shortjava.lang.Stringjava.lang.reflect.Arrayjava.util.ArrayListjava/lang/Booleanjava/lang/Bytejava/lang/Characterjava/lang/Doublejava/lang/Floatjava/lang/Integerjava/lang/Longjava/lang/Objectjava/lang/Runnablejava/lang/Shortjava/lang/Stringjava/lang/Systemjava/lang/Throwablejava/lang/reflect/Arrayjava/lang/reflect/FieldjavaTask must not be null.jsonjson:ArrayjsonSerializerjsonWriterjustify-contentjustifyContentkkMGTPEk_AppleReceiptKeyk_PKCS7Keyk_ReceiptBytesKeykaka-GEkeep-alivekeepAliveIntervalkeepAliveTimekeykey = key is nullkey was invalidkey=keySelectorkeyStrkeyValuekeyValuePairkeyboard-typekeyboardTypekeypairskeyrefkeyskeywordkhakikindkkkk-KZklkl-GLkmkm-KHknkn-INknownParameterskoko-KRkoikoi8koi8-rkoi8-rukoi8-ukoi8rkokkok-INkoreanks-c-5601ks-c5601ks_c_5601ks_c_5601-1987ks_c_5601-1989ks_c_5601_1987kyky-KGll1l2l3l4l5l9labellabel=labels=lambda_methodlanglang={0}&status={1}&token={2}lang_tag=languagelanguageDirectionlaoreetlastlatin1latin2latin3latin4latin5latin9launchBillingFlowlavenderlavenderblushlawngreenlaxlayerNameslayoutlblb-LUldapleaseManagerPollTimeleaseTimeleftleft joystickleftbuttonlegacylegacyStudiesAllTimelegacyStudiesLastLooplegacyStudiesSinceTR1legacyStudiesThisConstructionlegacyStudiesThisLooplemonchiffonlenlengthlength < 0length of {0} should be greater than or equal to 0 and less than or equal to {1}.length-percentagelength1length2lengthsletter-spacingletterSpacinglevellicense_errorlicense_initlifeBarlifetimelightbluelightcorallightcyanlightgoldenrodyellowlightgraylightgreenlightgreylightpinklightsalmonlightseagreenlightskybluelightslategraylightslategreylightsteelbluelightyellowlimelimegreenlimit=line line-feed (#xA) or tab (#x9) characters, leading or trailing spaces and sequences of one or more spaces (#x20) are not allowed in 'xs:token'.line-heightline-indentlineNumberlinePositionlineSpacinglinearlinear | <timing-function>linear-gradientlinenlinklinkIDlinuxlistlistenerlolo-LAloadloadBannerloadByIdsloadFactorloadFriendsloadListener is null, you will not receive any callbacksloadMoreFriendsloadMoreScoresloadPlayerloadPlayerCenteredScoresloadPlayerStatsloadTopScoreslocal-namelocalBoundlocalEPlocalNamelocalUserlocalhostlocalizedDescriptionlocalizedPricelocalizedPriceStringlocalizedTitlelocaltimelocklockTakenlockedlogErrorDelegatelogExceptionDelegatelogWarningDelegatelogged out of satorilogicallonglong:long: longValuelong[]looploop { ... }loopbackloremlow-limitlow-valuelowLimitlowLimit is greater than highLimitlowSurrogatelowValuelower-centerlower-leftlower-rightlowerBound={0}, upperBound={1}, isValid={2}lowerBoundslowercaseltlt-LTlvlv-LVmm_CachedPtrm_GateCount > 0m_GateDepth > 0m_MaxCapacitym_StringValuem_acctTypem_codePagem_currentThreadm_initializationState set to INITIALIZING. Initializing Builder next.m_initializationState: m_isAuthenticatedm_isReadOnlym_namem_serializedStatesm_typem_userTokenmacintoshmactripledesmagentamagnamailtomailto:majormakeFootermakeHeadermakeItemmakeNoneElementmanymarginmargin-bottommargin-leftmargin-rightmargin-topmarginBottommarginLeftmarginRightmarginTopmarkmaroonmask-charactermaskCharmaskCharactermatchmatchTimeoutmatch_id=materialmaterialReferenceIndexmaxmax-agemax-age=max-heightmax-lengthmax-stalemax-valuemax-widthmaxCapacitymaxCountmaxDisplayedSavedGames must be greater than 0maxExclusivemaxFontSizemaxHeightmaxInclusivemaxLengthmaxOccursmaxSizemaxStackSizemaxValuemaxWidthmax_size=maximum number of service points reachedmbmd2md2RSAmd4md4RSAmd5md5-sessmd5RSAmediumaquamarinemediumbluemediumorchidmediumpurplemediumseagreenmediumslatebluemediumspringgreenmediumturquoisemediumvioletredmembermemberInfomemberNamememberTypesmembersmembers=memory is not initializedmenumeshmeshesmessagemessage-typemessageIdmessageId must not be emptymessageTypemetaDatametadatametadata=methodmethod arguments are incompatiblemethod return type is incompatiblemethodInfomethodInstantiationmethodNamemethodName is null or emptymgf1mimi-NZmidmiddlemiddle-centermiddle-leftmiddle-rightmidnightbluemillisecondmillisecondsmillisecondsDelaymillisecondsTimeoutminmin-freshmin-fresh=min-heightmin-valuemin-widthminExclusiveminFontSizeminHeightminInclusiveminLengthminOccursminOccurs value cannot be greater than maxOccurs value.minSizeminValueminWidthmin_size=minimumLengthminormintcreamminutesmissing EncryptedContentInfomissing EncryptedContentInfo.ContentEncryptionAlgorithmIdentifiermissing EncryptedContentInfo.ContentTypemissing EncryptedContentInfo.EncryptedContentmissing MAC saltmissing algorithm OIDmissing versionmistyrosemixedmiyagimkmk-MKmlml-INmmsound.settingsmnmn-MNmn-Mong-CNmn-cyrlmn-mongmoccasinmodmodemode attribute is requiredmodelmodifiedmohmoh-CAmoneymono-io-layer-error ({0})monthmonthsmosaicKMandUpdSigmosaicUpdatedSigmousemouse-wheel-scroll-sizemouseWheelScrollSizemovemrmr-INmsms-BNms-MYms_Kanjimscorlibmscorlib.dllmsdatamsdata:UDTColumnValueWrappedmsdata:UseDataSetSchemaOnlymsftconnecttestmspacemstnsmstns:mtmt-MTmultilinemust be reducible nodemust-revalidatemykomyusernamennakama.sessionnamename cannot be emptyname=nameTablenamedParamsnames=namespacenamespace namespace-urinamespaceNamenamespaceResolvernamespaceUrinametablenamingStrategyTypenannanosecondsnative handle can not be nullnativePtrnativeTex can not be nullnavajowhitenavigation_gamebuild_infonavigation_navmesh_bakingnavigation_project_settings_infonavynbnb-NOnc={0:X8}, nene-NPnegative indexnegativeIntegernested-interaction-kindnestedInteractionKindnet.codestage.actk.androidnative.ACTkAndroidRoutinesnet.codestage.actk.androidnative.CodeHashCallbacknet.codestage.actk.androidnative.CodeHashGeneratornet.pipenet.tcpnet/snmpnet/snmp6net/tcpnet/tcp6net/udpnet/udp6net_ftpstatuscode_net_requestabortednet_webstatus_neutralnewnew new Colornew Color(new [] new {0}[{1}] {{ newAddressnewBuildernewElementnewErrornewItemsnewOutnewProxyInstancenewSizenew_sku_price_in_microsnewsnextnext_page_tokennfinibhnilnillablenistP192nistP224nksessionnlnl-BEnl-NLnmtokennmtokensnnnn-NOnntpnono colon foundno private key to exportno-cacheno-repeatno-storeno-transformno-wrapnoNamespaceSchemaLocationnobrnodenode cannot reduce to itself or nullnode=nodeChildrenPtrnodesnodetypenonNegativeIntegernonPositiveIntegernoncenonce="{0}", nonenone | <filter-function>+none | <number>{1,3}none | <single-transition-property>#none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]none | [ x | y | z | <number>{3} ] && <angle> | <angle>none | [<length> | <percentage>] [ [<length> | <percentage>] <length>? ]?none | [best-fit && <length-percentage>{2}]nonummynoparsenormalnormal | italic | bold | bold-and-italicnormal | nowrap | pre | pre-wrapnormalColornormalImagenormalize-spacenormalizedStringnotnot not a generic method definitionnot availablenot enough key parametersnotationnowrapnowrap | wrap | wrap-reversensnsmgrnsonso-ZAntlmnullnull Snapshot passed to AudioMixer.TransitionToSnapshot of AudioMixer 'null texture passed to GUI.DrawTexturenullableTypenum experiments is numBytesnumbernumberOfUnitsnv-constant-templatenv-emphasis-templatenv-pattern-templateoobjobjectobject object must be MarshalByRefobjectGeneratorobjectIDobjectID cannot be less than or equal to zero.objectInfo.objobjectNameobjectRequiredobjectToBeFixedobjectTypeobjectUriobjrefFlagsobscuredString value from inspector: ococ-FRoffoffsetoffset offset must be <= buffer.Lengthoffset must be >= 0offset1offset2offset={0}, blurRadius={1}, color={2}offsetInoffsetMaxoffsetMinoffsetOutoidoidValueoldItemsoldValueold_sku_period_stringold_sku_price_in_microsold_sku_remaining_secondsoldlaceoliveolivedrabononAddonAppReceiptRefreshFailedonAppReceiptRefreshedonEntitlementsRevokedonFetchStorePromotionOrderFailedonFetchStorePromotionOrderSucceededonFetchStorePromotionVisibilityFailedonFetchStorePromotionVisibilitySucceededonProductPurchaseDeferredonPromotionalPurchaseAttemptedonPurchaseFailedEvent({0})onRemoveonTransactionsRestoredFailonTransactionsRestoredSuccessoneonlineOfflineSecondsDifferenceonlineSecondsUtconly-if-cachedopopPoolop_Additionop_BitwiseAndop_BitwiseOrop_Decrementop_Divisionop_Equalityop_ExclusiveOrop_Explicitop_Exponentop_Exponentiationop_Falseop_GreaterThanop_GreaterThanOrEqualop_Implicitop_Incrementop_Inequalityop_LeftShiftop_LessThanop_LessThanOrEqualop_LogicalNotop_Modulusop_Multiplyop_OnesComplementop_RightShiftop_Subtractionop_Trueop_UnaryNegationop_UnaryPlusopacityopaqueopaque="{0}", openopen=operatoroptionaloptionsoror-INorangeorangeredorchidorderorderIdorderedorientationoriginoriginalRuleotherotherSimpleTypeoutoutArrayoutEventoutputoutputBufferoutputOffsetoverflowoverflowModeoverrideoverridingAddButtonBehaviorowner_ids=ppapa-INpackageDependenciespackageHashpackageManagerpackageNamepackageProviderpackage_init_timepackagespaddingpadding-bottompadding-boxpadding-box | content-boxpadding-leftpadding-rightpadding-toppaddingBottompaddingLeftpaddingRightpaddingToppage-sizepageSizepalegoldenrodpalegreenpaleturquoisepalevioletredpanelpanel.contextType == ContextType.EditorpapayawhipparagraphSpacingparallelOptionsparamparameterTypeparametersparameters.CountparamsparentparentIdparentkeyparse-escape-sequencesparseControlCharactersparseEscapeSequencesparse_receipt_transaction_errorparsing "{0}" - {1}partialpartialValidationTypeparticleparticlespartitionerOptionspasswordpathpath1path2path3pathLengthConstraintpathspatternpayload=payoutspeachpuffpenperiodpermessage-deflateperupipicking-modepickingModepinkpivotpixelsPerUnit must be set to a positive non-zero value.plpl-PLplaceholder-textplaceholderTextplacementId cannot be nil or emptyplacementId is emptyplacementsplanesplatformplayplayCoreApiMissingplayMaximumAmplitudePatternplayerplayer_profileplayerprofileplumpointSizepointerpointerEventpool.ntp.orgportpositionposition = position={0}, rotation={1}positionspositiveIntegerposixrulespowderblueprepre-wrappreLoadpreProcessFlagspreauthenticateprecedingpreceding-siblingpredicateprefixpresent_code_redemption_sheetpreservepreservePlayerPrefspressedColorpriceprice_amount_microsprice_currency_codeprimaryprimary-column-nameprimaryColumnNameprintpriority={0} privateprocessContentsprocessing-instructionproductIDproductIdproductId:productionprohibitedproppropertiespropertypropertyInfopropertyNameprotectedprotocolsprovidedArgsproviderproxyproxy-revalidateprsprs-AFpsps-AFpseudoclassptpt-BRpt-PTptrpubidpublicpublic keypublic key encryptedpurchaseInfopurchaseStatepurchaseTimepurchaseTokenpurpleputStringpxpypzqqaqopqop="{0}", ququalifiedqualifiedNamequantityquery=queryProductDetailsAsyncqueryPurchasesAsyncquery_async_sku_errorqueuequotqutqut-GTquzquz-BOquz-ECquz-PEq{0}rr4r8radradixrandomnumbergeneratorrangeranksratiorawrawDatarc2rc4readFullyreadTypereaderreadonlyrealmrealm="{0}", reasonrebeccapurplereceiptreceiveBufferSizerecord_deletion=redredefinereducible nodes must override Expression.Reduce()refref referreferencesrefresh_app_receiptregexInputregexPatternregisterListenerrejectConnectionrel_relationrelativerelative | absolutereleasereleaseCountrelic {0}, {1}remoteEPremoteonlyremovePackageremoveViewremove_keysrenderData should not be null when nestedRenderData is not nullrenderTexturerenderedWidth was not rounded: {0}rendererrenewOnCallTimereorder-modereorderModereorderablerepeatrepeat-xrepeat-x | repeat-y | [ repeat | space | round | no-repeat ]{1,2}repeat-yrepeatButtonrepeatCountreplacereplacementrequestrequest startedrequestConnectionrequestRecallAccessrequestServerSideAccessrequestUrirequestUriStringrequestingEndpointIdrequiredrequiredLengthresreset=resetToDefaultDependenciesresizableresize-previewresizePreviewresolveConflictresolveErrorUserActionresolvePackagesresolvedMapresolvedStyle.filter is not a List<FilterFunction>resourceNameresponse="{0}", restore_transactionrestrictionrestrictionsresultresultCallbackresultSelectorresultsretrieve_productsreturnreturnLabelreturnTypereturnValueAddressreturnalrevealrevisionrgbHashrgbIVrgbKeyrgbSignaturerichTextrightright joystickrightbuttonrijndaelripemd-160ripemd160rmrm-CHroro-ROrootrootTyperosybrownrotateroundroutine is nullrowrow-reverserowOrderroyalbluersaruru-RUruleruleIndexrunrunOnUiThreadrwrw-RWrxvtss (-0.30s max)s ATTACK SPEEDs)</size></color> and also grants Ozzy <b>-0.06s</b> <color=#646AFF>ATK Speed</color> <color=white><size=40>(-s)</size></color>.`
+  - offset `557573` [ascii] `The chance to trigger is equal to <color=#66B6FF>Effect Chance</color> <color=white><size=40>(s-maxages-maxage=s?(?![\w\d])s_availableSentinels_completedSentinelsasa-INsaddlebrownsahsah-RUsalmonsaltsandybrownsave_activeHourssave_backupssave_dailysave_extrasave_hourlysave_milestonesave_monthlysave_nowsave_weeklysavegamesbsbytesbyte[]sb}scalescale-and-cropscale-to-fitscaleModesceneNameschedulerschemaschemaLocationschemaToRemoveschemafragmentcountschemasscopeidscreenHeightscreenRectscreenWidthscreenshot.pngscrollscroll-deceleration-ratescrollDecelerationRatescrollOffsetscrollViewscrollviewsdfsdf | bitmapsese-FIse-NOse-SEseagreensealedsearchOptionsearchPatternsearchTargetseashellsecP160k1secP160r1secP160r2secP192k1secP224k1secP256k1secondsecondaryTexturesecondssedseeksegmentselect-all-on-focusselect-all-on-mouse-upselect-line-by-triple-clickselect-word-by-double-clickselectAllOnFocusselectAllOnMouseUpselectIndexselectableselectedselectedIndexselectedIndicesselectedItemselectedItemsselectionselection-typeselectionTypeselectorselfsendBufferSizesendPayloadsepiaseqsequencesequence expected to contain elements only. Schema was not created using this tool.serParserserWriterserialNumberserializationStreamserializerserializerReaderserializerWriterserverserverProvidersserver_idserviceserviceIdservicePointsetsetAllowAssetPackDeletionsetAmplitudeMultiplicationsetBackgroundColorsetBannerListenersetBannerPositionsetCategorysetCoverImagesetDebugModesetDescriptionsetGlobalVariablesetListenersetObfuscatedAccountIdsetObfuscatedProfileIdsetObjectIdsetOfferTokensetOldPurchaseTokensetPlayedTimeMillissetProductDetailssetProductDetailsParamsListsetProductIdsetProductListsetProductTypesetPurchaseTokensetStepssetStrategysetSubscriptionReplacementModesetSubscriptionUpdateParamsset_Itemset_Positionset_store_promotion_orderset_store_promotion_visibilitysettingsListshasha-256sha-384sha-512sha1sha1DSAsha1ECDSAsha1RSAsha256sha256ECDSAsha256RSAsha384sha384ECDSAsha384RSAsha512sha512ECDSAsha512RSAshaRSAshadershaderRuntimeInfoshareshift-jisshift_jisshortshort:shortValueshort[]shouldConvertToLinearSpaceshouldSerializeFuncshowshow-add-remove-footershow-alternating-row-backgroundsshow-bordershow-bound-collection-sizeshow-foldout-headershow-horizontal-scrollershow-input-fieldshow-vertical-scrollershowAchievementUishowAddRemoveFootershowAllLeaderboardsUishowAlternatingRowBackgroundsshowBordershowBoundCollectionSizeshowCaptureOverlayUishowCompareProfileWithAlternativeNameHintsUIshowFoldoutHeadershowInputFieldshowLeaderboardUishowListener is null, you will not receive any callbacksshowMixedValueshowSelectSnapshotUisisi-LKsiblingsiennasignInsignaturesilversimpleContentsimpleTypesinsingle-transitionsingle-transition-propertysitsizesize must be <= buffer.Length - offsetsize must be >= 0size={0}, allocator={1}sizeDeltasizeTypesizeofsi}sjissksk-SKskipskipFramesskuDetailssku_details_response_consolidator_errorsku_details_response_errorskyblueslsl-SIslateblueslategrayslategreysleep1Thresholdslicedsliced | tiledsl}smasma-NOsma-SEsmallcapssmjsmj-NOsmj-SEsmnsmn-FIsmssms-FIsnowsnowwhitesosoapInteropsocketsocketAddresssortColumnDescriptionssortablesorting-enabledsorting-modesortingModesortkey1sortkey2soundsourcesourceArraysourceBytesToCopysourceDirNamesourceFileNamesourceIndexsourceRectsourceTimeZonesourceTypesourceUrispspacespace-aroundspace-betweenspace-evenlyspecialAttrsspecifiedECDSAspinCountsponsorshipTimeoutspringgreenspritespriteAssetsqsq-ALsqrtsrsr-Cyrl-BAsr-Cyrl-CSsr-Latn-BAsr-Latn-CSsr-cyrlsr-latnsrcsrcOffsetss}ststackstackallocstagestaleness={0} standalonestandardstandard | advancedstartstart | middle | endstart1start2startAdvertisingstartConnectionstartDiscoverystartIndexstartIndex cannot be larger than length of string.startIndex must be less than length of string.startPackageManagerServerstartPosstartUpdateFlowstart_time=startatstarting Accept()starting Connect()starting capturestarting identity capturestarts-withstatestate = {0}state:{0}state=stateMachinestaticstatusstatus: {0} status={0} statusCodestatusDescriptionsteelbluestopstopAdvertisingstopAllEndpointsstopDiscoverystopPatternstoreLocationstoreNamestoreSpecificErrorCodestoreSpecificIdstore_idsstrstrDefaultstrLocalNamestrNamestreamstream:{0} conn:{1} exp:{2} completedRequest:{3}stretchstretch-modestretch-to-fillstretch-to-fill | scale-and-crop | scale-to-fitstretchModestretchablestrictstridestrikethroughColorstringstring examplestring-lengthstring1string2string:string: stringLengthstringToEscapestringToUnescapestring[]structstub is not used in MonostylestyleSheetstyleSheetsstylessubsubProtocolsubjectKeyIdentifiersubmeshIndexsubmeshIndex out of range.submitScoresubssubscriptionPeriodsubsetsubstitutionsubstitutionGroupsubstringsubstring-aftersubstring-beforesubtypesubtype cannot be longer than {0}suffixsumsun-cmdsupsuper secret passwordsupportExpressionssvsv-FIsv-SEsvfsvkswsw-KEswitchswitchNamesxsysyncsync=syrsyr-SYsysidsystemsystem.runtime.remotingsystem.security.cryptography.asymmetricalgorithmsystem.security.cryptography.dessystem.security.cryptography.descryptoserviceprovidersystem.security.cryptography.dsasystem.security.cryptography.dsacryptoserviceprovidersystem.security.cryptography.dsasignaturedeformattersystem.security.cryptography.dsasignaturedescriptionsystem.security.cryptography.dsasignatureformattersystem.security.cryptography.hashalgorithmsystem.security.cryptography.hmacsystem.security.cryptography.hmacmd5system.security.cryptography.hmacripemd160system.security.cryptography.hmacsha1system.security.cryptography.hmacsha256system.security.cryptography.hmacsha384system.security.cryptography.hmacsha512system.security.cryptography.keyedhashalgorithmsystem.security.cryptography.mactripledessystem.security.cryptography.md5system.security.cryptography.md5cryptoserviceprovidersystem.security.cryptography.randomnumbergeneratorsystem.security.cryptography.rc2system.security.cryptography.rc2cryptoserviceprovidersystem.security.cryptography.rijndaelsystem.security.cryptography.rijndaelmanagedsystem.security.cryptography.ripemd160system.security.cryptography.ripemd160managedsystem.security.cryptography.rngcryptoserviceprovidersystem.security.cryptography.rsasystem.security.cryptography.rsapkcs1sha1signaturedescriptionsystem.security.cryptography.rsapkcs1sha256signaturedescriptionsystem.security.cryptography.rsapkcs1sha384signaturedescriptionsystem.security.cryptography.rsapkcs1sha512signaturedescriptionsystem.security.cryptography.rsapkcs1signaturedeformattersystem.security.cryptography.rsapkcs1signatureformattersystem.security.cryptography.sha1system.security.cryptography.sha1cngsystem.security.cryptography.sha1cryptoserviceprovidersystem.security.cryptography.sha1managedsystem.security.cryptography.sha256system.security.cryptography.sha256cngsystem.security.cryptography.sha256cryptoserviceprovidersystem.security.cryptography.sha256managedsystem.security.cryptography.sha384system.security.cryptography.sha384cngsystem.security.cryptography.sha384cryptoserviceprovidersystem.security.cryptography.sha384managedsystem.security.cryptography.sha512system.security.cryptography.sha512cngsystem.security.cryptography.sha512cryptoserviceprovidersystem.security.cryptography.sha512managedsystem.security.cryptography.symmetricalgorithmsystem.security.cryptography.tripledessystem.security.cryptography.tripledescryptoserviceprovidersystemTypeInstanceszttata-INtabIndextabindextabletableNametableNamespacetagtag: tantargettarget must be nulltargetNamespacetargetTypetaskstete-INtealtelnettemptemp1temp2tempArgtempObjtempValuetemplatetemplateIdtemplateSourcetesttextexttext input 0x{0:x8} '{1}'text-overflowtext-shadowtext/htmltext: textAlignmenttextEditiontextElementtextOnlytextOverflowtextSelectiontextSettingstextShadowtextSpans: textWrappingModetextWritertextareatextfieldtexturetexture={0}, hotspot={1}textureToCopytgtg-Cyrl-TJtg-cyrlthth-THthe Goscurry is not a lie ;)thicknessthisthistlethrowthrow(thumbtickstiledtimetime.tztimeOfDaytimePeriodtimeouttimeoutTickstiming-functiontincidunttinttintColortitletktk-TMtmptmpDataSettntn-ZAtotoStringtoggletoggleOnLabelClicktokentomatotombstones=too latetooltiptoptop-level ValidateAttributetop-level ValidateText or ValidateWhitespacetopLefttopRighttotActiveDefaultTweens < 0totActiveFixedTweens < 0totActiveLateTweens < 0totActiveManualTweens < 0totActiveSequences < 0totActiveTweeners < 0totActiveTweens < 0total downloaded: {0}totalBytes={0} totalBytesToDownloadtotalDigitstotalMilliSecondstotalWidthtouchtouch-scroll-typetouchScrollBehaviortrtr-TRtracetrackedtransactionIdtransformtransform-origintransformNamestransformOrigintransform_planetransitiontransition-delaytransition-durationtransition-propertytransition-timing-functiontransitionDelaytransitionDurationtransitionPropertytransitionTimingFunctiontranslatetransparenttrianglestriple destriple-click-selects-linetripleClickSelectsLinetripledestripledeskeywraptruetrytry must have at least one catch, finally, or fault clausetry { ... }tttt-RUturnturquoisetvOStypetype is not a subclass of Multicastdelegatetype is not subclass of MulticastDelegate.type is null.type=type={0}, index={1}, world={2}, generation={3}typeArgumentstypeDatatypeInfotypeNametypeStringtypeoftypeof({0})typestzmtzm-Latn-DZtzm-latnuub}ucs-2ucs-4ucs-4 (Bigendian)ucs-4 (order 2143)ucs-4 (order 3412)udidugug-CNui1ui2ui4ui8uiduintuint:uint: uint[]ui}ukuk-UAulongulong[]ul}unaryTypeunbanUserunbindItemunbound variable: unboundeduncheckedundefinedunderlineColorunderlyingTypeunicodeunicode-1-1-utf-7unicode-1-1-utf-8unicode-2-0-utf-7unicode-2-0-utf-8unicodeFFFEunionuniqueunitunity-base-dropdownunity-base-fieldunity-base-popup-fieldunity-base-sliderunity-base-text-fieldunity-bounds-fieldunity-bounds-int-fieldunity-boxunity-buttonunity-button-groupunity-checkmarkunity-collection-viewunity-composite-fieldunity-contentunity-content-and-vertical-scroll-containerunity-content-containerunity-content-viewportunity-disabledunity-double-fieldunity-drag-containerunity-draggerunity-dragger-borderunity-draglineunity-dragline-anchorunity-enum-fieldunity-fillunity-float-fieldunity-foldoutunity-group-boxunity-hash128-fieldunity-height-inputunity-help-boxunity-hiddenunity-high-buttonunity-imageunity-imgui-containerunity-inspector-elementunity-inspector-main-containerunity-integer-fieldunity-labelunity-list-viewunity-long-fieldunity-low-buttonunity-m_Center-inputunity-m_Extent-inputunity-m_Position-inputunity-m_Size-inputunity-min-max-sliderunity-multi-column-headerunity-multi-column-header-column-iconunity-multi-column-header-column-titleunity-multi-column-header-containerunity-multi-column-scroll-viewunity-multi-column-viewunity-panel-containerunity-popup-fieldunity-popup-windowunity-progress-barunity-radio-buttonunity-radio-button-groupunity-rect-fieldunity-rect-int-fieldunity-repeat-buttonunity-scroll-viewunity-scrollerunity-sliderunity-slider-intunity-tabunity-tab-viewunity-text-elementunity-text-element--inner-input-field-componentunity-text-fieldunity-text-inputunity-thumb-maxunity-thumb-minunity-toggleunity-toggle-button-groupunity-trackerunity-tree-viewunity-two-pane-split-viewunity-two-pane-split-view--horizontalunity-two-pane-split-view--verticalunity-two-pane-split-view__content-containerunity-two-pane-split-view__draglineunity-two-pane-split-view__dragline-anchorunity-ui-document__rootunity-unsigned-integer-fieldunity-unsigned-long-fieldunity-vector2-fieldunity-vector2-int-fieldunity-vector3-fieldunity-vector3-int-fieldunity-vector4-fieldunity-vertical-collection-scroll-viewunity-w-inputunity-width-inputunity-x-inputunity-y-inputunity-z-inputunity.PurchaseFailedunity.cloud_useridunity.player_sessionidunity5BuildAssetBundlesunityBackgroundImageTintColorunityBackgroundScaleModeunityEditorTextRenderingModeunityFontunityFontDefinitionunityFontStyleAndWeightunityMaterialunityObjectunityOverflowClipBoxunityParagraphSpacingunitySliceBottomunitySliceLeftunitySliceRightunitySliceScaleunitySliceTopunitySliceTypeunityTextAlignunityTextAutoSizeunityTextGeneratorunityTextOutlineunityTextOutlineColorunityTextOutlineWidthunityTextOverflowPositionunity_GUIZTestModeunity_uie_UVRectunityads-idfiunityads-installinfounitytlsunknownunknown authenticatedSafeunknown oid unknown safeBag oidunlockunlockedunqualifiedunregisterListenerunsafeunsetunsignedByteunsignedIntunsignedLongunsignedShortunsupport certificate typeunsupported HMACuntypedAnyuntypedAtomicupbuttonupdateAvailabilityupdatePriorityupdate_subscription_metadataupgrade boughtupgrade_downgrade_subscriptionupper-centerupper-leftupper-left | middle-left | lower-left | upper-center | middle-center | lower-center | upper-right | middle-right | lower-rightupper-rightuppercaseurur-PKuriuri="{0}", uriFormaturiSchemeuriStringurlurl attribute is required in client element when it contains activated entriesurn:schemas-microsoft-com:datatypesurn:schemas-microsoft-com:xml-dataurn:schemas-microsoft-com:xml-diffgram-v1urn:schemas-microsoft-com:xml-msdataurn:schemas-microsoft-com:xml-mspropurn:schemas-microsoft-com:xml-updategramurn:uuid:urn:uuid:C2F41010-65B3-11D1-A29F-00AA00C14882/usus-asciiusage-hintsusageHintsuseuser-dirs.dirsuserDatauser_id=user_id_one=user_id_two=user_ids=username=usernames=ushortushort:ushort[]usingusnus}ututf-16utf-16BEutf-32utf-32BEutf-7utf-8utf32utf8 onuuiduuid:uuid:BDC6E3F0-6DA3-11D1-A2A3-00AA00C14882uuid:C2F41010-65B3-11D1-A29F-00AA00C14882uvuvIndexuvsuzuz-Cyrl-UZuz-Latn-UZuz-cyrluz-latnu{0:X4}vv1v2v3v3.3v4valuevalue is less than 0value(valueCountvalueFactoryvalueOfvalueSelectorvalueTypevaluesvaluesCountvaluesStartvarvar variablevariablesvevectorImageverversionversion=version="version={0} versioncontrol_ProviderSettings_OnUpdatevertexBottomLeftvertexBottomRightvertexCountvertexIndexvertexPaddingvertexTopLeftvertexTopRightvertical movementvertical-page-sizevertical-scroller-visibilityverticalAlignmentverticalPageSizeverticalScrollerVisibilityverticalscrollbarverticalscrollbardownbuttonverticalscrollbarthumbverticalscrollbarupbuttonverticalsliderverticalsliderthumbverticalsliderthumbextentvivi-VNviewview-data-keyviewDataKeyviewModelvioletvirtualvirtualization-methodvirtualizationMethodvisibilityvisiblevisible | hiddenvisible | hidden | scrollvisitorvisualvisualTreeAssetSourcevoffsetvoidvolatilevrsvsmacrosww: waitHandleswaitObjectwebsocketweekweightedModewellknownwellknown object mode 'wheatwhenAllwherewhere whilewhile already selecting an object.whitewhite-spacewhiteSpacewhitesmokewidthwildcardwindowwindows-1250windows-1251windows-1252windows-1253windows-1255windows-1256windows-1257windows-1258windows-874wowo-SNword-spacingwordSpacingwordWrapEnabledworldworldBoundworldTransformwrapwrap-reversewriteByteswriterwswsswtls9www.xx out of rangex per levelx*(x+(x-(x-Chinese-CNSx-Chinese-Etenx-Europax-IA5x-IA5-Germanx-IA5-Norwegianx-IA5-Swedishx-ansix-cp1250x-cp1251x-cp20001x-cp20003x-cp20004x-cp20005x-cp20261x-cp20269x-cp20936x-cp20949x-cp50227x-eucx-euc-cnx-euc-jpx-iscii-asx-iscii-bex-iscii-dex-iscii-gux-iscii-kax-iscii-max-iscii-orx-iscii-pax-iscii-tax-iscii-tex-mac-arabicx-mac-cex-mac-chinesesimpx-mac-chinesetradx-mac-croatianx-mac-cyrillicx-mac-greekx-mac-hebrewx-mac-icelandicx-mac-japanesex-mac-koreanx-mac-romanianx-mac-thaix-mac-turkishx-mac-ukrainianx-ms-cp932x-schema:x-schema:#x-sjisx-unicode-1-1-utf-7x-unicode-1-1-utf-8x-unicode-2-0-utf-7x-unicode-2-0-utf-8x-x-big5x/(x0x1.3x1.5x1e10x1e2x1e3x1e5x1e8x2x4x509x509chainx962P192v2x962P192v3x962P239v1x962P239v2x962P239v3x: xAdvancexdt:xdt:anyAtomicTypexhxh-ZAxmlxml:langxml:spacexmlAsStringxmlStringxmlTypexmlnsxmlns:xmlns:jsonxmlns:msdataxmlns:mspropxmlns:mstnsxmlns:xsxn--xpathxsxs:xsdxsixsi:nilxtermx{0:F0}x{0:F1}x{0:F2}x{0:F3}x{0:f2}x{0:f2} Fragmentsx{0:f3}x{0:f3} / x{1:f3} / x{2:f3}x{0:f4}x{0}x{0} (+{1}) AP Gained for each Hunter Level you've ever gainedx{0} (+{1}) Cells Gained for each Hunter Level you've ever gainedx{0} (+{1}) MP Gained for each Hunter Level you've ever gainedx{0} (+{1}) RP Gained for each Hunter Level you've ever gainedx{0} (+{1}) Shards Gained for each Hunter Level you've ever gainedx{0} Borge Lootx{0} Catch-up Timer Capx{0} Knox Lootx{0} Ozzy Lootx{0} to <color=#27B6E2>Mk3 Output</color>.x{0} to <color=#27E29E>Mk1 Output</color>.x{0} to <color=#27E2CC>Mk2 Output</color>.x{0} to <color=#3768FF>Mk4 Output</color>.x{0} to <color=#6851FF>Mk5 Output</color>.x{0} to <color=#A264FF>Mk6 Output</color>.x{0} to <color=#C6C6C6>Mk9 Output</color>.x{0} to <color=#CE54FF>Mk7 Output</color>.x{0} to <color=#FF54D1>Mk8 Output</color>.yyearyearMonthDurationyearsyellowyellowgreenyesyieldylithyoyo-NGyourDefaultKeyyyMMddyyMMdd.HHmmssyyMMddHHmmZyyMMddHHmmss'Z'yyyyyyyy MMMMyyyy'-'MM'-'dd HH':'mm':'ss'Z'yyyy'-'MM'-'dd'T'HH':'mm':'ssyyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFKyyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffffKyyyy'-'MM'-'ddTHH':'mm':'ss zzzyyyy-yyyy-MMyyyy-MM-yyyy-MM-ddyyyy-MM-dd zzzyyyy-MM-ddTyyyy-MM-ddTHH:mm:ss.FFFFFFFyyyy-MM-ddTHH:mm:ss.FFFFFFFKyyyy-MM-ddTHH:mm:ss.FFFFFFFZyyyy-MM-ddTHH:mm:ss.FFFFFFFzzzzzzyyyy-MM-ddTHH:mm:ss.fffyyyy-MM-ddZyyyy-MM-dd_HH-mm-ssyyyy-MM-ddzzzzzzyyyy-MMZyyyy-MMzzzzzzyyyy/MM/dd\THH:mm:ssyyyy/MM/dd\THH:mm:ss.ffffyyyyMMddyyyyMMddHHmmss'Z'yyyyMMddHHmmssZyyyyMMddHHmmsssyyyyMMddHHmmsszzzyyyyZyyyyzzzzzzzzeimarzhzh-CHSzh-CHTzh-CNzh-HKzh-Hanszh-Hantzh-MOzh-SGzh-TWzh-chszh-chtzh-hanszh-hantzuzu-ZA{{ "error" : "Cannot load inventory from UDP. Please make sure your UDP package is installed and up-to-date" }{ "error" : "Cannot parse inventory type for UDP. Please make sure your UDP package is installed and up-to-date" }{ "error" : "already retrieving products" }{ "time":{ ... } {"{'{... { ... 0xdd, ...}}{0,6}|{1,6}|{2,7}|{3} {4} : {0,6}|{1,6}|{2,7}|{3} {4} : {5}`
+  - offset `575210` [ascii] `{0,6}|{1,6}|{2,7}|{3} {4} : {5} [{6}]`
+  - offset `575249` [ascii] `{0,6}|{1,6}|{2,7}|{3} {4} UnusedBits:{5} : {000}{0:0.##} {1}{0:00}{0:00}:{1:00}{0:00}:{1:00}.{2:D3}{0:00}:{1:00}:{2:00}{0:00}:{1:00}:{2:00}.{3:D3}{0:0}{0:D2}.{1:D3}{0:F3}{0:N2} {1}B{0:N2} {1}iB{0:X2}{0:X2}{1:X2}{2:X2}{0:X2}{1:X2}{2:X2}{3:X2}{0:X}`
+  - offset `575497` [ascii] `{0:g7}{0:x2}{0xdddddddd, 0xdddd, 0xdddd, etc}{0xdddddddd, 0xdddd, etc}{0xdddddddd, etc}{0}{0}`
+  - offset `575627` [ascii] `{10}`
+  - offset `575632` [ascii] `{11}`
+  - offset `575637` [ascii] `{12}`
+  - offset `575642` [ascii] `{13}`
+  - offset `575647` [ascii] `{14}`
+  - offset `575652` [ascii] `{15}`
+  - offset `575657` [ascii] `{0} {0} (+{1}){0} (0x{0:x4}){0} ({1}){0} ({1}) (pinned){0} - Constructor!{0} - already initialized!{0} - error code: {1}{0} - error code: {1}, verify result: {2}{0} - initialize: {1}{0} - onQuitting{0} - onSceneLoaded{0} / {1}{0} / {1} LP{0} / {1}+{2}{0} = {1}{0} Array{0} Attack Speed{0} Bosses Killed`
+  - offset `575960` [ascii] `x{1} Mech Cap{0} CELLS PER {1} TICKS{0} LRs{0} Leaderboard Records for {1} deleted{0} Line {1}, position {2}.{0} Loot AutoPrefabScript is having issues.{0} MK1 GENS PER {1} TICKS{0} MK10 GENS PER {1} TICKS{0} MK11 GENS PER {1} TICKS{0} MK2 GENS PER {1} TICKS{0} MK3 GENS PER {1} TICKS{0} MK4 GENS PER {1} TICKS{0} MK5 GENS PER {1} TICKS{0} MK6 GENS PER {1} TICKS{0} MK7 GENS PER {1} TICKS{0} MK8 GENS PER {1} TICKS{0} MK9 GENS PER {1} TICKS{0} Pressed:{1}{0} RenderTexture requested without a depth buffer. Changing to a 16 bit depth buffer. To resolve this warning, please specify the desired number of depth bits when creating the render texture.{0} [Play Games Plugin 2.0.0] {1} {2}: {3}{0} can only be called once for each asynchronous operation.{0} cannot convert from {1}.{0} cannot have multiple values.{0} has been disposed. Do not call Render on disposed a RenderPipeline.{0} is an invalid culture identifier.{0} is not a GenericTypeDefinition. MakeGenericType may only be called on a type for which Type.IsGenericTypeDefinition is true.{0} is not a supported code page.{0} is not a valid value for {1}.{0} is not blittable ({1})`
+  - offset `577099` [ascii] `{0} is not blittable because it is not of value type ({1})`
+  - offset `577158` [ascii] `{0} is using source Texture as Secondary Texture.{0} must be greater than or equal to {1}{0} must be length of {1}{0} not found{0} on {1}{0} pos:{1} btn:{2} btns:{3} clk:{4}{5}{0} pos:{1} btns:{2}{3}{0} pos:{1} dlt:{2} btns:{3}{4}{0} pos:{1} scr:{2}{3}{0} requires a minimum element size of {1} to alias{0} to {1}!`
+  - offset `577473` [ascii] `{0} type {1} is not implemented!{0} x {1} @ {2}Hz{0} {1}{0} {1} HTTP/{2}.{3}`
+  - offset `577551` [ascii] `{0} {2} {1}{0}%{0}() argument is out of range.{0}(id:{1}){0}({1}){0}({1})({2}){0}, CatchType={1}{0}, FilterOffset={1}{0}, Version={1}, Culture={2}, PublicKeyToken={3}{0}, {1}{0},{1},{2}{0}-[Singleton] Instance '{1}' AWAKE{0}-[Singleton] Instance '{1}' CREATE Play: {2}{0}-[Singleton] Instance '{1}' CREATE Prefab{0}-[Singleton] Instance '{1}' ONDESTROY: {2}{0}. At ({1},{2}){0}. LEVEL IN ACADEMY AUTO-SCRAPPERS ({1}/{2}) `
+  - offset `577973` [ascii] `{0}. LEVEL IN ACADEMY FLIGHT-KICKS ({1}/{2}) `
+  - offset `578019` [ascii] `{0}. LEVEL IN ACADEMY JANITOR BOTS ({1}/{2}) `
+  - offset `578065` [ascii] `{0}. LEVEL IN ACADEMY MINING BOTS ({1}/{2}) `
+  - offset `578110` [ascii] `{0}. LEVEL IN ACCUMULATION MODIFICATION ({1}/{2}) `
+  - offset `578161` [ascii] `{0}. LEVEL IN ACCUMULATION THEORY ({1}/{2}) `
+  - offset `578206` [ascii] `{0}. LEVEL IN AHEAD OF THE CURVE ({1}/{2}) `
+  - offset `578250` [ascii] `{0}. LEVEL IN AUTO-MINING MACHINA ({1}/{2}) `
+  - offset `578295` [ascii] `{0}. LEVEL IN BETTER MINIRAL EXTRACTION ({1}/{2}) `
+  - offset `578346` [ascii] `{0}. LEVEL IN BI-PRODUCT GOO ({1}/{2}) `
+  - offset `578386` [ascii] `{0}. LEVEL IN BIO-MECH CELL COATING ({1}/{2}) `
+  - offset `578433` [ascii] `{0}. LEVEL IN BRAIN CAPACITY GENETICS ({1}/{2}) `
+  - offset `578482` [ascii] `{0}. LEVEL IN C.E.L.L MAINFRAME INTEGRATION ({1}/{2}) `
+  - offset `578537` [ascii] `{0}. LEVEL IN CANNED MINERAL WATER ({1}/{2}) `
+  - offset `578583` [ascii] `{0}. LEVEL IN CLUSTER SCANS ({1}/{2}) `
+  - offset `578622` [ascii] `{0}. LEVEL IN DATA THEORY ({1}/{2}) `
+  - offset `578659` [ascii] `{0}. LEVEL IN DATABASE BRAIN-LINK INTEGRATION ({1}/{2}) `
+  - offset `578716` [ascii] `{0}. LEVEL IN DATABYTE INTEGRATIONS ({1}/{2}) `
+  - offset `578763` [ascii] `{0}. LEVEL IN DEJA VU THEORY ({1}/{2}) `
+  - offset `578803` [ascii] `{0}. LEVEL IN DELIVERY DRONES ({1}/{2}) `
+  - offset `578844` [ascii] `{0}. LEVEL IN FACTORY MAINTAINER DRONE ({1}/{2}) `
+  - offset `578894` [ascii] `{0}. LEVEL IN FASTER TRANSPORTATION ({1}/{2}) `
+  - offset `578941` [ascii] `{0}. LEVEL IN FEEDBACK THEORY ({1}/{2}) `
+  - offset `578982` [ascii] `{0}. LEVEL IN FIVER CONNECTION ({1}/{2}) `
+  - offset `579024` [ascii] `{0}. LEVEL IN FLASHBACK THEORY ({1}/{2}) `
+
+### Match 2
+
+- Match offset: `775296`
+- Match value: `get_Market`
+- Nearby strings:
+  - offset `774688` [ascii] `Fragments`
+  - offset `774698` [ascii] `Hellish`
+  - offset `774706` [ascii] `Farahyte`
+  - offset `774715` [ascii] `Vectid`
+  - offset `774722` [ascii] `NautilusTeseract`
+  - offset `774739` [ascii] `Traversals`
+  - offset `774750` [ascii] `AllTimeOrbs`
+  - offset `774762` [ascii] `TimeInTraversal`
+  - offset `774778` [ascii] `NextOrbsAccumulated`
+  - offset `774798` [ascii] `MechsOwned`
+  - offset `774809` [ascii] `GadgetLevels`
+  - offset `774842` [ascii] `HighestCells`
+  - offset `774855` [ascii] `HighestManualGens`
+  - offset `774873` [ascii] `HighestTechUpLevels`
+  - offset `774893` [ascii] `HighestMP`
+  - offset `774903` [ascii] `HighestLoopMods`
+  - offset `774919` [ascii] `HighestLoopResets`
+  - offset `774937` [ascii] `HighestShards`
+  - offset `774951` [ascii] `HighestMilestoneLevels`
+  - offset `774974` [ascii] `HighestRP`
+  - offset `774984` [ascii] `HighestResearch`
+  - offset `775000` [ascii] `HighestAP`
+  - offset `775010` [ascii] `HighestGearLevels`
+  - offset `775028` [ascii] `HighestProjects`
+  - offset `775044` [ascii] `HighestBlueprints`
+  - offset `775062` [ascii] `HighestFragments`
+  - offset `775079` [ascii] `HighestRelicLevels`
+  - offset `775098` [ascii] `HighestBorgeProgress`
+  - offset `775119` [ascii] `HighestOzzyProgress`
+  - offset `775139` [ascii] `HighestKnoxProgress`
+  - offset `775159` [ascii] `GemData`
+  - offset `775167` [ascii] `GemNumber`
+  - offset `775177` [ascii] `GemUnlocked`
+  - offset `775189` [ascii] `GemNodesList`
+  - offset `775202` [ascii] `GemNodeCombo`
+  - offset `775215` [ascii] `gemNodeNumber`
+  - offset `775229` [ascii] `gemNodeUnlocked`
+  - offset `775245` [ascii] `GemNodeNumber`
+  - offset `775259` [ascii] `GemNodeUnlocked`
+  - offset `775275` [ascii] `PlayerProfileHandler`
+  - offset `775296` [ascii] `get_Market`
+  - offset `775307` [ascii] `get_BM`
+  - offset `775314` [ascii] `get_ZN`
+  - offset `775321` [ascii] `get_TU`
+  - offset `775328` [ascii] `get_Relics`
+  - offset `775339` [ascii] `get_CellData`
+  - offset `775352` [ascii] `get_ModPointData`
+  - offset `775369` [ascii] `get_ShardData`
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
+  - offset `775426` [ascii] `get_BlueprintsThisTR`
+  - offset `775447` [ascii] `get_ManualGensThisLR`
+  - offset `775468` [ascii] `get_TechUpsThisLR`
+  - offset `775486` [ascii] `GetPlayerProfileData`
+  - offset `775507` [ascii] `SetPlayerProfileTexts`
+  - offset `775529` [ascii] `playerData`
+  - offset `775540` [ascii] `lastCloudSaveDate`
+  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
+  - offset `775587` [ascii] `UpdatePlayerProfile`
+  - offset `775607` [ascii] `isSave`
+  - offset `775614` [ascii] `isLocalPP`
+  - offset `775624` [ascii] `playerID`
+  - offset `775633` [ascii] `FillPlayerProfileData`
+  - offset `775655` [ascii] `formatNumber`
+  - offset `775668` [ascii] `defaultValue`
+  - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+
+### Match 3
+
+- Match offset: `775840`
+- Match value: `Market`
+- Nearby strings:
+  - offset `775259` [ascii] `GemNodeUnlocked`
+  - offset `775275` [ascii] `PlayerProfileHandler`
+  - offset `775296` [ascii] `get_Market`
+  - offset `775307` [ascii] `get_BM`
+  - offset `775314` [ascii] `get_ZN`
+  - offset `775321` [ascii] `get_TU`
+  - offset `775328` [ascii] `get_Relics`
+  - offset `775339` [ascii] `get_CellData`
+  - offset `775352` [ascii] `get_ModPointData`
+  - offset `775369` [ascii] `get_ShardData`
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
+  - offset `775426` [ascii] `get_BlueprintsThisTR`
+  - offset `775447` [ascii] `get_ManualGensThisLR`
+  - offset `775468` [ascii] `get_TechUpsThisLR`
+  - offset `775486` [ascii] `GetPlayerProfileData`
+  - offset `775507` [ascii] `SetPlayerProfileTexts`
+  - offset `775529` [ascii] `playerData`
+  - offset `775540` [ascii] `lastCloudSaveDate`
+  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
+  - offset `775587` [ascii] `UpdatePlayerProfile`
+  - offset `775607` [ascii] `isSave`
+  - offset `775614` [ascii] `isLocalPP`
+  - offset `775624` [ascii] `playerID`
+  - offset `775633` [ascii] `FillPlayerProfileData`
+  - offset `775655` [ascii] `formatNumber`
+  - offset `775668` [ascii] `defaultValue`
+  - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+  - offset `775869` [ascii] `ModPointData`
+  - offset `775882` [ascii] `ShardData`
+  - offset `775892` [ascii] `ResearchPointData`
+  - offset `775910` [ascii] `AcademyPointData`
+  - offset `775927` [ascii] `BlueprintsThisTR`
+  - offset `775944` [ascii] `GemNodeActive`
+  - offset `775962` [ascii] `Active`
+  - offset `775969` [ascii] `<FillPlayerProfileData>d__45`
+  - offset `775998` [ascii] `<UpdatePlayerProfile>d__44`
+  - offset `776025` [ascii] `PlayerProfileUI`
+  - offset `776041` [ascii] `get_Gem1`
+  - offset `776050` [ascii] `get_Gem2`
+  - offset `776059` [ascii] `get_Gem3`
+  - offset `776068` [ascii] `get_Gem4`
+  - offset `776077` [ascii] `get_Gem5`
+  - offset `776086` [ascii] `get_Gem6`
+  - offset `776095` [ascii] `get_Gem7`
+  - offset `776104` [ascii] `ResetPlayerProfileTexts`
+  - offset `776128` [ascii] `InitPlayerProfilePanel`
+  - offset `776151` [ascii] `SetInventoryPanel`
+  - offset `776169` [ascii] `SetStatsPanel`
+  - offset `776183` [ascii] `SetNoncloudOptions`
+  - offset `776202` [ascii] `SetCloudButtons`
+  - offset `776218` [ascii] `SetSaveTexts`
+  - offset `776231` [ascii] `SetLoadTexts`
+  - offset `776244` [ascii] `TimeStamp`
+  - offset `776254` [ascii] `SetCloudSubtitle`
+  - offset `776271` [ascii] `SetLeaderboardText`
+  - offset `776290` [ascii] `SetLocalPlayerProfileText`
+  - offset `776316` [ascii] `playerDisplayName`
+  - offset `776334` [ascii] `OnOpenPlayerProfile`
+  - offset `776354` [ascii] `OnLocalPlayerProfileClick`
+  - offset `776380` [ascii] `OnStatsButtonClick`
+  - offset `776399` [ascii] `OnInventoryButtonClick`
+  - offset `776422` [ascii] `OnCloudAcceptButton`
+  - offset `776442` [ascii] `DisableCloudToggle`
+  - offset `776461` [ascii] `OnCloudToggleClick`
+  - offset `776480` [ascii] `loadMode`
+
+### Match 4
+
+- Match offset: `860139`
+- Match value: `StartMultiverseMarketDialogue`
+- Nearby strings:
+  - offset `858991` [ascii] `FirstMK2TriggerDialogue`
+  - offset `859015` [ascii] `TechUpTriggerDialogue`
+  - offset `859037` [ascii] `LoopTriggerDialogue`
+  - offset `859057` [ascii] `PlayerTriggerDialogue`
+  - offset `859079` [ascii] `AutomationTriggerDialogue`
+  - offset `859105` [ascii] `DiamondTriggerDialogue`
+  - offset `859128` [ascii] `TokenTriggerDialogue`
+  - offset `859149` [ascii] `ShardMainTriggerDialogue`
+  - offset `859174` [ascii] `ShardOperationTriggerDialogue`
+  - offset `859204` [ascii] `ShardMilestoneTriggerDialogue`
+  - offset `859234` [ascii] `ArcadeLMTriggerDialogue`
+  - offset `859258` [ascii] `ArcadeShopTriggerDialogue`
+  - offset `859284` [ascii] `FleetMainTriggerDialogue`
+  - offset `859309` [ascii] `FleetUpgradesTriggerDialogue`
+  - offset `859338` [ascii] `FleetEvolveTriggerDialogue`
+  - offset `859365` [ascii] `ResearchCenterTriggerDialogue`
+  - offset `859395` [ascii] `FirstAcademyMainTriggerDialogue`
+  - offset `859427` [ascii] `AcademyAfterOutpostTriggerDialogue`
+  - offset `859462` [ascii] `AcademyFirstPersonnelTriggerDialogue`
+  - offset `859499` [ascii] `AcademyAfterPersonnelTriggerDialogue`
+  - offset `859536` [ascii] `AcademyFirstMissionTriggerDialogue`
+  - offset `859571` [ascii] `AcademyAfterFirstMissionTriggerDialogue`
+  - offset `859611` [ascii] `AcademyFirstLootTriggerDialogue`
+  - offset `859643` [ascii] `AcademyAfterFirstLootTriggerDialogue`
+  - offset `859680` [ascii] `AcademyAfterFirstGearTriggerDialogue`
+  - offset `859717` [ascii] `OuroFirstResetTriggerDialogue`
+  - offset `859747` [ascii] `OuroTraitMenuTriggerDialogue`
+  - offset `859776` [ascii] `OuroTraitExitTriggerDialogue`
+  - offset `859805` [ascii] `OuroGemMenuTriggerDialogue`
+  - offset `859832` [ascii] `OuroGemUpgradeTriggerDialogue`
+  - offset `859862` [ascii] `OuroFirstGenAfterGemTriggerDialogue`
+  - offset `859898` [ascii] `OuroFirstShip8UnlockDialogue`
+  - offset `859927` [ascii] `OuroFirst10MK1GensDialogue`
+  - offset `859954` [ascii] `OuroFirstTechUpgDialogue`
+  - offset `859979` [ascii] `StartCellmasDialogue`
+  - offset `860000` [ascii] `StartHuntersHeadquarterDialogue`
+  - offset `860032` [ascii] `StartBorgeUpgradesDialogue`
+  - offset `860059` [ascii] `StartBorgeAttributesDialogue`
+  - offset `860088` [ascii] `StartBorgeBattleDialogue`
+  - offset `860113` [ascii] `StartBorgeBattle2Dialogue`
+  - offset `860139` [ascii] `StartMultiverseMarketDialogue`
+  - offset `860169` [ascii] `IntroDialogue`
+  - offset `860183` [ascii] `ShipIntroPostConstructDialogue`
+  - offset `860214` [ascii] `HomepagePreMK1Dialogue`
+  - offset `860237` [ascii] `HomepagePostMK1Dialogue`
+  - offset `860261` [ascii] `ReachedLevelOneDialogue`
+  - offset `860285` [ascii] `FirstMK2Dialogue`
+  - offset `860302` [ascii] `TechDialogue`
+  - offset `860315` [ascii] `LoopDialogue`
+  - offset `860328` [ascii] `PlayerDialogue`
+  - offset `860343` [ascii] `DiamondDialogue`
+  - offset `860359` [ascii] `TokenDialogue`
+  - offset `860373` [ascii] `AutomationDialogue`
+  - offset `860392` [ascii] `ShardMainDialogue`
+  - offset `860410` [ascii] `ShardOperationDialogue`
+  - offset `860433` [ascii] `ShardMilestoneDialogue`
+  - offset `860456` [ascii] `ArcadeLMDialogue`
+  - offset `860473` [ascii] `ArcadeShopDialogue`
+  - offset `860492` [ascii] `FleetMainDialogue`
+  - offset `860510` [ascii] `FleetUpgradesDialogue`
+  - offset `860532` [ascii] `FleetEvolveDialogue`
+  - offset `860552` [ascii] `ResearchCenterDialogue`
+  - offset `860575` [ascii] `FirstAcademyMainDialogue`
+  - offset `860600` [ascii] `AcademyAfterOutpostDialogue`
+  - offset `860628` [ascii] `AcademyFirstPersonnelDialogue`
+  - offset `860658` [ascii] `AcademyAfterPersonnelDialogue`
+  - offset `860688` [ascii] `AcademyFirstMissionEnterDialogue`
+  - offset `860721` [ascii] `AcademyAfterFirstMissionDialogue`
+  - offset `860754` [ascii] `AcademyFirstLootEnterDialogue`
+  - offset `860784` [ascii] `AcademyAfterLootDialogue`
+  - offset `860809` [ascii] `AcademyAfterFirstGearDialogue`
+  - offset `860839` [ascii] `FirstOuroResetDialogue`
+  - offset `860862` [ascii] `FirstTraitDialogue`
+  - offset `860881` [ascii] `FirstTraitExitDialogue`
+  - offset `860904` [ascii] `FirstGemMenuDialogue`
+  - offset `860925` [ascii] `FirstGemUpgradeDialogue`
+  - offset `860949` [ascii] `FirstGenPageAfterGemDialogue`
+  - offset `860978` [ascii] `Ship8UnlockDialogue`
+  - offset `860998` [ascii] `First10MK1GensAfterOuroDialogue`
+  - offset `861030` [ascii] `FirstTechUpgAfterOuroDialogue`
+  - offset `861060` [ascii] `CellmasDialogue`
+
+### Match 5
+
+- Match offset: `861191`
+- Match value: `MultiverseMarketTutorial`
+- Nearby strings:
+  - offset `860285` [ascii] `FirstMK2Dialogue`
+  - offset `860302` [ascii] `TechDialogue`
+  - offset `860315` [ascii] `LoopDialogue`
+  - offset `860328` [ascii] `PlayerDialogue`
+  - offset `860343` [ascii] `DiamondDialogue`
+  - offset `860359` [ascii] `TokenDialogue`
+  - offset `860373` [ascii] `AutomationDialogue`
+  - offset `860392` [ascii] `ShardMainDialogue`
+  - offset `860410` [ascii] `ShardOperationDialogue`
+  - offset `860433` [ascii] `ShardMilestoneDialogue`
+  - offset `860456` [ascii] `ArcadeLMDialogue`
+  - offset `860473` [ascii] `ArcadeShopDialogue`
+  - offset `860492` [ascii] `FleetMainDialogue`
+  - offset `860510` [ascii] `FleetUpgradesDialogue`
+  - offset `860532` [ascii] `FleetEvolveDialogue`
+  - offset `860552` [ascii] `ResearchCenterDialogue`
+  - offset `860575` [ascii] `FirstAcademyMainDialogue`
+  - offset `860600` [ascii] `AcademyAfterOutpostDialogue`
+  - offset `860628` [ascii] `AcademyFirstPersonnelDialogue`
+  - offset `860658` [ascii] `AcademyAfterPersonnelDialogue`
+  - offset `860688` [ascii] `AcademyFirstMissionEnterDialogue`
+  - offset `860721` [ascii] `AcademyAfterFirstMissionDialogue`
+  - offset `860754` [ascii] `AcademyFirstLootEnterDialogue`
+  - offset `860784` [ascii] `AcademyAfterLootDialogue`
+  - offset `860809` [ascii] `AcademyAfterFirstGearDialogue`
+  - offset `860839` [ascii] `FirstOuroResetDialogue`
+  - offset `860862` [ascii] `FirstTraitDialogue`
+  - offset `860881` [ascii] `FirstTraitExitDialogue`
+  - offset `860904` [ascii] `FirstGemMenuDialogue`
+  - offset `860925` [ascii] `FirstGemUpgradeDialogue`
+  - offset `860949` [ascii] `FirstGenPageAfterGemDialogue`
+  - offset `860978` [ascii] `Ship8UnlockDialogue`
+  - offset `860998` [ascii] `First10MK1GensAfterOuroDialogue`
+  - offset `861030` [ascii] `FirstTechUpgAfterOuroDialogue`
+  - offset `861060` [ascii] `CellmasDialogue`
+  - offset `861076` [ascii] `HuntersHeadquartersDialogue`
+  - offset `861104` [ascii] `BorgeUpgradesDialogue`
+  - offset `861126` [ascii] `BorgeAttributesDialogue`
+  - offset `861150` [ascii] `BorgeBattleTutorial`
+  - offset `861170` [ascii] `BorgeBattle2Tutorial`
+  - offset `861191` [ascii] `MultiverseMarketTutorial`
+  - offset `861216` [ascii] `OuroborosBottomButtonAnimation`
+  - offset `861247` [ascii] `UnlockHandler`
+  - offset `861261` [ascii] `CheckEverything`
+  - offset `861277` [ascii] `PlayerLevelChecker`
+  - offset `861296` [ascii] `CheckOverlaysFromLevel1`
+  - offset `861320` [ascii] `CheckOverlaysFromLevel2`
+  - offset `861344` [ascii] `CheckOverlaysFromGenerators`
+  - offset `861372` [ascii] `CheckOverlaysFromShips`
+  - offset `861395` [ascii] `CheckMK1Overlays`
+  - offset `861412` [ascii] `CheckMK2Overlays`
+  - offset `861429` [ascii] `CheckMK3Overlays`
+  - offset `861446` [ascii] `CheckMK4Overlays`
+  - offset `861463` [ascii] `CheckMK5Overlays`
+  - offset `861480` [ascii] `CheckMK6Overlays`
+  - offset `861497` [ascii] `CheckMK7Overlays`
+  - offset `861514` [ascii] `CheckMK8Overlays`
+  - offset `861531` [ascii] `CheckOuroGenerators`
+  - offset `861551` [ascii] `CheckMK9Overlays`
+  - offset `861568` [ascii] `CheckMK10Overlays`
+  - offset `861586` [ascii] `CheckMK11Overlays`
+  - offset `861604` [ascii] `CheckMK12Overlays`
+  - offset `861622` [ascii] `CheckShip1Overlays`
+  - offset `861641` [ascii] `CheckShip2Overlays`
+  - offset `861660` [ascii] `CheckShip3Overlays`
+  - offset `861679` [ascii] `CheckShip4Overlays`
+  - offset `861698` [ascii] `CheckShip5Overlays`
+  - offset `861717` [ascii] `CheckShip6Overlays`
+  - offset `861736` [ascii] `CheckShip7Overlays`
+  - offset `861755` [ascii] `CheckShip8Overlays`
+  - offset `861774` [ascii] `CheckMenuHeader`
+  - offset `861790` [ascii] `CheckOverlaysFromTechupgrades`
+  - offset `861820` [ascii] `CheckResearchAutomationUnlocks`
+  - offset `861851` [ascii] `UnlockMK1`
+  - offset `861861` [ascii] `UnlockMK2`
+  - offset `861871` [ascii] `UnlockMK3`
+  - offset `861881` [ascii] `UnlockMK4`
+  - offset `861891` [ascii] `UnlockMK5`
+  - offset `861901` [ascii] `UnlockMK6`
+  - offset `861911` [ascii] `UnlockMK7`
+  - offset `861921` [ascii] `UnlockMK8`
+
+### Match 6
+
+- Match offset: `959745`
+- Match value: `TextHandlerMarkets`
+- Nearby strings:
+  - offset `958404` [ascii] `<>c__DisplayClass1136_0`
+  - offset `958428` [ascii] `<SetOzzyStatisticsGalvariumAverageText>b__1`
+  - offset `958472` [ascii] `<>c__DisplayClass1139_0`
+  - offset `958496` [ascii] `<SetOzzyStatisticsVectidAverageText>b__1`
+  - offset `958537` [ascii] `<>c__DisplayClass1142_0`
+  - offset `958561` [ascii] `<SetOzzyStatisticsXPAverageText>b__1`
+  - offset `958598` [ascii] `<>c__DisplayClass1147_0`
+  - offset `958622` [ascii] `<SetKnoxStatisticsKillsAverageTexts>b__1`
+  - offset `958663` [ascii] `<>c__DisplayClass1149_0`
+  - offset `958687` [ascii] `<SetKnoxStatisticsStageAverageTexts>b__1`
+  - offset `958728` [ascii] `<>c__DisplayClass1150_0`
+  - offset `958752` [ascii] `<SetKnoxStatisticsRunTimerAverageTexts>b__1`
+  - offset `958796` [ascii] `<>c__DisplayClass1158_0`
+  - offset `958820` [ascii] `<SetKnoxStatisticsDmgAverageTexts>b__1`
+  - offset `958859` [ascii] `<>c__DisplayClass1160_0`
+  - offset `958883` [ascii] `<SetKnoxStatisticsExtraSalvoHitsAverageTexts>b__1`
+  - offset `958933` [ascii] `<>c__DisplayClass1162_0`
+  - offset `958957` [ascii] `<SetKnoxStatisticsExtraSalvosDmgAverageTexts>b__1`
+  - offset `959007` [ascii] `<>c__DisplayClass1168_0`
+  - offset `959031` [ascii] `<SetKnoxStatisticsDmgTakenAverageTexts>b__1`
+  - offset `959075` [ascii] `<>c__DisplayClass1170_0`
+  - offset `959099` [ascii] `<SetKnoxStatisticsHpRegeneratedAverageTexts>b__1`
+  - offset `959148` [ascii] `<>c__DisplayClass1177_0`
+  - offset `959172` [ascii] `<SetKnoxStatisticsBlocksAverageTexts>b__1`
+  - offset `959214` [ascii] `<>c__DisplayClass1181_0`
+  - offset `959238` [ascii] `<SetKnoxStatisticsDmgReductionAverageTexts>b__1`
+  - offset `959286` [ascii] `<>c__DisplayClass1185_0`
+  - offset `959310` [ascii] `<SetKnoxStatisticsEffectsAverage>b__1`
+  - offset `959348` [ascii] `<>c__DisplayClass1196_0`
+  - offset `959372` [ascii] `<SetKnoxStatisticsGlaciumAverageText>b__1`
+  - offset `959414` [ascii] `<>c__DisplayClass1199_0`
+  - offset `959438` [ascii] `<SetKnoxStatisticsAquariusQuartzAverageText>b__1`
+  - offset `959487` [ascii] `<>c__DisplayClass1202_0`
+  - offset `959511` [ascii] `<SetKnoxStatisticsNautilusTesseractAverageText>b__1`
+  - offset `959563` [ascii] `<>c__DisplayClass1205_0`
+  - offset `959587` [ascii] `<SetKnoxStatisticsXPAverageText>b__1`
+  - offset `959624` [ascii] `<>c__DisplayClass1655_0`
+  - offset `959648` [ascii] `<SetIntStatisticsAverageTexts>b__1`
+  - offset `959683` [ascii] `<>c__DisplayClass1656_0`
+  - offset `959707` [ascii] `<SetDoubleStatisticsAverageTexts>b__1`
+  - offset `959745` [ascii] `TextHandlerMarkets`
+  - offset `959764` [ascii] `SetAllMarketTexts`
+  - offset `959782` [ascii] `SetInscryptionsDoneText`
+  - offset `959806` [ascii] `SetHellishBioMatterText`
+  - offset `959830` [ascii] `SetAllChrystosEmporiumTexts`
+  - offset `959858` [ascii] `SetIS1CostText`
+  - offset `959873` [ascii] `SetIS2CostText`
+  - offset `959888` [ascii] `SetIS3CostText`
+  - offset `959903` [ascii] `SetIS4CostText`
+  - offset `959918` [ascii] `SetIS5CostText`
+  - offset `959933` [ascii] `SetIS6CostText`
+  - offset `959948` [ascii] `SetIS7CostText`
+  - offset `959963` [ascii] `SetIS8CostText`
+  - offset `959978` [ascii] `SetIS9CostText`
+  - offset `959993` [ascii] `SetIS10CostText`
+  - offset `960009` [ascii] `SetIS11CostText`
+  - offset `960025` [ascii] `SetIS12CostText`
+  - offset `960041` [ascii] `SetIS13CostText`
+  - offset `960057` [ascii] `SetIS14CostText`
+  - offset `960073` [ascii] `SetIS15CostText`
+  - offset `960089` [ascii] `SetIS16CostText`
+  - offset `960105` [ascii] `SetIS17CostText`
+  - offset `960121` [ascii] `SetIS18CostText`
+  - offset `960137` [ascii] `SetIS19CostText`
+  - offset `960153` [ascii] `SetIS20CostText`
+  - offset `960169` [ascii] `SetIS21CostText`
+  - offset `960185` [ascii] `SetIS22CostText`
+  - offset `960201` [ascii] `SetIS23CostText`
+  - offset `960217` [ascii] `SetIS24CostText`
+  - offset `960233` [ascii] `SetIS25CostText`
+  - offset `960249` [ascii] `SetIS26CostText`
+  - offset `960265` [ascii] `SetIS27CostText`
+  - offset `960281` [ascii] `SetIS28CostText`
+  - offset `960297` [ascii] `SetIS29CostText`
+  - offset `960313` [ascii] `SetIS30CostText`
+  - offset `960329` [ascii] `SetIS31CostText`
+  - offset `960345` [ascii] `SetIS32CostText`
+  - offset `960361` [ascii] `SetIS33CostText`
+  - offset `960377` [ascii] `SetIS34CostText`
+  - offset `960393` [ascii] `SetIS35CostText`
+  - offset `960409` [ascii] `SetIS36CostText`
+
+### Match 7
+
+- Match offset: `959764`
+- Match value: `SetAllMarketTexts`
+- Nearby strings:
+  - offset `958428` [ascii] `<SetOzzyStatisticsGalvariumAverageText>b__1`
+  - offset `958472` [ascii] `<>c__DisplayClass1139_0`
+  - offset `958496` [ascii] `<SetOzzyStatisticsVectidAverageText>b__1`
+  - offset `958537` [ascii] `<>c__DisplayClass1142_0`
+  - offset `958561` [ascii] `<SetOzzyStatisticsXPAverageText>b__1`
+  - offset `958598` [ascii] `<>c__DisplayClass1147_0`
+  - offset `958622` [ascii] `<SetKnoxStatisticsKillsAverageTexts>b__1`
+  - offset `958663` [ascii] `<>c__DisplayClass1149_0`
+  - offset `958687` [ascii] `<SetKnoxStatisticsStageAverageTexts>b__1`
+  - offset `958728` [ascii] `<>c__DisplayClass1150_0`
+  - offset `958752` [ascii] `<SetKnoxStatisticsRunTimerAverageTexts>b__1`
+  - offset `958796` [ascii] `<>c__DisplayClass1158_0`
+  - offset `958820` [ascii] `<SetKnoxStatisticsDmgAverageTexts>b__1`
+  - offset `958859` [ascii] `<>c__DisplayClass1160_0`
+  - offset `958883` [ascii] `<SetKnoxStatisticsExtraSalvoHitsAverageTexts>b__1`
+  - offset `958933` [ascii] `<>c__DisplayClass1162_0`
+  - offset `958957` [ascii] `<SetKnoxStatisticsExtraSalvosDmgAverageTexts>b__1`
+  - offset `959007` [ascii] `<>c__DisplayClass1168_0`
+  - offset `959031` [ascii] `<SetKnoxStatisticsDmgTakenAverageTexts>b__1`
+  - offset `959075` [ascii] `<>c__DisplayClass1170_0`
+  - offset `959099` [ascii] `<SetKnoxStatisticsHpRegeneratedAverageTexts>b__1`
+  - offset `959148` [ascii] `<>c__DisplayClass1177_0`
+  - offset `959172` [ascii] `<SetKnoxStatisticsBlocksAverageTexts>b__1`
+  - offset `959214` [ascii] `<>c__DisplayClass1181_0`
+  - offset `959238` [ascii] `<SetKnoxStatisticsDmgReductionAverageTexts>b__1`
+  - offset `959286` [ascii] `<>c__DisplayClass1185_0`
+  - offset `959310` [ascii] `<SetKnoxStatisticsEffectsAverage>b__1`
+  - offset `959348` [ascii] `<>c__DisplayClass1196_0`
+  - offset `959372` [ascii] `<SetKnoxStatisticsGlaciumAverageText>b__1`
+  - offset `959414` [ascii] `<>c__DisplayClass1199_0`
+  - offset `959438` [ascii] `<SetKnoxStatisticsAquariusQuartzAverageText>b__1`
+  - offset `959487` [ascii] `<>c__DisplayClass1202_0`
+  - offset `959511` [ascii] `<SetKnoxStatisticsNautilusTesseractAverageText>b__1`
+  - offset `959563` [ascii] `<>c__DisplayClass1205_0`
+  - offset `959587` [ascii] `<SetKnoxStatisticsXPAverageText>b__1`
+  - offset `959624` [ascii] `<>c__DisplayClass1655_0`
+  - offset `959648` [ascii] `<SetIntStatisticsAverageTexts>b__1`
+  - offset `959683` [ascii] `<>c__DisplayClass1656_0`
+  - offset `959707` [ascii] `<SetDoubleStatisticsAverageTexts>b__1`
+  - offset `959745` [ascii] `TextHandlerMarkets`
+  - offset `959764` [ascii] `SetAllMarketTexts`
+  - offset `959782` [ascii] `SetInscryptionsDoneText`
+  - offset `959806` [ascii] `SetHellishBioMatterText`
+  - offset `959830` [ascii] `SetAllChrystosEmporiumTexts`
+  - offset `959858` [ascii] `SetIS1CostText`
+  - offset `959873` [ascii] `SetIS2CostText`
+  - offset `959888` [ascii] `SetIS3CostText`
+  - offset `959903` [ascii] `SetIS4CostText`
+  - offset `959918` [ascii] `SetIS5CostText`
+  - offset `959933` [ascii] `SetIS6CostText`
+  - offset `959948` [ascii] `SetIS7CostText`
+  - offset `959963` [ascii] `SetIS8CostText`
+  - offset `959978` [ascii] `SetIS9CostText`
+  - offset `959993` [ascii] `SetIS10CostText`
+  - offset `960009` [ascii] `SetIS11CostText`
+  - offset `960025` [ascii] `SetIS12CostText`
+  - offset `960041` [ascii] `SetIS13CostText`
+  - offset `960057` [ascii] `SetIS14CostText`
+  - offset `960073` [ascii] `SetIS15CostText`
+  - offset `960089` [ascii] `SetIS16CostText`
+  - offset `960105` [ascii] `SetIS17CostText`
+  - offset `960121` [ascii] `SetIS18CostText`
+  - offset `960137` [ascii] `SetIS19CostText`
+  - offset `960153` [ascii] `SetIS20CostText`
+  - offset `960169` [ascii] `SetIS21CostText`
+  - offset `960185` [ascii] `SetIS22CostText`
+  - offset `960201` [ascii] `SetIS23CostText`
+  - offset `960217` [ascii] `SetIS24CostText`
+  - offset `960233` [ascii] `SetIS25CostText`
+  - offset `960249` [ascii] `SetIS26CostText`
+  - offset `960265` [ascii] `SetIS27CostText`
+  - offset `960281` [ascii] `SetIS28CostText`
+  - offset `960297` [ascii] `SetIS29CostText`
+  - offset `960313` [ascii] `SetIS30CostText`
+  - offset `960329` [ascii] `SetIS31CostText`
+  - offset `960345` [ascii] `SetIS32CostText`
+  - offset `960361` [ascii] `SetIS33CostText`
+  - offset `960377` [ascii] `SetIS34CostText`
+  - offset `960393` [ascii] `SetIS35CostText`
+  - offset `960409` [ascii] `SetIS36CostText`
+  - offset `960425` [ascii] `SetIS37CostText`
+
+### Match 8
+
+- Match offset: `1617157`
+- Match value: `CheckAllMultiverseMarketRecoloring`
+- Nearby strings:
+  - offset `1616515` [ascii] `T4FFinalMaxLevel`
+  - offset `1616532` [ascii] `T4FCost`
+  - offset `1616540` [ascii] `T4FTierCost`
+  - offset `1616552` [ascii] `T4FBonusPerLevel`
+  - offset `1616569` [ascii] `T4FFinalBonus`
+  - offset `1616583` [ascii] `T5FFinalMaxLevel`
+  - offset `1616600` [ascii] `T5FCost`
+  - offset `1616608` [ascii] `T5FTierCost`
+  - offset `1616620` [ascii] `T5FBonusPerLevel`
+  - offset `1616637` [ascii] `T5FFinalBonus`
+  - offset `1616651` [ascii] `T6FFinalMaxLevel`
+  - offset `1616668` [ascii] `T6FCost`
+  - offset `1616676` [ascii] `T6FTierCost`
+  - offset `1616688` [ascii] `T6FBonusPerLevel`
+  - offset `1616705` [ascii] `T6FFinalBonus`
+  - offset `1616719` [ascii] `T1GFinalMaxLevel`
+  - offset `1616736` [ascii] `T1GCost`
+  - offset `1616744` [ascii] `T1GTierCost`
+  - offset `1616756` [ascii] `T1GBonusPerLevel`
+  - offset `1616773` [ascii] `T1GBonusPerTier`
+  - offset `1616789` [ascii] `T1GFinalBonus`
+  - offset `1616803` [ascii] `T2GFinalMaxLevel`
+  - offset `1616820` [ascii] `T2GCost`
+  - offset `1616828` [ascii] `T2GTierCost`
+  - offset `1616840` [ascii] `T2GBonusPerLevel`
+  - offset `1616857` [ascii] `T2GFinalBonus`
+  - offset `1616871` [ascii] `T3GFinalMaxLevel`
+  - offset `1616888` [ascii] `T3GCost`
+  - offset `1616896` [ascii] `T3GTierCost`
+  - offset `1616908` [ascii] `T3GBonusPerLevel`
+  - offset `1616925` [ascii] `T3GFinalBonus`
+  - offset `1616939` [ascii] `T4GFinalMaxLevel`
+  - offset `1616956` [ascii] `T1VEFinalMaxLevel`
+  - offset `1616974` [ascii] `T2VEFinalMaxLevel`
+  - offset `1616992` [ascii] `<OfflineMechShop>d__829`
+  - offset `1617016` [ascii] `ButtonRecoloringOuro`
+  - offset `1617037` [ascii] `CheckAllAntimatterClaimRecoloring`
+  - offset `1617071` [ascii] `AntimatterClaimCellRecoloring`
+  - offset `1617101` [ascii] `AntimatterClaimMPRecoloring`
+  - offset `1617129` [ascii] `AntimatterClaimRPRecoloring`
+  - offset `1617157` [ascii] `CheckAllMultiverseMarketRecoloring`
+  - offset `1617192` [ascii] `CheckAllInscryptionRecoloring`
+  - offset `1617222` [ascii] `Inscryption1Recoler`
+  - offset `1617242` [ascii] `Inscryption2Recoler`
+  - offset `1617262` [ascii] `Inscryption3Recoler`
+  - offset `1617282` [ascii] `Inscryption4Recoler`
+  - offset `1617302` [ascii] `Inscryption5Recoler`
+  - offset `1617322` [ascii] `Inscryption6Recoler`
+  - offset `1617342` [ascii] `Inscryption7Recoler`
+  - offset `1617362` [ascii] `Inscryption8Recoler`
+  - offset `1617382` [ascii] `Inscryption9Recoler`
+  - offset `1617402` [ascii] `Inscryption10Recoler`
+  - offset `1617423` [ascii] `Inscryption11Recoler`
+  - offset `1617444` [ascii] `Inscryption12Recoler`
+  - offset `1617465` [ascii] `Inscryption13Recoler`
+  - offset `1617486` [ascii] `Inscryption14Recoler`
+  - offset `1617507` [ascii] `Inscryption15Recoler`
+  - offset `1617528` [ascii] `Inscryption16Recoler`
+  - offset `1617549` [ascii] `Inscryption17Recoler`
+  - offset `1617570` [ascii] `Inscryption18Recoler`
+  - offset `1617591` [ascii] `Inscryption19Recoler`
+  - offset `1617612` [ascii] `Inscryption20Recoler`
+  - offset `1617633` [ascii] `Inscryption21Recoler`
+  - offset `1617654` [ascii] `Inscryption22Recoler`
+  - offset `1617675` [ascii] `Inscryption23Recoler`
+  - offset `1617696` [ascii] `Inscryption24Recoler`
+  - offset `1617717` [ascii] `Inscryption25Recoler`
+  - offset `1617738` [ascii] `Inscryption26Recoler`
+  - offset `1617759` [ascii] `Inscryption27Recoler`
+  - offset `1617780` [ascii] `Inscryption28Recoler`
+  - offset `1617801` [ascii] `Inscryption29Recoler`
+  - offset `1617822` [ascii] `Inscryption30Recoler`
+  - offset `1617843` [ascii] `Inscryption31Recoler`
+  - offset `1617864` [ascii] `Inscryption32Recoler`
+  - offset `1617885` [ascii] `Inscryption33Recoler`
+  - offset `1617906` [ascii] `Inscryption34Recoler`
+  - offset `1617927` [ascii] `Inscryption35Recoler`
+  - offset `1617948` [ascii] `Inscryption36Recoler`
+  - offset `1617969` [ascii] `Inscryption37Recoler`
+  - offset `1617990` [ascii] `Inscryption38Recoler`
+  - offset `1618011` [ascii] `Inscryption39Recoler`
+
+### Match 9
+
+- Match offset: `1648633`
+- Match value: `CheckMultiverseMarkets`
+- Nearby strings:
+  - offset `1647566` [ascii] `get_PowerGU7BonusCalc`
+  - offset `1647588` [ascii] `get_PowerGU8BonusCalc`
+  - offset `1647610` [ascii] `get_PowerGU8BonusCalcRetro`
+  - offset `1647637` [ascii] `get_PowerGU9BonusCalc`
+  - offset `1647659` [ascii] `get_PowerGU9BonusCalcRetro`
+  - offset `1647686` [ascii] `get_PowerGU10BonusCalc`
+  - offset `1647709` [ascii] `get_PowerGU11BonusCalc`
+  - offset `1647732` [ascii] `get_InnovationExtraStudyBonusCalc`
+  - offset `1647766` [ascii] `get_InnoCellBonusCalc`
+  - offset `1647788` [ascii] `get_InnoMPBonusCalc`
+  - offset `1647808` [ascii] `get_InnoShardBonusCalc`
+  - offset `1647831` [ascii] `get_InnoRPBonusCalc`
+  - offset `1647851` [ascii] `get_InnoAPBonusCalc`
+  - offset `1647871` [ascii] `get_InnoGU7BonusCalc`
+  - offset `1647892` [ascii] `get_InnoGU8BonusCalcTotal`
+  - offset `1647918` [ascii] `get_InnoGU8BonusCalcRetroQuality`
+  - offset `1647951` [ascii] `get_InnoGU8BonusCalcRetroGU`
+  - offset `1647979` [ascii] `get_InnoGU8BonusCalcRetroQuantum`
+  - offset `1648012` [ascii] `get_InnoGU9BonusCalcTotal`
+  - offset `1648038` [ascii] `get_InnoGU9BonusCalcRetroQuality`
+  - offset `1648071` [ascii] `get_InnoGU9BonusCalcRetroGU`
+  - offset `1648099` [ascii] `get_InnoGU9BonusCalcRetroQuantum`
+  - offset `1648132` [ascii] `get_AttractionBorgeLootBonusCalc`
+  - offset `1648165` [ascii] `get_AttractionOzzyLootBonusCalc`
+  - offset `1648197` [ascii] `get_AttractionBorgeOzzyCatchUpBonusCalc`
+  - offset `1648237` [ascii] `get_AttractionKnoxLootBonusCalc`
+  - offset `1648269` [ascii] `get_AttractionKnoxCatchUpBonusCalc`
+  - offset `1648304` [ascii] `get_AttractionGU6BonusCalc`
+  - offset `1648331` [ascii] `get_CreationMechCapBonusCalc`
+  - offset `1648360` [ascii] `get_CreationTechHardwareBonusCalc`
+  - offset `1648394` [ascii] `get_CreationTechSoftwareBonusCalc`
+  - offset `1648428` [ascii] `get_CreationCellBonusCalc`
+  - offset `1648454` [ascii] `get_CreationMPBonusCalc`
+  - offset `1648478` [ascii] `get_CreationShardBonusCalc`
+  - offset `1648505` [ascii] `get_CreationRPBonusCalc`
+  - offset `1648529` [ascii] `get_CreationGU8Bonus`
+  - offset `1648550` [ascii] `get_CreationGU9Bonus`
+  - offset `1648571` [ascii] `get_CreationGU10Bonus`
+  - offset `1648593` [ascii] `get_CreationGU11Bonus`
+  - offset `1648615` [ascii] `CheckReturnButton`
+  - offset `1648633` [ascii] `CheckMultiverseMarkets`
+  - offset `1648656` [ascii] `InitializeGemQualities`
+  - offset `1648679` [ascii] `InitializeGemUpgrades`
+  - offset `1648701` [ascii] `SetAllGemRequirements`
+  - offset `1648723` [ascii] `CheckAllGemStates`
+  - offset `1648741` [ascii] `GemLevel`
+  - offset `1648750` [ascii] `GemMaxLevel`
+  - offset `1648762` [ascii] `RequirementGemLevel`
+  - offset `1648782` [ascii] `RequirementList`
+  - offset `1648798` [ascii] `UnlockPreviousText`
+  - offset `1648817` [ascii] `UnlockPreviousOverlay`
+  - offset `1648839` [ascii] `MaxedOverlay`
+  - offset `1648852` [ascii] `CheckGemRequirement`
+  - offset `1648872` [ascii] `GetGemRequirementName`
+  - offset `1648894` [ascii] `GetGemRequirementGemLevel`
+  - offset `1648920` [ascii] `SetAllExodusFills`
+  - offset `1648938` [ascii] `SetExodusGU1Fill`
+  - offset `1648955` [ascii] `SetExodusGU2Fill`
+  - offset `1648972` [ascii] `SetExodusGU3Fill`
+  - offset `1648989` [ascii] `SetExodusGU4Fill`
+  - offset `1649006` [ascii] `SetExodusGU5Fill`
+  - offset `1649023` [ascii] `SetExodusGU6Fill`
+  - offset `1649040` [ascii] `SetExodusGU7Fill`
+  - offset `1649057` [ascii] `SetAllEvolutionFills`
+  - offset `1649078` [ascii] `SetEvolutionAllGenFill`
+  - offset `1649101` [ascii] `SetEvolutionMK9CoreFill`
+  - offset `1649125` [ascii] `SetEvolutionMK10CoreFill`
+  - offset `1649150` [ascii] `SetEvolutionMK11CoreFill`
+  - offset `1649175` [ascii] `SetEvolutionMK12CoreFill`
+  - offset `1649200` [ascii] `SetEvolutionLPGainFill`
+  - offset `1649223` [ascii] `SetEvolutionMK9ResonanceFill`
+  - offset `1649252` [ascii] `SetEvolutionMK10ResonanceFill`
+  - offset `1649282` [ascii] `SetEvolutionMK11ResonanceFill`
+  - offset `1649312` [ascii] `SetEvolutionMK12ResonanceFill`
+  - offset `1649342` [ascii] `SetAllTemporalFills`
+  - offset `1649362` [ascii] `SetTemporalGU1Fill`
+  - offset `1649381` [ascii] `SetTemporalGU2Fill`
+  - offset `1649400` [ascii] `SetTemporalGU3Fill`
+  - offset `1649419` [ascii] `SetTemporalGU4Fill`
+  - offset `1649438` [ascii] `SetTemporalGU5Fill`
+  - offset `1649457` [ascii] `SetTemporalGU6Fill`
+
+### Match 10
+
+- Match offset: `1741883`
+- Match value: `MultiverseMarket`
+- Nearby strings:
+  - offset `1740999` [ascii] `OzzySkillButtons`
+  - offset `1741016` [ascii] `OzzySkillMaxOverlays`
+  - offset `1741037` [ascii] `OzzyUltimaTalentObject`
+  - offset `1741060` [ascii] `OzzySkill1Bonus`
+  - offset `1741076` [ascii] `OzzySkill2Bonus`
+  - offset `1741092` [ascii] `OzzySkill3Bonus`
+  - offset `1741108` [ascii] `OzzySkill4Bonus`
+  - offset `1741124` [ascii] `OzzySkill4Bonus2`
+  - offset `1741141` [ascii] `OzzySkill5Bonus`
+  - offset `1741157` [ascii] `OzzySkill6Bonus`
+  - offset `1741173` [ascii] `OzzySkill7Bonus`
+  - offset `1741189` [ascii] `OzzySkill8Bonus`
+  - offset `1741205` [ascii] `OzzySkill9Bonus`
+  - offset `1741221` [ascii] `OzzyUpgradeHPProgress`
+  - offset `1741243` [ascii] `OzzyUpgradeAtkPowerProgress`
+  - offset `1741271` [ascii] `OzzyUpgradeHPRegenProgress`
+  - offset `1741298` [ascii] `FinalOzzyUpgradeMaxHPBase`
+  - offset `1741324` [ascii] `FinalOzzyUpgradeAtkPowerBase`
+  - offset `1741353` [ascii] `FinalOzzyUpgradeHPRegenBase`
+  - offset `1741381` [ascii] `FinalOzzyMaxHPCost`
+  - offset `1741400` [ascii] `FinalOzzyAtkPowerCost`
+  - offset `1741422` [ascii] `FinalOzzyHPRegenCost`
+  - offset `1741443` [ascii] `FinalOzzyDmgReductionCost`
+  - offset `1741469` [ascii] `FinalOzzyEvadeChanceCost`
+  - offset `1741494` [ascii] `FinalOzzyEffectChanceCost`
+  - offset `1741520` [ascii] `FinalOzzyMultistrikeChanceCost`
+  - offset `1741551` [ascii] `FinalOzzyMultistrikePowerCost`
+  - offset `1741581` [ascii] `FinalOzzyAtkSpeedCost`
+  - offset `1741603` [ascii] `FinalOzzyMaxHPExtraCostExponent`
+  - offset `1741635` [ascii] `FinalOzzyAtkPowerCostExponent`
+  - offset `1741665` [ascii] `FinalOzzyHPRegenCostExponent`
+  - offset `1741694` [ascii] `FinalOzzySkill1Bonus`
+  - offset `1741715` [ascii] `FinalOzzySkill2Bonus`
+  - offset `1741736` [ascii] `FinalOzzySkill3Bonus`
+  - offset `1741757` [ascii] `FinalOzzySkill4Bonus`
+  - offset `1741778` [ascii] `FinalOzzySkill5Bonus`
+  - offset `1741799` [ascii] `FinalOzzySkill6Bonus`
+  - offset `1741820` [ascii] `FinalOzzySkill7Bonus`
+  - offset `1741841` [ascii] `FinalOzzySkill8Bonus`
+  - offset `1741862` [ascii] `FinalOzzySkill9Bonus`
+  - offset `1741883` [ascii] `MultiverseMarket`
+  - offset `1741900` [ascii] `get_FinalIS1Cost`
+  - offset `1741917` [ascii] `get_FinalIS2Cost`
+  - offset `1741934` [ascii] `get_FinalIS3Cost`
+  - offset `1741951` [ascii] `get_FinalIS4Cost`
+  - offset `1741968` [ascii] `get_FinalIS5Cost`
+  - offset `1741985` [ascii] `get_FinalIS6Cost`
+  - offset `1742002` [ascii] `get_FinalIS7Cost`
+  - offset `1742019` [ascii] `get_FinalIS8Cost`
+  - offset `1742036` [ascii] `get_FinalIS9Cost`
+  - offset `1742053` [ascii] `get_FinalIS10Cost`
+  - offset `1742071` [ascii] `get_FinalIS11Cost`
+  - offset `1742089` [ascii] `get_FinalIS12Cost`
+  - offset `1742107` [ascii] `get_FinalIS13Cost`
+  - offset `1742125` [ascii] `get_FinalIS14Cost`
+  - offset `1742143` [ascii] `get_FinalIS15Cost`
+  - offset `1742161` [ascii] `get_FinalIS16Cost`
+  - offset `1742179` [ascii] `get_FinalIS17Cost`
+  - offset `1742197` [ascii] `get_FinalIS18Cost`
+  - offset `1742215` [ascii] `get_FinalIS19Cost`
+  - offset `1742233` [ascii] `get_FinalIS20Cost`
+  - offset `1742251` [ascii] `get_FinalIS21Cost`
+  - offset `1742269` [ascii] `get_FinalIS22Cost`
+  - offset `1742287` [ascii] `get_FinalIS23Cost`
+  - offset `1742305` [ascii] `get_FinalIS24Cost`
+  - offset `1742323` [ascii] `get_FinalIS25Cost`
+  - offset `1742341` [ascii] `get_FinalIS26Cost`
+  - offset `1742359` [ascii] `get_FinalIS27Cost`
+  - offset `1742377` [ascii] `get_FinalIS28Cost`
+  - offset `1742395` [ascii] `get_FinalIS29Cost`
+  - offset `1742413` [ascii] `get_FinalIS30Cost`
+  - offset `1742431` [ascii] `get_FinalIS31Cost`
+  - offset `1742449` [ascii] `get_FinalIS32Cost`
+  - offset `1742467` [ascii] `get_FinalIS33Cost`
+  - offset `1742485` [ascii] `get_FinalIS34Cost`
+  - offset `1742503` [ascii] `get_FinalIS35Cost`
+  - offset `1742521` [ascii] `get_FinalIS36Cost`
+  - offset `1742539` [ascii] `get_FinalIS37Cost`
+  - offset `1742557` [ascii] `get_FinalIS38Cost`
+  - offset `1742575` [ascii] `get_FinalIS39Cost`
+  - offset `1742593` [ascii] `get_FinalIS40Cost`
+
+### Match 11
+
+- Match offset: `1755883`
+- Match value: `THMarkets`
+- Nearby strings:
+  - offset `1755505` [ascii] `BuyIS76`
+  - offset `1755513` [ascii] `BuyIS77`
+  - offset `1755521` [ascii] `BuyIS78`
+  - offset `1755529` [ascii] `BuyIS79`
+  - offset `1755537` [ascii] `BuyIS80`
+  - offset `1755545` [ascii] `BuyIS81`
+  - offset `1755553` [ascii] `BuyIS82`
+  - offset `1755561` [ascii] `BuyIS83`
+  - offset `1755569` [ascii] `BuyIS84`
+  - offset `1755577` [ascii] `BuyIS85`
+  - offset `1755585` [ascii] `BuyIS86`
+  - offset `1755593` [ascii] `BuyIS87`
+  - offset `1755601` [ascii] `BuyIS88`
+  - offset `1755609` [ascii] `BuyIS89`
+  - offset `1755617` [ascii] `BuyIS90`
+  - offset `1755625` [ascii] `BuyIS91`
+  - offset `1755633` [ascii] `BuyIS92`
+  - offset `1755641` [ascii] `BuyIS93`
+  - offset `1755649` [ascii] `BuyIS94`
+  - offset `1755657` [ascii] `BuyIS95`
+  - offset `1755665` [ascii] `BuyIS96`
+  - offset `1755673` [ascii] `BuyIS97`
+  - offset `1755681` [ascii] `BuyIS98`
+  - offset `1755689` [ascii] `BuyIS99`
+  - offset `1755697` [ascii] `BuyIS100`
+  - offset `1755706` [ascii] `BuyIS101`
+  - offset `1755715` [ascii] `BuyIS102`
+  - offset `1755724` [ascii] `BuyIS103`
+  - offset `1755733` [ascii] `BuyIS104`
+  - offset `1755742` [ascii] `BuyIS105`
+  - offset `1755751` [ascii] `BuyIS106`
+  - offset `1755760` [ascii] `BuyIS107`
+  - offset `1755769` [ascii] `BuyIS108`
+  - offset `1755778` [ascii] `BuyIS109`
+  - offset `1755787` [ascii] `BuyIS110`
+  - offset `1755796` [ascii] `ClearISObjects`
+  - offset `1755811` [ascii] `ClearISMaxLevelObjects`
+  - offset `1755834` [ascii] `SetISMaxLevelObjects`
+  - offset `1755855` [ascii] `CurrencyBox`
+  - offset `1755867` [ascii] `CheckISProgress`
+  - offset `1755883` [ascii] `THMarkets`
+  - offset `1755893` [ascii] `InscryptionsList`
+  - offset `1755910` [ascii] `EmptyPlaceholder`
+  - offset `1755927` [ascii] `IS1ID`
+  - offset `1755933` [ascii] `IS1MaxLevel`
+  - offset `1755945` [ascii] `IS1BuyButton`
+  - offset `1755958` [ascii] `IS1CurrencyBox`
+  - offset `1755973` [ascii] `IS1MaxOverlay`
+  - offset `1755987` [ascii] `IS1Bonus`
+  - offset `1755996` [ascii] `IS1StartCost`
+  - offset `1756009` [ascii] `IS1CostExponent`
+  - offset `1756025` [ascii] `IS1ProgressList`
+  - offset `1756041` [ascii] `IS1MaxLevelObjectsList`
+  - offset `1756064` [ascii] `IS2ID`
+  - offset `1756070` [ascii] `IS2MaxLevel`
+  - offset `1756082` [ascii] `IS2BuyButton`
+  - offset `1756095` [ascii] `IS2CurrencyBox`
+  - offset `1756110` [ascii] `IS2MaxOverlay`
+  - offset `1756124` [ascii] `IS2Bonus`
+  - offset `1756133` [ascii] `IS2StartCost`
+  - offset `1756146` [ascii] `IS2CostExponent`
+  - offset `1756162` [ascii] `IS2ProgressList`
+  - offset `1756178` [ascii] `IS2MaxLevelObjectsList`
+  - offset `1756201` [ascii] `IS3ID`
+  - offset `1756207` [ascii] `IS3MaxLevel`
+  - offset `1756219` [ascii] `IS3BuyButton`
+  - offset `1756232` [ascii] `IS3CurrencyBox`
+  - offset `1756247` [ascii] `IS3MaxOverlay`
+  - offset `1756261` [ascii] `IS3Bonus`
+  - offset `1756270` [ascii] `IS3StartCost`
+  - offset `1756283` [ascii] `IS3CostExponent`
+  - offset `1756299` [ascii] `IS3ProgressList`
+  - offset `1756315` [ascii] `IS3MaxLevelObjectsList`
+  - offset `1756338` [ascii] `IS4ID`
+  - offset `1756344` [ascii] `IS4MaxLevel`
+  - offset `1756356` [ascii] `IS4BuyButton`
+  - offset `1756369` [ascii] `IS4CurrencyBox`
+  - offset `1756384` [ascii] `IS4MaxOverlay`
+  - offset `1756398` [ascii] `IS4Bonus`
+  - offset `1756407` [ascii] `IS4StartCost`
+  - offset `1756420` [ascii] `IS4CostExponent`
+
+### Match 12
+
+- Match offset: `1782212`
+- Match value: `MarketsButton`
+- Nearby strings:
+  - offset `1781445` [ascii] `FirstGemUpgCheck`
+  - offset `1781462` [ascii] `FirstGenAfterOuroCheck`
+  - offset `1781485` [ascii] `CheckTraversalsCounter`
+  - offset `1781508` [ascii] `THLoadouts`
+  - offset `1781519` [ascii] `THRU`
+  - offset `1781524` [ascii] `NakamaLeaderboard`
+  - offset `1781542` [ascii] `TimeInSecondsBaseRequirement`
+  - offset `1781571` [ascii] `OuroborosPointsBaseRequirement`
+  - offset `1781602` [ascii] `TimeInSecondsRequirementExponent`
+  - offset `1781635` [ascii] `OuroborosPointsRequirementExponent`
+  - offset `1781670` [ascii] `PointsExponent`
+  - offset `1781685` [ascii] `TimeInSecondsFill`
+  - offset `1781703` [ascii] `OuroPointsFill`
+  - offset `1781718` [ascii] `TraversalsCounter`
+  - offset `1781736` [ascii] `TimeRequirementBox`
+  - offset `1781755` [ascii] `OuroCatchUpBox`
+  - offset `1781770` [ascii] `OuroCatchUpFill`
+  - offset `1781786` [ascii] `OuroCatchUpTimeText`
+  - offset `1781806` [ascii] `OuroCatchUpBonusText`
+  - offset `1781827` [ascii] `OuroCatchUpBoxOverlay`
+  - offset `1781849` [ascii] `OuroBreakdownBox`
+  - offset `1781866` [ascii] `OuroBreakdownBoxOverlay`
+  - offset `1781890` [ascii] `MeltdownBaseRequirement`
+  - offset `1781914` [ascii] `MeltdownScalePerReset`
+  - offset `1781936` [ascii] `PowerPerStep`
+  - offset `1781949` [ascii] `MeltdownPanel`
+  - offset `1781963` [ascii] `MeltdownFill`
+  - offset `1781976` [ascii] `MeltdownStepFill`
+  - offset `1781993` [ascii] `LoopModMeltdownStepFill`
+  - offset `1782017` [ascii] `LoopModMeltdownFill`
+  - offset `1782037` [ascii] `BottomMenuOuroButton`
+  - offset `1782058` [ascii] `BottomMenuOuroOverlay`
+  - offset `1782080` [ascii] `OuroResetButton`
+  - offset `1782096` [ascii] `OuroResetOverlay`
+  - offset `1782113` [ascii] `TraitSpheresButton`
+  - offset `1782132` [ascii] `TraitSpheresOverlay`
+  - offset `1782152` [ascii] `OuroGemsButton`
+  - offset `1782167` [ascii] `OuroGemsOverlay`
+  - offset `1782183` [ascii] `HuntersButton`
+  - offset `1782197` [ascii] `HuntersOverlay`
+  - offset `1782212` [ascii] `MarketsButton`
+  - offset `1782226` [ascii] `MarketsOverlay`
+  - offset `1782241` [ascii] `OuroborosResetAnimationPanel`
+  - offset `1782270` [ascii] `OuroborosResetPanel`
+  - offset `1782290` [ascii] `OuroborosConfirmPanel`
+  - offset `1782312` [ascii] `OuroborosToggle1On`
+  - offset `1782331` [ascii] `OuroborosToggle1Off`
+  - offset `1782351` [ascii] `OuroborosToggle2On`
+  - offset `1782370` [ascii] `OuroborosToggle2Off`
+  - offset `1782390` [ascii] `OuroborosToggle3On`
+  - offset `1782409` [ascii] `OuroborosToggle3Off`
+  - offset `1782429` [ascii] `OuroborosToggle4On`
+  - offset `1782448` [ascii] `OuroborosToggle4Off`
+  - offset `1782468` [ascii] `OuroborosToggle5On`
+  - offset `1782487` [ascii] `OuroborosToggle5Off`
+  - offset `1782507` [ascii] `OuroborosToggle6On`
+  - offset `1782526` [ascii] `OuroborosToggle6Off`
+  - offset `1782546` [ascii] `Toggle1Feedback`
+  - offset `1782562` [ascii] `Toggle2Feedback`
+  - offset `1782578` [ascii] `Toggle3Feedback`
+  - offset `1782594` [ascii] `Toggle4Feedback`
+  - offset `1782610` [ascii] `Toggle5Feedback`
+  - offset `1782626` [ascii] `Toggle6Feedback`
+  - offset `1782642` [ascii] `TimeRingFeedback`
+  - offset `1782659` [ascii] `OuroOrbsRingFeedback`
+  - offset `1782680` [ascii] `OnMeltdownPowerEffect`
+  - offset `1782702` [ascii] `<FinalMeltdownPower>k__BackingField`
+  - offset `1782738` [ascii] `BaseMeltdownSteps`
+  - offset `1782756` [ascii] `LimitBreakOverlay`
+  - offset `1782774` [ascii] `LimitBreakNotification1`
+  - offset `1782798` [ascii] `MeltdownPanelSprites`
+  - offset `1782819` [ascii] `MeltdownDescriptionText`
+  - offset `1782843` [ascii] `OuroCatchUpDescriptionText`
+  - offset `1782870` [ascii] `OuroTutorial`
+  - offset `1782883` [ascii] `OuroResetActive`
+  - offset `1782899` [ascii] `BottomGenOverlay`
+  - offset `1782916` [ascii] `BottomGenButton`
+  - offset `1782932` [ascii] `BottomFleetOverlay`
+  - offset `1782951` [ascii] `ResetActive`
+  - offset `1782963` [ascii] `MeltdownLMFill`
+  - offset `1782978` [ascii] `MeltdownStepLMFill`
+
+### Match 13
+
+- Match offset: `1782226`
+- Match value: `MarketsOverlay`
+- Nearby strings:
+  - offset `1781462` [ascii] `FirstGenAfterOuroCheck`
+  - offset `1781485` [ascii] `CheckTraversalsCounter`
+  - offset `1781508` [ascii] `THLoadouts`
+  - offset `1781519` [ascii] `THRU`
+  - offset `1781524` [ascii] `NakamaLeaderboard`
+  - offset `1781542` [ascii] `TimeInSecondsBaseRequirement`
+  - offset `1781571` [ascii] `OuroborosPointsBaseRequirement`
+  - offset `1781602` [ascii] `TimeInSecondsRequirementExponent`
+  - offset `1781635` [ascii] `OuroborosPointsRequirementExponent`
+  - offset `1781670` [ascii] `PointsExponent`
+  - offset `1781685` [ascii] `TimeInSecondsFill`
+  - offset `1781703` [ascii] `OuroPointsFill`
+  - offset `1781718` [ascii] `TraversalsCounter`
+  - offset `1781736` [ascii] `TimeRequirementBox`
+  - offset `1781755` [ascii] `OuroCatchUpBox`
+  - offset `1781770` [ascii] `OuroCatchUpFill`
+  - offset `1781786` [ascii] `OuroCatchUpTimeText`
+  - offset `1781806` [ascii] `OuroCatchUpBonusText`
+  - offset `1781827` [ascii] `OuroCatchUpBoxOverlay`
+  - offset `1781849` [ascii] `OuroBreakdownBox`
+  - offset `1781866` [ascii] `OuroBreakdownBoxOverlay`
+  - offset `1781890` [ascii] `MeltdownBaseRequirement`
+  - offset `1781914` [ascii] `MeltdownScalePerReset`
+  - offset `1781936` [ascii] `PowerPerStep`
+  - offset `1781949` [ascii] `MeltdownPanel`
+  - offset `1781963` [ascii] `MeltdownFill`
+  - offset `1781976` [ascii] `MeltdownStepFill`
+  - offset `1781993` [ascii] `LoopModMeltdownStepFill`
+  - offset `1782017` [ascii] `LoopModMeltdownFill`
+  - offset `1782037` [ascii] `BottomMenuOuroButton`
+  - offset `1782058` [ascii] `BottomMenuOuroOverlay`
+  - offset `1782080` [ascii] `OuroResetButton`
+  - offset `1782096` [ascii] `OuroResetOverlay`
+  - offset `1782113` [ascii] `TraitSpheresButton`
+  - offset `1782132` [ascii] `TraitSpheresOverlay`
+  - offset `1782152` [ascii] `OuroGemsButton`
+  - offset `1782167` [ascii] `OuroGemsOverlay`
+  - offset `1782183` [ascii] `HuntersButton`
+  - offset `1782197` [ascii] `HuntersOverlay`
+  - offset `1782212` [ascii] `MarketsButton`
+  - offset `1782226` [ascii] `MarketsOverlay`
+  - offset `1782241` [ascii] `OuroborosResetAnimationPanel`
+  - offset `1782270` [ascii] `OuroborosResetPanel`
+  - offset `1782290` [ascii] `OuroborosConfirmPanel`
+  - offset `1782312` [ascii] `OuroborosToggle1On`
+  - offset `1782331` [ascii] `OuroborosToggle1Off`
+  - offset `1782351` [ascii] `OuroborosToggle2On`
+  - offset `1782370` [ascii] `OuroborosToggle2Off`
+  - offset `1782390` [ascii] `OuroborosToggle3On`
+  - offset `1782409` [ascii] `OuroborosToggle3Off`
+  - offset `1782429` [ascii] `OuroborosToggle4On`
+  - offset `1782448` [ascii] `OuroborosToggle4Off`
+  - offset `1782468` [ascii] `OuroborosToggle5On`
+  - offset `1782487` [ascii] `OuroborosToggle5Off`
+  - offset `1782507` [ascii] `OuroborosToggle6On`
+  - offset `1782526` [ascii] `OuroborosToggle6Off`
+  - offset `1782546` [ascii] `Toggle1Feedback`
+  - offset `1782562` [ascii] `Toggle2Feedback`
+  - offset `1782578` [ascii] `Toggle3Feedback`
+  - offset `1782594` [ascii] `Toggle4Feedback`
+  - offset `1782610` [ascii] `Toggle5Feedback`
+  - offset `1782626` [ascii] `Toggle6Feedback`
+  - offset `1782642` [ascii] `TimeRingFeedback`
+  - offset `1782659` [ascii] `OuroOrbsRingFeedback`
+  - offset `1782680` [ascii] `OnMeltdownPowerEffect`
+  - offset `1782702` [ascii] `<FinalMeltdownPower>k__BackingField`
+  - offset `1782738` [ascii] `BaseMeltdownSteps`
+  - offset `1782756` [ascii] `LimitBreakOverlay`
+  - offset `1782774` [ascii] `LimitBreakNotification1`
+  - offset `1782798` [ascii] `MeltdownPanelSprites`
+  - offset `1782819` [ascii] `MeltdownDescriptionText`
+  - offset `1782843` [ascii] `OuroCatchUpDescriptionText`
+  - offset `1782870` [ascii] `OuroTutorial`
+  - offset `1782883` [ascii] `OuroResetActive`
+  - offset `1782899` [ascii] `BottomGenOverlay`
+  - offset `1782916` [ascii] `BottomGenButton`
+  - offset `1782932` [ascii] `BottomFleetOverlay`
+  - offset `1782951` [ascii] `ResetActive`
+  - offset `1782963` [ascii] `MeltdownLMFill`
+  - offset `1782978` [ascii] `MeltdownStepLMFill`
+  - offset `1782997` [ascii] `OuroDeviceValue`
+
+### Match 14
+
+- Match offset: `7567625`
+- Match value: `9\Assets\Scripts\Text\Text Ouroboros\TextHandlerMarkets.cs`
+- Nearby strings:
+  - offset `7565515` [ascii] `,\Assets\Scripts\Gameplay\NightModeHandler.cs`
+  - offset `7565567` [ascii] `)\Assets\Scripts\Gameplay\PlayerManager.cs`
+  - offset `7565616` [ascii] `(\Assets\Scripts\Gameplay\SoundManager.cs`
+  - offset `7565664` [ascii] `+\Assets\Scripts\Gameplay\StartGameSetter.cs`
+  - offset `7565715` [ascii] `)\Assets\Scripts\Gameplay\TestingBoosts.cs`
+  - offset `7565764` [ascii] `'\Assets\Scripts\Gameplay\TickHandler.cs`
+  - offset `7565811` [ascii] `-\Assets\Scripts\Gameplay\Tutorial\Dialogue.cs`
+  - offset `7565864` [ascii] `4\Assets\Scripts\Gameplay\Tutorial\DialogueManager.cs`
+  - offset `7565924` [ascii] `4\Assets\Scripts\Gameplay\Tutorial\DialogueTrigger.cs`
+  - offset `7565984` [ascii] `)\Assets\Scripts\Gameplay\UnlockHandler.cs`
+  - offset `7566034` [ascii] `\Assets\Scripts\Grow.cs`
+  - offset `7566064` [ascii] `+\Assets\Scripts\Lore\TextHandlerShopNPCs.cs`
+  - offset `7566115` [ascii] `*\Assets\Scripts\MasterManagerConversion.cs`
+  - offset `7566165` [ascii] `$\Assets\Scripts\Numbers\BigDouble.cs`
+  - offset `7566209` [ascii] `$\Assets\Scripts\Numbers\Converter.cs`
+  - offset `7566253` [ascii] `,\Assets\Scripts\Numbers\StatisticsManager.cs`
+  - offset `7566305` [ascii] `2\Assets\Scripts\Other\BrincksMechanicsNavigator.cs`
+  - offset `7566363` [ascii] `/\Assets\Scripts\Other\Button_AlphaHitControl.cs`
+  - offset `7566418` [ascii] `!\Assets\Scripts\Other\Frebsies.cs`
+  - offset `7566459` [ascii] `(\Assets\Scripts\Other\LoadoutTooltips.cs`
+  - offset `7566507` [ascii] `'\Assets\Scripts\Other\MechCheatCheck.cs`
+  - offset `7566554` [ascii] `,\Assets\Scripts\Other\NotificationCleanup.cs`
+  - offset `7566606` [ascii] `4\Assets\Scripts\Other\PlayerMenuNavigationHandler.cs`
+  - offset `7566666` [ascii] `(\Assets\Scripts\Other\RunInBackground.cs`
+  - offset `7566714` [ascii] `'\Assets\Scripts\Other\ViewportHelper.cs`
+  - offset `7566761` [ascii] `-\Assets\Scripts\Other\ViewPort_GemUpgrades.cs`
+  - offset `7566814` [ascii] `$\Assets\Scripts\Other\XPBarSetter.cs`
+  - offset `7566859` [ascii] `\Assets\Scripts\Screenshot.cs`
+  - offset `7566895` [ascii] `:\Assets\Scripts\ScriptableObjects\ScriptableObjectRelic.cs`
+  - offset `7566961` [ascii] `'\Assets\Scripts\TEST\InternalTesting.cs`
+  - offset `7567008` [ascii] `*\Assets\Scripts\TEST\ResearchUltimaTest.cs`
+  - offset `7567058` [ascii] `(\Assets\Scripts\Text\InventoryManager.cs`
+  - offset `7567106` [ascii] `$\Assets\Scripts\Text\NumberRoller.cs`
+  - offset `7567150` [ascii] `0\Assets\Scripts\Text\ShardPerLevelTextHandler.cs`
+  - offset `7567206` [ascii] `K\Assets\Scripts\Text\Text Ouroboros\NumberFormats\RelicsNumberFormatting.cs`
+  - offset `7567289` [ascii] `=\Assets\Scripts\Text\Text Ouroboros\TextHandlerBrincksMech.cs`
+  - offset `7567358` [ascii] `B\Assets\Scripts\Text\Text Ouroboros\TextHandlerEsotericExchange.cs`
+  - offset `7567432` [ascii] `:\Assets\Scripts\Text\Text Ouroboros\TextHandlerGemNodes.cs`
+  - offset `7567498` [ascii] `6\Assets\Scripts\Text\Text Ouroboros\TextHandlerGems.cs`
+  - offset `7567560` [ascii] `9\Assets\Scripts\Text\Text Ouroboros\TextHandlerHunters.cs`
+  - offset `7567625` [ascii] `9\Assets\Scripts\Text\Text Ouroboros\TextHandlerMarkets.cs`
+  - offset `7567690` [ascii] `@\Assets\Scripts\Text\Text Ouroboros\TextHandlerNecrumExchange.cs`
+  - offset `7567762` [ascii] `;\Assets\Scripts\Text\Text Ouroboros\TextHandlerOuroReset.cs`
+  - offset `7567829` [ascii] `?\Assets\Scripts\Text\Text Ouroboros\TextHandlerTraitsSpheres.cs`
+  - offset `7567900` [ascii] `C\Assets\Scripts\Text\Text Ouroboros\TextHandlerZeimarrNautallium.cs`
+  - offset `7567975` [ascii] `#\Assets\Scripts\Text\TextHandler.cs`
+  - offset `7568018` [ascii] `+\Assets\Scripts\Text\TextHandlerLoadouts.cs`
+  - offset `7568069` [ascii] `+\Assets\Scripts\Text\TextHandlerLoopMods.cs`
+  - offset `7568120` [ascii] `)\Assets\Scripts\Text\TextHandlerRelics.cs`
+  - offset `7568169` [ascii] `+\Assets\Scripts\Text\TextHandlerResearch.cs`
+  - offset `7568220` [ascii] `/\Assets\Scripts\Text\TextHandlerSpaceAcademy.cs`
+  - offset `7568275` [ascii] `#\Assets\Scripts\TrailerAnimation.cs`
+  - offset `7568318` [ascii] `.\Assets\Scripts\Upgrades\AcademyData\Badges.cs`
+  - offset `7568372` [ascii] `>\Assets\Scripts\Upgrades\AcademyData\ConstructionMilestones.cs`
+  - offset `7568442` [ascii] `<\Assets\Scripts\Upgrades\AcademyData\ConstructionProjects.cs`
+  - offset `7568510` [ascii] `,\Assets\Scripts\Upgrades\AcademyData\Gear.cs`
+  - offset `7568562` [ascii] `1\Assets\Scripts\Upgrades\AcademyData\Inventory.cs`
+  - offset `7568619` [ascii] `6\Assets\Scripts\Upgrades\AcademyData\MissionRewards.cs`
+  - offset `7568681` [ascii] `0\Assets\Scripts\Upgrades\AcademyData\Missions.cs`
+  - offset `7568737` [ascii] `2\Assets\Scripts\Upgrades\AcademyData\OuroRelics.cs`
+  - offset `7568795` [ascii] `1\Assets\Scripts\Upgrades\AcademyData\Personnel.cs`
+  - offset `7568852` [ascii] `8\Assets\Scripts\Upgrades\AcademyData\SpaceAcademyMain.cs`
+  - offset `7568916` [ascii] `.\Assets\Scripts\Upgrades\AchievementManager.cs`
+  - offset `7568970` [ascii] `-\Assets\Scripts\Upgrades\AutomationManager.cs`
+  - offset `7569023` [ascii] `*\Assets\Scripts\Upgrades\FleetAnimation.cs`
+  - offset `7569073` [ascii] `(\Assets\Scripts\Upgrades\FleetManager.cs`
+  - offset `7569121` [ascii] `)\Assets\Scripts\Upgrades\LoopModifiers.cs`
+  - offset `7569170` [ascii] `*\Assets\Scripts\Upgrades\LoopModsAssist.cs`
+  - offset `7569220` [ascii] `6\Assets\Scripts\Upgrades\Ouroboros\BrincksMechanics.cs`
+  - offset `7569282` [ascii] `:\Assets\Scripts\Upgrades\Ouroboros\ButtonRecoloringOuro.cs`
+  - offset `7569348` [ascii] `7\Assets\Scripts\Upgrades\Ouroboros\EstotericExchange.cs`
+  - offset `7569411` [ascii] `.\Assets\Scripts\Upgrades\Ouroboros\GemNodes.cs`
+  - offset `7569465` [ascii] `=\Assets\Scripts\Upgrades\Ouroboros\GemNodes\ExodusGemNodes.cs`
+  - offset `7569534` [ascii] `.\Assets\Scripts\Upgrades\Ouroboros\GemPerks.cs`
+  - offset `7569588` [ascii] `8\Assets\Scripts\Upgrades\Ouroboros\GemPerks\ExodusGem.cs`
+  - offset `7569652` [ascii] `3\Assets\Scripts\Upgrades\Ouroboros\Hunters\Borge.cs`
+  - offset `7569711` [ascii] `8\Assets\Scripts\Upgrades\Ouroboros\Hunters\BorgeEnemy.cs`
+  - offset `7569775` [ascii] `;\Assets\Scripts\Upgrades\Ouroboros\Hunters\BorgeUpgrades.cs`
+  - offset `7569842` [ascii] `Y\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Borge\Abilities\BookOfBaal.cs`
+  - offset `7569939` [ascii] `a\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Borge\Abilities\BorgeHuntAbilities.cs`
+  - offset `7570044` [ascii] `_\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Borge\Abilities\BorgeHuntAbility.cs`
+
+### Match 15
+
+- Match offset: `7582480`
+- Match value: `6\Assets\Scripts\Upgrades\Ouroboros\MultiverseMarket.cs`
+- Nearby strings:
+  - offset `7579034` [ascii] ``\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Abilities\ShimmeringScorpion.cs`
+  - offset `7579138` [ascii] `X\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Abilities\SoulOfSnek.cs`
+  - offset `7579234` [ascii] `\\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Abilities\TheOmenOfDecay.cs`
+  - offset `7579334` [ascii] ``\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Abilities\TheUnfairAdvantage.cs`
+  - offset `7579438` [ascii] `]\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Abilities\ThousandNeedles.cs`
+  - offset `7579539` [ascii] `]\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Abilities\TimelessMastery.cs`
+  - offset `7579640` [ascii] `\\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Abilities\TrickstersBoon.cs`
+  - offset `7579740` [ascii] `Z\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Abilities\VectidElixir.cs`
+  - offset `7579838` [ascii] `Y\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\Bosses\Benchy.cs`
+  - offset `7579935` [ascii] `\\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\Bosses\Exoscarab.cs`
+  - offset `7580035` [ascii] `_\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\Bosses\OzzyBossUnit.cs`
+  - offset `7580138` [ascii] `_\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\OzzyEnemyStatistics.cs`
+  - offset `7580241` [ascii] `Y\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\OzzyEnemyUnit.cs`
+  - offset `7580338` [ascii] `Y\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\Regular\Drone.cs`
+  - offset `7580435` [ascii] `Y\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\Regular\Scout.cs`
+  - offset `7580532` [ascii] `\\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\Regular\Tunneler.cs`
+  - offset `7580632` [ascii] `W\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\UnknownBoss.cs`
+  - offset `7580727` [ascii] `X\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\Enemies\UnknownEnemy.cs`
+  - offset `7580823` [ascii] `O\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\OzzyEffects.cs`
+  - offset `7580910` [ascii] `S\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\OzzyGameContext.cs`
+  - offset `7581001` [ascii] `V\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\OzzyHuntStatistics.cs`
+  - offset `7581095` [ascii] `S\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\OzzyOfflineHunt.cs`
+  - offset `7581186` [ascii] `X\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\OzzyOfflineHuntState.cs`
+  - offset `7581282` [ascii] `L\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Ozzy\OzzyUnit.cs`
+  - offset `7581366` [ascii] `F\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Program.cs`
+  - offset `7581444` [ascii] `H\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\Simulator.cs`
+  - offset `7581524` [ascii] `J\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\UnitActions.cs`
+  - offset `7581606` [ascii] `M\Assets\Scripts\Upgrades\Ouroboros\Hunters\DefaultHunterSim\UpgradesHelper.cs`
+  - offset `7581691` [ascii] `:\Assets\Scripts\Upgrades\Ouroboros\Hunters\HunterBattle.cs`
+  - offset `7581757` [ascii] `B\Assets\Scripts\Upgrades\Ouroboros\Hunters\HunterGeneralNumbers.cs`
+  - offset `7581831` [ascii] `;\Assets\Scripts\Upgrades\Ouroboros\Hunters\HunterMethods.cs`
+  - offset `7581898` [ascii] `?\Assets\Scripts\Upgrades\Ouroboros\Hunters\HuntersAttributes.cs`
+  - offset `7581969` [ascii] `@\Assets\Scripts\Upgrades\Ouroboros\Hunters\HuntersHeadquarter.cs`
+  - offset `7582041` [ascii] `2\Assets\Scripts\Upgrades\Ouroboros\Hunters\Knox.cs`
+  - offset `7582099` [ascii] `7\Assets\Scripts\Upgrades\Ouroboros\Hunters\KnoxEnemy.cs`
+  - offset `7582162` [ascii] `:\Assets\Scripts\Upgrades\Ouroboros\Hunters\KnoxUpgrades.cs`
+  - offset `7582228` [ascii] `9\Assets\Scripts\Upgrades\Ouroboros\Hunters\LootManager.cs`
+  - offset `7582293` [ascii] `2\Assets\Scripts\Upgrades\Ouroboros\Hunters\Ozzy.cs`
+  - offset `7582351` [ascii] `7\Assets\Scripts\Upgrades\Ouroboros\Hunters\OzzyEnemy.cs`
+  - offset `7582414` [ascii] `:\Assets\Scripts\Upgrades\Ouroboros\Hunters\OzzyUpgrades.cs`
+  - offset `7582480` [ascii] `6\Assets\Scripts\Upgrades\Ouroboros\MultiverseMarket.cs`
+  - offset `7582542` [ascii] `4\Assets\Scripts\Upgrades\Ouroboros\NecrumExchange.cs`
+  - offset `7582602` [ascii] `7\Assets\Scripts\Upgrades\Ouroboros\OuroborosResetter.cs`
+  - offset `7582665` [ascii] `2\Assets\Scripts\Upgrades\Ouroboros\TraitSpheres.cs`
+  - offset `7582723` [ascii] `7\Assets\Scripts\Upgrades\Ouroboros\ZeimarrNautallium.cs`
+  - offset `7582786` [ascii] `.\Assets\Scripts\Upgrades\ResearchLaboratory.cs`
+  - offset `7582840` [ascii] `+\Assets\Scripts\Upgrades\ResearchUltimas.cs`
+  - offset `7582891` [ascii] `'\Assets\Scripts\Upgrades\RewardLanes.cs`
+  - offset `7582938` [ascii] `'\Assets\Scripts\Upgrades\ShardMining.cs`
+  - offset `7582985` [ascii] `(\Assets\Scripts\Upgrades\TechUpgrades.cs`
+  - offset `7583033` [ascii] `#\Assets\Scripts\Utilities\Colors.cs`
+  - offset `7583143` [ascii] `?333333`
+  - offset `7583183` [ascii] `?333333`
+  - offset `7583191` [ascii] `?ffffff`
+  - offset `7583255` [ascii] `?333333`
+  - offset `7583375` [ascii] `?333333`
+  - offset `7583383` [ascii] `?ffffff`
+  - offset `7583391` [ascii] `?ffffff`
+  - offset `7583408` [ascii] `333333`
+  - offset `7583415` [ascii] `?ffffff`
+  - offset `7583455` [ascii] `?ffffff`
+  - offset `7583463` [ascii] `?ffffff`
+  - offset `7583485` [ascii] `|MissionsSO`
+  - offset `7583501` [ascii] `|ArcadeUpgradeSO`
+  - offset `7583522` [ascii] `|AnimationsInMenuHandler`
+  - offset `7583551` [ascii] `|ArcadeGeneralFunctions`
+  - offset `7583579` [ascii] `|ArcadeSaveData`
+  - offset `7583599` [ascii] `|ArcadeSaveSystem`
+  - offset `7583621` [ascii] `|ArcadeSceneManager`
+  - offset `7583645` [ascii] `|GameObjectFollowGameObject`
+  - offset `7583677` [ascii] `|BallDeathScript`
+  - offset `7583698` [ascii] `|BallDetectorOnTriggerEnter`
+  - offset `7583730` [ascii] `|ImpossipongHandler`
+  - offset `7583754` [ascii] `|MainBallScript`
+  - offset `7583774` [ascii] `|PongEnemyMovement`
+  - offset `7583797` [ascii] `|PongPickUpHandler`
+  - offset `7583820` [ascii] `|PongPlayerMovement`
+  - offset `7583844` [ascii] `|BulletScript`
+  - offset `7583862` [ascii] `|ChargeBulletScript`
+  - offset `7583886` [ascii] `|ChargeShotScript`
+  - offset `7583908` [ascii] `|ComboItem`
+
+### Match 16
+
+- Match offset: `7590588`
+- Match value: `|TextHandlerMarkets`
+- Nearby strings:
+  - offset `7589668` [ascii] `|TestingBoosts`
+  - offset `7589687` [ascii] `|TickHandler`
+  - offset `7589704` [ascii] `|Dialogue`
+  - offset `7589718` [ascii] `|DialogueManager`
+  - offset `7589739` [ascii] `|DialogueTrigger`
+  - offset `7589760` [ascii] `|UnlockHandler`
+  - offset `7589779` [ascii] `|Grow`
+  - offset `7589789` [ascii] `|TextHandlerShopNPCs`
+  - offset `7589814` [ascii] `|MasterManagerConversion`
+  - offset `7589843` [ascii] `BreakInfinity|BigDouble`
+  - offset `7589871` [ascii] `BreakInfinity.|BigNumber`
+  - offset `7589900` [ascii] `BreakInfinity.|PowersOf10`
+  - offset `7589930` [ascii] `BreakInfinity|BigMath`
+  - offset `7589955` [ascii] `!BreakInfinity|BigDoubleExtensions`
+  - offset `7589994` [ascii] `|Converter`
+  - offset `7590009` [ascii] `|StatisticsManager`
+  - offset `7590032` [ascii] `|BrincksMechanicsNavigator`
+  - offset `7590063` [ascii] `|Button_AlphaHitControl`
+  - offset `7590091` [ascii] `|Frebsies`
+  - offset `7590105` [ascii] `|LoadoutTooltips`
+  - offset `7590126` [ascii] `|MechCheatCheck`
+  - offset `7590146` [ascii] `|NotificationCleanup`
+  - offset `7590171` [ascii] `|PlayerMenuNavigationHandler`
+  - offset `7590204` [ascii] `|RunInBackground`
+  - offset `7590225` [ascii] `|ViewportHelper`
+  - offset `7590245` [ascii] `|Viewport_GemUpgrades`
+  - offset `7590271` [ascii] `|XPBarSetter`
+  - offset `7590288` [ascii] `|Screenshot`
+  - offset `7590304` [ascii] `|Relic`
+  - offset `7590315` [ascii] `|InternalTesting`
+  - offset `7590336` [ascii] `|ResearchUltimaTest`
+  - offset `7590360` [ascii] `|InventoryManager`
+  - offset `7590382` [ascii] `|NumberRoller`
+  - offset `7590400` [ascii] `|ShardPerLevelTextHandler`
+  - offset `7590430` [ascii] `|RelicNumberFormatting`
+  - offset `7590457` [ascii] `|TextHandlerBrincksMech`
+  - offset `7590485` [ascii] `|TextHandlerEsotericExchange`
+  - offset `7590518` [ascii] `|TextHandlerGemNodes`
+  - offset `7590543` [ascii] `|TextHandlerGems`
+  - offset `7590564` [ascii] `|TextHandlerHunters`
+  - offset `7590588` [ascii] `|TextHandlerMarkets`
+  - offset `7590612` [ascii] `|TextHandlerNecrumExchange`
+  - offset `7590643` [ascii] `|TextHandlerOuroReset`
+  - offset `7590669` [ascii] `|TextHandlerTraitsSpheres`
+  - offset `7590699` [ascii] `|TextHandlerZeimarrNautallium`
+  - offset `7590733` [ascii] `|TextHandler`
+  - offset `7590750` [ascii] `|TextHandlerLoadouts`
+  - offset `7590775` [ascii] `|TextHandlerLoopMods`
+  - offset `7590800` [ascii] `|TextHandlerRelics`
+  - offset `7590823` [ascii] `|TextHandlerResearch`
+  - offset `7590848` [ascii] `|TextHandlerSpaceAcademy`
+  - offset `7590877` [ascii] `|TrailerAnimation`
+  - offset `7590899` [ascii] `|Badges`
+  - offset `7590911` [ascii] `|ConstructionMilestones`
+  - offset `7590939` [ascii] `|ConstructionProjects`
+  - offset `7590965` [ascii] `|Gear`
+  - offset `7590975` [ascii] `|Inventory`
+  - offset `7590990` [ascii] `|MissionRewards`
+  - offset `7591010` [ascii] `|Missions`
+  - offset `7591024` [ascii] `|OuroRelics`
+  - offset `7591040` [ascii] `|Personnel`
+  - offset `7591055` [ascii] `|SpaceAcademyMain`
+  - offset `7591077` [ascii] `|AchievementManager`
+  - offset `7591101` [ascii] `|AutomationManager`
+  - offset `7591124` [ascii] `|FleetAnimation`
+  - offset `7591144` [ascii] `|FleetManager`
+  - offset `7591162` [ascii] `|LoopModifiers`
+  - offset `7591181` [ascii] `|LoopModsAssist`
+  - offset `7591201` [ascii] `|BrincksMechanics`
+  - offset `7591223` [ascii] `|ButtonRecoloringOuro`
+  - offset `7591249` [ascii] `|EstotericExchange`
+  - offset `7591272` [ascii] `|GemNodes`
+  - offset `7591286` [ascii] `|ExodusGemNodes`
+  - offset `7591306` [ascii] `|GemPerks`
+  - offset `7591320` [ascii] `|ExodusGem`
+  - offset `7591335` [ascii] `|Borge`
+  - offset `7591346` [ascii] `|BorgeEnemy`
+  - offset `7591362` [ascii] `|BorgeUpgrades`
+  - offset `7591380` [ascii] `+Cifi.OfflineHunt.Borge.Abilities|BookOfBaal`
+  - offset `7591428` [ascii] `3Cifi.OfflineHunt.Borge.Abilities|BorgeHuntAbilities`
+  - offset `7591484` [ascii] `1Cifi.OfflineHunt.Borge.Abilities|BorgeHuntAbility`
+
+### Match 17
+
+- Match offset: `7597408`
+- Match value: `|MultiverseMarket`
+- Nearby strings:
+  - offset `7595954` [ascii] `2Cifi.OfflineHunt.Ozzy.Abilities|ShimmeringScorpion`
+  - offset `7596009` [ascii] `*Cifi.OfflineHunt.Ozzy.Abilities|SoulOfSnek`
+  - offset `7596056` [ascii] `.Cifi.OfflineHunt.Ozzy.Abilities|TheOmenOfDecay`
+  - offset `7596107` [ascii] `2Cifi.OfflineHunt.Ozzy.Abilities|TheUnfairAdvantage`
+  - offset `7596162` [ascii] `/Cifi.OfflineHunt.Ozzy.Abilities|ThousandNeedles`
+  - offset `7596214` [ascii] `/Cifi.OfflineHunt.Ozzy.Abilities|TimelessMastery`
+  - offset `7596266` [ascii] `.Cifi.OfflineHunt.Ozzy.Abilities|TrickstersBoon`
+  - offset `7596317` [ascii] `,Cifi.OfflineHunt.Ozzy.Abilities|VectidElixir`
+  - offset `7596366` [ascii] `$Cifi.OfflineHunt.Ozzy.Enemies|Benchy`
+  - offset `7596407` [ascii] `'Cifi.OfflineHunt.Ozzy.Enemies|Exoscarab`
+  - offset `7596451` [ascii] `*Cifi.OfflineHunt.Ozzy.Enemies|OzzyBossUnit`
+  - offset `7596498` [ascii] `1Cifi.OfflineHunt.Ozzy.Enemies|OzzyEnemyStatistics`
+  - offset `7596552` [ascii] `+Cifi.OfflineHunt.Ozzy.Enemies|OzzyEnemyUnit`
+  - offset `7596600` [ascii] `#Cifi.OfflineHunt.Ozzy.Enemies|Drone`
+  - offset `7596640` [ascii] `#Cifi.OfflineHunt.Ozzy.Enemies|Scout`
+  - offset `7596680` [ascii] `&Cifi.OfflineHunt.Ozzy.Enemies|Tunneler`
+  - offset `7596723` [ascii] `)Cifi.OfflineHunt.Ozzy.Enemies|UnknownBoss`
+  - offset `7596769` [ascii] `*Cifi.OfflineHunt.Ozzy.Enemies|UnknownEnemy`
+  - offset `7596816` [ascii] `!Cifi.OfflineHunt.Ozzy|OzzyEffects`
+  - offset `7596854` [ascii] `%Cifi.OfflineHunt.Ozzy|OzzyGameContext`
+  - offset `7596896` [ascii] `(Cifi.OfflineHunt.Ozzy|OzzyHuntStatistics`
+  - offset `7596941` [ascii] `%Cifi.OfflineHunt.Ozzy|OzzyOfflineHunt`
+  - offset `7596983` [ascii] `*Cifi.OfflineHunt.Ozzy|OzzyOfflineHuntState`
+  - offset `7597031` [ascii] `Cifi.OfflineHunt.Ozzy|OzzyUnit`
+  - offset `7597066` [ascii] `Cifi.OfflineHunt|Program`
+  - offset `7597095` [ascii] `Cifi.OfflineHunt|Simulator`
+  - offset `7597126` [ascii] `Cifi.OfflineHunt|UnitActions`
+  - offset `7597159` [ascii] `Cifi.OfflineHunt|UpgradesHelper`
+  - offset `7597195` [ascii] `|HunterBattle`
+  - offset `7597213` [ascii] `|HunterGeneralNumbers`
+  - offset `7597239` [ascii] `|HunterMethods`
+  - offset `7597258` [ascii] `|HuntersAttributes`
+  - offset `7597281` [ascii] `|HuntersHeadquarter`
+  - offset `7597305` [ascii] `|Knox`
+  - offset `7597315` [ascii] `|KnoxEnemy`
+  - offset `7597330` [ascii] `|KnoxUpgrades`
+  - offset `7597348` [ascii] `|LootManager`
+  - offset `7597365` [ascii] `|Ozzy`
+  - offset `7597375` [ascii] `|OzzyEnemy`
+  - offset `7597390` [ascii] `|OzzyUpgrades`
+  - offset `7597408` [ascii] `|MultiverseMarket`
+  - offset `7597429` [ascii] `'MultiverseMarket|InscryptionTupleObject`
+  - offset `7597474` [ascii] `MultiverseMarket|Inscryption`
+  - offset `7597507` [ascii] `|NecrumExchange`
+  - offset `7597527` [ascii] `|OuroborosResetter`
+  - offset `7597550` [ascii] `|TraitSpheres`
+  - offset `7597568` [ascii] `|ZeimarrNautallium`
+  - offset `7597591` [ascii] `|ResearchLaboratory`
+  - offset `7597615` [ascii] `|ResearchUltimas`
+  - offset `7597636` [ascii] `|RewardLanes`
+  - offset `7597653` [ascii] `|ShardMining`
+  - offset `7597670` [ascii] `ShardMining|ShardUpgradeInfo`
+  - offset `7597703` [ascii] `|TechUpgrades`
+  - offset `7597721` [ascii] `|Colors`
+  - offset `7598377` [ascii] `ticks`
+  - offset `7598383` [ascii] `dateData`
+  - offset `7598418` [ascii] ` "$&(`
+  - offset `7598442` [ascii] ` "$&(*,.02468:<>@BDFHJL`
+  - offset `7598648` [ascii] `&6@BDFHJLNPRTVXZ\^`bdfhjlnpr`
+  - offset `7598955` [ascii] `[yy?`
+  - offset `7599031` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bd`
+  - offset `7599082` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdH1A5E0066-58DC-428A-B21C-0AD6CDAE2789`
+  - offset `7599165` [ascii] ` *48@BDFJLNV`
+  - offset `7599178` [ascii] `&(,.026HPRTXZ\^`jlnprtv`
+  - offset `7599234` [ascii] ` "$&(*,.02468:<>@B`
+  - offset `7599268` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdfhjlnprtvxz|~`
+  - offset `7600265` [ascii] ` "$&(*,`
+  - offset `7600403` [ascii] ` "$&(*,.02468:<>H`
+  - offset `7600460` [ascii] `&(*,.2468:<>@DFHJLPTVXZ\^``
+  - offset `7600536` [ascii] `  @B`
+  - offset `7600905` [ascii] ` !"@AE`
+  - offset `7600941` [ascii] ` !"@AE`
+  - offset `7601046` [ascii] `Fddd, dd MMM yyyy HH':'mm':'ss 'GMT':yyyy'-'MM'-'dd'T'HH':'mm':'ss<yyyy'-'MM'-'dd HH':'mm':'ss'Z'`
+  - offset `7601145` [ascii] `Lyyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffffK>yyyy'-'MM'-'ddTHH':'mm':'ss zzz`
+  - offset `7601486` [ascii] ` "$&(*,.02468:.`
+  - offset `7601514` [ascii] `4This instance is read only`
+  - offset `7601802` [ascii] `"$*:<>@BNd`
+  - offset `7601965` [ascii] `ddddd`
+  - offset `7601986` [ascii] `dddd`
+  - offset `7602022` [ascii] `dddddddd`
+  - offset `7602034` [ascii] `dddddd`
+
+### Match 18
+
+- Match offset: `7597429`
+- Match value: `'MultiverseMarket|InscryptionTupleObject`
+- Nearby strings:
+  - offset `7596009` [ascii] `*Cifi.OfflineHunt.Ozzy.Abilities|SoulOfSnek`
+  - offset `7596056` [ascii] `.Cifi.OfflineHunt.Ozzy.Abilities|TheOmenOfDecay`
+  - offset `7596107` [ascii] `2Cifi.OfflineHunt.Ozzy.Abilities|TheUnfairAdvantage`
+  - offset `7596162` [ascii] `/Cifi.OfflineHunt.Ozzy.Abilities|ThousandNeedles`
+  - offset `7596214` [ascii] `/Cifi.OfflineHunt.Ozzy.Abilities|TimelessMastery`
+  - offset `7596266` [ascii] `.Cifi.OfflineHunt.Ozzy.Abilities|TrickstersBoon`
+  - offset `7596317` [ascii] `,Cifi.OfflineHunt.Ozzy.Abilities|VectidElixir`
+  - offset `7596366` [ascii] `$Cifi.OfflineHunt.Ozzy.Enemies|Benchy`
+  - offset `7596407` [ascii] `'Cifi.OfflineHunt.Ozzy.Enemies|Exoscarab`
+  - offset `7596451` [ascii] `*Cifi.OfflineHunt.Ozzy.Enemies|OzzyBossUnit`
+  - offset `7596498` [ascii] `1Cifi.OfflineHunt.Ozzy.Enemies|OzzyEnemyStatistics`
+  - offset `7596552` [ascii] `+Cifi.OfflineHunt.Ozzy.Enemies|OzzyEnemyUnit`
+  - offset `7596600` [ascii] `#Cifi.OfflineHunt.Ozzy.Enemies|Drone`
+  - offset `7596640` [ascii] `#Cifi.OfflineHunt.Ozzy.Enemies|Scout`
+  - offset `7596680` [ascii] `&Cifi.OfflineHunt.Ozzy.Enemies|Tunneler`
+  - offset `7596723` [ascii] `)Cifi.OfflineHunt.Ozzy.Enemies|UnknownBoss`
+  - offset `7596769` [ascii] `*Cifi.OfflineHunt.Ozzy.Enemies|UnknownEnemy`
+  - offset `7596816` [ascii] `!Cifi.OfflineHunt.Ozzy|OzzyEffects`
+  - offset `7596854` [ascii] `%Cifi.OfflineHunt.Ozzy|OzzyGameContext`
+  - offset `7596896` [ascii] `(Cifi.OfflineHunt.Ozzy|OzzyHuntStatistics`
+  - offset `7596941` [ascii] `%Cifi.OfflineHunt.Ozzy|OzzyOfflineHunt`
+  - offset `7596983` [ascii] `*Cifi.OfflineHunt.Ozzy|OzzyOfflineHuntState`
+  - offset `7597031` [ascii] `Cifi.OfflineHunt.Ozzy|OzzyUnit`
+  - offset `7597066` [ascii] `Cifi.OfflineHunt|Program`
+  - offset `7597095` [ascii] `Cifi.OfflineHunt|Simulator`
+  - offset `7597126` [ascii] `Cifi.OfflineHunt|UnitActions`
+  - offset `7597159` [ascii] `Cifi.OfflineHunt|UpgradesHelper`
+  - offset `7597195` [ascii] `|HunterBattle`
+  - offset `7597213` [ascii] `|HunterGeneralNumbers`
+  - offset `7597239` [ascii] `|HunterMethods`
+  - offset `7597258` [ascii] `|HuntersAttributes`
+  - offset `7597281` [ascii] `|HuntersHeadquarter`
+  - offset `7597305` [ascii] `|Knox`
+  - offset `7597315` [ascii] `|KnoxEnemy`
+  - offset `7597330` [ascii] `|KnoxUpgrades`
+  - offset `7597348` [ascii] `|LootManager`
+  - offset `7597365` [ascii] `|Ozzy`
+  - offset `7597375` [ascii] `|OzzyEnemy`
+  - offset `7597390` [ascii] `|OzzyUpgrades`
+  - offset `7597408` [ascii] `|MultiverseMarket`
+  - offset `7597429` [ascii] `'MultiverseMarket|InscryptionTupleObject`
+  - offset `7597474` [ascii] `MultiverseMarket|Inscryption`
+  - offset `7597507` [ascii] `|NecrumExchange`
+  - offset `7597527` [ascii] `|OuroborosResetter`
+  - offset `7597550` [ascii] `|TraitSpheres`
+  - offset `7597568` [ascii] `|ZeimarrNautallium`
+  - offset `7597591` [ascii] `|ResearchLaboratory`
+  - offset `7597615` [ascii] `|ResearchUltimas`
+  - offset `7597636` [ascii] `|RewardLanes`
+  - offset `7597653` [ascii] `|ShardMining`
+  - offset `7597670` [ascii] `ShardMining|ShardUpgradeInfo`
+  - offset `7597703` [ascii] `|TechUpgrades`
+  - offset `7597721` [ascii] `|Colors`
+  - offset `7598377` [ascii] `ticks`
+  - offset `7598383` [ascii] `dateData`
+  - offset `7598418` [ascii] ` "$&(`
+  - offset `7598442` [ascii] ` "$&(*,.02468:<>@BDFHJL`
+  - offset `7598648` [ascii] `&6@BDFHJLNPRTVXZ\^`bdfhjlnpr`
+  - offset `7598955` [ascii] `[yy?`
+  - offset `7599031` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bd`
+  - offset `7599082` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdH1A5E0066-58DC-428A-B21C-0AD6CDAE2789`
+  - offset `7599165` [ascii] ` *48@BDFJLNV`
+  - offset `7599178` [ascii] `&(,.026HPRTXZ\^`jlnprtv`
+  - offset `7599234` [ascii] ` "$&(*,.02468:<>@B`
+  - offset `7599268` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdfhjlnprtvxz|~`
+  - offset `7600265` [ascii] ` "$&(*,`
+  - offset `7600403` [ascii] ` "$&(*,.02468:<>H`
+  - offset `7600460` [ascii] `&(*,.2468:<>@DFHJLPTVXZ\^``
+  - offset `7600536` [ascii] `  @B`
+  - offset `7600905` [ascii] ` !"@AE`
+  - offset `7600941` [ascii] ` !"@AE`
+  - offset `7601046` [ascii] `Fddd, dd MMM yyyy HH':'mm':'ss 'GMT':yyyy'-'MM'-'dd'T'HH':'mm':'ss<yyyy'-'MM'-'dd HH':'mm':'ss'Z'`
+  - offset `7601145` [ascii] `Lyyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffffK>yyyy'-'MM'-'ddTHH':'mm':'ss zzz`
+  - offset `7601486` [ascii] ` "$&(*,.02468:.`
+  - offset `7601514` [ascii] `4This instance is read only`
+  - offset `7601802` [ascii] `"$*:<>@BNd`
+  - offset `7601965` [ascii] `ddddd`
+  - offset `7601986` [ascii] `dddd`
+  - offset `7602022` [ascii] `dddddddd`
+  - offset `7602034` [ascii] `dddddd`
+  - offset `7602104` [ascii] `80( `
+
+### Match 19
+
+- Match offset: `7597474`
+- Match value: `MultiverseMarket|Inscryption`
+- Nearby strings:
+  - offset `7596056` [ascii] `.Cifi.OfflineHunt.Ozzy.Abilities|TheOmenOfDecay`
+  - offset `7596107` [ascii] `2Cifi.OfflineHunt.Ozzy.Abilities|TheUnfairAdvantage`
+  - offset `7596162` [ascii] `/Cifi.OfflineHunt.Ozzy.Abilities|ThousandNeedles`
+  - offset `7596214` [ascii] `/Cifi.OfflineHunt.Ozzy.Abilities|TimelessMastery`
+  - offset `7596266` [ascii] `.Cifi.OfflineHunt.Ozzy.Abilities|TrickstersBoon`
+  - offset `7596317` [ascii] `,Cifi.OfflineHunt.Ozzy.Abilities|VectidElixir`
+  - offset `7596366` [ascii] `$Cifi.OfflineHunt.Ozzy.Enemies|Benchy`
+  - offset `7596407` [ascii] `'Cifi.OfflineHunt.Ozzy.Enemies|Exoscarab`
+  - offset `7596451` [ascii] `*Cifi.OfflineHunt.Ozzy.Enemies|OzzyBossUnit`
+  - offset `7596498` [ascii] `1Cifi.OfflineHunt.Ozzy.Enemies|OzzyEnemyStatistics`
+  - offset `7596552` [ascii] `+Cifi.OfflineHunt.Ozzy.Enemies|OzzyEnemyUnit`
+  - offset `7596600` [ascii] `#Cifi.OfflineHunt.Ozzy.Enemies|Drone`
+  - offset `7596640` [ascii] `#Cifi.OfflineHunt.Ozzy.Enemies|Scout`
+  - offset `7596680` [ascii] `&Cifi.OfflineHunt.Ozzy.Enemies|Tunneler`
+  - offset `7596723` [ascii] `)Cifi.OfflineHunt.Ozzy.Enemies|UnknownBoss`
+  - offset `7596769` [ascii] `*Cifi.OfflineHunt.Ozzy.Enemies|UnknownEnemy`
+  - offset `7596816` [ascii] `!Cifi.OfflineHunt.Ozzy|OzzyEffects`
+  - offset `7596854` [ascii] `%Cifi.OfflineHunt.Ozzy|OzzyGameContext`
+  - offset `7596896` [ascii] `(Cifi.OfflineHunt.Ozzy|OzzyHuntStatistics`
+  - offset `7596941` [ascii] `%Cifi.OfflineHunt.Ozzy|OzzyOfflineHunt`
+  - offset `7596983` [ascii] `*Cifi.OfflineHunt.Ozzy|OzzyOfflineHuntState`
+  - offset `7597031` [ascii] `Cifi.OfflineHunt.Ozzy|OzzyUnit`
+  - offset `7597066` [ascii] `Cifi.OfflineHunt|Program`
+  - offset `7597095` [ascii] `Cifi.OfflineHunt|Simulator`
+  - offset `7597126` [ascii] `Cifi.OfflineHunt|UnitActions`
+  - offset `7597159` [ascii] `Cifi.OfflineHunt|UpgradesHelper`
+  - offset `7597195` [ascii] `|HunterBattle`
+  - offset `7597213` [ascii] `|HunterGeneralNumbers`
+  - offset `7597239` [ascii] `|HunterMethods`
+  - offset `7597258` [ascii] `|HuntersAttributes`
+  - offset `7597281` [ascii] `|HuntersHeadquarter`
+  - offset `7597305` [ascii] `|Knox`
+  - offset `7597315` [ascii] `|KnoxEnemy`
+  - offset `7597330` [ascii] `|KnoxUpgrades`
+  - offset `7597348` [ascii] `|LootManager`
+  - offset `7597365` [ascii] `|Ozzy`
+  - offset `7597375` [ascii] `|OzzyEnemy`
+  - offset `7597390` [ascii] `|OzzyUpgrades`
+  - offset `7597408` [ascii] `|MultiverseMarket`
+  - offset `7597429` [ascii] `'MultiverseMarket|InscryptionTupleObject`
+  - offset `7597474` [ascii] `MultiverseMarket|Inscryption`
+  - offset `7597507` [ascii] `|NecrumExchange`
+  - offset `7597527` [ascii] `|OuroborosResetter`
+  - offset `7597550` [ascii] `|TraitSpheres`
+  - offset `7597568` [ascii] `|ZeimarrNautallium`
+  - offset `7597591` [ascii] `|ResearchLaboratory`
+  - offset `7597615` [ascii] `|ResearchUltimas`
+  - offset `7597636` [ascii] `|RewardLanes`
+  - offset `7597653` [ascii] `|ShardMining`
+  - offset `7597670` [ascii] `ShardMining|ShardUpgradeInfo`
+  - offset `7597703` [ascii] `|TechUpgrades`
+  - offset `7597721` [ascii] `|Colors`
+  - offset `7598377` [ascii] `ticks`
+  - offset `7598383` [ascii] `dateData`
+  - offset `7598418` [ascii] ` "$&(`
+  - offset `7598442` [ascii] ` "$&(*,.02468:<>@BDFHJL`
+  - offset `7598648` [ascii] `&6@BDFHJLNPRTVXZ\^`bdfhjlnpr`
+  - offset `7598955` [ascii] `[yy?`
+  - offset `7599031` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bd`
+  - offset `7599082` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdH1A5E0066-58DC-428A-B21C-0AD6CDAE2789`
+  - offset `7599165` [ascii] ` *48@BDFJLNV`
+  - offset `7599178` [ascii] `&(,.026HPRTXZ\^`jlnprtv`
+  - offset `7599234` [ascii] ` "$&(*,.02468:<>@B`
+  - offset `7599268` [ascii] ` "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdfhjlnprtvxz|~`
+  - offset `7600265` [ascii] ` "$&(*,`
+  - offset `7600403` [ascii] ` "$&(*,.02468:<>H`
+  - offset `7600460` [ascii] `&(*,.2468:<>@DFHJLPTVXZ\^``
+  - offset `7600536` [ascii] `  @B`
+  - offset `7600905` [ascii] ` !"@AE`
+  - offset `7600941` [ascii] ` !"@AE`
+  - offset `7601046` [ascii] `Fddd, dd MMM yyyy HH':'mm':'ss 'GMT':yyyy'-'MM'-'dd'T'HH':'mm':'ss<yyyy'-'MM'-'dd HH':'mm':'ss'Z'`
+  - offset `7601145` [ascii] `Lyyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffffK>yyyy'-'MM'-'ddTHH':'mm':'ss zzz`
+  - offset `7601486` [ascii] ` "$&(*,.02468:.`
+  - offset `7601514` [ascii] `4This instance is read only`
+  - offset `7601802` [ascii] `"$*:<>@BNd`
+  - offset `7601965` [ascii] `ddddd`
+  - offset `7601986` [ascii] `dddd`
+  - offset `7602022` [ascii] `dddddddd`
+  - offset `7602034` [ascii] `dddddd`
+  - offset `7602104` [ascii] `80( `
+  - offset `7602112` [ascii] `91)!`
+
+## GemData
+
+### Match 1
+
+- Match offset: `775159`
+- Match value: `GemData`
+- Nearby strings:
+  - offset `774624` [ascii] `Ship7Unlock`
+  - offset `774636` [ascii] `Ship8Unlock`
+  - offset `774648` [ascii] `Gem1`
+  - offset `774653` [ascii] `Gem2`
+  - offset `774658` [ascii] `Gem3`
+  - offset `774663` [ascii] `Gem4`
+  - offset `774668` [ascii] `Gem5`
+  - offset `774673` [ascii] `Gem6`
+  - offset `774678` [ascii] `Gem7`
+  - offset `774683` [ascii] `Orbs`
+  - offset `774688` [ascii] `Fragments`
+  - offset `774698` [ascii] `Hellish`
+  - offset `774706` [ascii] `Farahyte`
+  - offset `774715` [ascii] `Vectid`
+  - offset `774722` [ascii] `NautilusTeseract`
+  - offset `774739` [ascii] `Traversals`
+  - offset `774750` [ascii] `AllTimeOrbs`
+  - offset `774762` [ascii] `TimeInTraversal`
+  - offset `774778` [ascii] `NextOrbsAccumulated`
+  - offset `774798` [ascii] `MechsOwned`
+  - offset `774809` [ascii] `GadgetLevels`
+  - offset `774842` [ascii] `HighestCells`
+  - offset `774855` [ascii] `HighestManualGens`
+  - offset `774873` [ascii] `HighestTechUpLevels`
+  - offset `774893` [ascii] `HighestMP`
+  - offset `774903` [ascii] `HighestLoopMods`
+  - offset `774919` [ascii] `HighestLoopResets`
+  - offset `774937` [ascii] `HighestShards`
+  - offset `774951` [ascii] `HighestMilestoneLevels`
+  - offset `774974` [ascii] `HighestRP`
+  - offset `774984` [ascii] `HighestResearch`
+  - offset `775000` [ascii] `HighestAP`
+  - offset `775010` [ascii] `HighestGearLevels`
+  - offset `775028` [ascii] `HighestProjects`
+  - offset `775044` [ascii] `HighestBlueprints`
+  - offset `775062` [ascii] `HighestFragments`
+  - offset `775079` [ascii] `HighestRelicLevels`
+  - offset `775098` [ascii] `HighestBorgeProgress`
+  - offset `775119` [ascii] `HighestOzzyProgress`
+  - offset `775139` [ascii] `HighestKnoxProgress`
+  - offset `775159` [ascii] `GemData`
+  - offset `775167` [ascii] `GemNumber`
+  - offset `775177` [ascii] `GemUnlocked`
+  - offset `775189` [ascii] `GemNodesList`
+  - offset `775202` [ascii] `GemNodeCombo`
+  - offset `775215` [ascii] `gemNodeNumber`
+  - offset `775229` [ascii] `gemNodeUnlocked`
+  - offset `775245` [ascii] `GemNodeNumber`
+  - offset `775259` [ascii] `GemNodeUnlocked`
+  - offset `775275` [ascii] `PlayerProfileHandler`
+  - offset `775296` [ascii] `get_Market`
+  - offset `775307` [ascii] `get_BM`
+  - offset `775314` [ascii] `get_ZN`
+  - offset `775321` [ascii] `get_TU`
+  - offset `775328` [ascii] `get_Relics`
+  - offset `775339` [ascii] `get_CellData`
+  - offset `775352` [ascii] `get_ModPointData`
+  - offset `775369` [ascii] `get_ShardData`
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
+  - offset `775426` [ascii] `get_BlueprintsThisTR`
+  - offset `775447` [ascii] `get_ManualGensThisLR`
+  - offset `775468` [ascii] `get_TechUpsThisLR`
+  - offset `775486` [ascii] `GetPlayerProfileData`
+  - offset `775507` [ascii] `SetPlayerProfileTexts`
+  - offset `775529` [ascii] `playerData`
+  - offset `775540` [ascii] `lastCloudSaveDate`
+  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
+  - offset `775587` [ascii] `UpdatePlayerProfile`
+  - offset `775607` [ascii] `isSave`
+  - offset `775614` [ascii] `isLocalPP`
+  - offset `775624` [ascii] `playerID`
+  - offset `775633` [ascii] `FillPlayerProfileData`
+  - offset `775655` [ascii] `formatNumber`
+  - offset `775668` [ascii] `defaultValue`
+  - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+
+### Match 2
+
+- Match offset: `7588101`
+- Match value: `PlayerProfileData|GemData`
+- Nearby strings:
+  - offset `7587178` [ascii] `Backups|BackupData`
+  - offset `7587201` [ascii] `Backups|BackupActiveHoursData`
+  - offset `7587235` [ascii] `Backups|BackUpStorage`
+  - offset `7587261` [ascii] `|Bans`
+  - offset `7587271` [ascii] `Bans|BanObject`
+  - offset `7587290` [ascii] `Bans|UnbanObject`
+  - offset `7587311` [ascii] `Bans|LeaderboardObject`
+  - offset `7587338` [ascii] `Bans|ExclusionObject`
+  - offset `7587363` [ascii] `Bans|BanReasonObject`
+  - offset `7587388` [ascii] `|Cloud`
+  - offset `7587399` [ascii] `|EventMasterSwitch`
+  - offset `7587422` [ascii] `|GlobalVariable`
+  - offset `7587441` [ascii] `#GlobalVariable|GlobalVariableObject`
+  - offset `7587482` [ascii] `GlobalVariable|DateObject`
+  - offset `7587512` [ascii] `|SimpleGlobalVariable`
+  - offset `7587537` [ascii] `'SimpleGlobalVariable|SimpleGVDataObject`
+  - offset `7587582` [ascii] `|SimpleGlobalVariableHandler`
+  - offset `7587615` [ascii] `|AccountPanel`
+  - offset `7587633` [ascii] `|NewCloudCanvasPanel`
+  - offset `7587658` [ascii] `|AcademyPoint`
+  - offset `7587676` [ascii] `|Cell`
+  - offset `7587686` [ascii] `|HunterBorge`
+  - offset `7587703` [ascii] `|HunterKnox`
+  - offset `7587719` [ascii] `|HunterOzzy`
+  - offset `7587735` [ascii] `|Leaderboard`
+  - offset `7587752` [ascii] `Leaderboard|Record`
+  - offset `7587775` [ascii] `|ModPoint`
+  - offset `7587789` [ascii] `|OuroOrbs`
+  - offset `7587803` [ascii] `|ResearchPoint`
+  - offset `7587822` [ascii] `|Shard`
+  - offset `7587833` [ascii] `|LeaderboardHandler`
+  - offset `7587856` [ascii] `$LeaderboardHandler|LastSelectedCombo`
+  - offset `7587897` [ascii] `,LeaderboardHandler|LeaderboardSelectionCombo`
+  - offset `7587947` [ascii] `|LeaderboardTop200UI`
+  - offset `7587972` [ascii] `|LeaderboardUI`
+  - offset `7587991` [ascii] `LeaderboardUI|MenuButton`
+  - offset `7588020` [ascii] `|ScoreboardElement`
+  - offset `7588043` [ascii] `|NakamaManager`
+  - offset `7588062` [ascii] `|NameChange`
+  - offset `7588078` [ascii] `|PlayerProfileData`
+  - offset `7588101` [ascii] `PlayerProfileData|GemData`
+  - offset `7588131` [ascii] `PlayerProfileData|GemNodeCombo`
+  - offset `7588166` [ascii] `|PlayerProfileHandler`
+  - offset `7588191` [ascii] `"PlayerProfileHandler|GemNodeActive`
+  - offset `7588231` [ascii] `|PlayerProfileUI`
+  - offset `7588252` [ascii] `PlayerProfileUI|GemUI`
+  - offset `7588278` [ascii] `PlayerProfileUI|GemUIMainPair`
+  - offset `7588312` [ascii] `|TempOnlineHandler`
+  - offset `7588335` [ascii] `|Tracker`
+  - offset `7588348` [ascii] `Tracker|TrackerDetails`
+  - offset `7588375` [ascii] `|CallBack`
+  - offset `7588389` [ascii] `|LBCodes`
+  - offset `7588402` [ascii] `|NakamaConfig`
+  - offset `7588420` [ascii] `|NakamaResources`
+  - offset `7588441` [ascii] `|NakamaUtil`
+  - offset `7588457` [ascii] `NakamaUtil|CollectionKeyPath`
+  - offset `7588490` [ascii] `|NavigationManager`
+  - offset `7588513` [ascii] `|NavigationManagerArcade`
+  - offset `7588541` [ascii] `*NavigationManagerArcade|HighscoreTextClass`
+  - offset `7588589` [ascii] `|NetTimeRequest`
+  - offset `7588608` [ascii] `!NetTimeRequest|NakamaTimeResponse`
+  - offset `7588647` [ascii] `NetTimeRequest|SnowTimeResponse`
+  - offset `7588683` [ascii] `|NoNetworkOfflineCalculations`
+  - offset `7588717` [ascii] `|NtpClient`
+  - offset `7588732` [ascii] `|OfflineCalculations`
+  - offset `7588757` [ascii] `|OfflineManager_New`
+  - offset `7588781` [ascii] `|RandomExtension`
+  - offset `7588802` [ascii] `|SaveData`
+  - offset `7588816` [ascii] `|SaveSystem`
+  - offset `7588832` [ascii] `|SystemMonotonicTime`
+  - offset `7588857` [ascii] `|Utils`
+  - offset `7588868` [ascii] `|EggSO`
+  - offset `7588879` [ascii] `|EggsterSpawnEggs`
+  - offset `7588901` [ascii] `|EggsterManager`
+  - offset `7588921` [ascii] `|EggsterPanelNavigation`
+  - offset `7588949` [ascii] `|EggMain`
+  - offset `7588962` [ascii] `|EggstoneMain`
+  - offset `7588980` [ascii] `|EventDecider`
+  - offset `7588998` [ascii] `|External`
+  - offset `7589011` [ascii] `"|AcademyAutomationCenter_Personnel`
+  - offset `7589051` [ascii] `|AcademyAutomationNavigation`
+
+## ShardData
+
+### Match 1
+
+- Match offset: `775369`
+- Match value: `get_ShardData`
+- Nearby strings:
+  - offset `774762` [ascii] `TimeInTraversal`
+  - offset `774778` [ascii] `NextOrbsAccumulated`
+  - offset `774798` [ascii] `MechsOwned`
+  - offset `774809` [ascii] `GadgetLevels`
+  - offset `774842` [ascii] `HighestCells`
+  - offset `774855` [ascii] `HighestManualGens`
+  - offset `774873` [ascii] `HighestTechUpLevels`
+  - offset `774893` [ascii] `HighestMP`
+  - offset `774903` [ascii] `HighestLoopMods`
+  - offset `774919` [ascii] `HighestLoopResets`
+  - offset `774937` [ascii] `HighestShards`
+  - offset `774951` [ascii] `HighestMilestoneLevels`
+  - offset `774974` [ascii] `HighestRP`
+  - offset `774984` [ascii] `HighestResearch`
+  - offset `775000` [ascii] `HighestAP`
+  - offset `775010` [ascii] `HighestGearLevels`
+  - offset `775028` [ascii] `HighestProjects`
+  - offset `775044` [ascii] `HighestBlueprints`
+  - offset `775062` [ascii] `HighestFragments`
+  - offset `775079` [ascii] `HighestRelicLevels`
+  - offset `775098` [ascii] `HighestBorgeProgress`
+  - offset `775119` [ascii] `HighestOzzyProgress`
+  - offset `775139` [ascii] `HighestKnoxProgress`
+  - offset `775159` [ascii] `GemData`
+  - offset `775167` [ascii] `GemNumber`
+  - offset `775177` [ascii] `GemUnlocked`
+  - offset `775189` [ascii] `GemNodesList`
+  - offset `775202` [ascii] `GemNodeCombo`
+  - offset `775215` [ascii] `gemNodeNumber`
+  - offset `775229` [ascii] `gemNodeUnlocked`
+  - offset `775245` [ascii] `GemNodeNumber`
+  - offset `775259` [ascii] `GemNodeUnlocked`
+  - offset `775275` [ascii] `PlayerProfileHandler`
+  - offset `775296` [ascii] `get_Market`
+  - offset `775307` [ascii] `get_BM`
+  - offset `775314` [ascii] `get_ZN`
+  - offset `775321` [ascii] `get_TU`
+  - offset `775328` [ascii] `get_Relics`
+  - offset `775339` [ascii] `get_CellData`
+  - offset `775352` [ascii] `get_ModPointData`
+  - offset `775369` [ascii] `get_ShardData`
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
+  - offset `775426` [ascii] `get_BlueprintsThisTR`
+  - offset `775447` [ascii] `get_ManualGensThisLR`
+  - offset `775468` [ascii] `get_TechUpsThisLR`
+  - offset `775486` [ascii] `GetPlayerProfileData`
+  - offset `775507` [ascii] `SetPlayerProfileTexts`
+  - offset `775529` [ascii] `playerData`
+  - offset `775540` [ascii] `lastCloudSaveDate`
+  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
+  - offset `775587` [ascii] `UpdatePlayerProfile`
+  - offset `775607` [ascii] `isSave`
+  - offset `775614` [ascii] `isLocalPP`
+  - offset `775624` [ascii] `playerID`
+  - offset `775633` [ascii] `FillPlayerProfileData`
+  - offset `775655` [ascii] `formatNumber`
+  - offset `775668` [ascii] `defaultValue`
+  - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+  - offset `775869` [ascii] `ModPointData`
+  - offset `775882` [ascii] `ShardData`
+  - offset `775892` [ascii] `ResearchPointData`
+  - offset `775910` [ascii] `AcademyPointData`
+  - offset `775927` [ascii] `BlueprintsThisTR`
+  - offset `775944` [ascii] `GemNodeActive`
+  - offset `775962` [ascii] `Active`
+
+### Match 2
+
+- Match offset: `775882`
+- Match value: `ShardData`
+- Nearby strings:
+  - offset `775314` [ascii] `get_ZN`
+  - offset `775321` [ascii] `get_TU`
+  - offset `775328` [ascii] `get_Relics`
+  - offset `775339` [ascii] `get_CellData`
+  - offset `775352` [ascii] `get_ModPointData`
+  - offset `775369` [ascii] `get_ShardData`
+  - offset `775383` [ascii] `get_ResearchPointData`
+  - offset `775405` [ascii] `get_AcademyPointData`
+  - offset `775426` [ascii] `get_BlueprintsThisTR`
+  - offset `775447` [ascii] `get_ManualGensThisLR`
+  - offset `775468` [ascii] `get_TechUpsThisLR`
+  - offset `775486` [ascii] `GetPlayerProfileData`
+  - offset `775507` [ascii] `SetPlayerProfileTexts`
+  - offset `775529` [ascii] `playerData`
+  - offset `775540` [ascii] `lastCloudSaveDate`
+  - offset `775558` [ascii] `ConvertSaveDataToProfileData`
+  - offset `775587` [ascii] `UpdatePlayerProfile`
+  - offset `775607` [ascii] `isSave`
+  - offset `775614` [ascii] `isLocalPP`
+  - offset `775624` [ascii] `playerID`
+  - offset `775633` [ascii] `FillPlayerProfileData`
+  - offset `775655` [ascii] `formatNumber`
+  - offset `775668` [ascii] `defaultValue`
+  - offset `775681` [ascii] `SafeParseInt`
+  - offset `775694` [ascii] `SafeParseBool`
+  - offset `775708` [ascii] `fragmentValue`
+  - offset `775722` [ascii] `getDecimalPlace`
+  - offset `775738` [ascii] `evoLevel`
+  - offset `775747` [ascii] `unlocked`
+  - offset `775756` [ascii] `ShipEvoObjects`
+  - offset `775771` [ascii] `ShipObject`
+  - offset `775782` [ascii] `SetShipEvoObject`
+  - offset `775799` [ascii] `dataNodes`
+  - offset `775809` [ascii] `UIGem`
+  - offset `775815` [ascii] `ProcessGem`
+  - offset `775826` [ascii] `saveInfoCache`
+  - offset `775840` [ascii] `Market`
+  - offset `775853` [ascii] `Relics`
+  - offset `775860` [ascii] `CellData`
+  - offset `775869` [ascii] `ModPointData`
+  - offset `775882` [ascii] `ShardData`
+  - offset `775892` [ascii] `ResearchPointData`
+  - offset `775910` [ascii] `AcademyPointData`
+  - offset `775927` [ascii] `BlueprintsThisTR`
+  - offset `775944` [ascii] `GemNodeActive`
+  - offset `775962` [ascii] `Active`
+  - offset `775969` [ascii] `<FillPlayerProfileData>d__45`
+  - offset `775998` [ascii] `<UpdatePlayerProfile>d__44`
+  - offset `776025` [ascii] `PlayerProfileUI`
+  - offset `776041` [ascii] `get_Gem1`
+  - offset `776050` [ascii] `get_Gem2`
+  - offset `776059` [ascii] `get_Gem3`
+  - offset `776068` [ascii] `get_Gem4`
+  - offset `776077` [ascii] `get_Gem5`
+  - offset `776086` [ascii] `get_Gem6`
+  - offset `776095` [ascii] `get_Gem7`
+  - offset `776104` [ascii] `ResetPlayerProfileTexts`
+  - offset `776128` [ascii] `InitPlayerProfilePanel`
+  - offset `776151` [ascii] `SetInventoryPanel`
+  - offset `776169` [ascii] `SetStatsPanel`
+  - offset `776183` [ascii] `SetNoncloudOptions`
+  - offset `776202` [ascii] `SetCloudButtons`
+  - offset `776218` [ascii] `SetSaveTexts`
+  - offset `776231` [ascii] `SetLoadTexts`
+  - offset `776244` [ascii] `TimeStamp`
+  - offset `776254` [ascii] `SetCloudSubtitle`
+  - offset `776271` [ascii] `SetLeaderboardText`
+  - offset `776290` [ascii] `SetLocalPlayerProfileText`
+  - offset `776316` [ascii] `playerDisplayName`
+  - offset `776334` [ascii] `OnOpenPlayerProfile`
+  - offset `776354` [ascii] `OnLocalPlayerProfileClick`
+  - offset `776380` [ascii] `OnStatsButtonClick`
+  - offset `776399` [ascii] `OnInventoryButtonClick`
+  - offset `776422` [ascii] `OnCloudAcceptButton`
+  - offset `776442` [ascii] `DisableCloudToggle`
+  - offset `776461` [ascii] `OnCloudToggleClick`
+  - offset `776480` [ascii] `loadMode`
+  - offset `776489` [ascii] `LastSavedTimestamp`
+  - offset `776508` [ascii] `ExcludedFromLeaderboardsPanel`
+  - offset `776538` [ascii] `PlayerProfilePanel`
+  - offset `776557` [ascii] `PlayerProfileLoadingCircle`

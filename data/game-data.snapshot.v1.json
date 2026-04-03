@@ -244,50 +244,111 @@
     {
       "id": "spend-planner-from-extracted-data",
       "title": "Spend planner from extracted token and market data",
-      "status": "queued",
+      "status": "archived",
       "goal": "Turn token-shop and multiverse-market extraction outputs into an MVP-safe spend-planner foundation without overselling completeness.",
-      "currentSlice": "Use APK and Unity extraction to harden spend-lane naming, TokenShop cost-lane, action-lane, owner-shell, and save-boundary splits, Daily Tokenium owner-family clues, token-bank controller and formula boundaries, MultiverseMarket prefab-remap boundaries, and save-model boundaries before planner wiring, including checked-in token versus tokenium naming clues, TokenBoost or DiamondBoost or TokenDailies lane splits, BuyTokenBoost or BuyDiamondBoost or BuyLM244 action-family splits, TokenShop or InitializeTokenShop or ClaimBankedTokens owner-shell clues, an explicit no-overlap boundary between the narrowed TokenShop owner shell and current PlayerProfileData or CloudSavePlayerProfile save-family clues, a narrow token-bank controller shell around ClaimBankedTokens or SetBankFill or BankFill or TokenBankDescriptionText or TokenShopButtonNotification, SpaceAcademy or FarmMissions or Collector-pack lane clues, TokenShop or TokenBankCap or LM244 split clues, a checked FinalTokenBankCap or FinalTokenBankFillSpeed output boundary, a checked zero-overlap boundary between validated MultiverseMarket rows and the current recovered IS99-110 metadata run, a checked broader BuyIS1-110 or SetIS1-110CostText action shell around the validated 50-59 and 63-74 row block, a checked MultiverseMarket owner-family shell around MultiverseMarket or Inscryptions or ResourceAmountText.InscryptionsDone or IS1-110 CurrencyBox UI anchors, a checked prefab-name override band from ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 that blocks naive row-label remaps for validated ids 69-74, an explicit no-overlap boundary between the narrowed MultiverseMarket action shell and current PlayerProfileData or CloudSavePlayerProfile save-family clues, and the strengthened MultiverseMarket CloudSave or PlayerProfile persistence path.",
+      "currentSlice": "Archived parent: this broad spend lane is now superseded by narrower successor tracks with separate save-model, state-owner, and remap exits.",
       "completedSteps": [
         "Recover grounded token-shop and multiverse-market data into checked-in repo artifacts.",
         "Document the spend-system integration gate and current verified versus unresolved app-integration facts.",
-        "Document the TokenShop-connected token-bank state lane and the adjacent mission, chest, and IAP systems it signals for later mapping.",
-        "Document that OR_TokenBankCap and OR_TokensFromChests currently behave like asset-label clues, not recovered formula owners.",
-        "Recover the current token-bank handler split: TokenShop for claim actions, BigStatisticPrefab.TokenBankCap for cap display, and TextHandlerLoopMods.SetLM244BonusText for one daily-tokenium mission text path.",
-        "Close the LM244 question by documenting it as a loop-mod text hook rather than a recovered gameplay owner.",
-        "Document Daily Tokenium as an Academy or Farm Mission reward lane with TokenShop, LoopModifiers, and the Collector pack acting as modifier families around it.",
-        "Promote the MultiverseMarket metadata-neighborhood clue bundle into bundled dataset validation and APK-grounding checks so save-side narrowing drift fails fast.",
-        "Surface the narrowed MultiverseMarket save-family boundary in the Validation page so spend-planner work stays blocked on declaring-owner recovery instead of doc memory.",
-        "Surface in-app that the recovered IS*Level field run is broader than the currently validated MultiverseMarket row block so future mapping does not over-claim planner coverage.",
-        "Promote exact MultiverseMarket validated-row coverage into APK checks and research support so spend-track work uses the recovered 50-59 and 63-74 block instead of a single-row proxy.",
-        "Promote TokenShop extracted family coverage into APK checks and research support so spend-track work uses the recovered numeric families and token-bank controller anchors instead of a generic owner-payload check.",
-        "Refresh the checked-in MultiverseMarket metadata neighborhood from APK artifacts to include CloudSavePlayerProfile, SetAllChrystosEmporiumTexts, and Mech1Unlocked, and promote those stronger save-model clues into fail-fast validation and app grounding.",
-        "Promote token versus tokenium naming clues from shipped assets into a checked-in extracted dataset so spend-track work can rely on Resource_Tokenium, Aca.Tokenium553, and parallel CostBox-Tokens or CostBox-Tokenium shells instead of doc-only terminology.",
-        "Promote token-bank controller-side clues from APK and Unity artifacts into a checked-in extracted dataset so spend-track work can rely on ClaimBankedTokens, get_TokenBankCap, BigStatisticPrefab.TokenBankCap, and SetLM244BonusText as a grounded controller or display split.",
-        "Promote Daily Tokenium lane clues from APK, Unity, and checked-in IAP artifacts into a bundled extracted dataset so spend-track work can rely on SpaceAcademy, FarmMissions, BuyLM244, FinalDailyTokenBonus, and Collector-pack copy as a grounded owner-family boundary instead of treating TokenShop as the lane owner."
-        ,
-        "Promote a token-bank formula boundary from APK metadata so spend-track work can rely on get_FinalTokenBankCap, get_FinalTokenBankFillSpeed, and their backing-field cluster as derived outputs that still do not join the checked PlayerProfile save-family path.",
-        "Promote a MultiverseMarket range boundary into a checked-in dataset so spend-track work can rely on the current zero-overlap result between validated rows 50-59 or 63-74 and the recovered metadata run IS99Level through IS110Level.",
-        "Promote validated-row text coverage from APK and Unity artifacts into a checked-in dataset so spend-track work can rely on TextHandlerMarkets, SetAllChrystosEmporiumTexts, and SetIS50-59 or 63-74 cost-text hooks for the validated block without confusing that with saved-state coverage.",
-        "Promote a MultiverseMarket prefab-remap boundary into a checked-in dataset so spend-track work can rely on the direct ChrystosEmporiumUpgrade50-68 shell, the explicit ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 override band, and the fact that validated ids 69-74 still do not have direct prefab-number label matches.",
-        "Promote a TokenShop cost-lane boundary into a checked-in dataset so spend-track work can rely on TokenBoost or DiamondBoost or TokenDailies families, plus CostBox-Tokens and CostBox-Tokenium text, as grounded lane splits instead of treating the whole owner payload as one spend currency lane.",
-        "Promote a spend action-lane boundary into a checked-in dataset so spend-track work can rely on BuyTokenBoost or BuyDiamondBoost direct hooks, BuyLM244 or BuyCollectorDevice modifier hooks, and the current zero-match result for BuyTokenDailies direct hooks instead of treating all spend rows as one recovered purchase-action family.",
-        "Promote a MultiverseMarket action-shell boundary into a checked-in dataset so spend-track work can rely on a broader context-derived BuyIS1-110 or SetIS1-110CostText shell while keeping only rows 50-59 and 63-74 treated as numerically validated.",
-        "Promote a MultiverseMarket owner-family boundary into a checked-in dataset so spend-track work can rely on MultiverseMarket or Inscryptions or SetInscryptionsDoneText or ResourceAmountText.InscryptionsDone or AchievementBar-Inscryptions or CostBox-InscryptionsDone and the IS1-110 CurrencyBox shell as one grounded owner and cost-lane family without treating that as saved-state recovery.",
-        "Promote a TokenShop owner-shell boundary into a checked-in dataset so spend-track work can rely on TokenShop or InitializeTokenShop or ClaimBankedTokens or CheckTokenClaimNotification and adjacent auto-clicker or chest-speedster hooks as one local owner shell without treating that as recovered save ownership.",
-        "Promote a TokenShop save-boundary dataset so spend-track work can rely on an explicit zero-overlap result between the narrowed TokenShop owner shell and the current PlayerProfileData or CloudSavePlayerProfile save-family clues instead of implicitly mixing owner-shell evidence with save recovery.",
-        "Promote a MultiverseMarket save-boundary dataset so spend-track work can rely on an explicit zero-overlap result between the narrowed MultiverseMarket action shell and the current PlayerProfileData or CloudSavePlayerProfile save-family clues instead of implicitly mixing action-shell evidence with save recovery.",
-        "Promote a token-bank controller-shell dataset so spend-track work can rely on a narrow ClaimBankedTokens or SetBankFill or BankFill or TokenBankDescriptionText or TokenShopButtonNotification cluster instead of treating those controller clues as disconnected symbols."
+        "Separate TokenShop cost lanes, action lanes, owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts.",
+        "Separate Daily Tokenium into an Academy or Farm Mission reward lane with TokenShop, LoopModifiers, and the Collector pack acting as modifier families.",
+        "Separate MultiverseMarket owner-family, action-shell, range-boundary, prefab-remap, metadata-neighborhood, and save-boundary evidence into checked artifacts."
+      ],
+      "nextSteps": []
+    },
+    {
+      "id": "spend-multiverse-save-model-recovery",
+      "title": "MultiverseMarket save-model recovery",
+      "status": "active",
+      "goal": "Recover the declaring save model behind `InscryptionsDone` and the nearby `IS*Level` cluster so Emporium state can move toward truthful player-owned import support and future external-tool replacement.",
+      "currentSlice": "Use the recovered metadata neighborhood, save-boundary, and market-member boundary artifacts to determine whether the Emporium balance and owned levels live on a direct PlayerProfile-side Market member shell, a broader wrapper payload, or directly typed fields on `PlayerProfileData`.",
+      "exitCondition": "The repo names the declaring save model for `InscryptionsDone` and the nearby owned-level cluster, or narrows it to a specific nested progression payload instead of the current broad persistence family.",
+      "blockedBy": "The current evidence narrows the search to the PlayerProfile persistence family but still stops short of the exact declaring save model.",
+      "smallestShippableSlice": "A checked save-model boundary or narrowed persistence artifact that names direct `PlayerProfileData` ownership or a specific nested progression payload without pretending the full Emporium planner state is already import-ready.",
+      "completedSteps": [
+        "Recover the MultiverseMarket owner, validated late-block constants, and `Inscryptions Done` cost-lane shell.",
+        "Promote a MultiverseMarket owner-family boundary that keeps owner-shell evidence separate from save-side recovery.",
+        "Promote a MultiverseMarket save-boundary dataset that preserves zero direct overlap between the action shell and the PlayerProfile save-family clues.",
+        "Refresh the checked metadata neighborhood to preserve `PlayerProfileData`, `CloudSavePlayerProfile`, `InscryptionsDone`, `IS*Level`, trade-counter, and nearby mech clues.",
+        "Surface in-app that the recovered `IS*Level` run is broader than the currently validated Emporium row block so future mapping does not over-claim coverage.",
+        "Deepen the checked metadata neighborhood to preserve the PlayerProfile-side `get_Market` accessor clue while confirming the repo still lacks a direct `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` type-map string.",
+        "Promote a checked market-member boundary showing that the strongest current handoff is a profile-side market member or broader wrapper hypothesis, not yet direct `MultiverseMarket` ownership on `PlayerProfileData`.",
+        "Deepen that boundary with a bare `Market` member-shell clue inside the `PlayerProfileData` neighborhood plus the nearby cloud-save bridge terms."
       ],
       "nextSteps": [
-        "Recover player-owned current levels for TokenShop upgrade rows now that the base cost lane is grounded.",
-        "Recover the saved-state owner or formula source behind token-bank cap, fill-speed, and claimable bank tokens from TokenShop or nearby level0 handlers rather than OR_* resource names.",
-        "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane now that its modifier families are separated.",
-        "Confirm whether the recovered InscryptionsDone, IS*Level, trade-counter, and nearby mech fields are declared directly on PlayerProfileData or on another progression sub-model.",
-        "Determine which recovered IS*Level range maps to the currently validated MultiverseMarket rows and which remain outside the validated block, now that the prefab shell explicitly breaks one-to-one row-number assumptions at 69-74.",
-        "Inspect the same save-side neighborhood before assuming any FinalIS or achievement symbol is the saved balance field.",
-        "Close the remaining prefab-to-label remap for validated ids 69-74 without assuming the ChrystosEmporiumUpgrade override band is already the final player-facing numbering.",
-        "Remap serialized ids and inscription numbers to grounded in-game labels and currency names before adding spend recommendations."
+        "Inspect the same save-side neighborhood before assuming any `FinalIS*` or achievement symbol is the saved balance owner.",
+        "Determine whether the PlayerProfile-side `get_Market` clue resolves to the declaring Emporium state owner or only to a broader market wrapper.",
+        "Determine whether `InscryptionsDone`, `IS*Level`, trade-counter, and nearby mech fields are declared directly on `PlayerProfileData` or on a nested progression sub-model.",
+        "If the declaring owner is recovered, fork row-range mapping follow-up work instead of extending this track."
+      ],
+      "sources": [
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/systems/spend/multiverse-market-verification.md",
+        "docs/systems/spend/multiverse-market-state-verification.md",
+        "docs/unity/unity-owner-map.md",
+        "docs/unity/unity-audit-playbook.md"
+      ],
+      "artifacts": [
+        "data/multiverse-market-metadata-neighborhood.json",
+        "data/multiverse-market-save-boundary.json",
+        "data/multiverse-market-market-member-boundary.json",
+        "data/multiverse-market-range-boundary.json",
+        "docs/systems/spend/multiverse-market-metadata-neighborhood.md"
+      ],
+      "verified": [
+        "`MultiverseMarket` is the real Emporium owner.",
+        "`InscryptionsDone` is a real metadata field string, not only a UI label.",
+        "The current save-side search is narrowed to the PlayerProfile persistence family rather than the raw Emporium owner object alone.",
+        "The recovered `IS*Level` run extends beyond the currently validated Emporium row block.",
+        "The PlayerProfile persistence neighborhood now preserves a direct `get_Market` accessor clue beside other profile-side accessors.",
+        "The strongest current repo-local handoff is now a direct PlayerProfile-side `Market` member shell or broader wrapper family, not yet direct `MultiverseMarket` ownership on `PlayerProfileData`."
+      ],
+      "uncertain": [
+        "Which declaring save model actually owns `InscryptionsDone`.",
+        "Whether `get_Market` points directly at the Emporium state owner or only at a broader market wrapper.",
+        "Whether the nearby `IS*Level`, trade-counter, and mech fields belong directly to `PlayerProfileData` or to a nested progression payload.",
+        "Which owned `IS*Level` range is safe future import input for the validated Emporium rows."
       ]
+    },
+    {
+      "id": "spend-token-shop-row-level-recovery",
+      "title": "TokenShop row-level recovery",
+      "status": "queued",
+      "goal": "Recover player-owned current TokenShop row levels needed for MVP-safe next-buy planning.",
+      "currentSlice": "Keep TokenShop planning blocked on current-level recovery even though the cost lane, owner shell, and token-bank controller split are now grounded.",
+      "exitCondition": "The repo recovers the player-owned current-level inputs for TokenShop rows strongly enough to support recommendation-side state reads.",
+      "blockedBy": "Current TokenShop artifacts recover owner-side constants and controller clues, but not the authoritative owned row-level state.",
+      "smallestShippableSlice": "A checked TokenShop level-owner or save-owner artifact that names the current-level family without yet claiming full planner logic."
+    },
+    {
+      "id": "spend-token-bank-state-owner",
+      "title": "Token-bank state owner recovery",
+      "status": "queued",
+      "goal": "Recover the saved-state owner behind token-bank cap, fill, and claimable-bank state so token planning can use truthful player inputs.",
+      "currentSlice": "Follow the controller-shell and formula-boundary artifacts past `TokenShop` display hooks toward the player-owned bank state instead of inferring ownership from `OR_*` outputs.",
+      "exitCondition": "The declaring owner for token-bank cap, fill, or claimable state is recovered strongly enough for truthful import or recommendation-side reads.",
+      "blockedBy": "Current evidence separates controller hooks and derived outputs, but still does not name the saved-state owner.",
+      "smallestShippableSlice": "A checked bank-state owner boundary that names the recovered save family or narrows the remaining handoff."
+    },
+    {
+      "id": "spend-daily-tokenium-save-owner",
+      "title": "Daily Tokenium save-owner recovery",
+      "status": "queued",
+      "goal": "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane.",
+      "currentSlice": "Keep Daily Tokenium in mapping work while the repo follows the Academy or Farm Mission lane past modifier families toward the actual saved reward state.",
+      "exitCondition": "The gameplay owner or saved-state family behind current Daily Tokenium amount or cap is recovered.",
+      "blockedBy": "The lane family is grounded, but current evidence still stops at modifier families and text paths.",
+      "smallestShippableSlice": "A checked owner-family or save-owner boundary that names the underlying Daily Tokenium gameplay lane more narrowly than the current Academy or Farm Mission family."
+    },
+    {
+      "id": "spend-multiverse-row-label-remap",
+      "title": "MultiverseMarket row label remap",
+      "status": "queued",
+      "goal": "Finish the validated Emporium row id and label remap once the owned-state side is recovered enough to keep row numbers truthful.",
+      "currentSlice": "Keep label remap work downstream from save-model recovery so the repo does not treat prefab numbers or validated row ids as final player-facing numbering too early.",
+      "exitCondition": "The validated Emporium rows have a grounded row-by-row id and player-facing label remap that survives the 69-74 prefab override band.",
+      "blockedBy": "The save-model and validated-row owned-state range are not yet recovered strongly enough to anchor the remap.",
+      "smallestShippableSlice": "A checked remap artifact for the currently validated block that stays explicit about override-band uncertainty."
     },
     {
       "id": "unified-feed-and-hardening",

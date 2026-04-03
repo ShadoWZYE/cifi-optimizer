@@ -403,7 +403,7 @@ function validateExtractionCandidateFamilies(families) {
   expectArray(families.globalContextTerms, "extraction candidate families globalContextTerms must be an array");
   expectArray(families.unresolvedMarkers, "extraction candidate families unresolvedMarkers must be an array");
   expectArray(families.families, "extraction candidate families families must be an array");
-  assert.ok(families.families.length >= 8, "extraction candidate families must preserve the seeded family set");
+  assert.ok(families.families.length >= 7, "extraction candidate families must preserve the seeded family set");
   families.families.forEach((entry, index) => {
     expectNonEmptyString(entry.id, `extraction candidate families[${index}].id must be present`);
     expectNonEmptyString(entry.label, `extraction candidate families[${index}].label must be present`);
@@ -412,7 +412,8 @@ function validateExtractionCandidateFamilies(families) {
     expectArray(entry.anchors, `extraction candidate families[${index}].anchors must be an array`);
   });
   assert.ok(families.families.some((entry) => entry.id === "shards.milestone-owner-family"), "extraction candidate families must preserve the shard milestone owner family");
-  assert.ok(families.families.some((entry) => entry.id === "spend.multiverse-market-owner-family"), "extraction candidate families must preserve the MultiverseMarket owner family");
+  assert.ok(families.families.some((entry) => entry.id === "spend.multiverse-market-save-model"), "extraction candidate families must preserve the MultiverseMarket save-model family");
+  assert.ok(!families.families.some((entry) => entry.id === "spend.multiverse-market-owner-family"), "extraction candidate families should not keep the resolved MultiverseMarket owner-family candidate active");
 
   return {
     id: "extraction-candidate-families",
@@ -438,12 +439,12 @@ function validateExtractionCandidateRanking(ranking) {
   expectArray(ranking.familyFilter, "extraction candidate ranking familyFilter must be an array");
   expectRecord(ranking.topCandidate, "extraction candidate ranking topCandidate must be an object");
   expectArray(ranking.candidates, "extraction candidate ranking candidates must be an array");
-  assert.ok(ranking.candidates.length >= 8, "extraction candidate ranking must preserve the scored candidate set");
+  assert.ok(ranking.candidates.length >= 7, "extraction candidate ranking must preserve the scored candidate set");
   expectNonEmptyString(ranking.topCandidate.id, "extraction candidate ranking topCandidate.id must be present");
   expectNonEmptyString(ranking.topCandidate.track, "extraction candidate ranking topCandidate.track must be present");
   assert.equal(typeof ranking.topCandidate.heuristicScore, "number", "extraction candidate ranking topCandidate.heuristicScore must be numeric");
-  assert.equal(ranking.topCandidate.id, "spend.multiverse-market-owner-family", "extraction candidate ranking topCandidate.id drifted");
-  assert.equal(ranking.topCandidate.track, "spend-planner-from-extracted-data", "extraction candidate ranking topCandidate.track drifted");
+  assert.equal(ranking.topCandidate.id, "shards.milestone-owner-family", "extraction candidate ranking topCandidate.id drifted");
+  assert.equal(ranking.topCandidate.track, "shard-milestone-payload-recovery", "extraction candidate ranking topCandidate.track drifted");
   const shardCandidate = ranking.candidates.find((entry) => entry.track === "shard-milestone-payload-recovery");
   assert.ok(shardCandidate, "extraction candidate ranking must preserve a shard-local candidate");
   assert.equal(shardCandidate.id, "shards.milestone-owner-family", "extraction candidate ranking top shard candidate drifted");
@@ -519,10 +520,10 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
   expectPositiveInteger(neighborhood.anchor_count, "multiverse metadata neighborhood anchor_count must be positive");
   expectPositiveInteger(neighborhood.context, "multiverse metadata neighborhood context must be positive");
   expectArray(neighborhood.results, "multiverse metadata neighborhood results must be an array");
-  assert.ok(neighborhood.results.length >= 7, "multiverse metadata neighborhood should preserve the narrowed anchor set");
+  assert.ok(neighborhood.results.length >= 10, "multiverse metadata neighborhood should preserve the narrowed anchor set");
 
   const anchors = neighborhood.results.map((entry) => entry.anchor);
-  ["CloudSavePlayerProfile", "PlayerProfileData", "FillPlayerProfileData", "GetPlayerProfileData", "InscryptionsDone", "SetAllChrystosEmporiumTexts", "Mech1Unlocked"].forEach((anchor) => {
+  ["CloudSavePlayerProfile", "PlayerProfileData", "FillPlayerProfileData", "GetPlayerProfileData", "InscryptionsDone", "SetAllChrystosEmporiumTexts", "Mech1Unlocked", "Market", "GemData", "ShardData"].forEach((anchor) => {
     assert.ok(anchors.includes(anchor), `multiverse metadata neighborhood missing ${anchor} anchor`);
   });
 
@@ -557,6 +558,14 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
     playerProfileStrings.some((value) => String(value).includes("FillPlayerProfileData")),
     "multiverse metadata neighborhood must preserve FillPlayerProfileData clues"
   );
+  assert.ok(
+    playerProfileStrings.some((value) => String(value).includes("get_Market")),
+    "multiverse metadata neighborhood must preserve get_Market clues"
+  );
+  assert.ok(
+    !playerProfileStrings.some((value) => String(value).includes("PlayerProfileData|Market")),
+    "multiverse metadata neighborhood should not yet claim a direct PlayerProfileData|Market type-map clue"
+  );
 
   const inscryptionsMatches = neighborhood.results.find((entry) => entry.anchor === "InscryptionsDone")?.matches ?? [];
   const inscryptionsStrings = inscryptionsMatches.flatMap((entry) => [
@@ -586,6 +595,24 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
     "multiverse metadata neighborhood must preserve Mech1Unlocked clues"
   );
 
+  const marketMatches = neighborhood.results.find((entry) => entry.anchor === "Market")?.matches ?? [];
+  const marketStrings = marketMatches.flatMap((entry) => [
+    entry.match_value,
+    ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
+  ]);
+  assert.ok(
+    marketStrings.some((value) => String(value).includes("get_Market")),
+    "multiverse metadata neighborhood must preserve get_Market accessors in the market-side clue bundle"
+  );
+  assert.ok(
+    marketStrings.some((value) => String(value).includes("MultiverseMarket|Inscryption")),
+    "multiverse metadata neighborhood must preserve MultiverseMarket|Inscryption type clues"
+  );
+  assert.ok(
+    !marketStrings.some((value) => String(value).includes("PlayerProfileData|Market")),
+    "multiverse metadata neighborhood should not yet claim a direct PlayerProfileData|Market relation"
+  );
+
   return {
     id: "multiverse-market-metadata-neighborhood",
     label: "Multiverse market metadata neighborhood",
@@ -593,7 +620,7 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
     stats: [
       `${neighborhood.anchor_count} probe anchors`,
       `${neighborhood.results.length} tracked anchor groups`,
-      "CloudSavePlayerProfile, PlayerProfileData, and InscryptionsDone save-side clues"
+      "CloudSavePlayerProfile, PlayerProfileData, get_Market, and InscryptionsDone save-side clues"
     ]
   };
 }
@@ -1172,6 +1199,48 @@ function validateMultiverseMarketSaveBoundary(boundary) {
   };
 }
 
+function validateMultiverseMarketMarketMemberBoundary(boundary) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market market-member boundary generatedAt must be present");
+  expectRecord(boundary.sources, "multiverse market market-member boundary sources must be an object");
+  ["probeScript", "metadataNeighborhood", "metadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market market-member boundary sources.${field} must be present`);
+  });
+  expectArray(boundary.playerProfileAccessorClues, "multiverse market market-member boundary playerProfileAccessorClues must be an array");
+  expectArray(boundary.playerProfileMemberShellClues, "multiverse market market-member boundary playerProfileMemberShellClues must be an array");
+  expectArray(boundary.cloudSaveBridgeClues, "multiverse market market-member boundary cloudSaveBridgeClues must be an array");
+  expectArray(boundary.missingDirectTypeMapClues, "multiverse market market-member boundary missingDirectTypeMapClues must be an array");
+  expectArray(boundary.marketWrapperTypeClues, "multiverse market market-member boundary marketWrapperTypeClues must be an array");
+  expectArray(boundary.currentBoundary, "multiverse market market-member boundary currentBoundary must be an array");
+
+  ["get_Market", "get_ShardData", "get_ResearchPointData", "get_AcademyPointData"].forEach((name) => {
+    assert.ok(boundary.playerProfileAccessorClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
+  ["Market", "Relics", "CellData", "ModPointData", "ShardData", "ResearchPointData", "AcademyPointData", "BlueprintsThisTR"].forEach((name) => {
+    assert.ok(boundary.playerProfileMemberShellClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
+  ["CloudSavePlayerProfile", "GetCurrentSaveFileInfo", "GetPlayerProfileInfo", "CloudLoad"].forEach((name) => {
+    assert.ok(boundary.cloudSaveBridgeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
+  ["PlayerProfileData|Market", "PlayerProfileData|Inscryption", "PlayerProfileData|MultiverseMarket"].forEach((name) => {
+    assert.ok(boundary.missingDirectTypeMapClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
+  ["MultiverseMarket", "MultiverseMarket|InscryptionTupleObject", "MultiverseMarket|Inscryption", "NecrumExchange", "OuroborosResetter", "TraitSpheres", "ZeimarrNautallium", "ResearchLaboratory", "ResearchUltimas", "RewardLanes", "ShardMining"].forEach((name) => {
+    assert.ok(boundary.marketWrapperTypeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
+
+  return {
+    id: "multiverse-market-market-member-boundary",
+    label: "Multiverse market market-member boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.playerProfileAccessorClues.length} PlayerProfile-side accessor clues`,
+      `${boundary.playerProfileMemberShellClues.length} PlayerProfile-side member-shell clues`,
+      `${boundary.marketWrapperTypeClues.length} nearby market-wrapper type clues`,
+      "MultiverseMarket save-side handoff is narrowed to a direct PlayerProfile-side Market member shell or broader wrapper hypothesis"
+    ]
+  };
+}
+
 function validateTokenBankControllerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token-bank controller shell generatedAt must be present");
   expectRecord(shell.sources, "token-bank controller shell sources must be an object");
@@ -1235,7 +1304,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 29, "bundled dataset contract must track the twenty-nine shipped dataset groups");
+  assert.equal(contract.datasets.length, 30, "bundled dataset contract must track the thirty shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -1307,6 +1376,7 @@ export async function validateBundledDatasets() {
   const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
+  const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
   const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
 
   const summaries = [
@@ -1338,6 +1408,7 @@ export async function validateBundledDatasets() {
     validateTokenShopOwnerShell(tokenShopOwnerShell),
     validateTokenShopSaveBoundary(tokenShopSaveBoundary),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
+    validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateTokenBankControllerShell(tokenBankControllerShell)
   ];
 
