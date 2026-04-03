@@ -69,6 +69,20 @@ Prevent:
 - must contain the current shard-specific payload-watch cluster around milestone totals, cost-list hooks, progress-fill hooks, and phase-tick fields tied to `ShardUpgradeInfo`
 - useful for narrowing the exact serialized shard payload search and fail-fast validation, not itself a recovered player-owned milestone row payload
 
+### Shard milestone row-shell boundary
+
+- file: `data/shard-milestone-row-shell-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the narrowed `ShardMining` row-shell anchors around `UnlockMilestone*`, `BuyMilestone*`, and `Milestone*TextChecker` samples plus explicit blocked-use framing
+- useful for future shard row verification and fail-fast validation, not itself a recovered row owner, full row table, or player-facing label map
+
+### Shard milestone row-alignment boundary
+
+- file: `data/shard-milestone-row-alignment-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the currently recovered unlock-hook, buy-hook, and text-checker ranges plus the explicit overlap result between those partial row-shell families
+- useful for blocking naive one-to-one shard row-number mapping and narrowing future row-verification probes, not itself a recovered row owner or verified row-label map
+
 ### Shard save boundary
 
 - file: `data/shard-save-boundary.v1.json`
@@ -143,5 +157,5 @@ Run:
 
 - `npm run verify:data`
 
-This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, shard-owner-family-boundary, shard-finalsu-bonus-boundary, shard-milestone-payload-boundary, shard-save-boundary, extraction-candidate-families, extraction-candidate-ranking, token-shop, multiverse-market, and spend-boundary datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
+This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, shard-owner-family-boundary, shard-finalsu-bonus-boundary, shard-milestone-payload-boundary, shard-milestone-row-shell-boundary, shard-milestone-row-alignment-boundary, shard-save-boundary, extraction-candidate-families, extraction-candidate-ranking, token-shop, multiverse-market, and spend-boundary datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
 

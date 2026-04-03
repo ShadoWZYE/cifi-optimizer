@@ -37,8 +37,19 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
     traitSphereCount: [["compatibility", "unresolvedProfileFields", "traitSphereCount"], ["systems", "metaProgression", "traitSphereCount"]],
     mechParts: [["compatibility", "unresolvedProfileFields", "mechParts"], ["systems", "metaProgression", "mechParts"]],
     shardMilestones: [["compatibility", "unmappedSystemState", "shardMilestones"], ["systems", "shardMilestones"]],
-    tokenShop: [["compatibility", "unmappedSystemState", "tokenShop"], ["systems", "tokenShop"]],
-    multiverseMarket: [["compatibility", "unmappedSystemState", "multiverseMarket"], ["systems", "multiverseMarket"]]
+    tokenShop: [["compatibility", "unmappedSystemState", "tokenShop"], ["systems", "tokenShop"], ["systems", "tokenBank"], ["tokenShop"], ["tokenBank"]],
+    multiverseMarket: [["compatibility", "unmappedSystemState", "multiverseMarket"], ["systems", "multiverseMarket"], ["multiverseMarket"]],
+    tokenShopStateClues: [
+      ["TokenBankCap"],
+      ["ClaimableBankTokens"],
+      ["BankedTokens"],
+      ["DailyTokenium"],
+      ["DailyTokeniumCap"],
+      ["FinalTokenBankCap"],
+      ["FinalTokenBankFillSpeed"],
+      ["FinalDailyTokenBonus"]
+    ],
+    multiverseMarketStateClues: [["InscryptionsDone"]]
   },
   shipCalibration: {
     communityToolState: [["externalModels", "shipPlanner", "communityToolState"]],
@@ -203,6 +214,55 @@ function coerceRecordOrNull(value) {
   return isRecord(value) ? cloneValue(value) : null;
 }
 
+function coerceCompatibilityValue(value) {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null || typeof value === "boolean") {
+    return value;
+  }
+  if (Array.isArray(value) || isRecord(value)) {
+    return cloneValue(value);
+  }
+
+  const numeric = coerceNullableNumber(value);
+  if (numeric !== null) {
+    return numeric;
+  }
+
+  return coerceNullableString(value);
+}
+
+function collectAliasedCompatibilityFields(source, fieldMap) {
+  return Object.entries(fieldMap).reduce((record, [fieldName, aliases]) => {
+    const value = coerceCompatibilityValue(readAliasedValue(source, aliases));
+    if (value !== undefined && value !== null) {
+      record[fieldName] = value;
+    }
+    return record;
+  }, {});
+}
+
+function collectTopLevelCompatibilityPattern(source, pattern) {
+  return Object.entries(source).reduce((record, [key, value]) => {
+    if (!pattern.test(key)) {
+      return record;
+    }
+    const coercedValue = coerceCompatibilityValue(value);
+    if (coercedValue !== undefined && coercedValue !== null) {
+      record[key] = coercedValue;
+    }
+    return record;
+  }, {});
+}
+
+function mergeCompatibilityRecord(baseRecord, patchRecord) {
+  const nextBase = isRecord(baseRecord) ? baseRecord : {};
+  const nextPatch = isRecord(patchRecord) ? patchRecord : {};
+  const merged = mergeDeep(nextBase, nextPatch);
+  return Object.keys(merged).length ? merged : null;
+}
+
 export function createDefaultPlayerProfile(baselineShipPlayerState = {}) {
   return {
     meta: {
@@ -315,8 +375,23 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   normalized.compatibility.unresolvedProfileFields.traitSphereCount = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.traitSphereCount));
   normalized.compatibility.unresolvedProfileFields.mechParts = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.mechParts));
   normalized.compatibility.unmappedSystemState.shardMilestones = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestones));
-  normalized.compatibility.unmappedSystemState.tokenShop = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop));
-  normalized.compatibility.unmappedSystemState.multiverseMarket = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarket));
+
+  const tokenShopStateAliases = Object.fromEntries(
+    PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.map((path) => [path[path.length - 1], [path]])
+  );
+  const importedTokenShopRecord = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop));
+  const importedTokenShopStateClues = collectAliasedCompatibilityFields(source, tokenShopStateAliases);
+  normalized.compatibility.unmappedSystemState.tokenShop = mergeCompatibilityRecord(importedTokenShopRecord, importedTokenShopStateClues);
+
+  const importedMultiverseMarketRecord = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarket));
+  const importedMultiverseMarketStateClues = collectAliasedCompatibilityFields(source, {
+    InscryptionsDone: PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarketStateClues
+  });
+  const importedMultiverseMarketLevels = collectTopLevelCompatibilityPattern(source, /^IS\d+Level$/u);
+  normalized.compatibility.unmappedSystemState.multiverseMarket = mergeCompatibilityRecord(
+    importedMultiverseMarketRecord,
+    mergeCompatibilityRecord(importedMultiverseMarketStateClues, importedMultiverseMarketLevels)
+  );
 
   const mergedShipToolState = mergeDeep(
     baselineShipPlayerState,

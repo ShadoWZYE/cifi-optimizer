@@ -169,9 +169,9 @@
     {
       "id": "shards-and-loop-guardrails",
       "title": "Shard workflow and loop guardrails",
-      "status": "active",
+      "status": "archived",
       "goal": "Keep shard guidance truthful while the repo verifies how much of the shard system is grounded from shipped-game evidence versus descriptive/community sources.",
-      "currentSlice": "The repo now preserves a checked shard owner-family boundary, a checked FinalSU bonus-field boundary, a checked milestone payload-watch boundary, and a checked shard save-boundary separation around ShardUpgradeInfo, so the next slice is still the exact serialized row payload or save-side owner behind that narrowed shard-specific trail.",
+      "currentSlice": "Archived parent: this broader shard lane is now superseded by narrower successor work, starting with shard-milestone-payload-recovery for the exact serialized row payload or save-side owner behind the narrowed shard-specific trail.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
@@ -187,11 +187,58 @@
         "Promote the current ShardUpgradeInfo milestone payload-watch cluster into a checked shard boundary dataset so milestone totals, cost-list hooks, progress-fill hooks, and phase ticks stay tied to the shard-specific carrier trail without over-claiming saved player rows.",
         "Promote a shard save-boundary dataset so shard-track work can rely on an explicit zero-overlap result between the narrowed shard-specific owner trail and the current PlayerProfileData or CloudSavePlayerProfile save-family clues instead of implicitly mixing owner-family evidence with save recovery."
       ],
+      "nextSteps": []
+    },
+    {
+      "id": "shard-milestone-payload-recovery",
+      "title": "Shard milestone payload recovery",
+      "status": "active",
+      "goal": "Recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs and future external-tool replacement.",
+      "currentSlice": "Follow the narrowed ShardMining / ShardUpgradeInfo trail through the checked payload-watch and save-boundary bundles until the repo either names the declaring row/save model or proves the current shard-specific contexts still stop short of it.",
+      "exitCondition": "The exact serialized shard milestone row payload or declaring save-side owner is recovered from the narrowed shard-specific trail.",
+      "blockedBy": "The current shard-local contexts preserve owner-family, payload-watch, and zero-overlap save-boundary evidence, but still do not expose the declaring saved row model itself.",
+      "smallestShippableSlice": "A checked shard row-owner or save-owner boundary that names the recovered declaring model, or a tighter shard-local probe result that narrows the exact remaining handoff without pretending player-owned rows are already decoded.",
+      "completedSteps": [
+        "Narrow the shard-specific owner trail to ShardMining plus ShardUpgradeInfo.",
+        "Preserve FinalSU unlock and bonus-field families as a checked shard-specific boundary.",
+        "Preserve milestone-total, cost-list, progress-fill, and phase-tick hooks as a checked payload-watch boundary.",
+        "Preserve a zero-overlap shard save boundary against PlayerProfileData and CloudSavePlayerProfile in the current narrowed contexts.",
+        "Promote the partial shard row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker into a checked boundary dataset so future row-verification probes stay attached to the narrowed ShardMining trail.",
+        "Promote a shard row-alignment boundary showing that UnlockMilestone17-29, Milestone0-12TextChecker, and BuyMilestone0 do not yet form one clean shared row-number family."
+      ],
       "nextSteps": [
-        "Recover the exact serialized milestone row payload or save-side state from the narrowed ShardMining and ShardUpgradeInfo trail.",
-        "Map the recovered FinalSU bonus-field family back to verified player-facing shard milestone rows.",
-        "Verify shard milestone owner mapping from shipped-game assets before promoting milestone names and rows as stronger repo truth.",
-        "Only expand shard recommendations after the system-mapping gate is satisfied."
+        "Check whether the narrowed ShardMining or ShardUpgradeInfo contexts can be tied to a declaring serialized object or save model instead of only owner-side hooks.",
+        "Verify whether the partial row shell around UnlockMilestone*, BuyMilestone*, and Milestone*TextChecker can be connected to a declaring model instead of staying controller-side only.",
+        "If the save/row owner is recovered, fork row-verification follow-up work instead of extending this track."
+      ],
+      "sources": [
+        "docs/systems/shards/shard-system-verification.md",
+        "docs/systems/shards/shard-owner-family-verification.md",
+        "docs/unity/unity-owner-map.md",
+        "docs/unity/unity-audit-playbook.md"
+      ],
+      "artifacts": [
+        "data/shard-owner-family-boundary.v1.json",
+        "data/shard-finalsu-bonus-boundary.v1.json",
+        "data/shard-milestone-payload-boundary.v1.json",
+        "data/shard-milestone-row-shell-boundary.v1.json",
+        "data/shard-milestone-row-alignment-boundary.v1.json",
+        "data/shard-save-boundary.v1.json",
+        "data/shardmining-metadata-neighborhood.v1.json",
+        "data/shardupgradeinfo-metadata-neighborhood.v1.json"
+      ],
+      "verified": [
+        "ShardMining is the strongest current shard milestone screen-controller family.",
+        "ShardUpgradeInfo is the strongest current shard-specific data carrier candidate.",
+        "The current shard-local trail preserves milestone totals, cost-list hooks, progress-fill hooks, phase ticks, and FinalSU families.",
+        "The narrowed shard controller trail also preserves a partial row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker hooks.",
+        "The current partial shard row shell does not yet provide one clean shared row-number family: unlock hooks currently sit at 17-29 while text-checker hooks sit at 0-12.",
+        "The narrowed shard-local contexts still have zero checked overlap with PlayerProfileData and CloudSavePlayerProfile."
+      ],
+      "uncertain": [
+        "Which declaring serialized object or save model actually owns the shard milestone rows.",
+        "Whether the eventual recovered payload maps directly to player-facing shard row labels.",
+        "Which player-owned shard milestone fields are safe future PlayerProfile inputs after recovery."
       ]
     },
     {

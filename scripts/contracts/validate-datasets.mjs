@@ -283,6 +283,82 @@ function validateShardMilestonePayloadBoundary(boundary) {
   };
 }
 
+function validateShardMilestoneRowShellBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard milestone row-shell boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard milestone row-shell boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard milestone row-shell boundary sources must be an object");
+  ["shardMiningMetadataNeighborhood", "ownerFamilyBoundary", "payloadBoundary", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard milestone row-shell boundary sources.${field} must be present`);
+  });
+  expectNonEmptyString(boundary.screenControllerFamily, "shard milestone row-shell boundary screenControllerFamily must be present");
+  expectNonEmptyString(boundary.dataCarrierTieIn, "shard milestone row-shell boundary dataCarrierTieIn must be present");
+  expectArray(boundary.controllerShellAnchors, "shard milestone row-shell boundary controllerShellAnchors must be an array");
+  expectArray(boundary.unlockHookSamples, "shard milestone row-shell boundary unlockHookSamples must be an array");
+  expectArray(boundary.buyHookSamples, "shard milestone row-shell boundary buyHookSamples must be an array");
+  expectArray(boundary.textCheckerSamples, "shard milestone row-shell boundary textCheckerSamples must be an array");
+  expectArray(boundary.currentBoundary, "shard milestone row-shell boundary currentBoundary must be an array");
+
+  assert.equal(boundary.screenControllerFamily, "ShardMining, Assembly-CSharp", "shard milestone row-shell boundary screenControllerFamily drifted");
+  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard milestone row-shell boundary dataCarrierTieIn drifted");
+  ["AttachFastBuyButton", "StartFastBuyButtonHold", "FastBuyButtonMethodShards"].forEach((name) => {
+    assert.ok(boundary.controllerShellAnchors.includes(name), `shard milestone row-shell boundary missing ${name}`);
+  });
+  ["UnlockMilestone17", "UnlockMilestone29"].forEach((name) => {
+    assert.ok(boundary.unlockHookSamples.includes(name), `shard milestone row-shell boundary missing ${name}`);
+  });
+  assert.ok(boundary.buyHookSamples.includes("BuyMilestone0"), "shard milestone row-shell boundary missing BuyMilestone0");
+  ["Milestone0TextChecker", "Milestone9TextChecker", "Milestone12TextChecker"].forEach((name) => {
+    assert.ok(boundary.textCheckerSamples.includes(name), `shard milestone row-shell boundary missing ${name}`);
+  });
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat this partial row shell")), "shard milestone row-shell boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-milestone-row-shell-boundary",
+    label: "Shard milestone row-shell boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.unlockHookSamples.length} shard unlock-hook samples`,
+      `${boundary.textCheckerSamples.length} shard text-checker samples`,
+      "Partial shard row shell stays attached to the narrowed ShardMining trail without row-owner claims"
+    ]
+  };
+}
+
+function validateShardMilestoneRowAlignmentBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard milestone row-alignment boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard milestone row-alignment boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard milestone row-alignment boundary sources must be an object");
+  ["shardMiningMetadataNeighborhood", "rowShellBoundary", "ownerFamilyBoundary", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard milestone row-alignment boundary sources.${field} must be present`);
+  });
+  expectNonEmptyString(boundary.screenControllerFamily, "shard milestone row-alignment boundary screenControllerFamily must be present");
+  expectRecord(boundary.unlockHookRange, "shard milestone row-alignment boundary unlockHookRange must be an object");
+  expectRecord(boundary.textCheckerRange, "shard milestone row-alignment boundary textCheckerRange must be an object");
+  expectRecord(boundary.buyHookRange, "shard milestone row-alignment boundary buyHookRange must be an object");
+  expectArray(boundary.unlockTextCheckerOverlapIds, "shard milestone row-alignment boundary unlockTextCheckerOverlapIds must be an array");
+  expectArray(boundary.buyTextCheckerOverlapIds, "shard milestone row-alignment boundary buyTextCheckerOverlapIds must be an array");
+  expectArray(boundary.currentBoundary, "shard milestone row-alignment boundary currentBoundary must be an array");
+
+  assert.equal(boundary.screenControllerFamily, "ShardMining, Assembly-CSharp", "shard milestone row-alignment boundary screenControllerFamily drifted");
+  assert.deepEqual(boundary.unlockHookRange, { start: 17, end: 29, count: 13 }, "shard milestone row-alignment boundary unlockHookRange drifted");
+  assert.deepEqual(boundary.textCheckerRange, { start: 0, end: 12, count: 13 }, "shard milestone row-alignment boundary textCheckerRange drifted");
+  assert.deepEqual(boundary.buyHookRange, { start: 0, end: 0, count: 1 }, "shard milestone row-alignment boundary buyHookRange drifted");
+  assert.deepEqual(boundary.unlockTextCheckerOverlapIds, [], "shard milestone row-alignment boundary unlockTextCheckerOverlapIds drifted");
+  assert.deepEqual(boundary.buyTextCheckerOverlapIds, [0], "shard milestone row-alignment boundary buyTextCheckerOverlapIds drifted");
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not infer that UnlockMilestone17 already maps")), "shard milestone row-alignment boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-milestone-row-alignment-boundary",
+    label: "Shard milestone row-alignment boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.unlockHookRange.count} unlock-hook ids`,
+      `${boundary.textCheckerRange.count} text-checker ids`,
+      "Partial shard row shell still does not form one clean shared row-number family"
+    ]
+  };
+}
+
 function validateShardSaveBoundary(boundary) {
   expectNonEmptyString(boundary.dataset, "shard save boundary dataset id must be present");
   expectNonEmptyString(boundary.generatedAt, "shard save boundary generatedAt must be present");
@@ -368,7 +444,7 @@ function validateExtractionCandidateRanking(ranking) {
   assert.equal(typeof ranking.topCandidate.heuristicScore, "number", "extraction candidate ranking topCandidate.heuristicScore must be numeric");
   assert.equal(ranking.topCandidate.id, "spend.multiverse-market-owner-family", "extraction candidate ranking topCandidate.id drifted");
   assert.equal(ranking.topCandidate.track, "spend-planner-from-extracted-data", "extraction candidate ranking topCandidate.track drifted");
-  const shardCandidate = ranking.candidates.find((entry) => entry.track === "shards-and-loop-guardrails");
+  const shardCandidate = ranking.candidates.find((entry) => entry.track === "shard-milestone-payload-recovery");
   assert.ok(shardCandidate, "extraction candidate ranking must preserve a shard-local candidate");
   assert.equal(shardCandidate.id, "shards.milestone-owner-family", "extraction candidate ranking top shard candidate drifted");
   assert.ok(shardCandidate.heuristicScore >= 500, "extraction candidate ranking top shard candidate heuristicScore regressed");
@@ -1159,7 +1235,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 27, "bundled dataset contract must track the twenty-seven shipped dataset groups");
+  assert.equal(contract.datasets.length, 29, "bundled dataset contract must track the twenty-nine shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -1209,6 +1285,8 @@ export async function validateBundledDatasets() {
   const shardOwnerFamilyBoundary = await readJson("../../data/shard-owner-family-boundary.v1.json");
   const shardFinalSuBonusBoundary = await readJson("../../data/shard-finalsu-bonus-boundary.v1.json");
   const shardMilestonePayloadBoundary = await readJson("../../data/shard-milestone-payload-boundary.v1.json");
+  const shardMilestoneRowShellBoundary = await readJson("../../data/shard-milestone-row-shell-boundary.v1.json");
+  const shardMilestoneRowAlignmentBoundary = await readJson("../../data/shard-milestone-row-alignment-boundary.v1.json");
   const shardSaveBoundary = await readJson("../../data/shard-save-boundary.v1.json");
   const extractionCandidateFamilies = await readJson("../../data/extraction-candidate-families.v1.json");
   const extractionCandidateRanking = await readJson("../../data/extraction-candidate-ranking.v1.json");
@@ -1238,6 +1316,8 @@ export async function validateBundledDatasets() {
     validateShardOwnerFamilyBoundary(shardOwnerFamilyBoundary),
     validateShardFinalSuBonusBoundary(shardFinalSuBonusBoundary),
     validateShardMilestonePayloadBoundary(shardMilestonePayloadBoundary),
+    validateShardMilestoneRowShellBoundary(shardMilestoneRowShellBoundary),
+    validateShardMilestoneRowAlignmentBoundary(shardMilestoneRowAlignmentBoundary),
     validateShardSaveBoundary(shardSaveBoundary),
     validateExtractionCandidateFamilies(extractionCandidateFamilies),
     validateExtractionCandidateRanking(extractionCandidateRanking),

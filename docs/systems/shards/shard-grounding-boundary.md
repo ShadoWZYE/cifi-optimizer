@@ -93,6 +93,8 @@ The current repo-local evidence is strong enough to narrow the shard milestone o
 
 - `ShardMining, Assembly-CSharp`
   - current role evidence: `CheckFirstTimeShardMilestoneOpened`, `AttachFastBuyButton`, `FastBuyButtonMethodShards`, `StartFastBuyButtonHold`
+  - partial row-shell evidence: `UnlockMilestone17` through `UnlockMilestone29`, `BuyMilestone0`, `Milestone0TextChecker` through `Milestone12TextChecker`
+  - current row-alignment result: unlock hooks and text-checker hooks do not yet share one clean row-number range
   - metadata tie-in: `ShardMining|ShardUpgradeInfo`
 - `ShardUpgradeInfo`
   - current role evidence: `TotalMilestoneLevels`, `get_IsUnlocked`, `get_SU*FinalUnlockReq`, `FinalSU*Bonus*`, over-level exponent fields, and `<FastBuyEnum>d__1429`
@@ -126,7 +128,7 @@ In short: ranking, ROI, ETA, affordability, and best-upgrade claims remain block
 
 ## Next allowed shard step
 
-The next shard planner pass should recover the exact serialized milestone row payload or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail and compare that extracted layer against the current descriptive dataset before any planner expansion.
+The next shard planner pass should recover the exact serialized milestone row payload or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail, using the partial `UnlockMilestone*` / `BuyMilestone*` / `Milestone*TextChecker` row shell as the nearest row-verification shell, and compare that extracted layer against the current descriptive dataset before any planner expansion.
 
 Current heuristic ranking for that work:
 

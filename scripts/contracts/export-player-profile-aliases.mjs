@@ -80,7 +80,9 @@ const TARGET_PATHS = {
     mechParts: "compatibility.unresolvedProfileFields.mechParts",
     shardMilestones: "compatibility.unmappedSystemState.shardMilestones",
     tokenShop: "compatibility.unmappedSystemState.tokenShop",
-    multiverseMarket: "compatibility.unmappedSystemState.multiverseMarket"
+    multiverseMarket: "compatibility.unmappedSystemState.multiverseMarket",
+    tokenShopStateClues: "compatibility.unmappedSystemState.tokenShop",
+    multiverseMarketStateClues: "compatibility.unmappedSystemState.multiverseMarket"
   },
   shipCalibration: {
     communityToolState: "externalModels.shipPlanner.communityToolState",

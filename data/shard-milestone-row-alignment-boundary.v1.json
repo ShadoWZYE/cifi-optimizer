@@ -1,0 +1,34 @@
+{
+  "dataset": "shard-milestone-row-alignment-boundary.v1",
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "shardMiningMetadataNeighborhood": "data/shardmining-metadata-neighborhood.v1.json",
+    "rowShellBoundary": "data/shard-milestone-row-shell-boundary.v1.json",
+    "ownerFamilyBoundary": "data/shard-owner-family-boundary.v1.json",
+    "globalMetadata": "workbench/apk/base/global-metadata.dat"
+  },
+  "screenControllerFamily": "ShardMining, Assembly-CSharp",
+  "unlockHookRange": {
+    "start": 17,
+    "end": 29,
+    "count": 13
+  },
+  "textCheckerRange": {
+    "start": 0,
+    "end": 12,
+    "count": 13
+  },
+  "buyHookRange": {
+    "start": 0,
+    "end": 0,
+    "count": 1
+  },
+  "unlockTextCheckerOverlapIds": [],
+  "buyTextCheckerOverlapIds": [0],
+  "currentBoundary": [
+    "Treat this bundle as the current shard row-shell alignment boundary inside the narrowed ShardMining controller trail.",
+    "The recovered partial shell currently splits into UnlockMilestone17-29, Milestone0-12TextChecker, and BuyMilestone0 instead of one clean shared row-number family.",
+    "That is enough to block naive one-to-one row-number mapping from the current controller shell alone and to keep future row-verification work focused on the declaring owner/model.",
+    "Do not infer that UnlockMilestone17 already maps to Milestone17TextChecker or BuyMilestone17 from this partial shell."
+  ]
+}

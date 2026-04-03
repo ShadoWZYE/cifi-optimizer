@@ -10,6 +10,8 @@ Boundary reference:
 - [shard-owner-family-verification.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-owner-family-verification.md)
 - [data/shard-finalsu-bonus-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-finalsu-bonus-boundary.v1.json)
 - [data/shard-milestone-payload-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-payload-boundary.v1.json)
+- [data/shard-milestone-row-shell-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-shell-boundary.v1.json)
+- [data/shard-milestone-row-alignment-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-alignment-boundary.v1.json)
 - [data/shard-save-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-save-boundary.v1.json)
 
 ## Current status
@@ -55,6 +57,8 @@ Repo-local owner-family evidence now narrows the milestone shell further:
 - metadata ties `ShardMining` to `ShardUpgradeInfo`
 - `ShardUpgradeInfo` sits beside `TotalMilestoneLevels`, `get_IsUnlocked`, `get_SU*FinalUnlockReq`, `FinalSU*Bonus*`, and over-level exponent fields
 - the same shard-specific trail now also preserves a checked payload-watch cluster around `get_TotalMilestoneLevels`, `InitializeShards`, `UpdateShardCostList`, `GetShardCostList`, `CheckAllMilestoneLevelFills`, `CheckMilestone*ProgressFill`, `Phase1Tick` through `Phase6Tick`, and `CooldownTick`
+- the narrowed `ShardMining` controller shell also preserves a checked partial row shell around `UnlockMilestone17` through `UnlockMilestone29`, `BuyMilestone0`, and `Milestone0TextChecker` through `Milestone12TextChecker`
+- the checked row-alignment boundary now makes the current mismatch explicit: unlock hooks sit at `17-29`, text-checker hooks sit at `0-12`, and buy hooks currently only reach `0`
 - the current narrowed shard-local contexts still preserve zero checked overlap with `PlayerProfileData`, `GetPlayerProfileData`, `FillPlayerProfileData`, or `CloudSavePlayerProfile`
 - `ConstructionMilestones` still exists as a parallel generic milestone family, but it is no longer the preferred shard-owner interpretation because its metadata path is academy-side
 - the recovered `FinalSU*Bonus*` plus `get_SU*FinalUnlockReq` family is now preserved in a checked shard boundary bundle tied to `ShardUpgradeInfo`
@@ -85,6 +89,8 @@ That makes it suitable for:
 - exact serialized shard milestone row owner or payload
 - asset-grounded shard milestone labels and bonus tables
 - asset-grounded milestone row order and milestone-number mapping
+- recovered declaring owner behind the partial `UnlockMilestone*` / `BuyMilestone*` / `Milestone*TextChecker` row shell
+- a clean one-to-one shard row-number family inside the current controller shell
 - asset-grounded milestone unlock list
 - exact mapping between recovered `FinalSU*Bonus*` fields and player-facing shard milestone rows
 - asset-grounded per-level shard costs

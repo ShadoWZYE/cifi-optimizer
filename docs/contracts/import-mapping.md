@@ -42,6 +42,7 @@ Future alias changes should update the inventory, the audit artifacts, and migra
 - flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired
 - ship implementation imports now require `systems.ship.*` or `externalModels.shipPlanner.*`; top-level `power`, `speed`, and `cargo` are retired
 - imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`
+- flat spend-state clues such as `InscryptionsDone`, `IS*Level`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved under `compatibility.unmappedSystemState.*`
 - preserving those objects does not make the system planner-ready or canonical
 
 ## Snapshot dataset imports

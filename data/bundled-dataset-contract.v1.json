@@ -74,6 +74,22 @@
       ]
     },
     {
+      "id": "shard-milestone-row-shell-boundary",
+      "label": "Shard milestone row-shell boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-milestone-row-shell-boundary.v1.json"
+      ]
+    },
+    {
+      "id": "shard-milestone-row-alignment-boundary",
+      "label": "Shard milestone row-alignment boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-milestone-row-alignment-boundary.v1.json"
+      ]
+    },
+    {
       "id": "shard-save-boundary",
       "label": "Shard save boundary",
       "classification": "extracted-mechanics",

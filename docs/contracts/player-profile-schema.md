@@ -109,6 +109,7 @@ Import rule:
 
 - prefer explicit `compatibility.*` paths or namespaced legacy sources such as `stage.*` and `systems.metaProgression.*`
 - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
+- flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and top-level `IS*Level` fields may be quarantined under `compatibility.unmappedSystemState.*`
 
 ## Migration policy
 
