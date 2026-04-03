@@ -392,7 +392,7 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardSaveBoundary, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, tokenBankControllerShell] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
@@ -402,6 +402,8 @@ async function bootstrap() {
     fetchJson("./data/shard-owner-family-boundary.v1.json"),
     fetchJson("./data/shard-finalsu-bonus-boundary.v1.json"),
     fetchJson("./data/shard-milestone-payload-boundary.v1.json"),
+    fetchJson("./data/shard-milestone-row-shell-boundary.v1.json"),
+    fetchJson("./data/shard-milestone-row-alignment-boundary.v1.json"),
     fetchJson("./data/shard-save-boundary.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
     fetchJson("./data/token-shop-values.json"),
@@ -440,6 +442,8 @@ async function bootstrap() {
     ownerFamilyBoundary: shardOwnerFamilyBoundary,
     finalSuBonusBoundary: shardFinalSuBonusBoundary,
     milestonePayloadBoundary: shardMilestonePayloadBoundary,
+    milestoneRowShellBoundary: shardMilestoneRowShellBoundary,
+    milestoneRowAlignmentBoundary: shardMilestoneRowAlignmentBoundary,
     saveBoundary: shardSaveBoundary
   };
   state.extractionCandidateRanking = extractionCandidateRanking;
@@ -1789,6 +1793,7 @@ function renderSpendPlannerBoundary() {
         <p class="meta">${hasImportedTokenShopState ? `Quarantined TokenShop payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedTokenShopState))}).` : "No quarantined TokenShop payload is present in the imported PlayerProfile."}</p>
         <p class="meta">${hasImportedMarketState ? `Quarantined MultiverseMarket payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedMarketState))}).` : "No quarantined MultiverseMarket payload is present in the imported PlayerProfile."}</p>
         <p class="meta">These imported blobs stay under <code>compatibility.unmappedSystemState</code> until spend owners, saved-state inputs, and grounded labels are recovered.</p>
+        <p class="meta">The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap</code>, <code>ClaimableBankTokens</code>, <code>InscryptionsDone</code>, and top-level <code>IS*Level</code> fields instead of dropping them.</p>
       </div>
       ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">First safe spend unlock path</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
       <div class="pill-row">
@@ -1853,6 +1858,7 @@ function getResearchTrackOrder(track) {
   const order = [
     "data-contracts-and-apk-pipeline",
     "playerprofile-boundary-and-imports",
+    "shard-milestone-payload-recovery",
     "shards-and-loop-guardrails",
     "unified-feed-and-hardening",
     "spend-planner-from-extracted-data",
@@ -1869,6 +1875,7 @@ function getResearchTrackSequenceLabel(track) {
   const labelsById = {
     "data-contracts-and-apk-pipeline": "Sequence 1/5",
     "playerprofile-boundary-and-imports": "Sequence 1/5",
+    "shard-milestone-payload-recovery": "Sequence 2/5",
     "shards-and-loop-guardrails": "Sequence 2/5",
     "unified-feed-and-hardening": "Sequence 3/5",
     "spend-planner-from-extracted-data": "Sequence 4/5",
@@ -1897,11 +1904,52 @@ function renderResearchTrackProgress(track) {
   `;
 }
 
+function renderResearchTrackContract(track) {
+  const sources = Array.isArray(track.sources) ? track.sources : [];
+  const artifacts = Array.isArray(track.artifacts) ? track.artifacts : [];
+  const verified = Array.isArray(track.verified) ? track.verified : [];
+  const uncertain = Array.isArray(track.uncertain) ? track.uncertain : [];
+  const metaBits = [
+    track.classification ? `<span class="pill">${escapeHtml(track.classification)}</span>` : "",
+    track.category ? `<span class="pill">${escapeHtml(track.category)}</span>` : "",
+    track.implementationRelevance ? `<span class="pill">${escapeHtml(track.implementationRelevance)}</span>` : "",
+    typeof track.apkUnityPathChecked === "boolean"
+      ? `<span class="pill">${escapeHtml(track.apkUnityPathChecked ? "APK/Unity first" : "APK/Unity not yet checked")}</span>`
+      : ""
+  ].filter(Boolean);
+
+  if (
+    !metaBits.length
+    && !track.exitCondition
+    && !track.blockedBy
+    && !track.smallestShippableSlice
+    && !sources.length
+    && !artifacts.length
+    && !verified.length
+    && !uncertain.length
+  ) {
+    return "";
+  }
+
+  return `
+    ${metaBits.length ? `<div class="pill-row">${metaBits.join("")}</div>` : ""}
+    ${track.exitCondition ? `<div class="meta-stack"><p class="snapshot-title">Exit condition</p><p class="meta">${escapeHtml(track.exitCondition)}</p></div>` : ""}
+    ${track.blockedBy ? `<div class="meta-stack"><p class="snapshot-title">Current blocker</p><p class="meta">${escapeHtml(track.blockedBy)}</p></div>` : ""}
+    ${track.smallestShippableSlice ? `<div class="meta-stack"><p class="snapshot-title">Smallest shippable slice</p><p class="meta">${escapeHtml(track.smallestShippableSlice)}</p></div>` : ""}
+    ${sources.length ? `<div class="meta-stack"><p class="snapshot-title">Sources</p><ul class="research-step-list">${sources.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${artifacts.length ? `<div class="meta-stack"><p class="snapshot-title">Repo artifacts</p><ul class="research-step-list">${artifacts.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${verified.length ? `<div class="meta-stack"><p class="snapshot-title">Verified now</p><ul class="research-step-list">${verified.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${uncertain.length ? `<div class="meta-stack"><p class="snapshot-title">Still uncertain</p><ul class="research-step-list">${uncertain.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+  `;
+}
+
 function renderResearchTrackSupport(track) {
-  if (track.id === "shards-and-loop-guardrails") {
+  if (track.id === "shards-and-loop-guardrails" || track.id === "shard-milestone-payload-recovery") {
     const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
     const finalSuBoundary = getShardFinalSuBonusBoundarySummary(state.shardGrounding?.finalSuBonusBoundary);
     const payloadBoundary = getShardMilestonePayloadBoundarySummary(state.shardGrounding?.milestonePayloadBoundary);
+    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(state.shardGrounding?.milestoneRowShellBoundary);
+    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(state.shardGrounding?.milestoneRowAlignmentBoundary);
     const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
     return `
       <div class="meta-stack">
@@ -1914,6 +1962,10 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${finalSuBoundary.hasBoundary ? "That narrows the shard-specific field family further, but it still does not map those fields back to verified player-facing milestone rows." : "The current build does not yet preserve a checked FinalSU bonus-field boundary."}</p>
         <p class="meta">${payloadBoundary.hasBoundary ? `A checked payload-watch boundary now keeps ${payloadBoundary.milestoneStateLabel} attached to ${payloadBoundary.dataCarrier}, with cost-list hooks such as ${payloadBoundary.costAccessorLabel}.` : "Shard milestone payload-watch boundary clues are not available in this build."}</p>
         <p class="meta">${payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields ? `The same shard-specific trail also keeps ${payloadBoundary.progressHookLabel} plus ${payloadBoundary.tickFieldLabel} grouped with ${payloadBoundary.costHookLabel}.` : "Expected shard payload-watch hooks are incomplete in this build."}</p>
+        <p class="meta">${rowShellBoundary.hasBoundary ? `A checked row-shell boundary now keeps ${rowShellBoundary.controllerHookLabel} attached to ${rowShellBoundary.screenController}, with partial row hooks such as ${rowShellBoundary.unlockHookLabel}.` : "Shard milestone row-shell boundary clues are not available in this build."}</p>
+        <p class="meta">${rowShellBoundary.hasUnlockHookSamples && rowShellBoundary.hasBuyHookSamples && rowShellBoundary.hasTextCheckerSamples ? `The same controller shell also preserves ${rowShellBoundary.buyHookLabel} plus ${rowShellBoundary.textCheckerLabel}, which is enough to narrow future row verification without claiming full row ownership or labels.` : "Expected shard milestone row-shell samples are incomplete in this build."}</p>
+        <p class="meta">${rowAlignmentBoundary.hasBoundary ? `A checked row-alignment boundary now keeps unlock hooks on ${rowAlignmentBoundary.unlockRangeLabel}, text-checker hooks on ${rowAlignmentBoundary.textCheckerRangeLabel}, and buy hooks on ${rowAlignmentBoundary.buyRangeLabel}.` : "Shard milestone row-alignment boundary clues are not available in this build."}</p>
+        <p class="meta">${rowAlignmentBoundary.hasZeroUnlockTextOverlap && rowAlignmentBoundary.hasBuyTextOverlap ? `The current partial row shell still has ${rowAlignmentBoundary.unlockTextOverlapLabel} direct overlap between unlock and text-checker ids, while buy and text-checker hooks only overlap on ${rowAlignmentBoundary.buyTextOverlapLabel}.` : "Expected shard row-shell alignment boundary results are incomplete in this build."}</p>
         <p class="meta">${saveBoundary.hasSeparationBoundary ? `A checked shard save boundary now keeps ${saveBoundary.ownerAnchor} separate from ${saveBoundary.saveAnchor} and ${saveBoundary.cloudSaveAnchor}, with ${saveBoundary.overlapLabel}.` : "Shard save-boundary clues are not available in this build."}</p>
         <p class="meta">${saveBoundary.hasSeparationBoundary ? "That keeps shard owner-family narrowing and save-side recovery as separate tasks, so the app should not infer player-owned shard milestone state from the current owner trail yet." : "The current build does not yet preserve a clean shard save-boundary separation."}</p>
         <p class="meta">This improves the shard mapping gate, but it still does not recover player-owned shard milestone rows, player-facing labels, or planner-safe affordability inputs.</p>
@@ -1977,30 +2029,7 @@ function renderResearchTrackSupport(track) {
     `;
   }
 
-  if (track.id !== "data-contracts-and-apk-pipeline") {
-    return "";
-  }
-
-  const sources = Array.isArray(track.sources) ? track.sources : [];
-  const artifacts = Array.isArray(track.artifacts) ? track.artifacts : [];
-  const verified = Array.isArray(track.verified) ? track.verified : [];
-  const uncertain = Array.isArray(track.uncertain) ? track.uncertain : [];
-  const metaBits = [
-    track.classification ? `<span class="pill">${escapeHtml(track.classification)}</span>` : "",
-    track.implementationRelevance ? `<span class="pill">${escapeHtml(track.implementationRelevance)}</span>` : "",
-    typeof track.apkUnityPathChecked === "boolean"
-      ? `<span class="pill">${escapeHtml(track.apkUnityPathChecked ? "APK/Unity first" : "APK/Unity not yet checked")}</span>`
-      : ""
-  ].filter(Boolean);
-
-  return `
-    ${metaBits.length ? `<div class="pill-row">${metaBits.join("")}</div>` : ""}
-    ${sources.length ? `<div class="meta-stack"><p class="snapshot-title">Sources</p><ul class="research-step-list">${sources.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
-    ${artifacts.length ? `<div class="meta-stack"><p class="snapshot-title">Repo artifacts</p><ul class="research-step-list">${artifacts.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
-    ${verified.length ? `<div class="meta-stack"><p class="snapshot-title">Verified now</p><ul class="research-step-list">${verified.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
-    ${uncertain.length ? `<div class="meta-stack"><p class="snapshot-title">Still uncertain</p><ul class="research-step-list">${uncertain.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
-    ${track.smallestShippableSlice ? `<div class="meta-stack"><p class="snapshot-title">Smallest shippable slice</p><p class="meta">${escapeHtml(track.smallestShippableSlice)}</p></div>` : ""}
-  `;
+  return renderResearchTrackContract(track);
 }
 
 function getTopExtractionCandidate(trackId = null) {
@@ -2044,6 +2073,7 @@ function getResearchTrackPhase(track) {
   const phaseById = {
     "data-contracts-and-apk-pipeline": "PR 1",
     "playerprofile-boundary-and-imports": "PR 1",
+    "shard-milestone-payload-recovery": "PR 2 successor",
     "shards-and-loop-guardrails": "PR 2",
     "unified-feed-and-hardening": "PR 3 then PR 5 hardening",
     "spend-planner-from-extracted-data": "PR 4",
@@ -2059,6 +2089,7 @@ function getResearchTrackSource(track) {
   const sourceById = {
     "data-contracts-and-apk-pipeline": "APK/Unity first",
     "playerprofile-boundary-and-imports": "Schema boundary",
+    "shard-milestone-payload-recovery": "Grounded shard data",
     "shards-and-loop-guardrails": "Grounded shard data",
     "spend-planner-from-extracted-data": "Extracted spend data",
     "unified-feed-and-hardening": "Integration contract",
@@ -2840,11 +2871,13 @@ function renderShardGroundingBoundary() {
   const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
   const finalSuBoundary = getShardFinalSuBonusBoundarySummary(state.shardGrounding?.finalSuBonusBoundary);
   const payloadBoundary = getShardMilestonePayloadBoundarySummary(state.shardGrounding?.milestonePayloadBoundary);
+  const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(state.shardGrounding?.milestoneRowShellBoundary);
+  const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(state.shardGrounding?.milestoneRowAlignmentBoundary);
   const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
   const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers) ? assetGrounding.groundedShellIdentifiers.slice(0, 5) : [];
   const blockedUses = Array.isArray(assetGrounding?.blockedUses) ? assetGrounding.blockedUses : [];
   const repoWideCandidate = getTopExtractionCandidate();
-  const shardCandidate = getTopExtractionCandidate("shards-and-loop-guardrails");
+  const shardCandidate = getTopExtractionCandidate("shard-milestone-payload-recovery");
   return `
     <div class="page-grid">
       <article class="snapshot-card">
@@ -2896,6 +2929,26 @@ function renderShardGroundingBoundary() {
           <p class="meta">${payloadBoundary.hasCostAndListHooks ? `Cost-list hooks currently include ${payloadBoundary.costHookLabel}.` : "Expected shard cost-list hooks are incomplete in this build."}</p>
           <p class="meta">${payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields ? `Progress and timing hooks still include ${payloadBoundary.progressHookLabel} plus ${payloadBoundary.tickFieldLabel}.` : "Expected shard progress-fill and phase-tick hooks are incomplete in this build."}</p>
           <p class="meta">${payloadBoundary.hasBoundary ? "This keeps the current milestone payload search attached to the shard-specific carrier trail, but it still does not recover saved player-owned milestone rows or verified row labels." : "The current build does not yet preserve a checked shard milestone payload-watch boundary."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Row-shell boundary</span>
+        <strong>ShardMining keeps the first row-hook shell local</strong>
+        <div class="meta-stack">
+          <p class="meta">${rowShellBoundary.hasBoundary ? `${rowShellBoundary.screenController} now preserves ${rowShellBoundary.controllerHookLabel}.` : "Shard milestone row-shell boundary clues are not available in this build."}</p>
+          <p class="meta">${rowShellBoundary.hasUnlockHookSamples ? `Recovered unlock-hook samples currently include ${rowShellBoundary.unlockHookLabel}.` : "Expected shard unlock-hook samples are incomplete in this build."}</p>
+          <p class="meta">${rowShellBoundary.hasBuyHookSamples && rowShellBoundary.hasTextCheckerSamples ? `Recovered row-shell samples also include ${rowShellBoundary.buyHookLabel} plus ${rowShellBoundary.textCheckerLabel}.` : "Expected shard buy-hook and text-checker samples are incomplete in this build."}</p>
+          <p class="meta">${rowShellBoundary.hasBoundary ? "This is enough to narrow future row verification toward the shard-specific controller shell, but it still does not recover the declaring row owner, full row range, or player-facing labels." : "The current build does not yet preserve a checked shard milestone row-shell boundary."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Row-alignment boundary</span>
+        <strong>Current row hooks do not form one clean number family yet</strong>
+        <div class="meta-stack">
+          <p class="meta">${rowAlignmentBoundary.hasBoundary ? `Unlock hooks currently sit at ${rowAlignmentBoundary.unlockRangeLabel}, while text-checker hooks sit at ${rowAlignmentBoundary.textCheckerRangeLabel}.` : "Shard milestone row-alignment boundary clues are not available in this build."}</p>
+          <p class="meta">${rowAlignmentBoundary.hasBoundary ? `Recovered buy hooks currently sit at ${rowAlignmentBoundary.buyRangeLabel}.` : "Expected shard buy-hook alignment clues are incomplete in this build."}</p>
+          <p class="meta">${rowAlignmentBoundary.hasZeroUnlockTextOverlap && rowAlignmentBoundary.hasBuyTextOverlap ? `There is ${rowAlignmentBoundary.unlockTextOverlapLabel} direct overlap between unlock and text-checker ids, while buy and text-checker hooks only overlap on ${rowAlignmentBoundary.buyTextOverlapLabel}.` : "Expected shard row-shell overlap results are incomplete in this build."}</p>
+          <p class="meta">${rowAlignmentBoundary.hasBoundary ? "This blocks naive one-to-one row-number mapping from the current controller shell alone, so future row verification still needs the declaring model or save owner." : "The current build does not yet preserve a checked shard milestone row-alignment boundary."}</p>
         </div>
       </article>
       <article class="snapshot-card">
@@ -3117,6 +3170,8 @@ function buildApkGroundingValidationCases() {
   const shardOwnerFamilyBoundary = state.shardGrounding?.ownerFamilyBoundary;
   const shardFinalSuBonusBoundary = state.shardGrounding?.finalSuBonusBoundary;
   const shardMilestonePayloadBoundary = state.shardGrounding?.milestonePayloadBoundary;
+  const shardMilestoneRowShellBoundary = state.shardGrounding?.milestoneRowShellBoundary;
+  const shardMilestoneRowAlignmentBoundary = state.shardGrounding?.milestoneRowAlignmentBoundary;
   const shardSaveBoundary = state.shardGrounding?.saveBoundary;
   const cases = [];
 
@@ -3171,6 +3226,30 @@ function buildApkGroundingValidationCases() {
         ? `ShardUpgradeInfo preserves ${payloadBoundary.milestoneStateLabel} plus ${payloadBoundary.costAccessorLabel}`
         : "Shard milestone payload-watch boundary drifted",
       pass: payloadBoundary.hasBoundary && payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields && payloadBoundary.hasCostAccessorSamples,
+      scope: "APK"
+    });
+  }
+  if (shardMilestoneRowShellBoundary) {
+    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(shardMilestoneRowShellBoundary);
+    cases.push({
+      title: "Shard milestone row shell",
+      expected: "ShardMining preserves partial UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell without row-owner claims",
+      actual: rowShellBoundary.hasBoundary && rowShellBoundary.hasUnlockHookSamples && rowShellBoundary.hasBuyHookSamples && rowShellBoundary.hasTextCheckerSamples
+        ? `ShardMining preserves ${rowShellBoundary.unlockHookLabel} plus ${rowShellBoundary.buyHookLabel} and ${rowShellBoundary.textCheckerLabel}`
+        : "Shard milestone row-shell boundary drifted",
+      pass: rowShellBoundary.hasBoundary && rowShellBoundary.hasUnlockHookSamples && rowShellBoundary.hasBuyHookSamples && rowShellBoundary.hasTextCheckerSamples,
+      scope: "APK"
+    });
+  }
+  if (shardMilestoneRowAlignmentBoundary) {
+    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(shardMilestoneRowAlignmentBoundary);
+    cases.push({
+      title: "Shard milestone row alignment",
+      expected: "Shard partial row shell keeps unlock, buy, and text-checker ranges separate until a declaring row model is recovered",
+      actual: rowAlignmentBoundary.hasBoundary && rowAlignmentBoundary.hasZeroUnlockTextOverlap && rowAlignmentBoundary.hasBuyTextOverlap
+        ? `Unlock ${rowAlignmentBoundary.unlockRangeLabel}, text ${rowAlignmentBoundary.textCheckerRangeLabel}, buy ${rowAlignmentBoundary.buyRangeLabel}`
+        : "Shard milestone row-alignment boundary drifted",
+      pass: rowAlignmentBoundary.hasBoundary && rowAlignmentBoundary.hasZeroUnlockTextOverlap && rowAlignmentBoundary.hasBuyTextOverlap,
       scope: "APK"
     });
   }
@@ -3604,6 +3683,56 @@ function getShardMilestonePayloadBoundarySummary(boundary) {
     progressHookLabel: progressFillHooks.join(", "),
     tickFieldLabel: tickFields.join(", "),
     costAccessorLabel: sampleCostAccessors.join(", ")
+  };
+}
+
+function getShardMilestoneRowShellBoundarySummary(boundary) {
+  const controllerShellAnchors = Array.isArray(boundary?.controllerShellAnchors) ? boundary.controllerShellAnchors : [];
+  const unlockHookSamples = Array.isArray(boundary?.unlockHookSamples) ? boundary.unlockHookSamples : [];
+  const buyHookSamples = Array.isArray(boundary?.buyHookSamples) ? boundary.buyHookSamples : [];
+  const textCheckerSamples = Array.isArray(boundary?.textCheckerSamples) ? boundary.textCheckerSamples : [];
+  return {
+    hasBoundary:
+      boundary?.screenControllerFamily === "ShardMining, Assembly-CSharp"
+      && boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo"
+      && ["AttachFastBuyButton", "StartFastBuyButtonHold", "FastBuyButtonMethodShards"].every((name) => controllerShellAnchors.includes(name)),
+    hasUnlockHookSamples: ["UnlockMilestone17", "UnlockMilestone29"].every((name) => unlockHookSamples.includes(name)),
+    hasBuyHookSamples: buyHookSamples.includes("BuyMilestone0"),
+    hasTextCheckerSamples: ["Milestone0TextChecker", "Milestone9TextChecker", "Milestone12TextChecker"].every((name) => textCheckerSamples.includes(name)),
+    screenController: boundary?.screenControllerFamily || "ShardMining, Assembly-CSharp",
+    tieIn: boundary?.dataCarrierTieIn || "ShardMining|ShardUpgradeInfo",
+    controllerHookLabel: controllerShellAnchors.join(", "),
+    unlockHookLabel: unlockHookSamples.join(", "),
+    buyHookLabel: buyHookSamples.join(", "),
+    textCheckerLabel: textCheckerSamples.join(", ")
+  };
+}
+
+function getShardMilestoneRowAlignmentBoundarySummary(boundary) {
+  const unlockHookRange = typeof boundary?.unlockHookRange === "object" && boundary.unlockHookRange ? boundary.unlockHookRange : {};
+  const textCheckerRange = typeof boundary?.textCheckerRange === "object" && boundary.textCheckerRange ? boundary.textCheckerRange : {};
+  const buyHookRange = typeof boundary?.buyHookRange === "object" && boundary.buyHookRange ? boundary.buyHookRange : {};
+  const unlockTextCheckerOverlapIds = Array.isArray(boundary?.unlockTextCheckerOverlapIds) ? boundary.unlockTextCheckerOverlapIds : [];
+  const buyTextCheckerOverlapIds = Array.isArray(boundary?.buyTextCheckerOverlapIds) ? boundary.buyTextCheckerOverlapIds : [];
+  return {
+    hasBoundary:
+      boundary?.screenControllerFamily === "ShardMining, Assembly-CSharp"
+      && unlockHookRange.start === 17
+      && unlockHookRange.end === 29
+      && unlockHookRange.count === 13
+      && textCheckerRange.start === 0
+      && textCheckerRange.end === 12
+      && textCheckerRange.count === 13
+      && buyHookRange.start === 0
+      && buyHookRange.end === 0
+      && buyHookRange.count === 1,
+    hasZeroUnlockTextOverlap: unlockTextCheckerOverlapIds.length === 0,
+    hasBuyTextOverlap: buyTextCheckerOverlapIds.length === 1 && buyTextCheckerOverlapIds[0] === 0,
+    unlockRangeLabel: `${unlockHookRange.start ?? "?"}-${unlockHookRange.end ?? "?"}`,
+    textCheckerRangeLabel: `${textCheckerRange.start ?? "?"}-${textCheckerRange.end ?? "?"}`,
+    buyRangeLabel: `${buyHookRange.start ?? "?"}-${buyHookRange.end ?? "?"}`,
+    unlockTextOverlapLabel: unlockTextCheckerOverlapIds.length ? unlockTextCheckerOverlapIds.join(", ") : "none",
+    buyTextOverlapLabel: buyTextCheckerOverlapIds.length ? buyTextCheckerOverlapIds.join(", ") : "none"
   };
 }
 

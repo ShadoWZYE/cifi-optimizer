@@ -1,0 +1,56 @@
+{
+  "dataset": "shard-milestone-row-shell-boundary.v1",
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "shardMiningMetadataNeighborhood": "data/shardmining-metadata-neighborhood.v1.json",
+    "ownerFamilyBoundary": "data/shard-owner-family-boundary.v1.json",
+    "payloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
+    "globalMetadata": "workbench/apk/base/global-metadata.dat"
+  },
+  "screenControllerFamily": "ShardMining, Assembly-CSharp",
+  "dataCarrierTieIn": "ShardMining|ShardUpgradeInfo",
+  "controllerShellAnchors": [
+    "AttachFastBuyButton",
+    "StartFastBuyButtonHold",
+    "FastBuyButtonMethodShards"
+  ],
+  "unlockHookSamples": [
+    "UnlockMilestone17",
+    "UnlockMilestone18",
+    "UnlockMilestone19",
+    "UnlockMilestone20",
+    "UnlockMilestone21",
+    "UnlockMilestone22",
+    "UnlockMilestone23",
+    "UnlockMilestone24",
+    "UnlockMilestone25",
+    "UnlockMilestone26",
+    "UnlockMilestone27",
+    "UnlockMilestone28",
+    "UnlockMilestone29"
+  ],
+  "buyHookSamples": [
+    "BuyMilestone0"
+  ],
+  "textCheckerSamples": [
+    "Milestone0TextChecker",
+    "Milestone1TextChecker",
+    "Milestone2TextChecker",
+    "Milestone3TextChecker",
+    "Milestone4TextChecker",
+    "Milestone5TextChecker",
+    "Milestone6TextChecker",
+    "Milestone7TextChecker",
+    "Milestone8TextChecker",
+    "Milestone9TextChecker",
+    "Milestone10TextChecker",
+    "Milestone11TextChecker",
+    "Milestone12TextChecker"
+  ],
+  "currentBoundary": [
+    "Treat this bundle as the current shard milestone row-shell boundary inside the narrowed ShardMining controller trail.",
+    "Use it to preserve the local partial row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker hooks without pretending the full row table is recovered.",
+    "This is enough to keep future shard row-verification probes attached to the shard-specific controller shell instead of a generic milestone family.",
+    "Do not treat this partial row shell as recovered player-owned row state, full milestone-number coverage, or verified player-facing row labels."
+  ]
+}

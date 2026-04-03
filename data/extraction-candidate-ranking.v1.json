@@ -513,7 +513,7 @@
     {
       "id": "shards.milestone-owner-family",
       "label": "Milestone owner family",
-      "track": "shards-and-loop-guardrails",
+      "track": "shard-milestone-payload-recovery",
       "terms": [
         "milestone owner",
         "shard milestone",
@@ -655,7 +655,7 @@
     {
       "id": "shards.loop-reset-stage-family",
       "label": "Loop-reset stage family",
-      "track": "shards-and-loop-guardrails",
+      "track": "shard-milestone-payload-recovery",
       "terms": [
         "loop reset",
         "loop-reset",
@@ -945,7 +945,7 @@
     {
       "id": "shards.shard-mining-ship-family",
       "label": "Shard-mining ship family",
-      "track": "shards-and-loop-guardrails",
+      "track": "shard-milestone-payload-recovery",
       "terms": [
         "shard mining",
         "demeter",
@@ -1063,7 +1063,7 @@
     {
       "id": "shards.shard-text-handlers",
       "label": "Shard milestone text handlers",
-      "track": "shards-and-loop-guardrails",
+      "track": "shard-milestone-payload-recovery",
       "terms": [
         "texthandlershard",
         "shard milestone bonuses per level"

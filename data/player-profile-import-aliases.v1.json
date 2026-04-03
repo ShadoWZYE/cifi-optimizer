@@ -2,8 +2,8 @@
   "version": "v1",
   "generatedFrom": "player-profile.js",
   "groupCount": 7,
-  "aliasCount": 30,
-  "acceptedPathCount": 68,
+  "aliasCount": 32,
+  "acceptedPathCount": 81,
   "groups": [
     {
       "id": "meta",
@@ -279,7 +279,10 @@
           "targetPath": "compatibility.unmappedSystemState.tokenShop",
           "acceptedPaths": [
             "compatibility.unmappedSystemState.tokenShop",
-            "systems.tokenShop"
+            "systems.tokenShop",
+            "systems.tokenBank",
+            "tokenShop",
+            "tokenBank"
           ]
         },
         {
@@ -287,11 +290,33 @@
           "targetPath": "compatibility.unmappedSystemState.multiverseMarket",
           "acceptedPaths": [
             "compatibility.unmappedSystemState.multiverseMarket",
-            "systems.multiverseMarket"
+            "systems.multiverseMarket",
+            "multiverseMarket"
+          ]
+        },
+        {
+          "field": "tokenShopStateClues",
+          "targetPath": "compatibility.unmappedSystemState.tokenShop",
+          "acceptedPaths": [
+            "TokenBankCap",
+            "ClaimableBankTokens",
+            "BankedTokens",
+            "DailyTokenium",
+            "DailyTokeniumCap",
+            "FinalTokenBankCap",
+            "FinalTokenBankFillSpeed",
+            "FinalDailyTokenBonus"
+          ]
+        },
+        {
+          "field": "multiverseMarketStateClues",
+          "targetPath": "compatibility.unmappedSystemState.multiverseMarket",
+          "acceptedPaths": [
+            "InscryptionsDone"
           ]
         }
       ],
-      "acceptedPathCount": 18
+      "acceptedPathCount": 31
     },
     {
       "id": "shipCalibration",

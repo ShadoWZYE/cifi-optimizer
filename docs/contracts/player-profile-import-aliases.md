@@ -82,7 +82,7 @@ Classification: `compatibility`
 
 Legacy or unmapped values preserved for migration safety only.
 
-Accepted alias paths: 18
+Accepted alias paths: 31
 
 | Field | Target path | Accepted aliases |
 |---|---|---|
@@ -93,8 +93,10 @@ Accepted alias paths: 18
 | `traitSphereCount` | `compatibility.unresolvedProfileFields.traitSphereCount` | `compatibility.unresolvedProfileFields.traitSphereCount`, `systems.metaProgression.traitSphereCount` |
 | `mechParts` | `compatibility.unresolvedProfileFields.mechParts` | `compatibility.unresolvedProfileFields.mechParts`, `systems.metaProgression.mechParts` |
 | `shardMilestones` | `compatibility.unmappedSystemState.shardMilestones` | `compatibility.unmappedSystemState.shardMilestones`, `systems.shardMilestones` |
-| `tokenShop` | `compatibility.unmappedSystemState.tokenShop` | `compatibility.unmappedSystemState.tokenShop`, `systems.tokenShop` |
-| `multiverseMarket` | `compatibility.unmappedSystemState.multiverseMarket` | `compatibility.unmappedSystemState.multiverseMarket`, `systems.multiverseMarket` |
+| `tokenShop` | `compatibility.unmappedSystemState.tokenShop` | `compatibility.unmappedSystemState.tokenShop`, `systems.tokenShop`, `systems.tokenBank`, `tokenShop`, `tokenBank` |
+| `multiverseMarket` | `compatibility.unmappedSystemState.multiverseMarket` | `compatibility.unmappedSystemState.multiverseMarket`, `systems.multiverseMarket`, `multiverseMarket` |
+| `tokenShopStateClues` | `compatibility.unmappedSystemState.tokenShop` | `TokenBankCap`, `ClaimableBankTokens`, `BankedTokens`, `DailyTokenium`, `DailyTokeniumCap`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `FinalDailyTokenBonus` |
+| `multiverseMarketStateClues` | `compatibility.unmappedSystemState.multiverseMarket` | `InscryptionsDone` |
 
 ## Ship Calibration Preservation
 

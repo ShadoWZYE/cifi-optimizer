@@ -35,6 +35,9 @@ Recovered adjacent strings include:
 - `AttachFastBuyButton`
 - `FastBuyButtonMethodShards`
 - `StartFastBuyButtonHold`
+- `UnlockMilestone17` through `UnlockMilestone29`
+- `BuyMilestone0`
+- `Milestone0TextChecker` through `Milestone12TextChecker`
 
 This is the strongest current repo-local evidence for the shard milestone screen controller family.
 
@@ -122,8 +125,14 @@ That bundle is the fail-fast repo contract for the current shard-specific owner 
 The next shard-local fail-fast bundle is now also preserved as:
 
 - [data/shard-milestone-payload-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-payload-boundary.v1.json)
+- [data/shard-milestone-row-shell-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-shell-boundary.v1.json)
+- [data/shard-milestone-row-alignment-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-alignment-boundary.v1.json)
 - [data/shard-save-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-save-boundary.v1.json)
 
 That payload boundary keeps the current milestone-total, cost-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail, but it still does not recover player-owned row payloads.
+
+The row-shell boundary separately keeps the first partial `UnlockMilestone*`, `BuyMilestone*`, and `Milestone*TextChecker` shell attached to `ShardMining`, but it still does not identify the declaring row owner or a complete row table.
+
+The row-alignment boundary makes the next blocker explicit: the current controller-side shell splits into `UnlockMilestone17-29`, `Milestone0-12TextChecker`, and `BuyMilestone0` rather than one shared row-number family, so the repo should not infer one-to-one row mapping from those symbols alone.
 
 The shard save boundary separately keeps the narrowed shard-local owner trail and the broader `PlayerProfileData` / `CloudSavePlayerProfile` save-family path from being treated as the same recovered context.
