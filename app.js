@@ -1813,6 +1813,7 @@ function renderSpendPlannerBoundary() {
         <p class="meta">${importedMarketPreview.hasImportedBalance ? `Imported <code>InscryptionsDone</code>: ${escapeHtml(importedMarketPreview.balanceLabel)}.` : "No imported <code>InscryptionsDone</code> balance is available yet."}</p>
         <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Current imported levels are available for ${importedMarketPreview.importedValidatedRowCount}/${importedMarketPreview.validatedRowCount} validated Emporium rows (${escapeHtml(importedMarketPreview.validatedRangeLabel)}).` : "No imported current levels are available yet for the validated Emporium rows."}</p>
         <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Preview sample: ${escapeHtml(importedMarketPreview.sampleLine)}.` : "When imported <code>IS*Level</code> fields are present, this build will surface only the validated row block and keep everything else quarantined."}</p>
+        <p class="meta">${importedMarketPreview.extraImportedRows.length ? `Additional imported <code>IS*Level</code> rows stay quarantined outside the grounded validated block: ${escapeHtml(importedMarketPreview.extraImportedLabel)}${importedMarketPreview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported <code>IS*Level</code> rows were found outside the grounded validated block."}</p>
         <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.maxedCount} imported validated rows are already at their recovered max level.` : "This preview stays descriptive only and does not unlock spend recommendations or canonical PlayerProfile fields."}</p>
       </div>
       ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Active Emporium next steps</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
@@ -4265,6 +4266,21 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
   const missingValidatedRows = validatedRecords
     .map((record) => Number(record?.inscription_id))
     .filter((rowId) => Number.isFinite(rowId) && !importedValidatedIds.has(rowId));
+  const extraImportedRows = Object.entries(importedState)
+    .map(([key, value]) => {
+      const match = /^IS(\d+)Level$/u.exec(String(key));
+      if (!match) {
+        return null;
+      }
+      const rowId = Number(match[1]);
+      const level = Number(value);
+      if (!Number.isFinite(rowId) || !Number.isFinite(level) || importedValidatedIds.has(rowId)) {
+        return null;
+      }
+      return { rowId, level };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.rowId - right.rowId);
   const averageCompletion = importedValidatedRows.length
     ? Math.round(
       importedValidatedRows
@@ -4285,6 +4301,10 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     averageCompletion,
     previewRows,
     missingValidatedRows,
+    extraImportedRows,
+    extraImportedLabel: extraImportedRows.length
+      ? extraImportedRows.slice(0, 8).map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}`).join(", ")
+      : "",
     sampleLine: previewRows.length
       ? previewRows.map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}${Number.isFinite(entry.maxLevel) ? `/${formatShardNumber(entry.maxLevel)}` : ""}`).join(" | ")
       : ""
@@ -4305,10 +4325,12 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
         <span class="pill">${preview.hasValidatedLevelPreview ? `${preview.importedValidatedRowCount}/${preview.validatedRowCount} validated rows` : "No validated Emporium levels"}</span>
         ${preview.hasValidatedLevelPreview ? `<span class="pill">${preview.maxedCount} maxed imported rows</span>` : ""}
         ${preview.hasValidatedLevelPreview && Number.isFinite(preview.averageCompletion) ? `<span class="pill">${preview.averageCompletion}% avg validated completion</span>` : ""}
+        ${preview.extraImportedRows.length ? `<span class="pill">${preview.extraImportedRows.length} extra imported rows quarantined</span>` : ""}
       </div>
       <div class="meta-stack">
         <p class="meta">${preview.hasValidatedLevelPreview ? `Imported current levels are present for validated rows ${escapeHtml(preview.validatedRangeLabel)}.` : "Imported current levels are not present for the validated Emporium row block."}</p>
         <p class="meta">${preview.hasValidatedLevelPreview ? `Missing validated imports: ${preview.missingValidatedRows.length ? escapeHtml(preview.missingValidatedRows.map((rowId) => `IS${rowId}`).join(", ")) : "none"}.` : "When imported IS*Level fields exist, this preview only surfaces the validated Emporium block and leaves the rest quarantined."}</p>
+        <p class="meta">${preview.extraImportedRows.length ? `Extra imported rows outside the grounded validated block stay quarantined: ${escapeHtml(preview.extraImportedLabel)}${preview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported rows were found outside the grounded validated block."}</p>
         ${preview.hasValidatedLevelPreview ? `<div class="preview-stack">${preview.previewRows.map((entry) => `
           <article class="preview-card">
             <strong>IS${escapeHtml(String(entry.rowId))}</strong>
