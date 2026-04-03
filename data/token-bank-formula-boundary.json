@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
+    "probe": "tmp-token-bank-formula-probe.json"
+  },
+  "derivedOutputCluster": [
+    "get_FinalTokenBankCap",
+    "set_FinalTokenBankCap",
+    "get_FinalTokenBankFillSpeed",
+    "set_FinalTokenBankFillSpeed",
+    "<FinalTokenBankCap>k__BackingField",
+    "<FinalTokenBankFillSpeed>k__BackingField",
+    "FinalTokenBankCap",
+    "FinalTokenBankFillSpeed"
+  ],
+  "controllerSideAnchors": [
+    "TokenShop",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens",
+    "ClaimBankedTokens",
+    "SetBankFill"
+  ],
+  "saveFamilyCluesChecked": [
+    "PlayerProfileData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "CloudSavePlayerProfile"
+  ],
+  "saveFamilyCluesInDerivedContext": [],
+  "currentBoundary": [
+    "Repo-local metadata now preserves a tight token-bank derived-output cluster for FinalTokenBankCap and FinalTokenBankFillSpeed, including accessors and backing fields.",
+    "The same checked local context does not currently expose PlayerProfileData or CloudSavePlayerProfile save-family clues beside those derived outputs.",
+    "This makes the current best repo-local conclusion narrower: these symbols still look like controller-side or computed outputs, not recovered saved-state fields.",
+    "That is enough to block premature promotion of FinalTokenBankCap or FinalTokenBankFillSpeed into canonical player state, but not enough to recover their true formula owners."
+  ]
+}

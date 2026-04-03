@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "probe": "tmp-spend-action-lane-probe.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
+    "tokenShopExtract": "data/token-shop-values.json",
+    "iapCatalog": "workbench/extract/assetripper-primary/Assets/Resources/IAPProductCatalog.bytes"
+  },
+  "tokenDirectBuyHooks": [
+    "BuyTokenBoost",
+    "BuyMK1TokenBoost",
+    "BuyMK2TokenBoost",
+    "BuyMK3TokenBoost",
+    "BuyMK4TokenBoost",
+    "BuyMK5TokenBoost",
+    "BuyMK6TokenBoost",
+    "BuyMK7TokenBoost",
+    "BuyMK8TokenBoost"
+  ],
+  "tokenHoldHooks": [
+    "StartTokenBoostHold",
+    "StopTokenBoostHold"
+  ],
+  "diamondDirectBuyHooks": [
+    "BuyDiamondBoost"
+  ],
+  "diamondHoldHooks": [
+    "StartDiamondBoostHold",
+    "StopDiamondBoostHold"
+  ],
+  "dailyTokeniumModifierHooks": [
+    "BuyLM244",
+    "BuyCollectorDevice"
+  ],
+  "tokenSupportingShells": [
+    "CostBox-Tokens"
+  ],
+  "dailyTokeniumSupportingShells": [
+    "CostBox-Tokenium",
+    "Mission Materials Booster",
+    "COLLECTERS PACK"
+  ],
+  "searchResults": {
+    "metadata": {
+      "BuyTokenBoost": 3,
+      "BuyDiamondBoost": 3,
+      "BuyTokenDailiesT2": 0,
+      "BuyTokenDailiesT3": 0,
+      "BuyLM244": 1,
+      "BuyCollectorDevice": 2,
+      "StartTokenBoostHold": 1,
+      "StopTokenBoostHold": 1,
+      "StartDiamondBoostHold": 1,
+      "StopDiamondBoostHold": 1
+    },
+    "level0": {
+      "BuyTokenBoost": 1,
+      "BuyDiamondBoost": 1,
+      "BuyTokenDailiesT2": 0,
+      "BuyTokenDailiesT3": 0,
+      "BuyLM244": 1,
+      "BuyCollectorDevice": 1,
+      "StartTokenBoostHold": 1,
+      "StopTokenBoostHold": 1,
+      "StartDiamondBoostHold": 1,
+      "StopDiamondBoostHold": 1,
+      "CostBox-Tokens": 5,
+      "CostBox-Tokenium": 5,
+      "Mission Materials Booster": 1,
+      "COLLECTERS PACK": 0
+    }
+  },
+  "currentBoundary": [
+    "The current APK and Unity probes preserve direct TokenShop buy-hook families for token spend and diamond spend through BuyTokenBoost, BuyMK1-8TokenBoost, BuyDiamondBoost, and their hold handlers.",
+    "The same local probes preserve BuyLM244 and BuyCollectorDevice as modifier-side hooks around the Daily Tokenium lane, alongside CostBox-Tokenium and Mission Materials Booster player-facing shells.",
+    "The checked probe currently returns zero BuyTokenDailiesT2 and BuyTokenDailiesT3 matches in both global-metadata.dat and level0, so TokenDailies should remain mapped as Daily Tokenium modifier families rather than recovered direct TokenShop purchase actions.",
+    "This is enough to keep spend action families separated in repo-local grounding, but not enough to recover player-owned levels or planner-ready saved-state inputs."
+  ]
+}

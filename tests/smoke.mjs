@@ -26,7 +26,20 @@ const shardAssetGrounding = JSON.parse(await readFile(new URL("../data/shard-ass
 const extractionCandidateFamilies = JSON.parse(await readFile(new URL("../data/extraction-candidate-families.v1.json", import.meta.url), "utf8"));
 const extractionCandidateRanking = JSON.parse(await readFile(new URL("../data/extraction-candidate-ranking.v1.json", import.meta.url), "utf8"));
 const bundledDatasetContract = JSON.parse(await readFile(new URL("../data/bundled-dataset-contract.v1.json", import.meta.url), "utf8"));
-const tokenShopData = JSON.parse(await readFile(new URL("../data/token-shop-values.json", import.meta.url), "utf8"));
+const multiverseMarketMetadataNeighborhoodData = JSON.parse(await readFile(new URL("../data/multiverse-market-metadata-neighborhood.json", import.meta.url), "utf8"));
+const tokeniumNamingCluesData = JSON.parse(await readFile(new URL("../data/tokenium-naming-clues.json", import.meta.url), "utf8"));
+const tokenBankStateCluesData = JSON.parse(await readFile(new URL("../data/token-bank-state-clues.json", import.meta.url), "utf8"));
+const dailyTokeniumLaneCluesData = JSON.parse(await readFile(new URL("../data/daily-tokenium-lane-clues.json", import.meta.url), "utf8"));
+const tokenBankFormulaBoundaryData = JSON.parse(await readFile(new URL("../data/token-bank-formula-boundary.json", import.meta.url), "utf8"));
+const multiverseMarketRangeBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-range-boundary.json", import.meta.url), "utf8"));
+const multiverseMarketRowTextCoverageData = JSON.parse(await readFile(new URL("../data/multiverse-market-row-text-coverage.json", import.meta.url), "utf8"));
+const tokenShopCostLanesData = JSON.parse(await readFile(new URL("../data/token-shop-cost-lanes.json", import.meta.url), "utf8"));
+const spendActionLaneCluesData = JSON.parse(await readFile(new URL("../data/spend-action-lane-clues.json", import.meta.url), "utf8"));
+const multiverseMarketActionShellData = JSON.parse(await readFile(new URL("../data/multiverse-market-action-shell.json", import.meta.url), "utf8"));
+const tokenShopOwnerShellData = JSON.parse(await readFile(new URL("../data/token-shop-owner-shell.json", import.meta.url), "utf8"));
+const tokenShopSaveBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-save-boundary.json", import.meta.url), "utf8"));
+const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8"));
+const tokenBankControllerShellData = JSON.parse(await readFile(new URL("../data/token-bank-controller-shell.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const agentsMd = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8");
@@ -213,11 +226,11 @@ assert.deepEqual(
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.id),
-  ["snapshot", "shards", "shard-asset-grounding", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market"]
+  ["snapshot", "shards", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "token-bank-controller-shell"]
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.classification),
-  ["canonical-app-snapshot", "grounded-descriptive", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics"]
+  ["canonical-app-snapshot", "grounded-descriptive", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics", "extracted-mechanics"]
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.find((entry) => entry.id === "shards")?.files,
@@ -298,17 +311,175 @@ assert.equal(groundedShardObserved.sourceReport, "docs/research/shard-milestones
 assert.equal(groundedShardProvenance.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
-  ["snapshot", "shards", "shard-asset-grounding", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market"]
-);
-assert.ok(snapshot.researchTracks.length >= 9, "expected intake and roadmap research tracks");
-assert.deepEqual(
-  tokenShopData.resource_icons,
-  ["resourceicons/resource_tokenium", "resourceicons/resource_tokenium_cap"]
+  ["snapshot", "shards", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "token-bank-controller-shell"]
 );
 assert.deepEqual(
   datasetValidation.map((entry) => entry.classification),
   bundledDatasetContract.datasets.map((entry) => entry.classification)
 );
+assert.equal(multiverseMarketMetadataNeighborhoodData.anchor_count, 9);
+assert.ok(
+  multiverseMarketMetadataNeighborhoodData.results.some((entry) => entry.anchor === "CloudSavePlayerProfile"),
+  "expected CloudSavePlayerProfile anchor in multiverse metadata neighborhood"
+);
+assert.ok(
+  multiverseMarketMetadataNeighborhoodData.results.some((entry) => entry.anchor === "PlayerProfileData"),
+  "expected PlayerProfileData anchor in multiverse metadata neighborhood"
+);
+assert.ok(
+  multiverseMarketMetadataNeighborhoodData.results.some((entry) => entry.anchor === "InscryptionsDone"),
+  "expected InscryptionsDone anchor in multiverse metadata neighborhood"
+);
+assert.ok(
+  multiverseMarketMetadataNeighborhoodData.results.some((entry) => entry.anchor === "SetAllChrystosEmporiumTexts"),
+  "expected SetAllChrystosEmporiumTexts anchor in multiverse metadata neighborhood"
+);
+assert.ok(
+  multiverseMarketMetadataNeighborhoodData.results.some((entry) => entry.anchor === "Mech1Unlocked"),
+  "expected Mech1Unlocked anchor in multiverse metadata neighborhood"
+);
+const multiverseMarketCloudSaveEntry = multiverseMarketMetadataNeighborhoodData.results.find((entry) => entry.anchor === "CloudSavePlayerProfile");
+const multiverseMarketCloudSaveStrings = (multiverseMarketCloudSaveEntry?.matches ?? []).flatMap((match) => [match.match_value, ...((match.context ?? []).map((item) => item.value))]);
+assert.ok(multiverseMarketCloudSaveStrings.some((value) => String(value).includes("CloudSavePlayerProfile")));
+assert.ok(multiverseMarketCloudSaveStrings.some((value) => String(value).includes("GetPlayerProfileInfo")));
+assert.deepEqual(tokeniumNamingCluesData.assetNames.resourceIcons, ["Resource_Tokenium", "Resource_Tokenium_Cap_0"]);
+assert.deepEqual(tokeniumNamingCluesData.assetNames.academySprites, ["Aca.Tokenium553"]);
+assert.ok(tokeniumNamingCluesData.level0Shells.includes("CostBox-Tokens"));
+assert.ok(tokeniumNamingCluesData.level0Shells.includes("CostBox-Tokenium"));
+assert.ok(tokeniumNamingCluesData.metadataStrings.includes("Daily Tokenium (from blue farm missions)"));
+assert.ok(tokeniumNamingCluesData.metadataStrings.includes("INCREASE TOKENS PER TOKENIUM-553"));
+assert.ok(tokenBankStateCluesData.tokenShopMethods.includes("ClaimBankedTokens"));
+assert.ok(tokenBankStateCluesData.tokenShopMethods.includes("get_TokenBankCap"));
+assert.ok(tokenBankStateCluesData.tokenShopControllerRefs.includes("BankFill"));
+assert.ok(tokenBankStateCluesData.tokenShopControllerRefs.includes("TokenBankDescriptionText"));
+assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("BigStatisticPrefab.TokenBankCap"));
+assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("TextHandlerLoopMods"));
+assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("SetLM244BonusText"));
+assert.ok(tokenBankStateCluesData.derivedOutputs.includes("FinalTokenBankFillSpeed"));
+assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("SpaceAcademy"));
+assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("SpaceAcademyMain"));
+assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("TextHandlerSpaceAcademy"));
+assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("FarmMissions"));
+assert.ok(dailyTokeniumLaneCluesData.modifierClues.includes("SetLM244BonusText"));
+assert.ok(dailyTokeniumLaneCluesData.modifierClues.includes("BuyLM244"));
+assert.ok(dailyTokeniumLaneCluesData.modifierClues.includes("FinalDailyTokenBonus"));
+assert.ok(dailyTokeniumLaneCluesData.modifierClues.includes("FinalFragmentsGainedFromFarmMissions"));
+assert.ok(dailyTokeniumLaneCluesData.premiumModifierClues.includes("BuyCollectorDevice"));
+assert.ok(dailyTokeniumLaneCluesData.premiumModifierClues.includes("CollectorCapBonus"));
+assert.ok(dailyTokeniumLaneCluesData.premiumModifierClues.includes("CollectorMatsBonus"));
+assert.ok(dailyTokeniumLaneCluesData.playerFacingStrings.includes("0 / 2000 Daily Tokenium (from blue farm missions)"));
+assert.ok(tokenBankFormulaBoundaryData.derivedOutputCluster.includes("get_FinalTokenBankCap"));
+assert.ok(tokenBankFormulaBoundaryData.derivedOutputCluster.includes("get_FinalTokenBankFillSpeed"));
+assert.ok(tokenBankFormulaBoundaryData.derivedOutputCluster.includes("<FinalTokenBankCap>k__BackingField"));
+assert.ok(tokenBankFormulaBoundaryData.derivedOutputCluster.includes("<FinalTokenBankFillSpeed>k__BackingField"));
+assert.ok(tokenBankFormulaBoundaryData.controllerSideAnchors.includes("ClaimBankedTokens"));
+assert.ok(tokenBankFormulaBoundaryData.saveFamilyCluesChecked.includes("PlayerProfileData"));
+assert.deepEqual(tokenBankFormulaBoundaryData.saveFamilyCluesInDerivedContext, []);
+assert.deepEqual(multiverseMarketRangeBoundaryData.validatedRowRanges, ["50-59", "63-74"]);
+assert.equal(multiverseMarketRangeBoundaryData.metadataIsRangeLabel, "IS99Level through IS110Level");
+assert.deepEqual(multiverseMarketRangeBoundaryData.overlapIds, []);
+assert.deepEqual(multiverseMarketRowTextCoverageData.textHandlerAnchors, ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts"]);
+assert.equal(multiverseMarketRowTextCoverageData.validatedRowCostTexts.length, 22);
+assert.ok(multiverseMarketRowTextCoverageData.validatedRowCostTexts.includes("SetIS50CostText"));
+assert.ok(multiverseMarketRowTextCoverageData.validatedRowCostTexts.includes("SetIS74CostText"));
+assert.deepEqual(multiverseMarketRowTextCoverageData.sampleBuyHooks, ["BuyIS50", "BuyIS74"]);
+assert.ok(tokenShopCostLanesData.tokenSpendGroups.includes("TokenBoost"));
+assert.ok(tokenShopCostLanesData.tokenSpendGroups.includes("TokenBoostT2"));
+assert.ok(tokenShopCostLanesData.tokenSpendGroups.includes("Tier5Token"));
+assert.ok(tokenShopCostLanesData.tokenSpendGroups.includes("MK8TokenBoost"));
+assert.ok(tokenShopCostLanesData.dailyTokeniumModifierGroups.includes("TokenDailiesT2"));
+assert.ok(tokenShopCostLanesData.dailyTokeniumModifierGroups.includes("TokenDailiesT3"));
+assert.deepEqual(tokenShopCostLanesData.diamondGroups, ["DiamondBoost"]);
+assert.ok(tokenShopCostLanesData.playerFacingClues.includes("CostBox-Tokens"));
+assert.ok(tokenShopCostLanesData.playerFacingClues.includes("CostBox-Tokenium"));
+assert.ok(tokenShopCostLanesData.playerFacingClues.includes("Mission Materials Booster"));
+assert.ok(spendActionLaneCluesData.tokenDirectBuyHooks.includes("BuyTokenBoost"));
+assert.ok(spendActionLaneCluesData.tokenDirectBuyHooks.includes("BuyMK1TokenBoost"));
+assert.ok(spendActionLaneCluesData.tokenDirectBuyHooks.includes("BuyMK8TokenBoost"));
+assert.deepEqual(spendActionLaneCluesData.diamondDirectBuyHooks, ["BuyDiamondBoost"]);
+assert.ok(spendActionLaneCluesData.dailyTokeniumModifierHooks.includes("BuyLM244"));
+assert.ok(spendActionLaneCluesData.dailyTokeniumModifierHooks.includes("BuyCollectorDevice"));
+assert.ok(spendActionLaneCluesData.dailyTokeniumSupportingShells.includes("CostBox-Tokenium"));
+assert.ok(spendActionLaneCluesData.dailyTokeniumSupportingShells.includes("Mission Materials Booster"));
+assert.ok(spendActionLaneCluesData.dailyTokeniumSupportingShells.includes("COLLECTERS PACK"));
+assert.equal(spendActionLaneCluesData.searchResults.metadata.BuyTokenDailiesT2, 0);
+assert.equal(spendActionLaneCluesData.searchResults.metadata.BuyTokenDailiesT3, 0);
+assert.equal(spendActionLaneCluesData.searchResults.level0.BuyTokenDailiesT2, 0);
+assert.equal(spendActionLaneCluesData.searchResults.level0.BuyTokenDailiesT3, 0);
+assert.deepEqual(multiverseMarketActionShellData.textHandlerAnchors, ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts"]);
+assert.equal(multiverseMarketActionShellData.contextDerivedBuyHookRange.start, 1);
+assert.equal(multiverseMarketActionShellData.contextDerivedBuyHookRange.end, 110);
+assert.equal(multiverseMarketActionShellData.contextDerivedBuyHookRange.count, 110);
+assert.equal(multiverseMarketActionShellData.contextDerivedCostTextRange.start, 1);
+assert.equal(multiverseMarketActionShellData.contextDerivedCostTextRange.end, 110);
+assert.equal(multiverseMarketActionShellData.contextDerivedCostTextRange.count, 110);
+assert.deepEqual(multiverseMarketActionShellData.validatedBuyHookRanges, ["50-59", "63-74"]);
+assert.equal(multiverseMarketActionShellData.validatedBuyHooks.length, 22);
+assert.ok(multiverseMarketActionShellData.validatedBuyHooks.includes("BuyIS50"));
+assert.ok(multiverseMarketActionShellData.validatedBuyHooks.includes("BuyIS74"));
+assert.equal(multiverseMarketActionShellData.validatedCostTexts.length, 22);
+assert.ok(multiverseMarketActionShellData.validatedCostTexts.includes("SetIS50CostText"));
+assert.ok(multiverseMarketActionShellData.validatedCostTexts.includes("SetIS74CostText"));
+assert.ok(tokenShopOwnerShellData.ownerAnchors.includes("TokenShop"));
+assert.ok(tokenShopOwnerShellData.ownerAnchors.includes("InitializeTokenShop"));
+assert.ok(tokenShopOwnerShellData.ownerAnchors.includes("SetAllTokenShopTexts"));
+assert.ok(tokenShopOwnerShellData.tokenBankMethods.includes("get_TokenBankCap"));
+assert.ok(tokenShopOwnerShellData.tokenBankMethods.includes("get_ClaimableBankTokens"));
+assert.ok(tokenShopOwnerShellData.tokenBankMethods.includes("ClaimBankedTokens"));
+assert.ok(tokenShopOwnerShellData.notificationHooks.includes("CheckTokenClaimNotification"));
+assert.ok(tokenShopOwnerShellData.notificationHooks.includes("TokenShopButtonNotification"));
+assert.ok(tokenShopOwnerShellData.notificationHooks.includes("BankedDescriptionTextIncrease"));
+assert.ok(tokenShopOwnerShellData.adjacentDeviceHooks.includes("BuyAutoTokenClicker"));
+assert.ok(tokenShopOwnerShellData.adjacentDeviceHooks.includes("BuyAutoDiamondClicker"));
+assert.ok(tokenShopOwnerShellData.adjacentDeviceHooks.includes("BuyChestSpeedster"));
+assert.equal(tokenShopOwnerShellData.sourcePresence.metadata.TokenShop, 1);
+assert.equal(tokenShopOwnerShellData.sourcePresence.metadata.ClaimBankedTokens, 1);
+assert.equal(tokenShopOwnerShellData.sourcePresence.level0.TokenShop, 1);
+assert.equal(tokenShopOwnerShellData.sourcePresence.level0.ClaimBankedTokens, 1);
+assert.ok(tokenShopSaveBoundaryData.ownerShellTermsChecked.includes("TokenShop"));
+assert.ok(tokenShopSaveBoundaryData.ownerShellTermsChecked.includes("ClaimBankedTokens"));
+assert.ok(tokenShopSaveBoundaryData.saveFamilyTermsChecked.includes("PlayerProfileData"));
+assert.ok(tokenShopSaveBoundaryData.saveFamilyTermsChecked.includes("CloudSavePlayerProfile"));
+assert.equal(tokenShopSaveBoundaryData.probeResults.metadataHasSaveTerms, true);
+assert.equal(tokenShopSaveBoundaryData.probeResults.level0HasSaveTerms, false);
+assert.equal(tokenShopSaveBoundaryData.probeResults.ownerShellWithSaveOverlapCount, 0);
+assert.equal(tokenShopSaveBoundaryData.probeResults.directTokenShopPlayerProfileContext, false);
+assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
+assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
+assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
+assert.ok(tokenBankControllerShellData.controllerAnchors.includes("BankFill"));
+assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenBankDescriptionText"));
+assert.ok(tokenBankControllerShellData.controllerAnchors.includes("CheckTokenClaimNotification"));
+assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShopButtonNotification"));
+assert.ok(tokenBankControllerShellData.adjacentControllerMethods.includes("get_TokenBankCap"));
+assert.ok(tokenBankControllerShellData.adjacentControllerMethods.includes("get_ClaimableBankTokens"));
+assert.ok(tokenBankControllerShellData.adjacentControllerMethods.includes("IncreaseBankedTokens"));
+assert.equal(tokenBankControllerShellData.sourcePresence.metadata.TokenShop, 1);
+assert.equal(tokenBankControllerShellData.sourcePresence.metadata.ClaimBankedTokens, 1);
+assert.equal(tokenBankControllerShellData.sourcePresence.metadata.SetBankFill, 1);
+assert.equal(tokenBankControllerShellData.sourcePresence.metadata.BankFill, 1);
+assert.equal(tokenBankControllerShellData.sourcePresence.metadata.TokenBankDescriptionText, 1);
+assert.equal(tokenBankControllerShellData.sourcePresence.metadata.CheckTokenClaimNotification, 1);
+assert.equal(tokenBankControllerShellData.sourcePresence.metadata.TokenShopButtonNotification, 1);
+assert.equal(tokenBankControllerShellData.sourcePresence.level0.ClaimBankedTokens, 1);
+assert.equal(tokenBankControllerShellData.sourcePresence.level0.BankedDescriptionTextIncrease, 1);
+assert.ok(multiverseMarketSaveBoundaryData.actionShellTermsChecked.includes("TextHandlerMarkets"));
+assert.ok(multiverseMarketSaveBoundaryData.actionShellTermsChecked.includes("SetAllChrystosEmporiumTexts"));
+assert.ok(multiverseMarketSaveBoundaryData.saveFamilyTermsChecked.includes("PlayerProfileData"));
+assert.ok(multiverseMarketSaveBoundaryData.saveFamilyTermsChecked.includes("CloudSavePlayerProfile"));
+assert.equal(multiverseMarketSaveBoundaryData.probeResults.actionShellWithSaveOverlapCount, 0);
+assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasActionTerms, true);
+assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasSaveTerms, true);
+assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataProbeHasSaveTerms, false);
+assert.equal(multiverseMarketSaveBoundaryData.probeResults.level0ProbeHasSaveTerms, false);
+const multiverseMarketInscryptionsEntry = multiverseMarketMetadataNeighborhoodData.results.find((entry) => entry.anchor === "InscryptionsDone");
+const recoveredInscryptionLevels = [...new Set(
+  (multiverseMarketInscryptionsEntry?.matches ?? [])
+    .flatMap((match) => [match.match_value, ...((match.context ?? []).map((item) => item.value))])
+    .flatMap((value) => Array.from(String(value).matchAll(/IS(\d+)Level/g), (match) => Number(match[1])))
+    .filter((value) => Number.isFinite(value))
+)].sort((left, right) => left - right);
+assert.deepEqual(recoveredInscryptionLevels, [99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]);
 assert.equal(normalizedFeedAction.id, "shard-threshold");
 assert.equal(normalizedFeedAction.kind, "upgrade");
 assert.equal(normalizedFeedAction.score, 42);
@@ -361,34 +532,84 @@ assert.ok(shardTrack.nextSteps.length >= 3, "expected remaining shard extraction
 const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
 assert.ok(spendTrack, "expected spend workflow track");
 assert.equal(spendTrack.status, "queued");
-assert.match(spendTrack.currentSlice, /TokenShop cost lane as grounded token or tokenium spending/);
-assert.match(spendTrack.currentSlice, /keep that boundary visible in-app before any spend cards land/);
-assert.match(spendTrack.currentSlice, /make extracted spend anchors fail fast in APK validation/);
-assert.match(spendTrack.currentSlice, /show the first safe spend-unlock path directly in the app/);
-assert.match(spendTrack.currentSlice, /surface imported spend payloads as quarantined compatibility state rather than planner inputs/);
+assert.match(spendTrack.currentSlice, /Use APK and Unity extraction to harden spend-lane naming, TokenShop cost-lane, action-lane, owner-shell, and save-boundary splits, Daily Tokenium owner-family clues, token-bank controller and formula boundaries, and save-model boundaries before planner wiring/);
+assert.match(spendTrack.currentSlice, /narrow token-bank controller shell around ClaimBankedTokens or SetBankFill or BankFill or TokenBankDescriptionText or TokenShopButtonNotification/);
+assert.match(spendTrack.currentSlice, /checked broader BuyIS1-110 or SetIS1-110CostText action shell around the validated 50-59 and 63-74 row block/);
 assert.ok(
-  spendTrack.completedSteps.some((step) => /TokenShop cost lane as token or tokenium spending/.test(step)),
-  "expected spend track to record TokenShop currency-lane grounding"
+  spendTrack.completedSteps.some((step) => /Promote the MultiverseMarket metadata-neighborhood clue bundle into bundled dataset validation and APK-grounding checks/.test(step)),
+  "expected spend track to record metadata-neighborhood validation hardening"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Show the spend-planner boundary in-app/.test(step)),
-  "expected spend track to record the in-app spend boundary slice"
+  spendTrack.completedSteps.some((step) => /Surface the narrowed MultiverseMarket save-family boundary in the Validation page/.test(step)),
+  "expected spend track to record in-app save-side boundary visibility"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Make recovered TokenShop token-bank anchors and MultiverseMarket late-block coverage fail fast in APK validation/.test(step)),
-  "expected spend track to record spend APK hardening"
+  spendTrack.completedSteps.some((step) => /recovered IS\*Level field run is broader than the currently validated MultiverseMarket row block/.test(step)),
+  "expected spend track to record row-block versus field-run boundary visibility"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Show the first safe spend-unlock path in-app/.test(step)),
-  "expected spend track to record the spend unlock-path slice"
+  spendTrack.completedSteps.some((step) => /Promote exact MultiverseMarket validated-row coverage into APK checks and research support/.test(step)),
+  "expected spend track to record exact row-coverage support in app surfaces"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Surface imported TokenShop and MultiverseMarket payloads as quarantined compatibility state/.test(step)),
-  "expected spend track to record quarantined spend-payload visibility"
+  spendTrack.completedSteps.some((step) => /Promote TokenShop extracted family coverage into APK checks and research support/.test(step)),
+  "expected spend track to record token-shop coverage support in app surfaces"
 );
 assert.ok(
-  spendTrack.nextSteps.some((step) => /player-owned current levels for TokenShop upgrade rows/.test(step)),
-  "expected spend track to move on to TokenShop owned-state recovery"
+  spendTrack.completedSteps.some((step) => /Refresh the checked-in MultiverseMarket metadata neighborhood from APK artifacts to include CloudSavePlayerProfile, SetAllChrystosEmporiumTexts, and Mech1Unlocked/.test(step)),
+  "expected spend track to record stronger APK metadata-neighborhood grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote token versus tokenium naming clues from shipped assets into a checked-in extracted dataset/.test(step)),
+  "expected spend track to record token versus tokenium naming grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote token-bank controller-side clues from APK and Unity artifacts into a checked-in extracted dataset/.test(step)),
+  "expected spend track to record token-bank controller split grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote Daily Tokenium lane clues from APK, Unity, and checked-in IAP artifacts into a bundled extracted dataset/.test(step)),
+  "expected spend track to record Daily Tokenium owner-family grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a token-bank formula boundary from APK metadata/.test(step)),
+  "expected spend track to record token-bank formula boundary grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a token-bank controller-shell dataset/.test(step)),
+  "expected spend track to record token-bank controller-shell grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a MultiverseMarket range boundary into a checked-in dataset/.test(step)),
+  "expected spend track to record MultiverseMarket range-boundary grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote validated-row text coverage from APK and Unity artifacts into a checked-in dataset/.test(step)),
+  "expected spend track to record MultiverseMarket row-text coverage grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a TokenShop cost-lane boundary into a checked-in dataset/.test(step)),
+  "expected spend track to record TokenShop cost-lane grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a spend action-lane boundary into a checked-in dataset/.test(step)),
+  "expected spend track to record spend action-lane grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a MultiverseMarket action-shell boundary into a checked-in dataset/.test(step)),
+  "expected spend track to record MultiverseMarket action-shell grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a TokenShop owner-shell boundary into a checked-in dataset/.test(step)),
+  "expected spend track to record TokenShop owner-shell grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a TokenShop save-boundary dataset/.test(step)),
+  "expected spend track to record TokenShop save-boundary grounding"
+);
+assert.ok(
+  spendTrack.completedSteps.some((step) => /Promote a MultiverseMarket save-boundary dataset/.test(step)),
+  "expected spend track to record MultiverseMarket save-boundary grounding"
 );
 const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-feed-and-hardening");
 assert.ok(feedTrack, "expected unified feed track");
@@ -839,7 +1060,63 @@ assert.match(appJs, /Planner helpers filled:/);
 assert.match(appJs, /quarantined support surface/);
 assert.match(appJs, /Grounding checks stay separate from MVP behavior/);
 assert.match(appJs, /TokenShop owner payload/);
+assert.match(appJs, /TokenShop extracted family coverage/);
+assert.match(appJs, /32 numeric groups with TokenBoost, DiamondBoost, and TokenDailiesT2 plus token-bank controller anchors/);
+assert.match(appJs, /Spend tokenium naming clues/);
+assert.match(appJs, /Resource_Tokenium, Aca\.Tokenium553, CostBox-Tokens, and CostBox-Tokenium available/);
+assert.match(appJs, /Token-bank controller split clues/);
+assert.match(appJs, /ClaimBankedTokens, get_TokenBankCap, BigStatisticPrefab\.TokenBankCap, and SetLM244BonusText available/);
 assert.match(appJs, /MultiverseMarket owner payload/);
+assert.match(appJs, /MultiverseMarket validated row coverage/);
+assert.match(appJs, /22 validated rows across ids 50-59 and 63-74/);
+assert.match(appJs, /MultiverseMarket save-family clues/);
+assert.match(appJs, /PlayerProfileData persistence clues available/);
+assert.match(appJs, /MultiverseMarket cloud-save path clues/);
+assert.match(appJs, /CloudSavePlayerProfile path clues available/);
+assert.match(appJs, /MultiverseMarket progression-field cluster/);
+assert.match(appJs, /InscryptionsDone trade-counter cluster available/);
+assert.match(appJs, /Spend save-side narrowing/);
+assert.match(appJs, /broader PlayerProfileData persistence family instead of treating MultiverseMarket itself as the recovered save owner/);
+assert.match(appJs, /Likely persistence family/);
+assert.match(appJs, /Cloud-save profile path/);
+assert.match(appJs, /CloudSavePlayerProfile and GetPlayerProfileInfo now appear in the same checked-in save-path neighborhood/);
+assert.match(appJs, /Grounded field-cluster clues/);
+assert.match(appJs, /Validated row block vs broader field run/);
+assert.match(appJs, /currently validates .* rows across ids/);
+assert.match(appJs, /broader than the currently validated row block/);
+assert.match(appJs, /Grounded spend inputs/);
+assert.match(appJs, /TokenShop currently exposes .* extracted numeric families across/);
+assert.match(appJs, /const namedLanes = \["TokenBoost", "DiamondBoost", "TokenDailiesT2"\]/);
+assert.match(appJs, /BankFill and TokenBankDescriptionText/);
+assert.match(appJs, /Shipped assets now preserve \$\{tokeniumNamingSummary\.resourceLabel\} plus \$\{tokeniumNamingSummary\.academyLabel\}/);
+assert.match(appJs, /level0 keeps both \$\{tokeniumNamingSummary\.tokenShellLabel\} and \$\{tokeniumNamingSummary\.tokeniumShellLabel\}/);
+assert.match(appJs, /function getTokeniumNamingSummary/);
+assert.match(appJs, /Token-bank controller clues now preserve \$\{tokenBankStateSummary\.claimMethod\}, \$\{tokenBankStateSummary\.capMethod\}, \$\{tokenBankStateSummary\.displayShell\}, and \$\{tokenBankStateSummary\.loopHandler\}/);
+assert.match(appJs, /function getTokenBankStateSummary/);
+assert.match(appJs, /Daily Tokenium lane clues now preserve \$\{dailyTokeniumSummary\.ownerFamilyLabel\}, \$\{dailyTokeniumSummary\.missionFamilyLabel\}, \$\{dailyTokeniumSummary\.loopHook\}, \$\{dailyTokeniumSummary\.purchaseHook\}, and \$\{dailyTokeniumSummary\.premiumPack\}/);
+assert.match(appJs, /Player-facing strings still frame Daily Tokenium as a farm-mission or Academy Menu reward lane that TokenShop and the Collector pack modify/);
+assert.match(appJs, /function getDailyTokeniumLaneSummary/);
+assert.match(appJs, /function getTokenBankFormulaBoundarySummary/);
+assert.match(appJs, /"ClaimBankedTokens"/);
+assert.match(appJs, /"BigStatisticPrefab\.TokenBankCap"/);
+assert.match(appJs, /"SetLM244BonusText"/);
+assert.match(appJs, /"SpaceAcademy"/);
+assert.match(appJs, /"FarmMissions"/);
+assert.match(appJs, /"BuyLM244"/);
+assert.match(appJs, /"BuyCollectorDevice"/);
+assert.match(appJs, /"COLLECTERS PACK"/);
+assert.match(appJs, /"get_FinalTokenBankCap"/);
+assert.match(appJs, /"get_FinalTokenBankFillSpeed"/);
+assert.match(appJs, /"<FinalTokenBankCap>k__BackingField"/);
+assert.match(appJs, /"<FinalTokenBankFillSpeed>k__BackingField"/);
+assert.match(appJs, /"Resource_Tokenium"/);
+assert.match(appJs, /"Aca\.Tokenium553"/);
+assert.match(appJs, /"CostBox-Tokens"/);
+assert.match(appJs, /"CostBox-Tokenium"/);
+assert.match(appJs, /MultiverseMarket currently has .* validated rows across ids/);
+assert.match(appJs, /not enough to identify the declaring save model or planner-ready owned-state inputs/);
+assert.match(appJs, /Do not promote FinalIS or achievement symbols into canonical player state yet/);
+assert.match(appJs, /does not identify the declaring save model or which recovered IS\*Level subset actually maps to the validated MultiverseMarket rows/);
 assert.match(appJs, /Shard milestone mapping gate/);
 assert.match(appJs, /Shard shell grounding payload/);
 assert.match(appJs, /Grounded shard shell evidence available/);
@@ -847,13 +1124,89 @@ assert.match(appJs, /Repo-wide default unknown candidate/);
 assert.match(appJs, /Top PR2-local shard candidate/);
 assert.match(appJs, /Why next:/);
 assert.match(appJs, /Available but unmapped/);
-assert.match(appJs, /Shard operations have built-in pacing/);
-assert.match(appJs, /Grounded shard anchors can support loop warnings even while milestone rows remain descriptive-only/);
-assert.match(appJs, /Grounded shard boundary/);
-assert.match(appJs, /Repo-local Unity assets already ground shard and loop shell identifiers/);
-assert.match(appJs, /They are not yet mapped from shipped-game shard milestone owners/);
-assert.match(appJs, /MilestoneBonusesPerLevel/);
-assert.match(appJs, /Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked/);
+assert.match(appJs, /\.\/data\/multiverse-market-metadata-neighborhood\.json/);
+assert.match(appJs, /\.\/data\/tokenium-naming-clues\.json/);
+assert.match(appJs, /\.\/data\/token-bank-state-clues\.json/);
+assert.match(appJs, /\.\/data\/daily-tokenium-lane-clues\.json/);
+assert.match(appJs, /\.\/data\/token-bank-formula-boundary\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-range-boundary\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-row-text-coverage\.json/);
+assert.match(appJs, /\.\/data\/token-shop-cost-lanes\.json/);
+assert.match(appJs, /\.\/data\/spend-action-lane-clues\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-action-shell\.json/);
+assert.match(appJs, /\.\/data\/token-shop-owner-shell\.json/);
+assert.match(appJs, /\.\/data\/token-shop-save-boundary\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
+assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
+assert.match(appJs, /Daily Tokenium owner-family clues/);
+assert.match(appJs, /SpaceAcademy, FarmMissions, SetLM244BonusText, BuyLM244, and BuyCollectorDevice available/);
+assert.match(appJs, /Daily Tokenium owner family/);
+assert.match(appJs, /SpaceAcademy, SpaceAcademyMain, TextHandlerSpaceAcademy, and FarmMissions now appear in a checked-in lane clue bundle/);
+assert.match(appJs, /Token-bank derived output boundary/);
+assert.match(appJs, /FinalTokenBankCap and FinalTokenBankFillSpeed cluster without PlayerProfileData or CloudSavePlayerProfile joins/);
+assert.match(appJs, /Token-bank formula clues now preserve \$\{tokenBankFormulaSummary\.capAccessor\}, \$\{tokenBankFormulaSummary\.fillAccessor\}, \$\{tokenBankFormulaSummary\.capField\}, and \$\{tokenBankFormulaSummary\.fillField\} as a derived-output cluster/);
+assert.match(appJs, /FinalTokenBankCap and FinalTokenBankFillSpeed now appear in a checked-in accessor and backing-field cluster/);
+assert.match(appJs, /The same checked local context still does not expose PlayerProfileData or CloudSavePlayerProfile beside those outputs/);
+assert.match(appJs, /MultiverseMarket row-range boundary/);
+assert.match(appJs, /Validated rows 50-59 and 63-74 do not overlap the recovered IS99-110 metadata run/);
+assert.match(appJs, /Validated rows \${multiverseMarketRangeSummary\.validatedRangeLabel} do not overlap \${multiverseMarketRangeSummary\.metadataRangeLabel}/);
+assert.match(appJs, /function getMultiverseMarketRangeBoundarySummary/);
+assert.match(appJs, /Validated rows vs recovered IS run/);
+assert.match(appJs, /The separate metadata run \${multiverseMarketRangeSummary\.metadataRangeLabel} currently has no direct overlap with that validated block/);
+assert.match(appJs, /The checked range boundary now preserves a zero-overlap result between validated rows \${multiverseMarketRangeSummary\.validatedRangeLabel} and the recovered metadata run \${multiverseMarketRangeSummary\.metadataRangeLabel}/);
+assert.match(appJs, /MultiverseMarket validated row text coverage/);
+assert.match(appJs, /TextHandlerMarkets and SetAllChrystosEmporiumTexts cover SetIS50-59 and 63-74 cost texts/);
+assert.match(appJs, /function getMultiverseMarketRowTextCoverageSummary/);
+assert.match(appJs, /The validated row block also has direct text-handler coverage through \${multiverseMarketRowTextSummary\.textHandler}, \${multiverseMarketRowTextSummary\.textBatcher}, and \${multiverseMarketRowTextSummary\.coveredCount} SetIS\*CostText hooks/);
+assert.match(appJs, /That is row-label coverage for the validated block, not saved-state coverage/);
+assert.match(appJs, /Validated row text coverage/);
+assert.match(appJs, /TextHandlerMarkets now preserves \${multiverseMarketRowTextSummary\.coveredCount} direct SetIS\*CostText hooks for validated rows \${multiverseMarketRowTextSummary\.validatedRangeLabel}/);
+assert.match(appJs, /function getTokenShopCostLaneSummary/);
+assert.match(appJs, /TokenShop cost-lane split/);
+assert.match(appJs, /TokenBoost, DiamondBoost, TokenDailiesT2, CostBox-Tokens, and CostBox-Tokenium available/);
+assert.match(appJs, /TokenShop cost-lane clues now preserve \${tokenShopCostLaneSummary\.tokenLaneLabel}, \${tokenShopCostLaneSummary\.diamondLaneLabel}, \${tokenShopCostLaneSummary\.dailyLaneLabel}, \${tokenShopCostLaneSummary\.tokensShellLabel}, and \${tokenShopCostLaneSummary\.tokeniumShellLabel}/);
+assert.match(appJs, /This keeps TokenDailies on the Daily Tokenium modifier lane instead of mixing it into generic token spend rows/);
+assert.match(appJs, /function getSpendActionLaneSummary/);
+assert.match(appJs, /Spend action-lane split/);
+assert.match(appJs, /BuyTokenBoost, BuyDiamondBoost, BuyLM244, BuyCollectorDevice, and zero BuyTokenDailies hooks preserved/);
+assert.match(appJs, /Spend action-lane clues now preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}/);
+assert.match(appJs, /The checked APK and Unity probe still returns zero \${spendActionLaneSummary\.dailyHookT2} or \${spendActionLaneSummary\.dailyHookT3} matches/);
+assert.match(appJs, /"BuyTokenBoost"/);
+assert.match(appJs, /"BuyDiamondBoost"/);
+assert.match(appJs, /"BuyLM244"/);
+assert.match(appJs, /"BuyCollectorDevice"/);
+assert.match(appJs, /"BuyTokenDailiesT2"/);
+assert.match(appJs, /"BuyTokenDailiesT3"/);
+assert.match(appJs, /function getMultiverseMarketActionShellSummary/);
+assert.match(appJs, /MultiverseMarket action shell/);
+assert.match(appJs, /Context-derived BuyIS1-110 and SetIS1-110CostText shell preserved while only rows 50-59 and 63-74 stay validated/);
+assert.match(appJs, /The same checked action shell context reaches \${multiverseMarketActionShellSummary\.buyRangeLabel} plus \${multiverseMarketActionShellSummary\.costTextRangeLabel}, while only \${multiverseMarketActionShellSummary\.validatedRangeLabel} stays numerically validated/);
+assert.match(appJs, /That broader action shell is useful for mapping and UI recovery, but it should not be promoted as full numeric validation or saved-state coverage/);
+assert.match(appJs, /function getTokenShopOwnerShellSummary/);
+assert.match(appJs, /TokenShop owner shell/);
+assert.match(appJs, /TokenShop, ClaimBankedTokens, CheckTokenClaimNotification, and BuyAutoTokenClicker preserved as one local owner shell/);
+assert.match(appJs, /TokenShop owner-shell clues now preserve \${tokenShopOwnerShellSummary\.ownerAnchor}, \${tokenShopOwnerShellSummary\.bankMethod}, \${tokenShopOwnerShellSummary\.notificationHook}, and \${tokenShopOwnerShellSummary\.deviceHook}/);
+assert.match(appJs, /That local TokenShop shell is enough to keep bank controls and adjacent device hooks grouped together, but not enough to promote player-owned bank values into planner state/);
+assert.match(appJs, /function getTokenShopSaveBoundarySummary/);
+assert.match(appJs, /TokenShop save boundary/);
+assert.match(appJs, /TokenShop owner shell and PlayerProfileData save-family clues stay separate with zero overlap/);
+assert.match(appJs, /The checked save boundary still keeps \${tokenShopSaveBoundarySummary\.ownerAnchor} separate from \${tokenShopSaveBoundarySummary\.saveAnchor}, with \${tokenShopSaveBoundarySummary\.overlapLabel}/);
+assert.match(appJs, /That means TokenShop ownership and PlayerProfile save recovery remain separate tasks, so the app should not infer saved bank values from owner-shell clues yet/);
+assert.match(appJs, /function getTokenBankControllerShellSummary/);
+assert.match(appJs, /Token-bank controller shell/);
+assert.match(appJs, /ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and CheckTokenClaimNotification preserved/);
+assert.match(appJs, /Token-bank controller shell now preserves \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}/);
+assert.match(appJs, /That keeps the narrow bank controller cluster together without promoting it into saved-state ownership or formula truth/);
+assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
+assert.match(appJs, /MultiverseMarket save boundary/);
+assert.match(appJs, /MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap/);
+assert.match(appJs, /The checked save boundary still keeps \${multiverseMarketSaveBoundarySummary\.actionAnchor} separate from \${multiverseMarketSaveBoundarySummary\.saveAnchor}, with \${multiverseMarketSaveBoundarySummary\.overlapLabel}/);
+assert.match(appJs, /That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet/);
+assert.match(appJs, /"TokenBoost"/);
+assert.match(appJs, /"DiamondBoost"/);
+assert.match(appJs, /"TokenDailiesT2"/);
+assert.match(appJs, /"CostBox-Tokens"/);
+assert.match(appJs, /"CostBox-Tokenium"/);
 assert.match(appJs, /These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels/);
 assert.match(appJs, /Canonical ship system, provisional implementation/);
 assert.match(appJs, /Experimental gem results/);

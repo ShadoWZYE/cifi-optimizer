@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
+    "assetNames": [
+      "workbench/extract/assetripper-primary/Assets/Resources/resourceicons/Resource_Tokenium.json",
+      "workbench/extract/assetripper-primary/Assets/Resources/resourceicons/Resource_Tokenium_Cap_0.json",
+      "workbench/extract/assetripper-primary/Assets/Sprite/Aca.Tokenium553.json"
+    ]
+  },
+  "assetNames": {
+    "resourceIcons": [
+      "Resource_Tokenium",
+      "Resource_Tokenium_Cap_0"
+    ],
+    "academySprites": [
+      "Aca.Tokenium553"
+    ]
+  },
+  "level0Shells": [
+    "AvailableTokensBar",
+    "CostBox-Tokens",
+    "CostBox-Tokens.TR",
+    "CostBox-Tokens.LR",
+    "CostBox-Tokens.TOTAL",
+    "CostBox-Tokenium",
+    "CostBox-Tokenium.TR",
+    "CostBox-Tokenium.LR",
+    "CostBox-Tokenium.TOTAL"
+  ],
+  "metadataStrings": [
+    "Daily Tokenium (from blue farm missions)",
+    "Mission Materials",
+    "@Research 106 - Mission Materials",
+    "INCREASE TOKENS PER TOKENIUM-553"
+  ],
+  "currentBoundary": [
+    "Shipped assets preserve both generic Tokenium and Academy.Tokenium553 naming.",
+    "Level0 preserves parallel CostBox-Tokens and CostBox-Tokenium shells plus AvailableTokensBar.",
+    "This is enough to keep token and tokenium naming lanes separate in app-facing grounding.",
+    "It is not yet enough to prove whether Tokenium and Tokenium-553 are one internal resource id or presentation variants of the same lane."
+  ]
+}

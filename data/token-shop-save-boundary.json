@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "probe": "tmp-token-shop-owner-shell-probe.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0"
+  },
+  "ownerShellTermsChecked": [
+    "TokenShop",
+    "InitializeTokenShop",
+    "SetAllTokenShopTexts",
+    "ClaimBankedTokens",
+    "get_TokenBankCap",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens",
+    "CheckTokenClaimNotification",
+    "TokenShopButtonNotification",
+    "BuyAutoTokenClicker",
+    "BuyAutoDiamondClicker",
+    "BuyChestSpeedster"
+  ],
+  "saveFamilyTermsChecked": [
+    "PlayerProfileData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "CloudSavePlayerProfile"
+  ],
+  "probeResults": {
+    "metadataHasSaveTerms": true,
+    "level0HasSaveTerms": false,
+    "ownerShellWithSaveOverlapCount": 0,
+    "directTokenShopPlayerProfileContext": false
+  },
+  "currentBoundary": [
+    "The checked TokenShop owner-shell probe now preserves TokenShop-side ownership and token-bank controller clues while separately confirming that PlayerProfileData, GetPlayerProfileData, FillPlayerProfileData, and CloudSavePlayerProfile still live outside the narrowed owner-shell contexts.",
+    "The same probe currently finds no save-family clues in level0 and zero direct overlap cases where the narrowed TokenShop owner shell shares a checked context with the PlayerProfile save-family terms.",
+    "This is enough to keep TokenShop ownership and save-family recovery separated in repo-local grounding, but not enough to recover the actual saved bank-value fields or declaring save model."
+  ]
+}

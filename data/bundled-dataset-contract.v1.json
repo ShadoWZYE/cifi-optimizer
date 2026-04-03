@@ -1,6 +1,6 @@
 {
   "contractVersion": "v1",
-  "updatedAt": "2026-03-29",
+  "updatedAt": "2026-04-03",
   "validationCommand": "npm run verify:data",
   "sourcePriority": [
     {
@@ -79,6 +79,118 @@
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-values.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-metadata-neighborhood",
+      "label": "Multiverse market metadata neighborhood",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-metadata-neighborhood.json"
+      ]
+    },
+    {
+      "id": "tokenium-naming-clues",
+      "label": "Tokenium naming clues",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/tokenium-naming-clues.json"
+      ]
+    },
+    {
+      "id": "token-bank-state-clues",
+      "label": "Token-bank state clues",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-bank-state-clues.json"
+      ]
+    },
+    {
+      "id": "daily-tokenium-lane-clues",
+      "label": "Daily Tokenium lane clues",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/daily-tokenium-lane-clues.json"
+      ]
+    },
+    {
+      "id": "token-bank-formula-boundary",
+      "label": "Token-bank formula boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-bank-formula-boundary.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-range-boundary",
+      "label": "Multiverse market range boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-range-boundary.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-row-text-coverage",
+      "label": "Multiverse market row text coverage",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-row-text-coverage.json"
+      ]
+    },
+    {
+      "id": "token-shop-cost-lanes",
+      "label": "Token shop cost lanes",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-cost-lanes.json"
+      ]
+    },
+    {
+      "id": "spend-action-lane-clues",
+      "label": "Spend action lane clues",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/spend-action-lane-clues.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-action-shell",
+      "label": "Multiverse market action shell",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-action-shell.json"
+      ]
+    },
+    {
+      "id": "token-shop-owner-shell",
+      "label": "Token shop owner shell",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-owner-shell.json"
+      ]
+    },
+    {
+      "id": "token-shop-save-boundary",
+      "label": "Token shop save boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-save-boundary.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-save-boundary",
+      "label": "Multiverse market save boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-save-boundary.json"
+      ]
+    },
+    {
+      "id": "token-bank-controller-shell",
+      "label": "Token-bank controller shell",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-bank-controller-shell.json"
       ]
     }
   ]

@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
+    "probe": "tmp-multiverse-row-text-probe.json",
+    "validatedRows": "data/multiverse-market-values.json"
+  },
+  "textHandlerAnchors": [
+    "TextHandlerMarkets",
+    "SetAllChrystosEmporiumTexts"
+  ],
+  "validatedRowCostTexts": [
+    "SetIS50CostText",
+    "SetIS51CostText",
+    "SetIS52CostText",
+    "SetIS53CostText",
+    "SetIS54CostText",
+    "SetIS55CostText",
+    "SetIS56CostText",
+    "SetIS57CostText",
+    "SetIS58CostText",
+    "SetIS59CostText",
+    "SetIS63CostText",
+    "SetIS64CostText",
+    "SetIS65CostText",
+    "SetIS66CostText",
+    "SetIS67CostText",
+    "SetIS68CostText",
+    "SetIS69CostText",
+    "SetIS70CostText",
+    "SetIS71CostText",
+    "SetIS72CostText",
+    "SetIS73CostText",
+    "SetIS74CostText"
+  ],
+  "sampleBuyHooks": [
+    "BuyIS50",
+    "BuyIS74"
+  ],
+  "currentBoundary": [
+    "Repo-local APK and Unity artifacts now preserve direct TextHandlerMarkets cost-text hooks for the currently validated MultiverseMarket rows 50-59 and 63-74.",
+    "That gives the repo a grounded row-text coverage path for the validated block through SetAllChrystosEmporiumTexts and the SetIS*CostText family.",
+    "This is still text-handler coverage, not saved-state coverage, so it does not resolve player-owned current levels or the declaring save model.",
+    "It is enough to separate validated row-label coverage from the unrelated IS99-110 save-side metadata run."
+  ]
+}

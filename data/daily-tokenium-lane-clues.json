@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-04-03",
+  "sources": {
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
+    "iapCatalog": "data/unity-textassets/IAPProductCatalog.txt",
+    "probe": "data/daily-tokenium-lane-probe.json",
+    "academySprite": "workbench/extract/assetripper-primary/Assets/Sprite/Aca.Tokenium553.json"
+  },
+  "ownerFamilyClues": [
+    "SpaceAcademy",
+    "SpaceAcademyMain",
+    "TextHandlerSpaceAcademy",
+    "FarmMissions"
+  ],
+  "modifierClues": [
+    "SetLM244BonusText",
+    "BuyLM244",
+    "FinalDailyTokenBonus",
+    "FinalFragmentsGainedFromFarmMissions"
+  ],
+  "premiumModifierClues": [
+    "BuyCollectorDevice",
+    "CollectorCapBonus",
+    "CollectorMatsBonus",
+    "SetCollectorDeviceTexts",
+    "COLLECTERS PACK",
+    "Increases Mission Mats & Daily Tokenium Cap!"
+  ],
+  "playerFacingStrings": [
+    "0 / 2000 Daily Tokenium (from blue farm missions)",
+    "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+    "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+  ],
+  "currentBoundary": [
+    "Shipped APK and Unity artifacts now preserve SpaceAcademy and FarmMissions as the strongest owner-family clues for the Daily Tokenium lane.",
+    "SetLM244BonusText and BuyLM244 still behave like modifier-side or text-side hooks around that lane, not as recovered saved-state owners.",
+    "Collector pack strings now give the repo a grounded premium modifier clue for the same Academy Menu Daily Tokenium cap lane.",
+    "This is enough to keep Daily Tokenium out of TokenShop-only planner behavior, but not enough to recover the gameplay owner object or saved-state fields."
+  ]
+}
