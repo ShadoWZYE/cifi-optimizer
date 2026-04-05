@@ -944,6 +944,14 @@ function validateShardCostNativeProbe(probe) {
     { rows: [19, 20, 21], path: "literalBuilderAdditive" },
   ], "shard cost native probe canonical merge constraints drifted");
   assert.ok(probe.canonicalMergeConstraints?.sharedConstraints?.some((line) => String(line).includes("first 200-plus feeder is stable")), "shard cost native probe canonical merge shared constraint drifted");
+  assert.equal(probe.formulaApplicationProfiles?.rowZero?.formulaClass, "row0-special-case", "shard cost native probe row-zero formula profile drifted");
+  assert.deepEqual(probe.formulaApplicationProfiles?.normalRows?.map((entry) => ({ rows: entry?.rows, formulaClass: entry?.formulaClass })), [
+    { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], formulaClass: "canonical-additive-premerge" },
+    { rows: [19, 20, 21], formulaClass: "canonical-literal-builder" },
+    { rows: [17, 22, 23], formulaClass: "drop-400-stage" },
+    { rows: [18, 24, 27, 28, 29], formulaClass: "two-stage-transition-band" },
+    { rows: [25, 26], formulaClass: "hundred-stage-short-class" },
+  ], "shard cost native probe formula application profiles drifted");
   const row1 = probe.rows?.find((entry) => entry?.row === 1);
   const row19 = probe.rows?.find((entry) => entry?.row === 19);
   const row27 = probe.rows?.find((entry) => entry?.row === 27);

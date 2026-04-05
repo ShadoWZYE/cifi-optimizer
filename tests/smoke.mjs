@@ -815,6 +815,14 @@ assert.deepEqual(shardCostNativeProbe.canonicalMergeConstraints.secondaryHundred
   { rows: [19, 20, 21], path: "literalBuilderAdditive" },
 ]);
 assert.ok(shardCostNativeProbe.canonicalMergeConstraints.sharedConstraints.some((line) => /first 200-plus feeder is stable/.test(line)));
+assert.equal(shardCostNativeProbe.formulaApplicationProfiles.rowZero.formulaClass, "row0-special-case");
+assert.deepEqual(shardCostNativeProbe.formulaApplicationProfiles.normalRows.map((entry) => ({ rows: entry.rows, formulaClass: entry.formulaClass })), [
+  { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], formulaClass: "canonical-additive-premerge" },
+  { rows: [19, 20, 21], formulaClass: "canonical-literal-builder" },
+  { rows: [17, 22, 23], formulaClass: "drop-400-stage" },
+  { rows: [18, 24, 27, 28, 29], formulaClass: "two-stage-transition-band" },
+  { rows: [25, 26], formulaClass: "hundred-stage-short-class" },
+]);
 const shardRow1Native = shardCostNativeProbe.rows.find((entry) => entry.row === 1);
 const shardRow19Native = shardCostNativeProbe.rows.find((entry) => entry.row === 19);
 const shardRow27Native = shardCostNativeProbe.rows.find((entry) => entry.row === 27);
@@ -1844,7 +1852,7 @@ assert.match(appJs, /Shard research and grounding/);
 assert.match(appJs, /These rows now live directly inside the shard subsystem/);
 assert.match(appJs, /Observed level/);
 assert.match(appJs, /Threshold row/);
-assert.match(appJs, /stays in canonical milestone order/);
+assert.match(appJs, /stays in canonical order/);
 assert.match(appJs, /Community alias:/);
 assert.match(appJs, /function getShardMilestonePanelTitle/);
 assert.match(appJs, /THE \${normalizedName\.toUpperCase\(\)} MILESTONE/);
@@ -1854,9 +1862,9 @@ assert.match(appJs, /Extracted bonus per level/);
 assert.match(appJs, /exact serialized cost fields/);
 assert.match(appJs, /Unlock req/);
 assert.match(appJs, /Extracted row state/);
-assert.match(appJs, /Extracted cost fields/);
+assert.match(appJs, /Formula profile/);
 assert.match(appJs, /Grounding detail/);
-assert.match(appJs, /Grounded data and extraction/);
+assert.match(appJs, /Grounded data/);
 assert.match(appJs, /Verified row inputs recovered; exact cost formula still unresolved\./);
 assert.match(appJs, /Native cost stages/);
 assert.match(appJs, /Observed value/);

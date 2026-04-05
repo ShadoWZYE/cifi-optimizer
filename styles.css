@@ -599,7 +599,7 @@ textarea {
   display: grid;
   gap: 14px;
   grid-template-columns: minmax(0, 1fr) 190px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .shard-mechanics-card {
@@ -687,7 +687,7 @@ textarea {
 
 .shard-level-up-rail {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   min-height: 100%;
   padding: 14px;
   border-radius: 14px;
@@ -696,18 +696,39 @@ textarea {
     radial-gradient(circle at top, rgba(120, 194, 255, 0.12), transparent 52%);
 }
 
+.shard-level-up-observed {
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(107, 145, 218, 0.22);
+  background: linear-gradient(180deg, rgba(20, 30, 57, 0.92), rgba(14, 21, 41, 0.96));
+}
+
+.shard-level-up-summary {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(107, 145, 218, 0.18);
+  background: linear-gradient(180deg, rgba(20, 30, 57, 0.7), rgba(14, 21, 41, 0.78));
+}
+
+.shard-level-up-summary .meta {
+  color: rgba(224, 233, 255, 0.8);
+}
+
 .shard-level-up-cost {
   margin: 0;
-  min-height: 86px;
+  min-height: 72px;
   padding: 12px 10px;
   border-radius: 12px;
   border: 1px solid rgba(107, 145, 218, 0.22);
   background: linear-gradient(180deg, rgba(18, 27, 50, 0.92), rgba(13, 20, 39, 0.96));
   color: #eff5ff;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.35;
   display: flex;
-  align-items: end;
+  align-items: center;
   justify-content: center;
   text-align: center;
 }
@@ -803,6 +824,10 @@ textarea {
   .shard-row-focus-field {
     flex-basis: auto;
     width: 100%;
+  }
+
+  .shard-level-up-rail {
+    grid-template-columns: 1fr;
   }
 }
 

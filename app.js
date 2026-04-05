@@ -3303,7 +3303,7 @@ function renderShardMilestoneDirectory() {
     <div class="meta-stack">
       <p class="eyebrow">Shard milestones</p>
       <h3>Shard milestones</h3>
-      <p class="meta">These rows now live directly inside the shard subsystem. Each card keeps its own observed level input, stays in canonical milestone order, and surfaces the strongest grounded title, bonus-slot, and cost evidence the repo currently has.</p>
+      <p class="meta">These rows now live directly inside the shard subsystem. Each card keeps its own observed level, stays in canonical order, and shows the strongest grounded row lane, staged formula class, and bonus data the repo can currently support without faking cost numbers.</p>
       <div class="preview-stack">
 ${milestones.map((milestone) => {
           const groundedRow = getShardMilestoneGroundedSummary(milestone);
@@ -3326,6 +3326,7 @@ ${milestones.map((milestone) => {
             })
             .filter(Boolean);
           const levelRailSummary = getShardMilestoneLevelRailSummary(milestone);
+          const formulaProfile = getShardFormulaApplicationProfile(milestone.milestoneNumber);
           return `
           <details class="snapshot-card shard-milestone-card" data-shard-milestone-card="${escapeHtml(String(milestone.id))}" ${isCardOpen ? "open" : ""}>
             <summary class="shard-milestone-summary">
@@ -3347,14 +3348,11 @@ ${milestones.map((milestone) => {
               <div class="shard-milestone-hero-copy">
                 <p class="meta">${escapeHtml(milestone.summary || "No milestone summary captured.")}</p>
                 <div class="shard-milestone-facts">
+                  <p class="meta"><strong>Unlock</strong> ${escapeHtml(describeUnlockCondition(milestone.unlockCondition))}</p>
                   <p class="meta"><strong>Thresholds</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
-                  <p class="meta"><strong>Source footing</strong> ${escapeHtml(getMilestoneSourceLabel(milestone) || "Named community reference; shipped-game owner mapping not yet recovered.")}</p>
+                  <p class="meta"><strong>Formula class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
                 </div>
               </div>
-              <label class="mini-field shard-row-focus-field">
-                <span>Observed level</span>
-                <input data-shard-focus-level data-shard-focus-level-for="${escapeHtml(String(milestone.id))}" type="number" min="0" step="1" value="${trackedLevel ?? ""}" placeholder="0">
-              </label>
             </div>
             <div class="shard-milestone-main-panel">
               <div class="shard-bonus-list">
@@ -3379,13 +3377,32 @@ ${milestones.map((milestone) => {
               </div>
               <aside class="shard-level-up-rail shard-panel-card">
                 <p class="snapshot-title">Level up</p>
+                <label class="mini-field shard-row-focus-field shard-level-up-observed">
+                  <span>Observed level</span>
+                  <input data-shard-focus-level data-shard-focus-level-for="${escapeHtml(String(milestone.id))}" type="number" min="0" step="1" value="${trackedLevel ?? ""}" placeholder="0">
+                </label>
+                <div class="shard-level-up-summary">
+                  <p class="meta"><strong>Formula class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
+                  <p class="meta"><strong>Stage path</strong> ${escapeHtml(levelRailSummary.stageLabel)}</p>
+                  <p class="meta"><strong>Next stage</strong> ${escapeHtml(levelRailSummary.nextStageLabel)}</p>
+                  ${formulaProfile ? `<p class="meta"><strong>Evaluator boundary</strong> ${escapeHtml(formulaProfile.summary)}</p>` : ""}
+                </div>
                 <p class="shard-level-up-cost">${escapeHtml(levelRailSummary.costLabel)}</p>
                 <button class="button ghost shard-level-up-button" type="button" disabled>${escapeHtml(levelRailSummary.buttonLabel)}</button>
               </aside>
             </div>
             <details class="shard-grounding-dropdown" data-shard-milestone-grounding="${escapeHtml(String(milestone.id))}" ${isGroundingOpen ? "open" : ""}>
-              <summary class="shard-grounding-summary">Grounded data and extraction</summary>
+              <summary class="shard-grounding-summary">Grounded data</summary>
               <div class="shard-milestone-data-grid">
+                <article class="validation-card shard-panel-card shard-mechanics-card">
+                  <div class="shard-panel-card-header">
+                    <strong>Formula profile</strong>
+                    <span class="shard-panel-card-tag">Runtime lane</span>
+                  </div>
+                  <p class="meta"><strong>Class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
+                  <p class="meta"><strong>Coverage</strong> ${escapeHtml(formulaProfile?.stageCoverage || (milestone.milestoneNumber === 0 ? "100-only special lane" : "Unresolved"))}</p>
+                  <p class="meta"><strong>Stage order</strong> ${escapeHtml(levelRailSummary.stageLabel)}</p>
+                </article>
                 <article class="validation-card shard-panel-card shard-mechanics-card">
                   <div class="shard-panel-card-header">
                     <strong>Extracted row state</strong>
@@ -3394,21 +3411,13 @@ ${milestones.map((milestone) => {
                   <p class="meta"><strong>Unlock req</strong> ${escapeHtml(extractedUnlockRequirement === null ? "Not recovered in direct row payload" : formatShardNumber(extractedUnlockRequirement))}</p>
                   <p class="meta"><strong>Threshold schedule</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
                   <p class="meta"><strong>Bonus slots</strong> ${escapeHtml(bonusSlotSummary ? String(bonusSlotSummary.bonusFieldCount) : "Unresolved")}</p>
-                  <p class="meta"><strong>Cost note</strong> ${escapeHtml(milestone.costProgression?.notes || "No cost progression note available.")}</p>
                 </article>
                 <article class="validation-card shard-panel-card shard-mechanics-card">
                   <div class="shard-panel-card-header">
-                    <strong>Extracted cost fields</strong>
+                    <strong>Extracted values</strong>
                     <span class="shard-panel-card-tag">Native inputs</span>
                   </div>
-                  <p class="meta">${escapeHtml(extractedCostFieldLabel)}</p>
-                  <p class="meta"><strong>Native cost stages</strong> ${escapeHtml(getShardNativeCostStageSummary(milestone.milestoneNumber, trackedLevel).stageLabel)}</p>
-                </article>
-                <article class="validation-card shard-panel-card shard-mechanics-card">
-                  <div class="shard-panel-card-header">
-                    <strong>Extracted bonus values</strong>
-                    <span class="shard-panel-card-tag">Per level</span>
-                  </div>
+                  <p class="meta"><strong>Cost fields</strong> ${escapeHtml(extractedCostFieldLabel)}</p>
                   <p class="meta">${escapeHtml(extractedBonusValues.length ? extractedBonusValues.join(" | ") : "No direct bonus-per-level floats recovered for this row yet.")}</p>
                 </article>
               </div>
@@ -5716,6 +5725,30 @@ function getShardNativeCostStageSummary(row, level = 0) {
   };
 }
 
+function getShardFormulaApplicationProfile(row) {
+  const profiles = state.shardGrounding?.costNativeProbe?.formulaApplicationProfiles;
+  if (!profiles) {
+    return null;
+  }
+  if (Number(row) === 0) {
+    return profiles.rowZero || null;
+  }
+  const normalRows = Array.isArray(profiles.normalRows) ? profiles.normalRows : [];
+  return normalRows.find((entry) => Array.isArray(entry?.rows) && entry.rows.includes(Number(row))) || null;
+}
+
+function formatShardFormulaClassLabel(formulaClass) {
+  const labels = {
+    "row0-special-case": "Row 0 special case",
+    "canonical-additive-premerge": "Canonical full recipe",
+    "canonical-literal-builder": "Canonical full recipe",
+    "drop-400-stage": "Drops 400+ stage",
+    "two-stage-transition-band": "100/200 transition band",
+    "hundred-stage-short-class": "100-only short class"
+  };
+  return labels[formulaClass] || "Unresolved native class";
+}
+
 function formatShardExtractedBonusPerLevel(value) {
   return Number.isFinite(Number(value)) ? `${Number(value).toFixed(3).replace(/\.?0+$/u, "")}x` : "Unknown";
 }
@@ -5820,11 +5853,18 @@ function getShardMilestonePanelTitle(milestone) {
 function getShardMilestoneLevelRailSummary(milestone) {
   const row = Number(milestone?.milestoneNumber ?? 0);
   const directValues = getShardRowDirectValues(row);
+  const profile = getShardFormulaApplicationProfile(row);
+  const nativeSummary = getShardNativeCostStageSummary(row, getShardFocusLevelForMilestone(milestone));
   return {
     buttonLabel: "Level up",
     costLabel: directValues
       ? "Verified row inputs recovered; exact cost formula still unresolved."
-      : "Current cost formula not yet verified."
+      : "Current cost formula not yet verified.",
+    formulaLabel: profile
+      ? `${formatShardFormulaClassLabel(profile.formulaClass)}${profile.stageCoverage ? ` (${profile.stageCoverage})` : ""}`
+      : (row === 0 ? "Row 0 special case" : "Unresolved native class"),
+    stageLabel: nativeSummary.thresholdStageLabel || nativeSummary.stageLabel,
+    nextStageLabel: nativeSummary.nextStageLabel
   };
 }
 

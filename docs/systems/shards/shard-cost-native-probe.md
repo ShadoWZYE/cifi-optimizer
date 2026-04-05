@@ -43,6 +43,7 @@ Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\da
 - That recipe is now preserved as one canonical symbolic stage assembler for the 100/200/300/400 class, with the shorter classes expressed as stage-coverage deltas rather than fresh formulas.
 - The canonical class itself now also preserves one stable internal split: rows 1-16 versus rows 19-21 differ in the secondary 100-plus feeder while keeping the same main stage ladder.
 - That makes the secondary 100-plus feeder the narrowest remaining merge breakpoint inside the canonical class; the sampled 300-plus feeder and both sampled 200-plus feeders are otherwise stable across that class.
+- The repo now also preserves direct formula-application profiles for all shard rows: row 0 is a separate special case, while rows 1-29 now resolve to one of five staged normal-row profile classes.
 - The constructor lanes are also typed: 0x24e1a07 builds a BigDouble from a double literal, 0x24e1d36 converts an integer into a BigDouble shell, and 0x24e1d8d does the same for float inputs.
 - The over-level exponent getters are no longer abstract hooks: they return row-owner-side BigDouble constants from ShardMining fields OverLevel100Base, OverLevel200Base, OverLevel300Base, and OverLevel400Base.
 - For rows 1-29 the getter entry path currently surfaces two early operand-pair starts, while row 0 surfaces three, which further supports row 0 as a separate native cost lane.
@@ -96,6 +97,15 @@ Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\da
   - `hundredStageStructure={'divideBy100CompilerPattern': True, 'loopCounterConvertedToBigDouble': True, 'perHundredLoop': {'usesLoopCompare': True, 'usesLoopIncrementLiteral': True, 'initialLiteralBuilderTarget': '0x24e1a07', 'loopMergeTarget': '0x24e1cb3'}, 'remainderLane': {'usesCurrentLevelBigDouble': True, 'usesBoundary100BigDouble': True, 'powerHelperTarget': '0x24e20d9', 'followUpMergeTarget': '0x24e3620', 'finalMergeTarget': '0x24e1cb3'}, 'stageFieldUsage': ['SU27StartCost', 'SU27CostExponent', 'SU27GrowthExponent'], 'literalLoads': [{'address': 38336169, 'mnemonic': 'movsd', 'targetAddress': 10316016, 'value': -5.134146299089364e+37}]}`
   - `threeHundredStageCostLane={'usesPositiveRemainderGate': True, 'usesCurrentLevelBigDouble': True, 'stageFieldUsage': ['SU27CostExponent', 'SU27GrowthExponent'], 'usesCostExponentAndGrowthExponentLane': True, 'mergeTargets': ['0x24e1cb3']}`
 
+## Formula application profiles
+
+- `row0`; `formulaClass=row0-special-case`; `Row 0 stays on its own five-field shard cost lane with only a checked 100+ gate in the sampled native body.`
+- `rows=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]`; `stageCoverage=100/200/300/400`; `formulaClass=canonical-additive-premerge`; `Uses the full canonical stage recipe with the additive-premerge secondary 100+ feeder.`
+- `rows=[19, 20, 21]`; `stageCoverage=100/200/300/400`; `formulaClass=canonical-literal-builder`; `Uses the full canonical stage recipe but swaps the secondary 100+ feeder to the literal-builder additive path.`
+- `rows=[17, 22, 23]`; `stageCoverage=100/200/300`; `formulaClass=drop-400-stage`; `Keeps the canonical scaffold through 300+ and drops the sampled 400+ stage coverage.`
+- `rows=[18, 24, 27, 28, 29]`; `stageCoverage=100/200`; `formulaClass=two-stage-transition-band`; `Uses the 100/200 scaffold with transition substitutions around the 100+ and 300+ feeder families.`
+- `rows=[25, 26]`; `stageCoverage=100`; `formulaClass=hundred-stage-short-class`; `Uses the shortest preserved normal-row class: canonical hundred-stage plus the literal-builder side lane through 0x24e1ab0.`
+
 ## Current boundary
 
 - Treat the get_SU*Cost native getter family as verified code that reads row-local ShardMining operands before entering a shared BigDouble helper chain.
@@ -119,6 +129,7 @@ Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\da
 - Treat one representative row per coverage class as enough to carry the current formula investigation, unless a new outlier breaks the shared hundred-stage or three-hundred-stage scaffolding inside that class.
 - Treat the current normal-row result as a class recipe boundary, not yet as a closed-form numeric evaluator.
 - Treat the canonical symbolic assembler as the current best repo-local description of normal-row shard cost construction, while still blocking exact cost output until the numeric merge rule is proven.
+- Treat the formula application profiles as player-safe structure summaries only: they map rows to staged recipe classes, not to exact current-cost numbers.
 - Treat the secondary 100-plus feeder split inside the canonical class as the next numeric-merge breakpoint to explain, rather than broadening back out to all rows.
 - Treat the sampled 300-plus feeder and both sampled 200-plus feeders as shared canonical-class structure until the binary evidence shows otherwise.
 - Do not expose exact next-level shard costs until the repo verifies how these operand reads and helper calls combine into the returned BreakInfinity.BigDouble.
