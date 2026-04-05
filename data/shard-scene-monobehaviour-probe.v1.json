@@ -1,0 +1,50 @@
+{
+  "dataset": "shard-scene-monobehaviour-probe.v1",
+  "generatedAt": "2026-04-04",
+  "source": {
+    "unityJoinedDir": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined",
+    "probeMethod": "UnityPy MonoBehaviour inventory with local dependency stubs"
+  },
+  "monoBehaviours": [
+    {
+      "pathId": 270194,
+      "scriptName": "ConstructionMilestones",
+      "objectName": "",
+      "assetsFile": "level0",
+      "byteStart": 30515072,
+      "byteSize": 4944,
+      "scriptFileId": 1,
+      "scriptPathId": 1983
+    },
+    {
+      "pathId": 290724,
+      "scriptName": "ShardMining",
+      "objectName": "",
+      "assetsFile": "level0",
+      "byteStart": 34088352,
+      "byteSize": 6732,
+      "scriptFileId": 1,
+      "scriptPathId": 2657
+    },
+    {
+      "pathId": 286629,
+      "scriptName": "ShardPerLevelTextHandler",
+      "objectName": "",
+      "assetsFile": "level0",
+      "byteStart": 33319696,
+      "byteSize": 1328,
+      "scriptFileId": 1,
+      "scriptPathId": 1984
+    }
+  ],
+  "findings": [
+    "level0 preserves a direct ShardMining MonoBehaviour object with a stable path id and byte range.",
+    "level0 also preserves a direct ShardPerLevelTextHandler object beside the shard menu object.",
+    "ConstructionMilestones is present in the same scene file, which keeps the academy-side numbered family visible while ShardMining remains the shard-local parser target."
+  ],
+  "currentBoundary": [
+    "Treat this probe as a byte-target narrowing step for future shard parsing work.",
+    "Use it to target direct ShardMining and ShardPerLevelTextHandler scene objects in level0.",
+    "Do not claim recovered shard numeric fields, formulas, or typed row payloads from this probe alone."
+  ]
+}

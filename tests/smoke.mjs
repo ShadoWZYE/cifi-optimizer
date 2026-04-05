@@ -26,9 +26,22 @@ const shardAssetGrounding = JSON.parse(await readFile(new URL("../data/shard-ass
 const shardOwnerFamilyBoundary = JSON.parse(await readFile(new URL("../data/shard-owner-family-boundary.v1.json", import.meta.url), "utf8"));
 const shardFinalSuBonusBoundary = JSON.parse(await readFile(new URL("../data/shard-finalsu-bonus-boundary.v1.json", import.meta.url), "utf8"));
 const shardMilestonePayloadBoundary = JSON.parse(await readFile(new URL("../data/shard-milestone-payload-boundary.v1.json", import.meta.url), "utf8"));
+const shardCostModelBoundary = JSON.parse(await readFile(new URL("../data/shard-cost-model-boundary.v1.json", import.meta.url), "utf8"));
+const shardMilestoneRowModelBoundary = JSON.parse(await readFile(new URL("../data/shard-milestone-row-model-boundary.v1.json", import.meta.url), "utf8"));
+const shardMilestoneTitleEffectBoundary = JSON.parse(await readFile(new URL("../data/shard-milestone-title-effect-boundary.v1.json", import.meta.url), "utf8"));
+const shardEffectTextHandlerBoundary = JSON.parse(await readFile(new URL("../data/shard-effect-text-handler-boundary.v1.json", import.meta.url), "utf8"));
 const shardMilestoneRowShellBoundary = JSON.parse(await readFile(new URL("../data/shard-milestone-row-shell-boundary.v1.json", import.meta.url), "utf8"));
 const shardMilestoneRowAlignmentBoundary = JSON.parse(await readFile(new URL("../data/shard-milestone-row-alignment-boundary.v1.json", import.meta.url), "utf8"));
+const shardMilestoneHandoffBoundary = JSON.parse(await readFile(new URL("../data/shard-milestone-handoff-boundary.v1.json", import.meta.url), "utf8"));
 const shardSaveBoundary = JSON.parse(await readFile(new URL("../data/shard-save-boundary.v1.json", import.meta.url), "utf8"));
+const shardSceneMonoBehaviourProbe = JSON.parse(await readFile(new URL("../data/shard-scene-monobehaviour-probe.v1.json", import.meta.url), "utf8"));
+const shardCostParameterProbe = JSON.parse(await readFile(new URL("../data/shard-cost-parameter-probe.v1.json", import.meta.url), "utf8"));
+const shardCostMethodProbe = JSON.parse(await readFile(new URL("../data/shard-cost-method-probe.v1.json", import.meta.url), "utf8"));
+const shardCostNativeProbe = JSON.parse(await readFile(new URL("../data/shard-cost-native-probe.v1.json", import.meta.url), "utf8"));
+const shardCostScreenshotCalibration = JSON.parse(await readFile(new URL("../data/shard-cost-screenshot-calibration.v1.json", import.meta.url), "utf8"));
+const shardCostListPathProbe = JSON.parse(await readFile(new URL("../data/shard-cost-list-path-probe.v1.json", import.meta.url), "utf8"));
+const shardBonusSlotProbe = JSON.parse(await readFile(new URL("../data/shard-bonus-slot-probe.v1.json", import.meta.url), "utf8"));
+const shardTypeMetadataProbe = JSON.parse(await readFile(new URL("../data/shard-type-metadata-probe.v1.json", import.meta.url), "utf8"));
 const extractionCandidateFamilies = JSON.parse(await readFile(new URL("../data/extraction-candidate-families.v1.json", import.meta.url), "utf8"));
 const extractionCandidateRanking = JSON.parse(await readFile(new URL("../data/extraction-candidate-ranking.v1.json", import.meta.url), "utf8"));
 const bundledDatasetContract = JSON.parse(await readFile(new URL("../data/bundled-dataset-contract.v1.json", import.meta.url), "utf8"));
@@ -109,10 +122,18 @@ assert.deepEqual(
     "shardOwnerFamilyBoundary",
     "shardFinalSuBonusBoundary",
     "shardMilestonePayloadBoundary",
+    "shardCostModelBoundary",
+    "shardMilestoneRowModelBoundary",
+    "shardMilestoneTitleEffectBoundary",
+    "shardEffectTextHandlerBoundary",
     "shardMilestoneRowShellBoundary",
     "shardMilestoneRowAlignmentBoundary",
-    "shardSaveBoundary",
-    "extractionCandidateRanking",
+      "shardSaveBoundary",
+      "shardSceneMonoBehaviourProbe",
+      "shardCostParameterProbe",
+      "shardCostNativeProbe",
+      "shardBonusSlotProbe",
+      "extractionCandidateRanking",
     "tokenShopValues",
     "multiverseMarketValues",
     "multiverseMarketMetadataNeighborhood",
@@ -130,6 +151,7 @@ assert.deepEqual(
     "tokenShopOwnerShell",
     "tokenShopSaveBoundary",
     "multiverseMarketSaveBoundary",
+    "multiverseMarketMarketMemberBoundary",
     "tokenBankControllerShell"
   ],
   "bootstrap dataset destructuring changed unexpectedly"
@@ -146,10 +168,18 @@ assert.deepEqual(
     "./data/shard-owner-family-boundary.v1.json",
     "./data/shard-finalsu-bonus-boundary.v1.json",
     "./data/shard-milestone-payload-boundary.v1.json",
+    "./data/shard-cost-model-boundary.v1.json",
+    "./data/shard-milestone-row-model-boundary.v1.json",
+    "./data/shard-milestone-title-effect-boundary.v1.json",
+    "./data/shard-effect-text-handler-boundary.v1.json",
     "./data/shard-milestone-row-shell-boundary.v1.json",
     "./data/shard-milestone-row-alignment-boundary.v1.json",
     "./data/shard-save-boundary.v1.json",
-    "./data/extraction-candidate-ranking.v1.json",
+    "./data/shard-scene-monobehaviour-probe.v1.json",
+    "./data/shard-cost-parameter-probe.v1.json",
+    "./data/shard-cost-native-probe.v1.json",
+    "./data/shard-bonus-slot-probe.v1.json",
+      "./data/extraction-candidate-ranking.v1.json",
     "./data/token-shop-values.json",
     "./data/multiverse-market-values.json",
     "./data/multiverse-market-metadata-neighborhood.json",
@@ -167,6 +197,7 @@ assert.deepEqual(
     "./data/token-shop-owner-shell.json",
     "./data/token-shop-save-boundary.json",
     "./data/multiverse-market-save-boundary.json",
+    "./data/multiverse-market-market-member-boundary.json",
     "./data/token-bank-controller-shell.json"
   ],
   "bootstrap fetch order changed unexpectedly"
@@ -244,8 +275,17 @@ assert.match(appJs, /compatibility\.unmappedSystemState/);
 assert.match(appJs, /No quarantined TokenShop payload is present in the imported PlayerProfile/);
 assert.match(appJs, /No quarantined MultiverseMarket payload is present in the imported PlayerProfile/);
 assert.match(appJs, /The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap<\/code>, <code>ClaimableBankTokens<\/code>, <code>InscryptionsDone<\/code>, and top-level <code>IS\*Level<\/code> fields instead of dropping them/);
-assert.match(appJs, /First safe spend unlock path/);
+assert.match(appJs, /Active Emporium save-model narrowing/);
+assert.match(appJs, /Partial Emporium import preview/);
+assert.match(appJs, /Grounded save-side overlap currently covers validated Emporium rows \${escapeHtml\(importedMarketPreview\.overlapRangeLabel\)}/);
+assert.match(appJs, /Current imported levels are available for \${importedMarketPreview\.importedOverlapRowCount}\/\${importedMarketPreview\.overlapRowCount} overlap-grounded Emporium rows/);
+assert.match(appJs, /\${importedMarketPreview\.overlapMaxedCount} imported overlap-grounded rows are already at recovered max level/);
+assert.match(appJs, /Broader validated preview: \${importedMarketPreview\.importedValidatedRowCount}\/\${importedMarketPreview\.validatedRowCount} validated Emporium rows/);
+assert.match(appJs, /Missing overlap-grounded imports: \${escapeHtml\(importedMarketPreview\.missingOverlapLabel\)}/);
+assert.match(appJs, /Overlap-grounded row cards now also show recovered row constants such as bonus, start cost, and cost exponent for the imported subset/);
 assert.match(appJs, /No spend recommendations yet/);
+assert.match(appJs, /same sibling accessor run as \${marketMemberSummary\.siblingAccessorLabel}/);
+assert.match(appJs, /strongest current repo-local host for future canonical market state/);
 assert.match(appJs, /TokenShop token-bank anchors/);
 assert.match(appJs, /Recovered token-bank controller anchors available/);
 assert.match(appJs, /Validated late-block constants available/);
@@ -324,6 +364,7 @@ const normalizedFixtureActions = recommendationFixtures.actions.map((item) => to
 const sortedFixtureActions = sortRecommendationFeed(normalizedFixtureActions);
 
 const defaultProfile = createDefaultPlayerProfile();
+assert.deepEqual(defaultProfile.planning.shards.observedLevelsByMilestone, {});
 
 assert.equal(snapshot.snapshotVersion, "v1.0.0-alpha");
 assert.equal(bundledDatasetContract.contractVersion, "v1");
@@ -334,7 +375,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.id),
-  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-save-boundary", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "token-bank-controller-shell"]
+  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-cost-model-boundary", "shard-milestone-row-model-boundary", "shard-milestone-title-effect-boundary", "shard-effect-text-handler-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-milestone-handoff-boundary", "shard-save-boundary", "shard-scene-monobehaviour-probe", "shard-cost-parameter-probe", "shard-cost-method-probe", "shard-cost-native-probe", "shard-cost-screenshot-calibration", "shard-cost-list-path-probe", "shard-bonus-slot-probe", "shard-type-metadata-probe", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "multiverse-market-market-member-boundary", "token-bank-controller-shell"]
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.classification),
@@ -366,14 +407,15 @@ assert.deepEqual(
   ["compatibility.unresolvedProfileFields.hunterLevel", "systems.metaProgression.hunterLevel"]
 );
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel.some((path) => path.join(".") === "systems.shards.focusMilestoneLevel"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardObservedLevelsByMilestone.some((path) => path.join(".") === "systems.shards.observedLevelsByMilestone"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop.some((path) => path.join(".") === "systems.tokenBank"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.some((path) => path.join(".") === "FinalTokenBankFillSpeed"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarketStateClues.some((path) => path.join(".") === "InscryptionsDone"));
 assert.equal(playerProfileAliasAuditData.version, "v1");
 assert.equal(playerProfileAliasAuditData.groupCount, 7);
-assert.equal(playerProfileAliasAuditData.aliasCount, 32);
-assert.equal(playerProfileAliasAuditData.acceptedPathCount, 81);
+assert.equal(playerProfileAliasAuditData.aliasCount, 33);
+assert.equal(playerProfileAliasAuditData.acceptedPathCount, 83);
 assert.deepEqual(
   playerProfileAliasAuditData.groups.map((group) => group.id),
   ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
@@ -428,6 +470,59 @@ assert.ok(shardMilestonePayloadBoundary.progressFillHooks.includes("CheckMilesto
 assert.ok(shardMilestonePayloadBoundary.tickFields.includes("CooldownTick"));
 assert.ok(shardMilestonePayloadBoundary.sampleCostAccessors.includes("get_SU29Cost"));
 assert.ok(shardMilestonePayloadBoundary.currentBoundary.some((line) => /Do not treat these hooks as recovered serialized player-owned milestone rows/.test(line)));
+assert.equal(shardCostModelBoundary.dataset, "shard-cost-model-boundary.v1");
+assert.equal(shardCostModelBoundary.dataCarrier, "ShardUpgradeInfo");
+assert.equal(shardCostModelBoundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo");
+assert.deepEqual(shardCostModelBoundary.sampleCostAccessorWindows[0], {
+  label: "earlyWindow",
+  start: 0,
+  end: 9,
+  count: 10,
+  accessors: ["get_SU0Cost", "get_SU1Cost", "get_SU2Cost", "get_SU3Cost", "get_SU4Cost", "get_SU5Cost", "get_SU6Cost", "get_SU7Cost", "get_SU8Cost", "get_SU9Cost"]
+});
+assert.deepEqual(shardCostModelBoundary.sampleCostAccessorWindows[1], {
+  label: "lateWindow",
+  start: 23,
+  end: 29,
+  count: 7,
+  accessors: ["get_SU23Cost", "get_SU24Cost", "get_SU25Cost", "get_SU26Cost", "get_SU27Cost", "get_SU28Cost", "get_SU29Cost"]
+});
+assert.ok(shardCostModelBoundary.row0CostFields.includes("SU0StartCost"));
+assert.ok(shardCostModelBoundary.row0CostFields.includes("SU0GrowthExponent3"));
+assert.ok(shardCostModelBoundary.row0FillFields.includes("SU0Level8Fill"));
+assert.ok(shardCostModelBoundary.row0BonusFields.includes("SU0Bonus8"));
+assert.ok(shardCostModelBoundary.optimizerBoundary.supportedNow.includes("row-local shard cost-parameter extraction and consistency checks against get_SU*Cost accessors"));
+assert.ok(shardCostModelBoundary.optimizerBoundary.blockedNow.includes("exact per-level shard costs"));
+assert.ok(shardCostModelBoundary.currentBoundary.some((line) => /Do not derive exact shard cost formulas/.test(line)));
+assert.equal(shardMilestoneRowModelBoundary.dataset, "shard-milestone-row-model-boundary.v1");
+assert.equal(shardMilestoneRowModelBoundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo");
+assert.deepEqual(shardMilestoneRowModelBoundary.textCheckerRange, { start: 0, end: 29, count: 30 });
+assert.deepEqual(shardMilestoneRowModelBoundary.unlockRequirementRange, { start: 0, end: 29, count: 30 });
+assert.deepEqual(shardMilestoneRowModelBoundary.buyHookEvidence.shardLocalDirectHooks, ["BuyMilestone0"]);
+assert.deepEqual(shardMilestoneRowModelBoundary.buyHookEvidence.genericNumberedFamily, { family: "ConstructionMilestones, Assembly-CSharp", start: 1, end: 57, count: 57 });
+assert.ok(shardMilestoneRowModelBoundary.currentBoundary.some((line) => /Do not infer that rows 0-29 are already mapped/.test(line)));
+assert.equal(shardMilestoneTitleEffectBoundary.dataset, "shard-milestone-title-effect-boundary.v1");
+assert.ok(shardMilestoneTitleEffectBoundary.titleAssetCandidates.some((entry) => entry.row === 0 && entry.assetName === "SMilestone-0-Eternal(OURO)"));
+assert.ok(shardMilestoneTitleEffectBoundary.titleAssetCandidates.some((entry) => entry.row === 29 && entry.assetName === "SMilestone-29-Earthly"));
+assert.ok(shardMilestoneTitleEffectBoundary.titleAssetCandidates.some((entry) => entry.row === 30 && entry.assetName === "SMilestone-30-Illuminating"));
+assert.equal(shardMilestoneTitleEffectBoundary.titleAssetCandidates.filter((entry) => entry.row === 28).length, 2);
+assert.ok(shardMilestoneTitleEffectBoundary.effectPresentationSlots.includes("ShardMilestoneBonus1"));
+assert.ok(shardMilestoneTitleEffectBoundary.effectPresentationSlots.includes("ShardMilestoneBonus8"));
+assert.ok(shardMilestoneTitleEffectBoundary.sampleBonusCalcAccessors.includes("get_SU1Bonus1Calc"));
+assert.ok(shardMilestoneTitleEffectBoundary.sampleBonusCalcAccessors.includes("get_SU5Bonus2Calc"));
+assert.ok(shardMilestoneTitleEffectBoundary.findings.some((line) => /row 28 currently has conflicting shipped asset title candidates/i.test(line)));
+assert.ok(shardMilestoneTitleEffectBoundary.currentBoundary.some((line) => /Do not treat the title list as fully conflict-free/.test(line)));
+assert.equal(shardEffectTextHandlerBoundary.dataset, "shard-effect-text-handler-boundary.v1");
+assert.equal(shardEffectTextHandlerBoundary.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N");
+assert.equal(shardEffectTextHandlerBoundary.genericMilestoneWriter, "SetAllMilestoneTexts");
+assert.deepEqual(shardEffectTextHandlerBoundary.rowModelCoverage, { start: 0, end: 29, count: 30 });
+assert.ok(shardEffectTextHandlerBoundary.presentationFamily.includes("ShardMilestoneBonus1"));
+assert.ok(shardEffectTextHandlerBoundary.presentationFamily.includes("ShardMilestoneBonus8"));
+assert.ok(shardEffectTextHandlerBoundary.sampleBonusCalcAccessors.includes("get_SU1Bonus1Calc"));
+assert.ok(shardEffectTextHandlerBoundary.sampleBonusCalcAccessors.includes("get_SU5Bonus2Calc"));
+assert.ok(shardEffectTextHandlerBoundary.uiContextAnchors.includes("LevelText"));
+assert.ok(shardEffectTextHandlerBoundary.uiContextAnchors.includes("DescriptionText"));
+assert.ok(shardEffectTextHandlerBoundary.currentBoundary.some((line) => /Do not treat this boundary as a recovered row-complete effect-text table/.test(line)));
 assert.equal(shardMilestoneRowShellBoundary.dataset, "shard-milestone-row-shell-boundary.v1");
 assert.equal(shardMilestoneRowShellBoundary.screenControllerFamily, "ShardMining, Assembly-CSharp");
 assert.equal(shardMilestoneRowShellBoundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo");
@@ -446,6 +541,18 @@ assert.deepEqual(shardMilestoneRowAlignmentBoundary.buyHookRange, { start: 0, en
 assert.deepEqual(shardMilestoneRowAlignmentBoundary.unlockTextCheckerOverlapIds, []);
 assert.deepEqual(shardMilestoneRowAlignmentBoundary.buyTextCheckerOverlapIds, [0]);
 assert.ok(shardMilestoneRowAlignmentBoundary.currentBoundary.some((line) => /Do not infer that UnlockMilestone17 already maps/.test(line)));
+assert.equal(shardMilestoneHandoffBoundary.dataset, "shard-milestone-handoff-boundary.v1");
+assert.equal(shardMilestoneHandoffBoundary.shardControllerFamily, "ShardMining, Assembly-CSharp");
+assert.deepEqual(shardMilestoneHandoffBoundary.shardControllerRowShell.unlockHookRange, { start: 17, end: 29, count: 13 });
+assert.deepEqual(shardMilestoneHandoffBoundary.shardControllerRowShell.buyHookRange, { start: 0, end: 0, count: 1 });
+assert.deepEqual(shardMilestoneHandoffBoundary.shardControllerRowShell.textCheckerRange, { start: 0, end: 12, count: 13 });
+assert.equal(shardMilestoneHandoffBoundary.genericMilestoneLead.family, "ConstructionMilestones, Assembly-CSharp");
+assert.equal(shardMilestoneHandoffBoundary.genericMilestoneLead.metadataPath, "Assets\\Scripts\\Upgrades\\AcademyData\\ConstructionMilestones.cs");
+assert.deepEqual(shardMilestoneHandoffBoundary.genericMilestoneLead.buyHookRange, { start: 1, end: 57, count: 57 });
+assert.ok(shardMilestoneHandoffBoundary.genericMilestoneLead.textAndValueAnchors.includes("InitializeMilestones"));
+assert.ok(shardMilestoneHandoffBoundary.genericMilestoneLead.textAndValueAnchors.includes("SetAllMilestoneTexts"));
+assert.ok(shardMilestoneHandoffBoundary.handoffFindings.some((line) => /BuyMilestone1-57/.test(line)));
+assert.ok(shardMilestoneHandoffBoundary.currentBoundary.some((line) => /not recovered player-owned shard milestone state/.test(line)));
 assert.equal(shardSaveBoundary.dataset, "shard-save-boundary.v1");
 assert.ok(shardSaveBoundary.ownerShellTermsChecked.includes("ShardMining"));
 assert.ok(shardSaveBoundary.ownerShellTermsChecked.includes("UpdateShardCostList"));
@@ -456,14 +563,358 @@ assert.equal(shardSaveBoundary.probeResults.level0HasSaveTerms, false);
 assert.equal(shardSaveBoundary.probeResults.ownerShellWithSaveOverlapCount, 0);
 assert.equal(shardSaveBoundary.probeResults.directShardPlayerProfileContext, false);
 assert.ok(shardSaveBoundary.currentBoundary.some((line) => /zero checked overlap/.test(line)));
+assert.equal(shardSceneMonoBehaviourProbe.dataset, "shard-scene-monobehaviour-probe.v1");
+assert.ok(shardSceneMonoBehaviourProbe.monoBehaviours.some((entry) => entry.scriptName === "ShardMining" && entry.pathId === 290724));
+assert.ok(shardSceneMonoBehaviourProbe.monoBehaviours.some((entry) => entry.scriptName === "ShardPerLevelTextHandler" && entry.byteSize === 1328));
+assert.ok(shardSceneMonoBehaviourProbe.currentBoundary.some((line) => /Do not claim recovered shard numeric fields/.test(line)));
+assert.equal(shardCostParameterProbe.dataset, "shard-cost-parameter-probe.v1");
+assert.equal(shardCostParameterProbe.metadataFamilies.startCostFields.length, 30);
+assert.equal(shardCostParameterProbe.metadataFamilies.costExponentFields.length, 30);
+assert.equal(shardCostParameterProbe.metadataFamilies.costAccessors.length, 30);
+assert.deepEqual(shardCostParameterProbe.metadataFamilies.overLevelExponentFields, ["OverLevel100Exponent", "OverLevel200Exponent", "OverLevel300Exponent", "OverLevel400Exponent"]);
+assert.deepEqual(shardCostParameterProbe.metadataFamilies.overLevelExponentAccessors, ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"]);
+assert.equal(shardCostParameterProbe.unlockRequirementBlock?.offset, 1456);
+assert.deepEqual(shardCostParameterProbe.unlockRequirementBlock?.values?.slice(0, 8), [0, 0, 5, 10, 20, 30, 40, 50]);
+assert.deepEqual(shardCostParameterProbe.unlockRequirementBlock?.values?.slice(-3), [8000, 8050, 8100]);
+assert.ok(shardCostParameterProbe.shardMiningCandidateTuples.length >= 7);
+assert.equal(shardCostParameterProbe.rowAlignedTupleCandidates.length, 29);
+assert.equal(shardCostParameterProbe.row0PreludeCandidate?.row, 0);
+assert.equal(shardCostParameterProbe.row0PreludeCandidate?.pointerRefCount, 19);
+assert.equal(shardCostParameterProbe.row0PreludeCandidate?.unlockRequirementValue, 0);
+assert.equal(shardCostParameterProbe.row0PreludeCandidate?.candidateStartCostInt, 0);
+assert.deepEqual(shardCostParameterProbe.row0PreludeCandidate?.bonusPerLevelValues?.slice(0, 5).map((value) => Number(value.toFixed(3))), [1.1, 1.02, 1.3, 1.011, 1.08]);
+assert.equal(Number(shardCostParameterProbe.row0PreludeCandidate?.leadingValue), 5);
+assert.equal(Number(shardCostParameterProbe.row0PreludeCandidate?.exponentA), 1.3);
+assert.equal(Number(shardCostParameterProbe.row0PreludeCandidate?.exponentB), 1.5);
+assert.equal(Number(shardCostParameterProbe.row0PreludeCandidate?.tailScalar), 1.1);
+assert.deepEqual(shardCostParameterProbe.row0PreludeCandidate?.strongestFieldOrderMapping?.values, { StartCost: 5, CostExponent: 1.3, GrowthExponent: 1.5, GrowthExponent2: 1.1, GrowthExponent3: 2 });
+assert.ok(shardCostParameterProbe.signatureGroups.length >= 5);
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 19 && entry.unlockRequirementValue === 1400 && entry.intValue === 70 && Number(entry.exponentA) === 2.5 && Number(entry.exponentB) === 4));
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 19 && entry.candidateStartCostInt === 70 && JSON.stringify(entry.bonusPerLevelValues.map((value) => Number(value.toFixed(2)))) === JSON.stringify([1.13, 1.15, 1.17])));
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 19 && Number(entry.strongestFieldOrderMapping?.values?.StartCost) === 1 && Number(entry.strongestFieldOrderMapping?.values?.CostExponent) === 2.5 && Number(entry.strongestFieldOrderMapping?.values?.GrowthExponent) === 4));
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 27 && entry.unlockRequirementValue === 8000 && entry.intValue === 975 && Number(entry.exponentA) === 2.25 && Number(entry.exponentB) === 4));
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 27 && entry.candidateStartCostInt === 975 && JSON.stringify(entry.bonusPerLevelValues.map((value) => Number(value.toFixed(2)))) === JSON.stringify([1.1, 1.19, 1.13])));
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 27 && Number(entry.strongestFieldOrderMapping?.values?.StartCost) === 2 && Number(entry.strongestFieldOrderMapping?.values?.CostExponent) === 2.25 && Number(entry.strongestFieldOrderMapping?.values?.GrowthExponent) === 4));
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 29 && entry.intValue === 988 && Number(entry.exponentA) === 2.3 && Number(entry.exponentB) === 4));
+assert.deepEqual(shardCostParameterProbe.repeatedCommonRowGroup?.rows, [19, 20, 21]);
+assert.equal(shardCostParameterProbe.repeatedCommonRowGroup?.tuples?.length, 3);
+assert.ok(shardCostParameterProbe.shardMiningCandidateTuples.every((entry) => typeof entry.tailSentinelA === "number" && typeof entry.tailSentinelB === "number"));
+assert.ok(shardCostParameterProbe.currentBoundary.some((line) => /exact serialized ShardMining row fields/.test(line)));
+assert.ok(shardCostParameterProbe.currentBoundary.some((line) => /verified get_SU\*Cost formula/.test(line)));
+assert.equal(shardCostMethodProbe.dataset, "shard-cost-method-probe.v1");
+assert.equal(shardCostMethodProbe.costGetterFamily.count, 30);
+assert.equal(shardCostMethodProbe.costGetterFamily.returnType, "BreakInfinity.BigDouble");
+assert.ok(shardCostMethodProbe.costGetterFamily.rows.some((entry) => entry.row === 0 && entry.name === "get_SU0Cost" && entry.rva === 38240178));
+assert.ok(shardCostMethodProbe.costGetterFamily.rows.some((entry) => entry.row === 19 && entry.estimatedTrackedBodySize === 3258));
+assert.ok(shardCostMethodProbe.costGetterFamily.rows.some((entry) => entry.row === 27 && entry.estimatedTrackedBodySize === 2693));
+assert.ok(shardCostMethodProbe.helperMethods.some((entry) => entry.name === "UpdateShardCostList" && entry.rva === 38238055));
+assert.ok(shardCostMethodProbe.helperMethods.some((entry) => entry.name === "GetShardCostList" && entry.rva === 38349168));
+assert.ok(shardCostMethodProbe.helperMethods.some((entry) => entry.name === "SortCostAndBools" && entry.rva === 38348434));
+assert.ok(shardCostMethodProbe.helperMethods.some((entry) => entry.name === "CountAffordableShard" && entry.rva === 38351862));
+assert.ok(shardCostMethodProbe.helperMethods.some((entry) => entry.name === "get_OverLevel100Exponent" && entry.rva === 38239421));
+assert.ok(shardCostMethodProbe.estimatedTrackedBodySizeClusters.some((entry) => entry.estimatedTrackedBodySize === 3258 && JSON.stringify(entry.rows) === JSON.stringify([19, 20, 21])));
+assert.ok(shardCostMethodProbe.estimatedTrackedBodySizeClusters.some((entry) => entry.estimatedTrackedBodySize === 2693 && JSON.stringify(entry.rows) === JSON.stringify([27, 28])));
+assert.ok(shardCostMethodProbe.findings.some((line) => /real get_SU0-29Cost runtime family/.test(line)));
+assert.ok(shardCostMethodProbe.currentBoundary.some((line) => /verified runtime getter family/.test(line)));
+assert.equal(shardCostNativeProbe.dataset, "shard-cost-native-probe.v1");
+assert.equal(shardCostNativeProbe.rows.length, 30);
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 0 && JSON.stringify(entry.earlyFieldReads.slice(3, 8).map((item) => item.offsetHex)) === JSON.stringify(["0x340", "0x348", "0x350", "0x358", "0x360"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 1 && JSON.stringify(entry.earlyFieldReads.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0x3e8", "0x3f0", "0x3f8", "0x400"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 1 && JSON.stringify(entry.operandFieldNames) === JSON.stringify(["SU1StartCost", "SU1CostExponent"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 1 && JSON.stringify(entry.costFieldUsage) === JSON.stringify(["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 1 && JSON.stringify(entry.levelGateChecks) === JSON.stringify([200, 100, 300])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 1 && entry.hundredStageStructure?.divideBy100CompilerPattern === true));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 1 && entry.hundredStageStructure?.remainderLane?.powerHelperTarget === "0x24e20d9"));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 1 && JSON.stringify(entry.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU1CostExponent", "SU1GrowthExponent"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 19 && JSON.stringify(entry.earlyFieldReads.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0xd58", "0xd60", "0xd68", "0xd70"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 19 && JSON.stringify(entry.operandFieldNames) === JSON.stringify(["SU19StartCost", "SU19CostExponent"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 19 && JSON.stringify(entry.costFieldUsage) === JSON.stringify(["SU19StartCost", "SU19CostExponent", "SU19GrowthExponent"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 19 && JSON.stringify(entry.levelGateChecks) === JSON.stringify([200, 100, 300])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 19 && entry.hundredStageStructure?.divideBy100CompilerPattern === true));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 19 && JSON.stringify(entry.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU19CostExponent", "SU19GrowthExponent"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 27 && JSON.stringify(entry.earlyFieldReads.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0x1188", "0x1190", "0x1198", "0x11a0"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 27 && JSON.stringify(entry.operandFieldNames) === JSON.stringify(["SU27StartCost", "SU27CostExponent"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 27 && JSON.stringify(entry.costFieldUsage) === JSON.stringify(["SU27StartCost", "SU27CostExponent", "SU27GrowthExponent"])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 27 && JSON.stringify(entry.levelGateChecks) === JSON.stringify([200, 100, 300])));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 27 && entry.hundredStageStructure?.divideBy100CompilerPattern === true));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 27 && JSON.stringify(entry.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU27CostExponent", "SU27GrowthExponent"])));
+assert.ok(shardCostNativeProbe.earlyCallClusters.some((entry) => JSON.stringify(entry.rows) === JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])));
+assert.ok(shardCostNativeProbe.earlyCallClusters.some((entry) => JSON.stringify(entry.rows) === JSON.stringify([17])));
+assert.ok(shardCostNativeProbe.overLevelGetterProfiles.some((entry) => entry.getterName === "get_OverLevel100Exponent" && entry.initialBuilderTarget === "0x24e1d36" && entry.initialIntegerSeed === 2));
+assert.ok(shardCostNativeProbe.overLevelGetterProfiles.some((entry) => entry.getterName === "get_OverLevel400Exponent" && entry.fallsIntoExtendedShardLane === true));
+assert.equal(shardCostNativeProbe.powerHelperFamily.shardPathEntryTarget, "0x24e20d9");
+assert.deepEqual(shardCostNativeProbe.powerHelperFamily.shardPathChain, ["0x24e20d9", "0x24e1a2b", "0x24e1452", "0x24e0faa", "0x24e1ab0"]);
+assert.deepEqual(shardCostNativeProbe.powerHelperFamily.nearbySiblingChain, ["0x24e21dc", "0x24e1bba", "0x24e1c3f", "0x24e1cb3"]);
+assert.equal(shardCostNativeProbe.genericBigDoubleHelpers.storedCostFieldsUseBigDoubleSlots, true);
+assert.equal(shardCostNativeProbe.genericBigDoubleHelpers.rowCostFieldSlotSizeBytes, 16);
+assert.equal(shardCostNativeProbe.genericBigDoubleHelpers.multiplyHelperTarget, "0x24e1b33");
+assert.equal(shardCostNativeProbe.genericBigDoubleHelpers.addHelperTarget, "0x24e176a");
+assert.equal(shardCostNativeProbe.genericBigDoubleHelpers.toDoubleTarget, "0x24e0cda");
+assert.equal(shardCostNativeProbe.scalarRemainderSubfamily.entryTarget, "0x24e3620");
+assert.equal(shardCostNativeProbe.scalarRemainderSubfamily.integralPartHelperTarget, "0x393469a");
+assert.equal(shardCostNativeProbe.scalarRemainderSubfamily.scalarToBigDoubleTarget, "0x24e349c");
+assert.equal(shardCostNativeProbe.scalarRemainderSubfamily.scaledPowerBuilderTarget, "0x24e38f9");
+assert.equal(shardCostNativeProbe.scalarRemainderSubfamily.unresolvedTransformTarget, "0x393474a");
+assert.equal(shardCostNativeProbe.scalarRemainderSubfamily.resolvedTransformKind, "powWrapper");
+assert.equal(shardCostNativeProbe.decimalPowerBridge.bigDoubleLog10Target, "0x24e30e4");
+assert.equal(shardCostNativeProbe.decimalPowerBridge.scaledPowerBuilderTarget, "0x24e38f9");
+assert.equal(shardCostNativeProbe.decimalPowerBridge.powWrapperTarget, "0x393474a");
+assert.equal(shardCostNativeProbe.decimalPowerBridge.mathImports.modfImportName, "modf");
+assert.equal(shardCostNativeProbe.decimalPowerBridge.mathImports.fmodImportName, "fmod");
+assert.equal(shardCostNativeProbe.decimalPowerBridge.mathImports.log10ImportName, "log10");
+assert.equal(shardCostNativeProbe.decimalPowerBridge.mathImports.powImportName, "pow");
+assert.equal(shardCostNativeProbe.stageAssemblyBoundary.stageDispatcherEntryTarget, "0x24e3620");
+assert.equal(shardCostNativeProbe.stageAssemblyBoundary.stageDispatcherBodyTarget, "0x24e368d");
+assert.equal(shardCostNativeProbe.stageAssemblyBoundary.scalarCompareTarget, "0x24e2d86");
+assert.equal(shardCostNativeProbe.stageAssemblyBoundary.specialCaseGateTarget, "0x24e387a");
+assert.equal(shardCostNativeProbe.stageAssemblyBoundary.scalarToBigDoubleTarget, "0x24e349c");
+assert.equal(shardCostNativeProbe.stageAssemblyBoundary.decimalPowerBuilderTarget, "0x24e38f9");
+assert.equal(shardCostNativeProbe.sampledOffsetFeeders.length, 3);
+assert.ok(shardCostNativeProbe.sampledOffsetFeeders.some((entry) => entry.row === 1 && entry.thresholdWindow === "100-plus-window" && entry.levelOffset === 70 && Math.abs(entry.coefficient - 9.765628774403013e-05) < 1e-16 && entry.model === "literalTimesBigDoubleOffsetThenAdd"));
+assert.ok(shardCostNativeProbe.sampledOffsetFeeders.some((entry) => entry.row === 19 && entry.thresholdWindow === "100-plus-window" && entry.levelOffset === 70 && Math.abs(entry.coefficient - (-0.00011718430323526263)) < 1e-16 && entry.model === "scalarOffsetTimesCoefficientThenAdd"));
+assert.ok(shardCostNativeProbe.sampledOffsetFeeders.some((entry) => entry.row === 27 && entry.thresholdWindow === "100-plus-window" && entry.levelOffset === 82 && Math.abs(entry.coefficient - 8192.001984596252) < 1e-9 && entry.model === "literalTimesBigDoubleOffsetThenAdd"));
+assert.deepEqual(shardCostNativeProbe.windowOffsetFamilies.hundredWindowFamilies, [
+  { thresholdWindow: "100-plus-window", model: "literalTimesBigDoubleOffsetThenAdd", levelOffset: 70, usesLiteralBuilder: false, usesPreMergeMultiply: true, rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
+  { thresholdWindow: "100-plus-window", model: "scalarOffsetTimesCoefficientThenAdd", levelOffset: 70, usesLiteralBuilder: true, usesPreMergeMultiply: false, rows: [19, 20, 21, 22, 23] },
+  { thresholdWindow: "100-plus-window", model: "scalarOffsetTimesCoefficientThenAdd", levelOffset: 67, usesLiteralBuilder: true, usesPreMergeMultiply: false, rows: [24, 25, 26] },
+  { thresholdWindow: "100-plus-window", model: "literalTimesBigDoubleOffsetThenAdd", levelOffset: 82, usesLiteralBuilder: false, usesPreMergeMultiply: true, rows: [27, 28, 29] },
+]);
+assert.deepEqual(shardCostNativeProbe.windowOffsetFamilies.twoHundredWindowFamilies, [
+  { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 27, 28, 29] },
+  { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [180], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 26, 27, 28, 29] },
+]);
+assert.deepEqual(shardCostNativeProbe.windowOffsetFamilies.threeHundredWindowFamilies, [
+  { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29] },
+  { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [49], rows: [24] },
+  { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [19], rows: [25] },
+]);
+assert.deepEqual(shardCostNativeProbe.stageWindowProfiles, [
+  {
+    rows: [0],
+    familySignature: [
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [] },
+    ],
+  },
+  {
+    rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29],
+    familySignature: [
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+      { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+    ],
+  },
+  {
+    rows: [18],
+    familySignature: [
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+      { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [99] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+    ],
+  },
+  {
+    rows: [19, 20, 21, 22, 23],
+    familySignature: [
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+      { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
+      { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+    ],
+  },
+  {
+    rows: [24],
+    familySignature: [
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+      { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [49] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
+      { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
+    ],
+  },
+  {
+    rows: [25],
+    familySignature: [
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+      { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [19] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
+    ],
+  },
+  {
+    rows: [26],
+    familySignature: [
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+      { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
+      { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
+    ],
+  },
+]);
+assert.deepEqual(shardCostNativeProbe.stageProfileCorrelations, [
+  { rows: [0], unlockRequirementRange: null, distinctRarities: [], distinctStartCosts: [], distinctCostExponents: [], distinctGrowthExponents: [] },
+  { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29], unlockRequirementRange: [0, 8100], distinctRarities: ["Epic", "Rare", "common"], distinctStartCosts: [1.4, 2, 2.4, 3.1, 3.6, 4, 5.6, 6, 8, 9, 9.99], distinctCostExponents: [1.15, 1.22, 1.24, 1.26, 1.4, 1.48, 1.5, 1.6, 1.78, 2, 2.25, 2.29, 2.3, 3, 4], distinctGrowthExponents: [1.2, 1.3, 1.6, 1.8, 2, 2.2, 2.5, 2.6, 2.8, 3.2, 3.4, 3.8, 4, 5, 8] },
+  { rows: [18], unlockRequirementRange: [1100, 1100], distinctRarities: ["Legendary"], distinctStartCosts: [1.5], distinctCostExponents: [1], distinctGrowthExponents: [5] },
+  { rows: [19, 20, 21, 22, 23], unlockRequirementRange: [1400, 1800], distinctRarities: ["Epic", "Rare", "common"], distinctStartCosts: [1], distinctCostExponents: [1, 2.5, 5], distinctGrowthExponents: [1, 3, 4] },
+  { rows: [24], unlockRequirementRange: [3300, 3300], distinctRarities: ["Rare"], distinctStartCosts: [4], distinctCostExponents: [5], distinctGrowthExponents: [5] },
+  { rows: [25], unlockRequirementRange: [3600, 3600], distinctRarities: ["Low Pristine"], distinctStartCosts: [3], distinctCostExponents: [2], distinctGrowthExponents: [2] },
+  { rows: [26], unlockRequirementRange: [3900, 3900], distinctRarities: ["Mid Pristine"], distinctStartCosts: [5], distinctCostExponents: [2], distinctGrowthExponents: [6] },
+]);
+assert.deepEqual(shardCostNativeProbe.transitionRowAnalysis.transitionRows.map((entry) => ({ row: entry.row, betweenRows: entry.betweenRows })), [
+  { row: 18, betweenRows: [17, 19] },
+  { row: 24, betweenRows: [23, 27] },
+  { row: 25, betweenRows: [24, 26] },
+  { row: 26, betweenRows: [25, 27] },
+]);
+assert.ok(shardCostNativeProbe.transitionRowAnalysis.transitionRows.some((entry) => entry.row === 18 && entry.neighborContrast.some((line) => /second 100-plus unary feeder/.test(line))));
+assert.ok(shardCostNativeProbe.transitionRowAnalysis.transitionRows.some((entry) => entry.row === 24 && entry.neighborContrast.some((line) => /seed 49/.test(line))));
+assert.ok(shardCostNativeProbe.transitionRowAnalysis.transitionRows.some((entry) => entry.row === 25 && entry.neighborContrast.some((line) => /seed 19/.test(line))));
+assert.ok(shardCostNativeProbe.transitionRowAnalysis.transitionRows.some((entry) => entry.row === 26 && entry.neighborContrast.some((line) => /seed 180/.test(line))));
+assert.deepEqual(shardCostNativeProbe.transitionRowAnalysis.row0SpecialCase.costFieldUsage, ["SU0StartCost", "SU0CostExponent", "SU0GrowthExponent", "SU0GrowthExponent2", "SU0GrowthExponent3"]);
+assert.deepEqual(shardCostNativeProbe.transitionRowAnalysis.row0SpecialCase.levelGateChecks, [100]);
+assert.equal(shardCostNativeProbe.transitionRowAnalysis.row0SpecialCase.thresholdStages.length, 0);
+assert.ok(shardCostNativeProbe.transitionRowAnalysis.row0SpecialCase.facts.some((line) => /five serialized cost fields/.test(line)));
+assert.deepEqual(shardCostNativeProbe.thresholdStageClasses, [
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21] },
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23] },
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29] },
+  { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26] },
+]);
+assert.deepEqual(shardCostNativeProbe.representativeClassAnalysis.map((entry) => ({
+  getterNames: entry.getterNames,
+  rows: entry.rows,
+  representativeRows: entry.representatives.map((rep) => rep.row),
+})), [
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21], representativeRows: [1, 21] },
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23], representativeRows: [17, 23] },
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29], representativeRows: [18, 29] },
+  { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26], representativeRows: [25, 26] },
+]);
+assert.ok(shardCostNativeProbe.representativeClassAnalysis.some((entry) => JSON.stringify(entry.getterNames) === JSON.stringify(["get_OverLevel100Exponent", "get_OverLevel200Exponent"]) && entry.representatives.some((rep) => rep.row === 29 && rep.hundredStageStructure.divideBy100CompilerPattern === true)));
+assert.deepEqual(shardCostNativeProbe.normalRowStageRecipe.classRecipes.map((entry) => ({ getterNames: entry.getterNames, rows: entry.rows })), [
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21] },
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23] },
+  { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29] },
+  { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26] },
+]);
+assert.ok(shardCostNativeProbe.normalRowStageRecipe.sharedScaffolding.facts.some((line) => /same hundred-stage structure/.test(line)));
+assert.deepEqual(shardCostNativeProbe.canonicalSymbolicAssembler.canonicalClass.getterNames, ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"]);
+assert.deepEqual(shardCostNativeProbe.canonicalSymbolicAssembler.canonicalClass.rows, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21]);
+assert.deepEqual(shardCostNativeProbe.canonicalSymbolicAssembler.canonicalClass.symbolicStages.map((entry) => entry.name), ["base-row-fields", "hundred-stage", "two-hundred-stage", "three-hundred-stage", "four-hundred-stage"]);
+assert.deepEqual(shardCostNativeProbe.canonicalSymbolicAssembler.canonicalClass.subprofiles.map((entry) => entry.rows), [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], [19, 20, 21]]);
+assert.ok(shardCostNativeProbe.canonicalSymbolicAssembler.classDeltas.some((entry) => JSON.stringify(entry.getterNames) === JSON.stringify(["get_OverLevel100Exponent"]) && entry.delta.some((line) => /0x24e1ab0/.test(line))));
+assert.deepEqual(shardCostNativeProbe.canonicalMergeConstraints.secondaryHundredPlusSplit.map((entry) => ({ rows: entry.rows, path: entry.path })), [
+  { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], path: "additivePremerge" },
+  { rows: [19, 20, 21], path: "literalBuilderAdditive" },
+]);
+assert.ok(shardCostNativeProbe.canonicalMergeConstraints.sharedConstraints.some((line) => /first 200-plus feeder is stable/.test(line)));
+const shardRow1Native = shardCostNativeProbe.rows.find((entry) => entry.row === 1);
+const shardRow19Native = shardCostNativeProbe.rows.find((entry) => entry.row === 19);
+const shardRow27Native = shardCostNativeProbe.rows.find((entry) => entry.row === 27);
+assert.ok(shardRow1Native.stageDispatchCallFamilies.some((family) => family.usesPreMergeAdd === true && family.usesCurrentLevelBigDouble === true && family.postDispatchMergeTarget === "0x24e1cb3"));
+assert.ok(shardRow1Native.stageDispatchCallFamilies.some((family) => family.usesUnaryThresholdTransform === true && JSON.stringify(family.integerSeeds) === JSON.stringify([100]) && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+assert.ok(shardRow1Native.stageDispatchCallFamilies.some((family) => family.usesUnaryThresholdTransform === true && JSON.stringify(family.integerSeeds) === JSON.stringify([180]) && family.thresholdWindow === "200-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+assert.ok(shardRow1Native.stageDispatchCallFamilies.some((family) => family.thresholdWindow === "300-plus-window" && family.usesPreMergeAdd === true && family.usesUnaryThresholdTransform === false));
+assert.ok(shardRow19Native.stageDispatchCallFamilies.some((family) => family.usesLiteralBuilder === true && family.usesPreMergeAdd === true && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+assert.ok(shardRow27Native.stageDispatchCallFamilies.some((family) => family.usesPreMergeMultiply === true && family.usesPreMergeAdd === true && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+assert.ok(shardCostNativeProbe.helperTargetSummaries.some((entry) => entry.target === "0x24e1a07" && /double literal/.test(entry.summary)));
+assert.ok(shardCostNativeProbe.helperTargetSummaries.some((entry) => entry.target === "0x24e1d36" && /integer input/.test(entry.summary)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /row-local ShardMining cost operands/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /stored as checked 16-byte BreakInfinity\.BigDouble slots/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /named ShardMining cost fields/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /touch GrowthExponent later/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /compare gates inside get_SU\*Cost/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /divide-by-100 integer lane/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /CostExponent and GrowthExponent neighborhood/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /checked unary helper chain/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /nearby sibling helper lane/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /0x24e3620 converts a BigDouble pair into a double before dispatching into the remaining scalar remainder subfamily/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /0x393469a now resolves to a modf wrapper/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /0x24e38f9 now preserves a checked decimal power-builder/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /0x24e349c now preserves a checked scalar-to-BigDouble fallback/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /0x393474a is no longer just a pow-like candidate/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /checked BigDouble-to-log10 bridge/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /checked stage dispatcher/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /first 100-plus unary threshold feeder/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /later 200-plus unary threshold feeder/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /300-plus window also preserves a plain additive dispatcher feeder/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /literal-seeded dispatcher feeder inside a 100-plus window/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /Sampled late-window feeder parameters are now preserved directly from the binary/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /clusters sampled rows into reusable late-window families/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /later stage windows now also preserve reusable row-family maps/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /cross-window profile map/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /do not collapse cleanly onto one rarity band/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /transition rows now preserve concrete neighbor contrasts/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /Row 0 is no longer just a weaker version/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /split cleanly by preserved over-level getter coverage/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /Representative rows from each normal-row coverage class/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /shared stage scaffold with class-specific stage coverage/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /canonical symbolic stage assembler/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /secondary 100-plus feeder/.test(line)));
+assert.ok(shardCostNativeProbe.findings.some((line) => /narrowest remaining merge breakpoint/.test(line)));
+assert.ok(shardCostNativeProbe.rows.some((entry) => entry.row === 1 && JSON.stringify(entry.thresholdStages.map((stage) => stage.getterName)) === JSON.stringify(["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"])));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /row-local ShardMining operands/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /serialized BreakInfinity\.BigDouble pairs/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /level 100, 200, and 300 compare gates/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /divide-by-100 loop/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /shard-path unary transform entry/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /0x24e30e4 as the checked BigDouble-to-log10 bridge/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /0x24e3620 and 0x24e368d as the checked stage dispatcher/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /pre-threshold, 100-plus, 200-plus, and 300-plus windows/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /sampled `\(level - offset\)` feeder parameters/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /100-plus feeder row clusters/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /new 200-plus and 300-plus family maps/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /new cross-window stage profiles/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /row-family switch inside get_SU\*Cost/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /Treat row 0 as a separate shard cost lane/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /preserved over-level getter coverage classes/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /one representative row per coverage class/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /class recipe boundary/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /canonical symbolic assembler/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /secondary 100-plus feeder split inside the canonical class/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /sampled 300-plus feeder and both sampled 200-plus feeders as shared canonical-class structure/.test(line)));
+assert.equal(shardCostScreenshotCalibration.dataset, "shard-cost-screenshot-calibration.v1");
+assert.equal(shardCostScreenshotCalibration.entries.length, 5);
+assert.ok(shardCostScreenshotCalibration.entries.some((entry) => entry.row === 1 && entry.observedLevel === 283 && entry.observedCostLabel === "1.89e565"));
+assert.ok(shardCostScreenshotCalibration.entries.some((entry) => entry.row === 25 && entry.observedLevel === 16 && entry.observedCostLabel === "5.38e563"));
+assert.ok(shardCostScreenshotCalibration.findings.some((line) => /e563-e565/.test(line)));
+assert.ok(shardCostScreenshotCalibration.currentBoundary.some((line) => /player/i.test(line)));
+assert.equal(shardCostListPathProbe.dataset, "shard-cost-list-path-probe.v1");
+assert.equal(shardCostListPathProbe.ownerFields.milestoneCostListField.name, "MilestoneCostList");
+assert.equal(shardCostListPathProbe.callOrder[0], "GetShardCostList");
+assert.equal(shardCostListPathProbe.callOrder.at(-1), "get_SU29Cost");
+assert.ok(shardCostListPathProbe.findings.some((line) => /same getter outputs/.test(line)));
+assert.equal(shardBonusSlotProbe.dataset, "shard-bonus-slot-probe.v1");
+assert.equal(shardBonusSlotProbe.rows.length, 30);
+assert.ok(shardBonusSlotProbe.rows.some((entry) => entry.row === 0 && entry.bonusFieldCount === 8 && entry.groundedBonusCount === 3));
+assert.ok(shardBonusSlotProbe.rows.some((entry) => entry.row === 18 && entry.bonusFieldCount === 6 && entry.calcAccessorCount === 6));
+assert.ok(shardBonusSlotProbe.rows.some((entry) => entry.row === 27 && entry.bonusFieldCount === 3 && entry.calcAccessorCount === 3));
+assert.ok(shardBonusSlotProbe.currentBoundary.some((line) => /slot counts alone/.test(line)));
+assert.equal(shardTypeMetadataProbe.dataset, "shard-type-metadata-probe.v1");
+assert.equal(shardTypeMetadataProbe.targets.shardMining.fullName, "ShardMining");
+assert.ok(shardTypeMetadataProbe.targets.shardMining.ownerListFields.some((entry) => entry.name === "MilestoneCostList"));
+assert.ok(shardTypeMetadataProbe.targets.shardMining.ownerListFields.some((entry) => entry.name === "upgradeInfoList" && entry.type === "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>"));
+assert.deepEqual(shardTypeMetadataProbe.targets.shardUpgradeInfo.fields.map((entry) => entry.name), ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]);
+assert.equal(shardTypeMetadataProbe.rows.length, 30);
+assert.ok(shardTypeMetadataProbe.rows.some((entry) => entry.row === 0 && entry.costFieldCount === 5 && entry.bonusFieldCount === 8));
+assert.ok(shardTypeMetadataProbe.rows.some((entry) => entry.row === 18 && entry.bonusFieldCount === 6 && entry.bonusTextFieldCount === 6));
+assert.ok(shardTypeMetadataProbe.rows.some((entry) => entry.row === 27 && entry.costFieldCount === 3 && entry.bonusTextFieldCount === 3));
+assert.ok(shardTypeMetadataProbe.currentBoundary.some((line) => /not as final serialized row values/.test(line)));
 assert.equal(extractionCandidateFamilies.dataset, "extraction-candidate-families.v1");
-assert.ok(extractionCandidateFamilies.families.length >= 8, "expected seeded extraction candidate families");
+assert.ok(extractionCandidateFamilies.families.length >= 7, "expected seeded extraction candidate families");
 assert.ok(extractionCandidateFamilies.families.some((family) => family.id === "shards.milestone-owner-family"));
-assert.ok(extractionCandidateFamilies.families.some((family) => family.id === "spend.multiverse-market-owner-family"));
+assert.ok(extractionCandidateFamilies.families.some((family) => family.id === "spend.multiverse-market-save-model"));
 assert.equal(extractionCandidateRanking.dataset, "extraction-candidate-ranking.v1");
 assert.equal(extractionCandidateRanking.sourceConfig, "data/extraction-candidate-families.v1.json");
-assert.equal(extractionCandidateRanking.topCandidate.id, "spend.multiverse-market-owner-family");
-assert.equal(extractionCandidateRanking.topCandidate.track, "spend-planner-from-extracted-data");
+assert.equal(extractionCandidateRanking.topCandidate.id, "shards.milestone-owner-family");
+assert.equal(extractionCandidateRanking.topCandidate.track, "shard-milestone-payload-recovery");
 assert.ok(Array.isArray(extractionCandidateRanking.familyFilter));
 assert.equal(extractionCandidateRanking.familyFilter.length, 0);
 const topShardCandidate = extractionCandidateRanking.candidates.find((candidate) => candidate.track === "shard-milestone-payload-recovery");
@@ -477,13 +928,13 @@ assert.equal(groundedShardObserved.sourceReport, "docs/research/shard-milestones
 assert.equal(groundedShardProvenance.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
-  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-save-boundary", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "token-bank-controller-shell"]
+  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-cost-model-boundary", "shard-milestone-row-model-boundary", "shard-milestone-title-effect-boundary", "shard-effect-text-handler-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-milestone-handoff-boundary", "shard-save-boundary", "shard-scene-monobehaviour-probe", "shard-cost-parameter-probe", "shard-cost-method-probe", "shard-cost-native-probe", "shard-cost-screenshot-calibration", "shard-cost-list-path-probe", "shard-bonus-slot-probe", "shard-type-metadata-probe", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "multiverse-market-market-member-boundary", "token-bank-controller-shell"]
 );
 assert.deepEqual(
   datasetValidation.map((entry) => entry.classification),
   bundledDatasetContract.datasets.map((entry) => entry.classification)
 );
-assert.equal(multiverseMarketMetadataNeighborhoodData.anchor_count, 9);
+assert.equal(multiverseMarketMetadataNeighborhoodData.anchor_count, 10);
 assert.ok(
   multiverseMarketMetadataNeighborhoodData.results.some((entry) => entry.anchor === "CloudSavePlayerProfile"),
   "expected CloudSavePlayerProfile anchor in multiverse metadata neighborhood"
@@ -559,8 +1010,8 @@ assert.ok(tokenBankFormulaBoundaryData.controllerSideAnchors.includes("ClaimBank
 assert.ok(tokenBankFormulaBoundaryData.saveFamilyCluesChecked.includes("PlayerProfileData"));
 assert.deepEqual(tokenBankFormulaBoundaryData.saveFamilyCluesInDerivedContext, []);
 assert.deepEqual(multiverseMarketRangeBoundaryData.validatedRowRanges, ["50-59", "63-74"]);
-assert.equal(multiverseMarketRangeBoundaryData.metadataIsRangeLabel, "IS99Level through IS110Level");
-assert.deepEqual(multiverseMarketRangeBoundaryData.overlapIds, []);
+assert.equal(multiverseMarketRangeBoundaryData.metadataIsRangeLabel, "IS71Level through IS110Level");
+assert.deepEqual(multiverseMarketRangeBoundaryData.overlapIds, [71, 72, 73, 74]);
 assert.deepEqual(multiverseMarketRowTextCoverageData.textHandlerAnchors, ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts"]);
 assert.equal(multiverseMarketRowTextCoverageData.validatedRowCostTexts.length, 22);
 assert.ok(multiverseMarketRowTextCoverageData.validatedRowCostTexts.includes("SetIS50CostText"));
@@ -668,7 +1119,10 @@ const recoveredInscryptionLevels = [...new Set(
     .flatMap((value) => Array.from(String(value).matchAll(/IS(\d+)Level/g), (match) => Number(match[1])))
     .filter((value) => Number.isFinite(value))
 )].sort((left, right) => left - right);
-assert.deepEqual(recoveredInscryptionLevels, [99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]);
+assert.deepEqual(
+  recoveredInscryptionLevels,
+  [71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
+);
 assert.equal(normalizedFeedAction.id, "shard-threshold");
 assert.equal(normalizedFeedAction.kind, "upgrade");
 assert.equal(normalizedFeedAction.score, 42);
@@ -721,7 +1175,9 @@ const shardTrack = snapshot.researchTracks.find((track) => track.id === "shard-m
 assert.ok(shardTrack, "expected shard milestone payload recovery track");
 assert.equal(shardTrack.status, "active");
 assert.match(shardTrack.goal, /Recover the exact shard-side serialized row payload or declaring save-side owner/);
-assert.match(shardTrack.currentSlice, /Follow the narrowed ShardMining \/ ShardUpgradeInfo trail/);
+assert.match(shardTrack.currentSlice, /Extend the narrowed ShardMining \/ ShardUpgradeInfo trail/);
+assert.match(shardTrack.currentSlice, /checked cost-model, row-model, title\/effect, and effect-text-handler boundaries/);
+assert.match(shardTrack.currentSlice, /title\/effect/);
 assert.match(shardTrack.exitCondition, /exact serialized shard milestone row payload or declaring save-side owner/);
 assert.match(shardTrack.blockedBy, /still do not expose the declaring saved row model itself/);
 assert.match(shardTrack.smallestShippableSlice, /checked shard row-owner or save-owner boundary/);
@@ -735,12 +1191,40 @@ assert.deepEqual(shardTrack.artifacts, [
   "data/shard-owner-family-boundary.v1.json",
   "data/shard-finalsu-bonus-boundary.v1.json",
   "data/shard-milestone-payload-boundary.v1.json",
+  "data/shard-cost-model-boundary.v1.json",
+  "data/shard-milestone-row-model-boundary.v1.json",
+  "data/shard-milestone-title-effect-boundary.v1.json",
+  "data/shard-effect-text-handler-boundary.v1.json",
   "data/shard-milestone-row-shell-boundary.v1.json",
   "data/shard-milestone-row-alignment-boundary.v1.json",
+  "data/shard-milestone-handoff-boundary.v1.json",
   "data/shard-save-boundary.v1.json",
+  "data/shard-scene-monobehaviour-probe.v1.json",
+  "data/shard-cost-parameter-probe.v1.json",
+  "data/shard-cost-method-probe.v1.json",
+  "data/shard-cost-native-probe.v1.json",
+  "data/shard-cost-list-path-probe.v1.json",
+  "data/shard-bonus-slot-probe.v1.json",
+  "data/shard-type-metadata-probe.v1.json",
   "data/shardmining-metadata-neighborhood.v1.json",
   "data/shardupgradeinfo-metadata-neighborhood.v1.json"
 ]);
+assert.ok(
+  shardTrack.completedSteps.some((step) => /first recovered shard cost-model shell/.test(step)),
+  "expected shard successor track to record the shard cost-model boundary slice"
+);
+assert.ok(
+  shardTrack.completedSteps.some((step) => /contiguous shard-local Milestone0-29TextChecker and SU0-29UnlockReq shell/.test(step)),
+  "expected shard successor track to record the shard row-model boundary slice"
+);
+assert.ok(
+  shardTrack.completedSteps.some((step) => /SMilestone title assets plus the ShardMilestoneBonus presentation family/.test(step)),
+  "expected shard successor track to record the shard title/effect boundary slice"
+);
+assert.ok(
+  shardTrack.completedSteps.some((step) => /strongest current shard-side effect-text handler clue/.test(step)),
+  "expected shard successor track to record the shard effect-text handler boundary slice"
+);
 assert.ok(
   shardTrack.completedSteps.some((step) => /partial shard row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker/.test(step)),
   "expected shard successor track to record the row-shell boundary slice"
@@ -750,6 +1234,22 @@ assert.ok(
   "expected shard successor track to record the row-alignment boundary slice"
 );
 assert.ok(
+  shardTrack.verified.some((line) => /sampled get_SU\*Cost accessors plus a row-local SU0 StartCost or exponent field shell/.test(line)),
+  "expected shard successor track to record the shard cost-model shell in verified facts"
+);
+assert.ok(
+  shardTrack.verified.some((line) => /Milestone0-29TextChecker and SU0-29UnlockReq families/.test(line)),
+  "expected shard successor track to record the row-model shell in verified facts"
+);
+assert.ok(
+  shardTrack.verified.some((line) => /title candidates for rows 0-30 and a generic ShardMilestoneBonus1-8 effect presentation family/.test(line)),
+  "expected shard successor track to record the title/effect boundary in verified facts"
+);
+assert.ok(
+  shardTrack.verified.some((line) => /TextHandlerShardMilestoneBonusesPerLevel\/N/.test(line)),
+  "expected shard successor track to record the shard effect-text handler clue in verified facts"
+);
+assert.ok(
   shardTrack.verified.some((line) => /partial row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker/.test(line)),
   "expected shard successor track to record the partial row shell in verified facts"
 );
@@ -757,92 +1257,75 @@ assert.ok(
   shardTrack.verified.some((line) => /unlock hooks currently sit at 17-29 while text-checker hooks sit at 0-12/.test(line)),
   "expected shard successor track to record the row-alignment mismatch in verified facts"
 );
-assert.ok(shardTrack.nextSteps.length <= 3, "expected narrowed shard successor next-step count");
+assert.ok(
+  shardTrack.verified.some((line) => /ShardMining keeps the shard-local row shell while ConstructionMilestones keeps the dense BuyMilestone1-57 family/.test(line)),
+  "expected shard successor track to record the narrowed handoff seam in verified facts"
+);
+assert.ok(shardTrack.nextSteps.length <= 5, "expected narrowed shard successor next-step count");
 const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
-assert.ok(spendTrack, "expected spend workflow track");
-assert.equal(spendTrack.status, "queued");
-assert.match(spendTrack.currentSlice, /Use APK and Unity extraction to harden spend-lane naming, TokenShop cost-lane, action-lane, owner-shell, and save-boundary splits, Daily Tokenium owner-family clues, token-bank controller and formula boundaries, MultiverseMarket prefab-remap boundaries, and save-model boundaries before planner wiring/);
-assert.match(spendTrack.currentSlice, /narrow token-bank controller shell around ClaimBankedTokens or SetBankFill or BankFill or TokenBankDescriptionText or TokenShopButtonNotification/);
-assert.match(spendTrack.currentSlice, /checked broader BuyIS1-110 or SetIS1-110CostText action shell around the validated 50-59 and 63-74 row block/);
+assert.ok(spendTrack, "expected archived spend parent track");
+assert.equal(spendTrack.status, "archived");
+assert.match(spendTrack.currentSlice, /Archived parent: this broad spend lane is now superseded by narrower successor tracks/);
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote the MultiverseMarket metadata-neighborhood clue bundle into bundled dataset validation and APK-grounding checks/.test(step)),
-  "expected spend track to record metadata-neighborhood validation hardening"
+  spendTrack.completedSteps.some((step) => /Separate TokenShop cost lanes, action lanes, owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
+  "expected archived spend parent to record TokenShop boundary separation"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Surface the narrowed MultiverseMarket save-family boundary in the Validation page/.test(step)),
-  "expected spend track to record in-app save-side boundary visibility"
+  spendTrack.completedSteps.some((step) => /Separate MultiverseMarket owner-family, action-shell, range-boundary, prefab-remap, metadata-neighborhood, and save-boundary evidence into checked artifacts/.test(step)),
+  "expected archived spend parent to record Emporium boundary separation"
+);
+const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id === "spend-multiverse-save-model-recovery");
+assert.ok(spendSaveModelTrack, "expected Emporium save-model successor track");
+assert.equal(spendSaveModelTrack.status, "active");
+assert.match(spendSaveModelTrack.currentSlice, /market-member boundary artifacts/);
+assert.match(spendSaveModelTrack.currentSlice, /direct PlayerProfile-side Market member shell/);
+assert.ok(
+  spendSaveModelTrack.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
+  "expected Emporium successor track to record market-member boundary grounding"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a MultiverseMarket prefab-remap boundary into a checked-in dataset/.test(step)),
-  "expected spend track to record the prefab-remap boundary dataset"
+  spendSaveModelTrack.completedSteps.some((step) => /Deepen that boundary with a bare `Market` member-shell clue/.test(step)),
+  "expected Emporium successor track to record Market member-shell narrowing"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /recovered IS\*Level field run is broader than the currently validated MultiverseMarket row block/.test(step)),
-  "expected spend track to record row-block versus field-run boundary visibility"
+  spendSaveModelTrack.completedSteps.some((step) => /Surface overlap-grounded Emporium import preview support/.test(step)),
+  "expected Emporium successor track to record overlap-grounded import preview support"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote exact MultiverseMarket validated-row coverage into APK checks and research support/.test(step)),
-  "expected spend track to record exact row-coverage support in app surfaces"
+  spendSaveModelTrack.completedSteps.some((step) => /checked `MultiverseMarket` row constants such as `Bonus`, `StartCost`, `CostExponent`, and recovered `MaxLevel`/.test(step)),
+  "expected Emporium successor track to record overlap-row constant preview support"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote TokenShop extracted family coverage into APK checks and research support/.test(step)),
-  "expected spend track to record token-shop coverage support in app surfaces"
+  spendSaveModelTrack.completedSteps.some((step) => /remaining levels to the checked max on rows `71-74`/.test(step)),
+  "expected Emporium successor track to record recovered cap progress support"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Refresh the checked-in MultiverseMarket metadata neighborhood from APK artifacts to include CloudSavePlayerProfile, SetAllChrystosEmporiumTexts, and Mech1Unlocked/.test(step)),
-  "expected spend track to record stronger APK metadata-neighborhood grounding"
+  spendSaveModelTrack.completedSteps.some((step) => /canonical market recovery now favors a `Market` member shell or broader wrapper/.test(step)),
+  "expected Emporium successor track to record canonical host narrowing"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote token versus tokenium naming clues from shipped assets into a checked-in extracted dataset/.test(step)),
-  "expected spend track to record token versus tokenium naming grounding"
+  spendSaveModelTrack.verified.some((line) => /direct `get_Market` accessor clue/.test(line)),
+  "expected Emporium successor track to record the get_Market clue in verified facts"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote token-bank controller-side clues from APK and Unity artifacts into a checked-in extracted dataset/.test(step)),
-  "expected spend track to record token-bank controller split grounding"
+  spendSaveModelTrack.verified.some((line) => /overlap-grounded `71-74` subset/.test(line)),
+  "expected Emporium successor track to record overlap-grounded previewing in verified facts"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote Daily Tokenium lane clues from APK, Unity, and checked-in IAP artifacts into a bundled extracted dataset/.test(step)),
-  "expected spend track to record Daily Tokenium owner-family grounding"
+  spendSaveModelTrack.verified.some((line) => /checked row constants from the `MultiverseMarket` payload/.test(line)),
+  "expected Emporium successor track to record checked overlap-row constants in verified facts"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a token-bank formula boundary from APK metadata/.test(step)),
-  "expected spend track to record token-bank formula boundary grounding"
+  spendSaveModelTrack.verified.some((line) => /recovered cap progress against checked `MaxLevel` values/.test(line)),
+  "expected Emporium successor track to record recovered overlap-row cap progress in verified facts"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a token-bank controller-shell dataset/.test(step)),
-  "expected spend track to record token-bank controller-shell grounding"
+  spendSaveModelTrack.verified.some((line) => /strongest current canonical host hypothesis/.test(line)),
+  "expected Emporium successor track to record the canonical host hypothesis in verified facts"
 );
 assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a MultiverseMarket range boundary into a checked-in dataset/.test(step)),
-  "expected spend track to record MultiverseMarket range-boundary grounding"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote validated-row text coverage from APK and Unity artifacts into a checked-in dataset/.test(step)),
-  "expected spend track to record MultiverseMarket row-text coverage grounding"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a TokenShop cost-lane boundary into a checked-in dataset/.test(step)),
-  "expected spend track to record TokenShop cost-lane grounding"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a spend action-lane boundary into a checked-in dataset/.test(step)),
-  "expected spend track to record spend action-lane grounding"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a MultiverseMarket action-shell boundary into a checked-in dataset/.test(step)),
-  "expected spend track to record MultiverseMarket action-shell grounding"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a TokenShop owner-shell boundary into a checked-in dataset/.test(step)),
-  "expected spend track to record TokenShop owner-shell grounding"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a TokenShop save-boundary dataset/.test(step)),
-  "expected spend track to record TokenShop save-boundary grounding"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Promote a MultiverseMarket save-boundary dataset/.test(step)),
-  "expected spend track to record MultiverseMarket save-boundary grounding"
+  spendTrack.completedSteps.some((step) => /owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
+  "expected archived spend parent to preserve save-boundary separation"
 );
 const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-feed-and-hardening");
 assert.ok(feedTrack, "expected unified feed track");
@@ -1077,11 +1560,28 @@ assert.match(shardVerificationDoc, /# Shard System Verification Gate/);
 assert.match(shardVerificationDoc, /community-grounded descriptive data/);
 assert.match(shardVerificationDoc, /not yet mapped enough from shipped-game assets/);
 assert.match(shardVerificationDoc, /Boundary reference:/);
+assert.match(shardVerificationDoc, /data\/shard-cost-model-boundary\.v1\.json/);
+assert.match(shardVerificationDoc, /data\/shard-milestone-row-model-boundary\.v1\.json/);
+assert.match(shardVerificationDoc, /data\/shard-milestone-title-effect-boundary\.v1\.json/);
+assert.match(shardVerificationDoc, /data\/shard-effect-text-handler-boundary\.v1\.json/);
+assert.match(shardVerificationDoc, /data\/shard-scene-monobehaviour-probe\.v1\.json/);
+assert.match(shardVerificationDoc, /data\/shard-cost-parameter-probe\.v1\.json/);
+assert.match(shardVerificationDoc, /data\/shard-cost-method-probe\.v1\.json/);
+assert.match(shardVerificationDoc, /data\/shard-cost-native-probe\.v1\.json/);
+assert.match(shardVerificationDoc, /data\/shard-bonus-slot-probe\.v1\.json/);
 assert.match(shardVerificationDoc, /Asset-grounded shell evidence/);
 assert.match(shardVerificationDoc, /Owner-family evidence/);
 assert.match(shardVerificationDoc, /ShardMining, Assembly-CSharp/);
 assert.match(shardVerificationDoc, /ShardUpgradeInfo/);
 assert.match(shardVerificationDoc, /TotalMilestoneLevels/);
+assert.match(shardVerificationDoc, /SU0StartCost/);
+assert.match(shardVerificationDoc, /get_SU0Cost/);
+assert.match(shardVerificationDoc, /Milestone0TextChecker/);
+assert.match(shardVerificationDoc, /SU29UnlockReq/);
+assert.match(shardVerificationDoc, /SMilestone-0/);
+assert.match(shardVerificationDoc, /ShardMilestoneBonus1/);
+assert.match(shardVerificationDoc, /TextHandlerShardMilestoneBonusesPerLevel\/N/);
+assert.match(shardVerificationDoc, /exact formulas/);
 assert.match(shardVerificationDoc, /zero checked overlap with `PlayerProfileData`, `GetPlayerProfileData`, `FillPlayerProfileData`, or `CloudSavePlayerProfile`/);
 assert.match(shardVerificationDoc, /FinalSU\*Bonus\*/);
 assert.match(shardVerificationDoc, /ConstructionMilestones/);
@@ -1101,6 +1601,10 @@ assert.match(shardGroundingBoundaryDoc, /Owner-family split recovered now/);
 assert.match(shardGroundingBoundaryDoc, /ConstructionMilestones, Assembly-CSharp/);
 assert.match(shardGroundingBoundaryDoc, /ShardMining, Assembly-CSharp/);
 assert.match(shardGroundingBoundaryDoc, /ShardUpgradeInfo/);
+assert.match(shardGroundingBoundaryDoc, /SMilestone-0-Eternal\(OURO\)/);
+assert.match(shardGroundingBoundaryDoc, /ShardMilestoneBonus1/);
+assert.match(shardGroundingBoundaryDoc, /TextHandlerShardMilestoneBonusesPerLevel\/N/);
+assert.match(shardGroundingBoundaryDoc, /SU0UnlockReq/);
 assert.match(shardGroundingBoundaryDoc, /UnlockMilestone17/);
 assert.match(shardGroundingBoundaryDoc, /Milestone12TextChecker/);
 assert.match(shardGroundingBoundaryDoc, /do not yet share one clean row-number range/);
@@ -1130,8 +1634,10 @@ assert.match(shardOwnerFamilyDoc, /UnlockMilestone17/);
 assert.match(shardOwnerFamilyDoc, /Milestone12TextChecker/);
 assert.match(shardOwnerFamilyDoc, /data\/shard-milestone-row-shell-boundary\.v1\.json/);
 assert.match(shardOwnerFamilyDoc, /data\/shard-milestone-row-alignment-boundary\.v1\.json/);
+assert.match(shardOwnerFamilyDoc, /data\/shard-milestone-handoff-boundary\.v1\.json/);
 assert.match(shardOwnerFamilyDoc, /splits into `UnlockMilestone17-29`, `Milestone0-12TextChecker`, and `BuyMilestone0`/);
 assert.match(shardOwnerFamilyDoc, /data\/shard-save-boundary\.v1\.json/);
+assert.match(shardOwnerFamilyDoc, /BuyMilestone1-57/);
 assert.match(shardOwnerFamilyDoc, /generic or academy-side milestone family/);
 assert.equal(shardOwnerFamilyProbe[0].file, "workbench\\unity\\joined\\level0");
 assert.ok(shardOwnerFamilyProbe.some((entry) => entry.match_count > 0), "expected shard owner-family probe matches");
@@ -1160,7 +1666,7 @@ assert.match(shardminingMetadataNeighborhoodDoc, /get_SU1FinalUnlockReq/);
 assert.match(shardUpgradeInfoMetadataNeighborhoodDoc, /FinalSU29Bonus2/);
 assert.match(shardUpgradeInfoMetadataNeighborhoodDoc, /<FastBuyEnum>d__1429/);
 assert.match(extractionRankingDoc, /# Extraction Candidate Ranking/);
-assert.match(extractionRankingDoc, /spend\.multiverse-market-owner-family/);
+assert.match(extractionRankingDoc, /spend-multiverse-save-model-recovery/);
 assert.match(extractionRankingDoc, /filter by track or family id/i);
 assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState/);
 assert.match(playerProfileSchemaDoc, /The active manual Profile form should only show values a typical player can quickly provide from the game/);
@@ -1230,9 +1736,14 @@ assert.doesNotMatch(html, /<label for="shardRatePerHour">Shard income \/ hour<\/
 assert.match(html, /Profile readiness/);
 assert.doesNotMatch(html, /Rank shard milestones/);
 assert.match(html, /Shard milestones \(disabled pending verified schema\)/);
-assert.match(html, /Descriptive shard workflow/);
-assert.match(html, /Focus milestone/);
-assert.match(html, /Observed level on focus milestone/);
+assert.match(html, /Progression subsystems/);
+assert.match(html, /Progression controls/);
+assert.match(html, /Subsystem selectors and calibration/);
+assert.match(html, /Refresh progression subsystems/);
+assert.match(html, /id="progressionSubsystemToggle"/);
+assert.match(html, /id="progressionCalibrationPanel"/);
+assert.doesNotMatch(html, /<label for="shardFocusMilestoneId">/);
+assert.doesNotMatch(html, /<label for="shardFocusMilestoneLevel">/);
 assert.match(html, /Total shard milestone levels/);
 assert.match(html, /Grounded MVP checks only/);
 assert.match(html, /Grounded checks, APK grounding, and support checks/);
@@ -1257,7 +1768,7 @@ assert.match(appJs, /function getResearchTrackStatus/);
 assert.match(appJs, /function getResearchTrackProgressLabel/);
 assert.match(appJs, /from "\.\/recommendation-contract\.js"/);
 assert.match(appJs, /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/);
-assert.match(appJs, /"spend-planner-from-extracted-data": "PR 4"/);
+assert.match(appJs, /"spend-multiverse-save-model-recovery": "PR 4 successor"/);
 assert.match(appJs, /function importPlayerProfileJson/);
 assert.match(appJs, /function exportPlayerProfileJson/);
 assert.match(appJs, /function renderPlayerProfileBoundarySummary/);
@@ -1284,6 +1795,9 @@ assert.match(appJs, /function renderValidationSection/);
 assert.match(appJs, /function toRecommendationAction/);
 assert.match(appJs, /function sanitizeRecommendationLines/);
 assert.match(appJs, /function getShardMilestonePayloadBoundarySummary/);
+assert.match(appJs, /function getShardCostModelBoundarySummary/);
+assert.match(appJs, /function getShardMilestoneRowModelBoundarySummary/);
+assert.match(appJs, /function getShardMilestoneTitleEffectBoundarySummary/);
 assert.match(appJs, /function getShardMilestoneRowShellBoundarySummary/);
 assert.match(appJs, /function getShardMilestoneRowAlignmentBoundarySummary/);
 assert.match(appJs, /function getShardSaveBoundarySummary/);
@@ -1296,6 +1810,8 @@ assert.match(appJs, /function getProvenanceConflictNote/);
 assert.match(appJs, /function buildLoopGuardrailRecommendations/);
 assert.match(appJs, /function getObservedBehaviorById/);
 assert.match(appJs, /function saveShardPlannerInputs/);
+assert.match(appJs, /function getShardFocusLevelForMilestone/);
+assert.match(appJs, /function getShardMilestoneGroundedSummary/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
 assert.match(appJs, /function normalizeImportRow/);
@@ -1314,6 +1830,58 @@ assert.match(appJs, /Shard cost bump watch/);
 assert.match(appJs, /Add current LR for loop guardrails/);
 assert.match(appJs, /Use intentional short vs long runs/);
 assert.match(appJs, /The current feed ranks trust-oriented warning urgency/);
+assert.match(appJs, /function getProgressionRecommendationFeedPartition\(/);
+assert.match(appJs, /function getProgressionSubsystemPartition\(/);
+assert.match(appJs, /function getSelectedProgressionSubsystem\(/);
+assert.match(appJs, /function renderProgressionSubsystemToggle\(/);
+assert.match(appJs, /function renderProgressionCalibrationPanel\(/);
+assert.match(appJs, /function getProgressionCalibrationSummary\(/);
+assert.match(appJs, /function renderProgressionSubsystemSection\(/);
+assert.match(appJs, /function renderShardSubsystemSection\(/);
+assert.match(appJs, /Shard subsystem/);
+assert.match(appJs, /Loop subsystem/);
+assert.match(appJs, /Shard research and grounding/);
+assert.match(appJs, /These rows now live directly inside the shard subsystem/);
+assert.match(appJs, /Observed level/);
+assert.match(appJs, /Threshold row/);
+assert.match(appJs, /stays in canonical milestone order/);
+assert.match(appJs, /Community alias:/);
+assert.match(appJs, /function getShardMilestonePanelTitle/);
+assert.match(appJs, /THE \${normalizedName\.toUpperCase\(\)} MILESTONE/);
+assert.match(appJs, /shard-threshold-pill/);
+assert.match(appJs, /Direct row-aligned ShardMining values are preserved for row/);
+assert.match(appJs, /Extracted bonus per level/);
+assert.match(appJs, /exact serialized cost fields/);
+assert.match(appJs, /Unlock req/);
+assert.match(appJs, /Extracted row state/);
+assert.match(appJs, /Extracted cost fields/);
+assert.match(appJs, /Grounding detail/);
+assert.match(appJs, /Grounded data and extraction/);
+assert.match(appJs, /Verified row inputs recovered; exact cost formula still unresolved\./);
+assert.match(appJs, /Native cost stages/);
+assert.match(appJs, /Observed value/);
+assert.match(appJs, /per-level multiplicative model/);
+assert.match(appJs, /Current value unresolved from checked inputs/);
+assert.match(appJs, /Title source/);
+assert.match(appJs, /Row shell/);
+assert.match(appJs, /Effect path/);
+assert.match(appJs, /Cost path/);
+assert.match(appJs, /shard-panel-card-tag/);
+assert.match(appJs, /Lane \${escapeHtml\(String\(index \+ 1\)\)}/);
+assert.match(appJs, /Runtime row/);
+assert.match(appJs, /Native inputs/);
+assert.match(appJs, /Open profile calibration/);
+assert.match(appJs, /state\.progressionView/);
+assert.match(appJs, /data-progression-view=/);
+assert.match(appJs, /data-progression-action="open-profile"/);
+assert.match(appJs, /data-shard-focus-level/);
+assert.match(appJs, /shard-grounding-dropdown/);
+assert.match(appJs, /shard-level-up-rail/);
+assert.match(appJs, /observedLevelsByMilestone/);
+assert.match(appJs, /\.\/data\/shard-scene-monobehaviour-probe\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-cost-parameter-probe\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-cost-native-probe\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-bonus-slot-probe\.v1\.json/);
 assert.match(appJs, /Shard milestone manual import stays disabled; this build only uses the bundled grounded descriptive dataset/);
 assert.match(appJs, /\.\/data\/shard-milestones\.grounded\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-observed-behaviors\.grounded\.v1\.json/);
@@ -1322,11 +1890,24 @@ assert.match(appJs, /\.\/data\/shard-asset-grounding\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-owner-family-boundary\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-finalsu-bonus-boundary\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestone-payload-boundary\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-cost-model-boundary\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-milestone-row-model-boundary\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-milestone-title-effect-boundary\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-effect-text-handler-boundary\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestone-row-shell-boundary\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestone-row-alignment-boundary\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-save-boundary\.v1\.json/);
 assert.match(appJs, /Row-shell boundary/);
 assert.match(appJs, /Row-alignment boundary/);
+assert.match(appJs, /Cost-model boundary/);
+assert.match(appJs, /Shard cost-model boundary/);
+assert.match(appJs, /Row-model boundary/);
+assert.match(appJs, /Title\/effect boundary/);
+assert.match(appJs, /Effect-text handler boundary/);
+assert.match(appJs, /Shard effect-text handler boundary/);
+assert.match(appJs, /Shard milestone row model/);
+assert.match(appJs, /Shard milestone titles and effect shell/);
+assert.match(appJs, /TextHandlerShardMilestoneBonusesPerLevel\/N/);
 assert.match(appJs, /Shard milestone row shell/);
 assert.match(appJs, /Shard milestone row alignment/);
 assert.match(appJs, /UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell/);
@@ -1367,6 +1948,8 @@ assert.match(appJs, /InscryptionsDone trade-counter cluster available/);
 assert.match(appJs, /Spend save-side narrowing/);
 assert.match(appJs, /broader PlayerProfileData persistence family instead of treating MultiverseMarket itself as the recovered save owner/);
 assert.match(appJs, /Likely persistence family/);
+assert.match(appJs, /Likely canonical host/);
+assert.match(appJs, /That makes \${marketMemberSummary\.canonicalHostLabel} the strongest current repo-local host for future canonical Emporium state/);
 assert.match(appJs, /Cloud-save profile path/);
 assert.match(appJs, /CloudSavePlayerProfile and GetPlayerProfileInfo now appear in the same checked-in save-path neighborhood/);
 assert.match(appJs, /Grounded field-cluster clues/);
@@ -1385,6 +1968,7 @@ assert.match(appJs, /function getTokenBankStateSummary/);
 assert.match(appJs, /Daily Tokenium lane clues now preserve \$\{dailyTokeniumSummary\.ownerFamilyLabel\}, \$\{dailyTokeniumSummary\.missionFamilyLabel\}, \$\{dailyTokeniumSummary\.loopHook\}, \$\{dailyTokeniumSummary\.purchaseHook\}, and \$\{dailyTokeniumSummary\.premiumPack\}/);
 assert.match(appJs, /Player-facing strings still frame Daily Tokenium as a farm-mission or Academy Menu reward lane that TokenShop and the Collector pack modify/);
 assert.match(appJs, /function getDailyTokeniumLaneSummary/);
+assert.match(appJs, /function formatNumericRanges/);
 assert.match(appJs, /function getTokenBankFormulaBoundarySummary/);
 assert.match(appJs, /"ClaimBankedTokens"/);
 assert.match(appJs, /"BigStatisticPrefab\.TokenBankCap"/);
@@ -1446,16 +2030,26 @@ assert.match(appJs, /Token-bank formula clues now preserve \$\{tokenBankFormulaS
 assert.match(appJs, /FinalTokenBankCap and FinalTokenBankFillSpeed now appear in a checked-in accessor and backing-field cluster/);
 assert.match(appJs, /The same checked local context still does not expose PlayerProfileData or CloudSavePlayerProfile beside those outputs/);
 assert.match(appJs, /MultiverseMarket row-range boundary/);
-assert.match(appJs, /Validated rows 50-59 and 63-74 do not overlap the recovered IS99-110 metadata run/);
-assert.match(appJs, /Validated rows \${multiverseMarketRangeSummary\.validatedRangeLabel} do not overlap \${multiverseMarketRangeSummary\.metadataRangeLabel}/);
+assert.match(appJs, /Validated rows 50-59 and 63-74 now share a first direct overlap with the recovered IS71-110 metadata run at rows 71-74/);
+assert.match(appJs, /Validated rows \${multiverseMarketRangeSummary\.validatedRangeLabel} now share a first direct overlap with \${multiverseMarketRangeSummary\.metadataRangeLabel} at rows \${multiverseMarketRangeSummary\.overlapLabel}/);
 assert.match(appJs, /function getMultiverseMarketRangeBoundarySummary/);
 assert.match(appJs, /Validated rows vs recovered IS run/);
-assert.match(appJs, /The separate metadata run \${multiverseMarketRangeSummary\.metadataRangeLabel} currently has no direct overlap with that validated block/);
-assert.match(appJs, /The checked range boundary now preserves a zero-overlap result between validated rows \${multiverseMarketRangeSummary\.validatedRangeLabel} and the recovered metadata run \${multiverseMarketRangeSummary\.metadataRangeLabel}/);
+assert.match(appJs, /The separate metadata run \${multiverseMarketRangeSummary\.metadataRangeLabel} now directly overlaps validated rows \${multiverseMarketRangeSummary\.overlapLabel}/);
+assert.match(appJs, /The checked range boundary now shows that validated rows \${multiverseMarketRangeSummary\.validatedRangeLabel} share a first direct overlap with the recovered metadata run \${multiverseMarketRangeSummary\.metadataRangeLabel} at rows \${multiverseMarketRangeSummary\.overlapLabel}/);
+assert.match(appJs, /formatNumericRanges\(overlapIds\)/);
 assert.match(appJs, /MultiverseMarket validated row text coverage/);
 assert.match(appJs, /TextHandlerMarkets and SetAllChrystosEmporiumTexts cover SetIS50-59 and 63-74 cost texts/);
 assert.match(appJs, /function getMultiverseMarketRowTextCoverageSummary/);
 assert.match(appJs, /function getMultiverseMarketPrefabRemapBoundarySummary/);
+assert.match(appJs, /function getImportedMultiverseMarketPreview\(importedMarketState, multiverseMarket, multiverseMarketRangeBoundary\)/);
+assert.match(appJs, /The first overlap-grounded Emporium rows are \${escapeHtml\(preview\.overlapRangeLabel\)}/);
+assert.match(appJs, /Missing overlap-grounded imports: \${escapeHtml\(preview\.missingOverlapLabel\)}/);
+assert.match(appJs, /overlap-grounded rows/);
+assert.match(appJs, /Imported overlap-grounded rows also show recovered row constants from the checked MultiverseMarket payload/);
+assert.match(appJs, /<span class="pill">\${preview\.overlapMaxedCount} overlap rows maxed<\/span>/);
+assert.match(appJs, /Recovered max reached for this overlap-grounded row\./);
+assert.match(appJs, /\${escapeHtml\(formatShardNumber\(entry\.remainingLevels\)\)} recovered levels remaining to cap\./);
+assert.match(appJs, /Recovered row constants: Bonus \${escapeHtml\(formatOptionalNumber\(entry\.bonusValue\)\)} \| StartCost \${escapeHtml\(formatOptionalNumber\(entry\.startCost\)\)} \| CostExponent \${escapeHtml\(formatOptionalNumber\(entry\.costExponent\)\)}/);
 assert.match(appJs, /The validated row block also has direct text-handler coverage through \${multiverseMarketRowTextSummary\.textHandler}, \${multiverseMarketRowTextSummary\.textBatcher}, and \${multiverseMarketRowTextSummary\.coveredCount} SetIS\*CostText hooks/);
 assert.match(appJs, /That is row-label coverage for the validated block, not saved-state coverage/);
 assert.match(appJs, /Validated row text coverage/);
@@ -1510,6 +2104,9 @@ assert.match(appJs, /MultiverseMarket save boundary/);
 assert.match(appJs, /MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap/);
 assert.match(appJs, /The checked save boundary still keeps \${multiverseMarketSaveBoundarySummary\.actionAnchor} separate from \${multiverseMarketSaveBoundarySummary\.saveAnchor}, with \${multiverseMarketSaveBoundarySummary\.overlapLabel}/);
 assert.match(appJs, /That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet/);
+assert.match(appJs, /MultiverseMarket canonical host narrowing/);
+assert.match(appJs, /PlayerProfile-side Market member shell or broader wrapper is now the strongest canonical host hypothesis/);
+assert.match(appJs, /now leads over direct MultiverseMarket ownership or loose PlayerProfileData fields/);
 assert.match(appJs, /"TokenBoost"/);
 assert.match(appJs, /"DiamondBoost"/);
 assert.match(appJs, /"TokenDailiesT2"/);
@@ -1526,7 +2123,7 @@ assert.match(appJs, /This card watches descriptive unlock gates only/);
 assert.match(appJs, /Shard milestone mapping status/);
 assert.match(appJs, /community-grounded descriptive data/);
 assert.match(appJs, /Grounded shard anchors/);
-assert.match(appJs, /Descriptive directory/);
+assert.match(appJs, /Title source/);
 assert.match(appJs, /Threshold guidance is milestone-specific and descriptive only/);
 assert.match(appJs, /Use this to avoid false precision near known cost-bump levels/);
 assert.match(appJs, /buildGroundedShardRecommendations\(\)\.map\(\(item\) => toRecommendationAction\(item, "shards"\)\)/);
@@ -1572,9 +2169,22 @@ assert.match(datasetContractsDoc, /data\/shard-asset-grounding\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-owner-family-boundary\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-finalsu-bonus-boundary\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-milestone-payload-boundary\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-cost-model-boundary\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-milestone-row-model-boundary\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-milestone-title-effect-boundary\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-effect-text-handler-boundary\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-milestone-row-shell-boundary\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-milestone-row-alignment-boundary\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-milestone-handoff-boundary\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-save-boundary\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-scene-monobehaviour-probe\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-cost-parameter-probe\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-cost-method-probe\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-cost-native-probe\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-cost-screenshot-calibration\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-cost-list-path-probe\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-bonus-slot-probe\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-type-metadata-probe\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/extraction-candidate-families\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/extraction-candidate-ranking\.v1\.json/);
 assert.match(datasetContractsDoc, /docs\/contracts\/dataset-refresh-checklist\.md/);
@@ -1677,6 +2287,7 @@ assert.equal(migratedLegacyProfile.planning.shards.ratePerHour, 80);
 assert.equal(migratedLegacyProfile.planning.shards.totalMilestoneLevels, 17);
 assert.equal(migratedLegacyProfile.planning.shards.focusMilestoneId, "milestone_alpha");
 assert.equal(migratedLegacyProfile.planning.shards.focusMilestoneLevel, 12);
+assert.deepEqual(migratedLegacyProfile.planning.shards.observedLevelsByMilestone, { milestone_alpha: 12 });
 assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.power, 7);
 assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.speed, 2.5);
 assert.equal(migratedLegacyProfile.externalModels.shipPlanner.summary.cargo, 19);
@@ -1837,6 +2448,7 @@ assert.equal(migratedUnmappedSystemsProfile.planning.shards.ratePerHour, 44);
 assert.equal(migratedUnmappedSystemsProfile.planning.shards.totalMilestoneLevels, 21);
 assert.equal(migratedUnmappedSystemsProfile.planning.shards.focusMilestoneId, "omega_watch");
 assert.equal(migratedUnmappedSystemsProfile.planning.shards.focusMilestoneLevel, 6);
+assert.deepEqual(migratedUnmappedSystemsProfile.planning.shards.observedLevelsByMilestone, { omega_watch: 6 });
 assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestones, {
   selectedMilestone: "alpha",
   observedLevel: 12
@@ -1887,6 +2499,7 @@ assert.equal(migratedInvalidShardHelpers.planning.shards.ratePerHour, null);
 assert.equal(migratedInvalidShardHelpers.planning.shards.totalMilestoneLevels, null);
 assert.equal(migratedInvalidShardHelpers.planning.shards.focusMilestoneId, null);
 assert.equal(migratedInvalidShardHelpers.planning.shards.focusMilestoneLevel, null);
+assert.deepEqual(migratedInvalidShardHelpers.planning.shards.observedLevelsByMilestone, {});
 
 assert.match(appJs, /function normalizeLoadoutName/);
 assert.match(appJs, /name: normalizeLoadoutName\(stored\.name, fallback\.name\)/);

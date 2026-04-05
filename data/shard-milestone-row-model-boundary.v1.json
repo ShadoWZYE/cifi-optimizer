@@ -1,0 +1,43 @@
+{
+  "dataset": "shard-milestone-row-model-boundary.v1",
+  "generatedAt": "2026-04-04",
+  "sources": {
+    "ownerFamilyProbe": "data/shard-owner-family-probe.v1.json",
+    "rowShellBoundary": "data/shard-milestone-row-shell-boundary.v1.json",
+    "rowAlignmentBoundary": "data/shard-milestone-row-alignment-boundary.v1.json",
+    "costModelBoundary": "data/shard-cost-model-boundary.v1.json",
+    "globalMetadata": "workbench/apk/base/global-metadata.dat"
+  },
+  "dataCarrierTieIn": "ShardMining|ShardUpgradeInfo",
+  "textCheckerRange": {
+    "start": 0,
+    "end": 29,
+    "count": 30
+  },
+  "unlockRequirementRange": {
+    "start": 0,
+    "end": 29,
+    "count": 30
+  },
+  "buyHookEvidence": {
+    "shardLocalDirectHooks": [
+      "BuyMilestone0"
+    ],
+    "genericNumberedFamily": {
+      "family": "ConstructionMilestones, Assembly-CSharp",
+      "start": 1,
+      "end": 57,
+      "count": 57
+    }
+  },
+  "rowModelFindings": [
+    "The owner-family probe preserves a contiguous shard-local text-checker shell from Milestone0TextChecker through Milestone29TextChecker.",
+    "The same probe preserves a contiguous row-local unlock shell from SU0UnlockReq through SU29UnlockReq.",
+    "The shard-local direct buy hook still only recovers BuyMilestone0, while numbered BuyMilestone1-57 continues to live in the generic ConstructionMilestones family."
+  ],
+  "currentBoundary": [
+    "Treat this bundle as the current shard row-model boundary around the narrowed ShardMining or ShardUpgradeInfo trail.",
+    "Use it to preserve that rows 0-29 exist as a contiguous shard-local text-checker and unlock-requirement family even though the numbered buy family still crosses the generic ConstructionMilestones seam.",
+    "Do not infer that rows 0-29 are already mapped to verified player-facing effect text, exact costs, or saved player-owned milestone levels."
+  ]
+}

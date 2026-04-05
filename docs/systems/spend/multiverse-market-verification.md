@@ -67,12 +67,14 @@ Current grounded conclusion:
 - Repo-local metadata now narrows the persistence search toward `PlayerProfileData`, `FillPlayerProfileData`, and `GetPlayerProfileData`.
 - Repo-local metadata now also exposes exact Emporium-adjacent field strings including `InscryptionsDone`, nearby `IS*Level` entries such as `IS50Level`, `IS64Level`, `IS73Level`, and nearby trade fields such as `EsotericR1Trades`.
 - The broader field run around `InscryptionsDone` now includes `IS25Level` through `IS110Level`, `EsotericR1Trades` through `EsotericR9Trades`, `NecrumR1Trades` through `NecrumR9Trades`, and early `Mech*` fields such as `Mech1Unlocked` and `Mech1Upg1Level`.
+- The checked range boundary now shows that the recovered save-side `IS*Level` run overlaps the validated Emporium row block at ids `71-74`.
 - Repo-local metadata also shows Inscryptions-adjacent reward/effect symbols such as `AchievementInscryptionsReward` and `<FinalISShardsBonus>k__BackingField`.
 - Current grounded conclusion:
   - `MultiverseMarket` remains the mechanic owner
   - the likely saved-state search path now runs through the broader player-profile persistence family
   - `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
   - the Emporium balance and owned-level fields appear to live in a broader progression-state field block rather than in the separate reward/effect symbol families
+  - validated rows `71-74` now have both checked row recovery and direct save-side `IS*Level` overlap, which is the strongest current repo-local foothold for future import mapping
   - effect/reward symbols should not be treated as recovered saved-balance fields
 
 ## Current app implication

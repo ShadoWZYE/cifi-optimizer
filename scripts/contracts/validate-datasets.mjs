@@ -283,6 +283,190 @@ function validateShardMilestonePayloadBoundary(boundary) {
   };
 }
 
+function validateShardCostModelBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard cost-model boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard cost-model boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard cost-model boundary sources must be an object");
+  ["shardUpgradeInfoMetadataNeighborhood", "ownerFamilyProbe", "milestonePayloadBoundary", "finalSuBonusBoundary", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard cost-model boundary sources.${field} must be present`);
+  });
+  expectNonEmptyString(boundary.dataCarrier, "shard cost-model boundary dataCarrier must be present");
+  expectNonEmptyString(boundary.dataCarrierTieIn, "shard cost-model boundary dataCarrierTieIn must be present");
+  expectArray(boundary.sampleCostAccessorWindows, "shard cost-model boundary sampleCostAccessorWindows must be an array");
+  expectArray(boundary.row0CostFields, "shard cost-model boundary row0CostFields must be an array");
+  expectArray(boundary.row0FillFields, "shard cost-model boundary row0FillFields must be an array");
+  expectArray(boundary.row0BonusFields, "shard cost-model boundary row0BonusFields must be an array");
+  expectArray(boundary.costModelFindings, "shard cost-model boundary costModelFindings must be an array");
+  expectRecord(boundary.optimizerBoundary, "shard cost-model boundary optimizerBoundary must be an object");
+  expectArray(boundary.optimizerBoundary.supportedNow, "shard cost-model boundary optimizerBoundary.supportedNow must be an array");
+  expectArray(boundary.optimizerBoundary.blockedNow, "shard cost-model boundary optimizerBoundary.blockedNow must be an array");
+  expectArray(boundary.currentBoundary, "shard cost-model boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataCarrier, "ShardUpgradeInfo", "shard cost-model boundary dataCarrier drifted");
+  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard cost-model boundary dataCarrierTieIn drifted");
+  assert.deepEqual(
+    boundary.sampleCostAccessorWindows,
+    [
+      {
+        label: "earlyWindow",
+        start: 0,
+        end: 9,
+        count: 10,
+        accessors: ["get_SU0Cost", "get_SU1Cost", "get_SU2Cost", "get_SU3Cost", "get_SU4Cost", "get_SU5Cost", "get_SU6Cost", "get_SU7Cost", "get_SU8Cost", "get_SU9Cost"]
+      },
+      {
+        label: "lateWindow",
+        start: 23,
+        end: 29,
+        count: 7,
+        accessors: ["get_SU23Cost", "get_SU24Cost", "get_SU25Cost", "get_SU26Cost", "get_SU27Cost", "get_SU28Cost", "get_SU29Cost"]
+      }
+    ],
+    "shard cost-model boundary accessor windows drifted"
+  );
+  ["SU0StartCost", "SU0CostExponent", "SU0GrowthExponent", "SU0GrowthExponent2", "SU0GrowthExponent3"].forEach((name) => {
+    assert.ok(boundary.row0CostFields.includes(name), `shard cost-model boundary missing ${name}`);
+  });
+  ["SU0Level1Fill", "SU0Level8Fill"].forEach((name) => {
+    assert.ok(boundary.row0FillFields.includes(name), `shard cost-model boundary missing ${name}`);
+  });
+  ["SU0Bonus1", "SU0Bonus8"].forEach((name) => {
+    assert.ok(boundary.row0BonusFields.includes(name), `shard cost-model boundary missing ${name}`);
+  });
+  assert.ok(boundary.optimizerBoundary.supportedNow.includes("row-local shard cost-parameter extraction and consistency checks against get_SU*Cost accessors"), "shard cost-model boundary must preserve supported extraction wording");
+  assert.ok(boundary.optimizerBoundary.blockedNow.includes("exact per-level shard costs"), "shard cost-model boundary must preserve exact-cost blocking");
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not derive exact shard cost formulas")), "shard cost-model boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-cost-model-boundary",
+    label: "Shard cost-model boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.sampleCostAccessorWindows.length} sampled shard cost windows`,
+      `${boundary.row0CostFields.length} SU0 cost-shell fields`,
+      "Shard cost-model evidence now preserves a row-local parameter shell without exact formula claims"
+    ]
+  };
+}
+
+function validateShardMilestoneRowModelBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard milestone row-model boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard milestone row-model boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard milestone row-model boundary sources must be an object");
+  ["ownerFamilyProbe", "rowShellBoundary", "rowAlignmentBoundary", "costModelBoundary", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard milestone row-model boundary sources.${field} must be present`);
+  });
+  expectNonEmptyString(boundary.dataCarrierTieIn, "shard milestone row-model boundary dataCarrierTieIn must be present");
+  expectRecord(boundary.textCheckerRange, "shard milestone row-model boundary textCheckerRange must be an object");
+  expectRecord(boundary.unlockRequirementRange, "shard milestone row-model boundary unlockRequirementRange must be an object");
+  expectRecord(boundary.buyHookEvidence, "shard milestone row-model boundary buyHookEvidence must be an object");
+  expectArray(boundary.buyHookEvidence.shardLocalDirectHooks, "shard milestone row-model boundary shardLocalDirectHooks must be an array");
+  expectRecord(boundary.buyHookEvidence.genericNumberedFamily, "shard milestone row-model boundary genericNumberedFamily must be an object");
+  expectArray(boundary.rowModelFindings, "shard milestone row-model boundary rowModelFindings must be an array");
+  expectArray(boundary.currentBoundary, "shard milestone row-model boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard milestone row-model boundary dataCarrierTieIn drifted");
+  assert.deepEqual(boundary.textCheckerRange, { start: 0, end: 29, count: 30 }, "shard milestone row-model boundary textCheckerRange drifted");
+  assert.deepEqual(boundary.unlockRequirementRange, { start: 0, end: 29, count: 30 }, "shard milestone row-model boundary unlockRequirementRange drifted");
+  assert.deepEqual(boundary.buyHookEvidence.shardLocalDirectHooks, ["BuyMilestone0"], "shard milestone row-model boundary shardLocalDirectHooks drifted");
+  assert.deepEqual(
+    boundary.buyHookEvidence.genericNumberedFamily,
+    { family: "ConstructionMilestones, Assembly-CSharp", start: 1, end: 57, count: 57 },
+    "shard milestone row-model boundary genericNumberedFamily drifted"
+  );
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not infer that rows 0-29 are already mapped")), "shard milestone row-model boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-milestone-row-model-boundary",
+    label: "Shard milestone row-model boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.textCheckerRange.count} shard-local text-checker rows`,
+      `${boundary.unlockRequirementRange.count} shard-local unlock rows`,
+      "Shard row-model evidence now preserves a contiguous 0-29 shell while the buy seam stays unresolved"
+    ]
+  };
+}
+
+function validateShardMilestoneTitleEffectBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard milestone title/effect boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard milestone title/effect boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard milestone title/effect boundary sources must be an object");
+  ["unityProbeReport", "ownerFamilyProbe", "shardUpgradeInfoMetadataNeighborhood", "rowModelBoundary", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard milestone title/effect boundary sources.${field} must be present`);
+  });
+  expectArray(boundary.titleAssetCandidates, "shard milestone title/effect boundary titleAssetCandidates must be an array");
+  expectArray(boundary.effectPresentationSlots, "shard milestone title/effect boundary effectPresentationSlots must be an array");
+  expectArray(boundary.sampleBonusCalcAccessors, "shard milestone title/effect boundary sampleBonusCalcAccessors must be an array");
+  expectArray(boundary.findings, "shard milestone title/effect boundary findings must be an array");
+  expectArray(boundary.currentBoundary, "shard milestone title/effect boundary currentBoundary must be an array");
+
+  assert.ok(boundary.titleAssetCandidates.some((entry) => entry.row === 0 && entry.assetName === "SMilestone-0-Eternal(OURO)"), "shard milestone title/effect boundary missing row 0 title asset");
+  assert.ok(boundary.titleAssetCandidates.some((entry) => entry.row === 29 && entry.assetName === "SMilestone-29-Earthly"), "shard milestone title/effect boundary missing row 29 title asset");
+  assert.ok(boundary.titleAssetCandidates.some((entry) => entry.row === 30 && entry.assetName === "SMilestone-30-Illuminating"), "shard milestone title/effect boundary missing row 30 title asset");
+  assert.equal(boundary.titleAssetCandidates.filter((entry) => entry.row === 28).length, 2, "shard milestone title/effect boundary should preserve both row 28 title candidates");
+  ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].forEach((name) => {
+    assert.ok(boundary.effectPresentationSlots.includes(name), `shard milestone title/effect boundary missing ${name}`);
+  });
+  ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].forEach((name) => {
+    assert.ok(boundary.sampleBonusCalcAccessors.includes(name), `shard milestone title/effect boundary missing ${name}`);
+  });
+  assert.ok(boundary.findings.some((line) => /row 28 currently has conflicting shipped asset title candidates/i.test(String(line))), "shard milestone title/effect boundary must preserve the row 28 conflict");
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat the title list as fully conflict-free")), "shard milestone title/effect boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-milestone-title-effect-boundary",
+    label: "Shard milestone title/effect boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.titleAssetCandidates.length} shipped shard title candidates`,
+      `${boundary.effectPresentationSlots.length} shard effect presentation slots`,
+      "Shard title assets and effect-family clues are preserved without claiming row-complete text mapping"
+    ]
+  };
+}
+
+function validateShardEffectTextHandlerBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard effect-text handler boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard effect-text handler boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard effect-text handler boundary sources must be an object");
+  ["unityProbeReport", "targetedStringProbe", "ownerComparisonProbe", "titleEffectBoundary", "rowModelBoundary"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard effect-text handler boundary sources.${field} must be present`);
+  });
+  expectNonEmptyString(boundary.probableTextHandler, "shard effect-text handler boundary probableTextHandler must be present");
+  expectArray(boundary.presentationFamily, "shard effect-text handler boundary presentationFamily must be an array");
+  expectArray(boundary.sampleBonusCalcAccessors, "shard effect-text handler boundary sampleBonusCalcAccessors must be an array");
+  expectArray(boundary.uiContextAnchors, "shard effect-text handler boundary uiContextAnchors must be an array");
+  expectNonEmptyString(boundary.genericMilestoneWriter, "shard effect-text handler boundary genericMilestoneWriter must be present");
+  expectRecord(boundary.rowModelCoverage, "shard effect-text handler boundary rowModelCoverage must be an object");
+  expectArray(boundary.currentBoundary, "shard effect-text handler boundary currentBoundary must be an array");
+
+  assert.equal(boundary.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N", "shard effect-text handler boundary probableTextHandler drifted");
+  ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].forEach((name) => {
+    assert.ok(boundary.presentationFamily.includes(name), `shard effect-text handler boundary missing ${name}`);
+  });
+  ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].forEach((name) => {
+    assert.ok(boundary.sampleBonusCalcAccessors.includes(name), `shard effect-text handler boundary missing ${name}`);
+  });
+  ["LevelText", "DescText", "ValueText", "DescriptionText"].forEach((name) => {
+    assert.ok(boundary.uiContextAnchors.includes(name), `shard effect-text handler boundary missing ${name}`);
+  });
+  assert.equal(boundary.genericMilestoneWriter, "SetAllMilestoneTexts", "shard effect-text handler boundary genericMilestoneWriter drifted");
+  assert.deepEqual(boundary.rowModelCoverage, { start: 0, end: 29, count: 30 }, "shard effect-text handler boundary rowModelCoverage drifted");
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat this boundary as a recovered row-complete effect-text table")), "shard effect-text handler boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-effect-text-handler-boundary",
+    label: "Shard effect-text handler boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      boundary.probableTextHandler,
+      `${boundary.presentationFamily.length} shard effect presentation slots`,
+      "Shard bonus text recovery now has a leading shard-specific handler clue without claiming row-complete final text"
+    ]
+  };
+}
+
 function validateShardMilestoneRowShellBoundary(boundary) {
   expectNonEmptyString(boundary.dataset, "shard milestone row-shell boundary dataset id must be present");
   expectNonEmptyString(boundary.generatedAt, "shard milestone row-shell boundary generatedAt must be present");
@@ -391,6 +575,627 @@ function validateShardSaveBoundary(boundary) {
       `${boundary.ownerShellTermsChecked.length} shard owner-shell terms checked`,
       `${boundary.saveFamilyTermsChecked.length} save-family terms checked`,
       "Shard owner trail still stays separate from recovered save-family clues"
+    ]
+  };
+}
+
+function validateShardSceneMonoBehaviourProbe(probe) {
+  expectNonEmptyString(probe.dataset, "shard scene MonoBehaviour probe dataset id must be present");
+  expectNonEmptyString(probe.generatedAt, "shard scene MonoBehaviour probe generatedAt must be present");
+  expectRecord(probe.source, "shard scene MonoBehaviour probe source must be an object");
+  ["unityJoinedDir", "probeMethod"].forEach((field) => {
+    expectNonEmptyString(probe.source[field], `shard scene MonoBehaviour probe source.${field} must be present`);
+  });
+  expectArray(probe.monoBehaviours, "shard scene MonoBehaviour probe monoBehaviours must be an array");
+  expectArray(probe.findings, "shard scene MonoBehaviour probe findings must be an array");
+  expectArray(probe.currentBoundary, "shard scene MonoBehaviour probe currentBoundary must be an array");
+
+  assert.equal(probe.dataset, "shard-scene-monobehaviour-probe.v1", "shard scene MonoBehaviour probe dataset drifted");
+  assert.ok(probe.monoBehaviours.some((entry) => entry.scriptName === "ShardMining" && entry.assetsFile === "level0"), "shard scene MonoBehaviour probe must preserve ShardMining level0 target");
+  assert.ok(probe.monoBehaviours.some((entry) => entry.scriptName === "ShardPerLevelTextHandler" && entry.assetsFile === "level0"), "shard scene MonoBehaviour probe must preserve shard text handler target");
+  assert.ok(probe.monoBehaviours.some((entry) => entry.scriptName === "ConstructionMilestones" && entry.assetsFile === "level0"), "shard scene MonoBehaviour probe must preserve ConstructionMilestones level0 target");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("Do not claim recovered shard numeric fields")), "shard scene MonoBehaviour probe must preserve blocked-use framing");
+
+  return {
+    id: "shard-scene-monobehaviour-probe",
+    label: "Shard scene MonoBehaviour probe",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.monoBehaviours.length} shard scene-object targets`,
+      "ShardMining and shard text-handler byte ranges are now preserved directly from level0",
+      "Scene-object narrowing is preserved without claiming typed shard values"
+    ]
+  };
+}
+
+function validateShardCostParameterProbe(probe) {
+  expectNonEmptyString(probe.dataset, "shard cost parameter probe dataset id must be present");
+  expectNonEmptyString(probe.generatedAt, "shard cost parameter probe generatedAt must be present");
+  expectRecord(probe.source, "shard cost parameter probe source must be an object");
+  ["metadata", "level0"].forEach((field) => {
+    expectNonEmptyString(probe.source[field], `shard cost parameter probe source.${field} must be present`);
+  });
+  expectRecord(probe.metadataFamilies, "shard cost parameter probe metadataFamilies must be an object");
+  ["startCostFields", "costExponentFields", "growthExponentFields", "costAccessors"].forEach((field) => {
+    expectArray(probe.metadataFamilies[field], `shard cost parameter probe metadataFamilies.${field} must be an array`);
+  });
+  ["overLevelExponentFields", "overLevelExponentAccessors"].forEach((field) => {
+    expectArray(probe.metadataFamilies[field], `shard cost parameter probe metadataFamilies.${field} must be an array`);
+  });
+  expectArray(probe.shardMiningCandidateTuples, "shard cost parameter probe shardMiningCandidateTuples must be an array");
+  expectArray(probe.rowAlignedTupleCandidates, "shard cost parameter probe rowAlignedTupleCandidates must be an array");
+  expectArray(probe.signatureGroups, "shard cost parameter probe signatureGroups must be an array");
+  expectArray(probe.findings, "shard cost parameter probe findings must be an array");
+  expectArray(probe.currentBoundary, "shard cost parameter probe currentBoundary must be an array");
+
+  assert.equal(probe.dataset, "shard-cost-parameter-probe.v1", "shard cost parameter probe dataset drifted");
+  assert.equal(probe.metadataFamilies.startCostFields.length, 30, "shard cost parameter probe startCostFields drifted");
+  assert.equal(probe.metadataFamilies.costExponentFields.length, 30, "shard cost parameter probe costExponentFields drifted");
+  assert.ok(probe.metadataFamilies.growthExponentFields.length >= 30, "shard cost parameter probe growthExponentFields regressed");
+  assert.equal(probe.metadataFamilies.costAccessors.length, 30, "shard cost parameter probe costAccessors drifted");
+  assert.deepEqual(probe.metadataFamilies.overLevelExponentFields, ["OverLevel100Exponent", "OverLevel200Exponent", "OverLevel300Exponent", "OverLevel400Exponent"], "shard cost parameter probe overLevelExponentFields drifted");
+  assert.deepEqual(probe.metadataFamilies.overLevelExponentAccessors, ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], "shard cost parameter probe overLevelExponentAccessors drifted");
+  assert.equal(probe.unlockRequirementBlock?.offset, 1456, "shard cost parameter probe unlockRequirementBlock offset drifted");
+  assert.deepEqual(probe.unlockRequirementBlock?.values?.slice(0, 8), [0, 0, 5, 10, 20, 30, 40, 50], "shard cost parameter probe early unlock requirements drifted");
+  assert.deepEqual(probe.unlockRequirementBlock?.values?.slice(-3), [8000, 8050, 8100], "shard cost parameter probe late unlock requirements drifted");
+  assert.ok(probe.shardMiningCandidateTuples.length >= 7, "shard cost parameter probe candidate tuples regressed");
+  assert.equal(probe.rowAlignedTupleCandidates.length, 29, "shard cost parameter probe rowAlignedTupleCandidates drifted");
+  assert.equal(probe.row0PreludeCandidate?.row, 0, "shard cost parameter probe row0PreludeCandidate row drifted");
+  assert.equal(probe.row0PreludeCandidate?.pointerRefCount, 19, "shard cost parameter probe row0PreludeCandidate pointerRefCount drifted");
+  assert.equal(probe.row0PreludeCandidate?.unlockRequirementValue, 0, "shard cost parameter probe row0PreludeCandidate unlockRequirementValue drifted");
+  assert.equal(Number(probe.row0PreludeCandidate?.leadingValue), 5, "shard cost parameter probe row0PreludeCandidate leadingValue drifted");
+  assert.equal(Number(probe.row0PreludeCandidate?.exponentA), 1.3, "shard cost parameter probe row0PreludeCandidate exponentA drifted");
+  assert.equal(Number(probe.row0PreludeCandidate?.exponentB), 1.5, "shard cost parameter probe row0PreludeCandidate exponentB drifted");
+  assert.equal(Number(probe.row0PreludeCandidate?.tailScalar), 1.1, "shard cost parameter probe row0PreludeCandidate tailScalar drifted");
+  assert.deepEqual(probe.row0PreludeCandidate?.strongestFieldOrderMapping?.values, {
+    StartCost: 5,
+    CostExponent: 1.3,
+    GrowthExponent: 1.5,
+    GrowthExponent2: 1.1,
+    GrowthExponent3: 2
+  }, "shard cost parameter probe row0PreludeCandidate strongestFieldOrderMapping drifted");
+  assert.ok(probe.signatureGroups.length >= 5, "shard cost parameter probe signatureGroups regressed");
+  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 19 && entry?.unlockRequirementValue === 1400 && entry?.intValue === 70 && Number(entry?.exponentA) === 2.5 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 19 tuple drifted");
+  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27 && entry?.unlockRequirementValue === 8000 && entry?.intValue === 975 && Number(entry?.exponentA) === 2.25 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 27 tuple drifted");
+  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 29 && entry?.intValue === 988 && Number(entry?.exponentA) === 2.3 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 29 tuple drifted");
+  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 19
+    && Number(entry?.strongestFieldOrderMapping?.values?.StartCost) === 1
+    && Number(entry?.strongestFieldOrderMapping?.values?.CostExponent) === 2.5
+    && Number(entry?.strongestFieldOrderMapping?.values?.GrowthExponent) === 4
+    && Number(entry?.strongestFieldOrderMapping?.auxiliaryIntCandidate) === 70), "shard cost parameter probe row 19 strongestFieldOrderMapping drifted");
+  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27
+    && Number(entry?.strongestFieldOrderMapping?.values?.StartCost) === 2
+    && Number(entry?.strongestFieldOrderMapping?.values?.CostExponent) === 2.25
+    && Number(entry?.strongestFieldOrderMapping?.values?.GrowthExponent) === 4
+    && Number(entry?.strongestFieldOrderMapping?.auxiliaryIntCandidate) === 975), "shard cost parameter probe row 27 strongestFieldOrderMapping drifted");
+  assert.deepEqual(probe.repeatedCommonRowGroup?.rows, [19, 20, 21], "shard cost parameter probe repeatedCommonRowGroup rows drifted");
+  assert.equal(probe.repeatedCommonRowGroup?.tuples?.length, 3, "shard cost parameter probe repeatedCommonRowGroup tuple count drifted");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("exact serialized ShardMining row fields")), "shard cost parameter probe must preserve serialized-field framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("not as a verified get_SU*Cost formula")), "shard cost parameter probe must preserve formula-block framing");
+
+  return {
+    id: "shard-cost-parameter-probe",
+    label: "Shard cost parameter probe",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.metadataFamilies.startCostFields.length} StartCost fields`,
+      `${probe.metadataFamilies.costAccessors.length} cost accessors`,
+      `${probe.shardMiningCandidateTuples.length} raw numeric tuples`,
+      `${probe.signatureGroups.length} direct signature groups`
+    ]
+  };
+}
+
+function validateShardCostMethodProbe(probe) {
+  expectNonEmptyString(probe.dataset, "shard cost method probe dataset id must be present");
+  expectNonEmptyString(probe.generatedAt, "shard cost method probe generatedAt must be present");
+  expectRecord(probe.source, "shard cost method probe source must be an object");
+  ["uabeaProbeReport", "libIl2cpp"].forEach((field) => {
+    expectNonEmptyString(probe.source[field], `shard cost method probe source.${field} must be present`);
+  });
+  expectRecord(probe.costGetterFamily, "shard cost method probe costGetterFamily must be an object");
+  expectArray(probe.costGetterFamily.rows, "shard cost method probe costGetterFamily.rows must be an array");
+  expectArray(probe.helperMethods, "shard cost method probe helperMethods must be an array");
+  expectArray(probe.estimatedTrackedBodySizeClusters, "shard cost method probe estimatedTrackedBodySizeClusters must be an array");
+  expectArray(probe.findings, "shard cost method probe findings must be an array");
+  expectArray(probe.currentBoundary, "shard cost method probe currentBoundary must be an array");
+
+  assert.equal(probe.dataset, "shard-cost-method-probe.v1", "shard cost method probe dataset drifted");
+  assert.equal(probe.costGetterFamily.count, 30, "shard cost method probe getter count drifted");
+  assert.equal(probe.costGetterFamily.returnType, "BreakInfinity.BigDouble", "shard cost method probe return type drifted");
+  assert.equal(probe.costGetterFamily.rows.length, 30, "shard cost method probe row count drifted");
+  assert.ok(probe.costGetterFamily.rows.some((entry) => entry?.row === 0 && entry?.name === "get_SU0Cost" && entry?.rva === 38240178), "shard cost method probe row 0 drifted");
+  assert.ok(probe.costGetterFamily.rows.some((entry) => entry?.row === 19 && entry?.name === "get_SU19Cost" && entry?.estimatedTrackedBodySize === 3258), "shard cost method probe row 19 drifted");
+  assert.ok(probe.costGetterFamily.rows.some((entry) => entry?.row === 27 && entry?.name === "get_SU27Cost" && entry?.estimatedTrackedBodySize === 2693), "shard cost method probe row 27 drifted");
+  assert.ok(probe.helperMethods.some((entry) => entry?.name === "UpdateShardCostList" && entry?.rva === 38238055), "shard cost method probe missing UpdateShardCostList");
+  assert.ok(probe.helperMethods.some((entry) => entry?.name === "GetShardCostList" && entry?.rva === 38349168), "shard cost method probe missing GetShardCostList");
+  assert.ok(probe.helperMethods.some((entry) => entry?.name === "SortCostAndBools" && entry?.rva === 38348434), "shard cost method probe missing SortCostAndBools");
+  assert.ok(probe.helperMethods.some((entry) => entry?.name === "CountAffordableShard" && entry?.rva === 38351862), "shard cost method probe missing CountAffordableShard");
+  assert.ok(probe.helperMethods.some((entry) => entry?.name === "get_OverLevel100Exponent" && entry?.rva === 38239421), "shard cost method probe missing get_OverLevel100Exponent");
+  assert.ok(probe.estimatedTrackedBodySizeClusters.some((entry) => entry?.estimatedTrackedBodySize === 3258 && JSON.stringify(entry?.rows) === JSON.stringify([19, 20, 21])), "shard cost method probe 19-21 cluster drifted");
+  assert.ok(probe.estimatedTrackedBodySizeClusters.some((entry) => entry?.estimatedTrackedBodySize === 2693 && JSON.stringify(entry?.rows) === JSON.stringify([27, 28])), "shard cost method probe 27-28 cluster drifted");
+  assert.ok(probe.findings.some((line) => String(line).includes("real get_SU0-29Cost runtime family")), "shard cost method probe must preserve the getter-family finding");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("verified runtime getter family")), "shard cost method probe must preserve runtime boundary framing");
+
+  return {
+    id: "shard-cost-method-probe",
+    label: "Shard cost method probe",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.costGetterFamily.count} cost getters`,
+      `${probe.helperMethods.length} helper methods`,
+      `${probe.estimatedTrackedBodySizeClusters.length} tracked size clusters`
+    ]
+  };
+}
+
+function validateShardCostNativeProbe(probe) {
+  expectNonEmptyString(probe.dataset, "shard cost native probe dataset id must be present");
+  expectNonEmptyString(probe.generatedAt, "shard cost native probe generatedAt must be present");
+  expectRecord(probe.source, "shard cost native probe source must be an object");
+  ["methodProbe", "uabeaProbeReport", "libIl2cpp", "vendorManual"].forEach((field) => {
+    expectNonEmptyString(probe.source[field], `shard cost native probe source.${field} must be present`);
+  });
+  expectArray(probe.rows, "shard cost native probe rows must be an array");
+  expectArray(probe.earlyCallClusters, "shard cost native probe earlyCallClusters must be an array");
+  expectArray(probe.helperTargetSummaries, "shard cost native probe helperTargetSummaries must be an array");
+  expectRecord(probe.powerHelperFamily, "shard cost native probe powerHelperFamily must be an object");
+  expectArray(probe.overLevelGetterProfiles, "shard cost native probe overLevelGetterProfiles must be an array");
+  expectArray(probe.findings, "shard cost native probe findings must be an array");
+  expectArray(probe.currentBoundary, "shard cost native probe currentBoundary must be an array");
+  expectRecord(probe.spotChecks, "shard cost native probe spotChecks must be an object");
+
+  assert.equal(probe.dataset, "shard-cost-native-probe.v1", "shard cost native probe dataset drifted");
+  assert.equal(probe.rows.length, 30, "shard cost native probe row count drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 0 && JSON.stringify(entry?.earlyFieldReads?.slice(3, 8).map((item) => item.offsetHex)) === JSON.stringify(["0x340", "0x348", "0x350", "0x358", "0x360"])), "shard cost native probe row 0 field shell drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0x3e8", "0x3f0", "0x3f8", "0x400"])), "shard cost native probe row 1 operand bridge drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.operandFieldNames) === JSON.stringify(["SU1StartCost", "SU1CostExponent"])), "shard cost native probe row 1 operand fields drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.costFieldUsage) === JSON.stringify(["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"])), "shard cost native probe row 1 cost field usage drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])), "shard cost native probe row 1 level gates drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 1 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true), "shard cost native probe row 1 hundred-stage divide-by-100 drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 1 && entry?.hundredStageStructure?.remainderLane?.powerHelperTarget === "0x24e20d9"), "shard cost native probe row 1 hundred-stage power helper drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU1CostExponent", "SU1GrowthExponent"])), "shard cost native probe row 1 three-hundred-stage lane drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0xd58", "0xd60", "0xd68", "0xd70"])), "shard cost native probe row 19 operand bridge drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.operandFieldNames) === JSON.stringify(["SU19StartCost", "SU19CostExponent"])), "shard cost native probe row 19 operand fields drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.costFieldUsage) === JSON.stringify(["SU19StartCost", "SU19CostExponent", "SU19GrowthExponent"])), "shard cost native probe row 19 cost field usage drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])), "shard cost native probe row 19 level gates drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 19 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true), "shard cost native probe row 19 hundred-stage divide-by-100 drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU19CostExponent", "SU19GrowthExponent"])), "shard cost native probe row 19 three-hundred-stage lane drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0x1188", "0x1190", "0x1198", "0x11a0"])), "shard cost native probe row 27 operand bridge drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.operandFieldNames) === JSON.stringify(["SU27StartCost", "SU27CostExponent"])), "shard cost native probe row 27 operand fields drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.costFieldUsage) === JSON.stringify(["SU27StartCost", "SU27CostExponent", "SU27GrowthExponent"])), "shard cost native probe row 27 cost field usage drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])), "shard cost native probe row 27 level gates drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 27 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true), "shard cost native probe row 27 hundred-stage divide-by-100 drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU27CostExponent", "SU27GrowthExponent"])), "shard cost native probe row 27 three-hundred-stage lane drifted");
+  assert.ok(probe.earlyCallClusters.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])), "shard cost native probe early cluster for rows 1-12 drifted");
+  assert.ok(probe.earlyCallClusters.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([17])), "shard cost native probe row 17 outlier drifted");
+  assert.ok(probe.helperTargetSummaries.some((entry) => entry?.target === "0x24e1a07" && String(entry?.summary).includes("double literal")), "shard cost native probe literal helper summary drifted");
+  assert.ok(probe.helperTargetSummaries.some((entry) => entry?.target === "0x24e1d36" && String(entry?.summary).includes("integer input")), "shard cost native probe int helper summary drifted");
+  assert.equal(probe.powerHelperFamily?.shardPathEntryTarget, "0x24e20d9", "shard cost native probe power-helper shard path entry drifted");
+  assert.deepEqual(probe.powerHelperFamily?.shardPathChain, ["0x24e20d9", "0x24e1a2b", "0x24e1452", "0x24e0faa", "0x24e1ab0"], "shard cost native probe shard-path helper chain drifted");
+  assert.deepEqual(probe.powerHelperFamily?.nearbySiblingChain, ["0x24e21dc", "0x24e1bba", "0x24e1c3f", "0x24e1cb3"], "shard cost native probe sibling helper chain drifted");
+  assert.equal(probe.genericBigDoubleHelpers?.storedCostFieldsUseBigDoubleSlots, true, "shard cost native probe must preserve BigDouble cost-slot interpretation");
+  assert.equal(probe.genericBigDoubleHelpers?.rowCostFieldSlotSizeBytes, 16, "shard cost native probe BigDouble slot size drifted");
+  assert.equal(probe.genericBigDoubleHelpers?.multiplyHelperTarget, "0x24e1b33", "shard cost native probe multiply helper drifted");
+  assert.equal(probe.genericBigDoubleHelpers?.addHelperTarget, "0x24e176a", "shard cost native probe add helper drifted");
+  assert.equal(probe.genericBigDoubleHelpers?.toDoubleTarget, "0x24e0cda", "shard cost native probe to-double helper drifted");
+  assert.equal(probe.scalarRemainderSubfamily?.entryTarget, "0x24e3620", "shard cost native probe scalar remainder entry drifted");
+  assert.equal(probe.scalarRemainderSubfamily?.integralPartHelperTarget, "0x393469a", "shard cost native probe scalar integral-part helper drifted");
+  assert.equal(probe.scalarRemainderSubfamily?.scalarToBigDoubleTarget, "0x24e349c", "shard cost native probe scalar-to-BigDouble helper drifted");
+  assert.equal(probe.scalarRemainderSubfamily?.scaledPowerBuilderTarget, "0x24e38f9", "shard cost native probe scalar power-builder helper drifted");
+  assert.equal(probe.scalarRemainderSubfamily?.unresolvedTransformTarget, "0x393474a", "shard cost native probe unresolved scalar transform drifted");
+  assert.equal(probe.scalarRemainderSubfamily?.resolvedTransformKind, "powWrapper", "shard cost native probe resolved transform kind drifted");
+  assert.equal(probe.decimalPowerBridge?.bigDoubleLog10Target, "0x24e30e4", "shard cost native probe BigDouble-to-log10 bridge drifted");
+  assert.equal(probe.decimalPowerBridge?.scaledPowerBuilderTarget, "0x24e38f9", "shard cost native probe decimal power-builder drifted");
+  assert.equal(probe.decimalPowerBridge?.powWrapperTarget, "0x393474a", "shard cost native probe pow-wrapper target drifted");
+  assert.equal(probe.decimalPowerBridge?.mathImports?.modfImportName, "modf", "shard cost native probe modf import drifted");
+  assert.equal(probe.decimalPowerBridge?.mathImports?.fmodImportName, "fmod", "shard cost native probe fmod import drifted");
+  assert.equal(probe.decimalPowerBridge?.mathImports?.log10ImportName, "log10", "shard cost native probe log10 import drifted");
+  assert.equal(probe.decimalPowerBridge?.mathImports?.powImportName, "pow", "shard cost native probe pow import drifted");
+  assert.equal(probe.stageAssemblyBoundary?.stageDispatcherEntryTarget, "0x24e3620", "shard cost native probe stage dispatcher entry drifted");
+  assert.equal(probe.stageAssemblyBoundary?.stageDispatcherBodyTarget, "0x24e368d", "shard cost native probe stage dispatcher body drifted");
+  assert.equal(probe.stageAssemblyBoundary?.scalarCompareTarget, "0x24e2d86", "shard cost native probe scalar compare helper drifted");
+  assert.equal(probe.stageAssemblyBoundary?.specialCaseGateTarget, "0x24e387a", "shard cost native probe special-case gate drifted");
+  assert.equal(probe.stageAssemblyBoundary?.scalarToBigDoubleTarget, "0x24e349c", "shard cost native probe stage scalar-to-BigDouble lane drifted");
+  assert.equal(probe.stageAssemblyBoundary?.decimalPowerBuilderTarget, "0x24e38f9", "shard cost native probe stage decimal power-builder drifted");
+  assert.equal(probe.sampledOffsetFeeders?.length, 3, "shard cost native probe sampled offset feeder count drifted");
+  assert.ok(probe.sampledOffsetFeeders?.some((entry) => entry?.row === 1 && entry?.thresholdWindow === "100-plus-window" && entry?.levelOffset === 70 && Math.abs(Number(entry?.coefficient) - 9.765628774403013e-05) < 1e-16 && entry?.model === "literalTimesBigDoubleOffsetThenAdd"), "shard cost native probe row 1 sampled offset feeder drifted");
+  assert.ok(probe.sampledOffsetFeeders?.some((entry) => entry?.row === 19 && entry?.thresholdWindow === "100-plus-window" && entry?.levelOffset === 70 && Math.abs(Number(entry?.coefficient) - (-0.00011718430323526263)) < 1e-16 && entry?.model === "scalarOffsetTimesCoefficientThenAdd"), "shard cost native probe row 19 sampled offset feeder drifted");
+  assert.ok(probe.sampledOffsetFeeders?.some((entry) => entry?.row === 27 && entry?.thresholdWindow === "100-plus-window" && entry?.levelOffset === 82 && Math.abs(Number(entry?.coefficient) - 8192.001984596252) < 1e-9 && entry?.model === "literalTimesBigDoubleOffsetThenAdd"), "shard cost native probe row 27 sampled offset feeder drifted");
+  assert.deepEqual(probe.windowOffsetFamilies?.hundredWindowFamilies, [
+    { thresholdWindow: "100-plus-window", model: "literalTimesBigDoubleOffsetThenAdd", levelOffset: 70, usesLiteralBuilder: false, usesPreMergeMultiply: true, rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
+    { thresholdWindow: "100-plus-window", model: "scalarOffsetTimesCoefficientThenAdd", levelOffset: 70, usesLiteralBuilder: true, usesPreMergeMultiply: false, rows: [19, 20, 21, 22, 23] },
+    { thresholdWindow: "100-plus-window", model: "scalarOffsetTimesCoefficientThenAdd", levelOffset: 67, usesLiteralBuilder: true, usesPreMergeMultiply: false, rows: [24, 25, 26] },
+    { thresholdWindow: "100-plus-window", model: "literalTimesBigDoubleOffsetThenAdd", levelOffset: 82, usesLiteralBuilder: false, usesPreMergeMultiply: true, rows: [27, 28, 29] },
+  ], "shard cost native probe hundred-window family clusters drifted");
+  assert.deepEqual(probe.windowOffsetFamilies?.twoHundredWindowFamilies, [
+    { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 27, 28, 29] },
+    { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [180], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 26, 27, 28, 29] },
+  ], "shard cost native probe two-hundred-window family clusters drifted");
+  assert.deepEqual(probe.windowOffsetFamilies?.threeHundredWindowFamilies, [
+    { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29] },
+    { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [49], rows: [24] },
+    { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [19], rows: [25] },
+  ], "shard cost native probe three-hundred-window family clusters drifted");
+  assert.deepEqual(probe.stageWindowProfiles, [
+    {
+      rows: [0],
+      familySignature: [
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [] },
+      ],
+    },
+    {
+      rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29],
+      familySignature: [
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      ],
+    },
+    {
+      rows: [18],
+      familySignature: [
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [99] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      ],
+    },
+    {
+      rows: [19, 20, 21, 22, 23],
+      familySignature: [
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
+        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+      ],
+    },
+    {
+      rows: [24],
+      familySignature: [
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [49] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
+        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
+      ],
+    },
+    {
+      rows: [25],
+      familySignature: [
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [19] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
+      ],
+    },
+    {
+      rows: [26],
+      familySignature: [
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
+        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
+        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
+        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
+      ],
+    },
+  ], "shard cost native probe stage-window profile map drifted");
+  assert.deepEqual(probe.stageProfileCorrelations, [
+    { rows: [0], unlockRequirementRange: null, distinctRarities: [], distinctStartCosts: [], distinctCostExponents: [], distinctGrowthExponents: [] },
+    { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29], unlockRequirementRange: [0, 8100], distinctRarities: ["Epic", "Rare", "common"], distinctStartCosts: [1.4, 2, 2.4, 3.1, 3.6, 4, 5.6, 6, 8, 9, 9.99], distinctCostExponents: [1.15, 1.22, 1.24, 1.26, 1.4, 1.48, 1.5, 1.6, 1.78, 2, 2.25, 2.29, 2.3, 3, 4], distinctGrowthExponents: [1.2, 1.3, 1.6, 1.8, 2, 2.2, 2.5, 2.6, 2.8, 3.2, 3.4, 3.8, 4, 5, 8] },
+    { rows: [18], unlockRequirementRange: [1100, 1100], distinctRarities: ["Legendary"], distinctStartCosts: [1.5], distinctCostExponents: [1], distinctGrowthExponents: [5] },
+    { rows: [19, 20, 21, 22, 23], unlockRequirementRange: [1400, 1800], distinctRarities: ["Epic", "Rare", "common"], distinctStartCosts: [1], distinctCostExponents: [1, 2.5, 5], distinctGrowthExponents: [1, 3, 4] },
+    { rows: [24], unlockRequirementRange: [3300, 3300], distinctRarities: ["Rare"], distinctStartCosts: [4], distinctCostExponents: [5], distinctGrowthExponents: [5] },
+    { rows: [25], unlockRequirementRange: [3600, 3600], distinctRarities: ["Low Pristine"], distinctStartCosts: [3], distinctCostExponents: [2], distinctGrowthExponents: [2] },
+    { rows: [26], unlockRequirementRange: [3900, 3900], distinctRarities: ["Mid Pristine"], distinctStartCosts: [5], distinctCostExponents: [2], distinctGrowthExponents: [6] },
+  ], "shard cost native probe stage-profile correlation map drifted");
+  assert.deepEqual(probe.transitionRowAnalysis?.transitionRows?.map((entry) => ({ row: entry?.row, betweenRows: entry?.betweenRows })), [
+    { row: 18, betweenRows: [17, 19] },
+    { row: 24, betweenRows: [23, 27] },
+    { row: 25, betweenRows: [24, 26] },
+    { row: 26, betweenRows: [25, 27] },
+  ], "shard cost native probe transition-row anchors drifted");
+  assert.ok(probe.transitionRowAnalysis?.transitionRows?.some((entry) => entry?.row === 18 && entry?.neighborContrast?.some((line) => String(line).includes("second 100-plus unary feeder"))), "shard cost native probe row 18 transition contrast drifted");
+  assert.ok(probe.transitionRowAnalysis?.transitionRows?.some((entry) => entry?.row === 24 && entry?.neighborContrast?.some((line) => String(line).includes("300-plus unary feeder with integer seed 49"))), "shard cost native probe row 24 transition contrast drifted");
+  assert.ok(probe.transitionRowAnalysis?.transitionRows?.some((entry) => entry?.row === 25 && entry?.neighborContrast?.some((line) => String(line).includes("seed 19"))), "shard cost native probe row 25 transition contrast drifted");
+  assert.ok(probe.transitionRowAnalysis?.transitionRows?.some((entry) => entry?.row === 26 && entry?.neighborContrast?.some((line) => String(line).includes("seed 180"))), "shard cost native probe row 26 transition contrast drifted");
+  assert.deepEqual(probe.transitionRowAnalysis?.row0SpecialCase?.costFieldUsage, ["SU0StartCost", "SU0CostExponent", "SU0GrowthExponent", "SU0GrowthExponent2", "SU0GrowthExponent3"], "shard cost native probe row 0 cost-field shell drifted");
+  assert.deepEqual(probe.transitionRowAnalysis?.row0SpecialCase?.levelGateChecks, [100], "shard cost native probe row 0 level-gate shell drifted");
+  assert.equal(probe.transitionRowAnalysis?.row0SpecialCase?.thresholdStages?.length, 0, "shard cost native probe row 0 threshold-stage shell drifted");
+  assert.ok(probe.transitionRowAnalysis?.row0SpecialCase?.facts?.some((line) => String(line).includes("five serialized cost fields")), "shard cost native probe row 0 special-case fact drifted");
+  assert.deepEqual(probe.thresholdStageClasses, [
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21] },
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23] },
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29] },
+    { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26] },
+  ], "shard cost native probe threshold-stage classes drifted");
+  assert.deepEqual(probe.representativeClassAnalysis?.map((entry) => ({
+    getterNames: entry?.getterNames,
+    rows: entry?.rows,
+    representativeRows: entry?.representatives?.map((rep) => rep?.row),
+  })), [
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21], representativeRows: [1, 21] },
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23], representativeRows: [17, 23] },
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29], representativeRows: [18, 29] },
+    { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26], representativeRows: [25, 26] },
+  ], "shard cost native probe representative class analysis drifted");
+  assert.ok(probe.representativeClassAnalysis?.some((entry) => JSON.stringify(entry?.getterNames) === JSON.stringify(["get_OverLevel100Exponent", "get_OverLevel200Exponent"]) && entry?.representatives?.some((rep) => rep?.row === 29 && rep?.hundredStageStructure?.divideBy100CompilerPattern === true)), "shard cost native probe representative hundred-stage structure drifted");
+  assert.deepEqual(probe.normalRowStageRecipe?.classRecipes?.map((entry) => ({ getterNames: entry?.getterNames, rows: entry?.rows })), [
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21] },
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23] },
+    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29] },
+    { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26] },
+  ], "shard cost native probe normal-row stage recipe drifted");
+  assert.ok(probe.normalRowStageRecipe?.sharedScaffolding?.facts?.some((line) => String(line).includes("same hundred-stage structure")), "shard cost native probe shared stage scaffolding drifted");
+  assert.deepEqual(probe.canonicalSymbolicAssembler?.canonicalClass?.getterNames, ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], "shard cost native probe canonical symbolic assembler getter coverage drifted");
+  assert.deepEqual(probe.canonicalSymbolicAssembler?.canonicalClass?.rows, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21], "shard cost native probe canonical symbolic assembler rows drifted");
+  assert.deepEqual(probe.canonicalSymbolicAssembler?.canonicalClass?.symbolicStages?.map((entry) => entry?.name), ["base-row-fields", "hundred-stage", "two-hundred-stage", "three-hundred-stage", "four-hundred-stage"], "shard cost native probe canonical symbolic assembler stages drifted");
+  assert.deepEqual(probe.canonicalSymbolicAssembler?.canonicalClass?.subprofiles?.map((entry) => entry?.rows), [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], [19, 20, 21]], "shard cost native probe canonical symbolic assembler subprofiles drifted");
+  assert.ok(probe.canonicalSymbolicAssembler?.classDeltas?.some((entry) => JSON.stringify(entry?.getterNames) === JSON.stringify(["get_OverLevel100Exponent"]) && entry?.delta?.some((line) => String(line).includes("0x24e1ab0"))), "shard cost native probe canonical symbolic assembler short-class delta drifted");
+  assert.deepEqual(probe.canonicalMergeConstraints?.secondaryHundredPlusSplit?.map((entry) => ({ rows: entry?.rows, path: entry?.path })), [
+    { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], path: "additivePremerge" },
+    { rows: [19, 20, 21], path: "literalBuilderAdditive" },
+  ], "shard cost native probe canonical merge constraints drifted");
+  assert.ok(probe.canonicalMergeConstraints?.sharedConstraints?.some((line) => String(line).includes("first 200-plus feeder is stable")), "shard cost native probe canonical merge shared constraint drifted");
+  const row1 = probe.rows?.find((entry) => entry?.row === 1);
+  const row19 = probe.rows?.find((entry) => entry?.row === 19);
+  const row27 = probe.rows?.find((entry) => entry?.row === 27);
+  assert.ok(row1?.stageDispatchCallFamilies?.some((family) => family?.usesPreMergeAdd === true && family?.usesCurrentLevelBigDouble === true && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 1 must preserve opening additive dispatcher feeder");
+  assert.ok(row1?.stageDispatchCallFamilies?.some((family) => family?.usesUnaryThresholdTransform === true && JSON.stringify(family?.integerSeeds) === JSON.stringify([100]) && family?.thresholdWindow === "100-plus-window" && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 1 must preserve 100-seed dispatcher feeder");
+  assert.ok(row1?.stageDispatchCallFamilies?.some((family) => family?.usesUnaryThresholdTransform === true && JSON.stringify(family?.integerSeeds) === JSON.stringify([180]) && family?.thresholdWindow === "200-plus-window" && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 1 must preserve 180-seed dispatcher feeder");
+  assert.ok(row1?.stageDispatchCallFamilies?.some((family) => family?.thresholdWindow === "300-plus-window" && family?.usesPreMergeAdd === true && family?.usesUnaryThresholdTransform === false), "shard cost native probe row 1 must preserve plain 300-plus dispatcher feeder");
+  assert.ok(row19?.stageDispatchCallFamilies?.some((family) => family?.usesLiteralBuilder === true && family?.usesPreMergeAdd === true && family?.thresholdWindow === "100-plus-window" && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 19 must preserve literal-seeded dispatcher feeder");
+  assert.ok(row27?.stageDispatchCallFamilies?.some((family) => family?.usesPreMergeMultiply === true && family?.usesPreMergeAdd === true && family?.thresholdWindow === "100-plus-window" && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 27 must preserve stacked additive-premerge feeder");
+  assert.ok(probe.overLevelGetterProfiles.some((entry) => entry?.getterName === "get_OverLevel100Exponent" && entry?.initialBuilderTarget === "0x24e1d36" && entry?.initialIntegerSeed === 2), "shard cost native probe OverLevel100 getter profile drifted");
+  assert.ok(probe.overLevelGetterProfiles.some((entry) => entry?.getterName === "get_OverLevel400Exponent" && entry?.fallsIntoExtendedShardLane === true), "shard cost native probe OverLevel400 getter profile drifted");
+  assert.ok(probe.findings.some((line) => String(line).includes("row-local ShardMining cost operands")), "shard cost native probe must preserve operand finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("stored as checked 16-byte BreakInfinity.BigDouble slots")), "shard cost native probe must preserve BigDouble slot finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("named ShardMining cost fields")), "shard cost native probe must preserve named field finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("touch GrowthExponent later")), "shard cost native probe must preserve growth exponent finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("compare gates inside get_SU*Cost")), "shard cost native probe must preserve compare-gate finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("divide-by-100 integer lane")), "shard cost native probe must preserve hundred-stage divide finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("CostExponent and GrowthExponent neighborhood")), "shard cost native probe must preserve three-hundred-stage lane finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("checked unary helper chain")), "shard cost native probe must preserve unary helper-chain finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("nearby sibling helper lane")), "shard cost native probe must preserve sibling helper-lane finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("0x24e3620 converts a BigDouble pair into a double before dispatching into the remaining scalar remainder subfamily")), "shard cost native probe must preserve scalar remainder finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("0x393469a now resolves to a modf wrapper")), "shard cost native probe must preserve modf-wrapper finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("0x24e38f9 now preserves a checked decimal power-builder")), "shard cost native probe must preserve decimal power-builder finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("0x24e349c now preserves a checked scalar-to-BigDouble fallback")), "shard cost native probe must preserve scalar-to-BigDouble fallback finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("0x393474a is no longer just a pow-like candidate")), "shard cost native probe must preserve pow-wrapper finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("checked BigDouble-to-log10 bridge")), "shard cost native probe must preserve BigDouble log10 bridge finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("checked stage dispatcher")), "shard cost native probe must preserve stage-dispatcher finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("first 100-plus unary threshold feeder")), "shard cost native probe must preserve 100-plus dispatcher finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("later 200-plus unary threshold feeder")), "shard cost native probe must preserve 200-plus dispatcher finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("300-plus window also preserves a plain additive dispatcher feeder")), "shard cost native probe must preserve 300-plus dispatcher finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("literal-seeded dispatcher feeder inside a 100-plus window")), "shard cost native probe must preserve row-19 dispatcher outlier finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("Sampled late-window feeder parameters are now preserved directly from the binary")), "shard cost native probe must preserve sampled feeder-parameter finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("clusters sampled rows into reusable late-window families")), "shard cost native probe must preserve hundred-window family finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("later stage windows now also preserve reusable row-family maps")), "shard cost native probe must preserve later-window family finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("cross-window profile map")), "shard cost native probe must preserve cross-window profile finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("do not collapse cleanly onto one rarity band")), "shard cost native probe must preserve stage-profile correlation finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("transition rows now preserve concrete neighbor contrasts")), "shard cost native probe must preserve transition-row finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("Row 0 is no longer just a weaker version")), "shard cost native probe must preserve row-0 special-case finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("split cleanly by preserved over-level getter coverage")), "shard cost native probe must preserve threshold-stage class finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("Representative rows from each normal-row coverage class")), "shard cost native probe must preserve representative-class finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("shared stage scaffold with class-specific stage coverage")), "shard cost native probe must preserve normal-row recipe finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("canonical symbolic stage assembler")), "shard cost native probe must preserve symbolic-assembler finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("secondary 100-plus feeder")), "shard cost native probe must preserve canonical subprofile finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("narrowest remaining merge breakpoint")), "shard cost native probe must preserve canonical merge finding");
+  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.thresholdStages?.map((stage) => stage.getterName)) === JSON.stringify(["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"])), "shard cost native probe row 1 threshold stages drifted");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("row-local ShardMining operands")), "shard cost native probe must preserve current boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("serialized BreakInfinity.BigDouble pairs")), "shard cost native probe must preserve BigDouble-pair boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("level 100, 200, and 300 compare gates")), "shard cost native probe must preserve compare-gate boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("divide-by-100 loop")), "shard cost native probe must preserve staged-structure boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("shard-path unary transform entry")), "shard cost native probe must preserve helper-family boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("0x24e30e4 as the checked BigDouble-to-log10 bridge")), "shard cost native probe must preserve BigDouble log10 boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("0x24e3620 and 0x24e368d as the checked stage dispatcher")), "shard cost native probe must preserve stage-dispatcher boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("pre-threshold, 100-plus, 200-plus, and 300-plus windows")), "shard cost native probe must preserve stage-window boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("sampled `(level - offset)` feeder parameters")), "shard cost native probe must preserve sampled feeder boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("100-plus feeder row clusters")), "shard cost native probe must preserve hundred-window family boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("new 200-plus and 300-plus family maps")), "shard cost native probe must preserve later-window family boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("new cross-window stage profiles")), "shard cost native probe must preserve cross-window profile boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("row-family switch inside get_SU*Cost")), "shard cost native probe must preserve stage-profile correlation boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("Treat row 0 as a separate shard cost lane")), "shard cost native probe must preserve row-0 special-case boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("preserved over-level getter coverage classes")), "shard cost native probe must preserve threshold-stage class boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("one representative row per coverage class")), "shard cost native probe must preserve representative-class boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("class recipe boundary")), "shard cost native probe must preserve normal-row recipe boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("canonical symbolic assembler")), "shard cost native probe must preserve symbolic-assembler boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("secondary 100-plus feeder split inside the canonical class")), "shard cost native probe must preserve canonical subprofile boundary framing");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("sampled 300-plus feeder and both sampled 200-plus feeders as shared canonical-class structure")), "shard cost native probe must preserve canonical merge boundary framing");
+
+  return {
+    id: "shard-cost-native-probe",
+    label: "Shard cost native probe",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.rows.length} native getter rows`,
+      `${probe.earlyCallClusters.length} early call clusters`,
+      "Getter entry operands stay tied to row-local shard fields"
+    ]
+  };
+}
+
+function validateShardCostScreenshotCalibration(probe) {
+  expectNonEmptyString(probe.dataset, "shard cost screenshot calibration dataset id must be present");
+  expectNonEmptyString(probe.generatedAt, "shard cost screenshot calibration generatedAt must be present");
+  expectRecord(probe.source, "shard cost screenshot calibration source must be an object");
+  expectArray(probe.entries, "shard cost screenshot calibration entries must be an array");
+  expectArray(probe.findings, "shard cost screenshot calibration findings must be an array");
+  expectArray(probe.currentBoundary, "shard cost screenshot calibration currentBoundary must be an array");
+
+  assert.equal(probe.dataset, "shard-cost-screenshot-calibration.v1", "shard cost screenshot calibration dataset drifted");
+  assert.equal(probe.entries.length, 5, "shard cost screenshot calibration row count drifted");
+  assert.ok(probe.entries.some((entry) => Number(entry.row) === 1 && Number(entry.observedLevel) === 283 && String(entry.observedCostLabel) === "1.89e565"), "shard cost screenshot calibration row 1 checkpoint drifted");
+  assert.ok(probe.entries.some((entry) => Number(entry.row) === 21 && Number(entry.observedLevel) === 126 && String(entry.observedCostLabel) === "1.20e565"), "shard cost screenshot calibration row 21 checkpoint drifted");
+  assert.ok(probe.findings.some((line) => String(line).includes("e563-e565")), "shard cost screenshot calibration must preserve magnitude finding");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("player")), "shard cost screenshot calibration must preserve screenshot-source framing");
+
+  return {
+    id: "shard-cost-screenshot-calibration",
+    label: "Shard cost screenshot calibration",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.entries.length} in-game cost checkpoints`,
+      "Rows 1, 9, 14, 21, and 25",
+      "Screenshot costs now anchor shard formula calibration"
+    ]
+  };
+}
+
+function validateShardCostListPathProbe(probe) {
+  expectNonEmptyString(probe.dataset, "shard cost list-path probe dataset id must be present");
+  expectNonEmptyString(probe.generatedAt, "shard cost list-path probe generatedAt must be present");
+  expectRecord(probe.source, "shard cost list-path probe source must be an object");
+  ["methodProbe", "uabeaProbeReport", "libIl2cpp"].forEach((field) => {
+    expectNonEmptyString(probe.source[field], `shard cost list-path probe source.${field} must be present`);
+  });
+  expectRecord(probe.ownerFields, "shard cost list-path probe ownerFields must be an object");
+  expectArray(probe.findings, "shard cost list-path probe findings must be an array");
+  expectArray(probe.callOrder, "shard cost list-path probe callOrder must be an array");
+  expectArray(probe.currentBoundary, "shard cost list-path probe currentBoundary must be an array");
+
+  assert.equal(probe.dataset, "shard-cost-list-path-probe.v1", "shard cost list-path probe dataset drifted");
+  assert.equal(probe.ownerFields.milestoneCostListField?.name, "MilestoneCostList", "shard cost list-path probe MilestoneCostList field drifted");
+  assert.equal(Number(probe.ownerFields.milestoneCostListField?.fieldOffset), 5160, "shard cost list-path probe MilestoneCostList offset drifted");
+  assert.equal(probe.callOrder[0], "GetShardCostList", "shard cost list-path probe call order must start at GetShardCostList");
+  assert.equal(probe.callOrder[1], "get_SU0Cost", "shard cost list-path probe must preserve get_SU0Cost as first appended getter");
+  assert.equal(probe.callOrder.at(-1), "get_SU29Cost", "shard cost list-path probe must preserve get_SU29Cost as final appended getter");
+  assert.ok(probe.findings.some((line) => String(line).includes("same getter outputs")), "shard cost list-path probe must preserve cache-builder finding");
+  assert.ok(probe.findings.some((line) => String(line).includes("affordability")), "shard cost list-path probe must preserve affordability finding");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("cache builder")), "shard cost list-path probe must preserve blocked-use framing");
+
+  return {
+    id: "shard-cost-list-path-probe",
+    label: "Shard cost list-path probe",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.callOrder.length - 1} appended row getters`,
+      "MilestoneCostList caches the per-row getter family",
+      "No alternate list-builder formula path found"
+    ]
+  };
+}
+
+function validateShardBonusSlotProbe(probe) {
+  expectNonEmptyString(probe.dataset, "shard bonus slot probe dataset id must be present");
+  expectNonEmptyString(probe.generatedAt, "shard bonus slot probe generatedAt must be present");
+  expectRecord(probe.source, "shard bonus slot probe source must be an object");
+  ["metadata", "groundedMilestones"].forEach((field) => {
+    expectNonEmptyString(probe.source[field], `shard bonus slot probe source.${field} must be present`);
+  });
+  expectArray(probe.rows, "shard bonus slot probe rows must be an array");
+  expectArray(probe.findings, "shard bonus slot probe findings must be an array");
+  expectArray(probe.currentBoundary, "shard bonus slot probe currentBoundary must be an array");
+
+  assert.equal(probe.dataset, "shard-bonus-slot-probe.v1", "shard bonus slot probe dataset drifted");
+  assert.equal(probe.rows.length, 30, "shard bonus slot probe row count drifted");
+  assert.ok(probe.rows.some((entry) => Number(entry.row) === 0 && Number(entry.bonusFieldCount) === 8 && Number(entry.groundedBonusCount) === 3), "shard bonus slot probe must preserve the Eternal row mismatch");
+  assert.ok(probe.rows.some((entry) => Number(entry.row) === 18 && Number(entry.bonusFieldCount) === 6 && Number(entry.calcAccessorCount) === 6), "shard bonus slot probe must preserve row 18 bonus-slot coverage");
+  assert.ok(probe.rows.some((entry) => Number(entry.row) === 27 && Number(entry.bonusFieldCount) === 3 && Number(entry.calcAccessorCount) === 3), "shard bonus slot probe must preserve late common row slot coverage");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("slot counts alone")), "shard bonus slot probe must preserve blocked-use framing");
+
+  return {
+    id: "shard-bonus-slot-probe",
+    label: "Shard bonus slot probe",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.rows.length} shard rows`,
+      "Exact SU*Bonus* slot counts now survive for rows 0-29",
+      "Row 0 still undershoots metadata in grounded descriptive coverage"
+    ]
+  };
+}
+
+function validateShardTypeMetadataProbe(probe) {
+  expectNonEmptyString(probe.dataset, "shard type metadata probe dataset id must be present");
+  expectNonEmptyString(probe.generatedAt, "shard type metadata probe generatedAt must be present");
+  expectRecord(probe.source, "shard type metadata probe source must be an object");
+  expectNonEmptyString(probe.source.uabeaProbeReport, "shard type metadata probe source.uabeaProbeReport must be present");
+  expectNonEmptyString(probe.source.probeMethod, "shard type metadata probe source.probeMethod must be present");
+  expectRecord(probe.targets, "shard type metadata probe targets must be an object");
+  expectRecord(probe.targets.shardMining, "shard type metadata probe shardMining target must be an object");
+  expectRecord(probe.targets.shardUpgradeInfo, "shard type metadata probe shardUpgradeInfo target must be an object");
+  expectRecord(probe.targets.shardPerLevelTextHandler, "shard type metadata probe shardPerLevelTextHandler target must be an object");
+  expectArray(probe.targets.shardMining.ownerListFields, "shard type metadata probe shardMining.ownerListFields must be an array");
+  expectArray(probe.targets.shardUpgradeInfo.fields, "shard type metadata probe shardUpgradeInfo.fields must be an array");
+  expectArray(probe.rows, "shard type metadata probe rows must be an array");
+  expectArray(probe.findings, "shard type metadata probe findings must be an array");
+  expectArray(probe.currentBoundary, "shard type metadata probe currentBoundary must be an array");
+
+  assert.equal(probe.dataset, "shard-type-metadata-probe.v1", "shard type metadata probe dataset drifted");
+  assert.equal(probe.targets.shardMining.fullName, "ShardMining", "shard type metadata probe ShardMining fullName drifted");
+  assert.equal(probe.targets.shardMining.baseType, "UnityEngine.MonoBehaviour", "shard type metadata probe ShardMining baseType drifted");
+  assert.equal(probe.targets.shardPerLevelTextHandler.fullName, "ShardPerLevelTextHandler", "shard type metadata probe text handler fullName drifted");
+  assert.equal(probe.targets.shardUpgradeInfo.fullName, "ShardMining+ShardUpgradeInfo", "shard type metadata probe ShardUpgradeInfo fullName drifted");
+  assert.ok(probe.targets.shardMining.ownerListFields.some((entry) => entry?.name === "MilestoneCostList" && entry?.type === "System.Collections.Generic.List`1<BreakInfinity.BigDouble>"), "shard type metadata probe must preserve MilestoneCostList");
+  assert.ok(probe.targets.shardMining.ownerListFields.some((entry) => entry?.name === "upgradeInfoList" && entry?.type === "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>"), "shard type metadata probe must preserve upgradeInfoList");
+  assert.deepEqual(probe.targets.shardUpgradeInfo.fields.map((entry) => entry?.name), ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"], "shard type metadata probe ShardUpgradeInfo field list drifted");
+  assert.equal(probe.rows.length, 30, "shard type metadata probe row count drifted");
+  assert.ok(probe.rows.some((entry) => entry?.row === 0 && entry?.costFieldCount === 5 && entry?.bonusFieldCount === 8), "shard type metadata probe must preserve row 0 schema");
+  assert.ok(probe.rows.some((entry) => entry?.row === 18 && entry?.bonusFieldCount === 6 && entry?.bonusTextFieldCount === 6), "shard type metadata probe must preserve row 18 bonus/text schema");
+  assert.ok(probe.rows.some((entry) => entry?.row === 27 && entry?.costFieldCount === 3 && entry?.bonusFieldCount === 3 && entry?.bonusTextFieldCount === 3), "shard type metadata probe must preserve row 27 schema");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("not as final serialized row values")), "shard type metadata probe must preserve blocked-use framing");
+
+  return {
+    id: "shard-type-metadata-probe",
+    label: "Shard type metadata probe",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.rows.length} typed shard rows`,
+      `${probe.targets.shardMining.ownerListFields.length} typed shard list or state hooks`,
+      "Direct LibCpp2IL shard type reflection is now preserved without claiming decoded serialized values"
+    ]
+  };
+}
+
+function validateShardMilestoneHandoffBoundary(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard milestone handoff boundary dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard milestone handoff boundary generatedAt must be present");
+  expectRecord(boundary.sources, "shard milestone handoff boundary sources must be an object");
+  ["shardMiningMetadataNeighborhood", "shardMetadataNeighborhood", "ownerFamilyBoundary", "rowShellBoundary", "rowAlignmentBoundary", "globalMetadata"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard milestone handoff boundary sources.${field} must be present`);
+  });
+  expectNonEmptyString(boundary.shardControllerFamily, "shard milestone handoff boundary shardControllerFamily must be present");
+  expectRecord(boundary.shardControllerRowShell, "shard milestone handoff boundary shardControllerRowShell must be an object");
+  expectRecord(boundary.shardControllerRowShell.unlockHookRange, "shard milestone handoff boundary unlockHookRange must be an object");
+  expectRecord(boundary.shardControllerRowShell.buyHookRange, "shard milestone handoff boundary buyHookRange must be an object");
+  expectRecord(boundary.shardControllerRowShell.textCheckerRange, "shard milestone handoff boundary textCheckerRange must be an object");
+  expectRecord(boundary.genericMilestoneLead, "shard milestone handoff boundary genericMilestoneLead must be an object");
+  expectNonEmptyString(boundary.genericMilestoneLead.family, "shard milestone handoff boundary genericMilestoneLead.family must be present");
+  expectNonEmptyString(boundary.genericMilestoneLead.metadataPath, "shard milestone handoff boundary genericMilestoneLead.metadataPath must be present");
+  expectRecord(boundary.genericMilestoneLead.buyHookRange, "shard milestone handoff boundary genericMilestoneLead.buyHookRange must be an object");
+  expectArray(boundary.genericMilestoneLead.textAndValueAnchors, "shard milestone handoff boundary genericMilestoneLead.textAndValueAnchors must be an array");
+  expectArray(boundary.handoffFindings, "shard milestone handoff boundary handoffFindings must be an array");
+  expectArray(boundary.currentBoundary, "shard milestone handoff boundary currentBoundary must be an array");
+
+  assert.equal(boundary.shardControllerFamily, "ShardMining, Assembly-CSharp", "shard milestone handoff boundary shardControllerFamily drifted");
+  assert.deepEqual(boundary.shardControllerRowShell.unlockHookRange, { start: 17, end: 29, count: 13 }, "shard milestone handoff boundary unlockHookRange drifted");
+  assert.deepEqual(boundary.shardControllerRowShell.buyHookRange, { start: 0, end: 0, count: 1 }, "shard milestone handoff boundary buyHookRange drifted");
+  assert.deepEqual(boundary.shardControllerRowShell.textCheckerRange, { start: 0, end: 12, count: 13 }, "shard milestone handoff boundary textCheckerRange drifted");
+  assert.equal(boundary.genericMilestoneLead.family, "ConstructionMilestones, Assembly-CSharp", "shard milestone handoff boundary genericMilestoneLead.family drifted");
+  assert.equal(boundary.genericMilestoneLead.metadataPath, "Assets\\Scripts\\Upgrades\\AcademyData\\ConstructionMilestones.cs", "shard milestone handoff boundary genericMilestoneLead.metadataPath drifted");
+  assert.deepEqual(boundary.genericMilestoneLead.buyHookRange, { start: 1, end: 57, count: 57 }, "shard milestone handoff boundary genericMilestoneLead.buyHookRange drifted");
+  ["InitializeMilestones", "SetAllMilestoneTexts", "GetMilestoneDiamondValue", "GetMilestoneTokenValue", "GetClaimedMilestonesAmount"].forEach((name) => {
+    assert.ok(boundary.genericMilestoneLead.textAndValueAnchors.includes(name), `shard milestone handoff boundary missing ${name}`);
+  });
+  assert.ok(boundary.handoffFindings.some((line) => String(line).includes("BuyMilestone1-57")), "shard milestone handoff boundary must preserve generic buy-family narrowing");
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("not recovered player-owned shard milestone state")), "shard milestone handoff boundary must preserve blocked-use framing");
+
+  return {
+    id: "shard-milestone-handoff-boundary",
+    label: "Shard milestone handoff boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.handoffFindings.length} handoff findings`,
+      `${boundary.genericMilestoneLead.textAndValueAnchors.length} generic milestone helper anchors`,
+      "The shard row-owner seam is narrowed to the ShardMining-to-ConstructionMilestones handoff"
     ]
   };
 }
@@ -800,9 +1605,9 @@ function validateMultiverseMarketRangeBoundary(boundary) {
   expectArray(boundary.currentBoundary, "multiverse market range boundary currentBoundary must be an array");
 
   assert.deepEqual(boundary.validatedRowRanges, ["50-59", "63-74"], "multiverse market range boundary validatedRowRanges drifted");
-  assert.deepEqual(boundary.metadataIsLevels, [99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110], "multiverse market range boundary metadataIsLevels drifted");
-  assert.equal(boundary.metadataIsRangeLabel, "IS99Level through IS110Level", "multiverse market range boundary metadataIsRangeLabel drifted");
-  assert.equal(boundary.overlapIds.length, 0, "multiverse market range boundary should preserve the current zero-overlap result");
+  assert.deepEqual(boundary.metadataIsLevels, [71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110], "multiverse market range boundary metadataIsLevels drifted");
+  assert.equal(boundary.metadataIsRangeLabel, "IS71Level through IS110Level", "multiverse market range boundary metadataIsRangeLabel drifted");
+  assert.deepEqual(boundary.overlapIds, [71, 72, 73, 74], "multiverse market range boundary overlapIds drifted");
 
   return {
     id: "multiverse-market-range-boundary",
@@ -811,7 +1616,7 @@ function validateMultiverseMarketRangeBoundary(boundary) {
     stats: [
       `${boundary.validatedRowIds.length} validated row ids`,
       `${boundary.metadataIsLevels.length} recovered metadata IS levels`,
-      "Validated row block and recovered IS run do not currently overlap"
+      "Validated row block and recovered IS run now share a first direct overlap at rows 71-74"
     ]
   };
 }
@@ -1304,7 +2109,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 30, "bundled dataset contract must track the thirty shipped dataset groups");
+  assert.equal(contract.datasets.length, 43, "bundled dataset contract must track the forty-three shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -1354,9 +2159,22 @@ export async function validateBundledDatasets() {
   const shardOwnerFamilyBoundary = await readJson("../../data/shard-owner-family-boundary.v1.json");
   const shardFinalSuBonusBoundary = await readJson("../../data/shard-finalsu-bonus-boundary.v1.json");
   const shardMilestonePayloadBoundary = await readJson("../../data/shard-milestone-payload-boundary.v1.json");
+  const shardCostModelBoundary = await readJson("../../data/shard-cost-model-boundary.v1.json");
+  const shardMilestoneRowModelBoundary = await readJson("../../data/shard-milestone-row-model-boundary.v1.json");
+  const shardMilestoneTitleEffectBoundary = await readJson("../../data/shard-milestone-title-effect-boundary.v1.json");
+  const shardEffectTextHandlerBoundary = await readJson("../../data/shard-effect-text-handler-boundary.v1.json");
   const shardMilestoneRowShellBoundary = await readJson("../../data/shard-milestone-row-shell-boundary.v1.json");
   const shardMilestoneRowAlignmentBoundary = await readJson("../../data/shard-milestone-row-alignment-boundary.v1.json");
+  const shardMilestoneHandoffBoundary = await readJson("../../data/shard-milestone-handoff-boundary.v1.json");
   const shardSaveBoundary = await readJson("../../data/shard-save-boundary.v1.json");
+  const shardSceneMonoBehaviourProbe = await readJson("../../data/shard-scene-monobehaviour-probe.v1.json");
+  const shardCostParameterProbe = await readJson("../../data/shard-cost-parameter-probe.v1.json");
+  const shardCostMethodProbe = await readJson("../../data/shard-cost-method-probe.v1.json");
+  const shardCostNativeProbe = await readJson("../../data/shard-cost-native-probe.v1.json");
+  const shardCostScreenshotCalibration = await readJson("../../data/shard-cost-screenshot-calibration.v1.json");
+  const shardCostListPathProbe = await readJson("../../data/shard-cost-list-path-probe.v1.json");
+  const shardBonusSlotProbe = await readJson("../../data/shard-bonus-slot-probe.v1.json");
+  const shardTypeMetadataProbe = await readJson("../../data/shard-type-metadata-probe.v1.json");
   const extractionCandidateFamilies = await readJson("../../data/extraction-candidate-families.v1.json");
   const extractionCandidateRanking = await readJson("../../data/extraction-candidate-ranking.v1.json");
   const tokenShop = await readJson("../../data/token-shop-values.json");
@@ -1386,9 +2204,22 @@ export async function validateBundledDatasets() {
     validateShardOwnerFamilyBoundary(shardOwnerFamilyBoundary),
     validateShardFinalSuBonusBoundary(shardFinalSuBonusBoundary),
     validateShardMilestonePayloadBoundary(shardMilestonePayloadBoundary),
+    validateShardCostModelBoundary(shardCostModelBoundary),
+    validateShardMilestoneRowModelBoundary(shardMilestoneRowModelBoundary),
+    validateShardMilestoneTitleEffectBoundary(shardMilestoneTitleEffectBoundary),
+    validateShardEffectTextHandlerBoundary(shardEffectTextHandlerBoundary),
     validateShardMilestoneRowShellBoundary(shardMilestoneRowShellBoundary),
     validateShardMilestoneRowAlignmentBoundary(shardMilestoneRowAlignmentBoundary),
+    validateShardMilestoneHandoffBoundary(shardMilestoneHandoffBoundary),
     validateShardSaveBoundary(shardSaveBoundary),
+    validateShardSceneMonoBehaviourProbe(shardSceneMonoBehaviourProbe),
+    validateShardCostParameterProbe(shardCostParameterProbe),
+    validateShardCostMethodProbe(shardCostMethodProbe),
+    validateShardCostNativeProbe(shardCostNativeProbe),
+    validateShardCostScreenshotCalibration(shardCostScreenshotCalibration),
+    validateShardCostListPathProbe(shardCostListPathProbe),
+    validateShardBonusSlotProbe(shardBonusSlotProbe),
+    validateShardTypeMetadataProbe(shardTypeMetadataProbe),
     validateExtractionCandidateFamilies(extractionCandidateFamilies),
     validateExtractionCandidateRanking(extractionCandidateRanking),
     validateTokenShop(tokenShop),

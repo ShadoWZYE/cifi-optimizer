@@ -1,0 +1,58 @@
+{
+  "dataset": "shard-effect-text-handler-boundary.v1",
+  "generatedAt": "2026-04-04",
+  "sources": {
+    "unityProbeReport": "data/unity-probe-report.json",
+    "targetedStringProbe": "data/unity-targeted-string-probe.json",
+    "ownerComparisonProbe": "data/shard-vs-construction-owner-probe.v1.json",
+    "titleEffectBoundary": "data/shard-milestone-title-effect-boundary.v1.json",
+    "rowModelBoundary": "data/shard-milestone-row-model-boundary.v1.json"
+  },
+  "probableTextHandler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+  "presentationFamily": [
+    "ShardMilestoneBonus1",
+    "ShardMilestoneBonus2",
+    "ShardMilestoneBonus3",
+    "ShardMilestoneBonus4",
+    "ShardMilestoneBonus5",
+    "ShardMilestoneBonus6",
+    "ShardMilestoneBonus7",
+    "ShardMilestoneBonus8"
+  ],
+  "sampleBonusCalcAccessors": [
+    "get_SU1Bonus1Calc",
+    "get_SU1Bonus2Calc",
+    "get_SU1Bonus3Calc",
+    "get_SU2Bonus1Calc",
+    "get_SU2Bonus2Calc",
+    "get_SU2Bonus3Calc",
+    "get_SU3Bonus1Calc",
+    "get_SU3Bonus2Calc",
+    "get_SU3Bonus3Calc",
+    "get_SU4Bonus1Calc",
+    "get_SU4Bonus2Calc",
+    "get_SU4Bonus3Calc",
+    "get_SU5Bonus1Calc",
+    "get_SU5Bonus2Calc"
+  ],
+  "uiContextAnchors": [
+    "LevelText",
+    "DescText",
+    "ValueText",
+    "DescriptionText",
+    "InfoPanel-new",
+    "PopUp1"
+  ],
+  "genericMilestoneWriter": "SetAllMilestoneTexts",
+  "rowModelCoverage": {
+    "start": 0,
+    "end": 29,
+    "count": 30
+  },
+  "currentBoundary": [
+    "The strongest current repo-local effect-text handler clue is TextHandlerShardMilestoneBonusesPerLevel/N, sitting in a shard UI context with LevelText, DescText, ValueText, and DescriptionText.",
+    "That handler clue aligns with the shipped ShardMilestoneBonus1-8 presentation family and sampled row-local get_SU*Bonus*Calc accessors, which is enough to treat shard effect text as a dedicated shard-side handler path rather than a generic milestone writer.",
+    "ConstructionMilestones still preserves SetAllMilestoneTexts, but that generic writer remains weaker than the shard-specific TextHandlerShardMilestoneBonusesPerLevel/N clue for milestone bonus text.",
+    "Do not treat this boundary as a recovered row-complete effect-text table or as proof that every row 0-29 bonus line is already mapped to a final player-facing string."
+  ]
+}

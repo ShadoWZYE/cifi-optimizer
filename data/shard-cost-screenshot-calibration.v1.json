@@ -1,0 +1,65 @@
+{
+  "dataset": "shard-cost-screenshot-calibration.v1",
+  "generatedAt": "2026-04-05",
+  "source": {
+    "kind": "user-provided-screenshots",
+    "note": "Player-supplied in-game shard milestone card screenshots captured during repo-local cost recovery."
+  },
+  "entries": [
+    {
+      "row": 1,
+      "title": "#1 THE ALPHA MILESTONE",
+      "observedLevel": 283,
+      "observedCostLabel": "1.89e565",
+      "scientificMantissa": 1.89,
+      "scientificExponent": 565,
+      "screenshotRole": "in-game cost checkpoint"
+    },
+    {
+      "row": 9,
+      "title": "#9 THE PRODUCING MILESTONE",
+      "observedLevel": 20,
+      "observedCostLabel": "3.31e564",
+      "scientificMantissa": 3.31,
+      "scientificExponent": 564,
+      "screenshotRole": "in-game cost checkpoint"
+    },
+    {
+      "row": 14,
+      "title": "#14 THE PATHING MILESTONE",
+      "observedLevel": 153,
+      "observedCostLabel": "9.73e565",
+      "scientificMantissa": 9.73,
+      "scientificExponent": 565,
+      "screenshotRole": "in-game cost checkpoint"
+    },
+    {
+      "row": 21,
+      "title": "#21 THE TARGETING MILESTONE",
+      "observedLevel": 126,
+      "observedCostLabel": "1.20e565",
+      "scientificMantissa": 1.2,
+      "scientificExponent": 565,
+      "screenshotRole": "in-game cost checkpoint"
+    },
+    {
+      "row": 25,
+      "title": "#25 THE FABRICATING MILESTONE",
+      "observedLevel": 16,
+      "observedCostLabel": "5.38e563",
+      "scientificMantissa": 5.38,
+      "scientificExponent": 563,
+      "screenshotRole": "in-game cost checkpoint"
+    }
+  ],
+  "findings": [
+    "These in-game checkpoints span rows 1, 9, 14, 21, and 25 across levels 16, 20, 126, 153, and 283.",
+    "Observed screenshot costs stay in the e563-e565 range even when the currently recovered StartCost mantissas are single-digit values, so the unresolved integer lane still matters to cost magnitude recovery.",
+    "The screenshots validate that the shard card rail should stay descriptive until the final BigDouble formula is proven, but they now give row-local calibration points for testing candidate formulas."
+  ],
+  "currentBoundary": [
+    "Treat these screenshot entries as in-game cost checkpoints supplied by the player, not as a closed-form formula proof by themselves.",
+    "Treat the observed cost magnitudes as evidence that the preserved integer lane is still part of the real shard cost payload or staging path.",
+    "Do not expose a computed next-cost number until a candidate formula matches these checkpoints across multiple rows and threshold bands."
+  ]
+}

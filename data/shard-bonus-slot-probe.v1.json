@@ -1,0 +1,569 @@
+{
+  "dataset": "shard-bonus-slot-probe.v1",
+  "generatedAt": "2026-04-04",
+  "source": {
+    "metadata": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\global-metadata.dat",
+    "groundedMilestones": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\shard-milestones.grounded.v1.json"
+  },
+  "rows": [
+    {
+      "row": 0,
+      "bonusFieldCount": 8,
+      "calcAccessorCount": 0,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "calcIds": [],
+      "matchesGroundedCount": false
+    },
+    {
+      "row": 1,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 2,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 3,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 4,
+      "bonusFieldCount": 4,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 4,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 5,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 6,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 7,
+      "bonusFieldCount": 4,
+      "calcAccessorCount": 4,
+      "groundedBonusCount": 4,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 8,
+      "bonusFieldCount": 5,
+      "calcAccessorCount": 5,
+      "groundedBonusCount": 5,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 9,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 10,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 11,
+      "bonusFieldCount": 4,
+      "calcAccessorCount": 4,
+      "groundedBonusCount": 4,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 12,
+      "bonusFieldCount": 5,
+      "calcAccessorCount": 5,
+      "groundedBonusCount": 5,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 13,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 14,
+      "bonusFieldCount": 4,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 4,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 15,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 16,
+      "bonusFieldCount": 4,
+      "calcAccessorCount": 4,
+      "groundedBonusCount": 4,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 17,
+      "bonusFieldCount": 5,
+      "calcAccessorCount": 5,
+      "groundedBonusCount": 5,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 18,
+      "bonusFieldCount": 6,
+      "calcAccessorCount": 6,
+      "groundedBonusCount": 6,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 19,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 20,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 21,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 22,
+      "bonusFieldCount": 4,
+      "calcAccessorCount": 4,
+      "groundedBonusCount": 4,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 23,
+      "bonusFieldCount": 5,
+      "calcAccessorCount": 5,
+      "groundedBonusCount": 5,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 24,
+      "bonusFieldCount": 4,
+      "calcAccessorCount": 4,
+      "groundedBonusCount": 4,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 25,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 26,
+      "bonusFieldCount": 5,
+      "calcAccessorCount": 5,
+      "groundedBonusCount": 5,
+      "slotIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "calcIds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 27,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 28,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    },
+    {
+      "row": 29,
+      "bonusFieldCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "slotIds": [
+        1,
+        2,
+        3
+      ],
+      "calcIds": [
+        1,
+        2,
+        3
+      ],
+      "matchesGroundedCount": true
+    }
+  ],
+  "findings": [
+    "Metadata preserves explicit SU0-29 bonus-field families, which yields exact bonus-slot counts for each shard row.",
+    "Rows 1-29 currently match the grounded descriptive bonus-entry counts.",
+    "Row 0 is the main mismatch: metadata preserves eight bonus slots while the grounded descriptive dataset currently carries only three surfaced bonus entries."
+  ],
+  "currentBoundary": [
+    "Treat the metadata slot counts as direct shard-row bonus-arity evidence.",
+    "Do not treat slot counts alone as final player-facing effect text or bonus formulas.",
+    "Use row-0 mismatch as evidence that the current descriptive Eternal milestone entry is still incomplete."
+  ]
+}

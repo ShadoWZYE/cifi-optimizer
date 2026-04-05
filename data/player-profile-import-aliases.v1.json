@@ -2,8 +2,8 @@
   "version": "v1",
   "generatedFrom": "player-profile.js",
   "groupCount": 7,
-  "aliasCount": 32,
-  "acceptedPathCount": 81,
+  "aliasCount": 33,
+  "acceptedPathCount": 83,
   "groups": [
     {
       "id": "meta",
@@ -145,9 +145,17 @@
             "planning.shardFocusMilestoneLevel",
             "shardFocusMilestoneLevel"
           ]
+        },
+        {
+          "field": "shardObservedLevelsByMilestone",
+          "targetPath": "planning.shards.observedLevelsByMilestone",
+          "acceptedPaths": [
+            "planning.shards.observedLevelsByMilestone",
+            "systems.shards.observedLevelsByMilestone"
+          ]
         }
       ],
-      "acceptedPathCount": 14
+      "acceptedPathCount": 16
     },
     {
       "id": "externalModel",

@@ -69,6 +69,34 @@ Prevent:
 - must contain the current shard-specific payload-watch cluster around milestone totals, cost-list hooks, progress-fill hooks, and phase-tick fields tied to `ShardUpgradeInfo`
 - useful for narrowing the exact serialized shard payload search and fail-fast validation, not itself a recovered player-owned milestone row payload
 
+### Shard cost-model boundary
+
+- file: `data/shard-cost-model-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the sampled `get_SU*Cost` accessor windows, the recovered `SU0StartCost` or exponent field shell, and explicit blocked-use framing for exact formulas and optimizer claims
+- useful for shard cost-model recovery and optimizer gating, not itself a recovered numeric cost table or planner-safe buy order
+
+### Shard milestone row-model boundary
+
+- file: `data/shard-milestone-row-model-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the contiguous shard-local `Milestone*TextChecker` and `SU*UnlockReq` row ranges plus explicit buy-family seam framing
+- useful for shard row recovery and title/effect mapping, not itself a recovered save owner or effect-text table
+
+### Shard milestone title/effect boundary
+
+- file: `data/shard-milestone-title-effect-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain shipped `SMilestone-*` title assets, the `ShardMilestoneBonus*` presentation family, sampled `get_SU*Bonus*Calc` accessors, and explicit conflict/blocking notes
+- useful for grounding in-game milestone names and effect-family existence, not itself a fully conflict-free title map or row-complete effect-text table
+
+### Shard effect-text handler boundary
+
+- file: `data/shard-effect-text-handler-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the strongest current shard-side effect-text handler clue, the `ShardMilestoneBonus*` presentation family, sampled `get_SU*Bonus*Calc` accessors, nearby UI text anchors, and explicit blocked-use framing
+- useful for narrowing the shard bonus text path away from generic milestone writers, not itself a recovered row-complete effect-text table
+
 ### Shard milestone row-shell boundary
 
 - file: `data/shard-milestone-row-shell-boundary.v1.json`
@@ -83,12 +111,81 @@ Prevent:
 - must contain the currently recovered unlock-hook, buy-hook, and text-checker ranges plus the explicit overlap result between those partial row-shell families
 - useful for blocking naive one-to-one shard row-number mapping and narrowing future row-verification probes, not itself a recovered row owner or verified row-label map
 
+### Shard milestone handoff boundary
+
+- file: `data/shard-milestone-handoff-boundary.v1.json`
+- classification: `extracted-mechanics`
+- must contain the narrowed `ShardMining` row-shell ranges, the academy-side `ConstructionMilestones` numbered buy-family range, and explicit boundary framing for the unresolved handoff between them
+- useful for narrowing the remaining declaring-owner seam and future shard row-owner probes, not itself a recovered player-owned row model or planner-safe numbering map
+
 ### Shard save boundary
 
 - file: `data/shard-save-boundary.v1.json`
 - classification: `extracted-mechanics`
 - must contain the narrowed shard-specific owner-shell terms, the checked save-family terms, and an explicit zero-overlap result across the current shard-local contexts
+
+### Shard scene MonoBehaviour probe
+
+- file: `data/shard-scene-monobehaviour-probe.v1.json`
+- classification: `extracted-mechanics`
+- must contain direct `level0` MonoBehaviour targets for `ShardMining`, `ShardPerLevelTextHandler`, and `ConstructionMilestones`, plus blocked-use framing against claiming typed shard values from the probe alone
 - useful for keeping shard owner-family evidence separate from save-side recovery, not itself a recovered shard save model
+
+### Shard cost parameter probe
+
+- file: `data/shard-cost-parameter-probe.v1.json`
+- classification: `extracted-mechanics`
+- must contain row-complete `SU0-29` StartCost and CostExponent metadata families plus direct ShardMining numeric candidate tuples, with blocked-use framing against claiming final per-row costs or a verified formula
+- useful for narrowing the next typed shard parser and surfacing direct numeric evidence without pretending the row mapping is solved
+
+### Shard cost method probe
+
+- file: `data/shard-cost-method-probe.v1.json`
+- classification: `extracted-mechanics`
+- must contain the verified `ShardMining.get_SU0-29Cost()` runtime getter family with direct libil2cpp RVAs
+- must contain the native helper neighborhood around `UpdateShardCostList`, `GetShardCostList`, `SortCostAndBools`, `CountAffordableShard`, and `get_OverLevel*Exponent`
+- must contain tracked getter body-size clustering as code-shape evidence, with blocked-use framing against claiming a final mathematical formula
+- useful for keeping the native shard-cost hunt checkable while the repo still lacks decoded method bodies
+
+### Shard cost native probe
+
+- file: `data/shard-cost-native-probe.v1.json`
+- classification: `extracted-mechanics`
+- must contain disassembled `get_SU*Cost` entry operand reads and early native call-target clusters
+- must contain the row-local field-offset bridge from native getters back to `ShardMining` serialized cost operands
+- must contain blocked-use framing against claiming a final BigDouble equation before the helper calls are typed
+- useful for narrowing the exact getter inputs and native lane splits behind future shard next-cost recovery
+
+### Shard cost screenshot calibration
+
+- file: `data/shard-cost-screenshot-calibration.v1.json`
+- classification: `extracted-mechanics`
+- must contain player-supplied in-game shard cost checkpoints with row ids, observed levels, and visible cost labels
+- must contain blocked-use framing against treating screenshot checkpoints as final formula proof
+- useful for calibrating candidate shard formulas against real in-game magnitudes while the runtime equation is still unresolved
+
+### Shard cost list-path probe
+
+- file: `data/shard-cost-list-path-probe.v1.json`
+- classification: `extracted-mechanics`
+- must contain the checked `GetShardCostList` call order through `get_SU0Cost` to `get_SU29Cost`
+- must contain the owner-side `MilestoneCostList` cache tie-in plus downstream `UpdateShardCostList`, `SortCostAndBools`, and `CountAffordableShard` framing
+- must contain blocked-use framing against treating the list-builder path as proof of a separate shard cost formula
+- useful for proving that the remaining formula work still lives inside `get_SU*Cost` instead of a hidden cache-builder path
+
+### Shard bonus slot probe
+
+- file: `data/shard-bonus-slot-probe.v1.json`
+- classification: `extracted-mechanics`
+- must contain exact `SU0-29` `Bonus*` slot-count coverage plus row-0 mismatch framing where grounded descriptive bonuses still undershoot metadata
+- useful for nailing row-local bonus arity without pretending the player-facing effect text or formulas are fully recovered
+
+### Shard type metadata probe
+
+- file: `data/shard-type-metadata-probe.v1.json`
+- classification: `extracted-mechanics`
+- must contain the direct `LibCpp2IL` typed shard schema for `ShardMining`, `ShardPerLevelTextHandler`, and nested `ShardUpgradeInfo`, plus the `upgradeInfoList` and `MilestoneCostList` owner hooks
+- useful for source-port validation and future typed shard value recovery, not itself a decoded serialized value table or verified cost formula
 
 ### Extraction candidate families
 
@@ -158,5 +255,5 @@ Run:
 
 - `npm run verify:data`
 
-This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, shard-owner-family-boundary, shard-finalsu-bonus-boundary, shard-milestone-payload-boundary, shard-milestone-row-shell-boundary, shard-milestone-row-alignment-boundary, shard-save-boundary, extraction-candidate-families, extraction-candidate-ranking, token-shop, multiverse-market, and spend-boundary datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
+This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, shard-owner-family-boundary, shard-finalsu-bonus-boundary, shard-milestone-payload-boundary, shard-milestone-row-shell-boundary, shard-milestone-row-alignment-boundary, shard-milestone-handoff-boundary, shard-save-boundary, shard-scene-monobehaviour-probe, shard-cost-parameter-probe, shard-cost-method-probe, shard-cost-native-probe, shard-cost-screenshot-calibration, shard-cost-list-path-probe, shard-bonus-slot-probe, shard-type-metadata-probe, extraction-candidate-families, extraction-candidate-ranking, token-shop, multiverse-market, and spend-boundary datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
 

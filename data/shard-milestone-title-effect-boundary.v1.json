@@ -1,0 +1,83 @@
+{
+  "dataset": "shard-milestone-title-effect-boundary.v1",
+  "generatedAt": "2026-04-04",
+  "sources": {
+    "unityProbeReport": "data/unity-probe-report.json",
+    "ownerFamilyProbe": "data/shard-owner-family-probe.v1.json",
+    "shardUpgradeInfoMetadataNeighborhood": "data/shardupgradeinfo-metadata-neighborhood.v1.json",
+    "rowModelBoundary": "data/shard-milestone-row-model-boundary.v1.json",
+    "globalMetadata": "workbench/apk/base/global-metadata.dat"
+  },
+  "titleAssetCandidates": [
+    { "row": 0, "assetName": "SMilestone-0-Eternal(OURO)", "title": "Eternal(OURO)" },
+    { "row": 1, "assetName": "SMilestone-1-Alpha", "title": "Alpha" },
+    { "row": 2, "assetName": "SMilestone-2-Aquarius", "title": "Aquarius" },
+    { "row": 3, "assetName": "SMilestone-3-Libra", "title": "Libra" },
+    { "row": 4, "assetName": "SMilestone-4-Modifying", "title": "Modifying" },
+    { "row": 5, "assetName": "SMilestone-5-Flowering", "title": "Flowering" },
+    { "row": 6, "assetName": "SMilestone-6-Connecting", "title": "Connecting" },
+    { "row": 7, "assetName": "SMilestone-7-Generating", "title": "Generating" },
+    { "row": 8, "assetName": "SMilestone-8-Morphing", "title": "Morphing" },
+    { "row": 9, "assetName": "SMilestone-9-Producing", "title": "Producing" },
+    { "row": 10, "assetName": "SMilestone-10-Expanding", "title": "Expanding" },
+    { "row": 11, "assetName": "SMilestone-11-Triangular", "title": "Triangular" },
+    { "row": 12, "assetName": "SMilestone-12-Extracting", "title": "Extracting" },
+    { "row": 13, "assetName": "SMilestone-13-Seeding", "title": "Seeding" },
+    { "row": 14, "assetName": "SMilestone-14-Pathing", "title": "Pathing" },
+    { "row": 15, "assetName": "SMilestone-15-Ritualistic", "title": "Ritualistic" },
+    { "row": 16, "assetName": "SMilestone-16-Modulistic", "title": "Modulistic" },
+    { "row": 17, "assetName": "SMilestone-17-Machining", "title": "Machining" },
+    { "row": 18, "assetName": "SMilestone-18-Studying", "title": "Studying" },
+    { "row": 19, "assetName": "SMilestone-19-Lucky", "title": "Lucky" },
+    { "row": 20, "assetName": "SMilestone-20-Duplicating", "title": "Duplicating" },
+    { "row": 21, "assetName": "SMilestone-21-Targeting", "title": "Targeting" },
+    { "row": 22, "assetName": "SMilestone-22-Quadratic", "title": "Quadratic" },
+    { "row": 23, "assetName": "SMilestone-23-Layering", "title": "Layering" },
+    { "row": 24, "assetName": "SMilestone-24-Torn", "title": "Torn" },
+    { "row": 25, "assetName": "SMilestone-25-Fabricating", "title": "Fabricating" },
+    { "row": 26, "assetName": "SMilestone-26-Wonderous", "title": "Wonderous" },
+    { "row": 27, "assetName": "SMilestone-27-Sharp", "title": "Sharp" },
+    { "row": 28, "assetName": "SMilestone-28-Studying", "title": "Studying" },
+    { "row": 28, "assetName": "SMilestone-28-Sly", "title": "Sly" },
+    { "row": 29, "assetName": "SMilestone-29-Earthly", "title": "Earthly" },
+    { "row": 30, "assetName": "SMilestone-30-Illuminating", "title": "Illuminating" }
+  ],
+  "effectPresentationSlots": [
+    "ShardMilestoneBonus1",
+    "ShardMilestoneBonus2",
+    "ShardMilestoneBonus3",
+    "ShardMilestoneBonus4",
+    "ShardMilestoneBonus5",
+    "ShardMilestoneBonus6",
+    "ShardMilestoneBonus7",
+    "ShardMilestoneBonus8"
+  ],
+  "sampleBonusCalcAccessors": [
+    "get_SU1Bonus1Calc",
+    "get_SU1Bonus2Calc",
+    "get_SU1Bonus3Calc",
+    "get_SU2Bonus1Calc",
+    "get_SU2Bonus2Calc",
+    "get_SU2Bonus3Calc",
+    "get_SU3Bonus1Calc",
+    "get_SU3Bonus2Calc",
+    "get_SU3Bonus3Calc",
+    "get_SU4Bonus1Calc",
+    "get_SU4Bonus2Calc",
+    "get_SU4Bonus3Calc",
+    "get_SU5Bonus1Calc",
+    "get_SU5Bonus2Calc"
+  ],
+  "findings": [
+    "Shipped Unity assets preserve explicit shard milestone title assets from SMilestone-0 through SMilestone-30.",
+    "Rows 0-29 overlap the recovered shard-local text-checker and unlock-requirement shell, while row 30 currently appears only in shipped asset names and not in the recovered 0-29 row shell.",
+    "The shipped shard UI preserves a generic effect presentation family ShardMilestoneBonus1 through ShardMilestoneBonus8.",
+    "ShardUpgradeInfo metadata also preserves row-specific bonus calc accessors such as get_SU1Bonus1Calc through get_SU5Bonus2Calc, which is enough to prove row-local effect math exists even though full player-facing effect text is not yet recovered.",
+    "Row 28 currently has conflicting shipped asset title candidates, Studying and Sly, so its player-facing title remains unresolved."
+  ],
+  "currentBoundary": [
+    "Treat this bundle as the current shard title and effect boundary from shipped assets.",
+    "Use it to preserve real in-game shard milestone title candidates and the existence of row-local bonus calc accessors.",
+    "Do not treat the title list as fully conflict-free, and do not treat ShardMilestoneBonus1-8 as fully mapped player-facing effect text for every row until the exact text handler or declaring row owner is recovered."
+  ]
+}

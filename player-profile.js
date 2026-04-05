@@ -17,7 +17,8 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
     shardRatePerHour: [["planning", "shards", "ratePerHour"], ["systems", "shards", "ratePerHour"], ["shardRatePerHour"]],
     totalShardMilestoneLevels: [["planning", "shards", "totalMilestoneLevels"], ["systems", "shards", "totalMilestoneLevels"], ["totalShardMilestoneLevels"]],
     shardFocusMilestoneId: [["planning", "shards", "focusMilestoneId"], ["systems", "shards", "focusMilestoneId"], ["planning", "shardFocusMilestoneId"], ["shardFocusMilestoneId"]],
-    shardFocusMilestoneLevel: [["planning", "shards", "focusMilestoneLevel"], ["systems", "shards", "focusMilestoneLevel"], ["planning", "shardFocusMilestoneLevel"], ["shardFocusMilestoneLevel"]]
+    shardFocusMilestoneLevel: [["planning", "shards", "focusMilestoneLevel"], ["systems", "shards", "focusMilestoneLevel"], ["planning", "shardFocusMilestoneLevel"], ["shardFocusMilestoneLevel"]],
+    shardObservedLevelsByMilestone: [["planning", "shards", "observedLevelsByMilestone"], ["systems", "shards", "observedLevelsByMilestone"]]
   },
   externalModel: {
     shipPower: [["externalModels", "shipPlanner", "summary", "power"], ["systems", "ship", "power"]],
@@ -214,6 +215,20 @@ function coerceRecordOrNull(value) {
   return isRecord(value) ? cloneValue(value) : null;
 }
 
+function coerceObservedShardLevels(value) {
+  if (!isRecord(value)) {
+    return {};
+  }
+  return Object.entries(value).reduce((record, [key, raw]) => {
+    const normalizedKey = coerceNullableString(key);
+    const normalizedValue = coerceNullableNumber(raw);
+    if (normalizedKey && normalizedValue !== null) {
+      record[normalizedKey] = normalizedValue;
+    }
+    return record;
+  }, {});
+}
+
 function coerceCompatibilityValue(value) {
   if (value === undefined) {
     return undefined;
@@ -287,7 +302,8 @@ export function createDefaultPlayerProfile(baselineShipPlayerState = {}) {
         ratePerHour: null,
         totalMilestoneLevels: null,
         focusMilestoneId: null,
-        focusMilestoneLevel: null
+        focusMilestoneLevel: null,
+        observedLevelsByMilestone: {}
       }
     },
     notes: {
@@ -354,6 +370,16 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   normalized.planning.shards.totalMilestoneLevels = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.totalShardMilestoneLevels));
   normalized.planning.shards.focusMilestoneId = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneId));
   normalized.planning.shards.focusMilestoneLevel = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel));
+  normalized.planning.shards.observedLevelsByMilestone = coerceObservedShardLevels(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardObservedLevelsByMilestone)
+  );
+  if (
+    normalized.planning.shards.focusMilestoneId
+    && normalized.planning.shards.focusMilestoneLevel !== null
+    && normalized.planning.shards.observedLevelsByMilestone[normalized.planning.shards.focusMilestoneId] === undefined
+  ) {
+    normalized.planning.shards.observedLevelsByMilestone[normalized.planning.shards.focusMilestoneId] = normalized.planning.shards.focusMilestoneLevel;
+  }
 
   normalized.notes.profile = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.notes));
 
