@@ -1537,9 +1537,9 @@ function renderProgressionResults(results) {
   const sectionMarkup = {
     shards: renderShardSubsystemSection(subsystemFeed.shards),
     loop: renderProgressionSubsystemSection(
-      "Loop subsystem",
-      "Progression subsystem",
-      "Loop cards remain warning-oriented guardrails. They are pacing and anti-bricking notes, not reset optimizers.",
+      "Loop Prestige",
+      "Loop reset guardrails",
+      "These cards stay warning-oriented. They are pacing and anti-bricking notes around Loop Prestige, not reset optimizers.",
       subsystemFeed.loop,
       "warning"
     ),
@@ -1547,11 +1547,11 @@ function renderProgressionResults(results) {
       <section class="meta-stack">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Progression subsystem</p>
-            <h3>Shard research and grounding</h3>
+            <p class="eyebrow">Shard grounding</p>
+            <h3>Shard Mining evidence</h3>
           </div>
         </div>
-        <p class="meta">This section keeps the shard recovery state visible as its own subsystem. It is grounded repo-local research support, not a ranked upgrade planner.</p>
+        <p class="meta">This section keeps the extracted Shard Mining evidence visible without mixing it into player-facing shard card logic before the cost evaluator is actually proven.</p>
         ${renderShardGroundingBoundary()}
         ${renderShardWorkflowReference()}
         ${renderObservedShardBehaviors()}
@@ -1559,11 +1559,6 @@ function renderProgressionResults(results) {
     `
   };
   $("#progressionResults").innerHTML = `
-    <article class="validation-card warn">
-      <strong>Shard milestone mapping status</strong>
-      <p class="meta">System-level shard anchors now include repo-local Unity shell evidence for shard and loop milestone families, but the current milestone list is still community-grounded descriptive data.</p>
-      <p class="meta">Do not treat milestone names, unlock rows, bonus labels, or cost notes here as shipped-game extracted truth until shard owner mapping is completed.</p>
-    </article>
     ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
     ${renderRecommendationFeedSupportNotice(recommendationFeedSupport, "progression")}
     ${sectionMarkup[selectedSubsystem]}
@@ -1576,12 +1571,12 @@ function renderShardSubsystemSection(items) {
     <section class="meta-stack">
       <div class="panel-header">
         <div>
-          <p class="eyebrow">Progression subsystem</p>
-          <h3>Shard subsystem</h3>
+          <p class="eyebrow">Shard Mining</p>
+          <h3>Shard milestones</h3>
         </div>
       </div>
-      <p class="meta">Descriptive shard guidance stays separated from loop warnings so shard-specific unlock, threshold, and milestone cards do not read like reset advice.</p>
-      ${cards ? `<div class="recommendation-list">${cards}</div>` : `<article class="validation-card warn"><strong>Shard subsystem unavailable</strong><p class="meta">No player-facing cards currently passed the shared recommendation contract for this subsystem.</p></article>`}
+      <p class="meta">Milestone guidance stays separate from Loop Prestige warnings so shard rows read like shard rows instead of reset advice.</p>
+      ${cards ? `<div class="recommendation-list">${cards}</div>` : `<article class="validation-card warn"><strong>Shard milestones unavailable</strong><p class="meta">No player-facing shard milestone cards currently passed the shared recommendation contract.</p></article>`}
       ${renderShardWorkflowSnapshot()}
       ${renderShardMilestoneDirectory()}
     </section>
@@ -3029,7 +3024,7 @@ function renderShardWorkflowSnapshot() {
   return `
     <div class="page-grid">
       <article class="snapshot-card">
-        <span class="snapshot-title">Shard workflow snapshot</span>
+        <span class="snapshot-title">Shard Mining snapshot</span>
         <strong>${escapeHtml(nextUnlock ? nextUnlock.name : "All unlock gates covered")}</strong>
         <p class="meta">Current shards: ${formatOptionalNumber(shardPlanner.currentShards)} | Shard income / hour: ${formatOptionalNumber(shardPlanner.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(shardPlanner.totalMilestoneLevels)}</p>
         <div class="meta-stack">
@@ -3303,7 +3298,7 @@ function renderShardMilestoneDirectory() {
     <div class="meta-stack">
       <p class="eyebrow">Shard milestones</p>
       <h3>Shard milestones</h3>
-      <p class="meta">These rows now live directly inside the shard subsystem. Each card keeps its own observed level, stays in canonical order, and shows the strongest grounded row lane, staged formula class, and bonus data the repo can currently support without faking cost numbers.</p>
+      <p class="meta">These rows now live directly inside Shard Mining. Each card keeps its own observed level, stays in canonical order, and shows the strongest grounded row lane, staged formula class, and bonus data the repo can currently support without faking cost numbers.</p>
       <div class="preview-stack">
 ${milestones.map((milestone) => {
           const groundedRow = getShardMilestoneGroundedSummary(milestone);
@@ -4981,9 +4976,9 @@ function renderProgressionSubsystemToggle(subsystemFeed) {
   };
   const selected = getSelectedProgressionSubsystem();
   $("#progressionSubsystemToggle").innerHTML = [
-    { id: "shards", label: `Shard subsystem (${counts.shards})` },
-    { id: "loop", label: `Loop subsystem (${counts.loop})` },
-    { id: "research", label: "Shard research" }
+    { id: "shards", label: `Shard milestones (${counts.shards})` },
+    { id: "loop", label: `Loop Prestige (${counts.loop})` },
+    { id: "research", label: "Shard Mining" }
   ].map((item) => `
     <button class="button${selected === item.id ? " is-active" : ""}" type="button" data-progression-view="${escapeHtml(item.id)}" role="tab" aria-selected="${selected === item.id}">
       ${escapeHtml(item.label)}
@@ -4995,22 +4990,22 @@ function renderProgressionCalibrationPanel(subsystemFeed) {
   const summary = getProgressionCalibrationSummary(subsystemFeed);
   $("#progressionCalibrationPanel").innerHTML = `
     <article class="validation-card ${summary.shards.ready ? "pass" : "warn"}">
-      <strong>Shard calibration quickstart</strong>
-      <p class="meta">${summary.shards.ready ? "The shard subsystem has the minimum tracked inputs it needs for descriptive unlock, threshold, and cost-bump watch cards." : "The shard subsystem is missing one or more of its minimum tracked inputs."}</p>
-      <p class="meta">Total levels: ${summary.shards.totalLevelsLabel} | Threshold row: ${summary.shards.focusMilestoneLabel} | Threshold row level: ${summary.shards.focusLevelLabel} | Observed rows: ${summary.shards.observedRowCountLabel}</p>
+      <strong>Shard milestone quickstart</strong>
+      <p class="meta">${summary.shards.ready ? "Shard milestones have the minimum tracked inputs needed for row-level guidance." : "Shard milestones are still missing one or more minimum tracked inputs."}</p>
+      <p class="meta">Total milestone levels: ${summary.shards.totalLevelsLabel} | Tracked row: ${summary.shards.focusMilestoneLabel} | Tracked row level: ${summary.shards.focusLevelLabel} | Observed rows: ${summary.shards.observedRowCountLabel}</p>
       <p class="meta">${escapeHtml(summary.shards.nextStep)}</p>
     </article>
     <article class="validation-card ${summary.loop.ready ? "pass" : "warn"}">
-      <strong>Loop calibration quickstart</strong>
-      <p class="meta">${summary.loop.ready ? "The loop subsystem has the minimum tracked inputs it needs for anti-bricking and pacing warnings." : "The loop subsystem is missing one or more of its minimum tracked inputs."}</p>
+      <strong>Loop Prestige quickstart</strong>
+      <p class="meta">${summary.loop.ready ? "Loop Prestige guardrails have the minimum tracked inputs needed for pacing warnings." : "Loop Prestige guardrails are still missing one or more minimum tracked inputs."}</p>
       <p class="meta">Current LR: ${summary.loop.loopResetLabel} | Current shards: ${summary.loop.shardsLabel}</p>
       <p class="meta">${escapeHtml(summary.loop.nextStep)}</p>
     </article>
     <article class="validation-card ${summary.profile.hasConfidence ? "pass" : "warn"}">
-      <strong>Calibration comfort</strong>
+      <strong>Profile readiness</strong>
       <p class="meta">Profile confidence: ${summary.profile.confidenceLabel}. Active progression view: ${escapeHtml(summary.profile.activeViewLabel)}.</p>
       <p class="meta">${escapeHtml(summary.profile.nextStep)}</p>
-      <button class="button" type="button" data-progression-action="open-profile">Open profile calibration</button>
+      <button class="button" type="button" data-progression-action="open-profile">Open Profile</button>
     </article>
   `;
 }
@@ -5035,24 +5030,24 @@ function getProgressionCalibrationSummary(subsystemFeed) {
       focusLevelLabel: formatOptionalNumber(shardPlanner.focusMilestoneLevel),
       observedRowCountLabel: formatOptionalNumber(observedRowCount),
       nextStep: hasTotalLevels && hasFocusMilestone && hasFocusLevel
-        ? `${shardCount} shard card${shardCount === 1 ? "" : "s"} are ready to render with the current manual calibration.`
-        : "Fill total shard milestone levels, then edit any shard row level so shard guidance becomes usable without extra row-selection steps."
+        ? `${shardCount} shard milestone card${shardCount === 1 ? "" : "s"} are ready with the current manual inputs.`
+        : "Fill total shard milestone levels, then edit any shard row so milestone guidance becomes usable."
     },
     loop: {
       ready: hasLoopReset && hasShards,
       loopResetLabel: formatOptionalNumber(canonical.loopReset),
       shardsLabel: formatOptionalNumber(canonical.shards),
       nextStep: hasLoopReset && hasShards
-        ? `${loopCount} loop guardrail card${loopCount === 1 ? "" : "s"} are ready to render with the current canonical inputs.`
-        : "Fill current LR and current shards in Profile so loop guardrails can warn without extra manual setup."
+        ? `${loopCount} Loop Prestige card${loopCount === 1 ? "" : "s"} are ready with the current profile inputs.`
+        : "Fill current LR and current shards in Profile so Loop Prestige guardrails can warn cleanly."
     },
     profile: {
       hasConfidence: Boolean(canonical.dataConfidence),
       confidenceLabel: canonical.dataConfidence || "missing",
-      activeViewLabel: selected === "research" ? "Shard research" : selected === "loop" ? "Loop subsystem" : "Shard subsystem",
+      activeViewLabel: selected === "research" ? "Shard Mining" : selected === "loop" ? "Loop Prestige" : "Shard milestones",
       nextStep: selected === "research"
-        ? "Use shard research when you need grounded system understanding; use shard or loop views once calibration is filled."
-        : "The app now keeps calibration and subsystem choice explicit so the active progression surface is easier to use without endless scrolling."
+        ? "Use Shard Mining when you need the extracted evidence; use Shard milestones or Loop Prestige for day-to-day play."
+        : "The active Progression view is now split into game-facing surfaces instead of one long mixed page."
     }
   };
 }
