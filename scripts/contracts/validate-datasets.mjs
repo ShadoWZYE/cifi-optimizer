@@ -2293,6 +2293,8 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   expectArray(boundary.playerProfileAccessorClues, "multiverse market market-member boundary playerProfileAccessorClues must be an array");
   expectArray(boundary.playerProfileMemberShellClues, "multiverse market market-member boundary playerProfileMemberShellClues must be an array");
   expectArray(boundary.playerProfileHandlerBridgeClues, "multiverse market market-member boundary playerProfileHandlerBridgeClues must be an array");
+  expectArray(boundary.directMemberHandoffClues, "multiverse market market-member boundary directMemberHandoffClues must be an array");
+  expectArray(boundary.typedSiblingContrastClues, "multiverse market market-member boundary typedSiblingContrastClues must be an array");
   expectArray(boundary.cloudSaveBridgeClues, "multiverse market market-member boundary cloudSaveBridgeClues must be an array");
   expectArray(boundary.missingDirectTypeMapClues, "multiverse market market-member boundary missingDirectTypeMapClues must be an array");
   expectArray(boundary.marketWrapperTypeClues, "multiverse market market-member boundary marketWrapperTypeClues must be an array");
@@ -2307,6 +2309,12 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   });
   ["PlayerProfileHandler", "playerData", "GetPlayerProfileData", "FillPlayerProfileData", "ConvertSaveDataToProfileData"].forEach((name) => {
     assert.ok(boundary.playerProfileHandlerBridgeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
+  ["get_Market", "Market", "GetPlayerProfileData", "FillPlayerProfileData", "<FillPlayerProfileData>d__45"].forEach((name) => {
+    assert.ok(boundary.directMemberHandoffClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
+  ["PlayerProfileData|GemData", "PlayerProfileData|GemNodeCombo"].forEach((name) => {
+    assert.ok(boundary.typedSiblingContrastClues.includes(name), `multiverse market market-member boundary missing ${name}`);
   });
   ["CloudSavePlayerProfile", "GetCurrentSaveFileInfo", "GetPlayerProfileInfo", "CloudLoad"].forEach((name) => {
     assert.ok(boundary.cloudSaveBridgeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
@@ -2329,9 +2337,10 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       `${boundary.playerProfileAccessorClues.length} PlayerProfile-side accessor clues`,
       `${boundary.playerProfileMemberShellClues.length} PlayerProfile-side member-shell clues`,
       `${boundary.playerProfileHandlerBridgeClues.length} PlayerProfileHandler bridge clues`,
+      `${boundary.directMemberHandoffClues.length} direct member-handoff clues`,
       `${boundary.progressionPayloadFieldClues.length} progression-payload field clues`,
       `${boundary.marketWrapperTypeClues.length} nearby market-wrapper type clues`,
-      "MultiverseMarket save-side handoff is narrowed to a PlayerProfileHandler-mediated playerData-to-Market wrapper bridge that most likely hands off to a deeper progression payload"
+      "MultiverseMarket save-side handoff is narrowed to a PlayerProfileHandler-mediated playerData-to-Market direct member handoff with no checked named object in between"
     ]
   };
 }
