@@ -177,6 +177,8 @@ This lane already points to several future owner families that matter beyond the
 
 - It is now safe to say TokenShop sits on top of a real token-bank state lane with cap, fill, and claim concepts.
 - It is still not safe to put token-bank values into `state.playerProfile` as canonical fields until the saved-state owner and naming are recovered.
+- It is now safe to treat the TokenShop controller shell, the `BigStatisticPrefab.TokenBankCap` display shell, and the `FinalTokenBank*` derived-output cluster as non-owner surfaces for save-state recovery.
+- It is now safe to keep token-bank save-side recovery on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary instead of treating `TokenShop` methods or `FinalTokenBank*` symbols as recovered saved-state owners.
 - Any future planner or import work should treat token-bank state as `available but unmapped` until those owned fields are proven from assets.
 
 

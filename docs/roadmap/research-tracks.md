@@ -199,7 +199,7 @@ Current active or queued tracks:
   - status: `queued`
   - goal: recover player-owned current TokenShop row levels now that the spend lane is grounded
 - `spend-token-bank-state-owner`
-  - status: `queued`
+  - status: `active`
   - goal: recover the saved-state owner behind token-bank cap, fill, and claimable state without guessing from derived `OR_*` labels
 - `spend-daily-tokenium-save-owner`
   - status: `queued`
