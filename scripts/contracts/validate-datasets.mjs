@@ -2296,9 +2296,10 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   expectArray(boundary.cloudSaveBridgeClues, "multiverse market market-member boundary cloudSaveBridgeClues must be an array");
   expectArray(boundary.missingDirectTypeMapClues, "multiverse market market-member boundary missingDirectTypeMapClues must be an array");
   expectArray(boundary.marketWrapperTypeClues, "multiverse market market-member boundary marketWrapperTypeClues must be an array");
+  expectArray(boundary.progressionPayloadFieldClues, "multiverse market market-member boundary progressionPayloadFieldClues must be an array");
   expectArray(boundary.currentBoundary, "multiverse market market-member boundary currentBoundary must be an array");
 
-  ["get_Market", "get_ShardData", "get_ResearchPointData", "get_AcademyPointData"].forEach((name) => {
+  ["get_Market", "get_BM", "get_ZN", "get_TU", "get_ShardData", "get_ResearchPointData", "get_AcademyPointData"].forEach((name) => {
     assert.ok(boundary.playerProfileAccessorClues.includes(name), `multiverse market market-member boundary missing ${name}`);
   });
   ["Market", "Relics", "CellData", "ModPointData", "ShardData", "ResearchPointData", "AcademyPointData", "BlueprintsThisTR"].forEach((name) => {
@@ -2316,6 +2317,9 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   ["MultiverseMarket", "MultiverseMarket|InscryptionTupleObject", "MultiverseMarket|Inscryption", "NecrumExchange", "OuroborosResetter", "TraitSpheres", "ZeimarrNautallium", "ResearchLaboratory", "ResearchUltimas", "RewardLanes", "ShardMining"].forEach((name) => {
     assert.ok(boundary.marketWrapperTypeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
   });
+  ["IS71Level", "IS110Level", "InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
+    assert.ok(boundary.progressionPayloadFieldClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
 
   return {
     id: "multiverse-market-market-member-boundary",
@@ -2325,8 +2329,9 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       `${boundary.playerProfileAccessorClues.length} PlayerProfile-side accessor clues`,
       `${boundary.playerProfileMemberShellClues.length} PlayerProfile-side member-shell clues`,
       `${boundary.playerProfileHandlerBridgeClues.length} PlayerProfileHandler bridge clues`,
+      `${boundary.progressionPayloadFieldClues.length} progression-payload field clues`,
       `${boundary.marketWrapperTypeClues.length} nearby market-wrapper type clues`,
-      "MultiverseMarket save-side handoff is narrowed to a PlayerProfileHandler-mediated playerData-to-Market wrapper bridge"
+      "MultiverseMarket save-side handoff is narrowed to a PlayerProfileHandler-mediated playerData-to-Market wrapper bridge that most likely hands off to a deeper progression payload"
     ]
   };
 }
