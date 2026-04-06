@@ -5,6 +5,8 @@ import sys
 import types
 from pathlib import Path
 
+from portable_paths import md_link, repo_relative
+
 
 ROOT = Path(__file__).resolve().parents[2]
 UNITY_JOINED_DIR = ROOT / "workbench" / "unity" / "joined"
@@ -106,7 +108,7 @@ def render_markdown(mono_behaviours: list[dict[str, object]]) -> str:
     lines = [
         "# Shard Scene MonoBehaviour Probe",
         "",
-        "Source: direct `MonoBehaviour` inventory from [`workbench/unity/joined`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined), read with vendored `UnityPy` plus local optional-dependency stubs so plain serialized-file reads still work in this repo.",
+        f"Source: direct `MonoBehaviour` inventory from {md_link(UNITY_JOINED_DIR)}, read with vendored `UnityPy` plus local optional-dependency stubs so plain serialized-file reads still work in this repo.",
         "",
         "## Grounded conclusions",
         "",
@@ -135,7 +137,7 @@ def main() -> int:
         "dataset": "shard-scene-monobehaviour-probe.v1",
         "generatedAt": "2026-04-04",
         "source": {
-            "unityJoinedDir": str(UNITY_JOINED_DIR),
+            "unityJoinedDir": repo_relative(UNITY_JOINED_DIR),
             "probeMethod": "UnityPy MonoBehaviour inventory with local dependency stubs",
         },
         "monoBehaviours": mono_behaviours,

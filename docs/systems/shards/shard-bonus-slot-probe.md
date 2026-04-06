@@ -1,6 +1,6 @@
 # Shard Bonus Slot Probe
 
-Source: [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\global-metadata.dat) compared against [`data/shard-milestones.grounded.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\shard-milestones.grounded.v1.json).
+Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) compared against [`data/shard-milestones.grounded.v1.json`](data/shard-milestones.grounded.v1.json).
 
 ## Grounded conclusions
 
@@ -40,3 +40,4 @@ Source: [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\
 - `SU27`: `bonusFields=3`; `calcAccessors=3`; `groundedEntries=3`; `matches=true`
 - `SU28`: `bonusFields=3`; `calcAccessors=3`; `groundedEntries=3`; `matches=true`
 - `SU29`: `bonusFields=3`; `calcAccessors=3`; `groundedEntries=3`; `matches=true`
+

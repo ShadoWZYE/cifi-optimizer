@@ -4,9 +4,9 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
 
 - `TokenShop`
   - system: token bank / token upgrades
-  - source owner: [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-  - parser: [`scripts/unity/token_shop_parse.py`](C:\Users\Shadow\Desktop\CiFi\scripts\unity\token_shop_parse.py)
-  - outputs: [`docs/systems/spend/token-shop-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\token-shop-values.md), [`docs/systems/spend/token-bank-state-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\token-bank-state-verification.md), [`data/token-shop-values.json`](C:\Users\Shadow\Desktop\CiFi\data\token-shop-values.json)
+  - source owner: [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+  - parser: [`scripts/unity/token_shop_parse.py`](scripts/unity/token_shop_parse.py)
+  - outputs: [`docs/systems/spend/token-shop-values.md`](docs/systems/spend/token-shop-values.md), [`docs/systems/spend/token-bank-state-verification.md`](docs/systems/spend/token-bank-state-verification.md), [`data/token-shop-values.json`](data/token-shop-values.json)
   - integration status: owner and serialized constants verified; token-bank state lane verified at the controller level; the base spend lane is now grounded as token or tokenium spending through token-bank labels and resource icons; the Daily Tokenium lane is now better grounded as an Academy or Farm Mission reward family that TokenShop modifies; `OR_TokenBankCap` and `OR_TokensFromChests` narrowed to asset-label clues rather than proven formula owners; player-owned current levels and final player-facing label remap still required before planner UI
   - recovered adjacent handlers:
     - `ClaimBankedTokens` -> `TokenShop, Assembly-CSharp`
@@ -34,9 +34,9 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
 
 - `MultiverseMarket`
   - system: Chrystos Emporium / Inscryptions
-  - source owner: [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-  - parser: [`scripts/unity/multiverse_market_parse.py`](C:\Users\Shadow\Desktop\CiFi\scripts\unity\multiverse_market_parse.py)
-  - outputs: [`docs/systems/spend/multiverse-market-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\multiverse-market-values.md), [`docs/systems/spend/multiverse-market-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\multiverse-market-verification.md), [`docs/systems/spend/multiverse-market-state-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\multiverse-market-state-verification.md), [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
+  - source owner: [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+  - parser: [`scripts/unity/multiverse_market_parse.py`](scripts/unity/multiverse_market_parse.py)
+  - outputs: [`docs/systems/spend/multiverse-market-values.md`](docs/systems/spend/multiverse-market-values.md), [`docs/systems/spend/multiverse-market-verification.md`](docs/systems/spend/multiverse-market-verification.md), [`docs/systems/spend/multiverse-market-state-verification.md`](docs/systems/spend/multiverse-market-state-verification.md), [`data/multiverse-market-values.json`](data/multiverse-market-values.json)
   - integration status: owner, partial row constants, and `Inscryptions Done` spend-lane shell verified; saved-state search now narrowed toward `PlayerProfileData`, and exact metadata field clues now include `InscryptionsDone` plus nearby `IS*Level` entries, but the exact declaring save model, player-owned current levels, and full row coverage still remain unresolved before planner UI
   - recovered adjacent handlers:
     - `BuyIS47` -> `MultiverseMarket, Assembly-CSharp`
@@ -72,10 +72,10 @@ Narrowed but not yet planner-ready owner families:
 - shard milestones / loop-reset shell
   - system: shard workflow and loop-reset progression shell
   - current source evidence:
-    - [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-    - [`workbench/unity/joined/sharedassets0.assets`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\sharedassets0.assets)
-    - [`docs/unity/unity-mechanics-pass.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity\unity-mechanics-pass.md)
-    - [`docs/systems/shards/shard-owner-family-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-owner-family-verification.md)
+    - [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+    - [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets)
+    - [`docs/unity/unity-mechanics-pass.md`](docs/unity/unity-mechanics-pass.md)
+    - [`docs/systems/shards/shard-owner-family-verification.md`](docs/systems/shards/shard-owner-family-verification.md)
   - recovered shell identifiers:
     - `LoopResetStage1` through `LoopResetStage5`
     - `ShardMilestones-64`
@@ -103,4 +103,5 @@ Narrowed but not yet planner-ready owner families:
   - integration status: shard-specific controller and bonus-field clues are grounded enough for truthful shard workflow copy, but the exact serialized milestone payload, player-owned milestone state, and player-facing milestone label mapping are still unresolved; keep planner behavior blocked
   - next extraction target:
     - recover the exact serialized milestone row or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail before promoting milestone rows, labels, or costs as game-side truth
+
 

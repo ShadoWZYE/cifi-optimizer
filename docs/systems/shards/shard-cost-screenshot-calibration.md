@@ -1,6 +1,6 @@
 # Shard Cost Screenshot Calibration
 
-Source: player-provided in-game shard milestone screenshots preserved in [`data/shard-cost-screenshot-calibration.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\shard-cost-screenshot-calibration.v1.json).
+Source: player-provided in-game shard milestone screenshots preserved in [`data/shard-cost-screenshot-calibration.v1.json`](data/shard-cost-screenshot-calibration.v1.json).
 
 ## Grounded conclusions
 
@@ -22,3 +22,4 @@ Source: player-provided in-game shard milestone screenshots preserved in [`data/
 - Treat these screenshot costs as in-game checkpoints supplied by the player.
 - Treat them as calibration anchors for candidate shard formulas, especially around the native `100+`, `200+`, and `300+` stage bands.
 - Do not promote a computed shard next-cost until the repo matches these checkpoints with a verified runtime equation.
+

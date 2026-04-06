@@ -4,10 +4,10 @@ Defines the grounded boundary for `state.playerProfile`.
 
 References:
 
-- `PLAYER_PROFILE_IMPORT_ALIASES` in [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
+- `PLAYER_PROFILE_IMPORT_ALIASES` in [`player-profile.js`](player-profile.js)
 - checked-in audit artifacts:
-  - [`docs/contracts/player-profile-import-aliases.md`](C:\Users\Shadow\Desktop\CiFi\docs\contracts\player-profile-import-aliases.md)
-  - [`data/player-profile-import-aliases.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\player-profile-import-aliases.v1.json)
+  - [`docs/contracts/player-profile-import-aliases.md`](docs/contracts/player-profile-import-aliases.md)
+  - [`data/player-profile-import-aliases.v1.json`](data/player-profile-import-aliases.v1.json)
 
 ## Classification rule
 
@@ -147,4 +147,5 @@ The active Profile form should show:
 - only directly visible in-game planner helpers
 
 It should not present external-model or compatibility fields as raw CIFI account state. Ship calibration belongs on the Ship Planner page, not the shared Profile page.
+
 

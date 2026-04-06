@@ -7,6 +7,8 @@ import struct
 from datetime import date
 from pathlib import Path
 
+from portable_paths import md_link, repo_relative
+
 
 ROOT = Path(__file__).resolve().parents[2]
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
@@ -442,7 +444,7 @@ def render_markdown(
     lines = [
         "# Shard Cost Parameter Probe",
         "",
-        "Source: [`workbench/apk/base/global-metadata.dat`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\global-metadata.dat) plus the direct `ShardMining` MonoBehaviour byte range in [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0).",
+        f"Source: {md_link(METADATA_PATH)} plus the direct `ShardMining` MonoBehaviour byte range in {md_link(LEVEL0_PATH)}.",
         "",
         "## Grounded conclusions",
         "",
@@ -588,8 +590,8 @@ def main() -> int:
         "dataset": "shard-cost-parameter-probe.v1",
         "generatedAt": str(date.today()),
         "source": {
-            "metadata": str(METADATA_PATH),
-            "level0": str(LEVEL0_PATH),
+            "metadata": repo_relative(METADATA_PATH),
+            "level0": repo_relative(LEVEL0_PATH),
             "shardMiningAbsoluteOffset": SHARD_MINING_ABSOLUTE_OFFSET,
             "shardMiningByteSize": SHARD_MINING_BYTE_SIZE,
         },

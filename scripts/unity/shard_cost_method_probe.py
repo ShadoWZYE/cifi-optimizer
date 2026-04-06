@@ -7,6 +7,8 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
+from portable_paths import md_link
+
 
 ROOT = Path(__file__).resolve().parents[2]
 UABEA_REPORT_PATH = ROOT / "data" / "uabea-probe-report.json"
@@ -140,7 +142,7 @@ def main() -> None:
     lines = [
         "# Shard Cost Method Probe",
         "",
-        "Source: [`data/uabea-probe-report.json`](C:\\Users\\Shadow\\Desktop\\CiFi\\data\\uabea-probe-report.json) plus the native code bytes in [`workbench/apk/base/libil2cpp.so`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\libil2cpp.so).",
+        f"Source: {md_link(UABEA_REPORT_PATH)} plus the native code bytes in {md_link(LIBIL2CPP_PATH)}.",
         "",
         "## Grounded conclusions",
         "",

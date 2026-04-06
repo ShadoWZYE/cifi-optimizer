@@ -4,6 +4,8 @@ import json
 import struct
 from pathlib import Path
 
+from portable_paths import md_link, repo_relative
+
 
 ROOT = Path(__file__).resolve().parents[2]
 LEVEL0_PATH = ROOT / "workbench" / "unity" / "joined" / "level0"
@@ -92,7 +94,7 @@ def render_markdown(records: list[dict[str, object]]) -> str:
     lines = [
         "# Multiverse Market Values",
         "",
-        "Source: serialized `MultiverseMarket` MonoBehaviour payload in [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0).",
+        f"Source: serialized `MultiverseMarket` MonoBehaviour payload in {md_link(LEVEL0_PATH)}.",
         "",
         "## Grounded conclusions",
         "",
@@ -143,7 +145,7 @@ def main() -> int:
 
     payload = {
         "source": {
-            "level0": str(LEVEL0_PATH),
+            "level0": repo_relative(LEVEL0_PATH),
             "multiverse_market_absolute_offset": MULTIVERSE_MARKET_ABSOLUTE_OFFSET,
             "late_block_start": LATE_BLOCK_START,
             "late_block_stride": LATE_BLOCK_STRIDE,

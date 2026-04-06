@@ -1,187 +1,189 @@
 [
   {
     "name": "IAPProductCatalog",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\IAPProductCatalog.txt",
+    "path": "data/unity-textassets/IAPProductCatalog.txt",
     "size": 8089
   },
   {
     "name": "nv-constant-template",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\nv-constant-template.txt",
+    "path": "data/unity-textassets/nv-constant-template.txt",
     "size": 819
   },
   {
     "name": "BillingMode",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\BillingMode.txt",
+    "path": "data/unity-textassets/BillingMode.txt",
     "size": 29
   },
   {
     "name": "fi",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\fi.txt",
+    "path": "data/unity-textassets/fi.txt",
     "size": 1564
   },
   {
     "name": "nv-emphasis-template",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\nv-emphasis-template.txt",
+    "path": "data/unity-textassets/nv-emphasis-template.txt",
     "size": 995
   },
   {
     "name": "LineBreaking Leading Characters",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\LineBreaking_Leading_Characters.bin",
+    "path": "data/unity-textassets/LineBreaking_Leading_Characters.bin",
     "size": 95
   },
   {
     "name": "nv-pattern-template",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\nv-pattern-template.txt",
+    "path": "data/unity-textassets/nv-pattern-template.txt",
     "size": 251
   },
   {
     "name": "LineBreaking Following Characters",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\LineBreaking_Following_Characters.bin",
+    "path": "data/unity-textassets/LineBreaking_Following_Characters.bin",
     "size": 269
   },
   {
     "name": "emoji",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\emoji.txt",
+    "path": "data/unity-textassets/emoji.txt",
     "size": 495
   },
   {
     "name": "zh",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\zh.txt",
+    "path": "data/unity-textassets/zh.txt",
     "size": 14050
   },
   {
     "name": "es",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\es.txt",
+    "path": "data/unity-textassets/es.txt",
     "size": 14655
   },
   {
     "name": "de_ch",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\de_ch.txt",
+    "path": "data/unity-textassets/de_ch.txt",
     "size": 273
   },
   {
     "name": "pt",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\pt.txt",
+    "path": "data/unity-textassets/pt.txt",
     "size": 728
   },
   {
     "name": "nl",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\nl.txt",
+    "path": "data/unity-textassets/nl.txt",
     "size": 22686
   },
   {
     "name": "de",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\de.txt",
+    "path": "data/unity-textassets/de.txt",
     "size": 4578
   },
   {
     "name": "da",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\da.txt",
+    "path": "data/unity-textassets/da.txt",
     "size": 144
   },
   {
     "name": "th",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\th.txt",
+    "path": "data/unity-textassets/th.txt",
     "size": 558
   },
   {
     "name": "fr",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\fr.txt",
+    "path": "data/unity-textassets/fr.txt",
     "size": 2124
   },
   {
     "name": "ja",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\ja.txt",
+    "path": "data/unity-textassets/ja.txt",
     "size": 5843
   },
   {
     "name": "ar",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\ar.txt",
+    "path": "data/unity-textassets/ar.txt",
     "size": 758
   },
   {
     "name": "tr",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\tr.txt",
+    "path": "data/unity-textassets/tr.txt",
     "size": 384
   },
   {
     "name": "no",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\no.txt",
+    "path": "data/unity-textassets/no.txt",
     "size": 1205
   },
   {
     "name": "pl",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\pl.txt",
+    "path": "data/unity-textassets/pl.txt",
     "size": 463
   },
   {
     "name": "ko",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\ko.txt",
+    "path": "data/unity-textassets/ko.txt",
     "size": 2051
   },
   {
     "name": "vi",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\vi.txt",
+    "path": "data/unity-textassets/vi.txt",
     "size": 1141
   },
   {
     "name": "names",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\names.txt",
+    "path": "data/unity-textassets/names.txt",
     "size": 3560
   },
   {
     "name": "en",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\en.txt",
+    "path": "data/unity-textassets/en.txt",
     "size": 5289
   },
   {
     "name": "sv",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\sv.txt",
+    "path": "data/unity-textassets/sv.txt",
     "size": 2332
   },
   {
     "name": "fa",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\fa.txt",
+    "path": "data/unity-textassets/fa.txt",
     "size": 534
   },
   {
     "name": "domains",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\domains.txt",
+    "path": "data/unity-textassets/domains.txt",
     "size": 9046
   },
   {
     "name": "ru",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\ru.txt",
+    "path": "data/unity-textassets/ru.txt",
     "size": 4956
   },
   {
     "name": "global",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\global.txt",
+    "path": "data/unity-textassets/global.txt",
     "size": 1151
   },
   {
     "name": "el",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\el.bin",
+    "path": "data/unity-textassets/el.bin",
     "size": 4124
   },
   {
     "name": "hu",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\hu.txt",
+    "path": "data/unity-textassets/hu.txt",
     "size": 923
   },
   {
     "name": "it",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\it.txt",
+    "path": "data/unity-textassets/it.txt",
     "size": 2304
   },
   {
     "name": "hi",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\hi.txt",
+    "path": "data/unity-textassets/hi.txt",
     "size": 1001
   },
   {
     "name": "cs",
-    "path": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\unity-textassets\\cs.txt",
+    "path": "data/unity-textassets/cs.txt",
     "size": 412
   }
 ]
+
+

@@ -2,8 +2,8 @@
   "dataset": "shard-cost-parameter-probe.v1",
   "generatedAt": "2026-04-06",
   "source": {
-    "metadata": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\global-metadata.dat",
-    "level0": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
     "shardMiningAbsoluteOffset": 34088352,
     "shardMiningByteSize": 6732
   },
@@ -4051,3 +4051,5 @@
     "Use this probe to narrow the next typed parser step around the existing ShardMining scene target."
   ]
 }
+
+

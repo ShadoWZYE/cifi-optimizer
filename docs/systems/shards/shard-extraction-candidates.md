@@ -4,9 +4,9 @@ This note records the current repo-local ranking for the next shard-owner extrac
 
 Inputs:
 
-- [data/extraction-candidate-families.v1.json](C:\Users\Shadow\Desktop\CiFi\data\extraction-candidate-families.v1.json)
-- [data/extraction-candidate-ranking.v1.json](C:\Users\Shadow\Desktop\CiFi\data\extraction-candidate-ranking.v1.json)
-- [scripts/unity/score_extraction_candidates.py](C:\Users\Shadow\Desktop\CiFi\scripts\unity\score_extraction_candidates.py)
+- [data/extraction-candidate-families.v1.json](data/extraction-candidate-families.v1.json)
+- [data/extraction-candidate-ranking.v1.json](data/extraction-candidate-ranking.v1.json)
+- [scripts/unity/score_extraction_candidates.py](scripts/unity/score_extraction_candidates.py)
 
 ## Method
 
@@ -82,3 +82,4 @@ The best next shard-planner extraction candidate is still the milestone payload 
 - `ShardMining|ShardUpgradeInfo`
 
 The loop-reset stage family remains the best secondary path if the milestone payload trail stalls.
+

@@ -4,12 +4,12 @@ This note separates what the repo can currently say about shards from repo-local
 
 Use it with:
 
-- [shard-system-verification.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-system-verification.md)
-- [unity-mechanics-pass.md](C:\Users\Shadow\Desktop\CiFi\docs\unity\unity-mechanics-pass.md)
-- [unity-owner-map.md](C:\Users\Shadow\Desktop\CiFi\docs\unity\unity-owner-map.md)
-- [data/shard-asset-grounding.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-asset-grounding.v1.json)
-- [shard-extraction-candidates.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-extraction-candidates.md)
-- [shard-owner-family-verification.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-owner-family-verification.md)
+- [shard-system-verification.md](docs/systems/shards/shard-system-verification.md)
+- [unity-mechanics-pass.md](docs/unity/unity-mechanics-pass.md)
+- [unity-owner-map.md](docs/unity/unity-owner-map.md)
+- [data/shard-asset-grounding.v1.json](data/shard-asset-grounding.v1.json)
+- [shard-extraction-candidates.md](docs/systems/shards/shard-extraction-candidates.md)
+- [shard-owner-family-verification.md](docs/systems/shards/shard-owner-family-verification.md)
 
 ## Integration status
 
@@ -65,9 +65,9 @@ They are not enough to claim:
 
 The current bundled shard datasets remain community-grounded descriptive inputs:
 
-- [data/shard-milestones.grounded.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestones.grounded.v1.json)
-- [data/shard-observed-behaviors.grounded.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-observed-behaviors.grounded.v1.json)
-- [data/shard-milestones-provenance.grounded.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestones-provenance.grounded.v1.json)
+- [data/shard-milestones.grounded.v1.json](data/shard-milestones.grounded.v1.json)
+- [data/shard-observed-behaviors.grounded.v1.json](data/shard-observed-behaviors.grounded.v1.json)
+- [data/shard-milestones-provenance.grounded.v1.json](data/shard-milestones-provenance.grounded.v1.json)
 
 That descriptive layer currently supplies:
 
@@ -151,4 +151,5 @@ Current heuristic ranking for that work:
 
 Reference:
 
-- [data/extraction-candidate-ranking.v1.json](C:\Users\Shadow\Desktop\CiFi\data\extraction-candidate-ranking.v1.json)
+- [data/extraction-candidate-ranking.v1.json](data/extraction-candidate-ranking.v1.json)
+

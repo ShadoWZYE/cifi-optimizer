@@ -4,6 +4,8 @@ import json
 import struct
 from pathlib import Path
 
+from portable_paths import md_link, repo_relative
+
 
 ROOT = Path(__file__).resolve().parents[2]
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
@@ -125,7 +127,7 @@ def render_markdown(entries: list[dict[str, object]], table: dict[str, dict[str,
     lines = [
         "# Token Shop Values",
         "",
-        "Source: serialized `TokenShop` MonoBehaviour payload in [`workbench/unity/joined/level0`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0), aligned to declaration-order field names recovered from [`workbench/apk/base/global-metadata.dat`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\global-metadata.dat).",
+        f"Source: serialized `TokenShop` MonoBehaviour payload in {md_link(LEVEL0_PATH)}, aligned to declaration-order field names recovered from {md_link(METADATA_PATH)}.",
         "",
         "## Grounded conclusions",
         "",
@@ -199,8 +201,8 @@ def main() -> int:
 
     payload = {
         "source": {
-            "metadata": str(METADATA_PATH),
-            "level0": str(LEVEL0_PATH),
+            "metadata": repo_relative(METADATA_PATH),
+            "level0": repo_relative(LEVEL0_PATH),
             "token_shop_absolute_offset": TOKEN_SHOP_ABSOLUTE_OFFSET,
             "token_shop_field_offset": TOKEN_SHOP_FIELD_OFFSET,
         },

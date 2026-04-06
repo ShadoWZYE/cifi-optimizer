@@ -1,6 +1,6 @@
 # Shard Cost Method Probe
 
-Source: [`data/uabea-probe-report.json`](C:\Users\Shadow\Desktop\CiFi\data\uabea-probe-report.json) plus the native code bytes in [`workbench/apk/base/libil2cpp.so`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\libil2cpp.so).
+Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) plus the native code bytes in [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so).
 
 ## Grounded conclusions
 
@@ -77,3 +77,4 @@ Source: [`data/uabea-probe-report.json`](C:\Users\Shadow\Desktop\CiFi\data\uabea
 - Treat UpdateShardCostList, get_OverLevel100-400Exponent, GetShardCostList, SortCostAndBools, and CountAffordableShard as the strongest current native helper neighborhood for shard cost recovery.
 - Treat tracked body-size clusters as code-shape evidence for shared or split cost lanes, not as final proof of the exact mathematical formula.
 - Do not promote next-level shard costs as player-facing truth until the repo recovers or verifies the actual BigDouble computation used by the getter family.
+

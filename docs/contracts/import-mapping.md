@@ -15,10 +15,10 @@ Accepted shapes:
 
 Alias inventory:
 
-- source: [`player-profile.js`](C:\Users\Shadow\Desktop\CiFi\player-profile.js)
+- source: [`player-profile.js`](player-profile.js)
 - checked-in audit:
-  - [`docs/contracts/player-profile-import-aliases.md`](C:\Users\Shadow\Desktop\CiFi\docs\contracts\player-profile-import-aliases.md)
-  - [`data/player-profile-import-aliases.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\player-profile-import-aliases.v1.json)
+  - [`docs/contracts/player-profile-import-aliases.md`](docs/contracts/player-profile-import-aliases.md)
+  - [`data/player-profile-import-aliases.v1.json`](data/player-profile-import-aliases.v1.json)
 
 Future alias changes should update the inventory, the audit artifacts, and migration smoke checks together.
 
@@ -111,4 +111,5 @@ Columns:
 - `nextSteps`
 
 `nextSteps` can be comma-separated in CSV imports.
+
 

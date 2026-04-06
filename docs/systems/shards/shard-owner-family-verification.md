@@ -4,13 +4,13 @@ This note records the strongest repo-local owner-family evidence for the shard m
 
 Inputs:
 
-- [data/shard-owner-family-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-owner-family-probe.v1.json)
-- [data/shard-vs-construction-owner-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-vs-construction-owner-probe.v1.json)
-- [data/shardmining-metadata-neighborhood.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shardmining-metadata-neighborhood.v1.json)
-- [data/shardupgradeinfo-metadata-neighborhood.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shardupgradeinfo-metadata-neighborhood.v1.json)
-- [data/shard-metadata-neighborhood.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-metadata-neighborhood.v1.json)
-- [workbench/unity/joined/level0](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-- [workbench/apk/base/global-metadata.dat](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\global-metadata.dat)
+- [data/shard-owner-family-probe.v1.json](data/shard-owner-family-probe.v1.json)
+- [data/shard-vs-construction-owner-probe.v1.json](data/shard-vs-construction-owner-probe.v1.json)
+- [data/shardmining-metadata-neighborhood.v1.json](data/shardmining-metadata-neighborhood.v1.json)
+- [data/shardupgradeinfo-metadata-neighborhood.v1.json](data/shardupgradeinfo-metadata-neighborhood.v1.json)
+- [data/shard-metadata-neighborhood.v1.json](data/shard-metadata-neighborhood.v1.json)
+- [workbench/unity/joined/level0](workbench/unity/joined/level0)
+- [workbench/apk/base/global-metadata.dat](workbench/apk/base/global-metadata.dat)
 
 ## Current conclusion
 
@@ -118,17 +118,17 @@ Future shard planner work still depends on a later extraction pass that recovers
 
 This narrowed owner-family result is now also preserved as:
 
-- [data/shard-owner-family-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-owner-family-boundary.v1.json)
+- [data/shard-owner-family-boundary.v1.json](data/shard-owner-family-boundary.v1.json)
 
 That bundle is the fail-fast repo contract for the current shard-specific owner trail. It is safe for validation and truthful UI boundary copy, but not for canonical shard milestone imports or planner math.
 
 The next shard-local fail-fast bundle is now also preserved as:
 
-- [data/shard-milestone-payload-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-payload-boundary.v1.json)
-- [data/shard-milestone-row-shell-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-shell-boundary.v1.json)
-- [data/shard-milestone-row-alignment-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-alignment-boundary.v1.json)
-- [data/shard-milestone-handoff-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-handoff-boundary.v1.json)
-- [data/shard-save-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-save-boundary.v1.json)
+- [data/shard-milestone-payload-boundary.v1.json](data/shard-milestone-payload-boundary.v1.json)
+- [data/shard-milestone-row-shell-boundary.v1.json](data/shard-milestone-row-shell-boundary.v1.json)
+- [data/shard-milestone-row-alignment-boundary.v1.json](data/shard-milestone-row-alignment-boundary.v1.json)
+- [data/shard-milestone-handoff-boundary.v1.json](data/shard-milestone-handoff-boundary.v1.json)
+- [data/shard-save-boundary.v1.json](data/shard-save-boundary.v1.json)
 
 That payload boundary keeps the current milestone-total, cost-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail, but it still does not recover player-owned row payloads.
 
@@ -139,3 +139,4 @@ The row-alignment boundary makes the next blocker explicit: the current controll
 The handoff boundary narrows the next blocker one step further: `ShardMining` still owns the shard-local row shell, while `ConstructionMilestones` still owns the dense `BuyMilestone1-57` generic buy family and milestone text helpers, so the remaining declaring-owner question is now the exact handoff seam between those two families rather than a fully open-ended shard-owner search.
 
 The shard save boundary separately keeps the narrowed shard-local owner trail and the broader `PlayerProfileData` / `CloudSavePlayerProfile` save-family path from being treated as the same recovered context.
+
