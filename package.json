@@ -5,6 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "node ./scripts/dev-server.mjs",
+    "probe:uabea": "node ./scripts/unity/run_probe.mjs uabea",
+    "probe:shards:parameters": "node ./scripts/unity/run_probe.mjs shards:parameters",
+    "probe:shards:type-metadata": "node ./scripts/unity/run_probe.mjs shards:type-metadata",
+    "probe:shards:method": "node ./scripts/unity/run_probe.mjs shards:method",
+    "probe:shards:cost-native": "node ./scripts/unity/run_probe.mjs shards:cost-native",
     "verify:data": "node ./scripts/contracts/validate-datasets.mjs",
     "test": "node ./tests/smoke.mjs"
   }

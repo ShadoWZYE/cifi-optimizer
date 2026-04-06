@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  artifact-guard:
+    name: Artifact Guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fail on forbidden added artifact paths
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            git fetch --no-tags origin "${{ github.base_ref }}"
+            DIFF_RANGE="origin/${{ github.base_ref }}...HEAD"
+          elif [[ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
+            DIFF_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          else
+            git fetch --no-tags origin "${{ github.event.repository.default_branch }}"
+            DIFF_RANGE="origin/${{ github.event.repository.default_branch }}...HEAD"
+          fi
+
+          mapfile -t added_paths < <(git diff --name-status "$DIFF_RANGE" | awk '$1 == "A" { print $2 }')
+
+          if [[ "${#added_paths[@]}" -eq 0 ]]; then
+            exit 0
+          fi
+
+          forbidden_regex='^(\.appdata/|\.dotnet/|\.nuget/|\.deps/|\.vendor_py/|tools/.*/bin/|tools/.*/obj/|workbench/apk/|workbench/unity/joined/|workbench/unity/raw/|workbench/extract/|workbench/emulator/|tmp-.*|data/unity-textassets/)'
+          forbidden=()
+
+          for path in "${added_paths[@]}"; do
+            if [[ "$path" =~ $forbidden_regex ]]; then
+              forbidden+=("$path")
+            fi
+          done
+
+          if [[ "${#forbidden[@]}" -gt 0 ]]; then
+            echo "Forbidden artifact paths were added:"
+            printf ' - %s\n' "${forbidden[@]}"
+            echo
+            echo "Do not add extracted game assets, temporary caches, large tool payloads, or ad hoc vendored trees."
+            echo "If vendoring is required, consolidate it under vendor/ with provenance notes."
+            exit 1
+          fi
+
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate datasets
+        run: npm run verify:data
+
+      - name: Run tests
+        run: npm test
+
+      - name: Syntax check app entry
+        run: node --check app.js
