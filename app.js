@@ -3911,7 +3911,7 @@ function buildApkGroundingValidationCases() {
     const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(multiverseMarketMarketMemberBoundary);
     cases.push({
       title: "MultiverseMarket canonical host narrowing",
-      expected: "PlayerProfile-side Market member shell or broader wrapper is now the strongest canonical host hypothesis",
+      expected: "Nested PlayerProfile-side Market wrapper path is now the strongest canonical host hypothesis",
       actual: marketMemberSummary.favorsPlayerProfileMemberHost
         ? `${marketMemberSummary.canonicalHostLabel} now leads over direct MultiverseMarket ownership or loose PlayerProfileData fields`
         : "Missing PlayerProfile-side Market host narrowing",
@@ -4603,7 +4603,7 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
     cloudSaveLabel: "CloudSavePlayerProfile",
     profileInfoLabel: "GetPlayerProfileInfo",
     missingTypeMapLabel: "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket",
-    canonicalHostLabel: "PlayerProfile-side Market member shell or broader wrapper"
+    canonicalHostLabel: "nested PlayerProfile-side Market wrapper path"
   };
 }
 

@@ -2321,7 +2321,7 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       `${boundary.playerProfileAccessorClues.length} PlayerProfile-side accessor clues`,
       `${boundary.playerProfileMemberShellClues.length} PlayerProfile-side member-shell clues`,
       `${boundary.marketWrapperTypeClues.length} nearby market-wrapper type clues`,
-      "MultiverseMarket save-side handoff is narrowed to a direct PlayerProfile-side Market member shell or broader wrapper hypothesis"
+      "MultiverseMarket save-side handoff is narrowed to a specific nested PlayerProfile-side Market wrapper path"
     ]
   };
 }
