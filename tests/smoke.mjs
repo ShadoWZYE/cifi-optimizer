@@ -9,6 +9,7 @@ import {
   createDefaultPlayerProfile,
   normalizePlayerProfile
 } from "../player-profile.js";
+import { generateDatasetIndex } from "../scripts/contracts/generate-dataset-index.mjs";
 import {
   getRecommendationContractIssues,
   sortRecommendationFeed,
@@ -19,8 +20,12 @@ import {
   evaluateShardCost,
   getShardCostFormulaModel,
   getShardCostRowClass,
-  getShardCostRuntimeRule
+  getShardCostRuntimeRule,
+  isShardCostPlannerSafe,
+  isShardCostPlannerSafeFromCalibration
 } from "../scripts/shards/cost-evaluator.mjs";
+import { lintDocPortability } from "../scripts/contracts/lint-doc-portability.mjs";
+import { verifyVendoringLayout } from "../scripts/contracts/verify-vendoring-layout.mjs";
 import {
   formatScientificLabel,
   getShardCostScreenshotCalibration,
@@ -45,6 +50,7 @@ const shardMilestoneRowShellBoundary = JSON.parse(await readFile(new URL("../dat
 const shardMilestoneRowAlignmentBoundary = JSON.parse(await readFile(new URL("../data/shard-milestone-row-alignment-boundary.v1.json", import.meta.url), "utf8"));
 const shardMilestoneHandoffBoundary = JSON.parse(await readFile(new URL("../data/shard-milestone-handoff-boundary.v1.json", import.meta.url), "utf8"));
 const shardSaveBoundary = JSON.parse(await readFile(new URL("../data/shard-save-boundary.v1.json", import.meta.url), "utf8"));
+const shardMilestoneSaveOwnerCandidates = JSON.parse(await readFile(new URL("../data/shard-milestone-save-owner-candidates.v1.json", import.meta.url), "utf8"));
 const shardSceneMonoBehaviourProbe = JSON.parse(await readFile(new URL("../data/shard-scene-monobehaviour-probe.v1.json", import.meta.url), "utf8"));
 const shardCostParameterProbe = JSON.parse(await readFile(new URL("../data/shard-cost-parameter-probe.v1.json", import.meta.url), "utf8"));
 const shardCostMethodProbe = JSON.parse(await readFile(new URL("../data/shard-cost-method-probe.v1.json", import.meta.url), "utf8"));
@@ -91,6 +97,7 @@ const recommendationContractModule = await readFile(new URL("../recommendation-c
 const recommendationFixtures = JSON.parse(await readFile(new URL("./fixtures/recommendation-actions.fixtures.json", import.meta.url), "utf8"));
 const shardVerificationDoc = await readFile(new URL("../docs/systems/shards/shard-system-verification.md", import.meta.url), "utf8");
 const shardGroundingBoundaryDoc = await readFile(new URL("../docs/systems/shards/shard-grounding-boundary.md", import.meta.url), "utf8");
+const shardPlayerFacingEvidenceDoc = await readFile(new URL("../docs/systems/shards/shard-player-facing-evidence.md", import.meta.url), "utf8");
 const shardExtractionCandidatesDoc = await readFile(new URL("../docs/systems/shards/shard-extraction-candidates.md", import.meta.url), "utf8");
 const shardOwnerFamilyDoc = await readFile(new URL("../docs/systems/shards/shard-owner-family-verification.md", import.meta.url), "utf8");
 const shardOwnerFamilyProbe = JSON.parse(await readFile(new URL("../data/shard-owner-family-probe.v1.json", import.meta.url), "utf8"));
@@ -110,6 +117,7 @@ const playerProfileAliasAuditDoc = await readFile(new URL("../docs/contracts/pla
 const playerProfileAliasAuditData = JSON.parse(await readFile(new URL("../data/player-profile-import-aliases.v1.json", import.meta.url), "utf8"));
 const datasetRefreshChecklistDoc = await readFile(new URL("../docs/contracts/dataset-refresh-checklist.md", import.meta.url), "utf8");
 const researchNoteTemplateDoc = await readFile(new URL("../docs/contracts/research-note-template.md", import.meta.url), "utf8");
+const datasetIndexGeneratedDoc = await readFile(new URL("../docs/contracts/dataset-index.generated.md", import.meta.url), "utf8");
 const shardResearchNote = await readFile(new URL("../docs/research/shard-milestones-grounded-2026-03-28.md", import.meta.url), "utf8");
 const tokenShopDoc = await readFile(new URL("../docs/systems/spend/token-shop-values.md", import.meta.url), "utf8");
 const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-values.md", import.meta.url), "utf8");
@@ -118,6 +126,7 @@ const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.met
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
+const generatedDatasetIndex = await generateDatasetIndex(repoRoot);
 await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
 const datasetValidation = await validateBundledDatasets();
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
@@ -374,6 +383,9 @@ const sortedFixtureActions = sortRecommendationFeed(normalizedFixtureActions);
 
 const defaultProfile = createDefaultPlayerProfile();
 assert.deepEqual(defaultProfile.planning.shards.observedLevelsByMilestone, {});
+assert.deepEqual(defaultProfile.externalModels.communityTools.shipOptimizer, {});
+assert.deepEqual(defaultProfile.externalModels.communityTools.shardOptimizer, {});
+assert.deepEqual(defaultProfile.externalModels.communityTools.modTreeOptimizer, {});
 
 assert.equal(snapshot.snapshotVersion, "v1.0.0-alpha");
 assert.equal(bundledDatasetContract.contractVersion, "v1");
@@ -384,7 +396,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.id),
-  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-cost-model-boundary", "shard-milestone-row-model-boundary", "shard-milestone-title-effect-boundary", "shard-effect-text-handler-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-milestone-handoff-boundary", "shard-save-boundary", "shard-scene-monobehaviour-probe", "shard-cost-parameter-probe", "shard-cost-method-probe", "shard-cost-native-probe", "shard-cost-screenshot-calibration", "shard-cost-list-path-probe", "shard-cost-formula-model", "shard-bonus-slot-probe", "shard-type-metadata-probe", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "multiverse-market-market-member-boundary", "token-bank-controller-shell"]
+  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-cost-model-boundary", "shard-milestone-row-model-boundary", "shard-milestone-title-effect-boundary", "shard-effect-text-handler-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-milestone-handoff-boundary", "shard-save-boundary", "shard-milestone-save-owner-candidates", "shard-scene-monobehaviour-probe", "shard-cost-parameter-probe", "shard-cost-method-probe", "shard-cost-native-probe", "shard-cost-screenshot-calibration", "shard-cost-list-path-probe", "shard-cost-formula-model", "shard-bonus-slot-probe", "shard-type-metadata-probe", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "multiverse-market-market-member-boundary", "token-bank-controller-shell"]
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.classification),
@@ -417,6 +429,8 @@ assert.deepEqual(
 );
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel.some((path) => path.join(".") === "systems.shards.focusMilestoneLevel"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardObservedLevelsByMilestone.some((path) => path.join(".") === "systems.shards.observedLevelsByMilestone"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState.some((path) => path.join(".") === "compatibility.unmappedSystemState.shardMilestoneState"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState.some((path) => path.join(".") === "systems.shardMilestones"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop.some((path) => path.join(".") === "systems.tokenBank"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.some((path) => path.join(".") === "FinalTokenBankFillSpeed"));
@@ -572,6 +586,15 @@ assert.equal(shardSaveBoundary.probeResults.level0HasSaveTerms, false);
 assert.equal(shardSaveBoundary.probeResults.ownerShellWithSaveOverlapCount, 0);
 assert.equal(shardSaveBoundary.probeResults.directShardPlayerProfileContext, false);
 assert.ok(shardSaveBoundary.currentBoundary.some((line) => /zero checked overlap/.test(line)));
+assert.equal(shardMilestoneSaveOwnerCandidates.dataset, "shard-milestone-save-owner-candidates.v1");
+assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.length >= 1);
+assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.some((entry) => entry.id === "player-profile-side-shard-member-shell"));
+assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.some((entry) => entry.id === "shard-mining-wrapper-or-handoff-shell"));
+assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.ownerShellWithSaveOverlapCount, 0);
+assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.directShardPlayerProfileContext, false);
+assert.ok(shardMilestoneSaveOwnerCandidates.warnings.some((line) => /not recovered player-owned shard milestone state/i.test(line)));
+assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /candidate-narrowing artifact only/i.test(line)));
+assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /not as recovered player-owned shard milestone state/i.test(line)));
 assert.equal(shardSceneMonoBehaviourProbe.dataset, "shard-scene-monobehaviour-probe.v1");
 assert.ok(shardSceneMonoBehaviourProbe.monoBehaviours.some((entry) => entry.scriptName === "ShardMining" && entry.pathId === 290724));
 assert.ok(shardSceneMonoBehaviourProbe.monoBehaviours.some((entry) => entry.scriptName === "ShardPerLevelTextHandler" && entry.byteSize === 1328));
@@ -1001,6 +1024,15 @@ const shardCostCalibrationChecks = runShardCostCalibrationChecks();
 assert.equal(shardCostCalibrationChecks.results.length, 5);
 assert.equal(shardCostCalibrationChecks.config.scientificLabelMantissaDecimals, 2);
 assert.ok(shardCostCalibrationChecks.results.every((entry) => typeof entry.actualLabel === "string" && /e/.test(entry.actualLabel)));
+assert.equal(
+  isShardCostPlannerSafeFromCalibration(shardCostCalibrationChecks),
+  (
+    shardCostFormulaModel.completionFlags.automatedCalibrationImplemented === true
+    && shardCostCalibrationChecks.allPassed === true
+    && shardCostFormulaModel.completionFlags.plannerSafeCostOutputApproved === true
+  )
+);
+assert.equal(await isShardCostPlannerSafe(), false);
 if (shardCostFormulaModel.completionFlags.automatedCalibrationImplemented) {
   assert.equal(shardCostCalibrationChecks.allPassed, true);
   assert.equal(shardCostCalibrationChecks.failureCount, 0);
@@ -1309,7 +1341,7 @@ assert.equal(groundedShardObserved.sourceReport, "docs/research/shard-milestones
 assert.equal(groundedShardProvenance.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
-  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-cost-model-boundary", "shard-milestone-row-model-boundary", "shard-milestone-title-effect-boundary", "shard-effect-text-handler-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-milestone-handoff-boundary", "shard-save-boundary", "shard-scene-monobehaviour-probe", "shard-cost-parameter-probe", "shard-cost-method-probe", "shard-cost-native-probe", "shard-cost-screenshot-calibration", "shard-cost-list-path-probe", "shard-cost-formula-model", "shard-bonus-slot-probe", "shard-type-metadata-probe", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "multiverse-market-market-member-boundary", "token-bank-controller-shell"]
+  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-cost-model-boundary", "shard-milestone-row-model-boundary", "shard-milestone-title-effect-boundary", "shard-effect-text-handler-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-milestone-handoff-boundary", "shard-save-boundary", "shard-milestone-save-owner-candidates", "shard-scene-monobehaviour-probe", "shard-cost-parameter-probe", "shard-cost-method-probe", "shard-cost-native-probe", "shard-cost-screenshot-calibration", "shard-cost-list-path-probe", "shard-cost-formula-model", "shard-bonus-slot-probe", "shard-type-metadata-probe", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "multiverse-market-market-member-boundary", "token-bank-controller-shell"]
 );
 assert.deepEqual(
   datasetValidation.map((entry) => entry.classification),
@@ -1996,6 +2028,9 @@ assert.match(shardGroundingBoundaryDoc, /generic or academy-side milestone famil
 assert.match(shardGroundingBoundaryDoc, /LoopResetStage1/);
 assert.match(shardGroundingBoundaryDoc, /Milestones, Assembly-CSharp/);
 assert.match(shardGroundingBoundaryDoc, /ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked/i);
+assert.match(shardPlayerFacingEvidenceDoc, /the grounded app can show shard evidence, watch cards, threshold wording, and loop-reset guardrails today/i);
+assert.match(shardPlayerFacingEvidenceDoc, /external-model imports are an interim compatibility path only and stay non-canonical/i);
+assert.match(shardPlayerFacingEvidenceDoc, /cannot yet claim exact shard cost math, affordability, ROI, ETA certainty, or best-buy order/i);
 assert.match(shardExtractionCandidatesDoc, /# Shard Extraction Candidates/);
 assert.match(shardExtractionCandidatesDoc, /shards\.milestone-owner-family/);
 assert.match(shardExtractionCandidatesDoc, /loop-reset stage family/i);
@@ -2050,10 +2085,12 @@ assert.match(shardUpgradeInfoMetadataNeighborhoodDoc, /<FastBuyEnum>d__1429/);
 assert.match(extractionRankingDoc, /# Extraction Candidate Ranking/);
 assert.match(extractionRankingDoc, /spend-multiverse-save-model-recovery/);
 assert.match(extractionRankingDoc, /filter by track or family id/i);
-assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState/);
+assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState\.shardMilestoneState/);
 assert.match(playerProfileSchemaDoc, /The active manual Profile form should only show values a typical player can quickly provide from the game/);
 assert.match(playerProfileSchemaDoc, /Academy relics \| `player\.resources\.academyRelics` \| real profile aggregate, but not a direct active-form input/);
 assert.match(playerProfileSchemaDoc, /Shard income \/ hour \| `planning\.shards\.ratePerHour` \| descriptive derived helper, not directly visible in game, so removed from the active form/);
+assert.match(playerProfileSchemaDoc, /verify the concrete shard milestone save owner or declaring save model/i);
+assert.match(playerProfileSchemaDoc, /prove planner-safe use before any recommendation or canonical `player\.\*` promotion/i);
 assert.match(playerProfileSchemaDoc, /## Experimental support-surface helpers/);
 assert.match(playerProfileSchemaDoc, /systems\.metaProgression\.hunterLevel/);
 assert.match(playerProfileSchemaDoc, /stage\.highestShipUnlocked/);
@@ -2063,6 +2100,10 @@ assert.match(playerProfileSchemaDoc, /flat `gemDust`, `hunterLevel`, `traitSpher
 assert.match(playerProfileSchemaDoc, /flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and top-level `IS\*Level` fields may be quarantined/);
 assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
 assert.match(importMappingDoc, /experimental helper imports now require explicit `externalModels\.experimental\.\*` paths/);
+assert.match(importMappingDoc, /externalModels\.communityTools\.shipOptimizer\.v1/);
+assert.match(importMappingDoc, /toolName/);
+assert.match(importMappingDoc, /sourceReference/);
+assert.match(importMappingDoc, /must not silently populate canonical `player\.\*` fields/i);
 assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
 assert.match(importMappingDoc, /flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired/);
 assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
@@ -2283,6 +2324,9 @@ assert.doesNotMatch(appJs, /Row-shell boundary/);
 assert.doesNotMatch(appJs, /Row-alignment boundary/);
 assert.doesNotMatch(appJs, /Cost-model boundary/);
 assert.match(appJs, /Shard cost-model boundary/);
+assert.match(appJs, /What the grounded app can safely show today: shard watch cards, loop warnings, threshold wording, and evidence-status notes sourced from the checked shard contract\./);
+assert.match(appJs, /Interim compatibility path: external-model imports can preserve community-tool context while staying non-canonical and outside grounded shard recommendations\./);
+assert.match(appJs, /If a player imports external-model or compatibility data, it is treated as an interim reference path only and not as canonical shard state\./);
 assert.doesNotMatch(appJs, /Row-model boundary/);
 assert.doesNotMatch(appJs, /Title\/effect boundary/);
 assert.doesNotMatch(appJs, /Effect-text handler boundary/);
@@ -2539,11 +2583,32 @@ assert.match(launcherVbs, /Start-Process -WindowStyle Hidden/);
 assert.match(launcherVbs, /--launcher-mode/);
 assert.match(launcherVbs, /ResolveNodePath/);
 assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
+assert.equal(pkg.scripts["contracts:gen-index"], "node ./scripts/contracts/generate-dataset-index.mjs");
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
+assert.equal(pkg.scripts["lint:docs"], "node ./scripts/contracts/lint-doc-portability.mjs");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
+assert.equal(pkg.scripts["verify:vendoring"], "node ./scripts/contracts/verify-vendoring-layout.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+assert.deepEqual(await lintDocPortability(repoRoot), []);
+const vendoringLayout = await verifyVendoringLayout(repoRoot);
+assert.deepEqual(vendoringLayout.regressions, []);
+assert.deepEqual(
+  vendoringLayout.tolerated,
+  [
+    { path: ".deps", rule: "top-level .deps/ bucket", classification: "temporary" },
+    { path: ".vendor_manual", rule: "top-level .vendor_*/ bucket", classification: "temporary" },
+    { path: ".vendor_py", rule: "top-level .vendor_*/ bucket", classification: "temporary" },
+    { path: ".wheelhouse", rule: "top-level cache bucket", classification: "temporary" }
+  ]
+);
 assert.match(importMappingDoc, /compatibility-only fields/i);
 const datasetContractsDoc = await readFile(new URL("../docs/contracts/dataset-contracts.md", import.meta.url), "utf8");
+assert.equal(generatedDatasetIndex, datasetIndexGeneratedDoc);
+assert.match(datasetIndexGeneratedDoc, /## Source priority/);
+assert.match(datasetIndexGeneratedDoc, /### `snapshot`/);
+assert.match(datasetIndexGeneratedDoc, /### `shard-cost-formula-model`/);
+assert.match(datasetIndexGeneratedDoc, /- Classification: `canonical-app-snapshot`/);
+assert.match(datasetIndexGeneratedDoc, /- Files:\n  - `data\/game-data\.snapshot\.v1\.json`/);
 assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-asset-grounding\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-owner-family-boundary\.v1\.json/);
@@ -2765,6 +2830,35 @@ const migratedNestedProfile = normalizePlayerProfile({
           Meltdown: 12
         }
       }
+    },
+    communityTools: {
+      shipOptimizer: {
+        v1: {
+          toolName: "CiFi Ship Optimizer",
+          toolVersion: "2026-04-06",
+          sourceReference: "https://example.com/ship-optimizer",
+          assumptionsSummary: "Community weights and provisional ship labels.",
+          data: {
+            selectedShip: "Meltdown",
+            weights: {
+              power: 7,
+              cargo: 4
+            }
+          }
+        }
+      },
+      shardOptimizer: {
+        v1: {
+          toolName: "CiFi Shard Optimizer",
+          toolVersion: "2026-04-06",
+          sourceReference: "local export 2026-04-06",
+          assumptionsSummary: "Uses community breakpoint heuristics only.",
+          data: {
+            targetRow: "omega_watch",
+            suggestedBudget: "1.5e9"
+          }
+        }
+      }
     }
   }
 });
@@ -2776,6 +2870,40 @@ assert.equal(migratedNestedProfile.player.resources.diamonds, 900);
 assert.equal(migratedNestedProfile.planning.shards.ratePerHour, 110);
 assert.equal(migratedNestedProfile.notes.profile, "nested");
 assert.equal(migratedNestedProfile.externalModels.shipPlanner.communityToolState.technical.Meltdown, 12);
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.toolName, "CiFi Ship Optimizer");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.toolVersion, "2026-04-06");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.sourceReference, "https://example.com/ship-optimizer");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.assumptionsSummary, "Community weights and provisional ship labels.");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.data.selectedShip, "Meltdown");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shardOptimizer.v1.data.targetRow, "omega_watch");
+assert.deepEqual(migratedNestedProfile.externalModels.communityTools.modTreeOptimizer, {});
+assert.equal(migratedNestedProfile.player.resources.shards, 15000);
+assert.equal(migratedNestedProfile.planning.shards.focusMilestoneId, null);
+
+const migratedInvalidCommunityToolProfile = normalizePlayerProfile({
+  externalModels: {
+    communityTools: {
+      modTreeOptimizer: {
+        v1: {
+          toolName: "Missing provenance",
+          data: {
+            branch: "crit"
+          }
+        }
+      }
+    }
+  }
+});
+
+assert.deepEqual(migratedInvalidCommunityToolProfile.externalModels.communityTools.modTreeOptimizer, {});
+
+const exportedNestedProfile = JSON.parse(JSON.stringify(migratedNestedProfile));
+assert.deepEqual(
+  exportedNestedProfile.externalModels.communityTools,
+  migratedNestedProfile.externalModels.communityTools
+);
+assert.equal(exportedNestedProfile.player.resources.shards, 15000);
+assert.equal(exportedNestedProfile.planning.shards.focusMilestoneId, null);
 
 const migratedCompatibilityAliasProfile = normalizePlayerProfile({
   stage: {
@@ -2830,10 +2958,30 @@ assert.equal(migratedUnmappedSystemsProfile.planning.shards.totalMilestoneLevels
 assert.equal(migratedUnmappedSystemsProfile.planning.shards.focusMilestoneId, "omega_watch");
 assert.equal(migratedUnmappedSystemsProfile.planning.shards.focusMilestoneLevel, 6);
 assert.deepEqual(migratedUnmappedSystemsProfile.planning.shards.observedLevelsByMilestone, { omega_watch: 6 });
-assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestones, {
-  selectedMilestone: "alpha",
-  observedLevel: 12
+assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestoneState, {
+  status: "quarantined-unmapped",
+  importedState: {
+    selectedMilestone: "alpha",
+    observedLevel: 12
+  },
+  mappingGate: {
+    plannerUseAllowed: false,
+    canonicalPromotionBlocked: true,
+    requiredBeforeCanonicalPromotion: [
+      "Verify the concrete shard milestone save owner or declaring save model.",
+      "Recover a grounded field-to-label mapping for player-owned shard milestone state.",
+      "Approve planner-safe recommendation use only after grounded save-state verification."
+    ]
+  },
+  currentBoundary: [
+    "Imported shard milestone state stays quarantined until the save owner, field mapping, and planner-safe interpretation are verified.",
+    "Do not treat this blob as canonical player truth or grounded planner input."
+  ]
 });
+assert.deepEqual(
+  migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestones,
+  migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestoneState
+);
 assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.tokenShop, {
   tokenBoostLevel: 4
 });
@@ -2841,6 +2989,30 @@ assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemStat
   inscription51Level: 2
 });
 assert.equal(migratedUnmappedSystemsProfile.player.resources.tokens, null);
+
+const migratedQuarantinedShardMilestoneProfile = normalizePlayerProfile({
+  compatibility: {
+    unmappedSystemState: {
+      shardMilestoneState: {
+        importedState: {
+          selectedMilestone: "beta",
+          observedLevel: 33,
+          recoveredOwner: "PlayerProfileData"
+        }
+      }
+    }
+  }
+});
+
+assert.equal(migratedQuarantinedShardMilestoneProfile.planning.shards.focusMilestoneId, null);
+assert.equal(migratedQuarantinedShardMilestoneProfile.planning.shards.focusMilestoneLevel, null);
+assert.deepEqual(migratedQuarantinedShardMilestoneProfile.planning.shards.observedLevelsByMilestone, {});
+assert.equal(migratedQuarantinedShardMilestoneProfile.compatibility.unmappedSystemState.shardMilestoneState.mappingGate.plannerUseAllowed, false);
+assert.equal(migratedQuarantinedShardMilestoneProfile.compatibility.unmappedSystemState.shardMilestoneState.mappingGate.canonicalPromotionBlocked, true);
+assert.equal(
+  migratedQuarantinedShardMilestoneProfile.compatibility.unmappedSystemState.shardMilestoneState.importedState.observedLevel,
+  33
+);
 
 const migratedFlatSpendStateProfile = normalizePlayerProfile({
   TokenBankCap: "1200",

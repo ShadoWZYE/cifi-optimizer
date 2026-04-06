@@ -30,6 +30,20 @@ Future alias changes should update the inventory, the audit artifacts, and migra
 - unresolved legacy values live under `compatibility`
 - imported blobs for real-but-unmapped systems live under `compatibility.unmappedSystemState`
 
+Versioned external-model community tooling lives under:
+
+- `externalModels.communityTools.shipOptimizer.v1`
+- `externalModels.communityTools.shardOptimizer.v1`
+- `externalModels.communityTools.modTreeOptimizer.v1`
+
+Each versioned payload must carry provenance metadata:
+
+- `toolName`
+- `toolVersion`
+- `sourceReference`
+- `assumptionsSummary`
+- `data`
+
 ## Important migration notes
 
 - legacy `gemDust` may still be preserved under `compatibility.unresolvedProfileFields.gemDust`
@@ -41,6 +55,7 @@ Future alias changes should update the inventory, the audit artifacts, and migra
 - preserving those aliases is migration safety only; it does not make hunter, mech, or stage terms active MVP truth
 - flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired
 - ship implementation imports now require `systems.ship.*` or `externalModels.shipPlanner.*`; top-level `power`, `speed`, and `cargo` are retired
+- versioned `externalModels.communityTools.*` payloads are external-model state only; they must not silently populate canonical `player.*` fields or planner-approved shard inputs
 - imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`
 - flat spend-state clues such as `InscryptionsDone`, `IS*Level`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved under `compatibility.unmappedSystemState.*`
 - preserving those objects does not make the system planner-ready or canonical

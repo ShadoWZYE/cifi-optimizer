@@ -103,13 +103,22 @@ Migration-only values:
 | Trait sphere count | `compatibility.unresolvedProfileFields.traitSphereCount` | unresolved shared-profile role |
 | Mech parts | `compatibility.unresolvedProfileFields.mechParts` | research-track territory |
 | Legacy stage fields | `compatibility.legacyStage.*` | old schema compatibility only |
-| Unmapped system blobs | `compatibility.unmappedSystemState.*` | shard milestones, TokenShop, MultiverseMarket, etc. |
+| Quarantined shard milestone state | `compatibility.unmappedSystemState.shardMilestoneState` | preferred quarantine location for imported shard milestone blobs; never canonical without a verified save-owner and grounded field mapping |
+| Legacy shard milestone mirror | `compatibility.unmappedSystemState.shardMilestones` | compatibility mirror of the quarantined shard milestone blob for older consumers |
+| Unmapped system blobs | `compatibility.unmappedSystemState.*` | TokenShop, MultiverseMarket, and other non-canonical system state |
 
 Import rule:
 
 - prefer explicit `compatibility.*` paths or namespaced legacy sources such as `stage.*` and `systems.metaProgression.*`
 - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
+- imported `systems.shardMilestones` or `compatibility.unmappedSystemState.shardMilestoneState` payloads must remain quarantined under `compatibility.unmappedSystemState.*` until the save owner, field mapping, and planner-safe recommendation gate are verified
 - flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and top-level `IS*Level` fields may be quarantined under `compatibility.unmappedSystemState.*`
+
+Mapping gate before canonical promotion:
+
+1. verify the concrete shard milestone save owner or declaring save model
+2. recover grounded field-to-label mapping for player-owned shard milestone state
+3. prove planner-safe use before any recommendation or canonical `player.*` promotion
 
 ## Migration policy
 

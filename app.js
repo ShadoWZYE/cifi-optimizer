@@ -3071,8 +3071,10 @@ function renderShardGroundingBoundary() {
         <strong>Recovered shard-cost evidence stays descriptive</strong>
         <div class="meta-stack">
           <p class="meta">Milestone names, unlock tables, effect lists, threshold wording, and cost evidence are shown as descriptive support, not as spend recommendations.</p>
+          <p class="meta">What the grounded app can safely show today: shard watch cards, loop warnings, threshold wording, and evidence-status notes sourced from the checked shard contract.</p>
           <p class="meta">The UI does not rank spend order, ROI, ETA, or per-level affordability from this recovery path.</p>
-          <p class="meta">${escapeHtml(blockedUses.length ? `${blockedUses.join(", ")} remain blocked until shard owner mapping and save-state inputs are recovered.` : "Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until shard owner mapping and save-state inputs are recovered.")}</p>
+          <p class="meta">${escapeHtml(blockedUses.length ? `${blockedUses.join(", ")} remain blocked until shard owner mapping, save-state inputs, and planner-safe cost validation are recovered.` : "Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until shard owner mapping, save-state inputs, and planner-safe cost validation are recovered.")}</p>
+          <p class="meta">Interim compatibility path: external-model imports can preserve community-tool context while staying non-canonical and outside grounded shard recommendations.</p>
           <p class="meta">Current provenance load: ${conflictCount} conflict note${conflictCount === 1 ? "" : "s"} and ${missingCount} missing-data note${missingCount === 1 ? "" : "s"}.</p>
         </div>
       </article>
@@ -3122,6 +3124,7 @@ function renderShardGroundingBoundary() {
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "Recovered shard-local evidence remains separated from PlayerProfile save ownership." : "The current build does not yet preserve a clean shard-to-save separation result."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "That is useful because it blocks the UI from implying imported shard milestone ownership that the contract does not support." : "Until separation is verified, shard evidence should be treated as even more provisional."}</p>
           <p class="meta">Manual inputs can guide descriptive watch cards, but they do not turn this flow into recovered save-state truth.</p>
+          <p class="meta">If a player imports external-model or compatibility data, it is treated as an interim reference path only and not as canonical shard state.</p>
         </div>
       </article>
       <article class="snapshot-card shard-status-card shard-status-card-blocked">

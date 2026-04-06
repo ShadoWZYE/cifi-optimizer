@@ -138,6 +138,14 @@
       ]
     },
     {
+      "id": "shard-milestone-save-owner-candidates",
+      "label": "Shard milestone save-owner candidates",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-milestone-save-owner-candidates.v1.json"
+      ]
+    },
+    {
       "id": "shard-scene-monobehaviour-probe",
       "label": "Shard scene MonoBehaviour probe",
       "classification": "extracted-mechanics",
