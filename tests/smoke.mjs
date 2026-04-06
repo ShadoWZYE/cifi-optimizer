@@ -22,6 +22,7 @@ import {
   getShardCostRuntimeRule
 } from "../scripts/shards/cost-evaluator.mjs";
 import { lintDocPortability } from "../scripts/contracts/lint-doc-portability.mjs";
+import { verifyVendoringLayout } from "../scripts/contracts/verify-vendoring-layout.mjs";
 import {
   formatScientificLabel,
   getShardCostScreenshotCalibration,
@@ -2543,8 +2544,10 @@ assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
 assert.equal(pkg.scripts["lint:docs"], "node ./scripts/contracts/lint-doc-portability.mjs");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
+assert.equal(pkg.scripts["verify:vendoring"], "node ./scripts/contracts/verify-vendoring-layout.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
 assert.deepEqual(await lintDocPortability(repoRoot), []);
+assert.deepEqual((await verifyVendoringLayout(repoRoot)).regressions, []);
 assert.match(importMappingDoc, /compatibility-only fields/i);
 const datasetContractsDoc = await readFile(new URL("../docs/contracts/dataset-contracts.md", import.meta.url), "utf8");
 assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);
