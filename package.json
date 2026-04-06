@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "contracts:gen-index": "node ./scripts/contracts/generate-dataset-index.mjs",
     "dev": "node ./scripts/dev-server.mjs",
     "lint:docs": "node ./scripts/contracts/lint-doc-portability.mjs",
     "probe:uabea": "node ./scripts/unity/run_probe.mjs uabea",

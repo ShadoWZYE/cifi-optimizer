@@ -9,6 +9,7 @@ import {
   createDefaultPlayerProfile,
   normalizePlayerProfile
 } from "../player-profile.js";
+import { generateDatasetIndex } from "../scripts/contracts/generate-dataset-index.mjs";
 import {
   getRecommendationContractIssues,
   sortRecommendationFeed,
@@ -112,6 +113,7 @@ const playerProfileAliasAuditDoc = await readFile(new URL("../docs/contracts/pla
 const playerProfileAliasAuditData = JSON.parse(await readFile(new URL("../data/player-profile-import-aliases.v1.json", import.meta.url), "utf8"));
 const datasetRefreshChecklistDoc = await readFile(new URL("../docs/contracts/dataset-refresh-checklist.md", import.meta.url), "utf8");
 const researchNoteTemplateDoc = await readFile(new URL("../docs/contracts/research-note-template.md", import.meta.url), "utf8");
+const datasetIndexGeneratedDoc = await readFile(new URL("../docs/contracts/dataset-index.generated.md", import.meta.url), "utf8");
 const shardResearchNote = await readFile(new URL("../docs/research/shard-milestones-grounded-2026-03-28.md", import.meta.url), "utf8");
 const tokenShopDoc = await readFile(new URL("../docs/systems/spend/token-shop-values.md", import.meta.url), "utf8");
 const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-values.md", import.meta.url), "utf8");
@@ -120,6 +122,7 @@ const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.met
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
+const generatedDatasetIndex = await generateDatasetIndex(repoRoot);
 await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
 const datasetValidation = await validateBundledDatasets();
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
@@ -2541,6 +2544,7 @@ assert.match(launcherVbs, /Start-Process -WindowStyle Hidden/);
 assert.match(launcherVbs, /--launcher-mode/);
 assert.match(launcherVbs, /ResolveNodePath/);
 assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
+assert.equal(pkg.scripts["contracts:gen-index"], "node ./scripts/contracts/generate-dataset-index.mjs");
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
 assert.equal(pkg.scripts["lint:docs"], "node ./scripts/contracts/lint-doc-portability.mjs");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
@@ -2560,6 +2564,12 @@ assert.deepEqual(
 );
 assert.match(importMappingDoc, /compatibility-only fields/i);
 const datasetContractsDoc = await readFile(new URL("../docs/contracts/dataset-contracts.md", import.meta.url), "utf8");
+assert.equal(generatedDatasetIndex, datasetIndexGeneratedDoc);
+assert.match(datasetIndexGeneratedDoc, /## Source priority/);
+assert.match(datasetIndexGeneratedDoc, /### `snapshot`/);
+assert.match(datasetIndexGeneratedDoc, /### `shard-cost-formula-model`/);
+assert.match(datasetIndexGeneratedDoc, /- Classification: `canonical-app-snapshot`/);
+assert.match(datasetIndexGeneratedDoc, /- Files:\n  - `data\/game-data\.snapshot\.v1\.json`/);
 assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-asset-grounding\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-owner-family-boundary\.v1\.json/);
