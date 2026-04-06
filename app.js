@@ -383,7 +383,6 @@ const state = {
   researchView: "active",
   progressionView: "shards",
   shardMilestoneCardOpenIds: [],
-  shardMilestoneGroundingOpenIds: [],
   route: "overview"
 };
 
@@ -1086,7 +1085,6 @@ function bindDataActions() {
 }
 
 function bindOptimizerActions() {
-  $("#runProgressionOptimizer").addEventListener("click", () => renderProgressionResults(runProgressionOptimization()));
   $("#progressionSubsystemToggle").addEventListener("click", (event) => {
     const button = event.target.closest("[data-progression-view]");
     if (!button) {
@@ -1098,17 +1096,6 @@ function bindOptimizerActions() {
     }
     state.progressionView = nextView;
     renderProgressionResults(runProgressionOptimization());
-  });
-  $("#progressionCalibrationPanel").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-progression-action]");
-    if (!button) {
-      return;
-    }
-    if (button.dataset.progressionAction === "open-profile") {
-      state.route = "profile";
-      renderNavigation();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
   });
   $("#progressionResults").addEventListener("click", (event) => {
     const focusButton = event.target.closest("[data-shard-focus-id]");
@@ -1122,11 +1109,7 @@ function bindOptimizerActions() {
   $("#progressionResults").addEventListener("toggle", (event) => {
     const card = event.target.closest("[data-shard-milestone-card]");
     if (card) {
-      syncShardMilestoneOpenState(card.dataset.shardMilestoneCard, card.open, "card");
-    }
-    const grounding = event.target.closest("[data-shard-milestone-grounding]");
-    if (grounding) {
-      syncShardMilestoneOpenState(grounding.dataset.shardMilestoneGrounding, grounding.open, "grounding");
+      syncShardMilestoneOpenState(card.dataset.shardMilestoneCard, card.open);
     }
   }, true);
   $("#progressionResults").addEventListener("change", (event) => {
@@ -1536,7 +1519,6 @@ function renderProgressionResults(results) {
   const selectedSubsystem = getSelectedProgressionSubsystem();
   renderShardPlannerControls();
   renderProgressionSubsystemToggle(subsystemFeed);
-  renderProgressionCalibrationPanel(subsystemFeed);
   const sectionMarkup = {
     shards: renderShardSubsystemSection(subsystemFeed.shards),
     loop: renderProgressionSubsystemSection(
@@ -1545,21 +1527,7 @@ function renderProgressionResults(results) {
       "These cards stay warning-oriented. They are pacing and anti-bricking notes around Loop Prestige, not reset optimizers.",
       subsystemFeed.loop,
       "warning"
-    ),
-    research: `
-      <section class="meta-stack">
-        <div class="panel-header">
-          <div>
-            <p class="eyebrow">Shard grounding</p>
-            <h3>Shard Mining evidence</h3>
-          </div>
-        </div>
-        <p class="meta">This section keeps the extracted Shard Mining evidence visible without mixing it into player-facing shard card logic before the cost evaluator is actually proven.</p>
-        ${renderShardGroundingBoundary()}
-        ${renderShardWorkflowReference()}
-        ${renderObservedShardBehaviors()}
-      </section>
-    `
+    )
   };
   $("#progressionResults").innerHTML = `
     ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
@@ -1575,13 +1543,13 @@ function renderShardSubsystemSection(items) {
       <div class="panel-header">
         <div>
           <p class="eyebrow">Shard Mining</p>
-          <h3>Shard milestones</h3>
+          <h3>Shard Mining</h3>
         </div>
       </div>
-      <p class="meta">Milestone guidance stays separate from Loop Prestige warnings so shard rows read like shard rows instead of reset advice.</p>
-      ${cards ? `<div class="recommendation-list">${cards}</div>` : `<article class="validation-card warn"><strong>Shard milestones unavailable</strong><p class="meta">No player-facing shard milestone cards currently passed the shared recommendation contract.</p></article>`}
-      ${renderShardWorkflowSnapshot()}
+      <p class="meta">Shard Mining is the player-facing shard surface. It keeps milestone guidance and row tracking together, while grounding details and recovery evidence stay in docs.</p>
+      ${cards ? `<div class="recommendation-list">${cards}</div>` : `<article class="validation-card warn"><strong>Shard Mining unavailable</strong><p class="meta">No player-facing shard cards currently passed the shared recommendation contract.</p></article>`}
       ${renderShardMilestoneDirectory()}
+      ${renderShardDocsNotice()}
     </section>
   `;
 }
@@ -3268,6 +3236,20 @@ function renderObservedShardBehaviors() {
   `;
 }
 
+function renderShardDocsNotice() {
+  return `
+    <article class="validation-card">
+      <strong>Grounding and evidence live in docs</strong>
+      <p class="meta">Shard Mining keeps the player-facing workflow lightweight. Deep grounding, cost recovery, and probe detail have been moved out of the page.</p>
+      <div class="shard-doc-link-list">
+        ${renderShardDocLink("./docs/systems/shards/shard-player-facing-evidence.md", "Shard evidence summary")}
+        ${renderShardDocLink("./docs/systems/shards/shard-grounding-boundary.md", "Grounding boundary")}
+        ${renderShardDocLink("./docs/systems/shards/shard-cost-parameter-probe.md", "Cost parameter probe")}
+      </div>
+    </article>
+  `;
+}
+
 function renderShardDocLink(href, label) {
   return `<a class="shard-doc-link" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`;
 }
@@ -3307,26 +3289,18 @@ function renderShardMilestoneDirectory() {
   const milestones = getMilestonesForDisplay();
   return `
     <div class="meta-stack">
-      <p class="eyebrow">Shard milestones</p>
-      <h3>Shard milestones</h3>
-      <p class="meta">These rows now live directly inside Shard Mining. Each card keeps its own observed level, stays in canonical order, and shows descriptive shard evidence with clear status labels instead of recommendation-style certainty.</p>
+      <p class="eyebrow">Shard Mining rows</p>
+      <h3>Shard milestone rows</h3>
+      <p class="meta">These rows live inside Shard Mining. Each card keeps its own observed level, stays in canonical order, and focuses on player-facing row tracking rather than in-page grounding detail.</p>
       <div class="preview-stack">
 ${milestones.map((milestone) => {
-          const groundedRow = getShardMilestoneGroundedSummary(milestone);
           const trackedLevel = getShardFocusLevelForMilestone(milestone);
-          const isCardOpen = isShardMilestoneOpen(milestone.id, "card");
-          const isGroundingOpen = isShardMilestoneOpen(milestone.id, "grounding");
+          const isCardOpen = isShardMilestoneOpen(milestone.id);
           const panelTitle = getShardMilestonePanelTitle(milestone);
           const displayMeta = getShardMilestoneDisplayMeta(milestone);
           const headerMeta = `${formatShardRarity(milestone.rarity)} | Unlock ${describeUnlockCondition(milestone.unlockCondition)}`;
           const thresholdSchedule = getThresholdScheduleForMilestone(milestone, mechanics);
           const hasThresholdSchedule = Array.isArray(thresholdSchedule) && thresholdSchedule.length > 0;
-          const directCostMapping = getShardExtractedCostFieldMapping(milestone.milestoneNumber);
-          const costEvidencePreview = directCostMapping
-            ? "Direct row-attached shard-cost values recovered."
-            : "No direct row-attached shard-cost values recovered yet.";
-          const extractedUnlockRequirement = groundedRow.extractedUnlockRequirement;
-          const bonusSlotSummary = getShardBonusSlotRowSummary(milestone.milestoneNumber);
           const extractedBonusValues = (milestone.bonuses || [])
             .map((bonus, index) => {
               const extracted = getShardExtractedBonusPerLevel(milestone.milestoneNumber, index);
@@ -3399,70 +3373,6 @@ ${milestones.map((milestone) => {
                 <button class="button ghost shard-level-up-button" type="button" disabled>${escapeHtml(levelRailSummary.buttonLabel)}</button>
               </aside>
             </div>
-            <details class="shard-grounding-dropdown" data-shard-milestone-grounding="${escapeHtml(String(milestone.id))}" ${isGroundingOpen ? "open" : ""}>
-              <summary class="shard-grounding-summary">Evidence & limits</summary>
-              <div class="shard-milestone-data-grid">
-                <article class="validation-card shard-panel-card shard-mechanics-card">
-                  <div class="shard-panel-card-header">
-                    <strong>Formula profile</strong>
-                    <span class="shard-panel-card-tag">Integrated</span>
-                  </div>
-                  <p class="meta"><strong>Class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
-                  <p class="meta"><strong>Coverage</strong> ${escapeHtml(formulaProfile?.stageCoverage || (milestone.milestoneNumber === 0 ? "100-only special lane" : "Unresolved"))}</p>
-                  <p class="meta"><strong>Stage order</strong> ${escapeHtml(levelRailSummary.stageLabel)}</p>
-                </article>
-                <article class="validation-card shard-panel-card shard-mechanics-card">
-                  <div class="shard-panel-card-header">
-                    <strong>Recovered row state</strong>
-                    <span class="shard-panel-card-tag">Available</span>
-                  </div>
-                  <p class="meta"><strong>Unlock req</strong> ${escapeHtml(extractedUnlockRequirement === null ? "Not recovered in direct row payload" : formatShardNumber(extractedUnlockRequirement))}</p>
-                  <p class="meta"><strong>Threshold schedule</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
-                  <p class="meta"><strong>Bonus slots</strong> ${escapeHtml(bonusSlotSummary ? String(bonusSlotSummary.bonusFieldCount) : "Unresolved")}</p>
-                </article>
-                <article class="validation-card shard-panel-card shard-mechanics-card">
-                  <div class="shard-panel-card-header">
-                    <strong>Recovered cost evidence</strong>
-                    <span class="shard-panel-card-tag">${directCostMapping ? "Available" : "Blocked"}</span>
-                  </div>
-                  <p class="meta">${escapeHtml(costEvidencePreview)}</p>
-                  <p class="meta">${escapeHtml(extractedBonusValues.length ? extractedBonusValues.join(" | ") : "No direct bonus-per-level floats recovered for this row yet.")}</p>
-                </article>
-              </div>
-              <section class="shard-evidence-block">
-                <p class="snapshot-title">Evidence detail</p>
-                <div class="validation-grid">
-                  <article class="validation-card shard-panel-card ${groundedRow.titleCoverageTone}">
-                    <div class="shard-panel-card-header">
-                      <strong>Title source</strong>
-                      <span class="shard-panel-card-tag ${groundedRow.titleCoverageStatusClass}">${escapeHtml(groundedRow.titleCoverageStatusLabel)}</span>
-                    </div>
-                    <p class="meta">${escapeHtml(groundedRow.titleCoverageLine)}</p>
-                  </article>
-                  <article class="validation-card shard-panel-card ${groundedRow.rowShellTone}">
-                    <div class="shard-panel-card-header">
-                      <strong>Row ownership</strong>
-                      <span class="shard-panel-card-tag ${groundedRow.rowShellStatusClass}">${escapeHtml(groundedRow.rowShellStatusLabel)}</span>
-                    </div>
-                    <p class="meta">${escapeHtml(groundedRow.rowShellLine)}</p>
-                  </article>
-                  <article class="validation-card shard-panel-card ${groundedRow.effectTone}">
-                    <div class="shard-panel-card-header">
-                      <strong>Effect path</strong>
-                      <span class="shard-panel-card-tag ${groundedRow.effectStatusClass}">${escapeHtml(groundedRow.effectStatusLabel)}</span>
-                    </div>
-                    <p class="meta">${escapeHtml(groundedRow.effectLine)}</p>
-                  </article>
-                  <article class="validation-card shard-panel-card ${groundedRow.costTone}">
-                    <div class="shard-panel-card-header">
-                      <strong>Shard-cost evidence</strong>
-                      <span class="shard-panel-card-tag ${groundedRow.costStatusClass}">${escapeHtml(groundedRow.costStatusLabel)}</span>
-                    </div>
-                    <p class="meta">${escapeHtml(groundedRow.costLine)}</p>
-                  </article>
-                </div>
-              </section>
-            </details>
           </details>
         `;
         }).join("")}
@@ -4979,7 +4889,7 @@ function getProgressionSubsystemPartition(items) {
 }
 
 function getSelectedProgressionSubsystem() {
-  return ["shards", "loop", "research"].includes(state.progressionView) ? state.progressionView : "shards";
+  return ["shards", "loop"].includes(state.progressionView) ? state.progressionView : "shards";
 }
 
 function renderProgressionSubsystemToggle(subsystemFeed) {
@@ -4989,80 +4899,13 @@ function renderProgressionSubsystemToggle(subsystemFeed) {
   };
   const selected = getSelectedProgressionSubsystem();
   $("#progressionSubsystemToggle").innerHTML = [
-    { id: "shards", label: `Shard milestones (${counts.shards})` },
-    { id: "loop", label: `Loop Prestige (${counts.loop})` },
-    { id: "research", label: "Shard Mining" }
+    { id: "shards", label: `Shard Mining (${counts.shards})` },
+    { id: "loop", label: `Loop Prestige (${counts.loop})` }
   ].map((item) => `
     <button class="button${selected === item.id ? " is-active" : ""}" type="button" data-progression-view="${escapeHtml(item.id)}" role="tab" aria-selected="${selected === item.id}">
       ${escapeHtml(item.label)}
     </button>
   `).join("");
-}
-
-function renderProgressionCalibrationPanel(subsystemFeed) {
-  const summary = getProgressionCalibrationSummary(subsystemFeed);
-  $("#progressionCalibrationPanel").innerHTML = `
-    <article class="validation-card ${summary.shards.ready ? "pass" : "warn"}">
-      <strong>Shard milestone quickstart</strong>
-      <p class="meta">${summary.shards.ready ? "Shard milestones have the minimum tracked inputs needed for row-level guidance." : "Shard milestones are still missing one or more minimum tracked inputs."}</p>
-      <p class="meta">Total milestone levels: ${summary.shards.totalLevelsLabel} | Tracked row: ${summary.shards.focusMilestoneLabel} | Tracked row level: ${summary.shards.focusLevelLabel} | Observed rows: ${summary.shards.observedRowCountLabel}</p>
-      <p class="meta">${escapeHtml(summary.shards.nextStep)}</p>
-    </article>
-    <article class="validation-card ${summary.loop.ready ? "pass" : "warn"}">
-      <strong>Loop Prestige quickstart</strong>
-      <p class="meta">${summary.loop.ready ? "Loop Prestige guardrails have the minimum tracked inputs needed for pacing warnings." : "Loop Prestige guardrails are still missing one or more minimum tracked inputs."}</p>
-      <p class="meta">Current LR: ${summary.loop.loopResetLabel} | Current shards: ${summary.loop.shardsLabel}</p>
-      <p class="meta">${escapeHtml(summary.loop.nextStep)}</p>
-    </article>
-    <article class="validation-card ${summary.profile.hasConfidence ? "pass" : "warn"}">
-      <strong>Profile readiness</strong>
-      <p class="meta">Profile confidence: ${summary.profile.confidenceLabel}. Active progression view: ${escapeHtml(summary.profile.activeViewLabel)}.</p>
-      <p class="meta">${escapeHtml(summary.profile.nextStep)}</p>
-      <button class="button" type="button" data-progression-action="open-profile">Open Profile</button>
-    </article>
-  `;
-}
-
-function getProgressionCalibrationSummary(subsystemFeed) {
-  const shardPlanner = getShardPlannerState();
-  const canonical = getCanonicalProfileState();
-  const selected = getSelectedProgressionSubsystem();
-  const hasTotalLevels = shardPlanner.totalMilestoneLevels !== null && shardPlanner.totalMilestoneLevels !== undefined && String(shardPlanner.totalMilestoneLevels) !== "";
-  const hasFocusMilestone = Boolean(shardPlanner.focusMilestoneId);
-  const hasFocusLevel = shardPlanner.focusMilestoneLevel !== null && shardPlanner.focusMilestoneLevel !== undefined && String(shardPlanner.focusMilestoneLevel) !== "";
-  const observedRowCount = Object.keys(shardPlanner.observedLevelsByMilestone ?? {}).length;
-  const hasLoopReset = canonical.loopReset !== null && canonical.loopReset !== undefined && String(canonical.loopReset) !== "";
-  const hasShards = canonical.shards !== null && canonical.shards !== undefined && String(canonical.shards) !== "";
-  const shardCount = Array.isArray(subsystemFeed?.shards) ? subsystemFeed.shards.length : 0;
-  const loopCount = Array.isArray(subsystemFeed?.loop) ? subsystemFeed.loop.length : 0;
-  return {
-    shards: {
-      ready: hasTotalLevels && hasFocusMilestone && hasFocusLevel,
-      totalLevelsLabel: formatOptionalNumber(shardPlanner.totalMilestoneLevels),
-      focusMilestoneLabel: shardPlanner.focusMilestoneId || "not set",
-      focusLevelLabel: formatOptionalNumber(shardPlanner.focusMilestoneLevel),
-      observedRowCountLabel: formatOptionalNumber(observedRowCount),
-      nextStep: hasTotalLevels && hasFocusMilestone && hasFocusLevel
-        ? `${shardCount} shard milestone card${shardCount === 1 ? "" : "s"} are ready with the current manual inputs.`
-        : "Fill total shard milestone levels, then edit any shard row so milestone guidance becomes usable."
-    },
-    loop: {
-      ready: hasLoopReset && hasShards,
-      loopResetLabel: formatOptionalNumber(canonical.loopReset),
-      shardsLabel: formatOptionalNumber(canonical.shards),
-      nextStep: hasLoopReset && hasShards
-        ? `${loopCount} Loop Prestige card${loopCount === 1 ? "" : "s"} are ready with the current profile inputs.`
-        : "Fill current LR and current shards in Profile so Loop Prestige guardrails can warn cleanly."
-    },
-    profile: {
-      hasConfidence: Boolean(canonical.dataConfidence),
-      confidenceLabel: canonical.dataConfidence || "missing",
-      activeViewLabel: selected === "research" ? "Shard Mining" : selected === "loop" ? "Loop Prestige" : "Shard milestones",
-      nextStep: selected === "research"
-        ? "Use Shard Mining when you need the extracted evidence; use Shard milestones or Loop Prestige for day-to-day play."
-        : "The active Progression view is now split into game-facing surfaces instead of one long mixed page."
-    }
-  };
 }
 
 function renderProgressionSubsystemSection(title, eyebrow, description, items, tone) {
@@ -5092,18 +4935,14 @@ function renderRecommendationFeedSummary(results, surface) {
 
   const loopCount = results.filter((item) => item.module === "loop").length;
   const shardCount = results.filter((item) => item.module === "shards").length;
-  const explainability = getRecommendationExplainabilitySummary(results);
   const contractAudit = getRecommendationContractSummary(results);
   return `
     <article class="validation-card warn">
       <strong>${surface === "overview" ? "Active MVP recommendation feed" : "Progression feed status"}</strong>
       <p class="meta">The current feed ranks trust-oriented warning urgency for the active shard and loop modules. These scores are UI priority, not ROI math.</p>
       <p class="meta">Visible feed items: ${results.length}. Loop guardrails: ${loopCount}. Shard workflow cards: ${shardCount}.</p>
-      <p class="meta">Contract audit: Valid ${contractAudit.validCount}/${results.length} | Contract gaps ${contractAudit.invalidCount}/${results.length} | ${escapeHtml(contractAudit.topIssueLine)}.</p>
-      <p class="meta">Explainability coverage: Why now ${explainability.withWhyNow}/${results.length} | Assumptions ${explainability.withAssumptions}/${results.length} | Warnings ${explainability.withWarnings}/${results.length} | Source notes ${explainability.withNotes}/${results.length}.</p>
-      <p class="meta">Average confidence: ${explainability.averageConfidence}% | Items with all explainability fields: ${explainability.withFullContext}/${results.length}.</p>
-      <p class="meta">Explainability audit: Complete context ${explainability.withFullContext}/${results.length} | Partial context ${explainability.partialContext}/${results.length} | Missing source notes ${explainability.missingSourceNotes}/${results.length}.</p>
-      <p class="meta">Spend-planner recommendations are still blocked by system-mapping gaps, so this feed currently covers the MVP-safe guidance surfaces only.</p>
+      <p class="meta">${contractAudit.invalidCount === 0 ? "All visible cards currently satisfy the shared recommendation contract." : `Contract gaps still hide ${contractAudit.invalidCount} item${contractAudit.invalidCount === 1 ? "" : "s"} from the active feed (${escapeHtml(contractAudit.topIssueLine)}).`}</p>
+      <p class="meta">Spend-planner recommendations remain blocked by system-mapping gaps, so this feed only covers MVP-safe watch notes.</p>
     </article>
   `;
 }
@@ -5582,18 +5421,15 @@ function getMilestonesForDisplay() {
   });
 }
 
-function isShardMilestoneOpen(id, type = "card") {
-  const source = type === "grounding"
-    ? state.shardMilestoneGroundingOpenIds
-    : state.shardMilestoneCardOpenIds;
-  return source.includes(String(id));
+function isShardMilestoneOpen(id) {
+  return state.shardMilestoneCardOpenIds.includes(String(id));
 }
 
-function syncShardMilestoneOpenState(id, open, type = "card") {
+function syncShardMilestoneOpenState(id, open) {
   if (!id) {
     return;
   }
-  const key = type === "grounding" ? "shardMilestoneGroundingOpenIds" : "shardMilestoneCardOpenIds";
+  const key = "shardMilestoneCardOpenIds";
   const nextIds = new Set(state[key] ?? []);
   if (open) {
     nextIds.add(String(id));
@@ -6193,6 +6029,9 @@ function makeRecommendationCard(item, module) {
   if (!item) {
     return "";
   }
+  if (module === "shards" || module === "loop") {
+    return makeCompactProgressionNoteCard(item, module);
+  }
   const explainabilityAudit = getRecommendationExplainabilityAudit(item);
   const contractIssues = getNormalizedRecommendationContractIssues(item);
   const detailLines = [
@@ -6257,6 +6096,51 @@ function makeRecommendationCard(item, module) {
       ${warnings}
     </article>
   `;
+}
+
+function makeCompactProgressionNoteCard(item, module) {
+  const contractIssues = getNormalizedRecommendationContractIssues(item);
+  const confidence = Math.round((item.confidence ?? 0.5) * 100);
+  const toneClass = module === "loop" || item.kind === "warning" ? "watch-note-warn" : "watch-note-pass";
+  const subtitle = item.subtitle ?? (module === "shards" ? "Shard Mining" : "Loop Prestige");
+  const primaryLine = getCompactProgressionNoteLine(item.warnings)
+    || getCompactProgressionNoteLine(item.whyNow)
+    || item.notes
+    || "";
+  const secondaryLine = getCompactProgressionNoteLine(item.whyNow, primaryLine)
+    || getCompactProgressionNoteLine(item.assumptions, primaryLine)
+    || getCompactProgressionNoteLine(item.benefit, primaryLine)
+    || "";
+  const sourceLine = item.notes || getCompactProgressionNoteLine(item.assumptions) || "";
+  const detailPills = [
+    `<span class="pill">${escapeHtml(module === "shards" ? "shard watch" : "loop watch")}</span>`,
+    `<span class="pill pill-neutral">confidence ${confidence}%</span>`,
+    item.cost ? `<span class="pill pill-neutral">cost ${escapeHtml(item.cost)}</span>` : "",
+    item.eta ? `<span class="pill pill-neutral">eta ${escapeHtml(item.eta)}</span>` : "",
+    contractIssues.length ? `<span class="pill watch-note-pill-warn">contract gap</span>` : ""
+  ].filter(Boolean).join("");
+  return `
+    <article class="recommendation-card watch-note-card ${toneClass}">
+      <div class="recommendation-head watch-note-head">
+        <div>
+          <p class="eyebrow">${escapeHtml(subtitle)}</p>
+          <strong>${escapeHtml(item.title)}</strong>
+        </div>
+        <span class="score">${Number(item.score).toFixed(1)}</span>
+      </div>
+      <div class="pill-row">
+        ${detailPills}
+      </div>
+      ${primaryLine ? `<p class="meta watch-note-primary">${escapeHtml(primaryLine)}</p>` : ""}
+      ${secondaryLine ? `<p class="meta">${escapeHtml(secondaryLine)}</p>` : ""}
+      ${sourceLine ? `<p class="meta watch-note-source">${escapeHtml(sourceLine)}</p>` : ""}
+    </article>
+  `;
+}
+
+function getCompactProgressionNoteLine(lines, exclude = "") {
+  const list = Array.isArray(lines) ? lines : [];
+  return list.find((line) => line && line !== exclude) || "";
 }
 
 function getRecommendationExplainabilityAudit(item) {

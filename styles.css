@@ -358,6 +358,37 @@ textarea {
   align-items: start;
 }
 
+.watch-note-card {
+  gap: 8px;
+  padding: 16px;
+}
+
+.watch-note-pass {
+  border-color: rgba(44, 155, 103, 0.2);
+}
+
+.watch-note-warn {
+  border-color: rgba(168, 115, 20, 0.22);
+}
+
+.watch-note-head .eyebrow {
+  margin-bottom: 6px;
+}
+
+.watch-note-primary {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.watch-note-source {
+  font-size: 0.86rem;
+}
+
+.watch-note-pill-warn {
+  background: rgba(168, 115, 20, 0.12);
+  color: var(--warning);
+}
+
 .score {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.92rem;
@@ -382,8 +413,8 @@ textarea {
 }
 
 .pill-neutral {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(224, 232, 255, 0.82);
+  background: rgba(53, 38, 19, 0.08);
+  color: rgba(76, 65, 56, 0.92);
 }
 
 .shard-threshold-pill {
