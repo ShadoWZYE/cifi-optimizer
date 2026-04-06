@@ -654,6 +654,7 @@ function validateShardCostParameterProbe(probe) {
     GrowthExponent2: 1.1,
     GrowthExponent3: 2
   }, "shard cost parameter probe row0PreludeCandidate strongestFieldOrderMapping drifted");
+  assert.equal(probe.row0PreludeCandidate?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label, "5.0e0", "shard cost parameter probe row0 StartCost BigDouble label drifted");
   assert.ok(probe.signatureGroups.length >= 5, "shard cost parameter probe signatureGroups regressed");
   assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 19 && entry?.unlockRequirementValue === 1400 && entry?.intValue === 70 && Number(entry?.exponentA) === 2.5 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 19 tuple drifted");
   assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27 && entry?.unlockRequirementValue === 8000 && entry?.intValue === 975 && Number(entry?.exponentA) === 2.25 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 27 tuple drifted");
@@ -663,11 +664,19 @@ function validateShardCostParameterProbe(probe) {
     && Number(entry?.strongestFieldOrderMapping?.values?.CostExponent) === 2.5
     && Number(entry?.strongestFieldOrderMapping?.values?.GrowthExponent) === 4
     && Number(entry?.strongestFieldOrderMapping?.auxiliaryIntCandidate) === 70), "shard cost parameter probe row 19 strongestFieldOrderMapping drifted");
+  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 19
+    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "1.0e70"
+    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.5e0"
+    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"), "shard cost parameter probe row 19 exact BigDouble mapping drifted");
   assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27
     && Number(entry?.strongestFieldOrderMapping?.values?.StartCost) === 2
     && Number(entry?.strongestFieldOrderMapping?.values?.CostExponent) === 2.25
     && Number(entry?.strongestFieldOrderMapping?.values?.GrowthExponent) === 4
     && Number(entry?.strongestFieldOrderMapping?.auxiliaryIntCandidate) === 975), "shard cost parameter probe row 27 strongestFieldOrderMapping drifted");
+  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27
+    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "2.0e975"
+    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.25e0"
+    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"), "shard cost parameter probe row 27 exact BigDouble mapping drifted");
   assert.deepEqual(probe.repeatedCommonRowGroup?.rows, [19, 20, 21], "shard cost parameter probe repeatedCommonRowGroup rows drifted");
   assert.equal(probe.repeatedCommonRowGroup?.tuples?.length, 3, "shard cost parameter probe repeatedCommonRowGroup tuple count drifted");
   assert.ok(probe.currentBoundary.some((line) => String(line).includes("exact serialized ShardMining row fields")), "shard cost parameter probe must preserve serialized-field framing");
@@ -952,13 +961,38 @@ function validateShardCostNativeProbe(probe) {
     { rows: [18, 24, 27, 28, 29], formulaClass: "two-stage-transition-band" },
     { rows: [25, 26], formulaClass: "hundred-stage-short-class" },
   ], "shard cost native probe formula application profiles drifted");
+  assert.deepEqual(probe.preThresholdMergeModels?.normalProfile?.rows, [9, 25], "shard cost native probe pre-threshold sample rows drifted");
+  assert.ok(String(probe.preThresholdMergeModels?.normalProfile?.symbolicApproximation).includes("multiply(StartCost, dispatch(currentLevel, add(CostExponent, multiply(currentLevelBigDouble, GrowthExponent))))"), "shard cost native probe pre-threshold symbolic approximation drifted");
+  assert.ok(probe.preThresholdMergeModels?.sharedNormalPath?.some((line) => String(line).includes("owner-flag-zero pre-threshold structure")), "shard cost native probe pre-threshold shared-path framing drifted");
+  assert.ok(probe.preThresholdMergeModels?.alternateFlaggedBranchSamples?.some((entry) => entry?.row === 25 && String(entry?.seedBuilder).includes("integer seed 4")), "shard cost native probe pre-threshold alternate branch drifted");
+  assert.equal(probe.dispatcherCompareModel?.compareTarget, "0x24e2d86", "shard cost native probe dispatcher compare target drifted");
+  assert.ok(probe.dispatcherCompareModel?.facts?.some((line) => String(line).includes("converted BigDouble lane is greater than the original scalar lane")), "shard cost native probe dispatcher compare semantics drifted");
+  assert.equal(probe.dispatcherAlignmentModel?.alignmentCheckTarget, "0x24e3597", "shard cost native probe dispatcher alignment target drifted");
+  assert.equal(Number(probe.dispatcherAlignmentModel?.toleranceLiteral), 5.238690707360522e-11, "shard cost native probe dispatcher alignment tolerance drifted");
+  assert.ok(probe.dispatcherAlignmentModel?.currentInference?.some((line) => String(line).includes("tiny fmod-style alignment gate")), "shard cost native probe dispatcher alignment inference drifted");
+  assert.ok(probe.dispatcherSelectionModel?.facts?.some((line) => String(line).includes("selector register equals 1")), "shard cost native probe dispatcher selection gate drifted");
+  assert.ok(probe.dispatcherSelectionModel?.sampledNormalRows?.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([1, 9, 27, 29]) && JSON.stringify(entry?.sampledSelectorValues) === JSON.stringify([0])), "shard cost native probe dispatcher sampled zero-selector rows drifted");
+  assert.ok(probe.dispatcherSelectionModel?.sampledNormalRows?.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([25]) && JSON.stringify(entry?.sampledSelectorValues) === JSON.stringify([4])), "shard cost native probe dispatcher sampled short-class selector drifted");
+  assert.ok(probe.findings?.some((line) => String(line).includes("exact serialized OverLevel*Base payload values remain unresolved")), "shard cost native probe over-level base unresolved finding drifted");
+  assert.ok(probe.currentBoundary?.some((line) => String(line).includes("OverLevel100/200/300/400Base metadata names as unresolved typed field clues")), "shard cost native probe over-level base boundary drifted");
+  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel100Exponent" && entry?.baseSeed === 2), "shard cost native probe over-level 100 seed drifted");
+  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel200Exponent" && Number(entry?.baseSeed) === 0), "shard cost native probe over-level 200 seed drifted");
+  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel300Exponent" && Number(entry?.baseSeed) === 0), "shard cost native probe over-level 300 seed drifted");
+  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel100Exponent" && Number(entry?.optionalMmoMergeFloatValue) === 1.264570970563716e-39), "shard cost native probe over-level 100 merge float drifted");
+  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel200Exponent" && Number(entry?.optionalMmoMergeFloatValue) === 6.345649113524877e-36), "shard cost native probe over-level 200 merge float drifted");
+  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel400Exponent" && Number(entry?.baseSeed) === 0.007812501846152979), "shard cost native probe over-level 400 seed drifted");
+  assert.ok(probe.overLevelSeedModels?.currentInference?.some((line) => String(line).includes("100 starts from integer seed 2")), "shard cost native probe over-level seed inference drifted");
   assert.deepEqual(probe.secondaryHundredPlusMergeModels?.profiles?.map((entry) => ({ rows: entry?.rows, profile: entry?.profile })), [
     { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 27, 28, 29], profile: "additive-premerge" },
     { rows: [19, 20, 21], profile: "literal-builder-additive" },
   ], "shard cost native probe secondary hundred-plus merge models drifted");
+  assert.ok(probe.secondaryHundredPlusMergeModels?.sharedFrame?.some((line) => String(line).includes("post-200, pre-300 branch")), "shard cost native probe secondary hundred-plus branch framing drifted");
   assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "additive-premerge" && String(entry?.symbolicApproximation).includes("multiply(levelOffsetBigDouble, preservedScalarLane)")), "shard cost native probe additive-premerge symbolic approximation drifted");
+  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "additive-premerge" && String(entry?.laneSources?.baseLane).includes("OverLevel200Base")), "shard cost native probe additive-premerge base-lane source drifted");
+  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "additive-premerge" && String(entry?.laneSources?.stageLane).includes("get_OverLevel200Exponent")), "shard cost native probe additive-premerge stage-lane helper drifted");
   assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "literal-builder-additive" && entry?.preDispatchAssembly?.some((line) => String(line).includes("0x24e1a07"))), "shard cost native probe literal-builder merge model drifted");
   assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "literal-builder-additive" && String(entry?.symbolicApproximation).includes("literalBigDouble((level - offset) * coefficient)")), "shard cost native probe literal-builder symbolic approximation drifted");
+  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "literal-builder-additive" && String(entry?.laneSources?.stageLane).includes("get_OverLevel200Exponent")), "shard cost native probe literal-builder stage-lane source drifted");
   const row1 = probe.rows?.find((entry) => entry?.row === 1);
   const row19 = probe.rows?.find((entry) => entry?.row === 19);
   const row27 = probe.rows?.find((entry) => entry?.row === 27);

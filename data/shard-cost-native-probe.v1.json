@@ -9926,8 +9926,8 @@
     "decimalPowerBuilderTarget": "0x24e38f9",
     "facts": [
       "0x24e3620 is the checked BigDouble-to-scalar stage bridge: it converts the incoming BigDouble lane through 0x24e0cda, then tail-jumps into the stage dispatcher at 0x24e368d with the original scalar lane plus the converted exponent-side scalar lane.",
-      "0x24e368d is the checked stage-assembly dispatcher for the scalar remainder family. It first records whether the converted exponent-side scalar is already near an integer through 0x24e3597, then runs a scalar compare through 0x24e2d86 before choosing its output lane.",
-      "When the scalar compare passes and the converted exponent-side scalar is not near an integer, 0x24e368d returns a cached BigDouble pair from the owner-side object slot at +0x40/+0x48 off the dispatcher metadata object rather than rebuilding the result through the decimal power builder.",
+      "0x24e368d is the checked stage-assembly dispatcher for the scalar remainder family. It first records whether the converted exponent-side scalar is already aligned to the tiny fmod tolerance shell through 0x24e3597, then runs a scalar compare through 0x24e2d86 before choosing its output lane.",
+      "When the scalar compare passes and the converted exponent-side scalar does not trip that tiny-tolerance alignment check, 0x24e368d returns a cached BigDouble pair from the owner-side object slot at +0x40/+0x48 off the dispatcher metadata object rather than rebuilding the result through the decimal power builder.",
       "Otherwise 0x24e368d falls into two active reconstruction lanes: it can route through 0x24e349c to rebuild directly from the converted exponent-side scalar, or through 0x24e38f9 to rebuild from the original scalar lane plus the converted exponent-side scalar via the decimal power path.",
       "0x24e387a is the checked special-case gate between those two reconstruction lanes. It only opens its positive path when the dispatcher row-selector argument equals 1, which makes it a narrow special-case lane rather than the general shard cost builder.",
       "That means the remaining shard-formula uncertainty is stage composition inside get_SU*Cost: the repo now has the helper identity and the dispatcher shape, but not yet the full symbolic rule for when each verified stage lane is selected across the 100/200/300/400 cost bands."
@@ -13645,10 +13645,58 @@
       "They are not yet strong enough to emit exact current-cost or next-cost numbers because the numeric merge rule inside those classes is still unresolved."
     ]
   },
+  "preThresholdMergeModels": {
+    "sharedNormalPath": [
+      "Sampled rows 9 and 25 preserve the same owner-flag-zero pre-threshold structure before the first 0x24e3620 dispatch.",
+      "That shared path opens on row-local StartCost and CostExponent, then reopens currentLevel and GrowthExponent before assembling the dispatcher input.",
+      "The sampled assembly order is: multiply currentLevelBigDouble by GrowthExponent, additive-merge that into CostExponent, dispatch the merged lane through 0x24e3620 with currentLevel, then post-multiply the dispatched result by StartCost.",
+      "This makes the pre-threshold lane materially tighter than before: below 100, the normal sampled rows now preserve one reusable symbolic recipe instead of only loose helper calls."
+    ],
+    "normalProfile": {
+      "rows": [
+        9,
+        25
+      ],
+      "symbolicApproximation": "multiply(StartCost, dispatch(currentLevel, add(CostExponent, multiply(currentLevelBigDouble, GrowthExponent))))",
+      "laneSources": {
+        "startCostLane": "Row-local StartCost BigDouble loaded first and preserved on rsp+8 before the post-dispatch multiply.",
+        "costExponentLane": "Row-local CostExponent BigDouble preserved on rsp before the GrowthExponent/currentLevel merge.",
+        "growthExponentLane": "Row-local GrowthExponent BigDouble reopened before the first dispatcher call.",
+        "currentLevelLane": "Current milestone level converted through 0x24e1d36 both for the GrowthExponent multiply and again for the 0x24e3620 dispatch."
+      },
+      "preDispatchAssembly": [
+        "Convert currentLevel into BigDouble through 0x24e1d36",
+        "Multiply GrowthExponent by currentLevel through 0x24e1cb3",
+        "Add that lane into CostExponent through 0x24e1ab0",
+        "Dispatch the merged lane through 0x24e3620 using currentLevel as the scalar input",
+        "Post-multiply the dispatched result by StartCost through 0x24e1cb3"
+      ]
+    },
+    "alternateFlaggedBranchSamples": [
+      {
+        "row": 9,
+        "branchCondition": "ownerFlagNonZero",
+        "seedBuilder": "0x24e1a07 from a sampled double-literal lane before the CostExponent and GrowthExponent multiplies"
+      },
+      {
+        "row": 25,
+        "branchCondition": "ownerFlagNonZero",
+        "seedBuilder": "0x24e1d36 from sampled integer seed 4 before the CostExponent and GrowthExponent multiplies"
+      }
+    ],
+    "currentInference": [
+      "The owner-flag-zero branch is now the strongest current candidate for the general below-100 shard cost recipe on normal rows.",
+      "The owner-flag-nonzero branch still exists in sampled rows 9 and 25, but its row-local seed builders diverge enough that it should stay a gated alternate branch until the repo proves when that flag is active in-game.",
+      "This does not finish the exact evaluator yet, but it clears a meaningful gap: the repo now has a reusable symbolic pre-threshold recipe instead of only staged 100/200/300/400 descriptions."
+    ]
+  },
   "secondaryHundredPlusMergeModels": {
     "sharedFrame": [
       "Both canonical 100-plus secondary lanes finish by feeding 0x24e3620, then post-multiply the result through 0x24e1cb3 with the preserved final stack lane.",
-      "Both lanes reuse the same current-level-minus-offset seam before dispatch, but they differ in how that seam is assembled into the pre-dispatch BigDouble input."
+      "Both lanes reuse the same current-level-minus-offset seam before dispatch, but they differ in how that seam is assembled into the pre-dispatch BigDouble input.",
+      "The sampled canonical split sits inside a post-200, pre-300 branch: both subprofiles load OverLevel200Base into the dispatch base lane and reuse get_OverLevel200Exponent before the final 0x24e3620 dispatch.",
+      "That means the sampled split is no longer between different owner-side exponent getters. It is between different extra pre-dispatch scalar-lane builders layered on top of the same OverLevel200 base-plus-exponent stage lane.",
+      "The final post-dispatch multiply lane is the already-accumulated stack result from the earlier stage chain, not a branch-specific helper return."
     ],
     "profiles": [
       {
@@ -13676,6 +13724,12 @@
         "profile": "additive-premerge",
         "offsetModel": "(level - offset)",
         "symbolicApproximation": "dispatch(baseLane, add(stageLane, multiply(levelOffsetBigDouble, preservedScalarLane))) then multiply(finalStackLane, dispatchedResult)",
+        "laneSources": {
+          "baseLane": "Owner-side OverLevel200Base BigDouble field loaded from ShardMining (sampled at rsp+8 before 0x24e3620 in the post-200 window).",
+          "stageLane": "Shared get_OverLevel200Exponent helper result returned into rsp+10 before 0x24e1ab0; sampled helper 0x2477d78 starts from a fixed BigDouble zero seed and may merge one float-built lane behind an MMO-side flag.",
+          "preservedScalarLane": "Literal-built BigDouble lane preserved on the stack before the multiply-side premerge.",
+          "finalStackLane": "Previously accumulated stage result preserved at rsp before the final 0x24e1cb3 merge."
+        },
         "preDispatchAssembly": [
           "Build BigDouble(level - offset) through 0x24e1d36",
           "Multiply that lane through 0x24e1cb3 with the preserved scalar slot",
@@ -13696,6 +13750,12 @@
         "profile": "literal-builder-additive",
         "offsetModel": "(level - offset) * coefficient",
         "symbolicApproximation": "dispatch(baseLane, add(stageLane, literalBigDouble((level - offset) * coefficient))) then multiply(finalStackLane, dispatchedResult)",
+        "laneSources": {
+          "baseLane": "Owner-side OverLevel200Base BigDouble field loaded from ShardMining (sampled at rsp+8 before 0x24e3620 in the post-200 window).",
+          "stageLane": "Shared get_OverLevel200Exponent helper result returned into rsp+10 before 0x24e1ab0; sampled helper 0x2477d78 starts from a fixed BigDouble zero seed and may merge one float-built lane behind an MMO-side flag.",
+          "preservedScalarLane": "Coefficient-scaled scalar lane converted through 0x24e1a07 before the additive pre-dispatch merge.",
+          "finalStackLane": "Previously accumulated stage result preserved at rsp before the final 0x24e1cb3 merge."
+        },
         "preDispatchAssembly": [
           "Convert currentLevel - offset into a scalar double lane",
           "Apply the recovered row-window coefficient before BigDouble construction",
@@ -13710,9 +13770,120 @@
     ],
     "currentInference": [
       "The strongest remaining numeric split inside the canonical class is now the pre-dispatch assembly rule for the secondary 100-plus lane.",
-      "Rows 1-16 and 27-29 preserve a multiplicative additive-premerge builder, while rows 19-21 preserve a scalar coefficient plus literal-builder additive path before the same dispatcher and final post-dispatch multiply lane.",
+      "Rows 1-16 and 27-29 preserve a multiplicative additive-premerge builder, while rows 19-21 preserve a scalar coefficient plus literal-builder additive path before the same OverLevel200-based dispatcher and final post-dispatch multiply lane.",
       "This is stronger than the earlier boundary because it identifies how the two canonical branches assemble their dispatcher input, not just that they call different helper families.",
-      "The remaining blocker inside this split is now the exact identity of the preserved stack-fed base, stage, scalar, and final lanes, not the branch-local helper order."
+      "The remaining blocker inside this split is no longer the owner-side base or exponent helper. It is the exact in-game meaning and magnitude of the profile-specific preserved scalar lane layered onto the shared OverLevel200 stage lane.",
+      "The sampled stack-fed lane sources are now narrowed enough to say baseLane is OverLevel200Base, stageLane is get_OverLevel200Exponent, and finalStackLane is a carried stage result; the unresolved part is the exact in-game meaning of the literal or coefficient lane magnitudes."
+    ]
+  },
+  "dispatcherCompareModel": {
+    "compareTarget": "0x24e2d86",
+    "arguments": {
+      "firstScalarMantissaLane": "Original scalar dispatcher input from xmm0.",
+      "firstScalarExponentLane": "Dispatcher selector or exponent-half integer carried in rdi.",
+      "secondScalarMantissaLane": "Converted BigDouble mantissa-style scalar from xmm1 after 0x24e0cda.",
+      "secondScalarExponentLane": "Converted BigDouble exponent-half integer carried in rsi."
+    },
+    "facts": [
+      "0x24e2d86 rejects non-finite scalar lanes first through 0x24e08e3 before doing any ordering work.",
+      "It then handles near-zero mantissas through 0x24e06df before falling back to sign and exponent ordering.",
+      "When both mantissas are non-zero and the exponent halves match, it compares the mantissas directly and returns true only when the converted BigDouble lane is greater than the original scalar lane.",
+      "When signs differ, it returns true exactly when the converted BigDouble lane is positive and the original scalar lane is non-positive.",
+      "When signs match and exponent halves differ, it uses exponent ordering instead of mantissa ordering, with the sign-aware inequality flipped for negative lanes."
+    ],
+    "currentInference": [
+      "The strongest current read is that 0x24e2d86 is a signed BigDouble-style greater-than comparator between the converted exponent-side lane and the original dispatcher scalar lane.",
+      "That means the cached constant fast path is no longer gated by an opaque boolean helper: it wins only when the converted BigDouble lane dominates the original scalar lane and the tiny-tolerance alignment check does not fire."
+    ]
+  },
+  "dispatcherAlignmentModel": {
+    "alignmentCheckTarget": "0x24e3597",
+    "nearZeroPredicateTarget": "0x24e06df",
+    "fractionImportTarget": "0x4437e30",
+    "toleranceLiteral": 5.238690707360522e-11,
+    "facts": [
+      "0x24e3597 applies the imported fractional helper at 0x4437e30 against the converted exponent-side scalar and the tiny 5.238690707360522e-11 tolerance literal.",
+      "It then feeds the absolute remainder through 0x24e06df, so the return value is a tiny-alignment predicate rather than a general integer test.",
+      "Inside 0x24e368d, that predicate only blocks the cached-lane fast path; it does not directly choose between 0x24e349c and 0x24e38f9."
+    ],
+    "currentInference": [
+      "The repo should stop describing 0x24e3597 as a vague near-integer check. The sampled body shows a tiny fmod-style alignment gate on the converted exponent-side scalar.",
+      "That aligns with the dispatcher layout: cached constants are reused only when the converted lane wins the compare and is not already aligned to the tiny tolerance shell."
+    ]
+  },
+  "dispatcherSelectionModel": {
+    "facts": [
+      "Inside 0x24e368d, the cached constant lane wins only when 0x24e2d86 says the converted BigDouble lane is greater than the original scalar lane and the converted exponent-side scalar does not trip the tiny-alignment check in 0x24e3597.",
+      "If that cached lane does not win, 0x24e387a only opens the scalar-to-BigDouble fallback when the dispatcher selector register equals 1.",
+      "Otherwise the dispatcher falls through to 0x24e38f9, the decimal power-builder lane."
+    ],
+    "sampledNormalRows": [
+      {
+        "rows": [
+          1,
+          9,
+          27,
+          29
+        ],
+        "selectorLaneSource": "Sampled pre-dispatch rdi lane comes from the CostExponent exponent-half slot preserved in the row-local BigDouble pair.",
+        "sampledSelectorValues": [
+          0
+        ],
+        "inference": "The 0x24e387a special-case gate does not naturally open on these sampled normal-row calls, so the non-cached path falls through to 0x24e38f9."
+      },
+      {
+        "rows": [
+          25
+        ],
+        "selectorLaneSource": "Sampled pre-dispatch rdi lane comes from the CostExponent exponent-half slot preserved in the row-local BigDouble pair.",
+        "sampledSelectorValues": [
+          4
+        ],
+        "inference": "This sampled short-class row also misses the selector==1 special-case gate, which again makes 0x24e38f9 the stronger non-cached candidate than 0x24e349c."
+      }
+    ],
+    "currentInference": [
+      "The scalar-to-BigDouble fallback 0x24e349c is now a narrow special-case reconstruction lane rather than the default normal-row rebuild path.",
+      "For the sampled normal rows, the strongest current dispatcher read is: cached owner-side constant lane when the converted lane dominates and does not trip the tiny-alignment gate, otherwise decimal power-builder 0x24e38f9.",
+      "This materially narrows the remaining formula gap because the normal-row evaluator no longer needs to treat 0x24e349c and 0x24e38f9 as equally likely on the sampled main paths."
+    ]
+  },
+  "overLevelSeedModels": {
+    "sampledGetters": [
+      {
+        "getterName": "get_OverLevel100Exponent",
+        "baseSeedModel": "integerBigDouble",
+        "baseSeed": 2,
+        "optionalMmoMergeModel": "floatBigDouble additive merge behind MMO flag",
+        "optionalMmoMergeFloatValue": 1.264570970563716e-39
+      },
+      {
+        "getterName": "get_OverLevel200Exponent",
+        "baseSeedModel": "doubleLiteralBigDouble",
+        "baseSeed": 0.0,
+        "optionalMmoMergeModel": "floatBigDouble additive merge behind MMO flag",
+        "optionalMmoMergeFloatValue": 6.345649113524877e-36
+      },
+      {
+        "getterName": "get_OverLevel300Exponent",
+        "baseSeedModel": "doubleLiteralBigDouble",
+        "baseSeed": 0.0,
+        "optionalMmoMergeModel": "floatBigDouble additive merge behind MMO flag",
+        "optionalMmoMergeFloatValue": 6.345649113524877e-36
+      },
+      {
+        "getterName": "get_OverLevel400Exponent",
+        "baseSeedModel": "doubleLiteralBigDouble",
+        "baseSeed": 0.007812501846152979,
+        "optionalMmoMergeModel": "floatBigDouble additive merge behind MMO flag before the wider SU0-driven lane",
+        "optionalMmoMergeFloatValue": 6.345649113524877e-36
+      }
+    ],
+    "currentInference": [
+      "The sampled 100/200/300 over-level exponent getters are now narrowed to literal-seeded BigDouble builders, not direct payload-field readers.",
+      "That makes these getters usable as stage-builder seed models even though the exact MMO-side float merge magnitude is still unresolved.",
+      "The strongest current read is: 100 starts from integer seed 2, while 200 and 300 start from zero BigDouble shells before the same gated float merge path.",
+      "The sampled MMO-side float merges are now preserved directly: 100 carries a tiny 1.264570970563716e-39 lane, 200 and 300 share 6.345649113524877e-36, and 400 starts from 0.007812501846152979 before the same tiny merge family."
     ]
   },
   "powerHelperFamily": {
@@ -13840,11 +14011,11 @@
     "The upgraded typed field map now resolves those operand-pair starts to named ShardMining cost fields: rows 1-29 open on StartCost and CostExponent, while row 0 also surfaces GrowthExponent in the early getter path.",
     "Extending the getter read window shows rows 1-29 also touch GrowthExponent later in the native body, so the current verified runtime input set for those rows is StartCost plus CostExponent plus GrowthExponent.",
     "The row-local integer lane is still live inside the getter body: current milestone level values are repeatedly converted through 0x24e1d36 before entering the staged helper chain, so the unresolved integer path remains a real candidate for final cost magnitude behavior.",
-    "Rows 1-29 now preserve an explicit staged over-level sequence: the getter bodies call get_OverLevel100Exponent, get_OverLevel200Exponent, get_OverLevel300Exponent, and get_OverLevel400Exponent in ascending threshold order, alongside owner-side OverLevel100-400Base fields.",
+    "Rows 1-29 now preserve an explicit staged over-level sequence: the getter bodies call get_OverLevel100Exponent, get_OverLevel200Exponent, get_OverLevel300Exponent, and get_OverLevel400Exponent in ascending threshold order.",
     "Rows 1-29 also preserve explicit current-level compare gates inside get_SU*Cost itself: the native bodies branch on level 100, 200, and 300 in the checked sample, with larger rows continuing into the 400 lane deeper in the body.",
     "Inside the 100+ branch, rows 1, 19, and 27 all preserve the compiler-style divide-by-100 integer lane, a repeated multiply-style BigDouble loop, and a second currentLevel-vs-100 remainder lane that routes through 0x24e20d9, 0x24e3620, and 0x24e1cb3 before rejoining the main result.",
     "Inside the 300+ branch, rows 1, 19, and 27 re-open the row-local cost operand shell in the CostExponent and GrowthExponent neighborhood rather than only reusing the earlier StartCost lane, which makes the late-stage cost path look like a stacked segmented construction.",
-    "Those over-level getters are owner-side constant assemblers rather than row-state readers: get_OverLevel100Exponent starts from an integer-built BigDouble 2 lane, get_OverLevel200Exponent and get_OverLevel300Exponent start from zero-style literal construction, and get_OverLevel400Exponent starts from a small fixed double literal before each optionally merges one shared float-literal lane.",
+    "The sampled over-level getters are now split more cleanly: get_OverLevel100Exponent, get_OverLevel200Exponent, and get_OverLevel300Exponent build their exponent lanes from fixed literal or integer seeds plus the MMO-side optional float merge, while sampled get_OverLevel400Exponent diverges into a wider SU0 field-driven lane.",
     "The generic helper family is now much tighter in BigDouble terms: 0x24e1b33 is a direct multiply helper, 0x24e176a is a direct additive merge helper, 0x24e05a0 and 0x24e0746 rebuild normalized BigDouble pairs, and 0x24e0cda converts BigDouble pairs back into scalar doubles.",
     "The merge and multiply helpers also preserve nearby checked normalization literals around 0.0078125, which suggests the BigDouble helper family is normalizing significand-style lanes while assembling shard costs.",
     "The shard path now preserves a checked unary helper chain for the 100+ remainder lane: 0x24e20d9 enters 0x24e1a2b, which routes through 0x24e1452 then 0x24e0faa before rejoining 0x24e1ab0.",
@@ -13855,6 +14026,8 @@
     "That makes the strongest current formula read a segmented decimal power-builder: stored BigDouble cost fields feed the staged 100/200/300/400 bands, while the remaining uncertainty is in how get_SU*Cost stacks those verified helper lanes across stage boundaries, not in the identity of the final scalar power transform itself.",
     "0x24e30e4 now gives the repo a checked BigDouble-to-log10 bridge, which means the probe has both sides of the decimal conversion pair used by the shard cost helper family.",
     "The remaining formula gap is now narrowed to a checked stage dispatcher: 0x24e3620 and 0x24e368d choose between a cached constant lane, the scalar-to-BigDouble fallback, and the decimal power-builder after the helper math has already been resolved.",
+    "0x24e2d86 is now typed as a signed BigDouble-style greater-than comparator between the converted exponent-side lane and the original scalar dispatcher lane, which removes one of the last opaque boolean gates from the cached-lane rule.",
+    "0x24e3597 is now typed more honestly too: it is a tiny fmod-style alignment gate on the converted exponent-side scalar, not a generic near-integer test.",
     "Sample rows 1, 19, and 27 all now preserve repeated dispatcher call families inside get_SU*Cost itself: an opening pre-threshold additive feeder, a first 100-plus unary threshold feeder through 0x24e20d9 with an explicit 100 seed, a later 200-plus unary threshold feeder with an explicit 180 seed, and later additive-premerge feeders that still route through the same dispatcher before rejoining the main multiply lane.",
     "The sampled 300-plus window also preserves a plain additive dispatcher feeder before the later 100-plus and 200-plus additive-premerge feeders reopen the stacked stage lane.",
     "Row 19 also preserves one extra literal-seeded dispatcher feeder inside a 100-plus window that is not present in the same sampled window for rows 1 and 27, which makes it the strongest current sampled outlier inside the otherwise shared dispatcher pattern.",
@@ -13869,12 +14042,18 @@
     "Representative rows from each normal-row coverage class preserve the same hundred-stage and three-hundred-stage scaffolding even when the serialized cost constants change sharply, which makes the stage-coverage class a stronger formula boundary than the raw row constants alone.",
     "The strongest current normal-row recipe is now a shared stage scaffold with class-specific stage coverage and feeder substitutions, rather than thirty unrelated shard formulas.",
     "That recipe is now preserved as one canonical symbolic stage assembler for the 100/200/300/400 class, with the shorter classes expressed as stage-coverage deltas rather than fresh formulas.",
+    "The sampled owner-flag-zero pre-threshold lane is now also preserved as a reusable symbolic recipe on rows 9 and 25: StartCost post-multiplies the result of dispatch(currentLevel, CostExponent + currentLevel * GrowthExponent).",
+    "That pre-threshold recipe is the strongest current below-100 model for normal rows, while the owner-flag-nonzero branch remains a gated alternate path with row-specific seed builders.",
+    "The stage dispatcher is now narrower on sampled normal rows: the 0x24e349c scalar fallback is a selector==1 special-case lane, while sampled normal-row selector lanes preserve CostExponent exponent halves 0 or 4, which makes 0x24e38f9 the stronger non-cached rebuild path.",
+    "The cached-lane condition is also tighter now: it is gated by a signed BigDouble-style dominance compare plus a tiny alignment check on the converted exponent-side scalar, not just an opaque helper pass.",
+    "The sampled 100/200/300 over-level exponent getters are now narrowed to literal-seeded BigDouble builders: 100 starts from integer seed 2, while 200 and 300 start from zero BigDouble shells before the shared MMO-side optional float merge.",
     "The canonical class itself now also preserves one stable internal split: rows 1-16 versus rows 19-21 differ in the secondary 100-plus feeder while keeping the same main stage ladder.",
     "That makes the secondary 100-plus feeder the narrowest remaining merge breakpoint inside the canonical class; the sampled 300-plus feeder and both sampled 200-plus feeders are otherwise stable across that class.",
     "The repo now also preserves direct formula-application profiles for all shard rows: row 0 is a separate special case, while rows 1-29 now resolve to one of five staged normal-row profile classes.",
     "The canonical split is now preserved as two explicit pre-dispatch merge models: an additive-premerge builder on rows 1-16 and 27-29, versus a coefficient-scaled literal-builder additive path on rows 19-21.",
     "The constructor lanes are also typed: 0x24e1a07 builds a BigDouble from a double literal, 0x24e1d36 converts an integer into a BigDouble shell, and 0x24e1d8d does the same for float inputs.",
-    "The over-level exponent getters are no longer abstract hooks: they return row-owner-side BigDouble constants from ShardMining fields OverLevel100Base, OverLevel200Base, OverLevel300Base, and OverLevel400Base.",
+    "The typed metadata still preserves OverLevel100Base, OverLevel200Base, OverLevel300Base, and OverLevel400Base field names on ShardMining, but the sampled 100/200/300 getter bodies do not directly read those payload fields in the current native trace.",
+    "That means exact serialized OverLevel*Base payload values remain unresolved and should not yet be treated as proven active runtime inputs for the sampled normal-row cost path.",
     "For rows 1-29 the getter entry path currently surfaces two early operand-pair starts, while row 0 surfaces three, which further supports row 0 as a separate native cost lane.",
     "This still does not prove the final mathematical cost equation, but it narrows the exact remaining blocker: how the scalar remainder subfamily under 0x24e3620 combines level-derived scalar pieces with the stored BigDouble cost fields across the 100/200/300/400 stage bands."
   ],
@@ -13901,6 +14080,12 @@
     "Treat the current normal-row result as a class recipe boundary, not yet as a closed-form numeric evaluator.",
     "Treat the canonical symbolic assembler as the current best repo-local description of normal-row shard cost construction, while still blocking exact cost output until the numeric merge rule is proven.",
     "Treat the formula application profiles as player-safe structure summaries only: they map rows to staged recipe classes, not to exact current-cost numbers.",
+    "Treat the new pre-threshold merge model as the strongest current below-100 recipe for normal rows, but keep the owner-flag-nonzero branch gated until the repo proves when that alternate path is active in-game.",
+    "Treat the dispatcherCompareModel as the strongest current symbolic read of 0x24e2d86: it compares the converted exponent-side BigDouble lane against the original scalar lane with sign-aware mantissa and exponent ordering.",
+    "Treat the dispatcherAlignmentModel as the strongest current read of 0x24e3597: it is a tiny fmod-style alignment gate, not a generic integer test.",
+    "Treat the dispatcherSelectionModel as a real narrowing step: on sampled normal-row calls, 0x24e349c is not a co-equal default with 0x24e38f9, but a selector==1 special-case lane behind the cached-constant fast path.",
+    "Treat the OverLevel100/200/300/400Base metadata names as unresolved typed field clues until the repo recovers a direct serialized mapping or a getter body that actually reads them.",
+    "Treat the overLevelSeedModels as the strongest current stage-builder inputs for the sampled 100/200/300 getters: literal seeds are grounded, while the optional MMO-side float merge magnitude remains unresolved.",
     "Treat the secondary 100-plus merge models as the strongest current candidate for the remaining numeric split, but do not collapse them into a final evaluator until the preserved stack lanes are typed into exact symbolic inputs.",
     "Treat the secondary 100-plus feeder split inside the canonical class as the next numeric-merge breakpoint to explain, rather than broadening back out to all rows.",
     "Treat the sampled 300-plus feeder and both sampled 200-plus feeders as shared canonical-class structure until the binary evidence shows otherwise.",

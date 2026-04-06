@@ -1,6 +1,6 @@
 {
   "dataset": "shard-cost-parameter-probe.v1",
-  "generatedAt": "2026-04-05",
+  "generatedAt": "2026-04-06",
   "source": {
     "metadata": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\global-metadata.dat",
     "level0": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0",
@@ -313,6 +313,20 @@
         1.3,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.15,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.3,
+          "exponent": -3
+        }
+      ],
       "candidateStartCostInt": 0,
       "candidateCostDoubleA": 2.0,
       "candidateCostDoubleB": 1.15,
@@ -334,10 +348,28 @@
           "GrowthExponent": 1.3
         },
         "auxiliaryIntCandidate": 0,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 0,
+            "label": "2.0e0"
+          },
+          "CostExponent": {
+            "mantissa": 1.15,
+            "exponent": 0,
+            "label": "1.15e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.3,
+            "exponent": -3,
+            "label": "1.3e-3"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -382,6 +414,20 @@
         2.2,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 6.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.22,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.2,
+          "exponent": -3
+        }
+      ],
       "candidateStartCostInt": 0,
       "candidateCostDoubleA": 6.0,
       "candidateCostDoubleB": 1.22,
@@ -403,10 +449,28 @@
           "GrowthExponent": 2.2
         },
         "auxiliaryIntCandidate": 0,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 6.0,
+            "exponent": 0,
+            "label": "6.0e0"
+          },
+          "CostExponent": {
+            "mantissa": 1.22,
+            "exponent": 0,
+            "label": "1.22e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.2,
+            "exponent": -3,
+            "label": "2.2e-3"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -451,6 +515,20 @@
         2.6,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 9.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.24,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.6,
+          "exponent": -3
+        }
+      ],
       "candidateStartCostInt": 0,
       "candidateCostDoubleA": 9.0,
       "candidateCostDoubleB": 1.24,
@@ -472,10 +550,28 @@
           "GrowthExponent": 2.6
         },
         "auxiliaryIntCandidate": 0,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 9.0,
+            "exponent": 0,
+            "label": "9.0e0"
+          },
+          "CostExponent": {
+            "mantissa": 1.24,
+            "exponent": 0,
+            "label": "1.24e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.6,
+            "exponent": -3,
+            "label": "2.6e-3"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -520,6 +616,20 @@
         1.2,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.4,
+          "exponent": 1
+        },
+        {
+          "mantissa": 1.4,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.2,
+          "exponent": -2
+        }
+      ],
       "candidateStartCostInt": 1,
       "candidateCostDoubleA": 2.4,
       "candidateCostDoubleB": 1.4,
@@ -542,10 +652,28 @@
           "GrowthExponent": 1.2
         },
         "auxiliaryIntCandidate": 1,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.4,
+            "exponent": 1,
+            "label": "2.4e1"
+          },
+          "CostExponent": {
+            "mantissa": 1.4,
+            "exponent": 0,
+            "label": "1.4e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.2,
+            "exponent": -2,
+            "label": "1.2e-2"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -590,6 +718,20 @@
         3.2,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 4.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 1.26,
+          "exponent": 0
+        },
+        {
+          "mantissa": 3.2,
+          "exponent": -3
+        }
+      ],
       "candidateStartCostInt": 1,
       "candidateCostDoubleA": 4.0,
       "candidateCostDoubleB": 1.26,
@@ -611,10 +753,28 @@
           "GrowthExponent": 3.2
         },
         "auxiliaryIntCandidate": 1,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 4.0,
+            "exponent": 1,
+            "label": "4.0e1"
+          },
+          "CostExponent": {
+            "mantissa": 1.26,
+            "exponent": 0,
+            "label": "1.26e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 3.2,
+            "exponent": -3,
+            "label": "3.2e-3"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -659,6 +819,20 @@
         3.4,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 8.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 1.26,
+          "exponent": 0
+        },
+        {
+          "mantissa": 3.4,
+          "exponent": -3
+        }
+      ],
       "candidateStartCostInt": 1,
       "candidateCostDoubleA": 8.0,
       "candidateCostDoubleB": 1.26,
@@ -680,10 +854,28 @@
           "GrowthExponent": 3.4
         },
         "auxiliaryIntCandidate": 1,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 8.0,
+            "exponent": 1,
+            "label": "8.0e1"
+          },
+          "CostExponent": {
+            "mantissa": 1.26,
+            "exponent": 0,
+            "label": "1.26e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 3.4,
+            "exponent": -3,
+            "label": "3.4e-3"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -728,6 +920,20 @@
         2.5,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.4,
+          "exponent": 2
+        },
+        {
+          "mantissa": 1.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.5,
+          "exponent": -2
+        }
+      ],
       "candidateStartCostInt": 2,
       "candidateCostDoubleA": 1.4,
       "candidateCostDoubleB": 1.5,
@@ -750,10 +956,28 @@
           "GrowthExponent": 2.5
         },
         "auxiliaryIntCandidate": 2,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.4,
+            "exponent": 2,
+            "label": "1.4e2"
+          },
+          "CostExponent": {
+            "mantissa": 1.5,
+            "exponent": 0,
+            "label": "1.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.5,
+            "exponent": -2,
+            "label": "2.5e-2"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -798,6 +1022,20 @@
         3.8,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 4.0,
+          "exponent": 3
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 3.8,
+          "exponent": -2
+        }
+      ],
       "candidateStartCostInt": 3,
       "candidateCostDoubleA": 4.0,
       "candidateCostDoubleB": 2.0,
@@ -821,10 +1059,28 @@
           "GrowthExponent": 3.8
         },
         "auxiliaryIntCandidate": 3,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 4.0,
+            "exponent": 3,
+            "label": "4.0e3"
+          },
+          "CostExponent": {
+            "mantissa": 2.0,
+            "exponent": 0,
+            "label": "2.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 3.8,
+            "exponent": -2,
+            "label": "3.8e-2"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -869,6 +1125,20 @@
         1.6,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 3.1,
+          "exponent": 4
+        },
+        {
+          "mantissa": 1.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.6,
+          "exponent": -2
+        }
+      ],
       "candidateStartCostInt": 4,
       "candidateCostDoubleA": 3.1,
       "candidateCostDoubleB": 1.5,
@@ -890,10 +1160,28 @@
           "GrowthExponent": 1.6
         },
         "auxiliaryIntCandidate": 4,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 3.1,
+            "exponent": 4,
+            "label": "3.1e4"
+          },
+          "CostExponent": {
+            "mantissa": 1.5,
+            "exponent": 0,
+            "label": "1.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.6,
+            "exponent": -2,
+            "label": "1.6e-2"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -938,6 +1226,20 @@
         1.8,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 3.6,
+          "exponent": 4
+        },
+        {
+          "mantissa": 1.48,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.8,
+          "exponent": -2
+        }
+      ],
       "candidateStartCostInt": 4,
       "candidateCostDoubleA": 3.6,
       "candidateCostDoubleB": 1.48,
@@ -959,10 +1261,28 @@
           "GrowthExponent": 1.8
         },
         "auxiliaryIntCandidate": 4,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 3.6,
+            "exponent": 4,
+            "label": "3.6e4"
+          },
+          "CostExponent": {
+            "mantissa": 1.48,
+            "exponent": 0,
+            "label": "1.48e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.8,
+            "exponent": -2,
+            "label": "1.8e-2"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1007,6 +1327,20 @@
         2.8,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 5.6,
+          "exponent": 7
+        },
+        {
+          "mantissa": 1.6,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.8,
+          "exponent": -2
+        }
+      ],
       "candidateStartCostInt": 7,
       "candidateCostDoubleA": 5.6,
       "candidateCostDoubleB": 1.6,
@@ -1029,10 +1363,28 @@
           "GrowthExponent": 2.8
         },
         "auxiliaryIntCandidate": 7,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 5.6,
+            "exponent": 7,
+            "label": "5.6e7"
+          },
+          "CostExponent": {
+            "mantissa": 1.6,
+            "exponent": 0,
+            "label": "1.6e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.8,
+            "exponent": -2,
+            "label": "2.8e-2"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1077,6 +1429,20 @@
         1.8,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 9.99,
+          "exponent": 12
+        },
+        {
+          "mantissa": 3.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.8,
+          "exponent": -1
+        }
+      ],
       "candidateStartCostInt": 12,
       "candidateCostDoubleA": 9.99,
       "candidateCostDoubleB": 3.0,
@@ -1100,10 +1466,28 @@
           "GrowthExponent": 1.8
         },
         "auxiliaryIntCandidate": 12,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 9.99,
+            "exponent": 12,
+            "label": "9.99e12"
+          },
+          "CostExponent": {
+            "mantissa": 3.0,
+            "exponent": 0,
+            "label": "3.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.8,
+            "exponent": -1,
+            "label": "1.8e-1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1148,6 +1532,20 @@
         8.0,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 13
+        },
+        {
+          "mantissa": 1.78,
+          "exponent": 0
+        },
+        {
+          "mantissa": 8.0,
+          "exponent": -2
+        }
+      ],
       "candidateStartCostInt": 13,
       "candidateCostDoubleA": 2.0,
       "candidateCostDoubleB": 1.78,
@@ -1169,10 +1567,28 @@
           "GrowthExponent": 8.0
         },
         "auxiliaryIntCandidate": 13,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 13,
+            "label": "2.0e13"
+          },
+          "CostExponent": {
+            "mantissa": 1.78,
+            "exponent": 0,
+            "label": "1.78e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 8.0,
+            "exponent": -2,
+            "label": "8.0e-2"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1217,6 +1633,20 @@
         2.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 17
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 0
+        }
+      ],
       "candidateStartCostInt": 17,
       "candidateCostDoubleA": 2.0,
       "candidateCostDoubleB": 4.0,
@@ -1239,10 +1669,28 @@
           "GrowthExponent": 2.0
         },
         "auxiliaryIntCandidate": 17,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 17,
+            "label": "2.0e17"
+          },
+          "CostExponent": {
+            "mantissa": 4.0,
+            "exponent": 0,
+            "label": "4.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.0,
+            "exponent": 0,
+            "label": "2.0e0"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1287,6 +1735,20 @@
         2.0,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 21
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": -1
+        }
+      ],
       "candidateStartCostInt": 21,
       "candidateCostDoubleA": 2.0,
       "candidateCostDoubleB": 2.0,
@@ -1308,10 +1770,28 @@
           "GrowthExponent": 2.0
         },
         "auxiliaryIntCandidate": 21,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 21,
+            "label": "2.0e21"
+          },
+          "CostExponent": {
+            "mantissa": 2.0,
+            "exponent": 0,
+            "label": "2.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.0,
+            "exponent": -1,
+            "label": "2.0e-1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1356,6 +1836,20 @@
         1.2,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 6.0,
+          "exponent": 23
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.2,
+          "exponent": 0
+        }
+      ],
       "candidateStartCostInt": 23,
       "candidateCostDoubleA": 6.0,
       "candidateCostDoubleB": 4.0,
@@ -1378,10 +1872,28 @@
           "GrowthExponent": 1.2
         },
         "auxiliaryIntCandidate": 23,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 6.0,
+            "exponent": 23,
+            "label": "6.0e23"
+          },
+          "CostExponent": {
+            "mantissa": 4.0,
+            "exponent": 0,
+            "label": "4.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.2,
+            "exponent": 0,
+            "label": "1.2e0"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1426,6 +1938,20 @@
         5.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 8.0,
+          "exponent": 25
+        },
+        {
+          "mantissa": 3.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 0
+        }
+      ],
       "candidateStartCostInt": 25,
       "candidateCostDoubleA": 8.0,
       "candidateCostDoubleB": 3.0,
@@ -1449,10 +1975,28 @@
           "GrowthExponent": 5.0
         },
         "auxiliaryIntCandidate": 25,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 8.0,
+            "exponent": 25,
+            "label": "8.0e25"
+          },
+          "CostExponent": {
+            "mantissa": 3.0,
+            "exponent": 1,
+            "label": "3.0e1"
+          },
+          "GrowthExponent": {
+            "mantissa": 5.0,
+            "exponent": 0,
+            "label": "5.0e0"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1497,6 +2041,20 @@
         5.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.5,
+          "exponent": 33
+        },
+        {
+          "mantissa": 1.0,
+          "exponent": 2
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 1
+        }
+      ],
       "candidateStartCostInt": 33,
       "candidateCostDoubleA": 1.5,
       "candidateCostDoubleB": 1.0,
@@ -1521,10 +2079,28 @@
           "GrowthExponent": 5.0
         },
         "auxiliaryIntCandidate": 33,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.5,
+            "exponent": 33,
+            "label": "1.5e33"
+          },
+          "CostExponent": {
+            "mantissa": 1.0,
+            "exponent": 2,
+            "label": "1.0e2"
+          },
+          "GrowthExponent": {
+            "mantissa": 5.0,
+            "exponent": 1,
+            "label": "5.0e1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1569,6 +2145,20 @@
         4.0,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 70
+        },
+        {
+          "mantissa": 2.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
       "candidateStartCostInt": 70,
       "candidateCostDoubleA": 1.0,
       "candidateCostDoubleB": 2.5,
@@ -1590,10 +2180,28 @@
           "GrowthExponent": 4.0
         },
         "auxiliaryIntCandidate": 70,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 70,
+            "label": "1.0e70"
+          },
+          "CostExponent": {
+            "mantissa": 2.5,
+            "exponent": 0,
+            "label": "2.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1638,6 +2246,20 @@
         4.0,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 82
+        },
+        {
+          "mantissa": 2.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
       "candidateStartCostInt": 82,
       "candidateCostDoubleA": 1.0,
       "candidateCostDoubleB": 2.5,
@@ -1659,10 +2281,28 @@
           "GrowthExponent": 4.0
         },
         "auxiliaryIntCandidate": 82,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 82,
+            "label": "1.0e82"
+          },
+          "CostExponent": {
+            "mantissa": 2.5,
+            "exponent": 0,
+            "label": "2.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1707,6 +2347,20 @@
         4.0,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 89
+        },
+        {
+          "mantissa": 2.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
       "candidateStartCostInt": 89,
       "candidateCostDoubleA": 1.0,
       "candidateCostDoubleB": 2.5,
@@ -1728,10 +2382,28 @@
           "GrowthExponent": 4.0
         },
         "auxiliaryIntCandidate": 89,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 89,
+            "label": "1.0e89"
+          },
+          "CostExponent": {
+            "mantissa": 2.5,
+            "exponent": 0,
+            "label": "2.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1776,6 +2448,20 @@
         3.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 97
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 3.0,
+          "exponent": 0
+        }
+      ],
       "candidateStartCostInt": 97,
       "candidateCostDoubleA": 1.0,
       "candidateCostDoubleB": 5.0,
@@ -1798,10 +2484,28 @@
           "GrowthExponent": 3.0
         },
         "auxiliaryIntCandidate": 97,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 97,
+            "label": "1.0e97"
+          },
+          "CostExponent": {
+            "mantissa": 5.0,
+            "exponent": 0,
+            "label": "5.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 3.0,
+            "exponent": 0,
+            "label": "3.0e0"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1846,6 +2550,20 @@
         1.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 114
+        },
+        {
+          "mantissa": 1.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 1.0,
+          "exponent": 1
+        }
+      ],
       "candidateStartCostInt": 114,
       "candidateCostDoubleA": 1.0,
       "candidateCostDoubleB": 1.0,
@@ -1869,10 +2587,28 @@
           "GrowthExponent": 1.0
         },
         "auxiliaryIntCandidate": 114,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 114,
+            "label": "1.0e114"
+          },
+          "CostExponent": {
+            "mantissa": 1.0,
+            "exponent": 1,
+            "label": "1.0e1"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.0,
+            "exponent": 1,
+            "label": "1.0e1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1917,6 +2653,20 @@
         5.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 4.0,
+          "exponent": 275
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 1
+        }
+      ],
       "candidateStartCostInt": 275,
       "candidateCostDoubleA": 4.0,
       "candidateCostDoubleB": 5.0,
@@ -1939,10 +2689,28 @@
           "GrowthExponent": 5.0
         },
         "auxiliaryIntCandidate": 275,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 4.0,
+            "exponent": 275,
+            "label": "4.0e275"
+          },
+          "CostExponent": {
+            "mantissa": 5.0,
+            "exponent": 1,
+            "label": "5.0e1"
+          },
+          "GrowthExponent": {
+            "mantissa": 5.0,
+            "exponent": 1,
+            "label": "5.0e1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -1987,6 +2755,20 @@
         2.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 3.0,
+          "exponent": 350
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 4
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 4
+        }
+      ],
       "candidateStartCostInt": 350,
       "candidateCostDoubleA": 3.0,
       "candidateCostDoubleB": 2.0,
@@ -2008,10 +2790,28 @@
           "GrowthExponent": 2.0
         },
         "auxiliaryIntCandidate": 350,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 3.0,
+            "exponent": 350,
+            "label": "3.0e350"
+          },
+          "CostExponent": {
+            "mantissa": 2.0,
+            "exponent": 4,
+            "label": "2.0e4"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.0,
+            "exponent": 4,
+            "label": "2.0e4"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -2056,6 +2856,20 @@
         6.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 5.0,
+          "exponent": 500
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 5
+        },
+        {
+          "mantissa": 6.0,
+          "exponent": 5
+        }
+      ],
       "candidateStartCostInt": 500,
       "candidateCostDoubleA": 5.0,
       "candidateCostDoubleB": 2.0,
@@ -2079,10 +2893,28 @@
           "GrowthExponent": 6.0
         },
         "auxiliaryIntCandidate": 500,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 5.0,
+            "exponent": 500,
+            "label": "5.0e500"
+          },
+          "CostExponent": {
+            "mantissa": 2.0,
+            "exponent": 5,
+            "label": "2.0e5"
+          },
+          "GrowthExponent": {
+            "mantissa": 6.0,
+            "exponent": 5,
+            "label": "6.0e5"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -2127,6 +2959,20 @@
         4.0,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 975
+        },
+        {
+          "mantissa": 2.25,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
       "candidateStartCostInt": 975,
       "candidateCostDoubleA": 2.0,
       "candidateCostDoubleB": 2.25,
@@ -2148,10 +2994,28 @@
           "GrowthExponent": 4.0
         },
         "auxiliaryIntCandidate": 975,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 975,
+            "label": "2.0e975"
+          },
+          "CostExponent": {
+            "mantissa": 2.25,
+            "exponent": 0,
+            "label": "2.25e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -2196,6 +3060,20 @@
         4.0,
         null
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 4.0,
+          "exponent": 982
+        },
+        {
+          "mantissa": 2.29,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
       "candidateStartCostInt": 982,
       "candidateCostDoubleA": 4.0,
       "candidateCostDoubleB": 2.29,
@@ -2217,10 +3095,28 @@
           "GrowthExponent": 4.0
         },
         "auxiliaryIntCandidate": 982,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 4.0,
+            "exponent": 982,
+            "label": "4.0e982"
+          },
+          "CostExponent": {
+            "mantissa": 2.29,
+            "exponent": 0,
+            "label": "2.29e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     },
@@ -2283,6 +3179,32 @@
         0.0,
         0.0
       ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 6.0,
+          "exponent": 988
+        },
+        {
+          "mantissa": 2.3,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        },
+        {
+          "mantissa": 0.008937502268,
+          "exponent": 1065588097
+        },
+        {
+          "mantissa": 0.0,
+          "exponent": 1241679340240896
+        },
+        {
+          "mantissa": 0.0,
+          "exponent": 8848
+        }
+      ],
       "candidateStartCostInt": 988,
       "candidateCostDoubleA": 6.0,
       "candidateCostDoubleB": 2.3,
@@ -2304,10 +3226,28 @@
           "GrowthExponent": 4.0
         },
         "auxiliaryIntCandidate": 988,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 6.0,
+            "exponent": 988,
+            "label": "6.0e988"
+          },
+          "CostExponent": {
+            "mantissa": 2.3,
+            "exponent": 0,
+            "label": "2.3e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
         "rationale": [
           "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
           "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-          "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
         ]
       }
     }
@@ -2368,6 +3308,28 @@
       2.0,
       null
     ],
+    "costPrefixBigDoublePairs": [
+      {
+        "mantissa": 5.0,
+        "exponent": 0
+      },
+      {
+        "mantissa": 1.3,
+        "exponent": 0
+      },
+      {
+        "mantissa": 1.5,
+        "exponent": -1
+      },
+      {
+        "mantissa": 1.1,
+        "exponent": -2
+      },
+      {
+        "mantissa": 2.0,
+        "exponent": -1
+      }
+    ],
     "candidateStartCostInt": 0,
     "candidateCostDoubleA": 5.0,
     "candidateCostDoubleB": 1.3,
@@ -2398,10 +3360,38 @@
         "GrowthExponent3": 2.0
       },
       "auxiliaryIntCandidate": 0,
+      "exactBigDoubleValues": {
+        "StartCost": {
+          "mantissa": 5.0,
+          "exponent": 0,
+          "label": "5.0e0"
+        },
+        "CostExponent": {
+          "mantissa": 1.3,
+          "exponent": 0,
+          "label": "1.3e0"
+        },
+        "GrowthExponent": {
+          "mantissa": 1.5,
+          "exponent": -1,
+          "label": "1.5e-1"
+        },
+        "GrowthExponent2": {
+          "mantissa": 1.1,
+          "exponent": -2,
+          "label": "1.1e-2"
+        },
+        "GrowthExponent3": {
+          "mantissa": 2.0,
+          "exponent": -1,
+          "label": "2.0e-1"
+        }
+      },
       "rationale": [
         "The row-0 prelude candidate preserves five 16-byte BigDouble slots before the bonus-per-level float tail.",
         "The row-0 metadata shell preserves five row-local cost field names in the same order: StartCost, CostExponent, GrowthExponent, GrowthExponent2, and GrowthExponent3.",
-        "This is strong enough to treat the row-0 five-value mapping as exact serialized row-local cost fields, even though the exact get_SU0Cost formula is still not verified."
+        "The paired exponent lane is part of each serialized BigDouble field rather than a spare integer lane outside the cost model.",
+        "This is strong enough to treat the row-0 five-slot mapping as exact serialized row-local BigDouble cost fields, even though the exact get_SU0Cost formula is still not verified."
       ]
     }
   },
@@ -2541,6 +3531,20 @@
           4.0,
           null
         ],
+        "costPrefixBigDoublePairs": [
+          {
+            "mantissa": 1.0,
+            "exponent": 70
+          },
+          {
+            "mantissa": 2.5,
+            "exponent": 0
+          },
+          {
+            "mantissa": 4.0,
+            "exponent": -1
+          }
+        ],
         "candidateStartCostInt": 70,
         "candidateCostDoubleA": 1.0,
         "candidateCostDoubleB": 2.5,
@@ -2562,10 +3566,28 @@
             "GrowthExponent": 4.0
           },
           "auxiliaryIntCandidate": 70,
+          "exactBigDoubleValues": {
+            "StartCost": {
+              "mantissa": 1.0,
+              "exponent": 70,
+              "label": "1.0e70"
+            },
+            "CostExponent": {
+              "mantissa": 2.5,
+              "exponent": 0,
+              "label": "2.5e0"
+            },
+            "GrowthExponent": {
+              "mantissa": 4.0,
+              "exponent": -1,
+              "label": "4.0e-1"
+            }
+          },
           "rationale": [
             "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
             "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-            "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+            "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+            "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
           ]
         }
       },
@@ -2610,6 +3632,20 @@
           4.0,
           null
         ],
+        "costPrefixBigDoublePairs": [
+          {
+            "mantissa": 1.0,
+            "exponent": 82
+          },
+          {
+            "mantissa": 2.5,
+            "exponent": 0
+          },
+          {
+            "mantissa": 4.0,
+            "exponent": -1
+          }
+        ],
         "candidateStartCostInt": 82,
         "candidateCostDoubleA": 1.0,
         "candidateCostDoubleB": 2.5,
@@ -2631,10 +3667,28 @@
             "GrowthExponent": 4.0
           },
           "auxiliaryIntCandidate": 82,
+          "exactBigDoubleValues": {
+            "StartCost": {
+              "mantissa": 1.0,
+              "exponent": 82,
+              "label": "1.0e82"
+            },
+            "CostExponent": {
+              "mantissa": 2.5,
+              "exponent": 0,
+              "label": "2.5e0"
+            },
+            "GrowthExponent": {
+              "mantissa": 4.0,
+              "exponent": -1,
+              "label": "4.0e-1"
+            }
+          },
           "rationale": [
             "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
             "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-            "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+            "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+            "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
           ]
         }
       },
@@ -2679,6 +3733,20 @@
           4.0,
           null
         ],
+        "costPrefixBigDoublePairs": [
+          {
+            "mantissa": 1.0,
+            "exponent": 89
+          },
+          {
+            "mantissa": 2.5,
+            "exponent": 0
+          },
+          {
+            "mantissa": 4.0,
+            "exponent": -1
+          }
+        ],
         "candidateStartCostInt": 89,
         "candidateCostDoubleA": 1.0,
         "candidateCostDoubleB": 2.5,
@@ -2700,10 +3768,28 @@
             "GrowthExponent": 4.0
           },
           "auxiliaryIntCandidate": 89,
+          "exactBigDoubleValues": {
+            "StartCost": {
+              "mantissa": 1.0,
+              "exponent": 89,
+              "label": "1.0e89"
+            },
+            "CostExponent": {
+              "mantissa": 2.5,
+              "exponent": 0,
+              "label": "2.5e0"
+            },
+            "GrowthExponent": {
+              "mantissa": 4.0,
+              "exponent": -1,
+              "label": "4.0e-1"
+            }
+          },
           "rationale": [
             "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
             "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-            "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified."
+            "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+            "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
           ]
         }
       }

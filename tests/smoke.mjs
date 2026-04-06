@@ -588,13 +588,16 @@ assert.equal(Number(shardCostParameterProbe.row0PreludeCandidate?.exponentA), 1.
 assert.equal(Number(shardCostParameterProbe.row0PreludeCandidate?.exponentB), 1.5);
 assert.equal(Number(shardCostParameterProbe.row0PreludeCandidate?.tailScalar), 1.1);
 assert.deepEqual(shardCostParameterProbe.row0PreludeCandidate?.strongestFieldOrderMapping?.values, { StartCost: 5, CostExponent: 1.3, GrowthExponent: 1.5, GrowthExponent2: 1.1, GrowthExponent3: 2 });
+assert.equal(shardCostParameterProbe.row0PreludeCandidate?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label, "5.0e0");
 assert.ok(shardCostParameterProbe.signatureGroups.length >= 5);
 assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 19 && entry.unlockRequirementValue === 1400 && entry.intValue === 70 && Number(entry.exponentA) === 2.5 && Number(entry.exponentB) === 4));
 assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 19 && entry.candidateStartCostInt === 70 && JSON.stringify(entry.bonusPerLevelValues.map((value) => Number(value.toFixed(2)))) === JSON.stringify([1.13, 1.15, 1.17])));
 assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 19 && Number(entry.strongestFieldOrderMapping?.values?.StartCost) === 1 && Number(entry.strongestFieldOrderMapping?.values?.CostExponent) === 2.5 && Number(entry.strongestFieldOrderMapping?.values?.GrowthExponent) === 4));
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 19 && entry.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "1.0e70" && entry.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.5e0" && entry.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"));
 assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 27 && entry.unlockRequirementValue === 8000 && entry.intValue === 975 && Number(entry.exponentA) === 2.25 && Number(entry.exponentB) === 4));
 assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 27 && entry.candidateStartCostInt === 975 && JSON.stringify(entry.bonusPerLevelValues.map((value) => Number(value.toFixed(2)))) === JSON.stringify([1.1, 1.19, 1.13])));
 assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 27 && Number(entry.strongestFieldOrderMapping?.values?.StartCost) === 2 && Number(entry.strongestFieldOrderMapping?.values?.CostExponent) === 2.25 && Number(entry.strongestFieldOrderMapping?.values?.GrowthExponent) === 4));
+assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 27 && entry.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "2.0e975" && entry.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.25e0" && entry.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"));
 assert.ok(shardCostParameterProbe.rowAlignedTupleCandidates.some((entry) => entry.row === 29 && entry.intValue === 988 && Number(entry.exponentA) === 2.3 && Number(entry.exponentB) === 4));
 assert.deepEqual(shardCostParameterProbe.repeatedCommonRowGroup?.rows, [19, 20, 21]);
 assert.equal(shardCostParameterProbe.repeatedCommonRowGroup?.tuples?.length, 3);
@@ -823,13 +826,38 @@ assert.deepEqual(shardCostNativeProbe.formulaApplicationProfiles.normalRows.map(
   { rows: [18, 24, 27, 28, 29], formulaClass: "two-stage-transition-band" },
   { rows: [25, 26], formulaClass: "hundred-stage-short-class" },
 ]);
+assert.deepEqual(shardCostNativeProbe.preThresholdMergeModels.normalProfile.rows, [9, 25]);
+assert.match(shardCostNativeProbe.preThresholdMergeModels.normalProfile.symbolicApproximation, /multiply\(StartCost, dispatch\(currentLevel, add\(CostExponent, multiply\(currentLevelBigDouble, GrowthExponent\)\)\)\)/);
+assert.ok(shardCostNativeProbe.preThresholdMergeModels.sharedNormalPath.some((line) => /owner-flag-zero pre-threshold structure/.test(line)));
+assert.ok(shardCostNativeProbe.preThresholdMergeModels.alternateFlaggedBranchSamples.some((entry) => entry.row === 25 && /integer seed 4/.test(entry.seedBuilder)));
+assert.equal(shardCostNativeProbe.dispatcherCompareModel.compareTarget, "0x24e2d86");
+assert.ok(shardCostNativeProbe.dispatcherCompareModel.facts.some((line) => /converted BigDouble lane is greater than the original scalar lane/.test(line)));
+assert.equal(shardCostNativeProbe.dispatcherAlignmentModel.alignmentCheckTarget, "0x24e3597");
+assert.equal(Number(shardCostNativeProbe.dispatcherAlignmentModel.toleranceLiteral), 5.238690707360522e-11);
+assert.ok(shardCostNativeProbe.dispatcherAlignmentModel.currentInference.some((line) => /tiny fmod-style alignment gate/.test(line)));
+assert.ok(shardCostNativeProbe.dispatcherSelectionModel.facts.some((line) => /selector register equals 1/.test(line)));
+assert.ok(shardCostNativeProbe.dispatcherSelectionModel.sampledNormalRows.some((entry) => JSON.stringify(entry.rows) === JSON.stringify([1, 9, 27, 29]) && JSON.stringify(entry.sampledSelectorValues) === JSON.stringify([0])));
+assert.ok(shardCostNativeProbe.dispatcherSelectionModel.sampledNormalRows.some((entry) => JSON.stringify(entry.rows) === JSON.stringify([25]) && JSON.stringify(entry.sampledSelectorValues) === JSON.stringify([4])));
+assert.ok(shardCostNativeProbe.findings.some((line) => /exact serialized OverLevel\*Base payload values remain unresolved/.test(line)));
+assert.ok(shardCostNativeProbe.currentBoundary.some((line) => /OverLevel100\/200\/300\/400Base metadata names as unresolved typed field clues/.test(line)));
+assert.ok(shardCostNativeProbe.overLevelSeedModels.sampledGetters.some((entry) => entry.getterName === "get_OverLevel100Exponent" && entry.baseSeed === 2));
+assert.ok(shardCostNativeProbe.overLevelSeedModels.sampledGetters.some((entry) => entry.getterName === "get_OverLevel200Exponent" && Number(entry.baseSeed) === 0));
+assert.ok(shardCostNativeProbe.overLevelSeedModels.sampledGetters.some((entry) => entry.getterName === "get_OverLevel300Exponent" && Number(entry.baseSeed) === 0));
+assert.ok(shardCostNativeProbe.overLevelSeedModels.sampledGetters.some((entry) => entry.getterName === "get_OverLevel100Exponent" && Number(entry.optionalMmoMergeFloatValue) === 1.264570970563716e-39));
+assert.ok(shardCostNativeProbe.overLevelSeedModels.sampledGetters.some((entry) => entry.getterName === "get_OverLevel200Exponent" && Number(entry.optionalMmoMergeFloatValue) === 6.345649113524877e-36));
+assert.ok(shardCostNativeProbe.overLevelSeedModels.sampledGetters.some((entry) => entry.getterName === "get_OverLevel400Exponent" && Number(entry.baseSeed) === 0.007812501846152979));
+assert.ok(shardCostNativeProbe.overLevelSeedModels.currentInference.some((line) => /100 starts from integer seed 2/.test(line)));
 assert.deepEqual(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.map((entry) => ({ rows: entry.rows, profile: entry.profile })), [
   { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 27, 28, 29], profile: "additive-premerge" },
   { rows: [19, 20, 21], profile: "literal-builder-additive" },
 ]);
+assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.sharedFrame.some((line) => /post-200, pre-300 branch/.test(line)));
 assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "additive-premerge" && /multiply\(levelOffsetBigDouble, preservedScalarLane\)/.test(entry.symbolicApproximation)));
+assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "additive-premerge" && /OverLevel200Base/.test(entry.laneSources.baseLane)));
+assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "additive-premerge" && /get_OverLevel200Exponent/.test(entry.laneSources.stageLane)));
 assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "literal-builder-additive" && entry.preDispatchAssembly.some((line) => /0x24e1a07/.test(line))));
 assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "literal-builder-additive" && /literalBigDouble\(\(level - offset\) \* coefficient\)/.test(entry.symbolicApproximation)));
+assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "literal-builder-additive" && /get_OverLevel200Exponent/.test(entry.laneSources.stageLane)));
 const shardRow1Native = shardCostNativeProbe.rows.find((entry) => entry.row === 1);
 const shardRow19Native = shardCostNativeProbe.rows.find((entry) => entry.row === 19);
 const shardRow27Native = shardCostNativeProbe.rows.find((entry) => entry.row === 27);

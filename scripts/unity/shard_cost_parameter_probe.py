@@ -164,6 +164,17 @@ def read_row_direct_values(body: bytes, tuple_offset: int, block_end: int, bonus
         "bonusFloatCount": len(bonus_per_level_values),
         "costPrefixU32": prefix_u32,
         "costPrefixF64": prefix_f64,
+        "costPrefixBigDoublePairs": [
+            {
+                "mantissa": prefix_f64[index] if index < len(prefix_f64) else None,
+                "exponent": (
+                    struct.unpack_from("<q", prefix, index * 8 + 8)[0]
+                    if (index * 8 + 16) <= len(prefix)
+                    else None
+                ),
+            }
+            for index in range(0, len(prefix_f64), 2)
+        ],
         "candidateStartCostInt": prefix_u32[2] if len(prefix_u32) >= 3 else None,
         "candidateCostDoubleA": prefix_f64[0] if len(prefix_f64) >= 1 else None,
         "candidateCostDoubleB": prefix_f64[2] if len(prefix_f64) >= 3 else None,
@@ -172,7 +183,19 @@ def read_row_direct_values(body: bytes, tuple_offset: int, block_end: int, bonus
     }
 
 
+def format_bigdouble_label(mantissa: object, exponent: object) -> str | None:
+    if not isinstance(mantissa, (int, float)) or not isinstance(exponent, int):
+        return None
+    if not math.isfinite(float(mantissa)):
+        return None
+    return f"{mantissa}e{exponent}"
+
+
 def build_field_order_mapping_for_common_row(direct_values: dict[str, object]) -> dict[str, object]:
+    pairs = direct_values.get("costPrefixBigDoublePairs", [])
+    start_pair = pairs[0] if len(pairs) >= 1 else {}
+    cost_pair = pairs[1] if len(pairs) >= 2 else {}
+    growth_pair = pairs[2] if len(pairs) >= 3 else {}
     return {
         "fieldNames": ["StartCost", "CostExponent", "GrowthExponent"],
         "values": {
@@ -181,16 +204,35 @@ def build_field_order_mapping_for_common_row(direct_values: dict[str, object]) -
             "GrowthExponent": direct_values.get("candidateCostDoubleC"),
         },
         "auxiliaryIntCandidate": direct_values.get("candidateStartCostInt"),
+        "exactBigDoubleValues": {
+            "StartCost": {
+                "mantissa": start_pair.get("mantissa"),
+                "exponent": start_pair.get("exponent"),
+                "label": format_bigdouble_label(start_pair.get("mantissa"), start_pair.get("exponent")),
+            },
+            "CostExponent": {
+                "mantissa": cost_pair.get("mantissa"),
+                "exponent": cost_pair.get("exponent"),
+                "label": format_bigdouble_label(cost_pair.get("mantissa"), cost_pair.get("exponent")),
+            },
+            "GrowthExponent": {
+                "mantissa": growth_pair.get("mantissa"),
+                "exponent": growth_pair.get("exponent"),
+                "label": format_bigdouble_label(growth_pair.get("mantissa"), growth_pair.get("exponent")),
+            },
+        },
         "rationale": [
             "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
             "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
-            "This is strong enough to treat the three-value mapping as exact serialized row-local cost fields, even though the formula that consumes them is still not fully verified.",
+            "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+            "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified.",
         ],
     }
 
 
 def build_field_order_mapping_for_row0(direct_values: dict[str, object]) -> dict[str, object]:
     prefix_f64 = direct_values.get("costPrefixF64", [])
+    pairs = direct_values.get("costPrefixBigDoublePairs", [])
     ordered_values = [
         prefix_f64[index] if index < len(prefix_f64) else None
         for index in (0, 2, 4, 6, 8)
@@ -211,10 +253,28 @@ def build_field_order_mapping_for_row0(direct_values: dict[str, object]) -> dict
             "GrowthExponent3": ordered_values[4],
         },
         "auxiliaryIntCandidate": direct_values.get("candidateStartCostInt"),
+        "exactBigDoubleValues": {
+            field_name: {
+                "mantissa": pairs[index].get("mantissa") if index < len(pairs) else None,
+                "exponent": pairs[index].get("exponent") if index < len(pairs) else None,
+                "label": format_bigdouble_label(
+                    pairs[index].get("mantissa") if index < len(pairs) else None,
+                    pairs[index].get("exponent") if index < len(pairs) else None,
+                ),
+            }
+            for index, field_name in enumerate([
+                "StartCost",
+                "CostExponent",
+                "GrowthExponent",
+                "GrowthExponent2",
+                "GrowthExponent3",
+            ])
+        },
         "rationale": [
             "The row-0 prelude candidate preserves five 16-byte BigDouble slots before the bonus-per-level float tail.",
             "The row-0 metadata shell preserves five row-local cost field names in the same order: StartCost, CostExponent, GrowthExponent, GrowthExponent2, and GrowthExponent3.",
-            "This is strong enough to treat the row-0 five-value mapping as exact serialized row-local cost fields, even though the exact get_SU0Cost formula is still not verified.",
+            "The paired exponent lane is part of each serialized BigDouble field rather than a spare integer lane outside the cost model.",
+            "This is strong enough to treat the row-0 five-slot mapping as exact serialized row-local BigDouble cost fields, even though the exact get_SU0Cost formula is still not verified.",
         ],
     }
 
