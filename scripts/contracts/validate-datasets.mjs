@@ -2,6 +2,21 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
+const REQUIRED_PROBE_DOC_PAIRS = [
+  {
+    datasetPath: "data/shard-cost-native-probe.v1.json",
+    docPath: "docs/systems/shards/shard-cost-native-probe.md"
+  },
+  {
+    datasetPath: "data/shard-cost-method-probe.v1.json",
+    docPath: "docs/systems/shards/shard-cost-method-probe.md"
+  },
+  {
+    datasetPath: "data/shard-cost-parameter-probe.v1.json",
+    docPath: "docs/systems/shards/shard-cost-parameter-probe.md"
+  }
+];
+
 async function readJson(relativePath) {
   const fileUrl = new URL(relativePath, import.meta.url);
   return JSON.parse(await readFile(fileUrl, "utf8"));
@@ -2369,10 +2384,28 @@ function assertContractMatchesValidation(contract, summaries) {
   });
 }
 
+async function validateRequiredProbeDocPairs() {
+  for (const pair of REQUIRED_PROBE_DOC_PAIRS) {
+    const datasetUrl = new URL(`../../${pair.datasetPath}`, import.meta.url);
+    const docUrl = new URL(`../../${pair.docPath}`, import.meta.url);
+
+    await access(datasetUrl);
+    try {
+      await access(docUrl);
+    } catch (error) {
+      throw new Error(
+        `Required probe doc is missing for ${pair.datasetPath}: expected ${pair.docPath}`,
+        { cause: error }
+      );
+    }
+  }
+}
+
 export async function validateBundledDatasets() {
   const bundledDatasetContract = await validateBundledDatasetContract(
     await readJson("../../data/bundled-dataset-contract.v1.json")
   );
+  await validateRequiredProbeDocPairs();
   const snapshot = await readJson("../../data/game-data.snapshot.v1.json");
   const shardMilestones = await readJson("../../data/shard-milestones.grounded.v1.json");
   const shardObserved = await readJson("../../data/shard-observed-behaviors.grounded.v1.json");
