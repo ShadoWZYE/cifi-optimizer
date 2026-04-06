@@ -1,6 +1,6 @@
 {
   "contractVersion": "v1",
-  "updatedAt": "2026-04-05",
+  "updatedAt": "2026-04-06",
   "validationCommand": "npm run verify:data",
   "sourcePriority": [
     {
@@ -183,6 +183,14 @@
       "classification": "extracted-mechanics",
       "files": [
         "data/shard-cost-list-path-probe.v1.json"
+      ]
+    },
+    {
+      "id": "shard-cost-formula-model",
+      "label": "Shard cost formula model",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-cost-formula-model.v1.json"
       ]
     },
     {

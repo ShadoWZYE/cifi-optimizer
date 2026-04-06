@@ -6,6 +6,7 @@ It exists because the current shard workflow uses a repo dataset, but that datas
 
 Boundary reference:
 
+- [shard-cost-pr23-audit.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-cost-pr23-audit.md)
 - [shard-grounding-boundary.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-grounding-boundary.md)
 - [shard-owner-family-verification.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-owner-family-verification.md)
 - [data/shard-finalsu-bonus-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-finalsu-bonus-boundary.v1.json)

@@ -639,22 +639,26 @@ function validateShardCostParameterProbe(probe) {
   assert.deepEqual(probe.unlockRequirementBlock?.values?.slice(0, 8), [0, 0, 5, 10, 20, 30, 40, 50], "shard cost parameter probe early unlock requirements drifted");
   assert.deepEqual(probe.unlockRequirementBlock?.values?.slice(-3), [8000, 8050, 8100], "shard cost parameter probe late unlock requirements drifted");
   assert.ok(probe.shardMiningCandidateTuples.length >= 7, "shard cost parameter probe candidate tuples regressed");
-  assert.equal(probe.rowAlignedTupleCandidates.length, 29, "shard cost parameter probe rowAlignedTupleCandidates drifted");
-  assert.equal(probe.row0PreludeCandidate?.row, 0, "shard cost parameter probe row0PreludeCandidate row drifted");
-  assert.equal(probe.row0PreludeCandidate?.pointerRefCount, 19, "shard cost parameter probe row0PreludeCandidate pointerRefCount drifted");
-  assert.equal(probe.row0PreludeCandidate?.unlockRequirementValue, 0, "shard cost parameter probe row0PreludeCandidate unlockRequirementValue drifted");
-  assert.equal(Number(probe.row0PreludeCandidate?.leadingValue), 5, "shard cost parameter probe row0PreludeCandidate leadingValue drifted");
-  assert.equal(Number(probe.row0PreludeCandidate?.exponentA), 1.3, "shard cost parameter probe row0PreludeCandidate exponentA drifted");
-  assert.equal(Number(probe.row0PreludeCandidate?.exponentB), 1.5, "shard cost parameter probe row0PreludeCandidate exponentB drifted");
-  assert.equal(Number(probe.row0PreludeCandidate?.tailScalar), 1.1, "shard cost parameter probe row0PreludeCandidate tailScalar drifted");
-  assert.deepEqual(probe.row0PreludeCandidate?.strongestFieldOrderMapping?.values, {
+  assert.equal(probe.rowAlignedTupleCandidates.length, 30, "shard cost parameter probe rowAlignedTupleCandidates drifted");
+  assert.equal(probe.row0AlignedTupleCandidate?.row, 0, "shard cost parameter probe row0AlignedTupleCandidate row drifted");
+  assert.equal(probe.row0AlignedTupleCandidate?.pointerRefCount, 19, "shard cost parameter probe row0AlignedTupleCandidate pointerRefCount drifted");
+  assert.equal(probe.row0AlignedTupleCandidate?.unlockRequirementValue, 0, "shard cost parameter probe row0AlignedTupleCandidate unlockRequirementValue drifted");
+  assert.equal(probe.row0AlignedTupleCandidate?.bonusCount, 3, "shard cost parameter probe row0AlignedTupleCandidate bonusCount drifted");
+  assert.equal(probe.row0AlignedTupleCandidate?.numericBlockByteCount, 92, "shard cost parameter probe row0AlignedTupleCandidate numericBlockByteCount drifted");
+  assert.equal(probe.row0AlignedTupleCandidate?.trailingSlackByteCount, 20, "shard cost parameter probe row0AlignedTupleCandidate trailingSlackByteCount drifted");
+  assert.equal(Number(probe.row0AlignedTupleCandidate?.leadingValue), 5, "shard cost parameter probe row0AlignedTupleCandidate leadingValue drifted");
+  assert.equal(Number(probe.row0AlignedTupleCandidate?.exponentA), 1.3, "shard cost parameter probe row0AlignedTupleCandidate exponentA drifted");
+  assert.equal(Number(probe.row0AlignedTupleCandidate?.exponentB), 1.5, "shard cost parameter probe row0AlignedTupleCandidate exponentB drifted");
+  assert.equal(Number(probe.row0AlignedTupleCandidate?.tailScalar), 1.1, "shard cost parameter probe row0AlignedTupleCandidate tailScalar drifted");
+  assert.deepEqual(probe.row0AlignedTupleCandidate?.strongestFieldOrderMapping?.values, {
     StartCost: 5,
     CostExponent: 1.3,
     GrowthExponent: 1.5,
     GrowthExponent2: 1.1,
     GrowthExponent3: 2
-  }, "shard cost parameter probe row0PreludeCandidate strongestFieldOrderMapping drifted");
-  assert.equal(probe.row0PreludeCandidate?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label, "5.0e0", "shard cost parameter probe row0 StartCost BigDouble label drifted");
+  }, "shard cost parameter probe row0AlignedTupleCandidate strongestFieldOrderMapping drifted");
+  assert.equal(probe.row0AlignedTupleCandidate?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label, "5.0e0", "shard cost parameter probe row0 StartCost BigDouble label drifted");
+  assert.deepEqual(probe.row0AlignedTupleCandidate?.bonusPerLevelValues?.map((value) => Number(value.toFixed(3))), [1.1, 1.02, 1.3], "shard cost parameter probe row0 bonusPerLevelValues drifted");
   assert.ok(probe.signatureGroups.length >= 5, "shard cost parameter probe signatureGroups regressed");
   assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 19 && entry?.unlockRequirementValue === 1400 && entry?.intValue === 70 && Number(entry?.exponentA) === 2.5 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 19 tuple drifted");
   assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27 && entry?.unlockRequirementValue === 8000 && entry?.intValue === 975 && Number(entry?.exponentA) === 2.25 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 27 tuple drifted");
@@ -677,6 +681,10 @@ function validateShardCostParameterProbe(probe) {
     && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "2.0e975"
     && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.25e0"
     && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"), "shard cost parameter probe row 27 exact BigDouble mapping drifted");
+  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 29
+    && entry?.numericBlockByteCount === 60
+    && entry?.trailingSlackByteCount === 48
+    && JSON.stringify(entry?.bonusPerLevelValues?.map((value) => Number(value.toFixed(3)))) === JSON.stringify([1.16, 1.018, 1.028])), "shard cost parameter probe row 29 bounded block drifted");
   assert.deepEqual(probe.repeatedCommonRowGroup?.rows, [19, 20, 21], "shard cost parameter probe repeatedCommonRowGroup rows drifted");
   assert.equal(probe.repeatedCommonRowGroup?.tuples?.length, 3, "shard cost parameter probe repeatedCommonRowGroup tuple count drifted");
   assert.ok(probe.currentBoundary.some((line) => String(line).includes("exact serialized ShardMining row fields")), "shard cost parameter probe must preserve serialized-field framing");
@@ -1132,6 +1140,164 @@ function validateShardCostListPathProbe(probe) {
   };
 }
 
+function validateShardCostFormulaModel(model) {
+  expectNonEmptyString(model.dataset, "shard cost formula model dataset id must be present");
+  expectNonEmptyString(model.generatedAt, "shard cost formula model generatedAt must be present");
+  expectRecord(model.sources, "shard cost formula model sources must be an object");
+  ["costModelBoundary", "parameterProbe", "methodProbe", "nativeProbe", "screenshotCalibration", "listPathProbe"].forEach((field) => {
+    expectNonEmptyString(model.sources[field], `shard cost formula model sources.${field} must be present`);
+  });
+  expectNonEmptyString(model.modelIntent, "shard cost formula model modelIntent must be present");
+  expectRecord(model.completionFlags, "shard cost formula model completionFlags must be an object");
+  expectRecord(model.implementation, "shard cost formula model implementation must be an object");
+  expectRecord(model.calibrationCheckConfig, "shard cost formula model calibrationCheckConfig must be an object");
+  expectRecord(model.runtimeGetterRules, "shard cost formula model runtimeGetterRules must be an object");
+  expectArray(model.rowClasses, "shard cost formula model rowClasses must be an array");
+  expectRecord(model.stageRules, "shard cost formula model stageRules must be an object");
+  expectRecord(model.verifiedParameters, "shard cost formula model verifiedParameters must be an object");
+  expectRecord(model.derivedParameters, "shard cost formula model derivedParameters must be an object");
+  expectArray(model.calibrationAnchors, "shard cost formula model calibrationAnchors must be an array");
+  expectArray(model.provenanceNotes, "shard cost formula model provenanceNotes must be an array");
+  expectRecord(model.boundedUncertaintyFlags, "shard cost formula model boundedUncertaintyFlags must be an object");
+  expectArray(model.blockedUses, "shard cost formula model blockedUses must be an array");
+  expectArray(model.currentBoundary, "shard cost formula model currentBoundary must be an array");
+
+  assert.equal(model.dataset, "shard-cost-formula-model.v1", "shard cost formula model dataset drifted");
+  assert.equal(model.completionFlags.canonicalDatasetShipped, true, "shard cost formula model must stay shipped");
+  assert.equal(model.completionFlags.deterministicEvaluatorImplemented, true, "shard cost formula model must preserve the deterministic evaluator flag");
+  assert.equal(model.completionFlags.automatedCalibrationImplemented, false, "shard cost formula model must not claim automated calibration");
+  assert.equal(model.completionFlags.plannerSafeCostOutputApproved, false, "shard cost formula model must keep planner-safe cost output blocked");
+  assert.equal(model.implementation.module, "scripts/shards/cost-evaluator.mjs", "shard cost formula model implementation module drifted");
+  assert.equal(model.implementation.outputKind, "normalized-bigdouble-like", "shard cost formula model implementation outputKind drifted");
+  assert.equal(model.implementation.deterministic, true, "shard cost formula model implementation must stay deterministic");
+  assert.equal(model.calibrationCheckConfig.scientificLabelMantissaDecimals, 2, "shard cost formula model calibration mantissa decimals drifted");
+  assert.equal(model.calibrationCheckConfig.requiredExponentDelta, 0, "shard cost formula model calibration requiredExponentDelta drifted");
+  assert.equal(model.calibrationCheckConfig.mantissaAbsoluteTolerance, 0.005, "shard cost formula model calibration mantissaAbsoluteTolerance drifted");
+  assert.equal(model.calibrationCheckConfig.mantissaRelativeTolerance, 0.005, "shard cost formula model calibration mantissaRelativeTolerance drifted");
+  assert.equal(model.runtimeGetterRules.getterFamily.ownerType, "ShardMining", "shard cost formula model getter ownerType drifted");
+  assert.equal(model.runtimeGetterRules.getterFamily.returnType, "BreakInfinity.BigDouble", "shard cost formula model getter returnType drifted");
+  assert.equal(model.runtimeGetterRules.getterFamily.getterNamePattern, "get_SU{row}Cost", "shard cost formula model getterNamePattern drifted");
+  assert.deepEqual(model.runtimeGetterRules.getterFamily.rows, Array.from({ length: 30 }, (_, index) => index), "shard cost formula model getter-family rows drifted");
+  assert.equal(model.runtimeGetterRules.getterFamily.stableCallOrder[0], "GetShardCostList", "shard cost formula model stableCallOrder start drifted");
+  assert.equal(model.runtimeGetterRules.getterFamily.stableCallOrder[1], "get_SU0Cost", "shard cost formula model stableCallOrder getter start drifted");
+  assert.equal(model.runtimeGetterRules.getterFamily.stableCallOrder.at(-1), "get_SU29Cost", "shard cost formula model stableCallOrder end drifted");
+  assert.ok(model.runtimeGetterRules.getterFamily.bodySizeClusterRules.some((entry) => entry.estimatedTrackedBodySize === 3258 && JSON.stringify(entry.rows) === JSON.stringify([19, 20, 21])), "shard cost formula model getter body-size cluster drifted");
+  assert.equal(model.runtimeGetterRules.cacheLifecycle.refreshMethod, "UpdateShardCostList", "shard cost formula model cache refreshMethod drifted");
+  assert.equal(model.runtimeGetterRules.cacheLifecycle.listBuilderMethod, "GetShardCostList", "shard cost formula model cache listBuilderMethod drifted");
+  assert.equal(model.runtimeGetterRules.cacheLifecycle.cacheField, "MilestoneCostList", "shard cost formula model cacheField drifted");
+  assert.equal(model.runtimeGetterRules.cacheLifecycle.cacheFieldOffset, 5160, "shard cost formula model cacheFieldOffset drifted");
+  assert.equal(model.runtimeGetterRules.cacheLifecycle.sortedConsumerMethod, "SortCostAndBools", "shard cost formula model sortedConsumerMethod drifted");
+  assert.equal(model.runtimeGetterRules.cacheLifecycle.affordabilityConsumerMethod, "CountAffordableShard", "shard cost formula model affordabilityConsumerMethod drifted");
+  assert.equal(model.runtimeGetterRules.cacheLifecycle.orderedGetterOutputsCached, true, "shard cost formula model orderedGetterOutputsCached drifted");
+  assert.equal(model.runtimeGetterRules.cacheLifecycle.alternateFormulaPathFound, false, "shard cost formula model alternateFormulaPathFound drifted");
+  assert.deepEqual(model.runtimeGetterRules.sharedStageLogic.windowOrder, ["pre-threshold", "100-plus-window", "200-plus-window", "300-plus-window", "400-plus-window"], "shard cost formula model windowOrder drifted");
+  assert.equal(model.runtimeGetterRules.sharedStageLogic.dispatcherTargets.stageDispatcherEntryTarget, "0x24e3620", "shard cost formula model stageDispatcherEntryTarget drifted");
+  assert.equal(model.runtimeGetterRules.sharedStageLogic.dispatcherTargets.decimalPowerBuilderTarget, "0x24e38f9", "shard cost formula model decimalPowerBuilderTarget drifted");
+  assert.deepEqual(model.runtimeGetterRules.sharedStageLogic.thresholdCoverageClasses.map((entry) => entry.getterNames), [
+    ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"],
+    ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"],
+    ["get_OverLevel100Exponent", "get_OverLevel200Exponent"],
+    ["get_OverLevel100Exponent"]
+  ], "shard cost formula model thresholdCoverageClasses drifted");
+  assert.deepEqual(model.runtimeGetterRules.sharedStageLogic.formulaApplicationProfiles.map((entry) => ({ formulaClass: entry.formulaClass, rows: entry.rows })), [
+    { formulaClass: "row0-special-case", rows: [0] },
+    { formulaClass: "canonical-additive-premerge", rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
+    { formulaClass: "canonical-literal-builder", rows: [19, 20, 21] },
+    { formulaClass: "drop-400-stage", rows: [17, 22, 23] },
+    { formulaClass: "two-stage-transition-band", rows: [18, 24, 27, 28, 29] },
+    { formulaClass: "hundred-stage-short-class", rows: [25, 26] }
+  ], "shard cost formula model formulaApplicationProfiles drifted");
+
+  assert.deepEqual(
+    model.rowClasses.map((entry) => entry.id),
+    [
+      "row0-special-case",
+      "canonical-additive-premerge",
+      "canonical-literal-builder",
+      "drop-400-stage",
+      "two-stage-transition-band",
+      "hundred-stage-short-class"
+    ],
+    "shard cost formula model row-class ids drifted"
+  );
+  assert.deepEqual(model.rowClasses[0].rows, [0], "shard cost formula model row0 class drifted");
+  assert.deepEqual(model.rowClasses[1].stageCoverage, [100, 200, 300, 400], "shard cost formula model canonical-additive-premerge stage coverage drifted");
+  assert.deepEqual(model.rowClasses[2].rows, [19, 20, 21], "shard cost formula model canonical-literal-builder rows drifted");
+  assert.deepEqual(model.rowClasses[3].rows, [17, 22, 23], "shard cost formula model drop-400-stage rows drifted");
+  assert.deepEqual(model.rowClasses[4].rows, [18, 24, 27, 28, 29], "shard cost formula model two-stage-transition-band rows drifted");
+  assert.deepEqual(model.rowClasses[5].rows, [25, 26], "shard cost formula model hundred-stage-short-class rows drifted");
+
+  assert.equal(
+    model.stageRules.preThreshold.symbolicApproximation,
+    "multiply(StartCost, dispatch(currentLevel, add(CostExponent, multiply(currentLevelBigDouble, GrowthExponent))))",
+    "shard cost formula model pre-threshold symbolic approximation drifted"
+  );
+  assert.deepEqual(model.stageRules.preThreshold.sampledRows, [9, 25], "shard cost formula model pre-threshold sampled rows drifted");
+  assert.equal(model.stageRules.hundredPlus.sampledOffsetFeeders.length, 3, "shard cost formula model sampled offset feeder count drifted");
+  assert.ok(model.stageRules.hundredPlus.sampledOffsetFeeders.some((entry) => entry.row === 1 && entry.levelOffset === 70 && Math.abs(Number(entry.coefficient) - 9.765628774403013e-05) < 1e-16), "shard cost formula model row 1 feeder drifted");
+  assert.ok(model.stageRules.hundredPlus.sampledOffsetFeeders.some((entry) => entry.row === 19 && entry.levelOffset === 70 && Math.abs(Number(entry.coefficient) - (-0.00011718430323526263)) < 1e-16), "shard cost formula model row 19 feeder drifted");
+  assert.ok(model.stageRules.hundredPlus.sampledOffsetFeeders.some((entry) => entry.row === 27 && entry.levelOffset === 82 && Math.abs(Number(entry.coefficient) - 8192.001984596252) < 1e-9), "shard cost formula model row 27 feeder drifted");
+  assert.deepEqual(model.stageRules.twoHundredPlus.sharedFamilies[1].integerSeeds, [180], "shard cost formula model 200-plus unary seed drifted");
+  assert.deepEqual(model.stageRules.threeHundredPlus.sharedFamilies[1].integerSeeds, [49], "shard cost formula model 300-plus row 24 seed drifted");
+  assert.deepEqual(model.stageRules.threeHundredPlus.sharedFamilies[2].integerSeeds, [19], "shard cost formula model 300-plus row 25 seed drifted");
+
+  assert.equal(model.verifiedParameters.unlockRequirementBlock.offset, 1456, "shard cost formula model unlock requirement offset drifted");
+  assert.deepEqual(model.verifiedParameters.unlockRequirementBlock.firstEightValues, [0, 0, 5, 10, 20, 30, 40, 50], "shard cost formula model unlock requirement prefix drifted");
+  assert.deepEqual(model.verifiedParameters.unlockRequirementBlock.lastThreeValues, [8000, 8050, 8100], "shard cost formula model unlock requirement suffix drifted");
+  assert.equal(model.verifiedParameters.row0FieldShell.exactBigDoubleValues.StartCost, "5.0e0", "shard cost formula model row0 StartCost drifted");
+  assert.ok(model.verifiedParameters.representativeNormalRows.some((entry) => entry.row === 19 && entry.exactBigDoubleValues.StartCost === "1.0e70"), "shard cost formula model row 19 exact StartCost drifted");
+  assert.ok(model.verifiedParameters.representativeNormalRows.some((entry) => entry.row === 27 && entry.exactBigDoubleValues.StartCost === "2.0e975"), "shard cost formula model row 27 exact StartCost drifted");
+  assert.ok(model.verifiedParameters.representativeNormalRows.some((entry) => entry.row === 29 && entry.exactBigDoubleValues.StartCost === "6.0e988"), "shard cost formula model row 29 exact StartCost drifted");
+  assert.deepEqual(model.verifiedParameters.overLevelExponentAccessors, ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], "shard cost formula model over-level accessors drifted");
+  assert.deepEqual(model.verifiedParameters.overLevelBaseFieldShells.map((entry) => entry.fieldName), ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"], "shard cost formula model over-level base field shells drifted");
+  assert.deepEqual(model.verifiedParameters.overLevelBaseFieldShells.map((entry) => entry.fieldOffset), [5080, 5096, 5112, 5128], "shard cost formula model over-level base field offsets drifted");
+  assert.equal(model.verifiedParameters.listPathTieIn.milestoneCostListField, "MilestoneCostList", "shard cost formula model MilestoneCostList field drifted");
+  assert.equal(model.verifiedParameters.listPathTieIn.milestoneCostListFieldOffset, 5160, "shard cost formula model MilestoneCostList offset drifted");
+  assert.equal(model.verifiedParameters.listPathTieIn.callOrderStart, "GetShardCostList", "shard cost formula model callOrderStart drifted");
+  assert.equal(model.verifiedParameters.listPathTieIn.callOrderEnd, "get_SU29Cost", "shard cost formula model callOrderEnd drifted");
+
+  assert.deepEqual(model.derivedParameters.repeatedCommonRowGroup.rows, [19, 20, 21], "shard cost formula model repeated common-row group drifted");
+  assert.equal(model.derivedParameters.dispatcherSelectionBoundary.decimalPowerBuilderTarget, "0x24e38f9", "shard cost formula model decimalPowerBuilderTarget drifted");
+  assert.equal(model.derivedParameters.dispatcherSelectionBoundary.bigDoubleLog10BridgeTarget, "0x24e30e4", "shard cost formula model bigDoubleLog10BridgeTarget drifted");
+  assert.ok(model.derivedParameters.overLevelSeedModels.some((entry) => entry.getterName === "get_OverLevel100Exponent" && entry.baseSeed === 2), "shard cost formula model 100 seed drifted");
+  assert.ok(model.derivedParameters.overLevelSeedModels.some((entry) => entry.getterName === "get_OverLevel200Exponent" && Number(entry.baseSeed) === 0), "shard cost formula model 200 seed drifted");
+  assert.ok(model.derivedParameters.overLevelSeedModels.some((entry) => entry.getterName === "get_OverLevel400Exponent" && Math.abs(Number(entry.baseSeed) - 0.007812501846152979) < 1e-18), "shard cost formula model 400 seed drifted");
+  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.status, "deterministic-native-seed-derivation", "shard cost formula model over-level base recovery status drifted");
+  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.exactSerializedValuesRecovered, false, "shard cost formula model must not claim exact over-level base extraction");
+  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt.uabeaDefaultValuesPresent, false, "shard cost formula model over-level asset default-value status drifted");
+  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt.directMonoBehaviourFieldHitsCount, 0, "shard cost formula model over-level directMonoBehaviourFieldHitsCount drifted");
+  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt.shardTargetMonoBehavioursCount, 0, "shard cost formula model over-level shardTargetMonoBehavioursCount drifted");
+  assert.deepEqual(model.derivedParameters.overLevelBaseRecoveryPath.derivedRuntimeSeedModels.map((entry) => entry.fieldName), ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"], "shard cost formula model over-level derivedRuntimeSeedModels drifted");
+  assert.ok(model.derivedParameters.overLevelBaseRecoveryPath.currentBoundary.some((line) => String(line).includes("not recovered serialized owner-field payload values")), "shard cost formula model over-level recovery boundary drifted");
+
+  assert.equal(model.calibrationAnchors.length, 5, "shard cost formula model calibration anchor count drifted");
+  assert.ok(model.calibrationAnchors.some((entry) => entry.row === 1 && entry.level === 283 && entry.observedCostLabel === "1.89e565"), "shard cost formula model calibration row 1 drifted");
+  assert.ok(model.calibrationAnchors.some((entry) => entry.row === 21 && entry.level === 126 && entry.observedCostLabel === "1.20e565"), "shard cost formula model calibration row 21 drifted");
+
+  assert.equal(model.boundedUncertaintyFlags.row0ExactClosedFormUnresolved, true, "shard cost formula model must keep row0 uncertainty explicit");
+  assert.equal(model.boundedUncertaintyFlags.normalRowNumericMergeRuleUnresolved, true, "shard cost formula model must keep normal-row uncertainty explicit");
+  assert.equal(model.boundedUncertaintyFlags.secondaryHundredPlusScalarLaneMeaningUnresolved, true, "shard cost formula model must keep secondary hundred-plus uncertainty explicit");
+  assert.equal(model.boundedUncertaintyFlags.overLevelBasePayloadValuesUnresolved, true, "shard cost formula model must keep over-level base uncertainty explicit");
+  assert.equal(model.boundedUncertaintyFlags.dispatcherLaneSelectionFullyProven, false, "shard cost formula model must not claim full dispatcher proof");
+  assert.equal(model.boundedUncertaintyFlags.screenshotAnchorsMatchedByAcceptedEvaluator, false, "shard cost formula model must not claim screenshot-matched evaluator");
+
+  assert.ok(model.blockedUses.includes("exact next-level shard costs"), "shard cost formula model must block exact next-level shard costs");
+  assert.ok(model.blockedUses.includes("planner-safe affordability outputs"), "shard cost formula model must block affordability outputs");
+  assert.ok(model.currentBoundary.some((line) => String(line).includes("single canonical shard-cost evaluator structure model")), "shard cost formula model must preserve canonical-dataset framing");
+  assert.ok(model.currentBoundary.some((line) => String(line).includes("Do not expose exact next-level shard costs")), "shard cost formula model must preserve blocked-use framing");
+
+  return {
+    id: "shard-cost-formula-model",
+    label: "Shard cost formula model",
+    classification: "extracted-mechanics",
+    stats: [
+      `${model.rowClasses.length} row classes`,
+      `${model.calibrationAnchors.length} calibration anchors`,
+      "Canonical evaluator-model dataset and deterministic evaluator exist, but automated calibration remains blocked"
+    ]
+  };
+}
+
 function validateShardBonusSlotProbe(probe) {
   expectNonEmptyString(probe.dataset, "shard bonus slot probe dataset id must be present");
   expectNonEmptyString(probe.generatedAt, "shard bonus slot probe generatedAt must be present");
@@ -1185,11 +1351,18 @@ function validateShardTypeMetadataProbe(probe) {
   assert.equal(probe.targets.shardUpgradeInfo.fullName, "ShardMining+ShardUpgradeInfo", "shard type metadata probe ShardUpgradeInfo fullName drifted");
   assert.ok(probe.targets.shardMining.ownerListFields.some((entry) => entry?.name === "MilestoneCostList" && entry?.type === "System.Collections.Generic.List`1<BreakInfinity.BigDouble>"), "shard type metadata probe must preserve MilestoneCostList");
   assert.ok(probe.targets.shardMining.ownerListFields.some((entry) => entry?.name === "upgradeInfoList" && entry?.type === "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>"), "shard type metadata probe must preserve upgradeInfoList");
+  assert.deepEqual(probe.targets.shardMining.overLevelBaseFields.map((entry) => entry?.name), ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"], "shard type metadata probe over-level base fields drifted");
+  assert.deepEqual(probe.targets.shardMining.overLevelBaseFields.map((entry) => entry?.fieldOffset), [5080, 5096, 5112, 5128], "shard type metadata probe over-level base field offsets drifted");
   assert.deepEqual(probe.targets.shardUpgradeInfo.fields.map((entry) => entry?.name), ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"], "shard type metadata probe ShardUpgradeInfo field list drifted");
   assert.equal(probe.rows.length, 30, "shard type metadata probe row count drifted");
   assert.ok(probe.rows.some((entry) => entry?.row === 0 && entry?.costFieldCount === 5 && entry?.bonusFieldCount === 8), "shard type metadata probe must preserve row 0 schema");
   assert.ok(probe.rows.some((entry) => entry?.row === 18 && entry?.bonusFieldCount === 6 && entry?.bonusTextFieldCount === 6), "shard type metadata probe must preserve row 18 bonus/text schema");
   assert.ok(probe.rows.some((entry) => entry?.row === 27 && entry?.costFieldCount === 3 && entry?.bonusFieldCount === 3 && entry?.bonusTextFieldCount === 3), "shard type metadata probe must preserve row 27 schema");
+  assert.equal(probe.overLevelBaseValueRecovery.uabeaDefaultValuesPresent, false, "shard type metadata probe over-level default values status drifted");
+  assert.equal(probe.overLevelBaseValueRecovery.directMonoBehaviourFieldHitsCount, 0, "shard type metadata probe over-level directMonoBehaviourFieldHitsCount drifted");
+  assert.equal(probe.overLevelBaseValueRecovery.shardTargetMonoBehavioursCount, 0, "shard type metadata probe over-level shardTargetMonoBehavioursCount drifted");
+  assert.equal(probe.overLevelBaseValueRecovery.exactSerializedValuesRecovered, false, "shard type metadata probe must not claim exact over-level values");
+  assert.ok(probe.currentBoundary.some((line) => String(line).includes("OverLevel*Base as typed owner-field shells only")), "shard type metadata probe over-level boundary drifted");
   assert.ok(probe.currentBoundary.some((line) => String(line).includes("not as final serialized row values")), "shard type metadata probe must preserve blocked-use framing");
 
   return {
@@ -2158,7 +2331,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 43, "bundled dataset contract must track the forty-three shipped dataset groups");
+  assert.equal(contract.datasets.length, 44, "bundled dataset contract must track the forty-four shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -2222,6 +2395,7 @@ export async function validateBundledDatasets() {
   const shardCostNativeProbe = await readJson("../../data/shard-cost-native-probe.v1.json");
   const shardCostScreenshotCalibration = await readJson("../../data/shard-cost-screenshot-calibration.v1.json");
   const shardCostListPathProbe = await readJson("../../data/shard-cost-list-path-probe.v1.json");
+  const shardCostFormulaModel = await readJson("../../data/shard-cost-formula-model.v1.json");
   const shardBonusSlotProbe = await readJson("../../data/shard-bonus-slot-probe.v1.json");
   const shardTypeMetadataProbe = await readJson("../../data/shard-type-metadata-probe.v1.json");
   const extractionCandidateFamilies = await readJson("../../data/extraction-candidate-families.v1.json");
@@ -2267,6 +2441,7 @@ export async function validateBundledDatasets() {
     validateShardCostNativeProbe(shardCostNativeProbe),
     validateShardCostScreenshotCalibration(shardCostScreenshotCalibration),
     validateShardCostListPathProbe(shardCostListPathProbe),
+    validateShardCostFormulaModel(shardCostFormulaModel),
     validateShardBonusSlotProbe(shardBonusSlotProbe),
     validateShardTypeMetadataProbe(shardTypeMetadataProbe),
     validateExtractionCandidateFamilies(extractionCandidateFamilies),

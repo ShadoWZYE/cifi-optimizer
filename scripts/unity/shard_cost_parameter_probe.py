@@ -271,7 +271,7 @@ def build_field_order_mapping_for_row0(direct_values: dict[str, object]) -> dict
             ])
         },
         "rationale": [
-            "The row-0 prelude candidate preserves five 16-byte BigDouble slots before the bonus-per-level float tail.",
+            "Row 0 preserves five 16-byte BigDouble slots before the bonus-per-level float tail inside its deterministic aligned block.",
             "The row-0 metadata shell preserves five row-local cost field names in the same order: StartCost, CostExponent, GrowthExponent, GrowthExponent2, and GrowthExponent3.",
             "The paired exponent lane is part of each serialized BigDouble field rather than a spare integer lane outside the cost model.",
             "This is strong enough to treat the row-0 five-slot mapping as exact serialized row-local BigDouble cost fields, even though the exact get_SU0Cost formula is still not verified.",
@@ -279,97 +279,114 @@ def build_field_order_mapping_for_row0(direct_values: dict[str, object]) -> dict
     }
 
 
-def build_row_aligned_tuple_candidates(level_blob: bytes, grounded: dict[str, object]) -> list[dict[str, object]]:
+def find_matched_row_run_slice(pointer_runs: list[dict[str, int]], expected_counts: list[int]) -> tuple[int, list[dict[str, int]]] | None:
+    for index in range(0, len(pointer_runs) - len(expected_counts) + 1):
+        candidate_slice = pointer_runs[index : index + len(expected_counts)]
+        if [int(entry["count"]) for entry in candidate_slice] == expected_counts:
+            return index, candidate_slice
+    return None
+
+
+def build_row_entry(
+    body: bytes,
+    row: int,
+    rarity: str | None,
+    bonus_count: int,
+    unlock_requirement_value: int | None,
+    run: dict[str, int],
+    next_pointer_run_start: int,
+) -> dict[str, object] | None:
+    tuple_offset = int(run["start"]) + int(run["count"]) * 12
+    field_count = 5 if row == 0 else 3
+    expected_numeric_block_byte_count = field_count * 16 + bonus_count * 4
+    block_end = tuple_offset + expected_numeric_block_byte_count
+    bounded_block_end = min(block_end, next_pointer_run_start)
+    if tuple_offset + 56 > len(body) or bounded_block_end <= tuple_offset:
+        return None
+
+    direct_values = read_row_direct_values(body, tuple_offset, bounded_block_end, bonus_count)
+    return {
+        "row": row,
+        "rarity": rarity,
+        "unlockRequirementValue": unlock_requirement_value,
+        "bonusCount": bonus_count,
+        "pointerRunStart": int(run["start"]),
+        "pointerRefCount": int(run["count"]),
+        "tupleOffset": tuple_offset,
+        "nextPointerRunStart": next_pointer_run_start,
+        "expectedNumericBlockByteCount": expected_numeric_block_byte_count,
+        "trailingSlackByteCount": max(0, next_pointer_run_start - block_end),
+        "rowBlockRecoveredDeterministically": bounded_block_end == block_end,
+        "rowBlockBoundaryMode": "expected-row-shape",
+        **read_row_tuple(body, tuple_offset),
+        **direct_values,
+        "strongestFieldOrderMapping": (
+            build_field_order_mapping_for_row0(direct_values)
+            if row == 0
+            else build_field_order_mapping_for_common_row(direct_values)
+        ),
+    }
+
+
+def build_row_aligned_tuple_candidates(
+    level_blob: bytes,
+    grounded: dict[str, object],
+) -> list[dict[str, object]]:
+    milestone_by_row = {
+        int(item["milestoneNumber"]): item
+        for item in grounded.get("milestones", [])
+        if int(item.get("milestoneNumber", -1)) >= 0
+    }
     milestones = sorted(
         [item for item in grounded.get("milestones", []) if int(item.get("milestoneNumber", -1)) >= 1],
         key=lambda item: int(item["milestoneNumber"]),
     )
     expected_counts = [2 * len(item.get("bonuses", [])) + 1 for item in milestones]
     pointer_runs = extract_pointer_runs(level_blob)
-    matched_slice: list[dict[str, int]] | None = None
-    for index in range(0, len(pointer_runs) - len(expected_counts) + 1):
-        candidate_slice = pointer_runs[index : index + len(expected_counts)]
-        if [int(entry["count"]) for entry in candidate_slice] == expected_counts:
-            matched_slice = candidate_slice
-            break
-    if matched_slice is None:
+    matched = find_matched_row_run_slice(pointer_runs, expected_counts)
+    if matched is None:
         return []
+    matched_index, matched_slice = matched
 
     raw = level_blob[SHARD_MINING_ABSOLUTE_OFFSET : SHARD_MINING_ABSOLUTE_OFFSET + SHARD_MINING_BYTE_SIZE]
     body = raw[MONOBEHAVIOUR_HEAD_SIZE:]
     unlock_requirement_block = extract_unlock_requirement_block(level_blob)
     unlock_values = unlock_requirement_block.get("values", []) if unlock_requirement_block else []
     rows: list[dict[str, object]] = []
+    row0_run = pointer_runs[matched_index - 1] if matched_index > 0 else None
+    row0_milestone = milestone_by_row.get(0)
+    if row0_run and row0_milestone:
+        row0_entry = build_row_entry(
+            body=body,
+            row=0,
+            rarity=row0_milestone.get("rarity"),
+            bonus_count=len(row0_milestone.get("bonuses", [])),
+            unlock_requirement_value=unlock_values[0] if unlock_values else None,
+            run=row0_run,
+            next_pointer_run_start=int(matched_slice[0]["start"]),
+        )
+        if row0_entry:
+            rows.append(row0_entry)
     for index, (milestone, run) in enumerate(zip(milestones, matched_slice)):
         row = int(milestone["milestoneNumber"])
         bonus_count = len(milestone.get("bonuses", []))
-        tuple_offset = int(run["start"]) + int(run["count"]) * 12
         next_run_start = (
             int(matched_slice[index + 1]["start"])
             if index + 1 < len(matched_slice)
             else len(body)
         )
-        if tuple_offset + 56 > len(body) or tuple_offset >= next_run_start:
-            continue
-        direct_values = read_row_direct_values(body, tuple_offset, next_run_start, bonus_count)
-        rows.append(
-            {
-                "row": row,
-                "rarity": milestone.get("rarity"),
-                "unlockRequirementValue": unlock_values[row] if row < len(unlock_values) else None,
-                "bonusCount": bonus_count,
-                "pointerRunStart": int(run["start"]),
-                "pointerRefCount": int(run["count"]),
-                "nextPointerRunStart": next_run_start,
-                **read_row_tuple(body, tuple_offset),
-                **direct_values,
-                "strongestFieldOrderMapping": build_field_order_mapping_for_common_row(direct_values),
-            }
+        entry = build_row_entry(
+            body=body,
+            row=row,
+            rarity=milestone.get("rarity"),
+            bonus_count=bonus_count,
+            unlock_requirement_value=unlock_values[row] if row < len(unlock_values) else None,
+            run=run,
+            next_pointer_run_start=next_run_start,
         )
+        if entry:
+            rows.append(entry)
     return rows
-
-
-def build_row0_prelude_candidate(level_blob: bytes, grounded: dict[str, object]) -> dict[str, object] | None:
-    milestones = sorted(
-        [item for item in grounded.get("milestones", []) if int(item.get("milestoneNumber", -1)) >= 1],
-        key=lambda item: int(item["milestoneNumber"]),
-    )
-    expected_counts = [2 * len(item.get("bonuses", [])) + 1 for item in milestones]
-    pointer_runs = extract_pointer_runs(level_blob)
-    matched_index: int | None = None
-    for index in range(0, len(pointer_runs) - len(expected_counts) + 1):
-        candidate_slice = pointer_runs[index : index + len(expected_counts)]
-        if [int(entry["count"]) for entry in candidate_slice] == expected_counts:
-            matched_index = index
-            break
-    if matched_index is None or matched_index == 0:
-        return None
-    prior_run = pointer_runs[matched_index - 1]
-    raw = level_blob[SHARD_MINING_ABSOLUTE_OFFSET : SHARD_MINING_ABSOLUTE_OFFSET + SHARD_MINING_BYTE_SIZE]
-    body = raw[MONOBEHAVIOUR_HEAD_SIZE:]
-    unlock_requirement_block = extract_unlock_requirement_block(level_blob)
-    unlock_values = unlock_requirement_block.get("values", []) if unlock_requirement_block else []
-    tuple_offset = int(prior_run["start"]) + int(prior_run["count"]) * 12
-    if tuple_offset + 56 > len(body):
-        return None
-    row0_bonus_count = 8
-    first_verified_row_run = pointer_runs[matched_index]
-    direct_values = read_row_direct_values(body, tuple_offset, int(first_verified_row_run["start"]), row0_bonus_count)
-    return {
-        "row": 0,
-        "unlockRequirementValue": unlock_values[0] if unlock_values else None,
-        "pointerRunStart": int(prior_run["start"]),
-        "pointerRefCount": int(prior_run["count"]),
-        "nextPointerRunStart": int(first_verified_row_run["start"]),
-        "rationale": [
-            "This is the strongest mixed numeric block immediately after the last pre-row pointer run before the verified row 1-29 sequence.",
-            "Row 0 is the only grounded shard milestone with 8 bonus slots and no preserved row-aligned tuple in the 1-29 sequence, so this prelude block is the strongest current row-0 candidate.",
-            "The row-local formula is not yet typed, so this stays a row-0 candidate block rather than a verified SU0 cost formula.",
-        ],
-        **read_row_tuple(body, tuple_offset),
-        **direct_values,
-        "strongestFieldOrderMapping": build_field_order_mapping_for_row0(direct_values),
-    }
 
 
 def build_signature_groups(candidate_tuples: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -418,10 +435,10 @@ def render_markdown(
     candidate_tuples: list[dict[str, object]],
     signature_groups: list[dict[str, object]],
     row_aligned_tuples: list[dict[str, object]],
-    row0_prelude_candidate: dict[str, object] | None,
     unlock_requirement_block: dict[str, object] | None,
     repeated_common_row_group: dict[str, object] | None,
 ) -> str:
+    row0_entry = next((entry for entry in row_aligned_tuples if int(entry.get("row", -1)) == 0), None)
     lines = [
         "# Shard Cost Parameter Probe",
         "",
@@ -435,11 +452,11 @@ def render_markdown(
         f"- The direct `ShardMining` body contains {len(candidate_tuples)} mixed integer/double parameter tuples beyond the old row-0 shell, which is stronger evidence that numeric shard cost parameters survive in scene data.",
         f"- The recovered tuples collapse into {len(signature_groups)} distinct parameter signatures inside the direct `ShardMining` payload.",
         f"- ShardMining also preserves an exact `SU0-29UnlockReq` int lane ending `... / 8000 / 8050 / 8100` at body offset `{unlock_requirement_block['offset']}`." if unlock_requirement_block else "- Exact serialized `SU0-29UnlockReq` values were not recovered in this probe.",
-        f"- Rows `1-29` now have a direct row-aligned tuple map inside `ShardMining` ({len(row_aligned_tuples)} row-aligned tuples).",
-        f"- Rows `0-29` now also preserve exact trailing `bonusPerLevel` float values inside the same `ShardMining` row blocks, including row `27` = `1.10 / 1.19 / 1.13` and row `19` = `1.13 / 1.15 / 1.17`.",
+        f"- Rows `0-29` now have a direct row-aligned tuple map inside `ShardMining` ({len(row_aligned_tuples)} row-aligned tuples).",
+        f"- Rows `0-29` now also preserve exact trailing `bonusPerLevel` float values inside deterministic row-shaped `ShardMining` row blocks, including row `27` = `1.10 / 1.19 / 1.13`, row `19` = `1.13 / 1.15 / 1.17`, and row `0` = `1.10 / 1.02 / 1.30`.",
         "- The aligned row blocks now preserve exact serialized cost fields: rows `1-29` expose `StartCost / CostExponent / GrowthExponent`, and row `0` exposes `StartCost / CostExponent / GrowthExponent / GrowthExponent2 / GrowthExponent3`.",
         "- The old row-local integer-at-+8 is still preserved as an auxiliary unknown, but it no longer outranks the ordered double-field mapping as the strongest current named-cost recovery.",
-        f"- Row `0` also has a strongest current prelude candidate block after a `pointerRefCount={row0_prelude_candidate['pointerRefCount']}` run." if row0_prelude_candidate else "- Row `0` still does not have a preserved candidate block in this probe.",
+        f"- Row `0` now resolves deterministically from the pointer run immediately before row `1`, with `pointerRefCount={row0_entry['pointerRefCount']}` and `trailingSlackByteCount={row0_entry['trailingSlackByteCount']}`." if row0_entry else "- Row `0` still does not have a deterministic aligned block in this probe.",
         "- These tuples are not yet fully formula-mapped, so they are preserved as candidate parameter records rather than promoted as final shard costs.",
         "- Every recovered tuple ends in the same `0xFFFFFFFF`-style tail sentinel pattern, which strengthens the repeated-record interpretation.",
         "",
@@ -500,27 +517,28 @@ def render_markdown(
     lines.extend(
         [
             "",
-            "## Row 0 prelude candidate",
+            "## Row 0 aligned block",
             "",
         ]
     )
-    if row0_prelude_candidate:
+    if row0_entry:
         lines.append(
             "- "
-            f"`unlockReq={row0_prelude_candidate['unlockRequirementValue']}`; "
-            f"`pointerRefs={row0_prelude_candidate['pointerRefCount']}`; "
-            f"`costFields={row0_prelude_candidate['strongestFieldOrderMapping']['values']}`; "
-            f"`auxInt={row0_prelude_candidate['strongestFieldOrderMapping']['auxiliaryIntCandidate']}`; "
-            f"`bonusPerLevel={row0_prelude_candidate['bonusPerLevelValues']}`; "
-            f"`leading={row0_prelude_candidate['leadingValue']}`; "
-            f"`int={row0_prelude_candidate['intValue']}`; "
-            f"`exponentA={row0_prelude_candidate['exponentA']}`; "
-            f"`exponentB={row0_prelude_candidate['exponentB']}`; "
-            f"`tailScalar={row0_prelude_candidate['tailScalar']}`"
+            f"`unlockReq={row0_entry['unlockRequirementValue']}`; "
+            f"`pointerRefs={row0_entry['pointerRefCount']}`; "
+            f"`costFields={row0_entry['strongestFieldOrderMapping']['values']}`; "
+            f"`auxInt={row0_entry['strongestFieldOrderMapping']['auxiliaryIntCandidate']}`; "
+            f"`bonusPerLevel={row0_entry['bonusPerLevelValues']}`; "
+            f"`leading={row0_entry['leadingValue']}`; "
+            f"`int={row0_entry['intValue']}`; "
+            f"`exponentA={row0_entry['exponentA']}`; "
+            f"`exponentB={row0_entry['exponentB']}`; "
+            f"`tailScalar={row0_entry['tailScalar']}`; "
+            f"`trailingSlackByteCount={row0_entry['trailingSlackByteCount']}`"
         )
-        lines.append("- This sits immediately before the verified row 1-29 tuple sequence, but it is still an inference-only row-0 candidate block.")
+        lines.append("- The row-0 block is now bounded by the same explicit row-shape rule as the other rows; the slack before row 1 is preserved as non-row spillover instead of folded into row-0 bonus floats.")
     else:
-        lines.append("- No row-0 prelude candidate block was preserved in the current probe.")
+        lines.append("- No deterministic row-0 aligned block was preserved in the current probe.")
     lines.extend(
         [
             "",
@@ -562,10 +580,10 @@ def main() -> int:
     metadata_families = extract_metadata_families(metadata_text)
     candidate_tuples = extract_shard_mining_candidate_tuples(level_blob)
     row_aligned_tuples = build_row_aligned_tuple_candidates(level_blob, grounded)
-    row0_prelude_candidate = build_row0_prelude_candidate(level_blob, grounded)
     unlock_requirement_block = extract_unlock_requirement_block(level_blob)
     signature_groups = build_signature_groups(candidate_tuples)
     repeated_common_row_group = build_repeated_common_row_group(row_aligned_tuples)
+    row0_entry = next((entry for entry in row_aligned_tuples if int(entry.get("row", -1)) == 0), None)
     payload = {
         "dataset": "shard-cost-parameter-probe.v1",
         "generatedAt": str(date.today()),
@@ -579,7 +597,7 @@ def main() -> int:
         "unlockRequirementBlock": unlock_requirement_block,
         "shardMiningCandidateTuples": candidate_tuples,
         "rowAlignedTupleCandidates": row_aligned_tuples,
-        "row0PreludeCandidate": row0_prelude_candidate,
+        "row0AlignedTupleCandidate": row0_entry,
         "signatureGroups": signature_groups,
         "repeatedCommonRowGroup": repeated_common_row_group,
         "findings": [
@@ -588,11 +606,11 @@ def main() -> int:
             "Shared OverLevel100/200/300/400 exponent hooks also remain visible beside the shard row family in metadata.",
             "The direct ShardMining body contains mixed integer/double parameter tuples beyond the older row-0 shell.",
             "Those tuples collapse into five distinct parameter signatures, including one signature that repeats exactly three times.",
-            "Rows 1-29 now have a direct row-aligned exact serialized value map inside ShardMining, derived from pointer-run counts that match the grounded row bonus structure.",
+            "Rows 0-29 now have a direct row-aligned exact serialized value map inside ShardMining, derived from pointer-run counts that match the grounded row bonus structure plus an explicit row-shaped byte count.",
             "Rows 0-29 also now preserve exact trailing bonus-per-level float values inside the same aligned ShardMining row blocks.",
             "The aligned row prefixes now preserve exact serialized StartCost/CostExponent/GrowthExponent fields for rows 1-29, while row 0 preserves StartCost/CostExponent/GrowthExponent/GrowthExponent2/GrowthExponent3.",
             "The aligned row integer-at-+8 still survives as an auxiliary unknown per row, but it no longer outranks the ordered double-field mapping as the strongest current named-cost recovery.",
-            "A strongest current row-0 prelude candidate block now sits immediately before that verified row 1-29 tuple sequence.",
+            "Row 0 now resolves deterministically from the pointer run immediately before the verified row 1-29 sequence, with slack bytes left outside the row-local operand block.",
             "The repeated leading=1 / exponentA=2.5 / exponentB=4 signature now maps directly to rows 19-21 in the row-aligned tuple map.",
             "The recovered tuples share the same tail sentinel pattern, which strengthens the repeated-record interpretation.",
             "The current repo can now preserve exact serialized shard row values without claiming a verified runtime formula.",
@@ -601,12 +619,12 @@ def main() -> int:
             "Treat these recovered row values as exact serialized ShardMining row fields and unlock thresholds, not as a verified get_SU*Cost formula or planner-safe next-cost output.",
             "Do not promote these row values into shard planner math until formula behavior is verified.",
             "Treat the row-aligned cost-field mapping and trailing bonus floats as exact serialized row values, but not yet as a verified get_SU*Cost formula.",
-            "Treat the row-0 prelude block as the strongest current SU0 candidate, not a verified row-0 cost tuple yet.",
+            "Treat the deterministic row-0 aligned block as exact serialized SU0 operands, not as a verified get_SU0Cost runtime formula.",
             "Use this probe to narrow the next typed parser step around the existing ShardMining scene target.",
         ],
     }
     JSON_OUT.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    MD_OUT.write_text(render_markdown(metadata_families, candidate_tuples, signature_groups, row_aligned_tuples, row0_prelude_candidate, unlock_requirement_block, repeated_common_row_group), encoding="utf-8")
+    MD_OUT.write_text(render_markdown(metadata_families, candidate_tuples, signature_groups, row_aligned_tuples, unlock_requirement_block, repeated_common_row_group), encoding="utf-8")
     return 0
 
 

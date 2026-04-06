@@ -173,6 +173,15 @@ Prevent:
 - must contain blocked-use framing against treating the list-builder path as proof of a separate shard cost formula
 - useful for proving that the remaining formula work still lives inside `get_SU*Cost` instead of a hidden cache-builder path
 
+### Shard cost formula model
+
+- file: `data/shard-cost-formula-model.v1.json`
+- classification: `extracted-mechanics`
+- must contain one canonical row-class and stage-rule model derived from the checked shard-cost evidence bundle
+- must contain verified serialized parameter anchors, derived staged rule families, provenance notes, and explicit bounded-uncertainty flags
+- must contain blocked-use framing against claiming a completed deterministic evaluator, exact next-cost output, or planner-safe optimizer behavior
+- useful for converging shard cost evidence into one versioned evaluator-model dataset without loosening any existing grounding gate
+
 ### Shard bonus slot probe
 
 - file: `data/shard-bonus-slot-probe.v1.json`
@@ -255,5 +264,5 @@ Run:
 
 - `npm run verify:data`
 
-This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, shard-owner-family-boundary, shard-finalsu-bonus-boundary, shard-milestone-payload-boundary, shard-milestone-row-shell-boundary, shard-milestone-row-alignment-boundary, shard-milestone-handoff-boundary, shard-save-boundary, shard-scene-monobehaviour-probe, shard-cost-parameter-probe, shard-cost-method-probe, shard-cost-native-probe, shard-cost-screenshot-calibration, shard-cost-list-path-probe, shard-bonus-slot-probe, shard-type-metadata-probe, extraction-candidate-families, extraction-candidate-ranking, token-shop, multiverse-market, and spend-boundary datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
+This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, shard-owner-family-boundary, shard-finalsu-bonus-boundary, shard-milestone-payload-boundary, shard-milestone-row-shell-boundary, shard-milestone-row-alignment-boundary, shard-milestone-handoff-boundary, shard-save-boundary, shard-scene-monobehaviour-probe, shard-cost-parameter-probe, shard-cost-method-probe, shard-cost-native-probe, shard-cost-screenshot-calibration, shard-cost-list-path-probe, shard-cost-formula-model, shard-bonus-slot-probe, shard-type-metadata-probe, extraction-candidate-families, extraction-candidate-ranking, token-shop, multiverse-market, and spend-boundary datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
 

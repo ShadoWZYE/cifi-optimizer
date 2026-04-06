@@ -10,11 +10,11 @@ Source: [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\
 - The direct `ShardMining` body contains 7 mixed integer/double parameter tuples beyond the old row-0 shell, which is stronger evidence that numeric shard cost parameters survive in scene data.
 - The recovered tuples collapse into 5 distinct parameter signatures inside the direct `ShardMining` payload.
 - ShardMining also preserves an exact `SU0-29UnlockReq` int lane ending `... / 8000 / 8050 / 8100` at body offset `1456`.
-- Rows `1-29` now have a direct row-aligned tuple map inside `ShardMining` (29 row-aligned tuples).
-- Rows `0-29` now also preserve exact trailing `bonusPerLevel` float values inside the same `ShardMining` row blocks, including row `27` = `1.10 / 1.19 / 1.13` and row `19` = `1.13 / 1.15 / 1.17`.
+- Rows `0-29` now have a direct row-aligned tuple map inside `ShardMining` (30 row-aligned tuples).
+- Rows `0-29` now also preserve exact trailing `bonusPerLevel` float values inside deterministic row-shaped `ShardMining` row blocks, including row `27` = `1.10 / 1.19 / 1.13`, row `19` = `1.13 / 1.15 / 1.17`, and row `0` = `1.10 / 1.02 / 1.30`.
 - The aligned row blocks now preserve exact serialized cost fields: rows `1-29` expose `StartCost / CostExponent / GrowthExponent`, and row `0` exposes `StartCost / CostExponent / GrowthExponent / GrowthExponent2 / GrowthExponent3`.
 - The old row-local integer-at-+8 is still preserved as an auxiliary unknown, but it no longer outranks the ordered double-field mapping as the strongest current named-cost recovery.
-- Row `0` also has a strongest current prelude candidate block after a `pointerRefCount=19` run.
+- Row `0` now resolves deterministically from the pointer run immediately before row `1`, with `pointerRefCount=19` and `trailingSlackByteCount=20`.
 - These tuples are not yet fully formula-mapped, so they are preserved as candidate parameter records rather than promoted as final shard costs.
 - Every recovered tuple ends in the same `0xFFFFFFFF`-style tail sentinel pattern, which strengthens the repeated-record interpretation.
 
@@ -35,6 +35,7 @@ Source: [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\
 
 ## Row-aligned tuple map
 
+- `row=0`; `rarity=Unique`; `unlockReq=0`; `bonusCount=3`; `pointerRefs=19`; `costFields={'StartCost': 5.0, 'CostExponent': 1.3, 'GrowthExponent': 1.5, 'GrowthExponent2': 1.1, 'GrowthExponent3': 2.0}`; `auxInt=0`; `bonusPerLevel=[1.100000023842, 1.019999980927, 1.299999952316]`; `leading=5.0`; `int=0`; `exponentA=1.3`; `exponentB=1.5`; `tailScalar=1.1`
 - `row=1`; `rarity=common`; `unlockReq=0`; `bonusCount=3`; `pointerRefs=7`; `costFields={'StartCost': 2.0, 'CostExponent': 1.15, 'GrowthExponent': 1.3}`; `auxInt=0`; `bonusPerLevel=[1.05999994278, 1.05999994278, 1.05999994278]`; `leading=2.0`; `int=0`; `exponentA=1.15`; `exponentB=1.3`; `tailScalar=0.011562498273`
 - `row=2`; `rarity=common`; `unlockReq=5`; `bonusCount=3`; `pointerRefs=7`; `costFields={'StartCost': 6.0, 'CostExponent': 1.22, 'GrowthExponent': 2.2}`; `auxInt=0`; `bonusPerLevel=[1.05999994278, 1.05999994278, 1.05999994278]`; `leading=6.0`; `int=0`; `exponentA=1.22`; `exponentB=2.2`; `tailScalar=0.011562498273`
 - `row=3`; `rarity=common`; `unlockReq=10`; `bonusCount=3`; `pointerRefs=7`; `costFields={'StartCost': 9.0, 'CostExponent': 1.24, 'GrowthExponent': 2.6}`; `auxInt=0`; `bonusPerLevel=[1.05999994278, 1.070000052452, 1.080000042915]`; `leading=9.0`; `int=0`; `exponentA=1.24`; `exponentB=2.6`; `tailScalar=0.012187505127`
@@ -63,12 +64,12 @@ Source: [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\
 - `row=26`; `rarity=Mid Pristine`; `unlockReq=3900`; `bonusCount=5`; `pointerRefs=11`; `costFields={'StartCost': 5.0, 'CostExponent': 2.0, 'GrowthExponent': 6.0}`; `auxInt=500`; `bonusPerLevel=[2.200000047684, 1.06400001049, 1.044000029564, 1.067999958992, 1.072000026703]`; `leading=5.0`; `int=500`; `exponentA=2.0`; `exponentB=6.0`; `tailScalar=0.01181250252`
 - `row=27`; `rarity=common`; `unlockReq=8000`; `bonusCount=3`; `pointerRefs=7`; `costFields={'StartCost': 2.0, 'CostExponent': 2.25, 'GrowthExponent': 4.0}`; `auxInt=975`; `bonusPerLevel=[1.100000023842, 1.19000005722, 1.129999995232]`; `leading=2.0`; `int=975`; `exponentA=2.25`; `exponentB=4.0`; `tailScalar=0.023750010852`
 - `row=28`; `rarity=common`; `unlockReq=8050`; `bonusCount=3`; `pointerRefs=7`; `costFields={'StartCost': 4.0, 'CostExponent': 2.29, 'GrowthExponent': 4.0}`; `auxInt=982`; `bonusPerLevel=[1.070000052452, 1.27999997139, 1.120000004768]`; `leading=4.0`; `int=982`; `exponentA=2.29`; `exponentB=4.0`; `tailScalar=0.038750000244`
-- `row=29`; `rarity=common`; `unlockReq=8100`; `bonusCount=3`; `pointerRefs=7`; `costFields={'StartCost': 6.0, 'CostExponent': 2.3, 'GrowthExponent': 4.0}`; `auxInt=988`; `bonusPerLevel=[0.0, 0.0, 0.0]`; `leading=6.0`; `int=988`; `exponentA=2.3`; `exponentB=4.0`; `tailScalar=0.008937502268`
+- `row=29`; `rarity=common`; `unlockReq=8100`; `bonusCount=3`; `pointerRefs=7`; `costFields={'StartCost': 6.0, 'CostExponent': 2.3, 'GrowthExponent': 4.0}`; `auxInt=988`; `bonusPerLevel=[1.159999966621, 1.018000006676, 1.027999997139]`; `leading=6.0`; `int=988`; `exponentA=2.3`; `exponentB=4.0`; `tailScalar=0.008937502268`
 
-## Row 0 prelude candidate
+## Row 0 aligned block
 
-- `unlockReq=0`; `pointerRefs=19`; `costFields={'StartCost': 5.0, 'CostExponent': 1.3, 'GrowthExponent': 1.5, 'GrowthExponent2': 1.1, 'GrowthExponent3': 2.0}`; `auxInt=0`; `bonusPerLevel=[1.100000023842, 1.019999980927, 1.299999952316, 1.011000037193, 1.080000042915, 1.0, 1.0, 1.0]`; `leading=5.0`; `int=0`; `exponentA=1.3`; `exponentB=1.5`; `tailScalar=1.1`
-- This sits immediately before the verified row 1-29 tuple sequence, but it is still an inference-only row-0 candidate block.
+- `unlockReq=0`; `pointerRefs=19`; `costFields={'StartCost': 5.0, 'CostExponent': 1.3, 'GrowthExponent': 1.5, 'GrowthExponent2': 1.1, 'GrowthExponent3': 2.0}`; `auxInt=0`; `bonusPerLevel=[1.100000023842, 1.019999980927, 1.299999952316]`; `leading=5.0`; `int=0`; `exponentA=1.3`; `exponentB=1.5`; `tailScalar=1.1`; `trailingSlackByteCount=20`
+- The row-0 block is now bounded by the same explicit row-shape rule as the other rows; the slack before row 1 is preserved as non-row spillover instead of folded into row-0 bonus floats.
 
 ## Repeated common-row group
 

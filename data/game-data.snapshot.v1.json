@@ -243,6 +243,7 @@
         "data/shard-cost-method-probe.v1.json",
         "data/shard-cost-native-probe.v1.json",
         "data/shard-cost-list-path-probe.v1.json",
+        "data/shard-cost-formula-model.v1.json",
         "data/shard-bonus-slot-probe.v1.json",
         "data/shard-type-metadata-probe.v1.json",
         "data/shardmining-metadata-neighborhood.v1.json",

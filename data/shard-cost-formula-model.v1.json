@@ -1,0 +1,1084 @@
+{
+  "dataset": "shard-cost-formula-model.v1",
+  "generatedAt": "2026-04-06",
+  "sources": {
+    "costModelBoundary": "data/shard-cost-model-boundary.v1.json",
+    "parameterProbe": "data/shard-cost-parameter-probe.v1.json",
+    "methodProbe": "data/shard-cost-method-probe.v1.json",
+    "nativeProbe": "data/shard-cost-native-probe.v1.json",
+    "screenshotCalibration": "data/shard-cost-screenshot-calibration.v1.json",
+    "listPathProbe": "data/shard-cost-list-path-probe.v1.json"
+  },
+  "modelIntent": "Canonical shard-cost evaluator structure model derived from checked APK/Unity evidence artifacts. This dataset centralizes row classes, staged rule families, runtime getter rules, verified serialized inputs, and bounded uncertainty without claiming calibration closure or planner-safe shard costs.",
+  "completionFlags": {
+    "canonicalDatasetShipped": true,
+    "deterministicEvaluatorImplemented": true,
+    "automatedCalibrationImplemented": false,
+    "plannerSafeCostOutputApproved": false
+  },
+  "implementation": {
+    "module": "scripts/shards/cost-evaluator.mjs",
+    "outputKind": "normalized-bigdouble-like",
+    "deterministic": true
+  },
+  "calibrationCheckConfig": {
+    "scientificLabelMantissaDecimals": 2,
+    "requiredExponentDelta": 0,
+    "mantissaAbsoluteTolerance": 0.005,
+    "mantissaRelativeTolerance": 0.005
+  },
+  "runtimeGetterRules": {
+    "getterFamily": {
+      "ownerType": "ShardMining",
+      "returnType": "BreakInfinity.BigDouble",
+      "getterNamePattern": "get_SU{row}Cost",
+      "rows": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "stableCallOrder": [
+        "GetShardCostList",
+        "get_SU0Cost",
+        "get_SU1Cost",
+        "get_SU2Cost",
+        "get_SU3Cost",
+        "get_SU4Cost",
+        "get_SU5Cost",
+        "get_SU6Cost",
+        "get_SU7Cost",
+        "get_SU8Cost",
+        "get_SU9Cost",
+        "get_SU10Cost",
+        "get_SU11Cost",
+        "get_SU12Cost",
+        "get_SU13Cost",
+        "get_SU14Cost",
+        "get_SU15Cost",
+        "get_SU16Cost",
+        "get_SU17Cost",
+        "get_SU18Cost",
+        "get_SU19Cost",
+        "get_SU20Cost",
+        "get_SU21Cost",
+        "get_SU22Cost",
+        "get_SU23Cost",
+        "get_SU24Cost",
+        "get_SU25Cost",
+        "get_SU26Cost",
+        "get_SU27Cost",
+        "get_SU28Cost",
+        "get_SU29Cost"
+      ],
+      "bodySizeClusterRules": [
+        {
+          "rows": [
+            1,
+            4,
+            6
+          ],
+          "estimatedTrackedBodySize": 3282
+        },
+        {
+          "rows": [
+            2,
+            3,
+            5
+          ],
+          "estimatedTrackedBodySize": 3279
+        },
+        {
+          "rows": [
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "estimatedTrackedBodySize": 3284
+        },
+        {
+          "rows": [
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "estimatedTrackedBodySize": 3287
+        },
+        {
+          "rows": [
+            19,
+            20,
+            21
+          ],
+          "estimatedTrackedBodySize": 3258
+        },
+        {
+          "rows": [
+            27,
+            28
+          ],
+          "estimatedTrackedBodySize": 2693
+        }
+      ]
+    },
+    "cacheLifecycle": {
+      "refreshMethod": "UpdateShardCostList",
+      "listBuilderMethod": "GetShardCostList",
+      "cacheField": "MilestoneCostList",
+      "cacheFieldOffset": 5160,
+      "sortedConsumerMethod": "SortCostAndBools",
+      "affordabilityConsumerMethod": "CountAffordableShard",
+      "orderedGetterOutputsCached": true,
+      "alternateFormulaPathFound": false,
+      "notes": [
+        "GetShardCostList materializes the getter family in row order and caches the results into MilestoneCostList.",
+        "UpdateShardCostList refreshes that cache before sorting and affordability checks consume it.",
+        "SortCostAndBools and CountAffordableShard are downstream consumers of cached getter outputs, not alternate formula builders."
+      ]
+    },
+    "sharedStageLogic": {
+      "windowOrder": [
+        "pre-threshold",
+        "100-plus-window",
+        "200-plus-window",
+        "300-plus-window",
+        "400-plus-window"
+      ],
+      "dispatcherTargets": {
+        "stageDispatcherEntryTarget": "0x24e3620",
+        "stageDispatcherBodyTarget": "0x24e368d",
+        "scalarCompareTarget": "0x24e2d86",
+        "alignmentCheckTarget": "0x24e3597",
+        "selectorOneFallbackTarget": "0x24e387a",
+        "scalarToBigDoubleFallbackTarget": "0x24e349c",
+        "decimalPowerBuilderTarget": "0x24e38f9",
+        "bigDoubleLog10BridgeTarget": "0x24e30e4"
+      },
+      "thresholdCoverageClasses": [
+        {
+          "getterNames": [
+            "get_OverLevel100Exponent",
+            "get_OverLevel200Exponent",
+            "get_OverLevel300Exponent",
+            "get_OverLevel400Exponent"
+          ],
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            19,
+            20,
+            21
+          ]
+        },
+        {
+          "getterNames": [
+            "get_OverLevel100Exponent",
+            "get_OverLevel200Exponent",
+            "get_OverLevel300Exponent"
+          ],
+          "rows": [
+            17,
+            22,
+            23
+          ]
+        },
+        {
+          "getterNames": [
+            "get_OverLevel100Exponent",
+            "get_OverLevel200Exponent"
+          ],
+          "rows": [
+            18,
+            24,
+            27,
+            28,
+            29
+          ]
+        },
+        {
+          "getterNames": [
+            "get_OverLevel100Exponent"
+          ],
+          "rows": [
+            25,
+            26
+          ]
+        }
+      ],
+      "formulaApplicationProfiles": [
+        {
+          "formulaClass": "row0-special-case",
+          "rows": [
+            0
+          ],
+          "notes": [
+            "Row 0 preserves a separate five-field getter lane with only a checked 100-plus stage gate in the sampled native body."
+          ]
+        },
+        {
+          "formulaClass": "canonical-additive-premerge",
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "secondaryHundredPlusProfile": "additive-premerge"
+        },
+        {
+          "formulaClass": "canonical-literal-builder",
+          "rows": [
+            19,
+            20,
+            21
+          ],
+          "secondaryHundredPlusProfile": "literal-builder-additive"
+        },
+        {
+          "formulaClass": "drop-400-stage",
+          "rows": [
+            17,
+            22,
+            23
+          ],
+          "dropsStages": [
+            400
+          ]
+        },
+        {
+          "formulaClass": "two-stage-transition-band",
+          "rows": [
+            18,
+            24,
+            27,
+            28,
+            29
+          ],
+          "dropsStages": [
+            300,
+            400
+          ]
+        },
+        {
+          "formulaClass": "hundred-stage-short-class",
+          "rows": [
+            25,
+            26
+          ],
+          "dropsStages": [
+            200,
+            300,
+            400
+          ]
+        }
+      ]
+    }
+  },
+  "rowClasses": [
+    {
+      "id": "row0-special-case",
+      "rows": [
+        0
+      ],
+      "stageCoverage": [
+        100
+      ],
+      "verifiedParameterFields": [
+        "StartCost",
+        "CostExponent",
+        "GrowthExponent",
+        "GrowthExponent2",
+        "GrowthExponent3"
+      ],
+      "nativeFormulaClass": "row0-special-case",
+      "notes": [
+        "Row 0 stays on a separate five-field shard cost lane.",
+        "The sampled native body currently preserves only a checked 100-plus gate."
+      ]
+    },
+    {
+      "id": "canonical-additive-premerge",
+      "rows": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "stageCoverage": [
+        100,
+        200,
+        300,
+        400
+      ],
+      "verifiedParameterFields": [
+        "StartCost",
+        "CostExponent",
+        "GrowthExponent"
+      ],
+      "nativeFormulaClass": "canonical-additive-premerge",
+      "notes": [
+        "Uses the full canonical stage recipe with the additive-premerge secondary 100-plus feeder."
+      ]
+    },
+    {
+      "id": "canonical-literal-builder",
+      "rows": [
+        19,
+        20,
+        21
+      ],
+      "stageCoverage": [
+        100,
+        200,
+        300,
+        400
+      ],
+      "verifiedParameterFields": [
+        "StartCost",
+        "CostExponent",
+        "GrowthExponent"
+      ],
+      "nativeFormulaClass": "canonical-literal-builder",
+      "notes": [
+        "Uses the full canonical stage recipe but swaps the secondary 100-plus feeder to the literal-builder additive path."
+      ]
+    },
+    {
+      "id": "drop-400-stage",
+      "rows": [
+        17,
+        22,
+        23
+      ],
+      "stageCoverage": [
+        100,
+        200,
+        300
+      ],
+      "verifiedParameterFields": [
+        "StartCost",
+        "CostExponent",
+        "GrowthExponent"
+      ],
+      "nativeFormulaClass": "drop-400-stage",
+      "notes": [
+        "Keeps the canonical scaffold through 300-plus and drops the sampled 400-plus stage coverage."
+      ]
+    },
+    {
+      "id": "two-stage-transition-band",
+      "rows": [
+        18,
+        24,
+        27,
+        28,
+        29
+      ],
+      "stageCoverage": [
+        100,
+        200
+      ],
+      "verifiedParameterFields": [
+        "StartCost",
+        "CostExponent",
+        "GrowthExponent"
+      ],
+      "nativeFormulaClass": "two-stage-transition-band",
+      "notes": [
+        "Uses the 100/200 scaffold with transition substitutions around the 100-plus and 300-plus feeder families."
+      ]
+    },
+    {
+      "id": "hundred-stage-short-class",
+      "rows": [
+        25,
+        26
+      ],
+      "stageCoverage": [
+        100
+      ],
+      "verifiedParameterFields": [
+        "StartCost",
+        "CostExponent",
+        "GrowthExponent"
+      ],
+      "nativeFormulaClass": "hundred-stage-short-class",
+      "notes": [
+        "Uses the shortest preserved normal-row class: canonical hundred-stage plus the literal-builder side lane."
+      ]
+    }
+  ],
+  "stageRules": {
+    "preThreshold": {
+      "ruleId": "normal-owner-flag-zero",
+      "sampledRows": [
+        9,
+        25
+      ],
+      "symbolicApproximation": "multiply(StartCost, dispatch(currentLevel, add(CostExponent, multiply(currentLevelBigDouble, GrowthExponent))))",
+      "boundedRuleStatus": "sampled-shared-structure",
+      "alternateFlaggedBranchSamples": [
+        {
+          "row": 9,
+          "branchCondition": "ownerFlagNonZero",
+          "seedBuilder": "0x24e1a07 from a sampled double-literal lane before the CostExponent and GrowthExponent multiplies"
+        },
+        {
+          "row": 25,
+          "branchCondition": "ownerFlagNonZero",
+          "seedBuilder": "0x24e1d36 from sampled integer seed 4 before the CostExponent and GrowthExponent multiplies"
+        }
+      ]
+    },
+    "hundredPlus": {
+      "sharedWindowFamilies": [
+        {
+          "model": "literalTimesBigDoubleOffsetThenAdd",
+          "levelOffset": 70,
+          "usesLiteralBuilder": false,
+          "usesPreMergeMultiply": true,
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18
+          ]
+        },
+        {
+          "model": "scalarOffsetTimesCoefficientThenAdd",
+          "levelOffset": 70,
+          "usesLiteralBuilder": true,
+          "usesPreMergeMultiply": false,
+          "rows": [
+            19,
+            20,
+            21,
+            22,
+            23
+          ]
+        },
+        {
+          "model": "scalarOffsetTimesCoefficientThenAdd",
+          "levelOffset": 67,
+          "usesLiteralBuilder": true,
+          "usesPreMergeMultiply": false,
+          "rows": [
+            24,
+            25,
+            26
+          ]
+        },
+        {
+          "model": "literalTimesBigDoubleOffsetThenAdd",
+          "levelOffset": 82,
+          "usesLiteralBuilder": false,
+          "usesPreMergeMultiply": true,
+          "rows": [
+            27,
+            28,
+            29
+          ]
+        }
+      ],
+      "canonicalSecondarySplit": [
+        {
+          "profile": "additive-premerge",
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            27,
+            28,
+            29
+          ],
+          "offsetModel": "(level - offset)",
+          "symbolicApproximation": "dispatch(baseLane, add(stageLane, multiply(levelOffsetBigDouble, preservedScalarLane))) then multiply(finalStackLane, dispatchedResult)"
+        },
+        {
+          "profile": "literal-builder-additive",
+          "rows": [
+            19,
+            20,
+            21
+          ],
+          "offsetModel": "(level - offset) * coefficient",
+          "symbolicApproximation": "dispatch(baseLane, add(stageLane, literalBigDouble((level - offset) * coefficient))) then multiply(finalStackLane, dispatchedResult)"
+        }
+      ],
+      "sampledOffsetFeeders": [
+        {
+          "row": 1,
+          "thresholdWindow": "100-plus-window",
+          "levelOffset": 70,
+          "coefficient": 9.765628774403013e-05,
+          "model": "literalTimesBigDoubleOffsetThenAdd"
+        },
+        {
+          "row": 19,
+          "thresholdWindow": "100-plus-window",
+          "levelOffset": 70,
+          "coefficient": -0.00011718430323526263,
+          "model": "scalarOffsetTimesCoefficientThenAdd"
+        },
+        {
+          "row": 27,
+          "thresholdWindow": "100-plus-window",
+          "levelOffset": 82,
+          "coefficient": 8192.001984596252,
+          "model": "literalTimesBigDoubleOffsetThenAdd"
+        }
+      ]
+    },
+    "twoHundredPlus": {
+      "sharedFamilies": [
+        {
+          "usesUnaryThresholdTransform": false,
+          "usesPreMergeMultiply": true,
+          "usesPreMergeAdd": true,
+          "usesCurrentLevelBigDouble": true,
+          "usesLiteralBuilder": false,
+          "integerSeeds": [],
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            27,
+            28,
+            29
+          ]
+        },
+        {
+          "usesUnaryThresholdTransform": true,
+          "usesPreMergeMultiply": false,
+          "usesPreMergeAdd": false,
+          "usesCurrentLevelBigDouble": true,
+          "usesLiteralBuilder": false,
+          "integerSeeds": [
+            180
+          ],
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            19,
+            20,
+            21,
+            22,
+            23,
+            26,
+            27,
+            28,
+            29
+          ]
+        }
+      ]
+    },
+    "threeHundredPlus": {
+      "sharedFamilies": [
+        {
+          "usesUnaryThresholdTransform": false,
+          "usesPreMergeMultiply": false,
+          "usesPreMergeAdd": true,
+          "usesCurrentLevelBigDouble": true,
+          "usesLiteralBuilder": false,
+          "integerSeeds": [],
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29
+          ]
+        },
+        {
+          "usesUnaryThresholdTransform": true,
+          "usesPreMergeMultiply": false,
+          "usesPreMergeAdd": false,
+          "usesCurrentLevelBigDouble": true,
+          "usesLiteralBuilder": false,
+          "integerSeeds": [
+            49
+          ],
+          "rows": [
+            24
+          ]
+        },
+        {
+          "usesUnaryThresholdTransform": true,
+          "usesPreMergeMultiply": false,
+          "usesPreMergeAdd": false,
+          "usesCurrentLevelBigDouble": true,
+          "usesLiteralBuilder": false,
+          "integerSeeds": [
+            19
+          ],
+          "rows": [
+            25
+          ]
+        }
+      ]
+    },
+    "fourHundredPlus": {
+      "coverageClasses": [
+        {
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            19,
+            20,
+            21
+          ],
+          "status": "sampled-four-hundred-stage-present"
+        },
+        {
+          "rows": [
+            17,
+            22,
+            23
+          ],
+          "status": "sampled-four-hundred-stage-dropped"
+        }
+      ]
+    }
+  },
+  "verifiedParameters": {
+    "unlockRequirementBlock": {
+      "offset": 1456,
+      "firstEightValues": [
+        0,
+        0,
+        5,
+        10,
+        20,
+        30,
+        40,
+        50
+      ],
+      "lastThreeValues": [
+        8000,
+        8050,
+        8100
+      ]
+    },
+    "row0FieldShell": {
+      "fieldNames": [
+        "StartCost",
+        "CostExponent",
+        "GrowthExponent",
+        "GrowthExponent2",
+        "GrowthExponent3"
+      ],
+      "exactBigDoubleValues": {
+        "StartCost": "5.0e0",
+        "CostExponent": "1.3e0",
+        "GrowthExponent": "1.5e-1",
+        "GrowthExponent2": "1.1e-2",
+        "GrowthExponent3": "2.0e-1"
+      }
+    },
+    "representativeNormalRows": [
+      {
+        "row": 19,
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "exactBigDoubleValues": {
+          "StartCost": "1.0e70",
+          "CostExponent": "2.5e0",
+          "GrowthExponent": "4.0e-1"
+        }
+      },
+      {
+        "row": 27,
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "exactBigDoubleValues": {
+          "StartCost": "2.0e975",
+          "CostExponent": "2.25e0",
+          "GrowthExponent": "4.0e-1"
+        }
+      },
+      {
+        "row": 29,
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "exactBigDoubleValues": {
+          "StartCost": "6.0e988",
+          "CostExponent": "2.3e0",
+          "GrowthExponent": "4.0e-1"
+        }
+      }
+    ],
+    "overLevelExponentAccessors": [
+      "get_OverLevel100Exponent",
+      "get_OverLevel200Exponent",
+      "get_OverLevel300Exponent",
+      "get_OverLevel400Exponent"
+    ],
+    "overLevelBaseFieldShells": [
+      {
+        "fieldName": "OverLevel100Base",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 5080,
+        "defaultValue": null
+      },
+      {
+        "fieldName": "OverLevel200Base",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 5096,
+        "defaultValue": null
+      },
+      {
+        "fieldName": "OverLevel300Base",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 5112,
+        "defaultValue": null
+      },
+      {
+        "fieldName": "OverLevel400Base",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 5128,
+        "defaultValue": null
+      }
+    ],
+    "listPathTieIn": {
+      "milestoneCostListField": "MilestoneCostList",
+      "milestoneCostListFieldOffset": 5160,
+      "callOrderStart": "GetShardCostList",
+      "callOrderEnd": "get_SU29Cost"
+    }
+  },
+  "derivedParameters": {
+    "repeatedCommonRowGroup": {
+      "rows": [
+        19,
+        20,
+        21
+      ],
+      "signature": {
+        "StartCostMantissa": 1.0,
+        "CostExponentMantissa": 2.5,
+        "GrowthExponentMantissa": 4.0
+      }
+    },
+    "dispatcherSelectionBoundary": {
+      "cachedLaneCompareTarget": "0x24e2d86",
+      "alignmentGateTarget": "0x24e3597",
+      "selectorOneFallbackTarget": "0x24e387a",
+      "scalarToBigDoubleFallbackTarget": "0x24e349c",
+      "decimalPowerBuilderTarget": "0x24e38f9",
+      "bigDoubleLog10BridgeTarget": "0x24e30e4"
+    },
+    "overLevelSeedModels": [
+      {
+        "getterName": "get_OverLevel100Exponent",
+        "baseFieldName": "OverLevel100Base",
+        "baseSeedModel": "integerBigDouble",
+        "baseSeed": 2
+      },
+      {
+        "getterName": "get_OverLevel200Exponent",
+        "baseFieldName": "OverLevel200Base",
+        "baseSeedModel": "doubleLiteralBigDouble",
+        "baseSeed": 0.0
+      },
+      {
+        "getterName": "get_OverLevel300Exponent",
+        "baseFieldName": "OverLevel300Base",
+        "baseSeedModel": "doubleLiteralBigDouble",
+        "baseSeed": 0.0
+      },
+      {
+        "getterName": "get_OverLevel400Exponent",
+        "baseFieldName": "OverLevel400Base",
+        "baseSeedModel": "doubleLiteralBigDouble",
+        "baseSeed": 0.007812501846152979
+      }
+    ],
+    "overLevelBaseRecoveryPath": {
+      "status": "deterministic-native-seed-derivation",
+      "exactSerializedValuesRecovered": false,
+      "assetExtractionAttempt": {
+        "source": "data/shard-type-metadata-probe.v1.json",
+        "uabeaDefaultValuesPresent": false,
+        "directMonoBehaviourFieldHitsCount": 0,
+        "shardTargetMonoBehavioursCount": 0,
+        "currentRead": "The current .NET asset probe preserves typed OverLevel*Base field shells but not concrete serialized values."
+      },
+      "derivedRuntimeSeedModels": [
+        {
+          "fieldName": "OverLevel100Base",
+          "getterName": "get_OverLevel100Exponent",
+          "derivationKind": "native getter seed",
+          "baseSeedModel": "integerBigDouble",
+          "derivedSeedBigDoubleLabel": "2.0e0",
+          "optionalMergeFloatValue": 1.264570970563716e-39,
+          "provenance": "data/shard-cost-native-probe.v1.json overLevelSeedModels.sampledGetters"
+        },
+        {
+          "fieldName": "OverLevel200Base",
+          "getterName": "get_OverLevel200Exponent",
+          "derivationKind": "native getter seed",
+          "baseSeedModel": "doubleLiteralBigDouble",
+          "derivedSeedBigDoubleLabel": "0",
+          "optionalMergeFloatValue": 6.345649113524877e-36,
+          "provenance": "data/shard-cost-native-probe.v1.json overLevelSeedModels.sampledGetters"
+        },
+        {
+          "fieldName": "OverLevel300Base",
+          "getterName": "get_OverLevel300Exponent",
+          "derivationKind": "native getter seed",
+          "baseSeedModel": "doubleLiteralBigDouble",
+          "derivedSeedBigDoubleLabel": "0",
+          "optionalMergeFloatValue": 6.345649113524877e-36,
+          "provenance": "data/shard-cost-native-probe.v1.json overLevelSeedModels.sampledGetters"
+        },
+        {
+          "fieldName": "OverLevel400Base",
+          "getterName": "get_OverLevel400Exponent",
+          "derivationKind": "native getter seed",
+          "baseSeedModel": "doubleLiteralBigDouble",
+          "derivedSeedBigDoubleLabel": "7.812502e-3",
+          "optionalMergeFloatValue": 6.345649113524877e-36,
+          "provenance": "data/shard-cost-native-probe.v1.json overLevelSeedModels.sampledGetters"
+        }
+      ],
+      "currentBoundary": [
+        "These are deterministic runtime seed models derived from preserved native constants, not recovered serialized owner-field payload values.",
+        "Treat the typed OverLevel*Base field shells as real owner fields and the native seed models as the strongest current derivation path until direct serialized extraction becomes possible."
+      ]
+    }
+  },
+  "calibrationAnchors": [
+    {
+      "row": 1,
+      "level": 283,
+      "observedCostLabel": "1.89e565"
+    },
+    {
+      "row": 9,
+      "level": 20,
+      "observedCostLabel": "3.31e564"
+    },
+    {
+      "row": 14,
+      "level": 153,
+      "observedCostLabel": "9.73e565"
+    },
+    {
+      "row": 21,
+      "level": 126,
+      "observedCostLabel": "1.20e565"
+    },
+    {
+      "row": 25,
+      "level": 16,
+      "observedCostLabel": "5.38e563"
+    }
+  ],
+  "provenanceNotes": [
+    "Row classes and staged rule families are derived from the checked native getter-family probe, not from community spreadsheet formulas.",
+    "Verified serialized row inputs are anchored to exact ShardMining BigDouble field recovery from the checked parameter probe.",
+    "MilestoneCostList remains a downstream cache of get_SU0-29Cost outputs rather than an alternate hidden cost-formula path.",
+    "Getter-family call order, cache refresh behavior, and threshold coverage classes are carried forward as stable evaluator rules from the checked method, list-path, and native probes.",
+    "Screenshot checkpoints provide in-game calibration anchors for future evaluator verification, but they do not by themselves close the formula."
+  ],
+  "boundedUncertaintyFlags": {
+    "row0ExactClosedFormUnresolved": true,
+    "normalRowNumericMergeRuleUnresolved": true,
+    "secondaryHundredPlusScalarLaneMeaningUnresolved": true,
+    "overLevelBasePayloadValuesUnresolved": true,
+    "dispatcherLaneSelectionFullyProven": false,
+    "screenshotAnchorsMatchedByAcceptedEvaluator": false
+  },
+  "blockedUses": [
+    "exact next-level shard costs",
+    "planner-safe affordability outputs",
+    "buy-order ranking or ROI claims",
+    "claiming the deterministic evaluator is calibrated or player-safe",
+    "claiming screenshot-calibrated formula closure"
+  ],
+  "currentBoundary": [
+    "Treat this dataset as the single canonical shard-cost evaluator structure model and the config source for the deterministic Node-side evaluator, not as proof that calibration or planner-safe cost output is finished.",
+    "Treat row classes, stage rules, and verified serialized inputs as grounded evidence carried forward from the checked probe artifacts.",
+    "Treat getter-family call order, cache lifecycle, and shared stage-coverage classes as stable evaluator rules derived from runtime evidence, not as a separate hidden formula path.",
+    "Do not expose exact next-level shard costs, affordability outputs, or optimizer claims until a deterministic evaluator implementation and automated calibration checks are shipped.",
+    "Do not treat the current row classes as proof that every remaining dispatcher lane, row-0 branch, or over-level base payload value is fully resolved."
+  ]
+}

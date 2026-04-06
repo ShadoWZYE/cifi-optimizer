@@ -100,6 +100,16 @@ def build_dataset() -> dict[str, object]:
     shard_text_handler_fields = list(shard_text_handler.get("fields", []))
     shard_upgrade_info_fields = list(shard_upgrade_info.get("fields", []))
     rows = build_rows(shard_mining_fields, shard_text_handler_fields)
+    over_level_base_fields = [
+        {
+            "name": field.get("name"),
+            "type": field.get("type"),
+            "fieldOffset": field.get("fieldOffset"),
+            "defaultValue": field.get("defaultValue"),
+        }
+        for field in shard_mining_fields
+        if str(field.get("name", "")).startswith("OverLevel") and str(field.get("name", "")).endswith("Base")
+    ]
 
     owner_list_fields = [
         {
@@ -124,6 +134,7 @@ def build_dataset() -> dict[str, object]:
                 "baseType": shard_mining.get("baseType"),
                 "fieldCount": shard_mining.get("fieldCount"),
                 "ownerListFields": owner_list_fields,
+                "overLevelBaseFields": over_level_base_fields,
             },
             "shardUpgradeInfo": {
                 "fullName": shard_upgrade_info.get("fullName"),
@@ -145,15 +156,30 @@ def build_dataset() -> dict[str, object]:
             },
         },
         "rows": rows,
+        "overLevelBaseValueRecovery": {
+            "typedFieldShells": over_level_base_fields,
+            "uabeaDefaultValuesPresent": False,
+            "directMonoBehaviourFieldHitsCount": len(probe.get("directMonoBehaviourFieldHits", [])),
+            "shardTargetMonoBehavioursCount": len(probe.get("shardTargetMonoBehaviours", [])),
+            "exactSerializedValuesRecovered": False,
+            "currentBestRead": [
+                "The direct asset probe currently preserves typed OverLevel100Base, OverLevel200Base, OverLevel300Base, and OverLevel400Base field shells on ShardMining, but not concrete serialized values.",
+                "The UABEA report records null default values for those fields and zero direct MonoBehaviour field hits for shard targets in this repo snapshot.",
+                "That blocks exact payload recovery from the current .NET asset probe output and keeps the field shells as owner/type evidence only.",
+            ],
+        },
         "findings": [
             "Direct LibCpp2IL metadata reflection now exposes typed ShardMining row fields instead of only string-shell clues.",
             "ShardMining keeps row-local SU0-29 UnlockReq, StartCost, CostExponent, GrowthExponent, and Bonus field families directly on the MonoBehaviour type.",
             "ShardMining also keeps an upgradeInfoList typed as List<ShardMining+ShardUpgradeInfo>, and the nested ShardUpgradeInfo type currently exposes Cost, MaxLevel, and IsUnlocked fields.",
+            "ShardMining also preserves typed OverLevel100Base, OverLevel200Base, OverLevel300Base, and OverLevel400Base BigDouble field shells on the owner MonoBehaviour.",
+            "The current UABEA asset probe does not recover concrete serialized OverLevel*Base values: default values stay null and direct shard MonoBehaviour field hits remain empty.",
             "ShardPerLevelTextHandler keeps row-local SM*B*Text fields for shard bonus text slots, which is a stronger typed UI-text lead than generic milestone writers.",
         ],
         "currentBoundary": [
             "Treat this as a typed shard schema probe, not as final serialized row values.",
             "The field table proves where typed shard cost, bonus, and runtime state fields live, but it does not yet decode concrete serialized values from level0.",
+            "Treat OverLevel*Base as typed owner-field shells only until a future asset probe or direct serialized parser can recover concrete payload values.",
             "Do not claim a verified get_SU*Cost formula or a row-complete player-facing effect-text table from the type schema alone.",
         ],
     }
@@ -185,6 +211,11 @@ def write_markdown(dataset: dict[str, object]) -> None:
         *[
             f"  - `{entry['name']}`: `{entry['type']}` @ `{entry['fieldOffset']}`"
             for entry in owner_fields
+        ],
+        "- `ShardMining` over-level base field shells:",
+        *[
+            f"  - `{entry['name']}`: `{entry['type']}` @ `{entry['fieldOffset']}`; `defaultValue={entry['defaultValue']}`"
+            for entry in target_shard_mining["overLevelBaseFields"]
         ],
         "- `ShardUpgradeInfo` fields:",
         *[
