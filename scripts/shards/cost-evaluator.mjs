@@ -71,6 +71,19 @@ export function getShardCostRuntimeRule(row) {
   };
 }
 
+export function isShardCostPlannerSafeFromCalibration(calibrationChecks) {
+  return (
+    formulaModel.completionFlags.automatedCalibrationImplemented === true
+    && calibrationChecks?.allPassed === true
+    && formulaModel.completionFlags.plannerSafeCostOutputApproved === true
+  );
+}
+
+export async function isShardCostPlannerSafe() {
+  const { runShardCostCalibrationChecks } = await import("./calibration-check.mjs");
+  return isShardCostPlannerSafeFromCalibration(runShardCostCalibrationChecks());
+}
+
 export function evaluateShardCost({ row, level }) {
   assertRow(row);
   const normalizedLevel = normalizeLevel(level);
@@ -173,7 +186,7 @@ export function evaluateShardCost({ row, level }) {
   return {
     kind: formulaModel.implementation.outputKind,
     deterministic: true,
-    status: formulaModel.completionFlags.automatedCalibrationImplemented ? "calibrated" : "bounded-uncertain",
+    status: "bounded-uncertain",
     row,
     requestedLevel: normalizedLevel,
     modeledLevel,

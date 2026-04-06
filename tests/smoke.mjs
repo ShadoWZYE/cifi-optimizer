@@ -20,7 +20,9 @@ import {
   evaluateShardCost,
   getShardCostFormulaModel,
   getShardCostRowClass,
-  getShardCostRuntimeRule
+  getShardCostRuntimeRule,
+  isShardCostPlannerSafe,
+  isShardCostPlannerSafeFromCalibration
 } from "../scripts/shards/cost-evaluator.mjs";
 import { lintDocPortability } from "../scripts/contracts/lint-doc-portability.mjs";
 import { verifyVendoringLayout } from "../scripts/contracts/verify-vendoring-layout.mjs";
@@ -1006,6 +1008,15 @@ const shardCostCalibrationChecks = runShardCostCalibrationChecks();
 assert.equal(shardCostCalibrationChecks.results.length, 5);
 assert.equal(shardCostCalibrationChecks.config.scientificLabelMantissaDecimals, 2);
 assert.ok(shardCostCalibrationChecks.results.every((entry) => typeof entry.actualLabel === "string" && /e/.test(entry.actualLabel)));
+assert.equal(
+  isShardCostPlannerSafeFromCalibration(shardCostCalibrationChecks),
+  (
+    shardCostFormulaModel.completionFlags.automatedCalibrationImplemented === true
+    && shardCostCalibrationChecks.allPassed === true
+    && shardCostFormulaModel.completionFlags.plannerSafeCostOutputApproved === true
+  )
+);
+assert.equal(await isShardCostPlannerSafe(), false);
 if (shardCostFormulaModel.completionFlags.automatedCalibrationImplemented) {
   assert.equal(shardCostCalibrationChecks.allPassed, true);
   assert.equal(shardCostCalibrationChecks.failureCount, 0);
