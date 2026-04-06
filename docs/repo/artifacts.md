@@ -15,7 +15,7 @@ If an artifact does not have a clear repo-owned purpose, do not commit it.
 Repo-owned data under `data/` may be committed only when all of the following are true:
 
 - the dataset is declared in `data/bundled-dataset-contract.v1.json`
-- the dataset shape and semantics are described in [dataset-contracts](C:\Users\Shadow\Desktop\CiFi\docs\contracts\dataset-contracts.md)
+- the dataset shape and semantics are described in [dataset-contracts](../contracts/dataset-contracts.md)
 - `npm run verify:data` passes against the committed result
 - the data is grounded or explicitly labeled according to the contract classification
 
