@@ -297,10 +297,10 @@
       "title": "MultiverseMarket save-model recovery",
       "status": "active",
       "goal": "Recover the declaring save model behind `InscryptionsDone` and the nearby `IS*Level` cluster so Emporium state can move toward truthful player-owned import support and future external-tool replacement.",
-      "currentSlice": "Use the recovered metadata neighborhood, save-boundary, and market-member boundary artifacts to keep the Emporium save path narrowed to a specific nested PlayerProfile-side `Market` wrapper path, then determine whether that wrapper itself declares `InscryptionsDone` and the nearby owned levels or only hands off to a deeper progression object.",
-      "exitCondition": "The repo either names the exact declaring save model inside the narrowed PlayerProfile-side `Market` wrapper path or proves that the wrapper itself directly declares `InscryptionsDone` and the nearby owned-level cluster.",
-      "blockedBy": "The current evidence now narrows the search to a specific nested PlayerProfile-side `Market` wrapper path, but still stops short of the exact declaring type inside that wrapper.",
-      "smallestShippableSlice": "A checked save-model boundary or narrowed persistence artifact that names the PlayerProfile-side `Market` wrapper path as the current host hypothesis and blocks direct `MultiverseMarket` or loose top-level `PlayerProfileData` ownership claims without pretending the full Emporium planner state is already import-ready.",
+      "currentSlice": "Use the recovered metadata neighborhood, save-boundary, and market-member boundary artifacts to keep the Emporium save path narrowed to a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` wrapper bridge, then determine whether that bridge itself declares `InscryptionsDone` and the nearby owned levels or only hands off to a deeper progression object.",
+      "exitCondition": "The repo either names the exact declaring save model inside the narrowed `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge or proves that the bridge itself directly declares `InscryptionsDone` and the nearby owned-level cluster.",
+      "blockedBy": "The current evidence now narrows the search to a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` wrapper bridge, but still stops short of the exact declaring type inside that bridge.",
+      "smallestShippableSlice": "A checked save-model boundary or narrowed persistence artifact that names the `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge as the current host hypothesis and blocks direct `MultiverseMarket` or loose top-level `PlayerProfileData` ownership claims without pretending the full Emporium planner state is already import-ready.",
       "completedSteps": [
         "Recover the MultiverseMarket owner, validated late-block constants, and `Inscryptions Done` cost-lane shell.",
         "Promote a MultiverseMarket owner-family boundary that keeps owner-shell evidence separate from save-side recovery.",
@@ -310,17 +310,18 @@
           "Deepen the checked metadata neighborhood to preserve the PlayerProfile-side `get_Market` accessor clue while confirming the repo still lacks a direct `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` type-map string.",
           "Promote a checked market-member boundary showing that the strongest current handoff is a specific nested PlayerProfile-side `Market` wrapper path, not direct `MultiverseMarket` ownership on `PlayerProfileData` or loose top-level `PlayerProfileData` fields.",
           "Deepen that boundary with a bare `Market` member-shell clue inside the `PlayerProfileData` neighborhood plus the nearby cloud-save bridge terms.",
+          "Deepen that boundary again with nearby `PlayerProfileHandler`, `playerData`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `ConvertSaveDataToProfileData` bridge clues so the remaining save-side host is a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` path rather than an unqualified wrapper guess.",
           "Refresh the checked range boundary so the recovered save-side `IS*Level` run now overlaps validated Emporium rows `71-74` instead of preserving the stale zero-overlap result.",
           "Surface overlap-grounded Emporium import preview support so quarantined `IS*Level` imports now distinguish the first save-side overlap subset `71-74` from the broader validated row block.",
           "Enrich imported overlap-grounded Emporium rows with checked `MultiverseMarket` row constants such as `Bonus`, `StartCost`, `CostExponent`, and recovered `MaxLevel` without promoting unproven planner formulas.",
           "Surface recovered cap progress for imported overlap-grounded Emporium rows so the app can show remaining levels to the checked max on rows `71-74` without inferring a next-cost formula.",
           "Promote the PlayerProfile-side sibling accessor and member-shell pattern so canonical market recovery now favors a specific nested PlayerProfile-side `Market` wrapper path over direct `MultiverseMarket` ownership or loose top-level `PlayerProfileData` fields.",
-          "Narrow the save-model conclusion from a broad PlayerProfile persistence-family guess to the specific nested PlayerProfile-side `Market` wrapper path while keeping the exact declaring type inside that wrapper unresolved."
+          "Narrow the save-model conclusion from a broad PlayerProfile persistence-family guess to a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge while keeping the exact declaring type inside that bridge unresolved."
       ],
       "nextSteps": [
         "Inspect the same save-side neighborhood before assuming any `FinalIS*` or achievement symbol is the saved balance owner.",
-        "Determine whether the PlayerProfile-side `get_Market` clue resolves to the declaring Emporium state owner or only to a broader market wrapper.",
-        "Determine whether `InscryptionsDone`, `IS*Level`, trade-counter, and nearby mech fields are declared directly on `PlayerProfileData` or on a nested progression sub-model.",
+        "Determine whether the `PlayerProfileHandler`-side `get_Market` clue resolves to the declaring Emporium state owner or only to a broader market wrapper.",
+        "Determine whether `InscryptionsDone`, `IS*Level`, trade-counter, and nearby mech fields are declared directly on the narrowed `Market` wrapper or on a nested progression sub-model under that bridge.",
         "If the declaring owner is recovered, fork row-range mapping follow-up work instead of extending this track."
       ],
       "sources": [
@@ -346,14 +347,15 @@
         "Imported quarantined Emporium rows can now be previewed against the overlap-grounded `71-74` subset separately from the broader validated row block.",
         "Imported overlap-grounded Emporium rows can now surface checked row constants from the `MultiverseMarket` payload without claiming a recommendation-safe cost formula.",
         "Imported overlap-grounded Emporium rows can now surface recovered cap progress against checked `MaxLevel` values for rows `71-74`.",
-        "The PlayerProfile-side `get_Market` clue now sits in the same sibling accessor and member-shell pattern as `Relics`, `CellData`, `ShardData`, `ResearchPointData`, and `AcademyPointData`, which makes a specific nested PlayerProfile-side `Market` wrapper path the strongest current canonical host hypothesis.",
+        "The PlayerProfile-side `get_Market` clue now sits in the same sibling accessor and member-shell pattern as `Relics`, `CellData`, `ShardData`, `ResearchPointData`, and `AcademyPointData`, which first narrowed the host to a specific nested PlayerProfile-side `Market` wrapper path.",
         "The PlayerProfile persistence neighborhood now preserves a direct `get_Market` accessor clue beside other profile-side accessors.",
-        "The strongest current repo-local handoff is now a specific nested PlayerProfile-side `Market` wrapper path, not direct `MultiverseMarket` ownership on `PlayerProfileData` or loose top-level `PlayerProfileData` fields."
+        "The same narrowed neighborhood also preserves `PlayerProfileHandler`, `playerData`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `ConvertSaveDataToProfileData` beside `get_Market` and `Market`.",
+        "The strongest current repo-local handoff is now a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge, not direct `MultiverseMarket` ownership on `PlayerProfileData` or loose top-level `PlayerProfileData` fields."
       ],
       "uncertain": [
-        "Which declaring save model actually owns `InscryptionsDone` inside the narrowed PlayerProfile-side `Market` wrapper path.",
+        "Which declaring save model actually owns `InscryptionsDone` inside the narrowed `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge.",
         "Whether `get_Market` points directly at the Emporium state owner or only at an intermediate market wrapper.",
-        "Whether the nearby `IS*Level`, trade-counter, and mech fields belong directly to the narrowed `Market` wrapper or to a deeper nested progression payload under that wrapper.",
+        "Whether the nearby `IS*Level`, trade-counter, and mech fields belong directly to the narrowed `Market` wrapper or to a deeper nested progression payload under that bridge.",
         "Which owned `IS*Level` range is safe future import input for the validated Emporium rows."
       ]
     },
