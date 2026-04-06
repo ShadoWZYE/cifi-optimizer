@@ -11021,11 +11021,22 @@
       "rows": [
         0
       ],
-      "unlockRequirementRange": null,
-      "distinctRarities": [],
-      "distinctStartCosts": [],
-      "distinctCostExponents": [],
-      "distinctGrowthExponents": []
+      "unlockRequirementRange": [
+        0,
+        0
+      ],
+      "distinctRarities": [
+        "Unique"
+      ],
+      "distinctStartCosts": [
+        5.0
+      ],
+      "distinctCostExponents": [
+        1.3
+      ],
+      "distinctGrowthExponents": [
+        1.5
+      ]
     },
     {
       "rows": [
