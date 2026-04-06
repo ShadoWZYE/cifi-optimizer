@@ -71,6 +71,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - `OR_TokenBankCap` and `OR_TokensFromChests` should currently be treated as grounded asset labels, not as recovered formula sources.
 - One key split is now grounded: claim actions resolve through `TokenShop`, token-bank cap display resolves through `BigStatisticPrefab.TokenBankCap`, and at least one daily-tokenium text path resolves through `TextHandlerLoopMods.SetLM244BonusText`.
 - `LM244` should currently be treated as a loop-mod text or explanation hook for daily tokenium, not as the recovered gameplay owner of that lane.
+- The current repo-local owner narrowing is still negative rather than positive: `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and the `FinalTokenBank*` derived-output cluster are not yet recovered saved-state owners, so the remaining search should stay on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary.
 - Daily Tokenium is now better grounded as an Academy or Farm Mission reward lane that `TokenShop`, `LoopModifiers`, and the Collector pack all touch, not as a TokenShop-only mechanic.
 
 ## MultiverseMarket

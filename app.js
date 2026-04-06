@@ -2165,6 +2165,27 @@ function renderResearchTrackSupport(track) {
     `;
   }
 
+  if (track.id === "spend-token-bank-state-owner") {
+    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(state.extractedMechanics?.tokenShopOwnerShell);
+    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(state.extractedMechanics?.tokenShopSaveBoundary);
+    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(state.extractedMechanics?.tokenBankControllerShell);
+    const tokenBankStateSummary = getTokenBankStateSummary(state.extractedMechanics?.tokenBankStateClues);
+    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(state.extractedMechanics?.tokenBankFormulaBoundary);
+    return `
+      <div class="meta-stack">
+        <p class="snapshot-title">Current owner narrowing</p>
+        <p class="meta">${tokenShopOwnerShellSummary.hasOwnerShell ? `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} as one local controller cluster.` : "TokenShop owner-shell clues are not available in this build."}</p>
+        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.` : "TokenShop save-boundary clues are not available in this build."}</p>
+        <p class="meta">${tokenBankControllerShellSummary.hasControllerShell ? `The checked token-bank controller shell also preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.` : "Token-bank controller-shell clues are not available in this build."}</p>
+        <p class="meta">${tokenBankStateSummary.hasControllerSplit ? `Separate display and presentation clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} are still preserved beside controller methods like ${tokenBankStateSummary.capMethod}.` : "Token-bank controller or display split clues are not available in this build."}</p>
+        <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? `The derived-output cluster still preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}.` : "Token-bank derived-output clues are not available in this build."}</p>
+        <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "That output-side cluster still has no checked PlayerProfileData or CloudSavePlayerProfile join, so FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields." : "The checked derived-output cluster now overlaps the broader save-family search and needs review."}</p>
+        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary && tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "The remaining grounded save-side search therefore stays on the broader PlayerProfileData and CloudSavePlayerProfile persistence-family boundary, not on TokenShop methods, BigStatisticPrefab.TokenBankCap, or FinalTokenBank outputs." : "The current build does not yet preserve a grounded negative owner narrowing for the token-bank save-state lane."}</p>
+        <p class="meta">This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state.</p>
+      </div>
+    `;
+  }
+
   return renderResearchTrackContract(track);
 }
 

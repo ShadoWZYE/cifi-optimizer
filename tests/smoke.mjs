@@ -1741,6 +1741,26 @@ assert.ok(
   spendTrack.completedSteps.some((step) => /owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
   "expected archived spend parent to preserve save-boundary separation"
 );
+const tokenBankOwnerTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-bank-state-owner");
+assert.ok(tokenBankOwnerTrack, "expected token-bank state-owner track");
+assert.equal(tokenBankOwnerTrack.status, "active");
+assert.match(tokenBankOwnerTrack.currentSlice, /broader `PlayerProfileData` \/ `CloudSavePlayerProfile` persistence-family boundary/);
+assert.ok(
+  tokenBankOwnerTrack.completedSteps.some((step) => /zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms/.test(step)),
+  "expected token-bank state-owner track to record TokenShop save-boundary separation"
+);
+assert.ok(
+  tokenBankOwnerTrack.completedSteps.some((step) => /FinalTokenBankCap and FinalTokenBankFillSpeed clustered as output-side accessors and backing fields without save-family joins/.test(step)),
+  "expected token-bank state-owner track to record the derived-output non-owner boundary"
+);
+assert.ok(
+  tokenBankOwnerTrack.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
+  "expected token-bank state-owner track to record the current broader save-family search path"
+);
+assert.ok(
+  tokenBankOwnerTrack.uncertain.some((line) => /directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper/.test(line)),
+  "expected token-bank state-owner track to keep the PlayerProfile-side wrapper question unresolved"
+);
 const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-feed-and-hardening");
 assert.ok(feedTrack, "expected unified feed track");
 assert.equal(feedTrack.status, "active");
@@ -2523,6 +2543,8 @@ assert.match(appJs, /Token-bank controller shell/);
 assert.match(appJs, /ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and CheckTokenClaimNotification preserved/);
 assert.match(appJs, /Token-bank controller shell now preserves \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}/);
 assert.match(appJs, /That keeps the narrow bank controller cluster together without promoting it into saved-state ownership or formula truth/);
+assert.match(appJs, /The remaining grounded save-side search therefore stays on the broader PlayerProfileData and CloudSavePlayerProfile persistence-family boundary, not on TokenShop methods, BigStatisticPrefab\.TokenBankCap, or FinalTokenBank outputs/);
+assert.match(appJs, /This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state/);
 assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
 assert.match(appJs, /MultiverseMarket save boundary/);
 assert.match(appJs, /MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap/);

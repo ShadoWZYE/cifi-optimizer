@@ -370,12 +370,47 @@
     {
       "id": "spend-token-bank-state-owner",
       "title": "Token-bank state owner recovery",
-      "status": "queued",
+      "status": "active",
       "goal": "Recover the saved-state owner behind token-bank cap, fill, and claimable-bank state so token planning can use truthful player inputs.",
-      "currentSlice": "Follow the controller-shell and formula-boundary artifacts past `TokenShop` display hooks toward the player-owned bank state instead of inferring ownership from `OR_*` outputs.",
-      "exitCondition": "The declaring owner for token-bank cap, fill, or claimable state is recovered strongly enough for truthful import or recommendation-side reads.",
-      "blockedBy": "Current evidence separates controller hooks and derived outputs, but still does not name the saved-state owner.",
-      "smallestShippableSlice": "A checked bank-state owner boundary that names the recovered save family or narrows the remaining handoff."
+      "currentSlice": "Use the checked TokenShop save-boundary, controller-shell, and derived-output artifacts to keep token-bank state ownership narrowed away from `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and the `FinalTokenBank*` cluster while the remaining save-side search stays on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary.",
+      "exitCondition": "The repo either names the exact declaring save model for token-bank cap, fill, or claimable state or proves a narrower PlayerProfile-side wrapper/path than the current broad persistence-family boundary.",
+      "blockedBy": "Current evidence separates TokenShop controller hooks, display shells, and derived outputs from save-family clues, but still does not expose a direct declaring save type or narrower wrapper path.",
+      "smallestShippableSlice": "A checked bank-state owner boundary that blocks `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and `FinalTokenBank*` as save-state owners while naming the current persistence-family boundary as the remaining grounded search path.",
+      "completedSteps": [
+        "Recover the TokenShop controller-side bank methods for cap, claimable amount, fill, and claim behavior.",
+        "Promote a TokenShop save-boundary dataset that preserves zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms.",
+        "Promote a token-bank controller-shell dataset that keeps ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and adjacent controller methods in one local cluster.",
+        "Promote a token-bank derived-output boundary that keeps FinalTokenBankCap and FinalTokenBankFillSpeed clustered as output-side accessors and backing fields without save-family joins.",
+        "Narrow the current owner conclusion so TokenShop methods, BigStatisticPrefab.TokenBankCap, and FinalTokenBank-derived outputs are treated as non-owner surfaces while the remaining save-side search stays on the broader PlayerProfile persistence-family boundary."
+      ],
+      "nextSteps": [
+        "Inspect the broader PlayerProfile persistence neighborhood for token-bank or banked-token field clues before assuming any FinalTokenBank output is the saved value owner.",
+        "Determine whether token-bank cap, fill, claimable, or banked-token state lives directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper.",
+        "If a narrower wrapper or declaring owner is recovered, fork import-shape follow-up work instead of extending this track."
+      ],
+      "sources": [
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/systems/spend/token-bank-state-verification.md",
+        "docs/unity/unity-owner-map.md"
+      ],
+      "artifacts": [
+        "data/token-shop-save-boundary.json",
+        "data/token-bank-controller-shell.json",
+        "data/token-bank-formula-boundary.json",
+        "data/token-bank-state-clues.json"
+      ],
+      "verified": [
+        "`TokenShop` is the strongest controller-side owner for token-bank cap, claimable, fill, and claim behavior.",
+        "`BigStatisticPrefab.TokenBankCap` is a separate token-bank display shell rather than the recovered save owner.",
+        "The `FinalTokenBankCap` and `FinalTokenBankFillSpeed` cluster is still output-side and currently has no checked PlayerProfileData or CloudSavePlayerProfile join in its local context.",
+        "The narrowed TokenShop owner shell currently preserves zero direct overlap with PlayerProfileData, GetPlayerProfileData, FillPlayerProfileData, and CloudSavePlayerProfile.",
+        "The remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary rather than on TokenShop-side or derived-output symbols."
+      ],
+      "uncertain": [
+        "Which declaring save model actually owns current token-bank cap, fill, claimable, or banked-token state.",
+        "Whether those fields live directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper.",
+        "Which current flat compatibility clues such as TokenBankCap, ClaimableBankTokens, BankedTokens, or FinalTokenBankFillSpeed map to true saved-state ownership rather than derived or compatibility-only values."
+      ]
     },
     {
       "id": "spend-daily-tokenium-save-owner",
