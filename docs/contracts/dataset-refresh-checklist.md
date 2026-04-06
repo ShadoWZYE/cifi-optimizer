@@ -45,3 +45,5 @@ Any research note that supports a bundled dataset promotion should explicitly re
 
 Use `docs/contracts/research-note-template.md` for new notes.
 
+Use `docs/contracts/lane-handoff-template.md` for compact branch or lane handoffs that do not promote shipped repo truth.
+
