@@ -790,6 +790,57 @@ textarea {
   color: rgba(196, 212, 248, 0.74);
 }
 
+.shard-status-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.shard-status-card {
+  gap: 12px;
+}
+
+.shard-status-card-available {
+  border-color: rgba(44, 155, 103, 0.26);
+}
+
+.shard-status-card-integrated {
+  border-color: rgba(64, 120, 220, 0.28);
+}
+
+.shard-status-card-blocked {
+  border-color: rgba(168, 115, 20, 0.28);
+}
+
+.shard-status-card-unmapped {
+  border-color: rgba(116, 127, 156, 0.28);
+}
+
+.shard-status-pill-available {
+  border-color: rgba(44, 155, 103, 0.34);
+  background: rgba(21, 64, 47, 0.62);
+  color: rgba(196, 247, 219, 0.9);
+}
+
+.shard-status-pill-integrated {
+  border-color: rgba(64, 120, 220, 0.34);
+  background: rgba(24, 45, 92, 0.62);
+  color: rgba(208, 224, 255, 0.9);
+}
+
+.shard-status-pill-blocked {
+  border-color: rgba(168, 115, 20, 0.34);
+  background: rgba(76, 49, 12, 0.62);
+  color: rgba(255, 226, 176, 0.9);
+}
+
+.shard-status-pill-unmapped {
+  border-color: rgba(116, 127, 156, 0.34);
+  background: rgba(38, 44, 59, 0.62);
+  color: rgba(214, 220, 234, 0.88);
+}
+
 .shard-milestone-card .validation-card,
 .shard-milestone-card .shard-bonus-card {
   align-content: start;
