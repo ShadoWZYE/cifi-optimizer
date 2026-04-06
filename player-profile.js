@@ -215,6 +215,55 @@ function coerceRecordOrNull(value) {
   return isRecord(value) ? cloneValue(value) : null;
 }
 
+function coerceCommunityToolPayload(value) {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const toolName = coerceNullableString(value.toolName);
+  const toolVersion = coerceNullableString(value.toolVersion);
+  const sourceReference = coerceNullableString(value.sourceReference);
+  const assumptionsSummary = coerceNullableString(value.assumptionsSummary);
+  const data = isRecord(value.data) || Array.isArray(value.data) ? cloneValue(value.data) : null;
+
+  if (!toolName || !toolVersion || !sourceReference || !assumptionsSummary || data === null) {
+    return null;
+  }
+
+  return {
+    toolName,
+    toolVersion,
+    sourceReference,
+    assumptionsSummary,
+    data
+  };
+}
+
+function coerceCommunityTools(value) {
+  if (!isRecord(value)) {
+    return {};
+  }
+
+  return Object.entries(value).reduce((record, [toolKey, versions]) => {
+    if (!isRecord(versions)) {
+      return record;
+    }
+
+    const normalizedVersions = Object.entries(versions).reduce((versionRecord, [versionKey, payload]) => {
+      const normalizedPayload = coerceCommunityToolPayload(payload);
+      if (normalizedPayload) {
+        versionRecord[versionKey] = normalizedPayload;
+      }
+      return versionRecord;
+    }, {});
+
+    if (Object.keys(normalizedVersions).length > 0) {
+      record[toolKey] = normalizedVersions;
+    }
+    return record;
+  }, {});
+}
+
 function coerceObservedShardLevels(value) {
   if (!isRecord(value)) {
     return {};
@@ -351,6 +400,11 @@ export function createDefaultPlayerProfile(baselineShipPlayerState = {}) {
           primaryFarmingFocus: null,
           researchHours: null
         }
+      },
+      communityTools: {
+        shipOptimizer: {},
+        shardOptimizer: {},
+        modTreeOptimizer: {}
       }
     },
     compatibility: {
@@ -419,6 +473,10 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
     FARMING_FOCUS_VALUES
   );
   normalized.externalModels.experimental.profileHints.researchHours = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.researchHours));
+  normalized.externalModels.communityTools = mergeDeep(
+    normalized.externalModels.communityTools,
+    coerceCommunityTools(source.externalModels?.communityTools)
+  );
 
   normalized.compatibility.legacyStage.highestShipUnlocked = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.highestShipUnlocked));
   normalized.compatibility.legacyStage.manualPhase = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.manualPhase));

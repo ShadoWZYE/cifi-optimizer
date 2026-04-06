@@ -382,6 +382,9 @@ const sortedFixtureActions = sortRecommendationFeed(normalizedFixtureActions);
 
 const defaultProfile = createDefaultPlayerProfile();
 assert.deepEqual(defaultProfile.planning.shards.observedLevelsByMilestone, {});
+assert.deepEqual(defaultProfile.externalModels.communityTools.shipOptimizer, {});
+assert.deepEqual(defaultProfile.externalModels.communityTools.shardOptimizer, {});
+assert.deepEqual(defaultProfile.externalModels.communityTools.modTreeOptimizer, {});
 
 assert.equal(snapshot.snapshotVersion, "v1.0.0-alpha");
 assert.equal(bundledDatasetContract.contractVersion, "v1");
@@ -2093,6 +2096,10 @@ assert.match(playerProfileSchemaDoc, /flat `gemDust`, `hunterLevel`, `traitSpher
 assert.match(playerProfileSchemaDoc, /flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and top-level `IS\*Level` fields may be quarantined/);
 assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
 assert.match(importMappingDoc, /experimental helper imports now require explicit `externalModels\.experimental\.\*` paths/);
+assert.match(importMappingDoc, /externalModels\.communityTools\.shipOptimizer\.v1/);
+assert.match(importMappingDoc, /toolName/);
+assert.match(importMappingDoc, /sourceReference/);
+assert.match(importMappingDoc, /must not silently populate canonical `player\.\*` fields/i);
 assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
 assert.match(importMappingDoc, /flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired/);
 assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
@@ -2816,6 +2823,35 @@ const migratedNestedProfile = normalizePlayerProfile({
           Meltdown: 12
         }
       }
+    },
+    communityTools: {
+      shipOptimizer: {
+        v1: {
+          toolName: "CiFi Ship Optimizer",
+          toolVersion: "2026-04-06",
+          sourceReference: "https://example.com/ship-optimizer",
+          assumptionsSummary: "Community weights and provisional ship labels.",
+          data: {
+            selectedShip: "Meltdown",
+            weights: {
+              power: 7,
+              cargo: 4
+            }
+          }
+        }
+      },
+      shardOptimizer: {
+        v1: {
+          toolName: "CiFi Shard Optimizer",
+          toolVersion: "2026-04-06",
+          sourceReference: "local export 2026-04-06",
+          assumptionsSummary: "Uses community breakpoint heuristics only.",
+          data: {
+            targetRow: "omega_watch",
+            suggestedBudget: "1.5e9"
+          }
+        }
+      }
     }
   }
 });
@@ -2827,6 +2863,40 @@ assert.equal(migratedNestedProfile.player.resources.diamonds, 900);
 assert.equal(migratedNestedProfile.planning.shards.ratePerHour, 110);
 assert.equal(migratedNestedProfile.notes.profile, "nested");
 assert.equal(migratedNestedProfile.externalModels.shipPlanner.communityToolState.technical.Meltdown, 12);
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.toolName, "CiFi Ship Optimizer");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.toolVersion, "2026-04-06");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.sourceReference, "https://example.com/ship-optimizer");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.assumptionsSummary, "Community weights and provisional ship labels.");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shipOptimizer.v1.data.selectedShip, "Meltdown");
+assert.equal(migratedNestedProfile.externalModels.communityTools.shardOptimizer.v1.data.targetRow, "omega_watch");
+assert.deepEqual(migratedNestedProfile.externalModels.communityTools.modTreeOptimizer, {});
+assert.equal(migratedNestedProfile.player.resources.shards, 15000);
+assert.equal(migratedNestedProfile.planning.shards.focusMilestoneId, null);
+
+const migratedInvalidCommunityToolProfile = normalizePlayerProfile({
+  externalModels: {
+    communityTools: {
+      modTreeOptimizer: {
+        v1: {
+          toolName: "Missing provenance",
+          data: {
+            branch: "crit"
+          }
+        }
+      }
+    }
+  }
+});
+
+assert.deepEqual(migratedInvalidCommunityToolProfile.externalModels.communityTools.modTreeOptimizer, {});
+
+const exportedNestedProfile = JSON.parse(JSON.stringify(migratedNestedProfile));
+assert.deepEqual(
+  exportedNestedProfile.externalModels.communityTools,
+  migratedNestedProfile.externalModels.communityTools
+);
+assert.equal(exportedNestedProfile.player.resources.shards, 15000);
+assert.equal(exportedNestedProfile.planning.shards.focusMilestoneId, null);
 
 const migratedCompatibilityAliasProfile = normalizePlayerProfile({
   stage: {
