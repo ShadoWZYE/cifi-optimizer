@@ -8,6 +8,8 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
+from portable_paths import md_link
+
 
 ROOT = Path(__file__).resolve().parents[2]
 VENDOR_PATH = ROOT / ".vendor_manual"
@@ -1870,7 +1872,7 @@ def main() -> None:
     lines = [
         "# Shard Cost Native Probe",
         "",
-        "Source: [`data/shard-cost-method-probe.v1.json`](C:\\Users\\Shadow\\Desktop\\CiFi\\data\\shard-cost-method-probe.v1.json), typed field offsets from [`data/uabea-probe-report.json`](C:\\Users\\Shadow\\Desktop\\CiFi\\data\\uabea-probe-report.json), plus disassembly of [`workbench/apk/base/libil2cpp.so`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\libil2cpp.so) using the manually extracted local libraries in `.vendor_manual`.",
+        f"Source: {md_link(METHOD_PROBE_PATH)}, typed field offsets from {md_link(UABEA_REPORT_PATH)}, plus disassembly of {md_link(LIBIL2CPP_PATH)} using the manually extracted local libraries in `.vendor_manual`.",
         "",
         "## Grounded conclusions",
         "",
@@ -1917,7 +1919,7 @@ def main() -> None:
             lines.append(f"  - {step}")
     lines.extend(["", "## Current boundary", ""])
     lines.extend(f"- {line}" for line in result["currentBoundary"])
-    MD_OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    MD_OUT.write_text("\n".join(lines) + "\n\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
