@@ -380,6 +380,9 @@ const state = {
   generatorOcrBusy: false,
   sourceRegistry: [],
   researchView: "active",
+  progressionView: "shards",
+  shardMilestoneCardOpenIds: [],
+  shardMilestoneGroundingOpenIds: [],
   route: "overview"
 };
 
@@ -392,7 +395,7 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell] = await Promise.all([
+  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardCostModelBoundary, shardMilestoneRowModelBoundary, shardMilestoneTitleEffectBoundary, shardEffectTextHandlerBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, shardSceneMonoBehaviourProbe, shardCostParameterProbe, shardCostNativeProbe, shardBonusSlotProbe, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
@@ -402,9 +405,17 @@ async function bootstrap() {
     fetchJson("./data/shard-owner-family-boundary.v1.json"),
     fetchJson("./data/shard-finalsu-bonus-boundary.v1.json"),
     fetchJson("./data/shard-milestone-payload-boundary.v1.json"),
+    fetchJson("./data/shard-cost-model-boundary.v1.json"),
+    fetchJson("./data/shard-milestone-row-model-boundary.v1.json"),
+    fetchJson("./data/shard-milestone-title-effect-boundary.v1.json"),
+    fetchJson("./data/shard-effect-text-handler-boundary.v1.json"),
     fetchJson("./data/shard-milestone-row-shell-boundary.v1.json"),
     fetchJson("./data/shard-milestone-row-alignment-boundary.v1.json"),
     fetchJson("./data/shard-save-boundary.v1.json"),
+    fetchJson("./data/shard-scene-monobehaviour-probe.v1.json"),
+    fetchJson("./data/shard-cost-parameter-probe.v1.json"),
+    fetchJson("./data/shard-cost-native-probe.v1.json"),
+    fetchJson("./data/shard-bonus-slot-probe.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
     fetchJson("./data/token-shop-values.json"),
     fetchJson("./data/multiverse-market-values.json"),
@@ -443,9 +454,17 @@ async function bootstrap() {
     ownerFamilyBoundary: shardOwnerFamilyBoundary,
     finalSuBonusBoundary: shardFinalSuBonusBoundary,
     milestonePayloadBoundary: shardMilestonePayloadBoundary,
+    costModelBoundary: shardCostModelBoundary,
+    rowModelBoundary: shardMilestoneRowModelBoundary,
+    titleEffectBoundary: shardMilestoneTitleEffectBoundary,
+    effectTextHandlerBoundary: shardEffectTextHandlerBoundary,
     milestoneRowShellBoundary: shardMilestoneRowShellBoundary,
     milestoneRowAlignmentBoundary: shardMilestoneRowAlignmentBoundary,
-    saveBoundary: shardSaveBoundary
+    saveBoundary: shardSaveBoundary,
+    sceneMonoBehaviourProbe: shardSceneMonoBehaviourProbe,
+    costParameterProbe: shardCostParameterProbe,
+    costNativeProbe: shardCostNativeProbe,
+    bonusSlotProbe: shardBonusSlotProbe
   };
   state.extractionCandidateRanking = extractionCandidateRanking;
   state.extractedMechanics = {
@@ -845,7 +864,8 @@ function getShardPlannerState() {
     ratePerHour: state.playerProfile.planning.shards.ratePerHour,
     totalMilestoneLevels: state.playerProfile.planning.shards.totalMilestoneLevels,
     focusMilestoneId: state.playerProfile.planning.shards.focusMilestoneId,
-    focusMilestoneLevel: state.playerProfile.planning.shards.focusMilestoneLevel
+    focusMilestoneLevel: state.playerProfile.planning.shards.focusMilestoneLevel,
+    observedLevelsByMilestone: state.playerProfile.planning.shards.observedLevelsByMilestone ?? {}
   };
 }
 
@@ -1064,7 +1084,58 @@ function bindDataActions() {
 
 function bindOptimizerActions() {
   $("#runProgressionOptimizer").addEventListener("click", () => renderProgressionResults(runProgressionOptimization()));
-  $("#saveShardPlannerBtn").addEventListener("click", saveShardPlannerInputs);
+  $("#progressionSubsystemToggle").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-progression-view]");
+    if (!button) {
+      return;
+    }
+    const nextView = button.dataset.progressionView;
+    if (!nextView || state.progressionView === nextView) {
+      return;
+    }
+    state.progressionView = nextView;
+    renderProgressionResults(runProgressionOptimization());
+  });
+  $("#progressionCalibrationPanel").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-progression-action]");
+    if (!button) {
+      return;
+    }
+    if (button.dataset.progressionAction === "open-profile") {
+      state.route = "profile";
+      renderNavigation();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+  $("#progressionResults").addEventListener("click", (event) => {
+    const focusButton = event.target.closest("[data-shard-focus-id]");
+    if (focusButton) {
+      const milestoneId = focusButton.dataset.shardFocusId || null;
+      const levelField = focusButton.closest(".shard-milestone-card")?.querySelector("[data-shard-focus-level]");
+      const milestoneLevel = coerceInputValue(levelField?.value ?? "");
+      saveShardPlannerInputs(milestoneId, milestoneLevel);
+    }
+  });
+  $("#progressionResults").addEventListener("toggle", (event) => {
+    const card = event.target.closest("[data-shard-milestone-card]");
+    if (card) {
+      syncShardMilestoneOpenState(card.dataset.shardMilestoneCard, card.open, "card");
+    }
+    const grounding = event.target.closest("[data-shard-milestone-grounding]");
+    if (grounding) {
+      syncShardMilestoneOpenState(grounding.dataset.shardMilestoneGrounding, grounding.open, "grounding");
+    }
+  }, true);
+  $("#progressionResults").addEventListener("change", (event) => {
+    const levelField = event.target.closest("[data-shard-focus-level]");
+    if (!levelField) {
+      return;
+    }
+    const milestoneId = levelField.dataset.shardFocusLevelFor || null;
+    if (milestoneId) {
+      saveShardPlannerInputs(milestoneId, coerceInputValue(levelField.value ?? ""));
+    }
+  });
   $("#runGemOptimizer").addEventListener("click", () => renderGemResults(runGemOptimization()));
   $("#runValidationSuite").addEventListener("click", renderValidationResults);
   $("#saveShipConfigBtn").addEventListener("click", () => {
@@ -1455,24 +1526,60 @@ function renderShipActions() {
 }
 
 function renderProgressionResults(results) {
-  const recommendationFeed = getActiveMvpRecommendationFeed();
-  const recommendationFeedSupport = getActiveMvpRecommendationFeedSupport();
+  const recommendationFeedPartition = getProgressionRecommendationFeedPartition(results);
+  const recommendationFeed = recommendationFeedPartition.valid;
+  const recommendationFeedSupport = recommendationFeedPartition.invalid;
+  const subsystemFeed = getProgressionSubsystemPartition(recommendationFeed);
+  const selectedSubsystem = getSelectedProgressionSubsystem();
   renderShardPlannerControls();
+  renderProgressionSubsystemToggle(subsystemFeed);
+  renderProgressionCalibrationPanel(subsystemFeed);
+  const sectionMarkup = {
+    shards: renderShardSubsystemSection(subsystemFeed.shards),
+    loop: renderProgressionSubsystemSection(
+      "Loop Prestige",
+      "Loop reset guardrails",
+      "These cards stay warning-oriented. They are pacing and anti-bricking notes around Loop Prestige, not reset optimizers.",
+      subsystemFeed.loop,
+      "warning"
+    ),
+    research: `
+      <section class="meta-stack">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Shard grounding</p>
+            <h3>Shard Mining evidence</h3>
+          </div>
+        </div>
+        <p class="meta">This section keeps the extracted Shard Mining evidence visible without mixing it into player-facing shard card logic before the cost evaluator is actually proven.</p>
+        ${renderShardGroundingBoundary()}
+        ${renderShardWorkflowReference()}
+        ${renderObservedShardBehaviors()}
+      </section>
+    `
+  };
   $("#progressionResults").innerHTML = `
-    <article class="validation-card warn">
-      <strong>Shard milestone mapping status</strong>
-      <p class="meta">System-level shard anchors now include repo-local Unity shell evidence for shard and loop milestone families, but the current milestone list is still community-grounded descriptive data.</p>
-      <p class="meta">Do not treat milestone names, unlock rows, bonus labels, or cost notes here as shipped-game extracted truth until shard owner mapping is completed.</p>
-    </article>
     ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
     ${renderRecommendationFeedSupportNotice(recommendationFeedSupport, "progression")}
-    <div class="recommendation-list">${recommendationFeed.map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : "shards")).join("")}</div>
-    ${renderShardGroundingBoundary()}
-    ${renderShardWorkflowSnapshot()}
-    ${renderShardGroundingBoundary()}
-    ${renderShardWorkflowReference()}
-    ${renderObservedShardBehaviors()}
-    ${renderShardMilestoneDirectory()}
+    ${sectionMarkup[selectedSubsystem]}
+  `;
+}
+
+function renderShardSubsystemSection(items) {
+  const cards = (Array.isArray(items) ? items : []).map((item) => makeRecommendationCard(item, "shards")).join("");
+  return `
+    <section class="meta-stack">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Shard Mining</p>
+          <h3>Shard milestones</h3>
+        </div>
+      </div>
+      <p class="meta">Milestone guidance stays separate from Loop Prestige warnings so shard rows read like shard rows instead of reset advice.</p>
+      ${cards ? `<div class="recommendation-list">${cards}</div>` : `<article class="validation-card warn"><strong>Shard milestones unavailable</strong><p class="meta">No player-facing shard milestone cards currently passed the shared recommendation contract.</p></article>`}
+      ${renderShardWorkflowSnapshot()}
+      ${renderShardMilestoneDirectory()}
+    </section>
   `;
 }
 
@@ -1551,6 +1658,7 @@ function renderSpendSaveSideBoundary() {
   const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(multiverseMarketRowTextCoverage);
   const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(multiverseMarketPrefabRemapBoundary);
   const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(state.extractedMechanics?.multiverseMarketOwnerFamily);
+  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
   return `
     <section class="meta-stack">
       <div class="panel-header">
@@ -1569,6 +1677,11 @@ function renderSpendSaveSideBoundary() {
           <strong>Cloud-save profile path</strong>
           <p class="meta">${summary.hasCloudSavePathClues ? "CloudSavePlayerProfile and GetPlayerProfileInfo now appear in the same checked-in save-path neighborhood, which strengthens the PlayerProfile-based persistence search." : "Cloud-save profile path clues are incomplete in the checked-in metadata neighborhood."}</p>
         </article>
+        <article class="validation-card ${marketMemberSummary.favorsPlayerProfileMemberHost ? "pass" : "warn"}">
+          <strong>Likely canonical host</strong>
+          <p class="meta">${marketMemberSummary.hasSiblingAccessorCluster ? `${marketMemberSummary.accessorLabel} now sits in the same PlayerProfile-side accessor run as ${marketMemberSummary.siblingAccessorLabel}.` : "The checked-in metadata neighborhood does not yet preserve the expected PlayerProfile-side sibling accessor run for Market."}</p>
+          <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That makes ${marketMemberSummary.canonicalHostLabel} the strongest current repo-local host for future canonical Emporium state, instead of direct MultiverseMarket ownership or loose top-level fields on PlayerProfileData.` : "The current build does not yet preserve a strong enough sibling-member pattern to narrow the future canonical host."}</p>
+        </article>
         <article class="validation-card ${summary.hasProgressionFieldCluster ? "pass" : "warn"}">
           <strong>Grounded field-cluster clues</strong>
           <p class="meta">${summary.hasProgressionFieldCluster ? "InscryptionsDone now sits beside nearby IS*Level entries and trade counters such as EsotericR1Trades in repo-local metadata." : "The checked-in metadata neighborhood does not yet preserve the expected InscryptionsDone progression-field cluster."}</p>
@@ -1578,10 +1691,10 @@ function renderSpendSaveSideBoundary() {
           <p class="meta">${validatedCoverage.hasValidatedRows ? `The checked-in MultiverseMarket extract currently validates ${validatedCoverage.count} rows across ids ${validatedCoverage.rangeLabel}.` : "The checked-in MultiverseMarket extract does not yet expose a validated row block."}</p>
           <p class="meta">${summary.recoveredIsRangeLabel ? `The save-side metadata neighborhood already reaches ${summary.recoveredIsRangeLabel}, which is broader than the currently validated row block.` : "The save-side metadata neighborhood does not yet expose a broad IS*Level run."}</p>
         </article>
-        <article class="validation-card ${multiverseMarketRangeSummary.hasExplicitZeroOverlap ? "pass" : "warn"}">
+        <article class="validation-card ${multiverseMarketRangeSummary.hasRangeBoundary ? "pass" : "warn"}">
           <strong>Validated rows vs recovered IS run</strong>
           <p class="meta">${multiverseMarketRangeSummary.hasValidatedRows ? `The checked-in row block still covers ids ${multiverseMarketRangeSummary.validatedRangeLabel}.` : "Validated row coverage is incomplete in the checked-in range boundary bundle."}</p>
-          <p class="meta">${multiverseMarketRangeSummary.hasExplicitZeroOverlap ? `The separate metadata run ${multiverseMarketRangeSummary.metadataRangeLabel} currently has no direct overlap with that validated block.` : "The checked-in range boundary no longer preserves the current zero-overlap result."}</p>
+          <p class="meta">${multiverseMarketRangeSummary.hasOverlap ? `The separate metadata run ${multiverseMarketRangeSummary.metadataRangeLabel} now directly overlaps validated rows ${multiverseMarketRangeSummary.overlapLabel}.` : multiverseMarketRangeSummary.hasExplicitZeroOverlap ? `The separate metadata run ${multiverseMarketRangeSummary.metadataRangeLabel} currently has no direct overlap with that validated block.` : "The checked-in range boundary is incomplete."}</p>
         </article>
         <article class="validation-card ${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? "pass" : "warn"}">
           <strong>Validated row text coverage</strong>
@@ -1768,7 +1881,11 @@ function renderSpendPlannerBoundary() {
   const numericGroupCount = Object.keys(tokenShop.numeric_table ?? {}).length;
   const validatedRows = Array.isArray(multiverseMarket.records) ? multiverseMarket.records.length : 0;
   const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
-  const importedMarketPreview = getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket);
+  const importedMarketPreview = getImportedMultiverseMarketPreview(
+    importedMarketState,
+    multiverseMarket,
+    state.extractedMechanics?.multiverseMarketRangeBoundary
+  );
   const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
   const hasTokeniumShell =
     resourceIcons.includes("resourceicons/resource_tokenium")
@@ -1798,6 +1915,8 @@ function renderSpendPlannerBoundary() {
       <div class="meta-stack">
         <p class="snapshot-title">Active Emporium save-model narrowing</p>
         <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
+        <p class="meta">${marketMemberSummary.hasSiblingAccessorCluster ? `${marketMemberSummary.accessorLabel} also sits in the same sibling accessor run as ${marketMemberSummary.siblingAccessorLabel}, with matching member shells such as ${marketMemberSummary.siblingMemberLabel}.` : "The checked build does not yet preserve a full sibling accessor and member-shell pattern around the Market handoff."}</p>
+        <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That makes ${marketMemberSummary.canonicalHostLabel} the strongest current repo-local host for future canonical market state.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
         <p class="meta">${marketMemberSummary.hasCloudBridge ? `The same narrowed path still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps this lane tied to repo-local player-profile recovery instead of UI-only text handlers.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the Emporium save-model path."}</p>
         <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the next safe step is still save-model recovery rather than planner logic.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save-model path and needs review."}</p>
       </div>
@@ -1811,9 +1930,14 @@ function renderSpendPlannerBoundary() {
       <div class="meta-stack">
         <p class="snapshot-title">Partial Emporium import preview</p>
         <p class="meta">${importedMarketPreview.hasImportedBalance ? `Imported <code>InscryptionsDone</code>: ${escapeHtml(importedMarketPreview.balanceLabel)}.` : "No imported <code>InscryptionsDone</code> balance is available yet."}</p>
-        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Current imported levels are available for ${importedMarketPreview.importedValidatedRowCount}/${importedMarketPreview.validatedRowCount} validated Emporium rows (${escapeHtml(importedMarketPreview.validatedRangeLabel)}).` : "No imported current levels are available yet for the validated Emporium rows."}</p>
-        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Preview sample: ${escapeHtml(importedMarketPreview.sampleLine)}.` : "When imported <code>IS*Level</code> fields are present, this build will surface only the validated row block and keep everything else quarantined."}</p>
+        <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Grounded save-side overlap currently covers validated Emporium rows ${escapeHtml(importedMarketPreview.overlapRangeLabel)}.` : "No overlap-grounded Emporium row subset is available yet."}</p>
+        <p class="meta">${importedMarketPreview.hasOverlapLevelPreview ? `Current imported levels are available for ${importedMarketPreview.importedOverlapRowCount}/${importedMarketPreview.overlapRowCount} overlap-grounded Emporium rows (${escapeHtml(importedMarketPreview.overlapRangeLabel)}).` : importedMarketPreview.hasOverlapGroundedRows ? "No imported current levels are available yet for the overlap-grounded Emporium rows." : "No imported current levels are available yet for the grounded overlap subset."}</p>
+        <p class="meta">${importedMarketPreview.hasOverlapLevelPreview ? `${importedMarketPreview.overlapMaxedCount} imported overlap-grounded rows are already at recovered max level.` : "Recovered-cap progress will appear here once overlap-grounded rows are imported."}</p>
+        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Broader validated preview: ${importedMarketPreview.importedValidatedRowCount}/${importedMarketPreview.validatedRowCount} validated Emporium rows (${escapeHtml(importedMarketPreview.validatedRangeLabel)}).` : "When imported <code>IS*Level</code> fields are present, this build will surface only the validated row block and keep everything else quarantined."}</p>
+        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Preview sample: ${escapeHtml(importedMarketPreview.sampleLine)}.` : "No validated-row preview sample is available yet."}</p>
+        <p class="meta">${importedMarketPreview.hasOverlapLevelPreview ? "Overlap-grounded row cards now also show recovered row constants such as bonus, start cost, and cost exponent for the imported subset." : "Recovered row constants will appear here once overlap-grounded Emporium rows are imported."}</p>
         <p class="meta">${importedMarketPreview.extraImportedRows.length ? `Additional imported <code>IS*Level</code> rows stay quarantined outside the grounded validated block: ${escapeHtml(importedMarketPreview.extraImportedLabel)}${importedMarketPreview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported <code>IS*Level</code> rows were found outside the grounded validated block."}</p>
+        <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Missing overlap-grounded imports: ${escapeHtml(importedMarketPreview.missingOverlapLabel)}.` : "The overlap-grounded subset is not available in this build."}</p>
         <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.maxedCount} imported validated rows are already at their recovered max level.` : "This preview stays descriptive only and does not unlock spend recommendations or canonical PlayerProfile fields."}</p>
       </div>
       ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Active Emporium next steps</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
@@ -1822,7 +1946,7 @@ function renderSpendPlannerBoundary() {
         <span class="pill">${validatedRows} validated market rows</span>
         <span class="pill">${hasTokeniumShell ? "Tokenium shell grounded" : "Tokenium shell incomplete"}</span>
         <span class="pill">${hasImportedTokenShopState || hasImportedMarketState ? "Imported spend payload quarantined" : "No imported spend payload yet"}</span>
-        <span class="pill">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.importedValidatedRowCount} validated Emporium levels previewed` : "No Emporium level preview yet"}</span>
+        <span class="pill">${importedMarketPreview.hasOverlapGroundedRows ? `${importedMarketPreview.importedOverlapRowCount}/${importedMarketPreview.overlapRowCount} overlap-grounded rows previewed` : importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.importedValidatedRowCount} validated Emporium levels previewed` : "No Emporium level preview yet"}</span>
         <span class="pill">${marketMemberSummary.hasBoundary ? "Emporium save path narrowed" : "Emporium save path unresolved"}</span>
         <span class="pill">No spend recommendations yet</span>
       </div>
@@ -1971,6 +2095,10 @@ function renderResearchTrackSupport(track) {
     const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
     const finalSuBoundary = getShardFinalSuBonusBoundarySummary(state.shardGrounding?.finalSuBonusBoundary);
     const payloadBoundary = getShardMilestonePayloadBoundarySummary(state.shardGrounding?.milestonePayloadBoundary);
+    const costModelBoundary = getShardCostModelBoundarySummary(state.shardGrounding?.costModelBoundary);
+    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(state.shardGrounding?.rowModelBoundary);
+    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(state.shardGrounding?.titleEffectBoundary);
+    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(state.shardGrounding?.effectTextHandlerBoundary);
     const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(state.shardGrounding?.milestoneRowShellBoundary);
     const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(state.shardGrounding?.milestoneRowAlignmentBoundary);
     const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
@@ -1985,6 +2113,16 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${finalSuBoundary.hasBoundary ? "That narrows the shard-specific field family further, but it still does not map those fields back to verified player-facing milestone rows." : "The current build does not yet preserve a checked FinalSU bonus-field boundary."}</p>
         <p class="meta">${payloadBoundary.hasBoundary ? `A checked payload-watch boundary now keeps ${payloadBoundary.milestoneStateLabel} attached to ${payloadBoundary.dataCarrier}, with cost-list hooks such as ${payloadBoundary.costAccessorLabel}.` : "Shard milestone payload-watch boundary clues are not available in this build."}</p>
         <p class="meta">${payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields ? `The same shard-specific trail also keeps ${payloadBoundary.progressHookLabel} plus ${payloadBoundary.tickFieldLabel} grouped with ${payloadBoundary.costHookLabel}.` : "Expected shard payload-watch hooks are incomplete in this build."}</p>
+        <p class="meta">${costModelBoundary.hasBoundary ? `A checked cost-model boundary now keeps sampled shard cost windows ${costModelBoundary.costWindowLabel} attached to ${costModelBoundary.dataCarrier}.` : "Shard cost-model boundary clues are not available in this build."}</p>
+        <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? `The same shard-local family also preserves ${costModelBoundary.row0FieldLabel} beside ${costModelBoundary.row0FillLabel} and ${costModelBoundary.row0BonusLabel}.` : "Expected shard cost-parameter shell clues are incomplete in this build."}</p>
+        <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? `That is enough to support ${costModelBoundary.supportedOptimizerLabel}, but it still blocks ${costModelBoundary.blockedOptimizerLabel}.` : "The current build does not yet preserve a checked shard cost-model boundary."}</p>
+        <p class="meta">${rowModelBoundary.hasBoundary ? `A checked row-model boundary now keeps text-checker rows on ${rowModelBoundary.textCheckerRangeLabel} and unlock rows on ${rowModelBoundary.unlockRangeLabel}.` : "Shard row-model boundary clues are not available in this build."}</p>
+        <p class="meta">${rowModelBoundary.hasShardLocalBuySample && rowModelBoundary.hasGenericBuyFamily ? `The buy seam still splits between shard-local ${rowModelBoundary.shardLocalBuyLabel} and generic ${rowModelBoundary.genericBuyLabel}.` : "Expected shard buy-seam clues are incomplete in this build."}</p>
+        <p class="meta">${titleEffectBoundary.hasBoundary ? `Shipped title assets now cover shard rows ${titleEffectBoundary.titleRangeLabel}.` : "Shard title/effect boundary clues are not available in this build."}</p>
+        <p class="meta">${titleEffectBoundary.hasEffectPresentationFamily && titleEffectBoundary.hasBonusCalcSamples ? `The shipped effect shell keeps ${titleEffectBoundary.effectSlotLabel}, while row-local calc samples include ${titleEffectBoundary.bonusCalcLabel}.` : "Expected shard effect-family clues are incomplete in this build."}</p>
+        <p class="meta">${titleEffectBoundary.hasBoundary ? `Row 28 still has conflicting shipped title candidates: ${titleEffectBoundary.row28ConflictLabel || "unknown"}.` : "The current build does not yet preserve the shard title conflict note."}</p>
+        <p class="meta">${effectTextHandlerBoundary.hasBoundary ? `The strongest current shard bonus text handler is ${effectTextHandlerBoundary.textHandlerLabel}, not the generic ${effectTextHandlerBoundary.genericWriterLabel}.` : "Shard effect-text handler boundary clues are not available in this build."}</p>
+        <p class="meta">${effectTextHandlerBoundary.hasPresentationFamily && effectTextHandlerBoundary.hasBonusCalcSamples && effectTextHandlerBoundary.hasUiContextAnchors ? `That handler currently sits beside ${effectTextHandlerBoundary.uiContextLabel}, lines up with ${effectTextHandlerBoundary.presentationFamilyLabel}, and stays compatible with calc samples such as ${effectTextHandlerBoundary.bonusCalcLabel}.` : "Expected shard effect-text handler alignment clues are incomplete in this build."}</p>
         <p class="meta">${rowShellBoundary.hasBoundary ? `A checked row-shell boundary now keeps ${rowShellBoundary.controllerHookLabel} attached to ${rowShellBoundary.screenController}, with partial row hooks such as ${rowShellBoundary.unlockHookLabel}.` : "Shard milestone row-shell boundary clues are not available in this build."}</p>
         <p class="meta">${rowShellBoundary.hasUnlockHookSamples && rowShellBoundary.hasBuyHookSamples && rowShellBoundary.hasTextCheckerSamples ? `The same controller shell also preserves ${rowShellBoundary.buyHookLabel} plus ${rowShellBoundary.textCheckerLabel}, which is enough to narrow future row verification without claiming full row ownership or labels.` : "Expected shard milestone row-shell samples are incomplete in this build."}</p>
         <p class="meta">${rowAlignmentBoundary.hasBoundary ? `A checked row-alignment boundary now keeps unlock hooks on ${rowAlignmentBoundary.unlockRangeLabel}, text-checker hooks on ${rowAlignmentBoundary.textCheckerRangeLabel}, and buy hooks on ${rowAlignmentBoundary.buyRangeLabel}.` : "Shard milestone row-alignment boundary clues are not available in this build."}</p>
@@ -2038,7 +2176,7 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "That checked local cluster still does not join the current PlayerProfile save-family path, so FinalTokenBank outputs remain output-side clues rather than recovered saved-state fields." : "The checked derived-output cluster now overlaps the broader save-family search and needs review."}</p>
         <p class="meta">${validatedCoverage.hasValidatedRows ? `MultiverseMarket currently has ${validatedCoverage.count} validated rows across ids ${validatedCoverage.rangeLabel}.` : "MultiverseMarket validated row coverage is not available in this build."}</p>
         <p class="meta">${metadataSummary.recoveredIsRangeLabel ? `The checked-in save-side field run currently reaches ${metadataSummary.recoveredIsRangeLabel}, which is broader than the validated MultiverseMarket row block.` : "The checked-in save-side field run is not available in this build."}</p>
-        <p class="meta">${multiverseMarketRangeSummary.hasExplicitZeroOverlap ? `The checked range boundary now preserves a zero-overlap result between validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} and the recovered metadata run ${multiverseMarketRangeSummary.metadataRangeLabel}.` : "The checked range boundary between validated rows and the recovered metadata run is not available in this build."}</p>
+        <p class="meta">${multiverseMarketRangeSummary.hasOverlap ? `The checked range boundary now shows that validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} share a first direct overlap with the recovered metadata run ${multiverseMarketRangeSummary.metadataRangeLabel} at rows ${multiverseMarketRangeSummary.overlapLabel}.` : multiverseMarketRangeSummary.hasExplicitZeroOverlap ? `The checked range boundary now preserves a zero-overlap result between validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} and the recovered metadata run ${multiverseMarketRangeSummary.metadataRangeLabel}.` : "The checked range boundary between validated rows and the recovered metadata run is not available in this build."}</p>
         <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? `The validated row block also has direct text-handler coverage through ${multiverseMarketRowTextSummary.textHandler}, ${multiverseMarketRowTextSummary.textBatcher}, and ${multiverseMarketRowTextSummary.coveredCount} SetIS*CostText hooks.` : "Validated-row text-handler coverage is not available in this build."}</p>
         <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? "That is row-label coverage for the validated block, not saved-state coverage, so it should not be used as proof of player-owned current levels." : "Validated-row text coverage is incomplete, so row-label support remains partially grounded."}</p>
         <p class="meta">${multiverseMarketActionShellSummary.hasActionShell ? `The same checked action shell context reaches ${multiverseMarketActionShellSummary.buyRangeLabel} plus ${multiverseMarketActionShellSummary.costTextRangeLabel}, while only ${multiverseMarketActionShellSummary.validatedRangeLabel} stays numerically validated.` : "MultiverseMarket action-shell coverage is not available in this build."}</p>
@@ -2215,8 +2353,9 @@ function renderPlayerProfileBoundarySummary() {
       note: "Manual helper inputs used by descriptive planners, not canonical account truth. Derived values that are not directly visible in game stay out of the active form.",
       items: [
         ["Total shard milestone levels", shardPlanner.totalMilestoneLevels],
-        ["Focus milestone", shardPlanner.focusMilestoneId],
-        ["Focus milestone level", shardPlanner.focusMilestoneLevel]
+        ["Threshold watch row", shardPlanner.focusMilestoneId],
+        ["Threshold watch row level", shardPlanner.focusMilestoneLevel],
+        ["Observed shard rows", Object.keys(shardPlanner.observedLevelsByMilestone ?? {}).length]
       ]
     },
     {
@@ -2260,7 +2399,8 @@ function renderPlayerProfileBoundarySummary() {
   });
   const importedMultiverseMarketPreview = getImportedMultiverseMarketPreview(
     compatibility.unmappedSystems?.multiverseMarket,
-    state.extractedMechanics?.multiverseMarket
+    state.extractedMechanics?.multiverseMarket,
+    state.extractedMechanics?.multiverseMarketRangeBoundary
   );
 
   $("#playerProfileImportSummary").innerHTML = groups.map((group) => {
@@ -2770,23 +2910,23 @@ function buildGroundedShardRecommendations() {
       module: "shards",
       kind: "warning",
       title: "Next shard threshold to watch",
-      subtitle: focusMilestone ? focusMilestone.name : "Select a focus milestone",
+      subtitle: focusMilestone ? focusMilestone.name : "Edit a shard row level",
       score: focusMilestone ? 52 : 34,
       confidence: 0.64,
       benefit: [
         focusMilestone
-          ? "Shows the next grounded threshold breakpoint on the selected milestone."
-          : "Explains which focus input is missing before threshold tracking can become useful."
+          ? "Shows the next grounded threshold breakpoint on the observed milestone row."
+          : "Explains which row input is missing before threshold tracking can become useful."
       ],
       whyNow: [
         focusMilestone
-          ? `Focus milestone rarity: ${formatShardRarity(focusMilestone.rarity)}. Threshold schedule: ${formatThresholdLevels(getThresholdScheduleForMilestone(focusMilestone, mechanics))}.`
-          : "Choose a focus milestone to inspect its grounded threshold schedule.",
+          ? `Observed row rarity: ${formatShardRarity(focusMilestone.rarity)}. Threshold schedule: ${formatThresholdLevels(getThresholdScheduleForMilestone(focusMilestone, mechanics))}.`
+          : "Edit a shard row level to inspect its grounded threshold schedule.",
         nextThreshold
-          ? `Next bonus threshold is level ${nextThreshold} from tracked level ${formatShardNumber(focusLevel)}.`
+          ? `Next bonus threshold is level ${nextThreshold} from observed level ${formatShardNumber(focusLevel)}.`
           : focusMilestone
             ? "All explicit grounded threshold levels on the selected milestone are already reached."
-            : "Threshold watch is unavailable until a focus milestone is selected."
+            : "Threshold watch is unavailable until a shard row level is tracked."
       ],
       assumptions: [
         focusMilestone?.summary || "Threshold watch uses imported unlock/bonus entries only.",
@@ -2795,7 +2935,7 @@ function buildGroundedShardRecommendations() {
       warnings: [
         focusMilestone?.uncertaintyNotes?.[0] || "Unknown/Unkown source values remain preserved where the source was incomplete.",
         conflictNote || "Threshold wording stays descriptive because milestone sources conflict across accessible snapshots.",
-        nextThreshold ? `You need ${Math.max(nextThreshold - focusLevel, 0)} more levels on the selected milestone to reach this threshold.` : "Threshold watch ends here unless you switch milestones."
+        nextThreshold ? `You need ${Math.max(nextThreshold - focusLevel, 0)} more levels on the observed milestone row to reach this threshold.` : "Threshold watch ends here unless you inspect another row."
       ],
       notes: sourceLabel
         ? `Threshold guidance is milestone-specific and descriptive only (${sourceLabel}).`
@@ -2816,7 +2956,7 @@ function buildGroundedShardRecommendations() {
         mechanics.cost_breakpoints_observed?.breakpoints_statement || "Cost bump notes are descriptive only.",
         nextCostBump
           ? `From tracked level ${formatShardNumber(focusLevel)}, the next noted cost bump is level ${nextCostBump.level} (${nextCostBump.severity}).`
-          : "No cost bump watch could be derived from the current focus level."
+          : "No cost bump watch could be derived from the current tracked row level."
       ],
       assumptions: [
         "The dataset provides breakpoint notes, not numeric shard costs.",
@@ -2834,13 +2974,28 @@ function buildGroundedShardRecommendations() {
   ];
 }
 
-function saveShardPlannerInputs() {
-  const milestoneId = formControl("shardFocusMilestoneId")?.value || null;
-  const milestoneLevel = coerceInputValue(formControl("shardFocusMilestoneLevel")?.value ?? "");
+function saveShardPlannerInputs(nextMilestoneId = undefined, nextMilestoneLevel = undefined) {
+  const milestoneId = nextMilestoneId !== undefined
+    ? nextMilestoneId
+    : formControl("shardFocusMilestoneId")?.value || null;
+  const milestoneLevel = nextMilestoneLevel !== undefined
+    ? nextMilestoneLevel
+    : coerceInputValue(formControl("shardFocusMilestoneLevel")?.value ?? "");
+  const observedLevelsByMilestone = {
+    ...(state.playerProfile.planning.shards.observedLevelsByMilestone ?? {})
+  };
+  if (milestoneId) {
+    if (milestoneLevel === null || milestoneLevel === undefined || milestoneLevel === "") {
+      delete observedLevelsByMilestone[milestoneId];
+    } else {
+      observedLevelsByMilestone[milestoneId] = milestoneLevel;
+    }
+  }
   setProfileValue(["planning", "shards", "focusMilestoneId"], milestoneId, state.playerProfile);
   setProfileValue(["planning", "shards", "focusMilestoneLevel"], milestoneLevel, state.playerProfile);
+  setProfileValue(["planning", "shards", "observedLevelsByMilestone"], observedLevelsByMilestone, state.playerProfile);
   persistPlayerProfile();
-  setStatus("shardPlannerStatus", "Shard workflow inputs saved.", "success");
+  setStatus("shardPlannerStatus", "Shard row calibration saved.", "success");
   renderProgressionResults(runProgressionOptimization());
 }
 
@@ -2869,7 +3024,7 @@ function renderShardWorkflowSnapshot() {
   return `
     <div class="page-grid">
       <article class="snapshot-card">
-        <span class="snapshot-title">Shard workflow snapshot</span>
+        <span class="snapshot-title">Shard Mining snapshot</span>
         <strong>${escapeHtml(nextUnlock ? nextUnlock.name : "All unlock gates covered")}</strong>
         <p class="meta">Current shards: ${formatOptionalNumber(shardPlanner.currentShards)} | Shard income / hour: ${formatOptionalNumber(shardPlanner.ratePerHour)} | Total shard milestone levels: ${formatOptionalNumber(shardPlanner.totalMilestoneLevels)}</p>
         <div class="meta-stack">
@@ -2903,6 +3058,11 @@ function renderShardGroundingBoundary() {
   const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
   const finalSuBoundary = getShardFinalSuBonusBoundarySummary(state.shardGrounding?.finalSuBonusBoundary);
   const payloadBoundary = getShardMilestonePayloadBoundarySummary(state.shardGrounding?.milestonePayloadBoundary);
+  const costModelBoundary = getShardCostModelBoundarySummary(state.shardGrounding?.costModelBoundary);
+  const sceneProbeBoundary = getShardSceneMonoBehaviourProbeSummary(state.shardGrounding?.sceneMonoBehaviourProbe);
+  const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(state.shardGrounding?.rowModelBoundary);
+  const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(state.shardGrounding?.titleEffectBoundary);
+  const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(state.shardGrounding?.effectTextHandlerBoundary);
   const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(state.shardGrounding?.milestoneRowShellBoundary);
   const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(state.shardGrounding?.milestoneRowAlignmentBoundary);
   const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
@@ -2961,6 +3121,46 @@ function renderShardGroundingBoundary() {
           <p class="meta">${payloadBoundary.hasCostAndListHooks ? `Cost-list hooks currently include ${payloadBoundary.costHookLabel}.` : "Expected shard cost-list hooks are incomplete in this build."}</p>
           <p class="meta">${payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields ? `Progress and timing hooks still include ${payloadBoundary.progressHookLabel} plus ${payloadBoundary.tickFieldLabel}.` : "Expected shard progress-fill and phase-tick hooks are incomplete in this build."}</p>
           <p class="meta">${payloadBoundary.hasBoundary ? "This keeps the current milestone payload search attached to the shard-specific carrier trail, but it still does not recover saved player-owned milestone rows or verified row labels." : "The current build does not yet preserve a checked shard milestone payload-watch boundary."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Cost-model boundary</span>
+        <strong>ShardUpgradeInfo now preserves a row-local cost shell</strong>
+        <div class="meta-stack">
+          <p class="meta">${costModelBoundary.hasBoundary ? `${costModelBoundary.dataCarrier} now preserves sampled shard cost windows ${costModelBoundary.costWindowLabel}.` : "Shard cost-model boundary clues are not available in this build."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? `Recovered row-local cost fields currently include ${costModelBoundary.row0FieldLabel}, sitting beside ${costModelBoundary.row0FillLabel} and ${costModelBoundary.row0BonusLabel}.` : "Expected shard row-local cost-parameter shell clues are incomplete in this build."}</p>
+          <p class="meta">${sceneProbeBoundary.hasBoundary ? `The direct scene parser target now narrows to ${sceneProbeBoundary.shardMiningLabel}, with shard bonus text on ${sceneProbeBoundary.textHandlerLabel}.` : "Direct shard scene-object targets are not available in this build."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? `This is enough to ground ${costModelBoundary.supportedOptimizerLabel}, but it still blocks ${costModelBoundary.blockedOptimizerLabel}.` : "The current build does not yet preserve a checked shard cost-model boundary."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? "The repo now knows shard costs are driven by row-local parameters, but it still does not know the numeric values or full row-owner mapping needed for a truthful buyer optimizer." : "Without this boundary, shard costs still look like opaque UI hooks instead of a recoverable cost family."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Row-model boundary</span>
+        <strong>The shard-local row shell now reaches rows 0-29</strong>
+        <div class="meta-stack">
+          <p class="meta">${rowModelBoundary.hasBoundary ? `Recovered text-checker rows currently span ${rowModelBoundary.textCheckerRangeLabel}, and recovered unlock rows span ${rowModelBoundary.unlockRangeLabel}.` : "Shard row-model boundary clues are not available in this build."}</p>
+          <p class="meta">${rowModelBoundary.hasShardLocalBuySample && rowModelBoundary.hasGenericBuyFamily ? `The current buy seam still splits between shard-local ${rowModelBoundary.shardLocalBuyLabel} and generic ${rowModelBoundary.genericBuyLabel}.` : "Expected shard buy-seam clues are incomplete in this build."}</p>
+          <p class="meta">${rowModelBoundary.hasBoundary ? "This is enough to treat the shard row model as a contiguous 0-29 shell for naming and effect recovery, but not enough to claim the final declaring row owner." : "The current build does not yet preserve a checked shard row-model boundary."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Title/effect boundary</span>
+        <strong>Shipped assets now expose in-game milestone title candidates</strong>
+        <div class="meta-stack">
+          <p class="meta">${titleEffectBoundary.hasBoundary ? `Shipped title assets currently cover shard rows ${titleEffectBoundary.titleRangeLabel}.` : "Shard title/effect boundary clues are not available in this build."}</p>
+          <p class="meta">${titleEffectBoundary.hasEffectPresentationFamily ? `The shipped effect presentation family currently includes ${titleEffectBoundary.effectSlotLabel}.` : "Expected shard effect presentation slots are incomplete in this build."}</p>
+          <p class="meta">${titleEffectBoundary.hasBonusCalcSamples ? `Recovered row-local effect calc samples currently include ${titleEffectBoundary.bonusCalcLabel}.` : "Expected shard bonus calc samples are incomplete in this build."}</p>
+          <p class="meta">${titleEffectBoundary.hasBoundary ? `Row 28 still has conflicting shipped title candidates: ${titleEffectBoundary.row28ConflictLabel || "unknown"}.` : "The current build does not yet preserve the shard title conflict note."}</p>
+        </div>
+      </article>
+      <article class="snapshot-card">
+        <span class="snapshot-title">Effect-text handler boundary</span>
+        <strong>The shard bonus text path now has a leading handler clue</strong>
+        <div class="meta-stack">
+          <p class="meta">${effectTextHandlerBoundary.hasBoundary ? `${effectTextHandlerBoundary.textHandlerLabel} is the strongest current shard-side effect-text handler clue across rows ${effectTextHandlerBoundary.rowCoverageLabel}.` : "Shard effect-text handler boundary clues are not available in this build."}</p>
+          <p class="meta">${effectTextHandlerBoundary.hasPresentationFamily && effectTextHandlerBoundary.hasBonusCalcSamples ? `It currently lines up with ${effectTextHandlerBoundary.presentationFamilyLabel} and calc accessors such as ${effectTextHandlerBoundary.bonusCalcLabel}.` : "Expected shard presentation-family and calc-accessor alignment clues are incomplete in this build."}</p>
+          <p class="meta">${effectTextHandlerBoundary.hasUiContextAnchors ? `Nearby UI text anchors currently include ${effectTextHandlerBoundary.uiContextLabel}.` : "Expected shard effect-text UI anchors are incomplete in this build."}</p>
+          <p class="meta">${effectTextHandlerBoundary.hasBoundary ? `This now leads over the generic ${effectTextHandlerBoundary.genericWriterLabel} writer for shard bonus text recovery, but it still does not recover a row-complete player-facing effect table.` : "Without this boundary, shard effect-text work still collapses back into generic milestone-writer ambiguity."}</p>
         </div>
       </article>
       <article class="snapshot-card">
@@ -3096,44 +3296,163 @@ function renderShardMilestoneDirectory() {
   const milestones = getMilestonesForDisplay();
   return `
     <div class="meta-stack">
-      <p class="eyebrow">Descriptive directory</p>
+      <p class="eyebrow">Shard milestones</p>
       <h3>Shard milestones</h3>
-      <p class="meta">These milestone rows are sourced from named community references with preserved uncertainty and conflicts. They are not yet mapped from shipped-game shard milestone owners.</p>
+      <p class="meta">These rows now live directly inside Shard Mining. Each card keeps its own observed level, stays in canonical order, and shows the strongest grounded row lane, staged formula class, and bonus data the repo can currently support without faking cost numbers.</p>
       <div class="preview-stack">
-        ${milestones.map((milestone) => `
-          <details class="snapshot-card shard-milestone-card" ${milestone.id === getSelectedShardMilestoneId() ? "open" : ""}>
+${milestones.map((milestone) => {
+          const groundedRow = getShardMilestoneGroundedSummary(milestone);
+          const trackedLevel = getShardFocusLevelForMilestone(milestone);
+          const isCardOpen = isShardMilestoneOpen(milestone.id, "card");
+          const isGroundingOpen = isShardMilestoneOpen(milestone.id, "grounding");
+          const panelTitle = getShardMilestonePanelTitle(milestone);
+          const displayMeta = getShardMilestoneDisplayMeta(milestone);
+          const headerMeta = `${formatShardRarity(milestone.rarity)} | Unlock ${describeUnlockCondition(milestone.unlockCondition)}`;
+          const thresholdSchedule = getThresholdScheduleForMilestone(milestone, mechanics);
+          const hasThresholdSchedule = Array.isArray(thresholdSchedule) && thresholdSchedule.length > 0;
+          const directCostMapping = getShardExtractedCostFieldMapping(milestone.milestoneNumber);
+          const extractedCostFieldLabel = formatShardExtractedCostFieldMapping(directCostMapping);
+          const extractedUnlockRequirement = groundedRow.extractedUnlockRequirement;
+          const bonusSlotSummary = getShardBonusSlotRowSummary(milestone.milestoneNumber);
+          const extractedBonusValues = (milestone.bonuses || [])
+            .map((bonus, index) => {
+              const extracted = getShardExtractedBonusPerLevel(milestone.milestoneNumber, index);
+              return Number.isFinite(extracted) ? `${bonus.effectLabel || `Bonus ${index + 1}`}: ${formatShardExtractedBonusPerLevel(extracted)}` : null;
+            })
+            .filter(Boolean);
+          const levelRailSummary = getShardMilestoneLevelRailSummary(milestone);
+          const formulaProfile = getShardFormulaApplicationProfile(milestone.milestoneNumber);
+          return `
+          <details class="snapshot-card shard-milestone-card" data-shard-milestone-card="${escapeHtml(String(milestone.id))}" ${isCardOpen ? "open" : ""}>
             <summary class="shard-milestone-summary">
-              <div>
-                <strong>${escapeHtml(milestone.name)}</strong>
-                <p class="meta">${escapeHtml(`${formatShardRarity(milestone.rarity)} | Unlock ${describeUnlockCondition(milestone.unlockCondition)}`)}</p>
+              <div class="shard-milestone-title-block">
+                <span class="shard-milestone-rank">#${escapeHtml(String(milestone.milestoneNumber ?? "?"))}</span>
+                <div class="shard-milestone-heading-copy">
+                  <strong>${escapeHtml(panelTitle)}</strong>
+                  <p class="meta">${escapeHtml(headerMeta)}</p>
+                  ${displayMeta.startsWith("Community alias:")
+                    ? `<p class="meta shard-milestone-alias">${escapeHtml(displayMeta)}</p>`
+                    : ""}
+                </div>
               </div>
-              <span class="pill">${escapeHtml(formatThresholdLevels(getThresholdScheduleForMilestone(milestone, mechanics)))}</span>
+              <div class="shard-milestone-summary-pills">
+                <span class="pill shard-threshold-pill ${hasThresholdSchedule ? "" : "pill-neutral"}">${escapeHtml(hasThresholdSchedule ? `Thresholds ${formatThresholdLevels(thresholdSchedule)}` : "No explicit thresholds")}</span>
+              </div>
             </summary>
-            <div class="meta-stack">
-              <p class="meta">${escapeHtml(milestone.summary || "No milestone summary captured.")}</p>
-              <p class="meta">Unlock condition: ${escapeHtml(describeUnlockCondition(milestone.unlockCondition))}</p>
-              <p class="meta">Threshold schedule: ${escapeHtml(formatThresholdLevels(getThresholdScheduleForMilestone(milestone, mechanics)))}</p>
-              <p class="meta">${escapeHtml(milestone.costProgression?.notes || "No cost progression note available.")}</p>
-              <p class="meta">Source footing: ${escapeHtml(getMilestoneSourceLabel(milestone) || "Named community reference; shipped-game owner mapping not yet recovered.")}</p>
+            <div class="shard-milestone-hero">
+              <div class="shard-milestone-hero-copy">
+                <p class="meta">${escapeHtml(milestone.summary || "No milestone summary captured.")}</p>
+                <div class="shard-milestone-facts">
+                  <p class="meta"><strong>Unlock</strong> ${escapeHtml(describeUnlockCondition(milestone.unlockCondition))}</p>
+                  <p class="meta"><strong>Thresholds</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
+                  <p class="meta"><strong>Formula class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
+                </div>
+              </div>
             </div>
-            <div class="shard-bonus-list">
-              ${(milestone.bonuses || []).map((bonus) => `
-                <article class="shard-bonus-card">
-                  <strong>${escapeHtml(bonus.effectLabel || "Unnamed bonus")}</strong>
+            <div class="shard-milestone-main-panel">
+              <div class="shard-bonus-list">
+              ${(milestone.bonuses || []).map((bonus, index) => {
+                const computedBonus = getShardComputedBonusSummary(milestone, bonus, trackedLevel);
+                const extractedBonusPerLevel = getShardExtractedBonusPerLevel(milestone.milestoneNumber, index);
+                return `
+                <article class="shard-bonus-card shard-panel-card">
+                  <div class="shard-panel-card-header">
+                    <strong>${escapeHtml(bonus.effectLabel || "Unnamed bonus")}</strong>
+                    <span class="shard-panel-card-tag">Lane ${escapeHtml(String(index + 1))}</span>
+                  </div>
                   <p class="meta">Unlock level: ${bonus.unlockLevel ?? "Listed without explicit threshold"}</p>
                   <p class="meta">Initial bonus: ${escapeHtml(String(bonus.initialBonus ?? "Unknown"))}</p>
                   <p class="meta">Bonus per level: ${escapeHtml(String(bonus.bonusPerLevel ?? "Unknown"))}</p>
+                  <p class="meta"><strong>Extracted bonus per level</strong> ${escapeHtml(Number.isFinite(extractedBonusPerLevel) ? formatShardExtractedBonusPerLevel(extractedBonusPerLevel) : "Not recovered in direct row payload")}</p>
+                  <p class="meta"><strong>Observed value</strong> ${escapeHtml(computedBonus.currentLabel)}</p>
+                  <p class="meta"><strong>Next level</strong> ${escapeHtml(computedBonus.nextLabel)}</p>
                 </article>
-              `).join("")}
-            </div>
-            ${(milestone.uncertaintyNotes || []).length ? `
-              <div class="meta-stack">
-                <p class="snapshot-title">Uncertainty notes</p>
-                ${milestone.uncertaintyNotes.map((note) => `<p class="meta">${escapeHtml(note)}</p>`).join("")}
+              `;
+              }).join("")}
               </div>
-            ` : ""}
+              <aside class="shard-level-up-rail shard-panel-card">
+                <p class="snapshot-title">Level up</p>
+                <label class="mini-field shard-row-focus-field shard-level-up-observed">
+                  <span>Observed level</span>
+                  <input data-shard-focus-level data-shard-focus-level-for="${escapeHtml(String(milestone.id))}" type="number" min="0" step="1" value="${trackedLevel ?? ""}" placeholder="0">
+                </label>
+                <div class="shard-level-up-summary">
+                  <p class="meta"><strong>Formula class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
+                  <p class="meta"><strong>Stage path</strong> ${escapeHtml(levelRailSummary.stageLabel)}</p>
+                  <p class="meta"><strong>Next stage</strong> ${escapeHtml(levelRailSummary.nextStageLabel)}</p>
+                  ${formulaProfile ? `<p class="meta"><strong>Evaluator boundary</strong> ${escapeHtml(formulaProfile.summary)}</p>` : ""}
+                </div>
+                <p class="shard-level-up-cost">${escapeHtml(levelRailSummary.costLabel)}</p>
+                <button class="button ghost shard-level-up-button" type="button" disabled>${escapeHtml(levelRailSummary.buttonLabel)}</button>
+              </aside>
+            </div>
+            <details class="shard-grounding-dropdown" data-shard-milestone-grounding="${escapeHtml(String(milestone.id))}" ${isGroundingOpen ? "open" : ""}>
+              <summary class="shard-grounding-summary">Grounded data</summary>
+              <div class="shard-milestone-data-grid">
+                <article class="validation-card shard-panel-card shard-mechanics-card">
+                  <div class="shard-panel-card-header">
+                    <strong>Formula profile</strong>
+                    <span class="shard-panel-card-tag">Runtime lane</span>
+                  </div>
+                  <p class="meta"><strong>Class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
+                  <p class="meta"><strong>Coverage</strong> ${escapeHtml(formulaProfile?.stageCoverage || (milestone.milestoneNumber === 0 ? "100-only special lane" : "Unresolved"))}</p>
+                  <p class="meta"><strong>Stage order</strong> ${escapeHtml(levelRailSummary.stageLabel)}</p>
+                </article>
+                <article class="validation-card shard-panel-card shard-mechanics-card">
+                  <div class="shard-panel-card-header">
+                    <strong>Extracted row state</strong>
+                    <span class="shard-panel-card-tag">Runtime row</span>
+                  </div>
+                  <p class="meta"><strong>Unlock req</strong> ${escapeHtml(extractedUnlockRequirement === null ? "Not recovered in direct row payload" : formatShardNumber(extractedUnlockRequirement))}</p>
+                  <p class="meta"><strong>Threshold schedule</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
+                  <p class="meta"><strong>Bonus slots</strong> ${escapeHtml(bonusSlotSummary ? String(bonusSlotSummary.bonusFieldCount) : "Unresolved")}</p>
+                </article>
+                <article class="validation-card shard-panel-card shard-mechanics-card">
+                  <div class="shard-panel-card-header">
+                    <strong>Extracted values</strong>
+                    <span class="shard-panel-card-tag">Native inputs</span>
+                  </div>
+                  <p class="meta"><strong>Cost fields</strong> ${escapeHtml(extractedCostFieldLabel)}</p>
+                  <p class="meta">${escapeHtml(extractedBonusValues.length ? extractedBonusValues.join(" | ") : "No direct bonus-per-level floats recovered for this row yet.")}</p>
+                </article>
+              </div>
+              <section class="shard-evidence-block">
+                <p class="snapshot-title">Grounding detail</p>
+                <div class="validation-grid">
+                  <article class="validation-card shard-panel-card ${groundedRow.titleCoverageTone}">
+                    <div class="shard-panel-card-header">
+                      <strong>Title source</strong>
+                      <span class="shard-panel-card-tag">Grounded</span>
+                    </div>
+                    <p class="meta">${escapeHtml(groundedRow.titleCoverageLine)}</p>
+                  </article>
+                  <article class="validation-card shard-panel-card ${groundedRow.rowShellTone}">
+                    <div class="shard-panel-card-header">
+                      <strong>Row shell</strong>
+                      <span class="shard-panel-card-tag">Grounded</span>
+                    </div>
+                    <p class="meta">${escapeHtml(groundedRow.rowShellLine)}</p>
+                  </article>
+                  <article class="validation-card shard-panel-card ${groundedRow.effectTone}">
+                    <div class="shard-panel-card-header">
+                      <strong>Effect path</strong>
+                      <span class="shard-panel-card-tag">Grounded</span>
+                    </div>
+                    <p class="meta">${escapeHtml(groundedRow.effectLine)}</p>
+                  </article>
+                  <article class="validation-card shard-panel-card ${groundedRow.costTone}">
+                    <div class="shard-panel-card-header">
+                      <strong>Cost path</strong>
+                      <span class="shard-panel-card-tag">Grounded</span>
+                    </div>
+                    <p class="meta">${escapeHtml(groundedRow.costLine)}</p>
+                  </article>
+                </div>
+              </section>
+            </details>
           </details>
-        `).join("")}
+        `;
+        }).join("")}
       </div>
     </div>
   `;
@@ -3196,12 +3515,17 @@ function buildApkGroundingValidationCases() {
   const tokenShopOwnerShell = state.extractedMechanics?.tokenShopOwnerShell;
   const tokenShopSaveBoundary = state.extractedMechanics?.tokenShopSaveBoundary;
   const multiverseMarketSaveBoundary = state.extractedMechanics?.multiverseMarketSaveBoundary;
+  const multiverseMarketMarketMemberBoundary = state.extractedMechanics?.multiverseMarketMarketMemberBoundary;
   const tokenBankControllerShell = state.extractedMechanics?.tokenBankControllerShell;
   const shardMilestones = state.shardGrounding?.milestones;
   const shardAssetGrounding = state.shardGrounding?.assetGrounding;
   const shardOwnerFamilyBoundary = state.shardGrounding?.ownerFamilyBoundary;
   const shardFinalSuBonusBoundary = state.shardGrounding?.finalSuBonusBoundary;
   const shardMilestonePayloadBoundary = state.shardGrounding?.milestonePayloadBoundary;
+  const shardCostModelBoundary = state.shardGrounding?.costModelBoundary;
+  const shardMilestoneRowModelBoundary = state.shardGrounding?.rowModelBoundary;
+  const shardMilestoneTitleEffectBoundary = state.shardGrounding?.titleEffectBoundary;
+  const shardEffectTextHandlerBoundary = state.shardGrounding?.effectTextHandlerBoundary;
   const shardMilestoneRowShellBoundary = state.shardGrounding?.milestoneRowShellBoundary;
   const shardMilestoneRowAlignmentBoundary = state.shardGrounding?.milestoneRowAlignmentBoundary;
   const shardSaveBoundary = state.shardGrounding?.saveBoundary;
@@ -3258,6 +3582,54 @@ function buildApkGroundingValidationCases() {
         ? `ShardUpgradeInfo preserves ${payloadBoundary.milestoneStateLabel} plus ${payloadBoundary.costAccessorLabel}`
         : "Shard milestone payload-watch boundary drifted",
       pass: payloadBoundary.hasBoundary && payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields && payloadBoundary.hasCostAccessorSamples,
+      scope: "APK"
+    });
+  }
+  if (shardCostModelBoundary) {
+    const costModelBoundary = getShardCostModelBoundarySummary(shardCostModelBoundary);
+    cases.push({
+      title: "Shard cost-model boundary",
+      expected: "ShardUpgradeInfo preserves sampled SU cost accessors plus a row-local SU0 cost parameter shell without formula claims",
+      actual: costModelBoundary.hasBoundary && costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell
+        ? `ShardUpgradeInfo preserves ${costModelBoundary.costWindowLabel} plus ${costModelBoundary.row0FieldLabel}`
+        : "Shard cost-model boundary drifted",
+      pass: costModelBoundary.hasBoundary && costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell,
+      scope: "APK"
+    });
+  }
+  if (shardMilestoneRowModelBoundary) {
+    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(shardMilestoneRowModelBoundary);
+    cases.push({
+      title: "Shard milestone row model",
+      expected: "Shard-local text-checker and unlock rows now reach 0-29 while the numbered buy seam still crosses the generic family",
+      actual: rowModelBoundary.hasBoundary && rowModelBoundary.hasShardLocalBuySample && rowModelBoundary.hasGenericBuyFamily
+        ? `Text ${rowModelBoundary.textCheckerRangeLabel}, unlock ${rowModelBoundary.unlockRangeLabel}, buy seam ${rowModelBoundary.shardLocalBuyLabel} vs ${rowModelBoundary.genericBuyLabel}`
+        : "Shard row-model boundary drifted",
+      pass: rowModelBoundary.hasBoundary && rowModelBoundary.hasShardLocalBuySample && rowModelBoundary.hasGenericBuyFamily,
+      scope: "APK"
+    });
+  }
+  if (shardMilestoneTitleEffectBoundary) {
+    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(shardMilestoneTitleEffectBoundary);
+    cases.push({
+      title: "Shard milestone titles and effect shell",
+      expected: "Shipped shard title assets and effect-family clues are preserved without claiming conflict-free row text",
+      actual: titleEffectBoundary.hasBoundary && titleEffectBoundary.hasEffectPresentationFamily && titleEffectBoundary.hasBonusCalcSamples
+        ? `Title rows ${titleEffectBoundary.titleRangeLabel} with effect shell ${titleEffectBoundary.effectSlotLabel}`
+        : "Shard title/effect boundary drifted",
+      pass: titleEffectBoundary.hasBoundary && titleEffectBoundary.hasEffectPresentationFamily && titleEffectBoundary.hasBonusCalcSamples,
+      scope: "APK"
+    });
+  }
+  if (shardEffectTextHandlerBoundary) {
+    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(shardEffectTextHandlerBoundary);
+    cases.push({
+      title: "Shard effect-text handler boundary",
+      expected: "A shard-specific bonus text handler leads over the generic milestone writer without claiming row-complete final text",
+      actual: effectTextHandlerBoundary.hasBoundary && effectTextHandlerBoundary.hasPresentationFamily && effectTextHandlerBoundary.hasBonusCalcSamples && effectTextHandlerBoundary.hasUiContextAnchors
+        ? `${effectTextHandlerBoundary.textHandlerLabel} aligned with ${effectTextHandlerBoundary.presentationFamilyLabel}`
+        : "Shard effect-text handler boundary drifted",
+      pass: effectTextHandlerBoundary.hasBoundary && effectTextHandlerBoundary.hasPresentationFamily && effectTextHandlerBoundary.hasBonusCalcSamples && effectTextHandlerBoundary.hasUiContextAnchors,
       scope: "APK"
     });
   }
@@ -3535,11 +3907,11 @@ function buildApkGroundingValidationCases() {
     const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(multiverseMarketRangeBoundary);
     cases.push({
       title: "MultiverseMarket row-range boundary",
-      expected: "Validated rows 50-59 and 63-74 do not overlap the recovered IS99-110 metadata run",
-      actual: multiverseMarketRangeSummary.hasExplicitZeroOverlap
-        ? `Validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} do not overlap ${multiverseMarketRangeSummary.metadataRangeLabel}`
+      expected: "Validated rows 50-59 and 63-74 now share a first direct overlap with the recovered IS71-110 metadata run at rows 71-74",
+      actual: multiverseMarketRangeSummary.hasOverlap
+        ? `Validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} now share a first direct overlap with ${multiverseMarketRangeSummary.metadataRangeLabel} at rows ${multiverseMarketRangeSummary.overlapLabel}`
         : "Missing validated-row versus metadata-run boundary",
-      pass: multiverseMarketRangeSummary.hasExplicitZeroOverlap,
+      pass: multiverseMarketRangeSummary.hasOverlap,
       scope: "APK"
     });
   }
@@ -3605,6 +3977,19 @@ function buildApkGroundingValidationCases() {
         ? `${multiverseMarketSaveBoundarySummary.actionAnchor} and ${multiverseMarketSaveBoundarySummary.saveAnchor} stay separate with ${multiverseMarketSaveBoundarySummary.overlapLabel}`
         : "Missing MultiverseMarket save-boundary clues",
       pass: multiverseMarketSaveBoundarySummary.hasSeparationBoundary,
+      scope: "APK"
+    });
+  }
+
+  if (multiverseMarketMarketMemberBoundary) {
+    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(multiverseMarketMarketMemberBoundary);
+    cases.push({
+      title: "MultiverseMarket canonical host narrowing",
+      expected: "PlayerProfile-side Market member shell or broader wrapper is now the strongest canonical host hypothesis",
+      actual: marketMemberSummary.favorsPlayerProfileMemberHost
+        ? `${marketMemberSummary.canonicalHostLabel} now leads over direct MultiverseMarket ownership or loose PlayerProfileData fields`
+        : "Missing PlayerProfile-side Market host narrowing",
+      pass: marketMemberSummary.favorsPlayerProfileMemberHost && marketMemberSummary.hasCloudBridge,
       scope: "APK"
     });
   }
@@ -3715,6 +4100,114 @@ function getShardMilestonePayloadBoundarySummary(boundary) {
     progressHookLabel: progressFillHooks.join(", "),
     tickFieldLabel: tickFields.join(", "),
     costAccessorLabel: sampleCostAccessors.join(", ")
+  };
+}
+
+function getShardCostModelBoundarySummary(boundary) {
+  const sampleCostAccessorWindows = Array.isArray(boundary?.sampleCostAccessorWindows) ? boundary.sampleCostAccessorWindows : [];
+  const row0CostFields = Array.isArray(boundary?.row0CostFields) ? boundary.row0CostFields : [];
+  const row0FillFields = Array.isArray(boundary?.row0FillFields) ? boundary.row0FillFields : [];
+  const row0BonusFields = Array.isArray(boundary?.row0BonusFields) ? boundary.row0BonusFields : [];
+  const optimizerBoundary = typeof boundary?.optimizerBoundary === "object" && boundary.optimizerBoundary ? boundary.optimizerBoundary : {};
+  const supportedNow = Array.isArray(optimizerBoundary.supportedNow) ? optimizerBoundary.supportedNow : [];
+  const blockedNow = Array.isArray(optimizerBoundary.blockedNow) ? optimizerBoundary.blockedNow : [];
+  const earlyWindow = sampleCostAccessorWindows.find((window) => window?.label === "earlyWindow") || {};
+  const lateWindow = sampleCostAccessorWindows.find((window) => window?.label === "lateWindow") || {};
+  const earlyAccessors = Array.isArray(earlyWindow.accessors) ? earlyWindow.accessors : [];
+  const lateAccessors = Array.isArray(lateWindow.accessors) ? lateWindow.accessors : [];
+  return {
+    hasBoundary:
+      boundary?.dataCarrier === "ShardUpgradeInfo"
+      && boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo",
+    hasSampledCostWindows:
+      earlyWindow.start === 0
+      && earlyWindow.end === 9
+      && earlyWindow.count === 10
+      && ["get_SU0Cost", "get_SU9Cost"].every((name) => earlyAccessors.includes(name))
+      && lateWindow.start === 23
+      && lateWindow.end === 29
+      && lateWindow.count === 7
+      && ["get_SU23Cost", "get_SU29Cost"].every((name) => lateAccessors.includes(name)),
+    hasRow0FormulaShell:
+      ["SU0StartCost", "SU0CostExponent", "SU0GrowthExponent", "SU0GrowthExponent2", "SU0GrowthExponent3"].every((name) => row0CostFields.includes(name))
+      && ["SU0Level1Fill", "SU0Level8Fill"].every((name) => row0FillFields.includes(name))
+      && ["SU0Bonus1", "SU0Bonus8"].every((name) => row0BonusFields.includes(name)),
+    dataCarrier: boundary?.dataCarrier || "ShardUpgradeInfo",
+    costWindowLabel: [earlyAccessors.join(", "), lateAccessors.join(", ")].filter(Boolean).join(" | "),
+    row0FieldLabel: row0CostFields.join(", "),
+    row0FillLabel: row0FillFields.join(", "),
+    row0BonusLabel: row0BonusFields.join(", "),
+    supportedOptimizerLabel: supportedNow.join(", "),
+    blockedOptimizerLabel: blockedNow.join(", ")
+  };
+}
+
+function getShardMilestoneRowModelBoundarySummary(boundary) {
+  const textCheckerRange = typeof boundary?.textCheckerRange === "object" && boundary.textCheckerRange ? boundary.textCheckerRange : {};
+  const unlockRequirementRange = typeof boundary?.unlockRequirementRange === "object" && boundary.unlockRequirementRange ? boundary.unlockRequirementRange : {};
+  const buyHookEvidence = typeof boundary?.buyHookEvidence === "object" && boundary.buyHookEvidence ? boundary.buyHookEvidence : {};
+  const shardLocalDirectHooks = Array.isArray(buyHookEvidence.shardLocalDirectHooks) ? buyHookEvidence.shardLocalDirectHooks : [];
+  const genericNumberedFamily = typeof buyHookEvidence.genericNumberedFamily === "object" && buyHookEvidence.genericNumberedFamily ? buyHookEvidence.genericNumberedFamily : {};
+  return {
+    hasBoundary:
+      boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo"
+      && textCheckerRange.start === 0
+      && textCheckerRange.end === 29
+      && textCheckerRange.count === 30
+      && unlockRequirementRange.start === 0
+      && unlockRequirementRange.end === 29
+      && unlockRequirementRange.count === 30,
+    hasShardLocalBuySample: shardLocalDirectHooks.includes("BuyMilestone0"),
+    hasGenericBuyFamily:
+      genericNumberedFamily.family === "ConstructionMilestones, Assembly-CSharp"
+      && genericNumberedFamily.start === 1
+      && genericNumberedFamily.end === 57
+      && genericNumberedFamily.count === 57,
+    textCheckerRangeLabel: `${textCheckerRange.start ?? "?"}-${textCheckerRange.end ?? "?"}`,
+    unlockRangeLabel: `${unlockRequirementRange.start ?? "?"}-${unlockRequirementRange.end ?? "?"}`,
+    shardLocalBuyLabel: shardLocalDirectHooks.join(", "),
+    genericBuyLabel: `${genericNumberedFamily.family || "ConstructionMilestones, Assembly-CSharp"} ${genericNumberedFamily.start ?? "?"}-${genericNumberedFamily.end ?? "?"}`
+  };
+}
+
+function getShardMilestoneTitleEffectBoundarySummary(boundary) {
+  const titleAssetCandidates = Array.isArray(boundary?.titleAssetCandidates) ? boundary.titleAssetCandidates : [];
+  const effectPresentationSlots = Array.isArray(boundary?.effectPresentationSlots) ? boundary.effectPresentationSlots : [];
+  const sampleBonusCalcAccessors = Array.isArray(boundary?.sampleBonusCalcAccessors) ? boundary.sampleBonusCalcAccessors : [];
+  const uniqueRows = [...new Set(titleAssetCandidates.map((entry) => entry?.row).filter((value) => Number.isInteger(value)))].sort((a, b) => a - b);
+  const row28Candidates = titleAssetCandidates.filter((entry) => entry?.row === 28).map((entry) => entry.title);
+  return {
+    hasBoundary: uniqueRows.includes(0) && uniqueRows.includes(29) && uniqueRows.includes(30),
+    hasEffectPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) => effectPresentationSlots.includes(name)),
+    hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) => sampleBonusCalcAccessors.includes(name)),
+    titleRangeLabel: uniqueRows.length ? `${uniqueRows[0]}-${uniqueRows[uniqueRows.length - 1]}` : "unknown",
+    effectSlotLabel: effectPresentationSlots.join(", "),
+    bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
+    row28ConflictLabel: row28Candidates.join(", ")
+  };
+}
+
+function getShardEffectTextHandlerBoundarySummary(boundary) {
+  const presentationFamily = Array.isArray(boundary?.presentationFamily) ? boundary.presentationFamily : [];
+  const sampleBonusCalcAccessors = Array.isArray(boundary?.sampleBonusCalcAccessors) ? boundary.sampleBonusCalcAccessors : [];
+  const uiContextAnchors = Array.isArray(boundary?.uiContextAnchors) ? boundary.uiContextAnchors : [];
+  const rowModelCoverage = typeof boundary?.rowModelCoverage === "object" && boundary?.rowModelCoverage ? boundary.rowModelCoverage : {};
+  return {
+    hasBoundary:
+      boundary?.probableTextHandler === "TextHandlerShardMilestoneBonusesPerLevel/N"
+      && boundary?.genericMilestoneWriter === "SetAllMilestoneTexts"
+      && rowModelCoverage.start === 0
+      && rowModelCoverage.end === 29
+      && rowModelCoverage.count === 30,
+    hasPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) => presentationFamily.includes(name)),
+    hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) => sampleBonusCalcAccessors.includes(name)),
+    hasUiContextAnchors: ["LevelText", "DescText", "ValueText", "DescriptionText"].every((name) => uiContextAnchors.includes(name)),
+    textHandlerLabel: boundary?.probableTextHandler || "TextHandlerShardMilestoneBonusesPerLevel/N",
+    genericWriterLabel: boundary?.genericMilestoneWriter || "SetAllMilestoneTexts",
+    presentationFamilyLabel: presentationFamily.join(", "),
+    bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
+    uiContextLabel: uiContextAnchors.join(", "),
+    rowCoverageLabel: `${rowModelCoverage.start ?? "?"}-${rowModelCoverage.end ?? "?"}`
   };
 }
 
@@ -3940,8 +4433,11 @@ function getMultiverseMarketRangeBoundarySummary(boundary) {
   const metadataIsRangeLabel = typeof boundary?.metadataIsRangeLabel === "string" ? boundary.metadataIsRangeLabel : "";
 
   return {
+    hasRangeBoundary: validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0,
     hasValidatedRows: validatedRowRanges.length > 0,
+    hasOverlap: overlapIds.length > 0,
     hasExplicitZeroOverlap: validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0 && overlapIds.length === 0,
+    overlapLabel: formatNumericRanges(overlapIds),
     validatedRangeLabel: validatedRowRanges.join(" and "),
     metadataRangeLabel: metadataIsRangeLabel
   };
@@ -4142,6 +4638,10 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
   const memberShellClues = Array.isArray(boundary?.playerProfileMemberShellClues) ? boundary.playerProfileMemberShellClues : [];
   const cloudSaveBridgeClues = Array.isArray(boundary?.cloudSaveBridgeClues) ? boundary.cloudSaveBridgeClues : [];
   const missingDirectTypeMapClues = Array.isArray(boundary?.missingDirectTypeMapClues) ? boundary.missingDirectTypeMapClues : [];
+  const siblingAccessorClues = ["get_Market", "get_Relics", "get_CellData", "get_ModPointData", "get_ShardData", "get_ResearchPointData", "get_AcademyPointData"];
+  const siblingMemberShellClues = ["Market", "Relics", "CellData", "ModPointData", "ShardData", "ResearchPointData", "AcademyPointData"];
+  const preservedSiblingAccessorCount = siblingAccessorClues.filter((name) => accessorClues.includes(name)).length;
+  const preservedSiblingMemberCount = siblingMemberShellClues.filter((name) => memberShellClues.includes(name)).length;
 
   return {
     hasBoundary:
@@ -4157,12 +4657,27 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
       missingDirectTypeMapClues.includes("PlayerProfileData|Market")
       && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption")
       && missingDirectTypeMapClues.includes("PlayerProfileData|MultiverseMarket"),
+    hasSiblingAccessorCluster:
+      siblingAccessorClues.every((name) => accessorClues.includes(name))
+      && siblingMemberShellClues.every((name) => memberShellClues.includes(name)),
+    favorsPlayerProfileMemberHost:
+      accessorClues.includes("get_Market")
+      && memberShellClues.includes("Market")
+      && siblingAccessorClues.filter((name) => accessorClues.includes(name)).length >= 6
+      && siblingMemberShellClues.filter((name) => memberShellClues.includes(name)).length >= 6
+      && missingDirectTypeMapClues.includes("PlayerProfileData|Market")
+      && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption"),
+    preservedSiblingAccessorCount,
+    preservedSiblingMemberCount,
     accessorLabel: "get_Market",
     memberLabel: "Market",
     memberShellLabel: "Relics, ShardData, ResearchPointData, and AcademyPointData",
+    siblingAccessorLabel: "get_Relics, get_CellData, get_ModPointData, get_ShardData, get_ResearchPointData, and get_AcademyPointData",
+    siblingMemberLabel: "Relics, CellData, ModPointData, ShardData, ResearchPointData, and AcademyPointData",
     cloudSaveLabel: "CloudSavePlayerProfile",
     profileInfoLabel: "GetPlayerProfileInfo",
-    missingTypeMapLabel: "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket"
+    missingTypeMapLabel: "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket",
+    canonicalHostLabel: "PlayerProfile-side Market member shell or broader wrapper"
   };
 }
 
@@ -4200,15 +4715,15 @@ function getMultiverseMarketMetadataSummary(neighborhood) {
   };
 }
 
-function getMultiverseMarketValidatedCoverage(multiverseMarket) {
-  const validatedIds = Array.isArray(multiverseMarket?.source?.validated_ids)
-    ? [...new Set(multiverseMarket.source.validated_ids.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
+function formatNumericRanges(values) {
+  const normalizedValues = Array.isArray(values)
+    ? [...new Set(values.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
     : [];
   const ranges = [];
   let rangeStart = null;
   let previous = null;
 
-  validatedIds.forEach((value) => {
+  normalizedValues.forEach((value) => {
     if (rangeStart === null) {
       rangeStart = value;
       previous = value;
@@ -4227,16 +4742,28 @@ function getMultiverseMarketValidatedCoverage(multiverseMarket) {
     ranges.push(rangeStart === previous ? `${rangeStart}` : `${rangeStart}-${previous}`);
   }
 
+  return ranges.join(" and ");
+}
+
+function getMultiverseMarketValidatedCoverage(multiverseMarket) {
+  const validatedIds = Array.isArray(multiverseMarket?.source?.validated_ids)
+    ? [...new Set(multiverseMarket.source.validated_ids.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
+    : [];
+
   return {
     hasValidatedRows: validatedIds.length > 0,
     count: validatedIds.length,
-    rangeLabel: ranges.join(" and ")
+    rangeLabel: formatNumericRanges(validatedIds)
   };
 }
 
-function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket) {
+function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket, multiverseMarketRangeBoundary) {
   const validatedRecords = Array.isArray(multiverseMarket?.records) ? multiverseMarket.records : [];
   const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
+  const overlapIds = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)
+    ? [...new Set(multiverseMarketRangeBoundary.overlapIds.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
+    : [];
+  const overlapIdSet = new Set(overlapIds);
   const importedState = typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
   const rawBalance = importedState.InscryptionsDone;
   const hasImportedBalance = isBoundaryValuePresent(rawBalance);
@@ -4245,6 +4772,9 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     .map((record) => {
       const rowId = Number(record?.inscription_id);
       const maxLevel = Number(record?.max_level);
+      const bonusValue = Number(record?.bonus_value);
+      const startCost = Number(record?.start_cost);
+      const costExponent = Number(record?.cost_exponent);
       const rawLevel = importedState[`IS${rowId}Level`];
       const level = Number(rawLevel);
       if (!Number.isFinite(rowId) || !Number.isFinite(level)) {
@@ -4254,6 +4784,11 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
         rowId,
         level,
         maxLevel: Number.isFinite(maxLevel) ? maxLevel : null,
+        bonusValue: Number.isFinite(bonusValue) ? bonusValue : null,
+        startCost: Number.isFinite(startCost) ? startCost : null,
+        costExponent: Number.isFinite(costExponent) ? costExponent : null,
+        remainingLevels: Number.isFinite(maxLevel) ? Math.max(0, maxLevel - level) : null,
+        isRecoveredMaxed: Number.isFinite(maxLevel) ? level >= maxLevel : false,
         completionPercent: Number.isFinite(maxLevel) && maxLevel > 0
           ? Math.min(100, Math.round((level / maxLevel) * 100))
           : null
@@ -4261,8 +4796,10 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     })
     .filter(Boolean)
     .sort((left, right) => left.rowId - right.rowId);
-  const previewRows = importedValidatedRows.slice(0, 8);
+  const importedOverlapRows = importedValidatedRows.filter((entry) => overlapIdSet.has(entry.rowId));
+  const previewRows = (importedOverlapRows.length ? importedOverlapRows : importedValidatedRows).slice(0, 8);
   const importedValidatedIds = new Set(importedValidatedRows.map((entry) => entry.rowId));
+  const missingOverlapRows = overlapIds.filter((rowId) => !importedValidatedIds.has(rowId));
   const missingValidatedRows = validatedRecords
     .map((record) => Number(record?.inscription_id))
     .filter((rowId) => Number.isFinite(rowId) && !importedValidatedIds.has(rowId));
@@ -4293,6 +4830,17 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
   return {
     hasImportedBalance,
     balanceLabel,
+    hasOverlapGroundedRows: overlapIds.length > 0,
+    overlapRangeLabel: formatNumericRanges(overlapIds),
+    overlapRowCount: overlapIds.length,
+    hasOverlapLevelPreview: importedOverlapRows.length > 0,
+    importedOverlapRowCount: importedOverlapRows.length,
+    overlapPreviewRows: importedOverlapRows.slice(0, 4),
+    overlapMaxedCount: importedOverlapRows.filter((entry) => entry.isRecoveredMaxed).length,
+    missingOverlapRows,
+    missingOverlapLabel: missingOverlapRows.length
+      ? missingOverlapRows.map((rowId) => `IS${rowId}`).join(", ")
+      : "none",
     hasValidatedLevelPreview: importedValidatedRows.length > 0,
     importedValidatedRowCount: importedValidatedRows.length,
     validatedRowCount: validatedRecords.length,
@@ -4322,15 +4870,28 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
       <p class="meta">This is a descriptive preview of quarantined Emporium state for the validated row block only. It does not promote these values into canonical PlayerProfile truth or spend recommendations.</p>
       <div class="pill-row">
         <span class="pill">${preview.hasImportedBalance ? `InscryptionsDone ${escapeHtml(preview.balanceLabel)}` : "No imported InscryptionsDone"}</span>
+        <span class="pill">${preview.hasOverlapGroundedRows ? `${preview.importedOverlapRowCount}/${preview.overlapRowCount} overlap-grounded rows` : "No overlap-grounded rows"}</span>
+        ${preview.hasOverlapLevelPreview ? `<span class="pill">${preview.overlapMaxedCount} overlap rows maxed</span>` : ""}
         <span class="pill">${preview.hasValidatedLevelPreview ? `${preview.importedValidatedRowCount}/${preview.validatedRowCount} validated rows` : "No validated Emporium levels"}</span>
         ${preview.hasValidatedLevelPreview ? `<span class="pill">${preview.maxedCount} maxed imported rows</span>` : ""}
         ${preview.hasValidatedLevelPreview && Number.isFinite(preview.averageCompletion) ? `<span class="pill">${preview.averageCompletion}% avg validated completion</span>` : ""}
         ${preview.extraImportedRows.length ? `<span class="pill">${preview.extraImportedRows.length} extra imported rows quarantined</span>` : ""}
       </div>
       <div class="meta-stack">
+        <p class="meta">${preview.hasOverlapGroundedRows ? `The first overlap-grounded Emporium rows are ${escapeHtml(preview.overlapRangeLabel)}.` : "No overlap-grounded Emporium row subset is available in this build."}</p>
+        <p class="meta">${preview.hasOverlapGroundedRows ? `Missing overlap-grounded imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "The overlap-grounded subset is not available for import preview."}</p>
         <p class="meta">${preview.hasValidatedLevelPreview ? `Imported current levels are present for validated rows ${escapeHtml(preview.validatedRangeLabel)}.` : "Imported current levels are not present for the validated Emporium row block."}</p>
         <p class="meta">${preview.hasValidatedLevelPreview ? `Missing validated imports: ${preview.missingValidatedRows.length ? escapeHtml(preview.missingValidatedRows.map((rowId) => `IS${rowId}`).join(", ")) : "none"}.` : "When imported IS*Level fields exist, this preview only surfaces the validated Emporium block and leaves the rest quarantined."}</p>
         <p class="meta">${preview.extraImportedRows.length ? `Extra imported rows outside the grounded validated block stay quarantined: ${escapeHtml(preview.extraImportedLabel)}${preview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported rows were found outside the grounded validated block."}</p>
+        <p class="meta">${preview.hasOverlapLevelPreview ? "Imported overlap-grounded rows also show recovered row constants from the checked MultiverseMarket payload." : "Recovered row constants appear here once overlap-grounded rows are imported."}</p>
+        ${preview.hasOverlapLevelPreview ? `<div class="preview-stack">${preview.overlapPreviewRows.map((entry) => `
+          <article class="preview-card">
+            <strong>IS${escapeHtml(String(entry.rowId))} overlap-grounded</strong>
+            <p class="meta">Imported level ${escapeHtml(formatShardNumber(entry.level))}${Number.isFinite(entry.maxLevel) ? ` / recovered max ${escapeHtml(formatShardNumber(entry.maxLevel))}` : ""}</p>
+            <p class="meta">${entry.isRecoveredMaxed ? "Recovered max reached for this overlap-grounded row." : Number.isFinite(entry.remainingLevels) ? `${escapeHtml(formatShardNumber(entry.remainingLevels))} recovered levels remaining to cap.` : "Recovered cap distance is not available in this build."}</p>
+            <p class="meta">Recovered row constants: Bonus ${escapeHtml(formatOptionalNumber(entry.bonusValue))} | StartCost ${escapeHtml(formatOptionalNumber(entry.startCost))} | CostExponent ${escapeHtml(formatOptionalNumber(entry.costExponent))}</p>
+          </article>
+        `).join("")}</div>` : ""}
         ${preview.hasValidatedLevelPreview ? `<div class="preview-stack">${preview.previewRows.map((entry) => `
           <article class="preview-card">
             <strong>IS${escapeHtml(String(entry.rowId))}</strong>
@@ -4368,8 +4929,8 @@ function getActiveMvpRecommendationFeedSupport() {
   return getActiveMvpRecommendationFeedPartition().invalid;
 }
 
-function getActiveMvpRecommendationFeedPartition() {
-  const all = runProgressionOptimization().filter((item) => item.module === "shards" || item.module === "loop");
+function getProgressionRecommendationFeedPartition(items) {
+  const all = Array.isArray(items) ? items.filter((item) => item?.module === "shards" || item?.module === "loop") : [];
   const valid = [];
   const invalid = [];
   all.forEach((item) => {
@@ -4380,6 +4941,131 @@ function getActiveMvpRecommendationFeedPartition() {
     valid.push(item);
   });
   return { all, valid, invalid };
+}
+
+function getActiveMvpRecommendationFeedPartition() {
+  return getProgressionRecommendationFeedPartition(runProgressionOptimization());
+}
+
+function getProgressionSubsystemPartition(items) {
+  const shardItems = [];
+  const loopItems = [];
+  (Array.isArray(items) ? items : []).forEach((item) => {
+    if (item?.module === "loop") {
+      loopItems.push(item);
+      return;
+    }
+    if (item?.module === "shards") {
+      shardItems.push(item);
+    }
+  });
+  return {
+    shards: shardItems,
+    loop: loopItems
+  };
+}
+
+function getSelectedProgressionSubsystem() {
+  return ["shards", "loop", "research"].includes(state.progressionView) ? state.progressionView : "shards";
+}
+
+function renderProgressionSubsystemToggle(subsystemFeed) {
+  const counts = {
+    shards: Array.isArray(subsystemFeed?.shards) ? subsystemFeed.shards.length : 0,
+    loop: Array.isArray(subsystemFeed?.loop) ? subsystemFeed.loop.length : 0
+  };
+  const selected = getSelectedProgressionSubsystem();
+  $("#progressionSubsystemToggle").innerHTML = [
+    { id: "shards", label: `Shard milestones (${counts.shards})` },
+    { id: "loop", label: `Loop Prestige (${counts.loop})` },
+    { id: "research", label: "Shard Mining" }
+  ].map((item) => `
+    <button class="button${selected === item.id ? " is-active" : ""}" type="button" data-progression-view="${escapeHtml(item.id)}" role="tab" aria-selected="${selected === item.id}">
+      ${escapeHtml(item.label)}
+    </button>
+  `).join("");
+}
+
+function renderProgressionCalibrationPanel(subsystemFeed) {
+  const summary = getProgressionCalibrationSummary(subsystemFeed);
+  $("#progressionCalibrationPanel").innerHTML = `
+    <article class="validation-card ${summary.shards.ready ? "pass" : "warn"}">
+      <strong>Shard milestone quickstart</strong>
+      <p class="meta">${summary.shards.ready ? "Shard milestones have the minimum tracked inputs needed for row-level guidance." : "Shard milestones are still missing one or more minimum tracked inputs."}</p>
+      <p class="meta">Total milestone levels: ${summary.shards.totalLevelsLabel} | Tracked row: ${summary.shards.focusMilestoneLabel} | Tracked row level: ${summary.shards.focusLevelLabel} | Observed rows: ${summary.shards.observedRowCountLabel}</p>
+      <p class="meta">${escapeHtml(summary.shards.nextStep)}</p>
+    </article>
+    <article class="validation-card ${summary.loop.ready ? "pass" : "warn"}">
+      <strong>Loop Prestige quickstart</strong>
+      <p class="meta">${summary.loop.ready ? "Loop Prestige guardrails have the minimum tracked inputs needed for pacing warnings." : "Loop Prestige guardrails are still missing one or more minimum tracked inputs."}</p>
+      <p class="meta">Current LR: ${summary.loop.loopResetLabel} | Current shards: ${summary.loop.shardsLabel}</p>
+      <p class="meta">${escapeHtml(summary.loop.nextStep)}</p>
+    </article>
+    <article class="validation-card ${summary.profile.hasConfidence ? "pass" : "warn"}">
+      <strong>Profile readiness</strong>
+      <p class="meta">Profile confidence: ${summary.profile.confidenceLabel}. Active progression view: ${escapeHtml(summary.profile.activeViewLabel)}.</p>
+      <p class="meta">${escapeHtml(summary.profile.nextStep)}</p>
+      <button class="button" type="button" data-progression-action="open-profile">Open Profile</button>
+    </article>
+  `;
+}
+
+function getProgressionCalibrationSummary(subsystemFeed) {
+  const shardPlanner = getShardPlannerState();
+  const canonical = getCanonicalProfileState();
+  const selected = getSelectedProgressionSubsystem();
+  const hasTotalLevels = shardPlanner.totalMilestoneLevels !== null && shardPlanner.totalMilestoneLevels !== undefined && String(shardPlanner.totalMilestoneLevels) !== "";
+  const hasFocusMilestone = Boolean(shardPlanner.focusMilestoneId);
+  const hasFocusLevel = shardPlanner.focusMilestoneLevel !== null && shardPlanner.focusMilestoneLevel !== undefined && String(shardPlanner.focusMilestoneLevel) !== "";
+  const observedRowCount = Object.keys(shardPlanner.observedLevelsByMilestone ?? {}).length;
+  const hasLoopReset = canonical.loopReset !== null && canonical.loopReset !== undefined && String(canonical.loopReset) !== "";
+  const hasShards = canonical.shards !== null && canonical.shards !== undefined && String(canonical.shards) !== "";
+  const shardCount = Array.isArray(subsystemFeed?.shards) ? subsystemFeed.shards.length : 0;
+  const loopCount = Array.isArray(subsystemFeed?.loop) ? subsystemFeed.loop.length : 0;
+  return {
+    shards: {
+      ready: hasTotalLevels && hasFocusMilestone && hasFocusLevel,
+      totalLevelsLabel: formatOptionalNumber(shardPlanner.totalMilestoneLevels),
+      focusMilestoneLabel: shardPlanner.focusMilestoneId || "not set",
+      focusLevelLabel: formatOptionalNumber(shardPlanner.focusMilestoneLevel),
+      observedRowCountLabel: formatOptionalNumber(observedRowCount),
+      nextStep: hasTotalLevels && hasFocusMilestone && hasFocusLevel
+        ? `${shardCount} shard milestone card${shardCount === 1 ? "" : "s"} are ready with the current manual inputs.`
+        : "Fill total shard milestone levels, then edit any shard row so milestone guidance becomes usable."
+    },
+    loop: {
+      ready: hasLoopReset && hasShards,
+      loopResetLabel: formatOptionalNumber(canonical.loopReset),
+      shardsLabel: formatOptionalNumber(canonical.shards),
+      nextStep: hasLoopReset && hasShards
+        ? `${loopCount} Loop Prestige card${loopCount === 1 ? "" : "s"} are ready with the current profile inputs.`
+        : "Fill current LR and current shards in Profile so Loop Prestige guardrails can warn cleanly."
+    },
+    profile: {
+      hasConfidence: Boolean(canonical.dataConfidence),
+      confidenceLabel: canonical.dataConfidence || "missing",
+      activeViewLabel: selected === "research" ? "Shard Mining" : selected === "loop" ? "Loop Prestige" : "Shard milestones",
+      nextStep: selected === "research"
+        ? "Use Shard Mining when you need the extracted evidence; use Shard milestones or Loop Prestige for day-to-day play."
+        : "The active Progression view is now split into game-facing surfaces instead of one long mixed page."
+    }
+  };
+}
+
+function renderProgressionSubsystemSection(title, eyebrow, description, items, tone) {
+  const cards = (Array.isArray(items) ? items : []).map((item) => makeRecommendationCard(item, tone)).join("");
+  return `
+    <section class="meta-stack">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">${escapeHtml(eyebrow)}</p>
+          <h3>${escapeHtml(title)}</h3>
+        </div>
+      </div>
+      <p class="meta">${escapeHtml(description)}</p>
+      ${cards ? `<div class="recommendation-list">${cards}</div>` : `<article class="validation-card warn"><strong>${escapeHtml(title)} unavailable</strong><p class="meta">No player-facing cards currently passed the shared recommendation contract for this subsystem.</p></article>`}
+    </section>
+  `;
 }
 
 function sortRecommendationFeed(items) {
@@ -4878,16 +5564,431 @@ function getShardFocusMilestone() {
 }
 
 function getMilestonesForDisplay() {
-  const selectedId = getSelectedShardMilestoneId();
   return [...getGroundedShardMilestones()].sort((left, right) => {
-    if (left.id === selectedId) {
-      return -1;
-    }
-    if (right.id === selectedId) {
-      return 1;
-    }
     return Number(left.milestoneNumber || 0) - Number(right.milestoneNumber || 0);
   });
+}
+
+function isShardMilestoneOpen(id, type = "card") {
+  const source = type === "grounding"
+    ? state.shardMilestoneGroundingOpenIds
+    : state.shardMilestoneCardOpenIds;
+  return source.includes(String(id));
+}
+
+function syncShardMilestoneOpenState(id, open, type = "card") {
+  if (!id) {
+    return;
+  }
+  const key = type === "grounding" ? "shardMilestoneGroundingOpenIds" : "shardMilestoneCardOpenIds";
+  const nextIds = new Set(state[key] ?? []);
+  if (open) {
+    nextIds.add(String(id));
+  } else {
+    nextIds.delete(String(id));
+  }
+  state[key] = [...nextIds];
+}
+
+function getShardFocusLevelForMilestone(milestone) {
+  if (!milestone) {
+    return "";
+  }
+  const value = getShardPlannerState().observedLevelsByMilestone?.[milestone.id];
+  return value ?? "";
+}
+
+function getShardSceneMonoBehaviourProbeSummary(probe) {
+  const monoBehaviours = Array.isArray(probe?.monoBehaviours) ? probe.monoBehaviours : [];
+  const shardMining = monoBehaviours.find((entry) => entry?.scriptName === "ShardMining");
+  const textHandler = monoBehaviours.find((entry) => entry?.scriptName === "ShardPerLevelTextHandler");
+  const constructionMilestones = monoBehaviours.find((entry) => entry?.scriptName === "ConstructionMilestones");
+  const formatProbeLabel = (entry) => entry
+    ? `${entry.assetsFile} path ${entry.pathId} @ ${entry.byteStart} (${entry.byteSize} bytes)`
+    : "unavailable";
+  return {
+    hasBoundary: Boolean(shardMining),
+    shardMiningLabel: formatProbeLabel(shardMining),
+    textHandlerLabel: formatProbeLabel(textHandler),
+    constructionMilestonesLabel: formatProbeLabel(constructionMilestones)
+  };
+}
+
+function getShardCostParameterProbeSummary(probe) {
+    const metadataFamilies = probe?.metadataFamilies ?? {};
+    const candidateTuples = Array.isArray(probe?.shardMiningCandidateTuples) ? probe.shardMiningCandidateTuples : [];
+    const rowAlignedTuples = Array.isArray(probe?.rowAlignedTupleCandidates) ? probe.rowAlignedTupleCandidates : [];
+    const signatureGroups = Array.isArray(probe?.signatureGroups) ? probe.signatureGroups : [];
+    const startCostFields = Array.isArray(metadataFamilies.startCostFields) ? metadataFamilies.startCostFields : [];
+    const costExponentFields = Array.isArray(metadataFamilies.costExponentFields) ? metadataFamilies.costExponentFields : [];
+    const growthExponentFields = Array.isArray(metadataFamilies.growthExponentFields) ? metadataFamilies.growthExponentFields : [];
+    const sampleTuple = rowAlignedTuples[0] ?? candidateTuples[0] ?? null;
+    return {
+    hasFullMetadataFamilies: startCostFields.length === 30 && costExponentFields.length === 30 && growthExponentFields.length >= 30,
+    metadataLabel: startCostFields.length === 30 && costExponentFields.length === 30
+      ? "SU0-29 StartCost and CostExponent"
+      : "partial SU* cost fields",
+      hasCandidateTuples: candidateTuples.length > 0,
+      hasRowAlignedTuples: rowAlignedTuples.length > 0,
+      candidateTupleCount: candidateTuples.length,
+      rowAlignedTupleCount: rowAlignedTuples.length,
+      signatureGroupCount: signatureGroups.length,
+      sampleTupleLabel: sampleTuple
+        ? `${formatProbeNumber(sampleTuple.intValue)} | ${formatProbeNumber(sampleTuple.exponentA)} | ${formatProbeNumber(sampleTuple.exponentB)} | ${formatProbeNumber(sampleTuple.tailScalar)}`
+        : "unavailable"
+    };
+  }
+
+function getShardBonusSlotRowSummary(row) {
+  const rows = Array.isArray(state.shardGrounding?.bonusSlotProbe?.rows) ? state.shardGrounding.bonusSlotProbe.rows : [];
+  return rows.find((entry) => Number(entry.row) === Number(row)) || null;
+}
+
+function getShardRowAlignedCostTuple(row) {
+  const tuples = Array.isArray(state.shardGrounding?.costParameterProbe?.rowAlignedTupleCandidates)
+    ? state.shardGrounding.costParameterProbe.rowAlignedTupleCandidates
+    : [];
+  return tuples.find((entry) => Number(entry.row) === Number(row)) || null;
+}
+
+function getShardRowDirectValues(row) {
+  if (Number(row) === 0) {
+    const row0 = state.shardGrounding?.costParameterProbe?.row0PreludeCandidate;
+    return Number(row0?.row) === 0 ? row0 : null;
+  }
+  return getShardRowAlignedCostTuple(row);
+}
+
+function getShardExtractedUnlockRequirement(row) {
+  const values = Array.isArray(state.shardGrounding?.costParameterProbe?.unlockRequirementBlock?.values)
+    ? state.shardGrounding.costParameterProbe.unlockRequirementBlock.values
+    : [];
+  const value = values[Number(row)];
+  return Number.isFinite(Number(value)) ? Number(value) : null;
+}
+
+function getShardExtractedBonusPerLevel(row, bonusIndex) {
+  const directValues = getShardRowDirectValues(row);
+  const bonusValues = Array.isArray(directValues?.bonusPerLevelValues) ? directValues.bonusPerLevelValues : [];
+  const value = bonusValues[bonusIndex];
+  return Number.isFinite(Number(value)) ? Number(value) : null;
+}
+
+function getShardExtractedCostFieldMapping(row) {
+  const directValues = getShardRowDirectValues(row);
+  return directValues?.strongestFieldOrderMapping || null;
+}
+
+function getShardNativeCostRowSummary(row) {
+  const rows = Array.isArray(state.shardGrounding?.costNativeProbe?.rows) ? state.shardGrounding.costNativeProbe.rows : [];
+  return rows.find((entry) => Number(entry.row) === Number(row)) || null;
+}
+
+function formatShardNativeThresholdStage(stage) {
+  const minimumLevel = Number(stage?.minimumLevel);
+  const getterName = stage?.getterName || "Unknown getter";
+  const baseFieldName = stage?.baseFieldName || "Unknown base";
+  if (!Number.isFinite(minimumLevel)) {
+    return `${getterName} | ${baseFieldName}`;
+  }
+  return `${formatShardNumber(minimumLevel)}+ via ${getterName} and ${baseFieldName}`;
+}
+
+function getShardNativeCostStageSummary(row, level = 0) {
+  const nativeRow = getShardNativeCostRowSummary(row);
+  const stages = Array.isArray(nativeRow?.thresholdStages) ? nativeRow.thresholdStages : [];
+  if (!stages.length) {
+    return {
+      stageLabel: "Native cost stages not yet recovered for this row.",
+      nextStageLabel: "No higher native over-level stage recovered.",
+      thresholdStageLabel: ""
+    };
+  }
+  const orderedStages = stages
+    .filter((stage) => Number.isFinite(Number(stage?.minimumLevel)))
+    .sort((left, right) => Number(left.minimumLevel) - Number(right.minimumLevel));
+  const stageLabel = orderedStages.map((stage) => formatShardNativeThresholdStage(stage)).join(" | ");
+  const nextStage = orderedStages.find((stage) => Number(stage.minimumLevel) > Number(level)) || null;
+  return {
+    stageLabel,
+    nextStageLabel: nextStage
+      ? `Next native cost stage: ${formatShardNativeThresholdStage(nextStage)}`
+      : "No higher native over-level stage recovered.",
+    thresholdStageLabel: orderedStages.length
+      ? `Verified stage order: base lane -> ${orderedStages.map((stage) => `${formatShardNumber(stage.minimumLevel)}+`).join(" -> ")}`
+      : ""
+  };
+}
+
+function getShardFormulaApplicationProfile(row) {
+  const profiles = state.shardGrounding?.costNativeProbe?.formulaApplicationProfiles;
+  if (!profiles) {
+    return null;
+  }
+  if (Number(row) === 0) {
+    return profiles.rowZero || null;
+  }
+  const normalRows = Array.isArray(profiles.normalRows) ? profiles.normalRows : [];
+  return normalRows.find((entry) => Array.isArray(entry?.rows) && entry.rows.includes(Number(row))) || null;
+}
+
+function formatShardFormulaClassLabel(formulaClass) {
+  const labels = {
+    "row0-special-case": "Row 0 special case",
+    "canonical-additive-premerge": "Canonical full recipe",
+    "canonical-literal-builder": "Canonical full recipe",
+    "drop-400-stage": "Drops 400+ stage",
+    "two-stage-transition-band": "100/200 transition band",
+    "hundred-stage-short-class": "100-only short class"
+  };
+  return labels[formulaClass] || "Unresolved native class";
+}
+
+function formatShardExtractedBonusPerLevel(value) {
+  return Number.isFinite(Number(value)) ? `${Number(value).toFixed(3).replace(/\.?0+$/u, "")}x` : "Unknown";
+}
+
+function formatShardExtractedCostFieldMapping(mapping) {
+  if (!mapping || typeof mapping !== "object" || !mapping.values) {
+    return "Not recovered in direct row payload";
+  }
+  const fieldNames = Array.isArray(mapping.fieldNames) ? mapping.fieldNames : Object.keys(mapping.values);
+  const parts = fieldNames
+    .filter((fieldName) => Number.isFinite(Number(mapping.values?.[fieldName])))
+    .map((fieldName) => `${fieldName} ${formatProbeNumber(mapping.values[fieldName])}`);
+  if (!parts.length) {
+    return "Not recovered in direct row payload";
+  }
+  const auxValue = mapping.auxiliaryIntCandidate;
+  if (Number.isFinite(Number(auxValue))) {
+    parts.push(`aux int ${formatProbeNumber(auxValue)}`);
+  }
+  return parts.join(" | ");
+}
+
+function getShardMilestoneGroundedSummary(milestone) {
+  const row = Number(milestone?.milestoneNumber);
+  const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(state.shardGrounding?.rowModelBoundary);
+  const titleEffectBoundary = state.shardGrounding?.titleEffectBoundary;
+  const titleEffectSummary = getShardMilestoneTitleEffectBoundarySummary(titleEffectBoundary);
+  const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(state.shardGrounding?.effectTextHandlerBoundary);
+  const costModelBoundary = getShardCostModelBoundarySummary(state.shardGrounding?.costModelBoundary);
+  const sceneProbeBoundary = getShardSceneMonoBehaviourProbeSummary(state.shardGrounding?.sceneMonoBehaviourProbe);
+  const costParameterProbe = getShardCostParameterProbeSummary(state.shardGrounding?.costParameterProbe);
+  const bonusSlotSummary = getShardBonusSlotRowSummary(row);
+  const directRowValues = getShardRowDirectValues(row);
+  const extractedUnlockRequirement = getShardExtractedUnlockRequirement(row);
+  const extractedCostFieldMapping = getShardExtractedCostFieldMapping(row);
+  const extractedCostFieldLabel = formatShardExtractedCostFieldMapping(extractedCostFieldMapping);
+  const titleCandidates = (Array.isArray(titleEffectBoundary?.titleAssetCandidates) ? titleEffectBoundary.titleAssetCandidates : [])
+    .filter((entry) => entry?.row === row)
+    .map((entry) => entry.title);
+  const uniqueTitles = [...new Set(titleCandidates)];
+  const bonusCalcAccessors = (Array.isArray(titleEffectBoundary?.sampleBonusCalcAccessors) ? titleEffectBoundary.sampleBonusCalcAccessors : [])
+    .filter((name) => name.startsWith(`get_SU${row}Bonus`));
+  const hasRowCostAccessor = rowModelBoundary.hasBoundary
+    && (((row >= 0 && row <= 9) || (row >= 23 && row <= 29)));
+  const costAccessorLabel = hasRowCostAccessor ? `get_SU${row}Cost` : "";
+  return {
+    titleCoverageTone: uniqueTitles.length ? "pass" : "warn",
+    titleCoverageLine: uniqueTitles.length > 1
+      ? `Row ${row} currently has multiple shipped title candidates: ${uniqueTitles.join(" | ")}.`
+      : uniqueTitles.length === 1
+        ? `Row ${row} has a shipped title candidate: ${uniqueTitles[0]}.`
+        : `Row ${row} does not yet have a preserved shipped title candidate in the checked bundle.`,
+    rowShellTone: rowModelBoundary.hasBoundary ? "pass" : "warn",
+    rowShellLine: rowModelBoundary.hasBoundary
+      ? `SU${row}UnlockReq and Milestone${row}TextChecker stay preserved on the shard-local 0-29 row shell.`
+      : `The checked row-model bundle is not strong enough to name row ${row} accessors yet.`,
+    effectTone: effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily ? "pass" : "warn",
+    effectLine: bonusCalcAccessors.length
+      ? `Metadata preserves ${bonusSlotSummary?.bonusFieldCount ?? bonusCalcAccessors.length} row-local bonus slots and calc hooks ${bonusCalcAccessors.join(", ")} on the ${effectTextHandlerBoundary.textHandlerLabel} text path.`
+      : effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily
+        ? `${titleEffectSummary.effectSlotLabel} and ${effectTextHandlerBoundary.textHandlerLabel} stay grounded.${bonusSlotSummary ? ` Metadata also preserves ${bonusSlotSummary.bonusFieldCount} slot ids for row ${row}.` : ""}${bonusSlotSummary && !bonusSlotSummary.matchesGroundedCount ? ` Grounded descriptive bonus entries still undershoot metadata on this row.` : ""}`
+        : `The current build does not preserve a strong enough shard-side effect path for row ${row}.`,
+    costTone: row === 0 || hasRowCostAccessor || directRowValues ? "pass" : "warn",
+    costLine: row === 0 && costModelBoundary.hasRow0FormulaShell
+      ? `${costParameterProbe.hasFullMetadataFamilies ? `${costParameterProbe.metadataLabel} field families are now preserved in metadata.` : "SU0StartCost, SU0CostExponent, and SU0GrowthExponent* field names are preserved."} ${directRowValues ? `Row 0 now also preserves exact serialized cost fields: ${extractedCostFieldLabel}.` : costParameterProbe.hasRowAlignedTuples ? `Rows 1-29 also keep ${costParameterProbe.rowAlignedTupleCount} direct row-aligned cost triples in ShardMining.` : costParameterProbe.hasCandidateTuples ? `ShardMining also exposes ${costParameterProbe.candidateTupleCount} mixed numeric tuples, for example ${costParameterProbe.sampleTupleLabel}.` : "Numeric row values are still blocked."} The exact get_SU0Cost formula is still not verified.${sceneProbeBoundary.hasBoundary ? ` Direct scene target: ${sceneProbeBoundary.shardMiningLabel}.` : ""}`
+      : hasRowCostAccessor && costModelBoundary.hasSampledCostWindows
+        ? `${costAccessorLabel} is preserved by name.${directRowValues ? ` This row now also preserves exact serialized cost fields: ${extractedCostFieldLabel}. Exact bonus-per-level floats ${(directRowValues.bonusPerLevelValues || []).map((value) => formatShardExtractedBonusPerLevel(value)).join(" / ")} are also recovered. The exact get_SU${row}Cost formula is still not verified.` : costParameterProbe.hasRowAlignedTuples ? " Nearby rows now have direct row-aligned ShardMining cost triples, which prove row-attached numeric parameters survive in scene data even though the formula is still being typed." : " Numeric StartCost or exponent values are still blocked."}${sceneProbeBoundary.hasBoundary ? ` Direct scene target: ${sceneProbeBoundary.shardMiningLabel}.` : ""}`
+        : directRowValues
+          ? `Direct row-aligned ShardMining values are preserved for row ${row}: exact serialized cost fields ${extractedCostFieldLabel} and exact bonus-per-level floats ${(directRowValues.bonusPerLevelValues || []).map((value) => formatShardExtractedBonusPerLevel(value)).join(" / ")}. Row attachment is grounded; the exact next-cost formula is still not verified.${sceneProbeBoundary.hasBoundary ? ` Direct scene target: ${sceneProbeBoundary.shardMiningLabel}.` : ""}`
+          : `${costParameterProbe.hasFullMetadataFamilies ? `${costParameterProbe.metadataLabel} field families are preserved globally.` : "Only partial shard cost shells are preserved."} ${costParameterProbe.hasRowAlignedTuples ? "Direct row-aligned ShardMining cost triples are preserved for other rows, but this row does not yet have a verified direct block in the checked sample." : costParameterProbe.hasCandidateTuples ? "ShardMining also exposes raw numeric tuples, but they are not mapped to this row yet." : "Only global cost-bump notes remain available."}${sceneProbeBoundary.hasBoundary ? ` Direct scene target: ${sceneProbeBoundary.shardMiningLabel}.` : ""}`
+    ,
+    extractedUnlockRequirement
+  };
+}
+
+function getShardMilestoneDisplayName(milestone) {
+  const row = Number(milestone?.milestoneNumber);
+  const titleCandidates = (Array.isArray(state.shardGrounding?.titleEffectBoundary?.titleAssetCandidates)
+    ? state.shardGrounding.titleEffectBoundary.titleAssetCandidates
+    : [])
+    .filter((entry) => entry?.row === row)
+    .map((entry) => String(entry.title || "").trim())
+    .filter(Boolean);
+  const uniqueTitles = [...new Set(titleCandidates)];
+  if (uniqueTitles.length === 1) {
+    return uniqueTitles[0];
+  }
+  return milestone?.name || `Milestone ${row}`;
+}
+
+function getShardMilestonePanelTitle(milestone) {
+    const row = Number(milestone?.milestoneNumber ?? 0);
+    const displayName = getShardMilestoneDisplayName(milestone);
+    const normalizedName = String(displayName || "")
+      .replace(/^The\s+/i, "")
+      .replace(/\([^)]*\)/g, "")
+      .replace(/\s+Milestone$/i, "")
+      .trim();
+    return `#${row} THE ${normalizedName.toUpperCase()} MILESTONE`;
+  }
+
+function getShardMilestoneLevelRailSummary(milestone) {
+  const row = Number(milestone?.milestoneNumber ?? 0);
+  const directValues = getShardRowDirectValues(row);
+  const profile = getShardFormulaApplicationProfile(row);
+  const nativeSummary = getShardNativeCostStageSummary(row, getShardFocusLevelForMilestone(milestone));
+  return {
+    buttonLabel: "Level up",
+    costLabel: directValues
+      ? "Verified row inputs recovered; exact cost formula still unresolved."
+      : "Current cost formula not yet verified.",
+    formulaLabel: profile
+      ? `${formatShardFormulaClassLabel(profile.formulaClass)}${profile.stageCoverage ? ` (${profile.stageCoverage})` : ""}`
+      : (row === 0 ? "Row 0 special case" : "Unresolved native class"),
+    stageLabel: nativeSummary.thresholdStageLabel || nativeSummary.stageLabel,
+    nextStageLabel: nativeSummary.nextStageLabel
+  };
+}
+
+function getShardMilestoneDisplayMeta(milestone) {
+  const preferredTitle = getShardMilestoneDisplayName(milestone);
+  const sourceTitle = milestone?.name || "";
+  if (preferredTitle && sourceTitle && preferredTitle !== sourceTitle) {
+    return `Community alias: ${sourceTitle}`;
+  }
+  return `Unlock ${describeUnlockCondition(milestone?.unlockCondition)}`;
+}
+
+function parseShardNumericLabel(value) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return null;
+  }
+  const normalized = text.replace(",", ".").replace(/\s+/g, "");
+  const match = normalized.match(/^([0-9]+(?:\.[0-9]+)?)$/);
+  if (!match) {
+    return null;
+  }
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseShardBonusDescriptor(value) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return null;
+  }
+  const normalized = text.replace(",", ".").replace(/\s+/g, "");
+  const multiplierMatch = normalized.match(/^([0-9]+(?:\.[0-9]+)?)x$/i);
+  if (multiplierMatch) {
+    return {
+      kind: "multiplier",
+      value: Number(multiplierMatch[1])
+    };
+  }
+  const secondsPerLevelMatch = normalized.match(/^([0-9]+(?:\.[0-9]+)?)s\/level$/i);
+  if (secondsPerLevelMatch) {
+    return {
+      kind: "seconds-per-level",
+      value: Number(secondsPerLevelMatch[1])
+    };
+  }
+  const secondsMatch = normalized.match(/^([0-9]+(?:\.[0-9]+)?)s$/i);
+  if (secondsMatch) {
+    return {
+      kind: "seconds",
+      value: Number(secondsMatch[1])
+    };
+  }
+  return null;
+}
+
+function formatShardComputedMultiplier(value) {
+  if (!Number.isFinite(value)) {
+    return "Unresolved";
+  }
+  if (Math.abs(value) >= 1000) {
+    return `x${formatShardNumber(value)}`;
+  }
+  if (Math.abs(value) >= 1) {
+    return `x${Number(value.toFixed(3)).toString()}`;
+  }
+  return `x${Number(value.toPrecision(4)).toString()}`;
+}
+
+function formatShardComputedSeconds(value) {
+  if (!Number.isFinite(value)) {
+    return "Unresolved";
+  }
+  return `${Number(value.toFixed(3)).toString()}s`;
+}
+
+function getShardComputedBonusSummary(milestone, bonus, observedLevelValue) {
+  const observedLevel = Number(observedLevelValue || 0);
+  if (!Number.isFinite(observedLevel) || observedLevel <= 0) {
+    return {
+      currentLabel: "Enter an observed level",
+      nextLabel: "Enter an observed level"
+    };
+  }
+  const unlockLevel = Number.isFinite(Number(bonus?.unlockLevel)) ? Number(bonus.unlockLevel) : null;
+  if (unlockLevel !== null && observedLevel < unlockLevel) {
+    return {
+      currentLabel: `Locked until level ${formatShardNumber(unlockLevel)}`,
+      nextLabel: `Locked until level ${formatShardNumber(unlockLevel)}`
+    };
+  }
+  const activeLevels = unlockLevel === null ? observedLevel : Math.max(observedLevel - unlockLevel + 1, 0);
+  const nextActiveLevels = unlockLevel === null ? observedLevel + 1 : Math.max(observedLevel + 1 - unlockLevel + 1, 0);
+  const initialDescriptor = parseShardBonusDescriptor(bonus?.initialBonus);
+  const bonusIndex = Array.isArray(milestone?.bonuses) ? milestone.bonuses.indexOf(bonus) : -1;
+  const extractedPerLevelValue = bonusIndex >= 0 ? getShardExtractedBonusPerLevel(milestone?.milestoneNumber, bonusIndex) : null;
+  const perLevelDescriptor = Number.isFinite(extractedPerLevelValue)
+    ? { kind: "multiplier", value: extractedPerLevelValue }
+    : parseShardBonusDescriptor(bonus?.bonusPerLevel);
+  if (perLevelDescriptor?.kind === "multiplier") {
+    if (initialDescriptor?.kind === "multiplier") {
+      const current = initialDescriptor.value * Math.pow(perLevelDescriptor.value, Math.max(activeLevels - 1, 0));
+      const next = initialDescriptor.value * Math.pow(perLevelDescriptor.value, Math.max(nextActiveLevels - 1, 0));
+      return {
+        currentLabel: `${formatShardComputedMultiplier(current)} (descriptive model)`,
+        nextLabel: `${formatShardComputedMultiplier(next)}`
+      };
+    }
+    if (unlockLevel === null || unlockLevel === 1) {
+      const current = Math.pow(perLevelDescriptor.value, observedLevel);
+      const next = Math.pow(perLevelDescriptor.value, observedLevel + 1);
+      return {
+        currentLabel: `${formatShardComputedMultiplier(current)} (per-level multiplicative model)`,
+        nextLabel: `${formatShardComputedMultiplier(next)}`
+      };
+    }
+  }
+  if (initialDescriptor?.kind === "seconds" && perLevelDescriptor?.kind === "seconds-per-level") {
+    const current = initialDescriptor.value + perLevelDescriptor.value * Math.max(activeLevels - 1, 0);
+    const next = initialDescriptor.value + perLevelDescriptor.value * Math.max(nextActiveLevels - 1, 0);
+    return {
+      currentLabel: `${formatShardComputedSeconds(current)} (descriptive model)`,
+      nextLabel: formatShardComputedSeconds(next)
+    };
+  }
+  return {
+    currentLabel: "Current value unresolved from checked inputs",
+    nextLabel: "Need typed bonus model or known initial value"
+  };
 }
 
 function getShardUnlockRequirement(milestone) {
@@ -4997,6 +6098,20 @@ function formatOptionalNumber(value) {
   return value === null || value === undefined || value === "" || Number.isNaN(Number(value))
     ? "Not tracked"
     : formatShardNumber(value);
+}
+
+function formatProbeNumber(value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return "Not tracked";
+  }
+  if (Math.abs(numericValue) >= 1000) {
+    return formatShardNumber(numericValue);
+  }
+  if (Math.abs(numericValue) >= 1) {
+    return Number(numericValue.toFixed(3)).toString();
+  }
+  return Number(numericValue.toPrecision(4)).toString();
 }
 
 function isBoundaryValuePresent(value) {

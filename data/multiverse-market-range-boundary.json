@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-03",
+  "generatedAt": "2026-04-04",
   "sources": {
     "validatedRows": "data/multiverse-market-values.json",
     "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json"
@@ -33,6 +33,34 @@
     "63-74"
   ],
   "metadataIsLevels": [
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
     99,
     100,
     101,
@@ -46,12 +74,17 @@
     109,
     110
   ],
-  "metadataIsRangeLabel": "IS99Level through IS110Level",
-  "overlapIds": [],
+  "metadataIsRangeLabel": "IS71Level through IS110Level",
+  "overlapIds": [
+    71,
+    72,
+    73,
+    74
+  ],
   "currentBoundary": [
     "The checked-in validated MultiverseMarket row block currently covers ids 50-59 and 63-74.",
-    "The checked-in save-side metadata neighborhood currently recovers IS99Level through IS110Level beside InscryptionsDone.",
-    "There is no direct overlap between the recovered save-side IS*Level run and the currently validated market row block.",
-    "This is enough to block any assumption that the current metadata run explains owned-state inputs for the validated rows."
+    "The checked-in save-side metadata neighborhood currently recovers IS71Level through IS110Level beside InscryptionsDone.",
+    "That broader save-side IS*Level run now reaches validated Emporium rows 71-74, which creates the first direct overlap between the recovered metadata run and the validated row block.",
+    "This overlap is still partial and does not, by itself, prove the declaring save owner or full owned-state mapping for the validated market rows."
   ]
 }

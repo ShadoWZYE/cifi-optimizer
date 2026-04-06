@@ -381,6 +381,23 @@ textarea {
   font-size: 0.84rem;
 }
 
+.pill-neutral {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(224, 232, 255, 0.82);
+}
+
+.shard-threshold-pill {
+  background: rgba(96, 149, 255, 0.16);
+  color: #dce9ff;
+  border: 1px solid rgba(118, 167, 255, 0.28);
+}
+
+.shard-threshold-pill.pill-neutral {
+  background: rgba(255, 210, 120, 0.14);
+  color: #ffe6b0;
+  border-color: rgba(255, 210, 120, 0.22);
+}
+
 .overview-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -450,12 +467,19 @@ textarea {
 }
 
 .shard-bonus-list {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .shard-milestone-card {
   display: grid;
-  gap: 12px;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(112, 148, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(17, 25, 56, 0.96), rgba(10, 15, 36, 0.96)),
+    radial-gradient(circle at top left, rgba(92, 140, 255, 0.18), transparent 40%);
+  color: #eef3ff;
+  box-shadow: inset 0 1px 0 rgba(155, 184, 255, 0.08);
 }
 
 .shard-milestone-summary {
@@ -467,8 +491,344 @@ textarea {
   list-style: none;
 }
 
+.shard-milestone-card strong {
+  color: #f6f8ff;
+}
+
+.shard-milestone-card .meta,
+.shard-milestone-card .snapshot-title {
+  color: rgba(224, 232, 255, 0.82);
+}
+
+.shard-milestone-title-block,
+.shard-milestone-summary-pills,
+.shard-milestone-hero {
+  display: flex;
+  gap: 10px;
+}
+
+.shard-milestone-title-block {
+  align-items: center;
+  min-width: 0;
+}
+
+.shard-milestone-heading-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.shard-milestone-alias {
+  font-size: 0.86rem;
+}
+
+.shard-milestone-summary-pills {
+  flex-wrap: wrap;
+  justify-content: end;
+  flex: 0 0 auto;
+}
+
+.shard-milestone-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(118, 167, 255, 0.45);
+  background: radial-gradient(circle at 35% 35%, rgba(111, 179, 255, 0.28), rgba(25, 39, 88, 0.96));
+  color: #d9e6ff;
+  font-weight: 700;
+}
+
+.shard-milestone-hero {
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0 4px;
+}
+
+.shard-milestone-hero-copy {
+  flex: 1 1 340px;
+  display: grid;
+  gap: 10px;
+}
+
+.shard-milestone-facts {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.shard-milestone-facts .meta strong {
+  color: #f6f8ff;
+  margin-right: 6px;
+}
+
+.shard-row-focus-field {
+  min-width: 168px;
+  flex: 0 0 168px;
+  padding: 12px;
+  border: 1px solid rgba(118, 167, 255, 0.28);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(30, 41, 80, 0.92), rgba(18, 26, 49, 0.92));
+  box-shadow: inset 0 1px 0 rgba(168, 191, 255, 0.1);
+}
+
+.shard-row-focus-field span {
+  color: rgba(224, 232, 255, 0.82);
+}
+
+.shard-row-focus-field input {
+  width: 100%;
+  margin-top: 6px;
+  font-size: 1.1rem;
+  text-align: right;
+  background: rgba(244, 247, 255, 0.92);
+  color: #20314f;
+  border-color: rgba(163, 182, 230, 0.42);
+}
+
+.shard-milestone-data-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.shard-milestone-main-panel {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  align-items: stretch;
+}
+
+.shard-mechanics-card {
+  min-height: 0;
+  align-content: start;
+  background:
+    linear-gradient(180deg, rgba(38, 52, 98, 0.78), rgba(23, 33, 63, 0.82)),
+    radial-gradient(circle at top left, rgba(114, 168, 255, 0.12), transparent 55%);
+  border-color: rgba(108, 150, 226, 0.28);
+  box-shadow: inset 0 1px 0 rgba(176, 202, 255, 0.08);
+}
+
+.shard-mechanics-card strong {
+  color: #edf4ff;
+}
+
+.shard-mechanics-card .meta {
+  color: rgba(219, 230, 255, 0.82);
+}
+
+.shard-panel-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.shard-panel-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(110, 205, 255, 0.85), rgba(138, 107, 255, 0.3), transparent 75%);
+  opacity: 0.7;
+}
+
+.shard-panel-card-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.shard-panel-card-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(132, 170, 244, 0.28);
+  background: rgba(18, 29, 58, 0.44);
+  color: rgba(214, 228, 255, 0.78);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.shard-milestone-card .validation-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.shard-milestone-card .validation-card,
+.shard-milestone-card .shard-bonus-card {
+  min-height: 0;
+  background:
+    linear-gradient(180deg, rgba(30, 43, 82, 0.78), rgba(18, 28, 56, 0.84)),
+    radial-gradient(circle at top left, rgba(126, 182, 255, 0.08), transparent 52%);
+  border-color: rgba(95, 130, 207, 0.22);
+  box-shadow: inset 0 1px 0 rgba(181, 205, 255, 0.07);
+}
+
+.shard-milestone-card .validation-card strong,
+.shard-milestone-card .shard-bonus-card strong {
+  color: #eef4ff;
+}
+
+.shard-milestone-card .validation-card .meta,
+.shard-milestone-card .shard-bonus-card .meta {
+  color: rgba(219, 229, 255, 0.8);
+}
+
+.shard-milestone-card .shard-bonus-list {
+  grid-template-columns: 1fr;
+}
+
+.shard-level-up-rail {
+  display: grid;
+  gap: 12px;
+  min-height: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(33, 48, 90, 0.82), rgba(18, 28, 54, 0.88)),
+    radial-gradient(circle at top, rgba(120, 194, 255, 0.12), transparent 52%);
+}
+
+.shard-level-up-observed {
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(107, 145, 218, 0.22);
+  background: linear-gradient(180deg, rgba(20, 30, 57, 0.92), rgba(14, 21, 41, 0.96));
+}
+
+.shard-level-up-summary {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(107, 145, 218, 0.18);
+  background: linear-gradient(180deg, rgba(20, 30, 57, 0.7), rgba(14, 21, 41, 0.78));
+}
+
+.shard-level-up-summary .meta {
+  color: rgba(224, 233, 255, 0.8);
+}
+
+.shard-level-up-cost {
+  margin: 0;
+  min-height: 72px;
+  padding: 12px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(107, 145, 218, 0.22);
+  background: linear-gradient(180deg, rgba(18, 27, 50, 0.92), rgba(13, 20, 39, 0.96));
+  color: #eff5ff;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.shard-level-up-button {
+  width: 100%;
+  min-height: 56px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.shard-grounding-dropdown {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(114, 144, 226, 0.16);
+}
+
+.shard-grounding-summary {
+  cursor: pointer;
+  list-style: none;
+  color: rgba(220, 231, 255, 0.84);
+  font-weight: 600;
+}
+
+.shard-grounding-summary::-webkit-details-marker {
+  display: none;
+}
+
+.shard-grounding-summary::before {
+  content: "Show ";
+  color: rgba(176, 195, 235, 0.72);
+}
+
+.shard-grounding-dropdown[open] .shard-grounding-summary::before {
+  content: "Hide ";
+}
+
+.shard-evidence-block {
+  display: grid;
+  gap: 10px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(114, 144, 226, 0.16);
+}
+
+.shard-evidence-block .snapshot-title {
+  color: rgba(214, 226, 255, 0.7);
+}
+
+.shard-evidence-block .validation-card {
+  background:
+    linear-gradient(180deg, rgba(23, 34, 65, 0.74), rgba(15, 23, 44, 0.8)),
+    radial-gradient(circle at top left, rgba(120, 167, 246, 0.06), transparent 55%);
+  opacity: 0.92;
+}
+
+.shard-evidence-block .shard-panel-card-tag {
+  background: rgba(14, 21, 40, 0.48);
+  color: rgba(196, 212, 248, 0.74);
+}
+
+.shard-milestone-card .validation-card,
+.shard-milestone-card .shard-bonus-card {
+  align-content: start;
+}
+
+.shard-milestone-card summary strong,
+.shard-milestone-card .meta strong {
+  overflow-wrap: anywhere;
+}
+
 .shard-milestone-summary::-webkit-details-marker {
   display: none;
+}
+
+@media (max-width: 780px) {
+  .shard-milestone-summary {
+    flex-direction: column;
+  }
+
+  .shard-milestone-summary-pills {
+    justify-content: start;
+  }
+
+  .shard-milestone-hero {
+    flex-direction: column;
+  }
+
+  .shard-milestone-main-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .shard-row-focus-field {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .shard-level-up-rail {
+    grid-template-columns: 1fr;
+  }
 }
 
 .validation-card.pass {

@@ -345,30 +345,23 @@
         <div class="page-header">
           <div>
             <p class="eyebrow">Progression</p>
-            <h2>Descriptive shard workflow</h2>
+            <h2>Shard milestones and Loop Prestige</h2>
           </div>
         </div>
         <section class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Shard workflow inputs</p>
-              <h2>Reference planner controls</h2>
+              <p class="eyebrow">Progression controls</p>
+              <h2>View selector and profile readiness</h2>
             </div>
-            <button id="saveShardPlannerBtn" class="button button-primary">Save shard workflow inputs</button>
           </div>
-          <p class="meta">This workflow is descriptive only. System-level shard anchors are grounded enough for repo truth, but the current milestone list is still community-grounded descriptive data rather than shipped-game owner-mapped milestone data. Track a focus milestone and level to inspect descriptive unlocks, thresholds, and guardrails without shard cost math.</p>
+          <p class="meta">Progression now splits into game-facing views: Shard milestones, Loop Prestige, and Shard Mining evidence. Shard rows keep their own observed levels, while extracted shard costs stay blocked until the native cost merge rule is actually proven.</p>
           <div class="module-controls">
-            <div class="field-group">
-              <label for="shardFocusMilestoneId">Focus milestone</label>
-              <select id="shardFocusMilestoneId"></select>
-            </div>
-            <div class="field-group">
-              <label for="shardFocusMilestoneLevel">Observed level on focus milestone</label>
-              <input id="shardFocusMilestoneLevel" type="number" min="0" step="1" placeholder="0">
-            </div>
-            <button id="runProgressionOptimizer" class="button button-primary">Show shard module status</button>
+            <button id="runProgressionOptimizer" class="button button-primary">Refresh progression</button>
           </div>
           <div id="shardPlannerStatus" class="status-line"></div>
+          <div class="research-view-toggle" id="progressionSubsystemToggle" role="tablist" aria-label="Progression view"></div>
+          <div id="progressionCalibrationPanel" class="page-grid"></div>
           <div id="progressionResults" class="recommendation-list"></div>
         </section>
       </section>

@@ -1,0 +1,66 @@
+{
+  "dataset": "shard-cost-list-path-probe.v1",
+  "generatedAt": "2026-04-05",
+  "source": {
+    "methodProbe": "data/shard-cost-method-probe.v1.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "libIl2cpp": "workbench/apk/base/libil2cpp.so"
+  },
+  "ownerFields": {
+    "milestoneCostListField": {
+      "name": "MilestoneCostList",
+      "fieldOffset": 5160
+    },
+    "upgradeInfoListField": {
+      "name": "upgradeInfoList",
+      "fieldOffset": 5216
+    },
+    "sortedCostBoolListOffset": 5216,
+    "affordableCountOffset": 5200
+  },
+  "findings": [
+    "GetShardCostList allocates a List<BreakInfinity.BigDouble> and then appends shard costs by calling the per-row get_SU*Cost getter family in order.",
+    "That means the shared cost-list path does not replace the row getters with a separate hidden formula; it materializes the same getter outputs into MilestoneCostList.",
+    "UpdateShardCostList refreshes the owner-side MilestoneCostList field before downstream sorting and affordability work.",
+    "SortCostAndBools calls GetShardCostList and combines the resulting costs with owned-state booleans into a separate sorted list.",
+    "CountAffordableShard folds the sorted cost list against the current shard currency lane, so affordability is downstream of the getter family rather than an alternate cost computation path."
+  ],
+  "callOrder": [
+    "GetShardCostList",
+    "get_SU0Cost",
+    "get_SU1Cost",
+    "get_SU2Cost",
+    "get_SU3Cost",
+    "get_SU4Cost",
+    "get_SU5Cost",
+    "get_SU6Cost",
+    "get_SU7Cost",
+    "get_SU8Cost",
+    "get_SU9Cost",
+    "get_SU10Cost",
+    "get_SU11Cost",
+    "get_SU12Cost",
+    "get_SU13Cost",
+    "get_SU14Cost",
+    "get_SU15Cost",
+    "get_SU16Cost",
+    "get_SU17Cost",
+    "get_SU18Cost",
+    "get_SU19Cost",
+    "get_SU20Cost",
+    "get_SU21Cost",
+    "get_SU22Cost",
+    "get_SU23Cost",
+    "get_SU24Cost",
+    "get_SU25Cost",
+    "get_SU26Cost",
+    "get_SU27Cost",
+    "get_SU28Cost",
+    "get_SU29Cost"
+  ],
+  "currentBoundary": [
+    "Treat GetShardCostList as a checked owner-side cache builder for the same per-row getter outputs, not as proof of a different shard cost formula.",
+    "Treat UpdateShardCostList, SortCostAndBools, and CountAffordableShard as downstream consumers of the getter family.",
+    "Do not expose exact shard next-costs until the repo still proves how each get_SU*Cost getter itself assembles the returned BreakInfinity.BigDouble."
+  ]
+}

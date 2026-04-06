@@ -20,6 +20,11 @@ env/
 *.log
 .env
 .env.*
+.appdata/
+.dotnet/
+.nuget/
+obj/
+.tmp_probe_*
 
 # OS / editor
 .DS_Store

@@ -1,6 +1,6 @@
 {
   "contractVersion": "v1",
-  "updatedAt": "2026-04-03",
+  "updatedAt": "2026-04-06",
   "validationCommand": "npm run verify:data",
   "sourcePriority": [
     {
@@ -74,6 +74,38 @@
       ]
     },
     {
+      "id": "shard-cost-model-boundary",
+      "label": "Shard cost-model boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-cost-model-boundary.v1.json"
+      ]
+    },
+    {
+      "id": "shard-milestone-row-model-boundary",
+      "label": "Shard milestone row-model boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-milestone-row-model-boundary.v1.json"
+      ]
+    },
+    {
+      "id": "shard-milestone-title-effect-boundary",
+      "label": "Shard milestone title/effect boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-milestone-title-effect-boundary.v1.json"
+      ]
+    },
+    {
+      "id": "shard-effect-text-handler-boundary",
+      "label": "Shard effect-text handler boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-effect-text-handler-boundary.v1.json"
+      ]
+    },
+    {
       "id": "shard-milestone-row-shell-boundary",
       "label": "Shard milestone row-shell boundary",
       "classification": "extracted-mechanics",
@@ -90,11 +122,91 @@
       ]
     },
     {
+      "id": "shard-milestone-handoff-boundary",
+      "label": "Shard milestone handoff boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-milestone-handoff-boundary.v1.json"
+      ]
+    },
+    {
       "id": "shard-save-boundary",
       "label": "Shard save boundary",
       "classification": "extracted-mechanics",
       "files": [
         "data/shard-save-boundary.v1.json"
+      ]
+    },
+    {
+      "id": "shard-scene-monobehaviour-probe",
+      "label": "Shard scene MonoBehaviour probe",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-scene-monobehaviour-probe.v1.json"
+      ]
+    },
+    {
+      "id": "shard-cost-parameter-probe",
+      "label": "Shard cost parameter probe",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-cost-parameter-probe.v1.json"
+      ]
+    },
+    {
+      "id": "shard-cost-method-probe",
+      "label": "Shard cost method probe",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-cost-method-probe.v1.json"
+      ]
+    },
+    {
+      "id": "shard-cost-native-probe",
+      "label": "Shard cost native probe",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-cost-native-probe.v1.json"
+      ]
+    },
+    {
+      "id": "shard-cost-screenshot-calibration",
+      "label": "Shard cost screenshot calibration",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-cost-screenshot-calibration.v1.json"
+      ]
+    },
+    {
+      "id": "shard-cost-list-path-probe",
+      "label": "Shard cost list-path probe",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-cost-list-path-probe.v1.json"
+      ]
+    },
+    {
+      "id": "shard-cost-formula-model",
+      "label": "Shard cost formula model",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-cost-formula-model.v1.json"
+      ]
+    },
+    {
+      "id": "shard-bonus-slot-probe",
+      "label": "Shard bonus slot probe",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-bonus-slot-probe.v1.json"
+      ]
+    },
+    {
+      "id": "shard-type-metadata-probe",
+      "label": "Shard type metadata probe",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/shard-type-metadata-probe.v1.json"
       ]
     },
     {

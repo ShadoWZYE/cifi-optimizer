@@ -1,0 +1,4053 @@
+{
+  "dataset": "shard-cost-parameter-probe.v1",
+  "generatedAt": "2026-04-06",
+  "source": {
+    "metadata": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\global-metadata.dat",
+    "level0": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined\\level0",
+    "shardMiningAbsoluteOffset": 34088352,
+    "shardMiningByteSize": 6732
+  },
+  "metadataFamilies": {
+    "startCostFields": [
+      "SU0StartCost",
+      "SU10StartCost",
+      "SU11StartCost",
+      "SU12StartCost",
+      "SU13StartCost",
+      "SU14StartCost",
+      "SU15StartCost",
+      "SU16StartCost",
+      "SU17StartCost",
+      "SU18StartCost",
+      "SU19StartCost",
+      "SU1StartCost",
+      "SU20StartCost",
+      "SU21StartCost",
+      "SU22StartCost",
+      "SU23StartCost",
+      "SU24StartCost",
+      "SU25StartCost",
+      "SU26StartCost",
+      "SU27StartCost",
+      "SU28StartCost",
+      "SU29StartCost",
+      "SU2StartCost",
+      "SU3StartCost",
+      "SU4StartCost",
+      "SU5StartCost",
+      "SU6StartCost",
+      "SU7StartCost",
+      "SU8StartCost",
+      "SU9StartCost"
+    ],
+    "costExponentFields": [
+      "SU0CostExponent",
+      "SU10CostExponent",
+      "SU11CostExponent",
+      "SU12CostExponent",
+      "SU13CostExponent",
+      "SU14CostExponent",
+      "SU15CostExponent",
+      "SU16CostExponent",
+      "SU17CostExponent",
+      "SU18CostExponent",
+      "SU19CostExponent",
+      "SU1CostExponent",
+      "SU20CostExponent",
+      "SU21CostExponent",
+      "SU22CostExponent",
+      "SU23CostExponent",
+      "SU24CostExponent",
+      "SU25CostExponent",
+      "SU26CostExponent",
+      "SU27CostExponent",
+      "SU28CostExponent",
+      "SU29CostExponent",
+      "SU2CostExponent",
+      "SU3CostExponent",
+      "SU4CostExponent",
+      "SU5CostExponent",
+      "SU6CostExponent",
+      "SU7CostExponent",
+      "SU8CostExponent",
+      "SU9CostExponent"
+    ],
+    "growthExponentFields": [
+      "SU0GrowthExponent",
+      "SU0GrowthExponent2",
+      "SU0GrowthExponent3",
+      "SU10GrowthExponent",
+      "SU11GrowthExponent",
+      "SU12GrowthExponent",
+      "SU13GrowthExponent",
+      "SU14GrowthExponent",
+      "SU15GrowthExponent",
+      "SU16GrowthExponent",
+      "SU17GrowthExponent",
+      "SU18GrowthExponent",
+      "SU19GrowthExponent",
+      "SU1GrowthExponent",
+      "SU20GrowthExponent",
+      "SU21GrowthExponent",
+      "SU22GrowthExponent",
+      "SU23GrowthExponent",
+      "SU24GrowthExponent",
+      "SU25GrowthExponent",
+      "SU26GrowthExponent",
+      "SU27GrowthExponent",
+      "SU28GrowthExponent",
+      "SU29GrowthExponent",
+      "SU2GrowthExponent",
+      "SU3GrowthExponent",
+      "SU4GrowthExponent",
+      "SU5GrowthExponent",
+      "SU6GrowthExponent",
+      "SU7GrowthExponent",
+      "SU8GrowthExponent",
+      "SU9GrowthExponent"
+    ],
+    "costAccessors": [
+      "get_SU0Cost",
+      "get_SU10Cost",
+      "get_SU11Cost",
+      "get_SU12Cost",
+      "get_SU13Cost",
+      "get_SU14Cost",
+      "get_SU15Cost",
+      "get_SU16Cost",
+      "get_SU17Cost",
+      "get_SU18Cost",
+      "get_SU19Cost",
+      "get_SU1Cost",
+      "get_SU20Cost",
+      "get_SU21Cost",
+      "get_SU22Cost",
+      "get_SU23Cost",
+      "get_SU24Cost",
+      "get_SU25Cost",
+      "get_SU26Cost",
+      "get_SU27Cost",
+      "get_SU28Cost",
+      "get_SU29Cost",
+      "get_SU2Cost",
+      "get_SU3Cost",
+      "get_SU4Cost",
+      "get_SU5Cost",
+      "get_SU6Cost",
+      "get_SU7Cost",
+      "get_SU8Cost",
+      "get_SU9Cost"
+    ],
+    "overLevelExponentFields": [
+      "OverLevel100Exponent",
+      "OverLevel200Exponent",
+      "OverLevel300Exponent",
+      "OverLevel400Exponent"
+    ],
+    "overLevelExponentAccessors": [
+      "get_OverLevel100Exponent",
+      "get_OverLevel200Exponent",
+      "get_OverLevel300Exponent",
+      "get_OverLevel400Exponent"
+    ]
+  },
+  "unlockRequirementBlock": {
+    "offset": 1456,
+    "absoluteOffset": 34089840,
+    "values": [
+      0,
+      0,
+      5,
+      10,
+      20,
+      30,
+      40,
+      50,
+      120,
+      150,
+      180,
+      340,
+      520,
+      560,
+      700,
+      800,
+      900,
+      1000,
+      1100,
+      1400,
+      1500,
+      1600,
+      1700,
+      1800,
+      3300,
+      3600,
+      3900,
+      8000,
+      8050,
+      8100
+    ],
+    "rationale": [
+      "This 30-int lane is the strongest direct match for the shard unlock requirement family inside ShardMining.",
+      "It preserves the zero-start pattern for rows 0-1, the early 5/10/20/30 progression, and the late 8000/8050/8100 thresholds for rows 27-29.",
+      "That makes it strong enough to treat as the exact serialized SU0-29 unlock requirement block rather than a generic int cluster."
+    ]
+  },
+  "shardMiningCandidateTuples": [
+    {
+      "offset": 3112,
+      "absoluteOffset": 34091496,
+      "leadingValue": 4.0,
+      "intValue": 3,
+      "exponentA": 2.0,
+      "exponentB": 3.8,
+      "tailScalar": 0.025000009668,
+      "tailSentinelA": 4294967294,
+      "tailSentinelB": 4294967295
+    },
+    {
+      "offset": 4240,
+      "absoluteOffset": 34092624,
+      "leadingValue": 2.0,
+      "intValue": 21,
+      "exponentA": 2.0,
+      "exponentB": 2.0,
+      "tailScalar": 0.011562498273,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295
+    },
+    {
+      "offset": 4984,
+      "absoluteOffset": 34093368,
+      "leadingValue": 1.0,
+      "intValue": 70,
+      "exponentA": 2.5,
+      "exponentB": 4.0,
+      "tailScalar": 0.01875000072,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295
+    },
+    {
+      "offset": 5128,
+      "absoluteOffset": 34093512,
+      "leadingValue": 1.0,
+      "intValue": 82,
+      "exponentA": 2.5,
+      "exponentB": 4.0,
+      "tailScalar": 0.025000009661,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295
+    },
+    {
+      "offset": 5272,
+      "absoluteOffset": 34093656,
+      "leadingValue": 1.0,
+      "intValue": 89,
+      "exponentA": 2.5,
+      "exponentB": 4.0,
+      "tailScalar": 0.012187505127,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295
+    },
+    {
+      "offset": 6304,
+      "absoluteOffset": 34094688,
+      "leadingValue": 2.0,
+      "intValue": 975,
+      "exponentA": 2.25,
+      "exponentB": 4.0,
+      "tailScalar": 0.023750010852,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295
+    },
+    {
+      "offset": 6448,
+      "absoluteOffset": 34094832,
+      "leadingValue": 4.0,
+      "intValue": 982,
+      "exponentA": 2.29,
+      "exponentB": 4.0,
+      "tailScalar": 0.038750000244,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295
+    }
+  ],
+  "rowAlignedTupleCandidates": [
+    {
+      "row": 0,
+      "rarity": "Unique",
+      "unlockRequirementValue": 0,
+      "bonusCount": 3,
+      "pointerRunStart": 1576,
+      "pointerRefCount": 19,
+      "tupleOffset": 1804,
+      "nextPointerRunStart": 1916,
+      "expectedNumericBlockByteCount": 92,
+      "trailingSlackByteCount": 20,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 5.0,
+      "intValue": 0,
+      "exponentA": 1.3,
+      "exponentB": 1.5,
+      "tailScalar": 1.1,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 92,
+      "costPrefixByteCount": 80,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1075052544,
+        0,
+        0,
+        3435973837,
+        1073007820,
+        0,
+        0,
+        0,
+        1073217536,
+        4294967295,
+        4294967295,
+        2576980378,
+        1072798105,
+        4294967294,
+        4294967295,
+        0,
+        1073741824,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        5.0,
+        0.0,
+        1.3,
+        0.0,
+        1.5,
+        null,
+        1.1,
+        null,
+        2.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 5.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.3,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.5,
+          "exponent": -1
+        },
+        {
+          "mantissa": 1.1,
+          "exponent": -2
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 0,
+      "candidateCostDoubleA": 5.0,
+      "candidateCostDoubleB": 1.3,
+      "candidateCostDoubleC": 1.5,
+      "bonusPerLevelValues": [
+        1.100000023842,
+        1.019999980927,
+        1.299999952316
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent",
+          "GrowthExponent2",
+          "GrowthExponent3"
+        ],
+        "values": {
+          "StartCost": 5.0,
+          "CostExponent": 1.3,
+          "GrowthExponent": 1.5,
+          "GrowthExponent2": 1.1,
+          "GrowthExponent3": 2.0
+        },
+        "auxiliaryIntCandidate": 0,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 5.0,
+            "exponent": 0,
+            "label": "5.0e0"
+          },
+          "CostExponent": {
+            "mantissa": 1.3,
+            "exponent": 0,
+            "label": "1.3e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.5,
+            "exponent": -1,
+            "label": "1.5e-1"
+          },
+          "GrowthExponent2": {
+            "mantissa": 1.1,
+            "exponent": -2,
+            "label": "1.1e-2"
+          },
+          "GrowthExponent3": {
+            "mantissa": 2.0,
+            "exponent": -1,
+            "label": "2.0e-1"
+          }
+        },
+        "rationale": [
+          "Row 0 preserves five 16-byte BigDouble slots before the bonus-per-level float tail inside its deterministic aligned block.",
+          "The row-0 metadata shell preserves five row-local cost field names in the same order: StartCost, CostExponent, GrowthExponent, GrowthExponent2, and GrowthExponent3.",
+          "The paired exponent lane is part of each serialized BigDouble field rather than a spare integer lane outside the cost model.",
+          "This is strong enough to treat the row-0 five-slot mapping as exact serialized row-local BigDouble cost fields, even though the exact get_SU0Cost formula is still not verified."
+        ]
+      }
+    },
+    {
+      "row": 1,
+      "rarity": "common",
+      "unlockRequirementValue": 0,
+      "bonusCount": 3,
+      "pointerRunStart": 1916,
+      "pointerRefCount": 7,
+      "tupleOffset": 2000,
+      "nextPointerRunStart": 2060,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 2.0,
+      "intValue": 0,
+      "exponentA": 1.15,
+      "exponentB": 1.3,
+      "tailScalar": 0.011562498273,
+      "tailSentinelA": 4294967293,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1073741824,
+        0,
+        0,
+        1717986918,
+        1072850534,
+        0,
+        0,
+        3435973836,
+        1073007820,
+        4294967293,
+        4294967295
+      ],
+      "costPrefixF64": [
+        2.0,
+        0.0,
+        1.15,
+        0.0,
+        1.3,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.15,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.3,
+          "exponent": -3
+        }
+      ],
+      "candidateStartCostInt": 0,
+      "candidateCostDoubleA": 2.0,
+      "candidateCostDoubleB": 1.15,
+      "candidateCostDoubleC": 1.3,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.05999994278,
+        1.05999994278
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 2.0,
+          "CostExponent": 1.15,
+          "GrowthExponent": 1.3
+        },
+        "auxiliaryIntCandidate": 0,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 0,
+            "label": "2.0e0"
+          },
+          "CostExponent": {
+            "mantissa": 1.15,
+            "exponent": 0,
+            "label": "1.15e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.3,
+            "exponent": -3,
+            "label": "1.3e-3"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 2,
+      "rarity": "common",
+      "unlockRequirementValue": 5,
+      "bonusCount": 3,
+      "pointerRunStart": 2060,
+      "pointerRefCount": 7,
+      "tupleOffset": 2144,
+      "nextPointerRunStart": 2204,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 6.0,
+      "intValue": 0,
+      "exponentA": 1.22,
+      "exponentB": 2.2,
+      "tailScalar": 0.011562498273,
+      "tailSentinelA": 4294967293,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1075314688,
+        0,
+        0,
+        3092376453,
+        1072923934,
+        0,
+        0,
+        2576980378,
+        1073846681,
+        4294967293,
+        4294967295
+      ],
+      "costPrefixF64": [
+        6.0,
+        0.0,
+        1.22,
+        0.0,
+        2.2,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 6.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.22,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.2,
+          "exponent": -3
+        }
+      ],
+      "candidateStartCostInt": 0,
+      "candidateCostDoubleA": 6.0,
+      "candidateCostDoubleB": 1.22,
+      "candidateCostDoubleC": 2.2,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.05999994278,
+        1.05999994278
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 6.0,
+          "CostExponent": 1.22,
+          "GrowthExponent": 2.2
+        },
+        "auxiliaryIntCandidate": 0,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 6.0,
+            "exponent": 0,
+            "label": "6.0e0"
+          },
+          "CostExponent": {
+            "mantissa": 1.22,
+            "exponent": 0,
+            "label": "1.22e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.2,
+            "exponent": -3,
+            "label": "2.2e-3"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 3,
+      "rarity": "common",
+      "unlockRequirementValue": 10,
+      "bonusCount": 3,
+      "pointerRunStart": 2204,
+      "pointerRefCount": 7,
+      "tupleOffset": 2288,
+      "nextPointerRunStart": 2348,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 9.0,
+      "intValue": 0,
+      "exponentA": 1.24,
+      "exponentB": 2.6,
+      "tailScalar": 0.012187505127,
+      "tailSentinelA": 4294967293,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1075970048,
+        0,
+        0,
+        1030792151,
+        1072944906,
+        0,
+        0,
+        3435973836,
+        1074056396,
+        4294967293,
+        4294967295
+      ],
+      "costPrefixF64": [
+        9.0,
+        0.0,
+        1.24,
+        0.0,
+        2.6,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 9.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.24,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.6,
+          "exponent": -3
+        }
+      ],
+      "candidateStartCostInt": 0,
+      "candidateCostDoubleA": 9.0,
+      "candidateCostDoubleB": 1.24,
+      "candidateCostDoubleC": 2.6,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.070000052452,
+        1.080000042915
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 9.0,
+          "CostExponent": 1.24,
+          "GrowthExponent": 2.6
+        },
+        "auxiliaryIntCandidate": 0,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 9.0,
+            "exponent": 0,
+            "label": "9.0e0"
+          },
+          "CostExponent": {
+            "mantissa": 1.24,
+            "exponent": 0,
+            "label": "1.24e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.6,
+            "exponent": -3,
+            "label": "2.6e-3"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 4,
+      "rarity": "Rare",
+      "unlockRequirementValue": 20,
+      "bonusCount": 4,
+      "pointerRunStart": 2348,
+      "pointerRefCount": 9,
+      "tupleOffset": 2456,
+      "nextPointerRunStart": 2520,
+      "expectedNumericBlockByteCount": 64,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 2.4,
+      "intValue": 1,
+      "exponentA": 1.4,
+      "exponentB": 1.2,
+      "tailScalar": 0.010937498869,
+      "tailSentinelA": 4294967294,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 64,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 4,
+      "costPrefixU32": [
+        858993459,
+        1073951539,
+        1,
+        0,
+        1717986918,
+        1073112678,
+        0,
+        0,
+        858993459,
+        1072902963,
+        4294967294,
+        4294967295
+      ],
+      "costPrefixF64": [
+        2.4,
+        0.0,
+        1.4,
+        0.0,
+        1.2,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.4,
+          "exponent": 1
+        },
+        {
+          "mantissa": 1.4,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.2,
+          "exponent": -2
+        }
+      ],
+      "candidateStartCostInt": 1,
+      "candidateCostDoubleA": 2.4,
+      "candidateCostDoubleB": 1.4,
+      "candidateCostDoubleC": 1.2,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.049999952316,
+        1.039999961853,
+        0.009999999776
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 2.4,
+          "CostExponent": 1.4,
+          "GrowthExponent": 1.2
+        },
+        "auxiliaryIntCandidate": 1,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.4,
+            "exponent": 1,
+            "label": "2.4e1"
+          },
+          "CostExponent": {
+            "mantissa": 1.4,
+            "exponent": 0,
+            "label": "1.4e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.2,
+            "exponent": -2,
+            "label": "1.2e-2"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 5,
+      "rarity": "common",
+      "unlockRequirementValue": 30,
+      "bonusCount": 3,
+      "pointerRunStart": 2520,
+      "pointerRefCount": 7,
+      "tupleOffset": 2604,
+      "nextPointerRunStart": 2664,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 4.0,
+      "intValue": 1,
+      "exponentA": 1.26,
+      "exponentB": 3.2,
+      "tailScalar": 0.012187505127,
+      "tailSentinelA": 4294967293,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1074790400,
+        1,
+        0,
+        3264175145,
+        1072965877,
+        0,
+        0,
+        2576980378,
+        1074370969,
+        4294967293,
+        4294967295
+      ],
+      "costPrefixF64": [
+        4.0,
+        0.0,
+        1.26,
+        0.0,
+        3.2,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 4.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 1.26,
+          "exponent": 0
+        },
+        {
+          "mantissa": 3.2,
+          "exponent": -3
+        }
+      ],
+      "candidateStartCostInt": 1,
+      "candidateCostDoubleA": 4.0,
+      "candidateCostDoubleB": 1.26,
+      "candidateCostDoubleC": 3.2,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.070000052452,
+        1.080000042915
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 4.0,
+          "CostExponent": 1.26,
+          "GrowthExponent": 3.2
+        },
+        "auxiliaryIntCandidate": 1,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 4.0,
+            "exponent": 1,
+            "label": "4.0e1"
+          },
+          "CostExponent": {
+            "mantissa": 1.26,
+            "exponent": 0,
+            "label": "1.26e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 3.2,
+            "exponent": -3,
+            "label": "3.2e-3"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 6,
+      "rarity": "common",
+      "unlockRequirementValue": 40,
+      "bonusCount": 3,
+      "pointerRunStart": 2664,
+      "pointerRefCount": 7,
+      "tupleOffset": 2748,
+      "nextPointerRunStart": 2808,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 8.0,
+      "intValue": 1,
+      "exponentA": 1.26,
+      "exponentB": 3.4,
+      "tailScalar": 0.012187505127,
+      "tailSentinelA": 4294967293,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1075838976,
+        1,
+        0,
+        3264175145,
+        1072965877,
+        0,
+        0,
+        858993459,
+        1074475827,
+        4294967293,
+        4294967295
+      ],
+      "costPrefixF64": [
+        8.0,
+        0.0,
+        1.26,
+        0.0,
+        3.4,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 8.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 1.26,
+          "exponent": 0
+        },
+        {
+          "mantissa": 3.4,
+          "exponent": -3
+        }
+      ],
+      "candidateStartCostInt": 1,
+      "candidateCostDoubleA": 8.0,
+      "candidateCostDoubleB": 1.26,
+      "candidateCostDoubleC": 3.4,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.070000052452,
+        1.080000042915
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 8.0,
+          "CostExponent": 1.26,
+          "GrowthExponent": 3.4
+        },
+        "auxiliaryIntCandidate": 1,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 8.0,
+            "exponent": 1,
+            "label": "8.0e1"
+          },
+          "CostExponent": {
+            "mantissa": 1.26,
+            "exponent": 0,
+            "label": "1.26e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 3.4,
+            "exponent": -3,
+            "label": "3.4e-3"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 7,
+      "rarity": "Rare",
+      "unlockRequirementValue": 50,
+      "bonusCount": 4,
+      "pointerRunStart": 2808,
+      "pointerRefCount": 9,
+      "tupleOffset": 2916,
+      "nextPointerRunStart": 2980,
+      "expectedNumericBlockByteCount": 64,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 1.4,
+      "intValue": 2,
+      "exponentA": 1.5,
+      "exponentB": 2.5,
+      "tailScalar": 0.014687502743,
+      "tailSentinelA": 4294967294,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 64,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 4,
+      "costPrefixU32": [
+        1717986918,
+        1073112678,
+        2,
+        0,
+        0,
+        1073217536,
+        0,
+        0,
+        0,
+        1074003968,
+        4294967294,
+        4294967295
+      ],
+      "costPrefixF64": [
+        1.4,
+        0.0,
+        1.5,
+        0.0,
+        2.5,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.4,
+          "exponent": 2
+        },
+        {
+          "mantissa": 1.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.5,
+          "exponent": -2
+        }
+      ],
+      "candidateStartCostInt": 2,
+      "candidateCostDoubleA": 1.4,
+      "candidateCostDoubleB": 1.5,
+      "candidateCostDoubleC": 2.5,
+      "bonusPerLevelValues": [
+        1.090000033379,
+        1.110000014305,
+        1.129999995232,
+        1.149999976158
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 1.4,
+          "CostExponent": 1.5,
+          "GrowthExponent": 2.5
+        },
+        "auxiliaryIntCandidate": 2,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.4,
+            "exponent": 2,
+            "label": "1.4e2"
+          },
+          "CostExponent": {
+            "mantissa": 1.5,
+            "exponent": 0,
+            "label": "1.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.5,
+            "exponent": -2,
+            "label": "2.5e-2"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 8,
+      "rarity": "Epic",
+      "unlockRequirementValue": 120,
+      "bonusCount": 5,
+      "pointerRunStart": 2980,
+      "pointerRefCount": 11,
+      "tupleOffset": 3112,
+      "nextPointerRunStart": 3180,
+      "expectedNumericBlockByteCount": 68,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 4.0,
+      "intValue": 3,
+      "exponentA": 2.0,
+      "exponentB": 3.8,
+      "tailScalar": 0.025000009668,
+      "tailSentinelA": 4294967294,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 68,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 5,
+      "costPrefixU32": [
+        0,
+        1074790400,
+        3,
+        0,
+        0,
+        1073741824,
+        0,
+        0,
+        1717986918,
+        1074685542,
+        4294967294,
+        4294967295
+      ],
+      "costPrefixF64": [
+        4.0,
+        0.0,
+        2.0,
+        0.0,
+        3.8,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 4.0,
+          "exponent": 3
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 3.8,
+          "exponent": -2
+        }
+      ],
+      "candidateStartCostInt": 3,
+      "candidateCostDoubleA": 4.0,
+      "candidateCostDoubleB": 2.0,
+      "candidateCostDoubleC": 3.8,
+      "bonusPerLevelValues": [
+        1.399999976158,
+        1.200000047684,
+        1.799999952316,
+        1.200000047684,
+        2.0
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 4.0,
+          "CostExponent": 2.0,
+          "GrowthExponent": 3.8
+        },
+        "auxiliaryIntCandidate": 3,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 4.0,
+            "exponent": 3,
+            "label": "4.0e3"
+          },
+          "CostExponent": {
+            "mantissa": 2.0,
+            "exponent": 0,
+            "label": "2.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 3.8,
+            "exponent": -2,
+            "label": "3.8e-2"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 9,
+      "rarity": "common",
+      "unlockRequirementValue": 150,
+      "bonusCount": 3,
+      "pointerRunStart": 3180,
+      "pointerRefCount": 7,
+      "tupleOffset": 3264,
+      "nextPointerRunStart": 3324,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 3.1,
+      "intValue": 4,
+      "exponentA": 1.5,
+      "exponentB": 1.6,
+      "tailScalar": 0.012187505127,
+      "tailSentinelA": 4294967294,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        3435973837,
+        1074318540,
+        4,
+        0,
+        0,
+        1073217536,
+        0,
+        0,
+        2576980378,
+        1073322393,
+        4294967294,
+        4294967295
+      ],
+      "costPrefixF64": [
+        3.1,
+        0.0,
+        1.5,
+        0.0,
+        1.6,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 3.1,
+          "exponent": 4
+        },
+        {
+          "mantissa": 1.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.6,
+          "exponent": -2
+        }
+      ],
+      "candidateStartCostInt": 4,
+      "candidateCostDoubleA": 3.1,
+      "candidateCostDoubleB": 1.5,
+      "candidateCostDoubleC": 1.6,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.070000052452,
+        1.080000042915
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 3.1,
+          "CostExponent": 1.5,
+          "GrowthExponent": 1.6
+        },
+        "auxiliaryIntCandidate": 4,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 3.1,
+            "exponent": 4,
+            "label": "3.1e4"
+          },
+          "CostExponent": {
+            "mantissa": 1.5,
+            "exponent": 0,
+            "label": "1.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.6,
+            "exponent": -2,
+            "label": "1.6e-2"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 10,
+      "rarity": "common",
+      "unlockRequirementValue": 180,
+      "bonusCount": 3,
+      "pointerRunStart": 3324,
+      "pointerRefCount": 7,
+      "tupleOffset": 3408,
+      "nextPointerRunStart": 3468,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 3.6,
+      "intValue": 4,
+      "exponentA": 1.48,
+      "exponentB": 1.8,
+      "tailScalar": 0.012187505127,
+      "tailSentinelA": 4294967294,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        3435973837,
+        1074580684,
+        4,
+        0,
+        2061584302,
+        1073196564,
+        0,
+        0,
+        3435973836,
+        1073532108,
+        4294967294,
+        4294967295
+      ],
+      "costPrefixF64": [
+        3.6,
+        0.0,
+        1.48,
+        0.0,
+        1.8,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 3.6,
+          "exponent": 4
+        },
+        {
+          "mantissa": 1.48,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.8,
+          "exponent": -2
+        }
+      ],
+      "candidateStartCostInt": 4,
+      "candidateCostDoubleA": 3.6,
+      "candidateCostDoubleB": 1.48,
+      "candidateCostDoubleC": 1.8,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.070000052452,
+        1.080000042915
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 3.6,
+          "CostExponent": 1.48,
+          "GrowthExponent": 1.8
+        },
+        "auxiliaryIntCandidate": 4,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 3.6,
+            "exponent": 4,
+            "label": "3.6e4"
+          },
+          "CostExponent": {
+            "mantissa": 1.48,
+            "exponent": 0,
+            "label": "1.48e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.8,
+            "exponent": -2,
+            "label": "1.8e-2"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 11,
+      "rarity": "Rare",
+      "unlockRequirementValue": 340,
+      "bonusCount": 4,
+      "pointerRunStart": 3468,
+      "pointerRefCount": 9,
+      "tupleOffset": 3576,
+      "nextPointerRunStart": 3640,
+      "expectedNumericBlockByteCount": 64,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 5.6,
+      "intValue": 7,
+      "exponentA": 1.6,
+      "exponentB": 2.8,
+      "tailScalar": 0.125000029663,
+      "tailSentinelA": 4294967294,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 64,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 4,
+      "costPrefixU32": [
+        1717986918,
+        1075209830,
+        7,
+        0,
+        2576980378,
+        1073322393,
+        0,
+        0,
+        1717986918,
+        1074161254,
+        4294967294,
+        4294967295
+      ],
+      "costPrefixF64": [
+        5.6,
+        0.0,
+        1.6,
+        0.0,
+        2.8,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 5.6,
+          "exponent": 7
+        },
+        {
+          "mantissa": 1.6,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.8,
+          "exponent": -2
+        }
+      ],
+      "candidateStartCostInt": 7,
+      "candidateCostDoubleA": 5.6,
+      "candidateCostDoubleB": 1.6,
+      "candidateCostDoubleC": 2.8,
+      "bonusPerLevelValues": [
+        1.399999976158,
+        1.5,
+        1.600000023842,
+        1.700000047684
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 5.6,
+          "CostExponent": 1.6,
+          "GrowthExponent": 2.8
+        },
+        "auxiliaryIntCandidate": 7,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 5.6,
+            "exponent": 7,
+            "label": "5.6e7"
+          },
+          "CostExponent": {
+            "mantissa": 1.6,
+            "exponent": 0,
+            "label": "1.6e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.8,
+            "exponent": -2,
+            "label": "2.8e-2"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 12,
+      "rarity": "Epic",
+      "unlockRequirementValue": 520,
+      "bonusCount": 5,
+      "pointerRunStart": 3640,
+      "pointerRefCount": 11,
+      "tupleOffset": 3772,
+      "nextPointerRunStart": 3840,
+      "expectedNumericBlockByteCount": 68,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 9.99,
+      "intValue": 12,
+      "exponentA": 3.0,
+      "exponentB": 1.8,
+      "tailScalar": 0.018750000722,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 68,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 5,
+      "costPrefixU32": [
+        1202590843,
+        1076099809,
+        12,
+        0,
+        0,
+        1074266112,
+        0,
+        0,
+        3435973836,
+        1073532108,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        9.99,
+        0.0,
+        3.0,
+        0.0,
+        1.8,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 9.99,
+          "exponent": 12
+        },
+        {
+          "mantissa": 3.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.8,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 12,
+      "candidateCostDoubleA": 9.99,
+      "candidateCostDoubleB": 3.0,
+      "candidateCostDoubleC": 1.8,
+      "bonusPerLevelValues": [
+        1.200000047684,
+        1.149999976158,
+        1.100000023842,
+        2.0,
+        1.25
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 9.99,
+          "CostExponent": 3.0,
+          "GrowthExponent": 1.8
+        },
+        "auxiliaryIntCandidate": 12,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 9.99,
+            "exponent": 12,
+            "label": "9.99e12"
+          },
+          "CostExponent": {
+            "mantissa": 3.0,
+            "exponent": 0,
+            "label": "3.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.8,
+            "exponent": -1,
+            "label": "1.8e-1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 13,
+      "rarity": "common",
+      "unlockRequirementValue": 560,
+      "bonusCount": 3,
+      "pointerRunStart": 3840,
+      "pointerRefCount": 7,
+      "tupleOffset": 3924,
+      "nextPointerRunStart": 3984,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 2.0,
+      "intValue": 13,
+      "exponentA": 1.78,
+      "exponentB": 8.0,
+      "tailScalar": 0.012187505127,
+      "tailSentinelA": 4294967294,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1073741824,
+        13,
+        0,
+        1202590843,
+        1073511137,
+        0,
+        0,
+        0,
+        1075838976,
+        4294967294,
+        4294967295
+      ],
+      "costPrefixF64": [
+        2.0,
+        0.0,
+        1.78,
+        0.0,
+        8.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 13
+        },
+        {
+          "mantissa": 1.78,
+          "exponent": 0
+        },
+        {
+          "mantissa": 8.0,
+          "exponent": -2
+        }
+      ],
+      "candidateStartCostInt": 13,
+      "candidateCostDoubleA": 2.0,
+      "candidateCostDoubleB": 1.78,
+      "candidateCostDoubleC": 8.0,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.070000052452,
+        1.080000042915
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 2.0,
+          "CostExponent": 1.78,
+          "GrowthExponent": 8.0
+        },
+        "auxiliaryIntCandidate": 13,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 13,
+            "label": "2.0e13"
+          },
+          "CostExponent": {
+            "mantissa": 1.78,
+            "exponent": 0,
+            "label": "1.78e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 8.0,
+            "exponent": -2,
+            "label": "8.0e-2"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 14,
+      "rarity": "Rare",
+      "unlockRequirementValue": 700,
+      "bonusCount": 4,
+      "pointerRunStart": 3984,
+      "pointerRefCount": 9,
+      "tupleOffset": 4092,
+      "nextPointerRunStart": 4156,
+      "expectedNumericBlockByteCount": 64,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 2.0,
+      "intValue": 17,
+      "exponentA": 4.0,
+      "exponentB": 2.0,
+      "tailScalar": 0.022499997144,
+      "tailSentinelA": 0,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 64,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 4,
+      "costPrefixU32": [
+        0,
+        1073741824,
+        17,
+        0,
+        0,
+        1074790400,
+        0,
+        0,
+        0,
+        1073741824,
+        0,
+        0
+      ],
+      "costPrefixF64": [
+        2.0,
+        0.0,
+        4.0,
+        0.0,
+        2.0,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 17
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 0
+        }
+      ],
+      "candidateStartCostInt": 17,
+      "candidateCostDoubleA": 2.0,
+      "candidateCostDoubleB": 4.0,
+      "candidateCostDoubleC": 2.0,
+      "bonusPerLevelValues": [
+        1.149999976158,
+        1.179999947548,
+        1.210000038147,
+        0.009999999776
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 2.0,
+          "CostExponent": 4.0,
+          "GrowthExponent": 2.0
+        },
+        "auxiliaryIntCandidate": 17,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 17,
+            "label": "2.0e17"
+          },
+          "CostExponent": {
+            "mantissa": 4.0,
+            "exponent": 0,
+            "label": "4.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.0,
+            "exponent": 0,
+            "label": "2.0e0"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 15,
+      "rarity": "common",
+      "unlockRequirementValue": 800,
+      "bonusCount": 3,
+      "pointerRunStart": 4156,
+      "pointerRefCount": 7,
+      "tupleOffset": 4240,
+      "nextPointerRunStart": 4300,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 2.0,
+      "intValue": 21,
+      "exponentA": 2.0,
+      "exponentB": 2.0,
+      "tailScalar": 0.011562498273,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1073741824,
+        21,
+        0,
+        0,
+        1073741824,
+        0,
+        0,
+        0,
+        1073741824,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        2.0,
+        0.0,
+        2.0,
+        0.0,
+        2.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 21
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 21,
+      "candidateCostDoubleA": 2.0,
+      "candidateCostDoubleB": 2.0,
+      "candidateCostDoubleC": 2.0,
+      "bonusPerLevelValues": [
+        1.05999994278,
+        1.05999994278,
+        1.05999994278
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 2.0,
+          "CostExponent": 2.0,
+          "GrowthExponent": 2.0
+        },
+        "auxiliaryIntCandidate": 21,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 21,
+            "label": "2.0e21"
+          },
+          "CostExponent": {
+            "mantissa": 2.0,
+            "exponent": 0,
+            "label": "2.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.0,
+            "exponent": -1,
+            "label": "2.0e-1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 16,
+      "rarity": "Rare",
+      "unlockRequirementValue": 900,
+      "bonusCount": 4,
+      "pointerRunStart": 4300,
+      "pointerRefCount": 9,
+      "tupleOffset": 4408,
+      "nextPointerRunStart": 4472,
+      "expectedNumericBlockByteCount": 64,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 6.0,
+      "intValue": 23,
+      "exponentA": 4.0,
+      "exponentB": 1.2,
+      "tailScalar": 0.031250007395,
+      "tailSentinelA": 0,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 64,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 4,
+      "costPrefixU32": [
+        0,
+        1075314688,
+        23,
+        0,
+        0,
+        1074790400,
+        0,
+        0,
+        858993459,
+        1072902963,
+        0,
+        0
+      ],
+      "costPrefixF64": [
+        6.0,
+        0.0,
+        4.0,
+        0.0,
+        1.2,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 6.0,
+          "exponent": 23
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 1.2,
+          "exponent": 0
+        }
+      ],
+      "candidateStartCostInt": 23,
+      "candidateCostDoubleA": 6.0,
+      "candidateCostDoubleB": 4.0,
+      "candidateCostDoubleC": 1.2,
+      "bonusPerLevelValues": [
+        1.049999952316,
+        1.25,
+        1.049999952316,
+        1.299999952316
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 6.0,
+          "CostExponent": 4.0,
+          "GrowthExponent": 1.2
+        },
+        "auxiliaryIntCandidate": 23,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 6.0,
+            "exponent": 23,
+            "label": "6.0e23"
+          },
+          "CostExponent": {
+            "mantissa": 4.0,
+            "exponent": 0,
+            "label": "4.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.2,
+            "exponent": 0,
+            "label": "1.2e0"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 17,
+      "rarity": "Epic",
+      "unlockRequirementValue": 1000,
+      "bonusCount": 5,
+      "pointerRunStart": 4472,
+      "pointerRefCount": 11,
+      "tupleOffset": 4604,
+      "nextPointerRunStart": 4672,
+      "expectedNumericBlockByteCount": 68,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 8.0,
+      "intValue": 25,
+      "exponentA": 3.0,
+      "exponentB": 5.0,
+      "tailScalar": 0.01343750395,
+      "tailSentinelA": 0,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 68,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 5,
+      "costPrefixU32": [
+        0,
+        1075838976,
+        25,
+        0,
+        0,
+        1074266112,
+        1,
+        0,
+        0,
+        1075052544,
+        0,
+        0
+      ],
+      "costPrefixF64": [
+        8.0,
+        0.0,
+        3.0,
+        0.0,
+        5.0,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 8.0,
+          "exponent": 25
+        },
+        {
+          "mantissa": 3.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 0
+        }
+      ],
+      "candidateStartCostInt": 25,
+      "candidateCostDoubleA": 8.0,
+      "candidateCostDoubleB": 3.0,
+      "candidateCostDoubleC": 5.0,
+      "bonusPerLevelValues": [
+        2.200000047684,
+        1.090000033379,
+        1.070000052452,
+        1.129999995232,
+        1.090000033379
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 8.0,
+          "CostExponent": 3.0,
+          "GrowthExponent": 5.0
+        },
+        "auxiliaryIntCandidate": 25,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 8.0,
+            "exponent": 25,
+            "label": "8.0e25"
+          },
+          "CostExponent": {
+            "mantissa": 3.0,
+            "exponent": 1,
+            "label": "3.0e1"
+          },
+          "GrowthExponent": {
+            "mantissa": 5.0,
+            "exponent": 0,
+            "label": "5.0e0"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 18,
+      "rarity": "Legendary",
+      "unlockRequirementValue": 1100,
+      "bonusCount": 6,
+      "pointerRunStart": 4672,
+      "pointerRefCount": 13,
+      "tupleOffset": 4828,
+      "nextPointerRunStart": 4900,
+      "expectedNumericBlockByteCount": 72,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 1.5,
+      "intValue": 33,
+      "exponentA": 1.0,
+      "exponentB": 5.0,
+      "tailScalar": 0.019999999528,
+      "tailSentinelA": 1,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 72,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 6,
+      "costPrefixU32": [
+        0,
+        1073217536,
+        33,
+        0,
+        0,
+        1072693248,
+        2,
+        0,
+        0,
+        1075052544,
+        1,
+        0
+      ],
+      "costPrefixF64": [
+        1.5,
+        0.0,
+        1.0,
+        0.0,
+        5.0,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.5,
+          "exponent": 33
+        },
+        {
+          "mantissa": 1.0,
+          "exponent": 2
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 1
+        }
+      ],
+      "candidateStartCostInt": 33,
+      "candidateCostDoubleA": 1.5,
+      "candidateCostDoubleB": 1.0,
+      "candidateCostDoubleC": 5.0,
+      "bonusPerLevelValues": [
+        1.149999976158,
+        1.159999966621,
+        6.0,
+        1.370000004768,
+        1.590000033379,
+        1.389999985695
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 1.5,
+          "CostExponent": 1.0,
+          "GrowthExponent": 5.0
+        },
+        "auxiliaryIntCandidate": 33,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.5,
+            "exponent": 33,
+            "label": "1.5e33"
+          },
+          "CostExponent": {
+            "mantissa": 1.0,
+            "exponent": 2,
+            "label": "1.0e2"
+          },
+          "GrowthExponent": {
+            "mantissa": 5.0,
+            "exponent": 1,
+            "label": "5.0e1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 19,
+      "rarity": "common",
+      "unlockRequirementValue": 1400,
+      "bonusCount": 3,
+      "pointerRunStart": 4900,
+      "pointerRefCount": 7,
+      "tupleOffset": 4984,
+      "nextPointerRunStart": 5044,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 1.0,
+      "intValue": 70,
+      "exponentA": 2.5,
+      "exponentB": 4.0,
+      "tailScalar": 0.01875000072,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1072693248,
+        70,
+        0,
+        0,
+        1074003968,
+        0,
+        0,
+        0,
+        1074790400,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        1.0,
+        0.0,
+        2.5,
+        0.0,
+        4.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 70
+        },
+        {
+          "mantissa": 2.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 70,
+      "candidateCostDoubleA": 1.0,
+      "candidateCostDoubleB": 2.5,
+      "candidateCostDoubleC": 4.0,
+      "bonusPerLevelValues": [
+        1.129999995232,
+        1.149999976158,
+        1.169999957085
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 1.0,
+          "CostExponent": 2.5,
+          "GrowthExponent": 4.0
+        },
+        "auxiliaryIntCandidate": 70,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 70,
+            "label": "1.0e70"
+          },
+          "CostExponent": {
+            "mantissa": 2.5,
+            "exponent": 0,
+            "label": "2.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 20,
+      "rarity": "common",
+      "unlockRequirementValue": 1500,
+      "bonusCount": 3,
+      "pointerRunStart": 5044,
+      "pointerRefCount": 7,
+      "tupleOffset": 5128,
+      "nextPointerRunStart": 5188,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 1.0,
+      "intValue": 82,
+      "exponentA": 2.5,
+      "exponentB": 4.0,
+      "tailScalar": 0.025000009661,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1072693248,
+        82,
+        0,
+        0,
+        1074003968,
+        0,
+        0,
+        0,
+        1074790400,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        1.0,
+        0.0,
+        2.5,
+        0.0,
+        4.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 82
+        },
+        {
+          "mantissa": 2.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 82,
+      "candidateCostDoubleA": 1.0,
+      "candidateCostDoubleB": 2.5,
+      "candidateCostDoubleC": 4.0,
+      "bonusPerLevelValues": [
+        1.149999976158,
+        1.200000047684,
+        1.070000052452
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 1.0,
+          "CostExponent": 2.5,
+          "GrowthExponent": 4.0
+        },
+        "auxiliaryIntCandidate": 82,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 82,
+            "label": "1.0e82"
+          },
+          "CostExponent": {
+            "mantissa": 2.5,
+            "exponent": 0,
+            "label": "2.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 21,
+      "rarity": "common",
+      "unlockRequirementValue": 1600,
+      "bonusCount": 3,
+      "pointerRunStart": 5188,
+      "pointerRefCount": 7,
+      "tupleOffset": 5272,
+      "nextPointerRunStart": 5332,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 1.0,
+      "intValue": 89,
+      "exponentA": 2.5,
+      "exponentB": 4.0,
+      "tailScalar": 0.012187505127,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1072693248,
+        89,
+        0,
+        0,
+        1074003968,
+        0,
+        0,
+        0,
+        1074790400,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        1.0,
+        0.0,
+        2.5,
+        0.0,
+        4.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 89
+        },
+        {
+          "mantissa": 2.5,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 89,
+      "candidateCostDoubleA": 1.0,
+      "candidateCostDoubleB": 2.5,
+      "candidateCostDoubleC": 4.0,
+      "bonusPerLevelValues": [
+        1.019999980927,
+        1.070000052452,
+        1.120000004768
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 1.0,
+          "CostExponent": 2.5,
+          "GrowthExponent": 4.0
+        },
+        "auxiliaryIntCandidate": 89,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 89,
+            "label": "1.0e89"
+          },
+          "CostExponent": {
+            "mantissa": 2.5,
+            "exponent": 0,
+            "label": "2.5e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 22,
+      "rarity": "Rare",
+      "unlockRequirementValue": 1700,
+      "bonusCount": 4,
+      "pointerRunStart": 5332,
+      "pointerRefCount": 9,
+      "tupleOffset": 5440,
+      "nextPointerRunStart": 5504,
+      "expectedNumericBlockByteCount": 64,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 1.0,
+      "intValue": 97,
+      "exponentA": 5.0,
+      "exponentB": 3.0,
+      "tailScalar": 4.80000019148,
+      "tailSentinelA": 0,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 64,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 4,
+      "costPrefixU32": [
+        0,
+        1072693248,
+        97,
+        0,
+        0,
+        1075052544,
+        0,
+        0,
+        0,
+        1074266112,
+        0,
+        0
+      ],
+      "costPrefixF64": [
+        1.0,
+        0.0,
+        5.0,
+        0.0,
+        3.0,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 97
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 0
+        },
+        {
+          "mantissa": 3.0,
+          "exponent": 0
+        }
+      ],
+      "candidateStartCostInt": 97,
+      "candidateCostDoubleA": 1.0,
+      "candidateCostDoubleB": 5.0,
+      "candidateCostDoubleC": 3.0,
+      "bonusPerLevelValues": [
+        2.200000047684,
+        2.299999952316,
+        2.400000095367,
+        2.5
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 1.0,
+          "CostExponent": 5.0,
+          "GrowthExponent": 3.0
+        },
+        "auxiliaryIntCandidate": 97,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 97,
+            "label": "1.0e97"
+          },
+          "CostExponent": {
+            "mantissa": 5.0,
+            "exponent": 0,
+            "label": "5.0e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 3.0,
+            "exponent": 0,
+            "label": "3.0e0"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 23,
+      "rarity": "Epic",
+      "unlockRequirementValue": 1800,
+      "bonusCount": 5,
+      "pointerRunStart": 5504,
+      "pointerRefCount": 11,
+      "tupleOffset": 5636,
+      "nextPointerRunStart": 5704,
+      "expectedNumericBlockByteCount": 68,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 1.0,
+      "intValue": 114,
+      "exponentA": 1.0,
+      "exponentB": 1.0,
+      "tailScalar": 0.015312502148,
+      "tailSentinelA": 1,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 68,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 5,
+      "costPrefixU32": [
+        0,
+        1072693248,
+        114,
+        0,
+        0,
+        1072693248,
+        1,
+        0,
+        0,
+        1072693248,
+        1,
+        0
+      ],
+      "costPrefixF64": [
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 1.0,
+          "exponent": 114
+        },
+        {
+          "mantissa": 1.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 1.0,
+          "exponent": 1
+        }
+      ],
+      "candidateStartCostInt": 114,
+      "candidateCostDoubleA": 1.0,
+      "candidateCostDoubleB": 1.0,
+      "candidateCostDoubleC": 1.0,
+      "bonusPerLevelValues": [
+        1.120000004768,
+        1.120000004768,
+        1.179999947548,
+        1.070000052452,
+        1.350000023842
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 1.0,
+          "CostExponent": 1.0,
+          "GrowthExponent": 1.0
+        },
+        "auxiliaryIntCandidate": 114,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 1.0,
+            "exponent": 114,
+            "label": "1.0e114"
+          },
+          "CostExponent": {
+            "mantissa": 1.0,
+            "exponent": 1,
+            "label": "1.0e1"
+          },
+          "GrowthExponent": {
+            "mantissa": 1.0,
+            "exponent": 1,
+            "label": "1.0e1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 24,
+      "rarity": "Rare",
+      "unlockRequirementValue": 3300,
+      "bonusCount": 4,
+      "pointerRunStart": 5704,
+      "pointerRefCount": 9,
+      "tupleOffset": 5812,
+      "nextPointerRunStart": 5876,
+      "expectedNumericBlockByteCount": 64,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 4.0,
+      "intValue": 275,
+      "exponentA": 5.0,
+      "exponentB": 5.0,
+      "tailScalar": 0.125000029698,
+      "tailSentinelA": 1,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 64,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 4,
+      "costPrefixU32": [
+        0,
+        1074790400,
+        275,
+        0,
+        0,
+        1075052544,
+        1,
+        0,
+        0,
+        1075052544,
+        1,
+        0
+      ],
+      "costPrefixF64": [
+        4.0,
+        0.0,
+        5.0,
+        0.0,
+        5.0,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 4.0,
+          "exponent": 275
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 1
+        },
+        {
+          "mantissa": 5.0,
+          "exponent": 1
+        }
+      ],
+      "candidateStartCostInt": 275,
+      "candidateCostDoubleA": 4.0,
+      "candidateCostDoubleB": 5.0,
+      "candidateCostDoubleC": 5.0,
+      "bonusPerLevelValues": [
+        1.549999952316,
+        1.5,
+        1.950000047684,
+        2.049999952316
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 4.0,
+          "CostExponent": 5.0,
+          "GrowthExponent": 5.0
+        },
+        "auxiliaryIntCandidate": 275,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 4.0,
+            "exponent": 275,
+            "label": "4.0e275"
+          },
+          "CostExponent": {
+            "mantissa": 5.0,
+            "exponent": 1,
+            "label": "5.0e1"
+          },
+          "GrowthExponent": {
+            "mantissa": 5.0,
+            "exponent": 1,
+            "label": "5.0e1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 25,
+      "rarity": "Low Pristine",
+      "unlockRequirementValue": 3600,
+      "bonusCount": 3,
+      "pointerRunStart": 5876,
+      "pointerRefCount": 7,
+      "tupleOffset": 5960,
+      "nextPointerRunStart": 6020,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 3.0,
+      "intValue": 350,
+      "exponentA": 2.0,
+      "exponentB": 2.0,
+      "tailScalar": 0.500000118483,
+      "tailSentinelA": 4,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1074266112,
+        350,
+        0,
+        0,
+        1073741824,
+        4,
+        0,
+        0,
+        1073741824,
+        4,
+        0
+      ],
+      "costPrefixF64": [
+        3.0,
+        0.0,
+        2.0,
+        0.0,
+        2.0,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 3.0,
+          "exponent": 350
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 4
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 4
+        }
+      ],
+      "candidateStartCostInt": 350,
+      "candidateCostDoubleA": 3.0,
+      "candidateCostDoubleB": 2.0,
+      "candidateCostDoubleC": 2.0,
+      "bonusPerLevelValues": [
+        1.22000002861,
+        1.75,
+        1.350000023842
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 3.0,
+          "CostExponent": 2.0,
+          "GrowthExponent": 2.0
+        },
+        "auxiliaryIntCandidate": 350,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 3.0,
+            "exponent": 350,
+            "label": "3.0e350"
+          },
+          "CostExponent": {
+            "mantissa": 2.0,
+            "exponent": 4,
+            "label": "2.0e4"
+          },
+          "GrowthExponent": {
+            "mantissa": 2.0,
+            "exponent": 4,
+            "label": "2.0e4"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 26,
+      "rarity": "Mid Pristine",
+      "unlockRequirementValue": 3900,
+      "bonusCount": 5,
+      "pointerRunStart": 6020,
+      "pointerRefCount": 11,
+      "tupleOffset": 6152,
+      "nextPointerRunStart": 6220,
+      "expectedNumericBlockByteCount": 68,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 5.0,
+      "intValue": 500,
+      "exponentA": 2.0,
+      "exponentB": 6.0,
+      "tailScalar": 0.01181250252,
+      "tailSentinelA": 5,
+      "tailSentinelB": 0,
+      "numericBlockByteCount": 68,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 5,
+      "costPrefixU32": [
+        0,
+        1075052544,
+        500,
+        0,
+        0,
+        1073741824,
+        5,
+        0,
+        0,
+        1075314688,
+        5,
+        0
+      ],
+      "costPrefixF64": [
+        5.0,
+        0.0,
+        2.0,
+        0.0,
+        6.0,
+        0.0
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 5.0,
+          "exponent": 500
+        },
+        {
+          "mantissa": 2.0,
+          "exponent": 5
+        },
+        {
+          "mantissa": 6.0,
+          "exponent": 5
+        }
+      ],
+      "candidateStartCostInt": 500,
+      "candidateCostDoubleA": 5.0,
+      "candidateCostDoubleB": 2.0,
+      "candidateCostDoubleC": 6.0,
+      "bonusPerLevelValues": [
+        2.200000047684,
+        1.06400001049,
+        1.044000029564,
+        1.067999958992,
+        1.072000026703
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 5.0,
+          "CostExponent": 2.0,
+          "GrowthExponent": 6.0
+        },
+        "auxiliaryIntCandidate": 500,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 5.0,
+            "exponent": 500,
+            "label": "5.0e500"
+          },
+          "CostExponent": {
+            "mantissa": 2.0,
+            "exponent": 5,
+            "label": "2.0e5"
+          },
+          "GrowthExponent": {
+            "mantissa": 6.0,
+            "exponent": 5,
+            "label": "6.0e5"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 27,
+      "rarity": "common",
+      "unlockRequirementValue": 8000,
+      "bonusCount": 3,
+      "pointerRunStart": 6220,
+      "pointerRefCount": 7,
+      "tupleOffset": 6304,
+      "nextPointerRunStart": 6364,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 2.0,
+      "intValue": 975,
+      "exponentA": 2.25,
+      "exponentB": 4.0,
+      "tailScalar": 0.023750010852,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1073741824,
+        975,
+        0,
+        0,
+        1073872896,
+        0,
+        0,
+        0,
+        1074790400,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        2.0,
+        0.0,
+        2.25,
+        0.0,
+        4.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 2.0,
+          "exponent": 975
+        },
+        {
+          "mantissa": 2.25,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 975,
+      "candidateCostDoubleA": 2.0,
+      "candidateCostDoubleB": 2.25,
+      "candidateCostDoubleC": 4.0,
+      "bonusPerLevelValues": [
+        1.100000023842,
+        1.19000005722,
+        1.129999995232
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 2.0,
+          "CostExponent": 2.25,
+          "GrowthExponent": 4.0
+        },
+        "auxiliaryIntCandidate": 975,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 2.0,
+            "exponent": 975,
+            "label": "2.0e975"
+          },
+          "CostExponent": {
+            "mantissa": 2.25,
+            "exponent": 0,
+            "label": "2.25e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 28,
+      "rarity": "common",
+      "unlockRequirementValue": 8050,
+      "bonusCount": 3,
+      "pointerRunStart": 6364,
+      "pointerRefCount": 7,
+      "tupleOffset": 6448,
+      "nextPointerRunStart": 6508,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 0,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 4.0,
+      "intValue": 982,
+      "exponentA": 2.29,
+      "exponentB": 4.0,
+      "tailScalar": 0.038750000244,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1074790400,
+        982,
+        0,
+        2233382994,
+        1073893867,
+        0,
+        0,
+        0,
+        1074790400,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        4.0,
+        0.0,
+        2.29,
+        0.0,
+        4.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 4.0,
+          "exponent": 982
+        },
+        {
+          "mantissa": 2.29,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 982,
+      "candidateCostDoubleA": 4.0,
+      "candidateCostDoubleB": 2.29,
+      "candidateCostDoubleC": 4.0,
+      "bonusPerLevelValues": [
+        1.070000052452,
+        1.27999997139,
+        1.120000004768
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 4.0,
+          "CostExponent": 2.29,
+          "GrowthExponent": 4.0
+        },
+        "auxiliaryIntCandidate": 982,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 4.0,
+            "exponent": 982,
+            "label": "4.0e982"
+          },
+          "CostExponent": {
+            "mantissa": 2.29,
+            "exponent": 0,
+            "label": "2.29e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    },
+    {
+      "row": 29,
+      "rarity": "common",
+      "unlockRequirementValue": 8100,
+      "bonusCount": 3,
+      "pointerRunStart": 6508,
+      "pointerRefCount": 7,
+      "tupleOffset": 6592,
+      "nextPointerRunStart": 6700,
+      "expectedNumericBlockByteCount": 60,
+      "trailingSlackByteCount": 48,
+      "rowBlockRecoveredDeterministically": true,
+      "rowBlockBoundaryMode": "expected-row-shape",
+      "leadingValue": 6.0,
+      "intValue": 988,
+      "exponentA": 2.3,
+      "exponentB": 4.0,
+      "tailScalar": 0.008937502268,
+      "tailSentinelA": 4294967295,
+      "tailSentinelB": 4294967295,
+      "numericBlockByteCount": 60,
+      "costPrefixByteCount": 48,
+      "bonusFloatCount": 3,
+      "costPrefixU32": [
+        0,
+        1075314688,
+        988,
+        0,
+        1717986918,
+        1073899110,
+        0,
+        0,
+        0,
+        1074790400,
+        4294967295,
+        4294967295
+      ],
+      "costPrefixF64": [
+        6.0,
+        0.0,
+        2.3,
+        0.0,
+        4.0,
+        null
+      ],
+      "costPrefixBigDoublePairs": [
+        {
+          "mantissa": 6.0,
+          "exponent": 988
+        },
+        {
+          "mantissa": 2.3,
+          "exponent": 0
+        },
+        {
+          "mantissa": 4.0,
+          "exponent": -1
+        }
+      ],
+      "candidateStartCostInt": 988,
+      "candidateCostDoubleA": 6.0,
+      "candidateCostDoubleB": 2.3,
+      "candidateCostDoubleC": 4.0,
+      "bonusPerLevelValues": [
+        1.159999966621,
+        1.018000006676,
+        1.027999997139
+      ],
+      "strongestFieldOrderMapping": {
+        "fieldNames": [
+          "StartCost",
+          "CostExponent",
+          "GrowthExponent"
+        ],
+        "values": {
+          "StartCost": 6.0,
+          "CostExponent": 2.3,
+          "GrowthExponent": 4.0
+        },
+        "auxiliaryIntCandidate": 988,
+        "exactBigDoubleValues": {
+          "StartCost": {
+            "mantissa": 6.0,
+            "exponent": 988,
+            "label": "6.0e988"
+          },
+          "CostExponent": {
+            "mantissa": 2.3,
+            "exponent": 0,
+            "label": "2.3e0"
+          },
+          "GrowthExponent": {
+            "mantissa": 4.0,
+            "exponent": -1,
+            "label": "4.0e-1"
+          }
+        },
+        "rationale": [
+          "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+          "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+          "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+          "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+        ]
+      }
+    }
+  ],
+  "row0AlignedTupleCandidate": {
+    "row": 0,
+    "rarity": "Unique",
+    "unlockRequirementValue": 0,
+    "bonusCount": 3,
+    "pointerRunStart": 1576,
+    "pointerRefCount": 19,
+    "tupleOffset": 1804,
+    "nextPointerRunStart": 1916,
+    "expectedNumericBlockByteCount": 92,
+    "trailingSlackByteCount": 20,
+    "rowBlockRecoveredDeterministically": true,
+    "rowBlockBoundaryMode": "expected-row-shape",
+    "leadingValue": 5.0,
+    "intValue": 0,
+    "exponentA": 1.3,
+    "exponentB": 1.5,
+    "tailScalar": 1.1,
+    "tailSentinelA": 4294967295,
+    "tailSentinelB": 4294967295,
+    "numericBlockByteCount": 92,
+    "costPrefixByteCount": 80,
+    "bonusFloatCount": 3,
+    "costPrefixU32": [
+      0,
+      1075052544,
+      0,
+      0,
+      3435973837,
+      1073007820,
+      0,
+      0,
+      0,
+      1073217536,
+      4294967295,
+      4294967295,
+      2576980378,
+      1072798105,
+      4294967294,
+      4294967295,
+      0,
+      1073741824,
+      4294967295,
+      4294967295
+    ],
+    "costPrefixF64": [
+      5.0,
+      0.0,
+      1.3,
+      0.0,
+      1.5,
+      null,
+      1.1,
+      null,
+      2.0,
+      null
+    ],
+    "costPrefixBigDoublePairs": [
+      {
+        "mantissa": 5.0,
+        "exponent": 0
+      },
+      {
+        "mantissa": 1.3,
+        "exponent": 0
+      },
+      {
+        "mantissa": 1.5,
+        "exponent": -1
+      },
+      {
+        "mantissa": 1.1,
+        "exponent": -2
+      },
+      {
+        "mantissa": 2.0,
+        "exponent": -1
+      }
+    ],
+    "candidateStartCostInt": 0,
+    "candidateCostDoubleA": 5.0,
+    "candidateCostDoubleB": 1.3,
+    "candidateCostDoubleC": 1.5,
+    "bonusPerLevelValues": [
+      1.100000023842,
+      1.019999980927,
+      1.299999952316
+    ],
+    "strongestFieldOrderMapping": {
+      "fieldNames": [
+        "StartCost",
+        "CostExponent",
+        "GrowthExponent",
+        "GrowthExponent2",
+        "GrowthExponent3"
+      ],
+      "values": {
+        "StartCost": 5.0,
+        "CostExponent": 1.3,
+        "GrowthExponent": 1.5,
+        "GrowthExponent2": 1.1,
+        "GrowthExponent3": 2.0
+      },
+      "auxiliaryIntCandidate": 0,
+      "exactBigDoubleValues": {
+        "StartCost": {
+          "mantissa": 5.0,
+          "exponent": 0,
+          "label": "5.0e0"
+        },
+        "CostExponent": {
+          "mantissa": 1.3,
+          "exponent": 0,
+          "label": "1.3e0"
+        },
+        "GrowthExponent": {
+          "mantissa": 1.5,
+          "exponent": -1,
+          "label": "1.5e-1"
+        },
+        "GrowthExponent2": {
+          "mantissa": 1.1,
+          "exponent": -2,
+          "label": "1.1e-2"
+        },
+        "GrowthExponent3": {
+          "mantissa": 2.0,
+          "exponent": -1,
+          "label": "2.0e-1"
+        }
+      },
+      "rationale": [
+        "Row 0 preserves five 16-byte BigDouble slots before the bonus-per-level float tail inside its deterministic aligned block.",
+        "The row-0 metadata shell preserves five row-local cost field names in the same order: StartCost, CostExponent, GrowthExponent, GrowthExponent2, and GrowthExponent3.",
+        "The paired exponent lane is part of each serialized BigDouble field rather than a spare integer lane outside the cost model.",
+        "This is strong enough to treat the row-0 five-slot mapping as exact serialized row-local BigDouble cost fields, even though the exact get_SU0Cost formula is still not verified."
+      ]
+    }
+  },
+  "signatureGroups": [
+    {
+      "leadingValue": 1.0,
+      "exponentA": 2.5,
+      "exponentB": 4.0,
+      "count": 3,
+      "offsets": [
+        4984,
+        5128,
+        5272
+      ],
+      "intValues": [
+        70,
+        82,
+        89
+      ],
+      "tailScalars": [
+        0.01875000072,
+        0.025000009661,
+        0.012187505127
+      ]
+    },
+    {
+      "leadingValue": 2.0,
+      "exponentA": 2.0,
+      "exponentB": 2.0,
+      "count": 1,
+      "offsets": [
+        4240
+      ],
+      "intValues": [
+        21
+      ],
+      "tailScalars": [
+        0.011562498273
+      ]
+    },
+    {
+      "leadingValue": 2.0,
+      "exponentA": 2.25,
+      "exponentB": 4.0,
+      "count": 1,
+      "offsets": [
+        6304
+      ],
+      "intValues": [
+        975
+      ],
+      "tailScalars": [
+        0.023750010852
+      ]
+    },
+    {
+      "leadingValue": 4.0,
+      "exponentA": 2.0,
+      "exponentB": 3.8,
+      "count": 1,
+      "offsets": [
+        3112
+      ],
+      "intValues": [
+        3
+      ],
+      "tailScalars": [
+        0.025000009668
+      ]
+    },
+    {
+      "leadingValue": 4.0,
+      "exponentA": 2.29,
+      "exponentB": 4.0,
+      "count": 1,
+      "offsets": [
+        6448
+      ],
+      "intValues": [
+        982
+      ],
+      "tailScalars": [
+        0.038750000244
+      ]
+    }
+  ],
+  "repeatedCommonRowGroup": {
+    "rows": [
+      19,
+      20,
+      21
+    ],
+    "rationale": [
+      "The row-aligned tuple map preserves exactly three repeated common-row records with signature leading=1, exponentA=2.5, exponentB=4.",
+      "Those rows are tied to direct row-aligned tuple offsets inside ShardMining, not just a free-floating tuple scan.",
+      "The tuple field semantics are still not fully typed, so this stays a row-family grouping result rather than a final cost-formula proof."
+    ],
+    "tuples": [
+      {
+        "row": 19,
+        "rarity": "common",
+        "unlockRequirementValue": 1400,
+        "bonusCount": 3,
+        "pointerRunStart": 4900,
+        "pointerRefCount": 7,
+        "tupleOffset": 4984,
+        "nextPointerRunStart": 5044,
+        "expectedNumericBlockByteCount": 60,
+        "trailingSlackByteCount": 0,
+        "rowBlockRecoveredDeterministically": true,
+        "rowBlockBoundaryMode": "expected-row-shape",
+        "leadingValue": 1.0,
+        "intValue": 70,
+        "exponentA": 2.5,
+        "exponentB": 4.0,
+        "tailScalar": 0.01875000072,
+        "tailSentinelA": 4294967295,
+        "tailSentinelB": 4294967295,
+        "numericBlockByteCount": 60,
+        "costPrefixByteCount": 48,
+        "bonusFloatCount": 3,
+        "costPrefixU32": [
+          0,
+          1072693248,
+          70,
+          0,
+          0,
+          1074003968,
+          0,
+          0,
+          0,
+          1074790400,
+          4294967295,
+          4294967295
+        ],
+        "costPrefixF64": [
+          1.0,
+          0.0,
+          2.5,
+          0.0,
+          4.0,
+          null
+        ],
+        "costPrefixBigDoublePairs": [
+          {
+            "mantissa": 1.0,
+            "exponent": 70
+          },
+          {
+            "mantissa": 2.5,
+            "exponent": 0
+          },
+          {
+            "mantissa": 4.0,
+            "exponent": -1
+          }
+        ],
+        "candidateStartCostInt": 70,
+        "candidateCostDoubleA": 1.0,
+        "candidateCostDoubleB": 2.5,
+        "candidateCostDoubleC": 4.0,
+        "bonusPerLevelValues": [
+          1.129999995232,
+          1.149999976158,
+          1.169999957085
+        ],
+        "strongestFieldOrderMapping": {
+          "fieldNames": [
+            "StartCost",
+            "CostExponent",
+            "GrowthExponent"
+          ],
+          "values": {
+            "StartCost": 1.0,
+            "CostExponent": 2.5,
+            "GrowthExponent": 4.0
+          },
+          "auxiliaryIntCandidate": 70,
+          "exactBigDoubleValues": {
+            "StartCost": {
+              "mantissa": 1.0,
+              "exponent": 70,
+              "label": "1.0e70"
+            },
+            "CostExponent": {
+              "mantissa": 2.5,
+              "exponent": 0,
+              "label": "2.5e0"
+            },
+            "GrowthExponent": {
+              "mantissa": 4.0,
+              "exponent": -1,
+              "label": "4.0e-1"
+            }
+          },
+          "rationale": [
+            "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+            "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+            "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+            "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+          ]
+        }
+      },
+      {
+        "row": 20,
+        "rarity": "common",
+        "unlockRequirementValue": 1500,
+        "bonusCount": 3,
+        "pointerRunStart": 5044,
+        "pointerRefCount": 7,
+        "tupleOffset": 5128,
+        "nextPointerRunStart": 5188,
+        "expectedNumericBlockByteCount": 60,
+        "trailingSlackByteCount": 0,
+        "rowBlockRecoveredDeterministically": true,
+        "rowBlockBoundaryMode": "expected-row-shape",
+        "leadingValue": 1.0,
+        "intValue": 82,
+        "exponentA": 2.5,
+        "exponentB": 4.0,
+        "tailScalar": 0.025000009661,
+        "tailSentinelA": 4294967295,
+        "tailSentinelB": 4294967295,
+        "numericBlockByteCount": 60,
+        "costPrefixByteCount": 48,
+        "bonusFloatCount": 3,
+        "costPrefixU32": [
+          0,
+          1072693248,
+          82,
+          0,
+          0,
+          1074003968,
+          0,
+          0,
+          0,
+          1074790400,
+          4294967295,
+          4294967295
+        ],
+        "costPrefixF64": [
+          1.0,
+          0.0,
+          2.5,
+          0.0,
+          4.0,
+          null
+        ],
+        "costPrefixBigDoublePairs": [
+          {
+            "mantissa": 1.0,
+            "exponent": 82
+          },
+          {
+            "mantissa": 2.5,
+            "exponent": 0
+          },
+          {
+            "mantissa": 4.0,
+            "exponent": -1
+          }
+        ],
+        "candidateStartCostInt": 82,
+        "candidateCostDoubleA": 1.0,
+        "candidateCostDoubleB": 2.5,
+        "candidateCostDoubleC": 4.0,
+        "bonusPerLevelValues": [
+          1.149999976158,
+          1.200000047684,
+          1.070000052452
+        ],
+        "strongestFieldOrderMapping": {
+          "fieldNames": [
+            "StartCost",
+            "CostExponent",
+            "GrowthExponent"
+          ],
+          "values": {
+            "StartCost": 1.0,
+            "CostExponent": 2.5,
+            "GrowthExponent": 4.0
+          },
+          "auxiliaryIntCandidate": 82,
+          "exactBigDoubleValues": {
+            "StartCost": {
+              "mantissa": 1.0,
+              "exponent": 82,
+              "label": "1.0e82"
+            },
+            "CostExponent": {
+              "mantissa": 2.5,
+              "exponent": 0,
+              "label": "2.5e0"
+            },
+            "GrowthExponent": {
+              "mantissa": 4.0,
+              "exponent": -1,
+              "label": "4.0e-1"
+            }
+          },
+          "rationale": [
+            "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+            "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+            "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+            "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+          ]
+        }
+      },
+      {
+        "row": 21,
+        "rarity": "common",
+        "unlockRequirementValue": 1600,
+        "bonusCount": 3,
+        "pointerRunStart": 5188,
+        "pointerRefCount": 7,
+        "tupleOffset": 5272,
+        "nextPointerRunStart": 5332,
+        "expectedNumericBlockByteCount": 60,
+        "trailingSlackByteCount": 0,
+        "rowBlockRecoveredDeterministically": true,
+        "rowBlockBoundaryMode": "expected-row-shape",
+        "leadingValue": 1.0,
+        "intValue": 89,
+        "exponentA": 2.5,
+        "exponentB": 4.0,
+        "tailScalar": 0.012187505127,
+        "tailSentinelA": 4294967295,
+        "tailSentinelB": 4294967295,
+        "numericBlockByteCount": 60,
+        "costPrefixByteCount": 48,
+        "bonusFloatCount": 3,
+        "costPrefixU32": [
+          0,
+          1072693248,
+          89,
+          0,
+          0,
+          1074003968,
+          0,
+          0,
+          0,
+          1074790400,
+          4294967295,
+          4294967295
+        ],
+        "costPrefixF64": [
+          1.0,
+          0.0,
+          2.5,
+          0.0,
+          4.0,
+          null
+        ],
+        "costPrefixBigDoublePairs": [
+          {
+            "mantissa": 1.0,
+            "exponent": 89
+          },
+          {
+            "mantissa": 2.5,
+            "exponent": 0
+          },
+          {
+            "mantissa": 4.0,
+            "exponent": -1
+          }
+        ],
+        "candidateStartCostInt": 89,
+        "candidateCostDoubleA": 1.0,
+        "candidateCostDoubleB": 2.5,
+        "candidateCostDoubleC": 4.0,
+        "bonusPerLevelValues": [
+          1.019999980927,
+          1.070000052452,
+          1.120000004768
+        ],
+        "strongestFieldOrderMapping": {
+          "fieldNames": [
+            "StartCost",
+            "CostExponent",
+            "GrowthExponent"
+          ],
+          "values": {
+            "StartCost": 1.0,
+            "CostExponent": 2.5,
+            "GrowthExponent": 4.0
+          },
+          "auxiliaryIntCandidate": 89,
+          "exactBigDoubleValues": {
+            "StartCost": {
+              "mantissa": 1.0,
+              "exponent": 89,
+              "label": "1.0e89"
+            },
+            "CostExponent": {
+              "mantissa": 2.5,
+              "exponent": 0,
+              "label": "2.5e0"
+            },
+            "GrowthExponent": {
+              "mantissa": 4.0,
+              "exponent": -1,
+              "label": "4.0e-1"
+            }
+          },
+          "rationale": [
+            "Rows 1-29 preserve exactly three 16-byte BigDouble slots in the row-local numeric prefix before the bonus-per-level float tail.",
+            "The metadata family for rows 1-29 also preserves exactly three row-local cost field names: StartCost, CostExponent, and GrowthExponent.",
+            "The so-called auxiliary int lane is the paired BigDouble exponent half of the serialized field, not a spare integer outside the cost model.",
+            "This is strong enough to treat the three-slot mapping as exact serialized row-local BigDouble cost fields, even though the formula that consumes them is still not fully verified."
+          ]
+        }
+      }
+    ]
+  },
+  "findings": [
+    "global-metadata.dat now preserves row-complete SU0-29 StartCost, CostExponent, and get_SU*Cost families.",
+    "The direct ShardMining payload now also preserves an exact serialized SU0-29 unlock requirement lane.",
+    "Shared OverLevel100/200/300/400 exponent hooks also remain visible beside the shard row family in metadata.",
+    "The direct ShardMining body contains mixed integer/double parameter tuples beyond the older row-0 shell.",
+    "Those tuples collapse into five distinct parameter signatures, including one signature that repeats exactly three times.",
+    "Rows 0-29 now have a direct row-aligned exact serialized value map inside ShardMining, derived from pointer-run counts that match the grounded row bonus structure plus an explicit row-shaped byte count.",
+    "Rows 0-29 also now preserve exact trailing bonus-per-level float values inside the same aligned ShardMining row blocks.",
+    "The aligned row prefixes now preserve exact serialized StartCost/CostExponent/GrowthExponent fields for rows 1-29, while row 0 preserves StartCost/CostExponent/GrowthExponent/GrowthExponent2/GrowthExponent3.",
+    "The aligned row integer-at-+8 still survives as an auxiliary unknown per row, but it no longer outranks the ordered double-field mapping as the strongest current named-cost recovery.",
+    "Row 0 now resolves deterministically from the pointer run immediately before the verified row 1-29 sequence, with slack bytes left outside the row-local operand block.",
+    "The repeated leading=1 / exponentA=2.5 / exponentB=4 signature now maps directly to rows 19-21 in the row-aligned tuple map.",
+    "The recovered tuples share the same tail sentinel pattern, which strengthens the repeated-record interpretation.",
+    "The current repo can now preserve exact serialized shard row values without claiming a verified runtime formula."
+  ],
+  "currentBoundary": [
+    "Treat these recovered row values as exact serialized ShardMining row fields and unlock thresholds, not as a verified get_SU*Cost formula or planner-safe next-cost output.",
+    "Do not promote these row values into shard planner math until formula behavior is verified.",
+    "Treat the row-aligned cost-field mapping and trailing bonus floats as exact serialized row values, but not yet as a verified get_SU*Cost formula.",
+    "Treat the deterministic row-0 aligned block as exact serialized SU0 operands, not as a verified get_SU0Cost runtime formula.",
+    "Use this probe to narrow the next typed parser step around the existing ShardMining scene target."
+  ]
+}

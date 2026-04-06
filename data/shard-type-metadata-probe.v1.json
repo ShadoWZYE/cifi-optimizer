@@ -1,0 +1,2222 @@
+{
+  "dataset": "shard-type-metadata-probe.v1",
+  "generatedAt": "2026-04-06",
+  "source": {
+    "uabeaProbeReport": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\uabea-probe-report.json",
+    "probeMethod": "direct LibCpp2IL Assembly-CSharp type reflection via CifiAssetProbe"
+  },
+  "targets": {
+    "shardMining": {
+      "fullName": "ShardMining",
+      "baseType": "UnityEngine.MonoBehaviour",
+      "fieldCount": 618,
+      "ownerListFields": [
+        {
+          "name": "MaxedMilestonesList",
+          "type": "System.Collections.Generic.List`1<System.Boolean>",
+          "fieldOffset": 5144
+        },
+        {
+          "name": "UnlockedMilestonesList",
+          "type": "System.Collections.Generic.List`1<System.Boolean>",
+          "fieldOffset": 5152
+        },
+        {
+          "name": "MilestoneCostList",
+          "type": "System.Collections.Generic.List`1<BreakInfinity.BigDouble>",
+          "fieldOffset": 5160
+        },
+        {
+          "name": "upgradeInfoList",
+          "type": "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>",
+          "fieldOffset": 5216
+        }
+      ],
+      "overLevelBaseFields": [
+        {
+          "name": "OverLevel100Base",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 5080,
+          "defaultValue": null
+        },
+        {
+          "name": "OverLevel200Base",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 5096,
+          "defaultValue": null
+        },
+        {
+          "name": "OverLevel300Base",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 5112,
+          "defaultValue": null
+        },
+        {
+          "name": "OverLevel400Base",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 5128,
+          "defaultValue": null
+        }
+      ]
+    },
+    "shardUpgradeInfo": {
+      "fullName": "ShardMining+ShardUpgradeInfo",
+      "baseType": "System.Object",
+      "fieldCount": 3,
+      "fields": [
+        {
+          "name": "<Cost>k__BackingField",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 16
+        },
+        {
+          "name": "<MaxLevel>k__BackingField",
+          "type": "System.Boolean",
+          "fieldOffset": 32
+        },
+        {
+          "name": "<IsUnlocked>k__BackingField",
+          "type": "System.Boolean",
+          "fieldOffset": 33
+        }
+      ]
+    },
+    "shardPerLevelTextHandler": {
+      "fullName": "ShardPerLevelTextHandler",
+      "baseType": "UnityEngine.MonoBehaviour",
+      "fieldCount": 108
+    }
+  },
+  "rows": [
+    {
+      "row": 0,
+      "unlockRequirementField": {
+        "name": "SU0UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 560
+      },
+      "costFields": [
+        {
+          "name": "SU0StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 832
+        },
+        {
+          "name": "SU0CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 848
+        },
+        {
+          "name": "SU0GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 864
+        },
+        {
+          "name": "SU0GrowthExponent2",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 880
+        },
+        {
+          "name": "SU0GrowthExponent3",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 896
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU0Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 912
+        },
+        {
+          "name": "SU0Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 916
+        },
+        {
+          "name": "SU0Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 920
+        },
+        {
+          "name": "SU0Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 924
+        },
+        {
+          "name": "SU0Bonus5",
+          "type": "System.Single",
+          "fieldOffset": 928
+        },
+        {
+          "name": "SU0Bonus6",
+          "type": "System.Single",
+          "fieldOffset": 932
+        },
+        {
+          "name": "SU0Bonus7",
+          "type": "System.Single",
+          "fieldOffset": 936
+        },
+        {
+          "name": "SU0Bonus8",
+          "type": "System.Single",
+          "fieldOffset": 940
+        }
+      ],
+      "bonusTextFields": [],
+      "costFieldCount": 5,
+      "bonusFieldCount": 8,
+      "bonusTextFieldCount": 0
+    },
+    {
+      "row": 1,
+      "unlockRequirementField": {
+        "name": "SU1UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 564
+      },
+      "costFields": [
+        {
+          "name": "SU1StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1000
+        },
+        {
+          "name": "SU1CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1016
+        },
+        {
+          "name": "SU1GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1032
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU1Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 1048
+        },
+        {
+          "name": "SU1Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 1052
+        },
+        {
+          "name": "SU1Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 1056
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM1B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 40
+        },
+        {
+          "name": "SM1B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 48
+        },
+        {
+          "name": "SM1B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 56
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 2,
+      "unlockRequirementField": {
+        "name": "SU2UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 568
+      },
+      "costFields": [
+        {
+          "name": "SU2StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1120
+        },
+        {
+          "name": "SU2CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1136
+        },
+        {
+          "name": "SU2GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1152
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU2Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 1168
+        },
+        {
+          "name": "SU2Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 1172
+        },
+        {
+          "name": "SU2Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 1176
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM2B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 64
+        },
+        {
+          "name": "SM2B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 72
+        },
+        {
+          "name": "SM2B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 80
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 3,
+      "unlockRequirementField": {
+        "name": "SU3UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 572
+      },
+      "costFields": [
+        {
+          "name": "SU3StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1240
+        },
+        {
+          "name": "SU3CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1256
+        },
+        {
+          "name": "SU3GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1272
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU3Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 1288
+        },
+        {
+          "name": "SU3Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 1292
+        },
+        {
+          "name": "SU3Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 1296
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM3B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 88
+        },
+        {
+          "name": "SM3B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 96
+        },
+        {
+          "name": "SM3B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 104
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 4,
+      "unlockRequirementField": {
+        "name": "SU4UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 576
+      },
+      "costFields": [
+        {
+          "name": "SU4StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1376
+        },
+        {
+          "name": "SU4CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1392
+        },
+        {
+          "name": "SU4GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1408
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU4Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 1424
+        },
+        {
+          "name": "SU4Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 1428
+        },
+        {
+          "name": "SU4Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 1432
+        },
+        {
+          "name": "SU4Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 1436
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM4B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 112
+        },
+        {
+          "name": "SM4B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 120
+        },
+        {
+          "name": "SM4B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 128
+        },
+        {
+          "name": "SM4B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 136
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 4,
+      "bonusTextFieldCount": 4
+    },
+    {
+      "row": 5,
+      "unlockRequirementField": {
+        "name": "SU5UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 580
+      },
+      "costFields": [
+        {
+          "name": "SU5StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1496
+        },
+        {
+          "name": "SU5CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1512
+        },
+        {
+          "name": "SU5GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1528
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU5Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 1544
+        },
+        {
+          "name": "SU5Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 1548
+        },
+        {
+          "name": "SU5Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 1552
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM5B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 144
+        },
+        {
+          "name": "SM5B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 152
+        },
+        {
+          "name": "SM5B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 160
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 6,
+      "unlockRequirementField": {
+        "name": "SU6UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 584
+      },
+      "costFields": [
+        {
+          "name": "SU6StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1616
+        },
+        {
+          "name": "SU6CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1632
+        },
+        {
+          "name": "SU6GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1648
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU6Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 1664
+        },
+        {
+          "name": "SU6Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 1668
+        },
+        {
+          "name": "SU6Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 1672
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM6B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 168
+        },
+        {
+          "name": "SM6B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 176
+        },
+        {
+          "name": "SM6B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 184
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 7,
+      "unlockRequirementField": {
+        "name": "SU7UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 588
+      },
+      "costFields": [
+        {
+          "name": "SU7StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1752
+        },
+        {
+          "name": "SU7CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1768
+        },
+        {
+          "name": "SU7GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1784
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU7Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 1800
+        },
+        {
+          "name": "SU7Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 1804
+        },
+        {
+          "name": "SU7Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 1808
+        },
+        {
+          "name": "SU7Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 1812
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM7B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 192
+        },
+        {
+          "name": "SM7B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 200
+        },
+        {
+          "name": "SM7B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 208
+        },
+        {
+          "name": "SM7B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 216
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 4,
+      "bonusTextFieldCount": 4
+    },
+    {
+      "row": 8,
+      "unlockRequirementField": {
+        "name": "SU8UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 592
+      },
+      "costFields": [
+        {
+          "name": "SU8StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1904
+        },
+        {
+          "name": "SU8CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1920
+        },
+        {
+          "name": "SU8GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 1936
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU8Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 1952
+        },
+        {
+          "name": "SU8Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 1956
+        },
+        {
+          "name": "SU8Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 1960
+        },
+        {
+          "name": "SU8Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 1964
+        },
+        {
+          "name": "SU8Bonus5",
+          "type": "System.Single",
+          "fieldOffset": 1968
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM8B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 224
+        },
+        {
+          "name": "SM8B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 232
+        },
+        {
+          "name": "SM8B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 240
+        },
+        {
+          "name": "SM8B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 248
+        },
+        {
+          "name": "SM8B5Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 256
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 5,
+      "bonusTextFieldCount": 5
+    },
+    {
+      "row": 9,
+      "unlockRequirementField": {
+        "name": "SU9UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 596
+      },
+      "costFields": [
+        {
+          "name": "SU9StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2032
+        },
+        {
+          "name": "SU9CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2048
+        },
+        {
+          "name": "SU9GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2064
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU9Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 2080
+        },
+        {
+          "name": "SU9Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 2084
+        },
+        {
+          "name": "SU9Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 2088
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM9B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 264
+        },
+        {
+          "name": "SM9B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 272
+        },
+        {
+          "name": "SM9B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 280
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 10,
+      "unlockRequirementField": {
+        "name": "SU10UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 600
+      },
+      "costFields": [
+        {
+          "name": "SU10StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2152
+        },
+        {
+          "name": "SU10CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2168
+        },
+        {
+          "name": "SU10GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2184
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU10Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 2200
+        },
+        {
+          "name": "SU10Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 2204
+        },
+        {
+          "name": "SU10Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 2208
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM10B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 288
+        },
+        {
+          "name": "SM10B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 296
+        },
+        {
+          "name": "SM10B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 304
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 11,
+      "unlockRequirementField": {
+        "name": "SU11UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 604
+      },
+      "costFields": [
+        {
+          "name": "SU11StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2288
+        },
+        {
+          "name": "SU11CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2304
+        },
+        {
+          "name": "SU11GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2320
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU11Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 2336
+        },
+        {
+          "name": "SU11Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 2340
+        },
+        {
+          "name": "SU11Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 2344
+        },
+        {
+          "name": "SU11Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 2348
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM11B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 312
+        },
+        {
+          "name": "SM11B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 320
+        },
+        {
+          "name": "SM11B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 328
+        },
+        {
+          "name": "SM11B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 336
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 4,
+      "bonusTextFieldCount": 4
+    },
+    {
+      "row": 12,
+      "unlockRequirementField": {
+        "name": "SU12UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 608
+      },
+      "costFields": [
+        {
+          "name": "SU12StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2440
+        },
+        {
+          "name": "SU12CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2456
+        },
+        {
+          "name": "SU12GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2472
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU12Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 2488
+        },
+        {
+          "name": "SU12Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 2492
+        },
+        {
+          "name": "SU12Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 2496
+        },
+        {
+          "name": "SU12Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 2500
+        },
+        {
+          "name": "SU12Bonus5",
+          "type": "System.Single",
+          "fieldOffset": 2504
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM12B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 344
+        },
+        {
+          "name": "SM12B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 352
+        },
+        {
+          "name": "SM12B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 360
+        },
+        {
+          "name": "SM12B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 368
+        },
+        {
+          "name": "SM12B5Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 376
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 5,
+      "bonusTextFieldCount": 5
+    },
+    {
+      "row": 13,
+      "unlockRequirementField": {
+        "name": "SU13UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 612
+      },
+      "costFields": [
+        {
+          "name": "SU13StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2568
+        },
+        {
+          "name": "SU13CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2584
+        },
+        {
+          "name": "SU13GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2600
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU13Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 2616
+        },
+        {
+          "name": "SU13Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 2620
+        },
+        {
+          "name": "SU13Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 2624
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM13B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 384
+        },
+        {
+          "name": "SM13B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 392
+        },
+        {
+          "name": "SM13B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 400
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 14,
+      "unlockRequirementField": {
+        "name": "SU14UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 616
+      },
+      "costFields": [
+        {
+          "name": "SU14StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2704
+        },
+        {
+          "name": "SU14CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2720
+        },
+        {
+          "name": "SU14GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2736
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU14Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 2752
+        },
+        {
+          "name": "SU14Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 2756
+        },
+        {
+          "name": "SU14Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 2760
+        },
+        {
+          "name": "SU14Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 2764
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM14B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 408
+        },
+        {
+          "name": "SM14B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 416
+        },
+        {
+          "name": "SM14B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 424
+        },
+        {
+          "name": "SM14B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 432
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 4,
+      "bonusTextFieldCount": 4
+    },
+    {
+      "row": 15,
+      "unlockRequirementField": {
+        "name": "SU15UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 620
+      },
+      "costFields": [
+        {
+          "name": "SU15StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2824
+        },
+        {
+          "name": "SU15CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2840
+        },
+        {
+          "name": "SU15GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2856
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU15Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 2872
+        },
+        {
+          "name": "SU15Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 2876
+        },
+        {
+          "name": "SU15Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 2880
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM15B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 440
+        },
+        {
+          "name": "SM15B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 448
+        },
+        {
+          "name": "SM15B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 456
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 16,
+      "unlockRequirementField": {
+        "name": "SU16UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 624
+      },
+      "costFields": [
+        {
+          "name": "SU16StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2960
+        },
+        {
+          "name": "SU16CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2976
+        },
+        {
+          "name": "SU16GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 2992
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU16Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 3008
+        },
+        {
+          "name": "SU16Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 3012
+        },
+        {
+          "name": "SU16Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 3016
+        },
+        {
+          "name": "SU16Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 3020
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM16B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 464
+        },
+        {
+          "name": "SM16B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 472
+        },
+        {
+          "name": "SM16B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 480
+        },
+        {
+          "name": "SM16B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 488
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 4,
+      "bonusTextFieldCount": 4
+    },
+    {
+      "row": 17,
+      "unlockRequirementField": {
+        "name": "SU17UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 628
+      },
+      "costFields": [
+        {
+          "name": "SU17StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3112
+        },
+        {
+          "name": "SU17CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3128
+        },
+        {
+          "name": "SU17GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3144
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU17Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 3160
+        },
+        {
+          "name": "SU17Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 3164
+        },
+        {
+          "name": "SU17Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 3168
+        },
+        {
+          "name": "SU17Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 3172
+        },
+        {
+          "name": "SU17Bonus5",
+          "type": "System.Single",
+          "fieldOffset": 3176
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM17B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 496
+        },
+        {
+          "name": "SM17B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 504
+        },
+        {
+          "name": "SM17B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 512
+        },
+        {
+          "name": "SM17B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 520
+        },
+        {
+          "name": "SM17B5Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 528
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 5,
+      "bonusTextFieldCount": 5
+    },
+    {
+      "row": 18,
+      "unlockRequirementField": {
+        "name": "SU18UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 632
+      },
+      "costFields": [
+        {
+          "name": "SU18StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3288
+        },
+        {
+          "name": "SU18CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3304
+        },
+        {
+          "name": "SU18GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3320
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU18Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 3336
+        },
+        {
+          "name": "SU18Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 3340
+        },
+        {
+          "name": "SU18Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 3344
+        },
+        {
+          "name": "SU18Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 3348
+        },
+        {
+          "name": "SU18Bonus5",
+          "type": "System.Single",
+          "fieldOffset": 3352
+        },
+        {
+          "name": "SU18Bonus6",
+          "type": "System.Single",
+          "fieldOffset": 3356
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM18B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 536
+        },
+        {
+          "name": "SM18B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 544
+        },
+        {
+          "name": "SM18B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 552
+        },
+        {
+          "name": "SM18B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 560
+        },
+        {
+          "name": "SM18B5Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 568
+        },
+        {
+          "name": "SM18B6Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 576
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 6,
+      "bonusTextFieldCount": 6
+    },
+    {
+      "row": 19,
+      "unlockRequirementField": {
+        "name": "SU19UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 636
+      },
+      "costFields": [
+        {
+          "name": "SU19StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3416
+        },
+        {
+          "name": "SU19CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3432
+        },
+        {
+          "name": "SU19GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3448
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU19Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 3464
+        },
+        {
+          "name": "SU19Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 3468
+        },
+        {
+          "name": "SU19Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 3472
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM19B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 584
+        },
+        {
+          "name": "SM19B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 592
+        },
+        {
+          "name": "SM19B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 600
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 20,
+      "unlockRequirementField": {
+        "name": "SU20UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 640
+      },
+      "costFields": [
+        {
+          "name": "SU20StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3536
+        },
+        {
+          "name": "SU20CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3552
+        },
+        {
+          "name": "SU20GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3568
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU20Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 3584
+        },
+        {
+          "name": "SU20Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 3588
+        },
+        {
+          "name": "SU20Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 3592
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM20B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 608
+        },
+        {
+          "name": "SM20B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 616
+        },
+        {
+          "name": "SM20B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 624
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 21,
+      "unlockRequirementField": {
+        "name": "SU21UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 644
+      },
+      "costFields": [
+        {
+          "name": "SU21StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3656
+        },
+        {
+          "name": "SU21CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3672
+        },
+        {
+          "name": "SU21GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3688
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU21Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 3704
+        },
+        {
+          "name": "SU21Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 3708
+        },
+        {
+          "name": "SU21Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 3712
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM21B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 632
+        },
+        {
+          "name": "SM21B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 640
+        },
+        {
+          "name": "SM21B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 648
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 22,
+      "unlockRequirementField": {
+        "name": "SU22UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 648
+      },
+      "costFields": [
+        {
+          "name": "SU22StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3792
+        },
+        {
+          "name": "SU22CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3808
+        },
+        {
+          "name": "SU22GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3824
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU22Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 3840
+        },
+        {
+          "name": "SU22Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 3844
+        },
+        {
+          "name": "SU22Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 3848
+        },
+        {
+          "name": "SU22Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 3852
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM22B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 656
+        },
+        {
+          "name": "SM22B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 664
+        },
+        {
+          "name": "SM22B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 672
+        },
+        {
+          "name": "SM22B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 680
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 4,
+      "bonusTextFieldCount": 4
+    },
+    {
+      "row": 23,
+      "unlockRequirementField": {
+        "name": "SU23UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 652
+      },
+      "costFields": [
+        {
+          "name": "SU23StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3944
+        },
+        {
+          "name": "SU23CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3960
+        },
+        {
+          "name": "SU23GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 3976
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU23Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 3992
+        },
+        {
+          "name": "SU23Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 3996
+        },
+        {
+          "name": "SU23Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 4000
+        },
+        {
+          "name": "SU23Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 4004
+        },
+        {
+          "name": "SU23Bonus5",
+          "type": "System.Single",
+          "fieldOffset": 4008
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM23B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 688
+        },
+        {
+          "name": "SM23B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 696
+        },
+        {
+          "name": "SM23B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 704
+        },
+        {
+          "name": "SM23B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 712
+        },
+        {
+          "name": "SM23B5Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 720
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 5,
+      "bonusTextFieldCount": 5
+    },
+    {
+      "row": 24,
+      "unlockRequirementField": {
+        "name": "SU24UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 656
+      },
+      "costFields": [
+        {
+          "name": "SU24StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4088
+        },
+        {
+          "name": "SU24CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4104
+        },
+        {
+          "name": "SU24GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4120
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU24Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 4136
+        },
+        {
+          "name": "SU24Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 4140
+        },
+        {
+          "name": "SU24Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 4144
+        },
+        {
+          "name": "SU24Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 4148
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM24B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 728
+        },
+        {
+          "name": "SM24B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 736
+        },
+        {
+          "name": "SM24B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 744
+        },
+        {
+          "name": "SM24B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 752
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 4,
+      "bonusTextFieldCount": 4
+    },
+    {
+      "row": 25,
+      "unlockRequirementField": {
+        "name": "SU25UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 660
+      },
+      "costFields": [
+        {
+          "name": "SU25StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4208
+        },
+        {
+          "name": "SU25CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4224
+        },
+        {
+          "name": "SU25GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4240
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU25Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 4256
+        },
+        {
+          "name": "SU25Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 4260
+        },
+        {
+          "name": "SU25Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 4264
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM25B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 760
+        },
+        {
+          "name": "SM25B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 768
+        },
+        {
+          "name": "SM25B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 776
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 26,
+      "unlockRequirementField": {
+        "name": "SU26UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 664
+      },
+      "costFields": [
+        {
+          "name": "SU26StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4360
+        },
+        {
+          "name": "SU26CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4376
+        },
+        {
+          "name": "SU26GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4392
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU26Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 4408
+        },
+        {
+          "name": "SU26Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 4412
+        },
+        {
+          "name": "SU26Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 4416
+        },
+        {
+          "name": "SU26Bonus4",
+          "type": "System.Single",
+          "fieldOffset": 4420
+        },
+        {
+          "name": "SU26Bonus5",
+          "type": "System.Single",
+          "fieldOffset": 4424
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM26B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 784
+        },
+        {
+          "name": "SM26B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 792
+        },
+        {
+          "name": "SM26B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 800
+        },
+        {
+          "name": "SM26B4Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 808
+        },
+        {
+          "name": "SM26B5Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 816
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 5,
+      "bonusTextFieldCount": 5
+    },
+    {
+      "row": 27,
+      "unlockRequirementField": {
+        "name": "SU27UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 668
+      },
+      "costFields": [
+        {
+          "name": "SU27StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4488
+        },
+        {
+          "name": "SU27CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4504
+        },
+        {
+          "name": "SU27GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4520
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU27Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 4536
+        },
+        {
+          "name": "SU27Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 4540
+        },
+        {
+          "name": "SU27Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 4544
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM27B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 824
+        },
+        {
+          "name": "SM27B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 832
+        },
+        {
+          "name": "SM27B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 840
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 28,
+      "unlockRequirementField": {
+        "name": "SU28UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 672
+      },
+      "costFields": [
+        {
+          "name": "SU28StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4608
+        },
+        {
+          "name": "SU28CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4624
+        },
+        {
+          "name": "SU28GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4640
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU28Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 4656
+        },
+        {
+          "name": "SU28Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 4660
+        },
+        {
+          "name": "SU28Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 4664
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM28B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 848
+        },
+        {
+          "name": "SM28B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 856
+        },
+        {
+          "name": "SM28B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 864
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    },
+    {
+      "row": 29,
+      "unlockRequirementField": {
+        "name": "SU29UnlockReq",
+        "type": "System.Int32",
+        "fieldOffset": 676
+      },
+      "costFields": [
+        {
+          "name": "SU29StartCost",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4728
+        },
+        {
+          "name": "SU29CostExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4744
+        },
+        {
+          "name": "SU29GrowthExponent",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 4760
+        }
+      ],
+      "bonusFields": [
+        {
+          "name": "SU29Bonus1",
+          "type": "System.Single",
+          "fieldOffset": 4776
+        },
+        {
+          "name": "SU29Bonus2",
+          "type": "System.Single",
+          "fieldOffset": 4780
+        },
+        {
+          "name": "SU29Bonus3",
+          "type": "System.Single",
+          "fieldOffset": 4784
+        }
+      ],
+      "bonusTextFields": [
+        {
+          "name": "SM29B1Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 872
+        },
+        {
+          "name": "SM29B2Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 880
+        },
+        {
+          "name": "SM29B3Text",
+          "type": "UnityEngine.UI.Text",
+          "fieldOffset": 888
+        }
+      ],
+      "costFieldCount": 3,
+      "bonusFieldCount": 3,
+      "bonusTextFieldCount": 3
+    }
+  ],
+  "overLevelBaseValueRecovery": {
+    "typedFieldShells": [
+      {
+        "name": "OverLevel100Base",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 5080,
+        "defaultValue": null
+      },
+      {
+        "name": "OverLevel200Base",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 5096,
+        "defaultValue": null
+      },
+      {
+        "name": "OverLevel300Base",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 5112,
+        "defaultValue": null
+      },
+      {
+        "name": "OverLevel400Base",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 5128,
+        "defaultValue": null
+      }
+    ],
+    "uabeaDefaultValuesPresent": false,
+    "directMonoBehaviourFieldHitsCount": 0,
+    "shardTargetMonoBehavioursCount": 0,
+    "exactSerializedValuesRecovered": false,
+    "currentBestRead": [
+      "The direct asset probe currently preserves typed OverLevel100Base, OverLevel200Base, OverLevel300Base, and OverLevel400Base field shells on ShardMining, but not concrete serialized values.",
+      "The UABEA report records null default values for those fields and zero direct MonoBehaviour field hits for shard targets in this repo snapshot.",
+      "That blocks exact payload recovery from the current .NET asset probe output and keeps the field shells as owner/type evidence only."
+    ]
+  },
+  "findings": [
+    "Direct LibCpp2IL metadata reflection now exposes typed ShardMining row fields instead of only string-shell clues.",
+    "ShardMining keeps row-local SU0-29 UnlockReq, StartCost, CostExponent, GrowthExponent, and Bonus field families directly on the MonoBehaviour type.",
+    "ShardMining also keeps an upgradeInfoList typed as List<ShardMining+ShardUpgradeInfo>, and the nested ShardUpgradeInfo type currently exposes Cost, MaxLevel, and IsUnlocked fields.",
+    "ShardMining also preserves typed OverLevel100Base, OverLevel200Base, OverLevel300Base, and OverLevel400Base BigDouble field shells on the owner MonoBehaviour.",
+    "The current UABEA asset probe does not recover concrete serialized OverLevel*Base values: default values stay null and direct shard MonoBehaviour field hits remain empty.",
+    "ShardPerLevelTextHandler keeps row-local SM*B*Text fields for shard bonus text slots, which is a stronger typed UI-text lead than generic milestone writers."
+  ],
+  "currentBoundary": [
+    "Treat this as a typed shard schema probe, not as final serialized row values.",
+    "The field table proves where typed shard cost, bonus, and runtime state fields live, but it does not yet decode concrete serialized values from level0.",
+    "Treat OverLevel*Base as typed owner-field shells only until a future asset probe or direct serialized parser can recover concrete payload values.",
+    "Do not claim a verified get_SU*Cost formula or a row-complete player-facing effect-text table from the type schema alone."
+  ]
+}

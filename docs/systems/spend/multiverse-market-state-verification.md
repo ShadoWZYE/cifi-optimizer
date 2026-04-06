@@ -136,6 +136,7 @@ Current grounded conclusion:
 
 - `InscryptionsDone` sits inside a broader player-progression field cluster rather than beside the separate `AchievementInscryptionsReward` or `FinalIS*` reward/effect symbols
 - this is stronger evidence that the Emporium lane belongs to a saved progression model or sub-structure, not to a UI-only text path
+- the recovered `IS*Level` run now directly overlaps the validated Emporium row block at ids `71-74`, which creates a grounded bridge between save-side level clues and checked market rows
 - this still does not identify whether the containing save structure is `PlayerProfileData` directly or a nested progression object serialized through that family
 
 ## Adjacent non-save signals that should not be mistaken for saved-state recovery
@@ -177,5 +178,6 @@ Current grounded conclusion:
 - It is now safe to treat `InscryptionsDone` and nearby `IS*Level` strings as grounded metadata field clues for future save-side mapping work.
 - It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
 - It is now safe to treat the save-side search as narrowed to the PlayerProfile persistence family and a direct PlayerProfile-side market member shell or broader wrapper handoff instead of the raw Emporium owner alone.
+- It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and direct save-side `IS*Level` overlap, while keeping the declaring owner unresolved.
 - The next spend-track slice should determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` cluster before any planner UI is added.
 

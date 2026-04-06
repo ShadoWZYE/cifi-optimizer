@@ -1,0 +1,97 @@
+{
+  "dataset": "shard-cost-model-boundary.v1",
+  "generatedAt": "2026-04-04",
+  "sources": {
+    "shardUpgradeInfoMetadataNeighborhood": "data/shardupgradeinfo-metadata-neighborhood.v1.json",
+    "ownerFamilyProbe": "data/shard-owner-family-probe.v1.json",
+    "milestonePayloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
+    "finalSuBonusBoundary": "data/shard-finalsu-bonus-boundary.v1.json",
+    "globalMetadata": "workbench/apk/base/global-metadata.dat"
+  },
+  "dataCarrier": "ShardUpgradeInfo",
+  "dataCarrierTieIn": "ShardMining|ShardUpgradeInfo",
+  "sampleCostAccessorWindows": [
+    {
+      "label": "earlyWindow",
+      "start": 0,
+      "end": 9,
+      "count": 10,
+      "accessors": [
+        "get_SU0Cost",
+        "get_SU1Cost",
+        "get_SU2Cost",
+        "get_SU3Cost",
+        "get_SU4Cost",
+        "get_SU5Cost",
+        "get_SU6Cost",
+        "get_SU7Cost",
+        "get_SU8Cost",
+        "get_SU9Cost"
+      ]
+    },
+    {
+      "label": "lateWindow",
+      "start": 23,
+      "end": 29,
+      "count": 7,
+      "accessors": [
+        "get_SU23Cost",
+        "get_SU24Cost",
+        "get_SU25Cost",
+        "get_SU26Cost",
+        "get_SU27Cost",
+        "get_SU28Cost",
+        "get_SU29Cost"
+      ]
+    }
+  ],
+  "row0CostFields": [
+    "SU0StartCost",
+    "SU0CostExponent",
+    "SU0GrowthExponent",
+    "SU0GrowthExponent2",
+    "SU0GrowthExponent3"
+  ],
+  "row0FillFields": [
+    "SU0Level1Fill",
+    "SU0Level2Fill",
+    "SU0Level3Fill",
+    "SU0Level4Fill",
+    "SU0Level5Fill",
+    "SU0Level6Fill",
+    "SU0Level7Fill",
+    "SU0Level8Fill"
+  ],
+  "row0BonusFields": [
+    "SU0Bonus1",
+    "SU0Bonus2",
+    "SU0Bonus3",
+    "SU0Bonus4",
+    "SU0Bonus5",
+    "SU0Bonus6",
+    "SU0Bonus7",
+    "SU0Bonus8"
+  ],
+  "costModelFindings": [
+    "ShardUpgradeInfo metadata preserves sampled shard cost accessors in two row windows: get_SU0Cost through get_SU9Cost and get_SU23Cost through get_SU29Cost.",
+    "The current owner-probe neighborhood preserves a row-local SU0 cost parameter shell: SU0StartCost, SU0CostExponent, SU0GrowthExponent, SU0GrowthExponent2, and SU0GrowthExponent3.",
+    "That SU0 shell sits beside SU0Level1Fill through SU0Level8Fill and SU0Bonus1 through SU0Bonus8, which is consistent with row-local milestone data rather than a menu-only hook cluster."
+  ],
+  "optimizerBoundary": {
+    "supportedNow": [
+      "descriptive unlock-threshold and total-level guardrails",
+      "row-local shard cost-parameter extraction and consistency checks against get_SU*Cost accessors",
+      "future cost-curve verification once numeric StartCost and GrowthExponent values are extracted"
+    ],
+    "blockedNow": [
+      "exact per-level shard costs",
+      "buy-order ranking, ROI, or affordability recommendations",
+      "player-owned shard milestone optimization from save-side inputs"
+    ]
+  },
+  "currentBoundary": [
+    "Treat this bundle as the current shard cost-model boundary around ShardUpgradeInfo and its ShardMining tie-in.",
+    "Use it to preserve that sampled get_SU*Cost accessors and the recovered SU0 StartCost or exponent field shell belong to the same shard-local mechanic family.",
+    "Do not derive exact shard cost formulas, numeric per-level prices, or optimizer recommendations until numeric parameter values and the declaring row or save owner are recovered."
+  ]
+}

@@ -25,8 +25,8 @@ What passes now:
 What still fails:
 
 - exact milestone row payload recovery
-- asset-grounded milestone labels and row mapping
-- asset-grounded bonus tables and per-level costs
+- conflict-free asset-grounded milestone labels and full row mapping
+- asset-grounded row-complete bonus tables and per-level costs
 - player-owned milestone save-state inputs for truthful planner logic
 
 ## APK or Unity-grounded now
@@ -95,9 +95,21 @@ The current repo-local evidence is strong enough to narrow the shard milestone o
   - current role evidence: `CheckFirstTimeShardMilestoneOpened`, `AttachFastBuyButton`, `FastBuyButtonMethodShards`, `StartFastBuyButtonHold`
   - partial row-shell evidence: `UnlockMilestone17` through `UnlockMilestone29`, `BuyMilestone0`, `Milestone0TextChecker` through `Milestone12TextChecker`
   - current row-alignment result: unlock hooks and text-checker hooks do not yet share one clean row-number range
+  - current handoff result: the shard-local row shell still stops short of the academy-side `ConstructionMilestones` numbered buy family instead of naming the declaring shard row model directly
   - metadata tie-in: `ShardMining|ShardUpgradeInfo`
 - `ShardUpgradeInfo`
   - current role evidence: `TotalMilestoneLevels`, `get_IsUnlocked`, `get_SU*FinalUnlockReq`, `FinalSU*Bonus*`, over-level exponent fields, and `<FastBuyEnum>d__1429`
+  - current row-model evidence: `SU0UnlockReq` through `SU29UnlockReq`
+  - current effect-model evidence: sampled `get_SU1Bonus1Calc` through `get_SU5Bonus2Calc`
+- shard bonus text handler
+  - current strongest handler clue: `TextHandlerShardMilestoneBonusesPerLevel/N`
+  - nearby UI text anchors: `LevelText`, `DescText`, `ValueText`, and `DescriptionText`
+  - current interpretation: shard-specific effect-text path leading over the generic `SetAllMilestoneTexts` writer
+- shipped shard title assets
+  - current title evidence: `SMilestone-0-Eternal(OURO)` through `SMilestone-30-Illuminating`
+  - current conflict note: row `28` still has competing shipped title candidates, `Studying` and `Sly`
+- shipped shard bonus presentation family
+  - current effect-shell evidence: `ShardMilestoneBonus1` through `ShardMilestoneBonus8`
 - `ConstructionMilestones, Assembly-CSharp`
   - current role evidence: `InitializeMilestones`, `BuyMilestone1` through `BuyMilestone57`, `ConstructionMilestonesSum`, `get_MilestoneMaxLevel`, and `FinalMilestone*Bonus*`
   - current interpretation: generic or academy-side milestone family, not the preferred shard-specific owner claim
@@ -122,13 +134,15 @@ Still blocked:
 - shard ROI or ETA math
 - milestone affordability estimates
 - best-upgrade recommendations
+- fully conflict-free milestone title import
+- row-complete player-facing effect text import
 - owner-grounded milestone import logic
 
 In short: ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until shard owner mapping is completed.
 
 ## Next allowed shard step
 
-The next shard planner pass should recover the exact serialized milestone row payload or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail, using the partial `UnlockMilestone*` / `BuyMilestone*` / `Milestone*TextChecker` row shell as the nearest row-verification shell, and compare that extracted layer against the current descriptive dataset before any planner expansion.
+The next shard planner pass should recover the exact serialized milestone row payload or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail, using the partial `UnlockMilestone*` / `BuyMilestone*` / `Milestone*TextChecker` row shell plus the newly narrowed `ConstructionMilestones` handoff seam as the nearest row-owner target, and compare that extracted layer against the current descriptive dataset before any planner expansion.
 
 Current heuristic ranking for that work:
 

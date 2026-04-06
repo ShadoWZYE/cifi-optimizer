@@ -1,0 +1,679 @@
+{
+  "dataset": "shard-cost-method-probe.v1",
+  "generatedAt": "2026-04-05",
+  "source": {
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "libIl2cpp": "workbench/apk/base/libil2cpp.so"
+  },
+  "costGetterFamily": {
+    "count": 30,
+    "returnType": "BreakInfinity.BigDouble",
+    "rows": [
+      {
+        "row": 0,
+        "name": "get_SU0Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38240178,
+        "methodPointer": 38256562,
+        "estimatedTrackedBodySize": 13978,
+        "entryBytesHex": "554157415641554154534883ec384989",
+        "trackedBodySha256": "f0dfd2a8f7a2973c283467b490f45f339e26a4046e73467faf8ed1bbffa95234",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU0Cost()"
+      },
+      {
+        "row": 1,
+        "name": "get_SU1Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38254156,
+        "methodPointer": 38270540,
+        "estimatedTrackedBodySize": 3282,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "dca813f8aa4f891733e11f0ed601b413e7ee942ad4e82ab67ceff5f88dafd596",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU1Cost()"
+      },
+      {
+        "row": 2,
+        "name": "get_SU2Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38257438,
+        "methodPointer": 38273822,
+        "estimatedTrackedBodySize": 3279,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "6c2ac43a906bd03861ed8a01e3f3297a3376feffdf21127f35f20db12fadb0c9",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU2Cost()"
+      },
+      {
+        "row": 3,
+        "name": "get_SU3Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38260717,
+        "methodPointer": 38277101,
+        "estimatedTrackedBodySize": 3279,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "f7784a12d50c37983f1551feec73e9c67066c950979efc3cecbbc28d9a099fab",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU3Cost()"
+      },
+      {
+        "row": 4,
+        "name": "get_SU4Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38263996,
+        "methodPointer": 38280380,
+        "estimatedTrackedBodySize": 3282,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "0fbd776cc0d4cf171c899ebe8aa7161a78a73cc5d958dee9e4fde7813807473a",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU4Cost()"
+      },
+      {
+        "row": 5,
+        "name": "get_SU5Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38267278,
+        "methodPointer": 38283662,
+        "estimatedTrackedBodySize": 3279,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "a947725afaa71b96a01ddf7a82d6e9f18c1764a2c11c2e9ae568088ed2e3dae6",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU5Cost()"
+      },
+      {
+        "row": 6,
+        "name": "get_SU6Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38270557,
+        "methodPointer": 38286941,
+        "estimatedTrackedBodySize": 3282,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "98b20b16136921d1baeb8b3db20d4a104b344ac60656e178730faf7697b570cd",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU6Cost()"
+      },
+      {
+        "row": 7,
+        "name": "get_SU7Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38273839,
+        "methodPointer": 38290223,
+        "estimatedTrackedBodySize": 3284,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "3b20a3210f1c1205882734273b9420bf038dbaf98600e6c571d51b62e9797367",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU7Cost()"
+      },
+      {
+        "row": 8,
+        "name": "get_SU8Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38277123,
+        "methodPointer": 38293507,
+        "estimatedTrackedBodySize": 3284,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "09085f51fb130bbe2e196bf7924e9b0f96ca802ec25370f4bb3cf1eb6d16e06e",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU8Cost()"
+      },
+      {
+        "row": 9,
+        "name": "get_SU9Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38280407,
+        "methodPointer": 38296791,
+        "estimatedTrackedBodySize": 3284,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "d5fc591c0f6bb9a786093fb1153cff04a13dc1201b56da6d21448233bbec9c6f",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU9Cost()"
+      },
+      {
+        "row": 10,
+        "name": "get_SU10Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38283691,
+        "methodPointer": 38300075,
+        "estimatedTrackedBodySize": 3284,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "8e31ea6b1b308d14fde413cfa20aabe824440b23b6262f34e462a42d8c583833",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU10Cost()"
+      },
+      {
+        "row": 11,
+        "name": "get_SU11Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38286975,
+        "methodPointer": 38303359,
+        "estimatedTrackedBodySize": 3284,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "c09f3eed5301cf8ca22d3c07ddb278013450f0fa1704ad1176af6d88db3f7a9c",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU11Cost()"
+      },
+      {
+        "row": 12,
+        "name": "get_SU12Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38290259,
+        "methodPointer": 38306643,
+        "estimatedTrackedBodySize": 3287,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "6a1dd63df562214ac9261c9d850c78c6e16a77438f868f68ef02e21942f0d2a8",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU12Cost()"
+      },
+      {
+        "row": 13,
+        "name": "get_SU13Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38293546,
+        "methodPointer": 38309930,
+        "estimatedTrackedBodySize": 3287,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "6c9cce129977deb550234107aca586c958a97b56b2f94cda41e707b57c915b12",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU13Cost()"
+      },
+      {
+        "row": 14,
+        "name": "get_SU14Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38296833,
+        "methodPointer": 38313217,
+        "estimatedTrackedBodySize": 3287,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "31e1c128bc6fa11c5955eb28975e0da8b35c1577754fb40a46c12bbbaf92b55c",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU14Cost()"
+      },
+      {
+        "row": 15,
+        "name": "get_SU15Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38300120,
+        "methodPointer": 38316504,
+        "estimatedTrackedBodySize": 3287,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "d967637193f0745ee0996f0c37d0c9e4c6037ee5f9e190ae7694953b967e5a2a",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU15Cost()"
+      },
+      {
+        "row": 16,
+        "name": "get_SU16Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38303407,
+        "methodPointer": 38319791,
+        "estimatedTrackedBodySize": 3287,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "40f031e831b2dfd12f46a0a949417dd5f05c44e678250ddff766779c39e0b508",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU16Cost()"
+      },
+      {
+        "row": 17,
+        "name": "get_SU17Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38306694,
+        "methodPointer": 38323078,
+        "estimatedTrackedBodySize": 3009,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "dbc805818cc7b3ab248d8dad42808bcf2dbaaca7d34f8e46a284ff775fe492d9",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU17Cost()"
+      },
+      {
+        "row": 18,
+        "name": "get_SU18Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38309703,
+        "methodPointer": 38326087,
+        "estimatedTrackedBodySize": 2735,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "c4622757fafc251be9c4d6b22b9383359a51929ad514f98e77c5a938c935354a",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU18Cost()"
+      },
+      {
+        "row": 19,
+        "name": "get_SU19Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38312438,
+        "methodPointer": 38328822,
+        "estimatedTrackedBodySize": 3258,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "c3d3a78910a952ffcad326c2ca6025e8194a9319bef33cc99cbbbd744c1a7dc7",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU19Cost()"
+      },
+      {
+        "row": 20,
+        "name": "get_SU20Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38315696,
+        "methodPointer": 38332080,
+        "estimatedTrackedBodySize": 3258,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "a90f1c45b07fcfea6f9f3bd7d65aa6c3444c5a352a7e4bf5fc3843a1c51c2e9b",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU20Cost()"
+      },
+      {
+        "row": 21,
+        "name": "get_SU21Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38318954,
+        "methodPointer": 38335338,
+        "estimatedTrackedBodySize": 3258,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "f61cbcef0fdb95910230564e92cfcf233c2ce4d6e11d5920da2a9f16d86c881d",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU21Cost()"
+      },
+      {
+        "row": 22,
+        "name": "get_SU22Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38322212,
+        "methodPointer": 38338596,
+        "estimatedTrackedBodySize": 2983,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "ea8f5feea4f0e259ce74355d71f72fa6c5ca308fa3a3a2076f233ce3cd23f125",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU22Cost()"
+      },
+      {
+        "row": 23,
+        "name": "get_SU23Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38325195,
+        "methodPointer": 38341579,
+        "estimatedTrackedBodySize": 2983,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "488a20b42a78ccecc57199836d8d16a4755b8f786c027ea5dea290d1bf1fd4e2",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU23Cost()"
+      },
+      {
+        "row": 24,
+        "name": "get_SU24Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38328178,
+        "methodPointer": 38344562,
+        "estimatedTrackedBodySize": 2662,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "3b8ec6299dc7781179084d5729728fb6f3f7883c6177de68c7d25ce214ba58e9",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU24Cost()"
+      },
+      {
+        "row": 25,
+        "name": "get_SU25Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38330840,
+        "methodPointer": 38347224,
+        "estimatedTrackedBodySize": 2346,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "8a77abe2cf517f469df95654d90a0ca7591a25e369d049373c9273e1493d1dc7",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU25Cost()"
+      },
+      {
+        "row": 26,
+        "name": "get_SU26Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38333186,
+        "methodPointer": 38349570,
+        "estimatedTrackedBodySize": 2392,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "80f1786613ad9afd7411db04a11e70e43cf2143371b8bf2708b359e00a5bf3c5",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU26Cost()"
+      },
+      {
+        "row": 27,
+        "name": "get_SU27Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38335578,
+        "methodPointer": 38351962,
+        "estimatedTrackedBodySize": 2693,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "4e6f6b65a400a4b658a265cb8ef8583922d39d2c4bd8e88022ce326de4eaa794",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU27Cost()"
+      },
+      {
+        "row": 28,
+        "name": "get_SU28Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38338271,
+        "methodPointer": 38354655,
+        "estimatedTrackedBodySize": 2693,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "d1fda59170915c63c28a9900b6884630745d5fb0f14965c94417ae016a62f74f",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU28Cost()"
+      },
+      {
+        "row": 29,
+        "name": "get_SU29Cost",
+        "returnType": "BreakInfinity.BigDouble",
+        "rva": 38340964,
+        "methodPointer": 38357348,
+        "estimatedTrackedBodySize": 7470,
+        "entryBytesHex": "554157415641554154534883ec284889",
+        "trackedBodySha256": "e4b45daa3813240abeaa7dbbf84c85edf5706a9d89612dbe469f5d97cf8caacb",
+        "humanReadableSignature": "BreakInfinity.BigDouble get_SU29Cost()"
+      }
+    ]
+  },
+  "helperMethods": [
+    {
+      "row": null,
+      "name": "UpdateShardCostList",
+      "returnType": "System.Void",
+      "rva": 38238055,
+      "methodPointer": 38254439,
+      "estimatedTrackedBodySize": 1366,
+      "entryBytesHex": "415653504889fb803d2ada4302007513",
+      "trackedBodySha256": "aeb5c51eee39f09772bb103c0fba61d4e9b9ee253f4fb7bb144d6d9c20e98773",
+      "humanReadableSignature": "System.Void UpdateShardCostList()"
+    },
+    {
+      "row": null,
+      "name": "get_OverLevel100Exponent",
+      "returnType": "BreakInfinity.BigDouble",
+      "rva": 38239421,
+      "methodPointer": 38255805,
+      "estimatedTrackedBodySize": 187,
+      "entryBytesHex": "41574156534883ec104989fe803da8d4",
+      "trackedBodySha256": "cc4c2fef82810527d3b89b49edb5a203a0b9172a465fbe532ac4bde611ece5aa",
+      "humanReadableSignature": "BreakInfinity.BigDouble get_OverLevel100Exponent()"
+    },
+    {
+      "row": null,
+      "name": "get_OverLevel200Exponent",
+      "returnType": "BreakInfinity.BigDouble",
+      "rva": 38239608,
+      "methodPointer": 38255992,
+      "estimatedTrackedBodySize": 190,
+      "entryBytesHex": "41574156534883ec104989fe803deed3",
+      "trackedBodySha256": "f90ecb992f7a8177ea6e870a11195e384f439ab599a1792eaa996ccde8b5aee8",
+      "humanReadableSignature": "BreakInfinity.BigDouble get_OverLevel200Exponent()"
+    },
+    {
+      "row": null,
+      "name": "get_OverLevel300Exponent",
+      "returnType": "BreakInfinity.BigDouble",
+      "rva": 38239798,
+      "methodPointer": 38256182,
+      "estimatedTrackedBodySize": 190,
+      "entryBytesHex": "41574156534883ec104989fe803d31d3",
+      "trackedBodySha256": "5e1518eb39783a3307b556f6fb8ce9b555aa1c0e3a4b6aee82d1bbb667a7c91f",
+      "humanReadableSignature": "BreakInfinity.BigDouble get_OverLevel300Exponent()"
+    },
+    {
+      "row": null,
+      "name": "get_OverLevel400Exponent",
+      "returnType": "BreakInfinity.BigDouble",
+      "rva": 38239988,
+      "methodPointer": 38256372,
+      "estimatedTrackedBodySize": 190,
+      "entryBytesHex": "41574156534883ec104989fe803d74d2",
+      "trackedBodySha256": "bbb4ab42c2acc28e766d15b009b4b0fb363b271068a97145b7282a2e5157bc47",
+      "humanReadableSignature": "BreakInfinity.BigDouble get_OverLevel400Exponent()"
+    },
+    {
+      "row": null,
+      "name": "SortCostAndBools",
+      "returnType": "System.Void",
+      "rva": 38348434,
+      "methodPointer": 38364818,
+      "estimatedTrackedBodySize": 734,
+      "entryBytesHex": "55415741564155415453504889fb803d",
+      "trackedBodySha256": "c66511e7d670aff720249ec36c657d366b6ac454c65bc00b9b5ef89c88be770a",
+      "humanReadableSignature": "System.Void SortCostAndBools()"
+    },
+    {
+      "row": null,
+      "name": "GetShardCostList",
+      "returnType": "System.Collections.Generic.List`1<BreakInfinity.BigDouble>",
+      "rva": 38349168,
+      "methodPointer": 38365552,
+      "estimatedTrackedBodySize": 2694,
+      "entryBytesHex": "41574156534989fe803d212842020075",
+      "trackedBodySha256": "def0a2887e3410d4be867b7cbeb7fc32e15d6c10159ff253357c984d01031d21",
+      "humanReadableSignature": "System.Collections.Generic.List`1<BreakInfinity.BigDouble> GetShardCostList()"
+    },
+    {
+      "row": null,
+      "name": "CountAffordableShard",
+      "returnType": "System.Void",
+      "rva": 38351862,
+      "methodPointer": 38368246,
+      "estimatedTrackedBodySize": null,
+      "entryBytesHex": "554157415641554154534883ec184889",
+      "trackedBodySha256": null,
+      "humanReadableSignature": "System.Void CountAffordableShard()"
+    }
+  ],
+  "estimatedTrackedBodySizeClusters": [
+    {
+      "estimatedTrackedBodySize": 3284,
+      "count": 5,
+      "rows": [
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "names": [
+        "get_SU7Cost",
+        "get_SU8Cost",
+        "get_SU9Cost",
+        "get_SU10Cost",
+        "get_SU11Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 3287,
+      "count": 5,
+      "rows": [
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "names": [
+        "get_SU12Cost",
+        "get_SU13Cost",
+        "get_SU14Cost",
+        "get_SU15Cost",
+        "get_SU16Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 3258,
+      "count": 3,
+      "rows": [
+        19,
+        20,
+        21
+      ],
+      "names": [
+        "get_SU19Cost",
+        "get_SU20Cost",
+        "get_SU21Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 3279,
+      "count": 3,
+      "rows": [
+        2,
+        3,
+        5
+      ],
+      "names": [
+        "get_SU2Cost",
+        "get_SU3Cost",
+        "get_SU5Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 3282,
+      "count": 3,
+      "rows": [
+        1,
+        4,
+        6
+      ],
+      "names": [
+        "get_SU1Cost",
+        "get_SU4Cost",
+        "get_SU6Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 2693,
+      "count": 2,
+      "rows": [
+        27,
+        28
+      ],
+      "names": [
+        "get_SU27Cost",
+        "get_SU28Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 2983,
+      "count": 2,
+      "rows": [
+        22,
+        23
+      ],
+      "names": [
+        "get_SU22Cost",
+        "get_SU23Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 2346,
+      "count": 1,
+      "rows": [
+        25
+      ],
+      "names": [
+        "get_SU25Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 2392,
+      "count": 1,
+      "rows": [
+        26
+      ],
+      "names": [
+        "get_SU26Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 2662,
+      "count": 1,
+      "rows": [
+        24
+      ],
+      "names": [
+        "get_SU24Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 2735,
+      "count": 1,
+      "rows": [
+        18
+      ],
+      "names": [
+        "get_SU18Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 3009,
+      "count": 1,
+      "rows": [
+        17
+      ],
+      "names": [
+        "get_SU17Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 7470,
+      "count": 1,
+      "rows": [
+        29
+      ],
+      "names": [
+        "get_SU29Cost"
+      ]
+    },
+    {
+      "estimatedTrackedBodySize": 13978,
+      "count": 1,
+      "rows": [
+        0
+      ],
+      "names": [
+        "get_SU0Cost"
+      ]
+    }
+  ],
+  "estimatedTrackedBodySizeDistribution": [
+    {
+      "estimatedTrackedBodySize": 3284,
+      "count": 5
+    },
+    {
+      "estimatedTrackedBodySize": 3287,
+      "count": 5
+    },
+    {
+      "estimatedTrackedBodySize": 3258,
+      "count": 3
+    },
+    {
+      "estimatedTrackedBodySize": 3279,
+      "count": 3
+    },
+    {
+      "estimatedTrackedBodySize": 3282,
+      "count": 3
+    },
+    {
+      "estimatedTrackedBodySize": 2693,
+      "count": 2
+    },
+    {
+      "estimatedTrackedBodySize": 2983,
+      "count": 2
+    },
+    {
+      "estimatedTrackedBodySize": 2346,
+      "count": 1
+    },
+    {
+      "estimatedTrackedBodySize": 2392,
+      "count": 1
+    },
+    {
+      "estimatedTrackedBodySize": 2662,
+      "count": 1
+    },
+    {
+      "estimatedTrackedBodySize": 2735,
+      "count": 1
+    },
+    {
+      "estimatedTrackedBodySize": 3009,
+      "count": 1
+    },
+    {
+      "estimatedTrackedBodySize": 7470,
+      "count": 1
+    },
+    {
+      "estimatedTrackedBodySize": 13978,
+      "count": 1
+    }
+  ],
+  "findings": [
+    "ShardMining preserves a real get_SU0-29Cost runtime family returning BreakInfinity.BigDouble inside libil2cpp.so, not just metadata names.",
+    "UpdateShardCostList, four get_OverLevel*Exponent helpers, and get_SU0Cost sit in one contiguous tracked neighborhood, which is the strongest current formula neighborhood for shard next-cost recovery.",
+    "The get_SU1-17Cost accessors mostly collapse into a near-uniform tracked body-size band around 3279-3287 bytes, which is consistent with one repeated code template with row-local constants.",
+    "Late getters diverge into smaller tracked size bands such as rows 19-21 at 3258 bytes, rows 23-24 at 2983 bytes, and rows 28-29 at 2693 bytes, which is consistent with branch changes or lane-specific late-game cost logic.",
+    "The repo still does not preserve the decoded method bodies, so these tracked sizes narrow the formula search but do not by themselves prove the exact get_SU*Cost equation."
+  ],
+  "currentBoundary": [
+    "Treat get_SU0-29Cost as a verified runtime getter family on ShardMining with direct libil2cpp RVAs and entry bytes.",
+    "Treat UpdateShardCostList, get_OverLevel100-400Exponent, GetShardCostList, SortCostAndBools, and CountAffordableShard as the strongest current native helper neighborhood for shard cost recovery.",
+    "Treat tracked body-size clusters as code-shape evidence for shared or split cost lanes, not as final proof of the exact mathematical formula.",
+    "Do not promote next-level shard costs as player-facing truth until the repo recovers or verifies the actual BigDouble computation used by the getter family."
+  ]
+}
