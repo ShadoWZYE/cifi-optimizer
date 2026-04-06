@@ -778,7 +778,7 @@ assert.deepEqual(shardCostNativeProbe.stageWindowProfiles, [
   },
 ]);
 assert.deepEqual(shardCostNativeProbe.stageProfileCorrelations, [
-  { rows: [0], unlockRequirementRange: null, distinctRarities: [], distinctStartCosts: [], distinctCostExponents: [], distinctGrowthExponents: [] },
+  { rows: [0], unlockRequirementRange: [0, 0], distinctRarities: ["Unique"], distinctStartCosts: [5], distinctCostExponents: [1.3], distinctGrowthExponents: [1.5] },
   { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29], unlockRequirementRange: [0, 8100], distinctRarities: ["Epic", "Rare", "common"], distinctStartCosts: [1.4, 2, 2.4, 3.1, 3.6, 4, 5.6, 6, 8, 9, 9.99], distinctCostExponents: [1.15, 1.22, 1.24, 1.26, 1.4, 1.48, 1.5, 1.6, 1.78, 2, 2.25, 2.29, 2.3, 3, 4], distinctGrowthExponents: [1.2, 1.3, 1.6, 1.8, 2, 2.2, 2.5, 2.6, 2.8, 3.2, 3.4, 3.8, 4, 5, 8] },
   { rows: [18], unlockRequirementRange: [1100, 1100], distinctRarities: ["Legendary"], distinctStartCosts: [1.5], distinctCostExponents: [1], distinctGrowthExponents: [5] },
   { rows: [19, 20, 21, 22, 23], unlockRequirementRange: [1400, 1800], distinctRarities: ["Epic", "Rare", "common"], distinctStartCosts: [1], distinctCostExponents: [1, 2.5, 5], distinctGrowthExponents: [1, 3, 4] },
