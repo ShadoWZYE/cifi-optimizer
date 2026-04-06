@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node ./scripts/dev-server.mjs",
+    "lint:docs": "node ./scripts/contracts/lint-doc-portability.mjs",
     "probe:uabea": "node ./scripts/unity/run_probe.mjs uabea",
     "probe:shards:parameters": "node ./scripts/unity/run_probe.mjs shards:parameters",
     "probe:shards:type-metadata": "node ./scripts/unity/run_probe.mjs shards:type-metadata",
