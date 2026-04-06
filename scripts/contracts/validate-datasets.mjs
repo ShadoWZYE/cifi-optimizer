@@ -2292,6 +2292,7 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   });
   expectArray(boundary.playerProfileAccessorClues, "multiverse market market-member boundary playerProfileAccessorClues must be an array");
   expectArray(boundary.playerProfileMemberShellClues, "multiverse market market-member boundary playerProfileMemberShellClues must be an array");
+  expectArray(boundary.playerProfileHandlerBridgeClues, "multiverse market market-member boundary playerProfileHandlerBridgeClues must be an array");
   expectArray(boundary.cloudSaveBridgeClues, "multiverse market market-member boundary cloudSaveBridgeClues must be an array");
   expectArray(boundary.missingDirectTypeMapClues, "multiverse market market-member boundary missingDirectTypeMapClues must be an array");
   expectArray(boundary.marketWrapperTypeClues, "multiverse market market-member boundary marketWrapperTypeClues must be an array");
@@ -2302,6 +2303,9 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   });
   ["Market", "Relics", "CellData", "ModPointData", "ShardData", "ResearchPointData", "AcademyPointData", "BlueprintsThisTR"].forEach((name) => {
     assert.ok(boundary.playerProfileMemberShellClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  });
+  ["PlayerProfileHandler", "playerData", "GetPlayerProfileData", "FillPlayerProfileData", "ConvertSaveDataToProfileData"].forEach((name) => {
+    assert.ok(boundary.playerProfileHandlerBridgeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
   });
   ["CloudSavePlayerProfile", "GetCurrentSaveFileInfo", "GetPlayerProfileInfo", "CloudLoad"].forEach((name) => {
     assert.ok(boundary.cloudSaveBridgeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
@@ -2320,8 +2324,9 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
     stats: [
       `${boundary.playerProfileAccessorClues.length} PlayerProfile-side accessor clues`,
       `${boundary.playerProfileMemberShellClues.length} PlayerProfile-side member-shell clues`,
+      `${boundary.playerProfileHandlerBridgeClues.length} PlayerProfileHandler bridge clues`,
       `${boundary.marketWrapperTypeClues.length} nearby market-wrapper type clues`,
-      "MultiverseMarket save-side handoff is narrowed to a specific nested PlayerProfile-side Market wrapper path"
+      "MultiverseMarket save-side handoff is narrowed to a PlayerProfileHandler-mediated playerData-to-Market wrapper bridge"
     ]
   };
 }

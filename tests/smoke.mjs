@@ -1692,7 +1692,7 @@ const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id ===
 assert.ok(spendSaveModelTrack, "expected Emporium save-model successor track");
 assert.equal(spendSaveModelTrack.status, "active");
 assert.match(spendSaveModelTrack.currentSlice, /market-member boundary artifacts/);
-assert.match(spendSaveModelTrack.currentSlice, /specific nested PlayerProfile-side `Market` wrapper path/);
+assert.match(spendSaveModelTrack.currentSlice, /`PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` wrapper bridge/);
 assert.ok(
   spendSaveModelTrack.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
   "expected Emporium successor track to record market-member boundary grounding"
@@ -1700,6 +1700,10 @@ assert.ok(
 assert.ok(
   spendSaveModelTrack.completedSteps.some((step) => /Deepen that boundary with a bare `Market` member-shell clue/.test(step)),
   "expected Emporium successor track to record Market member-shell narrowing"
+);
+assert.ok(
+  spendSaveModelTrack.completedSteps.some((step) => /`PlayerProfileHandler`, `playerData`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `ConvertSaveDataToProfileData` bridge clues/.test(step)),
+  "expected Emporium successor track to record the PlayerProfileHandler bridge narrowing"
 );
 assert.ok(
   spendSaveModelTrack.completedSteps.some((step) => /Surface overlap-grounded Emporium import preview support/.test(step)),
@@ -1714,8 +1718,8 @@ assert.ok(
   "expected Emporium successor track to record recovered cap progress support"
 );
 assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /canonical market recovery now favors a specific nested PlayerProfile-side `Market` wrapper path/.test(step)),
-  "expected Emporium successor track to record the narrowed Market-wrapper host path"
+  spendSaveModelTrack.completedSteps.some((step) => /`PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge/.test(step)),
+  "expected Emporium successor track to record the narrowed PlayerProfileHandler bridge path"
 );
 assert.ok(
   spendSaveModelTrack.verified.some((line) => /direct `get_Market` accessor clue/.test(line)),
@@ -1734,8 +1738,12 @@ assert.ok(
   "expected Emporium successor track to record recovered overlap-row cap progress in verified facts"
 );
 assert.ok(
-  spendSaveModelTrack.verified.some((line) => /strongest current canonical host hypothesis/.test(line)),
-  "expected Emporium successor track to record the canonical host hypothesis in verified facts"
+  spendSaveModelTrack.verified.some((line) => line.includes("`PlayerProfileHandler`") && line.includes("`playerData`") && line.includes("`ConvertSaveDataToProfileData`")),
+  "expected Emporium successor track to record the PlayerProfileHandler bridge clues in verified facts"
+);
+assert.ok(
+  spendSaveModelTrack.verified.some((line) => /strongest current repo-local handoff is now a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge/.test(line)),
+  "expected Emporium successor track to record the narrowed bridge hypothesis in verified facts"
 );
 assert.ok(
   spendTrack.completedSteps.some((step) => /owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
@@ -2551,8 +2559,8 @@ assert.match(appJs, /MultiverseMarket action shell and PlayerProfileData save-fa
 assert.match(appJs, /The checked save boundary still keeps \${multiverseMarketSaveBoundarySummary\.actionAnchor} separate from \${multiverseMarketSaveBoundarySummary\.saveAnchor}, with \${multiverseMarketSaveBoundarySummary\.overlapLabel}/);
 assert.match(appJs, /That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet/);
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
-assert.match(appJs, /Nested PlayerProfile-side Market wrapper path is now the strongest canonical host hypothesis/);
-assert.match(appJs, /now leads over direct MultiverseMarket ownership or loose PlayerProfileData fields/);
+assert.match(appJs, /PlayerProfileHandler-mediated playerData-to-Market wrapper bridge/);
+assert.match(appJs, /expected PlayerProfileHandler bridge clues for the market-member boundary/);
 assert.match(appJs, /"TokenBoost"/);
 assert.match(appJs, /"DiamondBoost"/);
 assert.match(appJs, /"TokenDailiesT2"/);

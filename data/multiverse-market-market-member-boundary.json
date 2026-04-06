@@ -21,6 +21,13 @@
     "AcademyPointData",
     "BlueprintsThisTR"
   ],
+  "playerProfileHandlerBridgeClues": [
+    "PlayerProfileHandler",
+    "playerData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "ConvertSaveDataToProfileData"
+  ],
   "cloudSaveBridgeClues": [
     "CloudSavePlayerProfile",
     "GetCurrentSaveFileInfo",
@@ -48,9 +55,10 @@
   "currentBoundary": [
     "The checked PlayerProfile persistence neighborhood now preserves a direct get_Market accessor beside other profile-side accessors such as get_ShardData, get_ResearchPointData, and get_AcademyPointData.",
     "The same PlayerProfileData neighborhood also preserves a bare Market member-shell clue beside other known profile-side members such as Relics, CellData, ModPointData, ShardData, ResearchPointData, AcademyPointData, and BlueprintsThisTR.",
+    "The same recovered neighborhood also preserves PlayerProfileHandler, playerData, GetPlayerProfileData, FillPlayerProfileData, and ConvertSaveDataToProfileData beside get_Market and Market, which narrows the current handoff to a PlayerProfileHandler-mediated playerData-to-Market bridge path rather than an unqualified nested wrapper guess.",
     "The adjacent cloud-save neighborhood still preserves CloudSavePlayerProfile plus GetCurrentSaveFileInfo, GetPlayerProfileInfo, and CloudLoad as the current repo-local bridge into PlayerProfile persistence recovery.",
     "The same checked repo-local metadata still does not expose a direct PlayerProfileData|Market, PlayerProfileData|Inscryption, or PlayerProfileData|MultiverseMarket type-map clue.",
     "The nearest recovered market-side type family still clusters MultiverseMarket with Inscryption tuple types plus adjacent Ouroboros market and progression systems such as NecrumExchange, OuroborosResetter, TraitSpheres, ZeimarrNautallium, ResearchLaboratory, RewardLanes, and ShardMining.",
-    "This is enough to narrow the remaining handoff from a broad PlayerProfile family guess to a specific nested PlayerProfile-side Market wrapper path, not direct MultiverseMarket ownership or loose top-level PlayerProfileData fields, but not enough to name the exact declaring type inside that wrapper."
+    "This is enough to narrow the remaining handoff from a broad PlayerProfile family guess to a specific PlayerProfileHandler-mediated playerData-to-Market wrapper path, not direct MultiverseMarket ownership or loose top-level PlayerProfileData fields, but not enough to name the exact declaring type inside that bridge."
   ]
 }

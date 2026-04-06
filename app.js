@@ -2158,7 +2158,8 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary still keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}.` : "MultiverseMarket save-boundary clues are not available in this build."}</p>
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? "That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet." : "The current build does not yet preserve a clean separation boundary between MultiverseMarket action-shell recovery and save-family recovery."}</p>
         <p class="meta">${marketMemberSummary.hasBoundary ? `The newer checked market-member boundary now preserves ${marketMemberSummary.accessorLabel}, ${marketMemberSummary.memberLabel}, and nearby profile-side member shells such as ${marketMemberSummary.memberShellLabel}.` : "The newer checked market-member boundary is not available in this build."}</p>
-        <p class="meta">${marketMemberSummary.hasCloudBridge ? `That same narrowed handoff still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which makes a direct PlayerProfile-side market member or wrapper handoff more credible than the older broad family guess.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
+        <p class="meta">${marketMemberSummary.hasHandlerBridge ? `That same narrowed handoff also keeps ${marketMemberSummary.handlerBridgeLabel} beside ${marketMemberSummary.accessorLabel} and ${marketMemberSummary.memberLabel}.` : "The current build does not yet preserve the expected PlayerProfileHandler bridge clues for the market-member boundary."}</p>
+        <p class="meta">${marketMemberSummary.hasCloudBridge ? `That combined neighborhood still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which makes the ${marketMemberSummary.canonicalHostLabel} more credible than the older broad family guess.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
         <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so this track remains a save-model recovery lane rather than a planner implementation lane.` : "The current build no longer preserves the expected direct-type-map gap for the market-member boundary and needs review."}</p>
         <p class="meta">This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs.</p>
       </div>
@@ -3932,7 +3933,7 @@ function buildApkGroundingValidationCases() {
     const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(multiverseMarketMarketMemberBoundary);
     cases.push({
       title: "MultiverseMarket canonical host narrowing",
-      expected: "Nested PlayerProfile-side Market wrapper path is now the strongest canonical host hypothesis",
+      expected: "PlayerProfileHandler-mediated playerData-to-Market wrapper bridge is now the strongest canonical host hypothesis",
       actual: marketMemberSummary.favorsPlayerProfileMemberHost
         ? `${marketMemberSummary.canonicalHostLabel} now leads over direct MultiverseMarket ownership or loose PlayerProfileData fields`
         : "Missing PlayerProfile-side Market host narrowing",
@@ -4583,10 +4584,12 @@ function getMultiverseMarketSaveBoundarySummary(boundary) {
 function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
   const accessorClues = Array.isArray(boundary?.playerProfileAccessorClues) ? boundary.playerProfileAccessorClues : [];
   const memberShellClues = Array.isArray(boundary?.playerProfileMemberShellClues) ? boundary.playerProfileMemberShellClues : [];
+  const handlerBridgeClues = Array.isArray(boundary?.playerProfileHandlerBridgeClues) ? boundary.playerProfileHandlerBridgeClues : [];
   const cloudSaveBridgeClues = Array.isArray(boundary?.cloudSaveBridgeClues) ? boundary.cloudSaveBridgeClues : [];
   const missingDirectTypeMapClues = Array.isArray(boundary?.missingDirectTypeMapClues) ? boundary.missingDirectTypeMapClues : [];
   const siblingAccessorClues = ["get_Market", "get_Relics", "get_CellData", "get_ModPointData", "get_ShardData", "get_ResearchPointData", "get_AcademyPointData"];
   const siblingMemberShellClues = ["Market", "Relics", "CellData", "ModPointData", "ShardData", "ResearchPointData", "AcademyPointData"];
+  const handlerBridgeRequirement = ["PlayerProfileHandler", "playerData", "GetPlayerProfileData", "FillPlayerProfileData", "ConvertSaveDataToProfileData"];
   const preservedSiblingAccessorCount = siblingAccessorClues.filter((name) => accessorClues.includes(name)).length;
   const preservedSiblingMemberCount = siblingMemberShellClues.filter((name) => memberShellClues.includes(name)).length;
 
@@ -4600,6 +4603,8 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
       cloudSaveBridgeClues.includes("CloudSavePlayerProfile")
       && cloudSaveBridgeClues.includes("GetPlayerProfileInfo")
       && cloudSaveBridgeClues.includes("CloudLoad"),
+    hasHandlerBridge:
+      handlerBridgeRequirement.every((name) => handlerBridgeClues.includes(name)),
     hasMissingDirectTypeMap:
       missingDirectTypeMapClues.includes("PlayerProfileData|Market")
       && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption")
@@ -4612,19 +4617,21 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
       && memberShellClues.includes("Market")
       && siblingAccessorClues.filter((name) => accessorClues.includes(name)).length >= 6
       && siblingMemberShellClues.filter((name) => memberShellClues.includes(name)).length >= 6
+      && handlerBridgeRequirement.every((name) => handlerBridgeClues.includes(name))
       && missingDirectTypeMapClues.includes("PlayerProfileData|Market")
       && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption"),
     preservedSiblingAccessorCount,
     preservedSiblingMemberCount,
     accessorLabel: "get_Market",
     memberLabel: "Market",
+    handlerBridgeLabel: "PlayerProfileHandler, playerData, GetPlayerProfileData, FillPlayerProfileData, and ConvertSaveDataToProfileData",
     memberShellLabel: "Relics, ShardData, ResearchPointData, and AcademyPointData",
     siblingAccessorLabel: "get_Relics, get_CellData, get_ModPointData, get_ShardData, get_ResearchPointData, and get_AcademyPointData",
     siblingMemberLabel: "Relics, CellData, ModPointData, ShardData, ResearchPointData, and AcademyPointData",
     cloudSaveLabel: "CloudSavePlayerProfile",
     profileInfoLabel: "GetPlayerProfileInfo",
     missingTypeMapLabel: "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket",
-    canonicalHostLabel: "nested PlayerProfile-side Market wrapper path"
+    canonicalHostLabel: "PlayerProfileHandler-mediated playerData-to-Market wrapper bridge"
   };
 }
 

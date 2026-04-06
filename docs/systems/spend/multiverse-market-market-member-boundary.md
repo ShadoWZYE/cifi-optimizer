@@ -18,6 +18,12 @@ This note records the current repo-local boundary around the `get_Market` access
   - `ResearchPointData`
   - `AcademyPointData`
   - `BlueprintsThisTR`
+- PlayerProfileHandler bridge clues:
+  - `PlayerProfileHandler`
+  - `playerData`
+  - `GetPlayerProfileData`
+  - `FillPlayerProfileData`
+  - `ConvertSaveDataToProfileData`
 - cloud-save bridge clues:
   - `CloudSavePlayerProfile`
   - `GetCurrentSaveFileInfo`
@@ -44,9 +50,10 @@ This note records the current repo-local boundary around the `get_Market` access
 
 - the PlayerProfile persistence family now has a real `get_Market` accessor clue, so the remaining save-side search is narrower than a generic "`PlayerProfileData` somewhere" hypothesis
 - the same `PlayerProfileData` neighborhood now also preserves a bare `Market` member-shell clue beside the same kind of profile-side substructure names used for `Relics`, `CellData`, `ShardData`, `ResearchPointData`, and `AcademyPointData`
+- the same narrowed neighborhood also preserves `PlayerProfileHandler`, `playerData`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `ConvertSaveDataToProfileData` beside `get_Market` and `Market`, which makes the strongest current bridge a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` path
 - the cloud-save neighborhood still points through `CloudSavePlayerProfile` and `GetPlayerProfileInfo`, which keeps this lane attached to repo-local player-profile recovery rather than to UI-only Emporium text handlers
 - the repo still does not have a direct `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` type-map string, so direct declaring ownership is still unresolved
-- the closest recovered market-side family still looks broader than `MultiverseMarket` alone, so the strongest grounded claim is now "direct PlayerProfileData member shell or broader wrapper handoff" rather than a fully named declared type
+- the closest recovered market-side family still looks broader than `MultiverseMarket` alone, so the strongest grounded claim is now a `PlayerProfileHandler`-mediated `Market` wrapper bridge rather than a fully named declared type
 
 ## Safe use
 
