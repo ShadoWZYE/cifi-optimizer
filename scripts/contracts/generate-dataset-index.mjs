@@ -10,7 +10,8 @@ export async function generateDatasetIndex(rootDir = repoRoot) {
   const resolvedContractPath = path.join(rootDir, "data", "bundled-dataset-contract.v1.json");
   const resolvedOutputPath = path.join(rootDir, "docs", "contracts", "dataset-index.generated.md");
   const contract = JSON.parse(await readFile(resolvedContractPath, "utf8"));
-  const markdown = renderDatasetIndex(contract);
+  const newline = await detectPreferredNewline(resolvedOutputPath);
+  const markdown = normalizeLineEndings(renderDatasetIndex(contract), newline);
 
   await writeFile(resolvedOutputPath, markdown, "utf8");
   return markdown;
@@ -50,6 +51,19 @@ export function renderDatasetIndex(contract) {
   }
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+async function detectPreferredNewline(outputPath) {
+  try {
+    const existing = await readFile(outputPath, "utf8");
+    return existing.includes("\r\n") ? "\r\n" : "\n";
+  } catch {
+    return "\n";
+  }
+}
+
+function normalizeLineEndings(text, newline) {
+  return text.replace(/\r?\n/g, newline);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

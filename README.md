@@ -56,6 +56,9 @@ If the APK/Unity path has not been checked for an unresolved mechanic, it should
 - `CODEX_BRIEF.md` = compact Codex context
 - `docs/roadmap/mvp-plan.md` = current roadmap and phase rules
 - `docs/roadmap/research-tracks.md` = active research/extraction queue
+- `docs/roadmap/active-grounding-boundaries.md` = compact handoff for active grounding lanes
+- `docs/roadmap/known-false-paths.md` = ruled-out interpretations to keep closed
+- `docs/contracts/lane-handoff-template.md` = minimal lane handoff/result format
 
 ## Commands
 

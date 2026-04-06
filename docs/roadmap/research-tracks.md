@@ -4,6 +4,12 @@
 
 `docs/roadmap/research-tracks.md` is the active unresolved queue for extraction, mapping, validation, and implementation-prep work.
 
+For fresh-thread restart context, pair this file with:
+
+- `docs/roadmap/active-grounding-boundaries.md`
+- `docs/roadmap/known-false-paths.md`
+- `docs/contracts/lane-handoff-template.md`
+
 It is not a permanent registry, a full history log, or a place to keep growing broad themes forever.
 
 Research tracks exist to turn uncertainty into one of three outcomes:
