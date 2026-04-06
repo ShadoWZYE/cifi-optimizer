@@ -841,6 +841,32 @@ textarea {
   color: rgba(214, 220, 234, 0.88);
 }
 
+.shard-doc-link-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shard-doc-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(77, 98, 133, 0.18);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--accent-strong);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.shard-doc-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(65, 34, 9, 0.08);
+  background: rgba(255, 255, 255, 0.94);
+}
+
 .shard-milestone-card .validation-card,
 .shard-milestone-card .shard-bonus-card {
   align-content: start;

@@ -363,6 +363,7 @@ function makeDefaultShipFilters(source = {}) {
 
 const state = {
   snapshot: null,
+  datasetContract: null,
   shipBaseline: null,
   shipTemplates: null,
   shardGrounding: null,
@@ -395,8 +396,9 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardCostModelBoundary, shardMilestoneRowModelBoundary, shardMilestoneTitleEffectBoundary, shardEffectTextHandlerBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, shardSceneMonoBehaviourProbe, shardCostParameterProbe, shardCostNativeProbe, shardBonusSlotProbe, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell] = await Promise.all([
+  const [snapshot, datasetContract, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardCostModelBoundary, shardMilestoneRowModelBoundary, shardMilestoneTitleEffectBoundary, shardEffectTextHandlerBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, shardSceneMonoBehaviourProbe, shardCostParameterProbe, shardCostNativeProbe, shardBonusSlotProbe, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
+    fetchJson("./data/bundled-dataset-contract.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/shard-milestones.grounded.v1.json"),
     fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
@@ -444,6 +446,7 @@ async function bootstrap() {
   const legacyProfile = loadStoredJson(LEGACY_STORAGE_KEYS.profile, null);
 
   state.snapshot = mergeDeep(snapshot, loadStoredJson(STORAGE_KEYS.snapshot, snapshot));
+  state.datasetContract = datasetContract;
   state.shipBaseline = shipBaseline;
   state.shipTemplates = buildShipTemplates(shipBaseline);
   state.shardGrounding = {
@@ -3063,8 +3066,19 @@ function renderShardGroundingBoundary() {
   const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
   const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers) ? assetGrounding.groundedShellIdentifiers.slice(0, 5) : [];
   const blockedUses = Array.isArray(assetGrounding?.blockedUses) ? assetGrounding.blockedUses : [];
-  const repoWideCandidate = getTopExtractionCandidate();
-  const shardCandidate = getTopExtractionCandidate("shard-milestone-payload-recovery");
+  const descriptiveBundleStatus = getDatasetBadgeMeta("shards", "Integrated");
+  const ownerBoundaryStatus = ownerBoundary.hasBoundary
+    ? getDatasetBadgeMeta("shard-owner-family-boundary", "Available")
+    : getShardBadgeMetaFromLabel("Unmapped");
+  const costBoundaryStatus = costModelBoundary.hasSampledCostWindows
+    ? getDatasetBadgeMeta("shard-cost-model-boundary", "Available")
+    : getShardBadgeMetaFromLabel("Blocked");
+  const rowEvidenceStatus = rowModelBoundary.hasBoundary && titleEffectBoundary.hasBoundary && effectTextHandlerBoundary.hasBoundary
+    ? getShardBadgeMetaFromLabel("Integrated")
+    : getShardBadgeMetaFromLabel("Unmapped");
+  const saveBoundaryStatus = saveBoundary.hasSeparationBoundary
+    ? getShardBadgeMetaFromLabel("Blocked")
+    : getShardBadgeMetaFromLabel("Unmapped");
   return `
     <div class="page-grid">
       <article class="snapshot-card shard-status-card shard-status-card-available">
@@ -3081,10 +3095,10 @@ function renderShardGroundingBoundary() {
           <p class="meta">Key shell identifiers: ${identifiers.map((entry) => `<code>${escapeHtml(entry)}</code>`).join(", ") || "<code>LoopResetStage1</code>, <code>ShardMilestones-64</code>, <code>MilestoneBonusesPerLevel</code>"}</p>
         </div>
       </article>
-      <article class="snapshot-card shard-status-card shard-status-card-integrated">
+      <article class="snapshot-card shard-status-card ${descriptiveBundleStatus.cardClass}">
         <div class="shard-status-heading">
           <span class="snapshot-title">Player-facing contract</span>
-          <span class="shard-status-pill shard-status-pill-integrated">Integrated</span>
+          <span class="shard-status-pill ${descriptiveBundleStatus.pillClass}">${escapeHtml(descriptiveBundleStatus.label)}</span>
         </div>
         <strong>Recovered shard-cost evidence stays descriptive</strong>
         <div class="meta-stack">
@@ -3094,10 +3108,10 @@ function renderShardGroundingBoundary() {
           <p class="meta">Current provenance load: ${conflictCount} conflict note${conflictCount === 1 ? "" : "s"} and ${missingCount} missing-data note${missingCount === 1 ? "" : "s"}.</p>
         </div>
       </article>
-      <article class="snapshot-card shard-status-card ${ownerBoundary.hasBoundary ? "shard-status-card-available" : "shard-status-card-unmapped"}">
+      <article class="snapshot-card shard-status-card ${ownerBoundaryStatus.cardClass}">
         <div class="shard-status-heading">
           <span class="snapshot-title">Ownership mapping</span>
-          <span class="shard-status-pill ${ownerBoundary.hasBoundary ? "shard-status-pill-available" : "shard-status-pill-unmapped"}">${ownerBoundary.hasBoundary ? "Available" : "Unmapped"}</span>
+          <span class="shard-status-pill ${ownerBoundaryStatus.pillClass}">${escapeHtml(ownerBoundaryStatus.label)}</span>
         </div>
         <strong>Shard-specific ownership evidence is narrowed, not resolved</strong>
         <div class="meta-stack">
@@ -3106,10 +3120,10 @@ function renderShardGroundingBoundary() {
           <p class="meta">${ownerBoundary.hasDowngradedGenericLead ? "The generic milestone path is still intentionally downgraded so the app does not over-read shared UI structure as shard truth." : "Generic milestone overlap still needs more comparison work."}</p>
         </div>
       </article>
-      <article class="snapshot-card shard-status-card ${costModelBoundary.hasSampledCostWindows ? "shard-status-card-available" : "shard-status-card-blocked"}">
+      <article class="snapshot-card shard-status-card ${costBoundaryStatus.cardClass}">
         <div class="shard-status-heading">
           <span class="snapshot-title">Shard-cost evidence</span>
-          <span class="shard-status-pill ${costModelBoundary.hasSampledCostWindows ? "shard-status-pill-available" : "shard-status-pill-blocked"}">${costModelBoundary.hasSampledCostWindows ? "Available" : "Blocked"}</span>
+          <span class="shard-status-pill ${costBoundaryStatus.pillClass}">${escapeHtml(costBoundaryStatus.label)}</span>
         </div>
         <strong>Recovered cost data now supports evidence cards</strong>
         <div class="meta-stack">
@@ -3118,10 +3132,10 @@ function renderShardGroundingBoundary() {
           <p class="meta">${costModelBoundary.hasSampledCostWindows ? "The app still does not claim exact next-cost math, best-buy order, or recommendation-grade certainty from this contract." : "No recommendation-grade shard cost behavior is enabled from this path."}</p>
         </div>
       </article>
-      <article class="snapshot-card shard-status-card ${rowModelBoundary.hasBoundary && titleEffectBoundary.hasBoundary && effectTextHandlerBoundary.hasBoundary ? "shard-status-card-integrated" : "shard-status-card-unmapped"}">
+      <article class="snapshot-card shard-status-card ${rowEvidenceStatus.cardClass}">
         <div class="shard-status-heading">
           <span class="snapshot-title">Row evidence coverage</span>
-          <span class="shard-status-pill ${rowModelBoundary.hasBoundary && titleEffectBoundary.hasBoundary && effectTextHandlerBoundary.hasBoundary ? "shard-status-pill-integrated" : "shard-status-pill-unmapped"}">${rowModelBoundary.hasBoundary && titleEffectBoundary.hasBoundary && effectTextHandlerBoundary.hasBoundary ? "Integrated" : "Unmapped"}</span>
+          <span class="shard-status-pill ${rowEvidenceStatus.pillClass}">${escapeHtml(rowEvidenceStatus.label)}</span>
         </div>
         <strong>Titles, effect lanes, and row shells feed evidence cards</strong>
         <div class="meta-stack">
@@ -3130,10 +3144,10 @@ function renderShardGroundingBoundary() {
           <p class="meta">${effectTextHandlerBoundary.hasBoundary ? `Recovered effect text coverage currently spans rows ${effectTextHandlerBoundary.rowCoverageLabel}.` : "Recovered effect text coverage is still incomplete."}</p>
         </div>
       </article>
-      <article class="snapshot-card shard-status-card ${saveBoundary.hasSeparationBoundary ? "shard-status-card-blocked" : "shard-status-card-unmapped"}">
+      <article class="snapshot-card shard-status-card ${saveBoundaryStatus.cardClass}">
         <div class="shard-status-heading">
           <span class="snapshot-title">Save-side mapping</span>
-          <span class="shard-status-pill ${saveBoundary.hasSeparationBoundary ? "shard-status-pill-blocked" : "shard-status-pill-unmapped"}">${saveBoundary.hasSeparationBoundary ? "Blocked" : "Unmapped"}</span>
+          <span class="shard-status-pill ${saveBoundaryStatus.pillClass}">${escapeHtml(saveBoundaryStatus.label)}</span>
         </div>
         <strong>Player-owned shard state is still not recovered</strong>
         <div class="meta-stack">
@@ -3154,20 +3168,20 @@ function renderShardGroundingBoundary() {
           <p class="meta">A single authoritative milestone list across conflicting community snapshots.</p>
         </div>
       </article>
-      <article class="snapshot-card shard-status-card shard-status-card-unmapped">
+      <article class="snapshot-card shard-status-card shard-status-card-integrated">
         <div class="shard-status-heading">
-          <span class="snapshot-title">Next grounding work</span>
-          <span class="shard-status-pill shard-status-pill-unmapped">Unmapped</span>
+          <span class="snapshot-title">Deep docs</span>
+          <span class="shard-status-pill shard-status-pill-integrated">Integrated</span>
         </div>
-        <strong>Repo-wide default unknown candidate</strong>
+        <strong>Open the full shard research trail in docs</strong>
         <div class="meta-stack">
-          <p class="meta">${repoWideCandidate ? `<code>${escapeHtml(repoWideCandidate.id)}</code> leads the current repo-wide unknown ranking.` : "Repo-wide extraction ranking is unavailable in this build."}</p>
-          <p class="meta">${repoWideCandidate ? `Why next: ${escapeHtml(repoWideCandidate.label)} currently has the strongest unresolved cross-track grounding footprint.` : "Why next: no repo-wide candidate summary is available yet."}</p>
-        </div>
-        <div class="meta-stack">
-          <p class="snapshot-title">Top PR2-local shard candidate</p>
-          <p class="meta">${shardCandidate ? `<code>${escapeHtml(shardCandidate.id)}</code> is the current shard-local extraction target.` : "No shard-local extraction candidate is available in this build."}</p>
-          <p class="meta">${shardCandidate ? `Why next: ${escapeHtml(shardCandidate.label)} is the best current shard-specific path toward owner mapping.` : "Why next: shard-local extraction ranking is not available."}</p>
+          <p class="meta">Player-facing pages stay lightweight. The long-form probe trail, boundary notes, and extraction follow-ups live in docs.</p>
+          <div class="shard-doc-link-list">
+            ${renderShardDocLink("./docs/systems/shards/shard-player-facing-evidence.md", "Shard evidence summary")}
+            ${renderShardDocLink("./docs/systems/shards/shard-grounding-boundary.md", "Grounding boundary")}
+            ${renderShardDocLink("./docs/systems/shards/shard-cost-parameter-probe.md", "Cost parameter probe")}
+            ${renderShardDocLink("./docs/systems/shards/shard-cost-native-probe.md", "Cost native probe")}
+          </div>
         </div>
       </article>
     </div>
@@ -3180,6 +3194,7 @@ function renderShardWorkflowReference() {
   const thresholds = mechanics.rarity_bonus_thresholds ?? {};
   const levelCaps = mechanics.max_level_rules_and_modifiers ?? {};
   const uncertaintyLog = provenance?.uncertaintyLog ?? [];
+  const topUncertainty = uncertaintyLog.slice(0, 3);
   return `
     <div class="page-grid">
       <article class="snapshot-card">
@@ -3197,7 +3212,7 @@ function renderShardWorkflowReference() {
         <p class="meta">${escapeHtml(mechanics.effect_scaling?.description || "Effect scaling note unavailable.")}</p>
       </article>
       <article class="snapshot-card">
-        <span class="snapshot-title">Max-level and cost-breakpoint notes</span>
+        <span class="snapshot-title">Reference limits</span>
         <div class="meta-stack">
           <p class="meta">Base max level before Workers Badge: ${formatOptionalNumber(levelCaps.base_max_level_before_workers_badge)}</p>
           <p class="meta">Max level after Workers Badge: ${formatOptionalNumber(levelCaps.max_level_after_workers_badge)}</p>
@@ -3207,7 +3222,11 @@ function renderShardWorkflowReference() {
         </div>
         <div class="meta-stack">
           <p class="snapshot-title">Preserved uncertainty</p>
-          ${uncertaintyLog.map((item) => `<p class="meta">${escapeHtml(`${item.topic}: ${item.what_is_missing || item.what_is_available || item.status}.`)}</p>`).join("")}
+          ${topUncertainty.map((item) => `<p class="meta">${escapeHtml(`${item.topic}: ${item.what_is_missing || item.what_is_available || item.status}.`)}</p>`).join("")}
+          <div class="shard-doc-link-list">
+            ${renderShardDocLink("./docs/systems/shards/shard-player-facing-evidence.md", "Open shard evidence summary")}
+            ${renderShardDocLink("./docs/systems/shards/shard-grounding-boundary.md", "Open full grounding boundary")}
+          </div>
         </div>
       </article>
     </div>
@@ -3237,14 +3256,50 @@ function renderObservedShardBehaviors() {
         <p class="meta">Milestone rows in this workflow are community-grounded descriptive data, not shipped-game owner-mapped shard milestone data.</p>
         <p class="meta">If uncertainty remains high, the correct output is a better research note, not stronger planner behavior.</p>
         <div class="meta-stack">
-          <p class="snapshot-title">Review sources</p>
-          ${Object.values(provenance?.sources || {}).slice(0, 5).map((source) => `
-            <p class="meta">${escapeHtml(source.title)}${source.last_edited_in_source ? ` (${escapeHtml(source.last_edited_in_source)})` : ""}</p>
-          `).join("")}
+          <p class="snapshot-title">Deep docs</p>
+          <div class="shard-doc-link-list">
+            ${renderShardDocLink("./docs/systems/shards/shard-player-facing-evidence.md", "Shard evidence summary")}
+            ${renderShardDocLink("./docs/systems/shards/shard-milestones-grounding-ingest.md", "Grounding ingest notes")}
+            ${renderShardDocLink("./docs/systems/shards/shard-system-verification.md", "System verification")}
+          </div>
         </div>
       </article>
     </div>
   `;
+}
+
+function renderShardDocLink(href, label) {
+  return `<a class="shard-doc-link" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`;
+}
+
+function getBundledDatasetContractEntry(id) {
+  const datasets = Array.isArray(state.datasetContract?.datasets) ? state.datasetContract.datasets : [];
+  return datasets.find((entry) => entry?.id === id) || null;
+}
+
+function mapDatasetClassificationToShardStatus(classification, fallback = "Unmapped") {
+  const statusByClassification = {
+    "canonical-app-snapshot": "Integrated",
+    "grounded-descriptive": "Integrated",
+    "extracted-mechanics": "Available",
+    "community-derived": "Unmapped"
+  };
+  return statusByClassification[classification] || fallback;
+}
+
+function getDatasetBadgeMeta(datasetId, fallbackLabel = "Unmapped") {
+  const entry = getBundledDatasetContractEntry(datasetId);
+  const label = mapDatasetClassificationToShardStatus(entry?.classification, fallbackLabel);
+  return getShardBadgeMetaFromLabel(label, entry?.classification || null);
+}
+
+function getShardBadgeMetaFromLabel(label, classification = null) {
+  return {
+    label,
+    cardClass: `shard-status-card-${label.toLowerCase()}`,
+    pillClass: `shard-status-pill-${label.toLowerCase()}`,
+    classification
+  };
 }
 
 function renderShardMilestoneDirectory() {
