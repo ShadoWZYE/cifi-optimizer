@@ -952,6 +952,13 @@ function validateShardCostNativeProbe(probe) {
     { rows: [18, 24, 27, 28, 29], formulaClass: "two-stage-transition-band" },
     { rows: [25, 26], formulaClass: "hundred-stage-short-class" },
   ], "shard cost native probe formula application profiles drifted");
+  assert.deepEqual(probe.secondaryHundredPlusMergeModels?.profiles?.map((entry) => ({ rows: entry?.rows, profile: entry?.profile })), [
+    { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 27, 28, 29], profile: "additive-premerge" },
+    { rows: [19, 20, 21], profile: "literal-builder-additive" },
+  ], "shard cost native probe secondary hundred-plus merge models drifted");
+  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "additive-premerge" && String(entry?.symbolicApproximation).includes("multiply(levelOffsetBigDouble, preservedScalarLane)")), "shard cost native probe additive-premerge symbolic approximation drifted");
+  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "literal-builder-additive" && entry?.preDispatchAssembly?.some((line) => String(line).includes("0x24e1a07"))), "shard cost native probe literal-builder merge model drifted");
+  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "literal-builder-additive" && String(entry?.symbolicApproximation).includes("literalBigDouble((level - offset) * coefficient)")), "shard cost native probe literal-builder symbolic approximation drifted");
   const row1 = probe.rows?.find((entry) => entry?.row === 1);
   const row19 = probe.rows?.find((entry) => entry?.row === 19);
   const row27 = probe.rows?.find((entry) => entry?.row === 27);

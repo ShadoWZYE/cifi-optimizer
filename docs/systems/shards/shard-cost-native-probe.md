@@ -44,6 +44,7 @@ Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\da
 - The canonical class itself now also preserves one stable internal split: rows 1-16 versus rows 19-21 differ in the secondary 100-plus feeder while keeping the same main stage ladder.
 - That makes the secondary 100-plus feeder the narrowest remaining merge breakpoint inside the canonical class; the sampled 300-plus feeder and both sampled 200-plus feeders are otherwise stable across that class.
 - The repo now also preserves direct formula-application profiles for all shard rows: row 0 is a separate special case, while rows 1-29 now resolve to one of five staged normal-row profile classes.
+- The canonical split is now preserved as two explicit pre-dispatch merge models: an additive-premerge builder on rows 1-16 and 27-29, versus a coefficient-scaled literal-builder additive path on rows 19-21.
 - The constructor lanes are also typed: 0x24e1a07 builds a BigDouble from a double literal, 0x24e1d36 converts an integer into a BigDouble shell, and 0x24e1d8d does the same for float inputs.
 - The over-level exponent getters are no longer abstract hooks: they return row-owner-side BigDouble constants from ShardMining fields OverLevel100Base, OverLevel200Base, OverLevel300Base, and OverLevel400Base.
 - For rows 1-29 the getter entry path currently surfaces two early operand-pair starts, while row 0 surfaces three, which further supports row 0 as a separate native cost lane.
@@ -106,6 +107,22 @@ Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\da
 - `rows=[18, 24, 27, 28, 29]`; `stageCoverage=100/200`; `formulaClass=two-stage-transition-band`; `Uses the 100/200 scaffold with transition substitutions around the 100+ and 300+ feeder families.`
 - `rows=[25, 26]`; `stageCoverage=100`; `formulaClass=hundred-stage-short-class`; `Uses the shortest preserved normal-row class: canonical hundred-stage plus the literal-builder side lane through 0x24e1ab0.`
 
+## Secondary 100-plus merge models
+
+- Both canonical 100-plus secondary lanes finish by feeding 0x24e3620, then post-multiply the result through 0x24e1cb3 with the preserved final stack lane.
+- Both lanes reuse the same current-level-minus-offset seam before dispatch, but they differ in how that seam is assembled into the pre-dispatch BigDouble input.
+- `rows=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 27, 28, 29]`; `profile=additive-premerge`; `offsetModel=(level - offset)`; `sampleRows=[1, 27]`
+  - Build BigDouble(level - offset) through 0x24e1d36
+  - Multiply that lane through 0x24e1cb3 with the preserved scalar slot
+  - Add the preserved stage lane through 0x24e1ab0
+  - Dispatch the assembled BigDouble through 0x24e3620
+- `rows=[19, 20, 21]`; `profile=literal-builder-additive`; `offsetModel=(level - offset) * coefficient`; `sampleRows=[19]`
+  - Convert currentLevel - offset into a scalar double lane
+  - Apply the recovered row-window coefficient before BigDouble construction
+  - Build that scalar result through 0x24e1a07
+  - Add the preserved stage lane through 0x24e1ab0
+  - Dispatch the assembled BigDouble through 0x24e3620
+
 ## Current boundary
 
 - Treat the get_SU*Cost native getter family as verified code that reads row-local ShardMining operands before entering a shared BigDouble helper chain.
@@ -130,6 +147,7 @@ Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\da
 - Treat the current normal-row result as a class recipe boundary, not yet as a closed-form numeric evaluator.
 - Treat the canonical symbolic assembler as the current best repo-local description of normal-row shard cost construction, while still blocking exact cost output until the numeric merge rule is proven.
 - Treat the formula application profiles as player-safe structure summaries only: they map rows to staged recipe classes, not to exact current-cost numbers.
+- Treat the secondary 100-plus merge models as the strongest current candidate for the remaining numeric split, but do not collapse them into a final evaluator until the preserved stack lanes are typed into exact symbolic inputs.
 - Treat the secondary 100-plus feeder split inside the canonical class as the next numeric-merge breakpoint to explain, rather than broadening back out to all rows.
 - Treat the sampled 300-plus feeder and both sampled 200-plus feeders as shared canonical-class structure until the binary evidence shows otherwise.
 - Do not expose exact next-level shard costs until the repo verifies how these operand reads and helper calls combine into the returned BreakInfinity.BigDouble.

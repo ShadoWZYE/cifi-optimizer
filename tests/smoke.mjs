@@ -823,6 +823,13 @@ assert.deepEqual(shardCostNativeProbe.formulaApplicationProfiles.normalRows.map(
   { rows: [18, 24, 27, 28, 29], formulaClass: "two-stage-transition-band" },
   { rows: [25, 26], formulaClass: "hundred-stage-short-class" },
 ]);
+assert.deepEqual(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.map((entry) => ({ rows: entry.rows, profile: entry.profile })), [
+  { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 27, 28, 29], profile: "additive-premerge" },
+  { rows: [19, 20, 21], profile: "literal-builder-additive" },
+]);
+assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "additive-premerge" && /multiply\(levelOffsetBigDouble, preservedScalarLane\)/.test(entry.symbolicApproximation)));
+assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "literal-builder-additive" && entry.preDispatchAssembly.some((line) => /0x24e1a07/.test(line))));
+assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((entry) => entry.profile === "literal-builder-additive" && /literalBigDouble\(\(level - offset\) \* coefficient\)/.test(entry.symbolicApproximation)));
 const shardRow1Native = shardCostNativeProbe.rows.find((entry) => entry.row === 1);
 const shardRow19Native = shardCostNativeProbe.rows.find((entry) => entry.row === 19);
 const shardRow27Native = shardCostNativeProbe.rows.find((entry) => entry.row === 27);
