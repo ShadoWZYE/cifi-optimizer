@@ -4,6 +4,7 @@ This note separates what the repo can currently say about shards from repo-local
 
 Use it with:
 
+- [shard-player-facing-evidence.md](docs/systems/shards/shard-player-facing-evidence.md)
 - [shard-system-verification.md](docs/systems/shards/shard-system-verification.md)
 - [unity-mechanics-pass.md](docs/unity/unity-mechanics-pass.md)
 - [unity-owner-map.md](docs/unity/unity-owner-map.md)

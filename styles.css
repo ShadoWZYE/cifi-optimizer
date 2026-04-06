@@ -358,6 +358,37 @@ textarea {
   align-items: start;
 }
 
+.watch-note-card {
+  gap: 8px;
+  padding: 16px;
+}
+
+.watch-note-pass {
+  border-color: rgba(44, 155, 103, 0.2);
+}
+
+.watch-note-warn {
+  border-color: rgba(168, 115, 20, 0.22);
+}
+
+.watch-note-head .eyebrow {
+  margin-bottom: 6px;
+}
+
+.watch-note-primary {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.watch-note-source {
+  font-size: 0.86rem;
+}
+
+.watch-note-pill-warn {
+  background: rgba(168, 115, 20, 0.12);
+  color: var(--warning);
+}
+
 .score {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.92rem;
@@ -382,8 +413,8 @@ textarea {
 }
 
 .pill-neutral {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(224, 232, 255, 0.82);
+  background: rgba(53, 38, 19, 0.08);
+  color: rgba(76, 65, 56, 0.92);
 }
 
 .shard-threshold-pill {
@@ -788,6 +819,83 @@ textarea {
 .shard-evidence-block .shard-panel-card-tag {
   background: rgba(14, 21, 40, 0.48);
   color: rgba(196, 212, 248, 0.74);
+}
+
+.shard-status-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.shard-status-card {
+  gap: 12px;
+}
+
+.shard-status-card-available {
+  border-color: rgba(44, 155, 103, 0.26);
+}
+
+.shard-status-card-integrated {
+  border-color: rgba(64, 120, 220, 0.28);
+}
+
+.shard-status-card-blocked {
+  border-color: rgba(168, 115, 20, 0.28);
+}
+
+.shard-status-card-unmapped {
+  border-color: rgba(116, 127, 156, 0.28);
+}
+
+.shard-status-pill-available {
+  border-color: rgba(44, 155, 103, 0.34);
+  background: rgba(21, 64, 47, 0.62);
+  color: rgba(196, 247, 219, 0.9);
+}
+
+.shard-status-pill-integrated {
+  border-color: rgba(64, 120, 220, 0.34);
+  background: rgba(24, 45, 92, 0.62);
+  color: rgba(208, 224, 255, 0.9);
+}
+
+.shard-status-pill-blocked {
+  border-color: rgba(168, 115, 20, 0.34);
+  background: rgba(76, 49, 12, 0.62);
+  color: rgba(255, 226, 176, 0.9);
+}
+
+.shard-status-pill-unmapped {
+  border-color: rgba(116, 127, 156, 0.34);
+  background: rgba(38, 44, 59, 0.62);
+  color: rgba(214, 220, 234, 0.88);
+}
+
+.shard-doc-link-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shard-doc-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(77, 98, 133, 0.18);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--accent-strong);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.shard-doc-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(65, 34, 9, 0.08);
+  background: rgba(255, 255, 255, 0.94);
 }
 
 .shard-milestone-card .validation-card,
