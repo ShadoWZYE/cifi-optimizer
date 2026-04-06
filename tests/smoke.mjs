@@ -425,6 +425,8 @@ assert.deepEqual(
 );
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel.some((path) => path.join(".") === "systems.shards.focusMilestoneLevel"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardObservedLevelsByMilestone.some((path) => path.join(".") === "systems.shards.observedLevelsByMilestone"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState.some((path) => path.join(".") === "compatibility.unmappedSystemState.shardMilestoneState"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState.some((path) => path.join(".") === "systems.shardMilestones"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop.some((path) => path.join(".") === "systems.tokenBank"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.some((path) => path.join(".") === "FinalTokenBankFillSpeed"));
@@ -2076,10 +2078,12 @@ assert.match(shardUpgradeInfoMetadataNeighborhoodDoc, /<FastBuyEnum>d__1429/);
 assert.match(extractionRankingDoc, /# Extraction Candidate Ranking/);
 assert.match(extractionRankingDoc, /spend-multiverse-save-model-recovery/);
 assert.match(extractionRankingDoc, /filter by track or family id/i);
-assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState/);
+assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState\.shardMilestoneState/);
 assert.match(playerProfileSchemaDoc, /The active manual Profile form should only show values a typical player can quickly provide from the game/);
 assert.match(playerProfileSchemaDoc, /Academy relics \| `player\.resources\.academyRelics` \| real profile aggregate, but not a direct active-form input/);
 assert.match(playerProfileSchemaDoc, /Shard income \/ hour \| `planning\.shards\.ratePerHour` \| descriptive derived helper, not directly visible in game, so removed from the active form/);
+assert.match(playerProfileSchemaDoc, /verify the concrete shard milestone save owner or declaring save model/i);
+assert.match(playerProfileSchemaDoc, /prove planner-safe use before any recommendation or canonical `player\.\*` promotion/i);
 assert.match(playerProfileSchemaDoc, /## Experimental support-surface helpers/);
 assert.match(playerProfileSchemaDoc, /systems\.metaProgression\.hunterLevel/);
 assert.match(playerProfileSchemaDoc, /stage\.highestShipUnlocked/);
@@ -2877,10 +2881,30 @@ assert.equal(migratedUnmappedSystemsProfile.planning.shards.totalMilestoneLevels
 assert.equal(migratedUnmappedSystemsProfile.planning.shards.focusMilestoneId, "omega_watch");
 assert.equal(migratedUnmappedSystemsProfile.planning.shards.focusMilestoneLevel, 6);
 assert.deepEqual(migratedUnmappedSystemsProfile.planning.shards.observedLevelsByMilestone, { omega_watch: 6 });
-assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestones, {
-  selectedMilestone: "alpha",
-  observedLevel: 12
+assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestoneState, {
+  status: "quarantined-unmapped",
+  importedState: {
+    selectedMilestone: "alpha",
+    observedLevel: 12
+  },
+  mappingGate: {
+    plannerUseAllowed: false,
+    canonicalPromotionBlocked: true,
+    requiredBeforeCanonicalPromotion: [
+      "Verify the concrete shard milestone save owner or declaring save model.",
+      "Recover a grounded field-to-label mapping for player-owned shard milestone state.",
+      "Approve planner-safe recommendation use only after grounded save-state verification."
+    ]
+  },
+  currentBoundary: [
+    "Imported shard milestone state stays quarantined until the save owner, field mapping, and planner-safe interpretation are verified.",
+    "Do not treat this blob as canonical player truth or grounded planner input."
+  ]
 });
+assert.deepEqual(
+  migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestones,
+  migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.shardMilestoneState
+);
 assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.tokenShop, {
   tokenBoostLevel: 4
 });
@@ -2888,6 +2912,30 @@ assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemStat
   inscription51Level: 2
 });
 assert.equal(migratedUnmappedSystemsProfile.player.resources.tokens, null);
+
+const migratedQuarantinedShardMilestoneProfile = normalizePlayerProfile({
+  compatibility: {
+    unmappedSystemState: {
+      shardMilestoneState: {
+        importedState: {
+          selectedMilestone: "beta",
+          observedLevel: 33,
+          recoveredOwner: "PlayerProfileData"
+        }
+      }
+    }
+  }
+});
+
+assert.equal(migratedQuarantinedShardMilestoneProfile.planning.shards.focusMilestoneId, null);
+assert.equal(migratedQuarantinedShardMilestoneProfile.planning.shards.focusMilestoneLevel, null);
+assert.deepEqual(migratedQuarantinedShardMilestoneProfile.planning.shards.observedLevelsByMilestone, {});
+assert.equal(migratedQuarantinedShardMilestoneProfile.compatibility.unmappedSystemState.shardMilestoneState.mappingGate.plannerUseAllowed, false);
+assert.equal(migratedQuarantinedShardMilestoneProfile.compatibility.unmappedSystemState.shardMilestoneState.mappingGate.canonicalPromotionBlocked, true);
+assert.equal(
+  migratedQuarantinedShardMilestoneProfile.compatibility.unmappedSystemState.shardMilestoneState.importedState.observedLevel,
+  33
+);
 
 const migratedFlatSpendStateProfile = normalizePlayerProfile({
   TokenBankCap: "1200",

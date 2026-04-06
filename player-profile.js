@@ -37,7 +37,7 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
     hunterLevel: [["compatibility", "unresolvedProfileFields", "hunterLevel"], ["systems", "metaProgression", "hunterLevel"]],
     traitSphereCount: [["compatibility", "unresolvedProfileFields", "traitSphereCount"], ["systems", "metaProgression", "traitSphereCount"]],
     mechParts: [["compatibility", "unresolvedProfileFields", "mechParts"], ["systems", "metaProgression", "mechParts"]],
-    shardMilestones: [["compatibility", "unmappedSystemState", "shardMilestones"], ["systems", "shardMilestones"]],
+    shardMilestoneState: [["compatibility", "unmappedSystemState", "shardMilestoneState"], ["compatibility", "unmappedSystemState", "shardMilestones"], ["systems", "shardMilestones"]],
     tokenShop: [["compatibility", "unmappedSystemState", "tokenShop"], ["systems", "tokenShop"], ["systems", "tokenBank"], ["tokenShop"], ["tokenBank"]],
     multiverseMarket: [["compatibility", "unmappedSystemState", "multiverseMarket"], ["systems", "multiverseMarket"], ["multiverseMarket"]],
     tokenShopStateClues: [
@@ -229,6 +229,31 @@ function coerceObservedShardLevels(value) {
   }, {});
 }
 
+function coerceQuarantinedShardMilestoneState(value) {
+  const importedState = isRecord(value?.importedState) ? cloneValue(value.importedState) : (isRecord(value) ? cloneValue(value) : null);
+  if (!importedState) {
+    return null;
+  }
+
+  return {
+    status: "quarantined-unmapped",
+    importedState,
+    mappingGate: {
+      plannerUseAllowed: false,
+      canonicalPromotionBlocked: true,
+      requiredBeforeCanonicalPromotion: [
+        "Verify the concrete shard milestone save owner or declaring save model.",
+        "Recover a grounded field-to-label mapping for player-owned shard milestone state.",
+        "Approve planner-safe recommendation use only after grounded save-state verification."
+      ]
+    },
+    currentBoundary: [
+      "Imported shard milestone state stays quarantined until the save owner, field mapping, and planner-safe interpretation are verified.",
+      "Do not treat this blob as canonical player truth or grounded planner input."
+    ]
+  };
+}
+
 function coerceCompatibilityValue(value) {
   if (value === undefined) {
     return undefined;
@@ -340,6 +365,7 @@ export function createDefaultPlayerProfile(baselineShipPlayerState = {}) {
         mechParts: null
       },
       unmappedSystemState: {
+        shardMilestoneState: null,
         shardMilestones: null,
         tokenShop: null,
         multiverseMarket: null
@@ -400,7 +426,12 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   normalized.compatibility.unresolvedProfileFields.hunterLevel = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel));
   normalized.compatibility.unresolvedProfileFields.traitSphereCount = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.traitSphereCount));
   normalized.compatibility.unresolvedProfileFields.mechParts = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.mechParts));
-  normalized.compatibility.unmappedSystemState.shardMilestones = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestones));
+  normalized.compatibility.unmappedSystemState.shardMilestoneState = coerceQuarantinedShardMilestoneState(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState)
+  );
+  normalized.compatibility.unmappedSystemState.shardMilestones = cloneValue(
+    normalized.compatibility.unmappedSystemState.shardMilestoneState
+  );
 
   const tokenShopStateAliases = Object.fromEntries(
     PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.map((path) => [path[path.length - 1], [path]])
