@@ -2547,7 +2547,17 @@ assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-data
 assert.equal(pkg.scripts["verify:vendoring"], "node ./scripts/contracts/verify-vendoring-layout.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
 assert.deepEqual(await lintDocPortability(repoRoot), []);
-assert.deepEqual((await verifyVendoringLayout(repoRoot)).regressions, []);
+const vendoringLayout = await verifyVendoringLayout(repoRoot);
+assert.deepEqual(vendoringLayout.regressions, []);
+assert.deepEqual(
+  vendoringLayout.tolerated,
+  [
+    { path: ".deps", rule: "top-level .deps/ bucket", classification: "temporary" },
+    { path: ".vendor_manual", rule: "top-level .vendor_*/ bucket", classification: "temporary" },
+    { path: ".vendor_py", rule: "top-level .vendor_*/ bucket", classification: "temporary" },
+    { path: ".wheelhouse", rule: "top-level cache bucket", classification: "temporary" }
+  ]
+);
 assert.match(importMappingDoc, /compatibility-only fields/i);
 const datasetContractsDoc = await readFile(new URL("../docs/contracts/dataset-contracts.md", import.meta.url), "utf8");
 assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);

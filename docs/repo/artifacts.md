@@ -76,6 +76,15 @@ Each vendored package or subtree should record:
 
 If a vendored payload does not meet that bar, do not commit it.
 
+Tolerated transition-state exceptions still tracked in the repo today are:
+
+- `.deps/`
+- `.vendor_manual/`
+- `.vendor_py/`
+- `.wheelhouse/`
+
+These paths are temporary legacy exceptions, not preferred layout. New vendored or cache-style buckets should not be added alongside them.
+
 ## Promotion gate
 
 Before committing a new artifact, verify:

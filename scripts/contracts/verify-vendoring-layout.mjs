@@ -1,5 +1,4 @@
 import { readdir } from "node:fs/promises";
-import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
@@ -12,37 +11,45 @@ const TOP_LEVEL_BUCKET_RULES = [
   { label: "top-level dependency cache bucket", test: (name) => [".dotnet", ".nuget"].includes(name) }
 ];
 
-const TOLERATED_LEGACY_PATHS = new Set([
+const IGNORED_LOCAL_BUCKETS = new Set([
   ".appdata",
-  ".deps",
+  ".cache",
   ".dotnet",
   ".local",
-  ".vendor_manual",
-  ".vendor_py",
-  ".wheelhouse"
+  ".nuget",
+  ".pytest_cache",
+  "__pycache__"
+]);
+
+const TOLERATED_LEGACY_PATHS = new Map([
+  [".deps", "temporary"],
+  [".vendor_manual", "temporary"],
+  [".vendor_py", "temporary"],
+  [".wheelhouse", "temporary"]
 ]);
 
 export async function verifyVendoringLayout(rootDir = repoRoot) {
-  const entries = await readdir(rootDir, { withFileTypes: true });
+  const topLevelDirectories = await listTopLevelDirectories(rootDir);
   const tolerated = [];
   const regressions = [];
 
-  for (const entry of entries) {
-    if (!entry.isDirectory()) {
+  for (const directory of topLevelDirectories) {
+    if (IGNORED_LOCAL_BUCKETS.has(directory)) {
       continue;
     }
 
-    const matchedRule = TOP_LEVEL_BUCKET_RULES.find((rule) => rule.test(entry.name));
+    const matchedRule = TOP_LEVEL_BUCKET_RULES.find((rule) => rule.test(directory));
     if (!matchedRule) {
       continue;
     }
 
     const record = {
-      path: entry.name,
-      rule: matchedRule.label
+      path: directory,
+      rule: matchedRule.label,
+      classification: TOLERATED_LEGACY_PATHS.get(directory) ?? null
     };
 
-    if (TOLERATED_LEGACY_PATHS.has(entry.name)) {
+    if (record.classification) {
       tolerated.push(record);
     } else {
       regressions.push(record);
@@ -58,6 +65,11 @@ export async function verifyVendoringLayout(rootDir = repoRoot) {
   };
 }
 
+async function listTopLevelDirectories(rootDir) {
+  const entries = await readdir(rootDir, { withFileTypes: true });
+  return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const result = await verifyVendoringLayout();
 
@@ -69,7 +81,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     if (result.tolerated.length > 0) {
       console.error("Tolerated legacy exceptions:");
       for (const tolerated of result.tolerated) {
-        console.error(`- ${tolerated.path}: ${tolerated.rule}`);
+        console.error(`- ${tolerated.path}: ${tolerated.rule} (${tolerated.classification})`);
       }
     }
     process.exitCode = 1;
@@ -78,7 +90,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     if (result.tolerated.length > 0) {
       console.log("Tolerated legacy exceptions:");
       for (const tolerated of result.tolerated) {
-        console.log(`- ${tolerated.path}: ${tolerated.rule}`);
+        console.log(`- ${tolerated.path}: ${tolerated.rule} (${tolerated.classification})`);
       }
     }
   }
