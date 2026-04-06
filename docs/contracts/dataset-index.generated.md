@@ -117,6 +117,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/shard-save-boundary.v1.json`
 
+### `shard-milestone-save-owner-candidates`
+
+- Label: Shard milestone save-owner candidates
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/shard-milestone-save-owner-candidates.v1.json`
+
 ### `shard-scene-monobehaviour-probe`
 
 - Label: Shard scene MonoBehaviour probe

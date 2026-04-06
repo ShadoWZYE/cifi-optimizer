@@ -594,6 +594,49 @@ function validateShardSaveBoundary(boundary) {
   };
 }
 
+function validateShardMilestoneSaveOwnerCandidates(candidates) {
+  expectNonEmptyString(candidates.dataset, "shard milestone save-owner candidates dataset id must be present");
+  expectNonEmptyString(candidates.generatedAt, "shard milestone save-owner candidates generatedAt must be present");
+  expectRecord(candidates.sources, "shard milestone save-owner candidates sources must be an object");
+  ["shardSaveBoundary", "ownerFamilyBoundary", "payloadBoundary", "typeMetadataProbe", "extractionCandidateFamilies", "globalMetadata", "level0"].forEach((field) => {
+    expectNonEmptyString(candidates.sources[field], `shard milestone save-owner candidates sources.${field} must be present`);
+  });
+  expectArray(candidates.candidateTypes, "shard milestone save-owner candidates candidateTypes must be an array");
+  assert.ok(candidates.candidateTypes.length >= 1, "shard milestone save-owner candidates must preserve at least one candidate");
+  candidates.candidateTypes.forEach((entry, index) => {
+    expectNonEmptyString(entry.id, `shard milestone save-owner candidates[${index}].id must be present`);
+    expectNonEmptyString(entry.label, `shard milestone save-owner candidates[${index}].label must be present`);
+    expectNonEmptyString(entry.kind, `shard milestone save-owner candidates[${index}].kind must be present`);
+    expectNonEmptyString(entry.confidence, `shard milestone save-owner candidates[${index}].confidence must be present`);
+    expectArray(entry.why, `shard milestone save-owner candidates[${index}].why must be an array`);
+    expectArray(entry.candidateFieldClusters, `shard milestone save-owner candidates[${index}].candidateFieldClusters must be an array`);
+    expectRecord(entry.checkedOverlapStats, `shard milestone save-owner candidates[${index}].checkedOverlapStats must be an object`);
+  });
+  expectArray(candidates.confidenceNotes, "shard milestone save-owner candidates confidenceNotes must be an array");
+  expectRecord(candidates.checkedOverlapStatistics, "shard milestone save-owner candidates checkedOverlapStatistics must be an object");
+  expectArray(candidates.warnings, "shard milestone save-owner candidates warnings must be an array");
+  expectArray(candidates.currentBoundary, "shard milestone save-owner candidates currentBoundary must be an array");
+
+  assert.ok(candidates.candidateTypes.some((entry) => entry.id === "player-profile-side-shard-member-shell"), "shard milestone save-owner candidates must preserve the PlayerProfile-side candidate");
+  assert.ok(candidates.candidateTypes.some((entry) => entry.id === "shard-mining-wrapper-or-handoff-shell"), "shard milestone save-owner candidates must preserve the shard wrapper candidate");
+  assert.equal(candidates.checkedOverlapStatistics.ownerShellWithSaveOverlapCount, 0, "shard milestone save-owner candidates overlap count drifted");
+  assert.equal(candidates.checkedOverlapStatistics.directShardPlayerProfileContext, false, "shard milestone save-owner candidates direct save context drifted");
+  assert.ok(candidates.warnings.some((line) => String(line).includes("not recovered player-owned shard milestone state")), "shard milestone save-owner candidates must preserve warning framing");
+  assert.ok(candidates.currentBoundary.some((line) => String(line).includes("candidate-narrowing artifact only")), "shard milestone save-owner candidates must preserve candidate-only framing");
+  assert.ok(candidates.currentBoundary.some((line) => String(line).includes("not as recovered player-owned shard milestone state")), "shard milestone save-owner candidates must preserve save-state boundary framing");
+
+  return {
+    id: "shard-milestone-save-owner-candidates",
+    label: "Shard milestone save-owner candidates",
+    classification: "extracted-mechanics",
+    stats: [
+      `${candidates.candidateTypes.length} candidate types`,
+      `${candidates.checkedOverlapStatistics.ownerShellWithSaveOverlapCount} checked save-overlap hits`,
+      "Save-owner candidates stay narrowed without claiming recovered player-owned shard milestone state"
+    ]
+  };
+}
+
 function validateShardSceneMonoBehaviourProbe(probe) {
   expectNonEmptyString(probe.dataset, "shard scene MonoBehaviour probe dataset id must be present");
   expectNonEmptyString(probe.generatedAt, "shard scene MonoBehaviour probe generatedAt must be present");
@@ -2346,7 +2389,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 44, "bundled dataset contract must track the forty-four shipped dataset groups");
+  assert.equal(contract.datasets.length, 45, "bundled dataset contract must track the forty-five shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -2422,6 +2465,7 @@ export async function validateBundledDatasets() {
   const shardMilestoneRowAlignmentBoundary = await readJson("../../data/shard-milestone-row-alignment-boundary.v1.json");
   const shardMilestoneHandoffBoundary = await readJson("../../data/shard-milestone-handoff-boundary.v1.json");
   const shardSaveBoundary = await readJson("../../data/shard-save-boundary.v1.json");
+  const shardMilestoneSaveOwnerCandidates = await readJson("../../data/shard-milestone-save-owner-candidates.v1.json");
   const shardSceneMonoBehaviourProbe = await readJson("../../data/shard-scene-monobehaviour-probe.v1.json");
   const shardCostParameterProbe = await readJson("../../data/shard-cost-parameter-probe.v1.json");
   const shardCostMethodProbe = await readJson("../../data/shard-cost-method-probe.v1.json");
@@ -2468,6 +2512,7 @@ export async function validateBundledDatasets() {
     validateShardMilestoneRowAlignmentBoundary(shardMilestoneRowAlignmentBoundary),
     validateShardMilestoneHandoffBoundary(shardMilestoneHandoffBoundary),
     validateShardSaveBoundary(shardSaveBoundary),
+    validateShardMilestoneSaveOwnerCandidates(shardMilestoneSaveOwnerCandidates),
     validateShardSceneMonoBehaviourProbe(shardSceneMonoBehaviourProbe),
     validateShardCostParameterProbe(shardCostParameterProbe),
     validateShardCostMethodProbe(shardCostMethodProbe),
