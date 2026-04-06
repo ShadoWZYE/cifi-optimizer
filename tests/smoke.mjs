@@ -97,6 +97,7 @@ const recommendationContractModule = await readFile(new URL("../recommendation-c
 const recommendationFixtures = JSON.parse(await readFile(new URL("./fixtures/recommendation-actions.fixtures.json", import.meta.url), "utf8"));
 const shardVerificationDoc = await readFile(new URL("../docs/systems/shards/shard-system-verification.md", import.meta.url), "utf8");
 const shardGroundingBoundaryDoc = await readFile(new URL("../docs/systems/shards/shard-grounding-boundary.md", import.meta.url), "utf8");
+const shardPlayerFacingEvidenceDoc = await readFile(new URL("../docs/systems/shards/shard-player-facing-evidence.md", import.meta.url), "utf8");
 const shardExtractionCandidatesDoc = await readFile(new URL("../docs/systems/shards/shard-extraction-candidates.md", import.meta.url), "utf8");
 const shardOwnerFamilyDoc = await readFile(new URL("../docs/systems/shards/shard-owner-family-verification.md", import.meta.url), "utf8");
 const shardOwnerFamilyProbe = JSON.parse(await readFile(new URL("../data/shard-owner-family-probe.v1.json", import.meta.url), "utf8"));
@@ -2027,6 +2028,9 @@ assert.match(shardGroundingBoundaryDoc, /generic or academy-side milestone famil
 assert.match(shardGroundingBoundaryDoc, /LoopResetStage1/);
 assert.match(shardGroundingBoundaryDoc, /Milestones, Assembly-CSharp/);
 assert.match(shardGroundingBoundaryDoc, /ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked/i);
+assert.match(shardPlayerFacingEvidenceDoc, /the grounded app can show shard evidence, watch cards, threshold wording, and loop-reset guardrails today/i);
+assert.match(shardPlayerFacingEvidenceDoc, /external-model imports are an interim compatibility path only and stay non-canonical/i);
+assert.match(shardPlayerFacingEvidenceDoc, /cannot yet claim exact shard cost math, affordability, ROI, ETA certainty, or best-buy order/i);
 assert.match(shardExtractionCandidatesDoc, /# Shard Extraction Candidates/);
 assert.match(shardExtractionCandidatesDoc, /shards\.milestone-owner-family/);
 assert.match(shardExtractionCandidatesDoc, /loop-reset stage family/i);
@@ -2320,6 +2324,9 @@ assert.doesNotMatch(appJs, /Row-shell boundary/);
 assert.doesNotMatch(appJs, /Row-alignment boundary/);
 assert.doesNotMatch(appJs, /Cost-model boundary/);
 assert.match(appJs, /Shard cost-model boundary/);
+assert.match(appJs, /What the grounded app can safely show today: shard watch cards, loop warnings, threshold wording, and evidence-status notes sourced from the checked shard contract\./);
+assert.match(appJs, /Interim compatibility path: external-model imports can preserve community-tool context while staying non-canonical and outside grounded shard recommendations\./);
+assert.match(appJs, /If a player imports external-model or compatibility data, it is treated as an interim reference path only and not as canonical shard state\./);
 assert.doesNotMatch(appJs, /Row-model boundary/);
 assert.doesNotMatch(appJs, /Title\/effect boundary/);
 assert.doesNotMatch(appJs, /Effect-text handler boundary/);

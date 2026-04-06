@@ -12,6 +12,7 @@ Safe to show in the app now:
 - loop-reset warnings and shard watch cards
 - descriptive unlock thresholds and cost-bump notes
 - descriptive shard-cost evidence with explicit status labels
+- explicit boundary notes about what is still blocked and why
 
 Not safe to imply in the app:
 
@@ -20,6 +21,16 @@ Not safe to imply in the app:
 - affordability estimates
 - exact next-cost math
 - recovered player-owned shard milestone state
+
+## Trust note
+
+Tell the player plainly:
+
+- the grounded app can show shard evidence, watch cards, threshold wording, and loop-reset guardrails today
+- the grounded app cannot yet claim exact shard cost math, affordability, ROI, ETA certainty, or best-buy order because save-owner mapping and planner-safe cost validation are still unresolved
+- external-model imports are an interim compatibility path only and stay non-canonical until their assumptions and saved-state mappings are grounded
+
+External-model compatibility can preserve community-tool payloads or imported unmapped blobs so a player does not lose context during research. That does not make those payloads grounded shard truth or recommendation-grade planner input.
 
 ## Status meanings
 
@@ -34,6 +45,8 @@ The shard page should summarize:
 
 - what is safe to show now
 - what remains blocked
+- why the blocked outputs are still blocked
+- where external-model compatibility can help as an interim path
 - where the user can open the deeper docs
 
 The shard page should not inline:
