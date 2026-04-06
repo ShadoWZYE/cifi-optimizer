@@ -51,6 +51,6 @@
     "The adjacent cloud-save neighborhood still preserves CloudSavePlayerProfile plus GetCurrentSaveFileInfo, GetPlayerProfileInfo, and CloudLoad as the current repo-local bridge into PlayerProfile persistence recovery.",
     "The same checked repo-local metadata still does not expose a direct PlayerProfileData|Market, PlayerProfileData|Inscryption, or PlayerProfileData|MultiverseMarket type-map clue.",
     "The nearest recovered market-side type family still clusters MultiverseMarket with Inscryption tuple types plus adjacent Ouroboros market and progression systems such as NecrumExchange, OuroborosResetter, TraitSpheres, ZeimarrNautallium, ResearchLaboratory, RewardLanes, and ShardMining.",
-    "This is enough to narrow the remaining handoff from a broad PlayerProfile family guess to a stronger direct PlayerProfileData member-shell or broader wrapper hypothesis, but not enough to claim that MultiverseMarket itself is declared directly on PlayerProfileData."
+    "This is enough to narrow the remaining handoff from a broad PlayerProfile family guess to a specific nested PlayerProfile-side Market wrapper path, not direct MultiverseMarket ownership or loose top-level PlayerProfileData fields, but not enough to name the exact declaring type inside that wrapper."
   ]
 }

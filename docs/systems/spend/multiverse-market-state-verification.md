@@ -82,9 +82,9 @@ The checked boundary artifact for this handoff now preserves the stronger repo-l
 Current grounded conclusion:
 
 - the strongest current repo-local handoff is no longer just "PlayerProfile family somewhere"
-- the stronger boundary is now "direct PlayerProfileData member shell or broader wrapper family" versus direct `MultiverseMarket` ownership on `PlayerProfileData`
-- the bare `Market` member-shell clue makes a direct PlayerProfile-side handoff more credible than the earlier accessor-only evidence
-- this is useful because it narrows the next recovery step toward the declaring member or nested payload without pretending the Emporium state is already import-ready
+- the stronger boundary is now a specific nested PlayerProfile-side `Market` wrapper path rather than direct `MultiverseMarket` ownership on `PlayerProfileData` or loose top-level `PlayerProfileData` fields
+- the bare `Market` member-shell clue makes that PlayerProfile-side wrapper path more credible than the earlier accessor-only evidence
+- this is useful because it narrows the next recovery step toward the exact declaring type inside that wrapper without pretending the Emporium state is already import-ready
 
 ## Exact metadata field cluster recovered from this pass
 
@@ -162,22 +162,22 @@ Current grounded conclusion:
   - `AchievementBar-Inscryptions`
   - `BuyIS*` handlers
 - likely persistence search family:
-  - `PlayerProfileData` / `FillPlayerProfileData` / `GetPlayerProfileData` / `get_Market`
+  - `PlayerProfileData` / `FillPlayerProfileData` / `GetPlayerProfileData` / `get_Market` / `Market`
 
 ## What remains unresolved
 
-- the exact declaring save model that owns `InscryptionsDone`
+- the exact declaring save model that owns `InscryptionsDone` inside the narrowed PlayerProfile-side `Market` wrapper path
 - the authoritative saved-state field range or list for owned inscription levels
-- whether the `get_Market` accessor resolves to the declaring Emporium state owner or only to a broader market wrapper
-- whether the contiguous `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / `Mech*` run belongs directly to `PlayerProfileData` or to a nested progression payload
-- whether the nearby `IS*Level` and `EsotericR*Trades` strings belong to direct profile fields, nested achievement/progression records, or another serialized sub-structure inside `PlayerProfileData`
+- whether the `get_Market` accessor resolves directly to the declaring Emporium state owner or only to an intermediate market wrapper that still hands off to a deeper progression object
+- whether the contiguous `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / `Mech*` run belongs directly to the narrowed `Market` wrapper or to a deeper nested progression payload under that wrapper
+- whether the nearby `IS*Level` and `EsotericR*Trades` strings belong to direct wrapper fields, nested achievement/progression records, or another serialized sub-structure under the same PlayerProfile-side market path
 
 ## Current app implication
 
 - It is still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state.playerProfile`.
 - It is now safe to treat `InscryptionsDone` and nearby `IS*Level` strings as grounded metadata field clues for future save-side mapping work.
 - It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
-- It is now safe to treat the save-side search as narrowed to the PlayerProfile persistence family and a direct PlayerProfile-side market member shell or broader wrapper handoff instead of the raw Emporium owner alone.
+- It is now safe to treat the save-side search as narrowed to the PlayerProfile persistence family and a specific nested PlayerProfile-side `Market` wrapper path instead of the raw Emporium owner alone.
 - It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and direct save-side `IS*Level` overlap, while keeping the declaring owner unresolved.
 - The next spend-track slice should determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` cluster before any planner UI is added.
 

@@ -1692,7 +1692,7 @@ const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id ===
 assert.ok(spendSaveModelTrack, "expected Emporium save-model successor track");
 assert.equal(spendSaveModelTrack.status, "active");
 assert.match(spendSaveModelTrack.currentSlice, /market-member boundary artifacts/);
-assert.match(spendSaveModelTrack.currentSlice, /direct PlayerProfile-side Market member shell/);
+assert.match(spendSaveModelTrack.currentSlice, /specific nested PlayerProfile-side `Market` wrapper path/);
 assert.ok(
   spendSaveModelTrack.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
   "expected Emporium successor track to record market-member boundary grounding"
@@ -1714,8 +1714,8 @@ assert.ok(
   "expected Emporium successor track to record recovered cap progress support"
 );
 assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /canonical market recovery now favors a `Market` member shell or broader wrapper/.test(step)),
-  "expected Emporium successor track to record canonical host narrowing"
+  spendSaveModelTrack.completedSteps.some((step) => /canonical market recovery now favors a specific nested PlayerProfile-side `Market` wrapper path/.test(step)),
+  "expected Emporium successor track to record the narrowed Market-wrapper host path"
 );
 assert.ok(
   spendSaveModelTrack.verified.some((line) => /direct `get_Market` accessor clue/.test(line)),
@@ -2529,7 +2529,7 @@ assert.match(appJs, /MultiverseMarket action shell and PlayerProfileData save-fa
 assert.match(appJs, /The checked save boundary still keeps \${multiverseMarketSaveBoundarySummary\.actionAnchor} separate from \${multiverseMarketSaveBoundarySummary\.saveAnchor}, with \${multiverseMarketSaveBoundarySummary\.overlapLabel}/);
 assert.match(appJs, /That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet/);
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
-assert.match(appJs, /PlayerProfile-side Market member shell or broader wrapper is now the strongest canonical host hypothesis/);
+assert.match(appJs, /Nested PlayerProfile-side Market wrapper path is now the strongest canonical host hypothesis/);
 assert.match(appJs, /now leads over direct MultiverseMarket ownership or loose PlayerProfileData fields/);
 assert.match(appJs, /"TokenBoost"/);
 assert.match(appJs, /"DiamondBoost"/);
