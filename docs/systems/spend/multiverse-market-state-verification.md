@@ -104,9 +104,9 @@ Repo-local metadata probing now recovers exact Emporium-adjacent field strings a
   - `SetInscryptionsDoneText`
   - `SetAllChrystosEmporiumTexts`
 - generated outputs from this pass:
-  - [`scripts/unity/metadata_neighborhood_probe.py`](C:\Users\Shadow\Desktop\CiFi\scripts\unity\metadata_neighborhood_probe.py)
-  - [`docs/systems/spend/multiverse-market-metadata-neighborhood.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-metadata-neighborhood.md)
-  - [`data/multiverse-market-metadata-neighborhood.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-metadata-neighborhood.json)
+  - [`scripts/unity/metadata_neighborhood_probe.py`](scripts/unity/metadata_neighborhood_probe.py)
+  - [`docs/systems/spend/multiverse-market-metadata-neighborhood.md`](docs/multiverse-market-metadata-neighborhood.md)
+  - [`data/multiverse-market-metadata-neighborhood.json`](data/multiverse-market-metadata-neighborhood.json)
 
 Current grounded conclusion:
 
@@ -180,4 +180,5 @@ Current grounded conclusion:
 - It is now safe to treat the save-side search as narrowed to the PlayerProfile persistence family and a direct PlayerProfile-side market member shell or broader wrapper handoff instead of the raw Emporium owner alone.
 - It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and direct save-side `IS*Level` overlap, while keeping the declaring owner unresolved.
 - The next spend-track slice should determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` cluster before any planner UI is added.
+
 

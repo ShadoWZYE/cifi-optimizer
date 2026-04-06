@@ -1,6 +1,6 @@
 # Shard Cost Native Probe
 
-Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\shard-cost-method-probe.v1.json), typed field offsets from [`data/uabea-probe-report.json`](C:\Users\Shadow\Desktop\CiFi\data\uabea-probe-report.json), plus disassembly of [`workbench/apk/base/libil2cpp.so`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\libil2cpp.so) using the manually extracted local libraries in `.vendor_manual`.
+Source: [`data/shard-cost-method-probe.v1.json`](data/shard-cost-method-probe.v1.json), typed field offsets from [`data/uabea-probe-report.json`](data/uabea-probe-report.json), plus disassembly of [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so) using the manually extracted local libraries in `.vendor_manual`.
 
 ## Grounded conclusions
 
@@ -168,3 +168,4 @@ Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\da
 - Treat the secondary 100-plus feeder split inside the canonical class as the next numeric-merge breakpoint to explain, rather than broadening back out to all rows.
 - Treat the sampled 300-plus feeder and both sampled 200-plus feeders as shared canonical-class structure until the binary evidence shows otherwise.
 - Do not expose exact next-level shard costs until the repo verifies how these operand reads and helper calls combine into the returned BreakInfinity.BigDouble.
+

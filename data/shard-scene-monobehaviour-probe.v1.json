@@ -2,7 +2,7 @@
   "dataset": "shard-scene-monobehaviour-probe.v1",
   "generatedAt": "2026-04-04",
   "source": {
-    "unityJoinedDir": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\unity\\joined",
+    "unityJoinedDir": "workbench/unity/joined",
     "probeMethod": "UnityPy MonoBehaviour inventory with local dependency stubs"
   },
   "monoBehaviours": [
@@ -48,3 +48,5 @@
     "Do not claim recovered shard numeric fields, formulas, or typed row payloads from this probe alone."
   ]
 }
+
+

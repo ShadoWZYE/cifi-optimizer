@@ -2,8 +2,8 @@
   "dataset": "shard-bonus-slot-probe.v1",
   "generatedAt": "2026-04-04",
   "source": {
-    "metadata": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\global-metadata.dat",
-    "groundedMilestones": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\shard-milestones.grounded.v1.json"
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "groundedMilestones": "data/shard-milestones.grounded.v1.json"
   },
   "rows": [
     {
@@ -567,3 +567,5 @@
     "Use row-0 mismatch as evidence that the current descriptive Eternal milestone entry is still incomplete."
   ]
 }
+
+

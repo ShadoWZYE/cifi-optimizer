@@ -19,10 +19,10 @@ This document captures the current extraction pathway for grounded CIFI mechanic
 
 - Goal: recover grounded in-game mechanic owners, field names, and serialized constants from the shipped Unity/IL2CPP build.
 - Current proven owners:
-  - `TokenShop` in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-  - `MultiverseMarket` in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
+  - `TokenShop` in [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+  - `MultiverseMarket` in [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
 - Current narrowed but unresolved owner family:
-  - shard milestones / loop-reset shell in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0) and [`workbench/unity/joined/sharedassets0.assets`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\sharedassets0.assets)
+  - shard milestones / loop-reset shell in [`workbench/unity/joined/level0`](workbench/unity/joined/level0) and [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets)
 - Current non-goal: full save-file decoding. The external save/export blobs are still opaque and should not block mechanic extraction.
 
 ## Source Inputs
@@ -43,10 +43,10 @@ These remain external prerequisites:
 
 Important primary files:
 
-- [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\global-metadata.dat)
-- [`workbench/apk/base/libil2cpp.so`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\libil2cpp.so)
-- [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-- [`workbench/unity/joined/sharedassets0.assets`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\sharedassets0.assets)
+- [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat)
+- [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so)
+- [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+- [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets)
 
 ## Proven Workflow
 
@@ -63,8 +63,8 @@ Important primary files:
 
 The current Unity build uses metadata version `39`. The available `Cpp2IL` path in local `AssetsTools.NET` tooling does not support that version cleanly enough for direct MonoBehaviour deserialization. The reliable fallback was:
 
-- recover declaration-order field names from [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\global-metadata.dat)
-- locate the owning MonoBehaviour byte range in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
+- recover declaration-order field names from [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat)
+- locate the owning MonoBehaviour byte range in [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
 - align named fields to the raw byte stream
 - promote successful alignments into repeatable parser scripts
 
@@ -72,21 +72,21 @@ The current Unity build uses metadata version `39`. The available `Cpp2IL` path 
 
 ### Token Bank
 
-- Scene/UI strings and prefab anchors are in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
+- Scene/UI strings and prefab anchors are in [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
 - Proven owner: `TokenShop`
-- Parser: [`scripts/unity/token_shop_parse.py`](C:\Users\Shadow\Desktop\CiFi\scripts\unity\token_shop_parse.py)
+- Parser: [`scripts/unity/token_shop_parse.py`](scripts/unity/token_shop_parse.py)
 - Outputs:
-  - [`docs/systems/spend/token-shop-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\token-shop-values.md)
-  - [`data/token-shop-values.json`](C:\Users\Shadow\Desktop\CiFi\data\token-shop-values.json)
+  - [`docs/systems/spend/token-shop-values.md`](docs/systems/spend/token-shop-values.md)
+  - [`data/token-shop-values.json`](data/token-shop-values.json)
 
 ### Chrystos Emporium
 
 - Scene/UI shell names include `ChrystosEmperium.Shop`, but the mechanics owner is `MultiverseMarket` on GameObject `Inscryptions`
-- Proven owner byte start: `33216256` in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-- Parser: [`scripts/unity/multiverse_market_parse.py`](C:\Users\Shadow\Desktop\CiFi\scripts\unity\multiverse_market_parse.py)
+- Proven owner byte start: `33216256` in [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+- Parser: [`scripts/unity/multiverse_market_parse.py`](scripts/unity/multiverse_market_parse.py)
 - Outputs:
-  - [`docs/systems/spend/multiverse-market-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\multiverse-market-values.md)
-  - [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
+  - [`docs/systems/spend/multiverse-market-values.md`](docs/systems/spend/multiverse-market-values.md)
+  - [`data/multiverse-market-values.json`](data/multiverse-market-values.json)
 
 ## Current Findings
 
@@ -149,9 +149,9 @@ Recommended next unresolved extraction target after PR2:
 
 The current repo-local candidate ranking for that step is recorded in:
 
-- [`docs/systems/shards/shard-extraction-candidates.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-extraction-candidates.md)
-- [`data/extraction-candidate-ranking.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\extraction-candidate-ranking.v1.json)
-- regenerated by [`scripts/unity/score_extraction_candidates.py`](C:\Users\Shadow\Desktop\CiFi\scripts\unity\score_extraction_candidates.py)
+- [`docs/systems/shards/shard-extraction-candidates.md`](docs/systems/shards/shard-extraction-candidates.md)
+- [`data/extraction-candidate-ranking.v1.json`](data/extraction-candidate-ranking.v1.json)
+- regenerated by [`scripts/unity/score_extraction_candidates.py`](scripts/unity/score_extraction_candidates.py)
 
 ## Portability Notes
 
@@ -195,4 +195,5 @@ If those gaps remain open, keep the system in extraction and verification docs r
 - Full save/export decoding is still unresolved.
 - `MultiverseMarket` is only partially decoded; the post-validated late block still needs a second-pass parser.
 - Community naming should not be substituted for in-game names unless clearly labeled as external.
+
 

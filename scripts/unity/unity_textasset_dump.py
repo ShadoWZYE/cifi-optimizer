@@ -4,6 +4,8 @@ import json
 import sys
 from pathlib import Path
 
+from portable_paths import repo_relative
+
 
 def main() -> int:
     repo = Path(__file__).resolve().parents[2]
@@ -37,7 +39,7 @@ def main() -> int:
         suffix = ".txt" if raw[:1] in {b"{", b"[", b"#"} else ".bin"
         target = output_dir / f"{safe_name}{suffix}"
         target.write_bytes(raw)
-        manifest.append({"name": name, "path": str(target), "size": len(raw)})
+        manifest.append({"name": name, "path": repo_relative(target), "size": len(raw)})
 
         if name == "IAPProductCatalog":
             catalog = json.loads(raw.decode("utf-8"))

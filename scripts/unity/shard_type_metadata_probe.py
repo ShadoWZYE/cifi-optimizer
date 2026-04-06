@@ -6,6 +6,8 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
+from portable_paths import repo_relative
+
 
 ROOT = Path(__file__).resolve().parents[2]
 UABEA_REPORT_PATH = ROOT / "data" / "uabea-probe-report.json"
@@ -125,7 +127,7 @@ def build_dataset() -> dict[str, object]:
         "dataset": "shard-type-metadata-probe.v1",
         "generatedAt": str(date.today()),
         "source": {
-            "uabeaProbeReport": str(UABEA_REPORT_PATH),
+            "uabeaProbeReport": repo_relative(UABEA_REPORT_PATH),
             "probeMethod": "direct LibCpp2IL Assembly-CSharp type reflection via CifiAssetProbe",
         },
         "targets": {

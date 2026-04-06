@@ -6,25 +6,25 @@ It exists because the current shard workflow uses a repo dataset, but that datas
 
 Boundary reference:
 
-- [shard-cost-pr23-audit.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-cost-pr23-audit.md)
-- [shard-grounding-boundary.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-grounding-boundary.md)
-- [shard-owner-family-verification.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-owner-family-verification.md)
-- [data/shard-finalsu-bonus-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-finalsu-bonus-boundary.v1.json)
-- [data/shard-milestone-payload-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-payload-boundary.v1.json)
-- [data/shard-cost-model-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-cost-model-boundary.v1.json)
-- [data/shard-milestone-row-model-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-model-boundary.v1.json)
-- [data/shard-milestone-title-effect-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-title-effect-boundary.v1.json)
-- [data/shard-effect-text-handler-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-effect-text-handler-boundary.v1.json)
-- [data/shard-milestone-row-shell-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-shell-boundary.v1.json)
-- [data/shard-milestone-row-alignment-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-row-alignment-boundary.v1.json)
-- [data/shard-milestone-handoff-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-milestone-handoff-boundary.v1.json)
-- [data/shard-save-boundary.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-save-boundary.v1.json)
-- [data/shard-scene-monobehaviour-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-scene-monobehaviour-probe.v1.json)
-- [data/shard-cost-parameter-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-cost-parameter-probe.v1.json)
-- [data/shard-cost-method-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-cost-method-probe.v1.json)
-- [data/shard-cost-native-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-cost-native-probe.v1.json)
-- [data/shard-bonus-slot-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-bonus-slot-probe.v1.json)
-- [data/shard-type-metadata-probe.v1.json](C:\Users\Shadow\Desktop\CiFi\data\shard-type-metadata-probe.v1.json)
+- [shard-cost-pr23-audit.md](docs/systems/shards/shard-cost-pr23-audit.md)
+- [shard-grounding-boundary.md](docs/systems/shards/shard-grounding-boundary.md)
+- [shard-owner-family-verification.md](docs/systems/shards/shard-owner-family-verification.md)
+- [data/shard-finalsu-bonus-boundary.v1.json](data/shard-finalsu-bonus-boundary.v1.json)
+- [data/shard-milestone-payload-boundary.v1.json](data/shard-milestone-payload-boundary.v1.json)
+- [data/shard-cost-model-boundary.v1.json](data/shard-cost-model-boundary.v1.json)
+- [data/shard-milestone-row-model-boundary.v1.json](data/shard-milestone-row-model-boundary.v1.json)
+- [data/shard-milestone-title-effect-boundary.v1.json](data/shard-milestone-title-effect-boundary.v1.json)
+- [data/shard-effect-text-handler-boundary.v1.json](data/shard-effect-text-handler-boundary.v1.json)
+- [data/shard-milestone-row-shell-boundary.v1.json](data/shard-milestone-row-shell-boundary.v1.json)
+- [data/shard-milestone-row-alignment-boundary.v1.json](data/shard-milestone-row-alignment-boundary.v1.json)
+- [data/shard-milestone-handoff-boundary.v1.json](data/shard-milestone-handoff-boundary.v1.json)
+- [data/shard-save-boundary.v1.json](data/shard-save-boundary.v1.json)
+- [data/shard-scene-monobehaviour-probe.v1.json](data/shard-scene-monobehaviour-probe.v1.json)
+- [data/shard-cost-parameter-probe.v1.json](data/shard-cost-parameter-probe.v1.json)
+- [data/shard-cost-method-probe.v1.json](data/shard-cost-method-probe.v1.json)
+- [data/shard-cost-native-probe.v1.json](data/shard-cost-native-probe.v1.json)
+- [data/shard-bonus-slot-probe.v1.json](data/shard-bonus-slot-probe.v1.json)
+- [data/shard-type-metadata-probe.v1.json](data/shard-type-metadata-probe.v1.json)
 
 ## Current status
 
@@ -96,9 +96,9 @@ It is still not enough to promote a fully conflict-free title map, row-complete 
 
 The bundled shard milestone dataset in:
 
-- [`data/shard-milestones.grounded.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\shard-milestones.grounded.v1.json)
-- [`data/shard-observed-behaviors.grounded.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\shard-observed-behaviors.grounded.v1.json)
-- [`data/shard-milestones-provenance.grounded.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\shard-milestones-provenance.grounded.v1.json)
+- [`data/shard-milestones.grounded.v1.json`](data/shard-milestones.grounded.v1.json)
+- [`data/shard-observed-behaviors.grounded.v1.json`](data/shard-observed-behaviors.grounded.v1.json)
+- [`data/shard-milestones-provenance.grounded.v1.json`](data/shard-milestones-provenance.grounded.v1.json)
 
 is grounded from named community sources and preserves uncertainty/provenance correctly.
 
@@ -141,3 +141,4 @@ Before expanding shard planner behavior, the repo should:
 3. recover numeric shard cost parameter values across enough rows to verify the real cost curve
 4. compare extracted results against the current community-grounded dataset
 5. then decide which future shard planner claims can be promoted beyond descriptive mode
+

@@ -1,6 +1,6 @@
 # Token Shop Values
 
-Source: serialized `TokenShop` MonoBehaviour payload in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0), aligned to declaration-order field names recovered from [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\global-metadata.dat).
+Source: serialized `TokenShop` MonoBehaviour payload in [`workbench/unity/joined/level0`](workbench/unity/joined/level0), aligned to declaration-order field names recovered from [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat).
 
 ## Grounded conclusions
 
@@ -189,3 +189,4 @@ The following early fields show the exact byte alignment between metadata names 
 
 - `T2Duo3StartCost=100`, `T2Duo3AdditiveCost=3`, `T2Duo3Bonus=1.02`, `T2Duo3MaxLevel=2500`.
 - This matches the in-game `Duo Booster Three` screenshots: cost at level `1722` is `100 + 3 * 1722 = 5266`, displayed as `5.27k` after rounding.
+

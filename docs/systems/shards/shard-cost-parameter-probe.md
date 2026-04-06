@@ -1,6 +1,6 @@
 # Shard Cost Parameter Probe
 
-Source: [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\global-metadata.dat) plus the direct `ShardMining` MonoBehaviour byte range in [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0).
+Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) plus the direct `ShardMining` MonoBehaviour byte range in [`workbench/unity/joined/level0`](workbench/unity/joined/level0).
 
 ## Grounded conclusions
 
@@ -85,3 +85,4 @@ Source: [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\
 - `offset=5272`; `leading=1.0`; `int=89`; `exponentA=2.5`; `exponentB=4.0`; `tailScalar=0.012187505127`; `tailSentinels=(4294967295, 4294967295)`
 - `offset=6304`; `leading=2.0`; `int=975`; `exponentA=2.25`; `exponentB=4.0`; `tailScalar=0.023750010852`; `tailSentinels=(4294967295, 4294967295)`
 - `offset=6448`; `leading=4.0`; `int=982`; `exponentA=2.29`; `exponentB=4.0`; `tailScalar=0.038750000244`; `tailSentinels=(4294967295, 4294967295)`
+

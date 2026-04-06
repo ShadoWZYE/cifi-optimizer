@@ -134,7 +134,7 @@ Safe repo conclusion:
 - `LoopModifiers` is an unlock or presentation family on that lane
 - the Collector pack is another modifier family on that lane
 
-See also: [`docs/systems/spend/daily-tokenium-mission-lane-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\daily-tokenium-mission-lane-verification.md)
+See also: [`docs/systems/spend/daily-tokenium-mission-lane-verification.md`](docs/daily-tokenium-mission-lane-verification.md)
 
 ## Not yet verified enough for app integration
 
@@ -178,4 +178,5 @@ This lane already points to several future owner families that matter beyond the
 - It is now safe to say TokenShop sits on top of a real token-bank state lane with cap, fill, and claim concepts.
 - It is still not safe to put token-bank values into `state.playerProfile` as canonical fields until the saved-state owner and naming are recovered.
 - Any future planner or import work should treat token-bank state as `available but unmapped` until those owned fields are proven from assets.
+
 

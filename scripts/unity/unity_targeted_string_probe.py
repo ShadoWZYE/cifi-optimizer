@@ -6,6 +6,8 @@ import re
 from bisect import bisect_left
 from pathlib import Path
 
+from portable_paths import repo_relative
+
 
 ASCII_RE = re.compile(rb"[ -~]{4,}")
 UTF16_RE = re.compile(rb"(?:[\x20-\x7E]\x00){4,}")
@@ -71,7 +73,7 @@ def main() -> int:
 
         report.append(
             {
-                "file": str(path),
+                "file": repo_relative(path),
                 "string_count": len(entries),
                 "match_count": len(matches),
                 "matches": matches,

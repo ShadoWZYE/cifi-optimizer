@@ -4,9 +4,9 @@ This note records the repo-wide default ranking for unresolved extraction target
 
 Inputs:
 
-- [data/extraction-candidate-families.v1.json](C:\Users\Shadow\Desktop\CiFi\data\extraction-candidate-families.v1.json)
-- [data/extraction-candidate-ranking.v1.json](C:\Users\Shadow\Desktop\CiFi\data\extraction-candidate-ranking.v1.json)
-- [scripts/unity/score_extraction_candidates.py](C:\Users\Shadow\Desktop\CiFi\scripts\unity\score_extraction_candidates.py)
+- [data/extraction-candidate-families.v1.json](data/extraction-candidate-families.v1.json)
+- [data/extraction-candidate-ranking.v1.json](data/extraction-candidate-ranking.v1.json)
+- [scripts/unity/score_extraction_candidates.py](scripts/unity/score_extraction_candidates.py)
 
 ## Default behavior
 
@@ -40,4 +40,5 @@ For roadmap-scoped follow-up, filter by track or family id instead of blindly ta
 
 Current PR2-local shard follow-up is documented in:
 
-- [shard-extraction-candidates.md](C:\Users\Shadow\Desktop\CiFi\docs\systems\shards\shard-extraction-candidates.md)
+- [shard-extraction-candidates.md](docs/systems/shards/shard-extraction-candidates.md)
+

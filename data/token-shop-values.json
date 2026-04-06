@@ -1,7 +1,7 @@
 {
   "source": {
-    "metadata": "C:\\Users\\Shadow\\Desktop\\CiFi\\_cifi_apk\\global-metadata.dat",
-    "level0": "C:\\Users\\Shadow\\Desktop\\CiFi\\_unity_joined\\level0",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0",
     "token_shop_absolute_offset": 32801984,
     "token_shop_field_offset": 236
   },
@@ -2163,3 +2163,4 @@
     "resourceicons/resource_tokenium_cap"
   ]
 }
+

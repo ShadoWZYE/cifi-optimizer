@@ -25,13 +25,13 @@ If any item is missing, the allowed work stays in docs, parser scripts, owner ma
 - In-game system family: token bank / token upgrades
 - Unity owner: `TokenShop`
 - Extracted source:
-  - [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-  - [`workbench/apk/base/global-metadata.dat`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\global-metadata.dat)
+  - [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+  - [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat)
 - Grounded outputs:
-  - [`docs/systems/spend/token-shop-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\token-shop-values.md)
-  - [`docs/systems/spend/token-bank-state-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\token-bank-state-verification.md)
-  - [`docs/systems/spend/daily-tokenium-mission-lane-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\daily-tokenium-mission-lane-verification.md)
-  - [`data/token-shop-values.json`](C:\Users\Shadow\Desktop\CiFi\data\token-shop-values.json)
+  - [`docs/systems/spend/token-shop-values.md`](docs/systems/spend/token-shop-values.md)
+  - [`docs/systems/spend/token-bank-state-verification.md`](docs/systems/spend/token-bank-state-verification.md)
+  - [`docs/systems/spend/daily-tokenium-mission-lane-verification.md`](docs/systems/spend/daily-tokenium-mission-lane-verification.md)
+  - [`data/token-shop-values.json`](data/token-shop-values.json)
 - Verified extracted fields include:
   - `StartCost`
   - `AdditiveCost`
@@ -80,12 +80,12 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - In-game system family: Chrystos Emporium / Inscryptions
 - Unity owner: `MultiverseMarket`
 - Extracted source:
-  - [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
+  - [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
 - Grounded outputs:
-  - [`docs/systems/spend/multiverse-market-values.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\multiverse-market-values.md)
-  - [`docs/systems/spend/multiverse-market-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\multiverse-market-verification.md)
-  - [`docs/systems/spend/multiverse-market-state-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\systems\spend\multiverse-market-state-verification.md)
-  - [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
+  - [`docs/systems/spend/multiverse-market-values.md`](docs/systems/spend/multiverse-market-values.md)
+  - [`docs/systems/spend/multiverse-market-verification.md`](docs/systems/spend/multiverse-market-verification.md)
+  - [`docs/systems/spend/multiverse-market-state-verification.md`](docs/systems/spend/multiverse-market-state-verification.md)
+  - [`data/multiverse-market-values.json`](data/multiverse-market-values.json)
 - Verified extracted fields in the validated late block include:
   - `ID`
   - `StartCost`
@@ -133,4 +133,5 @@ Priority order:
 4. recover the saved-state owners behind token-bank cap, fill, claim, and the Academy or Farm Mission Daily Tokenium lane
 5. remap serialized ids to grounded player-facing labels
 6. only then add spend recommendations with explicit assumptions
+
 

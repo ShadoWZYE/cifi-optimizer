@@ -2,7 +2,7 @@
   "dataset": "shard-type-metadata-probe.v1",
   "generatedAt": "2026-04-06",
   "source": {
-    "uabeaProbeReport": "C:\\Users\\Shadow\\Desktop\\CiFi\\data\\uabea-probe-report.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
     "probeMethod": "direct LibCpp2IL Assembly-CSharp type reflection via CifiAssetProbe"
   },
   "targets": {
@@ -2220,3 +2220,5 @@
     "Do not claim a verified get_SU*Cost formula or a row-complete player-facing effect-text table from the type schema alone."
   ]
 }
+
+

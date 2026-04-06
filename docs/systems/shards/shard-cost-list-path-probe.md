@@ -1,6 +1,6 @@
 # Shard Cost List Path Probe
 
-Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\shard-cost-method-probe.v1.json), [`data/uabea-probe-report.json`](C:\Users\Shadow\Desktop\CiFi\data\uabea-probe-report.json), and disassembly of [`workbench/apk/base/libil2cpp.so`](C:\Users\Shadow\Desktop\CiFi\workbench\apk\base\libil2cpp.so).
+Source: [`data/shard-cost-method-probe.v1.json`](data/shard-cost-method-probe.v1.json), [`data/uabea-probe-report.json`](data/uabea-probe-report.json), and disassembly of [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so).
 
 ## Grounded conclusions
 
@@ -14,3 +14,4 @@ Source: [`data/shard-cost-method-probe.v1.json`](C:\Users\Shadow\Desktop\CiFi\da
 - Treat the list-builder path as a checked owner-side cache of the getter family outputs.
 - Treat it as evidence that the remaining formula work still lives inside `get_SU*Cost`.
 - Do not expose exact shard next-costs until those getter bodies are fully explained.
+

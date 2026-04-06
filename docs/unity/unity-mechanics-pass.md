@@ -6,9 +6,9 @@ Date: 2026-03-28
 
 This pass reconstructed Unity split asset containers from the CIFI Android build and ran string extraction against the joined files:
 
-- `C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\globalgamemanagers.assets`
-- `C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0`
-- `C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\sharedassets0.assets`
+- `workbench/unity/joined/globalgamemanagers.assets`
+- `workbench/unity/joined/level0`
+- `workbench/unity/joined/sharedassets0.assets`
 
 The goal was to recover grounded mechanic/config identifiers even though full IL2CPP field deserialization is still blocked by tooling performance and parser compatibility.
 
@@ -173,3 +173,4 @@ Use a targeted extractor instead of a full asset walk:
    - `ShardMilestones-*`
 
 If field deserialization remains too slow, the fallback is to locate these objects by offset/name first and then inspect only those objects with a narrower tool path.
+

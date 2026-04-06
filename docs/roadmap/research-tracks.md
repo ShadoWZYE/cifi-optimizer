@@ -185,7 +185,7 @@ The goal is to keep each track small enough that progress means a real unlock, n
 
 ## Active Queue
 
-The repo's active unresolved queue currently lives in [`data/game-data.snapshot.v1.json`](C:\Users\Shadow\Desktop\CiFi\data\game-data.snapshot.v1.json) and should stay mirrored here at a high level.
+The repo's active unresolved queue currently lives in [`data/game-data.snapshot.v1.json`](data/game-data.snapshot.v1.json) and should stay mirrored here at a high level.
 
 Current active or queued tracks:
 
@@ -213,3 +213,4 @@ Superseded parent:
 - `spend-planner-from-extracted-data`
   - status: `archived`
   - reason: it mixed multiple independent spend blockers that now have distinct exit conditions and should no longer share one queue item
+

@@ -11,11 +11,11 @@ It exists because the repo had already proven the `MultiverseMarket` owner and l
 - Unity owner:
   - `MultiverseMarket`
 - Repo-local owner evidence:
-  - [`workbench/unity/joined/level0`](C:\Users\Shadow\Desktop\CiFi\workbench\unity\joined\level0)
-  - [`data/multiverse-market-values.json`](C:\Users\Shadow\Desktop\CiFi\data\multiverse-market-values.json)
-  - [`data/lm244-targeted-probe.json`](C:\Users\Shadow\Desktop\CiFi\data\lm244-targeted-probe.json)
-  - [`docs/systems/spend/multiverse-market-state-verification.md`](C:\Users\Shadow\Desktop\CiFi\docs\multiverse-market-state-verification.md)
-  - [`docs/unity/unity-audit-playbook.md`](C:\Users\Shadow\Desktop\CiFi\docs\unity-audit-playbook.md)
+  - [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+  - [`data/multiverse-market-values.json`](data/multiverse-market-values.json)
+  - [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json)
+  - [`docs/systems/spend/multiverse-market-state-verification.md`](docs/multiverse-market-state-verification.md)
+  - [`docs/unity/unity-audit-playbook.md`](docs/unity-audit-playbook.md)
 
 ## Spend-lane shell recovered from this pass
 
@@ -92,4 +92,5 @@ Current grounded conclusion:
 3. extend parsing past the current validated late block
 4. finish the inscription-number and prefab-to-label remap, especially across the `69-74` prefab override band
 5. only then add spend-planner recommendations
+
 

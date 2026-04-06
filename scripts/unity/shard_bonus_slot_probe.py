@@ -4,6 +4,8 @@ import json
 import re
 from pathlib import Path
 
+from portable_paths import md_link, repo_relative
+
 
 ROOT = Path(__file__).resolve().parents[2]
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
@@ -37,8 +39,8 @@ def main() -> int:
         "dataset": "shard-bonus-slot-probe.v1",
         "generatedAt": "2026-04-04",
         "source": {
-            "metadata": str(METADATA_PATH),
-            "groundedMilestones": str(GROUNDED_PATH),
+            "metadata": repo_relative(METADATA_PATH),
+            "groundedMilestones": repo_relative(GROUNDED_PATH),
         },
         "rows": rows,
         "findings": [
@@ -56,7 +58,7 @@ def main() -> int:
     lines = [
         "# Shard Bonus Slot Probe",
         "",
-        "Source: [`workbench/apk/base/global-metadata.dat`](C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\apk\\base\\global-metadata.dat) compared against [`data/shard-milestones.grounded.v1.json`](C:\\Users\\Shadow\\Desktop\\CiFi\\data\\shard-milestones.grounded.v1.json).",
+        f"Source: {md_link(METADATA_PATH)} compared against {md_link(GROUNDED_PATH)}.",
         "",
         "## Grounded conclusions",
         "",

@@ -7,6 +7,8 @@ import zipfile
 from collections import defaultdict
 from pathlib import Path
 
+from portable_paths import repo_relative
+
 
 ASCII_RE = re.compile(rb"[ -~]{4,}")
 UTF16_RE = re.compile(rb"(?:[\x20-\x7E]\x00){4,}")
@@ -88,7 +90,7 @@ def scan_files(paths: list[Path]) -> list[dict[str, object]]:
     results: list[dict[str, object]] = []
     for path in paths:
         if path.exists() and path.is_file():
-            results.append(scan_blob(str(path), path.read_bytes()))
+            results.append(scan_blob(repo_relative(path), path.read_bytes()))
     return results
 
 
@@ -130,7 +132,7 @@ def main() -> int:
     file_results = scan_files(args.files)
 
     payload = {
-        "apk": str(args.apk),
+        "apk": repo_relative(args.apk),
         "apk_results": apk_results,
         "file_results": file_results,
         "keywords": KEYWORDS,
