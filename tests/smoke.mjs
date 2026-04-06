@@ -1722,6 +1722,14 @@ assert.ok(
   "expected Emporium successor track to record the narrowed PlayerProfileHandler bridge path"
 );
 assert.ok(
+  spendSaveModelTrack.completedSteps.some((step) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(step)),
+  "expected Emporium successor track to record sibling market-side accessor narrowing"
+);
+assert.ok(
+  spendSaveModelTrack.completedSteps.some((step) => /deeper progression-payload candidate beneath that wrapper/.test(step)),
+  "expected Emporium successor track to record the wrapper-versus-payload narrowing"
+);
+assert.ok(
   spendSaveModelTrack.verified.some((line) => /direct `get_Market` accessor clue/.test(line)),
   "expected Emporium successor track to record the get_Market clue in verified facts"
 );
@@ -1744,6 +1752,18 @@ assert.ok(
 assert.ok(
   spendSaveModelTrack.verified.some((line) => /strongest current repo-local handoff is now a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge/.test(line)),
   "expected Emporium successor track to record the narrowed bridge hypothesis in verified facts"
+);
+assert.ok(
+  spendSaveModelTrack.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
+  "expected Emporium successor track to record sibling market-side accessors in verified facts"
+);
+assert.ok(
+  spendSaveModelTrack.verified.some((line) => /`IS\*Level`, Necrum trade-counter, and early `Mech\*` fields/.test(line)),
+  "expected Emporium successor track to record the broader progression field run in verified facts"
+);
+assert.ok(
+  spendSaveModelTrack.verified.some((line) => /intermediate wrapper/.test(line) && /deeper progression payload/.test(line)),
+  "expected Emporium successor track to record the wrapper-versus-payload boundary in verified facts"
 );
 assert.ok(
   spendTrack.completedSteps.some((step) => /owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
@@ -2560,6 +2580,10 @@ assert.match(appJs, /The checked save boundary still keeps \${multiverseMarketSa
 assert.match(appJs, /That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet/);
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
 assert.match(appJs, /PlayerProfileHandler-mediated playerData-to-Market wrapper bridge/);
+assert.match(appJs, /get_BM, get_ZN, get_TU/);
+assert.match(appJs, /broader progression-payload field cluster/);
+assert.match(appJs, /Market as an intermediate wrapper/);
+assert.match(appJs, /deeper progression payload/);
 assert.match(appJs, /expected PlayerProfileHandler bridge clues for the market-member boundary/);
 assert.match(appJs, /"TokenBoost"/);
 assert.match(appJs, /"DiamondBoost"/);
