@@ -2391,6 +2391,17 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook, "BuyTokenBoost", "token shop row remap boundary adjacent recovered bridge action hook drifted");
   assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity, "NewTokenUPGPrefab.T1.TokensBoost", "token shop row remap boundary adjacent recovered bridge prefab drifted");
   assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.shellField, "ATU3Button", "token shop row remap boundary blocked adjacent shell drifted");
+  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.shellPathId, 15810, "token shop row remap boundary blocked adjacent shell path drifted");
+  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook, "BuyCellBoost", "token shop row remap boundary blocked adjacent named action drifted");
+  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.diamondSpecialPrefab, "NewDiamondUPGPrefab.Specials.CellsBoost", "token shop row remap boundary blocked adjacent diamond special prefab drifted");
+  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.diamondSpecialTitle, ">Diamond Upgrade 10 - CellsBoost", "token shop row remap boundary blocked adjacent diamond special title drifted");
+  assert.deepEqual(
+    boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenPrefabCandidates,
+    ["NewTokenUPGPrefab.T1.CellsPerChestBooster", "NewTokenUPGPrefab.T5.UltimaCells"],
+    "token shop row remap boundary blocked adjacent token prefab candidates drifted"
+  );
+  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenTitleCandidate, "Token Ultima: Cells", "token shop row remap boundary blocked adjacent token title candidate drifted");
+  assert.match(boundary.adjacentFollowUp.blockedAdjacentShell.groundedConclusion, /ATU3Button does not yet clear/i, "token shop row remap boundary blocked adjacent conclusion drifted");
   assert.equal(boundary.adjacentFollowUp.result, "one more grounded bridge recovered", "token shop row remap boundary adjacent follow-up result drifted");
   ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
     assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);

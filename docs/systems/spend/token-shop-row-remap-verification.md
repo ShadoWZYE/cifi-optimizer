@@ -42,7 +42,12 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 - That is still not the same as recovering grounded row identity for the whole family.
 - The immediate adjacency test does not justify a reusable “neighbor rows follow the same remap pattern” rule:
   - `ATU1` clears because the repo has one more three-surface convergence across owner fields, effect hooks, action hooks, and prefab identity.
-  - the same committed evidence does not currently produce an equivalent effect-hook or action-hook join for adjacent `ATU3`, even though `ATU3Button` sits beside the `CellBoost*` field family.
+  - `ATU3Button` still sits beside the `CellBoost*` field family, but the committed repo evidence now narrows the blocker more sharply than simple adjacency.
+  - the nearest named action surface is `BuyCellBoost`, not an `ATU3`-specific buy hook.
+  - the surviving named cells-domain identity clues split across separate checked clusters instead of converging:
+    - diamond-special surface: `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost`
+    - token-prefab and title surface: `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells`
+  - none of those committed surfaces currently provides a checked object or text join back to `ATU3Button` path id `15810`.
 
 The remaining missing pieces are still checked joins:
 
@@ -62,6 +67,17 @@ Because those joins are still missing, the repo should not:
 - infer row identity from community naming
 - infer row identity from prefab-only naming without a checked object join
 
+## Grounded ATU3 follow-up conclusion
+
+- `ATU3Button` does not yet clear as one grounded bridge.
+- The repo now has a tighter blocked conclusion for this exact shell:
+  - committed evidence proves a cells-domain split, not a resolved row identity
+  - `CellBoost*` still grounds the adjacent owner-field block on the `TokenShop` payload
+  - `BuyCellBoost` proves a generic named buy surface exists for the same cells domain
+  - `NewDiamondUPGPrefab.Specials.CellsBoost` with `>Diamond Upgrade 10 - CellsBoost` proves one separate diamond-special identity surface
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` prove separate token-prefab and title surfaces
+  - no checked repo artifact joins any of those named cells surfaces directly to `ATU3Button` or path id `15810`
+
 ## Allowed implication
 
 - Raw `ATU*Level` fields remain safe only under `compatibility.unmappedSystemState.tokenShop`.
@@ -77,6 +93,9 @@ Recover one more checked identity bridge from the still-unresolved `ATU`-numbere
 
 The strongest next candidate is no longer “find any first bridge.” It is specifically:
 
-- recover the next exact bridge from an unresolved `ATU*Button`, `ATU*Content`, or `SetTokenTexts`-side neighborhood to one concrete prefab or one concrete final row title
+- for `ATU3`, run a cells-domain disambiguation pass that tries to join `ATU3Button` path id `15810` to one of three exact committed surfaces:
+  - `BuyCellBoost`
+  - the diamond-special `CellsBoost` prefab or title surface
+  - the separate token-prefab or `Token Ultima: Cells` title surface
 
 If only one additional subset clears that bar, keep the rest of the `ATU` family quarantined instead of forcing a full remap.
