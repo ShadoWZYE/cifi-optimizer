@@ -1,0 +1,199 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "multiverse-market-inscription-numbering-stability-boundary",
+  "sources": {
+    "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
+    "row7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "unityProbeReport": "data/unity-probe-report.json",
+    "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
+  },
+  "checkedFieldStability": {
+    "orderedSaveFieldRun": {
+      "fieldPattern": "ISNLevel",
+      "stableStartRow": 69,
+      "stableEndRow": 110,
+      "status": "same-number-stable"
+    },
+    "serializedIdFieldRun": {
+      "fieldPattern": "ISNID",
+      "stableStartRow": 69,
+      "stableEndRow": 110,
+      "status": "same-number-stable"
+    },
+    "buyHookRun": {
+      "fieldPattern": "BuyISN",
+      "stableStartRow": 69,
+      "stableEndRow": 110,
+      "status": "same-number-stable"
+    },
+    "prefabNumbering": {
+      "stableThroughRow": 68,
+      "brokenBandStartRow": 69,
+      "brokenBandEndRow": 74,
+      "stableResumeRow": 75,
+      "stableResumeEndRow": 110
+    },
+    "playerFacingStringAnchors": {
+      "checkedAnchorRows": [
+        25,
+        46,
+        78,
+        83
+      ],
+      "sameNumberPositiveRowsInsideStableResume": [
+        78,
+        83
+      ],
+      "status": "sparse-direct-anchors-only"
+    }
+  },
+  "brokenPrefabBand": [
+    {
+      "orderedInscriptionRow": 69,
+      "saveField": "IS69Level",
+      "serializedIdField": "IS69ID",
+      "buyHook": "BuyIS69",
+      "prefabName": "ChrystosEmporiumUpgrade69-ID57",
+      "remappedSerializedId": 57
+    },
+    {
+      "orderedInscriptionRow": 70,
+      "saveField": "IS70Level",
+      "serializedIdField": "IS70ID",
+      "buyHook": "BuyIS70",
+      "prefabName": "ChrystosEmporiumUpgrade70-ID58",
+      "remappedSerializedId": 58
+    },
+    {
+      "orderedInscriptionRow": 71,
+      "saveField": "IS71Level",
+      "serializedIdField": "IS71ID",
+      "buyHook": "BuyIS71",
+      "prefabName": "ChrystosEmporiumUpgrade71-ID59",
+      "remappedSerializedId": 59
+    },
+    {
+      "orderedInscriptionRow": 72,
+      "saveField": "IS72Level",
+      "serializedIdField": "IS72ID",
+      "buyHook": "BuyIS72",
+      "prefabName": "ChrystosEmporiumUpgrade72-ID60",
+      "remappedSerializedId": 60
+    },
+    {
+      "orderedInscriptionRow": 73,
+      "saveField": "IS73Level",
+      "serializedIdField": "IS73ID",
+      "buyHook": "BuyIS73",
+      "prefabName": "ChrystosEmporiumUpgrade73-ID61",
+      "remappedSerializedId": 61
+    },
+    {
+      "orderedInscriptionRow": 74,
+      "saveField": "IS74Level",
+      "serializedIdField": "IS74ID",
+      "buyHook": "BuyIS74",
+      "prefabName": "ChrystosEmporiumUpgrade74-ID62",
+      "remappedSerializedId": 62
+    }
+  ],
+  "stableResumeEvidence": [
+    {
+      "orderedInscriptionRow": 75,
+      "saveField": "IS75Level",
+      "serializedIdField": "IS75ID",
+      "buyHook": "BuyIS75",
+      "prefabName": "ChrystosEmporiumUpgrade75-ID75"
+    },
+    {
+      "orderedInscriptionRow": 78,
+      "saveField": "IS78Level",
+      "serializedIdField": "IS78ID",
+      "buyHook": "BuyIS78",
+      "prefabName": "ChrystosEmporiumUpgrade78-ID78",
+      "playerFacingLabel": "Inscryption 78: Ouroboros Orbs"
+    },
+    {
+      "orderedInscriptionRow": 83,
+      "saveField": "IS83Level",
+      "serializedIdField": "IS83ID",
+      "buyHook": "BuyIS83",
+      "prefabName": "ChrystosEmporiumUpgrade83-ID83",
+      "playerFacingLabel": "Inscryption 83: Fast-Loop ML"
+    },
+    {
+      "orderedInscriptionRow": 110,
+      "saveField": "IS110Level",
+      "serializedIdField": "IS110ID",
+      "buyHook": "BuyIS110",
+      "prefabName": "ChrystosEmporiumUpgrade110-ID110"
+    }
+  ],
+  "identityBindingBoundary": {
+    "earliestBrokenSameNumberPrefabRow": 69,
+    "brokenSameNumberPrefabBand": [
+      69,
+      74
+    ],
+    "sameNumberPrefabResumesAtRow": 75,
+    "sameNumberPrefabStableThroughRow": 110,
+    "playerFacingIdentityRecoveredRows": [
+      78,
+      83
+    ],
+    "playerFacingIdentityStillUnresolvedRows": [
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      79,
+      80,
+      81,
+      82,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110
+    ],
+    "helpsUnresolvedRows7174": false,
+    "canonicalImportSafeSubset": []
+  },
+  "currentBoundary": [
+    "Across the larger checked IS69-110 run, ISNLevel, ISNID, and BuyISN stay same-number in repo-local probe output.",
+    "The earliest checked same-number failure is prefab row 69, and prefab numbering stays remapped through row 74 as ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62.",
+    "The same-number prefab chain resumes at row 75 and stays direct through row 110 in checked repo-local probe output.",
+    "Player-facing identity binding still requires a direct string anchor, and the checked repo-local anchors inside that resumed stable run are still only rows 78 and 83.",
+    "This wider numbering-stability boundary does not ground new row identities for unresolved rows, so the canonical import-safe subset remains empty."
+  ]
+}

@@ -2724,6 +2724,126 @@ function validateMultiverseMarketNearbyIdentityBindingPattern(pattern, stateDoc,
   };
 }
 
+function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary, stateDoc, verificationDoc) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market inscription numbering-stability boundary generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "multiverse market inscription numbering-stability boundary dataset id must be present");
+  expectRecord(boundary.sources, "multiverse market inscription numbering-stability boundary sources must be an object");
+  ["prefabRemapBoundary", "row7174RemapBand", "metadataNeighborhood", "uabeaProbeReport", "unityProbeReport", "nearbyIdentityBindingPattern", "verificationDoc"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market inscription numbering-stability boundary sources.${field} must be present`);
+  });
+  expectRecord(boundary.checkedFieldStability, "multiverse market inscription numbering-stability boundary checkedFieldStability must be an object");
+  expectRecord(boundary.checkedFieldStability.orderedSaveFieldRun, "multiverse market inscription numbering-stability boundary orderedSaveFieldRun must be an object");
+  expectRecord(boundary.checkedFieldStability.serializedIdFieldRun, "multiverse market inscription numbering-stability boundary serializedIdFieldRun must be an object");
+  expectRecord(boundary.checkedFieldStability.buyHookRun, "multiverse market inscription numbering-stability boundary buyHookRun must be an object");
+  expectRecord(boundary.checkedFieldStability.prefabNumbering, "multiverse market inscription numbering-stability boundary prefabNumbering must be an object");
+  expectRecord(boundary.checkedFieldStability.playerFacingStringAnchors, "multiverse market inscription numbering-stability boundary playerFacingStringAnchors must be an object");
+  expectArray(boundary.checkedFieldStability.playerFacingStringAnchors.checkedAnchorRows, "multiverse market inscription numbering-stability boundary checkedAnchorRows must be an array");
+  expectArray(boundary.checkedFieldStability.playerFacingStringAnchors.sameNumberPositiveRowsInsideStableResume, "multiverse market inscription numbering-stability boundary sameNumberPositiveRowsInsideStableResume must be an array");
+  expectArray(boundary.brokenPrefabBand, "multiverse market inscription numbering-stability boundary brokenPrefabBand must be an array");
+  expectArray(boundary.stableResumeEvidence, "multiverse market inscription numbering-stability boundary stableResumeEvidence must be an array");
+  expectRecord(boundary.identityBindingBoundary, "multiverse market inscription numbering-stability boundary identityBindingBoundary must be an object");
+  expectArray(boundary.identityBindingBoundary.brokenSameNumberPrefabBand, "multiverse market inscription numbering-stability boundary brokenSameNumberPrefabBand must be an array");
+  expectArray(boundary.identityBindingBoundary.playerFacingIdentityRecoveredRows, "multiverse market inscription numbering-stability boundary playerFacingIdentityRecoveredRows must be an array");
+  expectArray(boundary.identityBindingBoundary.playerFacingIdentityStillUnresolvedRows, "multiverse market inscription numbering-stability boundary playerFacingIdentityStillUnresolvedRows must be an array");
+  expectArray(boundary.identityBindingBoundary.canonicalImportSafeSubset, "multiverse market inscription numbering-stability boundary canonicalImportSafeSubset must be an array");
+  expectArray(boundary.currentBoundary, "multiverse market inscription numbering-stability boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "multiverse-market-inscription-numbering-stability-boundary", "multiverse market inscription numbering-stability boundary dataset id drifted");
+  assert.deepEqual(
+    [
+      boundary.checkedFieldStability.orderedSaveFieldRun.fieldPattern,
+      boundary.checkedFieldStability.orderedSaveFieldRun.stableStartRow,
+      boundary.checkedFieldStability.orderedSaveFieldRun.stableEndRow,
+      boundary.checkedFieldStability.orderedSaveFieldRun.status
+    ],
+    ["ISNLevel", 69, 110, "same-number-stable"],
+    "multiverse market inscription numbering-stability boundary orderedSaveFieldRun drifted"
+  );
+  assert.deepEqual(
+    [
+      boundary.checkedFieldStability.serializedIdFieldRun.fieldPattern,
+      boundary.checkedFieldStability.serializedIdFieldRun.stableStartRow,
+      boundary.checkedFieldStability.serializedIdFieldRun.stableEndRow,
+      boundary.checkedFieldStability.serializedIdFieldRun.status
+    ],
+    ["ISNID", 69, 110, "same-number-stable"],
+    "multiverse market inscription numbering-stability boundary serializedIdFieldRun drifted"
+  );
+  assert.deepEqual(
+    [
+      boundary.checkedFieldStability.buyHookRun.fieldPattern,
+      boundary.checkedFieldStability.buyHookRun.stableStartRow,
+      boundary.checkedFieldStability.buyHookRun.stableEndRow,
+      boundary.checkedFieldStability.buyHookRun.status
+    ],
+    ["BuyISN", 69, 110, "same-number-stable"],
+    "multiverse market inscription numbering-stability boundary buyHookRun drifted"
+  );
+  assert.deepEqual(
+    [
+      boundary.checkedFieldStability.prefabNumbering.stableThroughRow,
+      boundary.checkedFieldStability.prefabNumbering.brokenBandStartRow,
+      boundary.checkedFieldStability.prefabNumbering.brokenBandEndRow,
+      boundary.checkedFieldStability.prefabNumbering.stableResumeRow,
+      boundary.checkedFieldStability.prefabNumbering.stableResumeEndRow
+    ],
+    [68, 69, 74, 75, 110],
+    "multiverse market inscription numbering-stability boundary prefabNumbering drifted"
+  );
+  assert.deepEqual(boundary.checkedFieldStability.playerFacingStringAnchors.checkedAnchorRows, [25, 46, 78, 83], "multiverse market inscription numbering-stability boundary checkedAnchorRows drifted");
+  assert.deepEqual(boundary.checkedFieldStability.playerFacingStringAnchors.sameNumberPositiveRowsInsideStableResume, [78, 83], "multiverse market inscription numbering-stability boundary sameNumberPositiveRowsInsideStableResume drifted");
+  assert.equal(boundary.checkedFieldStability.playerFacingStringAnchors.status, "sparse-direct-anchors-only", "multiverse market inscription numbering-stability boundary playerFacingStringAnchors status drifted");
+  assert.deepEqual(
+    boundary.brokenPrefabBand.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.prefabName, entry.remappedSerializedId]),
+    [
+      [69, "IS69Level", "IS69ID", "BuyIS69", "ChrystosEmporiumUpgrade69-ID57", 57],
+      [70, "IS70Level", "IS70ID", "BuyIS70", "ChrystosEmporiumUpgrade70-ID58", 58],
+      [71, "IS71Level", "IS71ID", "BuyIS71", "ChrystosEmporiumUpgrade71-ID59", 59],
+      [72, "IS72Level", "IS72ID", "BuyIS72", "ChrystosEmporiumUpgrade72-ID60", 60],
+      [73, "IS73Level", "IS73ID", "BuyIS73", "ChrystosEmporiumUpgrade73-ID61", 61],
+      [74, "IS74Level", "IS74ID", "BuyIS74", "ChrystosEmporiumUpgrade74-ID62", 62]
+    ],
+    "multiverse market inscription numbering-stability boundary brokenPrefabBand drifted"
+  );
+  assert.deepEqual(
+    boundary.stableResumeEvidence.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.prefabName, entry.playerFacingLabel ?? null]),
+    [
+      [75, "IS75Level", "IS75ID", "BuyIS75", "ChrystosEmporiumUpgrade75-ID75", null],
+      [78, "IS78Level", "IS78ID", "BuyIS78", "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs"],
+      [83, "IS83Level", "IS83ID", "BuyIS83", "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"],
+      [110, "IS110Level", "IS110ID", "BuyIS110", "ChrystosEmporiumUpgrade110-ID110", null]
+    ],
+    "multiverse market inscription numbering-stability boundary stableResumeEvidence drifted"
+  );
+  assert.equal(boundary.identityBindingBoundary.earliestBrokenSameNumberPrefabRow, 69, "multiverse market inscription numbering-stability boundary earliestBrokenSameNumberPrefabRow drifted");
+  assert.deepEqual(boundary.identityBindingBoundary.brokenSameNumberPrefabBand, [69, 74], "multiverse market inscription numbering-stability boundary brokenSameNumberPrefabBand drifted");
+  assert.equal(boundary.identityBindingBoundary.sameNumberPrefabResumesAtRow, 75, "multiverse market inscription numbering-stability boundary sameNumberPrefabResumesAtRow drifted");
+  assert.equal(boundary.identityBindingBoundary.sameNumberPrefabStableThroughRow, 110, "multiverse market inscription numbering-stability boundary sameNumberPrefabStableThroughRow drifted");
+  assert.deepEqual(boundary.identityBindingBoundary.playerFacingIdentityRecoveredRows, [78, 83], "multiverse market inscription numbering-stability boundary playerFacingIdentityRecoveredRows drifted");
+  assert.equal(boundary.identityBindingBoundary.helpsUnresolvedRows7174, false, "multiverse market inscription numbering-stability boundary helpsUnresolvedRows7174 must remain false");
+  assert.deepEqual(boundary.identityBindingBoundary.canonicalImportSafeSubset, [], "multiverse market inscription numbering-stability boundary canonicalImportSafeSubset must remain empty");
+
+  assert.match(stateDoc, /## Checked wider inscription numbering-stability boundary/, "multiverse market state verification doc must expose the wider numbering-stability boundary section");
+  assert.match(stateDoc, /same-number prefab numbering is stable through row `68`/i, "multiverse market state verification doc must preserve the stable-through-68 conclusion");
+  assert.match(stateDoc, /same-number prefab numbering is broken from rows `69-74`/i, "multiverse market state verification doc must preserve the broken 69-74 conclusion");
+  assert.match(stateDoc, /same-number prefab numbering resumes at row `75` and stays direct through row `110`/i, "multiverse market state verification doc must preserve the resumed 75-110 conclusion");
+  assert.match(verificationDoc, /## Wider checked inscription numbering-stability boundary/, "multiverse market verification doc must expose the wider numbering-stability boundary section");
+  assert.match(verificationDoc, /ChrystosEmporiumUpgrade69-ID57/, "multiverse market verification doc must preserve the earliest broken prefab row");
+  assert.match(verificationDoc, /ChrystosEmporiumUpgrade110-ID110/, "multiverse market verification doc must preserve the far-end stable resume evidence");
+  assert.match(verificationDoc, /this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `71-74`/i, "multiverse market verification doc must preserve the unresolved identity conclusion");
+
+  return {
+    id: "multiverse-market-inscription-numbering-stability-boundary",
+    label: "Multiverse market inscription numbering-stability boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      "Same-number save, id, and buy hooks stay stable across checked IS69-110",
+      "Prefab numbering breaks only in the checked 69-74 band and resumes at 75-110",
+      "Player-facing identity remains directly anchored only at rows 78 and 83"
+    ]
+  };
+}
+
 function validateTokenBankControllerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token-bank controller shell generatedAt must be present");
   expectRecord(shell.sources, "token-bank controller shell sources must be an object");
@@ -2787,7 +2907,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 49, "bundled dataset contract must track the forty-nine shipped dataset groups");
+  assert.equal(contract.datasets.length, 50, "bundled dataset contract must track the fifty shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -2897,6 +3017,7 @@ export async function validateBundledDatasets() {
   const multiverseMarketRow7174IdentityBoundary = await readJson("../../data/multiverse-market-row71-74-identity-boundary.json");
   const multiverseMarketRow7174RemapBand = await readJson("../../data/multiverse-market-row71-74-remap-band.json");
   const multiverseMarketNearbyIdentityBindingPattern = await readJson("../../data/multiverse-market-nearby-identity-binding-pattern.json");
+  const multiverseMarketInscriptionNumberingStabilityBoundary = await readJson("../../data/multiverse-market-inscription-numbering-stability-boundary.json");
   const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
   const multiverseMarketMarketMemberBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-market-member-boundary.md");
   const multiverseMarketStateVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-state-verification.md");
@@ -2952,6 +3073,7 @@ export async function validateBundledDatasets() {
     validateMultiverseMarketRow7174IdentityBoundary(multiverseMarketRow7174IdentityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarketRow7174RemapBand(multiverseMarketRow7174RemapBand, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarketNearbyIdentityBindingPattern(multiverseMarketNearbyIdentityBindingPattern, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
+    validateMultiverseMarketInscriptionNumberingStabilityBoundary(multiverseMarketInscriptionNumberingStabilityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateTokenBankControllerShell(tokenBankControllerShell)
   ];
 

@@ -443,6 +443,7 @@ const expectedBundledDatasetIds = [
   "multiverse-market-row71-74-identity-boundary",
   "multiverse-market-row71-74-remap-band",
   "multiverse-market-nearby-identity-binding-pattern",
+  "multiverse-market-inscription-numbering-stability-boundary",
   "token-bank-controller-shell"
 ];
 
