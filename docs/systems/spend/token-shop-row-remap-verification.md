@@ -6,6 +6,11 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 
 - Raw player-owned row levels are grounded on `SaveData` as `ATU1Level` through `ATU28Level`.
 - The grounded `TokenShop` owner payload preserves the same numbering family across row-shell fields such as `ATU1Button` through `ATU28MaxOverlay`.
+- One concrete shell-to-prefab bridge is now recovered:
+  - `ATU2Button` sits directly between the exact `DiamondBoost*` owner fields and the next named family in the checked `TokenShop` payload alignment.
+  - broader checked probe output also preserves `ATU2DiamondsBonus`.
+  - the checked `level0` prefab roster separately preserves `NewTokenUPGPrefab.T1.DiamondBoost`.
+  - taken together, that is enough to ground `ATU2Button` to `NewTokenUPGPrefab.T1.DiamondBoost` without relying on community naming, `OR_*` labels, or generic row-order similarity alone.
 - Checked probe output also preserves grounded non-label clues around some `ATU` rows:
   - effect hooks such as `ATU1TokenBonus`, `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU20TokenBonus`, `ATU21TokenDailiesBonus`, and `ATU24Bonus3Shards`
   - late direct-buy hooks such as `BuyATU24`, `BuyATU25`, `BuyATU26`, `BuyATU27`, and `BuyATU28`
@@ -23,19 +28,21 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 ## Grounded conclusion
 
 - The repo can now say more than “ATU is unnamed.”
+- One exact bridge is recovered: `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`.
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
 - Late `ATU` buy hooks also now sit inside a checked named tier-buy neighborhood instead of standing alone.
-- That is still not the same as recovering grounded row identity.
+- That is still not the same as recovering grounded row identity for the whole family.
 
-The missing piece is still a checked join:
+The remaining missing pieces are still checked joins:
 
-- no checked repo artifact currently joins any `ATU*Button` or `ATU*Content` path id directly to a specific `NewTokenUPGPrefab.*` object identity
-- no checked repo artifact currently ties a concrete `ATU` number directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently ties `ATU2Button` directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently joins the remaining `ATU*Button` or `ATU*Content` path ids directly to specific `NewTokenUPGPrefab.*` object identities
+- no checked repo artifact currently ties the remaining concrete `ATU` numbers directly to final player-facing TokenShop row titles
 - no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` neighborhood to a specific `ATU` row number
-- the repo now has three separate checked local clusters, but they remain unjoined:
-  - `ATU`-numbered getter and buy-hook metadata
+- the repo still has separate checked local clusters around most rows:
+  - most `ATU`-numbered getter and buy-hook metadata
   - generic TokenShop text-handler hooks
-  - prefab names and player-facing row-title strings in `level0`
+  - most prefab names and player-facing row-title strings in `level0`
 
 Because those joins are still missing, the repo should not:
 
@@ -47,18 +54,18 @@ Because those joins are still missing, the repo should not:
 ## Allowed implication
 
 - Raw `ATU*Level` fields remain safe only under `compatibility.unmappedSystemState.tokenShop`.
-- Canonical `state.playerProfile` promotion remains blocked.
+- Canonical `state.playerProfile` promotion remains blocked for the unrecovered rows.
 - Planner-safe spend behavior remains blocked on row identity recovery, not on row-level owner recovery.
 
 ## Narrowest next slice
 
-Recover one checked identity bridge from `ATU`-numbered TokenShop row shells to either:
+Recover one more checked identity bridge from the still-unresolved `ATU`-numbered TokenShop row shells to either:
 
 - a specific `NewTokenUPGPrefab.*` object, or
 - a final player-facing row title
 
-The strongest next candidate is no longer “search for more row labels” in the abstract. It is specifically:
+The strongest next candidate is no longer “find any first bridge.” It is specifically:
 
-- bridge one `ATU*Button`, `ATU*Content`, or `SetTokenTexts`-side object neighborhood to either one concrete `NewTokenUPGPrefab.*` object or one concrete final row title
+- recover a second exact bridge from an unresolved `ATU*Button`, `ATU*Content`, or `SetTokenTexts`-side neighborhood to one concrete prefab or one concrete final row title
 
-If only a subset clears that bar, keep the rest of the `ATU` family quarantined instead of forcing a full remap.
+If only one additional subset clears that bar, keep the rest of the `ATU` family quarantined instead of forcing a full remap.
