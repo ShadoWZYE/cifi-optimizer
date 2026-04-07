@@ -209,7 +209,7 @@ Current active or queued tracks:
   - goal: recovered exact `SaveData` ownership for raw `ATU1Level` through `ATU28Level` TokenShop row levels; follow-up work moves to row remap instead of owner recovery
 - `spend-token-shop-row-remap`
   - status: `active`
-  - goal: remap recovered raw `ATU*Level` TokenShop row fields onto grounded row identities without promoting speculative player-facing labels
+  - goal: remap recovered raw `ATU*Level` TokenShop row fields onto grounded row identities without promoting speculative player-facing labels; the current blocker is now narrowed to joining one `ATU` row shell or generic TokenShop text hook to one concrete prefab or final title
 - `spend-token-bank-state-owner`
   - status: `active`
   - goal: recover the saved-state owner behind token-bank cap, fill, and claimable state without guessing from derived `OR_*` labels
