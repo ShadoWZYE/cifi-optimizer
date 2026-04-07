@@ -1,0 +1,267 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "multiverse-market-savedata-import-boundary",
+  "sources": {
+    "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
+    "rangeBoundary": "data/multiverse-market-range-boundary.json",
+    "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
+    "actionShell": "data/multiverse-market-action-shell.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "validatedRows": "data/multiverse-market-values.json",
+    "typedProbeReport": "data/uabea-probe-report.json",
+    "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md"
+  },
+  "canonicalSplit": {
+    "accessorBridge": "PlayerProfileHandler.get_Market -> MultiverseMarket",
+    "metadataMemberShell": "Market",
+    "widerSaveOwner": "SaveData"
+  },
+  "checkedIsToRowOrderBoundary": {
+    "widerOrderedSet": {
+      "actionShellBuyHookRange": "BuyIS1 through BuyIS110",
+      "actionShellCostTextRange": "SetIS1CostText through SetIS110CostText",
+      "validatedRowRanges": [
+        "50-59",
+        "63-74"
+      ],
+      "saveDataFieldRange": "IS25Level through IS110Level"
+    },
+    "checkedOrderedMappings": [
+      {
+        "saveField": "IS71Level",
+        "orderedInscriptionRow": 71,
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-values.json",
+            "claim": "validatedRows includes inscription_id 71"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS71CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS71"
+          },
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "SaveData exact field names include IS71Level and MultiverseMarket exact field names include IS71ID"
+          }
+        ]
+      },
+      {
+        "saveField": "IS72Level",
+        "orderedInscriptionRow": 72,
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-values.json",
+            "claim": "validatedRows includes inscription_id 72"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS72CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS72"
+          },
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "SaveData exact field names include IS72Level and MultiverseMarket exact field names include IS72ID"
+          }
+        ]
+      },
+      {
+        "saveField": "IS73Level",
+        "orderedInscriptionRow": 73,
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-values.json",
+            "claim": "validatedRows includes inscription_id 73"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS73CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS73"
+          },
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "SaveData exact field names include IS73Level and MultiverseMarket exact field names include IS73ID"
+          }
+        ]
+      },
+      {
+        "saveField": "IS74Level",
+        "orderedInscriptionRow": 74,
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-values.json",
+            "claim": "validatedRows includes inscription_id 74"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS74CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS74"
+          },
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "SaveData exact field names include IS74Level and MultiverseMarket exact field names include IS74ID"
+          }
+        ]
+      }
+    ],
+    "blockedWiderMapping": [
+      "The wider inscription ordering outside rows 71-74 is not yet grounded enough from checked repo-local evidence to promote broader IS*Level row mappings.",
+      "The checked repo-local evidence still does not recover player-facing row labels for rows 71-74, only their ordered row positions inside the larger inscription set."
+    ]
+  },
+  "boundedImportConclusion": {
+    "importSafeSubset": [],
+    "exactImportSafeSubsetLabel": "none",
+    "currentBoundary": "Only the ordered row-position mapping IS71Level -> row 71 through IS74Level -> row 74 is currently grounded. The wider inscription ordering and final row labels remain unresolved enough that no recovered SaveData field is yet safe to promote into canonical PlayerProfile import.",
+    "blockedBy": [
+      "do not reopen the metadata-only Market typed-field question without new direct evidence",
+      "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap",
+      "do not do planner integration from the recovered SaveData block in this slice"
+    ]
+  },
+  "classifications": {
+    "safe_import_candidate": [],
+    "wrapper_or_export_only": [
+      {
+        "entryId": "inscryptionsdone-wrapper",
+        "fieldNames": [
+          "InscryptionsDone"
+        ],
+        "why": "PlayerProfileData already exposes InscryptionsDone as a flat wrapper/export field, so importing it from the wider SaveData block would widen the owner surface without adding a new bounded canonical Emporium import.",
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-market-member-boundary.json",
+            "claim": "directPlayerProfileFieldSamples includes InscryptionsDone"
+          },
+          {
+            "artifact": "data/multiverse-market-market-member-boundary.json",
+            "claim": "SaveData is the wider declaring owner while PlayerProfileData remains a flatter export-wrapper surface"
+          }
+        ]
+      }
+    ],
+    "verified_but_blocked": [
+      {
+        "entryId": "checked-row-order-is71-74",
+        "fieldNames": [
+          "IS71Level",
+          "IS72Level",
+          "IS73Level",
+          "IS74Level"
+        ],
+        "why": "These SaveData fields now have a checked ordered row-position mapping to validated inscription rows 71 through 74 inside the wider inscription set, but the repo-local evidence still does not recover final player-facing row labels or a canonical PlayerProfile import target for them.",
+        "blockedBy": [
+          "checked mapping is row-order only, not final row-label recovery",
+          "the wider inscription ordering outside rows 71-74 remains unresolved",
+          "canonical import promotion stays blocked until the row mapping is grounded beyond ordered overlap"
+        ],
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-range-boundary.json",
+            "claim": "validatedRowRanges are 50-59 and 63-74, metadata overlapIds are 71, 72, 73, and 74"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS71CostText through SetIS74CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS71 through BuyIS74 inside the broader BuyIS1 through BuyIS110 action shell"
+          },
+          {
+            "artifact": "data/multiverse-market-market-member-boundary.json",
+            "claim": "typedSaveDataProgressionOwnerSamples includes IS71Level and SaveData is the wider declaring owner"
+          }
+        ]
+      },
+      {
+        "entryId": "non-overlap-is25-70-and-is75-110",
+        "fieldNames": [
+          "IS25Level through IS70Level",
+          "IS75Level through IS110Level"
+        ],
+        "why": "The wider SaveData declaration block directly carries these inscription levels as part of the larger ordered inscription set, but the checked repo-local evidence still does not ground their row positions against a validated MultiverseMarket row block.",
+        "blockedBy": [
+          "no checked validated row overlap outside 71-74",
+          "no checked broader IS*Level to row mapping from repo-local evidence"
+        ],
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-metadata-neighborhood.json",
+            "claim": "InscryptionsDone neighborhood preserves IS25Level through IS110Level"
+          },
+          {
+            "artifact": "data/multiverse-market-range-boundary.json",
+            "claim": "validatedRowRanges stay narrower than the recovered SaveData IS range and overlapIds stay limited to 71, 72, 73, and 74"
+          }
+        ]
+      },
+      {
+        "entryId": "trade-counters",
+        "fieldNames": [
+          "EsotericR1Trades through EsotericR9Trades",
+          "NecrumR1Trades through NecrumR9Trades"
+        ],
+        "why": "These counters are directly recovered inside the same SaveData progression block, but the current slice does not ground them as canonical Emporium import targets and they widen beyond the smallest checked IS*Level row-order boundary.",
+        "blockedBy": [
+          "counter semantics are broader than the checked inscription row-order subset",
+          "no canonical PlayerProfile target is established for these counters in this slice"
+        ],
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-market-member-boundary.json",
+            "claim": "typedSaveDataProgressionOwnerSamples include EsotericR1Trades and NecrumR1Trades on SaveData"
+          },
+          {
+            "artifact": "data/multiverse-market-metadata-neighborhood.json",
+            "claim": "InscryptionsDone neighborhood preserves EsotericR1Trades through EsotericR9Trades and NecrumR1Trades through NecrumR9Trades"
+          }
+        ]
+      },
+      {
+        "entryId": "mech-progression-neighbors",
+        "fieldNames": [
+          "Mech1Unlocked",
+          "Mech1Units",
+          "Mech1Upg1Level",
+          "Mech1Upg2Level",
+          "Mech1MissionsProgress",
+          "Mech1MissionsCompleted",
+          "Mech2Unlocked"
+        ],
+        "why": "These fields are directly recovered in the same SaveData block, but they belong to the adjacent early mech progression cluster rather than the smallest defensible inscription row-order mapping boundary.",
+        "blockedBy": [
+          "outside the narrow Emporium row-order target for this slice",
+          "would widen import support beyond the recovered inscription boundary"
+        ],
+        "evidence": [
+          {
+            "artifact": "data/multiverse-market-market-member-boundary.json",
+            "claim": "typedSaveDataProgressionOwnerSamples include Mech1Unlocked and Mech1MissionsCompleted on SaveData"
+          },
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "exact SaveData field names include Mech1Units, Mech1Upg1Level, Mech1Upg2Level, Mech1MissionsProgress, and Mech2Unlocked"
+          },
+          {
+            "artifact": "data/multiverse-market-metadata-neighborhood.json",
+            "claim": "the recovered InscryptionsDone neighborhood runs forward into early Mech1* fields and Mech2Unlocked"
+          }
+        ]
+      }
+    ],
+    "unresolved": []
+  }
+}

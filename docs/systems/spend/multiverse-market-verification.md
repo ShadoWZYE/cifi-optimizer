@@ -55,6 +55,39 @@ Current grounded conclusion:
 - the checked prefab shell now stays direct through `ChrystosEmporiumUpgrade68` but switches to explicit overrides `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
 - label remap remains partial until the row-order and ID mapping are closed more completely
 
+## Narrow row 71-74 identity boundary
+
+- The ordered mapping stays settled:
+  - `IS71Level` -> row `71`
+  - `IS72Level` -> row `72`
+  - `IS73Level` -> row `73`
+  - `IS74Level` -> row `74`
+- The player-facing identity boundary for those same rows is still negative-only:
+  - `BuyIS71` through `BuyIS74` and `SetIS71CostText` through `SetIS74CostText` confirm ordered row access, not final labels
+  - `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62` explicitly point the visible prefab-number shell at serialized ids `59-62`, not at validated rows `71-74`
+  - the nearest checked player-facing inscription labels remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, which are outside rows `71-74`
+
+Current grounded conclusion:
+
+- no stable player-facing identity is currently grounded for rows `71-74`
+- rows `71-74` therefore remain ordered-only mappings, not import-safe player-facing labels
+- the canonical import-safe subset stays empty
+
+## Nearby checked identity-binding pattern
+
+- The nearest checked positive identity-binding examples are rows `78` and `83`.
+- Each row keeps the same number across the nearby checked chain:
+  - `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`
+  - `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`
+- Repo-local metadata and probe evidence place those anchors in the `TextHandlerMarkets` neighborhood, including the checked source-path string `9\Assets\Scripts\Text\Text Ouroboros\TextHandlerMarkets.cs`.
+
+Current grounded conclusion:
+
+- nearby player-facing identity can be grounded when the same row number survives across `ISNLevel`, `ISNID`, `BuyISN`, direct prefab name `ChrystosEmporiumUpgradeN-IDN`, and `Inscryption N: ...`
+- this explains how nearby inscription rows bind to player-facing labels without widening beyond checked rows `78` and `83`
+- this pattern still does not ground rows `71-74` because the prefab join is remapped there and no checked player-facing labels have been recovered for those rows
+- the canonical import-safe subset therefore stays empty
+
 ## Still unresolved
 
 - the saved-state field or owner that stores the current `Inscryptions Done` balance
@@ -67,14 +100,15 @@ Current grounded conclusion:
 - Repo-local metadata now narrows the persistence search toward `PlayerProfileData`, `FillPlayerProfileData`, and `GetPlayerProfileData`.
 - Repo-local metadata now also exposes exact Emporium-adjacent field strings including `InscryptionsDone`, nearby `IS*Level` entries such as `IS50Level`, `IS64Level`, `IS73Level`, and nearby trade fields such as `EsotericR1Trades`.
 - The broader field run around `InscryptionsDone` now includes `IS25Level` through `IS110Level`, `EsotericR1Trades` through `EsotericR9Trades`, `NecrumR1Trades` through `NecrumR9Trades`, and early `Mech*` fields such as `Mech1Unlocked` and `Mech1Upg1Level`.
-- The checked range boundary now shows that the recovered save-side `IS*Level` run overlaps the validated Emporium row block at ids `71-74`.
+- The checked range boundary now shows that the recovered save-side `IS*Level` run overlaps the validated Emporium row block at ids `71-74`, and the checked action-shell plus row-text coverage is now enough to ground the ordered row-position boundary `IS71Level -> row 71` through `IS74Level -> row 74`.
 - Repo-local metadata also shows Inscryptions-adjacent reward/effect symbols such as `AchievementInscryptionsReward` and `<FinalISShardsBonus>k__BackingField`.
 - Current grounded conclusion:
   - `MultiverseMarket` remains the mechanic owner
   - the likely saved-state search path now runs through the broader player-profile persistence family
   - `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
   - the Emporium balance and owned-level fields appear to live in a broader progression-state field block rather than in the separate reward/effect symbol families
-  - validated rows `71-74` now have both checked row recovery and direct save-side `IS*Level` overlap, which is the strongest current repo-local foothold for future import mapping
+  - validated rows `71-74` now have both checked row recovery and checked ordered save-side `IS*Level` overlap, which is the strongest current repo-local foothold for future import mapping
+  - that foothold is still row-order only, not final label recovery, so the canonical import-safe subset stays empty
   - effect/reward symbols should not be treated as recovered saved-balance fields
 
 ## Current app implication

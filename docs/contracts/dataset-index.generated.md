@@ -3,7 +3,7 @@
 > Generated from `data/bundled-dataset-contract.v1.json`. Do not edit by hand.
 
 Contract version: `v1`
-Updated at: `2026-04-06`
+Updated at: `2026-04-07`
 Validation command: `npm run verify:data`
 
 ## Source priority
@@ -326,6 +326,27 @@ Validation command: `npm run verify:data`
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-market-member-boundary.json`
+
+### `multiverse-market-savedata-import-boundary`
+
+- Label: Multiverse market SaveData import boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-savedata-import-boundary.json`
+
+### `multiverse-market-row71-74-identity-boundary`
+
+- Label: Multiverse market row 71-74 identity boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-row71-74-identity-boundary.json`
+
+### `multiverse-market-nearby-identity-binding-pattern`
+
+- Label: Multiverse market nearby identity-binding pattern
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-nearby-identity-binding-pattern.json`
 
 ### `token-bank-controller-shell`
 

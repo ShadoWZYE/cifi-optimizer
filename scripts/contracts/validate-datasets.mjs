@@ -2433,6 +2433,233 @@ function validateMultiverseMarketMarketShellDocs(boundaryDoc, stateDoc, activeBo
   assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `SaveData`/i, "multiverse market docs must not claim typed Market recovery on SaveData");
 }
 
+function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market SaveData import boundary generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "multiverse market SaveData import boundary dataset id must be present");
+  expectRecord(boundary.sources, "multiverse market SaveData import boundary sources must be an object");
+  ["marketMemberBoundary", "rangeBoundary", "rowTextCoverage", "actionShell", "metadataNeighborhood", "validatedRows", "typedProbeReport", "stateVerificationDoc"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market SaveData import boundary sources.${field} must be present`);
+  });
+  expectRecord(boundary.canonicalSplit, "multiverse market SaveData import boundary canonicalSplit must be an object");
+  expectRecord(boundary.checkedIsToRowOrderBoundary, "multiverse market SaveData import boundary checkedIsToRowOrderBoundary must be an object");
+  expectRecord(boundary.boundedImportConclusion, "multiverse market SaveData import boundary boundedImportConclusion must be an object");
+  expectRecord(boundary.classifications, "multiverse market SaveData import boundary classifications must be an object");
+  expectRecord(boundary.checkedIsToRowOrderBoundary.widerOrderedSet, "multiverse market SaveData import boundary widerOrderedSet must be an object");
+  expectArray(boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings, "multiverse market SaveData import boundary checkedOrderedMappings must be an array");
+  expectArray(boundary.checkedIsToRowOrderBoundary.blockedWiderMapping, "multiverse market SaveData import boundary blockedWiderMapping must be an array");
+  expectArray(boundary.boundedImportConclusion.importSafeSubset, "multiverse market SaveData import boundary importSafeSubset must be an array");
+  expectNonEmptyString(boundary.boundedImportConclusion.exactImportSafeSubsetLabel, "multiverse market SaveData import boundary exactImportSafeSubsetLabel must be present");
+  expectNonEmptyString(boundary.boundedImportConclusion.currentBoundary, "multiverse market SaveData import boundary currentBoundary must be present");
+  expectArray(boundary.boundedImportConclusion.blockedBy, "multiverse market SaveData import boundary blockedBy must be an array");
+  expectArray(boundary.classifications.safe_import_candidate, "multiverse market SaveData import boundary safe_import_candidate must be an array");
+  expectArray(boundary.classifications.wrapper_or_export_only, "multiverse market SaveData import boundary wrapper_or_export_only must be an array");
+  expectArray(boundary.classifications.verified_but_blocked, "multiverse market SaveData import boundary verified_but_blocked must be an array");
+  expectArray(boundary.classifications.unresolved, "multiverse market SaveData import boundary unresolved must be an array");
+
+  assert.equal(boundary.dataset, "multiverse-market-savedata-import-boundary", "multiverse market SaveData import boundary dataset id drifted");
+  assert.equal(boundary.canonicalSplit.accessorBridge, "PlayerProfileHandler.get_Market -> MultiverseMarket", "multiverse market SaveData import boundary accessor bridge drifted");
+  assert.equal(boundary.canonicalSplit.metadataMemberShell, "Market", "multiverse market SaveData import boundary metadata member shell drifted");
+  assert.equal(boundary.canonicalSplit.widerSaveOwner, "SaveData", "multiverse market SaveData import boundary wider save owner drifted");
+  assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellBuyHookRange, "BuyIS1 through BuyIS110", "multiverse market SaveData import boundary actionShellBuyHookRange drifted");
+  assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellCostTextRange, "SetIS1CostText through SetIS110CostText", "multiverse market SaveData import boundary actionShellCostTextRange drifted");
+  assert.deepEqual(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.validatedRowRanges, ["50-59", "63-74"], "multiverse market SaveData import boundary validatedRowRanges drifted");
+  assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.saveDataFieldRange, "IS25Level through IS110Level", "multiverse market SaveData import boundary saveDataFieldRange drifted");
+  assert.deepEqual(
+    boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.map((entry) => entry.saveField),
+    ["IS71Level", "IS72Level", "IS73Level", "IS74Level"],
+    "multiverse market SaveData import boundary checkedOrderedMappings saveField order drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.map((entry) => entry.orderedInscriptionRow),
+    [71, 72, 73, 74],
+    "multiverse market SaveData import boundary checkedOrderedMappings row ids drifted"
+  );
+  boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.forEach((entry, index) => {
+    expectArray(entry.evidence, `multiverse market SaveData import boundary checkedOrderedMappings[${index}].evidence must be an array`);
+    assert.equal(entry.evidence.length, 4, `multiverse market SaveData import boundary checkedOrderedMappings[${index}] should preserve four evidence links`);
+  });
+  assert.equal(boundary.checkedIsToRowOrderBoundary.blockedWiderMapping.length, 2, "multiverse market SaveData import boundary blockedWiderMapping count drifted");
+  assert.deepEqual(boundary.boundedImportConclusion.importSafeSubset, [], "multiverse market SaveData import boundary importSafeSubset must remain empty in this slice");
+  assert.equal(boundary.boundedImportConclusion.exactImportSafeSubsetLabel, "none", "multiverse market SaveData import boundary exactImportSafeSubsetLabel drifted");
+  assert.match(boundary.boundedImportConclusion.currentBoundary, /IS71Level -> row 71/i, "multiverse market SaveData import boundary currentBoundary must preserve the checked row-order conclusion");
+  assert.match(boundary.boundedImportConclusion.currentBoundary, /no recovered SaveData field/i, "multiverse market SaveData import boundary currentBoundary must preserve the no-safe-import conclusion");
+  ["do not reopen the metadata-only Market typed-field question without new direct evidence", "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap", "do not do planner integration from the recovered SaveData block in this slice"].forEach((line) => {
+    assert.ok(boundary.boundedImportConclusion.blockedBy.includes(line), `multiverse market SaveData import boundary missing blockedBy line ${line}`);
+  });
+
+  assert.equal(boundary.classifications.safe_import_candidate.length, 0, "multiverse market SaveData import boundary safe_import_candidate must remain empty");
+  assert.equal(boundary.classifications.wrapper_or_export_only.length, 1, "multiverse market SaveData import boundary wrapper_or_export_only count drifted");
+  assert.equal(boundary.classifications.verified_but_blocked.length, 4, "multiverse market SaveData import boundary verified_but_blocked count drifted");
+  assert.equal(boundary.classifications.unresolved.length, 0, "multiverse market SaveData import boundary unresolved count drifted");
+
+  const wrapperEntry = boundary.classifications.wrapper_or_export_only[0];
+  assert.equal(wrapperEntry.entryId, "inscryptionsdone-wrapper", "multiverse market SaveData import boundary wrapper entry id drifted");
+  assert.deepEqual(wrapperEntry.fieldNames, ["InscryptionsDone"], "multiverse market SaveData import boundary wrapper fieldNames drifted");
+  assert.match(wrapperEntry.why, /PlayerProfileData already exposes InscryptionsDone/i, "multiverse market SaveData import boundary wrapper rationale drifted");
+
+  const blockedById = new Map(boundary.classifications.verified_but_blocked.map((entry) => [entry.entryId, entry]));
+  assert.deepEqual(
+    [...blockedById.keys()],
+    ["checked-row-order-is71-74", "non-overlap-is25-70-and-is75-110", "trade-counters", "mech-progression-neighbors"],
+    "multiverse market SaveData import boundary verified_but_blocked entry ids drifted"
+  );
+  assert.deepEqual(blockedById.get("checked-row-order-is71-74")?.fieldNames, ["IS71Level", "IS72Level", "IS73Level", "IS74Level"], "multiverse market SaveData import boundary checked row-order fieldNames drifted");
+  assert.match(blockedById.get("checked-row-order-is71-74")?.why || "", /ordered row-position mapping/i, "multiverse market SaveData import boundary checked row-order rationale must mention ordered row-position mapping");
+  assert.deepEqual(blockedById.get("non-overlap-is25-70-and-is75-110")?.fieldNames, ["IS25Level through IS70Level", "IS75Level through IS110Level"], "multiverse market SaveData import boundary non-overlap IS ranges drifted");
+  assert.deepEqual(blockedById.get("trade-counters")?.fieldNames, ["EsotericR1Trades through EsotericR9Trades", "NecrumR1Trades through NecrumR9Trades"], "multiverse market SaveData import boundary trade counter ranges drifted");
+  assert.deepEqual(blockedById.get("mech-progression-neighbors")?.fieldNames, ["Mech1Unlocked", "Mech1Units", "Mech1Upg1Level", "Mech1Upg2Level", "Mech1MissionsProgress", "Mech1MissionsCompleted", "Mech2Unlocked"], "multiverse market SaveData import boundary mech fieldNames drifted");
+
+  const combinedDoc = stateDoc;
+  assert.match(combinedDoc, /## Checked `IS\*Level` to inscription-row boundary/, "multiverse market state verification doc must expose the checked IS-to-row boundary section");
+  assert.match(combinedDoc, /`IS71Level` -> ordered row `71`/, "multiverse market state verification doc must preserve the checked IS71 ordered row mapping");
+  assert.match(combinedDoc, /`IS74Level` -> ordered row `74`/, "multiverse market state verification doc must preserve the checked IS74 ordered row mapping");
+  assert.match(combinedDoc, /## Bounded SaveData import classification/, "multiverse market state verification doc must expose the bounded SaveData import classification");
+  assert.match(combinedDoc, /`safe_import_candidate`[\s\S]*none/, "multiverse market state verification doc must preserve an empty safe_import_candidate subset");
+  assert.match(combinedDoc, /`wrapper_or_export_only`[\s\S]*`InscryptionsDone`/, "multiverse market state verification doc must preserve the wrapper/export-only InscryptionsDone entry");
+  assert.match(combinedDoc, /`verified_but_blocked`[\s\S]*`IS71Level` through `IS74Level`/, "multiverse market state verification doc must preserve the blocked overlap IS71-74 entry");
+  assert.match(combinedDoc, /`verified_but_blocked`[\s\S]*`IS25Level` through `IS70Level` and `IS75Level` through `IS110Level`/, "multiverse market state verification doc must preserve the blocked broader IS range entry");
+  assert.match(combinedDoc, /`verified_but_blocked`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/, "multiverse market state verification doc must preserve the blocked trade counter entries");
+  assert.match(combinedDoc, /`verified_but_blocked`[\s\S]*`Mech1Unlocked`, `Mech1Units`, `Mech1Upg1Level`, `Mech1Upg2Level`, `Mech1MissionsProgress`, `Mech1MissionsCompleted`, and `Mech2Unlocked`/, "multiverse market state verification doc must preserve the blocked mech neighbor entry");
+  assert.match(combinedDoc, /`unresolved`[\s\S]*none/, "multiverse market state verification doc must preserve an empty unresolved subset");
+  assert.match(combinedDoc, /no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import/i, "multiverse market state verification doc must preserve the no-safe-import conclusion");
+
+  return {
+    id: "multiverse-market-savedata-import-boundary",
+    label: "Multiverse market SaveData import boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.length} checked IS-to-row ordered mappings`,
+      `${boundary.classifications.safe_import_candidate.length} safe import candidates`,
+      `${boundary.classifications.wrapper_or_export_only.length} wrapper-or-export-only entries`,
+      `${boundary.classifications.verified_but_blocked.length} verified-but-blocked entries`,
+      "No recovered SaveData field is yet safe for canonical Emporium import"
+    ]
+  };
+}
+
+function validateMultiverseMarketRow7174IdentityBoundary(boundary, stateDoc, verificationDoc) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market row 71-74 identity boundary generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "multiverse market row 71-74 identity boundary dataset id must be present");
+  expectRecord(boundary.sources, "multiverse market row 71-74 identity boundary sources must be an object");
+  ["saveDataImportBoundary", "validatedRows", "rowTextCoverage", "actionShell", "prefabRemapBoundary", "unityProbeReport", "uabeaProbeReport", "verificationDoc"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market row 71-74 identity boundary sources.${field} must be present`);
+  });
+  expectArray(boundary.settledOrderedMapping, "multiverse market row 71-74 identity boundary settledOrderedMapping must be an array");
+  expectRecord(boundary.playerFacingIdentityBoundary, "multiverse market row 71-74 identity boundary playerFacingIdentityBoundary must be an object");
+  expectArray(boundary.playerFacingIdentityBoundary.canonicalImportSafeSubset, "multiverse market row 71-74 identity boundary canonicalImportSafeSubset must be an array");
+  expectArray(boundary.playerFacingIdentityBoundary.identityRecovered, "multiverse market row 71-74 identity boundary identityRecovered must be an array");
+  expectArray(boundary.playerFacingIdentityBoundary.identityStillBlocked, "multiverse market row 71-74 identity boundary identityStillBlocked must be an array");
+  expectArray(boundary.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors, "multiverse market row 71-74 identity boundary adjacentKnownPlayerFacingAnchors must be an array");
+  expectArray(boundary.playerFacingIdentityBoundary.currentBoundary, "multiverse market row 71-74 identity boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "multiverse-market-row71-74-identity-boundary", "multiverse market row 71-74 identity boundary dataset id drifted");
+  assert.deepEqual(
+    boundary.settledOrderedMapping.map((entry) => [entry.saveField, entry.orderedInscriptionRow]),
+    [["IS71Level", 71], ["IS72Level", 72], ["IS73Level", 73], ["IS74Level", 74]],
+    "multiverse market row 71-74 identity boundary settledOrderedMapping drifted"
+  );
+  assert.deepEqual(boundary.playerFacingIdentityBoundary.canonicalImportSafeSubset, [], "multiverse market row 71-74 identity boundary canonicalImportSafeSubset must remain empty");
+  assert.deepEqual(boundary.playerFacingIdentityBoundary.identityRecovered, [], "multiverse market row 71-74 identity boundary identityRecovered must remain empty");
+  assert.deepEqual(
+    boundary.playerFacingIdentityBoundary.identityStillBlocked.map((entry) => entry.orderedInscriptionRow),
+    [71, 72, 73, 74],
+    "multiverse market row 71-74 identity boundary blocked row order drifted"
+  );
+  assert.deepEqual(
+    boundary.playerFacingIdentityBoundary.identityStillBlocked.map((entry) => entry.saveField),
+    ["IS71Level", "IS72Level", "IS73Level", "IS74Level"],
+    "multiverse market row 71-74 identity boundary blocked saveField order drifted"
+  );
+  boundary.playerFacingIdentityBoundary.identityStillBlocked.forEach((entry, index) => {
+    assert.equal(entry.status, "unresolved", `multiverse market row 71-74 identity boundary blocked entry ${index} status drifted`);
+    expectArray(entry.checkedEvidence, `multiverse market row 71-74 identity boundary blocked entry ${index} checkedEvidence must be an array`);
+    expectArray(entry.blockedBy, `multiverse market row 71-74 identity boundary blocked entry ${index} blockedBy must be an array`);
+  });
+  assert.deepEqual(
+    boundary.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors.map((entry) => [entry.orderedInscriptionRow, entry.label]),
+    [[78, "Inscryption 78: Ouroboros Orbs"], [83, "Inscryption 83: Fast-Loop ML"]],
+    "multiverse market row 71-74 identity boundary adjacent anchors drifted"
+  );
+
+  const combinedStateDoc = stateDoc;
+  assert.match(combinedStateDoc, /## Checked row `71-74` player-facing identity boundary/, "multiverse market state verification doc must expose the row 71-74 identity boundary section");
+  assert.match(combinedStateDoc, /no stable player-facing identity is currently grounded for rows `71-74`/i, "multiverse market state verification doc must preserve the unresolved row 71-74 identity conclusion");
+  assert.match(verificationDoc, /## Narrow row 71-74 identity boundary/, "multiverse market verification doc must expose the narrow row 71-74 identity boundary section");
+  assert.match(verificationDoc, /ChrystosEmporiumUpgrade71-ID59/, "multiverse market verification doc must preserve the row 71 prefab override evidence");
+  assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the adjacent row 78 anchor");
+  assert.match(verificationDoc, /the canonical import-safe subset stays empty/i, "multiverse market verification doc must preserve the empty canonical subset conclusion");
+
+  return {
+    id: "multiverse-market-row71-74-identity-boundary",
+    label: "Multiverse market row 71-74 identity boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.settledOrderedMapping.length} settled ordered mappings`,
+      `${boundary.playerFacingIdentityBoundary.identityRecovered.length} grounded player-facing identities`,
+      `${boundary.playerFacingIdentityBoundary.identityStillBlocked.length} blocked row identities`,
+      "Rows 71-74 remain ordered-only because player-facing identity is still unresolved"
+    ]
+  };
+}
+
+function validateMultiverseMarketNearbyIdentityBindingPattern(pattern, stateDoc, verificationDoc) {
+  expectNonEmptyString(pattern.generatedAt, "multiverse market nearby identity-binding pattern generatedAt must be present");
+  expectNonEmptyString(pattern.dataset, "multiverse market nearby identity-binding pattern dataset id must be present");
+  expectRecord(pattern.sources, "multiverse market nearby identity-binding pattern sources must be an object");
+  ["row7174IdentityBoundary", "metadataNeighborhood", "uabeaProbeReport", "unityProbeReport", "verificationDoc"].forEach((field) => {
+    expectNonEmptyString(pattern.sources[field], `multiverse market nearby identity-binding pattern sources.${field} must be present`);
+  });
+  expectArray(pattern.checkedPositiveBindings, "multiverse market nearby identity-binding pattern checkedPositiveBindings must be an array");
+  expectRecord(pattern.recoveredPattern, "multiverse market nearby identity-binding pattern recoveredPattern must be an object");
+  expectArray(pattern.recoveredPattern.playerFacingIdentityBindingRule, "multiverse market nearby identity-binding pattern playerFacingIdentityBindingRule must be an array");
+  expectArray(pattern.recoveredPattern.checkedPositiveRows, "multiverse market nearby identity-binding pattern checkedPositiveRows must be an array");
+  expectArray(pattern.recoveredPattern.checkedNegativeCarryoverRows, "multiverse market nearby identity-binding pattern checkedNegativeCarryoverRows must be an array");
+  expectArray(pattern.recoveredPattern.whyNotRows7174, "multiverse market nearby identity-binding pattern whyNotRows7174 must be an array");
+  expectArray(pattern.recoveredPattern.canonicalImportSafeSubset, "multiverse market nearby identity-binding pattern canonicalImportSafeSubset must be an array");
+  expectArray(pattern.currentBoundary, "multiverse market nearby identity-binding pattern currentBoundary must be an array");
+
+  assert.equal(pattern.dataset, "multiverse-market-nearby-identity-binding-pattern", "multiverse market nearby identity-binding pattern dataset id drifted");
+  assert.deepEqual(
+    pattern.checkedPositiveBindings.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.prefabName, entry.playerFacingLabel]),
+    [
+      [78, "IS78Level", "IS78ID", "BuyIS78", "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs"],
+      [83, "IS83Level", "IS83ID", "BuyIS83", "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"]
+    ],
+    "multiverse market nearby identity-binding pattern checkedPositiveBindings drifted"
+  );
+  pattern.checkedPositiveBindings.forEach((entry, index) => {
+    assert.equal(entry.textHandlerOwner, "TextHandlerMarkets", `multiverse market nearby identity-binding pattern entry ${index} textHandlerOwner drifted`);
+    assert.equal(entry.textHandlerScriptPath, "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs", `multiverse market nearby identity-binding pattern entry ${index} textHandlerScriptPath drifted`);
+    expectArray(entry.evidence, `multiverse market nearby identity-binding pattern entry ${index} evidence must be an array`);
+  });
+  assert.equal(pattern.recoveredPattern.patternName, "same-number nearby identity binding", "multiverse market nearby identity-binding pattern patternName drifted");
+  assert.equal(pattern.recoveredPattern.orderedRowMappingStatus, "separate-input", "multiverse market nearby identity-binding pattern orderedRowMappingStatus drifted");
+  assert.deepEqual(pattern.recoveredPattern.checkedPositiveRows, [78, 83], "multiverse market nearby identity-binding pattern checkedPositiveRows drifted");
+  assert.deepEqual(pattern.recoveredPattern.checkedNegativeCarryoverRows, [71, 72, 73, 74], "multiverse market nearby identity-binding pattern checkedNegativeCarryoverRows drifted");
+  assert.equal(pattern.recoveredPattern.helpsRows7174, false, "multiverse market nearby identity-binding pattern helpsRows7174 must remain false");
+  assert.deepEqual(pattern.recoveredPattern.canonicalImportSafeSubset, [], "multiverse market nearby identity-binding pattern canonicalImportSafeSubset must remain empty");
+
+  assert.match(stateDoc, /## Nearby checked inscription identity-binding pattern/, "multiverse market state verification doc must expose the nearby inscription identity-binding pattern section");
+  assert.match(stateDoc, /ChrystosEmporiumUpgrade78-ID78/, "multiverse market state verification doc must preserve the row 78 direct prefab binding");
+  assert.match(stateDoc, /ChrystosEmporiumUpgrade83-ID83/, "multiverse market state verification doc must preserve the row 83 direct prefab binding");
+  assert.match(stateDoc, /the canonical import-safe subset stays empty/i, "multiverse market state verification doc must preserve the empty canonical subset conclusion for the nearby binding pattern");
+  assert.match(verificationDoc, /## Nearby checked identity-binding pattern/, "multiverse market verification doc must expose the nearby identity-binding pattern section");
+  assert.match(verificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`/, "multiverse market verification doc must preserve the row 78 same-number binding chain");
+  assert.match(verificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/, "multiverse market verification doc must preserve the row 83 same-number binding chain");
+  assert.match(verificationDoc, /does not ground rows `71-74`/i, "multiverse market verification doc must preserve the negative carryover for rows 71-74");
+
+  return {
+    id: "multiverse-market-nearby-identity-binding-pattern",
+    label: "Multiverse market nearby identity-binding pattern",
+    classification: "extracted-mechanics",
+    stats: [
+      `${pattern.checkedPositiveBindings.length} checked positive binding examples`,
+      `${pattern.recoveredPattern.checkedNegativeCarryoverRows.length} unresolved carryover rows`,
+      "Nearby identity binding now checks direct same-number joins without widening row 71-74 identity"
+    ]
+  };
+}
+
 function validateTokenBankControllerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token-bank controller shell generatedAt must be present");
   expectRecord(shell.sources, "token-bank controller shell sources must be an object");
@@ -2496,7 +2723,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 45, "bundled dataset contract must track the forty-five shipped dataset groups");
+  assert.equal(contract.datasets.length, 48, "bundled dataset contract must track the forty-eight shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -2602,9 +2829,13 @@ export async function validateBundledDatasets() {
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
+  const multiverseMarketSaveDataImportBoundary = await readJson("../../data/multiverse-market-savedata-import-boundary.json");
+  const multiverseMarketRow7174IdentityBoundary = await readJson("../../data/multiverse-market-row71-74-identity-boundary.json");
+  const multiverseMarketNearbyIdentityBindingPattern = await readJson("../../data/multiverse-market-nearby-identity-binding-pattern.json");
   const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
   const multiverseMarketMarketMemberBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-market-member-boundary.md");
   const multiverseMarketStateVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-state-verification.md");
+  const multiverseMarketVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-verification.md");
   const activeGroundingBoundariesDoc = await readText("../../docs/roadmap/active-grounding-boundaries.md");
 
   const summaries = [
@@ -2652,6 +2883,9 @@ export async function validateBundledDatasets() {
     validateTokenShopSaveBoundary(tokenShopSaveBoundary),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
+    validateMultiverseMarketSaveDataImportBoundary(multiverseMarketSaveDataImportBoundary, multiverseMarketStateVerificationDoc),
+    validateMultiverseMarketRow7174IdentityBoundary(multiverseMarketRow7174IdentityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
+    validateMultiverseMarketNearbyIdentityBindingPattern(multiverseMarketNearbyIdentityBindingPattern, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateTokenBankControllerShell(tokenBankControllerShell)
   ];
 

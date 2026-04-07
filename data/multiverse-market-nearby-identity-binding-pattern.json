@@ -1,0 +1,85 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "multiverse-market-nearby-identity-binding-pattern",
+  "sources": {
+    "row7174IdentityBoundary": "data/multiverse-market-row71-74-identity-boundary.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "unityProbeReport": "data/unity-probe-report.json",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
+  },
+  "checkedPositiveBindings": [
+    {
+      "orderedInscriptionRow": 78,
+      "saveField": "IS78Level",
+      "serializedIdField": "IS78ID",
+      "buyHook": "BuyIS78",
+      "textHandlerOwner": "TextHandlerMarkets",
+      "textHandlerScriptPath": "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
+      "prefabName": "ChrystosEmporiumUpgrade78-ID78",
+      "playerFacingLabel": "Inscryption 78: Ouroboros Orbs",
+      "evidence": [
+        {
+          "artifact": "data/multiverse-market-metadata-neighborhood.json",
+          "claim": "metadata neighborhood preserves IS78Level, BuyIS78, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source path in one nearby UI shell"
+        },
+        {
+          "artifact": "data/uabea-probe-report.json",
+          "claim": "UABEA probe preserves IS78Level, IS78ID, BuyIS78, MultiverseMarket.BuyIS78(), TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78"
+        },
+        {
+          "artifact": "data/unity-probe-report.json",
+          "claim": "Unity probe preserves the player-facing string anchor Inscryption 78 Ouroboros Orbs beside the same TextHandlerMarkets.cs source path"
+        }
+      ]
+    },
+    {
+      "orderedInscriptionRow": 83,
+      "saveField": "IS83Level",
+      "serializedIdField": "IS83ID",
+      "buyHook": "BuyIS83",
+      "textHandlerOwner": "TextHandlerMarkets",
+      "textHandlerScriptPath": "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
+      "prefabName": "ChrystosEmporiumUpgrade83-ID83",
+      "playerFacingLabel": "Inscryption 83: Fast-Loop ML",
+      "evidence": [
+        {
+          "artifact": "data/multiverse-market-metadata-neighborhood.json",
+          "claim": "metadata neighborhood preserves IS83Level, BuyIS83, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source path in one nearby UI shell"
+        },
+        {
+          "artifact": "data/uabea-probe-report.json",
+          "claim": "UABEA probe preserves IS83Level, IS83ID, BuyIS83, MultiverseMarket.BuyIS83(), TextHandlerMarkets, and ChrystosEmporiumUpgrade83-ID83"
+        },
+        {
+          "artifact": "data/unity-probe-report.json",
+          "claim": "Unity probe preserves the player-facing string anchor Inscryption 83 Fast-Loop ML beside the same TextHandlerMarkets.cs source path"
+        }
+      ]
+    }
+  ],
+  "recoveredPattern": {
+    "patternName": "same-number nearby identity binding",
+    "orderedRowMappingStatus": "separate-input",
+    "playerFacingIdentityBindingRule": [
+      "A nearby positive binding exists when the same row number N is recovered across ISNLevel, ISNID, BuyISN, a direct prefab name ChrystosEmporiumUpgradeN-IDN, and a player-facing string anchor Inscryption N: ... in the TextHandlerMarkets neighborhood.",
+      "This pattern grounds nearby player-facing identity only for rows where the same-number chain is checked end to end from repo-local evidence."
+    ],
+    "checkedPositiveRows": [78, 83],
+    "checkedNegativeCarryoverRows": [71, 72, 73, 74],
+    "helpsRows7174": false,
+    "whyNotRows7174": [
+      "Rows 71-74 only have settled ordered mapping plus BuyIS71-BuyIS74 and SetIS71CostText-SetIS74CostText hooks.",
+      "The visible prefab-number shell is remapped as ChrystosEmporiumUpgrade71-ID59 through ChrystosEmporiumUpgrade74-ID62, so the same-number prefab join fails inside the 71-74 band.",
+      "No checked player-facing string anchor currently names Inscryption 71, 72, 73, or 74."
+    ],
+    "canonicalImportSafeSubset": []
+  },
+  "currentBoundary": [
+    "Ordered row mapping, serialized-id or prefab numbering, and player-facing identity binding remain separate checks.",
+    "Rows 78 and 83 provide the nearest checked positive examples where the row number survives across SaveData field name, serialized-id field name, BuyIS hook, prefab name, and player-facing string anchor.",
+    "This recovered nearby pattern explains how some inscription rows bind to player-facing labels without claiming that every row does so.",
+    "The pattern does not repair rows 71-74 because the direct prefab join is broken there and no checked player-facing labels have been recovered for those rows.",
+    "Because rows 71-74 still lack grounded player-facing identity, the canonical import-safe subset remains empty."
+  ]
+}
