@@ -22,6 +22,11 @@ async function readJson(relativePath) {
   return JSON.parse(await readFile(fileUrl, "utf8"));
 }
 
+async function readText(relativePath) {
+  const fileUrl = new URL(relativePath, import.meta.url);
+  return readFile(fileUrl, "utf8");
+}
+
 function expectRecord(value, message) {
   assert.ok(value && typeof value === "object" && !Array.isArray(value), message);
 }
@@ -2311,6 +2316,8 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   expectArray(boundary.negativeTypedDirectPlayerProfileProgressionChecks, "multiverse market market-member boundary negativeTypedDirectPlayerProfileProgressionChecks must be an array");
   expectArray(boundary.negativeTypedDirectMemberChecks, "multiverse market market-member boundary negativeTypedDirectMemberChecks must be an array");
   expectArray(boundary.negativeTypedSaveDataMarketChecks, "multiverse market market-member boundary negativeTypedSaveDataMarketChecks must be an array");
+  expectRecord(boundary.typedMarketFieldBoundary, "multiverse market market-member boundary typedMarketFieldBoundary must be an object");
+  expectRecord(boundary.deeperMarketOwnerStatus, "multiverse market market-member boundary deeperMarketOwnerStatus must be an object");
   expectArray(boundary.progressionPayloadFieldClues, "multiverse market market-member boundary progressionPayloadFieldClues must be an array");
   expectArray(boundary.currentBoundary, "multiverse market market-member boundary currentBoundary must be an array");
 
@@ -2375,6 +2382,16 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   ["SaveData.Market", "SaveData.MultiverseMarket"].forEach((name) => {
     assert.ok(boundary.negativeTypedSaveDataMarketChecks.includes(name), `multiverse market market-member boundary missing negative typed SaveData market check ${name}`);
   });
+  assert.equal(boundary.typedMarketFieldBoundary.checkedAccessorBridge, "PlayerProfileHandler.get_Market -> MultiverseMarket", "multiverse market market-member boundary checked accessor bridge drifted");
+  assert.equal(boundary.typedMarketFieldBoundary.metadataMemberShell, "Market", "multiverse market market-member boundary metadata member shell drifted");
+  assert.deepEqual(boundary.typedMarketFieldBoundary.checkedTypedFieldOwners, ["PlayerProfileHandler", "PlayerProfileData", "SaveData"], "multiverse market market-member boundary checked typed field owners drifted");
+  assert.deepEqual(boundary.typedMarketFieldBoundary.checkedNegativeTypedFieldRecoveries, ["PlayerProfileHandler.Market", "PlayerProfileData.Market", "PlayerProfileData.MultiverseMarket", "SaveData.Market", "SaveData.MultiverseMarket"], "multiverse market market-member boundary checked negative typed field recoveries drifted");
+  assert.equal(boundary.typedMarketFieldBoundary.conclusion, "negative-typed-market-field-in-checked-boundary", "multiverse market market-member boundary typed Market field conclusion drifted");
+  assert.equal(boundary.typedMarketFieldBoundary.currentUse, "accessor-member-shell-naming-only", "multiverse market market-member boundary typed Market field current-use drifted");
+  assert.equal(boundary.deeperMarketOwnerStatus.status, "unresolved", "multiverse market market-member boundary deeper market owner status drifted");
+  assert.equal(boundary.deeperMarketOwnerStatus.scope, "typed Market-named save-path owner beyond the checked accessor bridge", "multiverse market market-member boundary deeper market owner scope drifted");
+  assert.match(boundary.deeperMarketOwnerStatus.note, /SaveData/i, "multiverse market market-member boundary deeper market owner note must mention SaveData");
+  assert.match(boundary.deeperMarketOwnerStatus.note, /does not recover a typed Market field/i, "multiverse market market-member boundary deeper market owner note must preserve the negative typed Market result");
   ["IS71Level", "IS110Level", "InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
     assert.ok(boundary.progressionPayloadFieldClues.includes(name), `multiverse market market-member boundary missing ${name}`);
   });
@@ -2399,6 +2416,21 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       "MultiverseMarket save-side handoff is narrowed to a checked PlayerProfileHandler.get_Market-to-MultiverseMarket bridge with SaveData recovered as the wider progression owner"
     ]
   };
+}
+
+function validateMultiverseMarketMarketShellDocs(boundaryDoc, stateDoc, activeBoundariesDoc) {
+  const combinedDocs = [boundaryDoc, stateDoc, activeBoundariesDoc].join("\n");
+  assert.match(boundaryDoc, /checked accessor bridge:/, "multiverse market market-member boundary doc must split the checked accessor bridge");
+  assert.match(boundaryDoc, /metadata\/member-shell clue:/, "multiverse market market-member boundary doc must split the metadata member shell clue");
+  assert.match(boundaryDoc, /checked typed-`Market` field result:/, "multiverse market market-member boundary doc must split the checked typed Market field result");
+  assert.match(boundaryDoc, /deeper typed `Market`-named owner status:/, "multiverse market market-member boundary doc must preserve deeper Market owner status");
+  assert.match(combinedDocs, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/, "multiverse market docs must preserve the checked accessor bridge");
+  assert.match(combinedDocs, /metadata-only `Market` shell/, "multiverse market docs must preserve the metadata-only Market shell phrasing");
+  assert.match(combinedDocs, /(does not recover a typed `Market` field|no typed `Market`(?:-named)?(?: or `MultiverseMarket`)? field is recovered) on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/, "multiverse market docs must preserve the negative typed Market recovery");
+  assert.match(combinedDocs, /accessor\/member-shell naming only/, "multiverse market docs must preserve accessor/member-shell-only use");
+  assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `PlayerProfileHandler`/i, "multiverse market docs must not claim typed Market recovery on PlayerProfileHandler");
+  assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `PlayerProfileData`/i, "multiverse market docs must not claim typed Market recovery on PlayerProfileData");
+  assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `SaveData`/i, "multiverse market docs must not claim typed Market recovery on SaveData");
 }
 
 function validateTokenBankControllerShell(shell) {
@@ -2571,6 +2603,9 @@ export async function validateBundledDatasets() {
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
   const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
+  const multiverseMarketMarketMemberBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-market-member-boundary.md");
+  const multiverseMarketStateVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-state-verification.md");
+  const activeGroundingBoundariesDoc = await readText("../../docs/roadmap/active-grounding-boundaries.md");
 
   const summaries = [
     validateSnapshot(snapshot),
@@ -2619,6 +2654,12 @@ export async function validateBundledDatasets() {
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateTokenBankControllerShell(tokenBankControllerShell)
   ];
+
+  validateMultiverseMarketMarketShellDocs(
+    multiverseMarketMarketMemberBoundaryDoc,
+    multiverseMarketStateVerificationDoc,
+    activeGroundingBoundariesDoc
+  );
 
   assertContractMatchesValidation(bundledDatasetContract, summaries);
   return summaries;
