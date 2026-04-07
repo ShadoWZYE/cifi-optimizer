@@ -2,7 +2,7 @@
   "generatedAt": "2026-04-07",
   "dataset": "multiverse-market-nearby-identity-binding-pattern",
   "sources": {
-    "row7174IdentityBoundary": "data/multiverse-market-row71-74-identity-boundary.json",
+    "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
     "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
     "uabeaProbeReport": "data/uabea-probe-report.json",
     "unityProbeReport": "data/unity-probe-report.json",
@@ -66,12 +66,12 @@
       "This pattern grounds nearby player-facing identity only for rows where the same-number chain is checked end to end from repo-local evidence."
     ],
     "checkedPositiveRows": [78, 83],
-    "checkedNegativeCarryoverRows": [71, 72, 73, 74],
-    "helpsRows7174": false,
-    "whyNotRows7174": [
-      "Rows 71-74 only have settled ordered mapping plus same-number IS71ID-IS74ID fields and BuyIS71-BuyIS74 / SetIS71CostText-SetIS74CostText hooks.",
-      "The visible prefab-number shell is remapped as ChrystosEmporiumUpgrade71-ID59 through ChrystosEmporiumUpgrade74-ID62, so the same-number prefab join fails inside the 71-74 band.",
-      "No checked player-facing string anchor currently names Inscryption 71, 72, 73, or 74."
+    "checkedNegativeCarryoverRows": [69, 70, 71, 72, 73, 74],
+    "helpsRows6974": false,
+    "whyNotRows6974": [
+      "Rows 69-74 only have settled ordered mapping plus same-number IS69ID-IS74ID fields and BuyIS69-BuyIS74 / SetIS69CostText-SetIS74CostText hooks.",
+      "The visible prefab-number shell is remapped as ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62, so the same-number prefab join fails inside the 69-74 band.",
+      "No checked player-facing string anchor currently names Inscryption 69, 70, 71, 72, 73, or 74."
     ],
     "canonicalImportSafeSubset": []
   },
@@ -79,7 +79,7 @@
     "Ordered row mapping, serialized-id or prefab numbering, and player-facing identity binding remain separate checks.",
     "Rows 78 and 83 provide the nearest checked positive examples where the row number survives across SaveData field name, serialized-id field name, BuyIS hook, prefab name, and player-facing string anchor.",
     "This recovered nearby pattern explains how some inscription rows bind to player-facing labels without claiming that every row does so.",
-    "The pattern does not repair rows 71-74 because the direct prefab join is broken there and no checked player-facing labels have been recovered for those rows.",
-    "Because rows 71-74 still lack grounded player-facing identity, the canonical import-safe subset remains empty."
+    "The pattern does not repair rows 69-74 because the direct prefab join is broken there and no checked player-facing labels have been recovered for those rows.",
+    "Because rows 69-74 still lack grounded player-facing identity, the canonical import-safe subset remains empty."
   ]
 }
