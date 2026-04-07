@@ -190,7 +190,7 @@ Current grounded conclusion:
 
 ## Still unresolved
 
-- the saved-state field or owner that stores the current `Inscryptions Done` balance
+- the bounded import-safe surface for the current `Inscryptions Done` balance beyond the existing `PlayerProfileData` wrapper and the wider `SaveData` declaring owner
 - player-owned current inscription levels or equivalent owned-state inputs for next-buy logic
 - full row coverage outside the currently validated late block
 - exact row-by-row remap from serialized `IS*` ids and prefab identities to final in-game labels
@@ -203,25 +203,27 @@ Current grounded conclusion:
 - The checked range boundary now shows that the recovered save-side `IS*Level` run overlaps the validated Emporium row block at ids `71-74`, and the checked action-shell plus row-text coverage is now enough to ground the ordered row-position boundary `IS71Level -> row 71` through `IS74Level -> row 74`.
 - Repo-local metadata also shows Inscryptions-adjacent reward/effect symbols such as `AchievementInscryptionsReward` and `<FinalISShardsBonus>k__BackingField`.
 - Current grounded conclusion:
-  - `MultiverseMarket` remains the mechanic owner
-  - the likely saved-state search path now runs through the broader player-profile persistence family
-  - `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
-  - the Emporium balance and owned-level fields appear to live in a broader progression-state field block rather than in the separate reward/effect symbol families
-  - validated rows `71-74` now have both checked row recovery and checked ordered save-side `IS*Level` overlap, which is the strongest current repo-local foothold for future import mapping
-  - that foothold is still row-order only, not final label recovery, so the canonical import-safe subset stays empty
-  - effect/reward symbols should not be treated as recovered saved-balance fields
+- `MultiverseMarket` remains the mechanic owner
+- the likely saved-state search path now runs through the broader player-profile persistence family
+- `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
+- exact typed recovery now also confirms that `SaveData` directly declares the wider `InscryptionsDone` / `IS*Level` / trade-counter / early `Mech*` progression cluster, while `PlayerProfileData` stays a flatter wrapper/export surface for nearby fields such as `InscryptionsDone`
+- the Emporium balance and owned-level fields appear to live in a broader progression-state field block rather than in the separate reward/effect symbol families
+- validated rows `71-74` now have both checked row recovery and checked ordered save-side `IS*Level` overlap, which is the strongest current repo-local foothold for future import mapping
+- that foothold is still row-order only, not final label recovery, so the canonical import-safe subset stays empty
+- effect/reward symbols should not be treated as recovered saved-balance fields
 
 ## Current app implication
 
 - It is safe to treat `MultiverseMarket` as a real Emporium owner with a grounded `Inscryptions Done` cost-lane shell.
 - It is safe to treat the `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` override band as a real prefab-remap boundary that blocks naive label assumptions for validated ids `69-74`.
+- It is safe to treat `SaveData` as the exact declaring save owner for the wider `InscryptionsDone` / `IS*Level` / trade-counter / early `Mech*` progression cluster, while keeping `PlayerProfileData.InscryptionsDone` in the narrower wrapper/export bucket.
 - It is not safe to generate spend recommendations yet.
 - The spend-planner track should stop inferring this lane from diamonds or tokens.
 - `MultiverseMarket` remains `available but unmapped` until the owned-state and saved-balance inputs are recovered.
 
 ## Next allowed slice
 
-1. determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` fields
+1. decide how much of the recovered `SaveData` declaration block is safe to preserve for bounded import support without promoting `Market` into a typed wrapper claim
 2. recover player-owned inscription levels or equivalent next-purchase state from that same save-side neighborhood
 3. extend parsing past the current validated late block
 4. finish the inscription-number and prefab-to-label remap, especially across the `69-74` prefab override band

@@ -71,7 +71,7 @@ Current conclusion:
 - the Emporium owner is still `MultiverseMarket`
 - the `Inscryptions Done` purchase lane is grounded from the scene/UI side
 - the saved-state search is now better narrowed toward the broader player-profile persistence family
-- exact metadata field names now exist for `InscryptionsDone` and nearby `IS*Level`, but the declaring save model still needs confirmation
+- exact typed recovery now also confirms `SaveData` as the declaring save model for the wider `InscryptionsDone` / `IS*Level` / trade-counter / early `Mech*` cluster, while the typed `Market` wrapper itself still needs stronger recovery
 - the surrounding field run now looks like a broader progression-state block rather than an isolated achievement or reward symbol family
 - `AchievementInscryptionsReward` and `FinalIS*` symbols remain effect/reward clues rather than recovered saved-balance fields
 

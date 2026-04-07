@@ -219,7 +219,7 @@ Current status:
   - not yet verified enough for app planning: full player-owned current-level inputs and final remap from serialized field ids to player-facing labels
 - `MultiverseMarket`
   - verified: real owner, validated inscription rows, direct serialized constants for part of the system, an Emporium spend-lane shell labeled around `Inscryptions Done`, a checked `PlayerProfileHandler.get_Market -> MultiverseMarket` accessor bridge, exact `PlayerProfileData.InscryptionsDone`, exact metadata field clues such as nearby `IS*Level`, and a broader progression-style field run that continues into trade counters and `Mech*` fields
-  - not yet verified enough for app planning: complete row coverage, player-owned current-level inputs, and the exact declaring save model behind the recovered `InscryptionsDone` / `IS*Level` / trade-counter cluster
+  - not yet verified enough for app planning: complete row coverage, player-owned current-level inputs, and a bounded import-safe surface on top of the now-recovered `SaveData` declaring owner for the recovered `InscryptionsDone` / `IS*Level` / trade-counter cluster
 
 If those gaps remain open, keep the system in extraction and verification docs rather than recommendation UI.
 
