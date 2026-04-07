@@ -197,7 +197,7 @@ Current active or queued tracks:
 
 - `spend-planner-first-ui-slice`
   - status: `active`
-  - goal: ship a descriptive spend-planner panel that only reads canonical player inputs and labels blocked owner-dependent inputs as unavailable
+  - goal: ship a descriptive spend-planner panel that shows canonical inputs plus explicitly labeled boundary-backed spend evidence while keeping blocked owner-dependent inputs unavailable
 - `shard-milestone-payload-recovery`
   - status: `active`
   - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
