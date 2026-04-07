@@ -44,17 +44,25 @@ It exists because TokenShop upgrade constants alone are not enough to integrate 
 - TokenShop is connected to a real token-bank accumulation and claim flow, not only a flat list of upgrade rows.
 - There is a distinct cap concept for the token bank, and the build tracks final or derived cap state.
 - There is a distinct fill or claimable amount concept for banked tokens, and the build tracks final fill-speed state.
+- Exact typed save recovery now confirms `SaveData.BankedTokens` as the strongest current saved-state owner for the token-bank current stored amount.
 - Token acquisition is split across at least:
   - banked tokens
   - token chests
   - daily tokenium
   - missions or events feeding daily tokenium
-- TokenShop upgrades and nearby systems clearly modify this lane, but the exact runtime formulas and saved owned-state fields are still not recovered.
+- TokenShop upgrades and nearby systems clearly modify this lane, but the exact saved owner for token-bank cap and claimable or ready state is still not recovered.
 - Daily Tokenium should no longer be treated as a purely TokenShop-owned sub-lane. The stronger current evidence places it in the Academy or Farm Mission reward family that TokenShop modifies.
 
 ## Source narrowing from this pass
 
-This pass did not recover the final numeric owner, but it did narrow the likely source path.
+This pass did not close the full save boundary, but it did recover one exact current-state owner and narrow the remaining save-side search.
+
+- `SaveData.BankedTokens`
+  - Exact typed recovery in `data/uabea-probe-report.json` now shows `BankedTokens` as a direct `SaveData` field with type `System.Single`.
+  - Why it matters: this is the first exact save-side owner recovered for the token-bank lane itself, and it grounds the current stored token-bank amount without promoting any wider planner behavior.
+- `ClaimableBankTokens` and `TokenBankCap`
+  - The same checked typed save tables do not currently expose `ClaimableBankTokens` or `TokenBankCap` on `SaveData` or `PlayerProfileData`.
+  - Why it matters: cap and claimable or ready state remain blocked even though `BankedTokens` is now grounded, so the repo should not collapse the whole lane into one resolved owner claim.
 
 - `OR_TokenBankCap` and `OR_TokensFromChests`
   - Current evidence points to these being mechanic-named resource assets in `sharedassets0.assets`, not the underlying numeric formula objects.
@@ -66,9 +74,11 @@ This pass did not recover the final numeric owner, but it did narrow the likely 
 
 Safe repo conclusion:
 
+- treat `SaveData.BankedTokens` as the current exact saved-state owner for token-bank stored amount only
+- do not treat that exact `BankedTokens` recovery as proof that cap or claimable or ready state are recovered too
 - do not treat `OR_TokenBankCap` or `OR_TokensFromChests` as recovered formulas
 - treat them as grounded naming or asset-family clues
-- keep the next extraction pass focused on `TokenShop` and nearby `level0` handlers if the goal is saved-state or formula recovery
+- keep the next extraction pass focused on the remaining save-side owner for token-bank cap and claimable state instead of reopening controller-only or derived-output surfaces
 
 ## Handler split recovered from this pass
 
@@ -139,9 +149,9 @@ See also: [`docs/systems/spend/daily-tokenium-mission-lane-verification.md`](doc
 ## Not yet verified enough for app integration
 
 - the actual saved player-owned fields for:
-  - current token-bank amount
   - current claimable bank tokens
   - current bank cap
+  - any distinct saved fill or ready-state field beyond `SaveData.BankedTokens`
   - current daily tokenium amount or daily tokenium cap
 - whether `BankFill` is only a UI progress object or also directly mirrors serialized state
 - the exact relationship between:
@@ -176,9 +186,10 @@ This lane already points to several future owner families that matter beyond the
 ## Current app implication
 
 - It is now safe to say TokenShop sits on top of a real token-bank state lane with cap, fill, and claim concepts.
+- It is now safe to say the current token-bank stored amount is grounded more narrowly as `SaveData.BankedTokens`, while cap and claimable or ready state remain blocked.
 - It is still not safe to put token-bank values into `state.playerProfile` as canonical fields until the saved-state owner and naming are recovered.
 - It is now safe to treat the TokenShop controller shell, the `BigStatisticPrefab.TokenBankCap` display shell, and the `FinalTokenBank*` derived-output cluster as non-owner surfaces for save-state recovery.
-- It is now safe to keep token-bank save-side recovery on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary instead of treating `TokenShop` methods or `FinalTokenBank*` symbols as recovered saved-state owners.
+- It is now safe to keep token-bank cap and claimable or ready-state recovery on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary instead of treating `TokenShop` methods or `FinalTokenBank*` symbols as recovered saved-state owners.
 - Any future planner or import work should treat token-bank state as `available but unmapped` until those owned fields are proven from assets.
 
 

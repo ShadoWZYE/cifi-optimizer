@@ -1757,10 +1757,13 @@ function validateTokenBankStateClues(clues) {
   expectNonEmptyString(clues.sources.metadata, "token-bank state clues metadata path must be present");
   expectNonEmptyString(clues.sources.level0, "token-bank state clues level0 path must be present");
   expectNonEmptyString(clues.sources.probe, "token-bank state clues probe path must be present");
+  expectNonEmptyString(clues.sources.uabeaProbe, "token-bank state clues uabeaProbe path must be present");
   expectArray(clues.tokenShopMethods, "token-bank state clues tokenShopMethods must be an array");
   expectArray(clues.tokenShopControllerRefs, "token-bank state clues tokenShopControllerRefs must be an array");
   expectArray(clues.displayOrHandlerClues, "token-bank state clues displayOrHandlerClues must be an array");
   expectArray(clues.derivedOutputs, "token-bank state clues derivedOutputs must be an array");
+  expectRecord(clues.exactSaveOwnerRecovery, "token-bank state clues exactSaveOwnerRecovery must be an object");
+  expectArray(clues.negativeTypedOwnerChecks, "token-bank state clues negativeTypedOwnerChecks must be an array");
   expectArray(clues.currentBoundary, "token-bank state clues currentBoundary must be an array");
 
   ["get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "SetBankFill"].forEach((name) => {
@@ -1775,6 +1778,20 @@ function validateTokenBankStateClues(clues) {
   ["FinalTokenBankFillSpeed", "<FinalTokenBankFillSpeed>k__BackingField"].forEach((name) => {
     assert.ok(clues.derivedOutputs.includes(name), `token-bank state clues missing ${name}`);
   });
+  assert.equal(clues.exactSaveOwnerRecovery.declaringType, "SaveData", "token-bank state clues declaringType drifted");
+  assert.equal(clues.exactSaveOwnerRecovery.storedAmountField, "BankedTokens", "token-bank state clues storedAmountField drifted");
+  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldType, "System.Single", "token-bank state clues storedAmountFieldType drifted");
+  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldIndex, 214, "token-bank state clues storedAmountFieldIndex drifted");
+  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldOffset, 1800, "token-bank state clues storedAmountFieldOffset drifted");
+  [
+    "SaveData.ClaimableBankTokens",
+    "SaveData.TokenBankCap",
+    "PlayerProfileData.BankedTokens",
+    "PlayerProfileData.ClaimableBankTokens",
+    "PlayerProfileData.TokenBankCap"
+  ].forEach((name) => {
+    assert.ok(clues.negativeTypedOwnerChecks.includes(name), `token-bank state clues missing ${name}`);
+  });
 
   return {
     id: "token-bank-state-clues",
@@ -1783,7 +1800,7 @@ function validateTokenBankStateClues(clues) {
     stats: [
       `${clues.tokenShopMethods.length} token-bank controller methods`,
       `${clues.displayOrHandlerClues.length} display or handler clues`,
-      "TokenShop, TokenBankCap, and LM244 split clues"
+      "Exact SaveData.BankedTokens owner plus blocked cap or claimable typed checks"
     ]
   };
 }
