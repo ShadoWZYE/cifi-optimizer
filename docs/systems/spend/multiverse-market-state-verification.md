@@ -203,16 +203,22 @@ Current grounded conclusion:
 - This is grounded because each of those rows is present in the validated row dataset, each has checked `SetIS71CostText` through `SetIS74CostText` and `BuyIS71` through `BuyIS74` hooks, and the same numbers are directly recovered as `SaveData` fields.
 - This is still not final row-label recovery. The repo-local evidence does not yet recover player-facing labels for rows `71-74`, and it does not yet ground a broader ordered remap outside `71-74`.
 
-## Checked row `71-74` player-facing identity boundary
+## Checked row `69-74` player-facing identity-source boundary
 
-- The row-order mapping above is settled and separate from player-facing identity.
-- Repo-local evidence now checks one narrow negative identity boundary for those same rows:
-  - `IS71ID` through `IS74ID`, `BuyIS71` through `BuyIS74`, and `SetIS71CostText` through `SetIS74CostText` confirm ordered row access plus same-number serialized-id field recovery, not final player-facing labels
-  - the visible prefab-number shell `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62` is explicitly remapped to serialized ids `59-62`, so it cannot identify validated rows `71-74`
-  - the nearest checked player-facing inscription labels currently preserved in repo-local probes are `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, both outside the `71-74` target rows
+- The numbering boundary is settled and separate from player-facing identity source:
+  - `IS69Level` through `IS74Level`
+  - `IS69ID` through `IS74ID`
+  - `BuyIS69` through `BuyIS74`
+  - prefab-number shells `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
+- Repo-local evidence now checks the non-prefab identity-source candidates inside that same broken band:
+  - `TextHandlerMarkets` cost-text coverage preserves `SetIS69CostText` through `SetIS74CostText`
+  - the adjacent action shell preserves `BuyIS69` through `BuyIS74`
+  - the checked `MultiverseMarket` field table preserves `THMarkets: TextHandlerMarkets` beside `InscryptionsList: List<GameObject>`
+  - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
+  - the nearest checked player-facing inscription labels currently preserved in repo-local probes remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, both outside the `69-74` target rows
 - Current grounded conclusion:
-  - no stable player-facing identity is currently grounded for rows `71-74`
-  - ordered row mapping and player-facing identity must remain separated
+  - no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`
+  - save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
   - the canonical import-safe subset therefore stays empty
 
 ## Checked row `71-74` remap-band boundary
@@ -260,12 +266,12 @@ Current grounded conclusion:
 - same-number prefab numbering is stable through row `68`
 - same-number prefab numbering is broken from rows `69-74`
 - same-number prefab numbering resumes at row `75` and stays direct through row `110`
-- this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `71-74`
+- this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `69-74`
 - the canonical import-safe subset stays empty
 
 ## Nearby checked inscription identity-binding pattern
 
-- The nearest checked positive binding pattern now sits just outside the unresolved `71-74` band:
+- The nearest checked positive binding pattern now sits just outside the unresolved `69-74` band:
   - row `78`: `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`
   - row `83`: `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`
 - The smallest defensible pattern is a same-number nearby join recovered in the `TextHandlerMarkets` neighborhood:
@@ -274,12 +280,12 @@ Current grounded conclusion:
   - `BuyISN`
   - `ChrystosEmporiumUpgradeN-IDN`
   - `Inscryption N: ...`
-- This must stay distinct from ordered row mapping alone. Rows `71-74` still fail the direct prefab join because the visible shell is remapped as `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62`, and no checked player-facing string currently names those rows.
+- This must stay distinct from ordered row mapping alone. Rows `69-74` still fail the direct prefab join because the visible shell is remapped as `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`, and no checked player-facing string currently names those rows.
 
 Current grounded conclusion:
 
 - nearby rows `78` and `83` now show how ordered inscription rows can bind to player-facing identity when the same-number chain is preserved
-- this recovered pattern does not ground rows `71-74`
+- this recovered pattern does not ground rows `69-74`
 - the canonical import-safe subset stays empty
 
 ## Bounded SaveData import classification

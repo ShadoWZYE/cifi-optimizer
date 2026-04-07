@@ -1,0 +1,285 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "multiverse-market-row69-74-identity-source-boundary",
+  "sources": {
+    "inscriptionNumberingStabilityBoundary": "data/multiverse-market-inscription-numbering-stability-boundary.json",
+    "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
+    "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
+    "actionShell": "data/multiverse-market-action-shell.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "unityProbeReport": "data/unity-probe-report.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
+  },
+  "settledBrokenPrefabBand": [
+    {
+      "orderedInscriptionRow": 69,
+      "saveField": "IS69Level",
+      "serializedIdField": "IS69ID",
+      "buyHook": "BuyIS69",
+      "costTextHook": "SetIS69CostText",
+      "prefabName": "ChrystosEmporiumUpgrade69-ID57",
+      "remappedSerializedId": 57
+    },
+    {
+      "orderedInscriptionRow": 70,
+      "saveField": "IS70Level",
+      "serializedIdField": "IS70ID",
+      "buyHook": "BuyIS70",
+      "costTextHook": "SetIS70CostText",
+      "prefabName": "ChrystosEmporiumUpgrade70-ID58",
+      "remappedSerializedId": 58
+    },
+    {
+      "orderedInscriptionRow": 71,
+      "saveField": "IS71Level",
+      "serializedIdField": "IS71ID",
+      "buyHook": "BuyIS71",
+      "costTextHook": "SetIS71CostText",
+      "prefabName": "ChrystosEmporiumUpgrade71-ID59",
+      "remappedSerializedId": 59
+    },
+    {
+      "orderedInscriptionRow": 72,
+      "saveField": "IS72Level",
+      "serializedIdField": "IS72ID",
+      "buyHook": "BuyIS72",
+      "costTextHook": "SetIS72CostText",
+      "prefabName": "ChrystosEmporiumUpgrade72-ID60",
+      "remappedSerializedId": 60
+    },
+    {
+      "orderedInscriptionRow": 73,
+      "saveField": "IS73Level",
+      "serializedIdField": "IS73ID",
+      "buyHook": "BuyIS73",
+      "costTextHook": "SetIS73CostText",
+      "prefabName": "ChrystosEmporiumUpgrade73-ID61",
+      "remappedSerializedId": 61
+    },
+    {
+      "orderedInscriptionRow": 74,
+      "saveField": "IS74Level",
+      "serializedIdField": "IS74ID",
+      "buyHook": "BuyIS74",
+      "costTextHook": "SetIS74CostText",
+      "prefabName": "ChrystosEmporiumUpgrade74-ID62",
+      "remappedSerializedId": 62
+    }
+  ],
+  "checkedNonPrefabIdentitySources": {
+    "directPlayerFacingStringSearch": {
+      "searchedLabels": [
+        "Inscryption 69",
+        "Inscryption 70",
+        "Inscryption 71",
+        "Inscryption 72",
+        "Inscryption 73",
+        "Inscryption 74"
+      ],
+      "matches": [],
+      "conclusion": "No checked repo-local player-facing string anchor names rows 69-74 directly."
+    },
+    "textHandlerCoverage": {
+      "textHandlerOwner": "TextHandlerMarkets",
+      "textHandlerScriptPath": "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
+      "costTextHooks": [
+        "SetIS69CostText",
+        "SetIS70CostText",
+        "SetIS71CostText",
+        "SetIS72CostText",
+        "SetIS73CostText",
+        "SetIS74CostText"
+      ],
+      "conclusion": "Text/localization coverage confirms row-local cost text hooks only, not final player-facing row labels."
+    },
+    "actionShellCoverage": {
+      "buyHooks": [
+        "BuyIS69",
+        "BuyIS70",
+        "BuyIS71",
+        "BuyIS72",
+        "BuyIS73",
+        "BuyIS74"
+      ],
+      "conclusion": "Adjacent buy-hook recovery confirms row access only, not player-facing identity."
+    },
+    "metadataJoinCandidates": {
+      "ownerField": "THMarkets",
+      "ownerType": "TextHandlerMarkets",
+      "listField": "InscryptionsList",
+      "listType": "System.Collections.Generic.List`1<UnityEngine.GameObject>",
+      "conclusion": "A UI-owner plus GameObject-list shell is recoverable repo-locally, but no checked row-to-label join or serialized lookup table binds rows 69-74 to player-facing inscription names."
+    },
+    "nearbyPositiveBindingAnchors": [
+      {
+        "orderedInscriptionRow": 78,
+        "prefabName": "ChrystosEmporiumUpgrade78-ID78",
+        "playerFacingLabel": "Inscryption 78: Ouroboros Orbs"
+      },
+      {
+        "orderedInscriptionRow": 83,
+        "prefabName": "ChrystosEmporiumUpgrade83-ID83",
+        "playerFacingLabel": "Inscryption 83: Fast-Loop ML"
+      }
+    ]
+  },
+  "playerFacingIdentitySourceBoundary": {
+    "identitySourceRecovered": [],
+    "canonicalImportSafeSubset": [],
+    "helpsRows6974": false,
+    "identityStillBlocked": [
+      {
+        "orderedInscriptionRow": 69,
+        "saveField": "IS69Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
+            "claim": "row 69 keeps same-number IS69Level, IS69ID, and BuyIS69 while the prefab shell is remapped as ChrystosEmporiumUpgrade69-ID57"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS69CostText under TextHandlerMarkets coverage"
+          },
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "no checked player-facing string anchor names Inscryption 69"
+          }
+        ],
+        "blockedBy": [
+          "the visible prefab-number shell 69 is explicitly remapped to serialized id 57",
+          "TextHandlerMarkets cost text coverage does not recover a row-69 player-facing label",
+          "no alternate checked repo-local string or lookup source binds row 69 to a player-facing inscription identity"
+        ]
+      },
+      {
+        "orderedInscriptionRow": 70,
+        "saveField": "IS70Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
+            "claim": "row 70 keeps same-number IS70Level, IS70ID, and BuyIS70 while the prefab shell is remapped as ChrystosEmporiumUpgrade70-ID58"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS70CostText under TextHandlerMarkets coverage"
+          },
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "no checked player-facing string anchor names Inscryption 70"
+          }
+        ],
+        "blockedBy": [
+          "the visible prefab-number shell 70 is explicitly remapped to serialized id 58",
+          "TextHandlerMarkets cost text coverage does not recover a row-70 player-facing label",
+          "no alternate checked repo-local string or lookup source binds row 70 to a player-facing inscription identity"
+        ]
+      },
+      {
+        "orderedInscriptionRow": 71,
+        "saveField": "IS71Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
+            "claim": "row 71 keeps same-number IS71Level, IS71ID, and BuyIS71 while the prefab shell is remapped as ChrystosEmporiumUpgrade71-ID59"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS71CostText under TextHandlerMarkets coverage"
+          },
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "no checked player-facing string anchor names Inscryption 71"
+          }
+        ],
+        "blockedBy": [
+          "the visible prefab-number shell 71 is explicitly remapped to serialized id 59",
+          "TextHandlerMarkets cost text coverage does not recover a row-71 player-facing label",
+          "no alternate checked repo-local string or lookup source binds row 71 to a player-facing inscription identity"
+        ]
+      },
+      {
+        "orderedInscriptionRow": 72,
+        "saveField": "IS72Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
+            "claim": "row 72 keeps same-number IS72Level, IS72ID, and BuyIS72 while the prefab shell is remapped as ChrystosEmporiumUpgrade72-ID60"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS72CostText under TextHandlerMarkets coverage"
+          },
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "no checked player-facing string anchor names Inscryption 72"
+          }
+        ],
+        "blockedBy": [
+          "the visible prefab-number shell 72 is explicitly remapped to serialized id 60",
+          "TextHandlerMarkets cost text coverage does not recover a row-72 player-facing label",
+          "no alternate checked repo-local string or lookup source binds row 72 to a player-facing inscription identity"
+        ]
+      },
+      {
+        "orderedInscriptionRow": 73,
+        "saveField": "IS73Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
+            "claim": "row 73 keeps same-number IS73Level, IS73ID, and BuyIS73 while the prefab shell is remapped as ChrystosEmporiumUpgrade73-ID61"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS73CostText under TextHandlerMarkets coverage"
+          },
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "no checked player-facing string anchor names Inscryption 73"
+          }
+        ],
+        "blockedBy": [
+          "the visible prefab-number shell 73 is explicitly remapped to serialized id 61",
+          "TextHandlerMarkets cost text coverage does not recover a row-73 player-facing label",
+          "no alternate checked repo-local string or lookup source binds row 73 to a player-facing inscription identity"
+        ]
+      },
+      {
+        "orderedInscriptionRow": 74,
+        "saveField": "IS74Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
+            "claim": "row 74 keeps same-number IS74Level, IS74ID, and BuyIS74 while the prefab shell is remapped as ChrystosEmporiumUpgrade74-ID62"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS74CostText under TextHandlerMarkets coverage"
+          },
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "no checked player-facing string anchor names Inscryption 74"
+          }
+        ],
+        "blockedBy": [
+          "the visible prefab-number shell 74 is explicitly remapped to serialized id 62",
+          "TextHandlerMarkets cost text coverage does not recover a row-74 player-facing label",
+          "no alternate checked repo-local string or lookup source binds row 74 to a player-facing inscription identity"
+        ]
+      }
+    ],
+    "currentBoundary": [
+      "Save numbering, serialized-id numbering, prefab numbering, and player-facing identity source remain separate checks.",
+      "Across rows 69-74, checked repo-local non-prefab evidence recovers TextHandlerMarkets cost hooks, BuyIS hooks, and a THMarkets plus InscryptionsList UI shell, but not a direct player-facing inscription label source.",
+      "Direct string search in the checked repo-local probe artifacts does not recover Inscryption 69 through Inscryption 74.",
+      "Nearby same-number player-facing anchors remain rows 78 and 83 only, outside the broken 69-74 prefab band.",
+      "No player-facing identity source is recoverable repo-locally for rows 69-74, so those rows remain unresolved and the canonical import-safe subset stays empty."
+    ]
+  }
+}

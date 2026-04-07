@@ -80,9 +80,11 @@ const tokenShopSaveBoundaryData = JSON.parse(await readFile(new URL("../data/tok
 const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketMarketMemberBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-market-member-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveDataImportBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-savedata-import-boundary.json", import.meta.url), "utf8"));
+const multiverseMarketRow6974IdentitySourceBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-row69-74-identity-source-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketRow7174IdentityBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-row71-74-identity-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketRow7174RemapBandData = JSON.parse(await readFile(new URL("../data/multiverse-market-row71-74-remap-band.json", import.meta.url), "utf8"));
 const multiverseMarketNearbyIdentityBindingPatternData = JSON.parse(await readFile(new URL("../data/multiverse-market-nearby-identity-binding-pattern.json", import.meta.url), "utf8"));
+const multiverseMarketInscriptionNumberingStabilityBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-inscription-numbering-stability-boundary.json", import.meta.url), "utf8"));
 const tokenBankControllerShellData = JSON.parse(await readFile(new URL("../data/token-bank-controller-shell.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
@@ -440,6 +442,7 @@ const expectedBundledDatasetIds = [
   "multiverse-market-save-boundary",
   "multiverse-market-market-member-boundary",
   "multiverse-market-savedata-import-boundary",
+  "multiverse-market-row69-74-identity-source-boundary",
   "multiverse-market-row71-74-identity-boundary",
   "multiverse-market-row71-74-remap-band",
   "multiverse-market-nearby-identity-binding-pattern",
@@ -2177,6 +2180,7 @@ assertDatasetContractEntry("multiverse-market-prefab-remap-boundary", "data/mult
 assertDatasetContractEntry("multiverse-market-save-boundary", "data/multiverse-market-save-boundary.json");
 assertDatasetContractEntry("multiverse-market-market-member-boundary", "data/multiverse-market-market-member-boundary.json");
 assertDatasetContractEntry("multiverse-market-savedata-import-boundary", "data/multiverse-market-savedata-import-boundary.json");
+assertDatasetContractEntry("multiverse-market-row69-74-identity-source-boundary", "data/multiverse-market-row69-74-identity-source-boundary.json");
 assertDatasetContractEntry("multiverse-market-row71-74-identity-boundary", "data/multiverse-market-row71-74-identity-boundary.json");
 assertDatasetContractEntry("multiverse-market-row71-74-remap-band", "data/multiverse-market-row71-74-remap-band.json");
 assertDatasetContractEntry("multiverse-market-nearby-identity-binding-pattern", "data/multiverse-market-nearby-identity-binding-pattern.json");
@@ -2213,6 +2217,39 @@ assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]
 assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]*`Mech1Unlocked`, `Mech1Units`, `Mech1Upg1Level`, `Mech1Upg2Level`, `Mech1MissionsProgress`, `Mech1MissionsCompleted`, and `Mech2Unlocked`/);
 assert.match(multiverseMarketStateVerificationDoc, /`unresolved`[\s\S]*none/);
 assert.match(multiverseMarketStateVerificationDoc, /no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import/i);
+assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.dataset, "multiverse-market-row69-74-identity-source-boundary");
+assert.deepEqual(
+  multiverseMarketRow6974IdentitySourceBoundaryData.settledBrokenPrefabBand.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.costTextHook, entry.prefabName, entry.remappedSerializedId]),
+  [
+    [69, "IS69Level", "IS69ID", "BuyIS69", "SetIS69CostText", "ChrystosEmporiumUpgrade69-ID57", 57],
+    [70, "IS70Level", "IS70ID", "BuyIS70", "SetIS70CostText", "ChrystosEmporiumUpgrade70-ID58", 58],
+    [71, "IS71Level", "IS71ID", "BuyIS71", "SetIS71CostText", "ChrystosEmporiumUpgrade71-ID59", 59],
+    [72, "IS72Level", "IS72ID", "BuyIS72", "SetIS72CostText", "ChrystosEmporiumUpgrade72-ID60", 60],
+    [73, "IS73Level", "IS73ID", "BuyIS73", "SetIS73CostText", "ChrystosEmporiumUpgrade73-ID61", 61],
+    [74, "IS74Level", "IS74ID", "BuyIS74", "SetIS74CostText", "ChrystosEmporiumUpgrade74-ID62", 62]
+  ]
+);
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.searchedLabels, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.matches, []);
+assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.textHandlerCoverage.textHandlerOwner, "TextHandlerMarkets");
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.actionShellCoverage.buyHooks, ["BuyIS69", "BuyIS70", "BuyIS71", "BuyIS72", "BuyIS73", "BuyIS74"]);
+assert.deepEqual(
+  [
+    multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.metadataJoinCandidates.ownerField,
+    multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.metadataJoinCandidates.ownerType,
+    multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.metadataJoinCandidates.listField
+  ],
+  ["THMarkets", "TextHandlerMarkets", "InscryptionsList"]
+);
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.identitySourceRecovered, []);
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, []);
+assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.helpsRows6974, false);
+assert.deepEqual(
+  multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.identityStillBlocked.map((entry) => entry.orderedInscriptionRow),
+  [69, 70, 71, 72, 73, 74]
+);
+assert.match(multiverseMarketStateVerificationDoc, /## Checked row `69-74` player-facing identity-source boundary/);
+assert.match(multiverseMarketStateVerificationDoc, /no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`/i);
 assert.equal(multiverseMarketRow7174IdentityBoundaryData.dataset, "multiverse-market-row71-74-identity-boundary");
 assert.deepEqual(
   multiverseMarketRow7174IdentityBoundaryData.settledOrderedMapping.map((entry) => [entry.saveField, entry.orderedInscriptionRow]),
@@ -2228,8 +2265,7 @@ assert.deepEqual(
   multiverseMarketRow7174IdentityBoundaryData.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors.map((entry) => [entry.orderedInscriptionRow, entry.label]),
   [[78, "Inscryption 78: Ouroboros Orbs"], [83, "Inscryption 83: Fast-Loop ML"]]
 );
-assert.match(multiverseMarketStateVerificationDoc, /## Checked row `71-74` player-facing identity boundary/);
-assert.match(multiverseMarketStateVerificationDoc, /no stable player-facing identity is currently grounded for rows `71-74`/i);
+assert.match(multiverseMarketStateVerificationDoc, /ChrystosEmporiumUpgrade71-ID59/);
 assert.equal(multiverseMarketRow7174RemapBandData.dataset, "multiverse-market-row71-74-remap-band");
 assert.deepEqual(
   multiverseMarketRow7174RemapBandData.remapBandRows.map((entry) => [entry.orderedInscriptionRow, entry.serializedIdField, entry.prefabName, entry.remappedSerializedId]),
@@ -2247,7 +2283,6 @@ assert.deepEqual(
 assert.deepEqual(multiverseMarketRow7174RemapBandData.canonicalImportSafeSubset, []);
 assert.match(multiverseMarketStateVerificationDoc, /## Checked row `71-74` remap-band boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /prefab numbers `71-74` are reused as shells for serialized ids `59-62`/i);
-assert.match(multiverseMarketVerificationDoc, /## Narrow row 71-74 identity boundary/);
 assert.match(multiverseMarketVerificationDoc, /## Narrow row 71-74 remap-band boundary/);
 assert.match(multiverseMarketVerificationDoc, /ChrystosEmporiumUpgrade71-ID59/);
 assert.match(multiverseMarketVerificationDoc, /ChrystosEmporiumUpgrade59/);
@@ -2261,8 +2296,8 @@ assert.deepEqual(
   ]
 );
 assert.deepEqual(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.checkedPositiveRows, [78, 83]);
-assert.deepEqual(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.checkedNegativeCarryoverRows, [71, 72, 73, 74]);
-assert.equal(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.helpsRows7174, false);
+assert.deepEqual(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.checkedNegativeCarryoverRows, [69, 70, 71, 72, 73, 74]);
+assert.equal(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.helpsRows6974, false);
 assert.deepEqual(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.canonicalImportSafeSubset, []);
 assert.match(multiverseMarketStateVerificationDoc, /## Nearby checked inscription identity-binding pattern/);
 assert.match(multiverseMarketStateVerificationDoc, /ChrystosEmporiumUpgrade78-ID78/);
@@ -2270,8 +2305,8 @@ assert.match(multiverseMarketStateVerificationDoc, /ChrystosEmporiumUpgrade83-ID
 assert.match(multiverseMarketVerificationDoc, /## Nearby checked identity-binding pattern/);
 assert.match(multiverseMarketVerificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`/);
 assert.match(multiverseMarketVerificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/);
-assert.match(multiverseMarketVerificationDoc, /does not ground rows `71-74`/i);
-assert.match(multiverseMarketVerificationDoc, /prefab numbers `71-74` are reused as shells for serialized ids `59-62`/i);
+assert.match(multiverseMarketVerificationDoc, /does not ground rows `69-74`/i);
+assert.match(multiverseMarketVerificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);

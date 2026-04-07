@@ -54,6 +54,7 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - the broader `IS*Level` / trade-counter / mech run is not declared directly on checked `MultiverseMarket` or its first nested row-local payloads
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
   - the wider checked same-number prefab boundary is now stable through `68`, broken across `69-74`, and resumed at `75-110`
+  - checked non-prefab identity-source candidates inside the broken `69-74` band still stop at TextHandler/UI-shell evidence and do not recover player-facing inscription names
 - Still blocked:
   - the checked boundary still does not recover a typed `Market` field, so `Market` should remain accessor/member-shell naming only unless new evidence appears
   - the full owned `IS*Level` range is not yet safe import truth

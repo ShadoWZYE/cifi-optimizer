@@ -55,22 +55,26 @@ Current grounded conclusion:
 - the checked prefab shell now stays direct through `ChrystosEmporiumUpgrade68` but switches to explicit overrides `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
 - label remap remains partial until the row-order and ID mapping are closed more completely
 
-## Narrow row 71-74 identity boundary
+## Narrow row 69-74 identity-source boundary
 
-- The ordered mapping stays settled:
+- The row numbering stays settled:
+  - `IS69Level` -> row `69`
+  - `IS70Level` -> row `70`
   - `IS71Level` -> row `71`
   - `IS72Level` -> row `72`
   - `IS73Level` -> row `73`
   - `IS74Level` -> row `74`
-- The player-facing identity boundary for those same rows is still negative-only:
-  - `IS71ID` through `IS74ID`, `BuyIS71` through `BuyIS74`, and `SetIS71CostText` through `SetIS74CostText` confirm ordered row access plus same-number serialized-id field recovery, not final labels
-  - `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62` explicitly point the visible prefab-number shell at serialized ids `59-62`, not at validated rows `71-74`
-  - the nearest checked player-facing inscription labels remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, which are outside rows `71-74`
+- The checked non-prefab identity-source candidates for those same rows are still negative-only:
+  - `IS69ID` through `IS74ID`, `BuyIS69` through `BuyIS74`, and `SetIS69CostText` through `SetIS74CostText` confirm ordered row access plus same-number serialized-id field recovery, not final labels
+  - `THMarkets: TextHandlerMarkets` and `InscryptionsList: List<GameObject>` recover a nearby UI population shell, not a checked row-to-label join
+  - `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` explicitly point the visible prefab-number shell at serialized ids `57-62`, not at validated rows `69-74`
+  - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
+  - the nearest checked player-facing inscription labels remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, which are outside rows `69-74`
 
 Current grounded conclusion:
 
-- no stable player-facing identity is currently grounded for rows `71-74`
-- rows `71-74` therefore remain ordered-only mappings, not import-safe player-facing labels
+- no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`
+- rows `69-74` therefore remain unresolved for player-facing identity, not import-safe player-facing labels
 - the canonical import-safe subset stays empty
 
 ## Narrow row 71-74 remap-band boundary
@@ -115,7 +119,7 @@ Current grounded conclusion:
 - same-number prefab numbering is stable through row `68`
 - same-number prefab numbering is broken from rows `69-74`
 - same-number prefab numbering resumes at row `75` and stays direct through row `110`
-- this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `71-74`
+- this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `69-74`
 - the canonical import-safe subset stays empty
 
 ## Nearby checked identity-binding pattern
@@ -130,7 +134,7 @@ Current grounded conclusion:
 
 - nearby player-facing identity can be grounded when the same row number survives across `ISNLevel`, `ISNID`, `BuyISN`, direct prefab name `ChrystosEmporiumUpgradeN-IDN`, and `Inscryption N: ...`
 - this explains how nearby inscription rows bind to player-facing labels without widening beyond checked rows `78` and `83`
-- this pattern still does not ground rows `71-74` because the prefab join is remapped there and no checked player-facing labels have been recovered for those rows
+- this pattern still does not ground rows `69-74` because the prefab join is remapped there and no checked player-facing labels have been recovered for those rows
 - the canonical import-safe subset therefore stays empty
 
 ## Still unresolved

@@ -1,6 +1,6 @@
 # Multiverse Market Nearby Identity-Binding Pattern
 
-This note records the smallest checked positive pattern for how nearby inscription rows become player-facing labels, without reopening the settled negative result for rows `71-74`.
+This note records the smallest checked positive pattern for how nearby inscription rows become player-facing labels, without reopening the settled negative result for rows `69-74`.
 
 ## Checked positive bindings
 
@@ -31,25 +31,29 @@ This note records the smallest checked positive pattern for how nearby inscripti
 
 ## What this does not prove
 
-- This pattern does not promote rows `71-74` to player-facing identity.
-- Rows `71-74` still stop at ordered mapping plus same-number `ISNID` fields and UI access hooks:
+- This pattern does not promote rows `69-74` to player-facing identity.
+- Rows `69-74` still stop at ordered mapping plus same-number `ISNID` fields and UI access hooks:
+  - `IS69Level` -> row `69`, with `IS69ID`, `BuyIS69`, `SetIS69CostText`
+  - `IS70Level` -> row `70`, with `IS70ID`, `BuyIS70`, `SetIS70CostText`
   - `IS71Level` -> row `71`, with `IS71ID`, `BuyIS71`, `SetIS71CostText`
   - `IS72Level` -> row `72`, with `IS72ID`, `BuyIS72`, `SetIS72CostText`
   - `IS73Level` -> row `73`, with `IS73ID`, `BuyIS73`, `SetIS73CostText`
   - `IS74Level` -> row `74`, with `IS74ID`, `BuyIS74`, `SetIS74CostText`
 - The direct prefab join is broken there because the visible shell is remapped:
+  - `ChrystosEmporiumUpgrade69-ID57`
+  - `ChrystosEmporiumUpgrade70-ID58`
   - `ChrystosEmporiumUpgrade71-ID59`
   - `ChrystosEmporiumUpgrade72-ID60`
   - `ChrystosEmporiumUpgrade73-ID61`
   - `ChrystosEmporiumUpgrade74-ID62`
 - The smallest recovered explanation is a remap band:
-  - ordered row number and `ISNID` stay on `71-74`
-  - prefab numbers `71-74` are reused as shells for serialized ids `59-62`
-- No checked player-facing string currently names `Inscryption 71`, `Inscryption 72`, `Inscryption 73`, or `Inscryption 74`.
+  - ordered row number and `ISNID` stay on `69-74`
+  - prefab numbers `69-74` are reused as shells for serialized ids `57-62`
+- No checked player-facing string currently names `Inscryption 69`, `Inscryption 70`, `Inscryption 71`, `Inscryption 72`, `Inscryption 73`, or `Inscryption 74`.
 
 Current grounded conclusion:
 
 - ordered row mapping and player-facing identity binding stay separate
 - rows `78` and `83` show the nearest checked positive binding pattern
-- rows `71-74` remain unresolved for player-facing identity
+- rows `69-74` remain unresolved for player-facing identity
 - the canonical import-safe subset stays empty
