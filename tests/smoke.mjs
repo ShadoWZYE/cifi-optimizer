@@ -81,6 +81,7 @@ const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../d
 const multiverseMarketMarketMemberBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-market-member-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveDataImportBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-savedata-import-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketRow6974IdentitySourceBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-row69-74-identity-source-boundary.json", import.meta.url), "utf8"));
+const multiverseMarketSerializedLabelSourceBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-serialized-label-source-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketRow7174IdentityBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-row71-74-identity-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketRow7174RemapBandData = JSON.parse(await readFile(new URL("../data/multiverse-market-row71-74-remap-band.json", import.meta.url), "utf8"));
 const multiverseMarketNearbyIdentityBindingPatternData = JSON.parse(await readFile(new URL("../data/multiverse-market-nearby-identity-binding-pattern.json", import.meta.url), "utf8"));
@@ -443,6 +444,7 @@ const expectedBundledDatasetIds = [
   "multiverse-market-market-member-boundary",
   "multiverse-market-savedata-import-boundary",
   "multiverse-market-row69-74-identity-source-boundary",
+  "multiverse-market-serialized-label-source-boundary",
   "multiverse-market-row71-74-identity-boundary",
   "multiverse-market-row71-74-remap-band",
   "multiverse-market-nearby-identity-binding-pattern",
@@ -2181,6 +2183,7 @@ assertDatasetContractEntry("multiverse-market-save-boundary", "data/multiverse-m
 assertDatasetContractEntry("multiverse-market-market-member-boundary", "data/multiverse-market-market-member-boundary.json");
 assertDatasetContractEntry("multiverse-market-savedata-import-boundary", "data/multiverse-market-savedata-import-boundary.json");
 assertDatasetContractEntry("multiverse-market-row69-74-identity-source-boundary", "data/multiverse-market-row69-74-identity-source-boundary.json");
+assertDatasetContractEntry("multiverse-market-serialized-label-source-boundary", "data/multiverse-market-serialized-label-source-boundary.json");
 assertDatasetContractEntry("multiverse-market-row71-74-identity-boundary", "data/multiverse-market-row71-74-identity-boundary.json");
 assertDatasetContractEntry("multiverse-market-row71-74-remap-band", "data/multiverse-market-row71-74-remap-band.json");
 assertDatasetContractEntry("multiverse-market-nearby-identity-binding-pattern", "data/multiverse-market-nearby-identity-binding-pattern.json");
@@ -2250,6 +2253,31 @@ assert.deepEqual(
 );
 assert.match(multiverseMarketStateVerificationDoc, /## Checked row `69-74` player-facing identity-source boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`/i);
+assert.equal(multiverseMarketSerializedLabelSourceBoundaryData.dataset, "multiverse-market-serialized-label-source-boundary");
+assert.deepEqual(
+  multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.multiverseMarketContainerFields.map((entry) => [entry.name, entry.fieldOffset]),
+  [
+    ["InscryptionCostList", 10656],
+    ["InscryptionAndCostRelations", 10672],
+    ["IDChecks", 10688],
+    ["inscryptions", 10696],
+    ["InscryptionTupleList", 10704]
+  ]
+);
+assert.deepEqual(
+  multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.rowPayloadTypes.map((entry) => entry.typeName),
+  ["MultiverseMarket|Inscryption", "MultiverseMarket|InscryptionTupleObject"]
+);
+assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, []);
+assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.playerFacingIdentitySourceRecovered, []);
+assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.canonicalImportSafeSubset, []);
+assert.equal(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.helpsRows6974, false);
+assert.match(multiverseMarketVerificationDoc, /## Alternate serialized-export label-source boundary/);
+assert.match(multiverseMarketVerificationDoc, /InscryptionCostList/);
+assert.match(multiverseMarketVerificationDoc, /does not recover any player-facing label-bearing field/i);
+assert.match(multiverseMarketStateVerificationDoc, /## Alternate serialized-export label-source boundary/);
+assert.match(multiverseMarketStateVerificationDoc, /InscryptionTupleList/);
+assert.match(multiverseMarketStateVerificationDoc, /does not help rows `69-74` join back to the settled ordered mapping/i);
 assert.equal(multiverseMarketRow7174IdentityBoundaryData.dataset, "multiverse-market-row71-74-identity-boundary");
 assert.deepEqual(
   multiverseMarketRow7174IdentityBoundaryData.settledOrderedMapping.map((entry) => [entry.saveField, entry.orderedInscriptionRow]),

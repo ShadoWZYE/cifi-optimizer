@@ -2641,6 +2641,87 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
   };
 }
 
+function validateMultiverseMarketSerializedLabelSourceBoundary(boundary, stateDoc, verificationDoc, boundaryDoc) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market serialized label-source boundary generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "multiverse market serialized label-source boundary dataset id must be present");
+  expectRecord(boundary.sources, "multiverse market serialized label-source boundary sources must be an object");
+  ["row6974IdentitySourceBoundary", "marketMemberBoundary", "uabeaProbeReport", "stateVerificationDoc", "verificationDoc"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market serialized label-source boundary sources.${field} must be present`);
+  });
+  expectRecord(boundary.checkedSerializedExportEvidence, "multiverse market serialized label-source boundary checkedSerializedExportEvidence must be an object");
+  expectArray(boundary.checkedSerializedExportEvidence.multiverseMarketContainerFields, "multiverse market serialized label-source boundary multiverseMarketContainerFields must be an array");
+  expectArray(boundary.checkedSerializedExportEvidence.rowPayloadTypes, "multiverse market serialized label-source boundary rowPayloadTypes must be an array");
+  expectRecord(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks, "multiverse market serialized label-source boundary labelBearingFieldChecks must be an object");
+  expectArray(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.checkedAbsentFieldNames, "multiverse market serialized label-source boundary checkedAbsentFieldNames must be an array");
+  expectArray(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, "multiverse market serialized label-source boundary recoveredStringOrLabelFields must be an array");
+  expectRecord(boundary.joinBackAssessment, "multiverse market serialized label-source boundary joinBackAssessment must be an object");
+  expectArray(boundary.joinBackAssessment.distinctFromSettledCheckedPath, "multiverse market serialized label-source boundary distinctFromSettledCheckedPath must be an array");
+  expectArray(boundary.joinBackAssessment.structuralCarryover, "multiverse market serialized label-source boundary structuralCarryover must be an array");
+  expectArray(boundary.joinBackAssessment.playerFacingIdentitySourceRecovered, "multiverse market serialized label-source boundary playerFacingIdentitySourceRecovered must be an array");
+  expectArray(boundary.joinBackAssessment.canonicalImportSafeSubset, "multiverse market serialized label-source boundary canonicalImportSafeSubset must be an array");
+  expectArray(boundary.joinBackAssessment.blockedBy, "multiverse market serialized label-source boundary blockedBy must be an array");
+  expectArray(boundary.joinBackAssessment.currentBoundary, "multiverse market serialized label-source boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "multiverse-market-serialized-label-source-boundary", "multiverse market serialized label-source boundary dataset id drifted");
+  assert.deepEqual(
+    boundary.checkedSerializedExportEvidence.multiverseMarketContainerFields.map((entry) => [entry.name, entry.type, entry.fieldOffset]),
+    [
+      ["InscryptionCostList", "System.Collections.Generic.List`1<BreakInfinity.BigDouble>", 10656],
+      ["InscryptionAndCostRelations", "System.Collections.Generic.Dictionary`2<System.Int32, BreakInfinity.BigDouble>", 10672],
+      ["IDChecks", "System.Collections.Generic.List`1<System.Int32>", 10688],
+      ["inscryptions", "System.Collections.Generic.List`1<MultiverseMarket+Inscryption>", 10696],
+      ["InscryptionTupleList", "System.Collections.Generic.List`1<MultiverseMarket+InscryptionTupleObject>", 10704]
+    ],
+    "multiverse market serialized label-source boundary container fields drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedSerializedExportEvidence.rowPayloadTypes.map((entry) => [entry.typeName, entry.fields]),
+    [
+      ["MultiverseMarket|Inscryption", ["<ID>k__BackingField", "<Cost>k__BackingField", "<Level>k__BackingField", "<MaxLevel>k__BackingField", "<ISObject>k__BackingField", "transform"]],
+      ["MultiverseMarket|InscryptionTupleObject", ["<ID>k__BackingField", "<Cost>k__BackingField", "<Level>k__BackingField", "<MaxLevel>k__BackingField", "<ISObject>k__BackingField"]]
+    ],
+    "multiverse market serialized label-source boundary row payload types drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.checkedAbsentFieldNames,
+    ["Name", "Label", "Title", "Description", "Text", "LocalizationKey", "StringId"],
+    "multiverse market serialized label-source boundary checkedAbsentFieldNames drifted"
+  );
+  assert.deepEqual(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, [], "multiverse market serialized label-source boundary recoveredStringOrLabelFields must remain empty");
+  assert.match(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.conclusion, /structural row containers and GameObject carriers only/i, "multiverse market serialized label-source boundary conclusion drifted");
+  assert.deepEqual(boundary.joinBackAssessment.playerFacingIdentitySourceRecovered, [], "multiverse market serialized label-source boundary playerFacingIdentitySourceRecovered must remain empty");
+  assert.deepEqual(boundary.joinBackAssessment.canonicalImportSafeSubset, [], "multiverse market serialized label-source boundary canonicalImportSafeSubset must remain empty");
+  assert.equal(boundary.joinBackAssessment.helpsRows6974, false, "multiverse market serialized label-source boundary helpsRows6974 must remain false");
+  assert.deepEqual(
+    boundary.joinBackAssessment.structuralCarryover,
+    ["InscryptionCostList", "InscryptionAndCostRelations", "IDChecks", "inscryptions", "InscryptionTupleList", "<ID>k__BackingField", "<ISObject>k__BackingField"],
+    "multiverse market serialized label-source boundary structuralCarryover drifted"
+  );
+
+  const combinedDocs = [stateDoc, verificationDoc, boundaryDoc].join("\n");
+  assert.match(boundaryDoc, /checked UABEA field-table export/i, "serialized label-source boundary doc must mention the checked UABEA field-table export");
+  assert.match(boundaryDoc, /does not recover player-facing label fields/i, "serialized label-source boundary doc must preserve the negative label-field conclusion");
+  assert.match(verificationDoc, /## Alternate serialized-export label-source boundary/, "multiverse market verification doc must expose the alternate serialized-export label-source boundary section");
+  assert.match(verificationDoc, /InscryptionCostList/, "multiverse market verification doc must preserve the InscryptionCostList evidence");
+  assert.match(verificationDoc, /does not recover any player-facing label-bearing field/i, "multiverse market verification doc must preserve the label-field negative boundary");
+  assert.match(stateDoc, /## Alternate serialized-export label-source boundary/, "multiverse market state verification doc must expose the alternate serialized-export label-source boundary section");
+  assert.match(stateDoc, /InscryptionTupleList/, "multiverse market state verification doc must preserve the InscryptionTupleList evidence");
+  assert.match(stateDoc, /does not help rows `69-74` join back to the settled ordered mapping/i, "multiverse market state verification doc must preserve the no-join-back conclusion");
+  assert.match(combinedDocs, /the canonical import-safe subset stays empty/i, "serialized label-source boundary docs must preserve the empty canonical subset conclusion");
+
+  return {
+    id: "multiverse-market-serialized-label-source-boundary",
+    label: "Multiverse market serialized label-source boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.checkedSerializedExportEvidence.multiverseMarketContainerFields.length} checked serialized container fields`,
+      `${boundary.checkedSerializedExportEvidence.rowPayloadTypes.length} checked row payload types`,
+      `${boundary.joinBackAssessment.playerFacingIdentitySourceRecovered.length} recovered player-facing identity sources`,
+      "Alternate serialized export adds structural carriers only and does not resolve rows 69-74"
+    ]
+  };
+}
+
 function validateMultiverseMarketRow7174IdentityBoundary(boundary, stateDoc, verificationDoc) {
   expectNonEmptyString(boundary.generatedAt, "multiverse market row 71-74 identity boundary generatedAt must be present");
   expectNonEmptyString(boundary.dataset, "multiverse market row 71-74 identity boundary dataset id must be present");
@@ -3009,7 +3090,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 51, "bundled dataset contract must track the fifty-one shipped dataset groups");
+  assert.equal(contract.datasets.length, 52, "bundled dataset contract must track the fifty-two shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -3117,6 +3198,7 @@ export async function validateBundledDatasets() {
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
   const multiverseMarketSaveDataImportBoundary = await readJson("../../data/multiverse-market-savedata-import-boundary.json");
   const multiverseMarketRow6974IdentitySourceBoundary = await readJson("../../data/multiverse-market-row69-74-identity-source-boundary.json");
+  const multiverseMarketSerializedLabelSourceBoundary = await readJson("../../data/multiverse-market-serialized-label-source-boundary.json");
   const multiverseMarketRow7174IdentityBoundary = await readJson("../../data/multiverse-market-row71-74-identity-boundary.json");
   const multiverseMarketRow7174RemapBand = await readJson("../../data/multiverse-market-row71-74-remap-band.json");
   const multiverseMarketNearbyIdentityBindingPattern = await readJson("../../data/multiverse-market-nearby-identity-binding-pattern.json");
@@ -3125,6 +3207,7 @@ export async function validateBundledDatasets() {
   const multiverseMarketMarketMemberBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-market-member-boundary.md");
   const multiverseMarketStateVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-state-verification.md");
   const multiverseMarketVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-verification.md");
+  const multiverseMarketSerializedLabelSourceBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-serialized-label-source-boundary.md");
   const activeGroundingBoundariesDoc = await readText("../../docs/roadmap/active-grounding-boundaries.md");
 
   const summaries = [
@@ -3174,6 +3257,7 @@ export async function validateBundledDatasets() {
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateMultiverseMarketSaveDataImportBoundary(multiverseMarketSaveDataImportBoundary, multiverseMarketStateVerificationDoc),
     validateMultiverseMarketRow6974IdentitySourceBoundary(multiverseMarketRow6974IdentitySourceBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
+    validateMultiverseMarketSerializedLabelSourceBoundary(multiverseMarketSerializedLabelSourceBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarketSerializedLabelSourceBoundaryDoc),
     validateMultiverseMarketRow7174IdentityBoundary(multiverseMarketRow7174IdentityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarketRow7174RemapBand(multiverseMarketRow7174RemapBand, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarketNearbyIdentityBindingPattern(multiverseMarketNearbyIdentityBindingPattern, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),

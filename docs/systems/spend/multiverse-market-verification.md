@@ -77,6 +77,34 @@ Current grounded conclusion:
 - rows `69-74` therefore remain unresolved for player-facing identity, not import-safe player-facing labels
 - the canonical import-safe subset stays empty
 
+## Alternate serialized-export label-source boundary
+
+- This check is distinct from the settled Market/TextHandler/probe path.
+- The checked UABEA field-table export does recover additional `MultiverseMarket` structural containers:
+  - `InscryptionCostList`
+  - `InscryptionAndCostRelations`
+  - `IDChecks`
+  - `inscryptions`
+  - `InscryptionTupleList`
+- The same export also recovers the checked nested row payloads:
+  - `MultiverseMarket|Inscryption`
+  - `MultiverseMarket|InscryptionTupleObject`
+- Those nested payloads only preserve row-local carriers:
+  - `ID`
+  - `Cost`
+  - `Level`
+  - `MaxLevel`
+  - `ISObject`
+  - `transform` on `MultiverseMarket|Inscryption`
+- The checked serialized export does not recover any player-facing label-bearing field such as `Name`, `Label`, `Title`, `Description`, `Text`, `LocalizationKey`, or `StringId`.
+
+Current grounded conclusion:
+
+- this new evidence class is real, repo-local, and separate from the exhausted Market/TextHandler/probe path
+- it strengthens structural row-container recovery only
+- it does not help unresolved rows `69-74` join back to the settled ordered mapping as player-facing identities
+- the canonical import-safe subset stays empty
+
 ## Narrow row 71-74 remap-band boundary
 
 - The smallest checked remap relationship is:

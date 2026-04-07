@@ -1,0 +1,106 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "multiverse-market-serialized-label-source-boundary",
+  "sources": {
+    "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
+    "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
+  },
+  "checkedSerializedExportEvidence": {
+    "multiverseMarketContainerFields": [
+      {
+        "name": "InscryptionCostList",
+        "type": "System.Collections.Generic.List`1<BreakInfinity.BigDouble>",
+        "fieldOffset": 10656
+      },
+      {
+        "name": "InscryptionAndCostRelations",
+        "type": "System.Collections.Generic.Dictionary`2<System.Int32, BreakInfinity.BigDouble>",
+        "fieldOffset": 10672
+      },
+      {
+        "name": "IDChecks",
+        "type": "System.Collections.Generic.List`1<System.Int32>",
+        "fieldOffset": 10688
+      },
+      {
+        "name": "inscryptions",
+        "type": "System.Collections.Generic.List`1<MultiverseMarket+Inscryption>",
+        "fieldOffset": 10696
+      },
+      {
+        "name": "InscryptionTupleList",
+        "type": "System.Collections.Generic.List`1<MultiverseMarket+InscryptionTupleObject>",
+        "fieldOffset": 10704
+      }
+    ],
+    "rowPayloadTypes": [
+      {
+        "typeName": "MultiverseMarket|Inscryption",
+        "fields": [
+          "<ID>k__BackingField",
+          "<Cost>k__BackingField",
+          "<Level>k__BackingField",
+          "<MaxLevel>k__BackingField",
+          "<ISObject>k__BackingField",
+          "transform"
+        ]
+      },
+      {
+        "typeName": "MultiverseMarket|InscryptionTupleObject",
+        "fields": [
+          "<ID>k__BackingField",
+          "<Cost>k__BackingField",
+          "<Level>k__BackingField",
+          "<MaxLevel>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      }
+    ],
+    "labelBearingFieldChecks": {
+      "checkedAbsentFieldNames": [
+        "Name",
+        "Label",
+        "Title",
+        "Description",
+        "Text",
+        "LocalizationKey",
+        "StringId"
+      ],
+      "recoveredStringOrLabelFields": [],
+      "conclusion": "The checked alternate serialized export exposes structural row containers and GameObject carriers only, not player-facing label fields."
+    }
+  },
+  "joinBackAssessment": {
+    "distinctFromSettledCheckedPath": [
+      "This boundary checks alternate serialized UABEA field-table exports, not the exhausted Market/TextHandler/probe path.",
+      "It reuses the settled ordered row mapping only as context for whether a new label source can join back."
+    ],
+    "structuralCarryover": [
+      "InscryptionCostList",
+      "InscryptionAndCostRelations",
+      "IDChecks",
+      "inscryptions",
+      "InscryptionTupleList",
+      "<ID>k__BackingField",
+      "<ISObject>k__BackingField"
+    ],
+    "playerFacingIdentitySourceRecovered": [],
+    "canonicalImportSafeSubset": [],
+    "helpsRows6974": false,
+    "blockedBy": [
+      "The alternate serialized export does not recover any string, label, title, description, or localization-key field on the checked MultiverseMarket row payloads.",
+      "The recovered nested payloads stop at ID, Cost, Level, MaxLevel, ISObject, and transform carriers, which cannot by themselves resolve the player-facing identities of rows 69-74.",
+      "Because the checked export adds no player-facing label carrier, it cannot join the unresolved 69-74 rows back to the settled ordered mapping as final labels."
+    ],
+    "currentBoundary": [
+      "A new repo-local evidence class is checked: the alternate serialized UABEA field-table export for MultiverseMarket.",
+      "That export does recover extra structural containers for costs, ids, and nested row payload lists beyond the exhausted Market/TextHandler/probe path.",
+      "It does not recover any player-facing label-bearing field on MultiverseMarket, MultiverseMarket|Inscryption, or MultiverseMarket|InscryptionTupleObject.",
+      "It therefore does not help unresolved rows 69-74 join back to the settled ordered mapping as player-facing identities.",
+      "Rows 69-74 remain unresolved and the canonical import-safe subset stays empty."
+    ]
+  }
+}
