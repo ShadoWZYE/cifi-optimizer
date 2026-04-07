@@ -1808,13 +1808,16 @@ function validateTokenBankStateClues(clues) {
 function validateDailyTokeniumLaneClues(clues) {
   expectNonEmptyString(clues.generatedAt, "daily tokenium lane clues generatedAt must be present");
   expectRecord(clues.sources, "daily tokenium lane clues sources must be an object");
-  ["metadata", "level0", "iapCatalog", "probe", "academySprite"].forEach((field) => {
+  ["metadata", "level0", "iapCatalog", "probe", "academySprite", "uabeaProbe"].forEach((field) => {
     expectNonEmptyString(clues.sources[field], `daily tokenium lane clues sources.${field} must be present`);
   });
   expectArray(clues.ownerFamilyClues, "daily tokenium lane clues ownerFamilyClues must be an array");
   expectArray(clues.modifierClues, "daily tokenium lane clues modifierClues must be an array");
   expectArray(clues.premiumModifierClues, "daily tokenium lane clues premiumModifierClues must be an array");
   expectArray(clues.playerFacingStrings, "daily tokenium lane clues playerFacingStrings must be an array");
+  expectRecord(clues.exactSaveOwnerRecovery, "daily tokenium lane clues exactSaveOwnerRecovery must be an object");
+  expectRecord(clues.genericTokeniumClaimableBoundary, "daily tokenium lane clues genericTokeniumClaimableBoundary must be an object");
+  expectArray(clues.negativeTypedOwnerChecks, "daily tokenium lane clues negativeTypedOwnerChecks must be an array");
   expectArray(clues.currentBoundary, "daily tokenium lane clues currentBoundary must be an array");
 
   ["SpaceAcademy", "SpaceAcademyMain", "TextHandlerSpaceAcademy", "FarmMissions"].forEach((name) => {
@@ -1833,6 +1836,23 @@ function validateDailyTokeniumLaneClues(clues) {
   ].forEach((value) => {
     assert.ok(clues.playerFacingStrings.includes(value), `daily tokenium lane clues missing ${value}`);
   });
+  assert.equal(clues.exactSaveOwnerRecovery.declaringType, "SaveData", "daily tokenium lane clues declaringType drifted");
+  assert.equal(clues.exactSaveOwnerRecovery.storedAmountField, "DailyTokenium", "daily tokenium lane clues storedAmountField drifted");
+  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldType, "System.Double", "daily tokenium lane clues storedAmountFieldType drifted");
+  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldIndex, 2361, "daily tokenium lane clues storedAmountFieldIndex drifted");
+  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldOffset, 13032, "daily tokenium lane clues storedAmountFieldOffset drifted");
+  assert.equal(clues.genericTokeniumClaimableBoundary.declaringType, "SaveData", "daily tokenium lane clues claimable declaringType drifted");
+  assert.equal(clues.genericTokeniumClaimableBoundary.field, "ClaimableTokenium", "daily tokenium lane clues claimable field drifted");
+  assert.equal(clues.genericTokeniumClaimableBoundary.fieldType, "System.Double", "daily tokenium lane clues claimable fieldType drifted");
+  assert.equal(clues.genericTokeniumClaimableBoundary.fieldIndex, 2022, "daily tokenium lane clues claimable fieldIndex drifted");
+  assert.equal(clues.genericTokeniumClaimableBoundary.fieldOffset, 12064, "daily tokenium lane clues claimable fieldOffset drifted");
+  [
+    "SaveData.DailyTokeniumCap",
+    "PlayerProfileData.DailyTokenium",
+    "PlayerProfileData.DailyTokeniumCap"
+  ].forEach((name) => {
+    assert.ok(clues.negativeTypedOwnerChecks.includes(name), `daily tokenium lane clues missing ${name}`);
+  });
 
   return {
     id: "daily-tokenium-lane-clues",
@@ -1841,7 +1861,7 @@ function validateDailyTokeniumLaneClues(clues) {
     stats: [
       `${clues.ownerFamilyClues.length} academy or mission owner clues`,
       `${clues.modifierClues.length} lane modifier clues`,
-      "SpaceAcademy, FarmMissions, and Collector pack lane clues"
+      "Exact SaveData.DailyTokenium owner plus blocked cap and generic ClaimableTokenium boundary"
     ]
   };
 }
