@@ -74,8 +74,8 @@ Use these when the active lanes above close or split.
 ### `spend-token-shop-row-remap`
 
 - Goal: remap recovered `SaveData` `ATU*Level` fields onto grounded TokenShop rows without inventing player-facing names
-- Current blocker: the repo now has grounded ATU effect-domain clues and late direct-buy hooks, but it still lacks a checked object or text join from ATU-numbered row shells to specific prefab identities or final player-facing row titles
-- Smallest next slice: checked identity-join boundary that proves which `ATU` rows, if any, are safe to bind beyond compatibility-only import
+- Current blocker: the repo now has three checked but still separate local clusters: `ATU`-numbered getter and buy-hook metadata, generic TokenShop text-handler hooks such as `SetAllTokenShopTexts`, and the prefab/title rosters in `level0`; it still lacks a checked bridge from any concrete `ATU` row shell to a specific prefab identity or final player-facing row title
+- Smallest next slice: recover one checked bridge from an `ATU*Button`, `ATU*Content`, or `SetTokenTexts`-side neighborhood to one concrete `NewTokenUPGPrefab.*` object or one final row title
 
 ## Recently narrowed
 

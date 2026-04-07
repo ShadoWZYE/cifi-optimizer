@@ -12,17 +12,30 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 - Checked repo artifacts also preserve:
   - a prefab roster including `NewTokenUPGPrefab.T1.TokensBoost`, `NewTokenUPGPrefab.T2.DailyTokens`, `NewTokenUPGPrefab.T3.TrinityBoosterOne`, `NewTokenUPGPrefab.T4.Ultima`, and `NewTokenUPGPrefab.T5.CampaignFragments`
   - player-facing row strings including `Tokens Booster T2`, `Duo Booster Four`, `Trinity Booster One`, `Academy Booster`, `Trinity Oom Booster`, and `Tokens Booster T3`
+- Checked metadata neighborhoods now preserve a tighter late-row action shell:
+  - `BuyATU24` through `BuyATU28` sit beside named tier-buy hooks such as `BuyTokenT3`, `BuyTokenDailyT3`, `BuyTrio1Boost`, and `BuyTrio2Boost`
+  - the same metadata block also keeps `ATU1TokenBonus`, `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU24Bonus3Shards`, `get_ATU24Cost` through `get_ATU28Cost`, and `get_TotalT1TokenLevels` through `get_TotalT5TokenLevels` in one ATU-numbered family
+- Checked `level0` neighborhoods also preserve three separate local clusters:
+  - generic TokenShop text hooks such as `SetAllTokenShopTexts` and `SetTokenTexts`
+  - the `NewTokenUPGPrefab.*` named-object roster
+  - the player-facing row-title roster containing strings such as `Trinity Booster One`, `Academy Booster`, `Tokens Booster T3`, and `Campaign Fragments`
 
 ## Grounded conclusion
 
 - The repo can now say more than “ATU is unnamed.”
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
+- Late `ATU` buy hooks also now sit inside a checked named tier-buy neighborhood instead of standing alone.
 - That is still not the same as recovering grounded row identity.
 
 The missing piece is still a checked join:
 
 - no checked repo artifact currently joins any `ATU*Button` or `ATU*Content` path id directly to a specific `NewTokenUPGPrefab.*` object identity
 - no checked repo artifact currently ties a concrete `ATU` number directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` neighborhood to a specific `ATU` row number
+- the repo now has three separate checked local clusters, but they remain unjoined:
+  - `ATU`-numbered getter and buy-hook metadata
+  - generic TokenShop text-handler hooks
+  - prefab names and player-facing row-title strings in `level0`
 
 Because those joins are still missing, the repo should not:
 
@@ -43,5 +56,9 @@ Recover one checked identity bridge from `ATU`-numbered TokenShop row shells to 
 
 - a specific `NewTokenUPGPrefab.*` object, or
 - a final player-facing row title
+
+The strongest next candidate is no longer “search for more row labels” in the abstract. It is specifically:
+
+- bridge one `ATU*Button`, `ATU*Content`, or `SetTokenTexts`-side object neighborhood to either one concrete `NewTokenUPGPrefab.*` object or one concrete final row title
 
 If only a subset clears that bar, keep the rest of the `ATU` family quarantined instead of forcing a full remap.
