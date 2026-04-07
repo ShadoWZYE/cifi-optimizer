@@ -2269,15 +2269,29 @@ assert.deepEqual(
   ["MultiverseMarket|Inscryption", "MultiverseMarket|InscryptionTupleObject"]
 );
 assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, []);
+assert.deepEqual(
+  multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.indirectJoinSearch.candidateCatalogOrRelationFields,
+  ["InscryptionCostList", "InscryptionAndCostRelations", "IDChecks", "inscryptions", "InscryptionTupleList"]
+);
+assert.deepEqual(
+  multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.indirectJoinSearch.separateUiShellClues,
+  ["THMarkets", "InscryptionsList", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts"]
+);
+assert.deepEqual(
+  multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.indirectJoinSearch.repoLocalConsumerSearchSourcesWithoutCandidateHits,
+  ["data/unity-probe-report.json", "data/lm244-targeted-probe.json", "data/multiverse-market-metadata-neighborhood.json"]
+);
+assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.indirectJoinSearch.adjacentConsumerOrViewSymbolsRecovered, []);
 assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.playerFacingIdentitySourceRecovered, []);
 assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.canonicalImportSafeSubset, []);
 assert.equal(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.helpsRows6974, false);
-assert.match(multiverseMarketVerificationDoc, /## Alternate serialized-export label-source boundary/);
+assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.smallestRecoveredPattern, []);
+assert.match(multiverseMarketVerificationDoc, /## Alternate serialized-export indirect-join boundary/);
 assert.match(multiverseMarketVerificationDoc, /InscryptionCostList/);
-assert.match(multiverseMarketVerificationDoc, /does not recover any player-facing label-bearing field/i);
-assert.match(multiverseMarketStateVerificationDoc, /## Alternate serialized-export label-source boundary/);
+assert.match(multiverseMarketVerificationDoc, /no indirect catalog\/relation join is recoverable repo-locally/i);
+assert.match(multiverseMarketStateVerificationDoc, /## Alternate serialized-export indirect-join boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /InscryptionTupleList/);
-assert.match(multiverseMarketStateVerificationDoc, /does not help rows `69-74` join back to the settled ordered mapping/i);
+assert.match(multiverseMarketStateVerificationDoc, /no indirect catalog\/relation join is recoverable repo-locally/i);
 assert.equal(multiverseMarketRow7174IdentityBoundaryData.dataset, "multiverse-market-row71-74-identity-boundary");
 assert.deepEqual(
   multiverseMarketRow7174IdentityBoundaryData.settledOrderedMapping.map((entry) => [entry.saveField, entry.orderedInscriptionRow]),

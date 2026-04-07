@@ -2654,11 +2654,17 @@ function validateMultiverseMarketSerializedLabelSourceBoundary(boundary, stateDo
   expectRecord(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks, "multiverse market serialized label-source boundary labelBearingFieldChecks must be an object");
   expectArray(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.checkedAbsentFieldNames, "multiverse market serialized label-source boundary checkedAbsentFieldNames must be an array");
   expectArray(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, "multiverse market serialized label-source boundary recoveredStringOrLabelFields must be an array");
+  expectRecord(boundary.checkedSerializedExportEvidence.indirectJoinSearch, "multiverse market serialized label-source boundary indirectJoinSearch must be an object");
+  expectArray(boundary.checkedSerializedExportEvidence.indirectJoinSearch.candidateCatalogOrRelationFields, "multiverse market serialized label-source boundary candidateCatalogOrRelationFields must be an array");
+  expectArray(boundary.checkedSerializedExportEvidence.indirectJoinSearch.separateUiShellClues, "multiverse market serialized label-source boundary separateUiShellClues must be an array");
+  expectArray(boundary.checkedSerializedExportEvidence.indirectJoinSearch.repoLocalConsumerSearchSourcesWithoutCandidateHits, "multiverse market serialized label-source boundary repoLocalConsumerSearchSourcesWithoutCandidateHits must be an array");
+  expectArray(boundary.checkedSerializedExportEvidence.indirectJoinSearch.adjacentConsumerOrViewSymbolsRecovered, "multiverse market serialized label-source boundary adjacentConsumerOrViewSymbolsRecovered must be an array");
   expectRecord(boundary.joinBackAssessment, "multiverse market serialized label-source boundary joinBackAssessment must be an object");
   expectArray(boundary.joinBackAssessment.distinctFromSettledCheckedPath, "multiverse market serialized label-source boundary distinctFromSettledCheckedPath must be an array");
   expectArray(boundary.joinBackAssessment.structuralCarryover, "multiverse market serialized label-source boundary structuralCarryover must be an array");
   expectArray(boundary.joinBackAssessment.playerFacingIdentitySourceRecovered, "multiverse market serialized label-source boundary playerFacingIdentitySourceRecovered must be an array");
   expectArray(boundary.joinBackAssessment.canonicalImportSafeSubset, "multiverse market serialized label-source boundary canonicalImportSafeSubset must be an array");
+  expectArray(boundary.joinBackAssessment.smallestRecoveredPattern, "multiverse market serialized label-source boundary smallestRecoveredPattern must be an array");
   expectArray(boundary.joinBackAssessment.blockedBy, "multiverse market serialized label-source boundary blockedBy must be an array");
   expectArray(boundary.joinBackAssessment.currentBoundary, "multiverse market serialized label-source boundary currentBoundary must be an array");
 
@@ -2689,9 +2695,27 @@ function validateMultiverseMarketSerializedLabelSourceBoundary(boundary, stateDo
   );
   assert.deepEqual(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, [], "multiverse market serialized label-source boundary recoveredStringOrLabelFields must remain empty");
   assert.match(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.conclusion, /structural row containers and GameObject carriers only/i, "multiverse market serialized label-source boundary conclusion drifted");
+  assert.deepEqual(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch.candidateCatalogOrRelationFields,
+    ["InscryptionCostList", "InscryptionAndCostRelations", "IDChecks", "inscryptions", "InscryptionTupleList"],
+    "multiverse market serialized label-source boundary candidateCatalogOrRelationFields drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch.separateUiShellClues,
+    ["THMarkets", "InscryptionsList", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts"],
+    "multiverse market serialized label-source boundary separateUiShellClues drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch.repoLocalConsumerSearchSourcesWithoutCandidateHits,
+    ["data/unity-probe-report.json", "data/lm244-targeted-probe.json", "data/multiverse-market-metadata-neighborhood.json"],
+    "multiverse market serialized label-source boundary repoLocalConsumerSearchSourcesWithoutCandidateHits drifted"
+  );
+  assert.deepEqual(boundary.checkedSerializedExportEvidence.indirectJoinSearch.adjacentConsumerOrViewSymbolsRecovered, [], "multiverse market serialized label-source boundary adjacentConsumerOrViewSymbolsRecovered must remain empty");
+  assert.match(boundary.checkedSerializedExportEvidence.indirectJoinSearch.conclusion, /does not recover a consumer path that reads those carriers back into player-facing inscription labels/i, "multiverse market serialized label-source boundary indirectJoinSearch conclusion drifted");
   assert.deepEqual(boundary.joinBackAssessment.playerFacingIdentitySourceRecovered, [], "multiverse market serialized label-source boundary playerFacingIdentitySourceRecovered must remain empty");
   assert.deepEqual(boundary.joinBackAssessment.canonicalImportSafeSubset, [], "multiverse market serialized label-source boundary canonicalImportSafeSubset must remain empty");
   assert.equal(boundary.joinBackAssessment.helpsRows6974, false, "multiverse market serialized label-source boundary helpsRows6974 must remain false");
+  assert.deepEqual(boundary.joinBackAssessment.smallestRecoveredPattern, [], "multiverse market serialized label-source boundary smallestRecoveredPattern must remain empty");
   assert.deepEqual(
     boundary.joinBackAssessment.structuralCarryover,
     ["InscryptionCostList", "InscryptionAndCostRelations", "IDChecks", "inscryptions", "InscryptionTupleList", "<ID>k__BackingField", "<ISObject>k__BackingField"],
@@ -2700,13 +2724,13 @@ function validateMultiverseMarketSerializedLabelSourceBoundary(boundary, stateDo
 
   const combinedDocs = [stateDoc, verificationDoc, boundaryDoc].join("\n");
   assert.match(boundaryDoc, /checked UABEA field-table export/i, "serialized label-source boundary doc must mention the checked UABEA field-table export");
-  assert.match(boundaryDoc, /does not recover player-facing label fields/i, "serialized label-source boundary doc must preserve the negative label-field conclusion");
-  assert.match(verificationDoc, /## Alternate serialized-export label-source boundary/, "multiverse market verification doc must expose the alternate serialized-export label-source boundary section");
+  assert.match(boundaryDoc, /no indirect row-to-label join pattern is currently recoverable/i, "serialized label-source boundary doc must preserve the indirect-join negative boundary");
+  assert.match(verificationDoc, /## Alternate serialized-export indirect-join boundary/, "multiverse market verification doc must expose the alternate serialized-export indirect-join boundary section");
   assert.match(verificationDoc, /InscryptionCostList/, "multiverse market verification doc must preserve the InscryptionCostList evidence");
-  assert.match(verificationDoc, /does not recover any player-facing label-bearing field/i, "multiverse market verification doc must preserve the label-field negative boundary");
-  assert.match(stateDoc, /## Alternate serialized-export label-source boundary/, "multiverse market state verification doc must expose the alternate serialized-export label-source boundary section");
+  assert.match(verificationDoc, /no indirect catalog\/relation join is recoverable repo-locally/i, "multiverse market verification doc must preserve the indirect join negative boundary");
+  assert.match(stateDoc, /## Alternate serialized-export indirect-join boundary/, "multiverse market state verification doc must expose the alternate serialized-export indirect-join boundary section");
   assert.match(stateDoc, /InscryptionTupleList/, "multiverse market state verification doc must preserve the InscryptionTupleList evidence");
-  assert.match(stateDoc, /does not help rows `69-74` join back to the settled ordered mapping/i, "multiverse market state verification doc must preserve the no-join-back conclusion");
+  assert.match(stateDoc, /no indirect catalog\/relation join is recoverable repo-locally/i, "multiverse market state verification doc must preserve the indirect join negative boundary");
   assert.match(combinedDocs, /the canonical import-safe subset stays empty/i, "serialized label-source boundary docs must preserve the empty canonical subset conclusion");
 
   return {

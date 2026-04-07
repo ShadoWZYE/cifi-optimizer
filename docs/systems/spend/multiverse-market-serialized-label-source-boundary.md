@@ -1,4 +1,4 @@
-# Multiverse Market Serialized Label-Source Boundary
+# Multiverse Market Serialized Indirect Identity-Join Boundary
 
 This note records one new repo-local evidence class checked after the settled Market/TextHandler/probe path: the checked UABEA field-table export for `MultiverseMarket`.
 
@@ -25,7 +25,7 @@ This note records one new repo-local evidence class checked after the settled Ma
     - `<MaxLevel>k__BackingField`
     - `<ISObject>k__BackingField`
 
-## Checked negative boundary
+## Checked indirect-join boundary
 
 - This is distinct from the exhausted Market/TextHandler/probe path.
 - The checked serialized export does not recover player-facing label fields such as:
@@ -43,11 +43,25 @@ This note records one new repo-local evidence class checked after the settled Ma
   - max levels
   - GameObject pointers
   - one `transform` carrier on `MultiverseMarket|Inscryption`
+- The checked candidate catalog or relation field names are:
+  - `InscryptionCostList`
+  - `InscryptionAndCostRelations`
+  - `IDChecks`
+  - `inscryptions`
+  - `InscryptionTupleList`
+- The separate repo-local UI shell still stops at:
+  - `THMarkets`
+  - `InscryptionsList`
+  - `TextHandlerMarkets`
+  - `SetAllChrystosEmporiumTexts`
+- No checked repo-local adjacent consumer, controller, or view symbol references those five catalog or relation carriers outside the alternate UABEA field-table export.
+- That means no indirect row-to-label join pattern is currently recoverable between ordered rows or serialized ids and any separate identity-bearing catalog.
 
 Current grounded conclusion:
 
 - the alternate serialized export is a real new repo-local evidence class
 - it strengthens structural row-container recovery, not player-facing label recovery
+- no indirect catalog/relation join is recovered from the checked repo-local evidence
 - it does not help rows `69-74` join back to the settled ordered mapping as final player-facing identities
 - rows `69-74` remain unresolved
 - the canonical import-safe subset stays empty

@@ -77,7 +77,7 @@ Current grounded conclusion:
 - rows `69-74` therefore remain unresolved for player-facing identity, not import-safe player-facing labels
 - the canonical import-safe subset stays empty
 
-## Alternate serialized-export label-source boundary
+## Alternate serialized-export indirect-join boundary
 
 - This check is distinct from the settled Market/TextHandler/probe path.
 - The checked UABEA field-table export does recover additional `MultiverseMarket` structural containers:
@@ -97,11 +97,17 @@ Current grounded conclusion:
   - `ISObject`
   - `transform` on `MultiverseMarket|Inscryption`
 - The checked serialized export does not recover any player-facing label-bearing field such as `Name`, `Label`, `Title`, `Description`, `Text`, `LocalizationKey`, or `StringId`.
+- The checked repo-local UI-shell clues remain separate:
+  - `THMarkets: TextHandlerMarkets`
+  - `InscryptionsList: List<GameObject>`
+  - `SetAllChrystosEmporiumTexts`
+- No checked adjacent repo-local consumer, controller, or view symbol references `InscryptionCostList`, `InscryptionAndCostRelations`, `IDChecks`, `inscryptions`, or `InscryptionTupleList` outside the alternate UABEA field-table export.
 
 Current grounded conclusion:
 
 - this new evidence class is real, repo-local, and separate from the exhausted Market/TextHandler/probe path
 - it strengthens structural row-container recovery only
+- no indirect catalog/relation join is recoverable repo-locally between the settled ordered rows or serialized ids and any separate identity-bearing catalog
 - it does not help unresolved rows `69-74` join back to the settled ordered mapping as player-facing identities
 - the canonical import-safe subset stays empty
 
