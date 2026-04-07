@@ -16,6 +16,7 @@
     "shards:calibration-report": "node ./scripts/shards/calibration-report.mjs",
     "verify:data": "node ./scripts/contracts/validate-datasets.mjs",
     "verify:vendoring": "node ./scripts/contracts/verify-vendoring-layout.mjs",
-    "test": "node ./tests/smoke.mjs"
+    "test": "node ./tests/smoke.mjs",
+    "test:unit": "node --test --test-isolation=none ./tests/*.test.mjs"
   }
 }
