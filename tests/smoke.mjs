@@ -310,20 +310,24 @@ assert.match(appJs, /canonical-app-snapshot/);
 assert.match(appJs, /community-derived/);
 assert.match(appJs, /function renderSpendPlannerBoundary/);
 assert.match(appJs, /Spend planner first slice/);
-assert.match(appJs, /Descriptive only\. This panel shows grounded inputs that are available now and blocked inputs that remain unavailable while owner recovery is unresolved/);
-assert.match(appJs, /Grounded inputs available now/);
+assert.match(appJs, /Bounded preview only\. This panel separates grounded canonical inputs, evidence-backed boundary inputs, and blocked planner inputs while owner recovery and remap work remain unresolved/);
+assert.match(appJs, /Grounded canonical inputs available now/);
+assert.match(appJs, /Evidence-backed boundary inputs available now/);
 assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Why recommendations stay unavailable/);
 assert.match(appJs, /Tokens",\s*value: canonical\.tokens/);
 assert.match(appJs, /Diamonds",\s*value: canonical\.diamonds/);
 assert.match(appJs, /Current LR",\s*value: canonical\.loopReset/);
 assert.match(appJs, /Academy relics",\s*value: canonical\.academyRelics/);
+assert.match(appJs, /Banked tokens \(stored amount\)",\s*value: compatibility\.unmappedSystems\?\.tokenShop\?\.BankedTokens/);
+assert.match(appJs, /Exact SaveData\.BankedTokens recovery grounds the current stored token-bank amount as boundary-backed state only/);
 assert.match(appJs, /TokenShop current row levels/);
-assert.match(appJs, /token-bank cap, fill, and claimable tokens/i);
+assert.match(appJs, /token-bank cap and claimable tokens/i);
 assert.match(appJs, /Daily Tokenium current amount or cap/);
 assert.match(appJs, /Emporium owned progression and Inscryptions balance/);
-assert.match(appJs, /Confidence label: grounded canonical inputs only/);
-assert.match(appJs, /Canonical PlayerProfile only/);
+assert.match(appJs, /Confidence label: canonical PlayerProfile values and explicitly labeled boundary-backed evidence only/);
+assert.match(appJs, /Canonical boundary preserved/);
+assert.match(appJs, /Boundary-backed evidence labeled/);
 assert.match(appJs, /Uncertainty visible/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /function getRecommendationExplainabilitySummary/);
@@ -1937,12 +1941,17 @@ const spendFirstUiSliceTrack = snapshot.researchTracks.find((track) => track.id 
 withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice track", (track) => {
   assert.equal(track.status, "active");
   assert.match(track.goal, /minimal descriptive spend-planner panel/i);
-  assert.match(track.currentSlice, /only canonical `state\.playerProfile` spend-side inputs/);
-  assert.match(track.blockedBy, /TokenShop row remap, token-bank saved state, Daily Tokenium saved state, and Emporium owned progression fields/);
+  assert.match(track.currentSlice, /canonical `state\.playerProfile` spend-side inputs/);
+  assert.match(track.currentSlice, /exact `SaveData\.BankedTokens` as boundary-backed spend evidence/);
+  assert.match(track.blockedBy, /TokenShop row remap, token-bank cap and claimable state, Daily Tokenium saved state, and Emporium owned progression fields/);
   assert.match(track.smallestShippableSlice, /top-level spend-planner panel/);
   assert.ok(
     track.completedSteps.some((step) => /canonical `player\.resources\.\*`, `player\.loop\.loopReset`, and profile-confidence inputs only/.test(step)),
     "expected spend first UI slice track to record canonical-only panel inputs"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /exact `SaveData\.BankedTokens` as boundary-backed token-bank stored-amount evidence/.test(step)),
+    "expected spend first UI slice track to record BankedTokens boundary-backed evidence"
   );
   assert.ok(
     track.completedSteps.some((step) => /Label owner-dependent spend inputs as unavailable/.test(step)),
@@ -1953,8 +1962,12 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
     "expected spend first UI slice track to record available canonical spend inputs"
   );
   assert.ok(
-    track.verified.some((line) => /descriptive spend-planner panel can ship without promoting compatibility blobs or unresolved save owners/.test(line)),
-    "expected spend first UI slice track to keep compatibility and unresolved owners out of canonical inputs"
+    track.verified.some((line) => /Exact `SaveData\.BankedTokens` recovery now grounds the current token-bank stored amount strongly enough to show it as boundary-backed evidence/.test(line)),
+    "expected spend first UI slice track to record BankedTokens as boundary-backed evidence"
+  );
+  assert.ok(
+    track.verified.some((line) => /descriptive spend-planner panel can ship without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs/.test(line)),
+    "expected spend first UI slice track to keep unresolved owners and wrapper-only Emporium fields out of canonical inputs"
   );
   assert.ok(track.nextSteps.length <= 3, "expected spend first UI slice next-step count");
 });

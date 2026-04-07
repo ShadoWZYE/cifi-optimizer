@@ -1841,8 +1841,9 @@ function renderDatasetRefreshHardening() {
 
 function renderSpendPlannerBoundary() {
   const canonical = getCanonicalProfileState();
+  const compatibility = getCompatibilityProfileState();
   const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-planner-first-ui-slice");
-  const availableInputs = [
+  const canonicalInputs = [
     {
       label: "Tokens",
       value: canonical.tokens,
@@ -1868,14 +1869,22 @@ function renderSpendPlannerBoundary() {
       note: "Grounded canonical aggregate when imported, but still descriptive only in this slice."
     }
   ];
+  const boundaryBackedInputs = [
+    {
+      label: "Banked tokens (stored amount)",
+      value: compatibility.unmappedSystems?.tokenShop?.BankedTokens,
+      path: "compatibility.unmappedSystemState.tokenShop.BankedTokens",
+      note: "Exact SaveData.BankedTokens recovery grounds the current stored token-bank amount as boundary-backed state only. Cap and claimable planning stay blocked."
+    }
+  ];
   const blockedInputs = [
     {
       label: "TokenShop current row levels",
       reason: "Blocked until the recovered raw TokenShop ATU row levels are remapped onto grounded row identities. The save-side owner is now recovered, but canonical planner use is still blocked."
     },
     {
-      label: "Token-bank cap, fill, and claimable tokens",
-      reason: "Blocked until the saved-state owner is recovered. Current TokenShop and FinalTokenBank clues do not name planner-safe saved values."
+      label: "Token-bank cap and claimable tokens",
+      reason: "Blocked even with BankedTokens recovered. Current TokenShop and FinalTokenBank clues still do not name planner-safe cap or claimable saved values."
     },
     {
       label: "Daily Tokenium current amount or cap",
@@ -1883,7 +1892,7 @@ function renderSpendPlannerBoundary() {
     },
     {
       label: "Emporium owned progression and Inscryptions balance",
-      reason: "Blocked until the broader `InscryptionsDone` and `IS*Level` save-side handoff is safe for bounded import use. Current recovery still stops short of planner-safe canonical inputs."
+      reason: "Blocked for planner use. InscryptionsDone is still only a wrapper or export clue in this slice, and broader IS*Level import or remap decisions remain unresolved."
     }
   ];
   const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
@@ -1891,10 +1900,14 @@ function renderSpendPlannerBoundary() {
   return `
     <article class="validation-card warn">
       <strong>Spend planner first slice</strong>
-      <p class="validation-status">Descriptive only. This panel shows grounded inputs that are available now and blocked inputs that remain unavailable while owner recovery is unresolved.</p>
+      <p class="validation-status">Bounded preview only. This panel separates grounded canonical inputs, evidence-backed boundary inputs, and blocked planner inputs while owner recovery and remap work remain unresolved.</p>
       <div class="meta-stack">
-        <p class="snapshot-title">Grounded inputs available now</p>
-        <ul class="research-step-list">${availableInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not entered yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
+        <p class="snapshot-title">Grounded canonical inputs available now</p>
+        <ul class="research-step-list">${canonicalInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not entered yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
+      </div>
+      <div class="meta-stack">
+        <p class="snapshot-title">Evidence-backed boundary inputs available now</p>
+        <ul class="research-step-list">${boundaryBackedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not imported yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
       </div>
       <div class="meta-stack">
         <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
@@ -1903,13 +1916,15 @@ function renderSpendPlannerBoundary() {
       <div class="meta-stack">
         <p class="snapshot-title">Why recommendations stay unavailable</p>
         <p class="meta">Unresolved owners still prevent planner-safe recommendations. This slice does not claim best-buy order, ROI, ETA, optimizer correctness, or route quality while the blocked spend inputs remain unrecovered.</p>
-        <p class="meta">Confidence label: grounded canonical inputs only. Unresolved owner-dependent inputs stay explicitly unavailable instead of being inferred from compatibility blobs, extracted constants, or UI text hooks.</p>
+        <p class="meta">Confidence label: canonical PlayerProfile values and explicitly labeled boundary-backed evidence only. Unresolved owner-dependent inputs stay explicitly unavailable instead of being inferred from compatibility blobs, extracted constants, or UI text hooks.</p>
       </div>
       ${nextSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Current lane next steps</p><ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
       <div class="pill-row">
-        <span class="pill">${availableInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${availableInputs.length} grounded inputs entered</span>
+        <span class="pill">${canonicalInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${canonicalInputs.length} canonical inputs entered</span>
+        <span class="pill">${boundaryBackedInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${boundaryBackedInputs.length} boundary-backed inputs imported</span>
         <span class="pill">${blockedInputs.length} blocked inputs surfaced</span>
-        <span class="pill">Canonical PlayerProfile only</span>
+        <span class="pill">Canonical boundary preserved</span>
+        <span class="pill">Boundary-backed evidence labeled</span>
         <span class="pill">Uncertainty visible</span>
         <span class="pill">No spend recommendations yet</span>
       </div>
