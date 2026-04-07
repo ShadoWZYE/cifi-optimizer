@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { promisify } from "node:util";
+import { inspect, isDeepStrictEqual, promisify } from "node:util";
 import {
   PLAYER_PROFILE_IMPORT_ALIASES,
   PLAYER_PROFILE_SCHEMA_VERSION,
@@ -78,21 +78,12 @@ const multiverseMarketOwnerFamilyData = JSON.parse(await readFile(new URL("../da
 const tokenShopOwnerShellData = JSON.parse(await readFile(new URL("../data/token-shop-owner-shell.json", import.meta.url), "utf8"));
 const tokenShopSaveBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-save-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8"));
+const multiverseMarketMarketMemberBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-market-member-boundary.json", import.meta.url), "utf8"));
 const tokenBankControllerShellData = JSON.parse(await readFile(new URL("../data/token-bank-controller-shell.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const styles = await readFile(new URL("../styles.css", import.meta.url), "utf8");
-const agentsMd = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8");
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
-const groundingPlan = await readFile(new URL("../docs/cifi_grounding_plan.md", import.meta.url), "utf8");
-const unityAuditPlaybook = await readFile(new URL("../docs/unity/unity-audit-playbook.md", import.meta.url), "utf8");
-const ownerMap = await readFile(new URL("../docs/unity/unity-owner-map.md", import.meta.url), "utf8");
-const spendVerificationDoc = await readFile(new URL("../docs/systems/spend/spend-system-verification.md", import.meta.url), "utf8");
-const tokenBankStateDoc = await readFile(new URL("../docs/systems/spend/token-bank-state-verification.md", import.meta.url), "utf8");
-const dailyTokeniumMissionDoc = await readFile(new URL("../docs/systems/spend/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
-const multiverseMarketVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-verification.md", import.meta.url), "utf8");
-const multiverseMarketStateDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-state-verification.md", import.meta.url), "utf8");
-const multiverseMarketMetadataNeighborhoodDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-metadata-neighborhood.md", import.meta.url), "utf8");
 const recommendationContractModule = await readFile(new URL("../recommendation-contract.js", import.meta.url), "utf8");
 const recommendationFixtures = JSON.parse(await readFile(new URL("./fixtures/recommendation-actions.fixtures.json", import.meta.url), "utf8"));
 const shardVerificationDoc = await readFile(new URL("../docs/systems/shards/shard-system-verification.md", import.meta.url), "utf8");
@@ -121,7 +112,10 @@ const datasetIndexGeneratedDoc = await readFile(new URL("../docs/contracts/datas
 const shardResearchNote = await readFile(new URL("../docs/research/shard-milestones-grounded-2026-03-28.md", import.meta.url), "utf8");
 const tokenShopDoc = await readFile(new URL("../docs/systems/spend/token-shop-values.md", import.meta.url), "utf8");
 const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-values.md", import.meta.url), "utf8");
+const tokenBankStateDoc = await readFile(new URL("../docs/systems/spend/token-bank-state-verification.md", import.meta.url), "utf8");
+const dailyTokeniumMissionDoc = await readFile(new URL("../docs/systems/spend/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
 const shardIngestDoc = await readFile(new URL("../docs/systems/shards/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
+const unityAuditPlaybook = await readFile(new URL("../docs/unity/unity-audit-playbook.md", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
 const probeRunner = await readFile(new URL("../scripts/unity/run_probe.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
@@ -131,6 +125,17 @@ const generatedDatasetIndex = await generateDatasetIndex(repoRoot);
 await runNodeSyntaxCheck(fileURLToPath(new URL("../app.js", import.meta.url)));
 const datasetValidation = await validateBundledDatasets();
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
+const hardAssert = {
+  ok: assert.ok.bind(assert),
+  equal: assert.equal.bind(assert),
+  deepEqual: assert.deepEqual.bind(assert),
+  match: assert.match.bind(assert),
+  doesNotMatch: assert.doesNotMatch.bind(assert)
+};
+const smokeFailures = [];
+const seenSmokeFailureKeys = new Set();
+
+installSoftAssertions();
 
 assert.deepEqual(
   bootstrapDatasetBindings.variableNames,
@@ -381,6 +386,53 @@ const invalidFeedIssues = getRecommendationContractIssues({
 });
 const normalizedFixtureActions = recommendationFixtures.actions.map((item) => toRecommendationAction(item, item.module));
 const sortedFixtureActions = sortRecommendationFeed(normalizedFixtureActions);
+const expectedBundledDatasetIds = [
+  "snapshot",
+  "shards",
+  "shard-asset-grounding",
+  "shard-owner-family-boundary",
+  "shard-finalsu-bonus-boundary",
+  "shard-milestone-payload-boundary",
+  "shard-cost-model-boundary",
+  "shard-milestone-row-model-boundary",
+  "shard-milestone-title-effect-boundary",
+  "shard-effect-text-handler-boundary",
+  "shard-milestone-row-shell-boundary",
+  "shard-milestone-row-alignment-boundary",
+  "shard-milestone-handoff-boundary",
+  "shard-save-boundary",
+  "shard-milestone-save-owner-candidates",
+  "shard-scene-monobehaviour-probe",
+  "shard-cost-parameter-probe",
+  "shard-cost-method-probe",
+  "shard-cost-native-probe",
+  "shard-cost-screenshot-calibration",
+  "shard-cost-list-path-probe",
+  "shard-cost-formula-model",
+  "shard-bonus-slot-probe",
+  "shard-type-metadata-probe",
+  "extraction-candidate-families",
+  "extraction-candidate-ranking",
+  "token-shop",
+  "multiverse-market",
+  "multiverse-market-metadata-neighborhood",
+  "tokenium-naming-clues",
+  "token-bank-state-clues",
+  "daily-tokenium-lane-clues",
+  "token-bank-formula-boundary",
+  "multiverse-market-range-boundary",
+  "multiverse-market-row-text-coverage",
+  "multiverse-market-prefab-remap-boundary",
+  "token-shop-cost-lanes",
+  "spend-action-lane-clues",
+  "multiverse-market-action-shell",
+  "multiverse-market-owner-family",
+  "token-shop-owner-shell",
+  "token-shop-save-boundary",
+  "multiverse-market-save-boundary",
+  "multiverse-market-market-member-boundary",
+  "token-bank-controller-shell"
+];
 
 const defaultProfile = createDefaultPlayerProfile();
 assert.deepEqual(defaultProfile.planning.shards.observedLevelsByMilestone, {});
@@ -397,7 +449,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.id),
-  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-cost-model-boundary", "shard-milestone-row-model-boundary", "shard-milestone-title-effect-boundary", "shard-effect-text-handler-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-milestone-handoff-boundary", "shard-save-boundary", "shard-milestone-save-owner-candidates", "shard-scene-monobehaviour-probe", "shard-cost-parameter-probe", "shard-cost-method-probe", "shard-cost-native-probe", "shard-cost-screenshot-calibration", "shard-cost-list-path-probe", "shard-cost-formula-model", "shard-bonus-slot-probe", "shard-type-metadata-probe", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "multiverse-market-market-member-boundary", "token-bank-controller-shell"]
+  expectedBundledDatasetIds
 );
 assert.deepEqual(
   bundledDatasetContract.datasets.map((entry) => entry.classification),
@@ -909,12 +961,18 @@ assert.ok(shardCostNativeProbe.secondaryHundredPlusMergeModels.profiles.some((en
 const shardRow1Native = shardCostNativeProbe.rows.find((entry) => entry.row === 1);
 const shardRow19Native = shardCostNativeProbe.rows.find((entry) => entry.row === 19);
 const shardRow27Native = shardCostNativeProbe.rows.find((entry) => entry.row === 27);
-assert.ok(shardRow1Native.stageDispatchCallFamilies.some((family) => family.usesPreMergeAdd === true && family.usesCurrentLevelBigDouble === true && family.postDispatchMergeTarget === "0x24e1cb3"));
-assert.ok(shardRow1Native.stageDispatchCallFamilies.some((family) => family.usesUnaryThresholdTransform === true && JSON.stringify(family.integerSeeds) === JSON.stringify([100]) && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
-assert.ok(shardRow1Native.stageDispatchCallFamilies.some((family) => family.usesUnaryThresholdTransform === true && JSON.stringify(family.integerSeeds) === JSON.stringify([180]) && family.thresholdWindow === "200-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
-assert.ok(shardRow1Native.stageDispatchCallFamilies.some((family) => family.thresholdWindow === "300-plus-window" && family.usesPreMergeAdd === true && family.usesUnaryThresholdTransform === false));
-assert.ok(shardRow19Native.stageDispatchCallFamilies.some((family) => family.usesLiteralBuilder === true && family.usesPreMergeAdd === true && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
-assert.ok(shardRow27Native.stageDispatchCallFamilies.some((family) => family.usesPreMergeMultiply === true && family.usesPreMergeAdd === true && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+withRequiredValue(shardRow1Native, "expected native shard row 1 entry", (row) => {
+  assert.ok(row.stageDispatchCallFamilies.some((family) => family.usesPreMergeAdd === true && family.usesCurrentLevelBigDouble === true && family.postDispatchMergeTarget === "0x24e1cb3"));
+  assert.ok(row.stageDispatchCallFamilies.some((family) => family.usesUnaryThresholdTransform === true && JSON.stringify(family.integerSeeds) === JSON.stringify([100]) && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+  assert.ok(row.stageDispatchCallFamilies.some((family) => family.usesUnaryThresholdTransform === true && JSON.stringify(family.integerSeeds) === JSON.stringify([180]) && family.thresholdWindow === "200-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+  assert.ok(row.stageDispatchCallFamilies.some((family) => family.thresholdWindow === "300-plus-window" && family.usesPreMergeAdd === true && family.usesUnaryThresholdTransform === false));
+});
+withRequiredValue(shardRow19Native, "expected native shard row 19 entry", (row) => {
+  assert.ok(row.stageDispatchCallFamilies.some((family) => family.usesLiteralBuilder === true && family.usesPreMergeAdd === true && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+});
+withRequiredValue(shardRow27Native, "expected native shard row 27 entry", (row) => {
+  assert.ok(row.stageDispatchCallFamilies.some((family) => family.usesPreMergeMultiply === true && family.usesPreMergeAdd === true && family.thresholdWindow === "100-plus-window" && family.postDispatchMergeTarget === "0x24e1cb3"));
+});
 assert.ok(shardCostNativeProbe.helperTargetSummaries.some((entry) => entry.target === "0x24e1a07" && /double literal/.test(entry.summary)));
 assert.ok(shardCostNativeProbe.helperTargetSummaries.some((entry) => entry.target === "0x24e1d36" && /integer input/.test(entry.summary)));
 assert.ok(shardCostNativeProbe.findings.some((line) => /row-local ShardMining cost operands/.test(line)));
@@ -1343,17 +1401,18 @@ assert.equal(extractionCandidateRanking.topCandidate.track, "shard-milestone-pay
 assert.ok(Array.isArray(extractionCandidateRanking.familyFilter));
 assert.equal(extractionCandidateRanking.familyFilter.length, 0);
 const topShardCandidate = extractionCandidateRanking.candidates.find((candidate) => candidate.track === "shard-milestone-payload-recovery");
-assert.ok(topShardCandidate, "expected a PR2-local shard candidate");
-assert.equal(topShardCandidate.id, "shards.milestone-owner-family");
-assert.ok(topShardCandidate.heuristicScore >= 500);
-assert.ok(topShardCandidate.binaryFileCoverage.includes("workbench/unity/joined/level0"));
-assert.ok(topShardCandidate.binaryFileCoverage.includes("workbench/apk/base/global-metadata.dat"));
+withRequiredValue(topShardCandidate, "expected a PR2-local shard candidate", (candidate) => {
+  assert.equal(candidate.id, "shards.milestone-owner-family");
+  assert.ok(candidate.heuristicScore >= 500);
+  assert.ok(candidate.binaryFileCoverage.includes("workbench/unity/joined/level0"));
+  assert.ok(candidate.binaryFileCoverage.includes("workbench/apk/base/global-metadata.dat"));
+});
 assert.equal(groundedShardMilestones.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.equal(groundedShardObserved.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.equal(groundedShardProvenance.sourceReport, "docs/research/shard-milestones-grounded-2026-03-28.md");
 assert.deepEqual(
   datasetValidation.map((entry) => entry.id),
-  ["snapshot", "shards", "shard-asset-grounding", "shard-owner-family-boundary", "shard-finalsu-bonus-boundary", "shard-milestone-payload-boundary", "shard-cost-model-boundary", "shard-milestone-row-model-boundary", "shard-milestone-title-effect-boundary", "shard-effect-text-handler-boundary", "shard-milestone-row-shell-boundary", "shard-milestone-row-alignment-boundary", "shard-milestone-handoff-boundary", "shard-save-boundary", "shard-milestone-save-owner-candidates", "shard-scene-monobehaviour-probe", "shard-cost-parameter-probe", "shard-cost-method-probe", "shard-cost-native-probe", "shard-cost-screenshot-calibration", "shard-cost-list-path-probe", "shard-cost-formula-model", "shard-bonus-slot-probe", "shard-type-metadata-probe", "extraction-candidate-families", "extraction-candidate-ranking", "token-shop", "multiverse-market", "multiverse-market-metadata-neighborhood", "tokenium-naming-clues", "token-bank-state-clues", "daily-tokenium-lane-clues", "token-bank-formula-boundary", "multiverse-market-range-boundary", "multiverse-market-row-text-coverage", "multiverse-market-prefab-remap-boundary", "token-shop-cost-lanes", "spend-action-lane-clues", "multiverse-market-action-shell", "multiverse-market-owner-family", "token-shop-owner-shell", "token-shop-save-boundary", "multiverse-market-save-boundary", "multiverse-market-market-member-boundary", "token-bank-controller-shell"]
+  expectedBundledDatasetIds
 );
 assert.deepEqual(
   datasetValidation.map((entry) => entry.classification),
@@ -1591,451 +1650,436 @@ assert.deepEqual(
   ]
 );
 const archivedShardParentTrack = snapshot.researchTracks.find((track) => track.id === "shards-and-loop-guardrails");
-assert.ok(archivedShardParentTrack, "expected archived shard parent track");
-assert.equal(archivedShardParentTrack.status, "archived");
-assert.match(archivedShardParentTrack.currentSlice, /Archived parent/);
-assert.match(archivedShardParentTrack.currentSlice, /superseded by narrower successor work/);
-assert.equal(archivedShardParentTrack.nextSteps.length, 0);
+withRequiredValue(archivedShardParentTrack, "expected archived shard parent track", (track) => {
+  assert.equal(track.status, "archived");
+  assert.match(track.currentSlice, /Archived parent/);
+  assert.match(track.currentSlice, /superseded by narrower successor work/);
+  assert.equal(track.nextSteps.length, 0);
+});
 const shardTrack = snapshot.researchTracks.find((track) => track.id === "shard-milestone-payload-recovery");
-assert.ok(shardTrack, "expected shard milestone payload recovery track");
-assert.equal(shardTrack.status, "active");
-assert.match(shardTrack.goal, /Recover the exact shard-side serialized row payload or declaring save-side owner/);
-assert.match(shardTrack.currentSlice, /Extend the narrowed ShardMining \/ ShardUpgradeInfo trail/);
-assert.match(shardTrack.currentSlice, /checked cost-model, row-model, title\/effect, and effect-text-handler boundaries/);
-assert.match(shardTrack.currentSlice, /title\/effect/);
-assert.match(shardTrack.exitCondition, /exact serialized shard milestone row payload or declaring save-side owner/);
-assert.match(shardTrack.blockedBy, /still do not expose the declaring saved row model itself/);
-assert.match(shardTrack.smallestShippableSlice, /checked shard row-owner or save-owner boundary/);
-assert.deepEqual(shardTrack.sources, [
-  "docs/systems/shards/shard-system-verification.md",
-  "docs/systems/shards/shard-owner-family-verification.md",
-  "docs/unity/unity-owner-map.md",
-  "docs/unity/unity-audit-playbook.md"
-]);
-assert.deepEqual(shardTrack.artifacts, [
-  "data/shard-owner-family-boundary.v1.json",
-  "data/shard-finalsu-bonus-boundary.v1.json",
-  "data/shard-milestone-payload-boundary.v1.json",
-  "data/shard-cost-model-boundary.v1.json",
-  "data/shard-milestone-row-model-boundary.v1.json",
-  "data/shard-milestone-title-effect-boundary.v1.json",
-  "data/shard-effect-text-handler-boundary.v1.json",
-  "data/shard-milestone-row-shell-boundary.v1.json",
-  "data/shard-milestone-row-alignment-boundary.v1.json",
-  "data/shard-milestone-handoff-boundary.v1.json",
-  "data/shard-save-boundary.v1.json",
-  "data/shard-scene-monobehaviour-probe.v1.json",
-  "data/shard-cost-parameter-probe.v1.json",
-  "data/shard-cost-method-probe.v1.json",
-  "data/shard-cost-native-probe.v1.json",
-  "data/shard-cost-list-path-probe.v1.json",
-  "data/shard-cost-formula-model.v1.json",
-  "data/shard-bonus-slot-probe.v1.json",
-  "data/shard-type-metadata-probe.v1.json",
-  "data/shardmining-metadata-neighborhood.v1.json",
-  "data/shardupgradeinfo-metadata-neighborhood.v1.json"
-]);
-assert.ok(
-  shardTrack.completedSteps.some((step) => /first recovered shard cost-model shell/.test(step)),
-  "expected shard successor track to record the shard cost-model boundary slice"
-);
-assert.ok(
-  shardTrack.completedSteps.some((step) => /contiguous shard-local Milestone0-29TextChecker and SU0-29UnlockReq shell/.test(step)),
-  "expected shard successor track to record the shard row-model boundary slice"
-);
-assert.ok(
-  shardTrack.completedSteps.some((step) => /SMilestone title assets plus the ShardMilestoneBonus presentation family/.test(step)),
-  "expected shard successor track to record the shard title/effect boundary slice"
-);
-assert.ok(
-  shardTrack.completedSteps.some((step) => /strongest current shard-side effect-text handler clue/.test(step)),
-  "expected shard successor track to record the shard effect-text handler boundary slice"
-);
-assert.ok(
-  shardTrack.completedSteps.some((step) => /partial shard row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker/.test(step)),
-  "expected shard successor track to record the row-shell boundary slice"
-);
-assert.ok(
-  shardTrack.completedSteps.some((step) => /row-alignment boundary showing that UnlockMilestone17-29, Milestone0-12TextChecker, and BuyMilestone0 do not yet form one clean shared row-number family/.test(step)),
-  "expected shard successor track to record the row-alignment boundary slice"
-);
-assert.ok(
-  shardTrack.verified.some((line) => /sampled get_SU\*Cost accessors plus a row-local SU0 StartCost or exponent field shell/.test(line)),
-  "expected shard successor track to record the shard cost-model shell in verified facts"
-);
-assert.ok(
-  shardTrack.verified.some((line) => /Milestone0-29TextChecker and SU0-29UnlockReq families/.test(line)),
-  "expected shard successor track to record the row-model shell in verified facts"
-);
-assert.ok(
-  shardTrack.verified.some((line) => /title candidates for rows 0-30 and a generic ShardMilestoneBonus1-8 effect presentation family/.test(line)),
-  "expected shard successor track to record the title/effect boundary in verified facts"
-);
-assert.ok(
-  shardTrack.verified.some((line) => /TextHandlerShardMilestoneBonusesPerLevel\/N/.test(line)),
-  "expected shard successor track to record the shard effect-text handler clue in verified facts"
-);
-assert.ok(
-  shardTrack.verified.some((line) => /partial row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker/.test(line)),
-  "expected shard successor track to record the partial row shell in verified facts"
-);
-assert.ok(
-  shardTrack.verified.some((line) => /unlock hooks currently sit at 17-29 while text-checker hooks sit at 0-12/.test(line)),
-  "expected shard successor track to record the row-alignment mismatch in verified facts"
-);
-assert.ok(
-  shardTrack.verified.some((line) => /ShardMining keeps the shard-local row shell while ConstructionMilestones keeps the dense BuyMilestone1-57 family/.test(line)),
-  "expected shard successor track to record the narrowed handoff seam in verified facts"
-);
-assert.ok(shardTrack.nextSteps.length <= 5, "expected narrowed shard successor next-step count");
+withRequiredValue(shardTrack, "expected shard milestone payload recovery track", (track) => {
+  assert.equal(track.status, "active");
+  assert.match(track.goal, /Recover the exact shard-side serialized row payload or declaring save-side owner/);
+  assert.match(track.currentSlice, /Extend the narrowed ShardMining \/ ShardUpgradeInfo trail/);
+  assert.match(track.currentSlice, /checked cost-model, row-model, title\/effect, and effect-text-handler boundaries/);
+  assert.match(track.currentSlice, /title\/effect/);
+  assert.match(track.exitCondition, /exact serialized shard milestone row payload or declaring save-side owner/);
+  assert.match(track.blockedBy, /still do not expose the declaring saved row model itself/);
+  assert.match(track.smallestShippableSlice, /checked shard row-owner or save-owner boundary/);
+  assert.deepEqual(track.sources, [
+    "docs/systems/shards/shard-system-verification.md",
+    "docs/systems/shards/shard-owner-family-verification.md",
+    "docs/unity/unity-owner-map.md",
+    "docs/unity/unity-audit-playbook.md"
+  ]);
+  assert.deepEqual(track.artifacts, [
+    "data/shard-owner-family-boundary.v1.json",
+    "data/shard-finalsu-bonus-boundary.v1.json",
+    "data/shard-milestone-payload-boundary.v1.json",
+    "data/shard-cost-model-boundary.v1.json",
+    "data/shard-milestone-row-model-boundary.v1.json",
+    "data/shard-milestone-title-effect-boundary.v1.json",
+    "data/shard-effect-text-handler-boundary.v1.json",
+    "data/shard-milestone-row-shell-boundary.v1.json",
+    "data/shard-milestone-row-alignment-boundary.v1.json",
+    "data/shard-milestone-handoff-boundary.v1.json",
+    "data/shard-save-boundary.v1.json",
+    "data/shard-scene-monobehaviour-probe.v1.json",
+    "data/shard-cost-parameter-probe.v1.json",
+    "data/shard-cost-method-probe.v1.json",
+    "data/shard-cost-native-probe.v1.json",
+    "data/shard-cost-list-path-probe.v1.json",
+    "data/shard-cost-formula-model.v1.json",
+    "data/shard-bonus-slot-probe.v1.json",
+    "data/shard-type-metadata-probe.v1.json",
+    "data/shardmining-metadata-neighborhood.v1.json",
+    "data/shardupgradeinfo-metadata-neighborhood.v1.json"
+  ]);
+  assert.ok(
+    track.completedSteps.some((step) => /first recovered shard cost-model shell/.test(step)),
+    "expected shard successor track to record the shard cost-model boundary slice"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /contiguous shard-local Milestone0-29TextChecker and SU0-29UnlockReq shell/.test(step)),
+    "expected shard successor track to record the shard row-model boundary slice"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /SMilestone title assets plus the ShardMilestoneBonus presentation family/.test(step)),
+    "expected shard successor track to record the shard title/effect boundary slice"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /strongest current shard-side effect-text handler clue/.test(step)),
+    "expected shard successor track to record the shard effect-text handler boundary slice"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /partial shard row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker/.test(step)),
+    "expected shard successor track to record the row-shell boundary slice"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /row-alignment boundary showing that UnlockMilestone17-29, Milestone0-12TextChecker, and BuyMilestone0 do not yet form one clean shared row-number family/.test(step)),
+    "expected shard successor track to record the row-alignment boundary slice"
+  );
+  assert.ok(
+    track.verified.some((line) => /sampled get_SU\*Cost accessors plus a row-local SU0 StartCost or exponent field shell/.test(line)),
+    "expected shard successor track to record the shard cost-model shell in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /Milestone0-29TextChecker and SU0-29UnlockReq families/.test(line)),
+    "expected shard successor track to record the row-model shell in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /title candidates for rows 0-30 and a generic ShardMilestoneBonus1-8 effect presentation family/.test(line)),
+    "expected shard successor track to record the title/effect boundary in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /TextHandlerShardMilestoneBonusesPerLevel\/N/.test(line)),
+    "expected shard successor track to record the shard effect-text handler clue in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /partial row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker/.test(line)),
+    "expected shard successor track to record the partial row shell in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /unlock hooks currently sit at 17-29 while text-checker hooks sit at 0-12/.test(line)),
+    "expected shard successor track to record the row-alignment mismatch in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /ShardMining keeps the shard-local row shell while ConstructionMilestones keeps the dense BuyMilestone1-57 family/.test(line)),
+    "expected shard successor track to record the narrowed handoff seam in verified facts"
+  );
+  assert.ok(track.nextSteps.length <= 5, "expected narrowed shard successor next-step count");
+});
 const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
-assert.ok(spendTrack, "expected archived spend parent track");
-assert.equal(spendTrack.status, "archived");
-assert.match(spendTrack.currentSlice, /Archived parent: this broad spend lane is now superseded by narrower successor tracks/);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Separate TokenShop cost lanes, action lanes, owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
-  "expected archived spend parent to record TokenShop boundary separation"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /Separate MultiverseMarket owner-family, action-shell, range-boundary, prefab-remap, metadata-neighborhood, and save-boundary evidence into checked artifacts/.test(step)),
-  "expected archived spend parent to record Emporium boundary separation"
-);
+withRequiredValue(spendTrack, "expected archived spend parent track", (track) => {
+  assert.equal(track.status, "archived");
+  assert.match(track.currentSlice, /Archived parent: this broad spend lane is now superseded by narrower successor tracks/);
+  assert.ok(
+    track.completedSteps.some((step) => /Separate TokenShop cost lanes, action lanes, owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
+    "expected archived spend parent to record TokenShop boundary separation"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /Separate MultiverseMarket owner-family, action-shell, range-boundary, prefab-remap, metadata-neighborhood, and save-boundary evidence into checked artifacts/.test(step)),
+    "expected archived spend parent to record Emporium boundary separation"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
+    "expected archived spend parent to preserve save-boundary separation"
+  );
+});
 const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id === "spend-multiverse-save-model-recovery");
-assert.ok(spendSaveModelTrack, "expected Emporium save-model successor track");
-assert.equal(spendSaveModelTrack.status, "active");
-assert.match(spendSaveModelTrack.currentSlice, /market-member boundary artifacts/);
-assert.match(spendSaveModelTrack.currentSlice, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` accessor bridge/);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
-  "expected Emporium successor track to record market-member boundary grounding"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /Deepen that boundary with a bare `Market` member-shell clue/.test(step)),
-  "expected Emporium successor track to record Market member-shell narrowing"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /`PlayerProfileHandler`, `playerData`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `ConvertSaveDataToProfileData` bridge clues/.test(step)),
-  "expected Emporium successor track to record the PlayerProfileHandler bridge narrowing"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /Surface overlap-grounded Emporium import preview support/.test(step)),
-  "expected Emporium successor track to record overlap-grounded import preview support"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /checked `MultiverseMarket` row constants such as `Bonus`, `StartCost`, `CostExponent`, and recovered `MaxLevel`/.test(step)),
-  "expected Emporium successor track to record overlap-row constant preview support"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /remaining levels to the checked max on rows `71-74`/.test(step)),
-  "expected Emporium successor track to record recovered cap progress support"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /`PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge/.test(step) || /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
-  "expected Emporium successor track to record the narrowed PlayerProfileHandler bridge path"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(step)),
-  "expected Emporium successor track to record sibling market-side accessor narrowing"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /saveInfoCache: PlayerProfileData/.test(step) && /does not recover a typed `Market` field/.test(step)),
-  "expected Emporium successor track to record the refreshed typed boundary around PlayerProfileHandler and PlayerProfileData"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
-  "expected Emporium successor track to record the exact typed MultiverseMarket bridge"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /direct `get_Market` accessor clue/.test(line)),
-  "expected Emporium successor track to record the get_Market clue in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /overlap-grounded `71-74` subset/.test(line)),
-  "expected Emporium successor track to record overlap-grounded previewing in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /checked row constants from the `MultiverseMarket` payload/.test(line)),
-  "expected Emporium successor track to record checked overlap-row constants in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /recovered cap progress against checked `MaxLevel` values/.test(line)),
-  "expected Emporium successor track to record recovered overlap-row cap progress in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(line)),
-  "expected Emporium successor track to record the checked typed MultiverseMarket bridge in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /`PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`/.test(line)),
-  "expected Emporium successor track to record the direct PlayerProfileData field samples in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /`PlayerProfileHandler\.saveInfoCache: PlayerProfileData`/.test(line) && /does not recover a typed `Market` field/.test(line)),
-  "expected Emporium successor track to record the typed saveInfoCache field and missing typed Market field in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => line.includes("`PlayerProfileHandler`") && line.includes("`playerData`") && line.includes("`ConvertSaveDataToProfileData`")),
-  "expected Emporium successor track to record the PlayerProfileHandler bridge clues in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /checked accessor-versus-deeper-owner boundary/.test(line)),
-  "expected Emporium successor track to record the narrowed accessor-versus-deeper-owner boundary in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
-  "expected Emporium successor track to record sibling market-side accessors in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /`IS\*Level`, Necrum trade-counter, and early `Mech\*` fields/.test(line)),
-  "expected Emporium successor track to record the broader progression field run in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /accessor-versus-deeper-owner boundary/.test(line) && /deeper progression payload|separate PlayerProfileData-side family/.test(line)),
-  "expected Emporium successor track to record the accessor-versus-payload boundary in verified facts"
-);
-assert.ok(
-  spendSaveModelTrack.verified.some((line) => /rules out `MultiverseMarket` itself as the declaring type/.test(line)),
-  "expected Emporium successor track to record the ruled-out direct MultiverseMarket declaring type in verified facts"
-);
-assert.ok(
-  spendTrack.completedSteps.some((step) => /owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
-  "expected archived spend parent to preserve save-boundary separation"
-);
+withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor track", (track) => {
+  assert.equal(track.status, "active");
+  assert.match(track.currentSlice, /market-member boundary artifacts/);
+  assert.match(track.currentSlice, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` accessor bridge/);
+  assert.ok(
+    track.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
+    "expected Emporium successor track to record market-member boundary grounding"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /Deepen that boundary with a bare `Market` member-shell clue/.test(step)),
+    "expected Emporium successor track to record Market member-shell narrowing"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /`PlayerProfileHandler`, `playerData`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `ConvertSaveDataToProfileData` bridge clues/.test(step)),
+    "expected Emporium successor track to record the PlayerProfileHandler bridge narrowing"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /Surface overlap-grounded Emporium import preview support/.test(step)),
+    "expected Emporium successor track to record overlap-grounded import preview support"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /checked `MultiverseMarket` row constants such as `Bonus`, `StartCost`, `CostExponent`, and recovered `MaxLevel`/.test(step)),
+    "expected Emporium successor track to record overlap-row constant preview support"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /remaining levels to the checked max on rows `71-74`/.test(step)),
+    "expected Emporium successor track to record recovered cap progress support"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /`PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge/.test(step) || /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
+    "expected Emporium successor track to record the narrowed PlayerProfileHandler bridge path"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(step)),
+    "expected Emporium successor track to record sibling market-side accessor narrowing"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /saveInfoCache: PlayerProfileData/.test(step) && /does not recover a typed `Market` field/.test(step)),
+    "expected Emporium successor track to record the refreshed typed boundary around PlayerProfileHandler and PlayerProfileData"
+  );
+  assert.ok(
+    multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
+      multiverseMarketMarketMemberBoundaryData.directPlayerProfileFieldSamples.includes("InscryptionsDone") &&
+      multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /PlayerProfileData directly declares InscryptionsDone/i.test(line)),
+    "expected market-member boundary artifact to preserve the PlayerProfileData direct-field versus missing Market type-map boundary"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
+    "expected Emporium successor track to record the exact typed MultiverseMarket bridge"
+  );
+  assert.ok(
+    track.verified.some((line) => /direct `get_Market` accessor clue/.test(line)),
+    "expected Emporium successor track to record the get_Market clue in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /overlap-grounded `71-74` subset/.test(line)),
+    "expected Emporium successor track to record overlap-grounded previewing in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /checked row constants from the `MultiverseMarket` payload/.test(line)),
+    "expected Emporium successor track to record checked overlap-row constants in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /recovered cap progress against checked `MaxLevel` values/.test(line)),
+    "expected Emporium successor track to record recovered overlap-row cap progress in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(line)),
+    "expected Emporium successor track to record the checked typed MultiverseMarket bridge in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /`PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`/.test(line)),
+    "expected Emporium successor track to record the direct PlayerProfileData field samples in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /`PlayerProfileHandler\.saveInfoCache: PlayerProfileData`/.test(line) && /does not recover a typed `Market` field/.test(line)),
+    "expected Emporium successor track to record the typed saveInfoCache field and missing typed Market field in verified facts"
+  );
+  assert.ok(
+    multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
+      track.verified.some((line) => /`PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`/.test(line)),
+    "expected verified facts to keep the direct PlayerProfileData field samples separate from a missing typed PlayerProfileData|Market recovery"
+  );
+  assert.ok(
+    track.verified.some((line) => line.includes("`PlayerProfileHandler`") && line.includes("`playerData`") && line.includes("`ConvertSaveDataToProfileData`")),
+    "expected Emporium successor track to record the PlayerProfileHandler bridge clues in verified facts"
+  );
+  assert.ok(
+    multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /accessor-versus-deeper-owner boundary/i.test(line)),
+    "expected market-member boundary artifact to preserve the narrowed accessor-versus-deeper-owner boundary"
+  );
+  assert.ok(
+    track.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
+    "expected Emporium successor track to record sibling market-side accessors in verified facts"
+  );
+  assert.ok(
+    track.verified.some((line) => /`IS\*Level`, Necrum trade-counter, and early `Mech\*` fields/.test(line)),
+    "expected Emporium successor track to record the broader progression field run in verified facts"
+  );
+  assert.ok(
+    multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /does not place that wider run directly on MultiverseMarket/i.test(line)),
+    "expected market-member boundary artifact to keep the broader progression run separate from direct MultiverseMarket ownership"
+  );
+});
 const tokenBankOwnerTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-bank-state-owner");
-assert.ok(tokenBankOwnerTrack, "expected token-bank state-owner track");
-assert.equal(tokenBankOwnerTrack.status, "active");
-assert.match(tokenBankOwnerTrack.currentSlice, /broader `PlayerProfileData` \/ `CloudSavePlayerProfile` persistence-family boundary/);
-assert.ok(
-  tokenBankOwnerTrack.completedSteps.some((step) => /zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms/.test(step)),
-  "expected token-bank state-owner track to record TokenShop save-boundary separation"
-);
-assert.ok(
-  tokenBankOwnerTrack.completedSteps.some((step) => /FinalTokenBankCap and FinalTokenBankFillSpeed clustered as output-side accessors and backing fields without save-family joins/.test(step)),
-  "expected token-bank state-owner track to record the derived-output non-owner boundary"
-);
-assert.ok(
-  tokenBankOwnerTrack.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
-  "expected token-bank state-owner track to record the current broader save-family search path"
-);
-assert.ok(
-  tokenBankOwnerTrack.uncertain.some((line) => /directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper/.test(line)),
-  "expected token-bank state-owner track to keep the PlayerProfile-side wrapper question unresolved"
-);
+withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", (track) => {
+  assert.equal(track.status, "active");
+  assert.match(track.currentSlice, /broader `PlayerProfileData` \/ `CloudSavePlayerProfile` persistence-family boundary/);
+  assert.ok(
+    track.completedSteps.some((step) => /zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms/.test(step)),
+    "expected token-bank state-owner track to record TokenShop save-boundary separation"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /FinalTokenBankCap and FinalTokenBankFillSpeed clustered as output-side accessors and backing fields without save-family joins/.test(step)),
+    "expected token-bank state-owner track to record the derived-output non-owner boundary"
+  );
+  assert.ok(
+    track.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
+    "expected token-bank state-owner track to record the current broader save-family search path"
+  );
+  assert.ok(
+    track.uncertain.some((line) => /directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper/.test(line)),
+    "expected token-bank state-owner track to keep the PlayerProfile-side wrapper question unresolved"
+  );
+});
 const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-feed-and-hardening");
-assert.ok(feedTrack, "expected unified feed track");
-assert.equal(feedTrack.status, "active");
-assert.match(feedTrack.currentSlice, /quarantine contract-bad shard or loop cards out of the main player feed/);
+withRequiredValue(feedTrack, "expected unified feed track", (track) => {
+  assert.equal(track.status, "active");
+  assert.match(track.currentSlice, /quarantine contract-bad shard or loop cards out of the main player feed/);
 assert.ok(
-  feedTrack.completedSteps.some((step) => /Show the bundled dataset refresh hardening path inside the validation surface/.test(step)),
+  track.completedSteps.some((step) => /Show the bundled dataset refresh hardening path inside the validation surface/.test(step)),
   "expected unified feed track to record in-app refresh hardening"
 );
 assert.ok(
-  feedTrack.completedSteps.some((step) => /Show feed-level explainability coverage counts/.test(step)),
+  track.completedSteps.some((step) => /Show feed-level explainability coverage counts/.test(step)),
   "expected unified feed track to record explainability coverage work"
 );
 assert.ok(
-  feedTrack.completedSteps.some((step) => /Show per-card explainability audit status/.test(step)),
+  track.completedSteps.some((step) => /Show per-card explainability audit status/.test(step)),
   "expected unified feed track to record per-card explainability audit work"
 );
 assert.ok(
-  feedTrack.completedSteps.some((step) => /Show feed-level complete-versus-partial explainability audit counts/.test(step)),
+  track.completedSteps.some((step) => /Show feed-level complete-versus-partial explainability audit counts/.test(step)),
   "expected unified feed track to record feed-level explainability audit counts"
 );
 assert.ok(
-  feedTrack.completedSteps.some((step) => /Expand representative shard and loop fixtures toward partial-context warning shapes/.test(step)),
+  track.completedSteps.some((step) => /Expand representative shard and loop fixtures toward partial-context warning shapes/.test(step)),
   "expected unified feed track to record partial-context fixture coverage"
 );
 assert.ok(
-  feedTrack.completedSteps.some((step) => /recommendation contract audit status and per-card contract validity/.test(step)),
+  track.completedSteps.some((step) => /recommendation contract audit status and per-card contract validity/.test(step)),
   "expected unified feed track to record recommendation contract audit visibility"
 );
 assert.ok(
-  feedTrack.completedSteps.some((step) => /Promote recommendation-contract integrity into a shipped validation case/.test(step)),
+  track.completedSteps.some((step) => /Promote recommendation-contract integrity into a shipped validation case/.test(step)),
   "expected unified feed track to record runtime feed contract validation"
 );
 assert.ok(
-  feedTrack.completedSteps.some((step) => /explicit player-value benefit lines on active cards/.test(step)),
+  track.completedSteps.some((step) => /explicit player-value benefit lines on active cards/.test(step)),
   "expected unified feed track to record explicit player-value benefit lines"
 );
 assert.ok(
-  feedTrack.completedSteps.some((step) => /Quarantine contract-bad shard or loop cards into a labeled support notice/.test(step)),
+  track.completedSteps.some((step) => /Quarantine contract-bad shard or loop cards into a labeled support notice/.test(step)),
   "expected unified feed track to record contract-bad card quarantine"
 );
 assert.ok(
-  feedTrack.nextSteps.some((step) => /Apply the same refresh discipline when new asset-grounded datasets or owner recoveries are promoted/.test(step)),
+  track.nextSteps.some((step) => /Apply the same refresh discipline when new asset-grounded datasets or owner recoveries are promoted/.test(step)),
   "expected unified feed track to keep refresh discipline as remaining work"
 );
 assert.ok(
-  feedTrack.nextSteps.some((step) => /Keep strengthening explainability coverage as new recommendation modules join the feed/.test(step)),
+  track.nextSteps.some((step) => /Keep strengthening explainability coverage as new recommendation modules join the feed/.test(step)),
   "expected unified feed track to keep explainability hardening open"
-);
+  );
+});
 const profileTrack = snapshot.researchTracks.find((track) => track.id === "playerprofile-boundary-and-imports");
-assert.ok(profileTrack, "expected player profile track");
-assert.equal(profileTrack.status, "archived");
-assert.match(profileTrack.currentSlice, /classified alias inventory/);
-assert.match(profileTrack.currentSlice, /reduced non-canonical migration surface/);
-assert.equal(profileTrack.nextSteps.length, 0);
+withRequiredValue(profileTrack, "expected player profile track", (track) => {
+  assert.equal(track.status, "archived");
+  assert.match(track.currentSlice, /classified alias inventory/);
+  assert.match(track.currentSlice, /reduced non-canonical migration surface/);
+  assert.equal(track.nextSteps.length, 0);
+});
 const datasetContractTrack = snapshot.researchTracks.find((track) => track.id === "data-contracts-and-apk-pipeline");
-assert.ok(datasetContractTrack, "expected dataset contract track");
-assert.equal(datasetContractTrack.status, "archived");
-assert.match(datasetContractTrack.currentSlice, /checked-in bundled-dataset contract manifest/);
-assert.match(datasetContractTrack.currentSlice, /dataset refresh checklist/);
-assert.equal(datasetContractTrack.nextSteps.length, 0);
+withRequiredValue(datasetContractTrack, "expected dataset contract track", (track) => {
+  assert.equal(track.status, "archived");
+  assert.match(track.currentSlice, /checked-in bundled-dataset contract manifest/);
+  assert.match(track.currentSlice, /dataset refresh checklist/);
+  assert.equal(track.nextSteps.length, 0);
+});
 const hunterTrack = snapshot.researchTracks.find((track) => track.id === "hunter-related-planning");
-assert.ok(hunterTrack, "expected hunter intake track");
-assert.equal(hunterTrack.status, "research");
-assert.equal(hunterTrack.classification, "speculative");
-assert.equal(hunterTrack.apkUnityPathChecked, false);
-assert.match(hunterTrack.currentSlice, /separate real hunter state from planning metadata/);
+withRequiredValue(hunterTrack, "expected hunter intake track", (track) => {
+  assert.equal(track.status, "research");
+  assert.equal(track.classification, "speculative");
+  assert.equal(track.apkUnityPathChecked, false);
+  assert.match(track.currentSlice, /separate real hunter state from planning metadata/);
+});
 const mechTrack = snapshot.researchTracks.find((track) => track.id === "mech-related-planning");
-assert.ok(mechTrack, "expected mech intake track");
-assert.equal(mechTrack.status, "research");
-assert.equal(mechTrack.apkUnityPathChecked, true);
-assert.match(mechTrack.currentSlice, /uses recovered metadata clues only to narrow persistence neighborhoods/);
+withRequiredValue(mechTrack, "expected mech intake track", (track) => {
+  assert.equal(track.status, "research");
+  assert.equal(track.apkUnityPathChecked, true);
+  assert.match(track.currentSlice, /uses recovered metadata clues only to narrow persistence neighborhoods/);
+});
 const automationTrack = snapshot.researchTracks.find((track) => track.id === "input-automation-intake");
-assert.ok(automationTrack, "expected automation intake track");
-assert.equal(automationTrack.status, "research");
-assert.equal(automationTrack.category, "deferred-infrastructure");
-assert.match(automationTrack.currentSlice, /guided import is insufficient without OCR/);
+withRequiredValue(automationTrack, "expected automation intake track", (track) => {
+  assert.equal(track.status, "research");
+  assert.equal(track.category, "deferred-infrastructure");
+  assert.match(track.currentSlice, /guided import is insufficient without OCR/);
+});
 const externalModelTrack = snapshot.researchTracks.find((track) => track.id === "external-model-integration-intake");
-assert.ok(externalModelTrack, "expected external-model intake track");
-assert.equal(externalModelTrack.status, "research");
-assert.equal(externalModelTrack.classification, "external-model");
-assert.match(externalModelTrack.currentSlice, /avoid mixing app truth with model assumptions/);
-assert.match(agentsMd, /## Integration gate/);
-assert.match(agentsMd, /## Architecture rules/);
-assert.match(agentsMd, /Before integrating a system into app behavior, verify/);
-assert.match(agentsMd, /do not wire the system into planner\/recommendation logic/);
-assert.match(agentsMd, /keep it in docs, extraction, mapping, validation, or descriptive-mode surfaces/);
-assert.match(agentsMd, /record the unresolved gap/);
-assert.match(groundingPlan, /## System integration gate/);
-assert.match(groundingPlan, /Fail this gate if any of the above are inferred rather than evidenced/);
-assert.match(groundingPlan, /Presence of extracted data is not enough/);
-assert.match(groundingPlan, /Even when a system is known to exist in CIFI/);
-assert.match(unityAuditPlaybook, /## Integration readiness gate/);
-assert.match(unityAuditPlaybook, /MultiverseMarket/);
-assert.match(unityAuditPlaybook, /Current narrowed but unresolved owner family/);
-assert.match(unityAuditPlaybook, /shard milestones \/ loop-reset shell/);
-assert.match(unityAuditPlaybook, /LoopResetStage1/);
-assert.match(unityAuditPlaybook, /ShardMining, Assembly-CSharp/);
-assert.match(unityAuditPlaybook, /ShardUpgradeInfo/);
-assert.match(unityAuditPlaybook, /TotalMilestoneLevels/);
-assert.match(unityAuditPlaybook, /FinalSU\*Bonus\*/);
-assert.match(unityAuditPlaybook, /ConstructionMilestones, Assembly-CSharp/);
-assert.match(unityAuditPlaybook, /generic or academy-side milestone family/);
-assert.match(unityAuditPlaybook, /Recommended next unresolved extraction target after PR2/);
-assert.match(unityAuditPlaybook, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` accessor bridge/);
-assert.match(unityAuditPlaybook, /exact `PlayerProfileData\.InscryptionsDone`/);
-assert.match(unityAuditPlaybook, /exact metadata field clues such as nearby `IS\*Level`/);
-assert.match(unityAuditPlaybook, /broader progression-style field run that continues into trade counters and `Mech\*` fields/);
-assert.match(ownerMap, /integration status: owner and serialized constants verified/);
-assert.match(ownerMap, /base spend lane is now grounded as token or tokenium spending/);
-assert.match(ownerMap, /Daily Tokenium lane is now better grounded as an Academy or Farm Mission reward family/);
-assert.match(ownerMap, /OR_TokenBankCap/);
-assert.match(ownerMap, /recovered currency-shell evidence/);
-assert.match(ownerMap, /resourceicons\/resource_tokenium/);
-assert.match(ownerMap, /resourceicons\/resource_tokenium_cap/);
-assert.match(ownerMap, /TokenBankDescriptionText/);
-assert.match(ownerMap, /FinalTokenBankCap/);
-assert.match(ownerMap, /integration status: owner, partial row constants, and `Inscryptions Done` spend-lane shell verified/);
-assert.match(ownerMap, /Inscryptions Done/);
-assert.match(ownerMap, /InscryptionsDone/);
-assert.match(ownerMap, /IS50Level/);
-assert.match(ownerMap, /NecrumR1Trades/);
-assert.match(ownerMap, /Mech1Unlocked/);
-assert.match(ownerMap, /BuyIS47/);
-assert.match(ownerMap, /PlayerProfileData/);
-assert.match(ownerMap, /recovered adjacent handlers/);
-assert.match(ownerMap, /ClaimBankedTokens` -> `TokenShop, Assembly-CSharp/);
-assert.match(ownerMap, /token-bank cap display -> `BigStatisticPrefab\.TokenBankCap`/);
-assert.match(ownerMap, /daily-tokenium mission text path -> `TextHandlerLoopMods\.SetLM244BonusText`/);
-assert.match(ownerMap, /recovered owner-family split/);
-assert.match(ownerMap, /underlying Daily Tokenium lane -> `SpaceAcademy` \/ `FarmMissions` family in `level0`/);
-assert.match(ownerMap, /Collector pack -> premium modifier family on that lane through Academy-menu Daily Tokenium cap text/);
-assert.match(ownerMap, /ruled-out owner shortcut/);
-assert.match(ownerMap, /LM244` is currently grounded as a text-handler path, not as the recovered gameplay owner of daily tokenium/);
-assert.match(ownerMap, /adjacent systems still to map/);
-assert.match(ownerMap, /token-bank cap \/ fill \/ claim owner and save-state inputs/);
-assert.match(ownerMap, /Academy or Farm Mission gameplay owner and saved-state inputs for Daily Tokenium/);
-assert.match(ownerMap, /`DiamondBoost` relation to the wider diamond-upgrade domain/);
-assert.match(ownerMap, /downstream effect owners for generators, token chests, diamond chests, cells, mod points, shards, research points, academy points, hunt loot, campaign fragments, and Ouroboros orbs/);
-assert.match(ownerMap, /Narrowed but not yet planner-ready owner families/);
-assert.match(ownerMap, /shard milestones \/ loop-reset shell/);
-assert.match(ownerMap, /LoopResetStage1/);
-assert.match(ownerMap, /ShardMilestones-64/);
-assert.match(ownerMap, /MilestoneBonusesPerLevel/);
-assert.match(ownerMap, /SpaceShip-ShardMining-LV1/);
-assert.match(ownerMap, /ShardMining, Assembly-CSharp/);
-assert.match(ownerMap, /ShardUpgradeInfo/);
-assert.match(ownerMap, /TotalMilestoneLevels/);
-assert.match(ownerMap, /zero checked overlap with `PlayerProfileData`, `GetPlayerProfileData`, `FillPlayerProfileData`, or `CloudSavePlayerProfile`/);
-assert.match(ownerMap, /get_SU1FinalUnlockReq/);
-assert.match(ownerMap, /FinalSU1Bonus1/);
-assert.match(ownerMap, /ConstructionMilestones, Assembly-CSharp/);
-assert.match(ownerMap, /generic or academy-side milestone family/);
-assert.match(ownerMap, /keep planner behavior blocked/);
-assert.match(spendVerificationDoc, /# Spend System Verification Gate/);
-assert.match(spendVerificationDoc, /available but unmapped/);
-assert.match(spendVerificationDoc, /Verified currency-shell evidence now includes/);
-assert.match(spendVerificationDoc, /resourceicons\/resource_tokenium/);
-assert.match(spendVerificationDoc, /resourceicons\/resource_tokenium_cap/);
-assert.match(spendVerificationDoc, /Adjacent systems this signals/);
-assert.match(spendVerificationDoc, /Meltdown-linked gating objects/);
-assert.match(spendVerificationDoc, /downstream effect domains touched by TokenShop upgrades/);
-assert.match(spendVerificationDoc, /It is safe to describe its cost lane as token-bank token or tokenium spending/);
-assert.match(spendVerificationDoc, /token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped`/);
-assert.match(spendVerificationDoc, /OR_TokenBankCap` and `OR_TokensFromChests` should currently be treated as grounded asset labels/);
-assert.match(spendVerificationDoc, /claim actions resolve through `TokenShop`, token-bank cap display resolves through `BigStatisticPrefab\.TokenBankCap`, and at least one daily-tokenium text path resolves through `TextHandlerLoopMods\.SetLM244BonusText`/);
-assert.match(spendVerificationDoc, /LM244` should currently be treated as a loop-mod text or explanation hook for daily tokenium, not as the recovered gameplay owner of that lane/);
-assert.match(spendVerificationDoc, /Daily Tokenium is now better grounded as an Academy or Farm Mission reward lane that `TokenShop`, `LoopModifiers`, and the Collector pack all touch/);
-assert.match(spendVerificationDoc, /CostBox-InscryptionsDone/);
-assert.match(spendVerificationDoc, /InscryptionsDone/);
-assert.match(spendVerificationDoc, /IS50Level/);
-assert.match(spendVerificationDoc, /exact metadata field names for this lane/);
-assert.match(spendVerificationDoc, /broader progression-style field block around `InscryptionsDone`/);
-assert.match(spendVerificationDoc, /saved-state owner or runtime balance field behind the `Inscryptions Done` spend lane/);
-assert.match(spendVerificationDoc, /It is safe to stop inferring its spend lane from diamonds, tokens, or other unrelated player resources/);
-assert.match(spendVerificationDoc, /PlayerProfileData/);
-assert.match(spendVerificationDoc, /The current best repo-local saved-state path is the broader `PlayerProfileData` persistence family/);
-assert.match(multiverseMarketVerificationDoc, /# Multiverse Market Verification Gate/);
-assert.match(multiverseMarketVerificationDoc, /CostBox-InscryptionsDone/);
-assert.match(multiverseMarketVerificationDoc, /AchievementBar-Inscryptions/);
-assert.match(multiverseMarketVerificationDoc, /MultiverseMarket, Assembly-CSharp` -> `BuyIS47`/);
-assert.match(multiverseMarketVerificationDoc, /MultiverseMarket, Assembly-CSharp` -> `BuyIS64`/);
-assert.match(multiverseMarketVerificationDoc, /MultiverseMarket, Assembly-CSharp` -> `BuyIS73`/);
-assert.match(multiverseMarketVerificationDoc, /Inscryption 25: Shard Gains/);
-assert.match(multiverseMarketVerificationDoc, /Inscryption 78: Ouroboros Orbs/);
-assert.match(multiverseMarketVerificationDoc, /`InscryptionsDone` is an exact metadata field string/);
-assert.match(multiverseMarketVerificationDoc, /saved-state field or owner that stores the current `Inscryptions Done` balance/);
-assert.match(multiverseMarketVerificationDoc, /It is not safe to generate spend recommendations yet/);
-assert.match(multiverseMarketStateDoc, /# Multiverse Market State Verification/);
-assert.match(multiverseMarketStateDoc, /PlayerProfileData\.cs/);
-assert.match(multiverseMarketStateDoc, /FillPlayerProfileData/);
-assert.match(multiverseMarketStateDoc, /GetPlayerProfileData/);
-assert.match(multiverseMarketStateDoc, /CloudSavePlayerProfile/);
-assert.match(multiverseMarketStateDoc, /InscryptionsDone/);
-assert.match(multiverseMarketStateDoc, /IS50Level/);
-assert.match(multiverseMarketStateDoc, /NecrumR1Trades/);
-assert.match(multiverseMarketStateDoc, /Mech1Unlocked/);
-assert.match(multiverseMarketStateDoc, /AchievementInscryptionsReward/);
-assert.match(multiverseMarketStateDoc, /FinalISShardsBonus/);
-assert.match(multiverseMarketStateDoc, /still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state\.playerProfile`/);
-assert.match(multiverseMarketMetadataNeighborhoodDoc, /# Metadata Neighborhood Probe/);
-assert.match(multiverseMarketMetadataNeighborhoodDoc, /InscryptionsDone/);
-assert.match(multiverseMarketMetadataNeighborhoodDoc, /IS110Level/);
-assert.match(multiverseMarketMetadataNeighborhoodDoc, /EsotericR1Trades/);
-assert.match(multiverseMarketMetadataNeighborhoodDoc, /SetInscryptionsDoneText/);
-assert.match(tokenBankStateDoc, /# Token Bank State Verification Gate/);
-assert.match(tokenBankStateDoc, /ClaimBankedTokens/);
-assert.match(tokenBankStateDoc, /FinalTokenBankFillSpeed/);
-assert.match(tokenBankStateDoc, /0 \/ 2000 Daily Tokenium \(from blue farm missions\)/);
-assert.match(tokenBankStateDoc, /## Source narrowing from this pass/);
-assert.match(tokenBankStateDoc, /do not treat `OR_TokenBankCap` or `OR_TokensFromChests` as recovered formulas/);
-assert.match(tokenBankStateDoc, /## Handler split recovered from this pass/);
-assert.match(tokenBankStateDoc, /ClaimBankedTokens` appears directly beside `TokenShop, Assembly-CSharp`/);
-assert.match(tokenBankStateDoc, /BigStatisticPrefab\.TokenBankCap/);
-assert.match(tokenBankStateDoc, /TextHandlerLoopMods, Assembly-CSharp` -> `SetLM244BonusText/);
-assert.match(tokenBankStateDoc, /## LM244 conclusion from this pass/);
+withRequiredValue(externalModelTrack, "expected external-model intake track", (track) => {
+  assert.equal(track.status, "research");
+  assert.equal(track.classification, "external-model");
+  assert.match(track.currentSlice, /avoid mixing app truth with model assumptions/);
+});
+assert.deepEqual(multiverseMarketSaveBoundaryData.actionShellTermsChecked, [
+  "TextHandlerMarkets",
+  "SetAllChrystosEmporiumTexts",
+  "SetInscryptionsDoneText"
+]);
+assert.deepEqual(multiverseMarketSaveBoundaryData.saveFamilyTermsChecked, [
+  "PlayerProfileData",
+  "GetPlayerProfileData",
+  "FillPlayerProfileData",
+  "CloudSavePlayerProfile"
+]);
+assert.equal(multiverseMarketSaveBoundaryData.probeResults.actionShellWithSaveOverlapCount, 0);
+assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasActionTerms, true);
+assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasSaveTerms, true);
+assertCurrentBoundaryIncludes(multiverseMarketSaveBoundaryData.currentBoundary, [
+  /zero direct overlap/,
+  /not enough to recover declaring save ownership or player-owned row levels/
+], "MultiverseMarket save boundary");
+
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedBridgeRecovery, {
+  bridgeOwner: "PlayerProfileHandler",
+  bridgeAccessor: "get_Market",
+  bridgeReturnType: "MultiverseMarket"
+});
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedHandlerFieldRecovery, {
+  fieldOwner: "PlayerProfileHandler",
+  fieldName: "saveInfoCache",
+  fieldType: "PlayerProfileData"
+});
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues, [
+  "PlayerProfileData|Market",
+  "PlayerProfileData|Inscryption",
+  "PlayerProfileData|MultiverseMarket"
+]);
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.directPlayerProfileFieldSamples, [
+  "InscryptionsDone",
+  "MechsOwned",
+  "GadgetLevels"
+]);
+assert.ok(
+  multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /does not place that wider run directly on MultiverseMarket/i.test(line)),
+  "expected typed probe to keep the broader progression run off direct MultiverseMarket ownership"
+);
+assert.ok(
+  multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /first nested MultiverseMarket payload types are .* row-local .* broader saved progression block/i.test(line)),
+  "expected typed probe to keep the first nested row-local payloads separate from the broader progression run"
+);
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.firstNestedMarketTypeChecks, [
+  "MultiverseMarket|Inscryption",
+  "MultiverseMarket|InscryptionTupleObject"
+]);
+assert.ok(
+  multiverseMarketMarketMemberBoundaryData.progressionPayloadFieldClues.includes("NecrumR1Trades"),
+  "expected broader progression payload clues to preserve trade counters"
+);
+assert.ok(
+  multiverseMarketMarketMemberBoundaryData.progressionPayloadFieldClues.includes("Mech1Unlocked"),
+  "expected broader progression payload clues to preserve early mech fields"
+);
+assert.ok(
+  multiverseMarketMarketMemberBoundaryData.negativeTypedDirectMemberChecks.includes("MultiverseMarket.InscryptionsDone"),
+  "expected typed probe to preserve the ruled-out direct MultiverseMarket InscryptionsDone ownership check"
+);
+assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBoundary, [
+  /PlayerProfileHandler declares get_Market with return type MultiverseMarket/,
+  /saveInfoCache as a typed PlayerProfileData field/,
+  /bare Market member-shell clue/,
+  /does not place that wider run directly on MultiverseMarket/,
+  /accessor-versus-deeper-owner boundary/
+], "MultiverseMarket market-member boundary");
+
+assert.deepEqual(multiverseMarketRangeBoundaryData.validatedRowRanges, ["50-59", "63-74"]);
+assert.deepEqual(multiverseMarketRangeBoundaryData.overlapIds, [71, 72, 73, 74]);
+assert.equal(multiverseMarketRangeBoundaryData.metadataIsRangeLabel, "IS71Level through IS110Level");
+assertCurrentBoundaryIncludes(multiverseMarketRangeBoundaryData.currentBoundary, [
+  /first direct overlap/,
+  /does not, by itself, prove the declaring save owner/
+], "MultiverseMarket range boundary");
+
+assert.equal(multiverseMarketRowTextCoverageData.validatedRowCostTexts.length, 22);
+assert.deepEqual(multiverseMarketRowTextCoverageData.sampleBuyHooks, ["BuyIS50", "BuyIS74"]);
+assertCurrentBoundaryIncludes(multiverseMarketRowTextCoverageData.currentBoundary, [
+  /TextHandlerMarkets cost-text hooks/,
+  /text-handler coverage, not saved-state coverage/
+], "MultiverseMarket row-text coverage");
+
+assert.deepEqual(multiverseMarketPrefabRemapBoundaryData.validatedIdsWithoutDirectPrefabName, [69, 70, 71, 72, 73, 74]);
+assert.equal(multiverseMarketPrefabRemapBoundaryData.explicitPrefabIdOverrides.length, 6);
+assert.deepEqual(multiverseMarketPrefabRemapBoundaryData.overrideSerializedIdsOutsideValidatedBlock, [60, 61, 62]);
+assertCurrentBoundaryIncludes(multiverseMarketPrefabRemapBoundaryData.currentBoundary, [
+  /not a one-to-one player-facing remap/,
+  /block any assumption that validated rows 69 through 74 already have final grounded upgrade-number labels/
+], "MultiverseMarket prefab remap boundary");
+
+assertDatasetContractEntry("multiverse-market-metadata-neighborhood", "data/multiverse-market-metadata-neighborhood.json");
+assertDatasetContractEntry("multiverse-market-range-boundary", "data/multiverse-market-range-boundary.json");
+assertDatasetContractEntry("multiverse-market-row-text-coverage", "data/multiverse-market-row-text-coverage.json");
+assertDatasetContractEntry("multiverse-market-prefab-remap-boundary", "data/multiverse-market-prefab-remap-boundary.json");
+assertDatasetContractEntry("multiverse-market-save-boundary", "data/multiverse-market-save-boundary.json");
+assertDatasetContractEntry("multiverse-market-market-member-boundary", "data/multiverse-market-market-member-boundary.json");
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(tokenBankStateDoc, /## Daily Tokenium lane correction/);
 assert.match(tokenBankStateDoc, /Daily Tokenium currently belongs to an Academy or Farm Mission lane that multiple systems touch/);
@@ -2436,67 +2480,38 @@ assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
 assert.match(appJs, /quarantined support surface/);
 assert.match(appJs, /Grounding checks stay separate from MVP behavior/);
-assert.match(appJs, /TokenShop owner payload/);
-assert.match(appJs, /TokenShop extracted family coverage/);
-assert.match(appJs, /32 numeric groups with TokenBoost, DiamondBoost, and TokenDailiesT2 plus token-bank controller anchors/);
-assert.match(appJs, /Spend tokenium naming clues/);
-assert.match(appJs, /Resource_Tokenium, Aca\.Tokenium553, CostBox-Tokens, and CostBox-Tokenium available/);
-assert.match(appJs, /Token-bank controller split clues/);
-assert.match(appJs, /ClaimBankedTokens, get_TokenBankCap, BigStatisticPrefab\.TokenBankCap, and SetLM244BonusText available/);
-assert.match(appJs, /MultiverseMarket owner payload/);
-assert.match(appJs, /MultiverseMarket validated row coverage/);
-assert.match(appJs, /22 validated rows across ids 50-59 and 63-74/);
-assert.match(appJs, /MultiverseMarket save-family clues/);
-assert.match(appJs, /PlayerProfileData persistence clues available/);
-assert.match(appJs, /MultiverseMarket cloud-save path clues/);
-assert.match(appJs, /CloudSavePlayerProfile path clues available/);
-assert.match(appJs, /MultiverseMarket progression-field cluster/);
-assert.match(appJs, /InscryptionsDone trade-counter cluster available/);
-assert.match(appJs, /Spend save-side narrowing/);
-assert.match(appJs, /broader PlayerProfileData persistence family instead of treating MultiverseMarket itself as the recovered save owner/);
-assert.match(appJs, /Likely persistence family/);
-assert.match(appJs, /Likely canonical host/);
-assert.match(appJs, /That makes \${marketMemberSummary\.canonicalHostLabel} the strongest current repo-local host for future canonical Emporium state/);
-assert.match(appJs, /Cloud-save profile path/);
-assert.match(appJs, /CloudSavePlayerProfile and GetPlayerProfileInfo now appear in the same checked-in save-path neighborhood/);
-assert.match(appJs, /Grounded field-cluster clues/);
-assert.match(appJs, /Validated row block vs broader field run/);
-assert.match(appJs, /currently validates .* rows across ids/);
-assert.match(appJs, /broader than the currently validated row block/);
-assert.match(appJs, /Grounded spend inputs/);
-assert.match(appJs, /TokenShop currently exposes .* extracted numeric families across/);
-assert.match(appJs, /const namedLanes = \["TokenBoost", "DiamondBoost", "TokenDailiesT2"\]/);
-assert.match(appJs, /BankFill and TokenBankDescriptionText/);
-assert.match(appJs, /Shipped assets now preserve \$\{tokeniumNamingSummary\.resourceLabel\} plus \$\{tokeniumNamingSummary\.academyLabel\}/);
-assert.match(appJs, /level0 keeps both \$\{tokeniumNamingSummary\.tokenShellLabel\} and \$\{tokeniumNamingSummary\.tokeniumShellLabel\}/);
+assert.match(appJs, /function renderSpendPlannerBoundary/);
+assert.match(appJs, /No spend recommendations yet/);
+assert.match(appJs, /compatibility\.unmappedSystemState/);
 assert.match(appJs, /function getTokeniumNamingSummary/);
-assert.match(appJs, /Token-bank controller clues now preserve \$\{tokenBankStateSummary\.claimMethod\}, \$\{tokenBankStateSummary\.capMethod\}, \$\{tokenBankStateSummary\.displayShell\}, and \$\{tokenBankStateSummary\.loopHandler\}/);
 assert.match(appJs, /function getTokenBankStateSummary/);
-assert.match(appJs, /Daily Tokenium lane clues now preserve \$\{dailyTokeniumSummary\.ownerFamilyLabel\}, \$\{dailyTokeniumSummary\.missionFamilyLabel\}, \$\{dailyTokeniumSummary\.loopHook\}, \$\{dailyTokeniumSummary\.purchaseHook\}, and \$\{dailyTokeniumSummary\.premiumPack\}/);
-assert.match(appJs, /Player-facing strings still frame Daily Tokenium as a farm-mission or Academy Menu reward lane that TokenShop and the Collector pack modify/);
 assert.match(appJs, /function getDailyTokeniumLaneSummary/);
-assert.match(appJs, /function formatNumericRanges/);
 assert.match(appJs, /function getTokenBankFormulaBoundarySummary/);
-assert.match(appJs, /"ClaimBankedTokens"/);
-assert.match(appJs, /"BigStatisticPrefab\.TokenBankCap"/);
-assert.match(appJs, /"SetLM244BonusText"/);
-assert.match(appJs, /"SpaceAcademy"/);
-assert.match(appJs, /"FarmMissions"/);
-assert.match(appJs, /"BuyLM244"/);
-assert.match(appJs, /"BuyCollectorDevice"/);
-assert.match(appJs, /"COLLECTERS PACK"/);
-assert.match(appJs, /"get_FinalTokenBankCap"/);
-assert.match(appJs, /"get_FinalTokenBankFillSpeed"/);
-assert.match(appJs, /"<FinalTokenBankCap>k__BackingField"/);
-assert.match(appJs, /"<FinalTokenBankFillSpeed>k__BackingField"/);
-assert.match(appJs, /"Resource_Tokenium"/);
-assert.match(appJs, /"Aca\.Tokenium553"/);
-assert.match(appJs, /"CostBox-Tokens"/);
-assert.match(appJs, /"CostBox-Tokenium"/);
-assert.match(appJs, /MultiverseMarket currently has .* validated rows across ids/);
-assert.match(appJs, /not enough to identify the declaring save model or planner-ready owned-state inputs/);
-assert.match(appJs, /Do not promote FinalIS or achievement symbols into canonical player state yet/);
+assert.match(appJs, /function formatNumericRanges/);
+assert.match(appJs, /function getMultiverseMarketRangeBoundarySummary/);
+assert.match(appJs, /function getMultiverseMarketRowTextCoverageSummary/);
+assert.match(appJs, /function getMultiverseMarketPrefabRemapBoundarySummary/);
+assert.match(appJs, /function getImportedMultiverseMarketPreview\(importedMarketState, multiverseMarket, multiverseMarketRangeBoundary\)/);
+assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
+assert.match(appJs, /PlayerProfileHandler, playerData, GetPlayerProfileData, FillPlayerProfileData, and ConvertSaveDataToProfileData/);
+assert.match(appJs, /MultiverseMarket canonical host narrowing/);
 assert.match(appJs, /does not identify the declaring save model or which recovered IS\*Level subset actually maps to the validated MultiverseMarket rows/);
+assert.match(appJs, /\.\/data\/tokenium-naming-clues\.json/);
+assert.match(appJs, /\.\/data\/token-bank-state-clues\.json/);
+assert.match(appJs, /\.\/data\/daily-tokenium-lane-clues\.json/);
+assert.match(appJs, /\.\/data\/token-bank-formula-boundary\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-metadata-neighborhood\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-range-boundary\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-row-text-coverage\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-prefab-remap-boundary\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-action-shell\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-owner-family\.json/);
+assert.match(appJs, /\.\/data\/token-shop-save-boundary\.json/);
+assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
+assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
+assert.match(appJs, /Current imported levels are available for \${importedMarketPreview\.importedOverlapRowCount}\/\${importedMarketPreview\.overlapRowCount} overlap-grounded Emporium rows/);
+assert.match(appJs, /Recovered row constants: Bonus \${escapeHtml\(formatOptionalNumber\(entry\.bonusValue\)\)} \| StartCost \${escapeHtml\(formatOptionalNumber\(entry\.startCost\)\)} \| CostExponent \${escapeHtml\(formatOptionalNumber\(entry\.costExponent\)\)}/);
+assert.match(appJs, /get_Market, Market, GetPlayerProfileData, FillPlayerProfileData, and the FillPlayerProfileData coroutine shell/);
 assert.match(appJs, /Shard milestone mapping gate/);
 assert.match(appJs, /Shard shell grounding payload/);
 assert.match(appJs, /Shard milestone payload boundary/);
@@ -2506,14 +2521,6 @@ assert.doesNotMatch(appJs, /Repo-wide default unknown candidate/);
 assert.doesNotMatch(appJs, /Top PR2-local shard candidate/);
 assert.doesNotMatch(appJs, /Why next:/);
 assert.match(appJs, /Available but unmapped/);
-assert.match(appJs, /\.\/data\/multiverse-market-metadata-neighborhood\.json/);
-assert.match(appJs, /\.\/data\/tokenium-naming-clues\.json/);
-assert.match(appJs, /\.\/data\/token-bank-state-clues\.json/);
-assert.match(appJs, /\.\/data\/daily-tokenium-lane-clues\.json/);
-assert.match(appJs, /\.\/data\/token-bank-formula-boundary\.json/);
-assert.match(appJs, /\.\/data\/multiverse-market-range-boundary\.json/);
-assert.match(appJs, /\.\/data\/multiverse-market-row-text-coverage\.json/);
-assert.match(appJs, /\.\/data\/multiverse-market-prefab-remap-boundary\.json/);
 assert.match(appJs, /Shard milestone payload-watch boundary/);
 assert.match(appJs, /A checked payload-watch boundary now keeps/);
 assert.doesNotMatch(appJs, /Save-side separation/);
@@ -2521,47 +2528,7 @@ assert.doesNotMatch(appJs, /Shard owner trail stays separate from PlayerProfile 
 assert.match(appJs, /Shard owner trail and PlayerProfileData save-family clues stay separate with zero overlap/);
 assert.match(appJs, /\.\/data\/token-shop-cost-lanes\.json/);
 assert.match(appJs, /\.\/data\/spend-action-lane-clues\.json/);
-assert.match(appJs, /\.\/data\/multiverse-market-action-shell\.json/);
-assert.match(appJs, /\.\/data\/multiverse-market-owner-family\.json/);
 assert.match(appJs, /\.\/data\/token-shop-owner-shell\.json/);
-assert.match(appJs, /\.\/data\/token-shop-save-boundary\.json/);
-assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
-assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
-assert.match(appJs, /Daily Tokenium owner-family clues/);
-assert.match(appJs, /SpaceAcademy, FarmMissions, SetLM244BonusText, BuyLM244, and BuyCollectorDevice available/);
-assert.match(appJs, /Daily Tokenium owner family/);
-assert.match(appJs, /SpaceAcademy, SpaceAcademyMain, TextHandlerSpaceAcademy, and FarmMissions now appear in a checked-in lane clue bundle/);
-assert.match(appJs, /Token-bank derived output boundary/);
-assert.match(appJs, /FinalTokenBankCap and FinalTokenBankFillSpeed now appear in a checked-in accessor and backing-field cluster/);
-assert.match(appJs, /The same checked local context still does not expose PlayerProfileData or CloudSavePlayerProfile beside those outputs/);
-assert.match(appJs, /MultiverseMarket row-range boundary/);
-assert.match(appJs, /Validated rows 50-59 and 63-74 now share a first direct overlap with the recovered IS71-110 metadata run at rows 71-74/);
-assert.match(appJs, /Validated rows \${multiverseMarketRangeSummary\.validatedRangeLabel} now share a first direct overlap with \${multiverseMarketRangeSummary\.metadataRangeLabel} at rows \${multiverseMarketRangeSummary\.overlapLabel}/);
-assert.match(appJs, /function getMultiverseMarketRangeBoundarySummary/);
-assert.match(appJs, /Validated rows vs recovered IS run/);
-assert.match(appJs, /The separate metadata run \${multiverseMarketRangeSummary\.metadataRangeLabel} now directly overlaps validated rows \${multiverseMarketRangeSummary\.overlapLabel}/);
-assert.match(appJs, /The checked range boundary now shows that validated rows \${multiverseMarketRangeSummary\.validatedRangeLabel} share a first direct overlap with the recovered metadata run \${multiverseMarketRangeSummary\.metadataRangeLabel} at rows \${multiverseMarketRangeSummary\.overlapLabel}/);
-assert.match(appJs, /formatNumericRanges\(overlapIds\)/);
-assert.match(appJs, /MultiverseMarket validated row text coverage/);
-assert.match(appJs, /TextHandlerMarkets and SetAllChrystosEmporiumTexts cover SetIS50-59 and 63-74 cost texts/);
-assert.match(appJs, /function getMultiverseMarketRowTextCoverageSummary/);
-assert.match(appJs, /function getMultiverseMarketPrefabRemapBoundarySummary/);
-assert.match(appJs, /function getImportedMultiverseMarketPreview\(importedMarketState, multiverseMarket, multiverseMarketRangeBoundary\)/);
-assert.match(appJs, /The first overlap-grounded Emporium rows are \${escapeHtml\(preview\.overlapRangeLabel\)}/);
-assert.match(appJs, /Missing overlap-grounded imports: \${escapeHtml\(preview\.missingOverlapLabel\)}/);
-assert.match(appJs, /overlap-grounded rows/);
-assert.match(appJs, /Imported overlap-grounded rows also show recovered row constants from the checked MultiverseMarket payload/);
-assert.match(appJs, /<span class="pill">\${preview\.overlapMaxedCount} overlap rows maxed<\/span>/);
-assert.match(appJs, /Recovered max reached for this overlap-grounded row\./);
-assert.match(appJs, /\${escapeHtml\(formatShardNumber\(entry\.remainingLevels\)\)} recovered levels remaining to cap\./);
-assert.match(appJs, /Recovered row constants: Bonus \${escapeHtml\(formatOptionalNumber\(entry\.bonusValue\)\)} \| StartCost \${escapeHtml\(formatOptionalNumber\(entry\.startCost\)\)} \| CostExponent \${escapeHtml\(formatOptionalNumber\(entry\.costExponent\)\)}/);
-assert.match(appJs, /The validated row block also has direct text-handler coverage through \${multiverseMarketRowTextSummary\.textHandler}, \${multiverseMarketRowTextSummary\.textBatcher}, and \${multiverseMarketRowTextSummary\.coveredCount} SetIS\*CostText hooks/);
-assert.match(appJs, /That is row-label coverage for the validated block, not saved-state coverage/);
-assert.match(appJs, /Validated row text coverage/);
-assert.match(appJs, /TextHandlerMarkets now preserves \${multiverseMarketRowTextSummary\.coveredCount} direct SetIS\*CostText hooks for validated rows \${multiverseMarketRowTextSummary\.validatedRangeLabel}/);
-assert.match(appJs, /MultiverseMarket prefab remap boundary/);
-assert.match(appJs, /Validated ids 69-74 still do not have direct ChrystosEmporiumUpgrade number matches/);
-assert.match(appJs, /Prefab remap boundary/);
 assert.match(appJs, /function getTokenShopCostLaneSummary/);
 assert.match(appJs, /TokenShop cost-lane split/);
 assert.match(appJs, /TokenBoost, DiamondBoost, TokenDailiesT2, CostBox-Tokens, and CostBox-Tokenium available/);
@@ -2578,17 +2545,6 @@ assert.match(appJs, /"BuyLM244"/);
 assert.match(appJs, /"BuyCollectorDevice"/);
 assert.match(appJs, /"BuyTokenDailiesT2"/);
 assert.match(appJs, /"BuyTokenDailiesT3"/);
-assert.match(appJs, /function getMultiverseMarketActionShellSummary/);
-assert.match(appJs, /MultiverseMarket action shell/);
-assert.match(appJs, /Context-derived BuyIS1-110 and SetIS1-110CostText shell preserved while only rows 50-59 and 63-74 stay validated/);
-assert.match(appJs, /The same checked action shell context reaches \${multiverseMarketActionShellSummary\.buyRangeLabel} plus \${multiverseMarketActionShellSummary\.costTextRangeLabel}, while only \${multiverseMarketActionShellSummary\.validatedRangeLabel} stays numerically validated/);
-assert.match(appJs, /That broader action shell is useful for mapping and UI recovery, but it should not be promoted as full numeric validation or saved-state coverage/);
-assert.match(appJs, /function getMultiverseMarketOwnerFamilySummary/);
-assert.match(appJs, /MultiverseMarket owner family/);
-assert.match(appJs, /MultiverseMarket, Inscryptions, and IS1-110 CurrencyBox shell preserved without implying saved-state ownership/);
-assert.match(appJs, /MultiverseMarket owner-family clues now preserve \${multiverseMarketOwnerFamilySummary\.ownerAnchor}, \${multiverseMarketOwnerFamilySummary\.inscryptionsLabel}, \${multiverseMarketOwnerFamilySummary\.textHandler}, \${multiverseMarketOwnerFamilySummary\.batcher}, and \${multiverseMarketOwnerFamilySummary\.costBox}/);
-assert.match(appJs, /The same checked shell also preserves \${multiverseMarketOwnerFamilySummary\.resourceText}, \${multiverseMarketOwnerFamilySummary\.achievementBar}, and \${multiverseMarketOwnerFamilySummary\.currencyRangeLabel}, with validated samples such as \${multiverseMarketOwnerFamilySummary\.firstValidatedCurrencyBox} and \${multiverseMarketOwnerFamilySummary\.lastValidatedCurrencyBox}/);
-assert.match(appJs, /That is enough to keep the Emporium owner-family and Inscryptions cost-lane shell grounded, but not enough to recover player-owned balance fields or current row levels/);
 assert.match(appJs, /function getTokenShopOwnerShellSummary/);
 assert.match(appJs, /TokenShop owner shell/);
 assert.match(appJs, /TokenShop, ClaimBankedTokens, CheckTokenClaimNotification, and BuyAutoTokenClicker preserved as one local owner shell/);
@@ -2609,18 +2565,11 @@ assert.match(appJs, /This is enough to narrow future recovery work, but not enou
 assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
 assert.match(appJs, /MultiverseMarket save boundary/);
 assert.match(appJs, /MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap/);
-assert.match(appJs, /The checked save boundary still keeps \${multiverseMarketSaveBoundarySummary\.actionAnchor} separate from \${multiverseMarketSaveBoundarySummary\.saveAnchor}, with \${multiverseMarketSaveBoundarySummary\.overlapLabel}/);
-assert.match(appJs, /That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet/);
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
 assert.match(appJs, /PlayerProfileHandler get_Market accessor bridge/);
-assert.match(appJs, /typed probe still only recovers \$\{marketMemberSummary\.typedSaveCacheLabel\} and \$\{marketMemberSummary\.negativeTypedMarketLabel\}/);
-assert.match(appJs, /typedSaveCacheLabel: "PlayerProfileHandler\.saveInfoCache: PlayerProfileData"/);
-assert.match(appJs, /PlayerProfileData\|GemData and PlayerProfileData\|GemNodeCombo/);
 assert.match(appJs, /get_BM, get_ZN, get_TU/);
 assert.match(appJs, /broader progression-payload field cluster/);
 assert.match(appJs, /metadata-only \$\{marketMemberSummary\.memberLabel\} shell stays unresolved as an exact typed field/);
-assert.match(appJs, /negativeMultiverseFieldLabel: "MultiverseMarket does not directly declare InscryptionsDone, IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted in the checked typed probe"/);
-assert.match(appJs, /expected PlayerProfileHandler bridge clues for the market-member boundary/);
 assert.match(appJs, /"TokenBoost"/);
 assert.match(appJs, /"DiamondBoost"/);
 assert.match(appJs, /"TokenDailiesT2"/);
@@ -2757,7 +2706,7 @@ assert.match(readme, /## Doc map/);
 assert.match(readme, /docs\/roadmap\/mvp-plan\.md/);
 assert.match(readme, /docs\/roadmap\/research-tracks\.md/);
 
-await verifyLauncherModeServerLifecycle();
+await runBlockingCheck("launcher-mode lifecycle", verifyLauncherModeServerLifecycle);
 
 const shipWinner = [...snapshot.shipLoadouts]
   .map((loadout) => ({
@@ -3158,7 +3107,188 @@ assert.deepEqual(migratedInvalidShardHelpers.planning.shards.observedLevelsByMil
 assert.match(appJs, /function normalizeLoadoutName/);
 assert.match(appJs, /name: normalizeLoadoutName\(stored\.name, fallback\.name\)/);
 
-console.log("Smoke tests passed.");
+finalizeSmokeRun();
+
+function installSoftAssertions() {
+  assert.ok = (value, message = "expected truthy value") => {
+    if (!value) {
+      recordSmokeFailure("ok", message, `received ${summarizeValue(value)}`);
+    }
+  };
+
+  assert.equal = (actual, expected, message = "expected strict equality") => {
+    if (!Object.is(actual, expected)) {
+      recordSmokeFailure("equal", message, `expected ${summarizeValue(expected)}; received ${summarizeValue(actual)}`);
+    }
+  };
+
+  assert.deepEqual = (actual, expected, message = "expected deep equality") => {
+    if (!isDeepStrictEqual(actual, expected)) {
+      recordSmokeFailure("deepEqual", message, summarizeDeepEqualityMismatch(actual, expected));
+    }
+  };
+
+  assert.match = (actual, expected, message = `expected value to match ${String(expected)}`) => {
+    if (!expected.test(String(actual))) {
+      recordSmokeFailure("match", message, `pattern ${String(expected)}; actual preview ${summarizeText(actual)}`);
+    }
+  };
+
+  assert.doesNotMatch = (actual, expected, message = `expected value not to match ${String(expected)}`) => {
+    if (expected.test(String(actual))) {
+      recordSmokeFailure("doesNotMatch", message, `pattern ${String(expected)} unexpectedly matched ${summarizeText(actual)}`);
+    }
+  };
+}
+
+function recordSmokeFailure(kind, message, detail) {
+  const key = `${kind}:${message}`;
+  if (seenSmokeFailureKeys.has(key)) {
+    return;
+  }
+  seenSmokeFailureKeys.add(key);
+  smokeFailures.push({ kind, message, detail });
+}
+
+function summarizeValue(value) {
+  if (typeof value === "string") {
+    return summarizeText(value, 80);
+  }
+  if (typeof value === "number" || typeof value === "boolean" || value === null || value === undefined) {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return `array(len=${value.length}) ${inspect(value.slice(0, 3), { depth: 2, breakLength: 80 })}${value.length > 3 ? " ..." : ""}`;
+  }
+  if (typeof value === "object") {
+    const keys = Object.keys(value);
+    return `object(keys=${keys.length}) ${inspect(keys.slice(0, 5), { breakLength: 80 })}${keys.length > 5 ? " ..." : ""}`;
+  }
+  return inspect(value, { depth: 1, breakLength: 80 });
+}
+
+function summarizeText(value, maxLength = 140) {
+  const text = String(value).replace(/\s+/g, " ").trim();
+  if (text.length <= maxLength) {
+    return JSON.stringify(text);
+  }
+  return `${JSON.stringify(text.slice(0, maxLength))}... (len=${text.length})`;
+}
+
+function summarizeDeepEqualityMismatch(actual, expected) {
+  const mismatch = findFirstMismatch(actual, expected);
+  if (mismatch) {
+    return `${mismatch.path}: expected ${summarizeValue(mismatch.expected)}; received ${summarizeValue(mismatch.actual)}`;
+  }
+  return `expected ${summarizeValue(expected)}; received ${summarizeValue(actual)}`;
+}
+
+function findFirstMismatch(actual, expected, path = "root", depth = 0) {
+  if (depth > 3) {
+    return { path, actual, expected };
+  }
+
+  if (Object.is(actual, expected)) {
+    return null;
+  }
+
+  if (Array.isArray(actual) && Array.isArray(expected)) {
+    if (actual.length !== expected.length) {
+      return { path: `${path}.length`, actual: actual.length, expected: expected.length };
+    }
+    for (let index = 0; index < Math.min(actual.length, expected.length, 25); index += 1) {
+      const nested = findFirstMismatch(actual[index], expected[index], `${path}[${index}]`, depth + 1);
+      if (nested) {
+        return nested;
+      }
+    }
+    return { path, actual, expected };
+  }
+
+  if (isPlainObject(actual) && isPlainObject(expected)) {
+    const actualKeys = Object.keys(actual).sort();
+    const expectedKeys = Object.keys(expected).sort();
+    if (!isDeepStrictEqual(actualKeys, expectedKeys)) {
+      const missingKeys = expectedKeys.filter((key) => !actualKeys.includes(key));
+      const extraKeys = actualKeys.filter((key) => !expectedKeys.includes(key));
+      return {
+        path: `${path}{keys}`,
+        actual: { missingKeys, extraKeys },
+        expected: expectedKeys
+      };
+    }
+    for (const key of expectedKeys.slice(0, 25)) {
+      const nested = findFirstMismatch(actual[key], expected[key], `${path}.${key}`, depth + 1);
+      if (nested) {
+        return nested;
+      }
+    }
+    return { path, actual, expected };
+  }
+
+  return { path, actual, expected };
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function withRequiredValue(value, message, callback) {
+  assert.ok(value, message);
+  if (value) {
+    callback(value);
+  }
+}
+
+async function runBlockingCheck(label, task) {
+  try {
+    await task();
+  } catch (error) {
+    recordSmokeFailure("blocking", `${label} failed`, summarizeError(error));
+  }
+}
+
+function summarizeError(error) {
+  if (error instanceof Error) {
+    const message = error.message.replace(/\s+/g, " ").trim();
+    return message.length > 220 ? `${message.slice(0, 220)}...` : message;
+  }
+  return summarizeValue(error);
+}
+
+function finalizeSmokeRun() {
+  if (smokeFailures.length === 0) {
+    console.log("Smoke tests passed.");
+    return;
+  }
+
+  console.error(`Smoke tests failed with ${smokeFailures.length} issue(s):`);
+  for (const [index, failure] of smokeFailures.entries()) {
+    console.error(`${index + 1}. [${failure.kind}] ${failure.message}`);
+    if (failure.detail) {
+      console.error(`   ${failure.detail}`);
+    }
+  }
+
+  throw new Error(`Smoke tests failed with ${smokeFailures.length} issue(s).`);
+}
+
+function assertCurrentBoundaryIncludes(boundaryLines, patterns, label) {
+  const boundaryText = boundaryLines.join("\n");
+  for (const pattern of patterns) {
+    assert.match(boundaryText, pattern, `expected ${label} to include ${pattern}`);
+  }
+}
+
+function assertDatasetContractEntry(id, file) {
+  const entry = bundledDatasetContract.datasets.find((dataset) => dataset.id === id);
+  assert.ok(entry, `expected bundled dataset contract entry for ${id}`);
+  if (!entry) {
+    return;
+  }
+  assert.equal(entry.classification, "extracted-mechanics");
+  assert.deepEqual(entry.files, [file]);
+}
 
 async function waitForServer(url, attempts = 50, delayMs = 250) {
   for (let index = 0; index < attempts; index += 1) {
@@ -3220,28 +3350,28 @@ async function verifyLauncherModeServerLifecycle() {
   }
 
   const clientOpen = await postJson(`http://localhost:${testPort}/api/client/open`, { clientId: "smoke-client" });
-  assert.equal(clientOpen.ok, true);
-  assert.equal(clientOpen.launcherMode, true);
+  hardAssert.equal(clientOpen.ok, true);
+  hardAssert.equal(clientOpen.launcherMode, true);
 
   const eventController = new AbortController();
   const eventStream = await fetch(`http://localhost:${testPort}/api/client/events?clientId=smoke-client`, {
     signal: eventController.signal
   });
-  assert.equal(eventStream.ok, true);
+  hardAssert.equal(eventStream.ok, true);
 
   const launcherReopen = await fetch(`http://localhost:${testPort}/api/launcher/reopen`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: "{}"
   });
-  assert.equal(launcherReopen.status, 202);
+  hardAssert.equal(launcherReopen.status, 202);
 
   const healthAfterOpen = await fetchJson(`http://localhost:${testPort}/api/healthz`);
-  assert.equal(healthAfterOpen.clientCount, 1);
-  assert.equal(healthAfterOpen.launchSignalSequence, 1);
+  hardAssert.equal(healthAfterOpen.clientCount, 1);
+  hardAssert.equal(healthAfterOpen.launchSignalSequence, 1);
 
   const clientClose = await postJson(`http://localhost:${testPort}/api/client/close`, { clientId: "smoke-client" });
-  assert.equal(clientClose.ok, true);
+  hardAssert.equal(clientClose.ok, true);
   eventController.abort();
 
   await waitForExit(serverProcess, 9000);
@@ -3253,13 +3383,13 @@ async function postJson(url, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  assert.ok(response.ok, `Expected successful response from ${url}`);
+  hardAssert.ok(response.ok, `Expected successful response from ${url}`);
   return response.json();
 }
 
 async function fetchJson(url) {
   const response = await fetch(url);
-  assert.ok(response.ok, `Expected successful response from ${url}`);
+  hardAssert.ok(response.ok, `Expected successful response from ${url}`);
   return response.json();
 }
 
