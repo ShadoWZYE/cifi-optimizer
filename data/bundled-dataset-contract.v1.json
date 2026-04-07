@@ -370,6 +370,14 @@
       ]
     },
     {
+      "id": "token-shop-row-remap-boundary",
+      "label": "Token shop row remap boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-row-remap-boundary.json"
+      ]
+    },
+    {
       "id": "multiverse-market-save-boundary",
       "label": "Multiverse market save boundary",
       "classification": "extracted-mechanics",

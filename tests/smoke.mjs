@@ -434,6 +434,7 @@ const expectedBundledDatasetIds = [
   "token-shop-owner-shell",
   "token-shop-save-boundary",
   "token-shop-row-level-owner",
+  "token-shop-row-remap-boundary",
   "multiverse-market-save-boundary",
   "multiverse-market-market-member-boundary",
   "multiverse-market-savedata-import-boundary",
