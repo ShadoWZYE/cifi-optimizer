@@ -221,6 +221,30 @@ Current grounded conclusion:
   - save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
   - the canonical import-safe subset therefore stays empty
 
+## Alternate serialized-export label-source boundary
+
+- This check is a separate repo-local evidence class from the exhausted Market/TextHandler/probe path:
+  - the checked UABEA field table preserves `InscryptionCostList`, `InscryptionAndCostRelations`, `IDChecks`, `inscryptions`, and `InscryptionTupleList` on `MultiverseMarket`
+  - the same checked export preserves nested row payload types `MultiverseMarket|Inscryption` and `MultiverseMarket|InscryptionTupleObject`
+- Those nested row payloads stay structural only:
+  - `MultiverseMarket|Inscryption` preserves `ID`, `Cost`, `Level`, `MaxLevel`, `ISObject`, and `transform`
+  - `MultiverseMarket|InscryptionTupleObject` preserves `ID`, `Cost`, `Level`, `MaxLevel`, and `ISObject`
+- The checked serialized export still does not recover player-facing label-bearing fields such as:
+  - `Name`
+  - `Label`
+  - `Title`
+  - `Description`
+  - `Text`
+  - `LocalizationKey`
+  - `StringId`
+
+Current grounded conclusion:
+
+- the alternate serialized export is a real new repo-local evidence class for the Emporium row lane
+- it strengthens structural container recovery only, not player-facing label recovery
+- it does not help rows `69-74` join back to the settled ordered mapping as final player-facing identities
+- the canonical import-safe subset stays empty
+
 ## Checked row `71-74` remap-band boundary
 
 - The smallest defensible remap explanation is now checked directly inside the same band:

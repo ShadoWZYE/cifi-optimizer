@@ -341,6 +341,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-row69-74-identity-source-boundary.json`
 
+### `multiverse-market-serialized-label-source-boundary`
+
+- Label: Multiverse market serialized label-source boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-serialized-label-source-boundary.json`
+
 ### `multiverse-market-row71-74-identity-boundary`
 
 - Label: Multiverse market row 71-74 identity boundary

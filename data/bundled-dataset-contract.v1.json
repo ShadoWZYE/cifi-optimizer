@@ -394,6 +394,14 @@
       ]
     },
     {
+      "id": "multiverse-market-serialized-label-source-boundary",
+      "label": "Multiverse market serialized label-source boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-serialized-label-source-boundary.json"
+      ]
+    },
+    {
       "id": "multiverse-market-row71-74-identity-boundary",
       "label": "Multiverse market row 71-74 identity boundary",
       "classification": "extracted-mechanics",
