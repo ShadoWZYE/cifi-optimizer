@@ -1,6 +1,6 @@
 # Multiverse Market Market-Member Boundary
 
-This note records the current repo-local boundary around the `get_Market` accessor clue recovered inside the `PlayerProfile` persistence neighborhood.
+This note records the current repo-local boundary around the `get_Market` handoff recovered inside the `PlayerProfile` persistence neighborhood.
 
 ## What is now preserved
 
@@ -65,24 +65,41 @@ This note records the current repo-local boundary around the `get_Market` access
   - `NecrumR1Trades`
   - `Mech1Unlocked`
   - `Mech1MissionsCompleted`
+- exact typed bridge recovery:
+  - `PlayerProfileHandler.get_Market -> MultiverseMarket`
+- direct `PlayerProfileData` field samples recovered exactly:
+  - `InscryptionsDone`
+  - `MechsOwned`
+  - `GadgetLevels`
+- first nested `MultiverseMarket` payloads recovered exactly:
+  - `MultiverseMarket|Inscryption`
+  - `MultiverseMarket|InscryptionTupleObject`
+- first nested row-local field samples:
+  - `<ID>k__BackingField`
+  - `<Cost>k__BackingField`
+  - `<Level>k__BackingField`
+  - `<MaxLevel>k__BackingField`
+  - `<ISObject>k__BackingField`
+  - `transform`
 
 ## Current grounded conclusion
 
-- the PlayerProfile persistence family now has a real `get_Market` accessor clue, so the remaining save-side search is narrower than a generic "`PlayerProfileData` somewhere" hypothesis
-- the same `PlayerProfileData` neighborhood now also preserves a bare `Market` member-shell clue beside the same kind of profile-side substructure names used for `Relics`, `CellData`, `ShardData`, `ResearchPointData`, and `AcademyPointData`
-- the same narrowed neighborhood also preserves `PlayerProfileHandler`, `playerData`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `ConvertSaveDataToProfileData` beside `get_Market` and `Market`, which makes the strongest current bridge a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` path
-- that same direct local neighborhood also preserves `get_Market`, `Market`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `<FillPlayerProfileData>d__45` together, so there is still no checked repo-local evidence of another named object between `get_Market` and the PlayerProfile-side `Market` member
-- that same bridge also preserves sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`, which makes `Market` look more like a broader wrapper hub than a direct Emporium-only declaring owner
-- the recovered `InscryptionsDone` field run still lives in a separate broader progression cluster that spans `IS71Level` through `IS110Level`, `EsotericR*Trades`, `NecrumR*Trades`, and early `Mech1*` fields, which is broader than the direct-member `Market` shell itself
-- the same metadata still exposes typed nested `PlayerProfileData` siblings such as `PlayerProfileData|GemData` and `PlayerProfileData|GemNodeCombo` without exposing an equivalent `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` clue, so the exact type under that direct `Market` member handoff remains unresolved
+- exact typed recovery now confirms `PlayerProfileHandler.get_Market -> MultiverseMarket`, so the checked bridge is no longer just a metadata-neighborhood clue
+- the same `PlayerProfileData` neighborhood still preserves a bare `Market` member-shell clue beside the same kind of profile-side substructure names used for `Relics`, `CellData`, `ShardData`, `ResearchPointData`, and `AcademyPointData`
+- exact typed recovery also separately confirms that `PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels` as string fields
+- that same direct local neighborhood still preserves `get_Market`, `Market`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `<FillPlayerProfileData>d__45` together, so there is still no checked repo-local evidence of another named object between `get_Market` and the PlayerProfile-side `Market` member
+- the first recovered nested `MultiverseMarket` payloads are `MultiverseMarket|Inscryption` and `MultiverseMarket|InscryptionTupleObject`, and their exact fields are row-local `ID`, `Cost`, `Level`, `MaxLevel`, `ISObject`, and `transform` carriers rather than the broader save-side progression block
+- the recovered wider progression field run still spans `IS71Level` through `IS110Level`, `EsotericR*Trades`, `NecrumR*Trades`, and early `Mech1*` fields, and current checked typed recovery does not place that wider run directly on `MultiverseMarket` or on those first nested row-local payloads
+- that same bridge still preserves sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`, which keeps `Market` broader than a single Emporium-only field family even though `MultiverseMarket` itself is now recovered exactly
+- the same metadata still exposes typed nested `PlayerProfileData` siblings such as `PlayerProfileData|GemData` and `PlayerProfileData|GemNodeCombo` without exposing an equivalent `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` clue, so the exact declaring type for the wider `IS*Level` / trade-counter / mech run remains unresolved
 - the cloud-save neighborhood still points through `CloudSavePlayerProfile` and `GetPlayerProfileInfo`, which keeps this lane attached to repo-local player-profile recovery rather than to UI-only Emporium text handlers
-- the repo still does not have a direct `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` type-map string, so direct declaring ownership is still unresolved
-- the closest recovered market-side family still looks broader than `MultiverseMarket` alone, so the strongest grounded claim is now a `PlayerProfileHandler`-mediated direct `Market` member handoff that likely reaches a deeper progression payload rather than a fully named declared type
+- the narrowest checked grounded stop point is now direct member versus first nested payload: `PlayerProfileHandler.get_Market` returns `MultiverseMarket`, the first nested market payloads are row-local only, and the broader progression owner still is not recovered exactly
 
 ## Safe use
 
 - safe for save-model narrowing and fail-fast validation
 - not safe for adding canonical Emporium fields to `state.playerProfile`
-- not safe for claiming that `MultiverseMarket` is itself the serialized PlayerProfile member
+- not safe for claiming that `MultiverseMarket` is itself the serialized PlayerProfile member just because `get_Market` returns it
 - not safe for claiming that another named nested object has been recovered between `get_Market` and `Market`
-- not safe for claiming that `Market` itself directly declares `InscryptionsDone` or the nearby `IS*Level` cluster
+- not safe for claiming that `MultiverseMarket` or its first nested `Inscryption` payloads directly declare the broader `IS*Level`, trade-counter, or mech cluster
+- not safe for claiming that the wider progression run is fully solved just because `PlayerProfileData` directly declares `InscryptionsDone`
