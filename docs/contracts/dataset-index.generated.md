@@ -320,6 +320,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/token-shop-row-level-owner.json`
 
+### `token-shop-row-remap-boundary`
+
+- Label: Token shop row remap boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/token-shop-row-remap-boundary.json`
+
 ### `multiverse-market-save-boundary`
 
 - Label: Multiverse market save boundary

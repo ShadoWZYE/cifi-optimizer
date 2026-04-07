@@ -207,8 +207,8 @@ Current active or queued tracks:
 - `spend-token-shop-row-level-recovery`
   - status: `archived`
   - goal: recovered exact `SaveData` ownership for raw `ATU1Level` through `ATU28Level` TokenShop row levels; follow-up work moves to row remap instead of owner recovery
-- `spend-token-shop-row-label-remap`
-  - status: `queued`
+- `spend-token-shop-row-remap`
+  - status: `active`
   - goal: remap recovered raw `ATU*Level` TokenShop row fields onto grounded row identities without promoting speculative player-facing labels
 - `spend-token-bank-state-owner`
   - status: `active`

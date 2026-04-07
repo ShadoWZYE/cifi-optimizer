@@ -450,14 +450,44 @@
       ]
     },
     {
-      "id": "spend-token-shop-row-label-remap",
-      "title": "TokenShop row label remap",
-      "status": "queued",
+      "id": "spend-token-shop-row-remap",
+      "title": "TokenShop row remap",
+      "status": "active",
       "goal": "Map recovered raw `ATU*Level` TokenShop save fields onto grounded row identities strongly enough for bounded non-speculative use beyond compatibility import.",
-      "currentSlice": "Keep raw `ATU*Level` fields in the compatibility TokenShop sink while the repo verifies which exact grounded TokenShop rows those `ATU` numbers represent.",
+      "currentSlice": "Keep raw `ATU*Level` fields in the compatibility TokenShop sink while the repo tests whether any checked object or text join can bind ATU-numbered row shells to grounded TokenShop row identities.",
       "exitCondition": "The repo has a checked TokenShop row-by-row remap boundary that ties the recovered `ATU*Level` family to grounded row identities without inventing player-facing labels.",
-      "blockedBy": "The exact `SaveData` owner is now recovered, but the final row-by-row remap from raw `ATU` numbering to grounded TokenShop rows is still unresolved.",
-      "smallestShippableSlice": "A checked remap boundary that names which recovered `ATU` rows are safe to bind beyond compatibility-only import."
+      "blockedBy": "The exact `SaveData` owner is recovered and some ATU effect domains are grounded, but the repo still lacks a checked join from ATU-numbered row shells to specific prefab identities or final player-facing row titles.",
+      "smallestShippableSlice": "A checked identity-join boundary that proves which recovered `ATU` rows, if any, can be bound beyond compatibility-only import.",
+      "completedSteps": [
+        "Preserve the raw `ATU1Level` through `ATU28Level` family under the compatibility TokenShop sink while the row remap stays unresolved.",
+        "Promote a TokenShop row-remap boundary artifact that records grounded ATU effect-domain clues, direct late-row buy hooks, and the missing object or text joins that still block row identity recovery."
+      ],
+      "nextSteps": [
+        "Recover a checked bridge from `ATU*Button`, `ATU*Content`, or adjacent row-shell path ids to specific `NewTokenUPGPrefab.*` objects before claiming any row identity.",
+        "Recover a checked bridge from ATU-numbered row shells to final player-facing TokenShop row title text before promoting any player-facing remap.",
+        "If only a subset clears that join, keep the remaining ATU rows quarantined instead of forcing a whole-lane remap."
+      ],
+      "sources": [
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/systems/spend/token-shop-row-remap-verification.md",
+        "data/token-shop-values.json",
+        "data/uabea-probe-report.json",
+        "data/unity-probe-report.json",
+        "data/daily-tokenium-lane-probe.json"
+      ],
+      "artifacts": [
+        "data/token-shop-row-level-owner.json",
+        "data/token-shop-row-remap-boundary.json"
+      ],
+      "verified": [
+        "The repo preserves the raw `ATU1Level` through `ATU28Level` save family on `SaveData` and the same numbering family on the grounded `TokenShop` owner payload.",
+        "Checked probe output also preserves grounded non-label clues such as `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU24Bonus3Shards`, and late direct buy hooks `BuyATU24` through `BuyATU28`.",
+        "Checked prefab and player-facing row rosters both exist in repo artifacts, but they are not yet joined back onto specific ATU-numbered row shells."
+      ],
+      "uncertain": [
+        "Which exact grounded player-facing TokenShop row identity belongs to each `ATU*Level` field.",
+        "Whether any subset of ATU rows can clear a direct object or title join before the full lane is remapped."
+      ]
     },
     {
       "id": "spend-token-bank-state-owner",

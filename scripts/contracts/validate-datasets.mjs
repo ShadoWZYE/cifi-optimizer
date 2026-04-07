@@ -2307,6 +2307,59 @@ function validateTokenShopRowLevelOwner(boundary) {
   };
 }
 
+function validateTokenShopRowRemapBoundary(boundary) {
+  expectNonEmptyString(boundary.generatedAt, "token shop row remap boundary generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "token shop row remap boundary dataset must be present");
+  expectRecord(boundary.sources, "token shop row remap boundary sources must be an object");
+  ["tokenShopExtract", "uabeaProbe", "unityProbe", "dailyTokeniumLaneProbe"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `token shop row remap boundary sources.${field} must be present`);
+  });
+  expectRecord(boundary.rawSaveFamily, "token shop row remap boundary rawSaveFamily must be an object");
+  expectRecord(boundary.groundedNonLabelClues, "token shop row remap boundary groundedNonLabelClues must be an object");
+  expectRecord(boundary.blockedIdentityJoin, "token shop row remap boundary blockedIdentityJoin must be an object");
+  expectArray(boundary.groundedNonLabelClues.effectHookSamples, "token shop row remap boundary effectHookSamples must be an array");
+  expectArray(boundary.groundedNonLabelClues.prefabRosterSamples, "token shop row remap boundary prefabRosterSamples must be an array");
+  expectArray(boundary.groundedNonLabelClues.playerFacingStringSamples, "token shop row remap boundary playerFacingStringSamples must be an array");
+  expectArray(boundary.groundedNonLabelClues.directBuyHookSamples, "token shop row remap boundary directBuyHookSamples must be an array");
+  expectArray(boundary.blockedIdentityJoin.missingLinks, "token shop row remap boundary missingLinks must be an array");
+  expectArray(boundary.blockedIdentityJoin.unsafeInferenceSources, "token shop row remap boundary unsafeInferenceSources must be an array");
+  expectArray(boundary.currentBoundary, "token shop row remap boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "token-shop-row-remap-boundary", "token shop row remap boundary dataset id drifted");
+  assert.equal(boundary.rawSaveFamily.fieldRange, "ATU1Level through ATU28Level", "token shop row remap boundary field range drifted");
+  assert.equal(boundary.rawSaveFamily.owner, "SaveData", "token shop row remap boundary owner drifted");
+  assert.equal(boundary.rawSaveFamily.groundedOwnerPayloadRange, "ATU1Button through ATU28MaxOverlay", "token shop row remap boundary grounded owner payload range drifted");
+  ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
+    assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);
+  });
+  ["NewTokenUPGPrefab.T1.TokensBoost", "NewTokenUPGPrefab.T4.Ultima", "NewTokenUPGPrefab.T5.CampaignFragments"].forEach((name) => {
+    assert.ok(boundary.groundedNonLabelClues.prefabRosterSamples.includes(name), `token shop row remap boundary missing prefab roster sample ${name}`);
+  });
+  ["Tokens Booster T2", "Duo Booster Four", "Trinity Booster One", "Tokens Booster T3"].forEach((name) => {
+    assert.ok(boundary.groundedNonLabelClues.playerFacingStringSamples.includes(name), `token shop row remap boundary missing player-facing string sample ${name}`);
+  });
+  ["BuyATU24", "BuyATU25", "BuyATU26", "BuyATU27", "BuyATU28"].forEach((name) => {
+    assert.ok(boundary.groundedNonLabelClues.directBuyHookSamples.includes(name), `token shop row remap boundary missing direct buy hook sample ${name}`);
+  });
+  assert.ok(boundary.blockedIdentityJoin.missingLinks.some((line) => /ATU\*Button/i.test(line)), "token shop row remap boundary must preserve missing ATU button join blocker");
+  ["row-order similarity alone", "OR_* labels", "community naming", "prefab-only naming without a checked object join"].forEach((name) => {
+    assert.ok(boundary.blockedIdentityJoin.unsafeInferenceSources.includes(name), `token shop row remap boundary missing unsafe inference source ${name}`);
+  });
+  assert.ok(boundary.currentBoundary.some((line) => /ATU2DiamondsBonus and ATU24Bonus3Shards/i.test(line)), "token shop row remap boundary must preserve grounded effect-domain clue conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /do not prove which grounded player-facing TokenShop row identity belongs to each ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion");
+
+  return {
+    id: "token-shop-row-remap-boundary",
+    label: "Token shop row remap boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      boundary.rawSaveFamily.fieldRange,
+      `${boundary.groundedNonLabelClues.effectHookSamples.length} grounded non-label effect clues`,
+      "ATU row identity remains blocked until a checked prefab-or-title join is recovered"
+    ]
+  };
+}
+
 function validateMultiverseMarketSaveBoundary(boundary) {
   expectNonEmptyString(boundary.generatedAt, "multiverse market save boundary generatedAt must be present");
   expectRecord(boundary.sources, "multiverse market save boundary sources must be an object");
@@ -3240,7 +3293,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 54, "bundled dataset contract must track the fifty-four shipped dataset groups");
+  assert.equal(contract.datasets.length, 55, "bundled dataset contract must track the fifty-five shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -3345,6 +3398,7 @@ export async function validateBundledDatasets() {
   const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
   const tokenShopRowLevelOwner = await readJson("../../data/token-shop-row-level-owner.json");
+  const tokenShopRowRemapBoundary = await readJson("../../data/token-shop-row-remap-boundary.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
   const multiverseMarketSaveDataImportBoundary = await readJson("../../data/multiverse-market-savedata-import-boundary.json");
@@ -3407,6 +3461,7 @@ export async function validateBundledDatasets() {
     validateTokenShopOwnerShell(tokenShopOwnerShell),
     validateTokenShopSaveBoundary(tokenShopSaveBoundary),
     validateTokenShopRowLevelOwner(tokenShopRowLevelOwner),
+    validateTokenShopRowRemapBoundary(tokenShopRowRemapBoundary),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateMultiverseMarketSaveDataImportBoundary(multiverseMarketSaveDataImportBoundary, multiverseMarketStateVerificationDoc),

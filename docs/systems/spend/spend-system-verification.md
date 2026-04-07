@@ -29,10 +29,12 @@ If any item is missing, the allowed work stays in docs, parser scripts, owner ma
   - [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat)
 - Grounded outputs:
   - [`docs/systems/spend/token-shop-values.md`](docs/systems/spend/token-shop-values.md)
+  - [`docs/systems/spend/token-shop-row-remap-verification.md`](docs/systems/spend/token-shop-row-remap-verification.md)
   - [`docs/systems/spend/token-bank-state-verification.md`](docs/systems/spend/token-bank-state-verification.md)
   - [`docs/systems/spend/daily-tokenium-mission-lane-verification.md`](docs/systems/spend/daily-tokenium-mission-lane-verification.md)
   - [`data/token-shop-values.json`](data/token-shop-values.json)
   - [`data/token-shop-row-level-owner.json`](data/token-shop-row-level-owner.json)
+  - [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json)
 - Verified extracted fields include:
   - `StartCost`
   - `AdditiveCost`
@@ -51,6 +53,7 @@ If any item is missing, the allowed work stays in docs, parser scripts, owner ma
 ### Not yet verified enough for app recommendations
 
 - final remap from raw `ATU*Level` save fields to grounded player-facing TokenShop row labels
+- checked object or title joins from `ATU`-numbered row shells to specific prefab identities or final row titles
 - full rule set for moving from first-buy facts to true next-purchase planning
 
 ### Adjacent systems this signals
@@ -71,6 +74,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - It is safe to treat TokenShop as a real system with grounded extracted constants.
 - It is safe to describe its cost lane as token-bank token or tokenium spending, rather than as an unnamed generic spend pool.
 - It is safe to preserve raw `ATU1Level` through `ATU28Level` and `Tier2TokensUnlocked` through `Tier5TokensUnlocked` under `compatibility.unmappedSystemState.tokenShop`.
+- It is safe to say the repo now has grounded non-label clues around some `ATU` rows, including token, diamond, daily-token, shard, and late direct-buy hook evidence.
 - It is not yet safe to generate next-buy recommendations from player token budgets alone.
 - It is not yet safe to promote raw `ATU*Level` save fields into canonical `state.playerProfile` fields until the row-by-row remap is grounded.
 - TokenShop-connected token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped` until saved-state owners are recovered.
