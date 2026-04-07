@@ -1808,6 +1808,10 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
     "expected Emporium successor track to record the refreshed typed boundary around PlayerProfileHandler and PlayerProfileData"
   );
   assert.ok(
+    track.completedSteps.some((step) => /exact `PlayerProfileData` field table/.test(step) && /rules out flat direct `IS\*Level`/.test(step)),
+    "expected Emporium successor track to record the flat PlayerProfileData-versus-deeper-owner boundary"
+  );
+  assert.ok(
     multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
       multiverseMarketMarketMemberBoundaryData.directPlayerProfileFieldSamples.includes("InscryptionsDone") &&
       multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /PlayerProfileData directly declares InscryptionsDone/i.test(line)),
@@ -1842,6 +1846,10 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
     "expected Emporium successor track to record the direct PlayerProfileData field samples in verified facts"
   );
   assert.ok(
+    track.verified.some((line) => /checked `PlayerProfileData` field table has no direct `IS\*Level`, `EsotericR\*Trades`, `NecrumR\*Trades`, or early `Mech\*` fields/.test(line)),
+    "expected Emporium successor track to record the flat PlayerProfileData field-table negative boundary in verified facts"
+  );
+  assert.ok(
     track.verified.some((line) => /`PlayerProfileHandler\.saveInfoCache: PlayerProfileData`/.test(line) && /does not recover a typed `Market` field/.test(line)),
     "expected Emporium successor track to record the typed saveInfoCache field and missing typed Market field in verified facts"
   );
@@ -1855,8 +1863,8 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
     "expected Emporium successor track to record the PlayerProfileHandler bridge clues in verified facts"
   );
   assert.ok(
-    multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /accessor-versus-deeper-owner boundary/i.test(line)),
-    "expected market-member boundary artifact to preserve the narrowed accessor-versus-deeper-owner boundary"
+    multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /direct-wrapper-versus-deeper-owner boundary/i.test(line)),
+    "expected market-member boundary artifact to preserve the narrowed direct-wrapper-versus-deeper-owner boundary"
   );
   assert.ok(
     track.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
@@ -2009,6 +2017,11 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedHandlerFieldRecov
   fieldName: "saveInfoCache",
   fieldType: "PlayerProfileData"
 });
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedPlayerProfileFieldTableRecovery, {
+  fieldOwner: "PlayerProfileData",
+  fieldCount: 89,
+  methodCount: 1
+});
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues, [
   "PlayerProfileData|Market",
   "PlayerProfileData|Inscryption",
@@ -2019,9 +2032,28 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.directPlayerProfileFie
   "MechsOwned",
   "GadgetLevels"
 ]);
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedPlayerProfileNestedTypeChecks, [
+  "PlayerProfileData+GemData"
+]);
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.negativeTypedDirectPlayerProfileProgressionChecks, [
+  "PlayerProfileData.IS71Level",
+  "PlayerProfileData.IS110Level",
+  "PlayerProfileData.EsotericR1Trades",
+  "PlayerProfileData.NecrumR1Trades",
+  "PlayerProfileData.Mech1Unlocked",
+  "PlayerProfileData.Mech1MissionsCompleted"
+]);
 assert.ok(
   multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /does not place that wider run directly on MultiverseMarket/i.test(line)),
   "expected typed probe to keep the broader progression run off direct MultiverseMarket ownership"
+);
+assert.ok(
+  multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /PlayerProfileData field table has 89 direct fields and 1 method/i.test(line)),
+  "expected typed probe to preserve the exact PlayerProfileData field-table recovery"
+);
+assert.ok(
+  multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /none of those direct fields are named IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted/i.test(line)),
+  "expected typed probe to rule out flat direct PlayerProfileData progression ownership"
 );
 assert.ok(
   multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /first nested MultiverseMarket payload types are .* row-local .* broader saved progression block/i.test(line)),
@@ -2046,9 +2078,10 @@ assert.ok(
 assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBoundary, [
   /PlayerProfileHandler declares get_Market with return type MultiverseMarket/,
   /saveInfoCache as a typed PlayerProfileData field/,
+  /PlayerProfileData field table has 89 direct fields and 1 method/,
   /bare Market member-shell clue/,
   /does not place that wider run directly on MultiverseMarket/,
-  /accessor-versus-deeper-owner boundary/
+  /direct-wrapper-versus-deeper-owner boundary/
 ], "MultiverseMarket market-member boundary");
 
 assert.deepEqual(multiverseMarketRangeBoundaryData.validatedRowRanges, ["50-59", "63-74"]);
