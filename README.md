@@ -66,3 +66,5 @@ If the APK/Unity path has not been checked for an unresolved mechanic, it should
 - `npm run dev`
 - `npm run verify:data`
 - `npm test`
+- `npm run test:unit`
+- `npm run check:syntax`

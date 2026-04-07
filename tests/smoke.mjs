@@ -2934,7 +2934,9 @@ assert.equal(pkg.scripts["lint:docs"], "node ./scripts/contracts/lint-doc-portab
 assert.equal(pkg.scripts["probe:build"], "node ./scripts/unity/run_probe.mjs build");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
 assert.equal(pkg.scripts["verify:vendoring"], "node ./scripts/contracts/verify-vendoring-layout.mjs");
+assert.equal(pkg.scripts["check:syntax"], "node ./scripts/contracts/check-js-syntax.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+assert.equal(pkg.scripts["test:unit"], "node ./scripts/tests/run-unit-tests.mjs");
 assert.match(probeRunner, /"build": \[/);
 assert.match(probeRunner, /Probe artifact is stale:/);
 assert.match(probeRunner, /npm run probe:build/);
@@ -2998,6 +3000,7 @@ assert.match(datasetContractsDoc, /editing `data\/bundled-dataset-contract\.v1\.
 assert.match(datasetRefreshChecklistDoc, /# Dataset Refresh Checklist/);
 assert.match(datasetRefreshChecklistDoc, /Record the shipped dataset in `data\/bundled-dataset-contract\.v1\.json`/);
 assert.match(datasetRefreshChecklistDoc, /Run `npm run verify:data`/);
+assert.match(datasetRefreshChecklistDoc, /Run `npm run check:syntax`/);
 assert.match(datasetRefreshChecklistDoc, /Use `docs\/contracts\/research-note-template\.md` for new notes/);
 assert.match(researchNoteTemplateDoc, /# Research Note Template/);
 assert.match(researchNoteTemplateDoc, /APK\/Unity path checked first/);
@@ -3012,6 +3015,8 @@ assert.match(readme, /## Doc map/);
 assert.match(readme, /docs\/roadmap\/mvp-plan\.md/);
 assert.match(readme, /docs\/roadmap\/research-tracks\.md/);
 assert.match(readme, /docs\/tools\/ocr\.md/);
+assert.match(readme, /npm run test:unit/);
+assert.match(readme, /npm run check:syntax/);
 
 await runBlockingCheck("launcher-mode lifecycle", verifyLauncherModeServerLifecycle);
 
