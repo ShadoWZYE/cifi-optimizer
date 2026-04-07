@@ -1,0 +1,53 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import { PLAYER_PROFILE_SCHEMA_VERSION, normalizePlayerProfile } from "../player-profile.js";
+
+test("normalizePlayerProfile maps gems into canonical diamonds", () => {
+  const profile = normalizePlayerProfile({ gems: 1250 });
+  assert.equal(profile.player.resources.diamonds, 1250);
+});
+
+test("normalizePlayerProfile parses supported shorthand numeric formats", () => {
+  const profile = normalizePlayerProfile({
+    shards: "1.23e45",
+    shardRatePerHour: "10k",
+    resources: { academyRelics: "5m" }
+  });
+
+  assert.equal(profile.player.resources.shards, "1.23e45");
+  assert.equal(profile.planning.shards.ratePerHour, 10000);
+  assert.equal(profile.player.resources.academyRelics, 5000000);
+});
+
+test("normalizePlayerProfile converts invalid numeric strings to null", () => {
+  const profile = normalizePlayerProfile({
+    tokens: "not-a-number",
+    systems: { shards: { ratePerHour: "???" } }
+  });
+
+  assert.equal(profile.player.resources.tokens, null);
+  assert.equal(profile.planning.shards.ratePerHour, null);
+});
+
+test("normalizePlayerProfile preserves only allowed meta.dataConfidence values", () => {
+  assert.equal(normalizePlayerProfile({ confidence: "verified" }).meta.dataConfidence, "verified");
+  assert.equal(normalizePlayerProfile({ confidence: "guessed" }).meta.dataConfidence, "manual");
+  assert.equal(normalizePlayerProfile({ automationConfidence: "mixed" }).meta.dataConfidence, "mixed");
+});
+
+test("normalizePlayerProfile keeps multiverse market style levels quarantined", () => {
+  const profile = normalizePlayerProfile({
+    IS71Level: 4,
+    IS72Level: "5",
+    multiverseMarket: { ExistingRow: 8 }
+  });
+
+  assert.equal(profile.meta.schemaVersion, PLAYER_PROFILE_SCHEMA_VERSION);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS71Level, 4);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS72Level, 5);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.ExistingRow, 8);
+  assert.equal(profile.player.resources.tokens, null);
+  assert.equal(profile.player.resources.diamonds, null);
+  assert.equal(profile.player.IS71Level, undefined);
+});
