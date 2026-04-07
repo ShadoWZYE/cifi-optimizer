@@ -314,7 +314,7 @@ assert.match(appJs, /Missing overlap-grounded imports: \${escapeHtml\(importedMa
 assert.match(appJs, /Overlap-grounded row cards now also show recovered row constants such as bonus, start cost, and cost exponent for the imported subset/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /same sibling accessor run as \${marketMemberSummary\.siblingAccessorLabel}/);
-assert.match(appJs, /strongest current repo-local host for future canonical market state/);
+assert.match(appJs, /checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is \$\{marketMemberSummary\.exactSaveOwnerLabel\}/);
 assert.match(appJs, /TokenShop token-bank anchors/);
 assert.match(appJs, /Recovered token-bank controller anchors available/);
 assert.match(appJs, /Validated late-block constants available/);
@@ -1770,7 +1770,8 @@ const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id ===
 withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor track", (track) => {
   assert.equal(track.status, "active");
   assert.match(track.currentSlice, /market-member boundary artifacts/);
-  assert.match(track.currentSlice, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` accessor bridge/);
+  assert.match(track.currentSlice, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/);
+  assert.match(track.currentSlice, /`SaveData` for the exact wider `IS\*Level` \/ trade-counter \/ mech declaring owner/);
   assert.ok(
     track.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
     "expected Emporium successor track to record market-member boundary grounding"
@@ -1850,6 +1851,10 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
     "expected Emporium successor track to record the flat PlayerProfileData field-table negative boundary in verified facts"
   );
   assert.ok(
+    track.verified.some((line) => /`SaveData` directly declares `IS71Level`, `IS110Level`, `InscryptionsDone`, `EsotericR1Trades`, `NecrumR1Trades`, `Mech1Unlocked`, and `Mech1MissionsCompleted`/.test(line)),
+    "expected Emporium successor track to record the exact SaveData progression owner in verified facts"
+  );
+  assert.ok(
     track.verified.some((line) => /`PlayerProfileHandler\.saveInfoCache: PlayerProfileData`/.test(line) && /does not recover a typed `Market` field/.test(line)),
     "expected Emporium successor track to record the typed saveInfoCache field and missing typed Market field in verified facts"
   );
@@ -1865,6 +1870,10 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
   assert.ok(
     multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /direct-wrapper-versus-deeper-owner boundary/i.test(line)),
     "expected market-member boundary artifact to preserve the narrowed direct-wrapper-versus-deeper-owner boundary"
+  );
+  assert.ok(
+    track.verified.some((line) => /recovers `SaveData` as the declaring save model/.test(line)),
+    "expected Emporium successor track to record the exact SaveData declaring model in verified facts"
   );
   assert.ok(
     track.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
@@ -2022,6 +2031,11 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedPlayerProfileFiel
   fieldCount: 89,
   methodCount: 1
 });
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedSaveDataFieldTableRecovery, {
+  fieldOwner: "SaveData",
+  fieldCount: 4461,
+  methodCount: 1
+});
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues, [
   "PlayerProfileData|Market",
   "PlayerProfileData|Inscryption",
@@ -2031,6 +2045,15 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.directPlayerProfileFie
   "InscryptionsDone",
   "MechsOwned",
   "GadgetLevels"
+]);
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedSaveDataProgressionOwnerSamples, [
+  "IS71Level",
+  "IS110Level",
+  "InscryptionsDone",
+  "EsotericR1Trades",
+  "NecrumR1Trades",
+  "Mech1Unlocked",
+  "Mech1MissionsCompleted"
 ]);
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedPlayerProfileNestedTypeChecks, [
   "PlayerProfileData+GemData"
@@ -2075,10 +2098,16 @@ assert.ok(
   multiverseMarketMarketMemberBoundaryData.negativeTypedDirectMemberChecks.includes("MultiverseMarket.InscryptionsDone"),
   "expected typed probe to preserve the ruled-out direct MultiverseMarket InscryptionsDone ownership check"
 );
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.negativeTypedSaveDataMarketChecks, [
+  "SaveData.Market",
+  "SaveData.MultiverseMarket"
+]);
 assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBoundary, [
   /PlayerProfileHandler declares get_Market with return type MultiverseMarket/,
   /saveInfoCache as a typed PlayerProfileData field/,
   /PlayerProfileData field table has 89 direct fields and 1 method/,
+  /SaveData declares a 4461-field save table with 1 method/,
+  /SaveData the current declaring owner/,
   /bare Market member-shell clue/,
   /does not place that wider run directly on MultiverseMarket/,
   /direct-wrapper-versus-deeper-owner boundary/

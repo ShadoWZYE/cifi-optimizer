@@ -1887,15 +1887,15 @@ function renderSpendPlannerBoundary() {
         <p class="snapshot-title">Active Emporium save-model narrowing</p>
         <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
         <p class="meta">${marketMemberSummary.hasSiblingAccessorCluster ? `${marketMemberSummary.accessorLabel} also sits in the same sibling accessor run as ${marketMemberSummary.siblingAccessorLabel}, with matching member shells such as ${marketMemberSummary.siblingMemberLabel}.` : "The checked build does not yet preserve a full sibling accessor and member-shell pattern around the Market handoff."}</p>
-        <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That makes ${marketMemberSummary.canonicalHostLabel} the strongest current repo-local host for future canonical market state.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
+        <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That keeps ${marketMemberSummary.canonicalHostLabel} as the checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is ${marketMemberSummary.exactSaveOwnerLabel}.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
         <p class="meta">${marketMemberSummary.hasCloudBridge ? `The same narrowed path still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps this lane tied to repo-local player-profile recovery instead of UI-only text handlers.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the Emporium save-model path."}</p>
-        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the next safe step is still save-model recovery rather than planner logic.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save-model path and needs review."}</p>
+        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the next safe step is bounded import-surface review rather than planner logic or row remap.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save-model path and needs review."}</p>
       </div>
       <div class="meta-stack">
         <p class="snapshot-title">Imported spend payload watch</p>
         <p class="meta">${hasImportedTokenShopState ? `Quarantined TokenShop payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedTokenShopState))}).` : "No quarantined TokenShop payload is present in the imported PlayerProfile."}</p>
         <p class="meta">${hasImportedMarketState ? `Quarantined MultiverseMarket payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedMarketState))}).` : "No quarantined MultiverseMarket payload is present in the imported PlayerProfile."}</p>
-        <p class="meta">These imported blobs stay under <code>compatibility.unmappedSystemState</code> until spend owners, saved-state inputs, and grounded labels are recovered.</p>
+        <p class="meta">These imported blobs stay under <code>compatibility.unmappedSystemState</code> until the recovered spend owners, bounded import surfaces, and grounded labels clear the remaining integration gate.</p>
         <p class="meta">The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap</code>, <code>ClaimableBankTokens</code>, <code>InscryptionsDone</code>, and top-level <code>IS*Level</code> fields instead of dropping them.</p>
       </div>
       <div class="meta-stack">
@@ -2159,14 +2159,15 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? "That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet." : "The current build does not yet preserve a clean separation boundary between MultiverseMarket action-shell recovery and save-family recovery."}</p>
         <p class="meta">${marketMemberSummary.hasBoundary ? `The newer checked market-member boundary now preserves ${marketMemberSummary.accessorLabel}, ${marketMemberSummary.memberLabel}, and nearby profile-side member shells such as ${marketMemberSummary.memberShellLabel}.` : "The newer checked market-member boundary is not available in this build."}</p>
         <p class="meta">${marketMemberSummary.hasHandlerBridge ? `That same narrowed handoff also keeps ${marketMemberSummary.handlerBridgeLabel} beside ${marketMemberSummary.accessorLabel} and ${marketMemberSummary.memberLabel}.` : "The current build does not yet preserve the expected PlayerProfileHandler bridge clues for the market-member boundary."}</p>
-        <p class="meta">${marketMemberSummary.hasDirectMemberHandoff ? `The same direct neighborhood now also preserves ${marketMemberSummary.directMemberHandoffLabel}, but the exact typed probe still only recovers ${marketMemberSummary.typedSaveCacheLabel}, ${marketMemberSummary.typedPlayerProfileFieldTableLabel}, and ${marketMemberSummary.negativeTypedMarketLabel}.` : "The current build does not yet preserve the expected direct member-handoff clues for the market-member boundary."}</p>
+        <p class="meta">${marketMemberSummary.hasDirectMemberHandoff ? `The same direct neighborhood now also preserves ${marketMemberSummary.directMemberHandoffLabel}, while the exact typed probe recovers ${marketMemberSummary.typedSaveCacheLabel}, ${marketMemberSummary.typedPlayerProfileFieldTableLabel}, ${marketMemberSummary.typedSaveDataFieldTableLabel}, ${marketMemberSummary.typedSaveDataOwnerLabel}, and ${marketMemberSummary.negativeTypedMarketLabel}.` : "The current build does not yet preserve the expected direct member-handoff clues for the market-member boundary."}</p>
         <p class="meta">${marketMemberSummary.hasBoundary ? `The same bridge also preserves sibling market-side accessors such as ${marketMemberSummary.siblingAccessorLabel}.` : "The current build does not yet preserve the expected sibling market-side accessor clues for the market-member boundary."}</p>
         <p class="meta">${marketMemberSummary.hasProgressionPayloadBoundary ? `The broader field cluster still lives separately as ${marketMemberSummary.progressionPayloadLabel}, which is wider than the direct-member ${marketMemberSummary.memberLabel} shell itself.` : "The current build does not yet preserve the expected broader progression-payload field cluster."}</p>
         <p class="meta">${marketMemberSummary.hasTypedPlayerProfileFieldTable && marketMemberSummary.rulesOutDirectPlayerProfileProgressionOwner ? `The same checked PlayerProfileData field table now also rules out flat direct ownership because ${marketMemberSummary.negativeTypedPlayerProfileProgressionLabel}, while the only recovered typed nested child still stays at ${marketMemberSummary.typedPlayerProfileNestedTypeLabel}.` : "The current build does not yet preserve the expected flat PlayerProfileData-versus-deeper-owner boundary for the wider progression run."}</p>
-        <p class="meta">${marketMemberSummary.hasCloudBridge ? `That combined neighborhood still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps the ${marketMemberSummary.canonicalHostLabel} checked even while the metadata-only ${marketMemberSummary.memberLabel} shell stays unresolved as an exact typed field.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
+        <p class="meta">${marketMemberSummary.hasExactSaveDataProgressionOwner ? `The checked save-side owner is now ${marketMemberSummary.exactSaveOwnerLabel} because ${marketMemberSummary.typedSaveDataOwnerLabel}.` : "The current build does not yet preserve an exact typed save-side owner for the wider Emporium progression run."}</p>
+        <p class="meta">${marketMemberSummary.hasCloudBridge ? `That combined neighborhood still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps the ${marketMemberSummary.canonicalHostLabel} checked even while the metadata-only ${marketMemberSummary.memberLabel} shell stays unresolved as an exact typed field and ${marketMemberSummary.negativeTypedSaveDataMarketLabel}.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
         <p class="meta">${marketMemberSummary.hasTypedSiblingContrast ? `Typed sibling contrast still exists through ${marketMemberSummary.typedSiblingContrastLabel}, but no equivalent typed Market or Inscryption owner has been recovered yet.` : "The current build does not yet preserve the expected typed sibling contrast clues for the market-member boundary."}</p>
-        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so this track remains a save-model recovery lane rather than a planner implementation lane.` : "The current build no longer preserves the expected direct-type-map gap for the market-member boundary and needs review."}</p>
-        <p class="meta">${marketMemberSummary.favorsDirectMemberBoundary ? `This is enough to narrow the save-side handoff to a checked ${marketMemberSummary.canonicalHostLabel}, confirm ${marketMemberSummary.negativeMultiverseFieldLabel}, rule out flat direct PlayerProfileData progression ownership, and keep the broader progression owner unresolved.` : "This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs."}</p>
+        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so this track stays out of planner implementation and row remap even though the exact save owner is recovered.` : "The current build no longer preserves the expected direct-type-map gap for the market-member boundary and needs review."}</p>
+        <p class="meta">${marketMemberSummary.favorsDirectMemberBoundary && marketMemberSummary.hasExactSaveDataProgressionOwner ? `This is enough to narrow the save-side handoff to a checked ${marketMemberSummary.canonicalHostLabel}, confirm ${marketMemberSummary.negativeMultiverseFieldLabel}, rule out flat direct PlayerProfileData progression ownership, and recover ${marketMemberSummary.exactSaveOwnerLabel} as the declaring save model while the metadata-only Market shell remains unresolved.` : "This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs."}</p>
       </div>
     `;
   }
@@ -4598,9 +4599,12 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
   const typedPlayerProfileNestedTypeChecks = Array.isArray(boundary?.typedPlayerProfileNestedTypeChecks) ? boundary.typedPlayerProfileNestedTypeChecks : [];
   const negativeTypedDirectPlayerProfileProgressionChecks = Array.isArray(boundary?.negativeTypedDirectPlayerProfileProgressionChecks) ? boundary.negativeTypedDirectPlayerProfileProgressionChecks : [];
   const negativeTypedDirectMemberChecks = Array.isArray(boundary?.negativeTypedDirectMemberChecks) ? boundary.negativeTypedDirectMemberChecks : [];
+  const negativeTypedSaveDataMarketChecks = Array.isArray(boundary?.negativeTypedSaveDataMarketChecks) ? boundary.negativeTypedSaveDataMarketChecks : [];
   const typedBridgeRecovery = typeof boundary?.typedBridgeRecovery === "object" && boundary.typedBridgeRecovery ? boundary.typedBridgeRecovery : {};
   const typedHandlerFieldRecovery = typeof boundary?.typedHandlerFieldRecovery === "object" && boundary.typedHandlerFieldRecovery ? boundary.typedHandlerFieldRecovery : {};
   const typedPlayerProfileFieldTableRecovery = typeof boundary?.typedPlayerProfileFieldTableRecovery === "object" && boundary?.typedPlayerProfileFieldTableRecovery ? boundary.typedPlayerProfileFieldTableRecovery : {};
+  const typedSaveDataFieldTableRecovery = typeof boundary?.typedSaveDataFieldTableRecovery === "object" && boundary?.typedSaveDataFieldTableRecovery ? boundary.typedSaveDataFieldTableRecovery : {};
+  const typedSaveDataProgressionOwnerSamples = Array.isArray(boundary?.typedSaveDataProgressionOwnerSamples) ? boundary.typedSaveDataProgressionOwnerSamples : [];
   const siblingAccessorClues = ["get_Market", "get_BM", "get_ZN", "get_TU", "get_Relics", "get_CellData", "get_ModPointData", "get_ShardData", "get_ResearchPointData", "get_AcademyPointData"];
   const siblingMemberShellClues = ["Market", "Relics", "CellData", "ModPointData", "ShardData", "ResearchPointData", "AcademyPointData"];
   const handlerBridgeRequirement = ["PlayerProfileHandler", "playerData", "GetPlayerProfileData", "FillPlayerProfileData", "ConvertSaveDataToProfileData"];
@@ -4639,6 +4643,10 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
       typedPlayerProfileFieldTableRecovery.fieldOwner === "PlayerProfileData"
       && Number.isInteger(typedPlayerProfileFieldTableRecovery.fieldCount)
       && Number.isInteger(typedPlayerProfileFieldTableRecovery.methodCount),
+    hasTypedSaveDataFieldTable:
+      typedSaveDataFieldTableRecovery.fieldOwner === "SaveData"
+      && Number.isInteger(typedSaveDataFieldTableRecovery.fieldCount)
+      && Number.isInteger(typedSaveDataFieldTableRecovery.methodCount),
     hasTypedSiblingContrast:
       typedSiblingContrastRequirement.every((name) => typedSiblingContrastClues.includes(name)),
     hasProgressionPayloadBoundary:
@@ -4649,6 +4657,17 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
       negativeTypedPlayerProfileProgressionRequirement.every((name) => negativeTypedDirectPlayerProfileProgressionChecks.includes(name)),
     rulesOutDirectMultiverseFieldOwner:
       negativeDirectMultiverseRequirement.every((name) => negativeTypedDirectMemberChecks.includes(name)),
+    rulesOutTypedSaveDataMarketField:
+      ["SaveData.Market", "SaveData.MultiverseMarket"].every((name) => negativeTypedSaveDataMarketChecks.includes(name)),
+    hasExactSaveDataProgressionOwner:
+      typedSaveDataFieldTableRecovery.fieldOwner === "SaveData"
+      && typedSaveDataProgressionOwnerSamples.includes("IS71Level")
+      && typedSaveDataProgressionOwnerSamples.includes("IS110Level")
+      && typedSaveDataProgressionOwnerSamples.includes("InscryptionsDone")
+      && typedSaveDataProgressionOwnerSamples.includes("EsotericR1Trades")
+      && typedSaveDataProgressionOwnerSamples.includes("NecrumR1Trades")
+      && typedSaveDataProgressionOwnerSamples.includes("Mech1Unlocked")
+      && typedSaveDataProgressionOwnerSamples.includes("Mech1MissionsCompleted"),
     hasMissingDirectTypeMap:
       missingDirectTypeMapClues.includes("PlayerProfileData|Market")
       && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption")
@@ -4701,14 +4720,18 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
     typedSiblingContrastLabel: "PlayerProfileData|GemData and PlayerProfileData|GemNodeCombo",
     typedSaveCacheLabel: "PlayerProfileHandler.saveInfoCache: PlayerProfileData",
     typedPlayerProfileFieldTableLabel: "PlayerProfileData field table: 89 direct fields and 1 method",
+    typedSaveDataFieldTableLabel: "SaveData field table: 4461 direct fields and 1 method",
+    typedSaveDataOwnerLabel: "SaveData directly declares IS71Level, IS110Level, InscryptionsDone, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, and Mech1MissionsCompleted",
     typedPlayerProfileNestedTypeLabel: "PlayerProfileData+GemData",
     negativeTypedMarketLabel: "no typed Market or MultiverseMarket field recovered on PlayerProfileHandler or PlayerProfileData",
+    negativeTypedSaveDataMarketLabel: "no typed Market or MultiverseMarket field recovered on SaveData",
     negativeTypedPlayerProfileProgressionLabel: "PlayerProfileData does not directly declare IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted in the checked typed field table",
     negativeMultiverseFieldLabel: "MultiverseMarket does not directly declare InscryptionsDone, IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted in the checked typed probe",
     cloudSaveLabel: "CloudSavePlayerProfile",
     profileInfoLabel: "GetPlayerProfileInfo",
     missingTypeMapLabel: "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket",
-    canonicalHostLabel: "PlayerProfileHandler get_Market accessor bridge"
+    canonicalHostLabel: "PlayerProfileHandler get_Market accessor bridge",
+    exactSaveOwnerLabel: "SaveData"
   };
 }
 
