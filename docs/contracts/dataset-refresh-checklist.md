@@ -28,7 +28,7 @@ Use this for:
 6. Update any roadmap or research-track status text if the promotion changes the current slice.
 7. Run `npm run verify:data`.
 8. Run `npm test`.
-9. Run `node --check app.js` if app-facing copy or rendering changed.
+9. Run `npm run check:syntax` if app-facing copy or rendering changed.
 
 ## Research note minimums
 

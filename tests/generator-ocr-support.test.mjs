@@ -35,8 +35,8 @@ test("resolveGeneratorOcrScriptPath falls back to the legacy location", async ()
 test("createMissingGeneratorOcrScriptError names every checked path", () => {
   const payload = createMissingGeneratorOcrScriptError("C:\\repo");
   assert.equal(payload.stage, "powershell");
-  assert.match(payload.error, /scripts\\ocr\\generator-ocr\.ps1/);
-  assert.match(payload.error, /scripts\\generator-ocr\.ps1/);
+  assert.match(payload.error, /scripts[\\/]+ocr[\\/]+generator-ocr\.ps1/);
+  assert.match(payload.error, /scripts[\\/]+generator-ocr\.ps1/);
   assert.ok(payload.hints.some((hint) => hint.includes("PowerShell")));
 });
 
