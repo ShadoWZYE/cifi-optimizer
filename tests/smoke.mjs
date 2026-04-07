@@ -2897,6 +2897,7 @@ assert.equal(pkg.scripts["probe:build"], "node ./scripts/unity/run_probe.mjs bui
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
 assert.equal(pkg.scripts["verify:vendoring"], "node ./scripts/contracts/verify-vendoring-layout.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+assert.equal(pkg.scripts["test:unit"], "node --test --test-isolation=none ./tests/*.test.mjs");
 assert.match(probeRunner, /"build": \[/);
 assert.match(probeRunner, /Probe artifact is stale:/);
 assert.match(probeRunner, /npm run probe:build/);
@@ -2973,6 +2974,7 @@ assert.match(readme, /## Current phase/);
 assert.match(readme, /## Doc map/);
 assert.match(readme, /docs\/roadmap\/mvp-plan\.md/);
 assert.match(readme, /docs\/roadmap\/research-tracks\.md/);
+assert.match(readme, /docs\/tools\/ocr\.md/);
 
 await runBlockingCheck("launcher-mode lifecycle", verifyLauncherModeServerLifecycle);
 
