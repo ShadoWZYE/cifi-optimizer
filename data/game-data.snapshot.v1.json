@@ -374,6 +374,45 @@
       ]
     },
     {
+      "id": "spend-planner-first-ui-slice",
+      "title": "Spend planner first UI slice",
+      "status": "active",
+      "goal": "Ship a minimal descriptive spend-planner panel that only uses grounded canonical player inputs and visibly blocks owner-dependent planner actions.",
+      "currentSlice": "Show a descriptive spend-planner panel that reads only canonical `state.playerProfile` spend-side inputs, lists blocked owner-recovery inputs as unavailable, and keeps recommendation-safe planner actions disabled.",
+      "exitCondition": "The app exposes a descriptive spend-planner panel that only reads canonical `state.playerProfile` spend inputs, labels blocked owner-dependent inputs as unavailable with reasons, and avoids optimizer or recommendation claims.",
+      "blockedBy": "Planner-safe spend behavior is still blocked by unresolved owner recovery for TokenShop row levels, token-bank saved state, Daily Tokenium saved state, and Emporium owned progression fields.",
+      "smallestShippableSlice": "A top-level spend-planner panel that shows current canonical spend inputs, a blocked-input list with owner-recovery reasons, and a clear message that recommendations stay unavailable until the blocked owners are recovered.",
+      "completedSteps": [
+        "Fork a UI-only spend-planner lane so the app can ship descriptive spend visibility without reopening save-owner recovery.",
+        "Ship a descriptive spend-planner panel that reads canonical `player.resources.*`, `player.loop.loopReset`, and profile-confidence inputs only.",
+        "Label owner-dependent spend inputs as unavailable with grounded blocker reasons instead of inferring planner math or recommendations."
+      ],
+      "nextSteps": [
+        "Keep any future TokenShop, token-bank, Daily Tokenium, or Emporium planner logic behind their existing owner-recovery tracks.",
+        "Only add planner-safe spend actions after one blocked owner lane recovers a truthful player-owned input.",
+        "If the panel grows beyond descriptive gating, fork the next slice instead of reopening this UI-only lane."
+      ],
+      "sources": [
+        "docs/contracts/player-profile-schema.md",
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/roadmap/research-tracks.md"
+      ],
+      "artifacts": [
+        "data/game-data.snapshot.v1.json",
+        "app.js",
+        "tests/smoke.mjs"
+      ],
+      "verified": [
+        "Canonical spend-side inputs already available in `state.playerProfile` include `player.resources.tokens`, `player.resources.diamonds`, `player.loop.loopReset`, and importable `player.resources.academyRelics`.",
+        "Current spend owner-recovery blockers still live on separate TokenShop row-level, token-bank state-owner, Daily Tokenium, and Emporium save-model tracks.",
+        "A descriptive spend-planner panel can ship without promoting compatibility blobs or unresolved save owners into canonical planner inputs."
+      ],
+      "uncertain": [
+        "Which blocked spend lane will recover planner-safe player-owned state first.",
+        "Whether future planner-safe spend behavior should begin with TokenShop, token-bank, Daily Tokenium, or Emporium once one owner lane clears."
+      ]
+    },
+    {
       "id": "spend-token-shop-row-level-recovery",
       "title": "TokenShop row-level recovery",
       "status": "queued",

@@ -308,33 +308,23 @@ assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(appJs, /canonical-app-snapshot/);
 assert.match(appJs, /community-derived/);
 assert.match(appJs, /function renderSpendPlannerBoundary/);
-assert.match(appJs, /Spend planner boundary/);
-assert.match(appJs, /Extracted spend data is grounded enough for boundary notes, but still blocked for planner cards/);
-assert.match(appJs, /Safe grounded truths now/);
-assert.match(appJs, /Still blocked before planner behavior/);
-assert.match(appJs, /Imported spend payload watch/);
-assert.match(appJs, /compatibility\.unmappedSystemState/);
-assert.match(appJs, /No quarantined TokenShop payload is present in the imported PlayerProfile/);
-assert.match(appJs, /No quarantined MultiverseMarket payload is present in the imported PlayerProfile/);
-assert.match(appJs, /The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap<\/code>, <code>ClaimableBankTokens<\/code>, <code>InscryptionsDone<\/code>, and top-level <code>IS\*Level<\/code> fields instead of dropping them/);
-assert.match(appJs, /Active Emporium save-model narrowing/);
-assert.match(appJs, /Partial Emporium import preview/);
-assert.match(appJs, /Grounded save-side overlap currently covers validated Emporium rows \${escapeHtml\(importedMarketPreview\.overlapRangeLabel\)}/);
-assert.match(appJs, /Current imported levels are available for \${importedMarketPreview\.importedOverlapRowCount}\/\${importedMarketPreview\.overlapRowCount} overlap-grounded Emporium rows/);
-assert.match(appJs, /\${importedMarketPreview\.overlapMaxedCount} imported overlap-grounded rows are already at recovered max level/);
-assert.match(appJs, /Broader validated preview: \${importedMarketPreview\.importedValidatedRowCount}\/\${importedMarketPreview\.validatedRowCount} validated Emporium rows/);
-assert.match(appJs, /Missing overlap-grounded imports: \${escapeHtml\(importedMarketPreview\.missingOverlapLabel\)}/);
-assert.match(appJs, /Overlap-grounded row cards now also show recovered row constants such as bonus, start cost, and cost exponent for the imported subset/);
+assert.match(appJs, /Spend planner first slice/);
+assert.match(appJs, /Descriptive only\. This panel shows grounded inputs that are available now and blocked inputs that remain unavailable while owner recovery is unresolved/);
+assert.match(appJs, /Grounded inputs available now/);
+assert.match(appJs, /Blocked inputs and unavailable planner actions/);
+assert.match(appJs, /Why recommendations stay unavailable/);
+assert.match(appJs, /Tokens",\s*value: canonical\.tokens/);
+assert.match(appJs, /Diamonds",\s*value: canonical\.diamonds/);
+assert.match(appJs, /Current LR",\s*value: canonical\.loopReset/);
+assert.match(appJs, /Academy relics",\s*value: canonical\.academyRelics/);
+assert.match(appJs, /TokenShop current row levels/);
+assert.match(appJs, /token-bank cap, fill, and claimable tokens/i);
+assert.match(appJs, /Daily Tokenium current amount or cap/);
+assert.match(appJs, /Emporium owned progression and Inscryptions balance/);
+assert.match(appJs, /Confidence label: grounded canonical inputs only/);
+assert.match(appJs, /Canonical PlayerProfile only/);
+assert.match(appJs, /Uncertainty visible/);
 assert.match(appJs, /No spend recommendations yet/);
-assert.match(appJs, /same sibling accessor run as \${marketMemberSummary\.siblingAccessorLabel}/);
-assert.match(appJs, /checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is \$\{marketMemberSummary\.exactSaveOwnerLabel\}/);
-assert.match(appJs, /TokenShop token-bank anchors/);
-assert.match(appJs, /Recovered token-bank controller anchors available/);
-assert.match(appJs, /Validated late-block constants available/);
-assert.match(appJs, /validated late-block row set/);
-assert.match(appJs, /BigStatisticPrefab\.TokenBankCap/);
-assert.match(appJs, /TextHandlerLoopMods\.SetLM244BonusText/);
-assert.match(appJs, /Inscryptions Done/);
 assert.match(appJs, /function getRecommendationExplainabilitySummary/);
 assert.match(appJs, /function getRecommendationContractSummary/);
 assert.match(appJs, /function getRecommendationExplainabilityAudit/);
@@ -1909,6 +1899,31 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
     "expected market-member boundary artifact to keep the broader progression run separate from direct MultiverseMarket ownership"
   );
 });
+const spendFirstUiSliceTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-first-ui-slice");
+withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice track", (track) => {
+  assert.equal(track.status, "active");
+  assert.match(track.goal, /minimal descriptive spend-planner panel/i);
+  assert.match(track.currentSlice, /only canonical `state\.playerProfile` spend-side inputs/);
+  assert.match(track.blockedBy, /TokenShop row levels, token-bank saved state, Daily Tokenium saved state, and Emporium owned progression fields/);
+  assert.match(track.smallestShippableSlice, /top-level spend-planner panel/);
+  assert.ok(
+    track.completedSteps.some((step) => /canonical `player\.resources\.\*`, `player\.loop\.loopReset`, and profile-confidence inputs only/.test(step)),
+    "expected spend first UI slice track to record canonical-only panel inputs"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /Label owner-dependent spend inputs as unavailable/.test(step)),
+    "expected spend first UI slice track to record blocked-input labeling"
+  );
+  assert.ok(
+    track.verified.some((line) => /`player\.resources\.tokens`, `player\.resources\.diamonds`, `player\.loop\.loopReset`, and importable `player\.resources\.academyRelics`/.test(line)),
+    "expected spend first UI slice track to record available canonical spend inputs"
+  );
+  assert.ok(
+    track.verified.some((line) => /descriptive spend-planner panel can ship without promoting compatibility blobs or unresolved save owners/.test(line)),
+    "expected spend first UI slice track to keep compatibility and unresolved owners out of canonical inputs"
+  );
+  assert.ok(track.nextSteps.length <= 3, "expected spend first UI slice next-step count");
+});
 const tokenBankOwnerTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-bank-state-owner");
 withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", (track) => {
   assert.equal(track.status, "active");
@@ -2815,7 +2830,7 @@ assert.match(appJs, /\.\/data\/multiverse-market-owner-family\.json/);
 assert.match(appJs, /\.\/data\/token-shop-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
-assert.match(appJs, /Current imported levels are available for \${importedMarketPreview\.importedOverlapRowCount}\/\${importedMarketPreview\.overlapRowCount} overlap-grounded Emporium rows/);
+assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Recovered row constants: Bonus \${escapeHtml\(formatOptionalNumber\(entry\.bonusValue\)\)} \| StartCost \${escapeHtml\(formatOptionalNumber\(entry\.startCost\)\)} \| CostExponent \${escapeHtml\(formatOptionalNumber\(entry\.costExponent\)\)}/);
 assert.match(appJs, /get_Market, Market, GetPlayerProfileData, FillPlayerProfileData, and the FillPlayerProfileData coroutine shell/);
 assert.match(appJs, /Shard milestone mapping gate/);
