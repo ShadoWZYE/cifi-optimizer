@@ -355,6 +355,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-nearby-identity-binding-pattern.json`
 
+### `multiverse-market-inscription-numbering-stability-boundary`
+
+- Label: Multiverse market inscription numbering-stability boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-inscription-numbering-stability-boundary.json`
+
 ### `token-bank-controller-shell`
 
 - Label: Token-bank controller shell

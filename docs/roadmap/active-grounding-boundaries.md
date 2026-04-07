@@ -53,6 +53,7 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - exact typed recovery now also confirms `SaveData` as the declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster
   - the broader `IS*Level` / trade-counter / mech run is not declared directly on checked `MultiverseMarket` or its first nested row-local payloads
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
+  - the wider checked same-number prefab boundary is now stable through `68`, broken across `69-74`, and resumed at `75-110`
 - Still blocked:
   - the checked boundary still does not recover a typed `Market` field, so `Market` should remain accessor/member-shell naming only unless new evidence appears
   - the full owned `IS*Level` range is not yet safe import truth

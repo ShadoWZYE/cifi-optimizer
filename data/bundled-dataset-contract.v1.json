@@ -410,6 +410,14 @@
       ]
     },
     {
+      "id": "multiverse-market-inscription-numbering-stability-boundary",
+      "label": "Multiverse market inscription numbering-stability boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-inscription-numbering-stability-boundary.json"
+      ]
+    },
+    {
       "id": "token-bank-controller-shell",
       "label": "Token-bank controller shell",
       "classification": "extracted-mechanics",

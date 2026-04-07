@@ -233,6 +233,36 @@ Current grounded conclusion:
 - it still does not ground player-facing identity for rows `71-74`
 - the canonical import-safe subset stays empty
 
+## Checked wider inscription numbering-stability boundary
+
+- Across the checked larger `IS69-110` run, repo-local probes preserve the same number on:
+  - `ISNLevel`
+  - `ISNID`
+  - `BuyISN`
+- The earliest checked same-number failure is the prefab layer at row `69`, and the broken band is explicit:
+  - `ChrystosEmporiumUpgrade69-ID57`
+  - `ChrystosEmporiumUpgrade70-ID58`
+  - `ChrystosEmporiumUpgrade71-ID59`
+  - `ChrystosEmporiumUpgrade72-ID60`
+  - `ChrystosEmporiumUpgrade73-ID61`
+  - `ChrystosEmporiumUpgrade74-ID62`
+- The same-number prefab chain resumes at row `75` and stays direct through the checked remainder:
+  - `ChrystosEmporiumUpgrade75-ID75`
+  - `ChrystosEmporiumUpgrade78-ID78`
+  - `ChrystosEmporiumUpgrade83-ID83`
+  - `ChrystosEmporiumUpgrade110-ID110`
+- Direct player-facing string anchors inside that resumed stable range are still only:
+  - `Inscryption 78: Ouroboros Orbs`
+  - `Inscryption 83: Fast-Loop ML`
+
+Current grounded conclusion:
+
+- same-number prefab numbering is stable through row `68`
+- same-number prefab numbering is broken from rows `69-74`
+- same-number prefab numbering resumes at row `75` and stays direct through row `110`
+- this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `71-74`
+- the canonical import-safe subset stays empty
+
 ## Nearby checked inscription identity-binding pattern
 
 - The nearest checked positive binding pattern now sits just outside the unresolved `71-74` band:
