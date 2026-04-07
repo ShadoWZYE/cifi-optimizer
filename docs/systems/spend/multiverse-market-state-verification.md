@@ -189,6 +189,78 @@ Current grounded conclusion:
 - whether the metadata-only `Market` shell corresponds to a real typed field anywhere on the checked save path, or only to accessor/property naming around the checked bridge
 - whether downstream import work should read the wider `SaveData` declaration block directly, or continue using narrower wrapper-specific import surfaces for MVP safety
 
+## Checked `IS*Level` to inscription-row boundary
+
+- The wider inscription set now has three checked repo-local order clues that can be held together without over-claiming:
+  - the broader action shell preserves `BuyIS1` through `BuyIS110` and `SetIS1CostText` through `SetIS110CostText`
+  - the validated serialized late block currently covers rows `50-59` and `63-74`
+  - the recovered `SaveData` field run around `InscryptionsDone` spans `IS25Level` through `IS110Level`
+- Inside that wider ordered set, the smallest checked row-position overlap is now:
+  - `IS71Level` -> ordered row `71`
+  - `IS72Level` -> ordered row `72`
+  - `IS73Level` -> ordered row `73`
+  - `IS74Level` -> ordered row `74`
+- This is grounded because each of those rows is present in the validated row dataset, each has checked `SetIS71CostText` through `SetIS74CostText` and `BuyIS71` through `BuyIS74` hooks, and the same numbers are directly recovered as `SaveData` fields.
+- This is still not final row-label recovery. The repo-local evidence does not yet recover player-facing labels for rows `71-74`, and it does not yet ground a broader ordered remap outside `71-74`.
+
+## Checked row `71-74` player-facing identity boundary
+
+- The row-order mapping above is settled and separate from player-facing identity.
+- Repo-local evidence now checks one narrow negative identity boundary for those same rows:
+  - `BuyIS71` through `BuyIS74` and `SetIS71CostText` through `SetIS74CostText` confirm ordered row access, not final player-facing labels
+  - the visible prefab-number shell `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62` is explicitly remapped to serialized ids `59-62`, so it cannot identify validated rows `71-74`
+  - the nearest checked player-facing inscription labels currently preserved in repo-local probes are `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, both outside the `71-74` target rows
+- Current grounded conclusion:
+  - no stable player-facing identity is currently grounded for rows `71-74`
+  - ordered row mapping and player-facing identity must remain separated
+  - the canonical import-safe subset therefore stays empty
+
+## Nearby checked inscription identity-binding pattern
+
+- The nearest checked positive binding pattern now sits just outside the unresolved `71-74` band:
+  - row `78`: `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`
+  - row `83`: `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`
+- The smallest defensible pattern is a same-number nearby join recovered in the `TextHandlerMarkets` neighborhood:
+  - `ISNLevel`
+  - `ISNID`
+  - `BuyISN`
+  - `ChrystosEmporiumUpgradeN-IDN`
+  - `Inscryption N: ...`
+- This must stay distinct from ordered row mapping alone. Rows `71-74` still fail the direct prefab join because the visible shell is remapped as `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62`, and no checked player-facing string currently names those rows.
+
+Current grounded conclusion:
+
+- nearby rows `78` and `83` now show how ordered inscription rows can bind to player-facing identity when the same-number chain is preserved
+- this recovered pattern does not ground rows `71-74`
+- the canonical import-safe subset stays empty
+
+## Bounded SaveData import classification
+
+- `safe_import_candidate`
+  - none
+- `wrapper_or_export_only`
+  - `InscryptionsDone`
+    - `PlayerProfileData` already exposes `InscryptionsDone` as a flat wrapper/export field, so importing it from the wider `SaveData` block would widen the owner surface without adding a new bounded canonical Emporium import
+- `verified_but_blocked`
+  - `IS71Level` through `IS74Level`
+    - these now have a checked ordered row-position mapping to validated rows `71-74`, but final row labels and planner-safe canonical import mapping are still blocked in this slice
+  - `IS25Level` through `IS70Level` and `IS75Level` through `IS110Level`
+    - these are directly recovered on `SaveData`, but the wider `IS*Level` range still has no checked grounded row-position mapping for bounded canonical import
+  - `EsotericR1Trades` through `EsotericR9Trades`
+  - `NecrumR1Trades` through `NecrumR9Trades`
+    - these counters are directly recovered in the same `SaveData` block, but the current slice does not ground them as canonical Emporium import targets
+  - `Mech1Unlocked`, `Mech1Units`, `Mech1Upg1Level`, `Mech1Upg2Level`, `Mech1MissionsProgress`, `Mech1MissionsCompleted`, and `Mech2Unlocked`
+    - these fields are directly recovered in the same `SaveData` block, but they belong to the adjacent mech progression cluster rather than the narrow Emporium import surface
+- `unresolved`
+  - none
+
+Current grounded conclusion:
+
+- no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import
+- `InscryptionsDone` stays wrapper/export-only because `PlayerProfileData` already exposes it as a flat wrapper surface
+- `IS71Level` through `IS74Level` are the strongest blocked candidates because their ordered row positions now check out against validated Emporium rows `71-74`, but final row labels and broader row remap remain unresolved
+- the broader `IS*Level`, trade-counter, and early `Mech*` neighbors remain verified on `SaveData` but blocked from canonical import because this slice does not reopen `Market` typed-field recovery, row remap, or planner integration
+
 ## Current app implication
 
 - It is still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state.playerProfile`.
@@ -198,7 +270,7 @@ Current grounded conclusion:
 - It is now safe to treat `SaveData` as the exact declaring save owner for the wider `IS*Level` / trade-counter / mech progression cluster.
 - It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
 - It is now safe to treat the save-side search as narrowed to `SaveData` behind the PlayerProfile persistence family and a checked `PlayerProfileHandler.get_Market -> MultiverseMarket` accessor bridge, while explicitly not claiming that a typed `Market` field has been recovered on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`.
-- It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and direct save-side `IS*Level` overlap, while keeping row remap and canonical import promotion downstream.
+- It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and checked ordered `IS*Level` overlap, while keeping final label remap and canonical import promotion downstream.
 - The next spend-track slice should fork from this save-owner recovery and decide how much of the recovered `SaveData` declaration block can be used for bounded import support without reopening row remap or planner integration.
 
 

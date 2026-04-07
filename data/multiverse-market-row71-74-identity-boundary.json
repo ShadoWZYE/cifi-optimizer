@@ -1,0 +1,185 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "multiverse-market-row71-74-identity-boundary",
+  "sources": {
+    "saveDataImportBoundary": "data/multiverse-market-savedata-import-boundary.json",
+    "validatedRows": "data/multiverse-market-values.json",
+    "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
+    "actionShell": "data/multiverse-market-action-shell.json",
+    "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
+    "unityProbeReport": "data/unity-probe-report.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
+  },
+  "settledOrderedMapping": [
+    {
+      "saveField": "IS71Level",
+      "orderedInscriptionRow": 71
+    },
+    {
+      "saveField": "IS72Level",
+      "orderedInscriptionRow": 72
+    },
+    {
+      "saveField": "IS73Level",
+      "orderedInscriptionRow": 73
+    },
+    {
+      "saveField": "IS74Level",
+      "orderedInscriptionRow": 74
+    }
+  ],
+  "playerFacingIdentityBoundary": {
+    "canonicalImportSafeSubset": [],
+    "identityRecovered": [],
+    "identityStillBlocked": [
+      {
+        "orderedInscriptionRow": 71,
+        "saveField": "IS71Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-values.json",
+            "claim": "validatedRows includes inscription_id 71 with row-local serialized constants"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS71CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS71"
+          },
+          {
+            "artifact": "data/multiverse-market-prefab-remap-boundary.json",
+            "claim": "prefabNumber 71 points to serializedId 59 via ChrystosEmporiumUpgrade71-ID59 rather than validated row 71"
+          }
+        ],
+        "blockedBy": [
+          "no checked player-facing label string names row 71 directly",
+          "prefab-number shell 71 is explicitly remapped to serialized id 59, so it cannot be used as stable row-71 identity"
+        ]
+      },
+      {
+        "orderedInscriptionRow": 72,
+        "saveField": "IS72Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-values.json",
+            "claim": "validatedRows includes inscription_id 72 with row-local serialized constants"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS72CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS72"
+          },
+          {
+            "artifact": "data/multiverse-market-prefab-remap-boundary.json",
+            "claim": "prefabNumber 72 points to serializedId 60 via ChrystosEmporiumUpgrade72-ID60 rather than validated row 72"
+          }
+        ],
+        "blockedBy": [
+          "no checked player-facing label string names row 72 directly",
+          "prefab-number shell 72 is explicitly remapped to serialized id 60, so it cannot be used as stable row-72 identity"
+        ]
+      },
+      {
+        "orderedInscriptionRow": 73,
+        "saveField": "IS73Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-values.json",
+            "claim": "validatedRows includes inscription_id 73 with row-local serialized constants"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS73CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS73"
+          },
+          {
+            "artifact": "data/multiverse-market-prefab-remap-boundary.json",
+            "claim": "prefabNumber 73 points to serializedId 61 via ChrystosEmporiumUpgrade73-ID61 rather than validated row 73"
+          },
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "repo-local player-facing anchors in this neighborhood currently name Inscryption 78 Ouroboros Orbs and Inscryption 83 Fast-Loop ML, not row 73"
+          }
+        ],
+        "blockedBy": [
+          "BuyIS73 and SetIS73CostText confirm ordered row access, not final player-facing identity",
+          "the visible ChrystosEmporiumUpgrade73 shell is remapped to serialized id 61, so it cannot identify row 73",
+          "nearby known labels begin at Inscryption 78, which is outside the checked 71-74 target rows"
+        ]
+      },
+      {
+        "orderedInscriptionRow": 74,
+        "saveField": "IS74Level",
+        "status": "unresolved",
+        "checkedEvidence": [
+          {
+            "artifact": "data/multiverse-market-values.json",
+            "claim": "validatedRows includes inscription_id 74 with row-local serialized constants"
+          },
+          {
+            "artifact": "data/multiverse-market-row-text-coverage.json",
+            "claim": "validatedRowCostTexts includes SetIS74CostText"
+          },
+          {
+            "artifact": "data/multiverse-market-action-shell.json",
+            "claim": "validatedBuyHooks includes BuyIS74"
+          },
+          {
+            "artifact": "data/multiverse-market-prefab-remap-boundary.json",
+            "claim": "prefabNumber 74 points to serializedId 62 via ChrystosEmporiumUpgrade74-ID62 rather than validated row 74"
+          },
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "repo-local player-facing anchors in this neighborhood currently name Inscryption 78 Ouroboros Orbs and Inscryption 83 Fast-Loop ML, not row 74"
+          }
+        ],
+        "blockedBy": [
+          "BuyIS74 and SetIS74CostText confirm ordered row access, not final player-facing identity",
+          "the visible ChrystosEmporiumUpgrade74 shell is remapped to serialized id 62, so it cannot identify row 74",
+          "nearby known labels begin at Inscryption 78, which is outside the checked 71-74 target rows"
+        ]
+      }
+    ],
+    "adjacentKnownPlayerFacingAnchors": [
+      {
+        "orderedInscriptionRow": 78,
+        "label": "Inscryption 78: Ouroboros Orbs",
+        "evidence": [
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "player-facing string anchor includes Inscryption 78 Ouroboros Orbs"
+          }
+        ]
+      },
+      {
+        "orderedInscriptionRow": 83,
+        "label": "Inscryption 83: Fast-Loop ML",
+        "evidence": [
+          {
+            "artifact": "data/unity-probe-report.json",
+            "claim": "player-facing string anchor includes Inscryption 83 Fast-Loop ML"
+          }
+        ]
+      }
+    ],
+    "currentBoundary": [
+      "The ordered mapping IS71Level through IS74Level to rows 71 through 74 is settled separately and is not reopened here.",
+      "Repo-local BuyIS71 through BuyIS74 and SetIS71CostText through SetIS74CostText hooks confirm row access and row order, not final player-facing identity.",
+      "The visible prefab-number shell ChrystosEmporiumUpgrade71 through ChrystosEmporiumUpgrade74 is explicitly remapped to serialized ids 59 through 62, so it cannot be reused as stable player-facing identity for validated rows 71 through 74.",
+      "The nearest checked player-facing inscription labels in repo-local probes are Inscryption 78 Ouroboros Orbs and Inscryption 83 Fast-Loop ML, which remain outside the target 71-74 boundary.",
+      "Because row 71-74 identity is still not grounded from checked repo-local evidence, the canonical import-safe subset stays empty."
+    ]
+  }
+}

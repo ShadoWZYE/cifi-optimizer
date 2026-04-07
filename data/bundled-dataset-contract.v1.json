@@ -1,6 +1,6 @@
 {
   "contractVersion": "v1",
-  "updatedAt": "2026-04-06",
+  "updatedAt": "2026-04-07",
   "validationCommand": "npm run verify:data",
   "sourcePriority": [
     {
@@ -375,6 +375,30 @@
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-market-member-boundary.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-savedata-import-boundary",
+      "label": "Multiverse market SaveData import boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-savedata-import-boundary.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-row71-74-identity-boundary",
+      "label": "Multiverse market row 71-74 identity boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-row71-74-identity-boundary.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-nearby-identity-binding-pattern",
+      "label": "Multiverse market nearby identity-binding pattern",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-nearby-identity-binding-pattern.json"
       ]
     },
     {
