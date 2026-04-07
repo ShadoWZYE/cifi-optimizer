@@ -297,9 +297,9 @@
       "title": "MultiverseMarket save-model recovery",
       "status": "active",
       "goal": "Recover the declaring save model behind `InscryptionsDone` and the nearby `IS*Level` cluster so Emporium state can move toward truthful player-owned import support and future external-tool replacement.",
-      "currentSlice": "Use the recovered metadata neighborhood, save-boundary, and market-member boundary artifacts to keep the Emporium save path grounded as `PlayerProfileHandler.get_Market -> MultiverseMarket` for the accessor bridge, `PlayerProfileData` for nearby flat wrapper exports, and `SaveData` for the exact wider `IS*Level` / trade-counter / mech declaring owner while row remap and planner integration stay downstream.",
+      "currentSlice": "Use the recovered metadata neighborhood, save-boundary, and market-member boundary artifacts to keep the Emporium save path grounded as `PlayerProfileHandler.get_Market -> MultiverseMarket` for the checked accessor bridge, metadata-only `Market` for member-shell naming only, `PlayerProfileData` for nearby flat wrapper exports, and `SaveData` for the exact wider `IS*Level` / trade-counter / mech declaring owner while row remap and planner integration stay downstream.",
       "exitCondition": "The repo either names the exact declaring save model beyond the checked `PlayerProfileHandler.get_Market -> MultiverseMarket` bridge or proves the narrowest checked direct-wrapper-versus-deeper-owner boundary for the wider `InscryptionsDone` / `IS*Level` / trade-counter / mech cluster.",
-      "blockedBy": "Canonical import promotion and planner work still require a grounded decision about how much of the recovered `SaveData` declaration block is safe to surface, and the metadata-only `Market` shell still is not recovered as a typed save-path field.",
+      "blockedBy": "Canonical import promotion and planner work still require a grounded decision about how much of the recovered `SaveData` declaration block is safe to surface, and the checked boundary still does not recover a typed `Market` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`.",
       "smallestShippableSlice": "A checked save-model boundary artifact that names the checked `PlayerProfileHandler.get_Market -> MultiverseMarket` bridge, rules out `MultiverseMarket`, its first nested row-local payloads, and flat direct `PlayerProfileData` fields as the broader progression owner, names `SaveData` as the exact wider progression owner, and keeps row remap and planner use blocked.",
       "completedSteps": [
         "Recover the MultiverseMarket owner, validated late-block constants, and `Inscryptions Done` cost-lane shell.",
@@ -321,12 +321,13 @@
         "Recover the exact typed bridge `PlayerProfileHandler.get_Market -> MultiverseMarket`, check that the first nested `MultiverseMarket|Inscryption` payloads are row-local only, and stop the current lane at that direct-wrapper-versus-deeper-owner boundary while the wider progression owner remains unresolved.",
         "Refresh the typed boundary again so `PlayerProfileHandler` now also exposes `saveInfoCache: PlayerProfileData`, while the same checked probe still does not recover a typed `Market` field on `PlayerProfileHandler` or `PlayerProfileData` and does not place the broader progression run directly on `MultiverseMarket`.",
         "Deepen that typed boundary again so the exact `PlayerProfileData` field table now rules out flat direct `IS*Level`, `EsotericR*Trades`, `NecrumR*Trades`, and early `Mech*` ownership while preserving only flat wrappers such as `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`.",
-        "Extend the checked direct type probe to `SaveData`, recover `SaveData` as the exact declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster, and confirm that the metadata-only `Market` shell still is not recovered as a typed field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`."
+        "Extend the checked direct type probe to `SaveData`, recover `SaveData` as the exact declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster, and confirm that the metadata-only `Market` shell still is not recovered as a typed field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`.",
+        "Harden the `Market` shell boundary so the repo now separates the checked `PlayerProfileHandler.get_Market -> MultiverseMarket` bridge, the metadata/member-shell `Market` clue, and the still-negative typed `Market` field result in the checked PlayerProfile persistence family."
       ],
       "nextSteps": [
         "Keep row remap follow-up downstream from this save-owner recovery instead of reopening it inside the same lane.",
         "Decide whether any bounded `SaveData` import surface is safe to expose without promoting canonical Emporium state into `state.playerProfile` too early.",
-        "Determine whether the metadata-only `Market` shell ever resolves to a real typed field, or should remain treated as accessor/member-shell naming only.",
+        "If this lane is revisited, require new typed recovery evidence before treating metadata-shell `Market` as anything more than accessor/member-shell naming only.",
         "Fork any row-range mapping or planner follow-up work into a separate track instead of extending this save-owner lane."
       ],
       "sources": [
@@ -363,10 +364,11 @@
         "Exact typed recovery now also confirms that `SaveData` directly declares `IS71Level`, `IS110Level`, `InscryptionsDone`, `EsotericR1Trades`, `NecrumR1Trades`, `Mech1Unlocked`, and `Mech1MissionsCompleted` in the checked save table.",
         "The recovered `InscryptionsDone` field run still spans `IS*Level`, Necrum trade-counter, and early `Mech*` fields, which is broader than the direct-member `Market` shell itself.",
         "Exact typed recovery now also rules out `MultiverseMarket` itself as the declaring type for the broader `InscryptionsDone` / `IS*Level` / trade-counter / mech field run.",
-        "Exact typed recovery now recovers `SaveData` as the declaring save model for the broader `InscryptionsDone` / `IS*Level` / trade-counter / mech field run while leaving the metadata-only `Market` shell unresolved as a typed save-path field."
+        "Exact typed recovery now recovers `SaveData` as the declaring save model for the broader `InscryptionsDone` / `IS*Level` / trade-counter / mech field run while leaving the metadata-only `Market` shell unresolved as a typed save-path field.",
+        "The checked boundary now explicitly separates the accessor bridge `PlayerProfileHandler.get_Market -> MultiverseMarket`, the metadata/member-shell clue `Market`, and the still-negative typed `Market` field result on `PlayerProfileHandler`, `PlayerProfileData`, and `SaveData`."
       ],
       "uncertain": [
-        "Whether the metadata-only `Market` shell corresponds to a real typed field at all, or only to accessor naming around the checked bridge.",
+        "Whether a typed `Market`-named field exists outside the currently checked PlayerProfile persistence boundary, rather than only as accessor naming around the checked bridge.",
         "Whether any bounded `SaveData` import surface is safe to expose without over-promoting canonical Emporium state too early.",
         "Which owned `IS*Level` range is safe future import input for the validated Emporium rows."
       ]

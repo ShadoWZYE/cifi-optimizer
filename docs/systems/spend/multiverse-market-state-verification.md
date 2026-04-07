@@ -2,7 +2,7 @@
 
 This document records what the repo can currently say about the saved-state side of the `MultiverseMarket` track.
 
-It now includes exact metadata field strings that sit around the Emporium state lane plus exact typed bridge recovery for the direct `get_Market` accessor, but it still does not claim the exact declaring save model for the wider `IS*Level` / trade-counter / mech progression run. The current goal is narrower: identify which repo-local evidence meaningfully narrows the search, rule out over-claimed direct owners, and record what still remains unresolved.
+It now includes exact metadata field strings that sit around the Emporium state lane, exact typed bridge recovery for the direct `get_Market` accessor, and an exact negative result for typed `Market` field recovery on the checked PlayerProfile-side owners. The current goal is narrower than import support: keep the checked accessor bridge, the metadata-only `Market` shell, and the wider save-owner recovery separated so the repo does not silently treat `Market` as a typed declaring field without evidence.
 
 ## Saved-state narrowing from this pass
 
@@ -18,7 +18,7 @@ Current grounded conclusion:
 
 - saved player-owned progression is likely serialized through the broader `PlayerProfileData` family rather than being owned directly by `MultiverseMarket`
 - this is enough to narrow future saved-state recovery toward the profile/save path instead of continuing to treat the Emporium owner object as the only place to search
-- this is not enough to name the exact declaring save model for current `Inscryptions Done` balance or owned inscription levels
+- this does not, by itself, recover a typed `Market` field anywhere on the checked PlayerProfile persistence path
 
 ## PlayerProfile market-member clue recovered from this pass
 
@@ -40,7 +40,7 @@ Current grounded conclusion:
 - the PlayerProfile persistence family now exposes a direct `get_Market` accessor clue beside other profile-side accessors such as `get_ShardData`, `get_ResearchPointData`, and `get_AcademyPointData`
 - this is stronger than the earlier broad `PlayerProfileData` family narrowing because it suggests the Emporium lane may hang off a profile-side `Market` member or related sub-structure
 - the current repo-local metadata still does not expose a direct `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` type-map clue
-- this keeps the declaring owner unresolved, but it narrows the remaining question from "somewhere in the PlayerProfile family" toward "likely a profile-side market member or nested progression payload"
+- this keeps the typed `Market` field question open at the metadata layer, but not resolved enough to treat `Market` as a recovered typed member on the checked save path
 
 ## Market-member versus wrapper boundary
 
@@ -101,8 +101,9 @@ Current grounded conclusion:
 - exact typed recovery also confirms that the first nested `MultiverseMarket` payloads are `MultiverseMarket|Inscryption` and `MultiverseMarket|InscryptionTupleObject`, and those payloads are row-local carriers rather than the broader progression block
 - the same bridge still preserves sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`, which keeps `Market` broader than one Emporium-only field family even though the direct member handoff is now narrower than the older generic wrapper guess
 - the recovered wider progression field run still sits in a broader cluster that spans `IS*Level`, Inscryptions, Necrum trade counters, and early mech progression, and the current checked typed recovery does not place that wider run directly on `MultiverseMarket` or on the first recovered nested market payloads
-- that means the direct `get_Market -> MultiverseMarket` type itself is ruled out as the declaring owner for the combined progression run, flat `PlayerProfileData` fields are also ruled out for the wider `IS*Level` / trade-counter / mech run, and the metadata-only `Market` shell still remains unresolved as an exact typed field on the checked save path
-- this is useful because it closes the save-owner question without pretending the Emporium state is already import-ready: the declaring owner is now `SaveData`, while `Market` still stays only as accessor/member-shell naming around the bridge
+- the checked boundary therefore separates three things explicitly: `PlayerProfileHandler.get_Market -> MultiverseMarket` is the checked accessor bridge, `Market` is still only a metadata/member-shell clue, and no typed `Market`-named field is recovered on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
+- `SaveData` remains the exact wider progression owner for the broader `IS*Level` / trade-counter / mech run, but that wider owner recovery does not convert the metadata-only `Market` shell into a checked typed field or resolve a deeper typed `Market`-named save-path owner
+- this is useful because it closes the checked save-owner question for the broader run without pretending the Emporium state is already import-ready or that `Market` has been recovered as a typed declaring field
 
 ## Exact metadata field cluster recovered from this pass
 
@@ -184,7 +185,6 @@ Current grounded conclusion:
 
 ## What remains unresolved
 
-- whether the metadata-only `Market` shell clue corresponds to a real typed field at all, or only to accessor/property naming around the checked `PlayerProfileHandler.get_Market` bridge
 - the authoritative saved-state field range or list for owned inscription levels
 - whether the metadata-only `Market` shell corresponds to a real typed field anywhere on the checked save path, or only to accessor/property naming around the checked bridge
 - whether downstream import work should read the wider `SaveData` declaration block directly, or continue using narrower wrapper-specific import surfaces for MVP safety

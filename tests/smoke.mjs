@@ -112,8 +112,11 @@ const datasetIndexGeneratedDoc = await readFile(new URL("../docs/contracts/datas
 const shardResearchNote = await readFile(new URL("../docs/research/shard-milestones-grounded-2026-03-28.md", import.meta.url), "utf8");
 const tokenShopDoc = await readFile(new URL("../docs/systems/spend/token-shop-values.md", import.meta.url), "utf8");
 const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-values.md", import.meta.url), "utf8");
+const multiverseMarketStateVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-state-verification.md", import.meta.url), "utf8");
+const multiverseMarketMarketMemberBoundaryDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-market-member-boundary.md", import.meta.url), "utf8");
 const tokenBankStateDoc = await readFile(new URL("../docs/systems/spend/token-bank-state-verification.md", import.meta.url), "utf8");
 const dailyTokeniumMissionDoc = await readFile(new URL("../docs/systems/spend/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
+const activeGroundingBoundariesDoc = await readFile(new URL("../docs/roadmap/active-grounding-boundaries.md", import.meta.url), "utf8");
 const shardIngestDoc = await readFile(new URL("../docs/systems/shards/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
 const unityAuditPlaybook = await readFile(new URL("../docs/unity/unity-audit-playbook.md", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
@@ -2102,6 +2105,25 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.negativeTypedSaveDataM
   "SaveData.Market",
   "SaveData.MultiverseMarket"
 ]);
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedMarketFieldBoundary, {
+  checkedAccessorBridge: "PlayerProfileHandler.get_Market -> MultiverseMarket",
+  metadataMemberShell: "Market",
+  checkedTypedFieldOwners: ["PlayerProfileHandler", "PlayerProfileData", "SaveData"],
+  checkedNegativeTypedFieldRecoveries: [
+    "PlayerProfileHandler.Market",
+    "PlayerProfileData.Market",
+    "PlayerProfileData.MultiverseMarket",
+    "SaveData.Market",
+    "SaveData.MultiverseMarket"
+  ],
+  conclusion: "negative-typed-market-field-in-checked-boundary",
+  currentUse: "accessor-member-shell-naming-only"
+});
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.deeperMarketOwnerStatus, {
+  status: "unresolved",
+  scope: "typed Market-named save-path owner beyond the checked accessor bridge",
+  note: "The broader IS*Level / trade-counter / mech run is recovered separately on SaveData, but that wider owner recovery does not recover a typed Market field."
+});
 assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBoundary, [
   /PlayerProfileHandler declares get_Market with return type MultiverseMarket/,
   /saveInfoCache as a typed PlayerProfileData field/,
@@ -2109,6 +2131,8 @@ assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBo
   /SaveData declares a 4461-field save table with 1 method/,
   /SaveData the current declaring owner/,
   /bare Market member-shell clue/,
+  /separates three things explicitly/,
+  /no typed Market-named field is recovered on PlayerProfileHandler, PlayerProfileData, or SaveData/,
   /does not place that wider run directly on MultiverseMarket/,
   /direct-wrapper-versus-deeper-owner boundary/
 ], "MultiverseMarket market-member boundary");
@@ -2143,6 +2167,19 @@ assertDatasetContractEntry("multiverse-market-prefab-remap-boundary", "data/mult
 assertDatasetContractEntry("multiverse-market-save-boundary", "data/multiverse-market-save-boundary.json");
 assertDatasetContractEntry("multiverse-market-market-member-boundary", "data/multiverse-market-market-member-boundary.json");
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
+assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
+assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);
+assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked typed-`Market` field result:/);
+assert.match(multiverseMarketMarketMemberBoundaryDoc, /deeper typed `Market`-named owner status:/);
+assert.match(multiverseMarketMarketMemberBoundaryDoc, /no typed `Market` or `MultiverseMarket` field is recovered on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
+assert.match(multiverseMarketStateVerificationDoc, /metadata-only `Market` shell, and the wider save-owner recovery separated/);
+assert.match(multiverseMarketStateVerificationDoc, /(does not recover a typed `Market` field|no typed `Market`-named field is recovered) on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
+assert.match(multiverseMarketStateVerificationDoc, /`SaveData` remains the exact wider progression owner/);
+assert.match(activeGroundingBoundariesDoc, /the bare `Market` symbol is still only a metadata\/member-shell clue/);
+assert.match(activeGroundingBoundariesDoc, /does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
+assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `PlayerProfileHandler`/i);
+assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `PlayerProfileData`/i);
+assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `SaveData`/i);
 assert.match(tokenBankStateDoc, /## Daily Tokenium lane correction/);
 assert.match(tokenBankStateDoc, /Daily Tokenium currently belongs to an Academy or Farm Mission lane that multiple systems touch/);
 assert.match(tokenBankStateDoc, /Mission \/ farm mission rewards/);

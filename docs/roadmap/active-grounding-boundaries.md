@@ -47,16 +47,17 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - `MultiverseMarket` is the real Emporium owner
   - `InscryptionsDone` is a real metadata field string
   - the save-side search is narrowed to the PlayerProfile persistence family
-  - exact typed recovery now confirms `PlayerProfileHandler.get_Market -> MultiverseMarket`
-  - exact typed recovery also confirms `PlayerProfileData.InscryptionsDone`, while not recovering a typed `Market` field on `PlayerProfileHandler` or `PlayerProfileData`
+  - exact typed recovery now confirms `PlayerProfileHandler.get_Market -> MultiverseMarket` as the checked accessor bridge
+  - the bare `Market` symbol is still only a metadata/member-shell clue in the checked boundary
+  - exact typed recovery still does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
   - exact typed recovery now also confirms `SaveData` as the declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster
   - the broader `IS*Level` / trade-counter / mech run is not declared directly on checked `MultiverseMarket` or its first nested row-local payloads
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
 - Still blocked:
-  - the metadata-only `Market` shell still is not recovered as an exact typed field
+  - the checked boundary still does not recover a typed `Market` field, so `Market` should remain accessor/member-shell naming only unless new evidence appears
   - the full owned `IS*Level` range is not yet safe import truth
 - Smallest next slice:
-  - decide how much of the recovered `SaveData` declaration block is safe to expose for bounded import support without claiming import-ready planner state
+  - decide how much of the recovered `SaveData` declaration block is safe to expose for bounded import support without re-promoting metadata-shell `Market` into a typed owner claim
 - Start here:
   - `docs/systems/spend/multiverse-market-verification.md`
   - `docs/systems/spend/multiverse-market-state-verification.md`
