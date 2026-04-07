@@ -2354,6 +2354,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   expectRecord(boundary.rawSaveFamily, "token shop row remap boundary rawSaveFamily must be an object");
   expectRecord(boundary.groundedNonLabelClues, "token shop row remap boundary groundedNonLabelClues must be an object");
   expectRecord(boundary.recoveredBridge, "token shop row remap boundary recoveredBridge must be an object");
+  expectRecord(boundary.adjacentFollowUp, "token shop row remap boundary adjacentFollowUp must be an object");
   expectRecord(boundary.blockedIdentityJoin, "token shop row remap boundary blockedIdentityJoin must be an object");
   expectArray(boundary.groundedNonLabelClues.effectHookSamples, "token shop row remap boundary effectHookSamples must be an array");
   expectArray(boundary.groundedNonLabelClues.prefabRosterSamples, "token shop row remap boundary prefabRosterSamples must be an array");
@@ -2383,6 +2384,14 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.recoveredBridge.supportingEffectHook, "ATU2DiamondsBonus", "token shop row remap boundary recovered bridge effect hook drifted");
   assert.equal(boundary.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.DiamondBoost", "token shop row remap boundary recovered bridge prefab drifted");
   assert.match(boundary.recoveredBridge.groundedConclusion, /ATU2Button now has one checked bridge to NewTokenUPGPrefab\.T1\.DiamondBoost/i, "token shop row remap boundary recovered bridge conclusion drifted");
+  assert.deepEqual(boundary.adjacentFollowUp.testedNeighbors, ["ATU1Button", "ATU3Button"], "token shop row remap boundary tested neighbor set drifted");
+  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.shellField, "ATU1Button", "token shop row remap boundary adjacent recovered bridge shell drifted");
+  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.shellPathId, 15839, "token shop row remap boundary adjacent recovered bridge shell path drifted");
+  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingEffectHook, "ATU1TokenBonus", "token shop row remap boundary adjacent recovered bridge effect hook drifted");
+  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook, "BuyTokenBoost", "token shop row remap boundary adjacent recovered bridge action hook drifted");
+  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity, "NewTokenUPGPrefab.T1.TokensBoost", "token shop row remap boundary adjacent recovered bridge prefab drifted");
+  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.shellField, "ATU3Button", "token shop row remap boundary blocked adjacent shell drifted");
+  assert.equal(boundary.adjacentFollowUp.result, "one more grounded bridge recovered", "token shop row remap boundary adjacent follow-up result drifted");
   ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
     assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);
   });
@@ -2409,7 +2418,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     stats: [
       boundary.rawSaveFamily.fieldRange,
       `${boundary.groundedNonLabelClues.effectHookSamples.length} grounded non-label effect clues`,
-      "One ATU bridge is recovered; remaining row identity stays blocked"
+      "Two ATU bridges are recovered; adjacency still does not generalize"
     ]
   };
 }

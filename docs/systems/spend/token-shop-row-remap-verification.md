@@ -11,6 +11,12 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - broader checked probe output also preserves `ATU2DiamondsBonus`.
   - the checked `level0` prefab roster separately preserves `NewTokenUPGPrefab.T1.DiamondBoost`.
   - taken together, that is enough to ground `ATU2Button` to `NewTokenUPGPrefab.T1.DiamondBoost` without relying on community naming, `OR_*` labels, or generic row-order similarity alone.
+- One immediate adjacent follow-up bridge also clears:
+  - `ATU1Button` sits directly after the exact `TokenBoost*` owner fields and immediately before the recovered `DiamondBoost*` block in the checked `TokenShop` payload alignment.
+  - broader checked probe output also preserves `ATU1TokenBonus`.
+  - checked action-lane clues preserve the matching direct token buy family through `BuyTokenBoost`.
+  - the checked `level0` prefab roster separately preserves `NewTokenUPGPrefab.T1.TokensBoost`.
+  - taken together, that is enough to ground `ATU1Button` to the TokenShop `TokenBoost` or `NewTokenUPGPrefab.T1.TokensBoost` row family without relying on community naming, `OR_*` labels, or generic row-order similarity alone.
 - Checked probe output also preserves grounded non-label clues around some `ATU` rows:
   - effect hooks such as `ATU1TokenBonus`, `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU20TokenBonus`, `ATU21TokenDailiesBonus`, and `ATU24Bonus3Shards`
   - late direct-buy hooks such as `BuyATU24`, `BuyATU25`, `BuyATU26`, `BuyATU27`, and `BuyATU28`
@@ -28,14 +34,19 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 ## Grounded conclusion
 
 - The repo can now say more than “ATU is unnamed.”
-- One exact bridge is recovered: `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`.
+- Two exact shell-side bridges are now recovered:
+  - `ATU1Button` -> TokenShop `TokenBoost` / `NewTokenUPGPrefab.T1.TokensBoost`
+  - `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
 - Late `ATU` buy hooks also now sit inside a checked named tier-buy neighborhood instead of standing alone.
 - That is still not the same as recovering grounded row identity for the whole family.
+- The immediate adjacency test does not justify a reusable “neighbor rows follow the same remap pattern” rule:
+  - `ATU1` clears because the repo has one more three-surface convergence across owner fields, effect hooks, action hooks, and prefab identity.
+  - the same committed evidence does not currently produce an equivalent effect-hook or action-hook join for adjacent `ATU3`, even though `ATU3Button` sits beside the `CellBoost*` field family.
 
 The remaining missing pieces are still checked joins:
 
-- no checked repo artifact currently ties `ATU2Button` directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently ties `ATU1Button` or `ATU2Button` directly to a final player-facing TokenShop row title string
 - no checked repo artifact currently joins the remaining `ATU*Button` or `ATU*Content` path ids directly to specific `NewTokenUPGPrefab.*` object identities
 - no checked repo artifact currently ties the remaining concrete `ATU` numbers directly to final player-facing TokenShop row titles
 - no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` neighborhood to a specific `ATU` row number
@@ -66,6 +77,6 @@ Recover one more checked identity bridge from the still-unresolved `ATU`-numbere
 
 The strongest next candidate is no longer “find any first bridge.” It is specifically:
 
-- recover a second exact bridge from an unresolved `ATU*Button`, `ATU*Content`, or `SetTokenTexts`-side neighborhood to one concrete prefab or one concrete final row title
+- recover the next exact bridge from an unresolved `ATU*Button`, `ATU*Content`, or `SetTokenTexts`-side neighborhood to one concrete prefab or one concrete final row title
 
 If only one additional subset clears that bar, keep the rest of the `ATU` family quarantined instead of forcing a full remap.
