@@ -77,10 +77,18 @@
     "fieldName": "saveInfoCache",
     "fieldType": "PlayerProfileData"
   },
+  "typedPlayerProfileFieldTableRecovery": {
+    "fieldOwner": "PlayerProfileData",
+    "fieldCount": 89,
+    "methodCount": 1
+  },
   "directPlayerProfileFieldSamples": [
     "InscryptionsDone",
     "MechsOwned",
     "GadgetLevels"
+  ],
+  "typedPlayerProfileNestedTypeChecks": [
+    "PlayerProfileData+GemData"
   ],
   "firstNestedMarketTypeChecks": [
     "MultiverseMarket|Inscryption",
@@ -101,6 +109,14 @@
     "NecrumR1Trades",
     "Mech1Unlocked",
     "Mech1MissionsCompleted"
+  ],
+  "negativeTypedDirectPlayerProfileProgressionChecks": [
+    "PlayerProfileData.IS71Level",
+    "PlayerProfileData.IS110Level",
+    "PlayerProfileData.EsotericR1Trades",
+    "PlayerProfileData.NecrumR1Trades",
+    "PlayerProfileData.Mech1Unlocked",
+    "PlayerProfileData.Mech1MissionsCompleted"
   ],
   "negativeTypedDirectMemberChecks": [
     "PlayerProfileHandler.Market",
@@ -128,6 +144,8 @@
     "Exact typed recovery now confirms that PlayerProfileHandler declares get_Market with return type MultiverseMarket, so the checked bridge is a real PlayerProfileHandler-to-MultiverseMarket accessor rather than only a metadata-neighborhood guess.",
     "The same exact typed recovery also confirms that PlayerProfileHandler only exposes saveInfoCache as a typed PlayerProfileData field in the checked probe, and it does not recover a typed Market field on PlayerProfileHandler itself.",
     "Exact typed recovery separately confirms that PlayerProfileData directly declares InscryptionsDone, MechsOwned, and GadgetLevels as string fields, while the same checked probe still does not recover a typed Market or MultiverseMarket field on PlayerProfileData.",
+    "Exact typed recovery now also confirms that the checked PlayerProfileData field table has 89 direct fields and 1 method, and none of those direct fields are named IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted.",
+    "The same exact typed PlayerProfileData probe only recovers PlayerProfileData+GemData as a nested typed child in the checked field table, which means the wider Emporium progression run is not recovered as a direct typed PlayerProfileData child beside the flat InscryptionsDone, MechsOwned, and GadgetLevels wrappers.",
     "The metadata neighborhood still preserves a bare Market member-shell clue beside Relics, CellData, ModPointData, ShardData, ResearchPointData, AcademyPointData, and BlueprintsThisTR, but that Market shell remains metadata-only rather than an exact typed field recovery on PlayerProfileHandler or PlayerProfileData.",
     "Exact typed recovery also confirms the first nested MultiverseMarket payload types are MultiverseMarket|Inscryption and MultiverseMarket|InscryptionTupleObject, and their recovered fields are row-local ID, Cost, Level, MaxLevel, ISObject, and transform carriers rather than the broader saved progression block.",
     "The broader save-side progression cluster still lives in separate recovered field names spanning IS71Level through IS110Level, InscryptionsDone, EsotericR1Trades, NecrumR1Trades, and early Mech1* fields, and the checked typed probe does not place that wider run directly on MultiverseMarket or on those first nested row-local payload types.",
@@ -136,6 +154,6 @@
     "The same repo-local metadata still exposes typed nested PlayerProfileData siblings such as PlayerProfileData|GemData and PlayerProfileData|GemNodeCombo without exposing an equivalent PlayerProfileData|Market or PlayerProfileData|Inscryption clue, so the exact declaring type for the wider IS*Level, trade-counter, and mech run remains unresolved.",
     "The adjacent cloud-save neighborhood still preserves CloudSavePlayerProfile plus GetCurrentSaveFileInfo, GetPlayerProfileInfo, and CloudLoad as the current repo-local bridge into PlayerProfile persistence recovery.",
     "The nearest recovered market-side type family still clusters MultiverseMarket with Inscryption tuple types plus adjacent Ouroboros market and progression systems such as NecrumExchange, OuroborosResetter, TraitSpheres, ZeimarrNautallium, ResearchLaboratory, RewardLanes, and ShardMining.",
-    "This is enough to narrow the remaining handoff to a checked accessor-versus-deeper-owner boundary: PlayerProfileHandler.get_Market reaches MultiverseMarket, MultiverseMarket itself and its first nested row-local payloads are ruled out for the broader progression run, PlayerProfileData separately carries InscryptionsDone or MechsOwned or GadgetLevels, and the broader IS*Level or trade-counter or mech declaring owner still is not recovered exactly."
+    "This is enough to narrow the remaining handoff to a checked direct-wrapper-versus-deeper-owner boundary: PlayerProfileHandler.get_Market reaches MultiverseMarket, MultiverseMarket itself and its first nested row-local payloads are ruled out for the broader progression run, PlayerProfileData separately carries flat string wrappers such as InscryptionsDone or MechsOwned or GadgetLevels, and the broader IS*Level or trade-counter or mech declaring owner still is not recovered exactly."
   ]
 }
