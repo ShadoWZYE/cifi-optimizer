@@ -205,8 +205,11 @@ Current active or queued tracks:
   - status: `active`
   - goal: recover the declaring save model behind `InscryptionsDone` and the nearby `IS*Level` cluster so Emporium state can move toward truthful import-ready mapping
 - `spend-token-shop-row-level-recovery`
+  - status: `archived`
+  - goal: recovered exact `SaveData` ownership for raw `ATU1Level` through `ATU28Level` TokenShop row levels; follow-up work moves to row remap instead of owner recovery
+- `spend-token-shop-row-label-remap`
   - status: `queued`
-  - goal: recover player-owned current TokenShop row levels now that the spend lane is grounded
+  - goal: remap recovered raw `ATU*Level` TokenShop row fields onto grounded row identities without promoting speculative player-facing labels
 - `spend-token-bank-state-owner`
   - status: `active`
   - goal: recover the saved-state owner behind token-bank cap, fill, and claimable state without guessing from derived `OR_*` labels

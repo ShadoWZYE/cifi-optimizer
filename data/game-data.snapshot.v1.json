@@ -380,7 +380,7 @@
       "goal": "Ship a minimal descriptive spend-planner panel that only uses grounded canonical player inputs and visibly blocks owner-dependent planner actions.",
       "currentSlice": "Show a descriptive spend-planner panel that reads only canonical `state.playerProfile` spend-side inputs, lists blocked owner-recovery inputs as unavailable, and keeps recommendation-safe planner actions disabled.",
       "exitCondition": "The app exposes a descriptive spend-planner panel that only reads canonical `state.playerProfile` spend inputs, labels blocked owner-dependent inputs as unavailable with reasons, and avoids optimizer or recommendation claims.",
-      "blockedBy": "Planner-safe spend behavior is still blocked by unresolved owner recovery for TokenShop row levels, token-bank saved state, Daily Tokenium saved state, and Emporium owned progression fields.",
+      "blockedBy": "Planner-safe spend behavior is still blocked by unresolved TokenShop row remap, token-bank saved state, Daily Tokenium saved state, and Emporium owned progression fields.",
       "smallestShippableSlice": "A top-level spend-planner panel that shows current canonical spend inputs, a blocked-input list with owner-recovery reasons, and a clear message that recommendations stay unavailable until the blocked owners are recovered.",
       "completedSteps": [
         "Fork a UI-only spend-planner lane so the app can ship descriptive spend visibility without reopening save-owner recovery.",
@@ -415,12 +415,49 @@
     {
       "id": "spend-token-shop-row-level-recovery",
       "title": "TokenShop row-level recovery",
-      "status": "queued",
+      "status": "archived",
       "goal": "Recover player-owned current TokenShop row levels needed for MVP-safe next-buy planning.",
-      "currentSlice": "Keep TokenShop planning blocked on current-level recovery even though the cost lane, owner shell, and token-bank controller split are now grounded.",
+      "currentSlice": "Closed owner-recovery slice: exact typed `SaveData` now carries the raw `ATU1Level` through `ATU28Level` TokenShop row-level family plus tier-unlock booleans, and those fields are now preserved only under the compatibility TokenShop sink instead of being guessed into canonical state.",
       "exitCondition": "The repo recovers the player-owned current-level inputs for TokenShop rows strongly enough to support recommendation-side state reads.",
-      "blockedBy": "Current TokenShop artifacts recover owner-side constants and controller clues, but not the authoritative owned row-level state.",
-      "smallestShippableSlice": "A checked TokenShop level-owner or save-owner artifact that names the current-level family without yet claiming full planner logic."
+      "blockedBy": "Further TokenShop progress is now blocked by row remap and naming, not by the save-owner question.",
+      "smallestShippableSlice": "A checked TokenShop row-label remap or canonical-import boundary that keeps raw `ATU*Level` fields separate from grounded player-facing naming until the remap is verified.",
+      "completedSteps": [
+        "Preserve grounded TokenShop cost and row-shell evidence on the `TokenShop` owner payload.",
+        "Recover exact typed `SaveData` ownership for `ATU1Level` through `ATU28Level` and adjacent `Tier2TokensUnlocked` through `Tier5TokensUnlocked` fields.",
+        "Wire raw TokenShop row-level fields into `compatibility.unmappedSystemState.tokenShop` instead of promoting them into canonical `state.playerProfile`."
+      ],
+      "nextSteps": [],
+      "sources": [
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/roadmap/active-grounding-boundaries.md",
+        "data/token-shop-values.json",
+        "data/uabea-probe-report.json"
+      ],
+      "artifacts": [
+        "data/token-shop-values.json",
+        "data/token-shop-row-level-owner.json",
+        "player-profile.js"
+      ],
+      "verified": [
+        "Exact typed recovery now confirms that `SaveData` directly declares `ATU1Level` through `ATU28Level` in one contiguous TokenShop-adjacent save block.",
+        "The same exact `SaveData` block also carries `Tier2TokensUnlocked`, `Tier3TokensUnlocked`, `Tier4TokensUnlocked`, and `Tier5TokensUnlocked` beside the recovered row-level family.",
+        "The grounded TokenShop extract separately preserves the same `ATU` numbering family on the owner payload through fields such as `ATU1Button` through `ATU28MaxOverlay` and numeric entries such as `ATU24StartCost` through `ATU28Fill`.",
+        "The repo can now preserve raw `ATU*Level` and `Tier*TokensUnlocked` fields under `compatibility.unmappedSystemState.tokenShop` without guessing from `OR_*` labels or promoting speculative values into canonical state."
+      ],
+      "uncertain": [
+        "Which grounded player-facing TokenShop row labels correspond to each recovered raw `ATU*Level` field.",
+        "Which subset, if any, is safe to promote beyond compatibility-only import before the row remap is verified."
+      ]
+    },
+    {
+      "id": "spend-token-shop-row-label-remap",
+      "title": "TokenShop row label remap",
+      "status": "queued",
+      "goal": "Map recovered raw `ATU*Level` TokenShop save fields onto grounded row identities strongly enough for bounded non-speculative use beyond compatibility import.",
+      "currentSlice": "Keep raw `ATU*Level` fields in the compatibility TokenShop sink while the repo verifies which exact grounded TokenShop rows those `ATU` numbers represent.",
+      "exitCondition": "The repo has a checked TokenShop row-by-row remap boundary that ties the recovered `ATU*Level` family to grounded row identities without inventing player-facing labels.",
+      "blockedBy": "The exact `SaveData` owner is now recovered, but the final row-by-row remap from raw `ATU` numbering to grounded TokenShop rows is still unresolved.",
+      "smallestShippableSlice": "A checked remap boundary that names which recovered `ATU` rows are safe to bind beyond compatibility-only import."
     },
     {
       "id": "spend-token-bank-state-owner",

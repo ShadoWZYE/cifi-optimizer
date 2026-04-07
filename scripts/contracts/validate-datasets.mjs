@@ -2254,6 +2254,59 @@ function validateTokenShopSaveBoundary(boundary) {
   };
 }
 
+function validateTokenShopRowLevelOwner(boundary) {
+  expectNonEmptyString(boundary.generatedAt, "token shop row-level owner generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "token shop row-level owner dataset must be present");
+  expectRecord(boundary.sources, "token shop row-level owner sources must be an object");
+  ["uabeaProbe", "tokenShopExtract", "metadata", "level0"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `token shop row-level owner sources.${field} must be present`);
+  });
+  expectRecord(boundary.typedSaveDataFieldTableRecovery, "token shop row-level owner typedSaveDataFieldTableRecovery must be an object");
+  expectRecord(boundary.tokenShopRowLevelFamily, "token shop row-level owner tokenShopRowLevelFamily must be an object");
+  expectRecord(boundary.compatibilityImportBoundary, "token shop row-level owner compatibilityImportBoundary must be an object");
+  expectArray(boundary.tokenShopRowLevelFamily.saveFieldSamples, "token shop row-level owner saveFieldSamples must be an array");
+  expectArray(boundary.tokenShopRowLevelFamily.adjacentSaveFields, "token shop row-level owner adjacentSaveFields must be an array");
+  expectArray(boundary.tokenShopRowLevelFamily.groundedTokenShopNumericSamples, "token shop row-level owner groundedTokenShopNumericSamples must be an array");
+  expectArray(boundary.compatibilityImportBoundary.safeImportSubset, "token shop row-level owner safeImportSubset must be an array");
+  expectArray(boundary.compatibilityImportBoundary.blockedCanonicalPromotionBy, "token shop row-level owner blockedCanonicalPromotionBy must be an array");
+  expectArray(boundary.currentBoundary, "token shop row-level owner currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "token-shop-row-level-owner", "token shop row-level owner dataset id drifted");
+  assert.equal(boundary.typedSaveDataFieldTableRecovery.fieldOwner, "SaveData", "token shop row-level owner typed field owner drifted");
+  assert.equal(boundary.typedSaveDataFieldTableRecovery.fieldCount, 4461, "token shop row-level owner SaveData field count drifted");
+  assert.equal(boundary.typedSaveDataFieldTableRecovery.methodCount, 1, "token shop row-level owner SaveData method count drifted");
+  assert.equal(boundary.tokenShopRowLevelFamily.saveFieldRange, "ATU1Level through ATU28Level", "token shop row-level owner save field range drifted");
+  ["ATU1Level", "ATU14Level", "ATU24Level", "ATU28Level"].forEach((name) => {
+    assert.ok(boundary.tokenShopRowLevelFamily.saveFieldSamples.includes(name), `token shop row-level owner missing save field sample ${name}`);
+  });
+  ["BankedTokens", "Tier2TokensUnlocked", "Tier3TokensUnlocked", "Tier4TokensUnlocked", "Tier5TokensUnlocked"].forEach((name) => {
+    assert.ok(boundary.tokenShopRowLevelFamily.adjacentSaveFields.includes(name), `token shop row-level owner missing adjacent save field ${name}`);
+  });
+  assert.equal(boundary.tokenShopRowLevelFamily.groundedTokenShopFieldRange, "ATU1Button through ATU28MaxOverlay", "token shop row-level owner grounded field range drifted");
+  ["ATU24StartCost", "ATU25MaxLevel", "ATU26Fill", "ATU28Bonus"].forEach((name) => {
+    assert.ok(boundary.tokenShopRowLevelFamily.groundedTokenShopNumericSamples.includes(name), `token shop row-level owner missing grounded numeric sample ${name}`);
+  });
+  assert.equal(boundary.compatibilityImportBoundary.targetPath, "compatibility.unmappedSystemState.tokenShop", "token shop row-level owner target path drifted");
+  ["ATU1Level through ATU28Level", "Tier2TokensUnlocked", "Tier3TokensUnlocked", "Tier4TokensUnlocked", "Tier5TokensUnlocked"].forEach((name) => {
+    assert.ok(boundary.compatibilityImportBoundary.safeImportSubset.includes(name), `token shop row-level owner missing safe import subset ${name}`);
+  });
+  assert.ok(boundary.compatibilityImportBoundary.blockedCanonicalPromotionBy.some((line) => /row-by-row remap/i.test(line)), "token shop row-level owner must preserve remap blocker");
+  assert.ok(boundary.currentBoundary.some((line) => /SaveData directly declares BankedTokens plus ATU1Level through ATU28Level/i.test(line)), "token shop row-level owner must preserve SaveData declaring-owner conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /same ATU numbering family/i.test(line)), "token shop row-level owner must preserve shared ATU numbering-family conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /not yet enough to promote those raw ATU fields into canonical playerProfile state/i.test(line)), "token shop row-level owner must preserve canonical-blocked conclusion");
+
+  return {
+    id: "token-shop-row-level-owner",
+    label: "Token shop row-level owner",
+    classification: "extracted-mechanics",
+    stats: [
+      boundary.tokenShopRowLevelFamily.saveFieldRange,
+      `${boundary.compatibilityImportBoundary.safeImportSubset.length} compatibility-safe raw field groups`,
+      "SaveData now anchors raw TokenShop ATU row levels while canonical promotion stays blocked on row remap"
+    ]
+  };
+}
+
 function validateMultiverseMarketSaveBoundary(boundary) {
   expectNonEmptyString(boundary.generatedAt, "multiverse market save boundary generatedAt must be present");
   expectRecord(boundary.sources, "multiverse market save boundary sources must be an object");
@@ -3187,7 +3240,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 53, "bundled dataset contract must track the fifty-three shipped dataset groups");
+  assert.equal(contract.datasets.length, 54, "bundled dataset contract must track the fifty-four shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -3291,6 +3344,7 @@ export async function validateBundledDatasets() {
   const multiverseMarketOwnerFamily = await readJson("../../data/multiverse-market-owner-family.json");
   const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
+  const tokenShopRowLevelOwner = await readJson("../../data/token-shop-row-level-owner.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
   const multiverseMarketSaveDataImportBoundary = await readJson("../../data/multiverse-market-savedata-import-boundary.json");
@@ -3352,6 +3406,7 @@ export async function validateBundledDatasets() {
     validateMultiverseMarketOwnerFamily(multiverseMarketOwnerFamily),
     validateTokenShopOwnerShell(tokenShopOwnerShell),
     validateTokenShopSaveBoundary(tokenShopSaveBoundary),
+    validateTokenShopRowLevelOwner(tokenShopRowLevelOwner),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateMultiverseMarketSaveDataImportBoundary(multiverseMarketSaveDataImportBoundary, multiverseMarketStateVerificationDoc),

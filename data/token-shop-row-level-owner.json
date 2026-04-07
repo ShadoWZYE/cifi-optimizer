@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "token-shop-row-level-owner",
+  "sources": {
+    "uabeaProbe": "data/uabea-probe-report.json",
+    "tokenShopExtract": "data/token-shop-values.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0"
+  },
+  "typedSaveDataFieldTableRecovery": {
+    "fieldOwner": "SaveData",
+    "fieldCount": 4461,
+    "methodCount": 1
+  },
+  "tokenShopRowLevelFamily": {
+    "saveFieldRange": "ATU1Level through ATU28Level",
+    "saveFieldSamples": [
+      "ATU1Level",
+      "ATU14Level",
+      "ATU24Level",
+      "ATU28Level"
+    ],
+    "adjacentSaveFields": [
+      "BankedTokens",
+      "Tier2TokensUnlocked",
+      "Tier3TokensUnlocked",
+      "Tier4TokensUnlocked",
+      "Tier5TokensUnlocked"
+    ],
+    "groundedTokenShopFieldRange": "ATU1Button through ATU28MaxOverlay",
+    "groundedTokenShopNumericSamples": [
+      "ATU24StartCost",
+      "ATU25MaxLevel",
+      "ATU26Fill",
+      "ATU28Bonus"
+    ]
+  },
+  "compatibilityImportBoundary": {
+    "targetPath": "compatibility.unmappedSystemState.tokenShop",
+    "safeImportSubset": [
+      "ATU1Level through ATU28Level",
+      "Tier2TokensUnlocked",
+      "Tier3TokensUnlocked",
+      "Tier4TokensUnlocked",
+      "Tier5TokensUnlocked"
+    ],
+    "blockedCanonicalPromotionBy": [
+      "final row-by-row remap from ATU row numbers to grounded player-facing TokenShop labels is still unresolved",
+      "planner-safe next-buy logic still needs row naming and adjacent token-bank or Daily Tokenium boundaries kept separate",
+      "the canonical shared boundary remains state.playerProfile, so raw SaveData fields should stay in compatibility until that remap is grounded"
+    ]
+  },
+  "currentBoundary": [
+    "Exact typed recovery now confirms that SaveData directly declares BankedTokens plus ATU1Level through ATU28Level and Tier2TokensUnlocked through Tier5TokensUnlocked in one contiguous save-side block.",
+    "The grounded TokenShop extract separately preserves the same ATU numbering family across TokenShop row shells and numeric fields such as ATU1Button through ATU28MaxOverlay and ATU24StartCost through ATU28Fill.",
+    "This is enough to treat the current TokenShop row-level owner as a SaveData ATU-level family instead of guessing from OR_* labels, prefab-only names, or community remaps.",
+    "It is not yet enough to promote those raw ATU fields into canonical playerProfile state or planner recommendations, because the final row-by-row player-facing remap is still unresolved."
+  ]
+}

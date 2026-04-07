@@ -1871,7 +1871,7 @@ function renderSpendPlannerBoundary() {
   const blockedInputs = [
     {
       label: "TokenShop current row levels",
-      reason: "Blocked until the player-owned TokenShop row-level owner is recovered. Current clues only ground cost lanes and controller shells."
+      reason: "Blocked until the recovered raw TokenShop ATU row levels are remapped onto grounded row identities. The save-side owner is now recovered, but canonical planner use is still blocked."
     },
     {
       label: "Token-bank cap, fill, and claimable tokens",
