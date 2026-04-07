@@ -43,6 +43,10 @@
             "claim": "validatedRows includes inscription_id 71 with row-local serialized constants"
           },
           {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "UABEA preserves the same-number serialized-id field IS71ID beside the ordered row-71 save field"
+          },
+          {
             "artifact": "data/multiverse-market-row-text-coverage.json",
             "claim": "validatedRowCostTexts includes SetIS71CostText"
           },
@@ -70,6 +74,10 @@
             "claim": "validatedRows includes inscription_id 72 with row-local serialized constants"
           },
           {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "UABEA preserves the same-number serialized-id field IS72ID beside the ordered row-72 save field"
+          },
+          {
             "artifact": "data/multiverse-market-row-text-coverage.json",
             "claim": "validatedRowCostTexts includes SetIS72CostText"
           },
@@ -95,6 +103,10 @@
           {
             "artifact": "data/multiverse-market-values.json",
             "claim": "validatedRows includes inscription_id 73 with row-local serialized constants"
+          },
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "UABEA preserves the same-number serialized-id field IS73ID beside the ordered row-73 save field"
           },
           {
             "artifact": "data/multiverse-market-row-text-coverage.json",
@@ -127,6 +139,10 @@
           {
             "artifact": "data/multiverse-market-values.json",
             "claim": "validatedRows includes inscription_id 74 with row-local serialized constants"
+          },
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "UABEA preserves the same-number serialized-id field IS74ID beside the ordered row-74 save field"
           },
           {
             "artifact": "data/multiverse-market-row-text-coverage.json",
@@ -176,7 +192,7 @@
     ],
     "currentBoundary": [
       "The ordered mapping IS71Level through IS74Level to rows 71 through 74 is settled separately and is not reopened here.",
-      "Repo-local BuyIS71 through BuyIS74 and SetIS71CostText through SetIS74CostText hooks confirm row access and row order, not final player-facing identity.",
+      "Repo-local IS71ID through IS74ID, BuyIS71 through BuyIS74, and SetIS71CostText through SetIS74CostText confirm row access, row order, and same-number serialized-id field recovery, not final player-facing identity.",
       "The visible prefab-number shell ChrystosEmporiumUpgrade71 through ChrystosEmporiumUpgrade74 is explicitly remapped to serialized ids 59 through 62, so it cannot be reused as stable player-facing identity for validated rows 71 through 74.",
       "The nearest checked player-facing inscription labels in repo-local probes are Inscryption 78 Ouroboros Orbs and Inscryption 83 Fast-Loop ML, which remain outside the target 71-74 boundary.",
       "Because row 71-74 identity is still not grounded from checked repo-local evidence, the canonical import-safe subset stays empty."

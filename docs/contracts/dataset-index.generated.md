@@ -341,6 +341,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-row71-74-identity-boundary.json`
 
+### `multiverse-market-row71-74-remap-band`
+
+- Label: Multiverse market row 71-74 remap band
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-row71-74-remap-band.json`
+
 ### `multiverse-market-nearby-identity-binding-pattern`
 
 - Label: Multiverse market nearby identity-binding pattern

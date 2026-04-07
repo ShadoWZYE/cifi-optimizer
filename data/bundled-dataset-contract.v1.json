@@ -394,6 +394,14 @@
       ]
     },
     {
+      "id": "multiverse-market-row71-74-remap-band",
+      "label": "Multiverse market row 71-74 remap band",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-row71-74-remap-band.json"
+      ]
+    },
+    {
       "id": "multiverse-market-nearby-identity-binding-pattern",
       "label": "Multiverse market nearby identity-binding pattern",
       "classification": "extracted-mechanics",

@@ -1,0 +1,97 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "multiverse-market-row71-74-remap-band",
+  "sources": {
+    "row7174IdentityBoundary": "data/multiverse-market-row71-74-identity-boundary.json",
+    "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
+    "actionShell": "data/multiverse-market-action-shell.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "unityProbeReport": "data/unity-probe-report.json",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
+  },
+  "remapBandRows": [
+    {
+      "orderedInscriptionRow": 71,
+      "saveField": "IS71Level",
+      "serializedIdField": "IS71ID",
+      "buyHook": "BuyIS71",
+      "costTextHook": "SetIS71CostText",
+      "prefabNumber": 71,
+      "prefabName": "ChrystosEmporiumUpgrade71-ID59",
+      "remappedSerializedId": 59
+    },
+    {
+      "orderedInscriptionRow": 72,
+      "saveField": "IS72Level",
+      "serializedIdField": "IS72ID",
+      "buyHook": "BuyIS72",
+      "costTextHook": "SetIS72CostText",
+      "prefabNumber": 72,
+      "prefabName": "ChrystosEmporiumUpgrade72-ID60",
+      "remappedSerializedId": 60
+    },
+    {
+      "orderedInscriptionRow": 73,
+      "saveField": "IS73Level",
+      "serializedIdField": "IS73ID",
+      "buyHook": "BuyIS73",
+      "costTextHook": "SetIS73CostText",
+      "prefabNumber": 73,
+      "prefabName": "ChrystosEmporiumUpgrade73-ID61",
+      "remappedSerializedId": 61
+    },
+    {
+      "orderedInscriptionRow": 74,
+      "saveField": "IS74Level",
+      "serializedIdField": "IS74ID",
+      "buyHook": "BuyIS74",
+      "costTextHook": "SetIS74CostText",
+      "prefabNumber": 74,
+      "prefabName": "ChrystosEmporiumUpgrade74-ID62",
+      "remappedSerializedId": 62
+    }
+  ],
+  "earlierPrefabShellEvidence": [
+    {
+      "serializedId": 59,
+      "prefabName": "ChrystosEmporiumUpgrade59"
+    },
+    {
+      "serializedId": 60,
+      "prefabName": "ChrystosEmporiumUpgrade60"
+    },
+    {
+      "serializedId": 61,
+      "prefabName": "ChrystosEmporiumUpgrade61"
+    },
+    {
+      "serializedId": 62,
+      "prefabName": "ChrystosEmporiumUpgrade62"
+    }
+  ],
+  "nearbyUiBindingEvidence": {
+    "textHandlerOwner": "TextHandlerMarkets",
+    "textHandlerScriptPath": "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
+    "nearestPositiveSameNumberRows": [78, 83],
+    "nearestPositiveSameNumberLabels": [
+      "Inscryption 78: Ouroboros Orbs",
+      "Inscryption 83: Fast-Loop ML"
+    ]
+  },
+  "recoveredRelationship": {
+    "orderedRowNumberMeaning": "Rows 71-74 remain the settled ordered inscription rows reached by IS71Level through IS74Level.",
+    "serializedIdFieldMeaning": "UABEA also preserves same-number serialized-id fields IS71ID through IS74ID for those rows.",
+    "prefabNumberMeaning": "The visible prefab shell does not keep that same-number join in this band and instead swaps prefab numbers 71-74 onto serialized ids 59-62.",
+    "playerFacingIdentityMeaning": "Nearby TextHandlerMarkets evidence only grounds player-facing identity where the same-number chain survives through prefab and string anchors, which currently checks for rows 78 and 83 but not for rows 71-74."
+  },
+  "canonicalImportSafeSubset": [],
+  "currentBoundary": [
+    "Inside the 71-74 remap band, ordered row number, serialized-id field number, prefab numbering, and player-facing identity cannot be treated as the same thing.",
+    "Rows 71-74 keep same-number ordered/save evidence and same-number serialized-id field names IS71ID through IS74ID, but the prefab shell diverges to ChrystosEmporiumUpgrade71-ID59 through ChrystosEmporiumUpgrade74-ID62.",
+    "That is the smallest checked remap relationship recovered here: prefab numbers 71-74 are reused as shells for serialized ids 59-62, so the same-number identity-binding pattern seen at rows 78 and 83 breaks inside this band.",
+    "Repo-local UI/text evidence still stops short of direct player-facing labels for rows 71-74, so this remap-band explanation does not resolve their player-facing identity.",
+    "Because rows 71-74 still lack grounded player-facing identity, the canonical import-safe subset remains empty."
+  ]
+}
