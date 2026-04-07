@@ -49,14 +49,14 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - the save-side search is narrowed to the PlayerProfile persistence family
   - exact typed recovery now confirms `PlayerProfileHandler.get_Market -> MultiverseMarket`
   - exact typed recovery also confirms `PlayerProfileData.InscryptionsDone`, while not recovering a typed `Market` field on `PlayerProfileHandler` or `PlayerProfileData`
+  - exact typed recovery now also confirms `SaveData` as the declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster
   - the broader `IS*Level` / trade-counter / mech run is not declared directly on checked `MultiverseMarket` or its first nested row-local payloads
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
 - Still blocked:
-  - the exact declaring save model is not yet recovered
   - the metadata-only `Market` shell still is not recovered as an exact typed field
   - the full owned `IS*Level` range is not yet safe import truth
 - Smallest next slice:
-  - name the declaring save model or narrow the remaining accessor-versus-deeper-owner boundary without claiming import-ready planner state
+  - decide how much of the recovered `SaveData` declaration block is safe to expose for bounded import support without claiming import-ready planner state
 - Start here:
   - `docs/systems/spend/multiverse-market-verification.md`
   - `docs/systems/spend/multiverse-market-state-verification.md`

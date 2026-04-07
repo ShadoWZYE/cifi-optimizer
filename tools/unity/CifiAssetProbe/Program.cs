@@ -100,6 +100,18 @@ var directTypeTargets = new[]
     },
     new
     {
+        reportKey = "saveData",
+        lookupNames = new[] { "SaveData" },
+        methodPatterns = Array.Empty<string>()
+    },
+    new
+    {
+        reportKey = "cloudSavePlayerProfile",
+        lookupNames = new[] { "CloudSavePlayerProfile" },
+        methodPatterns = new[] { "GetCurrentSaveFileInfo", "GetPlayerProfileInfo", "CloudLoad" }
+    },
+    new
+    {
         reportKey = "multiverseMarket",
         lookupNames = new[] { "MultiverseMarket" },
         methodPatterns = new[] { "get_InscryptionsDone", "set_InscryptionsDone", "BuyIS", "SetInscryptionsDoneText" }

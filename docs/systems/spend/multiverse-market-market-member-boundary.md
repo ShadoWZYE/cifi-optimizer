@@ -72,10 +72,21 @@ This note records the current repo-local boundary around the `get_Market` handof
 - exact typed `PlayerProfileData` field-table recovery:
   - `89` direct fields
   - `1` method
+- exact typed `SaveData` field-table recovery:
+  - `4461` direct fields
+  - `1` method
 - direct `PlayerProfileData` field samples recovered exactly:
   - `InscryptionsDone`
   - `MechsOwned`
   - `GadgetLevels`
+- direct `SaveData` progression-owner samples recovered exactly:
+  - `IS71Level`
+  - `IS110Level`
+  - `InscryptionsDone`
+  - `EsotericR1Trades`
+  - `NecrumR1Trades`
+  - `Mech1Unlocked`
+  - `Mech1MissionsCompleted`
 - exact typed nested `PlayerProfileData` child checks:
   - `PlayerProfileData+GemData`
 - first nested `MultiverseMarket` payloads recovered exactly:
@@ -96,21 +107,24 @@ This note records the current repo-local boundary around the `get_Market` handof
 - exact typed recovery also separately confirms that `PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels` as string fields, while the same checked probe still does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileData`
 - exact typed recovery now also confirms that the checked `PlayerProfileData` field table has `89` direct fields and `1` method, and none of those direct fields are named `IS71Level`, `IS110Level`, `EsotericR1Trades`, `NecrumR1Trades`, `Mech1Unlocked`, or `Mech1MissionsCompleted`
 - the same exact typed `PlayerProfileData` probe only recovers `PlayerProfileData+GemData` as a nested typed child in the checked field table, so the wider Emporium progression run is not recovered as a direct typed `PlayerProfileData` child beside the flat `InscryptionsDone`, `MechsOwned`, and `GadgetLevels` wrappers
-- the same `PlayerProfileData` neighborhood still preserves a bare `Market` member-shell clue beside the same kind of profile-side substructure names used for `Relics`, `CellData`, `ShardData`, `ResearchPointData`, and `AcademyPointData`, but that `Market` clue remains metadata-shell evidence rather than an exact typed member recovery
+- exact typed recovery now also confirms that `SaveData` declares `4461` fields and `1` method, and that same save table directly carries `IS71Level` through `IS110Level`, `InscryptionsDone`, `EsotericR*Trades`, `NecrumR*Trades`, and early `Mech1*` progression fields such as `Mech1Unlocked` and `Mech1MissionsCompleted`
+- that makes `SaveData` the exact declaring save owner for the wider Emporium progression run, while `PlayerProfileData` remains a flatter export-wrapper surface for nearby summary fields such as `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`
+- the same `PlayerProfileData` neighborhood still preserves a bare `Market` member-shell clue beside the same kind of profile-side substructure names used for `Relics`, `CellData`, `ShardData`, `ResearchPointData`, and `AcademyPointData`, but that `Market` clue remains metadata-shell evidence rather than an exact typed member recovery on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
 - the first recovered nested `MultiverseMarket` payloads are `MultiverseMarket|Inscryption` and `MultiverseMarket|InscryptionTupleObject`, and their exact fields are row-local `ID`, `Cost`, `Level`, `MaxLevel`, `ISObject`, and `transform` carriers rather than the broader save-side progression block
-- the recovered wider progression field run still spans `IS71Level` through `IS110Level`, `EsotericR*Trades`, `NecrumR*Trades`, and early `Mech1*` fields, and current checked typed recovery does not place that wider run directly on `MultiverseMarket` or on those first nested row-local payloads
-- that means the direct PlayerProfile-side market type recovered through `get_Market` is ruled out as the declaring type for the combined progression run, even though the metadata shell still preserves `Market`-side clue strings
-- that same bridge still preserves sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`, which keeps the metadata-side `Market` clue broader than a single Emporium-only field family even though `MultiverseMarket` itself is now recovered exactly
-- the same metadata still exposes typed nested `PlayerProfileData` siblings such as `PlayerProfileData|GemData` and `PlayerProfileData|GemNodeCombo` without exposing an equivalent `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` clue, so the exact declaring type for the wider `IS*Level` / trade-counter / mech run remains unresolved
-- the cloud-save neighborhood still points through `CloudSavePlayerProfile` and `GetPlayerProfileInfo`, which keeps this lane attached to repo-local player-profile recovery rather than to UI-only Emporium text handlers
-- the narrowest checked grounded stop point is now flat wrapper versus deeper owner: `PlayerProfileHandler.get_Market` returns `MultiverseMarket`, `MultiverseMarket` itself and its first nested row-local payloads are ruled out for the broader progression run, `PlayerProfileData` separately carries flat wrappers such as `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`, and the broader `IS*Level` / trade-counter / mech owner still is not recovered exactly
+- the same checked typed probe does not place that wider run directly on `MultiverseMarket` or on those first nested row-local payloads, so `MultiverseMarket` stays grounded as the accessor-returned Emporium owner shell rather than the declaring save owner for the broader progression run
+- that means the direct PlayerProfile-side market type recovered through `get_Market` is ruled out as the declaring type for the combined progression run even though the metadata shell still preserves `Market`-side clue strings, and the checked save-side owner now sits deeper on `SaveData`
+- that same bridge still preserves sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`, which keeps the metadata-side `Market` clue broader than a single Emporium-only field family even though the typed save-side owner is now recovered separately on `SaveData`
+- the same metadata still exposes typed nested `PlayerProfileData` siblings such as `PlayerProfileData|GemData` and `PlayerProfileData|GemNodeCombo` without exposing an equivalent `PlayerProfileData|Market` or `PlayerProfileData|Inscryption` clue, which keeps the recovered `SaveData` owner separate from any exact typed `Market`-wrapper recovery on `PlayerProfileData`
+- the cloud-save neighborhood still points through `CloudSavePlayerProfile` and `GetPlayerProfileInfo`, which keeps this lane attached to repo-local player-profile recovery rather than to UI-only Emporium text handlers, but the checked direct type probe still does not recover `CloudSavePlayerProfile` itself as one of the queried declaring types on this path
+- the checked grounded stop point now cleanly distinguishes the save path: `PlayerProfileHandler.get_Market` returns `MultiverseMarket`, `MultiverseMarket` itself and its first nested row-local payloads are ruled out for the broader progression run, `PlayerProfileData` separately carries flat wrappers such as `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`, `SaveData` exactly declares the wider `IS*Level` / trade-counter / mech cluster, and the metadata-only `Market` shell still is not recovered as a typed save-path field
 
 ## Safe use
 
 - safe for save-model narrowing and fail-fast validation
+- safe for naming `SaveData` as the current exact declaring save owner for the wider `IS*Level` / trade-counter / mech cluster
 - not safe for adding canonical Emporium fields to `state.playerProfile`
 - not safe for claiming that `MultiverseMarket` is itself the serialized PlayerProfile member just because `get_Market` returns it
-- not safe for claiming that a typed `Market` field has been recovered on `PlayerProfileHandler` or `PlayerProfileData`
+- not safe for claiming that a typed `Market` field has been recovered on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
 - not safe for claiming that the wider `IS*Level` / trade-counter / mech run is directly declared as flat fields on `PlayerProfileData`
 - not safe for claiming that `MultiverseMarket` or its first nested `Inscryption` payloads directly declare the broader `IS*Level`, trade-counter, or mech cluster
-- not safe for claiming that the wider progression run is fully solved just because `PlayerProfileData` directly declares `InscryptionsDone`
+- not safe for claiming that the metadata-only `Market` shell has been recovered as a real typed field anywhere on the checked save path
