@@ -2094,9 +2094,16 @@ assert.deepEqual(multiverseMarketSaveBoundaryData.saveFamilyTermsChecked, [
 assert.equal(multiverseMarketSaveBoundaryData.probeResults.actionShellWithSaveOverlapCount, 0);
 assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasActionTerms, true);
 assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasSaveTerms, true);
+assert.deepEqual(multiverseMarketSaveBoundaryData.crossBoundaryTypedOwnerStatus, {
+  status: "exact-declaring-owner-recovered-elsewhere",
+  exactDeclaringOwner: "SaveData",
+  scope: "wider IS*Level / InscryptionsDone / trade-counter / early Mech* progression cluster",
+  note: "This artifact still records the action-shell versus save-family split only; the exact declaring owner comes from the checked typed market-member boundary and does not recover a typed Market field or import-ready row mapping."
+});
 assertCurrentBoundaryIncludes(multiverseMarketSaveBoundaryData.currentBoundary, [
   /zero direct overlap/,
-  /not enough to recover declaring save ownership or player-owned row levels/
+  /separately recovers SaveData as the exact declaring owner/,
+  /still does not recover a typed Market field, player-owned row levels/
 ], "MultiverseMarket save boundary");
 
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedBridgeRecovery, {

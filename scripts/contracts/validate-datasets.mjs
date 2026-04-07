@@ -2419,6 +2419,11 @@ function validateMultiverseMarketSaveBoundary(boundary) {
   assert.equal(boundary.probeResults.metadataNeighborhoodHasSaveTerms, true, "multiverse market save boundary metadataNeighborhoodHasSaveTerms drifted");
   assert.equal(boundary.probeResults.metadataProbeHasSaveTerms, false, "multiverse market save boundary metadataProbeHasSaveTerms drifted");
   assert.equal(boundary.probeResults.level0ProbeHasSaveTerms, false, "multiverse market save boundary level0ProbeHasSaveTerms drifted");
+  expectRecord(boundary.crossBoundaryTypedOwnerStatus, "multiverse market save boundary crossBoundaryTypedOwnerStatus must be an object");
+  assert.equal(boundary.crossBoundaryTypedOwnerStatus.status, "exact-declaring-owner-recovered-elsewhere", "multiverse market save boundary cross-boundary typed owner status drifted");
+  assert.equal(boundary.crossBoundaryTypedOwnerStatus.exactDeclaringOwner, "SaveData", "multiverse market save boundary exact declaring owner drifted");
+  assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /IS\*Level/, "multiverse market save boundary typed owner scope must preserve the IS*Level cluster");
+  assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /does not recover a typed Market field/i, "multiverse market save boundary typed owner note must preserve the typed Market-field blocker");
 
   return {
     id: "multiverse-market-save-boundary",
