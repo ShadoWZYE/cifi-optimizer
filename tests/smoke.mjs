@@ -115,12 +115,14 @@ const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiv
 const tokenBankStateDoc = await readFile(new URL("../docs/systems/spend/token-bank-state-verification.md", import.meta.url), "utf8");
 const dailyTokeniumMissionDoc = await readFile(new URL("../docs/systems/spend/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
 const shardIngestDoc = await readFile(new URL("../docs/systems/shards/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
+const unityAuditPlaybook = await readFile(new URL("../docs/unity/unity-audit-playbook.md", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
+const probeRunner = await readFile(new URL("../scripts/unity/run_probe.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
 const generatedDatasetIndex = await generateDatasetIndex(repoRoot);
-await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
+await runNodeSyntaxCheck(fileURLToPath(new URL("../app.js", import.meta.url)));
 const datasetValidation = await validateBundledDatasets();
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
 const hardAssert = {
@@ -507,8 +509,19 @@ assert.ok(snapshot.shipLoadouts.length >= 4, "expected ship loadouts");
 assert.deepEqual(snapshot.shardMilestones, [], "expected shard milestones to stay quarantined until verified");
 assert.ok(snapshot.gemNodes.length >= 4, "expected gem nodes");
 assert.equal(snapshot.validationCases.length, 4, "expected shipped validation case count");
-assert.ok(snapshot.validationCases.some((item) => item.expected === "Add current LR for loop guardrails"), "expected ranked progression validation case");
-assert.ok(snapshot.validationCases.some((item) => item.expected === "All active feed items satisfy shared recommendation contract"), "expected recommendation feed contract validation case");
+assert.deepEqual(
+  snapshot.validationCases.map((item) => ({ id: item.id, module: item.module })),
+  [
+    { id: "ship-parity-credits", module: "ship" },
+    { id: "progression-gems-midgame", module: "progression" },
+    { id: "recommendation-feed-contract", module: "recommendationFeed" },
+    { id: "gem-node-roi", module: "gem" }
+  ]
+);
+assert.match(getSnapshotValidationCase("progression-gems-midgame").description, /guardrail input/i);
+assert.match(getSnapshotValidationCase("recommendation-feed-contract").description, /contract-valid actions/i);
+assert.match(appJs, /id:\s*"loop-guardrail-input-warning"/);
+assert.match(appJs, /activeFeedContract\.invalidCount === 0/);
 assert.ok(groundedShardMilestones.milestones.length >= 20, "expected grounded shard milestone dataset");
 assert.ok(groundedShardObserved.observations.length >= 4, "expected grounded shard behavior examples");
 assert.ok(groundedShardProvenance.uncertaintyLog.length >= 2, "expected grounded shard provenance notes");
@@ -1757,7 +1770,7 @@ const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id ===
 withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor track", (track) => {
   assert.equal(track.status, "active");
   assert.match(track.currentSlice, /market-member boundary artifacts/);
-  assert.match(track.currentSlice, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` bridge/);
+  assert.match(track.currentSlice, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` accessor bridge/);
   assert.ok(
     track.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
     "expected Emporium successor track to record market-member boundary grounding"
@@ -1789,6 +1802,10 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
   assert.ok(
     track.completedSteps.some((step) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(step)),
     "expected Emporium successor track to record sibling market-side accessor narrowing"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /saveInfoCache: PlayerProfileData/.test(step) && /does not recover a typed `Market` field/.test(step)),
+    "expected Emporium successor track to record the refreshed typed boundary around PlayerProfileHandler and PlayerProfileData"
   );
   assert.ok(
     multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
@@ -1825,6 +1842,10 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
     "expected Emporium successor track to record the direct PlayerProfileData field samples in verified facts"
   );
   assert.ok(
+    track.verified.some((line) => /`PlayerProfileHandler\.saveInfoCache: PlayerProfileData`/.test(line) && /does not recover a typed `Market` field/.test(line)),
+    "expected Emporium successor track to record the typed saveInfoCache field and missing typed Market field in verified facts"
+  );
+  assert.ok(
     multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
       track.verified.some((line) => /`PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`/.test(line)),
     "expected verified facts to keep the direct PlayerProfileData field samples separate from a missing typed PlayerProfileData|Market recovery"
@@ -1834,8 +1855,8 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
     "expected Emporium successor track to record the PlayerProfileHandler bridge clues in verified facts"
   );
   assert.ok(
-    multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /direct-member-versus-first-nested-owner boundary/i.test(line)),
-    "expected market-member boundary artifact to preserve the narrowed direct-member-versus-first-nested-owner boundary"
+    multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /accessor-versus-deeper-owner boundary/i.test(line)),
+    "expected market-member boundary artifact to preserve the narrowed accessor-versus-deeper-owner boundary"
   );
   assert.ok(
     track.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
@@ -1983,6 +2004,11 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedBridgeRecovery, {
   bridgeAccessor: "get_Market",
   bridgeReturnType: "MultiverseMarket"
 });
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedHandlerFieldRecovery, {
+  fieldOwner: "PlayerProfileHandler",
+  fieldName: "saveInfoCache",
+  fieldType: "PlayerProfileData"
+});
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues, [
   "PlayerProfileData|Market",
   "PlayerProfileData|Inscryption",
@@ -1998,8 +2024,8 @@ assert.ok(
   "expected typed probe to keep the broader progression run off direct MultiverseMarket ownership"
 );
 assert.ok(
-  multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /first nested market payloads are row-local only/i.test(line)),
-  "expected typed probe to keep the first nested market payloads row-local only"
+  multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /first nested MultiverseMarket payload types are .* row-local .* broader saved progression block/i.test(line)),
+  "expected typed probe to keep the first nested row-local payloads separate from the broader progression run"
 );
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.firstNestedMarketTypeChecks, [
   "MultiverseMarket|Inscryption",
@@ -2013,11 +2039,16 @@ assert.ok(
   multiverseMarketMarketMemberBoundaryData.progressionPayloadFieldClues.includes("Mech1Unlocked"),
   "expected broader progression payload clues to preserve early mech fields"
 );
+assert.ok(
+  multiverseMarketMarketMemberBoundaryData.negativeTypedDirectMemberChecks.includes("MultiverseMarket.InscryptionsDone"),
+  "expected typed probe to preserve the ruled-out direct MultiverseMarket InscryptionsDone ownership check"
+);
 assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBoundary, [
   /PlayerProfileHandler declares get_Market with return type MultiverseMarket/,
+  /saveInfoCache as a typed PlayerProfileData field/,
   /bare Market member-shell clue/,
   /does not place that wider run directly on MultiverseMarket/,
-  /direct-member-versus-first-nested-owner boundary/
+  /accessor-versus-deeper-owner boundary/
 ], "MultiverseMarket market-member boundary");
 
 assert.deepEqual(multiverseMarketRangeBoundaryData.validatedRowRanges, ["50-59", "63-74"]);
@@ -2480,7 +2511,7 @@ assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
 assert.match(appJs, /Current imported levels are available for \${importedMarketPreview\.importedOverlapRowCount}\/\${importedMarketPreview\.overlapRowCount} overlap-grounded Emporium rows/);
 assert.match(appJs, /Recovered row constants: Bonus \${escapeHtml\(formatOptionalNumber\(entry\.bonusValue\)\)} \| StartCost \${escapeHtml\(formatOptionalNumber\(entry\.startCost\)\)} \| CostExponent \${escapeHtml\(formatOptionalNumber\(entry\.costExponent\)\)}/);
-assert.match(appJs, /PlayerProfileHandler-mediated playerData-to-Market direct member handoff/);
+assert.match(appJs, /get_Market, Market, GetPlayerProfileData, FillPlayerProfileData, and the FillPlayerProfileData coroutine shell/);
 assert.match(appJs, /Shard milestone mapping gate/);
 assert.match(appJs, /Shard shell grounding payload/);
 assert.match(appJs, /Shard milestone payload boundary/);
@@ -2531,6 +2562,14 @@ assert.match(appJs, /Token-bank controller shell now preserves \${tokenBankContr
 assert.match(appJs, /That keeps the narrow bank controller cluster together without promoting it into saved-state ownership or formula truth/);
 assert.match(appJs, /The remaining grounded save-side search therefore stays on the broader PlayerProfileData and CloudSavePlayerProfile persistence-family boundary, not on TokenShop methods, BigStatisticPrefab\.TokenBankCap, or FinalTokenBank outputs/);
 assert.match(appJs, /This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state/);
+assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
+assert.match(appJs, /MultiverseMarket save boundary/);
+assert.match(appJs, /MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap/);
+assert.match(appJs, /MultiverseMarket canonical host narrowing/);
+assert.match(appJs, /PlayerProfileHandler get_Market accessor bridge/);
+assert.match(appJs, /get_BM, get_ZN, get_TU/);
+assert.match(appJs, /broader progression-payload field cluster/);
+assert.match(appJs, /metadata-only \$\{marketMemberSummary\.memberLabel\} shell stays unresolved as an exact typed field/);
 assert.match(appJs, /"TokenBoost"/);
 assert.match(appJs, /"DiamondBoost"/);
 assert.match(appJs, /"TokenDailiesT2"/);
@@ -2586,9 +2625,20 @@ assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts["contracts:gen-index"], "node ./scripts/contracts/generate-dataset-index.mjs");
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
 assert.equal(pkg.scripts["lint:docs"], "node ./scripts/contracts/lint-doc-portability.mjs");
+assert.equal(pkg.scripts["probe:build"], "node ./scripts/unity/run_probe.mjs build");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
 assert.equal(pkg.scripts["verify:vendoring"], "node ./scripts/contracts/verify-vendoring-layout.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+assert.match(probeRunner, /"build": \[/);
+assert.match(probeRunner, /Probe artifact is stale:/);
+assert.match(probeRunner, /npm run probe:build/);
+assert.match(probeRunner, /dotnet", \["restore", probeProject\]/);
+assert.match(probeRunner, /readdirSync\(probeSourceDir\)/);
+assert.match(probeRunner, /\.NET 8 SDK was not found on PATH/);
+assert.match(unityAuditPlaybook, /`npm run probe:build`/);
+assert.match(unityAuditPlaybook, /fails fast and tells you to run `npm run probe:build`/);
+assert.match(unityAuditPlaybook, /no longer silently reuses a stale cached build/);
+assert.match(unityAuditPlaybook, /api\.nuget\.org/);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);
@@ -3367,5 +3417,23 @@ function getBootstrapDatasetBindings(source) {
       .filter(Boolean),
     fetchPaths: [...bootstrapMatch.groups.fetches.matchAll(/fetchJson\("([^"]+)"\)/g)].map((match) => match[1])
   };
+}
+
+function getSnapshotValidationCase(id) {
+  const validationCase = snapshot.validationCases.find((item) => item.id === id);
+  assert.ok(validationCase, `Expected snapshot validation case ${id}`);
+  return validationCase;
+}
+
+async function runNodeSyntaxCheck(targetFile) {
+  try {
+    await execFileAsync(process.execPath, ["--check", targetFile]);
+  } catch (error) {
+    if (error?.code === "EPERM" || error?.syscall === "spawn") {
+      console.warn(`Skipping node --check for ${targetFile} because child_process spawn is not permitted here.`);
+      return;
+    }
+    throw error;
+  }
 }
 

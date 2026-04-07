@@ -47,14 +47,16 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - `MultiverseMarket` is the real Emporium owner
   - `InscryptionsDone` is a real metadata field string
   - the save-side search is narrowed to the PlayerProfile persistence family
-  - the strongest current canonical host clue is a PlayerProfile-side `get_Market` member handoff or broader wrapper, not a loose top-level guess
+  - exact typed recovery now confirms `PlayerProfileHandler.get_Market -> MultiverseMarket`
+  - exact typed recovery also confirms `PlayerProfileData.InscryptionsDone`, while not recovering a typed `Market` field on `PlayerProfileHandler` or `PlayerProfileData`
+  - the broader `IS*Level` / trade-counter / mech run is not declared directly on checked `MultiverseMarket` or its first nested row-local payloads
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
 - Still blocked:
   - the exact declaring save model is not yet recovered
-  - it is still unresolved whether `Market` itself is the declaring owner or only a wrapper
+  - the metadata-only `Market` shell still is not recovered as an exact typed field
   - the full owned `IS*Level` range is not yet safe import truth
 - Smallest next slice:
-  - name the declaring save model or narrow the remaining `Market` handoff without claiming import-ready planner state
+  - name the declaring save model or narrow the remaining accessor-versus-deeper-owner boundary without claiming import-ready planner state
 - Start here:
   - `docs/systems/spend/multiverse-market-verification.md`
   - `docs/systems/spend/multiverse-market-state-verification.md`
