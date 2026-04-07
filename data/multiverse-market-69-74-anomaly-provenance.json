@@ -1,0 +1,99 @@
+{
+  "generatedAt": "2026-04-07",
+  "dataset": "multiverse-market-69-74-anomaly-provenance",
+  "sources": {
+    "rawAppSideAsset": "workbench/unity/joined/level0",
+    "rawUnityProbeReport": "data/unity-probe-report.json",
+    "rawUabeaProbeReport": "data/uabea-probe-report.json",
+    "derivedPrefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
+    "derivedRow7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
+    "derivedNumberingStabilityBoundary": "data/multiverse-market-inscription-numbering-stability-boundary.json",
+    "derivedRow6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md",
+    "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md"
+  },
+  "settledAnomaly": {
+    "sameNumberAlignmentLayers": [
+      "IS69Level through IS74Level",
+      "IS69ID through IS74ID",
+      "BuyIS69 through BuyIS74"
+    ],
+    "brokenPrefabBandRows": [
+      69,
+      70,
+      71,
+      72,
+      73,
+      74
+    ],
+    "prefabRemapPairs": [
+      "69->57",
+      "70->58",
+      "71->59",
+      "72->60",
+      "73->61",
+      "74->62"
+    ],
+    "playerFacingIdentityRecoveredRowsInBand": []
+  },
+  "pipelineStages": [
+    {
+      "stageId": "raw-app-side-asset",
+      "classification": "raw-app-side",
+      "artifacts": [
+        "workbench/unity/joined/level0"
+      ],
+      "evidence": [
+        "The preserved level0 asset contains direct string hits for ChrystosEmporiumUpgrade59, ChrystosEmporiumUpgrade60, ChrystosEmporiumUpgrade61, ChrystosEmporiumUpgrade62, and ChrystosEmporiumUpgrade69-ID57."
+      ],
+      "anomalyPresent": true
+    },
+    {
+      "stageId": "raw-app-side-probe-reports",
+      "classification": "raw-app-side",
+      "artifacts": [
+        "data/unity-probe-report.json",
+        "data/uabea-probe-report.json"
+      ],
+      "evidence": [
+        "unity-probe-report preserves both the earlier direct prefab shells ChrystosEmporiumUpgrade59 through ChrystosEmporiumUpgrade62 and the remapped shell ChrystosEmporiumUpgrade69-ID57.",
+        "uabea-probe-report preserves ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 as GameObject names.",
+        "uabea-probe-report also preserves same-number save-side and hook-side names IS69Level through IS74Level, IS69ID through IS74ID, and BuyIS69 through BuyIS74."
+      ],
+      "anomalyPresent": true
+    },
+    {
+      "stageId": "repo-local-derived-boundaries",
+      "classification": "repo-local-derived",
+      "artifacts": [
+        "data/multiverse-market-prefab-remap-boundary.json",
+        "data/multiverse-market-row71-74-remap-band.json",
+        "data/multiverse-market-inscription-numbering-stability-boundary.json",
+        "data/multiverse-market-row69-74-identity-source-boundary.json"
+      ],
+      "evidence": [
+        "The derived boundary datasets preserve the same inherited split: same-number save/id/hook alignment plus the 69-74 prefab remap band.",
+        "No checked repo-local normalization step is required to create the anomaly before those derived datasets can represent it."
+      ],
+      "anomalyPresent": true
+    }
+  ],
+  "provenanceConclusion": {
+    "earliestCheckedAppearanceStage": "raw-app-side-asset",
+    "anomalyOwner": "app-side-inherited",
+    "repoLocalIntroductionDetected": false,
+    "firstRepoLocalTransformationThatIntroducesAnomaly": null
+  },
+  "standardizationDecision": {
+    "standardizationAllowed": false,
+    "standardizationApplied": false,
+    "boundary": "Preserve the anomaly in derived datasets as inherited source truth; only add provenance and drift validation.",
+    "reason": "The remapped prefab shell is already present in preserved app-side asset and probe evidence before repo-local derived datasets summarize it."
+  },
+  "currentBoundary": [
+    "The 69-74 anomaly is inherited from preserved app-side evidence, not introduced by a checked repo-local normalization step.",
+    "Same-number save, serialized-id, and buy-hook alignment already coexists with remapped prefab shells in raw repo-local probe captures.",
+    "Because the anomaly is inherited source truth, the repo should preserve it in derived boundary datasets instead of normalizing it away.",
+    "Rows 69-74 still have no grounded player-facing identity, so provenance tracking must stay separate from player-facing remap work."
+  ]
+}
