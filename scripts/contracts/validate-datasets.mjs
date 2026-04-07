@@ -3051,6 +3051,79 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
   };
 }
 
+function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verificationDoc, provenanceDoc) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market 69-74 anomaly provenance generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "multiverse market 69-74 anomaly provenance dataset id must be present");
+  expectRecord(boundary.sources, "multiverse market 69-74 anomaly provenance sources must be an object");
+  [
+    "rawAppSideAsset",
+    "rawUnityProbeReport",
+    "rawUabeaProbeReport",
+    "derivedPrefabRemapBoundary",
+    "derivedRow7174RemapBand",
+    "derivedNumberingStabilityBoundary",
+    "derivedRow6974IdentitySourceBoundary",
+    "verificationDoc",
+    "stateVerificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market 69-74 anomaly provenance sources.${field} must be present`);
+  });
+  expectRecord(boundary.settledAnomaly, "multiverse market 69-74 anomaly provenance settledAnomaly must be an object");
+  expectArray(boundary.settledAnomaly.sameNumberAlignmentLayers, "multiverse market 69-74 anomaly provenance sameNumberAlignmentLayers must be an array");
+  expectArray(boundary.settledAnomaly.brokenPrefabBandRows, "multiverse market 69-74 anomaly provenance brokenPrefabBandRows must be an array");
+  expectArray(boundary.settledAnomaly.prefabRemapPairs, "multiverse market 69-74 anomaly provenance prefabRemapPairs must be an array");
+  expectArray(boundary.settledAnomaly.playerFacingIdentityRecoveredRowsInBand, "multiverse market 69-74 anomaly provenance playerFacingIdentityRecoveredRowsInBand must be an array");
+  expectArray(boundary.pipelineStages, "multiverse market 69-74 anomaly provenance pipelineStages must be an array");
+  expectRecord(boundary.provenanceConclusion, "multiverse market 69-74 anomaly provenance provenanceConclusion must be an object");
+  expectRecord(boundary.standardizationDecision, "multiverse market 69-74 anomaly provenance standardizationDecision must be an object");
+  expectArray(boundary.currentBoundary, "multiverse market 69-74 anomaly provenance currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "multiverse-market-69-74-anomaly-provenance", "multiverse market 69-74 anomaly provenance dataset id drifted");
+  assert.deepEqual(
+    boundary.settledAnomaly.sameNumberAlignmentLayers,
+    ["IS69Level through IS74Level", "IS69ID through IS74ID", "BuyIS69 through BuyIS74"],
+    "multiverse market 69-74 anomaly provenance sameNumberAlignmentLayers drifted"
+  );
+  assert.deepEqual(boundary.settledAnomaly.brokenPrefabBandRows, [69, 70, 71, 72, 73, 74], "multiverse market 69-74 anomaly provenance brokenPrefabBandRows drifted");
+  assert.deepEqual(boundary.settledAnomaly.prefabRemapPairs, ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"], "multiverse market 69-74 anomaly provenance prefabRemapPairs drifted");
+  assert.deepEqual(boundary.settledAnomaly.playerFacingIdentityRecoveredRowsInBand, [], "multiverse market 69-74 anomaly provenance playerFacingIdentityRecoveredRowsInBand must stay empty");
+  assert.deepEqual(
+    boundary.pipelineStages.map((stage) => [stage.stageId, stage.classification, stage.anomalyPresent]),
+    [
+      ["raw-app-side-asset", "raw-app-side", true],
+      ["raw-app-side-probe-reports", "raw-app-side", true],
+      ["repo-local-derived-boundaries", "repo-local-derived", true]
+    ],
+    "multiverse market 69-74 anomaly provenance pipelineStages drifted"
+  );
+  assert.equal(boundary.provenanceConclusion.earliestCheckedAppearanceStage, "raw-app-side-asset", "multiverse market 69-74 anomaly provenance earliestCheckedAppearanceStage drifted");
+  assert.equal(boundary.provenanceConclusion.anomalyOwner, "app-side-inherited", "multiverse market 69-74 anomaly provenance anomalyOwner drifted");
+  assert.equal(boundary.provenanceConclusion.repoLocalIntroductionDetected, false, "multiverse market 69-74 anomaly provenance repoLocalIntroductionDetected must remain false");
+  assert.equal(boundary.provenanceConclusion.firstRepoLocalTransformationThatIntroducesAnomaly, null, "multiverse market 69-74 anomaly provenance firstRepoLocalTransformationThatIntroducesAnomaly must remain null");
+  assert.equal(boundary.standardizationDecision.standardizationAllowed, false, "multiverse market 69-74 anomaly provenance standardizationAllowed must remain false");
+  assert.equal(boundary.standardizationDecision.standardizationApplied, false, "multiverse market 69-74 anomaly provenance standardizationApplied must remain false");
+  assert.match(boundary.standardizationDecision.boundary, /Preserve the anomaly/i, "multiverse market 69-74 anomaly provenance boundary text drifted");
+  assert.match(boundary.standardizationDecision.reason, /already present in preserved app-side asset and probe evidence/i, "multiverse market 69-74 anomaly provenance reason drifted");
+
+  assert.match(stateDoc, /## Checked `69-74` anomaly provenance boundary/, "multiverse market state verification doc must expose the anomaly provenance section");
+  assert.match(stateDoc, /app-side inherited rather than repo-local/i, "multiverse market state verification doc must preserve the app-side inherited conclusion");
+  assert.match(verificationDoc, /## Checked 69-74 anomaly provenance boundary/, "multiverse market verification doc must expose the anomaly provenance section");
+  assert.match(verificationDoc, /earliest checked appearance of the `69-74` anomaly is raw app-side evidence/i, "multiverse market verification doc must preserve the raw-source earliest appearance conclusion");
+  assert.match(provenanceDoc, /earliest checked appearance is raw app-side evidence/i, "multiverse market anomaly provenance doc must preserve the earliest checked appearance conclusion");
+  assert.match(provenanceDoc, /No dataset standardization is applied in this lane\./, "multiverse market anomaly provenance doc must preserve the no-standardization conclusion");
+
+  return {
+    id: "multiverse-market-69-74-anomaly-provenance",
+    label: "Multiverse market 69-74 anomaly provenance",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.pipelineStages.length} checked pipeline stages`,
+      `${boundary.settledAnomaly.prefabRemapPairs.length} settled prefab remap pairs`,
+      "69-74 anomaly is inherited from raw app-side evidence, so no standardization is applied"
+    ]
+  };
+}
+
 function validateTokenBankControllerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token-bank controller shell generatedAt must be present");
   expectRecord(shell.sources, "token-bank controller shell sources must be an object");
@@ -3114,7 +3187,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 52, "bundled dataset contract must track the fifty-two shipped dataset groups");
+  assert.equal(contract.datasets.length, 53, "bundled dataset contract must track the fifty-three shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -3227,11 +3300,13 @@ export async function validateBundledDatasets() {
   const multiverseMarketRow7174RemapBand = await readJson("../../data/multiverse-market-row71-74-remap-band.json");
   const multiverseMarketNearbyIdentityBindingPattern = await readJson("../../data/multiverse-market-nearby-identity-binding-pattern.json");
   const multiverseMarketInscriptionNumberingStabilityBoundary = await readJson("../../data/multiverse-market-inscription-numbering-stability-boundary.json");
+  const multiverseMarket6974AnomalyProvenance = await readJson("../../data/multiverse-market-69-74-anomaly-provenance.json");
   const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
   const multiverseMarketMarketMemberBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-market-member-boundary.md");
   const multiverseMarketStateVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-state-verification.md");
   const multiverseMarketVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-verification.md");
   const multiverseMarketSerializedLabelSourceBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-serialized-label-source-boundary.md");
+  const multiverseMarket6974AnomalyProvenanceDoc = await readText("../../docs/systems/spend/multiverse-market-69-74-anomaly-provenance.md");
   const activeGroundingBoundariesDoc = await readText("../../docs/roadmap/active-grounding-boundaries.md");
 
   const summaries = [
@@ -3286,6 +3361,7 @@ export async function validateBundledDatasets() {
     validateMultiverseMarketRow7174RemapBand(multiverseMarketRow7174RemapBand, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarketNearbyIdentityBindingPattern(multiverseMarketNearbyIdentityBindingPattern, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarketInscriptionNumberingStabilityBoundary(multiverseMarketInscriptionNumberingStabilityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
+    validateMultiverseMarket6974AnomalyProvenance(multiverseMarket6974AnomalyProvenance, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarket6974AnomalyProvenanceDoc),
     validateTokenBankControllerShell(tokenBankControllerShell)
   ];
 

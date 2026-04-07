@@ -434,6 +434,14 @@
       ]
     },
     {
+      "id": "multiverse-market-69-74-anomaly-provenance",
+      "label": "Multiverse market 69-74 anomaly provenance",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-69-74-anomaly-provenance.json"
+      ]
+    },
+    {
       "id": "token-bank-controller-shell",
       "label": "Token-bank controller shell",
       "classification": "extracted-mechanics",

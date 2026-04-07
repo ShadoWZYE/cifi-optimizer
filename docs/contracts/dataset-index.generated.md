@@ -376,6 +376,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-inscription-numbering-stability-boundary.json`
 
+### `multiverse-market-69-74-anomaly-provenance`
+
+- Label: Multiverse market 69-74 anomaly provenance
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-69-74-anomaly-provenance.json`
+
 ### `token-bank-controller-shell`
 
 - Label: Token-bank controller shell

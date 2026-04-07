@@ -86,6 +86,7 @@ const multiverseMarketRow7174IdentityBoundaryData = JSON.parse(await readFile(ne
 const multiverseMarketRow7174RemapBandData = JSON.parse(await readFile(new URL("../data/multiverse-market-row71-74-remap-band.json", import.meta.url), "utf8"));
 const multiverseMarketNearbyIdentityBindingPatternData = JSON.parse(await readFile(new URL("../data/multiverse-market-nearby-identity-binding-pattern.json", import.meta.url), "utf8"));
 const multiverseMarketInscriptionNumberingStabilityBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-inscription-numbering-stability-boundary.json", import.meta.url), "utf8"));
+const multiverseMarket6974AnomalyProvenanceData = JSON.parse(await readFile(new URL("../data/multiverse-market-69-74-anomaly-provenance.json", import.meta.url), "utf8"));
 const tokenBankControllerShellData = JSON.parse(await readFile(new URL("../data/token-bank-controller-shell.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
@@ -122,6 +123,7 @@ const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiv
 const multiverseMarketVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-verification.md", import.meta.url), "utf8");
 const multiverseMarketStateVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-state-verification.md", import.meta.url), "utf8");
 const multiverseMarketMarketMemberBoundaryDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-market-member-boundary.md", import.meta.url), "utf8");
+const multiverseMarket6974AnomalyProvenanceDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-69-74-anomaly-provenance.md", import.meta.url), "utf8");
 const tokenBankStateDoc = await readFile(new URL("../docs/systems/spend/token-bank-state-verification.md", import.meta.url), "utf8");
 const dailyTokeniumMissionDoc = await readFile(new URL("../docs/systems/spend/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
 const activeGroundingBoundariesDoc = await readFile(new URL("../docs/roadmap/active-grounding-boundaries.md", import.meta.url), "utf8");
@@ -449,6 +451,7 @@ const expectedBundledDatasetIds = [
   "multiverse-market-row71-74-remap-band",
   "multiverse-market-nearby-identity-binding-pattern",
   "multiverse-market-inscription-numbering-stability-boundary",
+  "multiverse-market-69-74-anomaly-provenance",
   "token-bank-controller-shell"
 ];
 
@@ -2187,6 +2190,7 @@ assertDatasetContractEntry("multiverse-market-serialized-label-source-boundary",
 assertDatasetContractEntry("multiverse-market-row71-74-identity-boundary", "data/multiverse-market-row71-74-identity-boundary.json");
 assertDatasetContractEntry("multiverse-market-row71-74-remap-band", "data/multiverse-market-row71-74-remap-band.json");
 assertDatasetContractEntry("multiverse-market-nearby-identity-binding-pattern", "data/multiverse-market-nearby-identity-binding-pattern.json");
+assertDatasetContractEntry("multiverse-market-69-74-anomaly-provenance", "data/multiverse-market-69-74-anomaly-provenance.json");
 assert.equal(multiverseMarketSaveDataImportBoundaryData.dataset, "multiverse-market-savedata-import-boundary");
 assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importSafeSubset, []);
 assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactImportSafeSubsetLabel, "none");
@@ -2349,6 +2353,26 @@ assert.match(multiverseMarketVerificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, 
 assert.match(multiverseMarketVerificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/);
 assert.match(multiverseMarketVerificationDoc, /does not ground rows `69-74`/i);
 assert.match(multiverseMarketVerificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i);
+assert.equal(multiverseMarket6974AnomalyProvenanceData.dataset, "multiverse-market-69-74-anomaly-provenance");
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.sameNumberAlignmentLayers, ["IS69Level through IS74Level", "IS69ID through IS74ID", "BuyIS69 through BuyIS74"]);
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.brokenPrefabBandRows, [69, 70, 71, 72, 73, 74]);
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.prefabRemapPairs, ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"]);
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.pipelineStages.map((stage) => [stage.stageId, stage.classification, stage.anomalyPresent]), [
+  ["raw-app-side-asset", "raw-app-side", true],
+  ["raw-app-side-probe-reports", "raw-app-side", true],
+  ["repo-local-derived-boundaries", "repo-local-derived", true]
+]);
+assert.equal(multiverseMarket6974AnomalyProvenanceData.provenanceConclusion.earliestCheckedAppearanceStage, "raw-app-side-asset");
+assert.equal(multiverseMarket6974AnomalyProvenanceData.provenanceConclusion.anomalyOwner, "app-side-inherited");
+assert.equal(multiverseMarket6974AnomalyProvenanceData.provenanceConclusion.repoLocalIntroductionDetected, false);
+assert.equal(multiverseMarket6974AnomalyProvenanceData.standardizationDecision.standardizationAllowed, false);
+assert.equal(multiverseMarket6974AnomalyProvenanceData.standardizationDecision.standardizationApplied, false);
+assert.match(multiverseMarketStateVerificationDoc, /## Checked `69-74` anomaly provenance boundary/);
+assert.match(multiverseMarketStateVerificationDoc, /the `69-74` anomaly is app-side inherited rather than repo-local/i);
+assert.match(multiverseMarketVerificationDoc, /## Checked 69-74 anomaly provenance boundary/);
+assert.match(multiverseMarketVerificationDoc, /the anomaly must remain represented as inherited source truth/i);
+assert.match(multiverseMarket6974AnomalyProvenanceDoc, /earliest checked appearance is raw app-side evidence/i);
+assert.match(multiverseMarket6974AnomalyProvenanceDoc, /No dataset standardization is applied in this lane\./);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);

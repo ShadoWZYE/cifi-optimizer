@@ -77,6 +77,23 @@ Current grounded conclusion:
 - rows `69-74` therefore remain unresolved for player-facing identity, not import-safe player-facing labels
 - the canonical import-safe subset stays empty
 
+## Checked 69-74 anomaly provenance boundary
+
+- Raw app-side evidence preserved repo-locally already carries the anomaly before the boundary datasets summarize it:
+  - the preserved `level0` asset includes direct-shell names `ChrystosEmporiumUpgrade59` through `ChrystosEmporiumUpgrade62`
+  - that same preserved app-side evidence also includes remapped shells `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
+  - raw probe reports also preserve same-number `IS69Level` through `IS74Level`, `IS69ID` through `IS74ID`, and `BuyIS69` through `BuyIS74`
+- The repo-local derived datasets therefore inherit an already-split source shape:
+  - same-number alignment holds on save/id/hook side
+  - prefab numbering is broken only in the `69-74` band
+  - player-facing identity is still unresolved
+
+Current grounded conclusion:
+
+- the earliest checked appearance of the `69-74` anomaly is raw app-side evidence, not a repo-local recovery or normalization step
+- the anomaly must remain represented as inherited source truth
+- no dataset standardization is applied in this lane because rewriting the derived datasets to a newer same-number prefab shape would erase checked app-side evidence
+
 ## Alternate serialized-export indirect-join boundary
 
 - This check is distinct from the settled Market/TextHandler/probe path.
