@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-04-03",
+  "generatedAt": "2026-04-07",
   "sources": {
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0",
     "iapCatalog": "data/unity-textassets/IAPProductCatalog.txt",
     "probe": "data/daily-tokenium-lane-probe.json",
-    "academySprite": "workbench/extract/assetripper-primary/Assets/Sprite/Aca.Tokenium553.json"
+    "academySprite": "workbench/extract/assetripper-primary/Assets/Sprite/Aca.Tokenium553.json",
+    "uabeaProbe": "data/uabea-probe-report.json"
   },
   "ownerFamilyClues": [
     "SpaceAcademy",
@@ -32,10 +33,31 @@
     "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
     "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
   ],
+  "exactSaveOwnerRecovery": {
+    "declaringType": "SaveData",
+    "storedAmountField": "DailyTokenium",
+    "storedAmountFieldType": "System.Double",
+    "storedAmountFieldIndex": 2361,
+    "storedAmountFieldOffset": 13032
+  },
+  "genericTokeniumClaimableBoundary": {
+    "declaringType": "SaveData",
+    "field": "ClaimableTokenium",
+    "fieldType": "System.Double",
+    "fieldIndex": 2022,
+    "fieldOffset": 12064,
+    "blockedReason": "The typed tables place ClaimableTokenium on the broader Tokenium resource cluster beside Tokenium, TokeniumExchangeLevel, TokeniumUnlocked, and TokeniumDiamondUpgLevel, not on a DailyTokenium or FarmMissions-specific wrapper."
+  },
+  "negativeTypedOwnerChecks": [
+    "SaveData.DailyTokeniumCap",
+    "PlayerProfileData.DailyTokenium",
+    "PlayerProfileData.DailyTokeniumCap"
+  ],
   "currentBoundary": [
-    "Shipped APK and Unity artifacts now preserve SpaceAcademy and FarmMissions as the strongest owner-family clues for the Daily Tokenium lane.",
+    "Shipped APK and Unity artifacts still preserve SpaceAcademy and FarmMissions as the strongest gameplay-surface family for the Daily Tokenium lane.",
+    "Exact typed recovery now confirms SaveData.DailyTokenium as the stored-amount field for the lane without promoting a wider Academy or Farm Mission wrapper claim.",
     "SetLM244BonusText and BuyLM244 still behave like modifier-side or text-side hooks around that lane, not as recovered saved-state owners.",
-    "Collector pack strings now give the repo a grounded premium modifier clue for the same Academy Menu Daily Tokenium cap lane.",
-    "This is enough to keep Daily Tokenium out of TokenShop-only planner behavior, but not enough to recover the gameplay owner object or saved-state fields."
+    "Collector pack strings still give the repo a grounded premium modifier clue for the same Academy Menu Daily Tokenium cap lane.",
+    "The typed tables do not currently expose DailyTokeniumCap on SaveData or PlayerProfileData, and ClaimableTokenium remains blocked at the broader generic Tokenium cluster rather than a checked Daily Tokenium ready-state owner."
   ]
 }

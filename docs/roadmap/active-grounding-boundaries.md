@@ -97,8 +97,8 @@ Use these when the active lanes above close or split.
 ### `spend-daily-tokenium-save-owner`
 
 - Goal: recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane
-- Current blocker: the lane family is grounded, but the owner still stops at modifier families and text paths
-- Smallest next slice: checked owner-family or save-owner boundary
+- Current blocker: exact typed recovery now confirms `SaveData.DailyTokenium` for the current stored amount, but cap and Daily Tokenium-specific ready-state ownership still stop at Academy or Farm Mission surfaces, modifier families, and broader generic Tokenium fields
+- Smallest next slice: checked cap or ready-state boundary that proves a narrower save wrapper than the current Academy or Farm Mission family without collapsing generic `ClaimableTokenium` into Daily Tokenium
 
 ### `spend-multiverse-row-label-remap`
 
