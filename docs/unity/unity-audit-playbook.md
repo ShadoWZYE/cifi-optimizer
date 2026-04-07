@@ -43,10 +43,15 @@ These remain external prerequisites:
 
 Repo-local npm probe wrappers:
 
+- `npm run probe:build`
+  - restores and rebuilds `tools/unity/CifiAssetProbe/bin/probe-run` from committed repo state
+  - keeps `.dotnet`, `.nuget/packages`, and `.appdata` inside the repo
+  - requires local `.NET 8 SDK`; the first restore also needs NuGet network access unless the repo-local package cache is already warm
 - `npm run probe:uabea`
   - rebuilds and runs `tools/unity/CifiAssetProbe`
   - keeps `.dotnet`, `.nuget/packages`, and `.appdata` inside the repo
-  - if `tools/unity/CifiAssetProbe/bin/probe-run/CifiAssetProbe.dll` already exists, the wrapper can reuse that cached build instead of requiring a fresh repo-local NuGet restore
+  - if the runnable probe artifact is missing, the wrapper restores and rebuilds it automatically
+  - if `Program.cs`, `CifiAssetProbe.csproj`, or `NuGet.Config` is newer than `bin/probe-run/CifiAssetProbe.dll`, the wrapper fails fast and tells you to run `npm run probe:build`
 - `npm run probe:shards:parameters`
   - regenerates `data/shard-cost-parameter-probe.v1.json` and `docs/systems/shards/shard-cost-parameter-probe.md`
 - `npm run probe:shards:type-metadata`
@@ -155,6 +160,7 @@ If resuming on another machine:
 3. run:
    - `python scripts/unity/token_shop_parse.py`
    - `python scripts/unity/multiverse_market_parse.py`
+   - `npm run probe:build`
    - `npm run probe:uabea`
    - `npm run probe:shards:parameters`
    - `npm run probe:shards:type-metadata`
@@ -177,9 +183,11 @@ The current repo-local candidate ranking for that step is recorded in:
 
 - `scripts/unity/uabea_probe.ps1` resolves the repo root from its own path and is clone-location agnostic.
 - `scripts/unity/run_probe.mjs` is the npm entry point for the probe wrappers and keeps `.dotnet`, `.nuget`, and `.appdata` repo-local before invoking `dotnet`.
+- `npm run probe:build` is the minimal reproducible rebuild path for the runnable probe artifact from repo state.
 - `scripts/unity/token_shop_parse.py` and `scripts/unity/multiverse_market_parse.py` also resolve the repo root from their own path and are clone-location agnostic.
 - The npm wrappers are path-portable, but they are not dependency-free: they still require local `dotnet`, Python, restored LFS assets, and the committed `.vendor_manual` libraries for the native shard probe.
-- The `.NET` wrapper intentionally prefers the cached `tools/unity/CifiAssetProbe/bin/probe-run` output when it already exists, because some checkouts may not have a warm repo-local `.nuget` cache for `dotnet build --no-restore`.
+- The first `npm run probe:build` on a machine may need outbound access to `api.nuget.org` to populate the repo-local `.nuget/packages` cache before later rebuilds can stay repo-local.
+- The `.NET` wrapper no longer silently reuses a stale cached build. It only reuses `tools/unity/CifiAssetProbe/bin/probe-run` when the checked runnable artifact is newer than the local probe source inputs.
 - On Windows, the wrapper accepts either `python` or `py -3`. On macOS/Linux, it looks for `python3` first and falls back to `python`.
 - The current wrappers assume a shell environment that can execute `node`, `dotnet`, and Python from `PATH`; they do not bootstrap those toolchains for a fresh machine.
 

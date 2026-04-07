@@ -123,11 +123,12 @@ const tokenShopDoc = await readFile(new URL("../docs/systems/spend/token-shop-va
 const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-values.md", import.meta.url), "utf8");
 const shardIngestDoc = await readFile(new URL("../docs/systems/shards/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
+const probeRunner = await readFile(new URL("../scripts/unity/run_probe.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
 const generatedDatasetIndex = await generateDatasetIndex(repoRoot);
-await execFileAsync(process.execPath, ["--check", fileURLToPath(new URL("../app.js", import.meta.url))]);
+await runNodeSyntaxCheck(fileURLToPath(new URL("../app.js", import.meta.url)));
 const datasetValidation = await validateBundledDatasets();
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
 
@@ -456,8 +457,19 @@ assert.ok(snapshot.shipLoadouts.length >= 4, "expected ship loadouts");
 assert.deepEqual(snapshot.shardMilestones, [], "expected shard milestones to stay quarantined until verified");
 assert.ok(snapshot.gemNodes.length >= 4, "expected gem nodes");
 assert.equal(snapshot.validationCases.length, 4, "expected shipped validation case count");
-assert.ok(snapshot.validationCases.some((item) => item.expected === "Add current LR for loop guardrails"), "expected ranked progression validation case");
-assert.ok(snapshot.validationCases.some((item) => item.expected === "All active feed items satisfy shared recommendation contract"), "expected recommendation feed contract validation case");
+assert.deepEqual(
+  snapshot.validationCases.map((item) => ({ id: item.id, module: item.module })),
+  [
+    { id: "ship-parity-credits", module: "ship" },
+    { id: "progression-gems-midgame", module: "progression" },
+    { id: "recommendation-feed-contract", module: "recommendationFeed" },
+    { id: "gem-node-roi", module: "gem" }
+  ]
+);
+assert.match(getSnapshotValidationCase("progression-gems-midgame").description, /guardrail input/i);
+assert.match(getSnapshotValidationCase("recommendation-feed-contract").description, /contract-valid actions/i);
+assert.match(appJs, /id:\s*"loop-guardrail-input-warning"/);
+assert.match(appJs, /activeFeedContract\.invalidCount === 0/);
 assert.ok(groundedShardMilestones.milestones.length >= 20, "expected grounded shard milestone dataset");
 assert.ok(groundedShardObserved.observations.length >= 4, "expected grounded shard behavior examples");
 assert.ok(groundedShardProvenance.uncertaintyLog.length >= 2, "expected grounded shard provenance notes");
@@ -2662,9 +2674,20 @@ assert.match(launcherVbs, /ResolveFromWhere\("node\.exe"\)/);
 assert.equal(pkg.scripts["contracts:gen-index"], "node ./scripts/contracts/generate-dataset-index.mjs");
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
 assert.equal(pkg.scripts["lint:docs"], "node ./scripts/contracts/lint-doc-portability.mjs");
+assert.equal(pkg.scripts["probe:build"], "node ./scripts/unity/run_probe.mjs build");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
 assert.equal(pkg.scripts["verify:vendoring"], "node ./scripts/contracts/verify-vendoring-layout.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+assert.match(probeRunner, /"build": \[/);
+assert.match(probeRunner, /Probe artifact is stale:/);
+assert.match(probeRunner, /npm run probe:build/);
+assert.match(probeRunner, /dotnet", \["restore", probeProject\]/);
+assert.match(probeRunner, /readdirSync\(probeSourceDir\)/);
+assert.match(probeRunner, /\.NET 8 SDK was not found on PATH/);
+assert.match(unityAuditPlaybook, /`npm run probe:build`/);
+assert.match(unityAuditPlaybook, /fails fast and tells you to run `npm run probe:build`/);
+assert.match(unityAuditPlaybook, /no longer silently reuses a stale cached build/);
+assert.match(unityAuditPlaybook, /api\.nuget\.org/);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);
@@ -3262,5 +3285,23 @@ function getBootstrapDatasetBindings(source) {
       .filter(Boolean),
     fetchPaths: [...bootstrapMatch.groups.fetches.matchAll(/fetchJson\("([^"]+)"\)/g)].map((match) => match[1])
   };
+}
+
+function getSnapshotValidationCase(id) {
+  const validationCase = snapshot.validationCases.find((item) => item.id === id);
+  assert.ok(validationCase, `Expected snapshot validation case ${id}`);
+  return validationCase;
+}
+
+async function runNodeSyntaxCheck(targetFile) {
+  try {
+    await execFileAsync(process.execPath, ["--check", targetFile]);
+  } catch (error) {
+    if (error?.code === "EPERM" || error?.syscall === "spawn") {
+      console.warn(`Skipping node --check for ${targetFile} because child_process spawn is not permitted here.`);
+      return;
+    }
+    throw error;
+  }
 }
 

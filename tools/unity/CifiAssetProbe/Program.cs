@@ -51,6 +51,15 @@ var shardTargetScriptNames = new HashSet<string>(StringComparer.OrdinalIgnoreCas
     "TextHandlerShardMilestoneBonusesPerLevel",
     "ShardUpgradeInfo"
 };
+var shardTargetMethodPatterns = new[]
+{
+    "get_SU",
+    "get_OverLevel",
+    "UpdateShardCostList",
+    "GetShardCostList",
+    "CountAffordableShard",
+    "SortCostAndBools"
+};
 var directTypeTargets = new[]
 {
     new
@@ -101,15 +110,6 @@ var directTypeTargets = new[]
         lookupNames = new[] { "InscryptionTupleObject", "MultiverseMarket+InscryptionTupleObject" },
         methodPatterns = Array.Empty<string>()
     }
-};
-var shardTargetMethodPatterns = new[]
-{
-    "get_SU",
-    "get_OverLevel",
-    "UpdateShardCostList",
-    "GetShardCostList",
-    "CountAffordableShard",
-    "SortCostAndBools"
 };
 var targetFileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 {
