@@ -2299,10 +2299,12 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   expectArray(boundary.missingDirectTypeMapClues, "multiverse market market-member boundary missingDirectTypeMapClues must be an array");
   expectArray(boundary.marketWrapperTypeClues, "multiverse market market-member boundary marketWrapperTypeClues must be an array");
   expectRecord(boundary.typedBridgeRecovery, "multiverse market market-member boundary typedBridgeRecovery must be an object");
+  expectRecord(boundary.typedHandlerFieldRecovery, "multiverse market market-member boundary typedHandlerFieldRecovery must be an object");
   expectArray(boundary.directPlayerProfileFieldSamples, "multiverse market market-member boundary directPlayerProfileFieldSamples must be an array");
   expectArray(boundary.firstNestedMarketTypeChecks, "multiverse market market-member boundary firstNestedMarketTypeChecks must be an array");
   expectArray(boundary.firstNestedMarketFieldSamples, "multiverse market market-member boundary firstNestedMarketFieldSamples must be an array");
   expectArray(boundary.negativeProgressionOwnerChecks, "multiverse market market-member boundary negativeProgressionOwnerChecks must be an array");
+  expectArray(boundary.negativeTypedDirectMemberChecks, "multiverse market market-member boundary negativeTypedDirectMemberChecks must be an array");
   expectArray(boundary.progressionPayloadFieldClues, "multiverse market market-member boundary progressionPayloadFieldClues must be an array");
   expectArray(boundary.currentBoundary, "multiverse market market-member boundary currentBoundary must be an array");
 
@@ -2333,6 +2335,9 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   assert.equal(boundary.typedBridgeRecovery.bridgeOwner, "PlayerProfileHandler", "multiverse market market-member boundary typed bridge owner drifted");
   assert.equal(boundary.typedBridgeRecovery.bridgeAccessor, "get_Market", "multiverse market market-member boundary typed bridge accessor drifted");
   assert.equal(boundary.typedBridgeRecovery.bridgeReturnType, "MultiverseMarket", "multiverse market market-member boundary typed bridge return type drifted");
+  assert.equal(boundary.typedHandlerFieldRecovery.fieldOwner, "PlayerProfileHandler", "multiverse market market-member boundary typed handler field owner drifted");
+  assert.equal(boundary.typedHandlerFieldRecovery.fieldName, "saveInfoCache", "multiverse market market-member boundary typed handler field name drifted");
+  assert.equal(boundary.typedHandlerFieldRecovery.fieldType, "PlayerProfileData", "multiverse market market-member boundary typed handler field type drifted");
   ["InscryptionsDone", "MechsOwned", "GadgetLevels"].forEach((name) => {
     assert.ok(boundary.directPlayerProfileFieldSamples.includes(name), `multiverse market market-member boundary missing direct PlayerProfileData field sample ${name}`);
   });
@@ -2344,6 +2349,9 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   });
   ["IS71Level", "IS110Level", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
     assert.ok(boundary.negativeProgressionOwnerChecks.includes(name), `multiverse market market-member boundary missing negative owner check ${name}`);
+  });
+  ["PlayerProfileHandler.Market", "PlayerProfileData.Market", "PlayerProfileData.MultiverseMarket", "MultiverseMarket.InscryptionsDone", "MultiverseMarket.IS71Level", "MultiverseMarket.IS110Level", "MultiverseMarket.EsotericR1Trades", "MultiverseMarket.NecrumR1Trades", "MultiverseMarket.Mech1Unlocked", "MultiverseMarket.Mech1MissionsCompleted"].forEach((name) => {
+    assert.ok(boundary.negativeTypedDirectMemberChecks.includes(name), `multiverse market market-member boundary missing negative typed direct-member check ${name}`);
   });
   ["IS71Level", "IS110Level", "InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
     assert.ok(boundary.progressionPayloadFieldClues.includes(name), `multiverse market market-member boundary missing ${name}`);
@@ -2358,6 +2366,7 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       `${boundary.playerProfileMemberShellClues.length} PlayerProfile-side member-shell clues`,
       `${boundary.playerProfileHandlerBridgeClues.length} PlayerProfileHandler bridge clues`,
       `${boundary.directMemberHandoffClues.length} direct member-handoff clues`,
+      "PlayerProfileHandler saveInfoCache field is recovered as PlayerProfileData while no typed Market field is recovered on PlayerProfileHandler or PlayerProfileData",
       `${boundary.directPlayerProfileFieldSamples.length} direct PlayerProfileData field samples`,
       `${boundary.firstNestedMarketTypeChecks.length} first nested market type checks`,
       `${boundary.progressionPayloadFieldClues.length} progression-payload field clues`,

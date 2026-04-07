@@ -88,6 +88,12 @@ var directTypeTargets = new[]
     },
     new
     {
+        reportKey = "playerProfileHandler",
+        lookupNames = new[] { "PlayerProfileHandler" },
+        methodPatterns = new[] { "get_Market", "GetPlayerProfileData", "FillPlayerProfileData", "ConvertSaveDataToProfileData" }
+    },
+    new
+    {
         reportKey = "playerProfileData",
         lookupNames = new[] { "PlayerProfileData" },
         methodPatterns = new[] { "get_Market", "get_BM", "get_ZN", "get_TU" }

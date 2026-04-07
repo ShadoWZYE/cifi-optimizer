@@ -1704,7 +1704,7 @@ const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id ===
 assert.ok(spendSaveModelTrack, "expected Emporium save-model successor track");
 assert.equal(spendSaveModelTrack.status, "active");
 assert.match(spendSaveModelTrack.currentSlice, /market-member boundary artifacts/);
-assert.match(spendSaveModelTrack.currentSlice, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` bridge/);
+assert.match(spendSaveModelTrack.currentSlice, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` accessor bridge/);
 assert.ok(
   spendSaveModelTrack.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
   "expected Emporium successor track to record market-member boundary grounding"
@@ -1738,12 +1738,8 @@ assert.ok(
   "expected Emporium successor track to record sibling market-side accessor narrowing"
 );
 assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /deeper progression-payload candidate beneath that wrapper/.test(step)),
-  "expected Emporium successor track to record the wrapper-versus-payload narrowing"
-);
-assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /no recovered named object between the accessor and the `Market` member/.test(step)),
-  "expected Emporium successor track to record the direct member-handoff narrowing"
+  spendSaveModelTrack.completedSteps.some((step) => /saveInfoCache: PlayerProfileData/.test(step) && /does not recover a typed `Market` field/.test(step)),
+  "expected Emporium successor track to record the refreshed typed boundary around PlayerProfileHandler and PlayerProfileData"
 );
 assert.ok(
   spendSaveModelTrack.completedSteps.some((step) => /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
@@ -1774,12 +1770,16 @@ assert.ok(
   "expected Emporium successor track to record the direct PlayerProfileData field samples in verified facts"
 );
 assert.ok(
+  spendSaveModelTrack.verified.some((line) => /`PlayerProfileHandler\.saveInfoCache: PlayerProfileData`/.test(line) && /does not recover a typed `Market` field/.test(line)),
+  "expected Emporium successor track to record the typed saveInfoCache field and missing typed Market field in verified facts"
+);
+assert.ok(
   spendSaveModelTrack.verified.some((line) => line.includes("`PlayerProfileHandler`") && line.includes("`playerData`") && line.includes("`ConvertSaveDataToProfileData`")),
   "expected Emporium successor track to record the PlayerProfileHandler bridge clues in verified facts"
 );
 assert.ok(
-  spendSaveModelTrack.verified.some((line) => /checked direct-member-versus-first-nested-owner boundary/.test(line)),
-  "expected Emporium successor track to record the narrowed direct-member-versus-first-nested-owner boundary in verified facts"
+  spendSaveModelTrack.verified.some((line) => /checked accessor-versus-deeper-owner boundary/.test(line)),
+  "expected Emporium successor track to record the narrowed accessor-versus-deeper-owner boundary in verified facts"
 );
 assert.ok(
   spendSaveModelTrack.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
@@ -1790,12 +1790,12 @@ assert.ok(
   "expected Emporium successor track to record the broader progression field run in verified facts"
 );
 assert.ok(
-  spendSaveModelTrack.verified.some((line) => /direct-member-versus-first-nested-owner boundary/.test(line) && /deeper progression payload/.test(line)),
-  "expected Emporium successor track to record the direct-member-versus-payload boundary in verified facts"
+  spendSaveModelTrack.verified.some((line) => /accessor-versus-deeper-owner boundary/.test(line) && /deeper progression payload|separate PlayerProfileData-side family/.test(line)),
+  "expected Emporium successor track to record the accessor-versus-payload boundary in verified facts"
 );
 assert.ok(
-  spendSaveModelTrack.verified.some((line) => /no checked named object recovered between the accessor and the direct `Market` member/.test(line)),
-  "expected Emporium successor track to record the direct member-handoff boundary in verified facts"
+  spendSaveModelTrack.verified.some((line) => /rules out `MultiverseMarket` itself as the declaring type/.test(line)),
+  "expected Emporium successor track to record the ruled-out direct MultiverseMarket declaring type in verified facts"
 );
 assert.ok(
   spendTrack.completedSteps.some((step) => /owner-shell clues, token-bank controller clues, and save-boundary clues into checked artifacts/.test(step)),
@@ -1924,8 +1924,9 @@ assert.match(unityAuditPlaybook, /FinalSU\*Bonus\*/);
 assert.match(unityAuditPlaybook, /ConstructionMilestones, Assembly-CSharp/);
 assert.match(unityAuditPlaybook, /generic or academy-side milestone family/);
 assert.match(unityAuditPlaybook, /Recommended next unresolved extraction target after PR2/);
-assert.match(unityAuditPlaybook, /narrowed persistence search toward `PlayerProfileData`/);
-assert.match(unityAuditPlaybook, /exact metadata field clues such as `InscryptionsDone` and nearby `IS\*Level`/);
+assert.match(unityAuditPlaybook, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` accessor bridge/);
+assert.match(unityAuditPlaybook, /exact `PlayerProfileData\.InscryptionsDone`/);
+assert.match(unityAuditPlaybook, /exact metadata field clues such as nearby `IS\*Level`/);
 assert.match(unityAuditPlaybook, /broader progression-style field run that continues into trade counters and `Mech\*` fields/);
 assert.match(ownerMap, /integration status: owner and serialized constants verified/);
 assert.match(ownerMap, /base spend lane is now grounded as token or tokenium spending/);
@@ -2611,13 +2612,14 @@ assert.match(appJs, /MultiverseMarket action shell and PlayerProfileData save-fa
 assert.match(appJs, /The checked save boundary still keeps \${multiverseMarketSaveBoundarySummary\.actionAnchor} separate from \${multiverseMarketSaveBoundarySummary\.saveAnchor}, with \${multiverseMarketSaveBoundarySummary\.overlapLabel}/);
 assert.match(appJs, /That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet/);
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
-assert.match(appJs, /PlayerProfileHandler-mediated playerData-to-Market direct member handoff/);
-assert.match(appJs, /no checked named object currently sits between the accessor and the PlayerProfile-side/);
+assert.match(appJs, /PlayerProfileHandler get_Market accessor bridge/);
+assert.match(appJs, /typed probe still only recovers \$\{marketMemberSummary\.typedSaveCacheLabel\} and \$\{marketMemberSummary\.negativeTypedMarketLabel\}/);
+assert.match(appJs, /typedSaveCacheLabel: "PlayerProfileHandler\.saveInfoCache: PlayerProfileData"/);
 assert.match(appJs, /PlayerProfileData\|GemData and PlayerProfileData\|GemNodeCombo/);
 assert.match(appJs, /get_BM, get_ZN, get_TU/);
 assert.match(appJs, /broader progression-payload field cluster/);
-assert.match(appJs, /direct PlayerProfile-side Market member/);
-assert.match(appJs, /deeper payload/);
+assert.match(appJs, /metadata-only \$\{marketMemberSummary\.memberLabel\} shell stays unresolved as an exact typed field/);
+assert.match(appJs, /negativeMultiverseFieldLabel: "MultiverseMarket does not directly declare InscryptionsDone, IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted in the checked typed probe"/);
 assert.match(appJs, /expected PlayerProfileHandler bridge clues for the market-member boundary/);
 assert.match(appJs, /"TokenBoost"/);
 assert.match(appJs, /"DiamondBoost"/);
@@ -2707,7 +2709,7 @@ assert.match(datasetIndexGeneratedDoc, /## Source priority/);
 assert.match(datasetIndexGeneratedDoc, /### `snapshot`/);
 assert.match(datasetIndexGeneratedDoc, /### `shard-cost-formula-model`/);
 assert.match(datasetIndexGeneratedDoc, /- Classification: `canonical-app-snapshot`/);
-assert.match(datasetIndexGeneratedDoc, /- Files:\n  - `data\/game-data\.snapshot\.v1\.json`/);
+assert.match(datasetIndexGeneratedDoc, /- Files:\r?\n  - `data\/game-data\.snapshot\.v1\.json`/);
 assert.match(datasetContractsDoc, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-asset-grounding\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-owner-family-boundary\.v1\.json/);
