@@ -2,7 +2,7 @@
 
 This document records what the repo can currently say about the saved-state side of the `MultiverseMarket` track.
 
-It now includes exact metadata field strings that sit around the Emporium state lane, but it still does not claim the exact declaring save model for the current `Inscryptions Done` balance. The current goal is narrower: identify which repo-local evidence meaningfully narrows the search, and record what still remains unresolved.
+It now includes exact metadata field strings that sit around the Emporium state lane plus exact typed bridge recovery for the direct `get_Market` handoff, but it still does not claim the exact declaring save model for the wider `IS*Level` / trade-counter / mech progression run. The current goal is narrower: identify which repo-local evidence meaningfully narrows the search, and record what still remains unresolved.
 
 ## Saved-state narrowing from this pass
 
@@ -78,15 +78,26 @@ The checked boundary artifact for this handoff now preserves the stronger repo-l
   - `ResearchUltimas`
   - `RewardLanes`
   - `ShardMining`
+- exact typed bridge recovery:
+  - `PlayerProfileHandler.get_Market -> MultiverseMarket`
+- direct `PlayerProfileData` field samples recovered exactly:
+  - `InscryptionsDone`
+  - `MechsOwned`
+  - `GadgetLevels`
+- first nested `MultiverseMarket` payloads recovered exactly:
+  - `MultiverseMarket|Inscryption`
+  - `MultiverseMarket|InscryptionTupleObject`
 
 Current grounded conclusion:
 
 - the strongest current repo-local handoff is no longer just "PlayerProfile family somewhere"
-- the stronger boundary is now a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` direct member handoff rather than direct `MultiverseMarket` ownership on `PlayerProfileData` or loose top-level `PlayerProfileData` fields
+- exact typed recovery now confirms that `PlayerProfileHandler.get_Market` returns `MultiverseMarket`, so the direct handoff itself is checked rather than inferred only from nearby strings
 - the same bridge also preserves `GetPlayerProfileData`, `FillPlayerProfileData`, and `<FillPlayerProfileData>d__45` beside `get_Market` and `Market`, which means there is still no checked repo-local evidence of another named object between the accessor and the PlayerProfile-side `Market` member
+- exact typed recovery separately confirms that `PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels` as string fields
+- exact typed recovery also confirms that the first nested `MultiverseMarket` payloads are `MultiverseMarket|Inscryption` and `MultiverseMarket|InscryptionTupleObject`, and those payloads are row-local carriers rather than the broader progression block
 - the same bridge still preserves sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`, which keeps `Market` broader than one Emporium-only field family even though the direct member handoff is now narrower than the older generic wrapper guess
-- the recovered `InscryptionsDone` field run still sits in a broader progression cluster that spans Inscryptions, Necrum trade counters, and early mech progression, which is wider than the direct `Market` member shell itself
-- this is useful because it narrows the next recovery step from "is there another named bridge object first?" toward "does `Market` itself declare the field run or does it hand off to an unnamed deeper progression payload?" without pretending the Emporium state is already import-ready
+- the recovered wider progression field run still sits in a broader cluster that spans `IS*Level`, Inscryptions, Necrum trade counters, and early mech progression, and the current checked typed recovery does not place that wider run directly on `MultiverseMarket` or on the first recovered nested market payloads
+- this is useful because it narrows the next recovery step from "is there another named bridge object first?" toward "does the PlayerProfile-side `Market` member itself declare the wider progression run or does it hand off to an unresolved deeper payload?" without pretending the Emporium state is already import-ready
 
 ## Exact metadata field cluster recovered from this pass
 
@@ -114,7 +125,7 @@ Current grounded conclusion:
 
 - `InscryptionsDone` is now grounded as an exact metadata field string, not just as a UI label
 - nearby `IS*Level` strings make it credible that player-owned inscription levels are persisted somewhere in the same broader save-side neighborhood
-- the repo still does not have the exact declaring type or serialized object layout that owns those fields at runtime
+- exact typed recovery now also shows that `InscryptionsDone` is directly declared on `PlayerProfileData`, while the wider `IS*Level` / trade-counter / mech cluster still does not have an exact declaring type or serialized object layout recovered at runtime
 
 ## Broader progression-field block recovered from this pass
 
@@ -139,7 +150,7 @@ Current grounded conclusion:
 - `InscryptionsDone` sits inside a broader player-progression field cluster rather than beside the separate `AchievementInscryptionsReward` or `FinalIS*` reward/effect symbols
 - this is stronger evidence that the Emporium lane belongs to a saved progression model or sub-structure, not to a UI-only text path
 - the recovered `IS*Level` run now directly overlaps the validated Emporium row block at ids `71-74`, which creates a grounded bridge between save-side level clues and checked market rows
-- this still does not identify whether the containing save structure is `PlayerProfileData` directly or a nested progression object serialized through that family
+- exact typed recovery now rules out the direct checked `MultiverseMarket` owner and its first recovered nested row-local payloads for that wider run, but it still does not identify whether the containing save structure is a deeper PlayerProfile-side `Market` payload or another unresolved nested progression object serialized through the broader PlayerProfile family
 
 ## Adjacent non-save signals that should not be mistaken for saved-state recovery
 
@@ -168,9 +179,9 @@ Current grounded conclusion:
 
 ## What remains unresolved
 
-- the exact declaring save model that owns `InscryptionsDone` inside the narrowed `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge path
+- the exact declaring save model that owns the wider `IS*Level` / trade-counter / mech progression run inside or beneath the narrowed `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge path
 - the authoritative saved-state field range or list for owned inscription levels
-- whether the direct `Market` member handoff itself is already the declaring Emporium owner or only the first unresolved payload container beneath `PlayerProfileData`
+- whether the direct PlayerProfile-side `Market` member handoff itself is already the declaring owner for the wider progression run or only the first unresolved payload container beneath `PlayerProfileData`
 - which deeper progression payload under that direct `Market` member owns the contiguous `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / `Mech*` run if `Market` itself is not the declaring owner
 - whether the nearby `IS*Level` and `EsotericR*Trades` strings belong to direct `Market` fields, nested achievement/progression records, or another serialized sub-structure immediately under the same PlayerProfile-side market member
 
@@ -178,9 +189,10 @@ Current grounded conclusion:
 
 - It is still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state.playerProfile`.
 - It is now safe to treat `InscryptionsDone` and nearby `IS*Level` strings as grounded metadata field clues for future save-side mapping work.
+- It is now safe to treat `PlayerProfileHandler.get_Market -> MultiverseMarket` as a checked typed bridge and the first nested `MultiverseMarket` payloads as row-local only.
 - It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
 - It is now safe to treat the save-side search as narrowed to the PlayerProfile persistence family and a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` direct member handoff, with no checked named object recovered between the accessor and `Market`.
 - It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and direct save-side `IS*Level` overlap, while keeping the declaring owner unresolved.
-- The next spend-track slice should determine whether `Market` itself directly declares `InscryptionsDone` and the nearby `IS*Level` cluster or whether an unnamed deeper save model under that direct member handoff owns them before any planner UI is added.
+- The next spend-track slice should determine whether the PlayerProfile-side `Market` member itself directly declares the wider `IS*Level` / trade-counter / mech cluster or whether an unnamed deeper save model under that direct member handoff owns it before any planner UI is added.
 
 

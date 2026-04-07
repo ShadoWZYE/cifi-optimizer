@@ -2287,7 +2287,7 @@ function validateMultiverseMarketSaveBoundary(boundary) {
 function validateMultiverseMarketMarketMemberBoundary(boundary) {
   expectNonEmptyString(boundary.generatedAt, "multiverse market market-member boundary generatedAt must be present");
   expectRecord(boundary.sources, "multiverse market market-member boundary sources must be an object");
-  ["probeScript", "metadataNeighborhood", "metadata"].forEach((field) => {
+  ["probeScript", "metadataNeighborhood", "metadata", "nativeBinary"].forEach((field) => {
     expectNonEmptyString(boundary.sources[field], `multiverse market market-member boundary sources.${field} must be present`);
   });
   expectArray(boundary.playerProfileAccessorClues, "multiverse market market-member boundary playerProfileAccessorClues must be an array");
@@ -2298,6 +2298,11 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   expectArray(boundary.cloudSaveBridgeClues, "multiverse market market-member boundary cloudSaveBridgeClues must be an array");
   expectArray(boundary.missingDirectTypeMapClues, "multiverse market market-member boundary missingDirectTypeMapClues must be an array");
   expectArray(boundary.marketWrapperTypeClues, "multiverse market market-member boundary marketWrapperTypeClues must be an array");
+  expectRecord(boundary.typedBridgeRecovery, "multiverse market market-member boundary typedBridgeRecovery must be an object");
+  expectArray(boundary.directPlayerProfileFieldSamples, "multiverse market market-member boundary directPlayerProfileFieldSamples must be an array");
+  expectArray(boundary.firstNestedMarketTypeChecks, "multiverse market market-member boundary firstNestedMarketTypeChecks must be an array");
+  expectArray(boundary.firstNestedMarketFieldSamples, "multiverse market market-member boundary firstNestedMarketFieldSamples must be an array");
+  expectArray(boundary.negativeProgressionOwnerChecks, "multiverse market market-member boundary negativeProgressionOwnerChecks must be an array");
   expectArray(boundary.progressionPayloadFieldClues, "multiverse market market-member boundary progressionPayloadFieldClues must be an array");
   expectArray(boundary.currentBoundary, "multiverse market market-member boundary currentBoundary must be an array");
 
@@ -2325,6 +2330,21 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   ["MultiverseMarket", "MultiverseMarket|InscryptionTupleObject", "MultiverseMarket|Inscryption", "NecrumExchange", "OuroborosResetter", "TraitSpheres", "ZeimarrNautallium", "ResearchLaboratory", "ResearchUltimas", "RewardLanes", "ShardMining"].forEach((name) => {
     assert.ok(boundary.marketWrapperTypeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
   });
+  assert.equal(boundary.typedBridgeRecovery.bridgeOwner, "PlayerProfileHandler", "multiverse market market-member boundary typed bridge owner drifted");
+  assert.equal(boundary.typedBridgeRecovery.bridgeAccessor, "get_Market", "multiverse market market-member boundary typed bridge accessor drifted");
+  assert.equal(boundary.typedBridgeRecovery.bridgeReturnType, "MultiverseMarket", "multiverse market market-member boundary typed bridge return type drifted");
+  ["InscryptionsDone", "MechsOwned", "GadgetLevels"].forEach((name) => {
+    assert.ok(boundary.directPlayerProfileFieldSamples.includes(name), `multiverse market market-member boundary missing direct PlayerProfileData field sample ${name}`);
+  });
+  ["MultiverseMarket|Inscryption", "MultiverseMarket|InscryptionTupleObject"].forEach((name) => {
+    assert.ok(boundary.firstNestedMarketTypeChecks.includes(name), `multiverse market market-member boundary missing first nested market type check ${name}`);
+  });
+  ["<ID>k__BackingField", "<Cost>k__BackingField", "<Level>k__BackingField", "<MaxLevel>k__BackingField", "<ISObject>k__BackingField", "transform"].forEach((name) => {
+    assert.ok(boundary.firstNestedMarketFieldSamples.includes(name), `multiverse market market-member boundary missing first nested market field sample ${name}`);
+  });
+  ["IS71Level", "IS110Level", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
+    assert.ok(boundary.negativeProgressionOwnerChecks.includes(name), `multiverse market market-member boundary missing negative owner check ${name}`);
+  });
   ["IS71Level", "IS110Level", "InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
     assert.ok(boundary.progressionPayloadFieldClues.includes(name), `multiverse market market-member boundary missing ${name}`);
   });
@@ -2338,9 +2358,11 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       `${boundary.playerProfileMemberShellClues.length} PlayerProfile-side member-shell clues`,
       `${boundary.playerProfileHandlerBridgeClues.length} PlayerProfileHandler bridge clues`,
       `${boundary.directMemberHandoffClues.length} direct member-handoff clues`,
+      `${boundary.directPlayerProfileFieldSamples.length} direct PlayerProfileData field samples`,
+      `${boundary.firstNestedMarketTypeChecks.length} first nested market type checks`,
       `${boundary.progressionPayloadFieldClues.length} progression-payload field clues`,
       `${boundary.marketWrapperTypeClues.length} nearby market-wrapper type clues`,
-      "MultiverseMarket save-side handoff is narrowed to a PlayerProfileHandler-mediated playerData-to-Market direct member handoff with no checked named object in between"
+      "MultiverseMarket save-side handoff is narrowed to a checked PlayerProfileHandler.get_Market-to-MultiverseMarket bridge with only row-local first nested payloads recovered"
     ]
   };
 }

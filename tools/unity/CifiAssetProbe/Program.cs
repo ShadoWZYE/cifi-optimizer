@@ -51,6 +51,57 @@ var shardTargetScriptNames = new HashSet<string>(StringComparer.OrdinalIgnoreCas
     "TextHandlerShardMilestoneBonusesPerLevel",
     "ShardUpgradeInfo"
 };
+var directTypeTargets = new[]
+{
+    new
+    {
+        reportKey = "shardMining",
+        lookupNames = new[] { "ShardMining" },
+        methodPatterns = shardTargetMethodPatterns
+    },
+    new
+    {
+        reportKey = "shardPerLevelTextHandler",
+        lookupNames = new[] { "ShardPerLevelTextHandler" },
+        methodPatterns = Array.Empty<string>()
+    },
+    new
+    {
+        reportKey = "textHandlerShardMilestoneBonusesPerLevel",
+        lookupNames = new[] { "TextHandlerShardMilestoneBonusesPerLevel" },
+        methodPatterns = Array.Empty<string>()
+    },
+    new
+    {
+        reportKey = "shardUpgradeInfo",
+        lookupNames = new[] { "ShardUpgradeInfo", "ShardMining+ShardUpgradeInfo" },
+        methodPatterns = Array.Empty<string>()
+    },
+    new
+    {
+        reportKey = "playerProfileData",
+        lookupNames = new[] { "PlayerProfileData" },
+        methodPatterns = new[] { "get_Market", "get_BM", "get_ZN", "get_TU" }
+    },
+    new
+    {
+        reportKey = "multiverseMarket",
+        lookupNames = new[] { "MultiverseMarket" },
+        methodPatterns = new[] { "get_InscryptionsDone", "set_InscryptionsDone", "BuyIS", "SetInscryptionsDoneText" }
+    },
+    new
+    {
+        reportKey = "multiverseMarketInscryption",
+        lookupNames = new[] { "Inscryption", "MultiverseMarket+Inscryption" },
+        methodPatterns = Array.Empty<string>()
+    },
+    new
+    {
+        reportKey = "multiverseMarketInscryptionTupleObject",
+        lookupNames = new[] { "InscryptionTupleObject", "MultiverseMarket+InscryptionTupleObject" },
+        methodPatterns = Array.Empty<string>()
+    }
+};
 var shardTargetMethodPatterns = new[]
 {
     "get_SU",
@@ -258,18 +309,20 @@ try
         {
             IEnumerable<LibCpp2IL.Metadata.Il2CppTypeDefinition> assemblyTypes =
                 assemblyCSharp.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>();
-            foreach (var targetScriptName in shardTargetScriptNames.OrderBy(name => name, StringComparer.Ordinal))
+            foreach (var target in directTypeTargets)
             {
                 var type = assemblyTypes.FirstOrDefault(t =>
-                    string.Equals(t.Name, targetScriptName, StringComparison.Ordinal) ||
-                    string.Equals(t.FullName, targetScriptName, StringComparison.Ordinal) ||
-                    t.FullName.EndsWith("." + targetScriptName, StringComparison.Ordinal));
+                    target.lookupNames.Any(lookupName =>
+                        string.Equals(t.Name, lookupName, StringComparison.Ordinal) ||
+                        string.Equals(t.FullName, lookupName, StringComparison.Ordinal) ||
+                        t.FullName.EndsWith("." + lookupName, StringComparison.Ordinal)));
 
                 if (type is null)
                 {
                     directTargetTypeMetadata.Add(new
                     {
-                        scriptName = targetScriptName,
+                        reportKey = target.reportKey,
+                        scriptName = target.lookupNames[0],
                         found = false
                     });
                     continue;
@@ -277,7 +330,8 @@ try
 
                 directTargetTypeMetadata.Add(new
                 {
-                    scriptName = targetScriptName,
+                    reportKey = target.reportKey,
+                    scriptName = target.lookupNames[0],
                     found = true,
                     fullName = type.FullName,
                     baseType = type.BaseType?.ToString(),
@@ -299,7 +353,7 @@ try
                         })
                         .ToArray(),
                     methods = type.Methods
-                        .Where(method => shardTargetMethodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
+                        .Where(method => target.methodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
                         .Select((method, index) => new
                         {
                             index,

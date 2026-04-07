@@ -1692,7 +1692,7 @@ const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id ===
 assert.ok(spendSaveModelTrack, "expected Emporium save-model successor track");
 assert.equal(spendSaveModelTrack.status, "active");
 assert.match(spendSaveModelTrack.currentSlice, /market-member boundary artifacts/);
-assert.match(spendSaveModelTrack.currentSlice, /`PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` direct member handoff/);
+assert.match(spendSaveModelTrack.currentSlice, /checked `PlayerProfileHandler\.get_Market -> MultiverseMarket` bridge/);
 assert.ok(
   spendSaveModelTrack.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
   "expected Emporium successor track to record market-member boundary grounding"
@@ -1718,7 +1718,7 @@ assert.ok(
   "expected Emporium successor track to record recovered cap progress support"
 );
 assert.ok(
-  spendSaveModelTrack.completedSteps.some((step) => /`PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge/.test(step)),
+  spendSaveModelTrack.completedSteps.some((step) => /`PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge/.test(step) || /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
   "expected Emporium successor track to record the narrowed PlayerProfileHandler bridge path"
 );
 assert.ok(
@@ -1732,6 +1732,10 @@ assert.ok(
 assert.ok(
   spendSaveModelTrack.completedSteps.some((step) => /no recovered named object between the accessor and the `Market` member/.test(step)),
   "expected Emporium successor track to record the direct member-handoff narrowing"
+);
+assert.ok(
+  spendSaveModelTrack.completedSteps.some((step) => /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
+  "expected Emporium successor track to record the exact typed MultiverseMarket bridge"
 );
 assert.ok(
   spendSaveModelTrack.verified.some((line) => /direct `get_Market` accessor clue/.test(line)),
@@ -1750,12 +1754,20 @@ assert.ok(
   "expected Emporium successor track to record recovered overlap-row cap progress in verified facts"
 );
 assert.ok(
+  spendSaveModelTrack.verified.some((line) => /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(line)),
+  "expected Emporium successor track to record the checked typed MultiverseMarket bridge in verified facts"
+);
+assert.ok(
+  spendSaveModelTrack.verified.some((line) => /`PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`/.test(line)),
+  "expected Emporium successor track to record the direct PlayerProfileData field samples in verified facts"
+);
+assert.ok(
   spendSaveModelTrack.verified.some((line) => line.includes("`PlayerProfileHandler`") && line.includes("`playerData`") && line.includes("`ConvertSaveDataToProfileData`")),
   "expected Emporium successor track to record the PlayerProfileHandler bridge clues in verified facts"
 );
 assert.ok(
-  spendSaveModelTrack.verified.some((line) => /strongest current repo-local handoff is now a `PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` direct member path/.test(line)),
-  "expected Emporium successor track to record the narrowed bridge hypothesis in verified facts"
+  spendSaveModelTrack.verified.some((line) => /checked direct-member-versus-first-nested-owner boundary/.test(line)),
+  "expected Emporium successor track to record the narrowed direct-member-versus-first-nested-owner boundary in verified facts"
 );
 assert.ok(
   spendSaveModelTrack.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
@@ -1766,7 +1778,7 @@ assert.ok(
   "expected Emporium successor track to record the broader progression field run in verified facts"
 );
 assert.ok(
-  spendSaveModelTrack.verified.some((line) => /direct member path/.test(line) && /deeper progression payload/.test(line)),
+  spendSaveModelTrack.verified.some((line) => /direct-member-versus-first-nested-owner boundary/.test(line) && /deeper progression payload/.test(line)),
   "expected Emporium successor track to record the direct-member-versus-payload boundary in verified facts"
 );
 assert.ok(
