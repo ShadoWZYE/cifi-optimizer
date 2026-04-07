@@ -1488,6 +1488,14 @@ assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("BigStatisticPr
 assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("TextHandlerLoopMods"));
 assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("SetLM244BonusText"));
 assert.ok(tokenBankStateCluesData.derivedOutputs.includes("FinalTokenBankFillSpeed"));
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.declaringType, "SaveData");
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountField, "BankedTokens");
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldType, "System.Single");
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldIndex, 214);
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldOffset, 1800);
+assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("SaveData.ClaimableBankTokens"));
+assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("SaveData.TokenBankCap"));
+assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("PlayerProfileData.BankedTokens"));
 assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("SpaceAcademy"));
 assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("SpaceAcademyMain"));
 assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("TextHandlerSpaceAcademy"));
@@ -1941,6 +1949,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
 const tokenBankOwnerTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-bank-state-owner");
 withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", (track) => {
   assert.equal(track.status, "active");
+  assert.match(track.currentSlice, /exact `SaveData\.BankedTokens` recovery as the current token-bank stored-amount owner/);
   assert.match(track.currentSlice, /broader `PlayerProfileData` \/ `CloudSavePlayerProfile` persistence-family boundary/);
   assert.ok(
     track.completedSteps.some((step) => /zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms/.test(step)),
@@ -1951,11 +1960,23 @@ withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", 
     "expected token-bank state-owner track to record the derived-output non-owner boundary"
   );
   assert.ok(
-    track.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
-    "expected token-bank state-owner track to record the current broader save-family search path"
+    track.completedSteps.some((step) => /exact typed `SaveData\.BankedTokens` ownership for the current token-bank stored amount/.test(step)),
+    "expected token-bank state-owner track to record exact BankedTokens owner recovery"
   );
   assert.ok(
-    track.uncertain.some((line) => /directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper/.test(line)),
+    track.verified.some((line) => /`SaveData` directly declares `BankedTokens` as the current token-bank stored-amount field/.test(line)),
+    "expected token-bank state-owner track to record exact stored-amount owner"
+  );
+  assert.ok(
+    track.verified.some((line) => /do not currently expose `ClaimableBankTokens` or `TokenBankCap` on `SaveData` or `PlayerProfileData`/.test(line)),
+    "expected token-bank state-owner track to record typed negative cap and claimable checks"
+  );
+  assert.ok(
+    track.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
+    "expected token-bank state-owner track to record the narrowed broader save-family search path"
+  );
+  assert.ok(
+    track.uncertain.some((line) => /cap or claimable state lives directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper/.test(line)),
     "expected token-bank state-owner track to keep the PlayerProfile-side wrapper question unresolved"
   );
 });
