@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -8,8 +8,17 @@ const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, "..", "..");
 
 const probeProject = path.join(root, "tools", "unity", "CifiAssetProbe", "CifiAssetProbe.csproj");
+const probeSourceDir = path.join(root, "tools", "unity", "CifiAssetProbe");
 const probeOutputDir = path.join(root, "tools", "unity", "CifiAssetProbe", "bin", "probe-run");
 const probeDll = path.join(probeOutputDir, "CifiAssetProbe.dll");
+const probeRuntimeConfig = path.join(probeOutputDir, "CifiAssetProbe.runtimeconfig.json");
+const probeSourceInputs = [
+  probeProject,
+  path.join(probeSourceDir, "NuGet.Config"),
+  ...readdirSync(probeSourceDir)
+    .filter((entry) => entry.toLowerCase().endsWith(".cs"))
+    .map((entry) => path.join(probeSourceDir, entry)),
+];
 
 const sharedEnv = {
   ...process.env,
@@ -21,6 +30,9 @@ const sharedEnv = {
 };
 
 const commandSets = {
+  "build": [
+    ["uabea-rebuild", []],
+  ],
   "uabea": [
     ["uabea-build", []],
     ["dotnet", [probeDll]],
@@ -47,6 +59,39 @@ const commandSets = {
   ],
 };
 
+function formatRepoPath(targetPath) {
+  return path.relative(root, targetPath).split(path.sep).join("/");
+}
+
+function getNewestPath(paths) {
+  return [...paths]
+    .filter((targetPath) => existsSync(targetPath))
+    .map((targetPath) => ({ path: targetPath, mtimeMs: statSync(targetPath).mtimeMs }))
+    .sort((left, right) => right.mtimeMs - left.mtimeMs)[0] ?? null;
+}
+
+function getProbeFreshness() {
+  const missingOutputs = [probeDll, probeRuntimeConfig].filter((targetPath) => !existsSync(targetPath));
+  if (missingOutputs.length > 0) {
+    return {
+      status: "missing",
+      missingOutputs,
+    };
+  }
+
+  const newestSource = getNewestPath(probeSourceInputs);
+  const builtDll = getNewestPath([probeDll]);
+  if (newestSource && builtDll && newestSource.mtimeMs > builtDll.mtimeMs) {
+    return {
+      status: "stale",
+      newestSource: newestSource.path,
+      builtDll: builtDll.path,
+    };
+  }
+
+  return { status: "fresh" };
+}
+
 function resolvePythonCommand() {
   const candidates = process.platform === "win32"
     ? [["python", []], ["py", ["-3"]]]
@@ -68,9 +113,22 @@ function resolvePythonCommand() {
 
 function runCommand(command, args) {
   if (command === "uabea-build") {
-    if (existsSync(probeDll)) {
+    const freshness = getProbeFreshness();
+    if (freshness.status === "fresh") {
       return;
     }
+    if (freshness.status === "missing") {
+      runCommand("uabea-rebuild", []);
+      return;
+    }
+    throw new Error(
+      `Probe artifact is stale: ${formatRepoPath(freshness.newestSource)} is newer than ${formatRepoPath(freshness.builtDll)}. `
+      + "Rebuild with `npm run probe:build` before running probe commands."
+    );
+  }
+
+  if (command === "uabea-rebuild") {
+    runCommand("dotnet", ["restore", probeProject]);
     runCommand("dotnet", ["build", probeProject, "-c", "Release", "--no-restore", "-o", probeOutputDir]);
     return;
   }
@@ -89,6 +147,11 @@ function runCommand(command, args) {
   });
 
   if (result.error) {
+    if (result.error.code === "ENOENT" && resolvedCommand === "dotnet") {
+      throw new Error(
+        ".NET 8 SDK was not found on PATH. Install the .NET 8 SDK, then rerun `npm run probe:build`."
+      );
+    }
     throw result.error;
   }
   if (result.status !== 0) {
