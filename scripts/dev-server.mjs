@@ -4,6 +4,11 @@ import { tmpdir } from "node:os";
 import { extname, join, normalize } from "node:path";
 import { cwd } from "node:process";
 import { spawn } from "node:child_process";
+import {
+  createGeneratorOcrStageError,
+  createMissingGeneratorOcrScriptError,
+  resolveGeneratorOcrScriptPath
+} from "./ocr/generator-ocr-support.mjs";
 
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
@@ -122,25 +127,58 @@ async function handleGeneratorOcr(request, response) {
         imagePaths.push(filePath);
       }
 
-      const scriptPath = join(root, "scripts", "generator-ocr.ps1");
-      const result = await runProcess("powershell", [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        scriptPath,
-        ...imagePaths
-      ]);
+      const { resolvedPath: scriptPath } = resolveGeneratorOcrScriptPath(root);
+      if (!scriptPath) {
+        writeJson(response, 500, createMissingGeneratorOcrScriptError(root));
+        return;
+      }
+
+      let result;
+      try {
+        result = await runProcess("powershell", [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          scriptPath,
+          ...imagePaths
+        ]);
+      } catch (error) {
+        writeJson(
+          response,
+          500,
+          createGeneratorOcrStageError(
+            detectOcrFailureStage(`${error?.message || ""}\n${error?.stderr || ""}\n${error?.stdout || ""}`),
+            error,
+            error
+          )
+        );
+        return;
+      }
+
+      if (result.stderr && /python|pytesseract|cv2|numpy|tesseract/i.test(result.stderr)) {
+        writeJson(
+          response,
+          500,
+          createGeneratorOcrStageError(detectOcrFailureStage(result.stderr), new Error("OCR tooling failed before JSON output."), result)
+        );
+        return;
+      }
 
       let parsed;
       try {
         parsed = JSON.parse(result.stdout || "{}");
       } catch {
-        writeJson(response, 500, {
-          error: "OCR script returned invalid JSON.",
-          stdout: result.stdout,
-          stderr: result.stderr
-        });
+        writeJson(response, 500, createGeneratorOcrStageError("powershell", new Error("OCR script returned invalid JSON."), result));
+        return;
+      }
+
+      if (parsed && typeof parsed === "object" && parsed.error) {
+        writeJson(
+          response,
+          500,
+          createGeneratorOcrStageError(detectOcrFailureStage(`${parsed.error}\n${result.stderr}\n${result.stdout}`), new Error(String(parsed.error)), result)
+        );
         return;
       }
 
@@ -151,6 +189,16 @@ async function handleGeneratorOcr(request, response) {
   } catch (error) {
     writeJson(response, 500, { error: error instanceof Error ? error.message : String(error) });
   }
+}
+
+function detectOcrFailureStage(text) {
+  if (/tesseract/i.test(text)) {
+    return "tesseract";
+  }
+  if (/python|pytesseract|cv2|numpy/i.test(text)) {
+    return "python";
+  }
+  return "powershell";
 }
 
 async function handleClientSessionTouch(request, response) {
@@ -286,7 +334,11 @@ function runProcess(command, args) {
         resolve({ stdout, stderr });
         return;
       }
-      reject(new Error(stderr || stdout || `Process exited with code ${code}.`));
+      const error = new Error(stderr || stdout || `Process exited with code ${code}.`);
+      error.code = code;
+      error.stdout = stdout;
+      error.stderr = stderr;
+      reject(error);
     });
   });
 }
