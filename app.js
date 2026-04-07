@@ -1840,85 +1840,77 @@ function renderDatasetRefreshHardening() {
 }
 
 function renderSpendPlannerBoundary() {
-  const tokenShop = state.extractedMechanics?.tokenShop ?? {};
-  const multiverseMarket = state.extractedMechanics?.multiverseMarket ?? {};
-  const compatibility = getCompatibilityProfileState();
-  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-multiverse-save-model-recovery");
-  const nextUnlockSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
-  const importedTokenShopState = compatibility.unmappedSystems?.tokenShop;
-  const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
-  const hasImportedTokenShopState = isBoundaryValuePresent(importedTokenShopState);
-  const hasImportedMarketState = isBoundaryValuePresent(importedMarketState);
-  const numericGroupCount = Object.keys(tokenShop.numeric_table ?? {}).length;
-  const validatedRows = Array.isArray(multiverseMarket.records) ? multiverseMarket.records.length : 0;
-  const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
-  const importedMarketPreview = getImportedMultiverseMarketPreview(
-    importedMarketState,
-    multiverseMarket,
-    state.extractedMechanics?.multiverseMarketRangeBoundary
-  );
-  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
-  const hasTokeniumShell =
-    resourceIcons.includes("resourceicons/resource_tokenium")
-    && resourceIcons.includes("resourceicons/resource_tokenium_cap");
-
-  if (!numericGroupCount && !validatedRows) {
-    return "";
-  }
+  const canonical = getCanonicalProfileState();
+  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-planner-first-ui-slice");
+  const availableInputs = [
+    {
+      label: "Tokens",
+      value: canonical.tokens,
+      path: "player.resources.tokens",
+      note: "Grounded canonical spend balance available for descriptive budgeting only."
+    },
+    {
+      label: "Diamonds",
+      value: canonical.diamonds,
+      path: "player.resources.diamonds",
+      note: "Grounded canonical premium-currency balance available for descriptive budgeting only."
+    },
+    {
+      label: "Current LR",
+      value: canonical.loopReset,
+      path: "player.loop.loopReset",
+      note: "Grounded progression context only. This slice does not turn LR into spend rankings."
+    },
+    {
+      label: "Academy relics",
+      value: canonical.academyRelics,
+      path: "player.resources.academyRelics",
+      note: "Grounded canonical aggregate when imported, but still descriptive only in this slice."
+    }
+  ];
+  const blockedInputs = [
+    {
+      label: "TokenShop current row levels",
+      reason: "Blocked until the player-owned TokenShop row-level owner is recovered. Current clues only ground cost lanes and controller shells."
+    },
+    {
+      label: "Token-bank cap, fill, and claimable tokens",
+      reason: "Blocked until the saved-state owner is recovered. Current TokenShop and FinalTokenBank clues do not name planner-safe saved values."
+    },
+    {
+      label: "Daily Tokenium current amount or cap",
+      reason: "Blocked until the Academy or Farm Mission save owner is recovered. The lane is grounded, but the saved reward state is still unresolved."
+    },
+    {
+      label: "Emporium owned progression and Inscryptions balance",
+      reason: "Blocked until the broader `InscryptionsDone` and `IS*Level` save-side handoff is safe for bounded import use. Current recovery still stops short of planner-safe canonical inputs."
+    }
+  ];
+  const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
 
   return `
     <article class="validation-card warn">
-      <strong>Spend planner boundary</strong>
-      <p class="validation-status">Extracted spend data is grounded enough for boundary notes, but still blocked for planner cards.</p>
+      <strong>Spend planner first slice</strong>
+      <p class="validation-status">Descriptive only. This panel shows grounded inputs that are available now and blocked inputs that remain unavailable while owner recovery is unresolved.</p>
       <div class="meta-stack">
-        <p class="snapshot-title">Safe grounded truths now</p>
-        <p class="meta">TokenShop is grounded as a token or tokenium spend lane through recovered constants, token-bank labels, and shipped resource icons.</p>
-        <p class="meta">MultiverseMarket has a validated late-block row set and an <code>Inscryptions Done</code> cost-lane shell, but not a recovered player-owned balance field yet.</p>
-        <p class="meta">Recovered handler split stays explicit: TokenShop handles claim actions, <code>BigStatisticPrefab.TokenBankCap</code> covers cap display, and <code>TextHandlerLoopMods.SetLM244BonusText</code> is only a daily-tokenium text hook.</p>
+        <p class="snapshot-title">Grounded inputs available now</p>
+        <ul class="research-step-list">${availableInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not entered yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
       </div>
       <div class="meta-stack">
-        <p class="snapshot-title">Still blocked before planner behavior</p>
-        <p class="meta">Player-owned current levels for TokenShop rows are not recovered.</p>
-        <p class="meta">Token-bank cap, fill-speed, and claimable-token save-state owners are still unmapped.</p>
-        <p class="meta">The Academy or Farm Mission Daily Tokenium lane is separated from TokenShop, but its gameplay owner and saved-state fields are still unresolved.</p>
-        <p class="meta"><code>Inscryptions Done</code> and <code>IS*Level</code> are not yet safe canonical PlayerProfile inputs, so MultiverseMarket recommendations remain blocked.</p>
+        <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
+        <ul class="research-step-list">${blockedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${escapeHtml(input.reason)}</li>`).join("")}</ul>
       </div>
       <div class="meta-stack">
-        <p class="snapshot-title">Active Emporium save-model narrowing</p>
-        <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
-        <p class="meta">${marketMemberSummary.hasSiblingAccessorCluster ? `${marketMemberSummary.accessorLabel} also sits in the same sibling accessor run as ${marketMemberSummary.siblingAccessorLabel}, with matching member shells such as ${marketMemberSummary.siblingMemberLabel}.` : "The checked build does not yet preserve a full sibling accessor and member-shell pattern around the Market handoff."}</p>
-        <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That keeps ${marketMemberSummary.canonicalHostLabel} as the checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is ${marketMemberSummary.exactSaveOwnerLabel}.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
-        <p class="meta">${marketMemberSummary.hasCloudBridge ? `The same narrowed path still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps this lane tied to repo-local player-profile recovery instead of UI-only text handlers.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the Emporium save-model path."}</p>
-        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the next safe step is bounded import-surface review rather than planner logic or row remap.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save-model path and needs review."}</p>
+        <p class="snapshot-title">Why recommendations stay unavailable</p>
+        <p class="meta">Unresolved owners still prevent planner-safe recommendations. This slice does not claim best-buy order, ROI, ETA, optimizer correctness, or route quality while the blocked spend inputs remain unrecovered.</p>
+        <p class="meta">Confidence label: grounded canonical inputs only. Unresolved owner-dependent inputs stay explicitly unavailable instead of being inferred from compatibility blobs, extracted constants, or UI text hooks.</p>
       </div>
-      <div class="meta-stack">
-        <p class="snapshot-title">Imported spend payload watch</p>
-        <p class="meta">${hasImportedTokenShopState ? `Quarantined TokenShop payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedTokenShopState))}).` : "No quarantined TokenShop payload is present in the imported PlayerProfile."}</p>
-        <p class="meta">${hasImportedMarketState ? `Quarantined MultiverseMarket payload present in PlayerProfile import (${escapeHtml(formatBoundaryValue(importedMarketState))}).` : "No quarantined MultiverseMarket payload is present in the imported PlayerProfile."}</p>
-        <p class="meta">These imported blobs stay under <code>compatibility.unmappedSystemState</code> until the recovered spend owners, bounded import surfaces, and grounded labels clear the remaining integration gate.</p>
-        <p class="meta">The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap</code>, <code>ClaimableBankTokens</code>, <code>InscryptionsDone</code>, and top-level <code>IS*Level</code> fields instead of dropping them.</p>
-      </div>
-      <div class="meta-stack">
-        <p class="snapshot-title">Partial Emporium import preview</p>
-        <p class="meta">${importedMarketPreview.hasImportedBalance ? `Imported <code>InscryptionsDone</code>: ${escapeHtml(importedMarketPreview.balanceLabel)}.` : "No imported <code>InscryptionsDone</code> balance is available yet."}</p>
-        <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Grounded save-side overlap currently covers validated Emporium rows ${escapeHtml(importedMarketPreview.overlapRangeLabel)}.` : "No overlap-grounded Emporium row subset is available yet."}</p>
-        <p class="meta">${importedMarketPreview.hasOverlapLevelPreview ? `Current imported levels are available for ${importedMarketPreview.importedOverlapRowCount}/${importedMarketPreview.overlapRowCount} overlap-grounded Emporium rows (${escapeHtml(importedMarketPreview.overlapRangeLabel)}).` : importedMarketPreview.hasOverlapGroundedRows ? "No imported current levels are available yet for the overlap-grounded Emporium rows." : "No imported current levels are available yet for the grounded overlap subset."}</p>
-        <p class="meta">${importedMarketPreview.hasOverlapLevelPreview ? `${importedMarketPreview.overlapMaxedCount} imported overlap-grounded rows are already at recovered max level.` : "Recovered-cap progress will appear here once overlap-grounded rows are imported."}</p>
-        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Broader validated preview: ${importedMarketPreview.importedValidatedRowCount}/${importedMarketPreview.validatedRowCount} validated Emporium rows (${escapeHtml(importedMarketPreview.validatedRangeLabel)}).` : "When imported <code>IS*Level</code> fields are present, this build will surface only the validated row block and keep everything else quarantined."}</p>
-        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `Preview sample: ${escapeHtml(importedMarketPreview.sampleLine)}.` : "No validated-row preview sample is available yet."}</p>
-        <p class="meta">${importedMarketPreview.hasOverlapLevelPreview ? "Overlap-grounded row cards now also show recovered row constants such as bonus, start cost, and cost exponent for the imported subset." : "Recovered row constants will appear here once overlap-grounded Emporium rows are imported."}</p>
-        <p class="meta">${importedMarketPreview.extraImportedRows.length ? `Additional imported <code>IS*Level</code> rows stay quarantined outside the grounded validated block: ${escapeHtml(importedMarketPreview.extraImportedLabel)}${importedMarketPreview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported <code>IS*Level</code> rows were found outside the grounded validated block."}</p>
-        <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Missing overlap-grounded imports: ${escapeHtml(importedMarketPreview.missingOverlapLabel)}.` : "The overlap-grounded subset is not available in this build."}</p>
-        <p class="meta">${importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.maxedCount} imported validated rows are already at their recovered max level.` : "This preview stays descriptive only and does not unlock spend recommendations or canonical PlayerProfile fields."}</p>
-      </div>
-      ${nextUnlockSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Active Emporium next steps</p><ul class="research-step-list">${nextUnlockSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+      ${nextSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Current lane next steps</p><ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
       <div class="pill-row">
-        <span class="pill">${numericGroupCount} TokenShop numeric groups</span>
-        <span class="pill">${validatedRows} validated market rows</span>
-        <span class="pill">${hasTokeniumShell ? "Tokenium shell grounded" : "Tokenium shell incomplete"}</span>
-        <span class="pill">${hasImportedTokenShopState || hasImportedMarketState ? "Imported spend payload quarantined" : "No imported spend payload yet"}</span>
-        <span class="pill">${importedMarketPreview.hasOverlapGroundedRows ? `${importedMarketPreview.importedOverlapRowCount}/${importedMarketPreview.overlapRowCount} overlap-grounded rows previewed` : importedMarketPreview.hasValidatedLevelPreview ? `${importedMarketPreview.importedValidatedRowCount} validated Emporium levels previewed` : "No Emporium level preview yet"}</span>
-        <span class="pill">${marketMemberSummary.hasBoundary ? "Emporium save path narrowed" : "Emporium save path unresolved"}</span>
+        <span class="pill">${availableInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${availableInputs.length} grounded inputs entered</span>
+        <span class="pill">${blockedInputs.length} blocked inputs surfaced</span>
+        <span class="pill">Canonical PlayerProfile only</span>
+        <span class="pill">Uncertainty visible</span>
         <span class="pill">No spend recommendations yet</span>
       </div>
     </article>
@@ -1979,6 +1971,7 @@ function getResearchTrackOrder(track) {
     "shard-milestone-payload-recovery",
     "shards-and-loop-guardrails",
     "unified-feed-and-hardening",
+    "spend-planner-first-ui-slice",
     "spend-multiverse-save-model-recovery",
     "hunter-related-planning",
     "mech-related-planning",
@@ -1996,6 +1989,7 @@ function getResearchTrackSequenceLabel(track) {
     "shard-milestone-payload-recovery": "Sequence 2/5",
     "shards-and-loop-guardrails": "Sequence 2/5",
     "unified-feed-and-hardening": "Sequence 3/5",
+    "spend-planner-first-ui-slice": "Sequence 4/5",
     "spend-multiverse-save-model-recovery": "Sequence 4/5",
     "hunter-related-planning": "Research intake",
     "mech-related-planning": "Research intake",
@@ -2240,6 +2234,7 @@ function getResearchTrackPhase(track) {
     "shard-milestone-payload-recovery": "PR 2 successor",
     "shards-and-loop-guardrails": "PR 2",
     "unified-feed-and-hardening": "PR 3 then PR 5 hardening",
+    "spend-planner-first-ui-slice": "PR 6 prep slice",
     "spend-multiverse-save-model-recovery": "PR 4 successor",
     "hunter-related-planning": "Research intake only",
     "mech-related-planning": "Research intake only",
@@ -2255,6 +2250,7 @@ function getResearchTrackSource(track) {
     "playerprofile-boundary-and-imports": "Schema boundary",
     "shard-milestone-payload-recovery": "Grounded shard data",
     "shards-and-loop-guardrails": "Grounded shard data",
+    "spend-planner-first-ui-slice": "Canonical PlayerProfile spend inputs",
     "spend-multiverse-save-model-recovery": "Extracted Emporium save-side data",
     "unified-feed-and-hardening": "Integration contract",
     "hunter-related-planning": "Research intake",

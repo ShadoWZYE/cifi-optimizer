@@ -195,6 +195,9 @@ The repo's active unresolved queue currently lives in [`data/game-data.snapshot.
 
 Current active or queued tracks:
 
+- `spend-planner-first-ui-slice`
+  - status: `active`
+  - goal: ship a descriptive spend-planner panel that only reads canonical player inputs and labels blocked owner-dependent inputs as unavailable
 - `shard-milestone-payload-recovery`
   - status: `active`
   - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
