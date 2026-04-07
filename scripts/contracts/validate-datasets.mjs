@@ -2353,6 +2353,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   });
   expectRecord(boundary.rawSaveFamily, "token shop row remap boundary rawSaveFamily must be an object");
   expectRecord(boundary.groundedNonLabelClues, "token shop row remap boundary groundedNonLabelClues must be an object");
+  expectRecord(boundary.recoveredBridge, "token shop row remap boundary recoveredBridge must be an object");
   expectRecord(boundary.blockedIdentityJoin, "token shop row remap boundary blockedIdentityJoin must be an object");
   expectArray(boundary.groundedNonLabelClues.effectHookSamples, "token shop row remap boundary effectHookSamples must be an array");
   expectArray(boundary.groundedNonLabelClues.prefabRosterSamples, "token shop row remap boundary prefabRosterSamples must be an array");
@@ -2366,6 +2367,22 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.rawSaveFamily.fieldRange, "ATU1Level through ATU28Level", "token shop row remap boundary field range drifted");
   assert.equal(boundary.rawSaveFamily.owner, "SaveData", "token shop row remap boundary owner drifted");
   assert.equal(boundary.rawSaveFamily.groundedOwnerPayloadRange, "ATU1Button through ATU28MaxOverlay", "token shop row remap boundary grounded owner payload range drifted");
+  assert.equal(boundary.recoveredBridge.shellField, "ATU2Button", "token shop row remap boundary recovered bridge shell drifted");
+  assert.equal(boundary.recoveredBridge.shellPathId, 15804, "token shop row remap boundary recovered bridge shell path drifted");
+  assert.deepEqual(
+    boundary.recoveredBridge.ownerFieldBlock,
+    [
+      "DiamondBoostStartCost",
+      "DiamondBoostAdditiveCost",
+      "DiamondBoostBonus",
+      "DiamondBoostMaxLevel",
+      "DiamondBoostFill"
+    ],
+    "token shop row remap boundary recovered bridge owner field block drifted"
+  );
+  assert.equal(boundary.recoveredBridge.supportingEffectHook, "ATU2DiamondsBonus", "token shop row remap boundary recovered bridge effect hook drifted");
+  assert.equal(boundary.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.DiamondBoost", "token shop row remap boundary recovered bridge prefab drifted");
+  assert.match(boundary.recoveredBridge.groundedConclusion, /ATU2Button now has one checked bridge to NewTokenUPGPrefab\.T1\.DiamondBoost/i, "token shop row remap boundary recovered bridge conclusion drifted");
   ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
     assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);
   });
@@ -2378,12 +2395,12 @@ function validateTokenShopRowRemapBoundary(boundary) {
   ["BuyATU24", "BuyATU25", "BuyATU26", "BuyATU27", "BuyATU28"].forEach((name) => {
     assert.ok(boundary.groundedNonLabelClues.directBuyHookSamples.includes(name), `token shop row remap boundary missing direct buy hook sample ${name}`);
   });
-  assert.ok(boundary.blockedIdentityJoin.missingLinks.some((line) => /ATU\*Button/i.test(line)), "token shop row remap boundary must preserve missing ATU button join blocker");
+  assert.ok(boundary.blockedIdentityJoin.missingLinks.some((line) => /remaining ATU\*Button or ATU\*Content/i.test(line)), "token shop row remap boundary must preserve narrowed remaining ATU button join blocker");
   ["row-order similarity alone", "OR_* labels", "community naming", "prefab-only naming without a checked object join"].forEach((name) => {
     assert.ok(boundary.blockedIdentityJoin.unsafeInferenceSources.includes(name), `token shop row remap boundary missing unsafe inference source ${name}`);
   });
-  assert.ok(boundary.currentBoundary.some((line) => /ATU2DiamondsBonus and ATU24Bonus3Shards/i.test(line)), "token shop row remap boundary must preserve grounded effect-domain clue conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /do not prove which grounded player-facing TokenShop row identity belongs to each ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU2Button aligns directly with the DiamondBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU2 bridge conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion for remaining rows");
 
   return {
     id: "token-shop-row-remap-boundary",
@@ -2392,7 +2409,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     stats: [
       boundary.rawSaveFamily.fieldRange,
       `${boundary.groundedNonLabelClues.effectHookSamples.length} grounded non-label effect clues`,
-      "ATU row identity remains blocked until a checked prefab-or-title join is recovered"
+      "One ATU bridge is recovered; remaining row identity stays blocked"
     ]
   };
 }
