@@ -496,7 +496,12 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   );
   const importedTokenShopRecord = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop));
   const importedTokenShopStateClues = collectAliasedCompatibilityFields(source, tokenShopStateAliases);
-  normalized.compatibility.unmappedSystemState.tokenShop = mergeCompatibilityRecord(importedTokenShopRecord, importedTokenShopStateClues);
+  const importedTokenShopLevels = collectTopLevelCompatibilityPattern(source, /^ATU\d+Level$/u);
+  const importedTokenShopTierUnlocks = collectTopLevelCompatibilityPattern(source, /^Tier[2-5]TokensUnlocked$/u);
+  normalized.compatibility.unmappedSystemState.tokenShop = mergeCompatibilityRecord(
+    importedTokenShopRecord,
+    mergeCompatibilityRecord(importedTokenShopStateClues, mergeCompatibilityRecord(importedTokenShopLevels, importedTokenShopTierUnlocks))
+  );
 
   const importedMultiverseMarketRecord = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarket));
   const importedMultiverseMarketStateClues = collectAliasedCompatibilityFields(source, {

@@ -57,7 +57,7 @@ Each versioned payload must carry provenance metadata:
 - ship implementation imports now require `systems.ship.*` or `externalModels.shipPlanner.*`; top-level `power`, `speed`, and `cargo` are retired
 - versioned `externalModels.communityTools.*` payloads are external-model state only; they must not silently populate canonical `player.*` fields or planner-approved shard inputs
 - imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`
-- flat spend-state clues such as `InscryptionsDone`, `IS*Level`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved under `compatibility.unmappedSystemState.*`
+- flat spend-state clues such as `InscryptionsDone`, `IS*Level`, `ATU*Level`, `Tier*TokensUnlocked`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved under `compatibility.unmappedSystemState.*`
 - preserving those objects does not make the system planner-ready or canonical
 
 ## Snapshot dataset imports

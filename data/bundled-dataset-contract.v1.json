@@ -362,6 +362,14 @@
       ]
     },
     {
+      "id": "token-shop-row-level-owner",
+      "label": "Token shop row-level owner",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-row-level-owner.json"
+      ]
+    },
+    {
       "id": "multiverse-market-save-boundary",
       "label": "Multiverse market save boundary",
       "classification": "extracted-mechanics",

@@ -313,6 +313,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/token-shop-save-boundary.json`
 
+### `token-shop-row-level-owner`
+
+- Label: Token shop row-level owner
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/token-shop-row-level-owner.json`
+
 ### `multiverse-market-save-boundary`
 
 - Label: Multiverse market save boundary

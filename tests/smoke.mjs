@@ -77,6 +77,7 @@ const multiverseMarketActionShellData = JSON.parse(await readFile(new URL("../da
 const multiverseMarketOwnerFamilyData = JSON.parse(await readFile(new URL("../data/multiverse-market-owner-family.json", import.meta.url), "utf8"));
 const tokenShopOwnerShellData = JSON.parse(await readFile(new URL("../data/token-shop-owner-shell.json", import.meta.url), "utf8"));
 const tokenShopSaveBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-save-boundary.json", import.meta.url), "utf8"));
+const tokenShopRowLevelOwnerData = JSON.parse(await readFile(new URL("../data/token-shop-row-level-owner.json", import.meta.url), "utf8"));
 const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketMarketMemberBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-market-member-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveDataImportBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-savedata-import-boundary.json", import.meta.url), "utf8"));
@@ -432,6 +433,7 @@ const expectedBundledDatasetIds = [
   "multiverse-market-owner-family",
   "token-shop-owner-shell",
   "token-shop-save-boundary",
+  "token-shop-row-level-owner",
   "multiverse-market-save-boundary",
   "multiverse-market-market-member-boundary",
   "multiverse-market-savedata-import-boundary",
@@ -1579,6 +1581,17 @@ assert.equal(tokenShopSaveBoundaryData.probeResults.metadataHasSaveTerms, true);
 assert.equal(tokenShopSaveBoundaryData.probeResults.level0HasSaveTerms, false);
 assert.equal(tokenShopSaveBoundaryData.probeResults.ownerShellWithSaveOverlapCount, 0);
 assert.equal(tokenShopSaveBoundaryData.probeResults.directTokenShopPlayerProfileContext, false);
+assert.equal(tokenShopRowLevelOwnerData.dataset, "token-shop-row-level-owner");
+assert.equal(tokenShopRowLevelOwnerData.typedSaveDataFieldTableRecovery.fieldOwner, "SaveData");
+assert.equal(tokenShopRowLevelOwnerData.typedSaveDataFieldTableRecovery.fieldCount, 4461);
+assert.equal(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.saveFieldRange, "ATU1Level through ATU28Level");
+assert.ok(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.saveFieldSamples.includes("ATU1Level"));
+assert.ok(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.saveFieldSamples.includes("ATU28Level"));
+assert.ok(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.adjacentSaveFields.includes("Tier2TokensUnlocked"));
+assert.ok(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.adjacentSaveFields.includes("Tier5TokensUnlocked"));
+assert.equal(tokenShopRowLevelOwnerData.compatibilityImportBoundary.targetPath, "compatibility.unmappedSystemState.tokenShop");
+assert.ok(tokenShopRowLevelOwnerData.compatibilityImportBoundary.safeImportSubset.includes("ATU1Level through ATU28Level"));
+assert.ok(tokenShopRowLevelOwnerData.currentBoundary.some((line) => /SaveData directly declares BankedTokens plus ATU1Level through ATU28Level/.test(line)));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -1904,7 +1917,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   assert.equal(track.status, "active");
   assert.match(track.goal, /minimal descriptive spend-planner panel/i);
   assert.match(track.currentSlice, /only canonical `state\.playerProfile` spend-side inputs/);
-  assert.match(track.blockedBy, /TokenShop row levels, token-bank saved state, Daily Tokenium saved state, and Emporium owned progression fields/);
+  assert.match(track.blockedBy, /TokenShop row remap, token-bank saved state, Daily Tokenium saved state, and Emporium owned progression fields/);
   assert.match(track.smallestShippableSlice, /top-level spend-planner panel/);
   assert.ok(
     track.completedSteps.some((step) => /canonical `player\.resources\.\*`, `player\.loop\.loopReset`, and profile-confidence inputs only/.test(step)),
@@ -2553,7 +2566,7 @@ assert.match(importMappingDoc, /must not silently populate canonical `player\.\*
 assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
 assert.match(importMappingDoc, /flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired/);
 assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
-assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, `IS\*Level`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved/);
+assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, `IS\*Level`, `ATU\*Level`, `Tier\*TokensUnlocked`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(tokenShopDoc, /## Adjacent systems still to map/);
@@ -3392,6 +3405,10 @@ assert.equal(
 );
 
 const migratedFlatSpendStateProfile = normalizePlayerProfile({
+  ATU1Level: "3",
+  ATU28Level: 1,
+  Tier2TokensUnlocked: true,
+  Tier4TokensUnlocked: false,
   TokenBankCap: "1200",
   ClaimableBankTokens: "450",
   FinalTokenBankFillSpeed: "1.25",
@@ -3402,6 +3419,10 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
 });
 
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
+  ATU1Level: 3,
+  ATU28Level: 1,
+  Tier2TokensUnlocked: true,
+  Tier4TokensUnlocked: false,
   TokenBankCap: 1200,
   ClaimableBankTokens: 450,
   FinalTokenBankFillSpeed: 1.25,
