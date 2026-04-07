@@ -61,14 +61,53 @@
     "prefabIdentity": "NewTokenUPGPrefab.T1.DiamondBoost",
     "groundedConclusion": "ATU2Button now has one checked bridge to NewTokenUPGPrefab.T1.DiamondBoost because the exact TokenShop owner payload interleaves ATU2Button directly with the DiamondBoost field family, the broader probe set preserves ATU2DiamondsBonus, and the checked level0 prefab roster preserves the exact DiamondBoost prefab identity."
   },
+  "adjacentFollowUp": {
+    "testedNeighbors": [
+      "ATU1Button",
+      "ATU3Button"
+    ],
+    "recoveredAdditionalBridge": {
+      "shellField": "ATU1Button",
+      "shellPathId": 15839,
+      "ownerFieldBlock": [
+        "TokenBoostStartCost",
+        "TokenBoostAdditiveCost",
+        "TokenBoostBonus",
+        "TokenBoostMaxLevel",
+        "TokenBoostFill"
+      ],
+      "supportingEffectHook": "ATU1TokenBonus",
+      "supportingActionHook": "BuyTokenBoost",
+      "prefabIdentity": "NewTokenUPGPrefab.T1.TokensBoost",
+      "groundedConclusion": "ATU1Button now has one additional checked bridge to the TokenShop TokenBoost or NewTokenUPGPrefab.T1.TokensBoost row family because the exact TokenShop owner payload places ATU1Button directly after the TokenBoost field family, broader probes preserve ATU1TokenBonus, checked action-lane clues preserve BuyTokenBoost, and the checked level0 prefab roster preserves the exact T1 TokensBoost prefab identity."
+    },
+    "blockedAdjacentShell": {
+      "shellField": "ATU3Button",
+      "shellPathId": 15810,
+      "adjacentOwnerFieldBlock": [
+        "CellBoostStartCost",
+        "CellBoostAdditiveCost",
+        "CellBoostBonus",
+        "CellBoostMaxLevel",
+        "CellBoostFill"
+      ],
+      "missingLinks": [
+        "No checked repo artifact in this lane currently preserves an ATU3-specific effect hook.",
+        "No checked repo artifact in this lane currently preserves an ATU3-specific direct buy hook.",
+        "No checked repo artifact in this lane currently joins ATU3Button directly to one exact NewTokenUPGPrefab.* object identity."
+      ],
+      "groundedConclusion": "The immediate adjacency test does not generalize past ATU1. ATU3Button remains unresolved because owner-field adjacency to CellBoost alone is not enough to prove a prefab or row-title bridge."
+    },
+    "result": "one more grounded bridge recovered"
+  },
   "blockedIdentityJoin": {
     "missingLinks": [
-      "No checked repo artifact currently ties ATU2Button directly to a final player-facing TokenShop row title string.",
+      "No checked repo artifact currently ties ATU1Button or ATU2Button directly to a final player-facing TokenShop row title string.",
       "No checked repo artifact currently joins the remaining ATU*Button or ATU*Content path_id family directly to specific NewTokenUPGPrefab.* object identities.",
       "The prefab roster and player-facing string roster are both present, but the repo still has not recovered a verified one-to-one bridge for the rest of the ATU numbering family.",
       "Checked metadata neighborhoods now preserve BuyATU24 through BuyATU28 beside named tier-buy hooks such as BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, but that local method cluster still does not include any final row title.",
       "Checked level0 neighborhoods still preserve SetAllTokenShopTexts and SetTokenTexts as generic TextHandler hooks, while most NewTokenUPGPrefab.* names and player-facing row titles remain separate clusters away from a checked ATU-numbered shell join.",
-      "Because only one ATU bridge is now recovered, canonical promotion and planner use should remain blocked for the rest of the TokenShop row family."
+      "Because only two ATU bridges are now recovered, canonical promotion and planner use should remain blocked for the rest of the TokenShop row family."
     ],
     "unsafeInferenceSources": [
       "row-order similarity alone",
@@ -78,12 +117,13 @@
     ]
   },
   "currentBoundary": [
-    "The repo now has one checked TokenShop row bridge: ATU2Button aligns directly with the DiamondBoost owner-field block in the exact TokenShop payload, broader probes preserve ATU2DiamondsBonus, and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.DiamondBoost.",
+    "The repo now has two checked TokenShop row bridges: ATU1Button aligns directly with the TokenBoost owner-field block while broader probes preserve ATU1TokenBonus, checked action-lane clues preserve BuyTokenBoost, and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.TokensBoost; ATU2Button aligns directly with the DiamondBoost owner-field block while broader probes preserve ATU2DiamondsBonus and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.DiamondBoost.",
     "The rest of the ATU family still only has stronger grounded non-label clues: raw SaveData row levels, shared ATU numbering on the TokenShop owner payload, effect-hook names such as ATU2DiamondsBonus and ATU24Bonus3Shards, and late direct-buy hooks such as BuyATU24 through BuyATU28.",
     "Those clues are enough to state that some ATU rows touch token, diamond, daily-token, or shard effect domains, but they still do not prove which grounded player-facing TokenShop row identity belongs to each remaining ATU number.",
+    "The immediate adjacency test also now has a bounded negative result: ATU1 clears because multiple committed surfaces converge on the same token-side family, but adjacent ATU3 still only has CellBoost-side owner-field proximity without a matching effect-hook, action-hook, or prefab join.",
     "Grounded metadata neighborhoods now tighten the late-row shell further: BuyATU24 through BuyATU28 sit beside named tier-buy hooks like BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, while getter neighborhoods preserve ATU1TokenBonus, ATU2DiamondsBonus, ATU14TokenDailiesBonus, and ATU24Bonus3Shards through ATU24Bonus5AP in one ATU-numbered family.",
     "Grounded level0 neighborhoods still tighten the remaining blocker: SetAllTokenShopTexts and SetTokenTexts remain generic TokenShop text-handler hooks, most NewTokenUPGPrefab.* names remain one separate prefab roster cluster, and player-facing titles such as Trinity Booster One, Academy Booster, Tokens Booster T3, and Campaign Fragments remain a separate text roster cluster.",
-    "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU2 bridge.",
+    "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU1 and ATU2 bridges.",
     "The narrowest honest next slice is no longer a general TokenShop row-remap search; it is a successor pass that either recovers one more exact ATU shell bridge or proves why the remaining shells require a different search surface."
   ]
 }
