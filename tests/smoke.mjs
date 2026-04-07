@@ -3011,6 +3011,7 @@ assert.match(readme, /## Current phase/);
 assert.match(readme, /## Doc map/);
 assert.match(readme, /docs\/roadmap\/mvp-plan\.md/);
 assert.match(readme, /docs\/roadmap\/research-tracks\.md/);
+assert.match(readme, /docs\/tools\/ocr\.md/);
 
 await runBlockingCheck("launcher-mode lifecycle", verifyLauncherModeServerLifecycle);
 
