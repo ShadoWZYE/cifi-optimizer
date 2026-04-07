@@ -15,6 +15,7 @@ This document does not reopen that ordered mapping.
 ## Checked player-facing identity boundary
 
 - row-order evidence that is real but insufficient for final identity:
+  - `IS71ID` through `IS74ID`
   - `BuyIS71` through `BuyIS74`
   - `SetIS71CostText` through `SetIS74CostText`
   - validated serialized rows `71` through `74`
@@ -34,5 +35,7 @@ This document does not reopen that ordered mapping.
 - No stable player-facing identity is currently grounded for rows `71-74`.
 - Ordered row mapping and player-facing identity must stay separated:
   - ordered mapping is checked for rows `71-74`
+  - same-number `IS71ID` through `IS74ID` is also checked for rows `71-74`
+  - prefab numbering diverges inside the remap band to serialized ids `59-62`
   - player-facing identity is still unresolved for rows `71-74`
 - Because row identity is still unresolved, the canonical import-safe subset stays explicitly empty.

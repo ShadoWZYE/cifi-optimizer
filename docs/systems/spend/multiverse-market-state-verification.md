@@ -207,13 +207,31 @@ Current grounded conclusion:
 
 - The row-order mapping above is settled and separate from player-facing identity.
 - Repo-local evidence now checks one narrow negative identity boundary for those same rows:
-  - `BuyIS71` through `BuyIS74` and `SetIS71CostText` through `SetIS74CostText` confirm ordered row access, not final player-facing labels
+  - `IS71ID` through `IS74ID`, `BuyIS71` through `BuyIS74`, and `SetIS71CostText` through `SetIS74CostText` confirm ordered row access plus same-number serialized-id field recovery, not final player-facing labels
   - the visible prefab-number shell `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62` is explicitly remapped to serialized ids `59-62`, so it cannot identify validated rows `71-74`
   - the nearest checked player-facing inscription labels currently preserved in repo-local probes are `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, both outside the `71-74` target rows
 - Current grounded conclusion:
   - no stable player-facing identity is currently grounded for rows `71-74`
   - ordered row mapping and player-facing identity must remain separated
   - the canonical import-safe subset therefore stays empty
+
+## Checked row `71-74` remap-band boundary
+
+- The smallest defensible remap explanation is now checked directly inside the same band:
+  - ordered rows remain `71-74` through `IS71Level` to `IS74Level`
+  - serialized-id fields also stay same-number as `IS71ID` to `IS74ID`
+  - prefab numbering breaks that same-number chain as `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62`
+- Repo-local probes also preserve earlier direct prefab shells `ChrystosEmporiumUpgrade59`, `ChrystosEmporiumUpgrade60`, `ChrystosEmporiumUpgrade61`, and `ChrystosEmporiumUpgrade62`.
+- The narrow recovered relationship is therefore:
+  - ordered row number and serialized-id field number stay aligned for `71-74`
+  - prefab numbers `71-74` are reused as shells for serialized ids `59-62`
+  - player-facing identity still stays unresolved because no checked string anchor names rows `71-74`
+
+Current grounded conclusion:
+
+- this remap-band explanation clarifies why the nearby same-number binding pattern breaks inside rows `71-74`
+- it still does not ground player-facing identity for rows `71-74`
+- the canonical import-safe subset stays empty
 
 ## Nearby checked inscription identity-binding pattern
 

@@ -32,16 +32,19 @@ This note records the smallest checked positive pattern for how nearby inscripti
 ## What this does not prove
 
 - This pattern does not promote rows `71-74` to player-facing identity.
-- Rows `71-74` still stop at ordered mapping plus UI access hooks:
-  - `IS71Level` -> row `71`
-  - `IS72Level` -> row `72`
-  - `IS73Level` -> row `73`
-  - `IS74Level` -> row `74`
+- Rows `71-74` still stop at ordered mapping plus same-number `ISNID` fields and UI access hooks:
+  - `IS71Level` -> row `71`, with `IS71ID`, `BuyIS71`, `SetIS71CostText`
+  - `IS72Level` -> row `72`, with `IS72ID`, `BuyIS72`, `SetIS72CostText`
+  - `IS73Level` -> row `73`, with `IS73ID`, `BuyIS73`, `SetIS73CostText`
+  - `IS74Level` -> row `74`, with `IS74ID`, `BuyIS74`, `SetIS74CostText`
 - The direct prefab join is broken there because the visible shell is remapped:
   - `ChrystosEmporiumUpgrade71-ID59`
   - `ChrystosEmporiumUpgrade72-ID60`
   - `ChrystosEmporiumUpgrade73-ID61`
   - `ChrystosEmporiumUpgrade74-ID62`
+- The smallest recovered explanation is a remap band:
+  - ordered row number and `ISNID` stay on `71-74`
+  - prefab numbers `71-74` are reused as shells for serialized ids `59-62`
 - No checked player-facing string currently names `Inscryption 71`, `Inscryption 72`, `Inscryption 73`, or `Inscryption 74`.
 
 Current grounded conclusion:

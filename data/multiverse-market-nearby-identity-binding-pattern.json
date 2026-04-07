@@ -69,7 +69,7 @@
     "checkedNegativeCarryoverRows": [71, 72, 73, 74],
     "helpsRows7174": false,
     "whyNotRows7174": [
-      "Rows 71-74 only have settled ordered mapping plus BuyIS71-BuyIS74 and SetIS71CostText-SetIS74CostText hooks.",
+      "Rows 71-74 only have settled ordered mapping plus same-number IS71ID-IS74ID fields and BuyIS71-BuyIS74 / SetIS71CostText-SetIS74CostText hooks.",
       "The visible prefab-number shell is remapped as ChrystosEmporiumUpgrade71-ID59 through ChrystosEmporiumUpgrade74-ID62, so the same-number prefab join fails inside the 71-74 band.",
       "No checked player-facing string anchor currently names Inscryption 71, 72, 73, or 74."
     ],

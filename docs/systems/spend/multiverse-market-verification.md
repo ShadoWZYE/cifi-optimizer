@@ -63,7 +63,7 @@ Current grounded conclusion:
   - `IS73Level` -> row `73`
   - `IS74Level` -> row `74`
 - The player-facing identity boundary for those same rows is still negative-only:
-  - `BuyIS71` through `BuyIS74` and `SetIS71CostText` through `SetIS74CostText` confirm ordered row access, not final labels
+  - `IS71ID` through `IS74ID`, `BuyIS71` through `BuyIS74`, and `SetIS71CostText` through `SetIS74CostText` confirm ordered row access plus same-number serialized-id field recovery, not final labels
   - `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62` explicitly point the visible prefab-number shell at serialized ids `59-62`, not at validated rows `71-74`
   - the nearest checked player-facing inscription labels remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, which are outside rows `71-74`
 
@@ -71,6 +71,21 @@ Current grounded conclusion:
 
 - no stable player-facing identity is currently grounded for rows `71-74`
 - rows `71-74` therefore remain ordered-only mappings, not import-safe player-facing labels
+- the canonical import-safe subset stays empty
+
+## Narrow row 71-74 remap-band boundary
+
+- The smallest checked remap relationship is:
+  - ordered rows: `IS71Level` through `IS74Level`
+  - serialized-id fields: `IS71ID` through `IS74ID`
+  - remapped prefab shells: `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62`
+- Repo-local probes also preserve earlier direct shells `ChrystosEmporiumUpgrade59`, `ChrystosEmporiumUpgrade60`, `ChrystosEmporiumUpgrade61`, and `ChrystosEmporiumUpgrade62`.
+- This means prefab numbers `71-74` are reused as shells for serialized ids `59-62`, so the nearby same-number join fails before a player-facing label can bind.
+
+Current grounded conclusion:
+
+- this recovers the remap-band relationship but not player-facing identity
+- rows `71-74` still stay unresolved for player-facing identity
 - the canonical import-safe subset stays empty
 
 ## Nearby checked identity-binding pattern
