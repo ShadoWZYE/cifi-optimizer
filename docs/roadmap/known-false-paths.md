@@ -43,7 +43,7 @@ This is not a list of open hypotheses. It is a compact list of paths that should
 ### Do not treat direct `MultiverseMarket` ownership on `PlayerProfileData` as recovered canonical save truth
 
 - Current checked result: the stronger current handoff is a PlayerProfile-side `get_Market` member path or broader wrapper
-- Why this stays closed: the exact declaring save model is still unresolved
+- Why this stays closed: the wider declaring owner is now `SaveData`, while the typed `Market` field itself still stays unresolved on the checked save path
 - Source anchors:
   - `docs/systems/spend/multiverse-market-state-verification.md`
   - `data/multiverse-market-market-member-boundary.json`

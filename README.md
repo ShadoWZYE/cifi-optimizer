@@ -59,10 +59,12 @@ If the APK/Unity path has not been checked for an unresolved mechanic, it should
 - `docs/roadmap/active-grounding-boundaries.md` = compact handoff for active grounding lanes
 - `docs/roadmap/known-false-paths.md` = ruled-out interpretations to keep closed
 - `docs/contracts/lane-handoff-template.md` = minimal lane handoff/result format
+- `docs/tools/ocr.md` = optional tooling notes for OCR setup and troubleshooting
 
 ## Commands
 
 - `npm run dev`
 - `npm run verify:data`
 - `npm test`
-- `node --check app.js`
+- `npm run test:unit`
+- `npm run check:syntax`

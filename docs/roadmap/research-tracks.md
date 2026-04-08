@@ -195,6 +195,9 @@ The repo's active unresolved queue currently lives in [`data/game-data.snapshot.
 
 Current active or queued tracks:
 
+- `spend-planner-first-ui-slice`
+  - status: `active`
+  - goal: ship a descriptive spend-planner panel that shows canonical inputs plus explicitly labeled boundary-backed spend evidence while keeping blocked owner-dependent inputs unavailable
 - `shard-milestone-payload-recovery`
   - status: `active`
   - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
@@ -202,8 +205,11 @@ Current active or queued tracks:
   - status: `active`
   - goal: decide whether any bounded `SaveData`-backed Emporium import surface is safe to expose without promoting unresolved row labels, broader progression fields, or planner behavior too early
 - `spend-token-shop-row-level-recovery`
-  - status: `queued`
-  - goal: recover player-owned current TokenShop row levels now that the spend lane is grounded
+  - status: `archived`
+  - goal: recovered exact `SaveData` ownership for raw `ATU1Level` through `ATU28Level` TokenShop row levels; follow-up work moves to row remap instead of owner recovery
+- `spend-token-shop-row-remap`
+  - status: `active`
+  - goal: remap recovered raw `ATU*Level` TokenShop row fields onto grounded row identities without promoting speculative player-facing labels; the current blocker is now narrowed to joining one `ATU` row shell or generic TokenShop text hook to one concrete prefab or final title
 - `spend-token-bank-state-owner`
   - status: `active`
   - goal: recover the saved-state owner behind token-bank cap, fill, and claimable state without guessing from derived `OR_*` labels

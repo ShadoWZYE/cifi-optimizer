@@ -71,6 +71,28 @@
       ],
       "recoveredStringOrLabelFields": [],
       "conclusion": "The checked alternate serialized export exposes structural row containers and GameObject carriers only, not player-facing label fields."
+    },
+    "indirectJoinSearch": {
+      "candidateCatalogOrRelationFields": [
+        "InscryptionCostList",
+        "InscryptionAndCostRelations",
+        "IDChecks",
+        "inscryptions",
+        "InscryptionTupleList"
+      ],
+      "separateUiShellClues": [
+        "THMarkets",
+        "InscryptionsList",
+        "TextHandlerMarkets",
+        "SetAllChrystosEmporiumTexts"
+      ],
+      "repoLocalConsumerSearchSourcesWithoutCandidateHits": [
+        "data/unity-probe-report.json",
+        "data/lm244-targeted-probe.json",
+        "data/multiverse-market-metadata-neighborhood.json"
+      ],
+      "adjacentConsumerOrViewSymbolsRecovered": [],
+      "conclusion": "The checked candidate catalog or relation field names are only recovered in the alternate UABEA field-table export; the separate repo-local UI-shell evidence does not recover a consumer path that reads those carriers back into player-facing inscription labels."
     }
   },
   "joinBackAssessment": {
@@ -90,15 +112,18 @@
     "playerFacingIdentitySourceRecovered": [],
     "canonicalImportSafeSubset": [],
     "helpsRows6974": false,
+    "smallestRecoveredPattern": [],
     "blockedBy": [
       "The alternate serialized export does not recover any string, label, title, description, or localization-key field on the checked MultiverseMarket row payloads.",
       "The recovered nested payloads stop at ID, Cost, Level, MaxLevel, ISObject, and transform carriers, which cannot by themselves resolve the player-facing identities of rows 69-74.",
-      "Because the checked export adds no player-facing label carrier, it cannot join the unresolved 69-74 rows back to the settled ordered mapping as final labels."
+      "No checked repo-local adjacent consumer, controller, or view symbol references InscryptionCostList, InscryptionAndCostRelations, IDChecks, inscryptions, or InscryptionTupleList outside the alternate UABEA field-table export.",
+      "The separate UI-shell clues THMarkets, InscryptionsList, TextHandlerMarkets, and SetAllChrystosEmporiumTexts do not expose a row-to-label catalog join for rows 69-74."
     ],
     "currentBoundary": [
       "A new repo-local evidence class is checked: the alternate serialized UABEA field-table export for MultiverseMarket.",
       "That export does recover extra structural containers for costs, ids, and nested row payload lists beyond the exhausted Market/TextHandler/probe path.",
       "It does not recover any player-facing label-bearing field on MultiverseMarket, MultiverseMarket|Inscryption, or MultiverseMarket|InscryptionTupleObject.",
+      "No separate repo-local catalog/relation consumer path is recovered that joins those structural carriers back to player-facing inscription identity.",
       "It therefore does not help unresolved rows 69-74 join back to the settled ordered mapping as player-facing identities.",
       "Rows 69-74 remain unresolved and the canonical import-safe subset stays empty."
     ]

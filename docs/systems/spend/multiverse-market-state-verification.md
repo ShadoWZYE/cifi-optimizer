@@ -221,7 +221,21 @@ Current grounded conclusion:
   - save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
   - the canonical import-safe subset therefore stays empty
 
-## Alternate serialized-export label-source boundary
+## Checked `69-74` anomaly provenance boundary
+
+- The earliest checked anomaly appearance is upstream of the repo-local derived boundary datasets:
+  - preserved app-side asset evidence already contains direct earlier shells `ChrystosEmporiumUpgrade59` through `ChrystosEmporiumUpgrade62`
+  - preserved app-side asset and probe evidence also already contain remapped shells `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
+  - the same raw probe layer still preserves same-number `IS69Level` through `IS74Level`, `IS69ID` through `IS74ID`, and `BuyIS69` through `BuyIS74`
+- This means the checked repo pipeline first records the anomaly as raw app-side truth and only then summarizes it in repo-local derived datasets.
+
+Current grounded conclusion:
+
+- the `69-74` anomaly is app-side inherited rather than repo-local
+- no repo-local normalization step is currently proven to introduce it
+- no dataset standardization is applied in this lane because preserving inherited source truth is safer than rewriting the prefab layer into a newer canonical shape the app-side evidence does not support
+
+## Alternate serialized-export indirect-join boundary
 
 - This check is a separate repo-local evidence class from the exhausted Market/TextHandler/probe path:
   - the checked UABEA field table preserves `InscryptionCostList`, `InscryptionAndCostRelations`, `IDChecks`, `inscryptions`, and `InscryptionTupleList` on `MultiverseMarket`
@@ -237,11 +251,17 @@ Current grounded conclusion:
   - `Text`
   - `LocalizationKey`
   - `StringId`
+- The separate checked UI-shell clues still stop at:
+  - `THMarkets: TextHandlerMarkets`
+  - `InscryptionsList: List<GameObject>`
+  - `SetAllChrystosEmporiumTexts`
+- No checked adjacent repo-local consumer, controller, or view symbol references `InscryptionCostList`, `InscryptionAndCostRelations`, `IDChecks`, `inscryptions`, or `InscryptionTupleList` outside the alternate UABEA field-table export.
 
 Current grounded conclusion:
 
 - the alternate serialized export is a real new repo-local evidence class for the Emporium row lane
 - it strengthens structural container recovery only, not player-facing label recovery
+- no indirect catalog/relation join is recoverable repo-locally between the settled ordered rows or serialized ids and any separate identity-bearing catalog
 - it does not help rows `69-74` join back to the settled ordered mapping as final player-facing identities
 - the canonical import-safe subset stays empty
 

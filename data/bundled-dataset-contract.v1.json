@@ -362,6 +362,22 @@
       ]
     },
     {
+      "id": "token-shop-row-level-owner",
+      "label": "Token shop row-level owner",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-row-level-owner.json"
+      ]
+    },
+    {
+      "id": "token-shop-row-remap-boundary",
+      "label": "Token shop row remap boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-row-remap-boundary.json"
+      ]
+    },
+    {
       "id": "multiverse-market-save-boundary",
       "label": "Multiverse market save boundary",
       "classification": "extracted-mechanics",
@@ -431,6 +447,14 @@
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-inscription-numbering-stability-boundary.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-69-74-anomaly-provenance",
+      "label": "Multiverse market 69-74 anomaly provenance",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-69-74-anomaly-provenance.json"
       ]
     },
     {

@@ -77,6 +77,7 @@ const multiverseMarketActionShellData = JSON.parse(await readFile(new URL("../da
 const multiverseMarketOwnerFamilyData = JSON.parse(await readFile(new URL("../data/multiverse-market-owner-family.json", import.meta.url), "utf8"));
 const tokenShopOwnerShellData = JSON.parse(await readFile(new URL("../data/token-shop-owner-shell.json", import.meta.url), "utf8"));
 const tokenShopSaveBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-save-boundary.json", import.meta.url), "utf8"));
+const tokenShopRowLevelOwnerData = JSON.parse(await readFile(new URL("../data/token-shop-row-level-owner.json", import.meta.url), "utf8"));
 const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketMarketMemberBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-market-member-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveDataImportBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-savedata-import-boundary.json", import.meta.url), "utf8"));
@@ -86,6 +87,7 @@ const multiverseMarketRow7174IdentityBoundaryData = JSON.parse(await readFile(ne
 const multiverseMarketRow7174RemapBandData = JSON.parse(await readFile(new URL("../data/multiverse-market-row71-74-remap-band.json", import.meta.url), "utf8"));
 const multiverseMarketNearbyIdentityBindingPatternData = JSON.parse(await readFile(new URL("../data/multiverse-market-nearby-identity-binding-pattern.json", import.meta.url), "utf8"));
 const multiverseMarketInscriptionNumberingStabilityBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-inscription-numbering-stability-boundary.json", import.meta.url), "utf8"));
+const multiverseMarket6974AnomalyProvenanceData = JSON.parse(await readFile(new URL("../data/multiverse-market-69-74-anomaly-provenance.json", import.meta.url), "utf8"));
 const tokenBankControllerShellData = JSON.parse(await readFile(new URL("../data/token-bank-controller-shell.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
@@ -122,6 +124,7 @@ const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiv
 const multiverseMarketVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-verification.md", import.meta.url), "utf8");
 const multiverseMarketStateVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-state-verification.md", import.meta.url), "utf8");
 const multiverseMarketMarketMemberBoundaryDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-market-member-boundary.md", import.meta.url), "utf8");
+const multiverseMarket6974AnomalyProvenanceDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-69-74-anomaly-provenance.md", import.meta.url), "utf8");
 const tokenBankStateDoc = await readFile(new URL("../docs/systems/spend/token-bank-state-verification.md", import.meta.url), "utf8");
 const dailyTokeniumMissionDoc = await readFile(new URL("../docs/systems/spend/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
 const activeGroundingBoundariesDoc = await readFile(new URL("../docs/roadmap/active-grounding-boundaries.md", import.meta.url), "utf8");
@@ -306,33 +309,30 @@ assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(appJs, /canonical-app-snapshot/);
 assert.match(appJs, /community-derived/);
 assert.match(appJs, /function renderSpendPlannerBoundary/);
-assert.match(appJs, /Spend planner boundary/);
-assert.match(appJs, /Extracted spend data is grounded enough for boundary notes, but still blocked for planner cards/);
-assert.match(appJs, /Safe grounded truths now/);
-assert.match(appJs, /Still blocked before planner behavior/);
-assert.match(appJs, /Imported spend payload watch/);
-assert.match(appJs, /compatibility\.unmappedSystemState/);
-assert.match(appJs, /No quarantined TokenShop payload is present in the imported PlayerProfile/);
-assert.match(appJs, /No quarantined MultiverseMarket payload is present in the imported PlayerProfile/);
-assert.match(appJs, /The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap<\/code>, <code>ClaimableBankTokens<\/code>, <code>InscryptionsDone<\/code>, and top-level <code>IS\*Level<\/code> fields instead of dropping them/);
+assert.match(appJs, /Spend planner first slice/);
+assert.match(appJs, /Bounded preview only\. This panel separates grounded canonical inputs, evidence-backed boundary inputs, and blocked planner inputs while owner recovery and remap work remain unresolved/);
+assert.match(appJs, /Grounded canonical inputs available now/);
+assert.match(appJs, /Evidence-backed boundary inputs available now/);
+assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Active Emporium import-surface decision/);
-assert.match(appJs, /Partial Emporium import preview/);
-assert.match(appJs, /Grounded save-side overlap currently covers validated Emporium rows \${escapeHtml\(importedMarketPreview\.overlapRangeLabel\)}/);
-assert.match(appJs, /Current imported levels are available for \${importedMarketPreview\.importedOverlapRowCount}\/\${importedMarketPreview\.overlapRowCount} overlap-grounded Emporium rows/);
-assert.match(appJs, /\${importedMarketPreview\.overlapMaxedCount} imported overlap-grounded rows are already at recovered max level/);
-assert.match(appJs, /Broader validated preview: \${importedMarketPreview\.importedValidatedRowCount}\/\${importedMarketPreview\.validatedRowCount} validated Emporium rows/);
-assert.match(appJs, /Missing overlap-grounded imports: \${escapeHtml\(importedMarketPreview\.missingOverlapLabel\)}/);
-assert.match(appJs, /Overlap-grounded row cards now also show recovered row constants such as bonus, start cost, and cost exponent for the imported subset/);
+assert.match(appJs, /Why recommendations stay unavailable/);
+assert.match(appJs, /Tokens",\s*value: canonical\.tokens/);
+assert.match(appJs, /Diamonds",\s*value: canonical\.diamonds/);
+assert.match(appJs, /Current LR",\s*value: canonical\.loopReset/);
+assert.match(appJs, /Academy relics",\s*value: canonical\.academyRelics/);
+assert.match(appJs, /Banked tokens \(stored amount\)",\s*value: compatibility\.unmappedSystems\?\.tokenShop\?\.BankedTokens/);
+assert.match(appJs, /Exact SaveData\.BankedTokens recovery grounds the current stored token-bank amount as boundary-backed state only/);
+assert.match(appJs, /TokenShop current row levels/);
+assert.match(appJs, /token-bank cap and claimable tokens/i);
+assert.match(appJs, /Daily Tokenium current amount or cap/);
+assert.match(appJs, /Emporium owned progression and Inscryptions balance/);
+assert.match(appJs, /Grounded SaveData overlap currently stops at ordered rows/);
+assert.match(appJs, /Emporium next step:/);
+assert.match(appJs, /Confidence label: canonical PlayerProfile values and explicitly labeled boundary-backed evidence only/);
+assert.match(appJs, /Canonical boundary preserved/);
+assert.match(appJs, /Boundary-backed evidence labeled/);
+assert.match(appJs, /Uncertainty visible/);
 assert.match(appJs, /No spend recommendations yet/);
-assert.match(appJs, /same sibling accessor run as \${marketMemberSummary\.siblingAccessorLabel}/);
-assert.match(appJs, /checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is \$\{marketMemberSummary\.exactSaveOwnerLabel\}/);
-assert.match(appJs, /TokenShop token-bank anchors/);
-assert.match(appJs, /Recovered token-bank controller anchors available/);
-assert.match(appJs, /Validated late-block constants available/);
-assert.match(appJs, /validated late-block row set/);
-assert.match(appJs, /BigStatisticPrefab\.TokenBankCap/);
-assert.match(appJs, /TextHandlerLoopMods\.SetLM244BonusText/);
-assert.match(appJs, /Inscryptions Done/);
 assert.match(appJs, /function getRecommendationExplainabilitySummary/);
 assert.match(appJs, /function getRecommendationContractSummary/);
 assert.match(appJs, /function getRecommendationExplainabilityAudit/);
@@ -440,6 +440,8 @@ const expectedBundledDatasetIds = [
   "multiverse-market-owner-family",
   "token-shop-owner-shell",
   "token-shop-save-boundary",
+  "token-shop-row-level-owner",
+  "token-shop-row-remap-boundary",
   "multiverse-market-save-boundary",
   "multiverse-market-market-member-boundary",
   "multiverse-market-savedata-import-boundary",
@@ -449,6 +451,7 @@ const expectedBundledDatasetIds = [
   "multiverse-market-row71-74-remap-band",
   "multiverse-market-nearby-identity-binding-pattern",
   "multiverse-market-inscription-numbering-stability-boundary",
+  "multiverse-market-69-74-anomaly-provenance",
   "token-bank-controller-shell"
 ];
 
@@ -1492,10 +1495,30 @@ assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("BigStatisticPr
 assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("TextHandlerLoopMods"));
 assert.ok(tokenBankStateCluesData.displayOrHandlerClues.includes("SetLM244BonusText"));
 assert.ok(tokenBankStateCluesData.derivedOutputs.includes("FinalTokenBankFillSpeed"));
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.declaringType, "SaveData");
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountField, "BankedTokens");
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldType, "System.Single");
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldIndex, 214);
+assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldOffset, 1800);
+assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("SaveData.ClaimableBankTokens"));
+assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("SaveData.TokenBankCap"));
+assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("PlayerProfileData.BankedTokens"));
 assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("SpaceAcademy"));
 assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("SpaceAcademyMain"));
 assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("TextHandlerSpaceAcademy"));
 assert.ok(dailyTokeniumLaneCluesData.ownerFamilyClues.includes("FarmMissions"));
+assert.equal(dailyTokeniumLaneCluesData.exactSaveOwnerRecovery.declaringType, "SaveData");
+assert.equal(dailyTokeniumLaneCluesData.exactSaveOwnerRecovery.storedAmountField, "DailyTokenium");
+assert.equal(dailyTokeniumLaneCluesData.exactSaveOwnerRecovery.storedAmountFieldType, "System.Double");
+assert.equal(dailyTokeniumLaneCluesData.exactSaveOwnerRecovery.storedAmountFieldIndex, 2361);
+assert.equal(dailyTokeniumLaneCluesData.exactSaveOwnerRecovery.storedAmountFieldOffset, 13032);
+assert.equal(dailyTokeniumLaneCluesData.genericTokeniumClaimableBoundary.declaringType, "SaveData");
+assert.equal(dailyTokeniumLaneCluesData.genericTokeniumClaimableBoundary.field, "ClaimableTokenium");
+assert.equal(dailyTokeniumLaneCluesData.genericTokeniumClaimableBoundary.fieldType, "System.Double");
+assert.ok(/broader Tokenium resource cluster/i.test(dailyTokeniumLaneCluesData.genericTokeniumClaimableBoundary.blockedReason));
+assert.ok(dailyTokeniumLaneCluesData.negativeTypedOwnerChecks.includes("SaveData.DailyTokeniumCap"));
+assert.ok(dailyTokeniumLaneCluesData.negativeTypedOwnerChecks.includes("PlayerProfileData.DailyTokenium"));
+assert.ok(dailyTokeniumLaneCluesData.negativeTypedOwnerChecks.includes("PlayerProfileData.DailyTokeniumCap"));
 assert.ok(dailyTokeniumLaneCluesData.modifierClues.includes("SetLM244BonusText"));
 assert.ok(dailyTokeniumLaneCluesData.modifierClues.includes("BuyLM244"));
 assert.ok(dailyTokeniumLaneCluesData.modifierClues.includes("FinalDailyTokenBonus"));
@@ -1586,6 +1609,17 @@ assert.equal(tokenShopSaveBoundaryData.probeResults.metadataHasSaveTerms, true);
 assert.equal(tokenShopSaveBoundaryData.probeResults.level0HasSaveTerms, false);
 assert.equal(tokenShopSaveBoundaryData.probeResults.ownerShellWithSaveOverlapCount, 0);
 assert.equal(tokenShopSaveBoundaryData.probeResults.directTokenShopPlayerProfileContext, false);
+assert.equal(tokenShopRowLevelOwnerData.dataset, "token-shop-row-level-owner");
+assert.equal(tokenShopRowLevelOwnerData.typedSaveDataFieldTableRecovery.fieldOwner, "SaveData");
+assert.equal(tokenShopRowLevelOwnerData.typedSaveDataFieldTableRecovery.fieldCount, 4461);
+assert.equal(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.saveFieldRange, "ATU1Level through ATU28Level");
+assert.ok(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.saveFieldSamples.includes("ATU1Level"));
+assert.ok(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.saveFieldSamples.includes("ATU28Level"));
+assert.ok(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.adjacentSaveFields.includes("Tier2TokensUnlocked"));
+assert.ok(tokenShopRowLevelOwnerData.tokenShopRowLevelFamily.adjacentSaveFields.includes("Tier5TokensUnlocked"));
+assert.equal(tokenShopRowLevelOwnerData.compatibilityImportBoundary.targetPath, "compatibility.unmappedSystemState.tokenShop");
+assert.ok(tokenShopRowLevelOwnerData.compatibilityImportBoundary.safeImportSubset.includes("ATU1Level through ATU28Level"));
+assert.ok(tokenShopRowLevelOwnerData.currentBoundary.some((line) => /SaveData directly declares BankedTokens plus ATU1Level through ATU28Level/.test(line)));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -1847,9 +1881,44 @@ withRequiredValue(spendImportSurfaceTrack, "expected Emporium import-surface suc
     "expected market-member boundary artifact to keep the broader progression run separate from direct MultiverseMarket ownership"
   );
 });
+const spendFirstUiSliceTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-first-ui-slice");
+withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice track", (track) => {
+  assert.equal(track.status, "active");
+  assert.match(track.goal, /minimal descriptive spend-planner panel/i);
+  assert.match(track.currentSlice, /canonical `state\.playerProfile` spend-side inputs/);
+  assert.match(track.currentSlice, /exact `SaveData\.BankedTokens` as boundary-backed spend evidence/);
+  assert.match(track.blockedBy, /TokenShop row remap, token-bank cap and claimable state, Daily Tokenium saved state, and Emporium owned progression fields/);
+  assert.match(track.smallestShippableSlice, /top-level spend-planner panel/);
+  assert.ok(
+    track.completedSteps.some((step) => /canonical `player\.resources\.\*`, `player\.loop\.loopReset`, and profile-confidence inputs only/.test(step)),
+    "expected spend first UI slice track to record canonical-only panel inputs"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /exact `SaveData\.BankedTokens` as boundary-backed token-bank stored-amount evidence/.test(step)),
+    "expected spend first UI slice track to record BankedTokens boundary-backed evidence"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /Label owner-dependent spend inputs as unavailable/.test(step)),
+    "expected spend first UI slice track to record blocked-input labeling"
+  );
+  assert.ok(
+    track.verified.some((line) => /`player\.resources\.tokens`, `player\.resources\.diamonds`, `player\.loop\.loopReset`, and importable `player\.resources\.academyRelics`/.test(line)),
+    "expected spend first UI slice track to record available canonical spend inputs"
+  );
+  assert.ok(
+    track.verified.some((line) => /Exact `SaveData\.BankedTokens` recovery now grounds the current token-bank stored amount strongly enough to show it as boundary-backed evidence/.test(line)),
+    "expected spend first UI slice track to record BankedTokens as boundary-backed evidence"
+  );
+  assert.ok(
+    track.verified.some((line) => /descriptive spend-planner panel can ship without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs/.test(line)),
+    "expected spend first UI slice track to keep unresolved owners and wrapper-only Emporium fields out of canonical inputs"
+  );
+  assert.ok(track.nextSteps.length <= 3, "expected spend first UI slice next-step count");
+});
 const tokenBankOwnerTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-bank-state-owner");
 withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", (track) => {
   assert.equal(track.status, "active");
+  assert.match(track.currentSlice, /exact `SaveData\.BankedTokens` recovery as the current token-bank stored-amount owner/);
   assert.match(track.currentSlice, /broader `PlayerProfileData` \/ `CloudSavePlayerProfile` persistence-family boundary/);
   assert.ok(
     track.completedSteps.some((step) => /zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms/.test(step)),
@@ -1860,11 +1929,23 @@ withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", 
     "expected token-bank state-owner track to record the derived-output non-owner boundary"
   );
   assert.ok(
-    track.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
-    "expected token-bank state-owner track to record the current broader save-family search path"
+    track.completedSteps.some((step) => /exact typed `SaveData\.BankedTokens` ownership for the current token-bank stored amount/.test(step)),
+    "expected token-bank state-owner track to record exact BankedTokens owner recovery"
   );
   assert.ok(
-    track.uncertain.some((line) => /directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper/.test(line)),
+    track.verified.some((line) => /`SaveData` directly declares `BankedTokens` as the current token-bank stored-amount field/.test(line)),
+    "expected token-bank state-owner track to record exact stored-amount owner"
+  );
+  assert.ok(
+    track.verified.some((line) => /do not currently expose `ClaimableBankTokens` or `TokenBankCap` on `SaveData` or `PlayerProfileData`/.test(line)),
+    "expected token-bank state-owner track to record typed negative cap and claimable checks"
+  );
+  assert.ok(
+    track.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
+    "expected token-bank state-owner track to record the narrowed broader save-family search path"
+  );
+  assert.ok(
+    track.uncertain.some((line) => /cap or claimable state lives directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper/.test(line)),
     "expected token-bank state-owner track to keep the PlayerProfile-side wrapper question unresolved"
   );
 });
@@ -1970,9 +2051,16 @@ assert.deepEqual(multiverseMarketSaveBoundaryData.saveFamilyTermsChecked, [
 assert.equal(multiverseMarketSaveBoundaryData.probeResults.actionShellWithSaveOverlapCount, 0);
 assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasActionTerms, true);
 assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasSaveTerms, true);
+assert.deepEqual(multiverseMarketSaveBoundaryData.crossBoundaryTypedOwnerStatus, {
+  status: "exact-declaring-owner-recovered-elsewhere",
+  exactDeclaringOwner: "SaveData",
+  scope: "wider IS*Level / InscryptionsDone / trade-counter / early Mech* progression cluster",
+  note: "This artifact still records the action-shell versus save-family split only; the exact declaring owner comes from the checked typed market-member boundary and does not recover a typed Market field or import-ready row mapping."
+});
 assertCurrentBoundaryIncludes(multiverseMarketSaveBoundaryData.currentBoundary, [
   /zero direct overlap/,
-  /not enough to recover declaring save ownership or player-owned row levels/
+  /separately recovers SaveData as the exact declaring owner/,
+  /still does not recover a typed Market field, player-owned row levels/
 ], "MultiverseMarket save boundary");
 
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedBridgeRecovery, {
@@ -2128,6 +2216,7 @@ assertDatasetContractEntry("multiverse-market-serialized-label-source-boundary",
 assertDatasetContractEntry("multiverse-market-row71-74-identity-boundary", "data/multiverse-market-row71-74-identity-boundary.json");
 assertDatasetContractEntry("multiverse-market-row71-74-remap-band", "data/multiverse-market-row71-74-remap-band.json");
 assertDatasetContractEntry("multiverse-market-nearby-identity-binding-pattern", "data/multiverse-market-nearby-identity-binding-pattern.json");
+assertDatasetContractEntry("multiverse-market-69-74-anomaly-provenance", "data/multiverse-market-69-74-anomaly-provenance.json");
 assert.equal(multiverseMarketSaveDataImportBoundaryData.dataset, "multiverse-market-savedata-import-boundary");
 assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importSafeSubset, []);
 assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactImportSafeSubsetLabel, "none");
@@ -2210,15 +2299,29 @@ assert.deepEqual(
   ["MultiverseMarket|Inscryption", "MultiverseMarket|InscryptionTupleObject"]
 );
 assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, []);
+assert.deepEqual(
+  multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.indirectJoinSearch.candidateCatalogOrRelationFields,
+  ["InscryptionCostList", "InscryptionAndCostRelations", "IDChecks", "inscryptions", "InscryptionTupleList"]
+);
+assert.deepEqual(
+  multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.indirectJoinSearch.separateUiShellClues,
+  ["THMarkets", "InscryptionsList", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts"]
+);
+assert.deepEqual(
+  multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.indirectJoinSearch.repoLocalConsumerSearchSourcesWithoutCandidateHits,
+  ["data/unity-probe-report.json", "data/lm244-targeted-probe.json", "data/multiverse-market-metadata-neighborhood.json"]
+);
+assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.indirectJoinSearch.adjacentConsumerOrViewSymbolsRecovered, []);
 assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.playerFacingIdentitySourceRecovered, []);
 assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.canonicalImportSafeSubset, []);
 assert.equal(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.helpsRows6974, false);
-assert.match(multiverseMarketVerificationDoc, /## Alternate serialized-export label-source boundary/);
+assert.deepEqual(multiverseMarketSerializedLabelSourceBoundaryData.joinBackAssessment.smallestRecoveredPattern, []);
+assert.match(multiverseMarketVerificationDoc, /## Alternate serialized-export indirect-join boundary/);
 assert.match(multiverseMarketVerificationDoc, /InscryptionCostList/);
-assert.match(multiverseMarketVerificationDoc, /does not recover any player-facing label-bearing field/i);
-assert.match(multiverseMarketStateVerificationDoc, /## Alternate serialized-export label-source boundary/);
+assert.match(multiverseMarketVerificationDoc, /no indirect catalog\/relation join is recoverable repo-locally/i);
+assert.match(multiverseMarketStateVerificationDoc, /## Alternate serialized-export indirect-join boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /InscryptionTupleList/);
-assert.match(multiverseMarketStateVerificationDoc, /does not help rows `69-74` join back to the settled ordered mapping/i);
+assert.match(multiverseMarketStateVerificationDoc, /no indirect catalog\/relation join is recoverable repo-locally/i);
 assert.equal(multiverseMarketRow7174IdentityBoundaryData.dataset, "multiverse-market-row71-74-identity-boundary");
 assert.deepEqual(
   multiverseMarketRow7174IdentityBoundaryData.settledOrderedMapping.map((entry) => [entry.saveField, entry.orderedInscriptionRow]),
@@ -2276,6 +2379,26 @@ assert.match(multiverseMarketVerificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, 
 assert.match(multiverseMarketVerificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/);
 assert.match(multiverseMarketVerificationDoc, /does not ground rows `69-74`/i);
 assert.match(multiverseMarketVerificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i);
+assert.equal(multiverseMarket6974AnomalyProvenanceData.dataset, "multiverse-market-69-74-anomaly-provenance");
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.sameNumberAlignmentLayers, ["IS69Level through IS74Level", "IS69ID through IS74ID", "BuyIS69 through BuyIS74"]);
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.brokenPrefabBandRows, [69, 70, 71, 72, 73, 74]);
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.prefabRemapPairs, ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"]);
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.pipelineStages.map((stage) => [stage.stageId, stage.classification, stage.anomalyPresent]), [
+  ["raw-app-side-asset", "raw-app-side", true],
+  ["raw-app-side-probe-reports", "raw-app-side", true],
+  ["repo-local-derived-boundaries", "repo-local-derived", true]
+]);
+assert.equal(multiverseMarket6974AnomalyProvenanceData.provenanceConclusion.earliestCheckedAppearanceStage, "raw-app-side-asset");
+assert.equal(multiverseMarket6974AnomalyProvenanceData.provenanceConclusion.anomalyOwner, "app-side-inherited");
+assert.equal(multiverseMarket6974AnomalyProvenanceData.provenanceConclusion.repoLocalIntroductionDetected, false);
+assert.equal(multiverseMarket6974AnomalyProvenanceData.standardizationDecision.standardizationAllowed, false);
+assert.equal(multiverseMarket6974AnomalyProvenanceData.standardizationDecision.standardizationApplied, false);
+assert.match(multiverseMarketStateVerificationDoc, /## Checked `69-74` anomaly provenance boundary/);
+assert.match(multiverseMarketStateVerificationDoc, /the `69-74` anomaly is app-side inherited rather than repo-local/i);
+assert.match(multiverseMarketVerificationDoc, /## Checked 69-74 anomaly provenance boundary/);
+assert.match(multiverseMarketVerificationDoc, /the anomaly must remain represented as inherited source truth/i);
+assert.match(multiverseMarket6974AnomalyProvenanceDoc, /earliest checked appearance is raw app-side evidence/i);
+assert.match(multiverseMarket6974AnomalyProvenanceDoc, /No dataset standardization is applied in this lane\./);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);
@@ -2296,7 +2419,11 @@ assert.match(tokenBankStateDoc, /Mission \/ farm mission rewards/);
 assert.match(tokenBankStateDoc, /IAP \/ permanent pack modifiers/);
 assert.match(dailyTokeniumMissionDoc, /# Daily Tokenium Mission Lane Verification/);
 assert.match(dailyTokeniumMissionDoc, /Daily Tokenium currently belongs to the Academy or Farm Mission reward family/);
+assert.match(dailyTokeniumMissionDoc, /`SaveData\.DailyTokenium` is now the strongest exact stored-amount recovery for the lane/);
 assert.match(dailyTokeniumMissionDoc, /Modifier-family split recovered from this pass/);
+assert.match(dailyTokeniumMissionDoc, /Exact save-side narrowing recovered from this pass/);
+assert.match(dailyTokeniumMissionDoc, /ClaimableTokenium/);
+assert.match(dailyTokeniumMissionDoc, /DailyTokeniumCap/);
 assert.match(dailyTokeniumMissionDoc, /grounded as one modifier family on the lane because a TokenShop upgrade text explicitly increases the Daily Tokenium cap/);
 assert.match(dailyTokeniumMissionDoc, /grounded as a premium modifier family on the lane because its description explicitly increases Mission Materials and the Daily Tokenium cap in the Academy menu/);
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
@@ -2441,7 +2568,7 @@ assert.match(importMappingDoc, /must not silently populate canonical `player\.\*
 assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
 assert.match(importMappingDoc, /flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired/);
 assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
-assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, `IS\*Level`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved/);
+assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, `IS\*Level`, `ATU\*Level`, `Tier\*TokensUnlocked`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(tokenShopDoc, /## Adjacent systems still to map/);
@@ -2718,7 +2845,7 @@ assert.match(appJs, /\.\/data\/multiverse-market-owner-family\.json/);
 assert.match(appJs, /\.\/data\/token-shop-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
-assert.match(appJs, /Current imported levels are available for \${importedMarketPreview\.importedOverlapRowCount}\/\${importedMarketPreview\.overlapRowCount} overlap-grounded Emporium rows/);
+assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Recovered row constants: Bonus \${escapeHtml\(formatOptionalNumber\(entry\.bonusValue\)\)} \| StartCost \${escapeHtml\(formatOptionalNumber\(entry\.startCost\)\)} \| CostExponent \${escapeHtml\(formatOptionalNumber\(entry\.costExponent\)\)}/);
 assert.match(appJs, /get_Market, Market, GetPlayerProfileData, FillPlayerProfileData, and the FillPlayerProfileData coroutine shell/);
 assert.match(appJs, /Shard milestone mapping gate/);
@@ -2837,7 +2964,9 @@ assert.equal(pkg.scripts["lint:docs"], "node ./scripts/contracts/lint-doc-portab
 assert.equal(pkg.scripts["probe:build"], "node ./scripts/unity/run_probe.mjs build");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
 assert.equal(pkg.scripts["verify:vendoring"], "node ./scripts/contracts/verify-vendoring-layout.mjs");
+assert.equal(pkg.scripts["check:syntax"], "node ./scripts/contracts/check-js-syntax.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
+assert.equal(pkg.scripts["test:unit"], "node ./scripts/tests/run-unit-tests.mjs");
 assert.match(probeRunner, /"build": \[/);
 assert.match(probeRunner, /Probe artifact is stale:/);
 assert.match(probeRunner, /npm run probe:build/);
@@ -2901,6 +3030,7 @@ assert.match(datasetContractsDoc, /editing `data\/bundled-dataset-contract\.v1\.
 assert.match(datasetRefreshChecklistDoc, /# Dataset Refresh Checklist/);
 assert.match(datasetRefreshChecklistDoc, /Record the shipped dataset in `data\/bundled-dataset-contract\.v1\.json`/);
 assert.match(datasetRefreshChecklistDoc, /Run `npm run verify:data`/);
+assert.match(datasetRefreshChecklistDoc, /Run `npm run check:syntax`/);
 assert.match(datasetRefreshChecklistDoc, /Use `docs\/contracts\/research-note-template\.md` for new notes/);
 assert.match(researchNoteTemplateDoc, /# Research Note Template/);
 assert.match(researchNoteTemplateDoc, /APK\/Unity path checked first/);
@@ -2914,6 +3044,9 @@ assert.match(readme, /## Current phase/);
 assert.match(readme, /## Doc map/);
 assert.match(readme, /docs\/roadmap\/mvp-plan\.md/);
 assert.match(readme, /docs\/roadmap\/research-tracks\.md/);
+assert.match(readme, /docs\/tools\/ocr\.md/);
+assert.match(readme, /npm run test:unit/);
+assert.match(readme, /npm run check:syntax/);
 
 await runBlockingCheck("launcher-mode lifecycle", verifyLauncherModeServerLifecycle);
 
@@ -3274,6 +3407,10 @@ assert.equal(
 );
 
 const migratedFlatSpendStateProfile = normalizePlayerProfile({
+  ATU1Level: "3",
+  ATU28Level: 1,
+  Tier2TokensUnlocked: true,
+  Tier4TokensUnlocked: false,
   TokenBankCap: "1200",
   ClaimableBankTokens: "450",
   FinalTokenBankFillSpeed: "1.25",
@@ -3284,6 +3421,10 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
 });
 
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
+  ATU1Level: 3,
+  ATU28Level: 1,
+  Tier2TokensUnlocked: true,
+  Tier4TokensUnlocked: false,
   TokenBankCap: 1200,
   ClaimableBankTokens: 450,
   FinalTokenBankFillSpeed: 1.25,

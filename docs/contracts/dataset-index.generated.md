@@ -313,6 +313,20 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/token-shop-save-boundary.json`
 
+### `token-shop-row-level-owner`
+
+- Label: Token shop row-level owner
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/token-shop-row-level-owner.json`
+
+### `token-shop-row-remap-boundary`
+
+- Label: Token shop row remap boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/token-shop-row-remap-boundary.json`
+
 ### `multiverse-market-save-boundary`
 
 - Label: Multiverse market save boundary
@@ -375,6 +389,13 @@ Validation command: `npm run verify:data`
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-inscription-numbering-stability-boundary.json`
+
+### `multiverse-market-69-74-anomaly-provenance`
+
+- Label: Multiverse market 69-74 anomaly provenance
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-69-74-anomaly-provenance.json`
 
 ### `token-bank-controller-shell`
 

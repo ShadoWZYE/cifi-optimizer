@@ -77,7 +77,24 @@ Current grounded conclusion:
 - rows `69-74` therefore remain unresolved for player-facing identity, not import-safe player-facing labels
 - the canonical import-safe subset stays empty
 
-## Alternate serialized-export label-source boundary
+## Checked 69-74 anomaly provenance boundary
+
+- Raw app-side evidence preserved repo-locally already carries the anomaly before the boundary datasets summarize it:
+  - the preserved `level0` asset includes direct-shell names `ChrystosEmporiumUpgrade59` through `ChrystosEmporiumUpgrade62`
+  - that same preserved app-side evidence also includes remapped shells `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
+  - raw probe reports also preserve same-number `IS69Level` through `IS74Level`, `IS69ID` through `IS74ID`, and `BuyIS69` through `BuyIS74`
+- The repo-local derived datasets therefore inherit an already-split source shape:
+  - same-number alignment holds on save/id/hook side
+  - prefab numbering is broken only in the `69-74` band
+  - player-facing identity is still unresolved
+
+Current grounded conclusion:
+
+- the earliest checked appearance of the `69-74` anomaly is raw app-side evidence, not a repo-local recovery or normalization step
+- the anomaly must remain represented as inherited source truth
+- no dataset standardization is applied in this lane because rewriting the derived datasets to a newer same-number prefab shape would erase checked app-side evidence
+
+## Alternate serialized-export indirect-join boundary
 
 - This check is distinct from the settled Market/TextHandler/probe path.
 - The checked UABEA field-table export does recover additional `MultiverseMarket` structural containers:
@@ -97,11 +114,17 @@ Current grounded conclusion:
   - `ISObject`
   - `transform` on `MultiverseMarket|Inscryption`
 - The checked serialized export does not recover any player-facing label-bearing field such as `Name`, `Label`, `Title`, `Description`, `Text`, `LocalizationKey`, or `StringId`.
+- The checked repo-local UI-shell clues remain separate:
+  - `THMarkets: TextHandlerMarkets`
+  - `InscryptionsList: List<GameObject>`
+  - `SetAllChrystosEmporiumTexts`
+- No checked adjacent repo-local consumer, controller, or view symbol references `InscryptionCostList`, `InscryptionAndCostRelations`, `IDChecks`, `inscryptions`, or `InscryptionTupleList` outside the alternate UABEA field-table export.
 
 Current grounded conclusion:
 
 - this new evidence class is real, repo-local, and separate from the exhausted Market/TextHandler/probe path
 - it strengthens structural row-container recovery only
+- no indirect catalog/relation join is recoverable repo-locally between the settled ordered rows or serialized ids and any separate identity-bearing catalog
 - it does not help unresolved rows `69-74` join back to the settled ordered mapping as player-facing identities
 - the canonical import-safe subset stays empty
 
@@ -167,7 +190,7 @@ Current grounded conclusion:
 
 ## Still unresolved
 
-- the saved-state field or owner that stores the current `Inscryptions Done` balance
+- the bounded import-safe surface for the current `Inscryptions Done` balance beyond the existing `PlayerProfileData` wrapper and the wider `SaveData` declaring owner
 - player-owned current inscription levels or equivalent owned-state inputs for next-buy logic
 - full row coverage outside the currently validated late block
 - exact row-by-row remap from serialized `IS*` ids and prefab identities to final in-game labels
@@ -180,18 +203,20 @@ Current grounded conclusion:
 - The checked range boundary now shows that the recovered save-side `IS*Level` run overlaps the validated Emporium row block at ids `71-74`, and the checked action-shell plus row-text coverage is now enough to ground the ordered row-position boundary `IS71Level -> row 71` through `IS74Level -> row 74`.
 - Repo-local metadata also shows Inscryptions-adjacent reward/effect symbols such as `AchievementInscryptionsReward` and `<FinalISShardsBonus>k__BackingField`.
 - Current grounded conclusion:
-  - `MultiverseMarket` remains the mechanic owner
-  - the likely saved-state search path now runs through the broader player-profile persistence family
-  - `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
-  - the Emporium balance and owned-level fields appear to live in a broader progression-state field block rather than in the separate reward/effect symbol families
-  - validated rows `71-74` now have both checked row recovery and checked ordered save-side `IS*Level` overlap, which is the strongest current repo-local foothold for future import mapping
-  - that foothold is still row-order only, not final label recovery, so the canonical import-safe subset stays empty
-  - effect/reward symbols should not be treated as recovered saved-balance fields
+- `MultiverseMarket` remains the mechanic owner
+- the likely saved-state search path now runs through the broader player-profile persistence family
+- `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
+- exact typed recovery now also confirms that `SaveData` directly declares the wider `InscryptionsDone` / `IS*Level` / trade-counter / early `Mech*` progression cluster, while `PlayerProfileData` stays a flatter wrapper/export surface for nearby fields such as `InscryptionsDone`
+- the Emporium balance and owned-level fields appear to live in a broader progression-state field block rather than in the separate reward/effect symbol families
+- validated rows `71-74` now have both checked row recovery and checked ordered save-side `IS*Level` overlap, which is the strongest current repo-local foothold for future import mapping
+- that foothold is still row-order only, not final label recovery, so the canonical import-safe subset stays empty
+- effect/reward symbols should not be treated as recovered saved-balance fields
 
 ## Current app implication
 
 - It is safe to treat `MultiverseMarket` as a real Emporium owner with a grounded `Inscryptions Done` cost-lane shell.
 - It is safe to treat the `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` override band as a real prefab-remap boundary that blocks naive label assumptions for validated ids `69-74`.
+- It is safe to treat `SaveData` as the exact declaring save owner for the wider `InscryptionsDone` / `IS*Level` / trade-counter / early `Mech*` progression cluster, while keeping `PlayerProfileData.InscryptionsDone` in the narrower wrapper/export bucket.
 - It is not safe to generate spend recommendations yet.
 - The spend-planner track should stop inferring this lane from diamonds or tokens.
 - `MultiverseMarket` remains `available but unmapped` until the owned-state and saved-balance inputs are recovered.

@@ -369,6 +369,47 @@
       ]
     },
     {
+      "id": "spend-planner-first-ui-slice",
+      "title": "Spend planner first UI slice",
+      "status": "active",
+      "goal": "Ship a minimal descriptive spend-planner panel that uses grounded canonical spend inputs plus explicitly labeled boundary-backed spend evidence while visibly blocking owner-dependent planner actions.",
+      "currentSlice": "Show a descriptive spend-planner panel that reads canonical `state.playerProfile` spend-side inputs, surfaces exact `SaveData.BankedTokens` as boundary-backed spend evidence, lists blocked owner-recovery inputs as unavailable, and keeps recommendation-safe planner actions disabled.",
+      "exitCondition": "The app exposes a descriptive spend-planner panel that separates canonical spend inputs, limited-use boundary-backed evidence, and blocked owner-dependent inputs with reasons, while avoiding optimizer or recommendation claims.",
+      "blockedBy": "Planner-safe spend behavior is still blocked by unresolved TokenShop row remap, token-bank cap and claimable state, Daily Tokenium saved state, and Emporium owned progression fields.",
+      "smallestShippableSlice": "A top-level spend-planner panel that shows current canonical spend inputs, exact BankedTokens evidence as boundary-backed state, a blocked-input list with owner-recovery reasons, and a clear message that recommendations stay unavailable until the blocked owners are recovered.",
+      "completedSteps": [
+        "Fork a UI-only spend-planner lane so the app can ship descriptive spend visibility without reopening save-owner recovery.",
+        "Ship a descriptive spend-planner panel that reads canonical `player.resources.*`, `player.loop.loopReset`, and profile-confidence inputs only.",
+        "Surface exact `SaveData.BankedTokens` as boundary-backed token-bank stored-amount evidence without promoting it into canonical planner state.",
+        "Label owner-dependent spend inputs as unavailable with grounded blocker reasons instead of inferring planner math or recommendations."
+      ],
+      "nextSteps": [
+        "Keep any future TokenShop, token-bank, Daily Tokenium, or Emporium planner logic behind their existing owner-recovery tracks.",
+        "Only add planner-safe spend actions after one blocked owner lane recovers a truthful player-owned input.",
+        "If the panel grows beyond descriptive gating, fork the next slice instead of reopening this UI-only lane."
+      ],
+      "sources": [
+        "docs/contracts/player-profile-schema.md",
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/roadmap/research-tracks.md"
+      ],
+      "artifacts": [
+        "data/game-data.snapshot.v1.json",
+        "app.js",
+        "tests/smoke.mjs"
+      ],
+      "verified": [
+        "Canonical spend-side inputs already available in `state.playerProfile` include `player.resources.tokens`, `player.resources.diamonds`, `player.loop.loopReset`, and importable `player.resources.academyRelics`.",
+        "Exact `SaveData.BankedTokens` recovery now grounds the current token-bank stored amount strongly enough to show it as boundary-backed evidence without promoting it into canonical planner state.",
+        "Current spend owner-recovery blockers still live on separate TokenShop row-level, token-bank cap or claimable state-owner, Daily Tokenium, and Emporium save-model tracks.",
+        "A descriptive spend-planner panel can ship without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs."
+      ],
+      "uncertain": [
+        "Which blocked spend lane will recover planner-safe player-owned state first.",
+        "Whether future planner-safe spend behavior should begin with TokenShop, token-bank, Daily Tokenium, or Emporium once one owner lane clears."
+      ]
+    },
+    {
       "id": "spend-multiverse-savedata-import-surface",
       "title": "MultiverseMarket SaveData import-surface decision",
       "status": "active",
@@ -424,28 +465,96 @@
     {
       "id": "spend-token-shop-row-level-recovery",
       "title": "TokenShop row-level recovery",
-      "status": "queued",
+      "status": "archived",
       "goal": "Recover player-owned current TokenShop row levels needed for MVP-safe next-buy planning.",
-      "currentSlice": "Keep TokenShop planning blocked on current-level recovery even though the cost lane, owner shell, and token-bank controller split are now grounded.",
+      "currentSlice": "Closed owner-recovery slice: exact typed `SaveData` now carries the raw `ATU1Level` through `ATU28Level` TokenShop row-level family plus tier-unlock booleans, and those fields are now preserved only under the compatibility TokenShop sink instead of being guessed into canonical state.",
       "exitCondition": "The repo recovers the player-owned current-level inputs for TokenShop rows strongly enough to support recommendation-side state reads.",
-      "blockedBy": "Current TokenShop artifacts recover owner-side constants and controller clues, but not the authoritative owned row-level state.",
-      "smallestShippableSlice": "A checked TokenShop level-owner or save-owner artifact that names the current-level family without yet claiming full planner logic."
+      "blockedBy": "Further TokenShop progress is now blocked by row remap and naming, not by the save-owner question.",
+      "smallestShippableSlice": "A checked TokenShop row-label remap or canonical-import boundary that keeps raw `ATU*Level` fields separate from grounded player-facing naming until the remap is verified.",
+      "completedSteps": [
+        "Preserve grounded TokenShop cost and row-shell evidence on the `TokenShop` owner payload.",
+        "Recover exact typed `SaveData` ownership for `ATU1Level` through `ATU28Level` and adjacent `Tier2TokensUnlocked` through `Tier5TokensUnlocked` fields.",
+        "Wire raw TokenShop row-level fields into `compatibility.unmappedSystemState.tokenShop` instead of promoting them into canonical `state.playerProfile`."
+      ],
+      "nextSteps": [],
+      "sources": [
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/roadmap/active-grounding-boundaries.md",
+        "data/token-shop-values.json",
+        "data/uabea-probe-report.json"
+      ],
+      "artifacts": [
+        "data/token-shop-values.json",
+        "data/token-shop-row-level-owner.json",
+        "player-profile.js"
+      ],
+      "verified": [
+        "Exact typed recovery now confirms that `SaveData` directly declares `ATU1Level` through `ATU28Level` in one contiguous TokenShop-adjacent save block.",
+        "The same exact `SaveData` block also carries `Tier2TokensUnlocked`, `Tier3TokensUnlocked`, `Tier4TokensUnlocked`, and `Tier5TokensUnlocked` beside the recovered row-level family.",
+        "The grounded TokenShop extract separately preserves the same `ATU` numbering family on the owner payload through fields such as `ATU1Button` through `ATU28MaxOverlay` and numeric entries such as `ATU24StartCost` through `ATU28Fill`.",
+        "The repo can now preserve raw `ATU*Level` and `Tier*TokensUnlocked` fields under `compatibility.unmappedSystemState.tokenShop` without guessing from `OR_*` labels or promoting speculative values into canonical state."
+      ],
+      "uncertain": [
+        "Which grounded player-facing TokenShop row labels correspond to each recovered raw `ATU*Level` field.",
+        "Which subset, if any, is safe to promote beyond compatibility-only import before the row remap is verified."
+      ]
+    },
+    {
+      "id": "spend-token-shop-row-remap",
+      "title": "TokenShop row remap",
+      "status": "active",
+      "goal": "Map recovered raw `ATU*Level` TokenShop save fields onto grounded row identities strongly enough for bounded non-speculative use beyond compatibility import.",
+      "currentSlice": "Keep raw `ATU*Level` fields in the compatibility TokenShop sink while the repo tests whether any checked object or text join can bind ATU-numbered row shells to grounded TokenShop row identities.",
+      "exitCondition": "The repo has a checked TokenShop row-by-row remap boundary that ties the recovered `ATU*Level` family to grounded row identities without inventing player-facing labels.",
+      "blockedBy": "The exact `SaveData` owner is recovered and some ATU effect domains are grounded, but the repo still lacks a checked join from ATU-numbered row shells to specific prefab identities or final player-facing row titles.",
+      "smallestShippableSlice": "A checked identity-join boundary that proves which recovered `ATU` rows, if any, can be bound beyond compatibility-only import.",
+      "completedSteps": [
+        "Preserve the raw `ATU1Level` through `ATU28Level` family under the compatibility TokenShop sink while the row remap stays unresolved.",
+        "Promote a TokenShop row-remap boundary artifact that records grounded ATU effect-domain clues, direct late-row buy hooks, and the missing object or text joins that still block row identity recovery."
+      ],
+      "nextSteps": [
+        "Recover a checked bridge from `ATU*Button`, `ATU*Content`, or adjacent row-shell path ids to specific `NewTokenUPGPrefab.*` objects before claiming any row identity.",
+        "Recover a checked bridge from ATU-numbered row shells to final player-facing TokenShop row title text before promoting any player-facing remap.",
+        "If only a subset clears that join, keep the remaining ATU rows quarantined instead of forcing a whole-lane remap."
+      ],
+      "sources": [
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/systems/spend/token-shop-row-remap-verification.md",
+        "data/token-shop-values.json",
+        "data/uabea-probe-report.json",
+        "data/unity-probe-report.json",
+        "data/daily-tokenium-lane-probe.json"
+      ],
+      "artifacts": [
+        "data/token-shop-row-level-owner.json",
+        "data/token-shop-row-remap-boundary.json"
+      ],
+      "verified": [
+        "The repo preserves the raw `ATU1Level` through `ATU28Level` save family on `SaveData` and the same numbering family on the grounded `TokenShop` owner payload.",
+        "Checked probe output also preserves grounded non-label clues such as `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU24Bonus3Shards`, and late direct buy hooks `BuyATU24` through `BuyATU28`.",
+        "Checked prefab and player-facing row rosters both exist in repo artifacts, but they are not yet joined back onto specific ATU-numbered row shells."
+      ],
+      "uncertain": [
+        "Which exact grounded player-facing TokenShop row identity belongs to each `ATU*Level` field.",
+        "Whether any subset of ATU rows can clear a direct object or title join before the full lane is remapped."
+      ]
     },
     {
       "id": "spend-token-bank-state-owner",
       "title": "Token-bank state owner recovery",
       "status": "active",
       "goal": "Recover the saved-state owner behind token-bank cap, fill, and claimable-bank state so token planning can use truthful player inputs.",
-      "currentSlice": "Use the checked TokenShop save-boundary, controller-shell, and derived-output artifacts to keep token-bank state ownership narrowed away from `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and the `FinalTokenBank*` cluster while the remaining save-side search stays on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary.",
+      "currentSlice": "Keep exact `SaveData.BankedTokens` recovery as the current token-bank stored-amount owner while the checked TokenShop save-boundary, controller-shell, and derived-output artifacts keep cap and claimable-bank ownership narrowed away from `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and the `FinalTokenBank*` cluster and the remaining save-side search stays on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary.",
       "exitCondition": "The repo either names the exact declaring save model for token-bank cap, fill, or claimable state or proves a narrower PlayerProfile-side wrapper/path than the current broad persistence-family boundary.",
-      "blockedBy": "Current evidence separates TokenShop controller hooks, display shells, and derived outputs from save-family clues, but still does not expose a direct declaring save type or narrower wrapper path.",
-      "smallestShippableSlice": "A checked bank-state owner boundary that blocks `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and `FinalTokenBank*` as save-state owners while naming the current persistence-family boundary as the remaining grounded search path.",
+      "blockedBy": "Current evidence now recovers `SaveData.BankedTokens` for current stored amount and separates TokenShop controller hooks, display shells, and derived outputs from save-family clues, but still does not expose a direct declaring save type or narrower wrapper path for cap or claimable-bank state.",
+      "smallestShippableSlice": "A checked bank-state owner boundary that names exact `SaveData.BankedTokens` ownership for current stored amount while blocking `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and `FinalTokenBank*` as cap or claimable save-state owners and naming the current persistence-family boundary as the remaining grounded search path.",
       "completedSteps": [
         "Recover the TokenShop controller-side bank methods for cap, claimable amount, fill, and claim behavior.",
         "Promote a TokenShop save-boundary dataset that preserves zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms.",
         "Promote a token-bank controller-shell dataset that keeps ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and adjacent controller methods in one local cluster.",
         "Promote a token-bank derived-output boundary that keeps FinalTokenBankCap and FinalTokenBankFillSpeed clustered as output-side accessors and backing fields without save-family joins.",
-        "Narrow the current owner conclusion so TokenShop methods, BigStatisticPrefab.TokenBankCap, and FinalTokenBank-derived outputs are treated as non-owner surfaces while the remaining save-side search stays on the broader PlayerProfile persistence-family boundary."
+        "Narrow the current owner conclusion so TokenShop methods, BigStatisticPrefab.TokenBankCap, and FinalTokenBank-derived outputs are treated as non-owner surfaces while the remaining save-side search stays on the broader PlayerProfile persistence-family boundary.",
+        "Recover exact typed `SaveData.BankedTokens` ownership for the current token-bank stored amount without promoting cap or claimable state into canonical planner inputs."
       ],
       "nextSteps": [
         "Inspect the broader PlayerProfile persistence neighborhood for token-bank or banked-token field clues before assuming any FinalTokenBank output is the saved value owner.",
@@ -464,16 +573,18 @@
         "data/token-bank-state-clues.json"
       ],
       "verified": [
+        "Exact typed recovery now confirms that `SaveData` directly declares `BankedTokens` as the current token-bank stored-amount field.",
         "`TokenShop` is the strongest controller-side owner for token-bank cap, claimable, fill, and claim behavior.",
         "`BigStatisticPrefab.TokenBankCap` is a separate token-bank display shell rather than the recovered save owner.",
         "The `FinalTokenBankCap` and `FinalTokenBankFillSpeed` cluster is still output-side and currently has no checked PlayerProfileData or CloudSavePlayerProfile join in its local context.",
         "The narrowed TokenShop owner shell currently preserves zero direct overlap with PlayerProfileData, GetPlayerProfileData, FillPlayerProfileData, and CloudSavePlayerProfile.",
-        "The remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary rather than on TokenShop-side or derived-output symbols."
+        "The checked typed save tables do not currently expose `ClaimableBankTokens` or `TokenBankCap` on `SaveData` or `PlayerProfileData`.",
+        "The remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary for token-bank cap and claimable state rather than on TokenShop-side or derived-output symbols."
       ],
       "uncertain": [
-        "Which declaring save model actually owns current token-bank cap, fill, claimable, or banked-token state.",
-        "Whether those fields live directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper.",
-        "Which current flat compatibility clues such as TokenBankCap, ClaimableBankTokens, BankedTokens, or FinalTokenBankFillSpeed map to true saved-state ownership rather than derived or compatibility-only values."
+        "Which declaring save model actually owns current token-bank cap or claimable-bank state beyond the recovered `SaveData.BankedTokens` stored-amount field.",
+        "Whether cap or claimable state lives directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper.",
+        "Whether any distinct saved fill or ready-state field exists beyond `SaveData.BankedTokens`, or whether fill stays a controller-side or computed surface in the checked repo boundary."
       ]
     },
     {
@@ -481,10 +592,10 @@
       "title": "Daily Tokenium save-owner recovery",
       "status": "queued",
       "goal": "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane.",
-      "currentSlice": "Keep Daily Tokenium in mapping work while the repo follows the Academy or Farm Mission lane past modifier families toward the actual saved reward state.",
-      "exitCondition": "The gameplay owner or saved-state family behind current Daily Tokenium amount or cap is recovered.",
-      "blockedBy": "The lane family is grounded, but current evidence still stops at modifier families and text paths.",
-      "smallestShippableSlice": "A checked owner-family or save-owner boundary that names the underlying Daily Tokenium gameplay lane more narrowly than the current Academy or Farm Mission family."
+      "currentSlice": "Keep `SaveData.DailyTokenium` as the exact stored-amount recovery for the lane while the broader Academy or Farm Mission gameplay wrapper, cap owner, and Daily Tokenium-specific ready-state owner stay blocked away from TokenShop modifiers, loop-mod text paths, and the broader generic `ClaimableTokenium` cluster.",
+      "exitCondition": "The repo either names the exact save-side owner for Daily Tokenium cap or a Daily Tokenium-specific ready state, or proves a narrower Academy or Farm Mission wrapper than the current family-only boundary without guessing from UI text.",
+      "blockedBy": "Current evidence now recovers exact `SaveData.DailyTokenium` ownership for the stored amount, but the checked typed tables still do not expose `DailyTokeniumCap` on `SaveData` or `PlayerProfileData`, and `ClaimableTokenium` remains on the broader generic Tokenium cluster rather than a checked Daily Tokenium-specific wrapper.",
+      "smallestShippableSlice": "A checked Daily Tokenium save-boundary update that preserves exact `SaveData.DailyTokenium` ownership for current stored amount while blocking cap and ready-state promotion until a narrower Academy or Farm Mission save wrapper is recovered."
     },
     {
       "id": "spend-multiverse-row-label-remap",

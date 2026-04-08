@@ -69,11 +69,22 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
 
 Use these when the active lanes above close or split.
 
+### `spend-token-shop-row-remap`
+
+- Goal: remap recovered `SaveData` `ATU*Level` fields onto grounded TokenShop rows without inventing player-facing names
+- Current blocker: the repo now has three checked but still separate local clusters: `ATU`-numbered getter and buy-hook metadata, generic TokenShop text-handler hooks such as `SetAllTokenShopTexts`, and the prefab/title rosters in `level0`; it still lacks a checked bridge from any concrete `ATU` row shell to a specific prefab identity or final player-facing row title
+- Smallest next slice: recover one checked bridge from an `ATU*Button`, `ATU*Content`, or `SetTokenTexts`-side neighborhood to one concrete `NewTokenUPGPrefab.*` object or one final row title
+
+## Recently narrowed
+
 ### `spend-token-shop-row-level-recovery`
 
-- Goal: recover player-owned current TokenShop row levels
-- Current blocker: owner-side constants and controller clues exist, but authoritative owned row-level state is not recovered
-- Smallest next slice: checked level-owner or save-owner artifact
+- Status: `archived`
+- Grounded conclusion:
+  - exact typed recovery now confirms `SaveData` as the declaring owner for `ATU1Level` through `ATU28Level`
+  - the same exact save block also carries `Tier2TokensUnlocked` through `Tier5TokensUnlocked`
+  - these raw fields are now safe for compatibility-only import under `compatibility.unmappedSystemState.tokenShop`
+  - canonical/player-facing remap work should continue on a narrower row-label boundary instead of reopening the owner question
 
 ### `spend-token-bank-state-owner`
 
@@ -84,8 +95,8 @@ Use these when the active lanes above close or split.
 ### `spend-daily-tokenium-save-owner`
 
 - Goal: recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane
-- Current blocker: the lane family is grounded, but the owner still stops at modifier families and text paths
-- Smallest next slice: checked owner-family or save-owner boundary
+- Current blocker: exact typed recovery now confirms `SaveData.DailyTokenium` for the current stored amount, but cap and Daily Tokenium-specific ready-state ownership still stop at Academy or Farm Mission surfaces, modifier families, and broader generic Tokenium fields
+- Smallest next slice: checked cap or ready-state boundary that proves a narrower save wrapper than the current Academy or Farm Mission family without collapsing generic `ClaimableTokenium` into Daily Tokenium
 
 ### `spend-multiverse-row-label-remap`
 

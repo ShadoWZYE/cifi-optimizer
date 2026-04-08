@@ -15,7 +15,9 @@ Use these instead for current guidance:
 - `AGENTS.md`
 - `docs/cifi_grounding_plan.md`
 - `docs/roadmap/pr-roadmap.md`
-- `docs/roadmap/research-followup-execution-plan.md`
+- `docs/roadmap/mvp-plan.md`
+- `docs/roadmap/research-tracks.md`
+- `docs/roadmap/active-grounding-boundaries.md`
 
 Those docs now carry the live grounding rules, roadmap sequencing, and implementation guidance that this reevaluation originally motivated.
 

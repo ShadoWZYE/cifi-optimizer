@@ -29,15 +29,22 @@ If any item is missing, the allowed work stays in docs, parser scripts, owner ma
   - [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat)
 - Grounded outputs:
   - [`docs/systems/spend/token-shop-values.md`](docs/systems/spend/token-shop-values.md)
+  - [`docs/systems/spend/token-shop-row-remap-verification.md`](docs/systems/spend/token-shop-row-remap-verification.md)
   - [`docs/systems/spend/token-bank-state-verification.md`](docs/systems/spend/token-bank-state-verification.md)
   - [`docs/systems/spend/daily-tokenium-mission-lane-verification.md`](docs/systems/spend/daily-tokenium-mission-lane-verification.md)
   - [`data/token-shop-values.json`](data/token-shop-values.json)
+  - [`data/token-shop-row-level-owner.json`](data/token-shop-row-level-owner.json)
+  - [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json)
 - Verified extracted fields include:
   - `StartCost`
   - `AdditiveCost`
   - `Bonus`
   - `MaxLevel`
   - `FillMaxLevel`
+- Verified save-side row-level owner evidence now includes:
+  - exact `SaveData` fields `ATU1Level` through `ATU28Level`
+  - adjacent exact `SaveData` fields `Tier2TokensUnlocked` through `Tier5TokensUnlocked`
+  - the same grounded `ATU` numbering family on the TokenShop owner payload
 - Verified currency-shell evidence now includes:
   - `resourceicons/resource_tokenium`
   - `resourceicons/resource_tokenium_cap`
@@ -45,8 +52,8 @@ If any item is missing, the allowed work stays in docs, parser scripts, owner ma
 
 ### Not yet verified enough for app recommendations
 
-- direct player-owned current levels for token-shop upgrades
-- final remap from serialized ids like `TokenBoost` or `ATU24` to grounded player-facing labels
+- final remap from raw `ATU*Level` save fields to grounded player-facing TokenShop row labels
+- checked object or title joins from `ATU`-numbered row shells to specific prefab identities or final row titles
 - full rule set for moving from first-buy facts to true next-purchase planning
 
 ### Adjacent systems this signals
@@ -66,7 +73,10 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 
 - It is safe to treat TokenShop as a real system with grounded extracted constants.
 - It is safe to describe its cost lane as token-bank token or tokenium spending, rather than as an unnamed generic spend pool.
+- It is safe to preserve raw `ATU1Level` through `ATU28Level` and `Tier2TokensUnlocked` through `Tier5TokensUnlocked` under `compatibility.unmappedSystemState.tokenShop`.
+- It is safe to say the repo now has grounded non-label clues around some `ATU` rows, including token, diamond, daily-token, shard, and late direct-buy hook evidence.
 - It is not yet safe to generate next-buy recommendations from player token budgets alone.
+- It is not yet safe to promote raw `ATU*Level` save fields into canonical `state.playerProfile` fields until the row-by-row remap is grounded.
 - TokenShop-connected token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped` until saved-state owners are recovered.
 - `OR_TokenBankCap` and `OR_TokensFromChests` should currently be treated as grounded asset labels, not as recovered formula sources.
 - One key split is now grounded: claim actions resolve through `TokenShop`, token-bank cap display resolves through `BigStatisticPrefab.TokenBankCap`, and at least one daily-tokenium text path resolves through `TextHandlerLoopMods.SetLM244BonusText`.
@@ -117,7 +127,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 
 - It is safe to treat MultiverseMarket as a real system with partially grounded extracted constants.
 - It is safe to stop inferring its spend lane from diamonds, tokens, or other unrelated player resources.
-- It is not yet safe to treat `Inscryptions Done` as an import-ready player field until its declaring save model is recovered.
+- It is not yet safe to treat `Inscryptions Done` as an import-ready player field even though the wider declaring owner is now recovered as `SaveData`; the bounded import surface and current owned row levels are still unresolved.
 - The current best repo-local saved-state path is the broader `PlayerProfileData` persistence family, not the raw `MultiverseMarket` owner object by itself.
 - The repo now has exact metadata field names for this lane, but not the import-ready save contract for `state.playerProfile`.
 - The recovered neighborhood now behaves like a wider progression-state field block, which further rules out treating nearby `AchievementInscryptionsReward` or `FinalIS*` symbols as the saved balance owner.

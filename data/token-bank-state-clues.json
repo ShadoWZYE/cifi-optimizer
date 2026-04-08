@@ -1,9 +1,10 @@
 {
-  "generatedAt": "2026-04-03",
+  "generatedAt": "2026-04-07",
   "sources": {
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0",
-    "probe": "tmp-token-bank-state-probe.json"
+    "probe": "tmp-token-bank-state-probe.json",
+    "uabeaProbe": "data/uabea-probe-report.json"
   },
   "tokenShopMethods": [
     "get_TokenBankCap",
@@ -28,10 +29,26 @@
     "<FinalTokenBankFillSpeed>k__BackingField",
     "FinalTokenBankFillSpeed"
   ],
+  "exactSaveOwnerRecovery": {
+    "declaringType": "SaveData",
+    "storedAmountField": "BankedTokens",
+    "storedAmountFieldType": "System.Single",
+    "storedAmountFieldIndex": 214,
+    "storedAmountFieldOffset": 1800
+  },
+  "negativeTypedOwnerChecks": [
+    "SaveData.ClaimableBankTokens",
+    "SaveData.TokenBankCap",
+    "PlayerProfileData.BankedTokens",
+    "PlayerProfileData.ClaimableBankTokens",
+    "PlayerProfileData.TokenBankCap"
+  ],
   "currentBoundary": [
-    "TokenShop is the strongest controller-side owner for token-bank cap, claimable, fill, and claim behavior.",
+    "Exact typed recovery now confirms that SaveData directly declares BankedTokens as System.Single, which is the strongest current saved-state owner for the token-bank current stored amount.",
+    "The same checked typed save tables do not currently expose ClaimableBankTokens or TokenBankCap on SaveData or PlayerProfileData.",
+    "TokenShop remains the strongest controller-side owner for token-bank cap, claimable, fill, and claim behavior, but not the recovered save-state owner.",
     "BigStatisticPrefab.TokenBankCap is a separate statistic-display shell for bank-cap presentation.",
     "TextHandlerLoopMods and SetLM244BonusText are still presentation-side daily-tokenium hooks, not recovered gameplay owners.",
-    "This is enough to ground the controller or display split, but not enough to recover saved-state fields or final formula owners."
+    "This is enough to split exact current stored amount ownership from the still-blocked cap and claimable-bank save boundary without guessing from derived outputs or promoting planner behavior."
   ]
 }
