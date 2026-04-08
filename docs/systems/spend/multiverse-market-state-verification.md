@@ -155,7 +155,7 @@ Current grounded conclusion:
 
 - `InscryptionsDone` sits inside a broader player-progression field cluster rather than beside the separate `AchievementInscryptionsReward` or `FinalIS*` reward/effect symbols
 - this is stronger evidence that the Emporium lane belongs to a saved progression model or sub-structure, not to a UI-only text path
-- the recovered `IS*Level` run now directly overlaps the validated Emporium row block at ids `71-74`, which creates a grounded bridge between save-side level clues and checked market rows
+- the recovered `IS*Level` run now directly overlaps the validated Emporium row block at ids `71-74`, which creates a grounded ordered-overlap bridge between save-side level clues and checked market rows
 - exact typed recovery now rules out the direct checked `MultiverseMarket` owner, its first recovered nested row-local payloads, and flat direct `PlayerProfileData` fields for that wider run, and now also identifies `SaveData` as the declaring save structure that carries that broader progression block
 
 ## Adjacent non-save signals that should not be mistaken for saved-state recovery
@@ -356,7 +356,7 @@ Current grounded conclusion:
 
 - no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import
 - `InscryptionsDone` stays wrapper/export-only because `PlayerProfileData` already exposes it as a flat wrapper surface
-- `IS71Level` through `IS74Level` are the strongest blocked candidates because their ordered row positions now check out against validated Emporium rows `71-74`, but final row labels and broader row remap remain unresolved
+- `IS71Level` through `IS74Level` remain the strongest ordered-overlap evidence, but they are still blocked from canonical import because final row labels and broader row remap remain unresolved
 - the broader `IS*Level`, trade-counter, and early `Mech*` neighbors remain verified on `SaveData` but blocked from canonical import because this slice does not reopen `Market` typed-field recovery, row remap, or planner integration
 
 ## Current app implication
@@ -369,6 +369,7 @@ Current grounded conclusion:
 - It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
 - It is now safe to treat the save-side search as narrowed to `SaveData` behind the PlayerProfile persistence family and a checked `PlayerProfileHandler.get_Market -> MultiverseMarket` accessor bridge, while explicitly not claiming that a typed `Market` field has been recovered on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`.
 - It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and checked ordered `IS*Level` overlap, while keeping final label remap and canonical import promotion downstream.
-- The next spend-track slice should fork from this save-owner recovery and decide how much of the recovered `SaveData` declaration block can be used for bounded import support without reopening row remap or planner integration.
+- The active import-surface result is still that no canonical Emporium subset is admissible yet, and rows `71-74` remain ordered overlap only.
+- The next spend-track slice should keep row remap separate and only revisit admissibility if stronger identity evidence appears.
 
 

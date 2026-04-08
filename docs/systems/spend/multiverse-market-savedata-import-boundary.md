@@ -1,6 +1,6 @@
 # Multiverse Market SaveData Import Boundary
 
-This note records the active follow-up lane after save-owner recovery closed: the smallest defensible checked import-surface boundary for the recovered `SaveData` Emporium-adjacent block.
+This note records the active follow-up lane after save-owner recovery closed: one bounded admissibility decision for the recovered `SaveData` Emporium-adjacent block, kept separate from downstream row identity/remap work.
 
 ## Canonical split
 
@@ -56,8 +56,10 @@ This note records the active follow-up lane after save-owner recovery closed: th
 
 - The smallest checked mapping is ordered only: `IS71Level -> row 71`, `IS72Level -> row 72`, `IS73Level -> row 73`, and `IS74Level -> row 74`.
 - The wider `IS*Level` run must be treated as part of a larger ordered inscription set, not as isolated import candidates.
+- The active admissibility result is `none`: no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import.
 - No recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import.
-- If the wider inscription ordering still cannot be grounded beyond this overlap, the canonical import-safe subset stays explicitly empty.
+- Rows `71-74` remain ordered overlap only, not an import-admissible canonical subset.
+- If stronger identity evidence does not appear, the canonical import-safe subset stays explicitly empty.
 
 ## Track implication
 

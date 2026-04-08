@@ -203,7 +203,7 @@ Current active or queued tracks:
   - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
 - `spend-multiverse-savedata-import-surface`
   - status: `active`
-  - goal: decide whether any bounded `SaveData`-backed Emporium import surface is safe to expose without promoting unresolved row labels, broader progression fields, or planner behavior too early
+  - goal: reach one bounded admissibility decision for `SaveData`-backed Emporium import without mixing that decision with row identity/remap research or planner behavior
 - `spend-token-shop-row-level-recovery`
   - status: `archived`
   - goal: recovered exact `SaveData` ownership for raw `ATU1Level` through `ATU28Level` TokenShop row levels; follow-up work moves to row remap instead of owner recovery

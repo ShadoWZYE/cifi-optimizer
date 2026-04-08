@@ -2666,9 +2666,10 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   assert.equal(boundary.checkedIsToRowOrderBoundary.blockedWiderMapping.length, 2, "multiverse market SaveData import boundary blockedWiderMapping count drifted");
   assert.deepEqual(boundary.boundedImportConclusion.importSafeSubset, [], "multiverse market SaveData import boundary importSafeSubset must remain empty in this slice");
   assert.equal(boundary.boundedImportConclusion.exactImportSafeSubsetLabel, "none", "multiverse market SaveData import boundary exactImportSafeSubsetLabel drifted");
+  assert.match(boundary.boundedImportConclusion.currentBoundary, /none admissible/i, "multiverse market SaveData import boundary currentBoundary must preserve the bounded admissibility conclusion");
   assert.match(boundary.boundedImportConclusion.currentBoundary, /IS71Level -> row 71/i, "multiverse market SaveData import boundary currentBoundary must preserve the checked row-order conclusion");
   assert.match(boundary.boundedImportConclusion.currentBoundary, /no recovered SaveData field/i, "multiverse market SaveData import boundary currentBoundary must preserve the no-safe-import conclusion");
-  ["do not reopen the metadata-only Market typed-field question without new direct evidence", "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap", "do not do planner integration from the recovered SaveData block in this slice"].forEach((line) => {
+  ["do not reopen the metadata-only Market typed-field question without new direct evidence", "do not treat ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery", "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap", "do not do planner integration from the recovered SaveData block in this slice"].forEach((line) => {
     assert.ok(boundary.boundedImportConclusion.blockedBy.includes(line), `multiverse market SaveData import boundary missing blockedBy line ${line}`);
   });
 

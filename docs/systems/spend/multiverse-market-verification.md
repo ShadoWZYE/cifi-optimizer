@@ -208,8 +208,8 @@ Current grounded conclusion:
 - `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
 - exact typed recovery now also confirms that `SaveData` directly declares the wider `InscryptionsDone` / `IS*Level` / trade-counter / early `Mech*` progression cluster, while `PlayerProfileData` stays a flatter wrapper/export surface for nearby fields such as `InscryptionsDone`
 - the Emporium balance and owned-level fields appear to live in a broader progression-state field block rather than in the separate reward/effect symbol families
-- validated rows `71-74` now have both checked row recovery and checked ordered save-side `IS*Level` overlap, which is the strongest current repo-local foothold for future import mapping
-- that foothold is still row-order only, not final label recovery, so the canonical import-safe subset stays empty
+- validated rows `71-74` now have both checked row recovery and checked ordered save-side `IS*Level` overlap
+- that overlap is still row-order only, not an import-admissible canonical subset or final label recovery, so the canonical import-safe subset stays empty
 - effect/reward symbols should not be treated as recovered saved-balance fields
 
 ## Current app implication
