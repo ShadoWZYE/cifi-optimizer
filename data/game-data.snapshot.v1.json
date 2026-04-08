@@ -295,12 +295,12 @@
     {
       "id": "spend-multiverse-save-model-recovery",
       "title": "MultiverseMarket save-model recovery",
-      "status": "active",
+      "status": "archived",
       "goal": "Recover the declaring save model behind `InscryptionsDone` and the nearby `IS*Level` cluster so Emporium state can move toward truthful player-owned import support and future external-tool replacement.",
-      "currentSlice": "Use the recovered metadata neighborhood, save-boundary, and market-member boundary artifacts to keep the Emporium save path grounded as `PlayerProfileHandler.get_Market -> MultiverseMarket` for the checked accessor bridge, metadata-only `Market` for member-shell naming only, `PlayerProfileData` for nearby flat wrapper exports, and `SaveData` for the exact wider `IS*Level` / trade-counter / mech declaring owner while row remap and planner integration stay downstream.",
-      "exitCondition": "The repo either names the exact declaring save model beyond the checked `PlayerProfileHandler.get_Market -> MultiverseMarket` bridge or proves the narrowest checked direct-wrapper-versus-deeper-owner boundary for the wider `InscryptionsDone` / `IS*Level` / trade-counter / mech cluster.",
-      "blockedBy": "Canonical import promotion and planner work still require a grounded decision about how much of the recovered `SaveData` declaration block is safe to surface, and the checked boundary still does not recover a typed `Market` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`.",
-      "smallestShippableSlice": "A checked save-model boundary artifact that names the checked `PlayerProfileHandler.get_Market -> MultiverseMarket` bridge, rules out `MultiverseMarket`, its first nested row-local payloads, and flat direct `PlayerProfileData` fields as the broader progression owner, names `SaveData` as the exact wider progression owner, and keeps row remap and planner use blocked.",
+      "currentSlice": "Archived owner-recovery lane: the checked accessor bridge, flat-wrapper boundary, and exact `SaveData` declaring-owner result are now grounded enough that the next active Emporium work belongs to a narrower `SaveData` import-surface decision track instead of generic save-owner recovery.",
+      "exitCondition": "Archived after the repo checked `PlayerProfileHandler.get_Market -> MultiverseMarket` as the accessor bridge, ruled out direct `MultiverseMarket` and flat direct `PlayerProfileData` ownership for the broader progression run, and recovered `SaveData` as the exact declaring owner for the wider `InscryptionsDone` / `IS*Level` / trade-counter / mech cluster.",
+      "blockedBy": "No longer the active blocker. Successor work is now blocked by the bounded import-surface decision and unresolved row identity, not by generic owner searching.",
+      "smallestShippableSlice": "Completed and superseded: a checked save-owner boundary that keeps the accessor bridge, metadata/member-shell naming, flat wrapper exports, and the exact wider `SaveData` owner separated without promoting planner behavior.",
       "completedSteps": [
         "Recover the MultiverseMarket owner, validated late-block constants, and `Inscryptions Done` cost-lane shell.",
         "Promote a MultiverseMarket owner-family boundary that keeps owner-shell evidence separate from save-side recovery.",
@@ -324,12 +324,7 @@
         "Extend the checked direct type probe to `SaveData`, recover `SaveData` as the exact declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster, and confirm that the metadata-only `Market` shell still is not recovered as a typed field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`.",
         "Harden the `Market` shell boundary so the repo now separates the checked `PlayerProfileHandler.get_Market -> MultiverseMarket` bridge, the metadata/member-shell `Market` clue, and the still-negative typed `Market` field result in the checked PlayerProfile persistence family."
       ],
-      "nextSteps": [
-        "Keep row remap follow-up downstream from this save-owner recovery instead of reopening it inside the same lane.",
-        "Decide whether any bounded `SaveData` import surface is safe to expose without promoting canonical Emporium state into `state.playerProfile` too early.",
-        "If this lane is revisited, require new typed recovery evidence before treating metadata-shell `Market` as anything more than accessor/member-shell naming only.",
-        "Fork any row-range mapping or planner follow-up work into a separate track instead of extending this save-owner lane."
-      ],
+      "nextSteps": [],
       "sources": [
         "docs/systems/spend/spend-system-verification.md",
         "docs/systems/spend/multiverse-market-verification.md",
@@ -412,6 +407,59 @@
       "uncertain": [
         "Which blocked spend lane will recover planner-safe player-owned state first.",
         "Whether future planner-safe spend behavior should begin with TokenShop, token-bank, Daily Tokenium, or Emporium once one owner lane clears."
+      ]
+    },
+    {
+      "id": "spend-multiverse-savedata-import-surface",
+      "title": "MultiverseMarket SaveData import-surface decision",
+      "status": "active",
+      "goal": "Decide whether any bounded `SaveData`-backed Emporium import surface is safe to expose without promoting unresolved row labels, broader progression fields, or planner behavior too early.",
+      "currentSlice": "Use the checked `multiverse-market-savedata-import-boundary` artifact to keep the active Emporium question narrow: `PlayerProfileHandler.get_Market -> MultiverseMarket` is only the accessor bridge, `PlayerProfileData` stays a flatter wrapper/export surface, `SaveData` is the exact declaring owner for the wider progression block, and the current import-safe subset remains explicitly empty while rows `71-74` stay ordered-only overlap and row identity/remap remain downstream.",
+      "exitCondition": "The repo either names a bounded Emporium import-safe subset from the recovered `SaveData` block with grounded scope and explicit non-goals, or checks that the canonical import-safe subset stays empty until stronger identity evidence exists.",
+      "blockedBy": "Rows `71-74` are only overlap-grounded by order today, while the `69-74` prefab anomaly and incomplete player-facing label remap still block canonical Emporium identity and planner-safe use.",
+      "smallestShippableSlice": "A checked import-surface decision that keeps canonical `state.playerProfile` expansion empty for Emporium, classifies `InscryptionsDone` as wrapper/export-only, classifies `IS71Level` through `IS74Level` as verified-but-blocked overlap rows, and keeps broader `SaveData` progression fields quarantined outside canonical import.",
+      "completedSteps": [
+        "Archive the broader save-owner lane after checking `PlayerProfileHandler.get_Market -> MultiverseMarket` as the accessor bridge and `SaveData` as the exact wider progression owner.",
+        "Promote a dedicated `multiverse-market-savedata-import-boundary` artifact so the active Emporium follow-up is an import-surface decision, not another generic owner search.",
+        "Keep `InscryptionsDone` classified as wrapper/export-only because `PlayerProfileData` already exposes it as a flat summary field.",
+        "Keep `IS71Level` through `IS74Level` classified as verified-but-blocked because they only have grounded ordered overlap to validated rows `71-74`, not final player-facing identity.",
+        "Keep the broader `IS25Level-IS110Level`, trade-counter, and early `Mech*` block quarantined as recovered `SaveData` progression context rather than canonical Emporium import truth.",
+        "Separate this import-surface decision lane from the downstream row `71-74` identity/remap lane so planner work and label recovery do not reopen owner recovery."
+      ],
+      "nextSteps": [
+        "Keep the canonical Emporium import-safe subset explicitly empty unless new evidence grounds a narrower `SaveData`-backed import slice.",
+        "If new import promotion is proposed, require it to name the exact field class, the grounded row subset, and why unresolved `69-74` identity does not leak into canonical `state.playerProfile`.",
+        "Leave row `71-74` player-facing identity/remap work on its separate downstream track instead of mixing it back into this import-surface lane."
+      ],
+      "sources": [
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/systems/spend/multiverse-market-verification.md",
+        "docs/systems/spend/multiverse-market-state-verification.md",
+        "docs/systems/spend/multiverse-market-savedata-import-boundary.md",
+        "docs/unity/unity-audit-playbook.md"
+      ],
+      "artifacts": [
+        "data/multiverse-market-savedata-import-boundary.json",
+        "data/multiverse-market-market-member-boundary.json",
+        "data/multiverse-market-range-boundary.json",
+        "data/multiverse-market-row71-74-identity-boundary.json",
+        "docs/systems/spend/multiverse-market-savedata-import-boundary.md"
+      ],
+      "verified": [
+        "`PlayerProfileHandler.get_Market -> MultiverseMarket` is the checked accessor bridge into the Emporium path.",
+        "`PlayerProfileData` stays a flatter wrapper/export surface rather than the declaring owner for the broader Emporium-adjacent progression cluster.",
+        "`SaveData` directly declares the wider `InscryptionsDone` / `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster.",
+        "`SaveData` directly declares `IS71Level`, `IS110Level`, `InscryptionsDone`, `EsotericR1Trades`, `NecrumR1Trades`, `Mech1Unlocked`, and `Mech1MissionsCompleted` in the checked save table.",
+        "Validated Emporium overlap currently has its strongest grounded foothold at rows `71-74`.",
+        "The checked ordered overlap is `IS71Level -> row 71` through `IS74Level -> row 74`.",
+        "`InscryptionsDone` is currently wrapper/export-only for import decisions, not a new bounded canonical Emporium import.",
+        "No recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import.",
+        "The broader recovered `SaveData` block still includes non-Emporium trade-counter and early `Mech*` progression fields that must stay outside canonical Emporium import decisions."
+      ],
+      "uncertain": [
+        "Whether any future bounded `SaveData`-backed Emporium import slice can be exposed without leaking unresolved row labels into canonical player state.",
+        "Whether rows `71-74` will gain grounded player-facing identity from a non-prefab source, or remain ordered-only overlap for now.",
+        "Whether any wrapper-based descriptive import preview should ever graduate beyond quarantined compatibility state before the row-identity boundary closes."
       ]
     },
     {

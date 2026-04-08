@@ -39,33 +39,31 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - `data/shard-milestone-handoff-boundary.v1.json`
   - `data/shard-save-boundary.v1.json`
 
-### `spend-multiverse-save-model-recovery`
+### `spend-multiverse-savedata-import-surface`
 
 - Status: `active`
-- Goal: recover the declaring save model behind `InscryptionsDone` and the nearby `IS*Level` cluster
+- Goal: decide whether any bounded `SaveData`-backed Emporium import surface is safe to expose without promoting unresolved labels or planner behavior too early
 - Safe carry-forward:
   - `MultiverseMarket` is the real Emporium owner
-  - `InscryptionsDone` is a real metadata field string
-  - the save-side search is narrowed to the PlayerProfile persistence family
   - exact typed recovery now confirms `PlayerProfileHandler.get_Market -> MultiverseMarket` as the checked accessor bridge
   - the bare `Market` symbol is still only a metadata/member-shell clue in the checked boundary
   - exact typed recovery still does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
+  - `PlayerProfileData` is a flatter wrapper/export surface, not the declaring owner for the broader progression cluster
   - exact typed recovery now also confirms `SaveData` as the declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster
-  - the broader `IS*Level` / trade-counter / mech run is not declared directly on checked `MultiverseMarket` or its first nested row-local payloads
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
-  - the wider checked same-number prefab boundary is now stable through `68`, broken across `69-74`, and resumed at `75-110`
-  - checked non-prefab identity-source candidates inside the broken `69-74` band still stop at TextHandler/UI-shell evidence and do not recover player-facing inscription names
-  - a separate checked UABEA serialized field-table export recovers structural containers such as `InscryptionCostList`, `InscryptionAndCostRelations`, and `InscryptionTupleList`, but no player-facing label-bearing field on the checked `MultiverseMarket` row payloads
+  - `IS71Level` through `IS74Level` only ground ordered overlap to rows `71-74`, not final player-facing identity
+  - `InscryptionsDone` is wrapper/export-only for import decisions, not a new bounded canonical Emporium import
+  - no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `state.playerProfile`
 - Still blocked:
-  - the checked boundary still does not recover a typed `Market` field, so `Market` should remain accessor/member-shell naming only unless new evidence appears
-  - the full owned `IS*Level` range is not yet safe import truth
+  - the `69-74` prefab anomaly and incomplete player-facing label remap still block canonical Emporium identity
+  - the recovered wider `SaveData` block mixes Emporium-adjacent rows with trade-counter and early `Mech*` progression fields, so the canonical import-safe subset stays empty
 - Smallest next slice:
-  - decide how much of the recovered `SaveData` declaration block is safe to expose for bounded import support without re-promoting metadata-shell `Market` into a typed owner claim
+  - keep the import-safe subset explicitly empty unless new evidence grounds a narrower `SaveData`-backed Emporium import slice
 - Start here:
   - `docs/systems/spend/multiverse-market-verification.md`
   - `docs/systems/spend/multiverse-market-state-verification.md`
-  - `data/multiverse-market-save-boundary.json`
-  - `data/multiverse-market-market-member-boundary.json`
+  - `docs/systems/spend/multiverse-market-savedata-import-boundary.md`
+  - `data/multiverse-market-savedata-import-boundary.json`
 
 ## Queued next blockers
 
@@ -103,7 +101,7 @@ Use these when the active lanes above close or split.
 ### `spend-multiverse-row-label-remap`
 
 - Goal: finish the validated Emporium row id and label remap after owned-state recovery is stronger
-- Current blocker: the save-model and validated-row owned-state range are not yet strong enough to anchor the remap
+- Current blocker: the active Emporium import-surface lane keeps the canonical import-safe subset empty, and rows `71-74` are still ordered-only overlap without grounded player-facing identity
 - Smallest next slice: checked remap artifact for the currently validated row block
 
 ## Keep separate

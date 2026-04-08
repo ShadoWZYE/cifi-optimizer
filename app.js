@@ -1843,6 +1843,17 @@ function renderSpendPlannerBoundary() {
   const canonical = getCanonicalProfileState();
   const compatibility = getCompatibilityProfileState();
   const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-planner-first-ui-slice");
+  const emporiumTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-multiverse-savedata-import-surface");
+  const tokenShop = state.extractedMechanics?.tokenShop ?? {};
+  const multiverseMarket = state.extractedMechanics?.multiverseMarket ?? {};
+  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
+  const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
+  const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
+  const importedMarketPreview = getImportedMultiverseMarketPreview(
+    importedMarketState,
+    multiverseMarket,
+    state.extractedMechanics?.multiverseMarketRangeBoundary
+  );
   const canonicalInputs = [
     {
       label: "Tokens",
@@ -1912,6 +1923,14 @@ function renderSpendPlannerBoundary() {
       <div class="meta-stack">
         <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
         <ul class="research-step-list">${blockedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${escapeHtml(input.reason)}</li>`).join("")}</ul>
+      </div>
+      <div class="meta-stack">
+        <p class="snapshot-title">Active Emporium import-surface decision</p>
+        <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
+        <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That keeps ${marketMemberSummary.canonicalHostLabel} as the checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is ${marketMemberSummary.exactSaveOwnerLabel}.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
+        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the next safe step is bounded import-surface review rather than planner logic or row remap.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save path and needs review."}</p>
+        <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Grounded SaveData overlap currently stops at ordered rows ${escapeHtml(importedMarketPreview.overlapRangeLabel)}, so the canonical Emporium import-safe subset stays empty while row identity remains unresolved.` : "The current build does not yet expose an overlap-grounded Emporium subset, so the canonical import-safe subset stays empty."}</p>
+        <p class="meta">${Array.isArray(emporiumTrack?.nextSteps) && emporiumTrack.nextSteps.length ? `Emporium next step: ${escapeHtml(emporiumTrack.nextSteps[0])}` : "Emporium next step is still the bounded import-surface decision, not planner logic or generic owner recovery."}</p>
       </div>
       <div class="meta-stack">
         <p class="snapshot-title">Why recommendations stay unavailable</p>
@@ -1987,6 +2006,7 @@ function getResearchTrackOrder(track) {
     "shards-and-loop-guardrails",
     "unified-feed-and-hardening",
     "spend-planner-first-ui-slice",
+    "spend-multiverse-savedata-import-surface",
     "spend-multiverse-save-model-recovery",
     "hunter-related-planning",
     "mech-related-planning",
@@ -2005,6 +2025,7 @@ function getResearchTrackSequenceLabel(track) {
     "shards-and-loop-guardrails": "Sequence 2/5",
     "unified-feed-and-hardening": "Sequence 3/5",
     "spend-planner-first-ui-slice": "Sequence 4/5",
+    "spend-multiverse-savedata-import-surface": "Sequence 4/5",
     "spend-multiverse-save-model-recovery": "Sequence 4/5",
     "hunter-related-planning": "Research intake",
     "mech-related-planning": "Research intake",
@@ -2114,7 +2135,7 @@ function renderResearchTrackSupport(track) {
     `;
   }
 
-  if (track.id === "spend-multiverse-save-model-recovery") {
+  if (track.id === "spend-multiverse-savedata-import-surface") {
     const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
     const validatedCoverage = getMultiverseMarketValidatedCoverage(state.extractedMechanics?.multiverseMarket);
     const metadataSummary = getMultiverseMarketMetadataSummary(state.extractedMechanics?.multiverseMarketMetadataNeighborhood);
@@ -2250,6 +2271,7 @@ function getResearchTrackPhase(track) {
     "shards-and-loop-guardrails": "PR 2",
     "unified-feed-and-hardening": "PR 3 then PR 5 hardening",
     "spend-planner-first-ui-slice": "PR 6 prep slice",
+    "spend-multiverse-savedata-import-surface": "PR 4 successor",
     "spend-multiverse-save-model-recovery": "PR 4 successor",
     "hunter-related-planning": "Research intake only",
     "mech-related-planning": "Research intake only",
@@ -2266,6 +2288,7 @@ function getResearchTrackSource(track) {
     "shard-milestone-payload-recovery": "Grounded shard data",
     "shards-and-loop-guardrails": "Grounded shard data",
     "spend-planner-first-ui-slice": "Canonical PlayerProfile spend inputs",
+    "spend-multiverse-savedata-import-surface": "Extracted Emporium save-side data",
     "spend-multiverse-save-model-recovery": "Extracted Emporium save-side data",
     "unified-feed-and-hardening": "Integration contract",
     "hunter-related-planning": "Research intake",

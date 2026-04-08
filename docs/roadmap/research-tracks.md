@@ -201,9 +201,9 @@ Current active or queued tracks:
 - `shard-milestone-payload-recovery`
   - status: `active`
   - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
-- `spend-multiverse-save-model-recovery`
+- `spend-multiverse-savedata-import-surface`
   - status: `active`
-  - goal: recover the declaring save model behind `InscryptionsDone` and the nearby `IS*Level` cluster so Emporium state can move toward truthful import-ready mapping
+  - goal: decide whether any bounded `SaveData`-backed Emporium import surface is safe to expose without promoting unresolved row labels, broader progression fields, or planner behavior too early
 - `spend-token-shop-row-level-recovery`
   - status: `archived`
   - goal: recovered exact `SaveData` ownership for raw `ATU1Level` through `ATU28Level` TokenShop row levels; follow-up work moves to row remap instead of owner recovery
@@ -218,11 +218,14 @@ Current active or queued tracks:
   - goal: recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane
 - `spend-multiverse-row-label-remap`
   - status: `queued`
-  - goal: finish the validated-row id and label remap after the Emporium save-model track names the owned-state side
+  - goal: finish the validated-row id and label remap after the bounded Emporium import-surface decision lane closes
 
 Superseded parent:
 
 - `spend-planner-from-extracted-data`
   - status: `archived`
   - reason: it mixed multiple independent spend blockers that now have distinct exit conditions and should no longer share one queue item
+- `spend-multiverse-save-model-recovery`
+  - status: `archived`
+  - reason: the save-owner question is now grounded enough that the active follow-up is a narrower `SaveData` import-surface decision, not more generic owner recovery
 
