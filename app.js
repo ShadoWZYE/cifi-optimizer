@@ -1843,7 +1843,7 @@ function renderSpendPlannerBoundary() {
   const tokenShop = state.extractedMechanics?.tokenShop ?? {};
   const multiverseMarket = state.extractedMechanics?.multiverseMarket ?? {};
   const compatibility = getCompatibilityProfileState();
-  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-multiverse-save-model-recovery");
+  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-multiverse-savedata-import-surface");
   const nextUnlockSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
   const importedTokenShopState = compatibility.unmappedSystems?.tokenShop;
   const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
@@ -1884,7 +1884,7 @@ function renderSpendPlannerBoundary() {
         <p class="meta"><code>Inscryptions Done</code> and <code>IS*Level</code> are not yet safe canonical PlayerProfile inputs, so MultiverseMarket recommendations remain blocked.</p>
       </div>
       <div class="meta-stack">
-        <p class="snapshot-title">Active Emporium save-model narrowing</p>
+        <p class="snapshot-title">Active Emporium import-surface decision</p>
         <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
         <p class="meta">${marketMemberSummary.hasSiblingAccessorCluster ? `${marketMemberSummary.accessorLabel} also sits in the same sibling accessor run as ${marketMemberSummary.siblingAccessorLabel}, with matching member shells such as ${marketMemberSummary.siblingMemberLabel}.` : "The checked build does not yet preserve a full sibling accessor and member-shell pattern around the Market handoff."}</p>
         <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That keeps ${marketMemberSummary.canonicalHostLabel} as the checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is ${marketMemberSummary.exactSaveOwnerLabel}.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
@@ -1979,7 +1979,7 @@ function getResearchTrackOrder(track) {
     "shard-milestone-payload-recovery",
     "shards-and-loop-guardrails",
     "unified-feed-and-hardening",
-    "spend-multiverse-save-model-recovery",
+    "spend-multiverse-savedata-import-surface",
     "hunter-related-planning",
     "mech-related-planning",
     "input-automation-intake",
@@ -1996,7 +1996,7 @@ function getResearchTrackSequenceLabel(track) {
     "shard-milestone-payload-recovery": "Sequence 2/5",
     "shards-and-loop-guardrails": "Sequence 2/5",
     "unified-feed-and-hardening": "Sequence 3/5",
-    "spend-multiverse-save-model-recovery": "Sequence 4/5",
+    "spend-multiverse-savedata-import-surface": "Sequence 4/5",
     "hunter-related-planning": "Research intake",
     "mech-related-planning": "Research intake",
     "input-automation-intake": "Research intake",
@@ -2105,7 +2105,7 @@ function renderResearchTrackSupport(track) {
     `;
   }
 
-  if (track.id === "spend-multiverse-save-model-recovery") {
+  if (track.id === "spend-multiverse-savedata-import-surface") {
     const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
     const validatedCoverage = getMultiverseMarketValidatedCoverage(state.extractedMechanics?.multiverseMarket);
     const metadataSummary = getMultiverseMarketMetadataSummary(state.extractedMechanics?.multiverseMarketMetadataNeighborhood);
@@ -2240,7 +2240,7 @@ function getResearchTrackPhase(track) {
     "shard-milestone-payload-recovery": "PR 2 successor",
     "shards-and-loop-guardrails": "PR 2",
     "unified-feed-and-hardening": "PR 3 then PR 5 hardening",
-    "spend-multiverse-save-model-recovery": "PR 4 successor",
+    "spend-multiverse-savedata-import-surface": "PR 4 successor",
     "hunter-related-planning": "Research intake only",
     "mech-related-planning": "Research intake only",
     "input-automation-intake": "Research intake only",
@@ -2255,7 +2255,7 @@ function getResearchTrackSource(track) {
     "playerprofile-boundary-and-imports": "Schema boundary",
     "shard-milestone-payload-recovery": "Grounded shard data",
     "shards-and-loop-guardrails": "Grounded shard data",
-    "spend-multiverse-save-model-recovery": "Extracted Emporium save-side data",
+    "spend-multiverse-savedata-import-surface": "Extracted Emporium save-side data",
     "unified-feed-and-hardening": "Integration contract",
     "hunter-related-planning": "Research intake",
     "mech-related-planning": "Research intake",

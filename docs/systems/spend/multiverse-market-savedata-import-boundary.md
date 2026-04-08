@@ -1,6 +1,6 @@
 # Multiverse Market SaveData Import Boundary
 
-This note records the smallest defensible checked row-order mapping boundary for the recovered `SaveData` Emporium-adjacent block.
+This note records the active follow-up lane after save-owner recovery closed: the smallest defensible checked import-surface boundary for the recovered `SaveData` Emporium-adjacent block.
 
 ## Canonical split
 
@@ -58,3 +58,8 @@ This note records the smallest defensible checked row-order mapping boundary for
 - The wider `IS*Level` run must be treated as part of a larger ordered inscription set, not as isolated import candidates.
 - No recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import.
 - If the wider inscription ordering still cannot be grounded beyond this overlap, the canonical import-safe subset stays explicitly empty.
+
+## Track implication
+
+- This artifact is the bounded successor to the archived `spend-multiverse-save-model-recovery` lane.
+- Keep row identity/remap work separate from this import-surface decision unless a future artifact grounds both in one checked slice.

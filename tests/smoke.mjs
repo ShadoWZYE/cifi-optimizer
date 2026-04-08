@@ -315,7 +315,7 @@ assert.match(appJs, /compatibility\.unmappedSystemState/);
 assert.match(appJs, /No quarantined TokenShop payload is present in the imported PlayerProfile/);
 assert.match(appJs, /No quarantined MultiverseMarket payload is present in the imported PlayerProfile/);
 assert.match(appJs, /The normalizer may also quarantine flat spend-state clues such as <code>TokenBankCap<\/code>, <code>ClaimableBankTokens<\/code>, <code>InscryptionsDone<\/code>, and top-level <code>IS\*Level<\/code> fields instead of dropping them/);
-assert.match(appJs, /Active Emporium save-model narrowing/);
+assert.match(appJs, /Active Emporium import-surface decision/);
 assert.match(appJs, /Partial Emporium import preview/);
 assert.match(appJs, /Grounded save-side overlap currently covers validated Emporium rows \${escapeHtml\(importedMarketPreview\.overlapRangeLabel\)}/);
 assert.match(appJs, /Current imported levels are available for \${importedMarketPreview\.importedOverlapRowCount}\/\${importedMarketPreview\.overlapRowCount} overlap-grounded Emporium rows/);
@@ -1784,51 +1784,41 @@ withRequiredValue(spendTrack, "expected archived spend parent track", (track) =>
     "expected archived spend parent to preserve save-boundary separation"
   );
 });
-const spendSaveModelTrack = snapshot.researchTracks.find((track) => track.id === "spend-multiverse-save-model-recovery");
-withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor track", (track) => {
+const spendSaveOwnerTrack = snapshot.researchTracks.find((track) => track.id === "spend-multiverse-save-model-recovery");
+withRequiredValue(spendSaveOwnerTrack, "expected archived Emporium save-owner track", (track) => {
+  assert.equal(track.status, "archived");
+  assert.match(track.currentSlice, /Archived owner-recovery lane/);
+  assert.equal(track.nextSteps.length, 0);
+});
+const spendImportSurfaceTrack = snapshot.researchTracks.find((track) => track.id === "spend-multiverse-savedata-import-surface");
+withRequiredValue(spendImportSurfaceTrack, "expected Emporium import-surface successor track", (track) => {
   assert.equal(track.status, "active");
-  assert.match(track.currentSlice, /market-member boundary artifacts/);
+  assert.match(track.currentSlice, /`multiverse-market-savedata-import-boundary` artifact/);
   assert.match(track.currentSlice, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/);
-  assert.match(track.currentSlice, /`SaveData` for the exact wider `IS\*Level` \/ trade-counter \/ mech declaring owner/);
+  assert.match(track.currentSlice, /current import-safe subset remains explicitly empty/);
   assert.ok(
-    track.completedSteps.some((step) => /Promote a checked market-member boundary/.test(step)),
-    "expected Emporium successor track to record market-member boundary grounding"
+    track.completedSteps.some((step) => /dedicated `multiverse-market-savedata-import-boundary` artifact/.test(step)),
+    "expected Emporium import-surface track to record the dedicated boundary artifact"
   );
   assert.ok(
-    track.completedSteps.some((step) => /Deepen that boundary with a bare `Market` member-shell clue/.test(step)),
-    "expected Emporium successor track to record Market member-shell narrowing"
+    track.completedSteps.some((step) => /`InscryptionsDone` classified as wrapper\/export-only/.test(step)),
+    "expected Emporium import-surface track to keep InscryptionsDone wrapper-only"
   );
   assert.ok(
-    track.completedSteps.some((step) => /`PlayerProfileHandler`, `playerData`, `GetPlayerProfileData`, `FillPlayerProfileData`, and `ConvertSaveDataToProfileData` bridge clues/.test(step)),
-    "expected Emporium successor track to record the PlayerProfileHandler bridge narrowing"
+    track.completedSteps.some((step) => /`IS71Level` through `IS74Level` classified as verified-but-blocked/.test(step)),
+    "expected Emporium import-surface track to keep overlap rows verified-but-blocked"
   );
   assert.ok(
-    track.completedSteps.some((step) => /Surface overlap-grounded Emporium import preview support/.test(step)),
-    "expected Emporium successor track to record overlap-grounded import preview support"
+    track.completedSteps.some((step) => /broader `IS25Level-IS110Level`, trade-counter, and early `Mech\*` block quarantined/.test(step)),
+    "expected Emporium import-surface track to quarantine the broader SaveData block"
   );
   assert.ok(
-    track.completedSteps.some((step) => /checked `MultiverseMarket` row constants such as `Bonus`, `StartCost`, `CostExponent`, and recovered `MaxLevel`/.test(step)),
-    "expected Emporium successor track to record overlap-row constant preview support"
+    track.nextSteps.some((step) => /canonical Emporium import-safe subset explicitly empty/.test(step)),
+    "expected Emporium import-surface track to keep the canonical subset empty"
   );
   assert.ok(
-    track.completedSteps.some((step) => /remaining levels to the checked max on rows `71-74`/.test(step)),
-    "expected Emporium successor track to record recovered cap progress support"
-  );
-  assert.ok(
-    track.completedSteps.some((step) => /`PlayerProfileHandler`-mediated `playerData -> get_Market -> Market` bridge/.test(step) || /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
-    "expected Emporium successor track to record the narrowed PlayerProfileHandler bridge path"
-  );
-  assert.ok(
-    track.completedSteps.some((step) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(step)),
-    "expected Emporium successor track to record sibling market-side accessor narrowing"
-  );
-  assert.ok(
-    track.completedSteps.some((step) => /saveInfoCache: PlayerProfileData/.test(step) && /does not recover a typed `Market` field/.test(step)),
-    "expected Emporium successor track to record the refreshed typed boundary around PlayerProfileHandler and PlayerProfileData"
-  );
-  assert.ok(
-    track.completedSteps.some((step) => /exact `PlayerProfileData` field table/.test(step) && /rules out flat direct `IS\*Level`/.test(step)),
-    "expected Emporium successor track to record the flat PlayerProfileData-versus-deeper-owner boundary"
+    track.nextSteps.some((step) => /Leave row `71-74` player-facing identity\/remap work on its separate downstream track/.test(step)),
+    "expected Emporium import-surface track to keep row remap separate"
   );
   assert.ok(
     multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
@@ -1837,69 +1827,20 @@ withRequiredValue(spendSaveModelTrack, "expected Emporium save-model successor t
     "expected market-member boundary artifact to preserve the PlayerProfileData direct-field versus missing Market type-map boundary"
   );
   assert.ok(
-    track.completedSteps.some((step) => /exact typed bridge `PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(step)),
-    "expected Emporium successor track to record the exact typed MultiverseMarket bridge"
-  );
-  assert.ok(
-    track.verified.some((line) => /direct `get_Market` accessor clue/.test(line)),
-    "expected Emporium successor track to record the get_Market clue in verified facts"
-  );
-  assert.ok(
-    track.verified.some((line) => /overlap-grounded `71-74` subset/.test(line)),
-    "expected Emporium successor track to record overlap-grounded previewing in verified facts"
-  );
-  assert.ok(
-    track.verified.some((line) => /checked row constants from the `MultiverseMarket` payload/.test(line)),
-    "expected Emporium successor track to record checked overlap-row constants in verified facts"
-  );
-  assert.ok(
-    track.verified.some((line) => /recovered cap progress against checked `MaxLevel` values/.test(line)),
-    "expected Emporium successor track to record recovered overlap-row cap progress in verified facts"
-  );
-  assert.ok(
     track.verified.some((line) => /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/.test(line)),
-    "expected Emporium successor track to record the checked typed MultiverseMarket bridge in verified facts"
-  );
-  assert.ok(
-    track.verified.some((line) => /`PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`/.test(line)),
-    "expected Emporium successor track to record the direct PlayerProfileData field samples in verified facts"
-  );
-  assert.ok(
-    track.verified.some((line) => /checked `PlayerProfileData` field table has no direct `IS\*Level`, `EsotericR\*Trades`, `NecrumR\*Trades`, or early `Mech\*` fields/.test(line)),
-    "expected Emporium successor track to record the flat PlayerProfileData field-table negative boundary in verified facts"
+    "expected Emporium import-surface track to record the checked accessor bridge in verified facts"
   );
   assert.ok(
     track.verified.some((line) => /`SaveData` directly declares `IS71Level`, `IS110Level`, `InscryptionsDone`, `EsotericR1Trades`, `NecrumR1Trades`, `Mech1Unlocked`, and `Mech1MissionsCompleted`/.test(line)),
-    "expected Emporium successor track to record the exact SaveData progression owner in verified facts"
+    "expected Emporium import-surface track to record the exact SaveData progression owner in verified facts"
   );
   assert.ok(
-    track.verified.some((line) => /`PlayerProfileHandler\.saveInfoCache: PlayerProfileData`/.test(line) && /does not recover a typed `Market` field/.test(line)),
-    "expected Emporium successor track to record the typed saveInfoCache field and missing typed Market field in verified facts"
+    track.verified.some((line) => /No recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import/.test(line)),
+    "expected Emporium import-surface track to keep canonical import blocked in verified facts"
   );
   assert.ok(
-    multiverseMarketMarketMemberBoundaryData.missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
-      track.verified.some((line) => /`PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`/.test(line)),
-    "expected verified facts to keep the direct PlayerProfileData field samples separate from a missing typed PlayerProfileData|Market recovery"
-  );
-  assert.ok(
-    track.verified.some((line) => line.includes("`PlayerProfileHandler`") && line.includes("`playerData`") && line.includes("`ConvertSaveDataToProfileData`")),
-    "expected Emporium successor track to record the PlayerProfileHandler bridge clues in verified facts"
-  );
-  assert.ok(
-    multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /direct-wrapper-versus-deeper-owner boundary/i.test(line)),
-    "expected market-member boundary artifact to preserve the narrowed direct-wrapper-versus-deeper-owner boundary"
-  );
-  assert.ok(
-    track.verified.some((line) => /recovers `SaveData` as the declaring save model/.test(line)),
-    "expected Emporium successor track to record the exact SaveData declaring model in verified facts"
-  );
-  assert.ok(
-    track.verified.some((line) => /sibling market-side accessors `get_BM`, `get_ZN`, and `get_TU`/.test(line)),
-    "expected Emporium successor track to record sibling market-side accessors in verified facts"
-  );
-  assert.ok(
-    track.verified.some((line) => /`IS\*Level`, Necrum trade-counter, and early `Mech\*` fields/.test(line)),
-    "expected Emporium successor track to record the broader progression field run in verified facts"
+    track.uncertain.some((line) => /bounded `SaveData`-backed Emporium import slice/.test(line)),
+    "expected Emporium import-surface track to keep the bounded import question open"
   );
   assert.ok(
     multiverseMarketMarketMemberBoundaryData.currentBoundary.some((line) => /does not place that wider run directly on MultiverseMarket/i.test(line)),
@@ -2476,7 +2417,7 @@ assert.match(shardminingMetadataNeighborhoodDoc, /get_SU1FinalUnlockReq/);
 assert.match(shardUpgradeInfoMetadataNeighborhoodDoc, /FinalSU29Bonus2/);
 assert.match(shardUpgradeInfoMetadataNeighborhoodDoc, /<FastBuyEnum>d__1429/);
 assert.match(extractionRankingDoc, /# Extraction Candidate Ranking/);
-assert.match(extractionRankingDoc, /spend-multiverse-save-model-recovery/);
+assert.match(extractionRankingDoc, /spend-multiverse-savedata-import-surface/);
 assert.match(extractionRankingDoc, /filter by track or family id/i);
 assert.match(playerProfileSchemaDoc, /compatibility\.unmappedSystemState\.shardMilestoneState/);
 assert.match(playerProfileSchemaDoc, /The active manual Profile form should only show values a typical player can quickly provide from the game/);
@@ -2584,7 +2525,7 @@ assert.match(appJs, /function getResearchTrackStatus/);
 assert.match(appJs, /function getResearchTrackProgressLabel/);
 assert.match(appJs, /from "\.\/recommendation-contract\.js"/);
 assert.match(appJs, /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/);
-assert.match(appJs, /"spend-multiverse-save-model-recovery": "PR 4 successor"/);
+assert.match(appJs, /"spend-multiverse-savedata-import-surface": "PR 4 successor"/);
 assert.match(appJs, /function importPlayerProfileJson/);
 assert.match(appJs, /function exportPlayerProfileJson/);
 assert.match(appJs, /function renderPlayerProfileBoundarySummary/);

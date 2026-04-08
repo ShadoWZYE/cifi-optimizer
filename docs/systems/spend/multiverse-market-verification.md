@@ -198,10 +198,9 @@ Current grounded conclusion:
 
 ## Next allowed slice
 
-1. determine which save model actually declares `InscryptionsDone` and the nearby `IS*Level` fields
-2. recover player-owned inscription levels or equivalent next-purchase state from that same save-side neighborhood
-3. extend parsing past the current validated late block
-4. finish the inscription-number and prefab-to-label remap, especially across the `69-74` prefab override band
-5. only then add spend-planner recommendations
+1. keep the active lane on the bounded `SaveData` import-surface decision and leave the canonical Emporium import-safe subset explicitly empty unless stronger identity evidence appears
+2. keep any player-owned inscription-level preview descriptive and quarantined unless a narrower grounded import slice is checked
+3. finish the inscription-number and prefab-to-label remap, especially across the `69-74` prefab override band, on its separate downstream lane
+4. only then revisit whether any canonical Emporium import or spend-planner recommendation is justified
 
 

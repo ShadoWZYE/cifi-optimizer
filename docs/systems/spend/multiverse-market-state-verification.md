@@ -2,7 +2,7 @@
 
 This document records what the repo can currently say about the saved-state side of the `MultiverseMarket` track.
 
-It now includes exact metadata field strings that sit around the Emporium state lane, exact typed bridge recovery for the direct `get_Market` accessor, and an exact negative result for typed `Market` field recovery on the checked PlayerProfile-side owners. The current goal is narrower than import support: keep the checked accessor bridge, the metadata-only `Market` shell, and the wider save-owner recovery separated so the repo does not silently treat `Market` as a typed declaring field without evidence.
+It now includes exact metadata field strings that sit around the Emporium state lane, exact typed bridge recovery for the direct `get_Market` accessor, and an exact negative result for typed `Market` field recovery on the checked PlayerProfile-side owners. Save-owner recovery is now grounded enough to archive that broader lane; the active follow-up is the narrower `SaveData` import-surface decision that keeps the checked accessor bridge, the metadata-only `Market` shell, and the wider save-owner recovery separated so the repo does not silently promote canonical Emporium imports without evidence. Until stronger evidence appears, `Market` remains accessor/member-shell naming only.
 
 ## Saved-state narrowing from this pass
 
@@ -185,9 +185,9 @@ Current grounded conclusion:
 
 ## What remains unresolved
 
-- the authoritative saved-state field range or list for owned inscription levels
+- the authoritative saved-state field range or list for owned inscription levels that is safe to treat as canonical Emporium import truth
 - whether the metadata-only `Market` shell corresponds to a real typed field anywhere on the checked save path, or only to accessor/property naming around the checked bridge
-- whether downstream import work should read the wider `SaveData` declaration block directly, or continue using narrower wrapper-specific import surfaces for MVP safety
+- whether downstream import work should ever read the wider `SaveData` declaration block directly, or continue using narrower wrapper-specific or compatibility-only surfaces for MVP safety
 
 ## Checked `IS*Level` to inscription-row boundary
 
