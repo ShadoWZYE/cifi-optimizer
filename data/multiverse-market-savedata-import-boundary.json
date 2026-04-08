@@ -124,9 +124,10 @@
   "boundedImportConclusion": {
     "importSafeSubset": [],
     "exactImportSafeSubsetLabel": "none",
-    "currentBoundary": "Only the ordered row-position mapping IS71Level -> row 71 through IS74Level -> row 74 is currently grounded. The wider inscription ordering and final row labels remain unresolved enough that no recovered SaveData field is yet safe to promote into canonical PlayerProfile import.",
+    "currentBoundary": "The active import-surface decision currently ends at none admissible. Only the ordered row-position mapping IS71Level -> row 71 through IS74Level -> row 74 is grounded, and that ordered overlap is not enough to expose any recovered SaveData field as canonical PlayerProfile import. No recovered SaveData field is currently safe to promote into canonical PlayerProfile import.",
     "blockedBy": [
       "do not reopen the metadata-only Market typed-field question without new direct evidence",
+      "do not treat ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery",
       "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap",
       "do not do planner integration from the recovered SaveData block in this slice"
     ]
@@ -165,7 +166,7 @@
         "blockedBy": [
           "checked mapping is row-order only, not final row-label recovery",
           "the wider inscription ordering outside rows 71-74 remains unresolved",
-          "canonical import promotion stays blocked until the row mapping is grounded beyond ordered overlap"
+          "canonical import promotion stays blocked because ordered overlap is not an admissibility result"
         ],
         "evidence": [
           {

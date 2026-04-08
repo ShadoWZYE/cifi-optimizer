@@ -1829,7 +1829,7 @@ withRequiredValue(spendImportSurfaceTrack, "expected Emporium import-surface suc
   assert.equal(track.status, "active");
   assert.match(track.currentSlice, /`multiverse-market-savedata-import-boundary` artifact/);
   assert.match(track.currentSlice, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/);
-  assert.match(track.currentSlice, /current import-safe subset remains explicitly empty/);
+  assert.match(track.currentSlice, /active admissibility result remains none/);
   assert.ok(
     track.completedSteps.some((step) => /dedicated `multiverse-market-savedata-import-boundary` artifact/.test(step)),
     "expected Emporium import-surface track to record the dedicated boundary artifact"

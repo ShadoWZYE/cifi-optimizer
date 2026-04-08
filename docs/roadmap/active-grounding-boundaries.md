@@ -42,7 +42,7 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
 ### `spend-multiverse-savedata-import-surface`
 
 - Status: `active`
-- Goal: decide whether any bounded `SaveData`-backed Emporium import surface is safe to expose without promoting unresolved labels or planner behavior too early
+- Goal: reach one bounded admissibility decision for `SaveData`-backed Emporium import without mixing that decision with row identity/remap work or planner behavior
 - Safe carry-forward:
   - `MultiverseMarket` is the real Emporium owner
   - exact typed recovery now confirms `PlayerProfileHandler.get_Market -> MultiverseMarket` as the checked accessor bridge
@@ -51,7 +51,7 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - `PlayerProfileData` is a flatter wrapper/export surface, not the declaring owner for the broader progression cluster
   - exact typed recovery now also confirms `SaveData` as the declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
-  - `IS71Level` through `IS74Level` only ground ordered overlap to rows `71-74`, not final player-facing identity
+  - `IS71Level` through `IS74Level` only ground ordered overlap to rows `71-74`, not import admissibility or final player-facing identity
   - `InscryptionsDone` is wrapper/export-only for import decisions, not a new bounded canonical Emporium import
   - no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `state.playerProfile`
 - Still blocked:
