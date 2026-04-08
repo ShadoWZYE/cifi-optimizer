@@ -30,6 +30,11 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - generic TokenShop text hooks such as `SetAllTokenShopTexts` and `SetTokenTexts`
   - the `NewTokenUPGPrefab.*` named-object roster
   - the player-facing row-title roster containing strings such as `Trinity Booster One`, `Academy Booster`, `Tokens Booster T3`, and `Campaign Fragments`
+- A tighter committed read now narrows the text-hook surface further:
+  - `SetAllTokenShopTexts` and `SetTokenTexts` sit in the checked `token` neighborhood with `CheckFirstTokenMenuTime`, `ClaimTokenium`, multiple `Tokens In Bank` formula strings, `TokenClaimRecolor`, and `TokenShopRecoloring`
+  - that same checked neighborhood does not preserve any `ATU*Button` or `ATU*Content` shell
+  - that same checked neighborhood does not preserve any `NewTokenUPGPrefab.*` object identity
+  - that same checked neighborhood does not preserve any final player-facing TokenShop row title
 
 ## Grounded conclusion
 
@@ -39,6 +44,7 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
 - Late `ATU` buy hooks also now sit inside a checked named tier-buy neighborhood instead of standing alone.
+- The generic TokenShop text-hook surface does not recover one additional shell-to-title or shell-to-prefab bridge.
 - That is still not the same as recovering grounded row identity for the whole family.
 - The immediate adjacency test does not justify a reusable “neighbor rows follow the same remap pattern” rule:
   - `ATU1` clears because the repo has one more three-surface convergence across owner fields, effect hooks, action hooks, and prefab identity.
@@ -54,10 +60,10 @@ The remaining missing pieces are still checked joins:
 - no checked repo artifact currently ties `ATU1Button` or `ATU2Button` directly to a final player-facing TokenShop row title string
 - no checked repo artifact currently joins the remaining `ATU*Button` or `ATU*Content` path ids directly to specific `NewTokenUPGPrefab.*` object identities
 - no checked repo artifact currently ties the remaining concrete `ATU` numbers directly to final player-facing TokenShop row titles
-- no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` neighborhood to a specific `ATU` row number
+- no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` token-menu or token-bank neighborhood to a specific `ATU` row number
 - the repo still has separate checked local clusters around most rows:
   - most `ATU`-numbered getter and buy-hook metadata
-  - generic TokenShop text-handler hooks
+  - generic TokenShop text-handler hooks in a token-menu or token-bank cluster
   - most prefab names and player-facing row-title strings in `level0`
 
 Because those joins are still missing, the repo should not:
@@ -70,6 +76,7 @@ Because those joins are still missing, the repo should not:
 ## Grounded ATU3 follow-up conclusion
 
 - `ATU3Button` does not yet clear as one grounded bridge.
+- `SetAllTokenShopTexts` and `SetTokenTexts` also do not clear as a grounded bridge surface for any unresolved `ATU` shell.
 - The repo now has a tighter blocked conclusion for this exact shell:
   - committed evidence proves a cells-domain split, not a resolved row identity
   - `CellBoost*` still grounds the adjacent owner-field block on the `TokenShop` payload
@@ -77,6 +84,12 @@ Because those joins are still missing, the repo should not:
   - `NewDiamondUPGPrefab.Specials.CellsBoost` with `>Diamond Upgrade 10 - CellsBoost` proves one separate diamond-special identity surface
   - `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` prove separate token-prefab and title surfaces
   - no checked repo artifact joins any of those named cells surfaces directly to `ATU3Button` or path id `15810`
+- The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
+  - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
+  - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`
+  - the checked prefab roster remains separate and includes names such as `NewTokenUPGPrefab.T2.DailyTokens`, `NewTokenUPGPrefab.T2.DuoBoosterFour`, `NewTokenUPGPrefab.T3.TrinityBoosterOne`, `NewTokenUPGPrefab.T5.CampaignFragments`, and `NewTokenUPGPrefab.T5.UltimaCells`
+  - the checked player-facing title roster remains separate and includes names such as `Token Ultima: Cells`, `Tokens Booster T2`, `Tokens Booster T3`, `Trinity Booster One`, and `Academy Booster`
+  - no checked repo artifact crosses from that generic text-hook cluster to one concrete `ATU` shell, exact prefab identity, or final player-facing row title
 
 ## Allowed implication
 
@@ -91,7 +104,7 @@ Recover one more checked identity bridge from the still-unresolved `ATU`-numbere
 - a specific `NewTokenUPGPrefab.*` object, or
 - a final player-facing row title
 
-The strongest next candidate is no longer “find any first bridge.” It is specifically:
+The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, so the next honest candidate is specifically:
 
 - for `ATU3`, run a cells-domain disambiguation pass that tries to join `ATU3Button` path id `15810` to one of three exact committed surfaces:
   - `BuyCellBoost`
