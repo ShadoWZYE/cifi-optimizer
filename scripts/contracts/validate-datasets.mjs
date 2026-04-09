@@ -2490,6 +2490,7 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   expectArray(boundary.marketWrapperTypeClues, "multiverse market market-member boundary marketWrapperTypeClues must be an array");
   expectRecord(boundary.typedBridgeRecovery, "multiverse market market-member boundary typedBridgeRecovery must be an object");
   expectRecord(boundary.typedHandlerFieldRecovery, "multiverse market market-member boundary typedHandlerFieldRecovery must be an object");
+  expectRecord(boundary.typedProfileConversionRecovery, "multiverse market market-member boundary typed profile conversion recovery must be an object");
   expectRecord(boundary.typedPlayerProfileFieldTableRecovery, "multiverse market market-member boundary typedPlayerProfileFieldTableRecovery must be an object");
   expectRecord(boundary.typedSaveDataFieldTableRecovery, "multiverse market market-member boundary typedSaveDataFieldTableRecovery must be an object");
   expectArray(boundary.directPlayerProfileFieldSamples, "multiverse market market-member boundary directPlayerProfileFieldSamples must be an array");
@@ -2536,6 +2537,11 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   assert.equal(boundary.typedHandlerFieldRecovery.fieldOwner, "PlayerProfileHandler", "multiverse market market-member boundary typed handler field owner drifted");
   assert.equal(boundary.typedHandlerFieldRecovery.fieldName, "saveInfoCache", "multiverse market market-member boundary typed handler field name drifted");
   assert.equal(boundary.typedHandlerFieldRecovery.fieldType, "PlayerProfileData", "multiverse market market-member boundary typed handler field type drifted");
+  assert.equal(boundary.typedProfileConversionRecovery.bridgeOwner, "PlayerProfileHandler", "multiverse market market-member boundary typed profile conversion owner drifted");
+  assert.equal(boundary.typedProfileConversionRecovery.bridgeMethod, "ConvertSaveDataToProfileData", "multiverse market market-member boundary typed profile conversion method drifted");
+  assert.equal(boundary.typedProfileConversionRecovery.sourceType, "SaveData", "multiverse market market-member boundary typed profile conversion source type drifted");
+  assert.equal(boundary.typedProfileConversionRecovery.returnType, "PlayerProfileData", "multiverse market market-member boundary typed profile conversion return type drifted");
+  assert.equal(boundary.typedProfileConversionRecovery.extraParameterType, "System.DateTime", "multiverse market market-member boundary typed profile conversion extra parameter type drifted");
   assert.equal(boundary.typedPlayerProfileFieldTableRecovery.fieldOwner, "PlayerProfileData", "multiverse market market-member boundary typed PlayerProfile field-table owner drifted");
   assert.equal(boundary.typedPlayerProfileFieldTableRecovery.fieldCount, 89, "multiverse market market-member boundary typed PlayerProfile field-count drifted");
   assert.equal(boundary.typedPlayerProfileFieldTableRecovery.methodCount, 1, "multiverse market market-member boundary typed PlayerProfile method-count drifted");
@@ -2591,6 +2597,7 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       `${boundary.playerProfileHandlerBridgeClues.length} PlayerProfileHandler bridge clues`,
       `${boundary.directMemberHandoffClues.length} direct member-handoff clues`,
       "PlayerProfileHandler saveInfoCache field is recovered as PlayerProfileData while no typed Market field is recovered on PlayerProfileHandler or PlayerProfileData",
+      "PlayerProfileHandler.ConvertSaveDataToProfileData bridges SaveData back into PlayerProfileData without recovering a typed Market field",
       "PlayerProfileData direct field table is recovered as 89 flat fields and 1 method with no direct IS/trade/mech members",
       "SaveData direct field table is recovered as 4461 fields and 1 method with direct IS/trade/mech ownership",
       `${boundary.directPlayerProfileFieldSamples.length} direct PlayerProfileData field samples`,
