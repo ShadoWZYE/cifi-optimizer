@@ -46,6 +46,7 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
 - Safe carry-forward:
   - `MultiverseMarket` is the real Emporium owner
   - exact typed recovery now confirms `PlayerProfileHandler.get_Market -> MultiverseMarket` as the checked accessor bridge
+  - exact typed recovery now also confirms `PlayerProfileHandler.ConvertSaveDataToProfileData(SaveData, System.DateTime) -> PlayerProfileData` as the checked save-to-profile conversion bridge
   - the bare `Market` symbol is still only a metadata/member-shell clue in the checked boundary
   - exact typed recovery still does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
   - `PlayerProfileData` is a flatter wrapper/export surface, not the declaring owner for the broader progression cluster

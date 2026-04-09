@@ -2073,6 +2073,13 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedHandlerFieldRecov
   fieldName: "saveInfoCache",
   fieldType: "PlayerProfileData"
 });
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedProfileConversionRecovery, {
+  bridgeOwner: "PlayerProfileHandler",
+  bridgeMethod: "ConvertSaveDataToProfileData",
+  sourceType: "SaveData",
+  returnType: "PlayerProfileData",
+  extraParameterType: "System.DateTime"
+});
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedPlayerProfileFieldTableRecovery, {
   fieldOwner: "PlayerProfileData",
   fieldCount: 89,
@@ -2171,6 +2178,7 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.deeperMarketOwnerStatu
 assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBoundary, [
   /PlayerProfileHandler declares get_Market with return type MultiverseMarket/,
   /saveInfoCache as a typed PlayerProfileData field/,
+  /ConvertSaveDataToProfileData\(SaveData saveData, System\.DateTime lastCloudSaveDate\) -> PlayerProfileData/,
   /PlayerProfileData field table has 89 direct fields and 1 method/,
   /SaveData declares a 4461-field save table with 1 method/,
   /SaveData the current declaring owner/,

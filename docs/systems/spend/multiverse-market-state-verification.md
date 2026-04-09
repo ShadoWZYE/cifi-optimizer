@@ -80,6 +80,8 @@ The checked boundary artifact for this handoff now preserves the stronger repo-l
   - `ShardMining`
 - exact typed bridge recovery:
   - `PlayerProfileHandler.get_Market -> MultiverseMarket`
+- exact typed save-to-profile conversion recovery:
+  - `PlayerProfileHandler.ConvertSaveDataToProfileData(SaveData saveData, System.DateTime lastCloudSaveDate) -> PlayerProfileData`
 - direct `PlayerProfileData` field samples recovered exactly:
   - `InscryptionsDone`
   - `MechsOwned`
@@ -93,6 +95,7 @@ Current grounded conclusion:
 - the strongest current repo-local handoff is no longer just "PlayerProfile family somewhere"
 - exact typed recovery now confirms that `PlayerProfileHandler.get_Market` returns `MultiverseMarket`, so the direct handoff itself is checked rather than inferred only from nearby strings
 - the same exact typed probe also confirms that `PlayerProfileHandler` only exposes `saveInfoCache: PlayerProfileData` as a typed save-side field in the checked target, and it does not recover a typed `Market` field on `PlayerProfileHandler` itself
+- exact typed recovery now also confirms that `PlayerProfileHandler.ConvertSaveDataToProfileData(SaveData saveData, System.DateTime lastCloudSaveDate) -> PlayerProfileData`, which gives the checked `SaveData` owner a direct typed conversion bridge back into the flatter `PlayerProfileData` export/wrapper surface without promoting a typed `Market` field
 - exact typed recovery separately confirms that `PlayerProfileData` directly declares `InscryptionsDone`, `MechsOwned`, and `GadgetLevels` as string fields, while the same probe does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileData`
 - exact typed recovery now also confirms that the checked `PlayerProfileData` field table has `89` direct fields and `1` method, and none of those direct fields are named `IS71Level`, `IS110Level`, `EsotericR1Trades`, `NecrumR1Trades`, `Mech1Unlocked`, or `Mech1MissionsCompleted`
 - the same exact typed `PlayerProfileData` probe only recovers `PlayerProfileData+GemData` as a nested typed child in the checked field table, so the wider Emporium progression run is not recovered as a direct typed `PlayerProfileData` child beside the flat `InscryptionsDone`, `MechsOwned`, and `GadgetLevels` wrappers
@@ -364,6 +367,7 @@ Current grounded conclusion:
 - It is still not safe to add canonical `Inscryptions Done` or inscription-level fields to `state.playerProfile`.
 - It is now safe to treat `InscryptionsDone` and nearby `IS*Level` strings as grounded metadata field clues for future save-side mapping work.
 - It is now safe to treat `PlayerProfileHandler.get_Market -> MultiverseMarket` as a checked typed bridge, `PlayerProfileHandler.saveInfoCache` as a checked `PlayerProfileData` field, and the first nested `MultiverseMarket` payloads as row-local only.
+- It is now safe to treat `PlayerProfileHandler.ConvertSaveDataToProfileData(SaveData, System.DateTime) -> PlayerProfileData` as a checked typed conversion bridge from the recovered `SaveData` owner back into the flatter profile-side wrapper surface.
 - It is now safe to treat flat direct `PlayerProfileData` ownership of the wider `IS*Level` / trade-counter / mech run as ruled out in the checked field table, even though `PlayerProfileData` still exposes flat wrappers such as `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`.
 - It is now safe to treat `SaveData` as the exact declaring save owner for the wider `IS*Level` / trade-counter / mech progression cluster.
 - It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
