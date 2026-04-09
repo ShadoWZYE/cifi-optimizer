@@ -63,5 +63,5 @@ Current grounded conclusion:
 - it strengthens structural row-container recovery, not player-facing label recovery
 - no indirect catalog/relation join is recovered from the checked repo-local evidence
 - it does not help rows `69-74` join back to the settled ordered mapping as final player-facing identities
-- rows `69-74` are now grounded by live UI evidence only; this serialized-export lane still does not recover a repo-local label source for them
+- rows `69-74` already keep their ordered identity through the same-number chain; this serialized-export lane still does not recover a repo-local player-facing effect or label text source for them
 - the canonical import-safe subset stays empty

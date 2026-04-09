@@ -2943,28 +2943,27 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
   assert.equal(boundary.playerFacingIdentitySourceBoundary.helpsRows6974, true, "multiverse market row 69-74 identity-source boundary helpsRows6974 drifted");
   assert.deepEqual(boundary.playerFacingIdentitySourceBoundary.identityStillBlocked, [], "multiverse market row 69-74 identity-source boundary blocked rows must now be empty");
 
-  assert.match(stateDoc, /## Checked row `69-74` player-facing identity-source boundary/, "multiverse market state verification doc must expose the row 69-74 identity-source boundary section");
-  assert.match(stateDoc, /no stable repo-local player-facing identity source is currently recoverable for rows `69-74`/i, "multiverse market state verification doc must preserve the repo-local negative boundary");
-  assert.match(stateDoc, /the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly/i, "multiverse market state verification doc must preserve the live UI identity recovery");
+  assert.match(stateDoc, /## Checked row `69-74` player-facing text-provenance boundary/, "multiverse market state verification doc must expose the row 69-74 text-provenance boundary section");
+  assert.match(stateDoc, /row identity for rows `69-74` is already carried by the same-number chain/i, "multiverse market state verification doc must preserve the structural row identity conclusion");
   assert.match(stateDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market state verification doc must preserve the remapped serialized-id blocker");
   assert.match(stateDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i, "multiverse market state verification doc must preserve the tmp probe negative boundary");
-  assert.match(verificationDoc, /## Narrow row 69-74 identity-source boundary/, "multiverse market verification doc must expose the narrow row 69-74 identity-source boundary section");
+  assert.match(verificationDoc, /## Narrow row 69-74 text-provenance boundary/, "multiverse market verification doc must expose the narrow row 69-74 text-provenance boundary section");
   assert.match(verificationDoc, /THMarkets: TextHandlerMarkets/, "multiverse market verification doc must preserve the THMarkets metadata join clue");
   assert.match(verificationDoc, /InscryptionsList: List<GameObject>/, "multiverse market verification doc must preserve the InscryptionsList metadata join clue");
   assert.match(verificationDoc, /the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`/i, "multiverse market verification doc must preserve the direct string negative boundary");
-  assert.match(verificationDoc, /the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly/i, "multiverse market verification doc must preserve the live UI identity recovery");
+  assert.match(verificationDoc, /the remaining unresolved lane is the actual game-side player-facing effect or label text source/i, "multiverse market verification doc must preserve the text-provenance blocker");
   assert.match(verificationDoc, /direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market verification doc must preserve the remapped serialized-id negative boundary");
   assert.match(verificationDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i, "multiverse market verification doc must preserve the tmp probe negative boundary");
 
   return {
     id: "multiverse-market-row69-74-identity-source-boundary",
-    label: "Multiverse market row 69-74 identity-source boundary",
+    label: "Multiverse market row 69-74 text-provenance boundary",
     classification: "extracted-mechanics",
     stats: [
       `${boundary.settledBrokenPrefabBand.length} checked broken-band rows`,
-      `${boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered.length} recovered player-facing identity sources`,
+      `${boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered.length} structurally grounded row identities`,
       `${boundary.playerFacingIdentitySourceBoundary.identityStillBlocked.length} unresolved row identities`,
-      "Rows 69-74 are now grounded by live UI screenshots while the 57-62 relation stays bounded as internal shell metadata only"
+      "Rows 69-74 keep structural row identity while player-facing text provenance remains unresolved and the 57-62 relation stays shell metadata only"
     ]
   };
 }
@@ -3245,7 +3244,7 @@ function validateMultiverseMarketNearbyIdentityBindingPattern(pattern, stateDoc,
   assert.match(verificationDoc, /## Nearby checked identity-binding pattern/, "multiverse market verification doc must expose the nearby identity-binding pattern section");
   assert.match(verificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`/, "multiverse market verification doc must preserve the row 78 same-number binding chain");
   assert.match(verificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/, "multiverse market verification doc must preserve the row 83 same-number binding chain");
-  assert.match(verificationDoc, /does not ground rows `69-74` by itself/i, "multiverse market verification doc must preserve the negative carryover for rows 69-74");
+  assert.match(verificationDoc, /does not recover the missing player-facing text provenance for rows `69-74`/i, "multiverse market verification doc must preserve the negative carryover for rows 69-74");
   assert.match(verificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i, "multiverse market verification doc must preserve the recovered remap-band explanation");
 
   return {
@@ -3255,7 +3254,7 @@ function validateMultiverseMarketNearbyIdentityBindingPattern(pattern, stateDoc,
     stats: [
       `${pattern.checkedPositiveBindings.length} checked positive binding examples`,
       `${pattern.recoveredPattern.checkedNegativeCarryoverRows.length} unresolved carryover rows`,
-      "Nearby identity binding now checks direct same-number joins without widening row 69-74 identity"
+      "Nearby identity binding now checks direct same-number joins without claiming the missing 69-74 text source"
     ]
   };
 }
@@ -3366,7 +3365,7 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
   assert.match(verificationDoc, /## Wider checked inscription numbering-stability boundary/, "multiverse market verification doc must expose the wider numbering-stability boundary section");
   assert.match(verificationDoc, /ChrystosEmporiumUpgrade69-ID57/, "multiverse market verification doc must preserve the earliest broken prefab row");
   assert.match(verificationDoc, /ChrystosEmporiumUpgrade110-ID110/, "multiverse market verification doc must preserve the far-end stable resume evidence");
-  assert.match(verificationDoc, /this wider numbering boundary still does not provide a repo-local row-label source for rows `69-74`, even though live UI evidence now grounds those rows directly/i, "multiverse market verification doc must preserve the widened numbering boundary conclusion");
+  assert.match(verificationDoc, /this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally/i, "multiverse market verification doc must preserve the widened numbering boundary conclusion");
 
   return {
     id: "multiverse-market-inscription-numbering-stability-boundary",

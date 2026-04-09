@@ -72,6 +72,14 @@ This is not a list of open hypotheses. It is a compact list of paths that should
   - `docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md`
   - `data/multiverse-market-shell-row-prediction-boundary.json`
 
+### Do not keep treating rows `69-74` as identity-blocked by the shell anomaly
+
+- Current checked result: row identity is already carried by the same-number chain `SaveData.ISNLevel -> ISNID -> BuyISN/SetISNCostText -> row payload ID/Level/ISObject`
+- Why this stays closed: the remaining blocker is not row identity, but the actual game-side player-facing effect/label text source for Emporium rows
+- Source anchors:
+  - `docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md`
+  - `docs/systems/spend/multiverse-market-verification.md`
+
 ### Do not treat Daily Tokenium as a TokenShop-only lane
 
 - Current checked result: Daily Tokenium is currently best grounded as an Academy or Farm Mission reward lane that multiple modifier families touch

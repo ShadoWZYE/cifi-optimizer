@@ -2354,9 +2354,8 @@ assert.deepEqual(
 assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, []);
 assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.helpsRows6974, true);
 assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.identityStillBlocked, []);
-assert.match(multiverseMarketStateVerificationDoc, /## Checked row `69-74` player-facing identity-source boundary/);
-assert.match(multiverseMarketStateVerificationDoc, /no stable repo-local player-facing identity source is currently recoverable for rows `69-74`/i);
-assert.match(multiverseMarketStateVerificationDoc, /the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly/i);
+assert.match(multiverseMarketStateVerificationDoc, /## Checked row `69-74` player-facing text-provenance boundary/);
+assert.match(multiverseMarketStateVerificationDoc, /row identity for rows `69-74` is already carried by the same-number chain/i);
 assert.match(multiverseMarketStateVerificationDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i);
 assert.match(multiverseMarketStateVerificationDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i);
 assert.equal(multiverseMarketSerializedLabelSourceBoundaryData.dataset, "multiverse-market-serialized-label-source-boundary");
@@ -2457,7 +2456,7 @@ assert.match(multiverseMarketStateVerificationDoc, /ChrystosEmporiumUpgrade83-ID
 assert.match(multiverseMarketVerificationDoc, /## Nearby checked identity-binding pattern/);
 assert.match(multiverseMarketVerificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`/);
 assert.match(multiverseMarketVerificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/);
-assert.match(multiverseMarketVerificationDoc, /does not ground rows `69-74` by itself/i);
+assert.match(multiverseMarketVerificationDoc, /does not recover the missing player-facing text provenance for rows `69-74`/i);
 assert.match(multiverseMarketVerificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i);
 assert.equal(multiverseMarket6974AnomalyProvenanceData.dataset, "multiverse-market-69-74-anomaly-provenance");
 assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.sameNumberAlignmentLayers, ["IS69Level through IS74Level", "IS69ID through IS74ID", "BuyIS69 through BuyIS74"]);

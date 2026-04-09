@@ -403,7 +403,7 @@
     },
     {
       "id": "multiverse-market-row69-74-identity-source-boundary",
-      "label": "Multiverse market row 69-74 identity-source boundary",
+      "label": "Multiverse market row 69-74 text-provenance boundary",
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-row69-74-identity-source-boundary.json"

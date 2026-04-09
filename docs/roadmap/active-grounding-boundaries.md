@@ -58,7 +58,7 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - `InscryptionsDone` is wrapper/export-only for import decisions, not a new bounded canonical Emporium import
   - no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `state.playerProfile`
 - Still blocked:
-  - canonical Emporium identity is still blocked even though live UI now grounds rows `69-74`, because the repo still lacks a broader canonical row-label/import-safe join and the prefab anomaly remains only shell metadata
+  - canonical Emporium import remains blocked even though row identity is now structurally grounded, because the repo still lacks the actual game-side player-facing effect/label text provenance and a broader canonical import-safe join
   - the recovered wider `SaveData` block still mixes Emporium-adjacent rows with trade-counter and early `Mech*` progression fields, so canonical import-safe identity stays empty even though the exact `IS1Level-IS110Level` span is compatibility-safe raw import
   - the only remaining save-owner seam is whether the metadata-only `Market` shell ever resolves to a real typed wrapper field beyond the checked accessor bridge; the checked declaring owner for the current cluster is already closed on `SaveData`
 - Smallest next slice:

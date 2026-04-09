@@ -209,7 +209,7 @@ Current grounded conclusion:
 - This is grounded because each of those rows is present in the validated row dataset, each has checked `SetIS71CostText` through `SetIS74CostText` and `BuyIS71` through `BuyIS74` hooks, and the same numbers are directly recovered as `SaveData` fields.
 - This is still not final row-label recovery. The repo-local evidence does not yet recover player-facing labels for rows `71-74`, and it does not yet ground a broader ordered remap outside `71-74`.
 
-## Checked row `69-74` player-facing identity-source boundary
+## Checked row `69-74` player-facing text-provenance boundary
 
 - The numbering boundary is settled and separate from player-facing identity source:
   - `IS69Level` through `IS74Level`
@@ -225,12 +225,12 @@ Current grounded conclusion:
   - the raw `tmp-multiverse-row-text-probe.json` continuation is now checked directly: `SetIS69BaseBonusText` stays in a bonus-presentation family, while `ClearISObjects`, `ClearISMaxLevelObjects`, `SetISMaxLevelObjects`, `THMarkets`, and `InscryptionsList` stay structural UI-shell hooks rather than a recovered row-title source
   - the supplied live UI screenshots directly show `INSCRYPTION #69` through `INSCRYPTION #74` in order between visible neighbors `INSCRYPTION #68` and `INSCRYPTION #75`, with row-local bonus texts `CELLS GAINED`, `SCIENTISTS COST REDUCTION`, `KDIOS RESEARCH EQUIPMENT BONUS`, `TICKS PER TICK-LOOP REDUCTION`, `LEVEL POINTS (LP) GAINED`, and `LOOP REQUIREMENT REDUCTION`
 - Current grounded conclusion:
-  - no stable repo-local player-facing identity source is currently recoverable for rows `69-74`
-  - the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly
-  - following the broken band back to remapped serialized ids `57-62` still does not recover a narrower player-facing label source and therefore stays bounded as shell metadata only
-  - the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation remains a checked negative boundary for repo-local row-label recovery
-  - save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
-  - repo-local identity recovery on rows `69-74` is closed unless a different repo-local source class appears
+  - row identity for rows `69-74` is already carried by the same-number chain `SaveData.ISNLevel -> ISNID -> BuyISN/SetISNCostText -> row payload ID/Level/ISObject`
+  - the supplied live UI screenshots validate those player-facing rows directly
+  - following the broken band back to remapped serialized ids `57-62` still does not recover a narrower player-facing text or label source and therefore stays bounded as shell metadata only
+  - the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation remains a checked negative boundary for repo-local effect or label text recovery
+  - save numbering, serialized-id numbering, prefab numbering, row identity, and player-facing text provenance must remain separated
+  - the actual missing repo-local source class is the game-side player-facing effect or label text path under the `TextHandlerMarkets` / bonus-text / localization layer
   - the canonical import-safe subset therefore stays empty
 
 ## Checked `69-74` anomaly provenance boundary
@@ -368,7 +368,7 @@ Current grounded conclusion:
 - same-number prefab numbering is stable through row `68`
 - same-number prefab numbering is broken from rows `69-74`
 - same-number prefab numbering resumes at row `75` and stays direct through row `110`
-- this wider numbering boundary still does not provide a repo-local row-label source for rows `69-74`, even though live UI evidence now grounds those rows directly
+- this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally
 - the canonical import-safe subset stays empty
 
 ## Nearby checked inscription identity-binding pattern

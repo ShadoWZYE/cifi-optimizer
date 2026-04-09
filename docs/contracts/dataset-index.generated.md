@@ -350,7 +350,7 @@ Validation command: `npm run verify:data`
 
 ### `multiverse-market-row69-74-identity-source-boundary`
 
-- Label: Multiverse market row 69-74 identity-source boundary
+- Label: Multiverse market row 69-74 text-provenance boundary
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-row69-74-identity-source-boundary.json`

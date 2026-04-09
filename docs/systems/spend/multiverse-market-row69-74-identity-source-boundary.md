@@ -1,6 +1,6 @@
 # Multiverse Market Row 69-74 Identity-Source Boundary
 
-This note records the checked player-facing identity-source boundary for the broken prefab band at rows `69-74`.
+This note now records the checked player-facing text-provenance boundary for the broken prefab band at rows `69-74`.
 
 ## Settled row facts carried into this boundary
 
@@ -58,9 +58,10 @@ This note records the checked player-facing identity-source boundary for the bro
 
 Current grounded conclusion:
 
-- save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must stay separated
-- repo-local evidence still does not recover a direct row-label source for rows `69-74`
-- the supplied live UI screenshots do recover the player-facing identities for rows `69-74` directly
-- remapped serialized ids `57-62` still fail to recover a checked player-facing identity source, so following the prefab remap does not narrow the row labels any further
+- save numbering, serialized-id numbering, prefab numbering, and player-facing text provenance must stay separated
+- row identity for rows `69-74` is already carried by the same-number chain `SaveData.ISNLevel -> ISNID -> BuyISN/SetISNCostText -> row payload ID/Level/ISObject`
+- the supplied live UI screenshots validate that row identity directly, but do not by themselves become canonical text provenance
+- remapped serialized ids `57-62` still fail to recover a checked player-facing text or label source, so following the prefab remap does not narrow the missing text source any further
 - the `69-74 -> 57-62` relation is therefore bounded as internal shell metadata only, not as the live player-facing remap model
+- the actual missing source class is the game-side player-facing effect or label text path for Emporium rows, likely in the `TextHandlerMarkets` / bonus-text / localization layer beyond the recovered cost hooks and row payload carriers
 - canonical Emporium import remains blocked for separate reasons, so the canonical import-safe subset stays empty

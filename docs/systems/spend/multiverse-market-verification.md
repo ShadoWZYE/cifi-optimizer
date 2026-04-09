@@ -55,7 +55,7 @@ Current grounded conclusion:
 - the checked prefab shell now stays direct through `ChrystosEmporiumUpgrade68` but switches to explicit overrides `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
 - label remap remains partial until the row-order and ID mapping are closed more completely
 
-## Narrow row 69-74 identity-source boundary
+## Narrow row 69-74 text-provenance boundary
 
 - The row numbering stays settled:
   - `IS69Level` -> row `69`
@@ -75,11 +75,11 @@ Current grounded conclusion:
 
 Current grounded conclusion:
 
-- no stable repo-local player-facing identity source is currently recoverable for rows `69-74`
-- the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly
-- following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing source either and therefore stays bounded as internal shell metadata only
-- the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation is now exhausted as a checked negative boundary for repo-local row-label recovery
-- repo-local identity recovery on rows `69-74` is therefore closed unless a different repo-local source class appears
+- row identity for rows `69-74` is already carried by the same-number chain `SaveData.ISNLevel -> ISNID -> BuyISN/SetISNCostText -> row payload ID/Level/ISObject`
+- the supplied live UI screenshots validate those player-facing rows directly
+- following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing text source either and therefore stays bounded as internal shell metadata only
+- the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation is now exhausted as a checked negative boundary for repo-local effect or label text recovery
+- the remaining unresolved lane is the actual game-side player-facing effect or label text source for Emporium rows
 - the canonical import-safe subset stays empty
 
 ## Checked 69-74 anomaly provenance boundary
@@ -208,7 +208,7 @@ Current grounded conclusion:
 - same-number prefab numbering is stable through row `68`
 - same-number prefab numbering is broken from rows `69-74`
 - same-number prefab numbering resumes at row `75` and stays direct through row `110`
-- this wider numbering boundary still does not provide a repo-local row-label source for rows `69-74`, even though live UI evidence now grounds those rows directly
+- this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally
 - the canonical import-safe subset stays empty
 
 ## Nearby checked identity-binding pattern
@@ -223,7 +223,7 @@ Current grounded conclusion:
 
 - nearby player-facing identity can be grounded when the same row number survives across `ISNLevel`, `ISNID`, `BuyISN`, direct prefab name `ChrystosEmporiumUpgradeN-IDN`, and `Inscryption N: ...`
 - this explains how nearby inscription rows bind to player-facing labels without widening beyond checked rows `78` and `83`
-- this pattern does not ground rows `69-74` by itself; those rows now rely on live UI evidence because the prefab join is remapped there and no checked repo-local player-facing labels have been recovered
+- this pattern does not recover the missing player-facing text provenance for rows `69-74`; those rows already keep their ordered identity through the same-number chain while the prefab join stays remapped and no checked repo-local player-facing strings have been recovered
 - the canonical import-safe subset therefore stays empty
 
 ## Still unresolved
@@ -263,7 +263,7 @@ Current grounded conclusion:
 
 1. keep the active lane on the bounded `SaveData` import-surface decision, preserve the exact typed `IS1Level` through `IS110Level` span as compatibility-only raw Emporium import truth, and leave the canonical Emporium import-safe subset explicitly empty unless stronger identity evidence appears
 2. keep any player-owned inscription-level preview descriptive and quarantined unless a narrower grounded canonical import slice is checked
-3. keep any future row-label work focused on broader coverage beyond the screenshot-grounded `69-74` band instead of reopening the falsified `57-62` player-facing remap
+3. keep any future Emporium follow-up focused on the actual missing source class: game-side player-facing effect or label text provenance beyond the recovered same-number row chain
 4. only then revisit whether any canonical Emporium import or spend-planner recommendation is justified
 
 

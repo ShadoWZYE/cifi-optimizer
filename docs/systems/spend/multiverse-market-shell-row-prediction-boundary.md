@@ -84,9 +84,10 @@ This note records which recovered Multiverse Market layer actually predicts live
 
 ## What is still unresolved
 
-- For rows `69-74`, the repo still does not recover the player-facing bonus-text phrases from shell or payload data alone.
+- For rows `69-74`, the repo still does not recover the game-side player-facing bonus-text phrases from shell or payload data alone.
 - The screenshots are only validation targets for those phrases in this lane, not canonical row-label promotion.
 - The `57-62` relation is therefore not pure noise, but it is only shell-local anomaly metadata rather than the recovered structure that links displayed row identity through to `SaveData`.
+- The next missing source class is the actual game-side player-facing effect or label text path under the `TextHandlerMarkets` / bonus-text / localization layer beyond the recovered `SetISNCostText` hooks and row payload carriers.
 
 Current grounded conclusion:
 
