@@ -1903,7 +1903,7 @@ function renderSpendPlannerBoundary() {
     },
     {
       label: "Emporium owned progression and Inscryptions balance",
-      reason: "Blocked for planner use. The app may show a compatibility-only preview of raw IS1Level through IS110Level imports, but InscryptionsDone remains wrapper-only, the preview stays non-canonical, and row identity or planner-safe remap work remains unresolved."
+      reason: "Blocked for planner use. The app may show a compatibility-only preview of the raw IS1Level through IS110Level span plus separate bounded trade-counter and early-mech quarantine ranges, but InscryptionsDone remains wrapper-only, the preview stays non-canonical, and no Emporium recommendation path is unlocked."
     }
   ];
   const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
@@ -4881,12 +4881,71 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
   }
   const previewRows = importedSpanRows.slice(0, 12);
   const trailingPreviewRows = importedSpanRows.slice(-4);
+  const importedTradeCounters = Object.entries(importedState)
+    .map(([key, value]) => {
+      const match = /^(Esoteric|Necrum)R([1-9])Trades$/u.exec(String(key));
+      if (!match) {
+        return null;
+      }
+      return {
+        family: match[1],
+        rank: Number(match[2]),
+        key,
+        value,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.${key}`
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => {
+      if (left.family !== right.family) {
+        return left.family.localeCompare(right.family);
+      }
+      return left.rank - right.rank;
+    });
+  const expectedTradeCounterKeys = [
+    ...Array.from({ length: 9 }, (_, index) => `EsotericR${index + 1}Trades`),
+    ...Array.from({ length: 9 }, (_, index) => `NecrumR${index + 1}Trades`)
+  ];
+  const importedTradeKeySet = new Set(importedTradeCounters.map((entry) => entry.key));
+  const missingTradeCounterKeys = expectedTradeCounterKeys.filter((key) => !importedTradeKeySet.has(key));
+  const tradeCounterFamilies = {
+    Esoteric: importedTradeCounters.filter((entry) => entry.family === "Esoteric"),
+    Necrum: importedTradeCounters.filter((entry) => entry.family === "Necrum")
+  };
+  const earlyMechWindowKeys = [
+    "Mech1Unlocked",
+    "Mech1Units",
+    "Mech1Upg1Level",
+    "Mech1Upg2Level",
+    "Mech1MissionsProgress",
+    "FinalMech1MainBonus",
+    "Mech1MissionsCompleted",
+    "Mech2Unlocked"
+  ];
+  const importedEarlyMechFields = earlyMechWindowKeys
+    .map((key) => {
+      const value = importedState[key];
+      if (!isBoundaryValuePresent(value)) {
+        return null;
+      }
+      return {
+        key,
+        value,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.${key}`
+      };
+    })
+    .filter(Boolean);
+  const importedEarlyMechKeySet = new Set(importedEarlyMechFields.map((entry) => entry.key));
+  const missingEarlyMechFields = earlyMechWindowKeys.filter((key) => !importedEarlyMechKeySet.has(key));
 
   return {
+    hasImportedCompatibilityPreview: importedSpanRows.length > 0 || importedTradeCounters.length > 0 || importedEarlyMechFields.length > 0,
     hasImportedSpanPreview: importedSpanRows.length > 0,
     importTargetPath: "compatibility.unmappedSystemState.multiverseMarket",
     wrapperOnlyFieldLabel: "InscryptionsDone",
     typedSpanLabel: "IS1Level through IS110Level",
+    tradeCounterLabel: "EsotericR1Trades through EsotericR9Trades and NecrumR1Trades through NecrumR9Trades",
+    earlyMechWindowLabel: "Mech1Unlocked through Mech2Unlocked",
     importedSpanRowCount: importedSpanRows.length,
     totalSpanRowCount: 110,
     importedRangeLabel: importedSpanRows.length ? formatNumericRanges(importedSpanRows.map((entry) => entry.rowId)) : "",
@@ -4908,6 +4967,22 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     missingOverlapLabel: missingOverlapRows.length
       ? missingOverlapRows.map((rowId) => `IS${rowId}Level`).join(", ")
       : "none",
+    hasTradeCounterPreview: importedTradeCounters.length > 0,
+    importedTradeCounters,
+    importedTradeCounterCount: importedTradeCounters.length,
+    totalTradeCounterCount: expectedTradeCounterKeys.length,
+    missingTradeCounterKeys,
+    missingTradeCounterLabel: missingTradeCounterKeys.length ? missingTradeCounterKeys.slice(0, 12).join(", ") : "none",
+    tradeCounterFamilies,
+    tradeCounterSampleLine: importedTradeCounters.length
+      ? importedTradeCounters.slice(0, 6).map((entry) => `${entry.key} ${formatBoundaryValue(entry.value)}`).join(" | ")
+      : "",
+    hasEarlyMechPreview: importedEarlyMechFields.length > 0,
+    importedEarlyMechFields,
+    importedEarlyMechCount: importedEarlyMechFields.length,
+    totalEarlyMechCount: earlyMechWindowKeys.length,
+    missingEarlyMechFields,
+    missingEarlyMechLabel: missingEarlyMechFields.length ? missingEarlyMechFields.join(", ") : "none",
     previewRows,
     trailingPreviewRows,
     sampleLine: previewRows.length
@@ -4917,29 +4992,33 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
 }
 
 function renderImportedMultiverseMarketPreviewCard(preview) {
-  if (!preview.hasImportedSpanPreview) {
+  if (!preview.hasImportedCompatibilityPreview) {
     return "";
   }
 
   return `
     <article class="preview-card">
       <strong>Emporium compatibility preview</strong>
-      <p class="meta">This is a descriptive preview of compatibility-only Emporium import state from the exact typed <code>${escapeHtml(preview.typedSpanLabel)}</code> span under <code>${escapeHtml(preview.importTargetPath)}</code>. It is non-canonical, stays outside <code>state.playerProfile</code>, and does not enable recommendations.</p>
+      <p class="meta">This is a descriptive preview of compatibility-only Emporium import state under <code>${escapeHtml(preview.importTargetPath)}</code>. It preserves the checked raw <code>${escapeHtml(preview.typedSpanLabel)}</code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only.</p>
       <div class="pill-row">
         <span class="pill">${preview.importedSpanRowCount}/${preview.totalSpanRowCount} raw IS rows imported</span>
-        <span class="pill">${preview.importedRangeLabel ? `Imported rows ${escapeHtml(preview.importedRangeLabel)}` : "No imported IS rows"}</span>
-        <span class="pill">${preview.missingSpanCount} raw IS rows still absent</span>
+        <span class="pill">${preview.importedTradeCounterCount}/${preview.totalTradeCounterCount} trade counters imported</span>
+        <span class="pill">${preview.importedEarlyMechCount}/${preview.totalEarlyMechCount} early-mech fields imported</span>
         ${preview.hasOverlapGroundedRows ? `<span class="pill">${preview.importedOverlapRowCount}/${preview.overlapRowCount} ordered-overlap rows imported</span>` : ""}
         <span class="pill">Compatibility only</span>
         <span class="pill">Planner blocked</span>
       </div>
       <div class="meta-stack">
-        <p class="meta">Only raw <code>IS*Level</code> values from the checked compatibility span are shown here. This card does not reopen row-label recovery, row remap, or planner logic.</p>
+        <p class="meta">Only compatibility-only evidence from the checked SaveData quarantine is shown here. This card does not reopen row-label recovery, row remap, planner logic, or canonical PlayerProfile promotion.</p>
         <p class="meta"><code>${escapeHtml(preview.wrapperOnlyFieldLabel)}</code> stays wrapper-only and is intentionally excluded from this preview even when it exists in the imported compatibility blob.</p>
         <p class="meta">${preview.importedRangeLabel ? `Imported raw Emporium levels currently cover ${escapeHtml(preview.firstImportedRowLabel)} through ${escapeHtml(preview.lastImportedRowLabel)} across rows ${escapeHtml(preview.importedRangeLabel)}.` : "No raw Emporium level fields are currently imported from the checked compatibility span."}</p>
         <p class="meta">${preview.missingSpanCount ? `Missing raw span fields still absent from this import: ${escapeHtml(preview.missingSpanLabel)}${preview.missingSpanCount > 12 ? "..." : ""}.` : "All raw fields in the checked IS1Level through IS110Level compatibility span are present in this import."}</p>
+        <p class="meta">${preview.hasTradeCounterPreview ? `Imported trade-counter quarantine currently covers ${escapeHtml(preview.tradeCounterLabel)} with ${preview.importedTradeCounterCount} recovered fields.` : "No adjacent trade-counter quarantine fields are currently imported from the checked compatibility envelope."}</p>
+        <p class="meta">${preview.missingTradeCounterKeys.length ? `Missing trade-counter quarantine fields: ${escapeHtml(preview.missingTradeCounterLabel)}${preview.missingTradeCounterKeys.length > 12 ? "..." : ""}.` : "All checked Esoteric and Necrum trade-counter quarantine fields are present in this import."}</p>
+        <p class="meta">${preview.hasEarlyMechPreview ? `Imported early-mech quarantine currently covers ${escapeHtml(preview.earlyMechWindowLabel)} with ${preview.importedEarlyMechCount} recovered fields.` : "No early-mech quarantine fields are currently imported from the checked compatibility envelope."}</p>
+        <p class="meta">${preview.missingEarlyMechFields.length ? `Missing early-mech quarantine fields: ${escapeHtml(preview.missingEarlyMechLabel)}.` : "All checked early-mech quarantine fields are present in this import."}</p>
         <p class="meta">${preview.hasOverlapGroundedRows ? `The checked ordered-overlap support rows ${escapeHtml(preview.overlapRangeLabel)} are tracked only as boundary evidence. Missing ordered-overlap imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "No ordered-overlap support rows are available in this build."}</p>
-        <p class="meta">Planner use stays blocked. These raw imported levels remain quarantined compatibility evidence, not canonical player truth, not row-label claims, and not recommendation inputs.</p>
+        <p class="meta">Planner use stays blocked. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence, not canonical player truth, not row-label claims, and not recommendation inputs.</p>
         ${preview.hasOverlapLevelPreview ? `<div class="preview-stack">${preview.overlapPreviewRows.map((entry) => `
           <article class="preview-card">
             <strong>IS${escapeHtml(String(entry.rowId))}Level overlap support</strong>
@@ -4955,6 +5034,21 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
           </article>
         `).join("")}</div>
         ${preview.trailingPreviewRows.length && preview.importedSpanRowCount > preview.previewRows.length ? `<p class="meta">Trailing imported raw rows: ${escapeHtml(preview.trailingPreviewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | "))}</p>` : ""}
+        ${preview.hasTradeCounterPreview ? `<div class="preview-stack">${preview.importedTradeCounters.slice(0, 8).map((entry) => `
+          <article class="preview-card">
+            <strong>${escapeHtml(entry.key)}</strong>
+            <p class="meta">Imported raw count ${escapeHtml(formatBoundaryValue(entry.value))}</p>
+            <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
+          </article>
+        `).join("")}</div>` : ""}
+        ${preview.tradeCounterSampleLine ? `<p class="meta">Trade-counter sample: ${escapeHtml(preview.tradeCounterSampleLine)}${preview.importedTradeCounterCount > 6 ? "..." : ""}</p>` : ""}
+        ${preview.hasEarlyMechPreview ? `<div class="preview-stack">${preview.importedEarlyMechFields.map((entry) => `
+          <article class="preview-card">
+            <strong>${escapeHtml(entry.key)}</strong>
+            <p class="meta">Imported raw value ${escapeHtml(formatBoundaryValue(entry.value))}</p>
+            <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
+          </article>
+        `).join("")}</div>` : ""}
       </div>
     </article>
   `;
