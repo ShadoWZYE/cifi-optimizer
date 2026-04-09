@@ -2457,12 +2457,14 @@ function validateMultiverseMarketSaveBoundary(boundary) {
   assert.equal(boundary.probeResults.metadataProbeHasSaveTerms, false, "multiverse market save boundary metadataProbeHasSaveTerms drifted");
   assert.equal(boundary.probeResults.level0ProbeHasSaveTerms, false, "multiverse market save boundary level0ProbeHasSaveTerms drifted");
   expectRecord(boundary.crossBoundaryTypedOwnerStatus, "multiverse market save boundary crossBoundaryTypedOwnerStatus must be an object");
-  assert.equal(boundary.crossBoundaryTypedOwnerStatus.status, "exact-declaring-owner-recovered-elsewhere", "multiverse market save boundary cross-boundary typed owner status drifted");
+  assert.equal(boundary.crossBoundaryTypedOwnerStatus.status, "declaring-owner-closed-market-wrapper-still-unresolved", "multiverse market save boundary cross-boundary typed owner status drifted");
   assert.equal(boundary.crossBoundaryTypedOwnerStatus.exactDeclaringOwner, "SaveData", "multiverse market save boundary exact declaring owner drifted");
+  assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /InscryptionsDone/i, "multiverse market save boundary typed owner scope must preserve InscryptionsDone");
   assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /IS\*Level/, "multiverse market save boundary typed owner scope must preserve the IS*Level cluster");
-  assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /InscryptionsDone.*dual declaration/i, "multiverse market save boundary typed owner scope must preserve the dual-declared InscryptionsDone split");
+  assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /typed Market-wrapper recovery only/i, "multiverse market save boundary typed owner scope must preserve the narrowed remaining seam");
   assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /does not recover a typed Market field/i, "multiverse market save boundary typed owner note must preserve the typed Market-field blocker");
-  assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /dual declaration on SaveData and PlayerProfileData/i, "multiverse market save boundary typed owner note must preserve the dual-declared InscryptionsDone split");
+  assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /PlayerProfileData\.InscryptionsDone:System\.String/i, "multiverse market save boundary typed owner note must preserve the PlayerProfileData InscryptionsDone type");
+  assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /SaveData\.InscryptionsDone:System\.Int32/i, "multiverse market save boundary typed owner note must preserve the SaveData InscryptionsDone type");
 
   return {
     id: "multiverse-market-save-boundary",
@@ -2496,6 +2498,7 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   expectRecord(boundary.typedPlayerProfileFieldTableRecovery, "multiverse market market-member boundary typedPlayerProfileFieldTableRecovery must be an object");
   expectRecord(boundary.typedSaveDataFieldTableRecovery, "multiverse market market-member boundary typedSaveDataFieldTableRecovery must be an object");
   expectArray(boundary.directPlayerProfileFieldSamples, "multiverse market market-member boundary directPlayerProfileFieldSamples must be an array");
+  expectRecord(boundary.typedInscryptionsDoneDualDeclaration, "multiverse market market-member boundary typedInscryptionsDoneDualDeclaration must be an object");
   expectArray(boundary.typedSaveDataProgressionOwnerSamples, "multiverse market market-member boundary typedSaveDataProgressionOwnerSamples must be an array");
   expectArray(boundary.typedPlayerProfileNestedTypeChecks, "multiverse market market-member boundary typedPlayerProfileNestedTypeChecks must be an array");
   expectArray(boundary.firstNestedMarketTypeChecks, "multiverse market market-member boundary firstNestedMarketTypeChecks must be an array");
@@ -2553,6 +2556,24 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   ["InscryptionsDone", "MechsOwned", "GadgetLevels"].forEach((name) => {
     assert.ok(boundary.directPlayerProfileFieldSamples.includes(name), `multiverse market market-member boundary missing direct PlayerProfileData field sample ${name}`);
   });
+  assert.deepEqual(
+    boundary.typedInscryptionsDoneDualDeclaration,
+    {
+      playerProfileData: {
+        fieldOwner: "PlayerProfileData",
+        fieldName: "InscryptionsDone",
+        fieldType: "System.String",
+        fieldIndex: 62
+      },
+      saveData: {
+        fieldOwner: "SaveData",
+        fieldName: "InscryptionsDone",
+        fieldType: "System.Int32",
+        fieldIndex: 3038
+      }
+    },
+    "multiverse market market-member boundary typed InscryptionsDone dual declaration drifted"
+  );
   ["IS71Level", "IS110Level", "InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
     assert.ok(boundary.typedSaveDataProgressionOwnerSamples.includes(name), `multiverse market market-member boundary missing typed SaveData progression-owner sample ${name}`);
   });
@@ -2581,8 +2602,8 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
   assert.deepEqual(boundary.typedMarketFieldBoundary.checkedNegativeTypedFieldRecoveries, ["PlayerProfileHandler.Market", "PlayerProfileData.Market", "PlayerProfileData.MultiverseMarket", "SaveData.Market", "SaveData.MultiverseMarket"], "multiverse market market-member boundary checked negative typed field recoveries drifted");
   assert.equal(boundary.typedMarketFieldBoundary.conclusion, "negative-typed-market-field-in-checked-boundary", "multiverse market market-member boundary typed Market field conclusion drifted");
   assert.equal(boundary.typedMarketFieldBoundary.currentUse, "accessor-member-shell-naming-only", "multiverse market market-member boundary typed Market field current-use drifted");
-  assert.equal(boundary.deeperMarketOwnerStatus.status, "unresolved", "multiverse market market-member boundary deeper market owner status drifted");
-  assert.equal(boundary.deeperMarketOwnerStatus.scope, "typed Market-named save-path owner beyond the checked accessor bridge", "multiverse market market-member boundary deeper market owner scope drifted");
+  assert.equal(boundary.deeperMarketOwnerStatus.status, "declaring-owner-closed-market-wrapper-still-unresolved", "multiverse market market-member boundary deeper market owner status drifted");
+  assert.equal(boundary.deeperMarketOwnerStatus.scope, "typed Market-named wrapper recovery beyond the checked accessor bridge, not the declaring owner for the checked InscryptionsDone / IS*Level cluster", "multiverse market market-member boundary deeper market owner scope drifted");
   assert.match(boundary.deeperMarketOwnerStatus.note, /SaveData/i, "multiverse market market-member boundary deeper market owner note must mention SaveData");
   assert.match(boundary.deeperMarketOwnerStatus.note, /does not recover a typed Market field/i, "multiverse market market-member boundary deeper market owner note must preserve the negative typed Market result");
   ["IS71Level", "IS110Level", "InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
@@ -2601,6 +2622,7 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       "PlayerProfileHandler saveInfoCache field is recovered as PlayerProfileData while no typed Market field is recovered on PlayerProfileHandler or PlayerProfileData",
       "PlayerProfileHandler.ConvertSaveDataToProfileData bridges SaveData back into PlayerProfileData without recovering a typed Market field",
       "PlayerProfileData direct field table is recovered as 89 flat fields and 1 method with no direct IS/trade/mech members",
+      "InscryptionsDone now has an exact typed split: PlayerProfileData exposes System.String while SaveData exposes System.Int32",
       "SaveData direct field table is recovered as 4461 fields and 1 method with direct IS/trade/mech ownership plus a wider InscryptionsDone declaration",
       `${boundary.directPlayerProfileFieldSamples.length} direct PlayerProfileData field samples`,
       `${boundary.typedSaveDataProgressionOwnerSamples.length} typed SaveData progression-owner samples`,
@@ -2621,6 +2643,8 @@ function validateMultiverseMarketMarketShellDocs(boundaryDoc, stateDoc, activeBo
   assert.match(combinedDocs, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/, "multiverse market docs must preserve the checked accessor bridge");
   assert.match(combinedDocs, /metadata-only `Market` shell/, "multiverse market docs must preserve the metadata-only Market shell phrasing");
   assert.match(combinedDocs, /(does not recover a typed `Market` field|no typed `Market`(?:-named)?(?: or `MultiverseMarket`)? field is recovered) on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/, "multiverse market docs must preserve the negative typed Market recovery");
+  assert.match(combinedDocs, /`PlayerProfileData\.InscryptionsDone`(?: is|:)? (?:recovered as )?`?System\.String`?[\s\S]*`SaveData\.InscryptionsDone`(?: is|:)? (?:recovered as )?`?System\.Int32`?/i, "multiverse market docs must preserve the exact InscryptionsDone type split");
+  assert.match(combinedDocs, /(remaining unresolved seam is only .*typed `Market`(?:-wrapper|` wrapper)|only a typed `Market`-wrapper recovery beyond the checked accessor bridge remains unresolved)/i, "multiverse market docs must preserve the narrowed remaining seam");
   assert.match(combinedDocs, /accessor\/member-shell naming only/, "multiverse market docs must preserve accessor/member-shell-only use");
   assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `PlayerProfileHandler`/i, "multiverse market docs must not claim typed Market recovery on PlayerProfileHandler");
   assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `PlayerProfileData`/i, "multiverse market docs must not claim typed Market recovery on PlayerProfileData");

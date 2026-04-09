@@ -43,9 +43,17 @@ This is not a list of open hypotheses. It is a compact list of paths that should
 ### Do not treat direct `MultiverseMarket` ownership on `PlayerProfileData` as recovered canonical save truth
 
 - Current checked result: the stronger current handoff is a PlayerProfile-side `get_Market` member path or broader wrapper
-- Why this stays closed: the checked declaring owner for the `IS*Level` / trade-counter / early `Mech*` run is now `SaveData`, `InscryptionsDone` is split out as an exact dual declaration on `SaveData` and `PlayerProfileData`, and the typed `Market` field itself still stays unresolved on the checked save path
+- Why this stays closed: the checked declaring owner for the `IS*Level` / trade-counter / early `Mech*` run is now `SaveData`, `InscryptionsDone` is split out as an exact dual declaration on `SaveData` and `PlayerProfileData`, the exact dual declaration is also type-split as `PlayerProfileData.InscryptionsDone: System.String` versus `SaveData.InscryptionsDone: System.Int32`, and the typed `Market` field itself still stays unresolved on the checked save path
 - Source anchors:
   - `docs/systems/spend/multiverse-market-state-verification.md`
+  - `data/multiverse-market-market-member-boundary.json`
+
+### Do not reopen a generic declaring-owner search behind `InscryptionsDone` and the nearby `IS*Level` cluster
+
+- Current checked result: the exact declaring owner for the checked cluster is already closed on `SaveData`
+- Why this stays closed: the remaining unresolved seam is only whether the metadata-only `Market` shell ever resolves to a typed wrapper field beyond the checked `PlayerProfileHandler.get_Market -> MultiverseMarket` bridge, not who declares the checked `InscryptionsDone` / `IS*Level` progression block
+- Source anchors:
+  - `docs/systems/spend/multiverse-market-market-member-boundary.md`
   - `data/multiverse-market-market-member-boundary.json`
 
 ### Do not treat Daily Tokenium as a TokenShop-only lane

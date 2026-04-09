@@ -2052,14 +2052,14 @@ assert.equal(multiverseMarketSaveBoundaryData.probeResults.actionShellWithSaveOv
 assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasActionTerms, true);
 assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasSaveTerms, true);
 assert.deepEqual(multiverseMarketSaveBoundaryData.crossBoundaryTypedOwnerStatus, {
-  status: "exact-declaring-owner-recovered-elsewhere",
+  status: "declaring-owner-closed-market-wrapper-still-unresolved",
   exactDeclaringOwner: "SaveData",
-  scope: "checked IS*Level / trade-counter / early Mech* progression cluster, with InscryptionsDone split out as an exact dual declaration on SaveData and PlayerProfileData",
-  note: "This artifact still records the action-shell versus save-family split only; the exact declaring owner comes from the checked typed market-member boundary, keeps InscryptionsDone split out as a dual declaration on SaveData and PlayerProfileData, and does not recover a typed Market field or import-ready row mapping."
+  scope: "checked InscryptionsDone / IS*Level / trade-counter / early Mech* progression cluster, with the declaring owner closed on SaveData and the remaining seam narrowed to typed Market-wrapper recovery only",
+  note: "This artifact still records the action-shell versus save-family split only; the checked typed market-member boundary closes the declaring-owner question on SaveData, preserves the exact PlayerProfileData.InscryptionsDone:System.String versus SaveData.InscryptionsDone:System.Int32 split, and still does not recover a typed Market field or import-ready row mapping."
 });
 assertCurrentBoundaryIncludes(multiverseMarketSaveBoundaryData.currentBoundary, [
   /zero direct overlap/,
-  /separately recovers SaveData as the exact declaring owner/,
+  /closes the declaring-owner question on SaveData/,
   /still does not recover a typed Market field, player-owned row levels/
 ], "MultiverseMarket save boundary");
 
@@ -2100,6 +2100,20 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.directPlayerProfileFie
   "MechsOwned",
   "GadgetLevels"
 ]);
+assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedInscryptionsDoneDualDeclaration, {
+  playerProfileData: {
+    fieldOwner: "PlayerProfileData",
+    fieldName: "InscryptionsDone",
+    fieldType: "System.String",
+    fieldIndex: 62
+  },
+  saveData: {
+    fieldOwner: "SaveData",
+    fieldName: "InscryptionsDone",
+    fieldType: "System.Int32",
+    fieldIndex: 3038
+  }
+});
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedSaveDataProgressionOwnerSamples, [
   "IS71Level",
   "IS110Level",
@@ -2171,14 +2185,15 @@ assert.deepEqual(multiverseMarketMarketMemberBoundaryData.typedMarketFieldBounda
   currentUse: "accessor-member-shell-naming-only"
 });
 assert.deepEqual(multiverseMarketMarketMemberBoundaryData.deeperMarketOwnerStatus, {
-  status: "unresolved",
-  scope: "typed Market-named save-path owner beyond the checked accessor bridge",
-  note: "The broader IS*Level / trade-counter / mech run is recovered separately on SaveData, but that wider owner recovery does not recover a typed Market field."
+  status: "declaring-owner-closed-market-wrapper-still-unresolved",
+  scope: "typed Market-named wrapper recovery beyond the checked accessor bridge, not the declaring owner for the checked InscryptionsDone / IS*Level cluster",
+  note: "Exact typed recovery closes the checked declaring-owner question on SaveData for the broader InscryptionsDone / IS*Level / trade-counter / early mech cluster, but still does not recover a typed Market field on PlayerProfileHandler, PlayerProfileData, or SaveData."
 });
 assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBoundary, [
   /PlayerProfileHandler declares get_Market with return type MultiverseMarket/,
   /saveInfoCache as a typed PlayerProfileData field/,
   /ConvertSaveDataToProfileData\(SaveData saveData, System\.DateTime lastCloudSaveDate\) -> PlayerProfileData/,
+  /PlayerProfileData\.InscryptionsDone is recovered as System\.String while SaveData\.InscryptionsDone is recovered as System\.Int32/,
   /PlayerProfileData field table has 89 direct fields and 1 method/,
   /SaveData declares a 4461-field save table with 1 method/,
   /SaveData the current exact declaring owner/,
@@ -2186,7 +2201,7 @@ assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBo
   /separates three things explicitly/,
   /no typed Market-named field is recovered on PlayerProfileHandler, PlayerProfileData, or SaveData/,
   /does not place that wider run directly on MultiverseMarket/,
-  /direct-wrapper-versus-deeper-owner boundary/
+  /remaining unresolved seam is only whether any typed Market-wrapper exists/
 ], "MultiverseMarket market-member boundary");
 
 assert.deepEqual(multiverseMarketRangeBoundaryData.validatedRowRanges, ["50-59", "63-74"]);

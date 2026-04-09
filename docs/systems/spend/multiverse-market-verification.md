@@ -190,7 +190,7 @@ Current grounded conclusion:
 
 ## Still unresolved
 
-- the bounded import-safe surface for the current `Inscryptions Done` balance beyond the existing `PlayerProfileData` wrapper and the wider `SaveData` declaring owner
+- whether any typed `Market`-wrapper exists beyond the existing `PlayerProfileData` string wrapper for `InscryptionsDone` and the wider `SaveData` declaring owner
 - player-owned current inscription levels or equivalent owned-state inputs for next-buy logic
 - full row coverage outside the currently validated late block
 - exact row-by-row remap from serialized `IS*` ids and prefab identities to final in-game labels
