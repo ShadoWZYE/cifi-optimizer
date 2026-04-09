@@ -2311,6 +2311,16 @@ assert.deepEqual(
 );
 assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.searchedLabels, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
 assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.matches, []);
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.remappedSerializedIds, [57, 58, 59, 60, 61, 62]);
+assert.deepEqual(
+  multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.earlierDirectPrefabShells,
+  ["ChrystosEmporiumUpgrade57", "ChrystosEmporiumUpgrade58", "ChrystosEmporiumUpgrade59", "ChrystosEmporiumUpgrade60", "ChrystosEmporiumUpgrade61", "ChrystosEmporiumUpgrade62"]
+);
+assert.deepEqual(
+  multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.searchedLabels,
+  ["Inscryption 57", "Inscryption 58", "Inscryption 59", "Inscryption 60", "Inscryption 61", "Inscryption 62"]
+);
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.matches, []);
 assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.textHandlerCoverage.textHandlerOwner, "TextHandlerMarkets");
 assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.actionShellCoverage.buyHooks, ["BuyIS69", "BuyIS70", "BuyIS71", "BuyIS72", "BuyIS73", "BuyIS74"]);
 assert.deepEqual(
@@ -2330,6 +2340,7 @@ assert.deepEqual(
 );
 assert.match(multiverseMarketStateVerificationDoc, /## Checked row `69-74` player-facing identity-source boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`/i);
+assert.match(multiverseMarketStateVerificationDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i);
 assert.equal(multiverseMarketSerializedLabelSourceBoundaryData.dataset, "multiverse-market-serialized-label-source-boundary");
 assert.deepEqual(
   multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.multiverseMarketContainerFields.map((entry) => [entry.name, entry.fieldOffset]),

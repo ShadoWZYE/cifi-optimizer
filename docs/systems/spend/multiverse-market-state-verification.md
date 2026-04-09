@@ -221,9 +221,11 @@ Current grounded conclusion:
   - the adjacent action shell preserves `BuyIS69` through `BuyIS74`
   - the checked `MultiverseMarket` field table preserves `THMarkets: TextHandlerMarkets` beside `InscryptionsList: List<GameObject>`
   - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
+  - following the prefab remap back to serialized ids `57-62` is still negative-only: earlier direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` are preserved, but the checked repo-local probe artifacts still do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
   - the nearest checked player-facing inscription labels currently preserved in repo-local probes remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, both outside the `69-74` target rows
 - Current grounded conclusion:
   - no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`
+  - following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing label source either
   - save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
   - the canonical import-safe subset therefore stays empty
 

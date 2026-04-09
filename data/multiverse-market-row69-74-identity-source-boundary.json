@@ -80,6 +80,34 @@
       "matches": [],
       "conclusion": "No checked repo-local player-facing string anchor names rows 69-74 directly."
     },
+    "remappedSerializedIdLabelBoundary": {
+      "remappedSerializedIds": [
+        57,
+        58,
+        59,
+        60,
+        61,
+        62
+      ],
+      "earlierDirectPrefabShells": [
+        "ChrystosEmporiumUpgrade57",
+        "ChrystosEmporiumUpgrade58",
+        "ChrystosEmporiumUpgrade59",
+        "ChrystosEmporiumUpgrade60",
+        "ChrystosEmporiumUpgrade61",
+        "ChrystosEmporiumUpgrade62"
+      ],
+      "searchedLabels": [
+        "Inscryption 57",
+        "Inscryption 58",
+        "Inscryption 59",
+        "Inscryption 60",
+        "Inscryption 61",
+        "Inscryption 62"
+      ],
+      "matches": [],
+      "conclusion": "Following the broken prefab band back to remapped serialized ids 57-62 still does not recover a checked repo-local player-facing label source."
+    },
     "textHandlerCoverage": {
       "textHandlerOwner": "TextHandlerMarkets",
       "textHandlerScriptPath": "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
@@ -149,6 +177,7 @@
         ],
         "blockedBy": [
           "the visible prefab-number shell 69 is explicitly remapped to serialized id 57",
+          "following that remap back to serialized id 57 still does not recover a checked player-facing label source",
           "TextHandlerMarkets cost text coverage does not recover a row-69 player-facing label",
           "no alternate checked repo-local string or lookup source binds row 69 to a player-facing inscription identity"
         ]
@@ -173,6 +202,7 @@
         ],
         "blockedBy": [
           "the visible prefab-number shell 70 is explicitly remapped to serialized id 58",
+          "following that remap back to serialized id 58 still does not recover a checked player-facing label source",
           "TextHandlerMarkets cost text coverage does not recover a row-70 player-facing label",
           "no alternate checked repo-local string or lookup source binds row 70 to a player-facing inscription identity"
         ]
@@ -197,6 +227,7 @@
         ],
         "blockedBy": [
           "the visible prefab-number shell 71 is explicitly remapped to serialized id 59",
+          "following that remap back to serialized id 59 still does not recover a checked player-facing label source",
           "TextHandlerMarkets cost text coverage does not recover a row-71 player-facing label",
           "no alternate checked repo-local string or lookup source binds row 71 to a player-facing inscription identity"
         ]
@@ -221,6 +252,7 @@
         ],
         "blockedBy": [
           "the visible prefab-number shell 72 is explicitly remapped to serialized id 60",
+          "following that remap back to serialized id 60 still does not recover a checked player-facing label source",
           "TextHandlerMarkets cost text coverage does not recover a row-72 player-facing label",
           "no alternate checked repo-local string or lookup source binds row 72 to a player-facing inscription identity"
         ]
@@ -245,6 +277,7 @@
         ],
         "blockedBy": [
           "the visible prefab-number shell 73 is explicitly remapped to serialized id 61",
+          "following that remap back to serialized id 61 still does not recover a checked player-facing label source",
           "TextHandlerMarkets cost text coverage does not recover a row-73 player-facing label",
           "no alternate checked repo-local string or lookup source binds row 73 to a player-facing inscription identity"
         ]
@@ -269,6 +302,7 @@
         ],
         "blockedBy": [
           "the visible prefab-number shell 74 is explicitly remapped to serialized id 62",
+          "following that remap back to serialized id 62 still does not recover a checked player-facing label source",
           "TextHandlerMarkets cost text coverage does not recover a row-74 player-facing label",
           "no alternate checked repo-local string or lookup source binds row 74 to a player-facing inscription identity"
         ]
@@ -278,6 +312,7 @@
       "Save numbering, serialized-id numbering, prefab numbering, and player-facing identity source remain separate checks.",
       "Across rows 69-74, checked repo-local non-prefab evidence recovers TextHandlerMarkets cost hooks, BuyIS hooks, and a THMarkets plus InscryptionsList UI shell, but not a direct player-facing inscription label source.",
       "Direct string search in the checked repo-local probe artifacts does not recover Inscryption 69 through Inscryption 74.",
+      "Following the broken prefab shells back to remapped serialized ids 57-62 also does not recover Inscryption 57 through Inscryption 62 or any checked alternate player-facing identity source.",
       "Nearby same-number player-facing anchors remain rows 78 and 83 only, outside the broken 69-74 prefab band.",
       "No player-facing identity source is recoverable repo-locally for rows 69-74, so those rows remain unresolved and the canonical import-safe subset stays empty."
     ]

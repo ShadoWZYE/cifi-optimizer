@@ -2857,6 +2857,33 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
     "multiverse market row 69-74 identity-source boundary searchedLabels drifted"
   );
   assert.deepEqual(boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.matches, [], "multiverse market row 69-74 identity-source boundary direct string matches must remain empty");
+  assert.deepEqual(
+    boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.remappedSerializedIds,
+    [57, 58, 59, 60, 61, 62],
+    "multiverse market row 69-74 identity-source boundary remappedSerializedIds drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.earlierDirectPrefabShells,
+    [
+      "ChrystosEmporiumUpgrade57",
+      "ChrystosEmporiumUpgrade58",
+      "ChrystosEmporiumUpgrade59",
+      "ChrystosEmporiumUpgrade60",
+      "ChrystosEmporiumUpgrade61",
+      "ChrystosEmporiumUpgrade62"
+    ],
+    "multiverse market row 69-74 identity-source boundary earlierDirectPrefabShells drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.searchedLabels,
+    ["Inscryption 57", "Inscryption 58", "Inscryption 59", "Inscryption 60", "Inscryption 61", "Inscryption 62"],
+    "multiverse market row 69-74 identity-source boundary remapped serialized searchedLabels drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.matches,
+    [],
+    "multiverse market row 69-74 identity-source boundary remapped serialized string matches must remain empty"
+  );
   assert.equal(boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.textHandlerOwner, "TextHandlerMarkets", "multiverse market row 69-74 identity-source boundary textHandlerOwner drifted");
   assert.equal(boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.textHandlerScriptPath, "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs", "multiverse market row 69-74 identity-source boundary textHandlerScriptPath drifted");
   assert.deepEqual(
@@ -2900,10 +2927,12 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
 
   assert.match(stateDoc, /## Checked row `69-74` player-facing identity-source boundary/, "multiverse market state verification doc must expose the row 69-74 identity-source boundary section");
   assert.match(stateDoc, /no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`/i, "multiverse market state verification doc must preserve the unresolved row 69-74 identity-source conclusion");
+  assert.match(stateDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market state verification doc must preserve the remapped serialized-id blocker");
   assert.match(verificationDoc, /## Narrow row 69-74 identity-source boundary/, "multiverse market verification doc must expose the narrow row 69-74 identity-source boundary section");
   assert.match(verificationDoc, /THMarkets: TextHandlerMarkets/, "multiverse market verification doc must preserve the THMarkets metadata join clue");
   assert.match(verificationDoc, /InscryptionsList: List<GameObject>/, "multiverse market verification doc must preserve the InscryptionsList metadata join clue");
   assert.match(verificationDoc, /the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`/i, "multiverse market verification doc must preserve the direct string negative boundary");
+  assert.match(verificationDoc, /direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market verification doc must preserve the remapped serialized-id negative boundary");
 
   return {
     id: "multiverse-market-row69-74-identity-source-boundary",
@@ -2913,7 +2942,7 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
       `${boundary.settledBrokenPrefabBand.length} checked broken-band rows`,
       `${boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered.length} recovered player-facing identity sources`,
       `${boundary.playerFacingIdentitySourceBoundary.identityStillBlocked.length} unresolved row identities`,
-      "Rows 69-74 remain unresolved because no repo-local player-facing identity source was recovered"
+      "Rows 69-74 remain unresolved because neither the broken-band rows nor remapped ids 57-62 recover a repo-local player-facing identity source"
     ]
   };
 }
