@@ -2054,8 +2054,8 @@ assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodH
 assert.deepEqual(multiverseMarketSaveBoundaryData.crossBoundaryTypedOwnerStatus, {
   status: "exact-declaring-owner-recovered-elsewhere",
   exactDeclaringOwner: "SaveData",
-  scope: "wider IS*Level / InscryptionsDone / trade-counter / early Mech* progression cluster",
-  note: "This artifact still records the action-shell versus save-family split only; the exact declaring owner comes from the checked typed market-member boundary and does not recover a typed Market field or import-ready row mapping."
+  scope: "checked IS*Level / trade-counter / early Mech* progression cluster, with InscryptionsDone split out as an exact dual declaration on SaveData and PlayerProfileData",
+  note: "This artifact still records the action-shell versus save-family split only; the exact declaring owner comes from the checked typed market-member boundary, keeps InscryptionsDone split out as a dual declaration on SaveData and PlayerProfileData, and does not recover a typed Market field or import-ready row mapping."
 });
 assertCurrentBoundaryIncludes(multiverseMarketSaveBoundaryData.currentBoundary, [
   /zero direct overlap/,
@@ -2181,7 +2181,7 @@ assertCurrentBoundaryIncludes(multiverseMarketMarketMemberBoundaryData.currentBo
   /ConvertSaveDataToProfileData\(SaveData saveData, System\.DateTime lastCloudSaveDate\) -> PlayerProfileData/,
   /PlayerProfileData field table has 89 direct fields and 1 method/,
   /SaveData declares a 4461-field save table with 1 method/,
-  /SaveData the current declaring owner/,
+  /SaveData the current exact declaring owner/,
   /bare Market member-shell clue/,
   /separates three things explicitly/,
   /no typed Market-named field is recovered on PlayerProfileHandler, PlayerProfileData, or SaveData/,
@@ -2415,7 +2415,7 @@ assert.match(multiverseMarketMarketMemberBoundaryDoc, /deeper typed `Market`-nam
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /no typed `Market` or `MultiverseMarket` field is recovered on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
 assert.match(multiverseMarketStateVerificationDoc, /metadata-only `Market` shell, and the wider save-owner recovery separated/);
 assert.match(multiverseMarketStateVerificationDoc, /(does not recover a typed `Market` field|no typed `Market`-named field is recovered) on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
-assert.match(multiverseMarketStateVerificationDoc, /`SaveData` remains the exact wider progression owner/);
+assert.match(multiverseMarketStateVerificationDoc, /`SaveData` remains the exact declaring owner for the checked `IS\*Level` \/ trade-counter \/ mech run/);
 assert.match(activeGroundingBoundariesDoc, /the bare `Market` symbol is still only a metadata\/member-shell clue/);
 assert.match(activeGroundingBoundariesDoc, /does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
 assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `PlayerProfileHandler`/i);
