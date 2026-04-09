@@ -24,7 +24,7 @@
         "50-59",
         "63-74"
       ],
-      "saveDataFieldRange": "IS25Level through IS110Level"
+      "saveDataFieldRange": "IS1Level through IS110Level"
     },
     "checkedOrderedMappings": [
       {
@@ -121,18 +121,47 @@
       "The checked repo-local evidence still does not recover player-facing row labels for rows 71-74, only their ordered row positions inside the larger inscription set."
     ]
   },
+  "typedSpanBoundary": {
+    "declaringOwner": "SaveData",
+    "contiguousLevelSpan": "IS1Level through IS110Level",
+    "lowerBoundary": {
+      "includedField": "IS1Level",
+      "excludedNeighbor": "IS0Level",
+      "why": "Exact typed recovery on SaveData includes IS1Level and the checked typed probe does not recover IS0Level."
+    },
+    "upperBoundary": {
+      "includedField": "IS110Level",
+      "excludedNeighbor": "IS111Level",
+      "nextTypedNeighbor": "InscryptionsDone",
+      "why": "Exact typed recovery on SaveData includes IS110Level, places InscryptionsDone immediately after it in the checked save table, and the checked typed probe does not recover IS111Level."
+    },
+    "evidence": [
+      {
+        "artifact": "data/uabea-probe-report.json",
+        "claim": "SaveData exact field names include IS1Level, IS24Level, IS25Level, and IS110Level"
+      },
+      {
+        "artifact": "data/uabea-probe-report.json",
+        "claim": "the checked typed probe does not recover IS0Level or IS111Level"
+      },
+      {
+        "artifact": "data/uabea-probe-report.json",
+        "claim": "InscryptionsDone is the next checked typed SaveData neighbor after IS110Level and remains a dual declaration on SaveData and PlayerProfileData"
+      }
+    ]
+  },
   "boundedImportConclusion": {
     "importSafeSubset": [
-      "IS25Level through IS110Level"
+      "IS1Level through IS110Level"
     ],
-    "exactImportSafeSubsetLabel": "IS25Level through IS110Level",
+    "exactImportSafeSubsetLabel": "IS1Level through IS110Level",
     "importTargetPath": "compatibility.unmappedSystemState.multiverseMarket",
     "canonicalImportSafeSubset": [],
     "exactCanonicalImportSafeSubsetLabel": "none",
-    "currentBoundary": "The exact SaveData-owned IS*Level span that is now safe to treat as raw Emporium import truth is IS25Level through IS110Level, and it should stay compatibility-only under compatibility.unmappedSystemState.multiverseMarket. The checked ordered overlap at rows 71-74 anchors that wider run to validated Emporium rows, while the exact SaveData ownership of the neighboring IS*Level / trade-counter / early Mech* block keeps the Emporium slice bounded without promoting the adjacent trade or mech fields. InscryptionsDone remains explicitly split out as dual-declared wrapper/export evidence on SaveData and PlayerProfileData, and no recovered SaveData field is currently safe to promote into canonical PlayerProfile import.",
+    "currentBoundary": "The exact SaveData-owned IS*Level span that is now safe to treat as raw Emporium import truth is IS1Level through IS110Level, and it should stay compatibility-only under compatibility.unmappedSystemState.multiverseMarket. Exact typed recovery now proves the hard lower boundary at IS1Level rather than IS0Level and the hard upper boundary at IS110Level before the next typed neighbor InscryptionsDone, while the checked ordered overlap at rows 71-74 still anchors that wider run to validated Emporium rows without promoting adjacent trade or mech fields. InscryptionsDone remains explicitly split out as dual-declared wrapper/export evidence on SaveData and PlayerProfileData, and no recovered SaveData field is currently safe to promote into canonical PlayerProfile import.",
     "blockedBy": [
       "do not reopen the metadata-only Market typed-field question without new direct evidence",
-      "do not treat the compatibility-safe IS25Level through IS110Level import span or the ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery",
+      "do not treat the compatibility-safe IS1Level through IS110Level import span or the ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery",
       "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap",
       "do not do planner integration from the recovered SaveData block in this slice"
     ]
@@ -140,16 +169,20 @@
   "classifications": {
     "safe_import_candidate": [
       {
-        "entryId": "savedata-owned-is25-110",
+        "entryId": "savedata-owned-is1-110",
         "fieldNames": [
-          "IS25Level through IS110Level"
+          "IS1Level through IS110Level"
         ],
         "targetPath": "compatibility.unmappedSystemState.multiverseMarket",
-        "why": "This is the exact SaveData-owned IS*Level span recovered in the checked Emporium-adjacent progression block. The checked rows 71-74 overlap anchors that wider run to validated Emporium rows, so the whole IS25Level through IS110Level span is safe to preserve as compatibility-only raw Emporium import truth without claiming canonical row identity or planner-ready semantics.",
+        "why": "This is the exact contiguous SaveData-owned IS*Level span recovered from the checked typed field table. Exact typed recovery proves IS1Level as the lower boundary, IS110Level as the upper boundary, and the absence of typed IS0Level and IS111Level, while the checked rows 71-74 overlap still anchors that wider run to validated Emporium rows so the whole span is safe to preserve as compatibility-only raw Emporium import truth without claiming canonical row identity or planner-ready semantics.",
         "evidence": [
           {
-            "artifact": "data/multiverse-market-metadata-neighborhood.json",
-            "claim": "InscryptionsDone neighborhood preserves IS25Level through IS110Level as one contiguous SaveData-side field run"
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "SaveData exact field names include IS1Level through IS110Level in one contiguous typed family"
+          },
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "the checked typed probe does not recover IS0Level or IS111Level and places InscryptionsDone immediately after IS110Level on SaveData"
           },
           {
             "artifact": "data/multiverse-market-range-boundary.json",

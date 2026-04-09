@@ -21,12 +21,20 @@ This note records the active follow-up lane after save-owner recovery closed: on
     - `50-59`
     - `63-74`
   - recovered `SaveData` field run:
-    - `IS25Level` through `IS110Level`
+    - `IS1Level` through `IS110Level`
 - checked ordered overlap:
   - `IS71Level` -> ordered row `71`
   - `IS72Level` -> ordered row `72`
   - `IS73Level` -> ordered row `73`
   - `IS74Level` -> ordered row `74`
+- exact typed hard boundaries on that run:
+  - lower edge:
+    - `SaveData` directly declares `IS1Level`
+    - the checked typed probe does not recover `IS0Level`
+  - upper edge:
+    - `SaveData` directly declares `IS110Level`
+    - the checked typed probe does not recover `IS111Level`
+    - `InscryptionsDone` is the next checked typed `SaveData` neighbor after `IS110Level`
 - what this does and does not ground:
   - this grounds ordered row position inside the wider inscription set
   - this does not yet ground final player-facing row labels for rows `71-74`
@@ -35,7 +43,7 @@ This note records the active follow-up lane after save-owner recovery closed: on
 ## Bounded import classification
 
 - `safe_import_candidate`
-  - `IS25Level` through `IS110Level`
+  - `IS1Level` through `IS110Level`
     - this exact SaveData-owned `IS*Level` span is now safe to preserve as compatibility-only raw Emporium import truth under `compatibility.unmappedSystemState.multiverseMarket`
     - the checked rows `71-74` overlap anchors that wider run to validated Emporium rows without claiming final player-facing row identity
 - `wrapper_or_export_only`
@@ -55,9 +63,10 @@ This note records the active follow-up lane after save-owner recovery closed: on
 ## Grounded conclusion
 
 - The smallest checked mapping is ordered only: `IS71Level -> row 71`, `IS72Level -> row 72`, `IS73Level -> row 73`, and `IS74Level -> row 74`.
-- The exact SaveData-owned `IS*Level` span that is safe to import as raw Emporium truth is `IS25Level` through `IS110Level`.
+- The exact SaveData-owned `IS*Level` span that is safe to import as raw Emporium truth is `IS1Level` through `IS110Level`.
 - That import-safe span is compatibility-only and should stay under `compatibility.unmappedSystemState.multiverseMarket`.
 - `InscryptionsDone` remains explicitly dual-declared and wrapper/export-only rather than part of the promoted `IS*Level` import span.
+- Exact typed recovery currently sets hard boundaries on that compatibility span: no checked `IS0Level` below it and no checked `IS111Level` above it.
 - Rows `71-74` remain ordered overlap only for identity work, not an import-admissible canonical subset.
 - If stronger identity evidence does not appear, the canonical import-safe subset stays explicitly empty.
 

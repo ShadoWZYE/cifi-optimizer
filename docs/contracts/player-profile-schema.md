@@ -112,7 +112,7 @@ Import rule:
 - prefer explicit `compatibility.*` paths or namespaced legacy sources such as `stage.*` and `systems.metaProgression.*`
 - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
 - imported `systems.shardMilestones` or `compatibility.unmappedSystemState.shardMilestoneState` payloads must remain quarantined under `compatibility.unmappedSystemState.*` until the save owner, field mapping, and planner-safe recommendation gate are verified
-- flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and exact SaveData-backed Emporium levels `IS25Level` through `IS110Level` may be quarantined under `compatibility.unmappedSystemState.*`
+- flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level` may be quarantined under `compatibility.unmappedSystemState.*`
 
 Mapping gate before canonical promotion:
 

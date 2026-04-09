@@ -60,7 +60,7 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
     - `IS110Level`
     - `EsotericR1Trades`
   - recovered broader progression-field neighborhood:
-    - `IS25Level` through `IS110Level`
+    - `IS1Level` through `IS110Level`
     - `EsotericR1Trades` through `EsotericR9Trades`
     - `NecrumR1Trades` through `NecrumR9Trades`
     - `Mech1Unlocked`
