@@ -2660,7 +2660,20 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellBuyHookRange, "BuyIS1 through BuyIS110", "multiverse market SaveData import boundary actionShellBuyHookRange drifted");
   assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellCostTextRange, "SetIS1CostText through SetIS110CostText", "multiverse market SaveData import boundary actionShellCostTextRange drifted");
   assert.deepEqual(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.validatedRowRanges, ["50-59", "63-74"], "multiverse market SaveData import boundary validatedRowRanges drifted");
-  assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.saveDataFieldRange, "IS25Level through IS110Level", "multiverse market SaveData import boundary saveDataFieldRange drifted");
+  assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.saveDataFieldRange, "IS1Level through IS110Level", "multiverse market SaveData import boundary saveDataFieldRange drifted");
+  expectRecord(boundary.typedSpanBoundary, "multiverse market SaveData import boundary typedSpanBoundary must be an object");
+  expectNonEmptyString(boundary.typedSpanBoundary.declaringOwner, "multiverse market SaveData import boundary typedSpanBoundary.declaringOwner must be present");
+  expectNonEmptyString(boundary.typedSpanBoundary.contiguousLevelSpan, "multiverse market SaveData import boundary typedSpanBoundary.contiguousLevelSpan must be present");
+  expectRecord(boundary.typedSpanBoundary.lowerBoundary, "multiverse market SaveData import boundary typedSpanBoundary.lowerBoundary must be an object");
+  expectRecord(boundary.typedSpanBoundary.upperBoundary, "multiverse market SaveData import boundary typedSpanBoundary.upperBoundary must be an object");
+  expectArray(boundary.typedSpanBoundary.evidence, "multiverse market SaveData import boundary typedSpanBoundary.evidence must be an array");
+  assert.equal(boundary.typedSpanBoundary.declaringOwner, "SaveData", "multiverse market SaveData import boundary typed span declaringOwner drifted");
+  assert.equal(boundary.typedSpanBoundary.contiguousLevelSpan, "IS1Level through IS110Level", "multiverse market SaveData import boundary typed contiguous span drifted");
+  assert.equal(boundary.typedSpanBoundary.lowerBoundary.includedField, "IS1Level", "multiverse market SaveData import boundary typed lower included field drifted");
+  assert.equal(boundary.typedSpanBoundary.lowerBoundary.excludedNeighbor, "IS0Level", "multiverse market SaveData import boundary typed lower excluded neighbor drifted");
+  assert.equal(boundary.typedSpanBoundary.upperBoundary.includedField, "IS110Level", "multiverse market SaveData import boundary typed upper included field drifted");
+  assert.equal(boundary.typedSpanBoundary.upperBoundary.excludedNeighbor, "IS111Level", "multiverse market SaveData import boundary typed upper excluded neighbor drifted");
+  assert.equal(boundary.typedSpanBoundary.upperBoundary.nextTypedNeighbor, "InscryptionsDone", "multiverse market SaveData import boundary typed upper next neighbor drifted");
   assert.deepEqual(
     boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.map((entry) => entry.saveField),
     ["IS71Level", "IS72Level", "IS73Level", "IS74Level"],
@@ -2676,15 +2689,17 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
     assert.equal(entry.evidence.length, 4, `multiverse market SaveData import boundary checkedOrderedMappings[${index}] should preserve four evidence links`);
   });
   assert.equal(boundary.checkedIsToRowOrderBoundary.blockedWiderMapping.length, 2, "multiverse market SaveData import boundary blockedWiderMapping count drifted");
-  assert.deepEqual(boundary.boundedImportConclusion.importSafeSubset, ["IS25Level through IS110Level"], "multiverse market SaveData import boundary importSafeSubset drifted");
-  assert.equal(boundary.boundedImportConclusion.exactImportSafeSubsetLabel, "IS25Level through IS110Level", "multiverse market SaveData import boundary exactImportSafeSubsetLabel drifted");
+  assert.deepEqual(boundary.boundedImportConclusion.importSafeSubset, ["IS1Level through IS110Level"], "multiverse market SaveData import boundary importSafeSubset drifted");
+  assert.equal(boundary.boundedImportConclusion.exactImportSafeSubsetLabel, "IS1Level through IS110Level", "multiverse market SaveData import boundary exactImportSafeSubsetLabel drifted");
   assert.equal(boundary.boundedImportConclusion.importTargetPath, "compatibility.unmappedSystemState.multiverseMarket", "multiverse market SaveData import boundary importTargetPath drifted");
   assert.deepEqual(boundary.boundedImportConclusion.canonicalImportSafeSubset, [], "multiverse market SaveData import boundary canonicalImportSafeSubset must remain empty in this slice");
   assert.equal(boundary.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel, "none", "multiverse market SaveData import boundary exactCanonicalImportSafeSubsetLabel drifted");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /IS25Level through IS110Level/i, "multiverse market SaveData import boundary currentBoundary must preserve the exact import-safe span");
+  assert.match(boundary.boundedImportConclusion.currentBoundary, /IS1Level through IS110Level/i, "multiverse market SaveData import boundary currentBoundary must preserve the exact import-safe span");
+  assert.match(boundary.boundedImportConclusion.currentBoundary, /IS1Level rather than IS0Level/i, "multiverse market SaveData import boundary currentBoundary must preserve the typed lower boundary");
+  assert.match(boundary.boundedImportConclusion.currentBoundary, /IS110Level before the next typed neighbor InscryptionsDone/i, "multiverse market SaveData import boundary currentBoundary must preserve the typed upper boundary");
   assert.match(boundary.boundedImportConclusion.currentBoundary, /compatibility-only/i, "multiverse market SaveData import boundary currentBoundary must preserve the compatibility-only conclusion");
   assert.match(boundary.boundedImportConclusion.currentBoundary, /no recovered SaveData field is currently safe to promote into canonical PlayerProfile import/i, "multiverse market SaveData import boundary currentBoundary must preserve the canonical block");
-  ["do not reopen the metadata-only Market typed-field question without new direct evidence", "do not treat the compatibility-safe IS25Level through IS110Level import span or the ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery", "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap", "do not do planner integration from the recovered SaveData block in this slice"].forEach((line) => {
+  ["do not reopen the metadata-only Market typed-field question without new direct evidence", "do not treat the compatibility-safe IS1Level through IS110Level import span or the ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery", "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap", "do not do planner integration from the recovered SaveData block in this slice"].forEach((line) => {
     assert.ok(boundary.boundedImportConclusion.blockedBy.includes(line), `multiverse market SaveData import boundary missing blockedBy line ${line}`);
   });
 
@@ -2694,8 +2709,8 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   assert.equal(boundary.classifications.unresolved.length, 0, "multiverse market SaveData import boundary unresolved count drifted");
 
   const safeEntry = boundary.classifications.safe_import_candidate[0];
-  assert.equal(safeEntry.entryId, "savedata-owned-is25-110", "multiverse market SaveData import boundary safe entry id drifted");
-  assert.deepEqual(safeEntry.fieldNames, ["IS25Level through IS110Level"], "multiverse market SaveData import boundary safe fieldNames drifted");
+  assert.equal(safeEntry.entryId, "savedata-owned-is1-110", "multiverse market SaveData import boundary safe entry id drifted");
+  assert.deepEqual(safeEntry.fieldNames, ["IS1Level through IS110Level"], "multiverse market SaveData import boundary safe fieldNames drifted");
   assert.equal(safeEntry.targetPath, "compatibility.unmappedSystemState.multiverseMarket", "multiverse market SaveData import boundary safe targetPath drifted");
   assert.match(safeEntry.why, /compatibility-only raw Emporium import truth/i, "multiverse market SaveData import boundary safe rationale drifted");
 
@@ -2720,7 +2735,7 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   assert.match(combinedDoc, /`IS71Level` -> ordered row `71`/, "multiverse market state verification doc must preserve the checked IS71 ordered row mapping");
   assert.match(combinedDoc, /`IS74Level` -> ordered row `74`/, "multiverse market state verification doc must preserve the checked IS74 ordered row mapping");
   assert.match(combinedDoc, /## Bounded SaveData import classification/, "multiverse market state verification doc must expose the bounded SaveData import classification");
-  assert.match(combinedDoc, /`safe_import_candidate`[\s\S]*`IS25Level` through `IS110Level`/, "multiverse market state verification doc must preserve the exact compatibility-safe IS span");
+  assert.match(combinedDoc, /`safe_import_candidate`[\s\S]*`IS1Level` through `IS110Level`/, "multiverse market state verification doc must preserve the exact compatibility-safe IS span");
   assert.match(combinedDoc, /`wrapper_or_export_only`[\s\S]*`InscryptionsDone`/, "multiverse market state verification doc must preserve the wrapper/export-only InscryptionsDone entry");
   assert.match(combinedDoc, /`verified_but_blocked`[\s\S]*`IS71Level` through `IS74Level`/, "multiverse market state verification doc must preserve the blocked overlap IS71-74 entry");
   assert.match(combinedDoc, /`verified_but_blocked`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/, "multiverse market state verification doc must preserve the blocked trade counter entries");
@@ -2737,7 +2752,7 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
       `${boundary.classifications.safe_import_candidate.length} safe import candidates`,
       `${boundary.classifications.wrapper_or_export_only.length} wrapper-or-export-only entries`,
       `${boundary.classifications.verified_but_blocked.length} verified-but-blocked entries`,
-      "Canonical Emporium import remains blocked even though the exact IS25-110 span is compatibility-safe raw import"
+      "Canonical Emporium import remains blocked even though the exact IS1-110 span is compatibility-safe raw import"
     ]
   };
 }

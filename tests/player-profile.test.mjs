@@ -36,10 +36,11 @@ test("normalizePlayerProfile preserves only allowed meta.dataConfidence values",
   assert.equal(normalizePlayerProfile({ automationConfidence: "mixed" }).meta.dataConfidence, "mixed");
 });
 
-test("normalizePlayerProfile keeps only the checked SaveData-backed multiverse market levels quarantined", () => {
+test("normalizePlayerProfile keeps only the exact typed SaveData-backed multiverse market levels quarantined", () => {
   const profile = normalizePlayerProfile({
-    IS24Level: 3,
-    IS25Level: "4",
+    IS0Level: 3,
+    IS1Level: "4",
+    IS24Level: 4,
     IS71Level: 4,
     IS72Level: "5",
     IS111Level: 6,
@@ -47,8 +48,9 @@ test("normalizePlayerProfile keeps only the checked SaveData-backed multiverse m
   });
 
   assert.equal(profile.meta.schemaVersion, PLAYER_PROFILE_SCHEMA_VERSION);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS24Level, undefined);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS25Level, 4);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS0Level, undefined);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS1Level, 4);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS24Level, 4);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS71Level, 4);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS72Level, 5);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS111Level, undefined);
