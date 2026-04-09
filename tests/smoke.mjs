@@ -2226,8 +2226,19 @@ assertDatasetContractEntry("multiverse-market-row71-74-remap-band", "data/multiv
 assertDatasetContractEntry("multiverse-market-nearby-identity-binding-pattern", "data/multiverse-market-nearby-identity-binding-pattern.json");
 assertDatasetContractEntry("multiverse-market-69-74-anomaly-provenance", "data/multiverse-market-69-74-anomaly-provenance.json");
 assert.equal(multiverseMarketSaveDataImportBoundaryData.dataset, "multiverse-market-savedata-import-boundary");
-assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importSafeSubset, ["IS1Level through IS110Level"]);
-assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactImportSafeSubsetLabel, "IS1Level through IS110Level");
+assert.deepEqual(
+  multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importSafeSubset,
+  [
+    "IS1Level through IS110Level",
+    "EsotericR1Trades through EsotericR9Trades",
+    "NecrumR1Trades through NecrumR9Trades",
+    "Mech1Unlocked through Mech2Unlocked"
+  ]
+);
+assert.equal(
+  multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactImportSafeSubsetLabel,
+  "IS1Level through IS110Level plus separate bounded trade-counter and early-mech quarantine ranges after the dual-declared InscryptionsDone boundary"
+);
 assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importTargetPath, "compatibility.unmappedSystemState.multiverseMarket");
 assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.canonicalImportSafeSubset, []);
 assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel, "none");
@@ -2248,7 +2259,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.classifications.safe_import_candidate.map((entry) => entry.entryId),
-  ["savedata-owned-is1-110"]
+  ["savedata-owned-is1-110", "savedata-owned-trade-counters", "savedata-owned-adjacent-mech-window"]
 );
 assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.classifications.wrapper_or_export_only.map((entry) => entry.entryId),
@@ -2256,7 +2267,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.classifications.verified_but_blocked.map((entry) => entry.entryId),
-  ["checked-row-order-is71-74", "trade-counters", "mech-progression-neighbors"]
+  ["checked-row-order-is71-74"]
 );
 assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.classifications.unresolved, []);
 assert.match(multiverseMarketStateVerificationDoc, /## Checked `IS\*Level` to inscription-row boundary/);
@@ -2264,10 +2275,11 @@ assert.match(multiverseMarketStateVerificationDoc, /`IS71Level` -> ordered row `
 assert.match(multiverseMarketStateVerificationDoc, /`IS74Level` -> ordered row `74`/);
 assert.match(multiverseMarketStateVerificationDoc, /## Bounded SaveData import classification/);
 assert.match(multiverseMarketStateVerificationDoc, /`safe_import_candidate`[\s\S]*`IS1Level` through `IS110Level`/);
+assert.match(multiverseMarketStateVerificationDoc, /`safe_import_candidate`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/);
+assert.match(multiverseMarketStateVerificationDoc, /`safe_import_candidate`[\s\S]*`Mech1Unlocked` through `Mech2Unlocked`/);
 assert.match(multiverseMarketStateVerificationDoc, /`wrapper_or_export_only`[\s\S]*`InscryptionsDone`/);
 assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]*`IS71Level` through `IS74Level`/);
-assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/);
-assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]*`Mech1Unlocked`, `Mech1Units`, `Mech1Upg1Level`, `Mech1Upg2Level`, `Mech1MissionsProgress`, `Mech1MissionsCompleted`, and `Mech2Unlocked`/);
+assert.match(multiverseMarketStateVerificationDoc, /split into separate exact typed quarantine ranges/i);
 assert.match(multiverseMarketStateVerificationDoc, /`unresolved`[\s\S]*none/);
 assert.match(multiverseMarketStateVerificationDoc, /no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import/i);
 assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.dataset, "multiverse-market-row69-74-identity-source-boundary");
@@ -2578,7 +2590,7 @@ assert.match(playerProfileSchemaDoc, /stage\.highestShipUnlocked/);
 assert.match(playerProfileSchemaDoc, /top-level `power`, `speed`, and `cargo` no longer migrate/);
 assert.match(playerProfileSchemaDoc, /planning\.gemNodeBudget`, `planning\.resourceFocus`, `planning\.researchHours`, and their flat helper forms are retired/);
 assert.match(playerProfileSchemaDoc, /flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically/);
-assert.match(playerProfileSchemaDoc, /flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level` may be quarantined/);
+assert.match(playerProfileSchemaDoc, /flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, and the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked` may be quarantined/);
 assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
 assert.match(importMappingDoc, /experimental helper imports now require explicit `externalModels\.experimental\.\*` paths/);
 assert.match(importMappingDoc, /externalModels\.communityTools\.shipOptimizer\.v1/);
@@ -2588,7 +2600,7 @@ assert.match(importMappingDoc, /must not silently populate canonical `player\.\*
 assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
 assert.match(importMappingDoc, /flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired/);
 assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
-assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, `ATU\*Level`, `Tier\*TokensUnlocked`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved/);
+assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked`, `ATU\*Level`, `Tier\*TokensUnlocked`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(tokenShopDoc, /## Adjacent systems still to map/);
@@ -3439,6 +3451,12 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
   IS0Level: "1",
   IS1Level: "2",
   IS73Level: 4,
+  EsotericR1Trades: "5",
+  NecrumR9Trades: 6,
+  Mech1Unlocked: true,
+  FinalMech1MainBonus: "2.5e3",
+  Mech2Unlocked: false,
+  Mech2Units: 7,
   IS111Level: "9"
 });
 
@@ -3455,8 +3473,14 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket, {
   InscryptionsDone: 98,
   IS1Level: 2,
-  IS73Level: 4
+  IS73Level: 4,
+  EsotericR1Trades: 5,
+  NecrumR9Trades: 6,
+  Mech1Unlocked: true,
+  FinalMech1MainBonus: 2500,
+  Mech2Unlocked: false
 });
+assert.equal(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.Mech2Units, undefined);
 assert.equal(migratedFlatSpendStateProfile.player.resources.tokens, null);
 
 const migratedInvalidShardHelpers = normalizePlayerProfile({
