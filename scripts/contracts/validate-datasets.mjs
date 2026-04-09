@@ -2460,7 +2460,9 @@ function validateMultiverseMarketSaveBoundary(boundary) {
   assert.equal(boundary.crossBoundaryTypedOwnerStatus.status, "exact-declaring-owner-recovered-elsewhere", "multiverse market save boundary cross-boundary typed owner status drifted");
   assert.equal(boundary.crossBoundaryTypedOwnerStatus.exactDeclaringOwner, "SaveData", "multiverse market save boundary exact declaring owner drifted");
   assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /IS\*Level/, "multiverse market save boundary typed owner scope must preserve the IS*Level cluster");
+  assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /InscryptionsDone.*dual declaration/i, "multiverse market save boundary typed owner scope must preserve the dual-declared InscryptionsDone split");
   assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /does not recover a typed Market field/i, "multiverse market save boundary typed owner note must preserve the typed Market-field blocker");
+  assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /dual declaration on SaveData and PlayerProfileData/i, "multiverse market save boundary typed owner note must preserve the dual-declared InscryptionsDone split");
 
   return {
     id: "multiverse-market-save-boundary",
@@ -2599,13 +2601,13 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
       "PlayerProfileHandler saveInfoCache field is recovered as PlayerProfileData while no typed Market field is recovered on PlayerProfileHandler or PlayerProfileData",
       "PlayerProfileHandler.ConvertSaveDataToProfileData bridges SaveData back into PlayerProfileData without recovering a typed Market field",
       "PlayerProfileData direct field table is recovered as 89 flat fields and 1 method with no direct IS/trade/mech members",
-      "SaveData direct field table is recovered as 4461 fields and 1 method with direct IS/trade/mech ownership",
+      "SaveData direct field table is recovered as 4461 fields and 1 method with direct IS/trade/mech ownership plus a wider InscryptionsDone declaration",
       `${boundary.directPlayerProfileFieldSamples.length} direct PlayerProfileData field samples`,
       `${boundary.typedSaveDataProgressionOwnerSamples.length} typed SaveData progression-owner samples`,
       `${boundary.firstNestedMarketTypeChecks.length} first nested market type checks`,
       `${boundary.progressionPayloadFieldClues.length} progression-payload field clues`,
       `${boundary.marketWrapperTypeClues.length} nearby market-wrapper type clues`,
-      "MultiverseMarket save-side handoff is narrowed to a checked PlayerProfileHandler.get_Market-to-MultiverseMarket bridge with SaveData recovered as the wider progression owner"
+      "MultiverseMarket save-side handoff is narrowed to a checked PlayerProfileHandler.get_Market-to-MultiverseMarket bridge with SaveData recovered as the checked IS/trade/mech owner and InscryptionsDone split out as a dual declaration"
     ]
   };
 }

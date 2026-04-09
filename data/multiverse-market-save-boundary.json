@@ -28,13 +28,13 @@
   "crossBoundaryTypedOwnerStatus": {
     "status": "exact-declaring-owner-recovered-elsewhere",
     "exactDeclaringOwner": "SaveData",
-    "scope": "wider IS*Level / InscryptionsDone / trade-counter / early Mech* progression cluster",
-    "note": "This artifact still records the action-shell versus save-family split only; the exact declaring owner comes from the checked typed market-member boundary and does not recover a typed Market field or import-ready row mapping."
+    "scope": "checked IS*Level / trade-counter / early Mech* progression cluster, with InscryptionsDone split out as an exact dual declaration on SaveData and PlayerProfileData",
+    "note": "This artifact still records the action-shell versus save-family split only; the exact declaring owner comes from the checked typed market-member boundary, keeps InscryptionsDone split out as a dual declaration on SaveData and PlayerProfileData, and does not recover a typed Market field or import-ready row mapping."
   },
   "currentBoundary": [
     "The checked MultiverseMarket action-shell probe now preserves TextHandlerMarkets, SetAllChrystosEmporiumTexts, and SetInscryptionsDoneText while separately confirming zero direct overlap with the current PlayerProfileData or CloudSavePlayerProfile save-family clues.",
     "The checked metadata-neighborhood dataset still preserves both the action-side anchors and the save-family anchors, but the narrowed action-shell probe itself does not recover save-family terms in either global-metadata.dat action contexts or level0.",
-    "This is enough to keep the MultiverseMarket action shell and save-family recovery separated in repo-local grounding, while the checked typed market-member boundary now separately recovers SaveData as the exact declaring owner for the wider IS*Level and InscryptionsDone and trade-counter and early Mech progression cluster.",
+    "This is enough to keep the MultiverseMarket action shell and save-family recovery separated in repo-local grounding, while the checked typed market-member boundary now separately recovers SaveData as the exact declaring owner for the checked IS*Level and trade-counter and early Mech progression cluster and keeps InscryptionsDone split out as an exact dual declaration on SaveData and PlayerProfileData.",
     "This artifact by itself still does not recover a typed Market field, player-owned row levels, or a canonical import-ready Emporium state surface."
   ]
 }

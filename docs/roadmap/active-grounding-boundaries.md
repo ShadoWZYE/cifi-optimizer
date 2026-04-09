@@ -49,8 +49,8 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - exact typed recovery now also confirms `PlayerProfileHandler.ConvertSaveDataToProfileData(SaveData, System.DateTime) -> PlayerProfileData` as the checked save-to-profile conversion bridge
   - the bare `Market` symbol is still only a metadata/member-shell clue in the checked boundary
   - exact typed recovery still does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
-  - `PlayerProfileData` is a flatter wrapper/export surface, not the declaring owner for the broader progression cluster
-  - exact typed recovery now also confirms `SaveData` as the declaring owner for the wider `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster
+  - `PlayerProfileData` is a flatter wrapper/export surface, not the declaring owner for the broader checked progression cluster, even though it also directly declares `InscryptionsDone`
+  - exact typed recovery now also confirms `SaveData` as the declaring owner for the checked `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster, with `InscryptionsDone` split out as an exact dual declaration on `SaveData` and `PlayerProfileData`
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
   - `IS71Level` through `IS74Level` only ground ordered overlap to rows `71-74`, not import admissibility or final player-facing identity
   - `InscryptionsDone` is wrapper/export-only for import decisions, not a new bounded canonical Emporium import
