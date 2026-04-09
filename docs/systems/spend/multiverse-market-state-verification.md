@@ -248,6 +248,51 @@ Current grounded conclusion:
 - live UI evidence now grounds rows `69-74` as player-facing rows `69-74`, but that does not rewrite the inherited prefab anomaly
 - no dataset standardization is applied in this lane because preserving inherited source truth is safer than rewriting the prefab layer into a newer canonical shape the app-side evidence does not support
 
+## Checked shell-to-SaveData row-prediction boundary
+
+- The strongest recoverable structure from shell/object path down to save owner is:
+  - `PlayerProfileHandler.get_Market -> MultiverseMarket`
+  - `SaveData.ISNLevel`
+  - `ISNID`
+  - `BuyISN`
+  - `SetISNCostText`
+  - nested payload carriers `MultiverseMarket|Inscryption` and `MultiverseMarket|InscryptionTupleObject`
+  - row-local fields `ID`, `Level`, and `ISObject`
+- For rows `69-74`, that same-number owner and carrier chain predicts the displayed row number better than the shell names do:
+  - `IS69Level` through `IS74Level`
+  - `IS69ID` through `IS74ID`
+  - `BuyIS69` through `BuyIS74`
+  - `SetIS69CostText` through `SetIS74CostText`
+  - validated row payload ids `69` through `74`
+- The validated row payload values also match the supplied live bonus magnitudes for rows `69-74`:
+  - row `69`: `5000000136282112.0` aligns with `x5.00qa`
+  - row `70`: `10000000000.0` aligns with `/10.00b`
+  - row `71`: `0.019999999552965164` aligns with `+0.02x`
+  - row `72`: `0.05999999865889549` aligns with `-0.06`
+  - row `73`: `10.0` aligns with `+10`
+  - row `74`: `40.0` aligns with `-40`
+- The prefab shell layer diverges in the broken band:
+  - `ChrystosEmporiumUpgrade69-ID57`
+  - `ChrystosEmporiumUpgrade70-ID58`
+  - `ChrystosEmporiumUpgrade71-ID59`
+  - `ChrystosEmporiumUpgrade72-ID60`
+  - `ChrystosEmporiumUpgrade73-ID61`
+  - `ChrystosEmporiumUpgrade74-ID62`
+- Control row `78` preserves the non-divergent case:
+  - `IS78Level`
+  - `IS78ID`
+  - `BuyIS78`
+  - `ChrystosEmporiumUpgrade78-ID78`
+  - `Inscryption 78: Ouroboros Orbs`
+
+Current grounded conclusion:
+
+- displayed row number follows the ordered same-number `SaveData` and row-carrier chain, not the prefab shell suffix
+- displayed bonus magnitude follows the validated row payload keyed by `inscription_id`, not the remapped shell ids
+- the `57-62` relation is only shell-local anomaly metadata, not the recovered structure that links displayed inscription row identity through to `SaveData`
+- the repo still does not recover the player-facing bonus-text phrases for rows `69-74` from shell or payload data alone
+- compatibility-only import stays under `compatibility.unmappedSystemState.multiverseMarket`, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked
+
 ## Alternate serialized-export indirect-join boundary
 
 - This check is a separate repo-local evidence class from the exhausted Market/TextHandler/probe path:

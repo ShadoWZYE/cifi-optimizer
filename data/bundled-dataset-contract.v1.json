@@ -458,6 +458,14 @@
       ]
     },
     {
+      "id": "multiverse-market-shell-row-prediction-boundary",
+      "label": "Multiverse market shell-row prediction boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-shell-row-prediction-boundary.json"
+      ]
+    },
+    {
       "id": "token-bank-controller-shell",
       "label": "Token-bank controller shell",
       "classification": "extracted-mechanics",

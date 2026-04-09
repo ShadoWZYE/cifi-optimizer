@@ -100,6 +100,38 @@ Current grounded conclusion:
 - live UI evidence now grounds player-facing rows `69-74` directly, but that does not rewrite the inherited prefab anomaly
 - no dataset standardization is applied in this lane because rewriting the derived datasets to a newer same-number prefab shape would erase checked app-side evidence
 
+## Shell-to-SaveData row-prediction boundary
+
+- The strongest recoverable row-link structure now runs:
+  - `PlayerProfileHandler.get_Market -> MultiverseMarket`
+  - `SaveData.ISNLevel`
+  - `ISNID`
+  - `BuyISN`
+  - `SetISNCostText`
+  - `MultiverseMarket|Inscryption` and `MultiverseMarket|InscryptionTupleObject`
+  - `ID`, `Level`, and `ISObject`
+- For rows `69-74`, that ordered same-number chain predicts the displayed row number and the validated row payload predicts the live bonus magnitude.
+- The shell layer does not:
+  - `ChrystosEmporiumUpgrade69-ID57`
+  - `ChrystosEmporiumUpgrade70-ID58`
+  - `ChrystosEmporiumUpgrade71-ID59`
+  - `ChrystosEmporiumUpgrade72-ID60`
+  - `ChrystosEmporiumUpgrade73-ID61`
+  - `ChrystosEmporiumUpgrade74-ID62`
+- The bonus-value mismatch is explicit where earlier ids are validated:
+  - id `57` carries `0.05`, not row `69`'s `5qa`
+  - id `58` carries `5`, not row `70`'s `10b`
+  - id `59` carries `5`, not row `71`'s `0.02`
+- Control row `78` shows the same-number non-divergent case:
+  - `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`
+
+Current grounded conclusion:
+
+- the actual structure linking displayed inscription rows through to `SaveData` is the ordered same-number owner and row-carrier path, not the prefab shell suffix
+- the `57-62` relation is meaningful only as shell-local anomaly metadata
+- row payload carriers recover live bonus magnitudes for rows `69-74`, but not their player-facing bonus-text phrases
+- compatibility-only import and planner blocks remain unchanged
+
 ## Alternate serialized-export indirect-join boundary
 
 - This check is distinct from the settled Market/TextHandler/probe path.

@@ -3456,6 +3456,80 @@ function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verif
   };
 }
 
+function validateMultiverseMarketShellRowPredictionBoundary(boundary, stateDoc, verificationDoc, boundaryDoc) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market shell-row prediction boundary generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "multiverse market shell-row prediction boundary dataset id must be present");
+  expectRecord(boundary.sources, "multiverse market shell-row prediction boundary sources must be an object");
+  [
+    "marketMemberBoundary",
+    "saveDataImportBoundary",
+    "metadataNeighborhood",
+    "values",
+    "actionShell",
+    "rowTextCoverage",
+    "prefabRemapBoundary",
+    "serializedLabelSourceBoundary",
+    "nearbyIdentityBindingPattern",
+    "liveUiScreenshotEvidence",
+    "verificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market shell-row prediction boundary sources.${field} must be present`);
+  });
+  expectArray(boundary.testedRows, "multiverse market shell-row prediction boundary testedRows must be an array");
+  expectRecord(boundary.layerPredictionAssessment, "multiverse market shell-row prediction boundary layerPredictionAssessment must be an object");
+  expectRecord(boundary.actualStructureConclusion, "multiverse market shell-row prediction boundary actualStructureConclusion must be an object");
+  expectArray(boundary.currentBoundary, "multiverse market shell-row prediction boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "multiverse-market-shell-row-prediction-boundary", "multiverse market shell-row prediction boundary dataset id drifted");
+  assert.deepEqual(
+    boundary.testedRows.map((entry) => [entry.orderedInscriptionRow, entry.saveDataOwnerChain.saveField, entry.saveDataOwnerChain.serializedIdField, entry.saveDataOwnerChain.buyHook]),
+    [
+      [69, "IS69Level", "IS69ID", "BuyIS69"],
+      [70, "IS70Level", "IS70ID", "BuyIS70"],
+      [71, "IS71Level", "IS71ID", "BuyIS71"],
+      [72, "IS72Level", "IS72ID", "BuyIS72"],
+      [73, "IS73Level", "IS73ID", "BuyIS73"],
+      [74, "IS74Level", "IS74ID", "BuyIS74"],
+      [78, "IS78Level", "IS78ID", "BuyIS78"]
+    ],
+    "multiverse market shell-row prediction boundary tested row carrier chain drifted"
+  );
+  assert.deepEqual(
+    boundary.testedRows.slice(0, 6).map((entry) => [entry.orderedInscriptionRow, entry.rowPayloadChain.recordInscriptionId, entry.rowPayloadChain.bonusValue]),
+    [
+      [69, 69, 5000000136282112.0],
+      [70, 70, 10000000000.0],
+      [71, 71, 0.019999999552965164],
+      [72, 72, 0.05999999865889549],
+      [73, 73, 10.0],
+      [74, 74, 40.0]
+    ],
+    "multiverse market shell-row prediction boundary row payload values drifted"
+  );
+  assert.equal(boundary.testedRows[6].shellMetadata.prefabName, "ChrystosEmporiumUpgrade78-ID78", "multiverse market shell-row prediction boundary control row prefab drifted");
+  assert.match(boundary.layerPredictionAssessment.prefabShellLayer.predictsDisplayedRowNumber[0].why, /remapped ids 57-62/i, "multiverse market shell-row prediction boundary prefab divergence reasoning drifted");
+  assert.match(boundary.layerPredictionAssessment.rowPayloadLayer.predictsBonusMagnitude[0].why, /5qa[\s\S]*10b[\s\S]*0\.02[\s\S]*0\.06[\s\S]*10[\s\S]*40/i, "multiverse market shell-row prediction boundary row payload magnitude reasoning drifted");
+  assert.deepEqual(boundary.actualStructureConclusion.canonicalImportSafeSubset, [], "multiverse market shell-row prediction boundary canonicalImportSafeSubset must remain empty");
+  assert.equal(boundary.actualStructureConclusion.compatibilityOnlyImportPath, "compatibility.unmappedSystemState.multiverseMarket", "multiverse market shell-row prediction boundary compatibility path drifted");
+
+  const combinedDocs = [stateDoc, verificationDoc, boundaryDoc].join("\n");
+  assert.match(stateDoc, /## Checked shell-to-SaveData row-prediction boundary/, "multiverse market state verification doc must expose the shell-to-SaveData boundary section");
+  assert.match(verificationDoc, /## Shell-to-SaveData row-prediction boundary/, "multiverse market verification doc must expose the shell-to-SaveData boundary section");
+  assert.match(boundaryDoc, /displayed row number follows the ordered same-number `SaveData` and row-carrier chain, not the prefab shell suffix/i, "multiverse market shell-row prediction boundary doc must preserve the ordered chain conclusion");
+  assert.match(combinedDocs, /the `57-62` relation is (only )?shell-local anomaly metadata/i, "multiverse market shell-row prediction boundary docs must preserve the shell-local metadata conclusion");
+
+  return {
+    id: "multiverse-market-shell-row-prediction-boundary",
+    label: "Multiverse market shell-row prediction boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.testedRows.length} traced rows`,
+      "Ordered SaveData and row-carrier chain predicts live rows 69-74 better than the prefab shell band does",
+      "57-62 relation stays shell-local anomaly metadata only"
+    ]
+  };
+}
+
 function validateTokenBankControllerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token-bank controller shell generatedAt must be present");
   expectRecord(shell.sources, "token-bank controller shell sources must be an object");
@@ -3519,7 +3593,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 55, "bundled dataset contract must track the fifty-five shipped dataset groups");
+  assert.equal(contract.datasets.length, 56, "bundled dataset contract must track the fifty-six shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -3635,12 +3709,14 @@ export async function validateBundledDatasets() {
   const multiverseMarketNearbyIdentityBindingPattern = await readJson("../../data/multiverse-market-nearby-identity-binding-pattern.json");
   const multiverseMarketInscriptionNumberingStabilityBoundary = await readJson("../../data/multiverse-market-inscription-numbering-stability-boundary.json");
   const multiverseMarket6974AnomalyProvenance = await readJson("../../data/multiverse-market-69-74-anomaly-provenance.json");
+  const multiverseMarketShellRowPredictionBoundary = await readJson("../../data/multiverse-market-shell-row-prediction-boundary.json");
   const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
   const multiverseMarketMarketMemberBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-market-member-boundary.md");
   const multiverseMarketStateVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-state-verification.md");
   const multiverseMarketVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-verification.md");
   const multiverseMarketSerializedLabelSourceBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-serialized-label-source-boundary.md");
   const multiverseMarket6974AnomalyProvenanceDoc = await readText("../../docs/systems/spend/multiverse-market-69-74-anomaly-provenance.md");
+  const multiverseMarketShellRowPredictionBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md");
   const activeGroundingBoundariesDoc = await readText("../../docs/roadmap/active-grounding-boundaries.md");
 
   const summaries = [
@@ -3698,6 +3774,7 @@ export async function validateBundledDatasets() {
     validateMultiverseMarketNearbyIdentityBindingPattern(multiverseMarketNearbyIdentityBindingPattern, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarketInscriptionNumberingStabilityBoundary(multiverseMarketInscriptionNumberingStabilityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarket6974AnomalyProvenance(multiverseMarket6974AnomalyProvenance, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarket6974AnomalyProvenanceDoc),
+    validateMultiverseMarketShellRowPredictionBoundary(multiverseMarketShellRowPredictionBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarketShellRowPredictionBoundaryDoc),
     validateTokenBankControllerShell(tokenBankControllerShell)
   ];
 

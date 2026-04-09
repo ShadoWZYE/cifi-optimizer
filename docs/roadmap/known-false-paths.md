@@ -64,6 +64,14 @@ This is not a list of open hypotheses. It is a compact list of paths that should
   - `docs/systems/spend/multiverse-market-row69-74-identity-source-boundary.md`
   - `docs/systems/spend/multiverse-market-row71-74-remap-band.md`
 
+### Do not treat prefab shell numbering as the strongest link from displayed Emporium row identity back to `SaveData`
+
+- Current checked result: the stronger row-link structure is the same-number `SaveData.ISNLevel` plus `ISNID` or `BuyISN` or `SetISNCostText` chain with row payload carriers under `MultiverseMarket`
+- Why this stays closed: the shell layer diverges in rows `69-74`, while the ordered save-owner and row-payload path still predicts the displayed row number and bonus magnitude
+- Source anchors:
+  - `docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md`
+  - `data/multiverse-market-shell-row-prediction-boundary.json`
+
 ### Do not treat Daily Tokenium as a TokenShop-only lane
 
 - Current checked result: Daily Tokenium is currently best grounded as an Academy or Farm Mission reward lane that multiple modifier families touch

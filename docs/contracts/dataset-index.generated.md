@@ -397,6 +397,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-69-74-anomaly-provenance.json`
 
+### `multiverse-market-shell-row-prediction-boundary`
+
+- Label: Multiverse market shell-row prediction boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-shell-row-prediction-boundary.json`
+
 ### `token-bank-controller-shell`
 
 - Label: Token-bank controller shell
