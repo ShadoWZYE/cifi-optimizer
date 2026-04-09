@@ -36,13 +36,21 @@ test("normalizePlayerProfile preserves only allowed meta.dataConfidence values",
   assert.equal(normalizePlayerProfile({ automationConfidence: "mixed" }).meta.dataConfidence, "mixed");
 });
 
-test("normalizePlayerProfile keeps only the exact typed SaveData-backed multiverse market levels quarantined", () => {
+test("normalizePlayerProfile keeps only the exact typed bounded multiverse market SaveData ranges quarantined", () => {
   const profile = normalizePlayerProfile({
     IS0Level: 3,
     IS1Level: "4",
     IS24Level: 4,
     IS71Level: 4,
     IS72Level: "5",
+    EsotericR1Trades: "6",
+    NecrumR9Trades: 7,
+    EsotericR10Trades: 8,
+    Mech1Unlocked: true,
+    Mech1Units: "9",
+    FinalMech1MainBonus: "1.25e5",
+    Mech2Unlocked: false,
+    Mech2Units: 10,
     IS111Level: 6,
     multiverseMarket: { ExistingRow: 8 }
   });
@@ -53,6 +61,14 @@ test("normalizePlayerProfile keeps only the exact typed SaveData-backed multiver
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS24Level, 4);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS71Level, 4);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS72Level, 5);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.EsotericR1Trades, 6);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.NecrumR9Trades, 7);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.EsotericR10Trades, undefined);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech1Unlocked, true);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech1Units, 9);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.FinalMech1MainBonus, 125000);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech2Unlocked, false);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech2Units, undefined);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS111Level, undefined);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.ExistingRow, 8);
   assert.equal(profile.player.resources.tokens, null);
