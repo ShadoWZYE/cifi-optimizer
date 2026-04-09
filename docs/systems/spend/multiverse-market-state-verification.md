@@ -338,15 +338,15 @@ Current grounded conclusion:
 ## Bounded SaveData import classification
 
 - `safe_import_candidate`
-  - none
+  - `IS25Level` through `IS110Level`
+    - this exact SaveData-owned `IS*Level` span is now safe to preserve as compatibility-only raw Emporium import truth under `compatibility.unmappedSystemState.multiverseMarket`
+    - the checked rows `71-74` overlap anchors that wider run to validated Emporium rows without claiming final player-facing row identity
 - `wrapper_or_export_only`
   - `InscryptionsDone`
     - `PlayerProfileData` already exposes `InscryptionsDone` as a flat wrapper/export field, so importing it from the wider `SaveData` block would widen the owner surface without adding a new bounded canonical Emporium import
 - `verified_but_blocked`
   - `IS71Level` through `IS74Level`
     - these now have a checked ordered row-position mapping to validated rows `71-74`, but final row labels and planner-safe canonical import mapping are still blocked in this slice
-  - `IS25Level` through `IS70Level` and `IS75Level` through `IS110Level`
-    - these are directly recovered on `SaveData`, but the wider `IS*Level` range still has no checked grounded row-position mapping for bounded canonical import
   - `EsotericR1Trades` through `EsotericR9Trades`
   - `NecrumR1Trades` through `NecrumR9Trades`
     - these counters are directly recovered in the same `SaveData` block, but the current slice does not ground them as canonical Emporium import targets
@@ -357,9 +357,11 @@ Current grounded conclusion:
 
 Current grounded conclusion:
 
+- the exact SaveData-owned `IS*Level` span that is now safe to treat as raw Emporium import truth is `IS25Level` through `IS110Level`
+- that import-safe span is compatibility-only and should stay under `compatibility.unmappedSystemState.multiverseMarket`
 - no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import
 - `InscryptionsDone` stays wrapper/export-only because `PlayerProfileData` already exposes it as a flat wrapper surface
-- `IS71Level` through `IS74Level` remain the strongest ordered-overlap evidence, but they are still blocked from canonical import because final row labels and broader row remap remain unresolved
+- `IS71Level` through `IS74Level` remain the strongest ordered-overlap evidence for identity work, but they are still blocked from canonical import because final row labels and broader row remap remain unresolved
 - the broader `IS*Level`, trade-counter, and early `Mech*` neighbors remain verified on `SaveData` but blocked from canonical import because this slice does not reopen `Market` typed-field recovery, row remap, or planner integration
 
 ## Current app implication
@@ -370,10 +372,11 @@ Current grounded conclusion:
 - It is now safe to treat `PlayerProfileHandler.ConvertSaveDataToProfileData(SaveData, System.DateTime) -> PlayerProfileData` as a checked typed conversion bridge from the recovered `SaveData` owner back into the flatter profile-side wrapper surface.
 - It is now safe to treat flat direct `PlayerProfileData` ownership of the wider `IS*Level` / trade-counter / mech run as ruled out in the checked field table, even though `PlayerProfileData` still exposes flat wrappers such as `InscryptionsDone`, `MechsOwned`, and `GadgetLevels`.
 - It is now safe to treat `SaveData` as the exact declaring save owner for the checked `IS*Level` / trade-counter / mech progression cluster while keeping `InscryptionsDone` split out as an exact dual declaration on `SaveData` and `PlayerProfileData`.
+- It is now safe to preserve the exact SaveData-owned `IS25Level` through `IS110Level` run as compatibility-only raw Emporium import truth under `compatibility.unmappedSystemState.multiverseMarket`.
 - It is now safe to treat the surrounding trade and mech fields as evidence that this lane lives in a broader saved progression block rather than in the separate reward/effect families.
 - It is now safe to treat the save-side search as narrowed to `SaveData` behind the PlayerProfile persistence family and a checked `PlayerProfileHandler.get_Market -> MultiverseMarket` accessor bridge, while explicitly not claiming that a typed `Market` field has been recovered on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`.
 - It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and checked ordered `IS*Level` overlap, while keeping final label remap and canonical import promotion downstream.
-- The active import-surface result is still that no canonical Emporium subset is admissible yet, and rows `71-74` remain ordered overlap only.
+- The active import-surface result is now a split: `IS25Level` through `IS110Level` is compatibility-safe raw import truth, while no canonical Emporium subset is admissible yet and rows `71-74` remain ordered overlap only.
 - The next spend-track slice should keep row remap separate and only revisit admissibility if stronger identity evidence appears.
 
 

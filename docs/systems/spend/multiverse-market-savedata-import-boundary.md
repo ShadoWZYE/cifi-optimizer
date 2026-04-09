@@ -35,15 +35,15 @@ This note records the active follow-up lane after save-owner recovery closed: on
 ## Bounded import classification
 
 - `safe_import_candidate`
-  - none
+  - `IS25Level` through `IS110Level`
+    - this exact SaveData-owned `IS*Level` span is now safe to preserve as compatibility-only raw Emporium import truth under `compatibility.unmappedSystemState.multiverseMarket`
+    - the checked rows `71-74` overlap anchors that wider run to validated Emporium rows without claiming final player-facing row identity
 - `wrapper_or_export_only`
   - `InscryptionsDone`
     - `PlayerProfileData` already exposes `InscryptionsDone` as a flat wrapper/export field, so importing it from the wider `SaveData` block would widen the owner surface without adding a new bounded canonical Emporium import
 - `verified_but_blocked`
   - `IS71Level` through `IS74Level`
     - these now have a checked ordered row-position mapping to validated rows `71-74`, but final row labels and canonical import targets are still not grounded
-  - `IS25Level` through `IS70Level` and `IS75Level` through `IS110Level`
-    - these are directly recovered on `SaveData`, but the checked repo-local evidence still does not ground their row positions against validated rows
   - `EsotericR1Trades` through `EsotericR9Trades`
   - `NecrumR1Trades` through `NecrumR9Trades`
     - these counters are directly recovered in the same `SaveData` block, but the current slice does not ground them as canonical Emporium import targets
@@ -55,10 +55,10 @@ This note records the active follow-up lane after save-owner recovery closed: on
 ## Grounded conclusion
 
 - The smallest checked mapping is ordered only: `IS71Level -> row 71`, `IS72Level -> row 72`, `IS73Level -> row 73`, and `IS74Level -> row 74`.
-- The wider `IS*Level` run must be treated as part of a larger ordered inscription set, not as isolated import candidates.
-- The active admissibility result is `none`: no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import.
-- No recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import.
-- Rows `71-74` remain ordered overlap only, not an import-admissible canonical subset.
+- The exact SaveData-owned `IS*Level` span that is safe to import as raw Emporium truth is `IS25Level` through `IS110Level`.
+- That import-safe span is compatibility-only and should stay under `compatibility.unmappedSystemState.multiverseMarket`.
+- `InscryptionsDone` remains explicitly dual-declared and wrapper/export-only rather than part of the promoted `IS*Level` import span.
+- Rows `71-74` remain ordered overlap only for identity work, not an import-admissible canonical subset.
 - If stronger identity evidence does not appear, the canonical import-safe subset stays explicitly empty.
 
 ## Track implication

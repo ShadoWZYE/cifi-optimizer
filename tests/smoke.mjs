@@ -1829,7 +1829,7 @@ withRequiredValue(spendImportSurfaceTrack, "expected Emporium import-surface suc
   assert.equal(track.status, "active");
   assert.match(track.currentSlice, /`multiverse-market-savedata-import-boundary` artifact/);
   assert.match(track.currentSlice, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/);
-  assert.match(track.currentSlice, /active admissibility result remains none/);
+  assert.match(track.currentSlice, /`IS25Level` through `IS110Level` is the exact compatibility-safe raw Emporium import span/);
   assert.ok(
     track.completedSteps.some((step) => /dedicated `multiverse-market-savedata-import-boundary` artifact/.test(step)),
     "expected Emporium import-surface track to record the dedicated boundary artifact"
@@ -1843,8 +1843,8 @@ withRequiredValue(spendImportSurfaceTrack, "expected Emporium import-surface suc
     "expected Emporium import-surface track to keep overlap rows verified-but-blocked"
   );
   assert.ok(
-    track.completedSteps.some((step) => /broader `IS25Level-IS110Level`, trade-counter, and early `Mech\*` block quarantined/.test(step)),
-    "expected Emporium import-surface track to quarantine the broader SaveData block"
+    track.completedSteps.some((step) => /Promote the exact `IS25Level` through `IS110Level` span as compatibility-only raw Emporium import truth/.test(step)),
+    "expected Emporium import-surface track to record the compatibility-safe IS span"
   );
   assert.ok(
     track.nextSteps.some((step) => /canonical Emporium import-safe subset explicitly empty/.test(step)),
@@ -2226,8 +2226,11 @@ assertDatasetContractEntry("multiverse-market-row71-74-remap-band", "data/multiv
 assertDatasetContractEntry("multiverse-market-nearby-identity-binding-pattern", "data/multiverse-market-nearby-identity-binding-pattern.json");
 assertDatasetContractEntry("multiverse-market-69-74-anomaly-provenance", "data/multiverse-market-69-74-anomaly-provenance.json");
 assert.equal(multiverseMarketSaveDataImportBoundaryData.dataset, "multiverse-market-savedata-import-boundary");
-assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importSafeSubset, []);
-assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactImportSafeSubsetLabel, "none");
+assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importSafeSubset, ["IS25Level through IS110Level"]);
+assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactImportSafeSubsetLabel, "IS25Level through IS110Level");
+assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importTargetPath, "compatibility.unmappedSystemState.multiverseMarket");
+assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.canonicalImportSafeSubset, []);
+assert.equal(multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel, "none");
 assert.equal(multiverseMarketSaveDataImportBoundaryData.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellBuyHookRange, "BuyIS1 through BuyIS110");
 assert.equal(multiverseMarketSaveDataImportBoundaryData.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellCostTextRange, "SetIS1CostText through SetIS110CostText");
 assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.checkedIsToRowOrderBoundary.widerOrderedSet.validatedRowRanges, ["50-59", "63-74"]);
@@ -2236,24 +2239,26 @@ assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.checkedIsToRowOrderBoundary.checkedOrderedMappings.map((entry) => [entry.saveField, entry.orderedInscriptionRow]),
   [["IS71Level", 71], ["IS72Level", 72], ["IS73Level", 73], ["IS74Level", 74]]
 );
-assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.classifications.safe_import_candidate, []);
+assert.deepEqual(
+  multiverseMarketSaveDataImportBoundaryData.classifications.safe_import_candidate.map((entry) => entry.entryId),
+  ["savedata-owned-is25-110"]
+);
 assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.classifications.wrapper_or_export_only.map((entry) => entry.entryId),
   ["inscryptionsdone-wrapper"]
 );
 assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.classifications.verified_but_blocked.map((entry) => entry.entryId),
-  ["checked-row-order-is71-74", "non-overlap-is25-70-and-is75-110", "trade-counters", "mech-progression-neighbors"]
+  ["checked-row-order-is71-74", "trade-counters", "mech-progression-neighbors"]
 );
 assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.classifications.unresolved, []);
 assert.match(multiverseMarketStateVerificationDoc, /## Checked `IS\*Level` to inscription-row boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /`IS71Level` -> ordered row `71`/);
 assert.match(multiverseMarketStateVerificationDoc, /`IS74Level` -> ordered row `74`/);
 assert.match(multiverseMarketStateVerificationDoc, /## Bounded SaveData import classification/);
-assert.match(multiverseMarketStateVerificationDoc, /`safe_import_candidate`[\s\S]*none/);
+assert.match(multiverseMarketStateVerificationDoc, /`safe_import_candidate`[\s\S]*`IS25Level` through `IS110Level`/);
 assert.match(multiverseMarketStateVerificationDoc, /`wrapper_or_export_only`[\s\S]*`InscryptionsDone`/);
 assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]*`IS71Level` through `IS74Level`/);
-assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]*`IS25Level` through `IS70Level` and `IS75Level` through `IS110Level`/);
 assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/);
 assert.match(multiverseMarketStateVerificationDoc, /`verified_but_blocked`[\s\S]*`Mech1Unlocked`, `Mech1Units`, `Mech1Upg1Level`, `Mech1Upg2Level`, `Mech1MissionsProgress`, `Mech1MissionsCompleted`, and `Mech2Unlocked`/);
 assert.match(multiverseMarketStateVerificationDoc, /`unresolved`[\s\S]*none/);
@@ -2566,7 +2571,7 @@ assert.match(playerProfileSchemaDoc, /stage\.highestShipUnlocked/);
 assert.match(playerProfileSchemaDoc, /top-level `power`, `speed`, and `cargo` no longer migrate/);
 assert.match(playerProfileSchemaDoc, /planning\.gemNodeBudget`, `planning\.resourceFocus`, `planning\.researchHours`, and their flat helper forms are retired/);
 assert.match(playerProfileSchemaDoc, /flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically/);
-assert.match(playerProfileSchemaDoc, /flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and top-level `IS\*Level` fields may be quarantined/);
+assert.match(playerProfileSchemaDoc, /flat spend-state clues such as `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and exact SaveData-backed Emporium levels `IS25Level` through `IS110Level` may be quarantined/);
 assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
 assert.match(importMappingDoc, /experimental helper imports now require explicit `externalModels\.experimental\.\*` paths/);
 assert.match(importMappingDoc, /externalModels\.communityTools\.shipOptimizer\.v1/);
@@ -2576,7 +2581,7 @@ assert.match(importMappingDoc, /must not silently populate canonical `player\.\*
 assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
 assert.match(importMappingDoc, /flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired/);
 assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
-assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, `IS\*Level`, `ATU\*Level`, `Tier\*TokensUnlocked`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved/);
+assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, exact SaveData-backed Emporium levels `IS25Level` through `IS110Level`, `ATU\*Level`, `Tier\*TokensUnlocked`, `TokenBankCap`, `ClaimableBankTokens`, or `FinalTokenBankFillSpeed` may also be preserved/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(tokenShopDoc, /## Adjacent systems still to map/);
@@ -3424,8 +3429,10 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
   FinalTokenBankFillSpeed: "1.25",
   DailyTokeniumCap: "2000",
   InscryptionsDone: "98",
-  IS51Level: "2",
-  IS73Level: 4
+  IS24Level: "1",
+  IS25Level: "2",
+  IS73Level: 4,
+  IS111Level: "9"
 });
 
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
@@ -3440,7 +3447,7 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
 });
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket, {
   InscryptionsDone: 98,
-  IS51Level: 2,
+  IS25Level: 2,
   IS73Level: 4
 });
 assert.equal(migratedFlatSpendStateProfile.player.resources.tokens, null);

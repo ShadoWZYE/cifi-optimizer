@@ -60,6 +60,7 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
 
 const PROFILE_CONFIDENCE_VALUES = new Set(["manual", "mixed", "verified"]);
 const FARMING_FOCUS_VALUES = new Set(["credits", "alloy", "research", "shards"]);
+const MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN = /^IS(?:2[5-9]|[3-9]\d|10\d|110)Level$/u;
 const CI_SUFFIX_EXPONENTS = {
   k: 3,
   m: 6,
@@ -507,7 +508,7 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   const importedMultiverseMarketStateClues = collectAliasedCompatibilityFields(source, {
     InscryptionsDone: PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarketStateClues
   });
-  const importedMultiverseMarketLevels = collectTopLevelCompatibilityPattern(source, /^IS\d+Level$/u);
+  const importedMultiverseMarketLevels = collectTopLevelCompatibilityPattern(source, MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN);
   normalized.compatibility.unmappedSystemState.multiverseMarket = mergeCompatibilityRecord(
     importedMultiverseMarketRecord,
     mergeCompatibilityRecord(importedMultiverseMarketStateClues, importedMultiverseMarketLevels)

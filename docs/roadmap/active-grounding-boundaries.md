@@ -51,15 +51,16 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - exact typed recovery still does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
   - `PlayerProfileData` is a flatter wrapper/export surface, not the declaring owner for the broader checked progression cluster, even though it also directly declares `InscryptionsDone`
   - exact typed recovery now also confirms `SaveData` as the declaring owner for the checked `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster, with `InscryptionsDone` split out as an exact dual declaration on `SaveData` and `PlayerProfileData`
+  - the exact SaveData-owned `IS25Level` through `IS110Level` span is now safe for compatibility-only raw Emporium import under `compatibility.unmappedSystemState.multiverseMarket`
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
   - `IS71Level` through `IS74Level` only ground ordered overlap to rows `71-74`, not import admissibility or final player-facing identity
   - `InscryptionsDone` is wrapper/export-only for import decisions, not a new bounded canonical Emporium import
   - no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `state.playerProfile`
 - Still blocked:
   - the `69-74` prefab anomaly and incomplete player-facing label remap still block canonical Emporium identity
-  - the recovered wider `SaveData` block mixes Emporium-adjacent rows with trade-counter and early `Mech*` progression fields, so the canonical import-safe subset stays empty
+  - the recovered wider `SaveData` block still mixes Emporium-adjacent rows with trade-counter and early `Mech*` progression fields, so canonical import-safe identity stays empty even though the exact `IS25Level-IS110Level` span is compatibility-safe raw import
 - Smallest next slice:
-  - keep the import-safe subset explicitly empty unless new evidence grounds a narrower `SaveData`-backed Emporium import slice
+  - keep canonical promotion explicitly blocked unless new evidence grounds player-facing row identity or a narrower canonical `SaveData`-backed Emporium import slice
 - Start here:
   - `docs/systems/spend/multiverse-market-verification.md`
   - `docs/systems/spend/multiverse-market-state-verification.md`
