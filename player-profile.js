@@ -60,7 +60,18 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
 
 const PROFILE_CONFIDENCE_VALUES = new Set(["manual", "mixed", "verified"]);
 const FARMING_FOCUS_VALUES = new Set(["credits", "alloy", "research", "shards"]);
-const MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN = /^IS(?:2[5-9]|[3-9]\d|10\d|110)Level$/u;
+const MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN = /^IS(?:[1-9]|[1-9]\d|10\d|110)Level$/u;
+const MULTIVERSE_MARKET_TRADE_COUNTER_PATTERN = /^(?:Esoteric|Necrum)R[1-9]Trades$/u;
+const MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS = {
+  Mech1Unlocked: [["Mech1Unlocked"]],
+  Mech1Units: [["Mech1Units"]],
+  Mech1Upg1Level: [["Mech1Upg1Level"]],
+  Mech1Upg2Level: [["Mech1Upg2Level"]],
+  Mech1MissionsProgress: [["Mech1MissionsProgress"]],
+  FinalMech1MainBonus: [["FinalMech1MainBonus"]],
+  Mech1MissionsCompleted: [["Mech1MissionsCompleted"]],
+  Mech2Unlocked: [["Mech2Unlocked"]]
+};
 const CI_SUFFIX_EXPONENTS = {
   k: 3,
   m: 6,
@@ -509,9 +520,17 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
     InscryptionsDone: PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarketStateClues
   });
   const importedMultiverseMarketLevels = collectTopLevelCompatibilityPattern(source, MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN);
+  const importedMultiverseMarketTradeCounters = collectTopLevelCompatibilityPattern(source, MULTIVERSE_MARKET_TRADE_COUNTER_PATTERN);
+  const importedMultiverseMarketAdjacentMechWindow = collectAliasedCompatibilityFields(source, MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS);
   normalized.compatibility.unmappedSystemState.multiverseMarket = mergeCompatibilityRecord(
     importedMultiverseMarketRecord,
-    mergeCompatibilityRecord(importedMultiverseMarketStateClues, importedMultiverseMarketLevels)
+    mergeCompatibilityRecord(
+      importedMultiverseMarketStateClues,
+      mergeCompatibilityRecord(
+        importedMultiverseMarketLevels,
+        mergeCompatibilityRecord(importedMultiverseMarketTradeCounters, importedMultiverseMarketAdjacentMechWindow)
+      )
+    )
   );
 
   const mergedShipToolState = mergeDeep(

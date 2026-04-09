@@ -223,7 +223,7 @@ Current grounded conclusion:
 
 ## Next allowed slice
 
-1. keep the active lane on the bounded `SaveData` import-surface decision, preserve `IS25Level` through `IS110Level` as compatibility-only raw Emporium import truth, and leave the canonical Emporium import-safe subset explicitly empty unless stronger identity evidence appears
+1. keep the active lane on the bounded `SaveData` import-surface decision, preserve the exact typed `IS1Level` through `IS110Level` span as compatibility-only raw Emporium import truth, and leave the canonical Emporium import-safe subset explicitly empty unless stronger identity evidence appears
 2. keep any player-owned inscription-level preview descriptive and quarantined unless a narrower grounded canonical import slice is checked
 3. finish the inscription-number and prefab-to-label remap, especially across the `69-74` prefab override band, on its separate downstream lane
 4. only then revisit whether any canonical Emporium import or spend-planner recommendation is justified
