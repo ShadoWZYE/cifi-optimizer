@@ -20,7 +20,7 @@ Help build the grounded MVP core of a local-first CIFI toolkit that can replace 
 
 - start every task by checking whether the worktree is clean
 - if the worktree is dirty, report the exact paths before changing anything
-- use `origin/main` as the base source of truth unless the user says otherwise
+- use remote `origin/main` as the base source of truth unless the user says otherwise
 - never work directly on `main`
 - create or switch to one dedicated branch per PR
 - keep each branch scoped to one coherent grounded claim
