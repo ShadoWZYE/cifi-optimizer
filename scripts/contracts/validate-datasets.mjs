@@ -2906,6 +2906,21 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
     ["THMarkets", "TextHandlerMarkets", "InscryptionsList", "System.Collections.Generic.List`1<UnityEngine.GameObject>"],
     "multiverse market row 69-74 identity-source boundary metadataJoinCandidates drifted"
   );
+  assert.equal(
+    boundary.checkedNonPrefabIdentitySources.lastUncheckedRepoLocalSource.artifact,
+    "tmp-multiverse-row-text-probe.json",
+    "multiverse market row 69-74 identity-source boundary last unchecked artifact drifted"
+  );
+  assert.equal(
+    boundary.checkedNonPrefabIdentitySources.lastUncheckedRepoLocalSource.sourceClass,
+    "raw TextHandlerMarkets presentation-probe continuation",
+    "multiverse market row 69-74 identity-source boundary last unchecked sourceClass drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedNonPrefabIdentitySources.lastUncheckedRepoLocalSource.anchors,
+    ["SetIS69BaseBonusText", "ClearISObjects", "THMarkets", "InscryptionsList"],
+    "multiverse market row 69-74 identity-source boundary last unchecked anchors drifted"
+  );
   assert.deepEqual(
     boundary.checkedNonPrefabIdentitySources.nearbyPositiveBindingAnchors.map((entry) => [entry.orderedInscriptionRow, entry.prefabName, entry.playerFacingLabel]),
     [[78, "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs"], [83, "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"]],
@@ -2928,11 +2943,13 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
   assert.match(stateDoc, /## Checked row `69-74` player-facing identity-source boundary/, "multiverse market state verification doc must expose the row 69-74 identity-source boundary section");
   assert.match(stateDoc, /no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`/i, "multiverse market state verification doc must preserve the unresolved row 69-74 identity-source conclusion");
   assert.match(stateDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market state verification doc must preserve the remapped serialized-id blocker");
+  assert.match(stateDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects/i, "multiverse market state verification doc must preserve the last unchecked repo-local source seam");
   assert.match(verificationDoc, /## Narrow row 69-74 identity-source boundary/, "multiverse market verification doc must expose the narrow row 69-74 identity-source boundary section");
   assert.match(verificationDoc, /THMarkets: TextHandlerMarkets/, "multiverse market verification doc must preserve the THMarkets metadata join clue");
   assert.match(verificationDoc, /InscryptionsList: List<GameObject>/, "multiverse market verification doc must preserve the InscryptionsList metadata join clue");
   assert.match(verificationDoc, /the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`/i, "multiverse market verification doc must preserve the direct string negative boundary");
   assert.match(verificationDoc, /direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market verification doc must preserve the remapped serialized-id negative boundary");
+  assert.match(verificationDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects/i, "multiverse market verification doc must preserve the last unchecked repo-local source seam");
 
   return {
     id: "multiverse-market-row69-74-identity-source-boundary",
@@ -2942,7 +2959,7 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
       `${boundary.settledBrokenPrefabBand.length} checked broken-band rows`,
       `${boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered.length} recovered player-facing identity sources`,
       `${boundary.playerFacingIdentitySourceBoundary.identityStillBlocked.length} unresolved row identities`,
-      "Rows 69-74 remain unresolved because neither the broken-band rows nor remapped ids 57-62 recover a repo-local player-facing identity source"
+      "Rows 69-74 remain unresolved because neither the broken-band rows, remapped ids 57-62, nor the last raw TextHandlerMarkets seam recover a repo-local player-facing identity source"
     ]
   };
 }

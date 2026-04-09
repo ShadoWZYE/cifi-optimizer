@@ -2331,6 +2331,12 @@ assert.deepEqual(
   ],
   ["THMarkets", "TextHandlerMarkets", "InscryptionsList"]
 );
+assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.lastUncheckedRepoLocalSource.artifact, "tmp-multiverse-row-text-probe.json");
+assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.lastUncheckedRepoLocalSource.sourceClass, "raw TextHandlerMarkets presentation-probe continuation");
+assert.deepEqual(
+  multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.lastUncheckedRepoLocalSource.anchors,
+  ["SetIS69BaseBonusText", "ClearISObjects", "THMarkets", "InscryptionsList"]
+);
 assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.identitySourceRecovered, []);
 assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, []);
 assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.helpsRows6974, false);
@@ -2341,6 +2347,7 @@ assert.deepEqual(
 assert.match(multiverseMarketStateVerificationDoc, /## Checked row `69-74` player-facing identity-source boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`/i);
 assert.match(multiverseMarketStateVerificationDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i);
+assert.match(multiverseMarketStateVerificationDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects/i);
 assert.equal(multiverseMarketSerializedLabelSourceBoundaryData.dataset, "multiverse-market-serialized-label-source-boundary");
 assert.deepEqual(
   multiverseMarketSerializedLabelSourceBoundaryData.checkedSerializedExportEvidence.multiverseMarketContainerFields.map((entry) => [entry.name, entry.fieldOffset]),

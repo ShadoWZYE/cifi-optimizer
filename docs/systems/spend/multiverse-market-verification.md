@@ -70,12 +70,14 @@ Current grounded conclusion:
   - `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` explicitly point the visible prefab-number shell at serialized ids `57-62`, not at validated rows `69-74`
   - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
   - following that prefab remap back to earlier direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` is also still negative-only because the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
+  - the last remaining repo-local source class not yet normalized into the checked boundary is the raw `tmp-multiverse-row-text-probe.json` continuation at `SetIS69BaseBonusText` beside `ClearISObjects`, `THMarkets`, and `InscryptionsList`, but that seam still reads as effect or presentation-side text plumbing rather than a row-label source
   - the nearest checked player-facing inscription labels remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, which are outside rows `69-74`
 
 Current grounded conclusion:
 
 - no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`
 - following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing source either
+- the only remaining repo-local seam to exhaust is the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation, and it still does not amount to a defensible player-facing label/remap source today
 - rows `69-74` therefore remain unresolved for player-facing identity, not import-safe player-facing labels
 - the canonical import-safe subset stays empty
 

@@ -139,6 +139,18 @@
       "listType": "System.Collections.Generic.List`1<UnityEngine.GameObject>",
       "conclusion": "A UI-owner plus GameObject-list shell is recoverable repo-locally, but no checked row-to-label join or serialized lookup table binds rows 69-74 to player-facing inscription names."
     },
+    "lastUncheckedRepoLocalSource": {
+      "artifact": "tmp-multiverse-row-text-probe.json",
+      "sourceClass": "raw TextHandlerMarkets presentation-probe continuation",
+      "anchors": [
+        "SetIS69BaseBonusText",
+        "ClearISObjects",
+        "THMarkets",
+        "InscryptionsList"
+      ],
+      "whyStillUnchecked": "This raw probe continuation is not yet normalized into the checked row69-74 identity boundary artifacts, and the preserved anchor reaches only a base-bonus presentation setter plus adjacent GameObject-shell hooks rather than a recovered row-title or localization-key source.",
+      "currentBestReading": "If any repo-local source remains to exhaust, it is this raw TextHandlerMarkets base-bonus and ISObject-shell continuation. Today it still reads as effect or presentation-side text plumbing, not as a defensible player-facing row-label source for rows 69-74."
+    },
     "nearbyPositiveBindingAnchors": [
       {
         "orderedInscriptionRow": 78,
@@ -313,6 +325,7 @@
       "Across rows 69-74, checked repo-local non-prefab evidence recovers TextHandlerMarkets cost hooks, BuyIS hooks, and a THMarkets plus InscryptionsList UI shell, but not a direct player-facing inscription label source.",
       "Direct string search in the checked repo-local probe artifacts does not recover Inscryption 69 through Inscryption 74.",
       "Following the broken prefab shells back to remapped serialized ids 57-62 also does not recover Inscryption 57 through Inscryption 62 or any checked alternate player-facing identity source.",
+      "The last remaining repo-local source class not yet normalized into this checked boundary is the raw tmp-multiverse-row-text-probe TextHandlerMarkets continuation at SetIS69BaseBonusText beside ClearISObjects, THMarkets, and InscryptionsList, but that seam still reads as effect or GameObject-shell presentation rather than as a recovered row-label source.",
       "Nearby same-number player-facing anchors remain rows 78 and 83 only, outside the broken 69-74 prefab band.",
       "No player-facing identity source is recoverable repo-locally for rows 69-74, so those rows remain unresolved and the canonical import-safe subset stays empty."
     ]

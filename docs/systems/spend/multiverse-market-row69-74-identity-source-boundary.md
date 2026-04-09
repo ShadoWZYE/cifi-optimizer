@@ -48,6 +48,10 @@ This note records the checked player-facing identity-source boundary for the bro
 - Following the broken prefab band back through the remapped serialized ids is also still negative-only:
   - earlier direct prefab shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` are preserved repo-locally
   - the checked repo-local probe artifacts still do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
+- The last still-unchecked repo-local source class is narrower than a new owner or save search:
+  - raw probe continuation in `tmp-multiverse-row-text-probe.json`
+  - currently preserved anchors: `SetIS69BaseBonusText`, `ClearISObjects`, `THMarkets`, `InscryptionsList`
+  - current best reading: this is still effect or presentation-side text plumbing plus GameObject-shell cleanup, not a recovered row-title or localization-key source
 - The nearest checked positive same-number identity anchors remain outside the broken band:
   - row `78`: `Inscryption 78: Ouroboros Orbs`
   - row `83`: `Inscryption 83: Fast-Loop ML`
@@ -57,5 +61,6 @@ Current grounded conclusion:
 - save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
 - rows `69-74` have checked row access and UI-shell evidence, but no recovered repo-local player-facing identity source
 - remapped serialized ids `57-62` also fail to recover a checked player-facing identity source, so following the prefab remap does not narrow the row labels any further
+- the only remaining repo-local source class to exhaust is the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation in `tmp-multiverse-row-text-probe.json`, and today it still does not rise to a defensible row-label source
 - rows `69-74` therefore remain unresolved for player-facing identity
 - the canonical import-safe subset stays empty
