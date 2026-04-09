@@ -1903,7 +1903,7 @@ function renderSpendPlannerBoundary() {
     },
     {
       label: "Emporium owned progression and Inscryptions balance",
-      reason: "Blocked for planner use. InscryptionsDone is still only a wrapper or export clue in this slice, and broader IS*Level import or remap decisions remain unresolved."
+      reason: "Blocked for planner use. The app may show a compatibility-only preview of raw IS1Level through IS110Level imports, but InscryptionsDone remains wrapper-only, the preview stays non-canonical, and row identity or planner-safe remap work remains unresolved."
     }
   ];
   const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
@@ -4846,52 +4846,12 @@ function getMultiverseMarketValidatedCoverage(multiverseMarket) {
 }
 
 function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket, multiverseMarketRangeBoundary) {
-  const validatedRecords = Array.isArray(multiverseMarket?.records) ? multiverseMarket.records : [];
-  const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
   const overlapIds = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)
     ? [...new Set(multiverseMarketRangeBoundary.overlapIds.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
     : [];
-  const overlapIdSet = new Set(overlapIds);
   const importedState = typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
-  const rawBalance = importedState.InscryptionsDone;
-  const hasImportedBalance = isBoundaryValuePresent(rawBalance);
-  const balanceLabel = hasImportedBalance ? formatBoundaryValue(rawBalance) : "Not imported";
-  const importedValidatedRows = validatedRecords
-    .map((record) => {
-      const rowId = Number(record?.inscription_id);
-      const maxLevel = Number(record?.max_level);
-      const bonusValue = Number(record?.bonus_value);
-      const startCost = Number(record?.start_cost);
-      const costExponent = Number(record?.cost_exponent);
-      const rawLevel = importedState[`IS${rowId}Level`];
-      const level = Number(rawLevel);
-      if (!Number.isFinite(rowId) || !Number.isFinite(level)) {
-        return null;
-      }
-      return {
-        rowId,
-        level,
-        maxLevel: Number.isFinite(maxLevel) ? maxLevel : null,
-        bonusValue: Number.isFinite(bonusValue) ? bonusValue : null,
-        startCost: Number.isFinite(startCost) ? startCost : null,
-        costExponent: Number.isFinite(costExponent) ? costExponent : null,
-        remainingLevels: Number.isFinite(maxLevel) ? Math.max(0, maxLevel - level) : null,
-        isRecoveredMaxed: Number.isFinite(maxLevel) ? level >= maxLevel : false,
-        completionPercent: Number.isFinite(maxLevel) && maxLevel > 0
-          ? Math.min(100, Math.round((level / maxLevel) * 100))
-          : null
-      };
-    })
-    .filter(Boolean)
-    .sort((left, right) => left.rowId - right.rowId);
-  const importedOverlapRows = importedValidatedRows.filter((entry) => overlapIdSet.has(entry.rowId));
-  const previewRows = (importedOverlapRows.length ? importedOverlapRows : importedValidatedRows).slice(0, 8);
-  const importedValidatedIds = new Set(importedValidatedRows.map((entry) => entry.rowId));
-  const missingOverlapRows = overlapIds.filter((rowId) => !importedValidatedIds.has(rowId));
-  const missingValidatedRows = validatedRecords
-    .map((record) => Number(record?.inscription_id))
-    .filter((rowId) => Number.isFinite(rowId) && !importedValidatedIds.has(rowId));
-  const extraImportedRows = Object.entries(importedState)
+  const overlapIdSet = new Set(overlapIds);
+  const importedSpanRows = Object.entries(importedState)
     .map(([key, value]) => {
       const match = /^IS(\d+)Level$/u.exec(String(key));
       if (!match) {
@@ -4899,94 +4859,102 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
       }
       const rowId = Number(match[1]);
       const level = Number(value);
-      if (!Number.isFinite(rowId) || !Number.isFinite(level) || importedValidatedIds.has(rowId)) {
+      if (!Number.isFinite(rowId) || rowId < 1 || rowId > 110 || !Number.isFinite(level)) {
         return null;
       }
-      return { rowId, level };
+      return {
+        rowId,
+        level,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.IS${rowId}Level`
+      };
     })
     .filter(Boolean)
     .sort((left, right) => left.rowId - right.rowId);
-  const averageCompletion = importedValidatedRows.length
-    ? Math.round(
-      importedValidatedRows
-        .filter((entry) => Number.isFinite(entry.completionPercent))
-        .reduce((total, entry) => total + Number(entry.completionPercent || 0), 0)
-        / Math.max(importedValidatedRows.filter((entry) => Number.isFinite(entry.completionPercent)).length, 1)
-    )
-    : null;
+  const importedSpanIds = new Set(importedSpanRows.map((entry) => entry.rowId));
+  const importedOverlapRows = importedSpanRows.filter((entry) => overlapIdSet.has(entry.rowId));
+  const missingOverlapRows = overlapIds.filter((rowId) => !importedSpanIds.has(rowId));
+  const missingSpanRows = [];
+  for (let rowId = 1; rowId <= 110; rowId += 1) {
+    if (!importedSpanIds.has(rowId)) {
+      missingSpanRows.push(rowId);
+    }
+  }
+  const previewRows = importedSpanRows.slice(0, 12);
+  const trailingPreviewRows = importedSpanRows.slice(-4);
 
   return {
-    hasImportedBalance,
-    balanceLabel,
+    hasImportedSpanPreview: importedSpanRows.length > 0,
+    importTargetPath: "compatibility.unmappedSystemState.multiverseMarket",
+    wrapperOnlyFieldLabel: "InscryptionsDone",
+    typedSpanLabel: "IS1Level through IS110Level",
+    importedSpanRowCount: importedSpanRows.length,
+    totalSpanRowCount: 110,
+    importedRangeLabel: importedSpanRows.length ? formatNumericRanges(importedSpanRows.map((entry) => entry.rowId)) : "",
+    firstImportedRowLabel: importedSpanRows.length ? `IS${importedSpanRows[0].rowId}Level` : "",
+    lastImportedRowLabel: importedSpanRows.length ? `IS${importedSpanRows[importedSpanRows.length - 1].rowId}Level` : "",
+    missingSpanRows,
+    missingSpanCount: missingSpanRows.length,
+    missingSpanLabel: missingSpanRows.length
+      ? missingSpanRows.slice(0, 12).map((rowId) => `IS${rowId}Level`).join(", ")
+      : "none",
+    importedSpanRows,
     hasOverlapGroundedRows: overlapIds.length > 0,
     overlapRangeLabel: formatNumericRanges(overlapIds),
     overlapRowCount: overlapIds.length,
     hasOverlapLevelPreview: importedOverlapRows.length > 0,
     importedOverlapRowCount: importedOverlapRows.length,
     overlapPreviewRows: importedOverlapRows.slice(0, 4),
-    overlapMaxedCount: importedOverlapRows.filter((entry) => entry.isRecoveredMaxed).length,
     missingOverlapRows,
     missingOverlapLabel: missingOverlapRows.length
-      ? missingOverlapRows.map((rowId) => `IS${rowId}`).join(", ")
+      ? missingOverlapRows.map((rowId) => `IS${rowId}Level`).join(", ")
       : "none",
-    hasValidatedLevelPreview: importedValidatedRows.length > 0,
-    importedValidatedRowCount: importedValidatedRows.length,
-    validatedRowCount: validatedRecords.length,
-    validatedRangeLabel: validatedCoverage.rangeLabel || "50-59 and 63-74",
-    maxedCount: importedValidatedRows.filter((entry) => Number.isFinite(entry.maxLevel) && entry.level >= entry.maxLevel).length,
-    averageCompletion,
     previewRows,
-    missingValidatedRows,
-    extraImportedRows,
-    extraImportedLabel: extraImportedRows.length
-      ? extraImportedRows.slice(0, 8).map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}`).join(", ")
-      : "",
+    trailingPreviewRows,
     sampleLine: previewRows.length
-      ? previewRows.map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}${Number.isFinite(entry.maxLevel) ? `/${formatShardNumber(entry.maxLevel)}` : ""}`).join(" | ")
+      ? previewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | ")
       : ""
   };
 }
 
 function renderImportedMultiverseMarketPreviewCard(preview) {
-  if (!preview.hasImportedBalance && !preview.hasValidatedLevelPreview) {
+  if (!preview.hasImportedSpanPreview) {
     return "";
   }
 
   return `
     <article class="preview-card">
-      <strong>Emporium import preview</strong>
-      <p class="meta">This is a descriptive preview of quarantined Emporium state for the validated row block only. It does not promote these values into canonical PlayerProfile truth or spend recommendations.</p>
+      <strong>Emporium compatibility preview</strong>
+      <p class="meta">This is a descriptive preview of compatibility-only Emporium import state from the exact typed <code>${escapeHtml(preview.typedSpanLabel)}</code> span under <code>${escapeHtml(preview.importTargetPath)}</code>. It is non-canonical, stays outside <code>state.playerProfile</code>, and does not enable recommendations.</p>
       <div class="pill-row">
-        <span class="pill">${preview.hasImportedBalance ? `InscryptionsDone ${escapeHtml(preview.balanceLabel)}` : "No imported InscryptionsDone"}</span>
-        <span class="pill">${preview.hasOverlapGroundedRows ? `${preview.importedOverlapRowCount}/${preview.overlapRowCount} overlap-grounded rows` : "No overlap-grounded rows"}</span>
-        ${preview.hasOverlapLevelPreview ? `<span class="pill">${preview.overlapMaxedCount} overlap rows maxed</span>` : ""}
-        <span class="pill">${preview.hasValidatedLevelPreview ? `${preview.importedValidatedRowCount}/${preview.validatedRowCount} validated rows` : "No validated Emporium levels"}</span>
-        ${preview.hasValidatedLevelPreview ? `<span class="pill">${preview.maxedCount} maxed imported rows</span>` : ""}
-        ${preview.hasValidatedLevelPreview && Number.isFinite(preview.averageCompletion) ? `<span class="pill">${preview.averageCompletion}% avg validated completion</span>` : ""}
-        ${preview.extraImportedRows.length ? `<span class="pill">${preview.extraImportedRows.length} extra imported rows quarantined</span>` : ""}
+        <span class="pill">${preview.importedSpanRowCount}/${preview.totalSpanRowCount} raw IS rows imported</span>
+        <span class="pill">${preview.importedRangeLabel ? `Imported rows ${escapeHtml(preview.importedRangeLabel)}` : "No imported IS rows"}</span>
+        <span class="pill">${preview.missingSpanCount} raw IS rows still absent</span>
+        ${preview.hasOverlapGroundedRows ? `<span class="pill">${preview.importedOverlapRowCount}/${preview.overlapRowCount} ordered-overlap rows imported</span>` : ""}
+        <span class="pill">Compatibility only</span>
+        <span class="pill">Planner blocked</span>
       </div>
       <div class="meta-stack">
-        <p class="meta">${preview.hasOverlapGroundedRows ? `The first overlap-grounded Emporium rows are ${escapeHtml(preview.overlapRangeLabel)}.` : "No overlap-grounded Emporium row subset is available in this build."}</p>
-        <p class="meta">${preview.hasOverlapGroundedRows ? `Missing overlap-grounded imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "The overlap-grounded subset is not available for import preview."}</p>
-        <p class="meta">${preview.hasValidatedLevelPreview ? `Imported current levels are present for validated rows ${escapeHtml(preview.validatedRangeLabel)}.` : "Imported current levels are not present for the validated Emporium row block."}</p>
-        <p class="meta">${preview.hasValidatedLevelPreview ? `Missing validated imports: ${preview.missingValidatedRows.length ? escapeHtml(preview.missingValidatedRows.map((rowId) => `IS${rowId}`).join(", ")) : "none"}.` : "When imported IS*Level fields exist, this preview only surfaces the validated Emporium block and leaves the rest quarantined."}</p>
-        <p class="meta">${preview.extraImportedRows.length ? `Extra imported rows outside the grounded validated block stay quarantined: ${escapeHtml(preview.extraImportedLabel)}${preview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported rows were found outside the grounded validated block."}</p>
-        <p class="meta">${preview.hasOverlapLevelPreview ? "Imported overlap-grounded rows also show recovered row constants from the checked MultiverseMarket payload." : "Recovered row constants appear here once overlap-grounded rows are imported."}</p>
+        <p class="meta">Only raw <code>IS*Level</code> values from the checked compatibility span are shown here. This card does not reopen row-label recovery, row remap, or planner logic.</p>
+        <p class="meta"><code>${escapeHtml(preview.wrapperOnlyFieldLabel)}</code> stays wrapper-only and is intentionally excluded from this preview even when it exists in the imported compatibility blob.</p>
+        <p class="meta">${preview.importedRangeLabel ? `Imported raw Emporium levels currently cover ${escapeHtml(preview.firstImportedRowLabel)} through ${escapeHtml(preview.lastImportedRowLabel)} across rows ${escapeHtml(preview.importedRangeLabel)}.` : "No raw Emporium level fields are currently imported from the checked compatibility span."}</p>
+        <p class="meta">${preview.missingSpanCount ? `Missing raw span fields still absent from this import: ${escapeHtml(preview.missingSpanLabel)}${preview.missingSpanCount > 12 ? "..." : ""}.` : "All raw fields in the checked IS1Level through IS110Level compatibility span are present in this import."}</p>
+        <p class="meta">${preview.hasOverlapGroundedRows ? `The checked ordered-overlap support rows ${escapeHtml(preview.overlapRangeLabel)} are tracked only as boundary evidence. Missing ordered-overlap imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "No ordered-overlap support rows are available in this build."}</p>
+        <p class="meta">Planner use stays blocked. These raw imported levels remain quarantined compatibility evidence, not canonical player truth, not row-label claims, and not recommendation inputs.</p>
         ${preview.hasOverlapLevelPreview ? `<div class="preview-stack">${preview.overlapPreviewRows.map((entry) => `
           <article class="preview-card">
-            <strong>IS${escapeHtml(String(entry.rowId))} overlap-grounded</strong>
-            <p class="meta">Imported level ${escapeHtml(formatShardNumber(entry.level))}${Number.isFinite(entry.maxLevel) ? ` / recovered max ${escapeHtml(formatShardNumber(entry.maxLevel))}` : ""}</p>
-            <p class="meta">${entry.isRecoveredMaxed ? "Recovered max reached for this overlap-grounded row." : Number.isFinite(entry.remainingLevels) ? `${escapeHtml(formatShardNumber(entry.remainingLevels))} recovered levels remaining to cap.` : "Recovered cap distance is not available in this build."}</p>
-            <p class="meta">Recovered row constants: Bonus ${escapeHtml(formatOptionalNumber(entry.bonusValue))} | StartCost ${escapeHtml(formatOptionalNumber(entry.startCost))} | CostExponent ${escapeHtml(formatOptionalNumber(entry.costExponent))}</p>
+            <strong>IS${escapeHtml(String(entry.rowId))}Level overlap support</strong>
+            <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))} at <code>${escapeHtml(entry.fieldPath)}</code>.</p>
+            <p class="meta">This row sits inside the checked ordered-overlap support band only. It is still not a recovered player-facing row label or canonical Emporium identity.</p>
           </article>
         `).join("")}</div>` : ""}
-        ${preview.hasValidatedLevelPreview ? `<div class="preview-stack">${preview.previewRows.map((entry) => `
+        <div class="preview-stack">${preview.previewRows.map((entry) => `
           <article class="preview-card">
-            <strong>IS${escapeHtml(String(entry.rowId))}</strong>
-            <p class="meta">Imported level ${escapeHtml(formatShardNumber(entry.level))}${Number.isFinite(entry.maxLevel) ? ` / recovered max ${escapeHtml(formatShardNumber(entry.maxLevel))}` : ""}</p>
-            <p class="meta">${Number.isFinite(entry.completionPercent) ? `${escapeHtml(String(entry.completionPercent))}% of recovered max` : "Recovered max not available in this build"}</p>
+            <strong>IS${escapeHtml(String(entry.rowId))}Level</strong>
+            <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))}</p>
+            <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
           </article>
-        `).join("")}</div>` : ""}
+        `).join("")}</div>
+        ${preview.trailingPreviewRows.length && preview.importedSpanRowCount > preview.previewRows.length ? `<p class="meta">Trailing imported raw rows: ${escapeHtml(preview.trailingPreviewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | "))}</p>` : ""}
       </div>
     </article>
   `;
