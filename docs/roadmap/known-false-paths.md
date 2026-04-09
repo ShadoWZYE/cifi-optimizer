@@ -56,6 +56,14 @@ This is not a list of open hypotheses. It is a compact list of paths that should
   - `docs/systems/spend/multiverse-market-market-member-boundary.md`
   - `data/multiverse-market-market-member-boundary.json`
 
+### Do not treat the `69-74 -> 57-62` prefab shell relation as the live player-facing Emporium remap
+
+- Current checked result: the shell anomaly is real, but supplied in-game screenshots show the live UI still presenting rows `69-74` directly as `INSCRYPTION #69` through `INSCRYPTION #74`
+- Why this stays closed: the remapped prefab names remain useful only as internal shell metadata and anomaly provenance, not as the player-facing row identities
+- Source anchors:
+  - `docs/systems/spend/multiverse-market-row69-74-identity-source-boundary.md`
+  - `docs/systems/spend/multiverse-market-row71-74-remap-band.md`
+
 ### Do not treat Daily Tokenium as a TokenShop-only lane
 
 - Current checked result: Daily Tokenium is currently best grounded as an Academy or Farm Mission reward lane that multiple modifier families touch

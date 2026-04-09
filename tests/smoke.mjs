@@ -2337,15 +2337,23 @@ assert.deepEqual(
   multiverseMarketRow6974IdentitySourceBoundaryData.checkedNonPrefabIdentitySources.tmpProbeNegativeBoundary.checkedAnchors,
   ["SetIS69BaseBonusText", "ClearISObjects", "ClearISMaxLevelObjects", "SetISMaxLevelObjects", "THMarkets", "InscryptionsList"]
 );
-assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.identitySourceRecovered, []);
-assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, []);
-assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.helpsRows6974, false);
 assert.deepEqual(
-  multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.identityStillBlocked.map((entry) => entry.orderedInscriptionRow),
-  [69, 70, 71, 72, 73, 74]
+  multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.identitySourceRecovered.map((entry) => [entry.orderedInscriptionRow, entry.playerFacingLabel]),
+  [
+    [69, "INSCRYPTION #69"],
+    [70, "INSCRYPTION #70"],
+    [71, "INSCRYPTION #71"],
+    [72, "INSCRYPTION #72"],
+    [73, "INSCRYPTION #73"],
+    [74, "INSCRYPTION #74"]
+  ]
 );
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, []);
+assert.equal(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.helpsRows6974, true);
+assert.deepEqual(multiverseMarketRow6974IdentitySourceBoundaryData.playerFacingIdentitySourceBoundary.identityStillBlocked, []);
 assert.match(multiverseMarketStateVerificationDoc, /## Checked row `69-74` player-facing identity-source boundary/);
-assert.match(multiverseMarketStateVerificationDoc, /no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`/i);
+assert.match(multiverseMarketStateVerificationDoc, /no stable repo-local player-facing identity source is currently recoverable for rows `69-74`/i);
+assert.match(multiverseMarketStateVerificationDoc, /the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly/i);
 assert.match(multiverseMarketStateVerificationDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i);
 assert.match(multiverseMarketStateVerificationDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i);
 assert.equal(multiverseMarketSerializedLabelSourceBoundaryData.dataset, "multiverse-market-serialized-label-source-boundary");
@@ -2393,14 +2401,14 @@ assert.deepEqual(
   [["IS71Level", 71], ["IS72Level", 72], ["IS73Level", 73], ["IS74Level", 74]]
 );
 assert.deepEqual(multiverseMarketRow7174IdentityBoundaryData.playerFacingIdentityBoundary.canonicalImportSafeSubset, []);
-assert.deepEqual(multiverseMarketRow7174IdentityBoundaryData.playerFacingIdentityBoundary.identityRecovered, []);
 assert.deepEqual(
-  multiverseMarketRow7174IdentityBoundaryData.playerFacingIdentityBoundary.identityStillBlocked.map((entry) => entry.orderedInscriptionRow),
-  [71, 72, 73, 74]
+  multiverseMarketRow7174IdentityBoundaryData.playerFacingIdentityBoundary.identityRecovered.map((entry) => [entry.orderedInscriptionRow, entry.playerFacingLabel]),
+  [[71, "INSCRYPTION #71"], [72, "INSCRYPTION #72"], [73, "INSCRYPTION #73"], [74, "INSCRYPTION #74"]]
 );
+assert.deepEqual(multiverseMarketRow7174IdentityBoundaryData.playerFacingIdentityBoundary.identityStillBlocked, []);
 assert.deepEqual(
   multiverseMarketRow7174IdentityBoundaryData.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors.map((entry) => [entry.orderedInscriptionRow, entry.label]),
-  [[78, "Inscryption 78: Ouroboros Orbs"], [83, "Inscryption 83: Fast-Loop ML"]]
+  [[68, "INSCRYPTION #68"], [75, "INSCRYPTION #75"]]
 );
 assert.match(multiverseMarketStateVerificationDoc, /ChrystosEmporiumUpgrade71-ID59/);
 assert.equal(multiverseMarketRow7174RemapBandData.dataset, "multiverse-market-row71-74-remap-band");
@@ -2416,6 +2424,10 @@ assert.deepEqual(
 assert.deepEqual(
   multiverseMarketRow7174RemapBandData.earlierPrefabShellEvidence.map((entry) => [entry.serializedId, entry.prefabName]),
   [[59, "ChrystosEmporiumUpgrade59"], [60, "ChrystosEmporiumUpgrade60"], [61, "ChrystosEmporiumUpgrade61"], [62, "ChrystosEmporiumUpgrade62"]]
+);
+assert.deepEqual(
+  multiverseMarketRow7174RemapBandData.liveUiComparison.testedRows.map((entry) => [entry.orderedInscriptionRow, entry.playerFacingLabel]),
+  [[71, "INSCRYPTION #71"], [72, "INSCRYPTION #72"], [73, "INSCRYPTION #73"], [74, "INSCRYPTION #74"]]
 );
 assert.deepEqual(multiverseMarketRow7174RemapBandData.canonicalImportSafeSubset, []);
 assert.match(multiverseMarketStateVerificationDoc, /## Checked row `71-74` remap-band boundary/);
@@ -2442,12 +2454,13 @@ assert.match(multiverseMarketStateVerificationDoc, /ChrystosEmporiumUpgrade83-ID
 assert.match(multiverseMarketVerificationDoc, /## Nearby checked identity-binding pattern/);
 assert.match(multiverseMarketVerificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`/);
 assert.match(multiverseMarketVerificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/);
-assert.match(multiverseMarketVerificationDoc, /does not ground rows `69-74`/i);
+assert.match(multiverseMarketVerificationDoc, /does not ground rows `69-74` by itself/i);
 assert.match(multiverseMarketVerificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i);
 assert.equal(multiverseMarket6974AnomalyProvenanceData.dataset, "multiverse-market-69-74-anomaly-provenance");
 assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.sameNumberAlignmentLayers, ["IS69Level through IS74Level", "IS69ID through IS74ID", "BuyIS69 through BuyIS74"]);
 assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.brokenPrefabBandRows, [69, 70, 71, 72, 73, 74]);
 assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.prefabRemapPairs, ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"]);
+assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.settledAnomaly.playerFacingIdentityRecoveredRowsInBand, [69, 70, 71, 72, 73, 74]);
 assert.deepEqual(multiverseMarket6974AnomalyProvenanceData.pipelineStages.map((stage) => [stage.stageId, stage.classification, stage.anomalyPresent]), [
   ["raw-app-side-asset", "raw-app-side", true],
   ["raw-app-side-probe-reports", "raw-app-side", true],
@@ -2460,6 +2473,7 @@ assert.equal(multiverseMarket6974AnomalyProvenanceData.standardizationDecision.s
 assert.equal(multiverseMarket6974AnomalyProvenanceData.standardizationDecision.standardizationApplied, false);
 assert.match(multiverseMarketStateVerificationDoc, /## Checked `69-74` anomaly provenance boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /the `69-74` anomaly is app-side inherited rather than repo-local/i);
+assert.match(multiverseMarketStateVerificationDoc, /live UI evidence now grounds rows `69-74` as player-facing rows `69-74`/i);
 assert.match(multiverseMarketVerificationDoc, /## Checked 69-74 anomaly provenance boundary/);
 assert.match(multiverseMarketVerificationDoc, /the anomaly must remain represented as inherited source truth/i);
 assert.match(multiverseMarket6974AnomalyProvenanceDoc, /earliest checked appearance is raw app-side evidence/i);

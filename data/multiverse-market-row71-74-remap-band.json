@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-07",
+  "generatedAt": "2026-04-10",
   "dataset": "multiverse-market-row71-74-remap-band",
   "sources": {
     "row7174IdentityBoundary": "data/multiverse-market-row71-74-identity-boundary.json",
@@ -9,6 +9,7 @@
     "actionShell": "data/multiverse-market-action-shell.json",
     "uabeaProbeReport": "data/uabea-probe-report.json",
     "unityProbeReport": "data/unity-probe-report.json",
+    "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
   "remapBandRows": [
@@ -80,18 +81,55 @@
       "Inscryption 83: Fast-Loop ML"
     ]
   },
+  "liveUiComparison": {
+    "visibleNeighbors": [
+      {
+        "orderedInscriptionRow": 68,
+        "playerFacingLabel": "INSCRYPTION #68",
+        "bonusText": "FREE KDIOS CREW"
+      },
+      {
+        "orderedInscriptionRow": 75,
+        "playerFacingLabel": "INSCRYPTION #75",
+        "bonusText": "TO MAX LV OF ALL ACCUMULATIVE LEVEL GROWTH MODULES (LOOP MODS)"
+      }
+    ],
+    "testedRows": [
+      {
+        "orderedInscriptionRow": 71,
+        "playerFacingLabel": "INSCRYPTION #71",
+        "bonusText": "KDIOS RESEARCH EQUIPMENT BONUS"
+      },
+      {
+        "orderedInscriptionRow": 72,
+        "playerFacingLabel": "INSCRYPTION #72",
+        "bonusText": "TICKS PER TICK-LOOP REDUCTION"
+      },
+      {
+        "orderedInscriptionRow": 73,
+        "playerFacingLabel": "INSCRYPTION #73",
+        "bonusText": "LEVEL POINTS (LP) GAINED"
+      },
+      {
+        "orderedInscriptionRow": 74,
+        "playerFacingLabel": "INSCRYPTION #74",
+        "bonusText": "LOOP REQUIREMENT REDUCTION"
+      }
+    ],
+    "conclusion": "The live UI preserves rows 71-74 as player-facing rows 71-74 in direct order, so the 59-62 relation cannot be reused as the player-facing identity model."
+  },
   "recoveredRelationship": {
     "orderedRowNumberMeaning": "Rows 71-74 remain the settled ordered inscription rows reached by IS71Level through IS74Level.",
     "serializedIdFieldMeaning": "UABEA also preserves same-number serialized-id fields IS71ID through IS74ID for those rows.",
     "prefabNumberMeaning": "The visible prefab shell does not keep that same-number join in this band and instead swaps prefab numbers 71-74 onto serialized ids 59-62.",
-    "playerFacingIdentityMeaning": "Nearby TextHandlerMarkets evidence only grounds player-facing identity where the same-number chain survives through prefab and string anchors, which currently checks for rows 78 and 83 but not for rows 71-74."
+    "playerFacingIdentityMeaning": "The supplied live UI screenshots falsify that shell swap as a player-facing remap explanation for rows 71-74: the game still presents them directly as INSCRYPTION #71 through INSCRYPTION #74."
   },
   "canonicalImportSafeSubset": [],
   "currentBoundary": [
     "Inside the 71-74 remap band, ordered row number, serialized-id field number, prefab numbering, and player-facing identity cannot be treated as the same thing.",
     "Rows 71-74 keep same-number ordered/save evidence and same-number serialized-id field names IS71ID through IS74ID, but the prefab shell diverges to ChrystosEmporiumUpgrade71-ID59 through ChrystosEmporiumUpgrade74-ID62.",
-    "That is the smallest checked remap relationship recovered here: prefab numbers 71-74 are reused as shells for serialized ids 59-62, so the same-number identity-binding pattern seen at rows 78 and 83 breaks inside this band.",
-    "Repo-local UI/text evidence still stops short of direct player-facing labels for rows 71-74, so this remap-band explanation does not resolve their player-facing identity.",
-    "Because rows 71-74 still lack grounded player-facing identity, the canonical import-safe subset remains empty."
+    "The supplied live UI screenshots show INSCRYPTION #71 through INSCRYPTION #74 directly between visible neighbors INSCRYPTION #68 and INSCRYPTION #75, so the 59-62 relation is bounded as internal shell metadata only.",
+    "This narrows the remap relationship further: prefab numbers 71-74 are reused as shells for serialized ids 59-62, but that shell swap does not replace the live player-facing row numbers.",
+    "Because this lane only tightens identity evidence and does not change canonical import admissibility, the canonical import-safe subset remains empty."
   ]
 }

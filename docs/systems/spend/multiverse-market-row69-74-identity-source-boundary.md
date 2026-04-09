@@ -14,7 +14,7 @@ This note records the checked player-facing identity-source boundary for the bro
   - `ChrystosEmporiumUpgrade73-ID61`
   - `ChrystosEmporiumUpgrade74-ID62`
 
-## Checked non-prefab identity sources
+## Checked repo-local evidence that stays structural only
 
 - Text/localization coverage:
   - `TextHandlerMarkets`
@@ -34,37 +34,33 @@ This note records the checked player-facing identity-source boundary for the bro
 - Alternate metadata joins:
   - `THMarkets: TextHandlerMarkets`
   - `InscryptionsList: List<GameObject>`
+- Checked negative repo-local boundary:
+  - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
+  - earlier direct prefab shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` are preserved repo-locally, but still do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
+  - `tmp-multiverse-row-text-probe.json` stays negative-only:
+    - `SetIS69BaseBonusText` stays inside a bonus or effect-presentation family
+    - `ClearISObjects`, `ClearISMaxLevelObjects`, `SetISMaxLevelObjects`, `THMarkets`, and `InscryptionsList` stay structural UI-shell hooks
+    - no row-title, localization-key, `StringId`, `Label`, `Name`, or direct player-facing `Inscryption 69` through `Inscryption 74` anchor is recovered repo-locally
 
-## Checked negative boundary
+## Checked live UI evidence
 
-- Those non-prefab sources are still not enough to bind rows `69-74` to player-facing inscription identity.
-- The checked repo-local probe artifacts do not recover direct player-facing strings:
-  - `Inscryption 69`
-  - `Inscryption 70`
-  - `Inscryption 71`
-  - `Inscryption 72`
-  - `Inscryption 73`
-  - `Inscryption 74`
-- Following the broken prefab band back through the remapped serialized ids is also still negative-only:
-  - earlier direct prefab shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` are preserved repo-locally
-  - the checked repo-local probe artifacts still do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
-- The last repo-local source class has now been checked directly as a negative boundary:
-  - raw probe continuation in `tmp-multiverse-row-text-probe.json`
-  - checked anchors: `SetIS69BaseBonusText`, `ClearISObjects`, `ClearISMaxLevelObjects`, `SetISMaxLevelObjects`, `THMarkets`, `InscryptionsList`
-  - checked negative result:
-    - `SetIS69BaseBonusText` stays inside a bonus or effect-presentation family, not a row-title family
-    - the same raw continuation does not recover `SetIS70BaseBonusText` through `SetIS74BaseBonusText`
-    - the same raw continuation does not recover any row-title, localization-key, `StringId`, `Label`, `Name`, or direct player-facing `Inscryption 69` through `Inscryption 74` string anchor
-- The nearest checked positive same-number identity anchors remain outside the broken band:
-  - row `78`: `Inscryption 78: Ouroboros Orbs`
-  - row `83`: `Inscryption 83: Fast-Loop ML`
+- The supplied in-game screenshots show the player-facing row labels directly:
+  - row `68`: `INSCRYPTION #68` with `FREE KDIOS CREW`
+  - row `69`: `INSCRYPTION #69` with `CELLS GAINED`
+  - row `70`: `INSCRYPTION #70` with `SCIENTISTS COST REDUCTION`
+  - row `71`: `INSCRYPTION #71` with `KDIOS RESEARCH EQUIPMENT BONUS`
+  - row `72`: `INSCRYPTION #72` with `TICKS PER TICK-LOOP REDUCTION`
+  - row `73`: `INSCRYPTION #73` with `LEVEL POINTS (LP) GAINED`
+  - row `74`: `INSCRYPTION #74` with `LOOP REQUIREMENT REDUCTION`
+  - row `75`: `INSCRYPTION #75` with `TO MAX LV OF ALL ACCUMULATIVE LEVEL GROWTH MODULES (LOOP MODS)`
+- This matters because the visible neighboring order stays `68 -> 69 -> 70 -> 71 -> 72 -> 73 -> 74 -> 75`.
+- That live UI ordering and labeling does not reproduce a player-facing `57-62` row band.
 
 Current grounded conclusion:
 
-- save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
-- rows `69-74` have checked row access and UI-shell evidence, but no recovered repo-local player-facing identity source
-- remapped serialized ids `57-62` also fail to recover a checked player-facing identity source, so following the prefab remap does not narrow the row labels any further
-- the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation in `tmp-multiverse-row-text-probe.json` is now checked as a negative boundary and still does not rise to a defensible row-label source
-- rows `69-74` therefore remain unresolved for player-facing identity
-- repo-local identity recovery on rows `69-74` is therefore closed unless a different source class appears
-- the canonical import-safe subset stays empty
+- save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must stay separated
+- repo-local evidence still does not recover a direct row-label source for rows `69-74`
+- the supplied live UI screenshots do recover the player-facing identities for rows `69-74` directly
+- remapped serialized ids `57-62` still fail to recover a checked player-facing identity source, so following the prefab remap does not narrow the row labels any further
+- the `69-74 -> 57-62` relation is therefore bounded as internal shell metadata only, not as the live player-facing remap model
+- canonical Emporium import remains blocked for separate reasons, so the canonical import-safe subset stays empty

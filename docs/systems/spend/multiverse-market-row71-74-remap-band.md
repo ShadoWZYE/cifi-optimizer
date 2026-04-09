@@ -1,6 +1,6 @@
 # Multiverse Market Row 71-74 Remap Band
 
-This note records the smallest checked explanation for why rows `71-74` break the nearby same-number identity-binding pattern.
+This note records the smallest checked explanation for why rows `71-74` break the nearby same-number prefab pattern without replacing the live player-facing row numbers.
 
 ## Checked remap relationship
 
@@ -20,10 +20,26 @@ This note records the smallest checked explanation for why rows `71-74` break th
   - `ChrystosEmporiumUpgrade61`
   - `ChrystosEmporiumUpgrade62`
 
+## Checked live UI comparison
+
+- The supplied screenshots show the neighboring live UI rows directly:
+  - `INSCRYPTION #68`
+  - `INSCRYPTION #71`
+  - `INSCRYPTION #72`
+  - `INSCRYPTION #73`
+  - `INSCRYPTION #74`
+  - `INSCRYPTION #75`
+- The visible order still follows player-facing rows `71-74`, not a remapped `59-62` presentation band.
+- The displayed bonus texts for rows `71-74` are row-local:
+  - row `71`: `KDIOS RESEARCH EQUIPMENT BONUS`
+  - row `72`: `TICKS PER TICK-LOOP REDUCTION`
+  - row `73`: `LEVEL POINTS (LP) GAINED`
+  - row `74`: `LOOP REQUIREMENT REDUCTION`
+
 ## Grounded conclusion
 
 - Ordered row number and serialized-id field number stay aligned for rows `71-74`.
 - Prefab numbering does not stay aligned in that band; prefab numbers `71-74` are reused as shells for serialized ids `59-62`.
-- Nearby `TextHandlerMarkets` evidence only closes the same-number player-facing chain at rows `78` and `83`, not at rows `71-74`.
-- This explains why the nearby same-number identity-binding pattern breaks in the `71-74` remap band.
-- It does not recover player-facing identity for rows `71-74`, so the canonical import-safe subset stays empty.
+- The supplied live UI screenshots falsify that shell swap as the player-facing row-identity model for rows `71-74`.
+- The `59-62` relation therefore stays bounded as internal shell metadata only.
+- This does not widen canonical import or planner safety, so the canonical import-safe subset stays empty.

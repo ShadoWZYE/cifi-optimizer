@@ -64,22 +64,22 @@ Current grounded conclusion:
   - `IS72Level` -> row `72`
   - `IS73Level` -> row `73`
   - `IS74Level` -> row `74`
-- The checked non-prefab identity-source candidates for those same rows are still negative-only:
+- The checked repo-local non-prefab identity-source candidates for those same rows are still negative-only:
   - `IS69ID` through `IS74ID`, `BuyIS69` through `BuyIS74`, and `SetIS69CostText` through `SetIS74CostText` confirm ordered row access plus same-number serialized-id field recovery, not final labels
   - `THMarkets: TextHandlerMarkets` and `InscryptionsList: List<GameObject>` recover a nearby UI population shell, not a checked row-to-label join
   - `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` explicitly point the visible prefab-number shell at serialized ids `57-62`, not at validated rows `69-74`
   - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
   - following that prefab remap back to earlier direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` is also still negative-only because the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
   - the raw `tmp-multiverse-row-text-probe.json` continuation is now checked directly: `SetIS69BaseBonusText` stays inside a bonus-presentation family, while `ClearISObjects`, `ClearISMaxLevelObjects`, `SetISMaxLevelObjects`, `THMarkets`, and `InscryptionsList` stay structural UI-shell hooks rather than a row-label source
-  - the nearest checked player-facing inscription labels remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, which are outside rows `69-74`
+  - the supplied live UI screenshots directly show `INSCRYPTION #69` through `INSCRYPTION #74` in order, between visible neighbors `INSCRYPTION #68` and `INSCRYPTION #75`
 
 Current grounded conclusion:
 
-- no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`
-- following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing source either
-- the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation is now exhausted as a checked negative boundary and still does not amount to a defensible player-facing label/remap source
-- rows `69-74` therefore remain unresolved for player-facing identity, not import-safe player-facing labels
-- repo-local identity recovery on rows `69-74` is therefore closed unless a different source class appears
+- no stable repo-local player-facing identity source is currently recoverable for rows `69-74`
+- the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly
+- following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing source either and therefore stays bounded as internal shell metadata only
+- the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation is now exhausted as a checked negative boundary for repo-local row-label recovery
+- repo-local identity recovery on rows `69-74` is therefore closed unless a different repo-local source class appears
 - the canonical import-safe subset stays empty
 
 ## Checked 69-74 anomaly provenance boundary
@@ -91,12 +91,13 @@ Current grounded conclusion:
 - The repo-local derived datasets therefore inherit an already-split source shape:
   - same-number alignment holds on save/id/hook side
   - prefab numbering is broken only in the `69-74` band
-  - player-facing identity is still unresolved
+  - the repo-local player-facing label source is still unresolved even though live UI now grounds the visible row identities
 
 Current grounded conclusion:
 
 - the earliest checked appearance of the `69-74` anomaly is raw app-side evidence, not a repo-local recovery or normalization step
 - the anomaly must remain represented as inherited source truth
+- live UI evidence now grounds player-facing rows `69-74` directly, but that does not rewrite the inherited prefab anomaly
 - no dataset standardization is applied in this lane because rewriting the derived datasets to a newer same-number prefab shape would erase checked app-side evidence
 
 ## Alternate serialized-export indirect-join boundary
@@ -140,12 +141,12 @@ Current grounded conclusion:
   - serialized-id fields: `IS71ID` through `IS74ID`
   - remapped prefab shells: `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62`
 - Repo-local probes also preserve earlier direct shells `ChrystosEmporiumUpgrade59`, `ChrystosEmporiumUpgrade60`, `ChrystosEmporiumUpgrade61`, and `ChrystosEmporiumUpgrade62`.
-- This means prefab numbers `71-74` are reused as shells for serialized ids `59-62`, so the nearby same-number join fails before a player-facing label can bind.
+- This means prefab numbers `71-74` are reused as shells for serialized ids `59-62`, but the supplied live UI screenshots still show player-facing rows `71-74` directly.
 
 Current grounded conclusion:
 
-- this recovers the remap-band relationship but not player-facing identity
-- rows `71-74` still stay unresolved for player-facing identity
+- this recovers the remap-band relationship while bounding `59-62` as internal shell metadata only
+- rows `71-74` stay player-facing rows `71-74` in live UI
 - the canonical import-safe subset stays empty
 
 ## Wider checked inscription numbering-stability boundary
@@ -175,7 +176,7 @@ Current grounded conclusion:
 - same-number prefab numbering is stable through row `68`
 - same-number prefab numbering is broken from rows `69-74`
 - same-number prefab numbering resumes at row `75` and stays direct through row `110`
-- this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `69-74`
+- this wider numbering boundary still does not provide a repo-local row-label source for rows `69-74`, even though live UI evidence now grounds those rows directly
 - the canonical import-safe subset stays empty
 
 ## Nearby checked identity-binding pattern
@@ -190,7 +191,7 @@ Current grounded conclusion:
 
 - nearby player-facing identity can be grounded when the same row number survives across `ISNLevel`, `ISNID`, `BuyISN`, direct prefab name `ChrystosEmporiumUpgradeN-IDN`, and `Inscryption N: ...`
 - this explains how nearby inscription rows bind to player-facing labels without widening beyond checked rows `78` and `83`
-- this pattern still does not ground rows `69-74` because the prefab join is remapped there and no checked player-facing labels have been recovered for those rows
+- this pattern does not ground rows `69-74` by itself; those rows now rely on live UI evidence because the prefab join is remapped there and no checked repo-local player-facing labels have been recovered
 - the canonical import-safe subset therefore stays empty
 
 ## Still unresolved
@@ -220,7 +221,7 @@ Current grounded conclusion:
 ## Current app implication
 
 - It is safe to treat `MultiverseMarket` as a real Emporium owner with a grounded `Inscryptions Done` cost-lane shell.
-- It is safe to treat the `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` override band as a real prefab-remap boundary that blocks naive label assumptions for validated ids `69-74`.
+- It is safe to treat the `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` override band as a real prefab-remap boundary whose `57-62` relation stays internal shell metadata rather than a player-facing remap for validated ids `69-74`.
 - It is safe to treat `SaveData` as the exact declaring save owner for the checked `IS*Level` / trade-counter / early `Mech*` progression cluster, while keeping `InscryptionsDone` split out as an exact dual declaration on `SaveData` and `PlayerProfileData`.
 - It is not safe to generate spend recommendations yet.
 - The spend-planner track should stop inferring this lane from diamonds or tokens.
@@ -230,7 +231,7 @@ Current grounded conclusion:
 
 1. keep the active lane on the bounded `SaveData` import-surface decision, preserve the exact typed `IS1Level` through `IS110Level` span as compatibility-only raw Emporium import truth, and leave the canonical Emporium import-safe subset explicitly empty unless stronger identity evidence appears
 2. keep any player-owned inscription-level preview descriptive and quarantined unless a narrower grounded canonical import slice is checked
-3. finish the inscription-number and prefab-to-label remap, especially across the `69-74` prefab override band, on its separate downstream lane
+3. keep any future row-label work focused on broader coverage beyond the screenshot-grounded `69-74` band instead of reopening the falsified `57-62` player-facing remap
 4. only then revisit whether any canonical Emporium import or spend-planner recommendation is justified
 
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-07",
+  "generatedAt": "2026-04-10",
   "dataset": "multiverse-market-row69-74-identity-source-boundary",
   "sources": {
     "inscriptionNumberingStabilityBoundary": "data/multiverse-market-inscription-numbering-stability-boundary.json",
@@ -9,6 +9,7 @@
     "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
     "unityProbeReport": "data/unity-probe-report.json",
     "uabeaProbeReport": "data/uabea-probe-report.json",
+    "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
   "settledBrokenPrefabBand": [
@@ -156,7 +157,74 @@
         "The same raw probe continuation also preserves ClearISObjects, ClearISMaxLevelObjects, SetISMaxLevelObjects, THMarkets, and InscryptionsList as structural UI-shell or GameObject-list hooks.",
         "The checked raw probe continuation does not recover any direct row-title, localization-key, StringId, Label, Name, or player-facing Inscryption 69 through Inscryption 74 string anchor."
       ],
-      "conclusion": "The remaining tmp probe seam is now exhausted as a checked negative boundary. It does not falsify the current row-boundary model with a stronger player-facing row join, and it does not recover a defensible label source for rows 69-74."
+      "conclusion": "The remaining tmp probe seam is now exhausted as a checked negative boundary. It does not recover a stronger repo-local row-label join for rows 69-74."
+    },
+    "liveUiScreenshotEvidence": {
+      "sourceClass": "user-supplied in-game screenshots",
+      "visibleNeighborRows": [
+        {
+          "orderedInscriptionRow": 68,
+          "playerFacingLabel": "INSCRYPTION #68",
+          "bonusText": "FREE KDIOS CREW"
+        },
+        {
+          "orderedInscriptionRow": 75,
+          "playerFacingLabel": "INSCRYPTION #75",
+          "bonusText": "TO MAX LV OF ALL ACCUMULATIVE LEVEL GROWTH MODULES (LOOP MODS)"
+        }
+      ],
+      "testedRows": [
+        {
+          "orderedInscriptionRow": 69,
+          "playerFacingLabel": "INSCRYPTION #69",
+          "bonusText": "CELLS GAINED",
+          "bonusPerInscryption": "x5.00qa"
+        },
+        {
+          "orderedInscriptionRow": 70,
+          "playerFacingLabel": "INSCRYPTION #70",
+          "bonusText": "SCIENTISTS COST REDUCTION",
+          "bonusPerInscryption": "/10.00b"
+        },
+        {
+          "orderedInscriptionRow": 71,
+          "playerFacingLabel": "INSCRYPTION #71",
+          "bonusText": "KDIOS RESEARCH EQUIPMENT BONUS",
+          "bonusPerInscryption": "+0.02x"
+        },
+        {
+          "orderedInscriptionRow": 72,
+          "playerFacingLabel": "INSCRYPTION #72",
+          "bonusText": "TICKS PER TICK-LOOP REDUCTION",
+          "bonusPerInscryption": "-0.06"
+        },
+        {
+          "orderedInscriptionRow": 73,
+          "playerFacingLabel": "INSCRYPTION #73",
+          "bonusText": "LEVEL POINTS (LP) GAINED",
+          "bonusPerInscryption": "+10"
+        },
+        {
+          "orderedInscriptionRow": 74,
+          "playerFacingLabel": "INSCRYPTION #74",
+          "bonusText": "LOOP REQUIREMENT REDUCTION",
+          "bonusPerInscryption": "-40"
+        }
+      ],
+      "comparisonAgainstShellRemap": {
+        "testedShellPairs": [
+          "69->57",
+          "70->58",
+          "71->59",
+          "72->60",
+          "73->61",
+          "74->62"
+        ],
+        "matchedPlayerFacingRowNumbers": [],
+        "matchedBonusTexts": [],
+        "matchedNeighborOrder": [],
+        "conclusion": "Live UI preserves rows 69-74 in direct neighboring order between rows 68 and 75, with row-local labels and bonus texts that do not read as player-facing rows 57-62."
+      }
     },
     "nearbyPositiveBindingAnchors": [
       {
@@ -172,169 +240,60 @@
     ]
   },
   "playerFacingIdentitySourceBoundary": {
-    "identitySourceRecovered": [],
-    "canonicalImportSafeSubset": [],
-    "helpsRows6974": false,
-    "identityStillBlocked": [
+    "identitySourceRecovered": [
       {
         "orderedInscriptionRow": 69,
         "saveField": "IS69Level",
-        "status": "unresolved",
-        "checkedEvidence": [
-          {
-            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
-            "claim": "row 69 keeps same-number IS69Level, IS69ID, and BuyIS69 while the prefab shell is remapped as ChrystosEmporiumUpgrade69-ID57"
-          },
-          {
-            "artifact": "data/multiverse-market-row-text-coverage.json",
-            "claim": "validatedRowCostTexts includes SetIS69CostText under TextHandlerMarkets coverage"
-          },
-          {
-            "artifact": "data/unity-probe-report.json",
-            "claim": "no checked player-facing string anchor names Inscryption 69"
-          }
-        ],
-        "blockedBy": [
-          "the visible prefab-number shell 69 is explicitly remapped to serialized id 57",
-          "following that remap back to serialized id 57 still does not recover a checked player-facing label source",
-          "TextHandlerMarkets cost text coverage does not recover a row-69 player-facing label",
-          "no alternate checked repo-local string or lookup source binds row 69 to a player-facing inscription identity"
-        ]
+        "source": "live-ui-screenshot",
+        "playerFacingLabel": "INSCRYPTION #69",
+        "bonusText": "CELLS GAINED"
       },
       {
         "orderedInscriptionRow": 70,
         "saveField": "IS70Level",
-        "status": "unresolved",
-        "checkedEvidence": [
-          {
-            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
-            "claim": "row 70 keeps same-number IS70Level, IS70ID, and BuyIS70 while the prefab shell is remapped as ChrystosEmporiumUpgrade70-ID58"
-          },
-          {
-            "artifact": "data/multiverse-market-row-text-coverage.json",
-            "claim": "validatedRowCostTexts includes SetIS70CostText under TextHandlerMarkets coverage"
-          },
-          {
-            "artifact": "data/unity-probe-report.json",
-            "claim": "no checked player-facing string anchor names Inscryption 70"
-          }
-        ],
-        "blockedBy": [
-          "the visible prefab-number shell 70 is explicitly remapped to serialized id 58",
-          "following that remap back to serialized id 58 still does not recover a checked player-facing label source",
-          "TextHandlerMarkets cost text coverage does not recover a row-70 player-facing label",
-          "no alternate checked repo-local string or lookup source binds row 70 to a player-facing inscription identity"
-        ]
+        "source": "live-ui-screenshot",
+        "playerFacingLabel": "INSCRYPTION #70",
+        "bonusText": "SCIENTISTS COST REDUCTION"
       },
       {
         "orderedInscriptionRow": 71,
         "saveField": "IS71Level",
-        "status": "unresolved",
-        "checkedEvidence": [
-          {
-            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
-            "claim": "row 71 keeps same-number IS71Level, IS71ID, and BuyIS71 while the prefab shell is remapped as ChrystosEmporiumUpgrade71-ID59"
-          },
-          {
-            "artifact": "data/multiverse-market-row-text-coverage.json",
-            "claim": "validatedRowCostTexts includes SetIS71CostText under TextHandlerMarkets coverage"
-          },
-          {
-            "artifact": "data/unity-probe-report.json",
-            "claim": "no checked player-facing string anchor names Inscryption 71"
-          }
-        ],
-        "blockedBy": [
-          "the visible prefab-number shell 71 is explicitly remapped to serialized id 59",
-          "following that remap back to serialized id 59 still does not recover a checked player-facing label source",
-          "TextHandlerMarkets cost text coverage does not recover a row-71 player-facing label",
-          "no alternate checked repo-local string or lookup source binds row 71 to a player-facing inscription identity"
-        ]
+        "source": "live-ui-screenshot",
+        "playerFacingLabel": "INSCRYPTION #71",
+        "bonusText": "KDIOS RESEARCH EQUIPMENT BONUS"
       },
       {
         "orderedInscriptionRow": 72,
         "saveField": "IS72Level",
-        "status": "unresolved",
-        "checkedEvidence": [
-          {
-            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
-            "claim": "row 72 keeps same-number IS72Level, IS72ID, and BuyIS72 while the prefab shell is remapped as ChrystosEmporiumUpgrade72-ID60"
-          },
-          {
-            "artifact": "data/multiverse-market-row-text-coverage.json",
-            "claim": "validatedRowCostTexts includes SetIS72CostText under TextHandlerMarkets coverage"
-          },
-          {
-            "artifact": "data/unity-probe-report.json",
-            "claim": "no checked player-facing string anchor names Inscryption 72"
-          }
-        ],
-        "blockedBy": [
-          "the visible prefab-number shell 72 is explicitly remapped to serialized id 60",
-          "following that remap back to serialized id 60 still does not recover a checked player-facing label source",
-          "TextHandlerMarkets cost text coverage does not recover a row-72 player-facing label",
-          "no alternate checked repo-local string or lookup source binds row 72 to a player-facing inscription identity"
-        ]
+        "source": "live-ui-screenshot",
+        "playerFacingLabel": "INSCRYPTION #72",
+        "bonusText": "TICKS PER TICK-LOOP REDUCTION"
       },
       {
         "orderedInscriptionRow": 73,
         "saveField": "IS73Level",
-        "status": "unresolved",
-        "checkedEvidence": [
-          {
-            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
-            "claim": "row 73 keeps same-number IS73Level, IS73ID, and BuyIS73 while the prefab shell is remapped as ChrystosEmporiumUpgrade73-ID61"
-          },
-          {
-            "artifact": "data/multiverse-market-row-text-coverage.json",
-            "claim": "validatedRowCostTexts includes SetIS73CostText under TextHandlerMarkets coverage"
-          },
-          {
-            "artifact": "data/unity-probe-report.json",
-            "claim": "no checked player-facing string anchor names Inscryption 73"
-          }
-        ],
-        "blockedBy": [
-          "the visible prefab-number shell 73 is explicitly remapped to serialized id 61",
-          "following that remap back to serialized id 61 still does not recover a checked player-facing label source",
-          "TextHandlerMarkets cost text coverage does not recover a row-73 player-facing label",
-          "no alternate checked repo-local string or lookup source binds row 73 to a player-facing inscription identity"
-        ]
+        "source": "live-ui-screenshot",
+        "playerFacingLabel": "INSCRYPTION #73",
+        "bonusText": "LEVEL POINTS (LP) GAINED"
       },
       {
         "orderedInscriptionRow": 74,
         "saveField": "IS74Level",
-        "status": "unresolved",
-        "checkedEvidence": [
-          {
-            "artifact": "data/multiverse-market-inscription-numbering-stability-boundary.json",
-            "claim": "row 74 keeps same-number IS74Level, IS74ID, and BuyIS74 while the prefab shell is remapped as ChrystosEmporiumUpgrade74-ID62"
-          },
-          {
-            "artifact": "data/multiverse-market-row-text-coverage.json",
-            "claim": "validatedRowCostTexts includes SetIS74CostText under TextHandlerMarkets coverage"
-          },
-          {
-            "artifact": "data/unity-probe-report.json",
-            "claim": "no checked player-facing string anchor names Inscryption 74"
-          }
-        ],
-        "blockedBy": [
-          "the visible prefab-number shell 74 is explicitly remapped to serialized id 62",
-          "following that remap back to serialized id 62 still does not recover a checked player-facing label source",
-          "TextHandlerMarkets cost text coverage does not recover a row-74 player-facing label",
-          "no alternate checked repo-local string or lookup source binds row 74 to a player-facing inscription identity"
-        ]
+        "source": "live-ui-screenshot",
+        "playerFacingLabel": "INSCRYPTION #74",
+        "bonusText": "LOOP REQUIREMENT REDUCTION"
       }
     ],
+    "canonicalImportSafeSubset": [],
+    "helpsRows6974": true,
+    "identityStillBlocked": [],
     "currentBoundary": [
       "Save numbering, serialized-id numbering, prefab numbering, and player-facing identity source remain separate checks.",
-      "Across rows 69-74, checked repo-local non-prefab evidence recovers TextHandlerMarkets cost hooks, BuyIS hooks, and a THMarkets plus InscryptionsList UI shell, but not a direct player-facing inscription label source.",
-      "Direct string search in the checked repo-local probe artifacts does not recover Inscryption 69 through Inscryption 74.",
-      "Following the broken prefab shells back to remapped serialized ids 57-62 also does not recover Inscryption 57 through Inscryption 62 or any checked alternate player-facing identity source.",
-      "The raw tmp-multiverse-row-text-probe TextHandlerMarkets continuation is now checked as a negative boundary: SetIS69BaseBonusText stays in bonus-presentation territory, while ClearISObjects, ClearISMaxLevelObjects, SetISMaxLevelObjects, THMarkets, and InscryptionsList stay structural UI-shell hooks rather than a recovered row-label source.",
-      "Nearby same-number player-facing anchors remain rows 78 and 83 only, outside the broken 69-74 prefab band.",
-      "No player-facing identity source is recoverable repo-locally for rows 69-74, so repo-local identity recovery on that band is closed and the canonical import-safe subset stays empty."
+      "Across rows 69-74, checked repo-local non-prefab evidence still recovers TextHandlerMarkets cost hooks, BuyIS hooks, and a THMarkets plus InscryptionsList UI shell, but not a direct repo-local player-facing label source.",
+      "The supplied live UI screenshots do recover player-facing identity for rows 69-74 directly: the game displays INSCRYPTION #69 through INSCRYPTION #74 in order between visible neighbors INSCRYPTION #68 and INSCRYPTION #75, each with stable row-local bonus text.",
+      "Following the broken prefab shells back to remapped serialized ids 57-62 remains negative-only for player-facing labels, so that relation stays bounded as internal shell metadata rather than a player-facing remap.",
+      "The raw tmp-multiverse-row-text-probe TextHandlerMarkets continuation remains a checked negative boundary for repo-local row-label recovery and is no longer the blocker for the live player-facing row identity question.",
+      "This screenshot-backed identity recovery does not change canonical import admissibility: SaveData ownership stays closed on IS1Level through IS110Level, compatibility-only import stays under compatibility.unmappedSystemState.multiverseMarket, and the canonical import-safe subset stays empty."
     ]
   }
 }

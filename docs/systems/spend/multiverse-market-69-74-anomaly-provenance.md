@@ -38,5 +38,5 @@ Current grounded conclusion:
 ## Current grounded conclusion
 
 - the `69-74` anomaly is app-side inherited
-- rows `69-74` still have no grounded player-facing identity
+- live UI evidence now grounds rows `69-74` as player-facing rows `69-74`, but that does not change the inherited prefab anomaly provenance
 - drift checks must therefore enforce alignment between raw app-side evidence, derived datasets, and verification docs without rewriting the inherited shape

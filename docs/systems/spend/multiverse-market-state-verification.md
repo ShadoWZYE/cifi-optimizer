@@ -223,13 +223,14 @@ Current grounded conclusion:
   - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
   - following the prefab remap back to serialized ids `57-62` is still negative-only: earlier direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` are preserved, but the checked repo-local probe artifacts still do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
   - the raw `tmp-multiverse-row-text-probe.json` continuation is now checked directly: `SetIS69BaseBonusText` stays in a bonus-presentation family, while `ClearISObjects`, `ClearISMaxLevelObjects`, `SetISMaxLevelObjects`, `THMarkets`, and `InscryptionsList` stay structural UI-shell hooks rather than a recovered row-title source
-  - the nearest checked player-facing inscription labels currently preserved in repo-local probes remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, both outside the `69-74` target rows
+  - the supplied live UI screenshots directly show `INSCRYPTION #69` through `INSCRYPTION #74` in order between visible neighbors `INSCRYPTION #68` and `INSCRYPTION #75`, with row-local bonus texts `CELLS GAINED`, `SCIENTISTS COST REDUCTION`, `KDIOS RESEARCH EQUIPMENT BONUS`, `TICKS PER TICK-LOOP REDUCTION`, `LEVEL POINTS (LP) GAINED`, and `LOOP REQUIREMENT REDUCTION`
 - Current grounded conclusion:
-  - no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`
-  - following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing label source either
-  - the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation is now exhausted as a checked negative boundary and still reads as effect/presentation plumbing rather than row identity
+  - no stable repo-local player-facing identity source is currently recoverable for rows `69-74`
+  - the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly
+  - following the broken band back to remapped serialized ids `57-62` still does not recover a narrower player-facing label source and therefore stays bounded as shell metadata only
+  - the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation remains a checked negative boundary for repo-local row-label recovery
   - save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
-  - repo-local identity recovery on rows `69-74` is therefore closed unless a different source class appears
+  - repo-local identity recovery on rows `69-74` is closed unless a different repo-local source class appears
   - the canonical import-safe subset therefore stays empty
 
 ## Checked `69-74` anomaly provenance boundary
@@ -244,6 +245,7 @@ Current grounded conclusion:
 
 - the `69-74` anomaly is app-side inherited rather than repo-local
 - no repo-local normalization step is currently proven to introduce it
+- live UI evidence now grounds rows `69-74` as player-facing rows `69-74`, but that does not rewrite the inherited prefab anomaly
 - no dataset standardization is applied in this lane because preserving inherited source truth is safer than rewriting the prefab layer into a newer canonical shape the app-side evidence does not support
 
 ## Alternate serialized-export indirect-join boundary
@@ -286,12 +288,12 @@ Current grounded conclusion:
 - The narrow recovered relationship is therefore:
   - ordered row number and serialized-id field number stay aligned for `71-74`
   - prefab numbers `71-74` are reused as shells for serialized ids `59-62`
-  - player-facing identity still stays unresolved because no checked string anchor names rows `71-74`
+  - the supplied live UI screenshots show that player-facing identity still stays on rows `71-74`, so the `59-62` relation is shell metadata only
 
 Current grounded conclusion:
 
-- this remap-band explanation clarifies why the nearby same-number binding pattern breaks inside rows `71-74`
-- it still does not ground player-facing identity for rows `71-74`
+- this remap-band explanation clarifies why the nearby same-number prefab-binding pattern breaks inside rows `71-74`
+- live UI evidence still grounds player-facing identity for rows `71-74` directly as rows `71-74`
 - the canonical import-safe subset stays empty
 
 ## Checked wider inscription numbering-stability boundary
@@ -321,7 +323,7 @@ Current grounded conclusion:
 - same-number prefab numbering is stable through row `68`
 - same-number prefab numbering is broken from rows `69-74`
 - same-number prefab numbering resumes at row `75` and stays direct through row `110`
-- this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `69-74`
+- this wider numbering boundary still does not provide a repo-local row-label source for rows `69-74`, even though live UI evidence now grounds those rows directly
 - the canonical import-safe subset stays empty
 
 ## Nearby checked inscription identity-binding pattern
@@ -335,12 +337,12 @@ Current grounded conclusion:
   - `BuyISN`
   - `ChrystosEmporiumUpgradeN-IDN`
   - `Inscryption N: ...`
-- This must stay distinct from ordered row mapping alone. Rows `69-74` still fail the direct prefab join because the visible shell is remapped as `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`, and no checked player-facing string currently names those rows.
+- This must stay distinct from ordered row mapping alone. Rows `69-74` still fail the direct prefab join because the visible shell is remapped as `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`, and no checked repo-local player-facing string currently names those rows.
 
 Current grounded conclusion:
 
 - nearby rows `78` and `83` now show how ordered inscription rows can bind to player-facing identity when the same-number chain is preserved
-- this recovered pattern does not ground rows `69-74`
+- this recovered pattern does not ground rows `69-74` by itself; those rows now rely on live UI evidence instead
 - the canonical import-safe subset stays empty
 
 ## Bounded SaveData import classification

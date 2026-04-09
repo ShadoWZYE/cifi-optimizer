@@ -2818,7 +2818,7 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
   expectNonEmptyString(boundary.generatedAt, "multiverse market row 69-74 identity-source boundary generatedAt must be present");
   expectNonEmptyString(boundary.dataset, "multiverse market row 69-74 identity-source boundary dataset id must be present");
   expectRecord(boundary.sources, "multiverse market row 69-74 identity-source boundary sources must be an object");
-  ["inscriptionNumberingStabilityBoundary", "prefabRemapBoundary", "rowTextCoverage", "actionShell", "metadataNeighborhood", "unityProbeReport", "uabeaProbeReport", "verificationDoc"].forEach((field) => {
+  ["inscriptionNumberingStabilityBoundary", "prefabRemapBoundary", "rowTextCoverage", "actionShell", "metadataNeighborhood", "unityProbeReport", "uabeaProbeReport", "liveUiScreenshotEvidence", "verificationDoc"].forEach((field) => {
     expectNonEmptyString(boundary.sources[field], `multiverse market row 69-74 identity-source boundary sources.${field} must be present`);
   });
   expectArray(boundary.settledBrokenPrefabBand, "multiverse market row 69-74 identity-source boundary settledBrokenPrefabBand must be an array");
@@ -2831,6 +2831,7 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
   expectRecord(boundary.checkedNonPrefabIdentitySources.actionShellCoverage, "multiverse market row 69-74 identity-source boundary actionShellCoverage must be an object");
   expectArray(boundary.checkedNonPrefabIdentitySources.actionShellCoverage.buyHooks, "multiverse market row 69-74 identity-source boundary buyHooks must be an array");
   expectRecord(boundary.checkedNonPrefabIdentitySources.metadataJoinCandidates, "multiverse market row 69-74 identity-source boundary metadataJoinCandidates must be an object");
+  expectRecord(boundary.checkedNonPrefabIdentitySources.liveUiScreenshotEvidence, "multiverse market row 69-74 identity-source boundary liveUiScreenshotEvidence must be an object");
   expectArray(boundary.checkedNonPrefabIdentitySources.nearbyPositiveBindingAnchors, "multiverse market row 69-74 identity-source boundary nearbyPositiveBindingAnchors must be an array");
   expectRecord(boundary.playerFacingIdentitySourceBoundary, "multiverse market row 69-74 identity-source boundary playerFacingIdentitySourceBoundary must be an object");
   expectArray(boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered, "multiverse market row 69-74 identity-source boundary identitySourceRecovered must be an array");
@@ -2926,28 +2927,32 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
     [[78, "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs"], [83, "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"]],
     "multiverse market row 69-74 identity-source boundary nearbyPositiveBindingAnchors drifted"
   );
-  assert.deepEqual(boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered, [], "multiverse market row 69-74 identity-source boundary identitySourceRecovered must remain empty");
-  assert.deepEqual(boundary.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, [], "multiverse market row 69-74 identity-source boundary canonicalImportSafeSubset must remain empty");
-  assert.equal(boundary.playerFacingIdentitySourceBoundary.helpsRows6974, false, "multiverse market row 69-74 identity-source boundary helpsRows6974 must remain false");
   assert.deepEqual(
-    boundary.playerFacingIdentitySourceBoundary.identityStillBlocked.map((entry) => entry.orderedInscriptionRow),
-    [69, 70, 71, 72, 73, 74],
-    "multiverse market row 69-74 identity-source boundary blocked row order drifted"
+    boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.playerFacingLabel]),
+    [
+      [69, "IS69Level", "INSCRYPTION #69"],
+      [70, "IS70Level", "INSCRYPTION #70"],
+      [71, "IS71Level", "INSCRYPTION #71"],
+      [72, "IS72Level", "INSCRYPTION #72"],
+      [73, "IS73Level", "INSCRYPTION #73"],
+      [74, "IS74Level", "INSCRYPTION #74"]
+    ],
+    "multiverse market row 69-74 identity-source boundary recovered identities drifted"
   );
-  boundary.playerFacingIdentitySourceBoundary.identityStillBlocked.forEach((entry, index) => {
-    assert.equal(entry.status, "unresolved", `multiverse market row 69-74 identity-source boundary blocked entry ${index} status drifted`);
-    expectArray(entry.checkedEvidence, `multiverse market row 69-74 identity-source boundary blocked entry ${index} checkedEvidence must be an array`);
-    expectArray(entry.blockedBy, `multiverse market row 69-74 identity-source boundary blocked entry ${index} blockedBy must be an array`);
-  });
+  assert.deepEqual(boundary.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, [], "multiverse market row 69-74 identity-source boundary canonicalImportSafeSubset must remain empty");
+  assert.equal(boundary.playerFacingIdentitySourceBoundary.helpsRows6974, true, "multiverse market row 69-74 identity-source boundary helpsRows6974 drifted");
+  assert.deepEqual(boundary.playerFacingIdentitySourceBoundary.identityStillBlocked, [], "multiverse market row 69-74 identity-source boundary blocked rows must now be empty");
 
   assert.match(stateDoc, /## Checked row `69-74` player-facing identity-source boundary/, "multiverse market state verification doc must expose the row 69-74 identity-source boundary section");
-  assert.match(stateDoc, /no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`/i, "multiverse market state verification doc must preserve the unresolved row 69-74 identity-source conclusion");
+  assert.match(stateDoc, /no stable repo-local player-facing identity source is currently recoverable for rows `69-74`/i, "multiverse market state verification doc must preserve the repo-local negative boundary");
+  assert.match(stateDoc, /the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly/i, "multiverse market state verification doc must preserve the live UI identity recovery");
   assert.match(stateDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market state verification doc must preserve the remapped serialized-id blocker");
   assert.match(stateDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i, "multiverse market state verification doc must preserve the tmp probe negative boundary");
   assert.match(verificationDoc, /## Narrow row 69-74 identity-source boundary/, "multiverse market verification doc must expose the narrow row 69-74 identity-source boundary section");
   assert.match(verificationDoc, /THMarkets: TextHandlerMarkets/, "multiverse market verification doc must preserve the THMarkets metadata join clue");
   assert.match(verificationDoc, /InscryptionsList: List<GameObject>/, "multiverse market verification doc must preserve the InscryptionsList metadata join clue");
   assert.match(verificationDoc, /the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`/i, "multiverse market verification doc must preserve the direct string negative boundary");
+  assert.match(verificationDoc, /the supplied live UI screenshots do recover the player-facing identities of rows `69-74` directly/i, "multiverse market verification doc must preserve the live UI identity recovery");
   assert.match(verificationDoc, /direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market verification doc must preserve the remapped serialized-id negative boundary");
   assert.match(verificationDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i, "multiverse market verification doc must preserve the tmp probe negative boundary");
 
@@ -2959,7 +2964,7 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
       `${boundary.settledBrokenPrefabBand.length} checked broken-band rows`,
       `${boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered.length} recovered player-facing identity sources`,
       `${boundary.playerFacingIdentitySourceBoundary.identityStillBlocked.length} unresolved row identities`,
-      "Rows 69-74 remain unresolved because neither the broken-band rows, remapped ids 57-62, nor the checked tmp TextHandlerMarkets seam recover a repo-local player-facing identity source"
+      "Rows 69-74 are now grounded by live UI screenshots while the 57-62 relation stays bounded as internal shell metadata only"
     ]
   };
 }
@@ -3073,7 +3078,7 @@ function validateMultiverseMarketRow7174IdentityBoundary(boundary, stateDoc, ver
   expectNonEmptyString(boundary.generatedAt, "multiverse market row 71-74 identity boundary generatedAt must be present");
   expectNonEmptyString(boundary.dataset, "multiverse market row 71-74 identity boundary dataset id must be present");
   expectRecord(boundary.sources, "multiverse market row 71-74 identity boundary sources must be an object");
-  ["saveDataImportBoundary", "validatedRows", "rowTextCoverage", "actionShell", "prefabRemapBoundary", "unityProbeReport", "uabeaProbeReport", "verificationDoc"].forEach((field) => {
+  ["saveDataImportBoundary", "validatedRows", "rowTextCoverage", "actionShell", "prefabRemapBoundary", "unityProbeReport", "uabeaProbeReport", "liveUiScreenshotEvidence", "verificationDoc"].forEach((field) => {
     expectNonEmptyString(boundary.sources[field], `multiverse market row 71-74 identity boundary sources.${field} must be present`);
   });
   expectArray(boundary.settledOrderedMapping, "multiverse market row 71-74 identity boundary settledOrderedMapping must be an array");
@@ -3091,25 +3096,20 @@ function validateMultiverseMarketRow7174IdentityBoundary(boundary, stateDoc, ver
     "multiverse market row 71-74 identity boundary settledOrderedMapping drifted"
   );
   assert.deepEqual(boundary.playerFacingIdentityBoundary.canonicalImportSafeSubset, [], "multiverse market row 71-74 identity boundary canonicalImportSafeSubset must remain empty");
-  assert.deepEqual(boundary.playerFacingIdentityBoundary.identityRecovered, [], "multiverse market row 71-74 identity boundary identityRecovered must remain empty");
   assert.deepEqual(
-    boundary.playerFacingIdentityBoundary.identityStillBlocked.map((entry) => entry.orderedInscriptionRow),
-    [71, 72, 73, 74],
-    "multiverse market row 71-74 identity boundary blocked row order drifted"
+    boundary.playerFacingIdentityBoundary.identityRecovered.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.playerFacingLabel]),
+    [
+      [71, "IS71Level", "INSCRYPTION #71"],
+      [72, "IS72Level", "INSCRYPTION #72"],
+      [73, "IS73Level", "INSCRYPTION #73"],
+      [74, "IS74Level", "INSCRYPTION #74"]
+    ],
+    "multiverse market row 71-74 identity boundary identityRecovered drifted"
   );
-  assert.deepEqual(
-    boundary.playerFacingIdentityBoundary.identityStillBlocked.map((entry) => entry.saveField),
-    ["IS71Level", "IS72Level", "IS73Level", "IS74Level"],
-    "multiverse market row 71-74 identity boundary blocked saveField order drifted"
-  );
-  boundary.playerFacingIdentityBoundary.identityStillBlocked.forEach((entry, index) => {
-    assert.equal(entry.status, "unresolved", `multiverse market row 71-74 identity boundary blocked entry ${index} status drifted`);
-    expectArray(entry.checkedEvidence, `multiverse market row 71-74 identity boundary blocked entry ${index} checkedEvidence must be an array`);
-    expectArray(entry.blockedBy, `multiverse market row 71-74 identity boundary blocked entry ${index} blockedBy must be an array`);
-  });
+  assert.deepEqual(boundary.playerFacingIdentityBoundary.identityStillBlocked, [], "multiverse market row 71-74 identity boundary blocked rows must now be empty");
   assert.deepEqual(
     boundary.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors.map((entry) => [entry.orderedInscriptionRow, entry.label]),
-    [[78, "Inscryption 78: Ouroboros Orbs"], [83, "Inscryption 83: Fast-Loop ML"]],
+    [[68, "INSCRYPTION #68"], [75, "INSCRYPTION #75"]],
     "multiverse market row 71-74 identity boundary adjacent anchors drifted"
   );
 
@@ -3127,7 +3127,7 @@ function validateMultiverseMarketRow7174IdentityBoundary(boundary, stateDoc, ver
       `${boundary.settledOrderedMapping.length} settled ordered mappings`,
       `${boundary.playerFacingIdentityBoundary.identityRecovered.length} grounded player-facing identities`,
       `${boundary.playerFacingIdentityBoundary.identityStillBlocked.length} blocked row identities`,
-      "Rows 71-74 remain ordered-only because player-facing identity is still unresolved"
+      "Rows 71-74 now keep ordered overlap and live UI player-facing identity while canonical import remains blocked"
     ]
   };
 }
@@ -3136,12 +3136,13 @@ function validateMultiverseMarketRow7174RemapBand(boundary, stateDoc, verificati
   expectNonEmptyString(boundary.generatedAt, "multiverse market row 71-74 remap band generatedAt must be present");
   expectNonEmptyString(boundary.dataset, "multiverse market row 71-74 remap band dataset id must be present");
   expectRecord(boundary.sources, "multiverse market row 71-74 remap band sources must be an object");
-  ["row7174IdentityBoundary", "prefabRemapBoundary", "metadataNeighborhood", "rowTextCoverage", "actionShell", "uabeaProbeReport", "unityProbeReport", "verificationDoc"].forEach((field) => {
+  ["row7174IdentityBoundary", "prefabRemapBoundary", "metadataNeighborhood", "rowTextCoverage", "actionShell", "uabeaProbeReport", "unityProbeReport", "liveUiScreenshotEvidence", "verificationDoc"].forEach((field) => {
     expectNonEmptyString(boundary.sources[field], `multiverse market row 71-74 remap band sources.${field} must be present`);
   });
   expectArray(boundary.remapBandRows, "multiverse market row 71-74 remap band remapBandRows must be an array");
   expectArray(boundary.earlierPrefabShellEvidence, "multiverse market row 71-74 remap band earlierPrefabShellEvidence must be an array");
   expectRecord(boundary.nearbyUiBindingEvidence, "multiverse market row 71-74 remap band nearbyUiBindingEvidence must be an object");
+  expectRecord(boundary.liveUiComparison, "multiverse market row 71-74 remap band liveUiComparison must be an object");
   expectRecord(boundary.recoveredRelationship, "multiverse market row 71-74 remap band recoveredRelationship must be an object");
   expectArray(boundary.canonicalImportSafeSubset, "multiverse market row 71-74 remap band canonicalImportSafeSubset must be an array");
   expectArray(boundary.currentBoundary, "multiverse market row 71-74 remap band currentBoundary must be an array");
@@ -3175,13 +3176,18 @@ function validateMultiverseMarketRow7174RemapBand(boundary, stateDoc, verificati
   assert.equal(boundary.nearbyUiBindingEvidence.textHandlerScriptPath, "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs", "multiverse market row 71-74 remap band textHandlerScriptPath drifted");
   assert.deepEqual(boundary.nearbyUiBindingEvidence.nearestPositiveSameNumberRows, [78, 83], "multiverse market row 71-74 remap band nearestPositiveSameNumberRows drifted");
   assert.deepEqual(boundary.nearbyUiBindingEvidence.nearestPositiveSameNumberLabels, ["Inscryption 78: Ouroboros Orbs", "Inscryption 83: Fast-Loop ML"], "multiverse market row 71-74 remap band nearestPositiveSameNumberLabels drifted");
+  assert.deepEqual(
+    boundary.liveUiComparison.testedRows.map((entry) => [entry.orderedInscriptionRow, entry.playerFacingLabel]),
+    [[71, "INSCRYPTION #71"], [72, "INSCRYPTION #72"], [73, "INSCRYPTION #73"], [74, "INSCRYPTION #74"]],
+    "multiverse market row 71-74 remap band live UI comparison drifted"
+  );
   assert.deepEqual(boundary.canonicalImportSafeSubset, [], "multiverse market row 71-74 remap band canonicalImportSafeSubset must remain empty");
 
   assert.match(stateDoc, /## Checked row `71-74` remap-band boundary/, "multiverse market state verification doc must expose the row 71-74 remap-band boundary section");
   assert.match(stateDoc, /prefab numbers `71-74` are reused as shells for serialized ids `59-62`/i, "multiverse market state verification doc must preserve the remap-band relationship");
   assert.match(verificationDoc, /## Narrow row 71-74 remap-band boundary/, "multiverse market verification doc must expose the row 71-74 remap-band boundary section");
   assert.match(verificationDoc, /ChrystosEmporiumUpgrade59/, "multiverse market verification doc must preserve the earlier shell evidence for id 59");
-  assert.match(verificationDoc, /this recovers the remap-band relationship but not player-facing identity/i, "multiverse market verification doc must preserve the remap-band limitation");
+  assert.match(verificationDoc, /rows `71-74` stay player-facing rows `71-74` in live UI/i, "multiverse market verification doc must preserve the live UI row identity conclusion");
 
   return {
     id: "multiverse-market-row71-74-remap-band",
@@ -3190,7 +3196,7 @@ function validateMultiverseMarketRow7174RemapBand(boundary, stateDoc, verificati
     stats: [
       `${boundary.remapBandRows.length} checked remap-band rows`,
       `${boundary.earlierPrefabShellEvidence.length} earlier prefab shell anchors`,
-      "Rows 71-74 keep same-number row and ISNID fields while prefab numbering remaps to ids 59-62"
+      "Rows 71-74 keep same-number row and ISNID fields while the 59-62 relation stays shell metadata only"
     ]
   };
 }
@@ -3239,7 +3245,7 @@ function validateMultiverseMarketNearbyIdentityBindingPattern(pattern, stateDoc,
   assert.match(verificationDoc, /## Nearby checked identity-binding pattern/, "multiverse market verification doc must expose the nearby identity-binding pattern section");
   assert.match(verificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`/, "multiverse market verification doc must preserve the row 78 same-number binding chain");
   assert.match(verificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/, "multiverse market verification doc must preserve the row 83 same-number binding chain");
-  assert.match(verificationDoc, /does not ground rows `69-74`/i, "multiverse market verification doc must preserve the negative carryover for rows 69-74");
+  assert.match(verificationDoc, /does not ground rows `69-74` by itself/i, "multiverse market verification doc must preserve the negative carryover for rows 69-74");
   assert.match(verificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i, "multiverse market verification doc must preserve the recovered remap-band explanation");
 
   return {
@@ -3360,7 +3366,7 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
   assert.match(verificationDoc, /## Wider checked inscription numbering-stability boundary/, "multiverse market verification doc must expose the wider numbering-stability boundary section");
   assert.match(verificationDoc, /ChrystosEmporiumUpgrade69-ID57/, "multiverse market verification doc must preserve the earliest broken prefab row");
   assert.match(verificationDoc, /ChrystosEmporiumUpgrade110-ID110/, "multiverse market verification doc must preserve the far-end stable resume evidence");
-  assert.match(verificationDoc, /this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `69-74`/i, "multiverse market verification doc must preserve the unresolved identity conclusion");
+  assert.match(verificationDoc, /this wider numbering boundary still does not provide a repo-local row-label source for rows `69-74`, even though live UI evidence now grounds those rows directly/i, "multiverse market verification doc must preserve the widened numbering boundary conclusion");
 
   return {
     id: "multiverse-market-inscription-numbering-stability-boundary",
@@ -3387,6 +3393,7 @@ function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verif
     "derivedNumberingStabilityBoundary",
     "derivedRow6974IdentitySourceBoundary",
     "verificationDoc",
+    "liveUiScreenshotEvidence",
     "stateVerificationDoc"
   ].forEach((field) => {
     expectNonEmptyString(boundary.sources[field], `multiverse market 69-74 anomaly provenance sources.${field} must be present`);
@@ -3409,7 +3416,7 @@ function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verif
   );
   assert.deepEqual(boundary.settledAnomaly.brokenPrefabBandRows, [69, 70, 71, 72, 73, 74], "multiverse market 69-74 anomaly provenance brokenPrefabBandRows drifted");
   assert.deepEqual(boundary.settledAnomaly.prefabRemapPairs, ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"], "multiverse market 69-74 anomaly provenance prefabRemapPairs drifted");
-  assert.deepEqual(boundary.settledAnomaly.playerFacingIdentityRecoveredRowsInBand, [], "multiverse market 69-74 anomaly provenance playerFacingIdentityRecoveredRowsInBand must stay empty");
+  assert.deepEqual(boundary.settledAnomaly.playerFacingIdentityRecoveredRowsInBand, [69, 70, 71, 72, 73, 74], "multiverse market 69-74 anomaly provenance playerFacingIdentityRecoveredRowsInBand drifted");
   assert.deepEqual(
     boundary.pipelineStages.map((stage) => [stage.stageId, stage.classification, stage.anomalyPresent]),
     [
@@ -3430,8 +3437,10 @@ function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verif
 
   assert.match(stateDoc, /## Checked `69-74` anomaly provenance boundary/, "multiverse market state verification doc must expose the anomaly provenance section");
   assert.match(stateDoc, /app-side inherited rather than repo-local/i, "multiverse market state verification doc must preserve the app-side inherited conclusion");
+  assert.match(stateDoc, /live UI evidence now grounds rows `69-74` as player-facing rows `69-74`/i, "multiverse market state verification doc must preserve the separate live UI identity conclusion");
   assert.match(verificationDoc, /## Checked 69-74 anomaly provenance boundary/, "multiverse market verification doc must expose the anomaly provenance section");
   assert.match(verificationDoc, /earliest checked appearance of the `69-74` anomaly is raw app-side evidence/i, "multiverse market verification doc must preserve the raw-source earliest appearance conclusion");
+  assert.match(verificationDoc, /live UI evidence now grounds player-facing rows `69-74` directly/i, "multiverse market verification doc must preserve the live UI identity conclusion");
   assert.match(provenanceDoc, /earliest checked appearance is raw app-side evidence/i, "multiverse market anomaly provenance doc must preserve the earliest checked appearance conclusion");
   assert.match(provenanceDoc, /No dataset standardization is applied in this lane\./, "multiverse market anomaly provenance doc must preserve the no-standardization conclusion");
 

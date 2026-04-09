@@ -1,6 +1,6 @@
 # Multiverse Market Nearby Identity-Binding Pattern
 
-This note records the smallest checked positive pattern for how nearby inscription rows become player-facing labels, without reopening the settled negative result for rows `69-74`.
+This note records the smallest checked positive repo-local pattern for how nearby inscription rows become player-facing labels, separate from the screenshot-backed live UI recovery for rows `69-74`.
 
 ## Checked positive bindings
 
@@ -31,7 +31,7 @@ This note records the smallest checked positive pattern for how nearby inscripti
 
 ## What this does not prove
 
-- This pattern does not promote rows `69-74` to player-facing identity.
+- This pattern is not the source that grounds rows `69-74` to player-facing identity.
 - Rows `69-74` still stop at ordered mapping plus same-number `ISNID` fields and UI access hooks:
   - `IS69Level` -> row `69`, with `IS69ID`, `BuyIS69`, `SetIS69CostText`
   - `IS70Level` -> row `70`, with `IS70ID`, `BuyIS70`, `SetIS70CostText`
@@ -49,11 +49,11 @@ This note records the smallest checked positive pattern for how nearby inscripti
 - The smallest recovered explanation is a remap band:
   - ordered row number and `ISNID` stay on `69-74`
   - prefab numbers `69-74` are reused as shells for serialized ids `57-62`
-- No checked player-facing string currently names `Inscryption 69`, `Inscryption 70`, `Inscryption 71`, `Inscryption 72`, `Inscryption 73`, or `Inscryption 74`.
+- No checked repo-local player-facing string currently names `Inscryption 69`, `Inscryption 70`, `Inscryption 71`, `Inscryption 72`, `Inscryption 73`, or `Inscryption 74`.
 
 Current grounded conclusion:
 
 - ordered row mapping and player-facing identity binding stay separate
 - rows `78` and `83` show the nearest checked positive binding pattern
-- rows `69-74` remain unresolved for player-facing identity
+- rows `69-74` now have live UI player-facing identity evidence, but not via this same-number repo-local binding pattern
 - the canonical import-safe subset stays empty
