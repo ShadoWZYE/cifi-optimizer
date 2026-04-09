@@ -414,20 +414,20 @@
       "title": "MultiverseMarket SaveData import-surface decision",
       "status": "active",
       "goal": "Reach one bounded admissibility decision for `SaveData`-backed Emporium import without mixing that decision with row identity/remap research or planner behavior.",
-      "currentSlice": "Use the checked `multiverse-market-savedata-import-boundary` artifact to keep the active Emporium question narrow: `PlayerProfileHandler.get_Market -> MultiverseMarket` is only the accessor bridge, `PlayerProfileData` stays a flatter wrapper/export surface and also directly declares `InscryptionsDone`, `SaveData` is the exact declaring owner for the checked `IS*Level` / trade-counter / mech block, the active admissibility result remains none, and rows `71-74` stay ordered-overlap-only while row identity/remap remains downstream.",
+      "currentSlice": "Use the checked `multiverse-market-savedata-import-boundary` artifact to keep the active Emporium question narrow: `PlayerProfileHandler.get_Market -> MultiverseMarket` is only the accessor bridge, `PlayerProfileData` stays a flatter wrapper/export surface and also directly declares `InscryptionsDone`, `SaveData` is the exact declaring owner for the checked `IS*Level` / trade-counter / mech block, `IS25Level` through `IS110Level` is the exact compatibility-safe raw Emporium import span, and rows `71-74` stay ordered-overlap-only while row identity/remap remains downstream.",
       "exitCondition": "The repo either names a bounded Emporium import-safe subset from the recovered `SaveData` block with grounded scope and explicit non-goals, or checks that the canonical import-safe subset stays empty until stronger identity evidence exists.",
       "blockedBy": "Rows `71-74` are only overlap-grounded by order today, while the `69-74` prefab anomaly and incomplete player-facing label remap still block canonical Emporium identity and planner-safe use.",
-      "smallestShippableSlice": "A checked import-surface decision that keeps canonical `state.playerProfile` expansion empty for Emporium, classifies `InscryptionsDone` as wrapper/export-only, classifies `IS71Level` through `IS74Level` as verified-but-blocked overlap rows, and keeps broader `SaveData` progression fields quarantined outside canonical import.",
+      "smallestShippableSlice": "A checked import-surface decision that keeps canonical `state.playerProfile` expansion empty for Emporium, classifies `InscryptionsDone` as wrapper/export-only, promotes the exact `IS25Level` through `IS110Level` span as compatibility-only raw Emporium import truth, and keeps the adjacent trade-counter and early `Mech*` `SaveData` neighbors outside that import slice.",
       "completedSteps": [
         "Archive the broader save-owner lane after checking `PlayerProfileHandler.get_Market -> MultiverseMarket` as the accessor bridge, `SaveData` as the exact checked `IS*Level` / trade-counter / mech owner, and `InscryptionsDone` as a dual declaration on `SaveData` and `PlayerProfileData`.",
         "Promote a dedicated `multiverse-market-savedata-import-boundary` artifact so the active Emporium follow-up is an import-surface decision, not another generic owner search.",
         "Keep `InscryptionsDone` classified as wrapper/export-only because `PlayerProfileData` already exposes it as a flat summary field.",
         "Keep `IS71Level` through `IS74Level` classified as verified-but-blocked because they only have grounded ordered overlap to validated rows `71-74`, not final player-facing identity.",
-        "Keep the broader `IS25Level-IS110Level`, trade-counter, and early `Mech*` block quarantined as recovered `SaveData` progression context rather than canonical Emporium import truth.",
+        "Promote the exact `IS25Level` through `IS110Level` span as compatibility-only raw Emporium import truth while keeping `InscryptionsDone` wrapper-only and leaving adjacent trade-counter and early `Mech*` neighbors outside that import slice.",
         "Separate this import-surface decision lane from the downstream row `71-74` identity/remap lane so planner work and label recovery do not reopen owner recovery."
       ],
       "nextSteps": [
-        "Keep the canonical Emporium import-safe subset explicitly empty unless new evidence grounds a narrower `SaveData`-backed import slice.",
+        "Keep the canonical Emporium import-safe subset explicitly empty unless new evidence grounds player-facing row identity for a narrower `SaveData`-backed canonical import slice.",
         "If new import promotion is proposed, require it to name the exact field class, the grounded row subset, and why unresolved `69-74` identity does not leak into canonical `state.playerProfile`.",
         "Leave row `71-74` player-facing identity/remap work on its separate downstream track instead of mixing it back into this import-surface lane."
       ],
