@@ -206,7 +206,7 @@ Current grounded conclusion:
 - `MultiverseMarket` remains the mechanic owner
 - the likely saved-state search path now runs through the broader player-profile persistence family
 - `InscryptionsDone` is an exact metadata field string, not just a UI label inferred from `CostBox-InscryptionsDone`
-- exact typed recovery now also confirms that `SaveData` directly declares the wider `InscryptionsDone` / `IS*Level` / trade-counter / early `Mech*` progression cluster, while `PlayerProfileData` stays a flatter wrapper/export surface for nearby fields such as `InscryptionsDone`
+- exact typed recovery now also confirms that `SaveData` directly declares the checked `IS*Level` / trade-counter / early `Mech*` progression cluster, while `InscryptionsDone` is exactly declared on both `SaveData` and `PlayerProfileData` and `PlayerProfileData` stays a flatter wrapper/export surface for nearby fields such as `InscryptionsDone`
 - the Emporium balance and owned-level fields appear to live in a broader progression-state field block rather than in the separate reward/effect symbol families
 - validated rows `71-74` now have both checked row recovery and checked ordered save-side `IS*Level` overlap
 - that overlap is still row-order only, not an import-admissible canonical subset or final label recovery, so the canonical import-safe subset stays empty
@@ -216,7 +216,7 @@ Current grounded conclusion:
 
 - It is safe to treat `MultiverseMarket` as a real Emporium owner with a grounded `Inscryptions Done` cost-lane shell.
 - It is safe to treat the `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` override band as a real prefab-remap boundary that blocks naive label assumptions for validated ids `69-74`.
-- It is safe to treat `SaveData` as the exact declaring save owner for the wider `InscryptionsDone` / `IS*Level` / trade-counter / early `Mech*` progression cluster, while keeping `PlayerProfileData.InscryptionsDone` in the narrower wrapper/export bucket.
+- It is safe to treat `SaveData` as the exact declaring save owner for the checked `IS*Level` / trade-counter / early `Mech*` progression cluster, while keeping `InscryptionsDone` split out as an exact dual declaration on `SaveData` and `PlayerProfileData`.
 - It is not safe to generate spend recommendations yet.
 - The spend-planner track should stop inferring this lane from diamonds or tokens.
 - `MultiverseMarket` remains `available but unmapped` until the owned-state and saved-balance inputs are recovered.

@@ -127,7 +127,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 
 - It is safe to treat MultiverseMarket as a real system with partially grounded extracted constants.
 - It is safe to stop inferring its spend lane from diamonds, tokens, or other unrelated player resources.
-- It is not yet safe to treat `Inscryptions Done` as an import-ready player field even though the wider declaring owner is now recovered as `SaveData`; the bounded import surface and current owned row levels are still unresolved.
+- It is not yet safe to treat `Inscryptions Done` as an import-ready player field even though `SaveData` is now the checked declaring owner for the broader `IS*Level` / trade-counter / mech block and `InscryptionsDone` itself is exactly declared on both `SaveData` and `PlayerProfileData`; the bounded import surface and current owned row levels are still unresolved.
 - The current best repo-local saved-state path is the broader `PlayerProfileData` persistence family, not the raw `MultiverseMarket` owner object by itself.
 - The repo now has exact metadata field names for this lane, but not the import-ready save contract for `state.playerProfile`.
 - The recovered neighborhood now behaves like a wider progression-state field block, which further rules out treating nearby `AchievementInscryptionsReward` or `FinalIS*` symbols as the saved balance owner.

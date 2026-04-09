@@ -148,7 +148,7 @@
           },
           {
             "artifact": "data/multiverse-market-market-member-boundary.json",
-            "claim": "SaveData is the wider declaring owner while PlayerProfileData remains a flatter export-wrapper surface"
+            "claim": "SaveData is the exact declaring owner for the checked IS*Level / trade-counter / early Mech* cluster while PlayerProfileData also directly declares InscryptionsDone as a flatter wrapper/export surface"
           }
         ]
       }
@@ -183,7 +183,7 @@
           },
           {
             "artifact": "data/multiverse-market-market-member-boundary.json",
-            "claim": "typedSaveDataProgressionOwnerSamples includes IS71Level and SaveData is the wider declaring owner"
+            "claim": "typedSaveDataProgressionOwnerSamples includes IS71Level and SaveData is the exact declaring owner for the checked IS*Level / trade-counter / early Mech* cluster"
           }
         ]
       },
