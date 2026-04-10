@@ -53,6 +53,7 @@ This note records the narrowest checked game-side path from a structurally settl
   - `SetAllChrystosEmporiumTexts` directly calls `SetAllBaseBonusTexts`
   - `SetIS78BaseBonusText` and `SetIS83BaseBonusText` read `IS78BaseBonusText` / `IS83BaseBonusText`, compose strings, and end in the standard IL2CPP `UnityEngine.UI.Text` virtual-dispatch write pattern
   - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, compose strings, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
+  - the same exact runtime surface now also preserves the wider `IS1BonusText` through `IS110BonusText` field family and `SetIS1BonusText` through `SetIS110BonusText` writer family on `TextHandlerMarkets`
   - that means the repo now recovers both a checked runtime base-bonus write lane and a separate checked runtime effect-label write lane
 - This means the repo can now name two checked game-side text-adjacent source classes:
   - direct Unity string anchors in the `TextHandlerMarkets` neighborhood
@@ -69,7 +70,8 @@ This note records the narrowest checked game-side path from a structurally settl
   - `SetIS69BaseBonusText`
 - That is a stronger scaling clue than the earlier generic text-provenance blocker.
 - It is still not a recovered row-to-text join:
-  - the recovered runtime `SetISNBaseBonusText` lane writes the base-bonus text, while the separately recovered `SetISNBonusText` lane still does not prove which recovered row-local slot it targets
+  - the recovered runtime `SetISNBaseBonusText` lane writes the base-bonus text, while the separately recovered `SetISNBonusText` lane still does not prove which non-`CurrentBonusText` recovered row-local slot it targets
+  - the same exact `TextHandlerMarkets` runtime surface exposes no `CurrentBonusText`-named field and no `SetCurrentBonusText` writer family, so `CurrentBonusText` is no longer a plausible alias for the recovered `ISNBonusText` sink
   - no checked row-local string table or localization-key catalog is recovered
   - the live-asset walk does recover concrete row-local slot objects like `CurrentBonusText`, `BonusDescriptionText`, `PerLevelBonusText`, and `DescriptionText`, but the assignment-site scan shows only local ownership edges into their `UnityEngine.UI.Text` components
   - no direct strings `Inscryption 69` through `Inscryption 74` are recovered repo-locally
@@ -77,14 +79,14 @@ This note records the narrowest checked game-side path from a structurally settl
 ## Exact last missing layer
 
 - The isolated missing layer is now:
-  - the typed row-local alias for the recovered `ISNBonusText` effect-label writer family, plus any separate `CurrentBonusText` writer
+  - the typed non-`CurrentBonusText` row-local alias for the recovered `ISNBonusText` effect-label writer family
 - In practical terms, the repo still needs the step that turns:
   - `SetAllBaseBonusTexts`
   - `SetISNBaseBonusText`
   - `SetIS78BonusText`
   - `SetIS83BonusText`
   - `SetISNBonusText`
-  - into one exact recovered row-local slot binding such as `BonusDescriptionText`, while also checking whether `CurrentBonusText` has a different writer family
+  - into one exact recovered row-local slot binding such as `BonusDescriptionText`
 into:
   - concrete player-facing effect text
   - or concrete localization keys
@@ -102,5 +104,6 @@ Current grounded conclusion:
 - a control-row text-adjacent path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain
 - the broader handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
 - the repo also now recovers a parallel runtime effect-label write family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
-- the exact remaining blocker is the unrecovered typed row-local slot alias for that effect-label writer family, plus any separate `CurrentBonusText` writer, before final live player-facing effect text can be claimed
+- `CurrentBonusText` is now narrowed away from that recovered effect-label family because `TextHandlerMarkets` has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family in the checked runtime surface
+- the exact remaining blocker is the unrecovered typed non-`CurrentBonusText` row-local slot alias for that effect-label writer family before final live player-facing effect text can be claimed
 - compatibility-only import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked

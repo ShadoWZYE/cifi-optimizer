@@ -326,12 +326,13 @@ Current grounded conclusion:
   - `SetAllChrystosEmporiumTexts` directly calls `SetAllBaseBonusTexts`
   - `SetIS78BaseBonusText` and `SetIS83BaseBonusText` read `IS78BaseBonusText` / `IS83BaseBonusText`, compose strings, and end in the standard IL2CPP `UnityEngine.UI.Text` virtual-dispatch write pattern
   - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, compose strings, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
-  - that means the repo now recovers both the runtime base-bonus lane and a separate runtime effect-label writer family
+  - the same exact runtime surface also preserves `IS1BonusText` through `IS110BonusText` and `SetIS1BonusText` through `SetIS110BonusText`, while exposing no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family on `TextHandlerMarkets`
+  - that means the repo now recovers both the runtime base-bonus lane and a separate runtime effect-label writer family, while closing `CurrentBonusText` off as a different unrecovered writer lane
 - That still does not scale to the whole table as a recovered row-to-text join:
   - sparse direct anchors exist for rows `25`, `46`, `78`, and `83`
   - no checked repo-local player-facing strings `Inscryption 69` through `Inscryption 74` are recovered
   - the live-asset walk reaches row-local slot objects and their `UnityEngine.UI.Text` components, but the assignment-site pass shows no serialized producer-side join back to `THMarkets` or `MultiverseMarket`
-  - the recovered `SetISNBonusText` family still does not prove which recovered row-local slot carries that effect-label text, and no separate dedicated `CurrentBonusText` writer is recovered yet
+  - the recovered `SetISNBonusText` family still does not prove which non-`CurrentBonusText` recovered row-local slot carries that effect-label text
 
 Current grounded conclusion:
 
@@ -340,7 +341,8 @@ Current grounded conclusion:
 - a control-row text-adjacent path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain
 - the handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
 - the repo also now recovers a separate runtime effect-label writer family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
-- the exact remaining blocker is the unrecovered typed row-local slot alias for that effect-label writer family, plus any separate dedicated `CurrentBonusText` writer, before final live player-facing effect text can be claimed
+- `CurrentBonusText` is now narrowed away from that recovered effect-label family because the checked `TextHandlerMarkets` runtime surface has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family
+- the exact remaining blocker is the unrecovered typed non-`CurrentBonusText` row-local slot alias for that effect-label writer family before final live player-facing effect text can be claimed
 - the canonical import-safe subset stays empty
 
 ## Alternate serialized-export indirect-join boundary

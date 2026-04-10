@@ -22,6 +22,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_64  # type: ignore
 
 CALL_TARGET_RE = re.compile(r"^0x([0-9a-f]+)$")
 FIELD_ACCESS_RE = re.compile(r"\[(?P<base>[a-z0-9]+) \+ (?P<offset>0x[0-9a-f]+)\]")
+INSCRIPTION_NUMBER_RE = re.compile(r"IS(?P<number>\d+)")
 
 
 def load_runtime_surface() -> dict[str, object]:
@@ -212,6 +213,15 @@ def summarize_method(
     }
 
 
+def sort_inscription_names(names: list[str]) -> list[str]:
+    def key(name: str) -> tuple[int, str]:
+        match = INSCRIPTION_NUMBER_RE.search(name)
+        number = int(match.group("number")) if match else 999999
+        return (number, name)
+
+    return sorted(names, key=key)
+
+
 def main() -> None:
     surface = load_runtime_surface()
     text_handler = extract_target(surface, "textHandlerMarkets")
@@ -221,6 +231,24 @@ def main() -> None:
     methods_by_rva, sorted_rvas = build_method_index(text_handler, unity_text, system_string)
     field_map = build_field_offset_map(text_handler)
     blob = LIBIL2CPP_PATH.read_bytes()
+    text_handler_fields = text_handler.get("fields", [])
+    text_handler_methods = text_handler.get("methods", [])
+    bonus_text_field_names = sort_inscription_names([
+        field.get("name") for field in text_handler_fields
+        if isinstance(field.get("name"), str)
+        and field["name"].startswith("IS")
+        and field["name"].endswith("BonusText")
+        and "BaseBonusText" not in field["name"]
+    ])
+    bonus_text_method_names = sort_inscription_names([
+        method.get("name") for method in text_handler_methods
+        if isinstance(method.get("name"), str)
+        and method["name"].startswith("SetIS")
+        and method["name"].endswith("BonusText")
+        and "BaseBonusText" not in method["name"]
+    ])
+    current_bonus_text_field_present = any(field.get("name") == "CurrentBonusText" for field in text_handler_fields)
+    current_bonus_text_method_present = any(method.get("name") == "SetCurrentBonusText" for method in text_handler_methods)
 
     target_methods = [
         "SetAllChrystosEmporiumTexts",
@@ -246,8 +274,9 @@ def main() -> None:
         "SetIS78BaseBonusText and SetIS83BaseBonusText both read their row-local TextHandlerMarkets fields IS78BaseBonusText and IS83BaseBonusText, compose a string, and then end in the standard IL2CPP virtual-dispatch pattern that loads a UnityEngine.UI.Text method pair from the target object's class and jumps through it.",
         "Because UnityEngine.UI.Text.set_text is itself a virtual one-string setter in the recovered runtime surface, the narrowest defensible read is that the SetISNBaseBonusText family is a checked runtime assignment lane into UnityEngine.UI.Text components, but only as an inferred virtual setter bind rather than a named direct-call edge.",
         "SetIS78BonusText and SetIS83BonusText form a second parallel runtime writer family: they read IS78BonusText and IS83BonusText, compose strings, and end in the same UnityEngine.UI.Text virtual-dispatch write pattern, which recovers a separate effect-label lane beyond the already checked base-bonus lane.",
-        "No CurrentBonusText-named or DescriptionText-named writer family is recovered in the TextHandlerMarkets runtime surface, so the strongest current inference is that ISNBonusText maps to the row-local effect-label slot most likely represented by BonusDescriptionText, while CurrentBonusText remains a separate current-value slot outside the recovered binder family.",
-        "The remaining seam is now narrower than a missing effect-label producer: the repo still does not recover a typed row-local alias that proves whether ISNBonusText binds to BonusDescriptionText directly, nor a separate dedicated current-value writer for CurrentBonusText.",
+        "The same runtime surface now recovers a full typed effect-label family on TextHandlerMarkets from IS1BonusText through IS110BonusText and from SetIS1BonusText through SetIS110BonusText, which closes the producer side for the non-current-value effect-label lane rather than only for rows 78 and 83.",
+        "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, so CurrentBonusText is no longer a plausible alias for the recovered ISNBonusText sink and must remain a separate unrecovered writer lane if it is written at runtime.",
+        "The remaining seam is now narrower than a generic slot-alias question: the repo still does not recover the exact non-CurrentBonusText row-local alias that proves whether ISNBonusText binds directly to BonusDescriptionText or another recovered row-local UnityEngine.UI.Text slot.",
     ]
 
     result = {
@@ -286,10 +315,19 @@ def main() -> None:
                     "boundFieldNames": sorted({hit["fieldName"] for hit in row83_effect["fieldAccesses"]}),
                 },
             ],
+            "effectLabelFamilySurface": {
+                "fieldFamilyFirst": bonus_text_field_names[0],
+                "fieldFamilyLast": bonus_text_field_names[-1],
+                "fieldFamilyCount": len(bonus_text_field_names),
+                "methodFamilyFirst": bonus_text_method_names[0],
+                "methodFamilyLast": bonus_text_method_names[-1],
+                "methodFamilyCount": len(bonus_text_method_names),
+            },
             "currentValueSlotStatus": {
-                "namedWriterFamilyRecovered": False,
-                "inferenceOnly": True,
-                "strongestCurrentInference": "ISNBonusText is the recovered effect-label writer family and most likely targets the row-local BonusDescriptionText slot, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets writer."
+                "textHandlerCurrentBonusTextFieldPresent": current_bonus_text_field_present,
+                "textHandlerCurrentBonusTextWriterPresent": current_bonus_text_method_present,
+                "sameSinkAsRecoveredEffectLabelFamily": False,
+                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family."
             }
         },
         "findings": findings,
@@ -298,7 +336,8 @@ def main() -> None:
             "Treat TextHandlerMarkets.SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts through SetIS78BaseBonusText or SetIS83BaseBonusText as a checked runtime-only write path into UnityEngine.UI.Text for the base-bonus lane.",
             "Treat TextHandlerMarkets.SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane.",
             "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
-            "Treat the exact remaining missing layer as the typed row-local alias from ISNBonusText into the recovered row-local slot objects, with BonusDescriptionText as the strongest current inference and CurrentBonusText still outside the recovered dedicated writer family.",
+            "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family but no CurrentBonusText-named field or writer family.",
+            "Treat the exact remaining missing layer as the typed non-CurrentBonusText row-local alias from ISNBonusText into the recovered row-local slot objects, with BonusDescriptionText as the strongest current inference.",
             "Do not widen canonical import, planner behavior, or the shipped compatibility preview while that effect-label producer remains unrecovered.",
         ],
     }
@@ -326,6 +365,16 @@ def main() -> None:
         lines.append(
             f"- `row={entry['row']}`; `{method['name']}`; `rva={method['rva']}`; `callsDirectUnityUiSetText={method['callsDirectUnityUiSetText']}`; `virtualUnityUiTextSetterInference={method['virtualUnityUiTextSetterInference']}`; `boundFields={entry['boundFieldNames']}`"
         )
+    family = result["methodChain"]["effectLabelFamilySurface"]
+    lines.extend([
+        "",
+        "## Effect-label family surface",
+        "",
+        f"- `fields={family['fieldFamilyFirst']}..{family['fieldFamilyLast']}`; `count={family['fieldFamilyCount']}`",
+        f"- `methods={family['methodFamilyFirst']}..{family['methodFamilyLast']}`; `count={family['methodFamilyCount']}`",
+        f"- `TextHandlerMarkets.CurrentBonusText field present={result['methodChain']['currentValueSlotStatus']['textHandlerCurrentBonusTextFieldPresent']}`",
+        f"- `TextHandlerMarkets.SetCurrentBonusText writer present={result['methodChain']['currentValueSlotStatus']['textHandlerCurrentBonusTextWriterPresent']}`",
+    ])
     lines.extend(["", "## Current boundary", ""])
     lines.extend(f"- {line}" for line in result["currentBoundary"])
     MD_OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
