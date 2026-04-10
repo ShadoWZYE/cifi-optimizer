@@ -226,6 +226,33 @@ Current grounded conclusion:
 - this pattern does not recover the missing player-facing text provenance for rows `69-74`; those rows already keep their ordered identity through the same-number chain while the prefab join stays remapped and no checked repo-local player-facing strings have been recovered
 - the canonical import-safe subset therefore stays empty
 
+## Checked control-row text-provenance path boundary
+
+- A narrow game-side text-bearing path is now checked for control row `78`:
+  - structural row chain: `IS78Level`, `IS78ID`, `BuyIS78`, `SetIS78CostText`
+  - text-side shell: `THMarkets: TextHandlerMarkets`, `SetAllChrystosEmporiumTexts`
+  - direct text-bearing source: `Inscryption 78: Ouroboros Orbs`
+- This does recover one real text-bearing source, but only as a sparse Unity string anchor in the `TextHandlerMarkets` neighborhood.
+- The broadest handler-side scaling clue now checked repo-locally is:
+  - `SetAllBaseBonusTexts`
+  - `SetIS1BaseBonusText`
+  - `SetIS25BaseBonusText`
+  - `SetIS50BaseBonusText`
+  - `SetIS68BaseBonusText`
+  - `SetIS69BaseBonusText`
+- That still does not produce a reusable whole-table text join:
+  - sparse direct anchors exist only for rows `25`, `46`, `78`, and `83`
+  - no checked repo-local player-facing strings `Inscryption 69` through `Inscryption 74` are recovered
+  - no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog
+
+Current grounded conclusion:
+
+- the structural row model stays unchanged
+- a control-row text-bearing source is recoverable, but only as a sparse Unity string anchor
+- the handler-side scaling clue is now tightened to the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
+- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final player-facing effect text
+- the canonical import-safe subset stays empty
+
 ## Still unresolved
 
 - whether any typed `Market`-wrapper exists beyond the existing `PlayerProfileData` string wrapper for `InscryptionsDone` and the wider `SaveData` declaring owner

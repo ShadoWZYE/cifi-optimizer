@@ -3529,6 +3529,90 @@ function validateMultiverseMarketShellRowPredictionBoundary(boundary, stateDoc, 
   };
 }
 
+function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, verificationDoc, boundaryDoc) {
+  expectNonEmptyString(boundary.generatedAt, "multiverse market text-provenance path boundary generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "multiverse market text-provenance path boundary dataset id must be present");
+  expectRecord(boundary.sources, "multiverse market text-provenance path boundary sources must be an object");
+  ["shellRowPredictionBoundary", "nearbyIdentityBindingPattern", "rowTextCoverage", "metadataNeighborhood", "uabeaProbeReport", "unityProbeReport", "tmpRowTextProbe", "stateVerificationDoc", "verificationDoc"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `multiverse market text-provenance path boundary sources.${field} must be present`);
+  });
+  expectRecord(boundary.controlRowTextPath, "multiverse market text-provenance path boundary controlRowTextPath must be an object");
+  expectRecord(boundary.controlRowTextPath.saveDataOwnerChain, "multiverse market text-provenance path boundary controlRowTextPath.saveDataOwnerChain must be an object");
+  expectRecord(boundary.controlRowTextPath.textHandlerShell, "multiverse market text-provenance path boundary controlRowTextPath.textHandlerShell must be an object");
+  expectRecord(boundary.controlRowTextPath.textBearingSource, "multiverse market text-provenance path boundary controlRowTextPath.textBearingSource must be an object");
+  expectArray(boundary.controlRowTextPath.evidence, "multiverse market text-provenance path boundary controlRowTextPath.evidence must be an array");
+  expectRecord(boundary.scalingCheck, "multiverse market text-provenance path boundary scalingCheck must be an object");
+  expectArray(boundary.scalingCheck.broadHandlerFamilyRecovered, "multiverse market text-provenance path boundary scalingCheck.broadHandlerFamilyRecovered must be an array");
+  expectArray(boundary.scalingCheck.playerFacingStringAnchorsRecovered, "multiverse market text-provenance path boundary scalingCheck.playerFacingStringAnchorsRecovered must be an array");
+  expectArray(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, "multiverse market text-provenance path boundary scalingCheck.missingInsideTheCheckedEmporiumBand must be an array");
+  expectArray(boundary.scalingCheck.whyNot, "multiverse market text-provenance path boundary scalingCheck.whyNot must be an array");
+  expectRecord(boundary.lastMissingBindingLayer, "multiverse market text-provenance path boundary lastMissingBindingLayer must be an object");
+  expectArray(boundary.lastMissingBindingLayer.currentlyRecoveredInputs, "multiverse market text-provenance path boundary lastMissingBindingLayer.currentlyRecoveredInputs must be an array");
+  expectArray(boundary.lastMissingBindingLayer.notYetRecovered, "multiverse market text-provenance path boundary lastMissingBindingLayer.notYetRecovered must be an array");
+  expectArray(boundary.currentBoundary, "multiverse market text-provenance path boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "multiverse-market-text-provenance-path-boundary", "multiverse market text-provenance path boundary dataset id drifted");
+  assert.deepEqual(
+    [
+      boundary.controlRowTextPath.orderedInscriptionRow,
+      boundary.controlRowTextPath.saveDataOwnerChain.saveField,
+      boundary.controlRowTextPath.saveDataOwnerChain.serializedIdField,
+      boundary.controlRowTextPath.saveDataOwnerChain.buyHook,
+      boundary.controlRowTextPath.saveDataOwnerChain.costTextHook
+    ],
+    [78, "IS78Level", "IS78ID", "BuyIS78", "SetIS78CostText"],
+    "multiverse market text-provenance path boundary control row chain drifted"
+  );
+  assert.deepEqual(
+    [
+      boundary.controlRowTextPath.textHandlerShell.ownerField,
+      boundary.controlRowTextPath.textHandlerShell.ownerType,
+      boundary.controlRowTextPath.textHandlerShell.allTextsHook
+    ],
+    ["THMarkets", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts"],
+    "multiverse market text-provenance path boundary text handler shell drifted"
+  );
+  assert.equal(boundary.controlRowTextPath.textBearingSource.playerFacingLabel, "Inscryption 78: Ouroboros Orbs", "multiverse market text-provenance path boundary control row label drifted");
+  assert.deepEqual(
+    boundary.scalingCheck.broadHandlerFamilyRecovered,
+    ["SetAllBaseBonusTexts", "SetIS1BaseBonusText", "SetIS25BaseBonusText", "SetIS50BaseBonusText", "SetIS68BaseBonusText", "SetIS69BaseBonusText"],
+    "multiverse market text-provenance path boundary broad handler family drifted"
+  );
+  assert.deepEqual(
+    boundary.scalingCheck.playerFacingStringAnchorsRecovered,
+    ["Inscryption 25: Idle Ship Speed", "Inscryption 46: Increase Basic Power", "Inscryption 78: Ouroboros Orbs", "Inscryption 83: Fast-Loop ML"],
+    "multiverse market text-provenance path boundary string anchors drifted"
+  );
+  assert.deepEqual(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"], "multiverse market text-provenance path boundary missing checked-band strings drifted");
+  assert.equal(boundary.scalingCheck.scalesToWholeTable, false, "multiverse market text-provenance path boundary scalesToWholeTable must remain false");
+  assert.equal(boundary.lastMissingBindingLayer.layerName, "TextHandlerMarkets base-bonus text binding consumer", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
+  assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /final TextHandlerMarkets-side binding step/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
+
+  assert.match(boundaryDoc, /sparse Unity string anchor/i, "multiverse market text-provenance path boundary doc must preserve the sparse Unity string anchor conclusion");
+  assert.match(boundaryDoc, /SetAllBaseBonusTexts/i, "multiverse market text-provenance path boundary doc must preserve the broad handler family clue");
+  assert.match(boundaryDoc, /TextHandlerMarkets` consumer or binding step/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
+  assert.match(stateDoc, /## Checked control-row text-provenance path boundary/, "multiverse market state verification doc must expose the control-row text-provenance path boundary section");
+  assert.match(stateDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market state verification doc must preserve the control row string anchor");
+  assert.match(stateDoc, /SetAllBaseBonusTexts/, "multiverse market state verification doc must preserve the base-bonus family clue");
+  assert.match(stateDoc, /unrecovered `TextHandlerMarkets` consumer or binding step/i, "multiverse market state verification doc must preserve the exact remaining blocker");
+  assert.match(verificationDoc, /## Checked control-row text-provenance path boundary/, "multiverse market verification doc must expose the control-row text-provenance path boundary section");
+  assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the control row string anchor");
+  assert.match(verificationDoc, /SetIS69BaseBonusText/, "multiverse market verification doc must preserve the checked handler-side scaling clue");
+  assert.match(verificationDoc, /no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog/i, "multiverse market verification doc must preserve the binding-consumer blocker");
+
+  return {
+    id: "multiverse-market-text-provenance-path-boundary",
+    label: "Multiverse market text-provenance path boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      "Control row 78 reaches a real text-bearing source only as a sparse Unity string anchor",
+      `${boundary.scalingCheck.broadHandlerFamilyRecovered.length} checked base-bonus handler clues`,
+      `${boundary.scalingCheck.playerFacingStringAnchorsRecovered.length} sparse player-facing string anchors`,
+      "The exact remaining blocker is the TextHandlerMarkets base-bonus text binding consumer"
+    ]
+  };
+}
+
 function validateTokenBankControllerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token-bank controller shell generatedAt must be present");
   expectRecord(shell.sources, "token-bank controller shell sources must be an object");
@@ -3592,7 +3676,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 56, "bundled dataset contract must track the fifty-six shipped dataset groups");
+  assert.equal(contract.datasets.length, 57, "bundled dataset contract must track the fifty-seven shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -3709,6 +3793,7 @@ export async function validateBundledDatasets() {
   const multiverseMarketInscriptionNumberingStabilityBoundary = await readJson("../../data/multiverse-market-inscription-numbering-stability-boundary.json");
   const multiverseMarket6974AnomalyProvenance = await readJson("../../data/multiverse-market-69-74-anomaly-provenance.json");
   const multiverseMarketShellRowPredictionBoundary = await readJson("../../data/multiverse-market-shell-row-prediction-boundary.json");
+  const multiverseMarketTextProvenancePathBoundary = await readJson("../../data/multiverse-market-text-provenance-path-boundary.json");
   const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
   const multiverseMarketMarketMemberBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-market-member-boundary.md");
   const multiverseMarketStateVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-state-verification.md");
@@ -3716,6 +3801,7 @@ export async function validateBundledDatasets() {
   const multiverseMarketSerializedLabelSourceBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-serialized-label-source-boundary.md");
   const multiverseMarket6974AnomalyProvenanceDoc = await readText("../../docs/systems/spend/multiverse-market-69-74-anomaly-provenance.md");
   const multiverseMarketShellRowPredictionBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md");
+  const multiverseMarketTextProvenancePathBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-text-provenance-path-boundary.md");
   const activeGroundingBoundariesDoc = await readText("../../docs/roadmap/active-grounding-boundaries.md");
 
   const summaries = [
@@ -3774,6 +3860,7 @@ export async function validateBundledDatasets() {
     validateMultiverseMarketInscriptionNumberingStabilityBoundary(multiverseMarketInscriptionNumberingStabilityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
     validateMultiverseMarket6974AnomalyProvenance(multiverseMarket6974AnomalyProvenance, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarket6974AnomalyProvenanceDoc),
     validateMultiverseMarketShellRowPredictionBoundary(multiverseMarketShellRowPredictionBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarketShellRowPredictionBoundaryDoc),
+    validateMultiverseMarketTextProvenancePathBoundary(multiverseMarketTextProvenancePathBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarketTextProvenancePathBoundaryDoc),
     validateTokenBankControllerShell(tokenBankControllerShell)
   ];
 

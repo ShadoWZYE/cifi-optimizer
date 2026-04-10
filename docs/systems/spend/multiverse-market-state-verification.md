@@ -293,6 +293,33 @@ Current grounded conclusion:
 - the repo still does not recover the player-facing bonus-text phrases for rows `69-74` from shell or payload data alone
 - compatibility-only import stays under `compatibility.unmappedSystemState.multiverseMarket`, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked
 
+## Checked control-row text-provenance path boundary
+
+- A narrow game-side text-bearing path is now checked for control row `78`:
+  - structural row chain: `IS78Level`, `IS78ID`, `BuyIS78`, `SetIS78CostText`
+  - text-side shell: `THMarkets: TextHandlerMarkets`, `SetAllChrystosEmporiumTexts`
+  - direct text-bearing source: `Inscryption 78: Ouroboros Orbs`
+- This is a real text-bearing path, but only as a sparse Unity string anchor in the `TextHandlerMarkets` neighborhood.
+- The broadest handler-side scaling clue now checked repo-locally is:
+  - `SetAllBaseBonusTexts`
+  - `SetIS1BaseBonusText`
+  - `SetIS25BaseBonusText`
+  - `SetIS50BaseBonusText`
+  - `SetIS68BaseBonusText`
+  - `SetIS69BaseBonusText`
+- That still does not scale to the whole table as a recovered row-to-text join:
+  - sparse direct anchors exist for rows `25`, `46`, `78`, and `83`
+  - no checked repo-local player-facing strings `Inscryption 69` through `Inscryption 74` are recovered
+  - no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog
+
+Current grounded conclusion:
+
+- the structural row model stays unchanged
+- a control-row text-bearing source is recoverable, but only as a sparse Unity string anchor
+- the handler-side scaling clue is now tightened to the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
+- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final player-facing effect text
+- the canonical import-safe subset stays empty
+
 ## Alternate serialized-export indirect-join boundary
 
 - This check is a separate repo-local evidence class from the exhausted Market/TextHandler/probe path:

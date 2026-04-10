@@ -1,0 +1,103 @@
+{
+  "generatedAt": "2026-04-10",
+  "dataset": "multiverse-market-text-provenance-path-boundary",
+  "sources": {
+    "shellRowPredictionBoundary": "data/multiverse-market-shell-row-prediction-boundary.json",
+    "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
+    "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "unityProbeReport": "data/unity-probe-report.json",
+    "tmpRowTextProbe": "tmp-multiverse-row-text-probe.json",
+    "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
+  },
+  "controlRowTextPath": {
+    "orderedInscriptionRow": 78,
+    "saveDataOwnerChain": {
+      "saveField": "IS78Level",
+      "serializedIdField": "IS78ID",
+      "buyHook": "BuyIS78",
+      "costTextHook": "SetIS78CostText"
+    },
+    "textHandlerShell": {
+      "ownerField": "THMarkets",
+      "ownerType": "TextHandlerMarkets",
+      "textHandlerScriptPath": "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
+      "allTextsHook": "SetAllChrystosEmporiumTexts"
+    },
+    "textBearingSource": {
+      "sourceClass": "Unity string anchor",
+      "playerFacingLabel": "Inscryption 78: Ouroboros Orbs"
+    },
+    "evidence": [
+      {
+        "artifact": "data/multiverse-market-nearby-identity-binding-pattern.json",
+        "claim": "row 78 keeps the same number across IS78Level, IS78ID, BuyIS78, TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78 beside the player-facing string anchor Inscryption 78 Ouroboros Orbs"
+      },
+      {
+        "artifact": "data/multiverse-market-metadata-neighborhood.json",
+        "claim": "the same neighborhood preserves TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source-path clue"
+      },
+      {
+        "artifact": "data/unity-probe-report.json",
+        "claim": "the repo preserves a direct Unity string anchor Inscryption 78 Ouroboros Orbs"
+      }
+    ],
+    "conclusion": "A real text-bearing path is recoverable for a control row, but only as a sparse Unity string anchor in the TextHandlerMarkets neighborhood rather than as a recovered row-local text-binding method."
+  },
+  "scalingCheck": {
+    "broadHandlerFamilyRecovered": [
+      "SetAllBaseBonusTexts",
+      "SetIS1BaseBonusText",
+      "SetIS25BaseBonusText",
+      "SetIS50BaseBonusText",
+      "SetIS68BaseBonusText",
+      "SetIS69BaseBonusText"
+    ],
+    "playerFacingStringAnchorsRecovered": [
+      "Inscryption 25: Idle Ship Speed",
+      "Inscryption 46: Increase Basic Power",
+      "Inscryption 78: Ouroboros Orbs",
+      "Inscryption 83: Fast-Loop ML"
+    ],
+    "missingInsideTheCheckedEmporiumBand": [
+      "Inscryption 69",
+      "Inscryption 70",
+      "Inscryption 71",
+      "Inscryption 72",
+      "Inscryption 73",
+      "Inscryption 74"
+    ],
+    "scalesToWholeTable": false,
+    "whyNot": [
+      "The repo recovers a broad TextHandlerMarkets-side SetAllBaseBonusTexts or SetISNBaseBonusText method family, but not the concrete text payloads those methods emit.",
+      "The repo separately recovers sparse Unity string anchors for only a few control rows, including rows 78 and 83.",
+      "No checked repo-local consumer or binding layer joins SetISNBaseBonusText to direct player-facing strings, localization keys, or a row-local text catalog across the table."
+    ]
+  },
+  "lastMissingBindingLayer": {
+    "layerName": "TextHandlerMarkets base-bonus text binding consumer",
+    "currentlyRecoveredInputs": [
+      "TextHandlerMarkets",
+      "THMarkets",
+      "SetAllChrystosEmporiumTexts",
+      "SetAllBaseBonusTexts",
+      "SetISNCostText",
+      "SetISNBaseBonusText",
+      "InscryptionsList"
+    ],
+    "notYetRecovered": [
+      "the method body or adjacent consumer that resolves SetISNBaseBonusText into concrete player-facing effect text",
+      "a row-local string table, localization key, or literal text payload read by that consumer",
+      "a checked repo-local binding from that text payload back to rows 69-74 or the wider Emporium table"
+    ],
+    "smallestDefensibleConclusion": "The isolated missing source class is no longer generic label provenance. It is the final TextHandlerMarkets-side binding step that turns the recovered SetISNBaseBonusText family into concrete player-facing effect text."
+  },
+  "currentBoundary": [
+    "The current structural row model stays unchanged: row identity still rides SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText and row payload ID or Level or ISObject carriers.",
+    "A real text-bearing control-row path is recoverable only as a sparse Unity string anchor in the TextHandlerMarkets neighborhood, not as a recovered scalable row-to-text join.",
+    "The broadest checked handler-side scaling clue is SetAllBaseBonusTexts plus the SetISNBaseBonusText family, but the repo still lacks the consumer or binding layer that resolves those methods into concrete player-facing effect text.",
+    "This does not widen canonical import, planner behavior, or the shipped compatibility preview. compatibility.unmappedSystemState.multiverseMarket stays compatibility-only, InscryptionsDone stays wrapper-only, and canonical state.playerProfile promotion stays blocked."
+  ]
+}

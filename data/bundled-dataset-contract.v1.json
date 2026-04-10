@@ -466,6 +466,14 @@
       ]
     },
     {
+      "id": "multiverse-market-text-provenance-path-boundary",
+      "label": "Multiverse market text-provenance path boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-text-provenance-path-boundary.json"
+      ]
+    },
+    {
       "id": "token-bank-controller-shell",
       "label": "Token-bank controller shell",
       "classification": "extracted-mechanics",

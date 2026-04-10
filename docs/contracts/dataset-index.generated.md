@@ -404,6 +404,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-shell-row-prediction-boundary.json`
 
+### `multiverse-market-text-provenance-path-boundary`
+
+- Label: Multiverse market text-provenance path boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-text-provenance-path-boundary.json`
+
 ### `token-bank-controller-shell`
 
 - Label: Token-bank controller shell

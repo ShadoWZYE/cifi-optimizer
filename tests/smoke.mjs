@@ -89,6 +89,7 @@ const multiverseMarketNearbyIdentityBindingPatternData = JSON.parse(await readFi
 const multiverseMarketInscriptionNumberingStabilityBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-inscription-numbering-stability-boundary.json", import.meta.url), "utf8"));
 const multiverseMarket6974AnomalyProvenanceData = JSON.parse(await readFile(new URL("../data/multiverse-market-69-74-anomaly-provenance.json", import.meta.url), "utf8"));
 const multiverseMarketShellRowPredictionBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-shell-row-prediction-boundary.json", import.meta.url), "utf8"));
+const multiverseMarketTextProvenancePathBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-text-provenance-path-boundary.json", import.meta.url), "utf8"));
 const tokenBankControllerShellData = JSON.parse(await readFile(new URL("../data/token-bank-controller-shell.json", import.meta.url), "utf8"));
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
@@ -454,6 +455,7 @@ const expectedBundledDatasetIds = [
   "multiverse-market-inscription-numbering-stability-boundary",
   "multiverse-market-69-74-anomaly-provenance",
   "multiverse-market-shell-row-prediction-boundary",
+  "multiverse-market-text-provenance-path-boundary",
   "token-bank-controller-shell"
 ];
 
@@ -2243,6 +2245,7 @@ assertDatasetContractEntry("multiverse-market-row71-74-remap-band", "data/multiv
 assertDatasetContractEntry("multiverse-market-nearby-identity-binding-pattern", "data/multiverse-market-nearby-identity-binding-pattern.json");
 assertDatasetContractEntry("multiverse-market-69-74-anomaly-provenance", "data/multiverse-market-69-74-anomaly-provenance.json");
 assertDatasetContractEntry("multiverse-market-shell-row-prediction-boundary", "data/multiverse-market-shell-row-prediction-boundary.json");
+assertDatasetContractEntry("multiverse-market-text-provenance-path-boundary", "data/multiverse-market-text-provenance-path-boundary.json");
 assert.equal(multiverseMarketSaveDataImportBoundaryData.dataset, "multiverse-market-savedata-import-boundary");
 assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importSafeSubset,
@@ -2513,6 +2516,36 @@ assert.match(multiverseMarketVerificationDoc, /## Shell-to-SaveData row-predicti
 assert.match(multiverseMarketVerificationDoc, /id `57` carries `0\.05`, not row `69`'s `5qa`/i);
 assert.match(multiverseMarketVerificationDoc, /id `58` carries `5`, not row `70`'s `10b`/i);
 assert.match(multiverseMarketVerificationDoc, /id `59` carries `5`, not row `71`'s `0\.02`/i);
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.dataset, "multiverse-market-text-provenance-path-boundary");
+assert.deepEqual(
+  [
+    multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.orderedInscriptionRow,
+    multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.saveDataOwnerChain.saveField,
+    multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.saveDataOwnerChain.serializedIdField,
+    multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.saveDataOwnerChain.buyHook,
+    multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.saveDataOwnerChain.costTextHook
+  ],
+  [78, "IS78Level", "IS78ID", "BuyIS78", "SetIS78CostText"]
+);
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.textBearingSource.playerFacingLabel, "Inscryption 78: Ouroboros Orbs");
+assert.deepEqual(
+  multiverseMarketTextProvenancePathBoundaryData.scalingCheck.broadHandlerFamilyRecovered,
+  ["SetAllBaseBonusTexts", "SetIS1BaseBonusText", "SetIS25BaseBonusText", "SetIS50BaseBonusText", "SetIS68BaseBonusText", "SetIS69BaseBonusText"]
+);
+assert.deepEqual(
+  multiverseMarketTextProvenancePathBoundaryData.scalingCheck.playerFacingStringAnchorsRecovered,
+  ["Inscryption 25: Idle Ship Speed", "Inscryption 46: Increase Basic Power", "Inscryption 78: Ouroboros Orbs", "Inscryption 83: Fast-Loop ML"]
+);
+assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesToWholeTable, false);
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "TextHandlerMarkets base-bonus text binding consumer");
+assert.match(multiverseMarketStateVerificationDoc, /## Checked control-row text-provenance path boundary/);
+assert.match(multiverseMarketStateVerificationDoc, /Inscryption 78: Ouroboros Orbs/);
+assert.match(multiverseMarketStateVerificationDoc, /SetAllBaseBonusTexts/);
+assert.match(multiverseMarketStateVerificationDoc, /unrecovered `TextHandlerMarkets` consumer or binding step/i);
+assert.match(multiverseMarketVerificationDoc, /## Checked control-row text-provenance path boundary/);
+assert.match(multiverseMarketVerificationDoc, /SetIS69BaseBonusText/);
+assert.match(multiverseMarketVerificationDoc, /no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog/i);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);
