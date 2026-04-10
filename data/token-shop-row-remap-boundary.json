@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-07",
+  "generatedAt": "2026-04-10",
   "dataset": "token-shop-row-remap-boundary",
   "sources": {
     "tokenShopExtract": "data/token-shop-values.json",
@@ -124,6 +124,20 @@
     "prefabIdentity": "NewTokenUPGPrefab.T1.MK1Booster",
     "groundedConclusion": "ATU5Button now has one checked bridge to NewTokenUPGPrefab.T1.MK1Booster because the exact TokenShop owner payload places ATU5Button directly after the MK1TokenBoost field family, checked action-lane clues preserve BuyMK1TokenBoost, and the checked level0 prefab roster preserves the exact MK1Booster token prefab identity."
   },
+  "boundedRecoveredBridgeFollowUp": {
+    "shellField": "ATU6Button",
+    "shellPathId": 15835,
+    "ownerFieldBlock": [
+      "MK2TokenBoostStartCost",
+      "MK2TokenBoostAdditiveCost",
+      "MK2TokenBoostBonus",
+      "MK2TokenBoostFillMaxLevel",
+      "MK2TokenBoostFill"
+    ],
+    "supportingActionHook": "BuyMK2TokenBoost",
+    "prefabIdentity": "NewTokenUPGPrefab.T1.MK2Booster",
+    "groundedConclusion": "ATU6Button now has one additional checked bridge to NewTokenUPGPrefab.T1.MK2Booster because the exact TokenShop owner payload places ATU6Button directly after the MK2TokenBoost field family, checked action-lane clues preserve BuyMK2TokenBoost, and the checked level0 prefab roster preserves the exact MK2Booster token prefab identity."
+  },
   "textHookFollowUp": {
     "testedHooks": [
       "SetAllTokenShopTexts",
@@ -168,7 +182,7 @@
       "The prefab roster and player-facing string roster are both present, but the repo still has not recovered a verified one-to-one bridge for the rest of the ATU numbering family.",
       "Checked metadata neighborhoods now preserve BuyATU24 through BuyATU28 beside named tier-buy hooks such as BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, but that local method cluster still does not include any final row title.",
       "Checked level0 neighborhoods still preserve SetAllTokenShopTexts and SetTokenTexts inside a token-menu or token-bank TextHandler cluster, while most NewTokenUPGPrefab.* names and player-facing row titles remain separate clusters away from a checked ATU-numbered shell join.",
-      "Because only two ATU bridges are now recovered, canonical promotion and planner use should remain blocked for the rest of the TokenShop row family."
+      "Because only four ATU bridges are now recovered, canonical promotion and planner use should remain blocked for the rest of the TokenShop row family, which stays compatibility-only and out of canonical state.playerProfile use."
     ],
     "unsafeInferenceSources": [
       "row-order similarity alone",
@@ -178,14 +192,14 @@
     ]
   },
   "currentBoundary": [
-    "The repo now has three checked TokenShop row bridges: ATU1Button aligns directly with the TokenBoost owner-field block while broader probes preserve ATU1TokenBonus, checked action-lane clues preserve BuyTokenBoost, and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.TokensBoost; ATU2Button aligns directly with the DiamondBoost owner-field block while broader probes preserve ATU2DiamondsBonus and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.DiamondBoost; and ATU5Button aligns directly with the MK1TokenBoost owner-field block while checked action-lane clues preserve BuyMK1TokenBoost and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.MK1Booster.",
+    "The repo now has four checked TokenShop row bridges: ATU1Button aligns directly with the TokenBoost owner-field block while broader probes preserve ATU1TokenBonus, checked action-lane clues preserve BuyTokenBoost, and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.TokensBoost; ATU2Button aligns directly with the DiamondBoost owner-field block while broader probes preserve ATU2DiamondsBonus and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.DiamondBoost; ATU5Button aligns directly with the MK1TokenBoost owner-field block while checked action-lane clues preserve BuyMK1TokenBoost and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.MK1Booster; and ATU6Button aligns directly with the MK2TokenBoost owner-field block while checked action-lane clues preserve BuyMK2TokenBoost and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.MK2Booster.",
     "The rest of the ATU family still only has stronger grounded non-label clues: raw SaveData row levels, shared ATU numbering on the TokenShop owner payload, effect-hook names such as ATU2DiamondsBonus and ATU24Bonus3Shards, and late direct-buy hooks such as BuyATU24 through BuyATU28.",
     "Those clues are enough to state that some ATU rows touch token, diamond, daily-token, or shard effect domains, but they still do not prove which grounded player-facing TokenShop row identity belongs to each remaining ATU number.",
     "The immediate adjacency test also now has a bounded negative result: ATU1 clears because multiple committed surfaces converge on the same token-side family, but ATU3 now tightens into a cells-domain split instead of a bridge. Its surviving clues are the CellBoost owner block, the generic BuyCellBoost action hook, the separate diamond-special CellsBoost prefab and title, and separate token-prefab and Token Ultima: Cells title clusters, without any checked join back to ATU3Button path_id 15810.",
-    "The new MK1 row bridge is still a bounded shell-to-prefab result only: no checked repo artifact yet ties ATU5Button directly to a final player-facing row title, and the neighboring MK2-MK8 token rows remain unresolved even though the same owner payload preserves their numbered shells and the broader action lane preserves BuyMK2TokenBoost through BuyMK8TokenBoost.",
+    "The new MK1 and MK2 row bridges are still bounded shell-to-prefab results only: no checked repo artifact yet ties ATU5Button or ATU6Button directly to a final player-facing row title, and the neighboring MK3-MK8 token rows remain unresolved even though the same owner payload preserves their numbered shells and the broader action lane preserves BuyMK3TokenBoost through BuyMK8TokenBoost.",
     "Grounded metadata neighborhoods now tighten the late-row shell further: BuyATU24 through BuyATU28 sit beside named tier-buy hooks like BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, while getter neighborhoods preserve ATU1TokenBonus, ATU2DiamondsBonus, ATU14TokenDailiesBonus, and ATU24Bonus3Shards through ATU24Bonus5AP in one ATU-numbered family.",
     "Grounded level0 neighborhoods now tighten the text-hook blocker further: SetAllTokenShopTexts and SetTokenTexts sit in a token-menu or token-bank text-handler cluster with CheckFirstTokenMenuTime, ClaimTokenium, token-bank formula strings, TokenClaimRecolor, and TokenShopRecoloring, while most NewTokenUPGPrefab.* names remain one separate prefab roster cluster and player-facing titles such as Trinity Booster One, Academy Booster, Tokens Booster T3, and Campaign Fragments remain a separate title cluster.",
-    "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU1, ATU2, and ATU5 bridges.",
+    "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU1, ATU2, ATU5, and ATU6 bridges, and the unrecovered ATU family should stay compatibility-only instead of entering planner logic or canonical state.playerProfile.",
     "The narrowest honest next slice is no longer a general TokenShop row-remap search. The generic text-hook surface is now a bounded negative result, and the next unresolved shell slice should either disambiguate ATU3's split cells-domain evidence or prove one more exact shell-to-prefab or shell-to-title bridge without promoting the rest of the family."
   ]
 }
