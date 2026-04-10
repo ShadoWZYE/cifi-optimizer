@@ -60,6 +60,10 @@ Safe repo conclusion:
 - `SaveData.DailyTokenium`
   - exact typed recovery now confirms the current stored Daily Tokenium amount as a direct `SaveData` field with type `System.Double`
   - why it matters: the repo no longer needs to describe the current amount as fully unresolved owner-family state
+- `SaveData` mission-persistence neighborhood
+  - exact typed field order places `DailyTokenium` immediately after `MissionsCompletedAllTime` and `MissionsSinceTR1`, and immediately before `WastaMissionActive`, `CrytonMissionActive`, `EgetuarMissionActive`, `SekhurMissionActive`, `WastaCampaignProgress`, and `WastaFarmActiveCount`
+  - why it matters: this is a narrower checked save-side wrapper than the earlier Academy or Farm Mission family-only boundary, and it keeps the lane tied to mission persistence rather than TokenShop or a generic Tokenium cluster
+  - why it stays bounded: the same neighborhood still does not expose a `DailyTokeniumCap` field or a Daily Tokenium-specific ready or claimable field
 - `ClaimableTokenium`
   - exact typed recovery also exposes `SaveData.ClaimableTokenium`, but only inside the broader generic Tokenium cluster beside `Tokenium`, `TokeniumExchangeLevel`, `TokeniumUnlocked`, and `TokeniumDiamondUpgLevel`
   - why it stays blocked: this does not yet prove a Daily Tokenium-specific claimable or ready-state owner for the Academy or Farm Mission lane
@@ -83,6 +87,7 @@ Safe repo conclusion:
 ## Current app implication
 
 - Daily Tokenium current stored amount is now grounded at `SaveData.DailyTokenium`, but should stay outside canonical `state.playerProfile` until a justified import lane is chosen.
+- The current narrowest checked save wrapper is the `SaveData` mission-persistence neighborhood around mission counters and mission-active fields, but that wrapper is still not import-ready player state by itself.
 - Daily Tokenium cap and Daily Tokenium-specific ready or claimable state should remain `available but unmapped`.
 - Future spend-planner work should treat it as a cross-system mission lane, not as a simple TokenShop budget field.
 - The next mapping pass should chase the gameplay owner or saved-state family for Academy or Farm Mission reward state, not only more TokenShop strings.

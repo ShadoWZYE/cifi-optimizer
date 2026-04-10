@@ -83,6 +83,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - `LM244` should currently be treated as a loop-mod text or explanation hook for daily tokenium, not as the recovered gameplay owner of that lane.
 - The current repo-local owner narrowing is still negative rather than positive: `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and the `FinalTokenBank*` derived-output cluster are not yet recovered saved-state owners, and the checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge still only exposes generic `PlayerProfileData.Tokens` and `PlayerProfileData.Tokenium` wrapper strings, so the remaining search should move past that export surface rather than promoting it into canonical state.
 - Daily Tokenium is now better grounded as an Academy or Farm Mission reward lane that `TokenShop`, `LoopModifiers`, and the Collector pack all touch, not as a TokenShop-only mechanic.
+- The current narrowest checked save-side wrapper for that lane is the `SaveData` mission-persistence neighborhood around `MissionsCompleted*`, `*MissionActive`, and `WastaFarmActiveCount`; cap and Daily Tokenium-specific ready or claimable ownership still remain unresolved.
 
 ## MultiverseMarket
 

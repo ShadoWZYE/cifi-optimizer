@@ -7,7 +7,7 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
   - source owner: [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
   - parser: [`scripts/unity/token_shop_parse.py`](scripts/unity/token_shop_parse.py)
   - outputs: [`docs/systems/spend/token-shop-values.md`](docs/systems/spend/token-shop-values.md), [`docs/systems/spend/token-bank-state-verification.md`](docs/systems/spend/token-bank-state-verification.md), [`data/token-shop-values.json`](data/token-shop-values.json)
-  - integration status: owner and serialized constants verified; token-bank state lane verified at the controller level; exact `SaveData.BankedTokens` now grounds the current stored token-bank amount without expanding planner behavior; the base spend lane is now grounded as token or tokenium spending through token-bank labels and resource icons; the Daily Tokenium lane is now better grounded as an Academy or Farm Mission reward family that TokenShop modifies; the checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData.Tokens` and `PlayerProfileData.Tokenium` wrapper strings in this lane; `OR_TokenBankCap` and `OR_TokensFromChests` narrowed to asset-label clues rather than proven formula owners; token-bank cap and claimable or ready save-state owners plus final player-facing row remap still remain unresolved before planner UI
+  - integration status: owner and serialized constants verified; token-bank state lane verified at the controller level; exact `SaveData.BankedTokens` now grounds the current stored token-bank amount without expanding planner behavior; the base spend lane is now grounded as token or tokenium spending through token-bank labels and resource icons; the Daily Tokenium lane is now better grounded as an Academy or Farm Mission reward family that TokenShop modifies, with exact `SaveData.DailyTokenium` plus its adjacent mission-persistence neighborhood now narrowing the save-side wrapper beyond a family-only surface; the checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData.Tokens` and `PlayerProfileData.Tokenium` wrapper strings in this lane; `OR_TokenBankCap` and `OR_TokensFromChests` narrowed to asset-label clues rather than proven formula owners; token-bank cap and claimable or ready save-state owners plus final player-facing row remap still remain unresolved before planner UI
   - recovered adjacent handlers:
     - `ClaimBankedTokens` -> `TokenShop, Assembly-CSharp`
     - token-bank cap display -> `BigStatisticPrefab.TokenBankCap`
@@ -19,6 +19,7 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
     - `FinalTokenBankCap`
   - recovered owner-family split:
     - underlying Daily Tokenium lane -> `SpaceAcademy` / `FarmMissions` family in `level0`
+    - narrowest checked save wrapper -> `SaveData` mission-persistence neighborhood around `MissionsCompletedAllTime`, `MissionsSinceTR1`, `WastaMissionActive`, `CrytonMissionActive`, `EgetuarMissionActive`, `SekhurMissionActive`, `WastaCampaignProgress`, and `WastaFarmActiveCount`
     - TokenShop -> modifier family on that lane through Daily Tokenium cap upgrade text
     - Collector pack -> premium modifier family on that lane through Academy-menu Daily Tokenium cap text
   - ruled-out owner shortcut:
@@ -26,7 +27,7 @@ Current grounded mechanic owners recovered from the shipped CIFI Unity build:
   - adjacent systems still to map:
     - token-bank cap and claimable or ready save-state inputs
     - any distinct token-bank fill owner beyond `SaveData.BankedTokens`
-    - Academy or Farm Mission gameplay owner and saved-state inputs for Daily Tokenium
+    - Daily Tokenium cap and Daily Tokenium-specific ready or claimable inputs inside that narrowed mission-persistence neighborhood
     - `DiamondBoost` relation to the wider diamond-upgrade domain
     - Meltdown-linked tier gating objects
     - `NewTokenUPGPrefab.*` identity remap

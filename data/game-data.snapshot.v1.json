@@ -600,10 +600,10 @@
       "title": "Daily Tokenium save-owner recovery",
       "status": "queued",
       "goal": "Recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane.",
-      "currentSlice": "Keep `SaveData.DailyTokenium` as the exact stored-amount recovery for the lane while the broader Academy or Farm Mission gameplay wrapper, cap owner, and Daily Tokenium-specific ready-state owner stay blocked away from TokenShop modifiers, loop-mod text paths, and the broader generic `ClaimableTokenium` cluster.",
+      "currentSlice": "Keep `SaveData.DailyTokenium` as the exact stored-amount recovery for the lane and treat its adjacent `SaveData` mission-persistence block as the current narrowest checked save wrapper, while cap owner and Daily Tokenium-specific ready-state owner stay blocked away from TokenShop modifiers, loop-mod text paths, and the broader generic `ClaimableTokenium` cluster.",
       "exitCondition": "The repo either names the exact save-side owner for Daily Tokenium cap or a Daily Tokenium-specific ready state, or proves a narrower Academy or Farm Mission wrapper than the current family-only boundary without guessing from UI text.",
-      "blockedBy": "Current evidence now recovers exact `SaveData.DailyTokenium` ownership for the stored amount, but the checked typed tables still do not expose `DailyTokeniumCap` on `SaveData` or `PlayerProfileData`, and `ClaimableTokenium` remains on the broader generic Tokenium cluster rather than a checked Daily Tokenium-specific wrapper.",
-      "smallestShippableSlice": "A checked Daily Tokenium save-boundary update that preserves exact `SaveData.DailyTokenium` ownership for current stored amount while blocking cap and ready-state promotion until a narrower Academy or Farm Mission save wrapper is recovered."
+      "blockedBy": "Current evidence now recovers exact `SaveData.DailyTokenium` ownership for the stored amount and narrows the save-side wrapper to the adjacent mission-persistence block in `SaveData`, but the checked typed tables still do not expose `DailyTokeniumCap` on `SaveData` or `PlayerProfileData`, and `ClaimableTokenium` remains on the broader generic Tokenium cluster rather than a checked Daily Tokenium-specific wrapper.",
+      "smallestShippableSlice": "A checked Daily Tokenium save-boundary update that preserves exact `SaveData.DailyTokenium` ownership for current stored amount, records the narrowed `SaveData` mission-persistence wrapper, and still blocks cap and ready-state promotion until a Daily Tokenium-specific field clears."
     },
     {
       "id": "spend-multiverse-row-label-remap",

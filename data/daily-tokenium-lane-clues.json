@@ -40,6 +40,29 @@
     "storedAmountFieldIndex": 2361,
     "storedAmountFieldOffset": 13032
   },
+  "saveNeighborhoodWrapperRecovery": {
+    "declaringType": "SaveData",
+    "wrapperLabel": "Academy or Farm Mission persistence neighborhood",
+    "fieldOrderEvidence": {
+      "immediatelyBefore": [
+        "MissionsCompletedAllTime",
+        "MissionsSinceTR1"
+      ],
+      "immediatelyAfter": [
+        "CrytonUnlocked",
+        "EgetuarUnlocked",
+        "SekhurUnlocked",
+        "WastaMissionActive",
+        "CrytonMissionActive",
+        "EgetuarMissionActive",
+        "SekhurMissionActive",
+        "WastaCampaignProgress",
+        "WastaFarmActiveCount"
+      ]
+    },
+    "whyItClears": "Exact typed field order places SaveData.DailyTokenium inside a mission-progress and mission-activity save block, which is a narrower save-side wrapper than the earlier SpaceAcademy or FarmMissions family-only boundary.",
+    "blockedReason": "This neighborhood still does not expose a DailyTokeniumCap field or a Daily Tokenium-specific ready or claimable field, so it narrows the wrapper without clearing cap or claim-state ownership."
+  },
   "genericTokeniumClaimableBoundary": {
     "declaringType": "SaveData",
     "field": "ClaimableTokenium",
@@ -56,6 +79,7 @@
   "currentBoundary": [
     "Shipped APK and Unity artifacts still preserve SpaceAcademy and FarmMissions as the strongest gameplay-surface family for the Daily Tokenium lane.",
     "Exact typed recovery now confirms SaveData.DailyTokenium as the stored-amount field for the lane without promoting a wider Academy or Farm Mission wrapper claim.",
+    "Checked SaveData field order now narrows the save-side wrapper to a mission-persistence neighborhood around mission counters, mission-active flags, and Wasta campaign or farm progression fields.",
     "SetLM244BonusText and BuyLM244 still behave like modifier-side or text-side hooks around that lane, not as recovered saved-state owners.",
     "Collector pack strings still give the repo a grounded premium modifier clue for the same Academy Menu Daily Tokenium cap lane.",
     "The typed tables do not currently expose DailyTokeniumCap on SaveData or PlayerProfileData, and ClaimableTokenium remains blocked at the broader generic Tokenium cluster rather than a checked Daily Tokenium ready-state owner."

@@ -99,8 +99,8 @@ Use these when the active lanes above close or split.
 ### `spend-daily-tokenium-save-owner`
 
 - Goal: recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane
-- Current blocker: exact typed recovery now confirms `SaveData.DailyTokenium` for the current stored amount, but cap and Daily Tokenium-specific ready-state ownership still stop at Academy or Farm Mission surfaces, modifier families, and broader generic Tokenium fields
-- Smallest next slice: checked cap or ready-state boundary that proves a narrower save wrapper than the current Academy or Farm Mission family without collapsing generic `ClaimableTokenium` into Daily Tokenium
+- Current blocker: exact typed recovery now confirms `SaveData.DailyTokenium` for the current stored amount and narrows the save-side wrapper to the nearby mission-persistence block in `SaveData`, but cap and Daily Tokenium-specific ready-state ownership still stop short of a direct field and broader generic Tokenium claimable state is still not a checked Daily Tokenium join
+- Smallest next slice: checked cap or ready-state boundary inside that narrower `SaveData` mission-persistence neighborhood without collapsing generic `ClaimableTokenium` into Daily Tokenium
 
 ### `spend-multiverse-row-label-remap`
 
