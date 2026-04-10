@@ -52,7 +52,7 @@ This note records the narrowest checked game-side path from a structurally settl
 - The runtime code seam is now partially recovered too:
   - `SetAllChrystosEmporiumTexts` directly calls `SetAllBaseBonusTexts`
   - `SetIS78BaseBonusText` and `SetIS83BaseBonusText` read `IS78BaseBonusText` / `IS83BaseBonusText`, compose strings, and end in the standard IL2CPP `UnityEngine.UI.Text` virtual-dispatch write pattern
-  - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, compose strings, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
+  - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, source their payload values from `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()`, pass through unresolved formatter helpers, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
   - the same exact runtime surface now also preserves the wider `IS1BonusText` through `IS110BonusText` field family and `SetIS1BonusText` through `SetIS110BonusText` writer family on `TextHandlerMarkets`
   - that same runtime surface also preserves `IS1IDText` through `IS110IDText` and `SetIS1IDText` through `SetIS110IDText`, while exposing no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family and no `SetISNDescriptionText` family
   - that means the repo now recovers both a checked runtime base-bonus write lane and a separate checked runtime effect-label write lane, and can close the row-local effect-label slot alias by elimination to `BonusDescriptionText`
@@ -72,6 +72,7 @@ This note records the narrowest checked game-side path from a structurally settl
 - That is a stronger scaling clue than the earlier generic text-provenance blocker.
 - It is still not a recovered row-to-text join:
   - the recovered runtime `SetISNBaseBonusText` lane writes the base-bonus text, while the separately recovered `SetISNBonusText` lane now closes to the row-local `BonusDescriptionText` slot because `PerLevelBonusText` aligns with `SetISNBaseBonusText`, `IDText` aligns with `SetISNIDText`, `CurrentBonusText` has no recovered writer family, and `DescriptionText` has no recovered `SetISNDescriptionText` family
+  - the control payload source is now narrower than a generic localization blocker because row `78` resolves through `MultiverseMarket.get_FinalIS78Bonus()` and row `83` resolves through `MultiverseMarket.get_FinalIS83Bonus()` before unresolved formatter helpers and `System.String.Concat`
   - no checked row-local string table or localization-key catalog is recovered
   - the live-asset walk does recover concrete row-local slot objects like `CurrentBonusText`, `BonusDescriptionText`, `PerLevelBonusText`, and `DescriptionText`, but the assignment-site scan shows only local ownership edges into their `UnityEngine.UI.Text` components
   - no direct strings `Inscryption 69` through `Inscryption 74` are recovered repo-locally
@@ -79,19 +80,21 @@ This note records the narrowest checked game-side path from a structurally settl
 ## Exact last missing layer
 
 - The isolated missing layer is now:
-  - the final runtime payload or localization-key assignment into the now-closed `BonusDescriptionText` slot alias for the recovered `ISNBonusText` effect-label writer family
+  - the separate dedicated `CurrentBonusText` runtime writer lane
+  - the unresolved formatter-helper names inside the already recovered `BonusDescriptionText` payload path
 - In practical terms, the repo still needs the step that turns:
-  - `SetAllBaseBonusTexts`
-  - `SetISNBaseBonusText`
   - `SetIS78BonusText`
   - `SetIS83BonusText`
   - `SetISNBonusText`
+  - `MultiverseMarket.get_FinalIS78Bonus()`
+  - `MultiverseMarket.get_FinalIS83Bonus()`
+  - unresolved formatter helpers
+  - `System.String.Concat`
   - into the now-closed row-local slot binding `BonusDescriptionText`
-into:
-  - concrete player-facing effect text
-  - or concrete localization keys
-  - written into the recovered `UnityEngine.UI.Text` components
-  - tied back to ordered Emporium rows
+- What is still not recovered is:
+  - the dedicated runtime method family, if any, that writes `CurrentBonusText`
+  - the exact helper/type names behind the remaining formatter RVAs inside the already recovered `BonusDescriptionText` payload path
+  - a broader typed join from that runtime path back to rows `69-74` or the rest of the Emporium table
 - The live local assets no longer look like the missing layer:
   - they do not serialize any producer-side `TextHandlerMarkets` or `MultiverseMarket` links into those text components
   - they only serialize the component graph around the row-local UI subtree
@@ -105,6 +108,7 @@ Current grounded conclusion:
 - the broader handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
 - the repo also now recovers a parallel runtime effect-label write family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
 - the row-local slot alias for that recovered effect-label family is now closed to `BonusDescriptionText`
+- the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus unresolved formatter helpers and `System.String.Concat`
 - `CurrentBonusText` remains a separate unrecovered writer lane because `TextHandlerMarkets` has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family in the checked runtime surface
-- the exact remaining blocker is the unrecovered final runtime payload or localization-key assignment into `BonusDescriptionText` before final live player-facing effect text can be claimed
+- the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane plus the unresolved helper-name layer inside the already recovered `BonusDescriptionText` payload path
 - compatibility-only import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked

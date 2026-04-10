@@ -493,7 +493,7 @@ if (runtimeReportPath is not null)
             var runtimeTargets = new[]
             {
                 new { reportKey = "textHandlerMarkets", assemblyName = "Assembly-CSharp", lookupNames = new[] { "TextHandlerMarkets" }, methodPatterns = new[] { "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS", "ClearISObjects", "SetISMaxLevelObjects" } },
-                new { reportKey = "multiverseMarket", assemblyName = "Assembly-CSharp", lookupNames = new[] { "MultiverseMarket" }, methodPatterns = new[] { "BuyIS", "SetIS", "SetInscryptionsDoneText" } },
+                new { reportKey = "multiverseMarket", assemblyName = "Assembly-CSharp", lookupNames = new[] { "MultiverseMarket" }, methodPatterns = Array.Empty<string>() },
                 new { reportKey = "unityUiText", assemblyName = "UnityEngine.UI", lookupNames = new[] { "UnityEngine.UI.Text", "Text" }, methodPatterns = new[] { "set_text", "get_text", "set_supportRichText", "OnPopulateMesh" } },
                 new { reportKey = "string", assemblyName = "mscorlib", lookupNames = new[] { "System.String", "String" }, methodPatterns = new[] { "Concat", "Format" } }
             };

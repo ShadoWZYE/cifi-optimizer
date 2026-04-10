@@ -3602,10 +3602,10 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   );
   assert.deepEqual(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"], "multiverse market text-provenance path boundary missing checked-band strings drifted");
   assert.equal(boundary.scalingCheck.scalesToWholeTable, false, "multiverse market text-provenance path boundary scalesToWholeTable must remain false");
-  assert.equal(boundary.lastMissingBindingLayer.layerName, "final runtime payload or localization assignment into BonusDescriptionText after the recovered TextHandlerMarkets ISNBonusText write path", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
+  assert.equal(boundary.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane, plus the unresolved formatter-helper names inside the already recovered BonusDescriptionText payload path", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
   assert.deepEqual(
     boundary.lastMissingBindingLayer.currentlyRecoveredInputs,
-    ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer"],
+    ["TextHandlerMarkets", "THMarkets", "MultiverseMarket", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "get_FinalIS78Bonus", "get_FinalIS83Bonus", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer", "System.String.Concat"],
     "multiverse market text-provenance path boundary currentlyRecoveredInputs drifted"
   );
   assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /ISNBonusText effect-label write lane/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
@@ -3618,7 +3618,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(boundaryDoc, /SetAllChrystosEmporiumTexts/i, "multiverse market text-provenance path boundary doc must preserve the runtime producer clue");
   assert.match(boundaryDoc, /virtual-dispatch write pattern/i, "multiverse market text-provenance path boundary doc must preserve the runtime write-pattern result");
   assert.match(boundaryDoc, /BonusDescriptionText/, "multiverse market text-provenance path boundary doc must preserve the closed effect-label slot alias");
-  assert.match(boundaryDoc, /final runtime payload or localization-key assignment into the now-closed `BonusDescriptionText` slot alias/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
+  assert.match(boundaryDoc, /separate dedicated `CurrentBonusText` runtime writer lane/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
+  assert.match(boundaryDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market text-provenance path boundary doc must preserve the narrowed control payload source");
   assert.match(stateDoc, /## Checked control-row text-provenance path boundary/, "multiverse market state verification doc must expose the control-row text-provenance path boundary section");
   assert.match(stateDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market state verification doc must preserve the control row string anchor");
   assert.match(stateDoc, /OUROBOROS POINTS GAINED/i, "multiverse market state verification doc must preserve the row 78 live-text mismatch");
@@ -3631,7 +3632,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(stateDoc, /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i, "multiverse market state verification doc must preserve the CurrentBonusText negative result");
   assert.match(stateDoc, /SetIS1IDText/, "multiverse market state verification doc must preserve the dedicated IDText family clue");
   assert.match(stateDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i, "multiverse market state verification doc must preserve the closed slot alias");
-  assert.match(stateDoc, /final runtime payload or localization-key assignment into `BonusDescriptionText`/i, "multiverse market state verification doc must preserve the exact remaining blocker");
+  assert.match(stateDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market state verification doc must preserve the narrowed control payload source");
+  assert.match(stateDoc, /separate `CurrentBonusText` writer lane/i, "multiverse market state verification doc must preserve the exact remaining blocker");
   assert.match(verificationDoc, /## Checked control-row text-provenance path boundary/, "multiverse market verification doc must expose the control-row text-provenance path boundary section");
   assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the control row string anchor");
   assert.match(verificationDoc, /OUROBOROS POINTS GAINED/i, "multiverse market verification doc must preserve the row 78 live-text mismatch");
@@ -3644,7 +3646,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(verificationDoc, /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i, "multiverse market verification doc must preserve the CurrentBonusText negative result");
   assert.match(verificationDoc, /SetIS1IDText/, "multiverse market verification doc must preserve the dedicated IDText family clue");
   assert.match(verificationDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i, "multiverse market verification doc must preserve the closed slot alias");
-  assert.match(verificationDoc, /final runtime payload or localization-key assignment into `BonusDescriptionText`/i, "multiverse market verification doc must preserve the narrowed text-slot blocker");
+  assert.match(verificationDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market verification doc must preserve the narrowed control payload source");
+  assert.match(verificationDoc, /separate `CurrentBonusText` writer lane/i, "multiverse market verification doc must preserve the narrowed text-slot blocker");
 
   return {
     id: "multiverse-market-text-provenance-path-boundary",
@@ -3654,7 +3657,7 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
       "Control row 78 reaches only a partial text-adjacent control and fails against live screenshot text",
       `${boundary.scalingCheck.broadHandlerFamilyRecovered.length} checked base-bonus handler clues`,
       `${boundary.scalingCheck.playerFacingStringAnchorsRecovered.length} sparse player-facing string anchors`,
-      "The exact remaining blocker is the final runtime payload or localization assignment into BonusDescriptionText after the recovered ISNBonusText effect-label writer family"
+      "The exact remaining blocker is the separate CurrentBonusText writer lane plus unresolved formatter helpers inside the recovered BonusDescriptionText payload path"
     ]
   };
 }

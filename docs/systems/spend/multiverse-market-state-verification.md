@@ -325,7 +325,7 @@ Current grounded conclusion:
 - The runtime code seam is now partially recovered:
   - `SetAllChrystosEmporiumTexts` directly calls `SetAllBaseBonusTexts`
   - `SetIS78BaseBonusText` and `SetIS83BaseBonusText` read `IS78BaseBonusText` / `IS83BaseBonusText`, compose strings, and end in the standard IL2CPP `UnityEngine.UI.Text` virtual-dispatch write pattern
-  - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, compose strings, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
+  - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, source their payload values from `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()`, pass through unresolved formatter helpers, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
   - the same exact runtime surface also preserves `IS1BonusText` through `IS110BonusText`, `SetIS1BonusText` through `SetIS110BonusText`, `IS1IDText` through `IS110IDText`, and `SetIS1IDText` through `SetIS110IDText`, while exposing no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family on `TextHandlerMarkets` and no `SetISNDescriptionText` family
   - that means the repo now recovers both the runtime base-bonus lane and a separate runtime effect-label writer family, while also closing `IDText` and `CurrentBonusText` away from the recovered effect-label sink
 - That still does not scale to the whole table as a recovered row-to-text join:
@@ -343,7 +343,8 @@ Current grounded conclusion:
 - the repo also now recovers a separate runtime effect-label writer family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
 - the recovered runtime families now close the row-local effect-label slot alias to `BonusDescriptionText`
 - `CurrentBonusText` remains narrowed away from that recovered effect-label family because the checked `TextHandlerMarkets` runtime surface has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family
-- the exact remaining blocker is the unrecovered final runtime payload or localization-key assignment into `BonusDescriptionText` before final live player-facing effect text can be claimed
+- the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus unresolved formatter helpers and `System.String.Concat`
+- the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane plus the unresolved helper-name layer inside the already recovered `BonusDescriptionText` payload path
 - the canonical import-safe subset stays empty
 
 ## Alternate serialized-export indirect-join boundary

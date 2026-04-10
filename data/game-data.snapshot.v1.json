@@ -427,7 +427,7 @@
         "Separate this import-surface decision lane from the downstream row `71-74` identity/remap lane so planner work and label recovery do not reopen owner recovery."
       ],
       "nextSteps": [
-        "Keep the canonical Emporium import-safe subset explicitly empty unless new evidence grounds the final runtime payload/localization assignment into the now-closed `BonusDescriptionText` slot alias for the recovered `SetISNBonusText` effect-label writer family, beyond the already recovered `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText` base-bonus lane and parallel `SetISNBonusText` effect-label lane for a narrower `SaveData`-backed canonical import slice.",
+        "Keep the canonical Emporium import-safe subset explicitly empty unless new evidence grounds the separate `CurrentBonusText` writer lane and a broader canonical-safe row join, beyond the already recovered `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText` base-bonus lane, the parallel `SetISNBonusText` effect-label lane, and the control-row payload source through `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` for a narrower `SaveData`-backed canonical import slice.",
         "If new import promotion is proposed, require it to name the exact field class, the grounded row subset, and why unresolved Emporium effect-text binding does not leak into canonical `state.playerProfile`.",
         "Leave row `71-74` player-facing identity/remap work on its separate downstream track instead of mixing it back into this import-surface lane."
       ],

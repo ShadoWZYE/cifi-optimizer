@@ -60,7 +60,7 @@
         "UnityEngine.UI.Outline",
         "UnityEngine.UI.Shadow"
       ],
-      "missingJoin": "No checked serialized-asset join routes TextHandlerMarkets into the recovered row-local slot objects. The recovered runtime code path now proves both the ISNBaseBonusText base-bonus write lane and the separate ISNBonusText effect-label write lane, and the exact TextHandlerMarkets runtime surface now closes the row-local effect-label slot alias to BonusDescriptionText while excluding CurrentBonusText from that family, but the final runtime payload assignment into that slot is still unrecovered."
+      "missingJoin": "No checked serialized-asset join routes TextHandlerMarkets into the recovered row-local slot objects. The recovered runtime code path now proves both the ISNBaseBonusText base-bonus write lane and the separate ISNBonusText effect-label write lane, and the exact TextHandlerMarkets runtime surface now closes the row-local effect-label slot alias to BonusDescriptionText while excluding CurrentBonusText from that family. The remaining runtime-only gap is the separate CurrentBonusText writer lane, plus unresolved helper names inside the already recovered BonusDescriptionText payload path."
     },
     "assignmentSiteRecovery": {
       "status": "serialized-row-local-ownership-only",
@@ -117,10 +117,10 @@
       },
       {
         "artifact": "data/multiverse-market-text-runtime-probe.json",
-        "claim": "the runtime code probe shows SetAllChrystosEmporiumTexts calling SetAllBaseBonusTexts, the row-78 and row-83 SetISNBaseBonusText methods ending in a UnityEngine.UI.Text virtual-dispatch write pattern after composing their base-bonus strings, and the parallel SetIS78BonusText and SetIS83BonusText methods ending in the same write pattern after reading IS78BonusText and IS83BonusText"
+        "claim": "the runtime code probe shows SetAllChrystosEmporiumTexts calling SetAllBaseBonusTexts, the row-78 and row-83 SetISNBaseBonusText methods ending in a UnityEngine.UI.Text virtual-dispatch write pattern after composing their base-bonus strings, and the parallel SetIS78BonusText and SetIS83BonusText methods ending in the same write pattern after sourcing payload values from MultiverseMarket.get_FinalIS78Bonus() and MultiverseMarket.get_FinalIS83Bonus()"
       }
     ],
-    "conclusion": "A real text-adjacent path is recoverable for a control row as a sparse Unity string anchor, a row-local asset-slot chain, a typed runtime base-bonus write lane on TextHandlerMarkets, and a separate runtime ISNBonusText effect-label write lane. The recovered runtime families now close the row-local effect-label slot alias to BonusDescriptionText while separately accounting for IDText and PerLevelBonusText and excluding CurrentBonusText. What remains unrecovered is the final runtime payload or localization assignment into BonusDescriptionText and any separate CurrentBonusText writer lane."
+    "conclusion": "A real text-adjacent path is recoverable for a control row as a sparse Unity string anchor, a row-local asset-slot chain, a typed runtime base-bonus write lane on TextHandlerMarkets, and a separate runtime ISNBonusText effect-label write lane. That effect-label lane now closes further to MultiverseMarket.get_FinalIS78Bonus() or get_FinalIS83Bonus(), unresolved formatter helpers, System.String.Concat, and the row-local BonusDescriptionText sink. What remains unrecovered is any separate CurrentBonusText writer lane and the unresolved helper-name layer inside the already recovered BonusDescriptionText payload path."
   },
   "scalingCheck": {
     "broadHandlerFamilyRecovered": [
@@ -150,20 +150,23 @@
       "The repo now recovers a typed runtime TextHandlerMarkets chain from SetAllChrystosEmporiumTexts into SetAllBaseBonusTexts and row-specific SetIS78BaseBonusText or SetIS83BaseBonusText, plus the parallel SetIS1BonusText through SetIS110BonusText effect-label writer family and the separate SetIS1IDText through SetIS110IDText row-label family, while that same runtime surface exposes no CurrentBonusText-named field or SetCurrentBonusText writer family and no SetISNDescriptionText family on TextHandlerMarkets.",
       "The repo separately recovers sparse Unity string anchors for only a few control rows, including rows 78 and 83, but the row 78 screenshot now shows that the anchor text does not reproduce the live effect text.",
       "The live-asset seed walk now recovers mirrored row-local slot objects for rows 78 and 83, and the assignment-site scan shows that the serialized asset graph stops at those objects' own Text or Outline or Shadow or Image component ownership.",
-      "No serialized TextHandlerMarkets or MultiverseMarket object links into the recovered row-local UnityEngine.UI.Text components, so no local serialized producer-side assignment path is recoverable across the table."
+      "The widened runtime pass only closes the control payload source one step further, through MultiverseMarket.get_FinalIS78Bonus() and get_FinalIS83Bonus() plus unresolved formatter helpers, so no whole-table current-value writer or canonical label/localization join is recoverable yet."
     ]
   },
   "lastMissingBindingLayer": {
-    "layerName": "final runtime payload or localization assignment into BonusDescriptionText after the recovered TextHandlerMarkets ISNBonusText write path",
+    "layerName": "separate dedicated CurrentBonusText runtime writer lane, plus the unresolved formatter-helper names inside the already recovered BonusDescriptionText payload path",
     "currentlyRecoveredInputs": [
       "TextHandlerMarkets",
       "THMarkets",
+      "MultiverseMarket",
       "SetAllChrystosEmporiumTexts",
       "SetAllBaseBonusTexts",
       "SetIS78BaseBonusText",
       "SetIS83BaseBonusText",
       "SetIS78BonusText",
       "SetIS83BonusText",
+      "get_FinalIS78Bonus",
+      "get_FinalIS83Bonus",
       "SetISNCostText",
       "SetISNBaseBonusText",
       "SetISNBonusText",
@@ -179,22 +182,22 @@
       "UnityEngine.UI.Outline",
       "UnityEngine.UI.Shadow",
       "RectTransform",
-      "CanvasRenderer"
+      "CanvasRenderer",
+      "System.String.Concat"
     ],
     "notYetRecovered": [
-      "the final string payload or localization-key assignment that the recovered ISNBonusText writer family writes into the closed BonusDescriptionText slot alias at runtime",
       "the separate dedicated runtime writer family for CurrentBonusText as a current-value slot distinct from the recovered ISNBonusText effect-label lane",
-      "the final string payload or localization-key assignment written into the recovered UnityEngine.UI.Text components on those slot objects at runtime once that row-local alias is fixed",
+      "the unresolved helper names behind the recovered formatter/helper RVAs that sit between MultiverseMarket.get_FinalIS78Bonus() or get_FinalIS83Bonus() and System.String.Concat inside the BonusDescriptionText payload path",
       "a checked repo-local binding from that payload-assignment step back to rows 69-74 or the wider Emporium table"
     ],
-    "smallestDefensibleConclusion": "The isolated missing source class is no longer generic label provenance, generic slot discovery, the entire TextHandlerMarkets effect-label producer family, or the row-local slot alias question itself. The repo now recovers both the runtime base-bonus write lane and the separate ISNBonusText effect-label write lane, and closes that effect-label writer onto BonusDescriptionText, while the unrecovered seam is the final runtime payload assignment into that slot plus any distinct CurrentBonusText writer."
+    "smallestDefensibleConclusion": "The isolated missing source class is no longer generic label provenance, generic slot discovery, the entire TextHandlerMarkets effect-label producer family, or the row-local slot alias question itself. The repo now recovers both the runtime base-bonus write lane and the separate ISNBonusText effect-label write lane, closes that effect-label writer onto BonusDescriptionText, and narrows the control-row payload source to MultiverseMarket.get_FinalIS78Bonus() or get_FinalIS83Bonus() plus unresolved formatter helpers and System.String.Concat. The unrecovered seam is now the separate CurrentBonusText writer lane plus the unresolved helper-name layer inside the already recovered BonusDescriptionText payload path."
   },
   "currentBoundary": [
     "The current structural row model stays unchanged: row identity still rides SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText and row payload ID or Level or ISObject carriers.",
     "Rows 78 and 83 must now be treated as partial text-adjacent controls, not completed player-facing label bindings.",
     "A real text-adjacent control-row path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain, but not as a recovered scalable row-to-live-effect-text join.",
     "The repo now recovers a typed runtime TextHandlerMarkets base-bonus lane from SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts into row-specific SetIS78BaseBonusText or SetIS83BaseBonusText, while the live-asset seed walk independently recovers row-local slot objects and UnityEngine.UI.Text components for rows 78 and 83.",
-    "The deeper assignment-site probe shows that local serialized assets stop at row-local ownership edges, and the runtime probe narrows the remaining gap further: the unrecovered step is not the effect-label producer family itself and no longer includes CurrentBonusText, IDText, PerLevelBonusText, or DescriptionText as plausible aliases for that family, because the recovered runtime families close the SetISNBonusText sink to BonusDescriptionText.",
+    "The deeper assignment-site probe shows that local serialized assets stop at row-local ownership edges, and the runtime probe narrows the remaining gap further: the unrecovered step is not the effect-label producer family itself and no longer includes CurrentBonusText, IDText, PerLevelBonusText, or DescriptionText as plausible aliases for that family, because the recovered runtime families close the SetISNBonusText sink to BonusDescriptionText and narrow the control payload source to MultiverseMarket.get_FinalIS78Bonus() or get_FinalIS83Bonus().",
     "This does not widen canonical import, planner behavior, or the shipped compatibility preview. compatibility.unmappedSystemState.multiverseMarket stays compatibility-only, InscryptionsDone stays wrapper-only, and canonical state.playerProfile promotion stays blocked."
   ]
 }

@@ -225,10 +225,11 @@ def sort_inscription_names(names: list[str]) -> list[str]:
 def main() -> None:
     surface = load_runtime_surface()
     text_handler = extract_target(surface, "textHandlerMarkets")
+    multiverse_market = extract_target(surface, "multiverseMarket")
     unity_text = extract_target(surface, "unityUiText")
     system_string = extract_target(surface, "string")
 
-    methods_by_rva, sorted_rvas = build_method_index(text_handler, unity_text, system_string)
+    methods_by_rva, sorted_rvas = build_method_index(text_handler, multiverse_market, unity_text, system_string)
     field_map = build_field_offset_map(text_handler)
     blob = LIBIL2CPP_PATH.read_bytes()
     text_handler_fields = text_handler.get("fields", [])
@@ -286,12 +287,59 @@ def main() -> None:
     row78_effect = by_name["SetIS78BonusText"]
     row83_effect = by_name["SetIS83BonusText"]
 
+    def summarize_effect_payload_path(method_summary: dict[str, object]) -> dict[str, object]:
+        call_targets = method_summary["callTargets"]
+        source_getter = next(
+            (
+                call["resolvedTarget"]
+                for call in call_targets
+                if isinstance(call.get("resolvedTarget"), dict)
+                and call["resolvedTarget"].get("typeName") == "MultiverseMarket"
+                and str(call["resolvedTarget"].get("name", "")).startswith("get_FinalIS")
+            ),
+            None,
+        )
+        formatter_helpers = [
+            {
+                "targetRva": call["targetRva"],
+                "operand": call["operand"],
+            }
+            for call in call_targets
+            if call["targetRva"] is not None and call.get("resolvedTarget") is None
+        ]
+        string_compose = [
+            call["resolvedTarget"]
+            for call in call_targets
+            if isinstance(call.get("resolvedTarget"), dict)
+            and call["resolvedTarget"].get("typeName") == "System.String"
+        ]
+        return {
+            "sinkField": next(
+                (
+                    hit["fieldName"]
+                    for hit in method_summary["fieldAccesses"]
+                    if hit.get("fieldName", "").endswith("BonusText")
+                    and "BaseBonusText" not in str(hit.get("fieldName"))
+                ),
+                None,
+            ),
+            "marketFieldRead": any(hit.get("fieldName") == "Market" for hit in method_summary["fieldAccesses"]),
+            "sourceGetter": source_getter,
+            "formatterHelpers": formatter_helpers,
+            "stringComposeMethods": string_compose,
+            "virtualUnityUiTextSetterInference": method_summary["virtualUnityUiTextSetterInference"],
+        }
+
+    row78_effect_payload = summarize_effect_payload_path(row78_effect)
+    row83_effect_payload = summarize_effect_payload_path(row83_effect)
+
     findings = [
         "The runtime probe now recovers typed TextHandlerMarkets field offsets and native RVAs for the exact Emporium text-handler family, without reopening the asset walk or shell-remap lane.",
         "SetAllChrystosEmporiumTexts directly calls SetAllBaseBonusTexts inside TextHandlerMarkets, which confirms a real runtime-only producer chain on the THMarkets side.",
         "SetIS78BaseBonusText and SetIS83BaseBonusText both read their row-local TextHandlerMarkets fields IS78BaseBonusText and IS83BaseBonusText, compose a string, and then end in the standard IL2CPP virtual-dispatch pattern that loads a UnityEngine.UI.Text method pair from the target object's class and jumps through it.",
         "Because UnityEngine.UI.Text.set_text is itself a virtual one-string setter in the recovered runtime surface, the narrowest defensible read is that the SetISNBaseBonusText family is a checked runtime assignment lane into UnityEngine.UI.Text components, but only as an inferred virtual setter bind rather than a named direct-call edge.",
         "SetIS78BonusText and SetIS83BonusText form a second parallel runtime writer family: they read IS78BonusText and IS83BonusText, compose strings, and end in the same UnityEngine.UI.Text virtual-dispatch write pattern, which recovers a separate effect-label lane beyond the already checked base-bonus lane.",
+        "The widened MultiverseMarket runtime surface now closes the row-78 and row-83 effect payload sources one step further: SetIS78BonusText calls MultiverseMarket.get_FinalIS78Bonus(), while SetIS83BonusText calls MultiverseMarket.get_FinalIS83Bonus(), before additional formatter helpers and System.String.Concat write into the recovered ISNBonusText sink.",
         "The same runtime surface now recovers a full typed effect-label family on TextHandlerMarkets from IS1BonusText through IS110BonusText and from SetIS1BonusText through SetIS110BonusText, which closes the producer side for the non-current-value effect-label lane rather than only for rows 78 and 83.",
         "The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.",
         "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, so CurrentBonusText is no longer a plausible alias for the recovered ISNBonusText sink and must remain a separate unrecovered writer lane if it is written at runtime.",
@@ -327,11 +375,13 @@ def main() -> None:
                     "row": 78,
                     "runtimeMethod": row78_effect,
                     "boundFieldNames": sorted({hit["fieldName"] for hit in row78_effect["fieldAccesses"]}),
+                    "payloadPath": row78_effect_payload,
                 },
                 {
                     "row": 83,
                     "runtimeMethod": row83_effect,
                     "boundFieldNames": sorted({hit["fieldName"] for hit in row83_effect["fieldAccesses"]}),
+                    "payloadPath": row83_effect_payload,
                 },
             ],
             "effectLabelFamilySurface": {
@@ -358,7 +408,7 @@ def main() -> None:
                 "textHandlerCurrentBonusTextFieldPresent": current_bonus_text_field_present,
                 "textHandlerCurrentBonusTextWriterPresent": current_bonus_text_method_present,
                 "sameSinkAsRecoveredEffectLabelFamily": False,
-                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family."
+                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family."
             },
             "effectLabelSlotAliasResolution": {
                 "status": "closed-best-fit-typed-alias",
@@ -382,11 +432,11 @@ def main() -> None:
         "currentBoundary": [
             "Treat SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText through row payload ID or Level or ISObject as the settled row-identity chain.",
             "Treat TextHandlerMarkets.SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts through SetIS78BaseBonusText or SetIS83BaseBonusText as a checked runtime-only write path into UnityEngine.UI.Text for the base-bonus lane.",
-            "Treat TextHandlerMarkets.SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane.",
+            "Treat TextHandlerMarkets.SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus unresolved formatter helpers and System.String.Concat.",
             "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
             "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family but no CurrentBonusText-named field or writer family.",
             "Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.",
-            "Do not widen canonical import, planner behavior, or the shipped compatibility preview while that effect-label producer remains unrecovered.",
+            "Do not widen canonical import, planner behavior, or the shipped compatibility preview while the separate CurrentBonusText writer lane remains unrecovered.",
         ],
     }
 
@@ -412,6 +462,13 @@ def main() -> None:
         method = entry["runtimeMethod"]
         lines.append(
             f"- `row={entry['row']}`; `{method['name']}`; `rva={method['rva']}`; `callsDirectUnityUiSetText={method['callsDirectUnityUiSetText']}`; `virtualUnityUiTextSetterInference={method['virtualUnityUiTextSetterInference']}`; `boundFields={entry['boundFieldNames']}`"
+        )
+        payload = entry["payloadPath"]
+        source_getter = payload["sourceGetter"]
+        lines.append(
+            f"  payload: `sinkField={payload['sinkField']}`; `marketFieldRead={payload['marketFieldRead']}`; "
+            f"`sourceGetter={source_getter['name'] if isinstance(source_getter, dict) else None}`; "
+            f"`formatterHelperRvas={[helper['targetRva'] for helper in payload['formatterHelpers']]}`"
         )
     family = result["methodChain"]["effectLabelFamilySurface"]
     lines.extend([
