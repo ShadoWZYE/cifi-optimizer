@@ -3602,7 +3602,7 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   );
   assert.deepEqual(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"], "multiverse market text-provenance path boundary missing checked-band strings drifted");
   assert.equal(boundary.scalingCheck.scalesToWholeTable, false, "multiverse market text-provenance path boundary scalesToWholeTable must remain false");
-  assert.equal(boundary.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the BonusDescriptionText helper path is role-closed", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
+  assert.equal(boundary.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
   assert.deepEqual(
     boundary.lastMissingBindingLayer.currentlyRecoveredInputs,
     ["TextHandlerMarkets", "THMarkets", "MultiverseMarket", "SetAllChrystosEmporiumTexts", "SetAllBonusTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "get_FinalIS78Bonus", "get_FinalIS83Bonus", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "GeneralFunctionsManager.BigDoubleToText", "System.Int32.ToString", "runtime metadata init helper", "null-reference throw helper", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer", "System.String.Concat"],
@@ -3625,8 +3625,15 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(boundaryDoc, /System\.Int32\.ToString|Int32\.ToString/, "multiverse market text-provenance path boundary doc must preserve the narrowed row 83 helper name");
   assert.match(boundaryDoc, /runtime metadata-init helper|runtime metadata init helper/i, "multiverse market text-provenance path boundary doc must preserve the resolved metadata helper role");
   assert.match(boundaryDoc, /null-reference throw helper/i, "multiverse market text-provenance path boundary doc must preserve the resolved null helper role");
-  assert.match(boundaryDoc, /NavigationManager/, "multiverse market text-provenance path boundary doc must preserve the checked negative orchestration owner");
-  assert.match(boundaryDoc, /TextHandlerShopNPCs/, "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue owner");
+  assert.match(boundaryDoc, /NavigationManager\.UpdateInscryptionUI/, "multiverse market text-provenance path boundary doc must preserve the checked negative update surface");
+  assert.match(boundaryDoc, /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/, "multiverse market text-provenance path boundary doc must preserve the checked negative update coroutine");
+  assert.match(boundaryDoc, /NavigationManager\+<InscEnum>d__186\.MoveNext/, "multiverse market text-provenance path boundary doc must preserve the checked negative row-enum coroutine");
+  assert.match(boundaryDoc, /NavigationManager\.DisableInscryptionObjects/, "multiverse market text-provenance path boundary doc must preserve the checked negative row-hide surface");
+  assert.match(boundaryDoc, /NavigationManager\.OnAvailbleInscryptionsClick/, "multiverse market text-provenance path boundary doc must preserve the checked negative available-click surface");
+  assert.match(boundaryDoc, /NavigationManager\.OnFinishedInscryptionsClick/, "multiverse market text-provenance path boundary doc must preserve the checked negative finished-click surface");
+  assert.match(boundaryDoc, /TextHandlerShopNPCs\.OpeningChrystosEmporium/, "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue-open surface");
+  assert.match(boundaryDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/, "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue-default surface");
+  assert.match(boundaryDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/, "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue coroutine");
   assert.match(stateDoc, /## Checked control-row text-provenance path boundary/, "multiverse market state verification doc must expose the control-row text-provenance path boundary section");
   assert.match(stateDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market state verification doc must preserve the control row string anchor");
   assert.match(stateDoc, /OUROBOROS POINTS GAINED/i, "multiverse market state verification doc must preserve the row 78 live-text mismatch");
@@ -3646,8 +3653,15 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(stateDoc, /runtime metadata-init helper|runtime metadata init helper/i, "multiverse market state verification doc must preserve the resolved metadata helper role");
   assert.match(stateDoc, /null-reference throw helper/i, "multiverse market state verification doc must preserve the resolved null helper role");
   assert.match(stateDoc, /separate `CurrentBonusText` writer lane/i, "multiverse market state verification doc must preserve the exact remaining blocker");
-  assert.match(stateDoc, /NavigationManager/, "multiverse market state verification doc must preserve the checked negative orchestration owner");
-  assert.match(stateDoc, /TextHandlerShopNPCs/, "multiverse market state verification doc must preserve the checked negative dialogue owner");
+  assert.match(stateDoc, /NavigationManager\.UpdateInscryptionUI/, "multiverse market state verification doc must preserve the checked negative update surface");
+  assert.match(stateDoc, /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/, "multiverse market state verification doc must preserve the checked negative update coroutine");
+  assert.match(stateDoc, /NavigationManager\+<InscEnum>d__186\.MoveNext/, "multiverse market state verification doc must preserve the checked negative row-enum coroutine");
+  assert.match(stateDoc, /NavigationManager\.DisableInscryptionObjects/, "multiverse market state verification doc must preserve the checked negative row-hide surface");
+  assert.match(stateDoc, /NavigationManager\.OnAvailbleInscryptionsClick/, "multiverse market state verification doc must preserve the checked negative available-click surface");
+  assert.match(stateDoc, /NavigationManager\.OnFinishedInscryptionsClick/, "multiverse market state verification doc must preserve the checked negative finished-click surface");
+  assert.match(stateDoc, /TextHandlerShopNPCs\.OpeningChrystosEmporium/, "multiverse market state verification doc must preserve the checked negative dialogue-open surface");
+  assert.match(stateDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/, "multiverse market state verification doc must preserve the checked negative dialogue-default surface");
+  assert.match(stateDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/, "multiverse market state verification doc must preserve the checked negative dialogue coroutine");
   assert.match(verificationDoc, /## Checked control-row text-provenance path boundary/, "multiverse market verification doc must expose the control-row text-provenance path boundary section");
   assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the control row string anchor");
   assert.match(verificationDoc, /OUROBOROS POINTS GAINED/i, "multiverse market verification doc must preserve the row 78 live-text mismatch");
@@ -3667,8 +3681,15 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(verificationDoc, /runtime metadata-init helper|runtime metadata init helper/i, "multiverse market verification doc must preserve the resolved metadata helper role");
   assert.match(verificationDoc, /null-reference throw helper/i, "multiverse market verification doc must preserve the resolved null helper role");
   assert.match(verificationDoc, /separate `CurrentBonusText` writer lane/i, "multiverse market verification doc must preserve the narrowed text-slot blocker");
-  assert.match(verificationDoc, /NavigationManager/, "multiverse market verification doc must preserve the checked negative orchestration owner");
-  assert.match(verificationDoc, /TextHandlerShopNPCs/, "multiverse market verification doc must preserve the checked negative dialogue owner");
+  assert.match(verificationDoc, /NavigationManager\.UpdateInscryptionUI/, "multiverse market verification doc must preserve the checked negative update surface");
+  assert.match(verificationDoc, /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/, "multiverse market verification doc must preserve the checked negative update coroutine");
+  assert.match(verificationDoc, /NavigationManager\+<InscEnum>d__186\.MoveNext/, "multiverse market verification doc must preserve the checked negative row-enum coroutine");
+  assert.match(verificationDoc, /NavigationManager\.DisableInscryptionObjects/, "multiverse market verification doc must preserve the checked negative row-hide surface");
+  assert.match(verificationDoc, /NavigationManager\.OnAvailbleInscryptionsClick/, "multiverse market verification doc must preserve the checked negative available-click surface");
+  assert.match(verificationDoc, /NavigationManager\.OnFinishedInscryptionsClick/, "multiverse market verification doc must preserve the checked negative finished-click surface");
+  assert.match(verificationDoc, /TextHandlerShopNPCs\.OpeningChrystosEmporium/, "multiverse market verification doc must preserve the checked negative dialogue-open surface");
+  assert.match(verificationDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/, "multiverse market verification doc must preserve the checked negative dialogue-default surface");
+  assert.match(verificationDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/, "multiverse market verification doc must preserve the checked negative dialogue coroutine");
 
   return {
     id: "multiverse-market-text-provenance-path-boundary",
@@ -3678,7 +3699,7 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
       "Control row 78 reaches only a partial text-adjacent control and fails against live screenshot text",
       `${boundary.scalingCheck.broadHandlerFamilyRecovered.length} checked base-bonus handler clues`,
       `${boundary.scalingCheck.playerFacingStringAnchorsRecovered.length} sparse player-facing string anchors`,
-      "The exact remaining blocker is the separate CurrentBonusText writer lane after the BonusDescriptionText helper path is role-closed"
+      "The exact remaining blocker is the separate CurrentBonusText writer lane after the last plausible row-local update surfaces are exhausted"
     ]
   };
 }

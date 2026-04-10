@@ -2553,7 +2553,7 @@ assert.deepEqual(
 );
 assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesToWholeTable, false);
-assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the BonusDescriptionText helper path is role-closed");
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.currentlyRecoveredInputs,
   ["TextHandlerMarkets", "THMarkets", "MultiverseMarket", "SetAllChrystosEmporiumTexts", "SetAllBonusTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "get_FinalIS78Bonus", "get_FinalIS83Bonus", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "GeneralFunctionsManager.BigDoubleToText", "System.Int32.ToString", "runtime metadata init helper", "null-reference throw helper", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer", "System.String.Concat"]
@@ -2577,8 +2577,15 @@ assert.match(multiverseMarketStateVerificationDoc, /System\.Int32\.ToString|Int3
 assert.match(multiverseMarketStateVerificationDoc, /runtime metadata-init helper|runtime metadata init helper/i);
 assert.match(multiverseMarketStateVerificationDoc, /null-reference throw helper/i);
 assert.match(multiverseMarketStateVerificationDoc, /separate `CurrentBonusText` writer lane/i);
-assert.match(multiverseMarketStateVerificationDoc, /NavigationManager/);
-assert.match(multiverseMarketStateVerificationDoc, /TextHandlerShopNPCs/);
+assert.match(multiverseMarketStateVerificationDoc, /NavigationManager\.UpdateInscryptionUI/);
+assert.match(multiverseMarketStateVerificationDoc, /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/);
+assert.match(multiverseMarketStateVerificationDoc, /NavigationManager\+<InscEnum>d__186\.MoveNext/);
+assert.match(multiverseMarketStateVerificationDoc, /NavigationManager\.DisableInscryptionObjects/);
+assert.match(multiverseMarketStateVerificationDoc, /NavigationManager\.OnAvailbleInscryptionsClick/);
+assert.match(multiverseMarketStateVerificationDoc, /NavigationManager\.OnFinishedInscryptionsClick/);
+assert.match(multiverseMarketStateVerificationDoc, /TextHandlerShopNPCs\.OpeningChrystosEmporium/);
+assert.match(multiverseMarketStateVerificationDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/);
+assert.match(multiverseMarketStateVerificationDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/);
 assert.match(multiverseMarketVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketVerificationDoc, /SetIS69BaseBonusText/);
@@ -2595,8 +2602,15 @@ assert.match(multiverseMarketVerificationDoc, /SetAllBonusTexts/);
 assert.match(multiverseMarketVerificationDoc, /GeneralFunctionsManager\.BigDoubleToText/);
 assert.match(multiverseMarketVerificationDoc, /System\.Int32\.ToString|Int32\.ToString/);
 assert.match(multiverseMarketVerificationDoc, /separate `CurrentBonusText` writer lane/i);
-assert.match(multiverseMarketVerificationDoc, /NavigationManager/);
-assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs/);
+assert.match(multiverseMarketVerificationDoc, /NavigationManager\.UpdateInscryptionUI/);
+assert.match(multiverseMarketVerificationDoc, /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/);
+assert.match(multiverseMarketVerificationDoc, /NavigationManager\+<InscEnum>d__186\.MoveNext/);
+assert.match(multiverseMarketVerificationDoc, /NavigationManager\.DisableInscryptionObjects/);
+assert.match(multiverseMarketVerificationDoc, /NavigationManager\.OnAvailbleInscryptionsClick/);
+assert.match(multiverseMarketVerificationDoc, /NavigationManager\.OnFinishedInscryptionsClick/);
+assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs\.OpeningChrystosEmporium/);
+assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/);
+assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);

@@ -343,6 +343,30 @@ def summarize_search_method(
     }
 
 
+def summarize_search_method_if_present(
+    full_type_name: str,
+    method_name: str,
+    search: dict[str, object],
+    methods_by_rva: dict[int, dict[str, object]],
+    sorted_rvas: list[int],
+    blob: bytes,
+) -> dict[str, object] | None:
+    for match in search.get("matches", []):
+        if match.get("fullName") != full_type_name:
+            continue
+        for method in match.get("methodHits", []):
+            if method.get("name") == method_name:
+                return summarize_search_method(
+                    full_type_name,
+                    method_name,
+                    search,
+                    methods_by_rva,
+                    sorted_rvas,
+                    blob,
+                )
+    return None
+
+
 def sort_inscription_names(names: list[str]) -> list[str]:
     def key(name: str) -> tuple[int, str]:
         match = INSCRIPTION_NUMBER_RE.search(name)
@@ -533,6 +557,62 @@ def main() -> None:
         sorted_rvas,
         blob,
     )
+    update_inscryption_ui = summarize_search_method_if_present(
+        "NavigationManager",
+        "UpdateInscryptionUI",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
+    insc_enum_move_next = summarize_search_method_if_present(
+        "NavigationManager+<InscEnum>d__186",
+        "MoveNext",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
+    disable_inscryption_objects = summarize_search_method_if_present(
+        "NavigationManager",
+        "DisableInscryptionObjects",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
+    on_available_inscryptions_click = summarize_search_method_if_present(
+        "NavigationManager",
+        "OnAvailbleInscryptionsClick",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
+    on_finished_inscryptions_click = summarize_search_method_if_present(
+        "NavigationManager",
+        "OnFinishedInscryptionsClick",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
+    opening_chrystos_emporium = summarize_search_method_if_present(
+        "TextHandlerShopNPCs",
+        "OpeningChrystosEmporium",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
+    emporium_default_text = summarize_search_method_if_present(
+        "TextHandlerShopNPCs",
+        "EmporiumDefaultText",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
     display_text_emporium_move_next = summarize_search_method(
         "TextHandlerShopNPCs+<DisplayTextEmporium>d__22",
         "MoveNext",
@@ -582,7 +662,7 @@ def main() -> None:
         "The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.",
         "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, and the widened slot-name assembly search also fails to recover any typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. CurrentBonusText therefore remains a separate runtime-only lane with no recovered dedicated producer.",
         "Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.",
-        "The narrowed Emporium UI-updater fallback search now surfaces NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as the last plausible non-TextHandlerMarkets runtime candidates. UpdateInscryptionUI.MoveNext iterates and toggles row objects without calling recovered MultiverseMarket final-bonus getters, recovered TextHandlerMarkets SetISN writers, or System.String.Concat, while DisplayTextEmporium.MoveNext does compose and write text but only in the shop-dialogue lane rather than a row-local CurrentBonusText lane.",
+        "The narrowed Emporium UI-updater fallback search now surfaces NavigationManager.UpdateInscryptionUI, NavigationManager+<UpdateInscryptionUI>d__185.MoveNext, NavigationManager+<InscEnum>d__186.MoveNext, NavigationManager.DisableInscryptionObjects, OnAvailbleInscryptionsClick, OnFinishedInscryptionsClick, TextHandlerShopNPCs.OpeningChrystosEmporium, TextHandlerShopNPCs.EmporiumDefaultText, and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as the last plausible non-TextHandlerMarkets runtime candidates. The checked NavigationManager routines stay in row-filter, row-toggle, and coroutine-orchestration flow without recovered MultiverseMarket final-bonus getters, recovered TextHandlerMarkets SetISN writers, or string-compose-to-text-setter behavior, while the TextHandlerShopNPCs routines stay in Emporium dialogue/current-string flow rather than a row-local CurrentBonusText lane.",
     ]
     if row78_helper_labels or row83_helper_labels:
         findings.append(
@@ -671,11 +751,18 @@ def main() -> None:
                     if isinstance(match, dict)
                 ],
                 "currentLaneCandidateChecks": {
+                    "updateInscryptionUi": update_inscryption_ui,
                     "updateInscryptionUiMoveNext": update_inscryption_ui_move_next,
+                    "inscEnumMoveNext": insc_enum_move_next,
+                    "disableInscryptionObjects": disable_inscryption_objects,
+                    "onAvailbleInscryptionsClick": on_available_inscryptions_click,
+                    "onFinishedInscryptionsClick": on_finished_inscryptions_click,
+                    "openingChrystosEmporium": opening_chrystos_emporium,
+                    "emporiumDefaultText": emporium_default_text,
                     "displayTextEmporiumMoveNext": display_text_emporium_move_next,
                 },
                 "sameSinkAsRecoveredEffectLabelFamily": False,
-                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime surface now also recovers SetAllBonusTexts as the batch entry for the ISNBonusText family, but still recovers no typed CurrentBonusText field, no SetCurrentBonusText writer family, and no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. The narrowed Emporium UI-updater fallback search also checks NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext, but only recovers row-toggle flow and shop-dialogue text flow rather than a row-local CurrentBonusText producer."
+                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime surface now also recovers SetAllBonusTexts as the batch entry for the ISNBonusText family, but still recovers no typed CurrentBonusText field, no SetCurrentBonusText writer family, and no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. The narrowed Emporium UI-updater fallback search now also checks NavigationManager.UpdateInscryptionUI, NavigationManager+<InscEnum>d__186.MoveNext, NavigationManager.DisableInscryptionObjects, OnAvailbleInscryptionsClick, OnFinishedInscryptionsClick, TextHandlerShopNPCs.OpeningChrystosEmporium, and TextHandlerShopNPCs.EmporiumDefaultText, but still only recovers row-filter, row-toggle, coroutine-orchestration, and Emporium dialogue/current-string flow rather than a row-local CurrentBonusText producer."
             },
             "effectLabelSlotAliasResolution": {
                 "status": "closed-best-fit-typed-alias",
@@ -702,7 +789,7 @@ def main() -> None:
             "Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat.",
             "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
             "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family plus SetAllBonusTexts but no CurrentBonusText-named field or writer family, and the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct slot-writer method.",
-            "Treat NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as checked negative fallback candidates for the CurrentBonusText lane: the former only iterates and toggles row objects, and the latter only composes and writes shop-dialogue text.",
+            "Treat NavigationManager.UpdateInscryptionUI, NavigationManager+<UpdateInscryptionUI>d__185.MoveNext, NavigationManager+<InscEnum>d__186.MoveNext, NavigationManager.DisableInscryptionObjects, OnAvailbleInscryptionsClick, OnFinishedInscryptionsClick, TextHandlerShopNPCs.OpeningChrystosEmporium, TextHandlerShopNPCs.EmporiumDefaultText, and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as checked negative fallback candidates for the CurrentBonusText lane: the NavigationManager methods stay in row-filter, row-toggle, and coroutine-orchestration flow, while the TextHandlerShopNPCs methods stay in Emporium dialogue/current-string flow.",
             "Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.",
             "Do not widen canonical import, planner behavior, or the shipped compatibility preview while the separate CurrentBonusText writer lane remains unrecovered.",
         ],
@@ -783,8 +870,23 @@ def main() -> None:
     lines.append(f"- `row83Helpers={row83_helper_labels}`")
     lines.extend(["", "## Current lane fallback candidates", ""])
     current_checks = result["methodChain"]["currentValueSlotStatus"]["currentLaneCandidateChecks"]
+    update_method = current_checks["updateInscryptionUi"]
     update_candidate = current_checks["updateInscryptionUiMoveNext"]
+    insc_enum_candidate = current_checks["inscEnumMoveNext"]
+    disable_candidate = current_checks["disableInscryptionObjects"]
+    available_candidate = current_checks["onAvailbleInscryptionsClick"]
+    finished_candidate = current_checks["onFinishedInscryptionsClick"]
+    opening_candidate = current_checks["openingChrystosEmporium"]
+    default_candidate = current_checks["emporiumDefaultText"]
     dialogue_candidate = current_checks["displayTextEmporiumMoveNext"]
+    if update_method is not None:
+        lines.append(
+            f"- `updateInscryptionUi.rva={update_method['rva']}`; "
+            f"`callsStringCompose={len(update_method['callsStringCompose'])}`; "
+            f"`callsRecoveredFinalBonusGetters={len(update_method['callsRecoveredFinalBonusGetters'])}`; "
+            f"`callsRecoveredBonusWriters={len(update_method['callsRecoveredBonusWriters'])}`; "
+            f"`hasVirtualUnityUiTextSetterPattern={update_method['hasVirtualUnityUiTextSetterPattern']}`"
+        )
     lines.append(
         f"- `updateInscryptionUiMoveNext.rva={update_candidate['rva']}`; "
         f"`callsStringCompose={len(update_candidate['callsStringCompose'])}`; "
@@ -792,6 +894,54 @@ def main() -> None:
         f"`callsRecoveredBonusWriters={len(update_candidate['callsRecoveredBonusWriters'])}`; "
         f"`hasVirtualUnityUiTextSetterPattern={update_candidate['hasVirtualUnityUiTextSetterPattern']}`"
     )
+    if insc_enum_candidate is not None:
+        lines.append(
+            f"- `inscEnumMoveNext.rva={insc_enum_candidate['rva']}`; "
+            f"`callsStringCompose={len(insc_enum_candidate['callsStringCompose'])}`; "
+            f"`callsRecoveredFinalBonusGetters={len(insc_enum_candidate['callsRecoveredFinalBonusGetters'])}`; "
+            f"`callsRecoveredBonusWriters={len(insc_enum_candidate['callsRecoveredBonusWriters'])}`; "
+            f"`hasVirtualUnityUiTextSetterPattern={insc_enum_candidate['hasVirtualUnityUiTextSetterPattern']}`"
+        )
+    if disable_candidate is not None:
+        lines.append(
+            f"- `disableInscryptionObjects.rva={disable_candidate['rva']}`; "
+            f"`callsStringCompose={len(disable_candidate['callsStringCompose'])}`; "
+            f"`callsRecoveredFinalBonusGetters={len(disable_candidate['callsRecoveredFinalBonusGetters'])}`; "
+            f"`callsRecoveredBonusWriters={len(disable_candidate['callsRecoveredBonusWriters'])}`; "
+            f"`hasVirtualUnityUiTextSetterPattern={disable_candidate['hasVirtualUnityUiTextSetterPattern']}`"
+        )
+    if available_candidate is not None:
+        lines.append(
+            f"- `onAvailbleInscryptionsClick.rva={available_candidate['rva']}`; "
+            f"`callsStringCompose={len(available_candidate['callsStringCompose'])}`; "
+            f"`callsRecoveredFinalBonusGetters={len(available_candidate['callsRecoveredFinalBonusGetters'])}`; "
+            f"`callsRecoveredBonusWriters={len(available_candidate['callsRecoveredBonusWriters'])}`; "
+            f"`hasVirtualUnityUiTextSetterPattern={available_candidate['hasVirtualUnityUiTextSetterPattern']}`"
+        )
+    if finished_candidate is not None:
+        lines.append(
+            f"- `onFinishedInscryptionsClick.rva={finished_candidate['rva']}`; "
+            f"`callsStringCompose={len(finished_candidate['callsStringCompose'])}`; "
+            f"`callsRecoveredFinalBonusGetters={len(finished_candidate['callsRecoveredFinalBonusGetters'])}`; "
+            f"`callsRecoveredBonusWriters={len(finished_candidate['callsRecoveredBonusWriters'])}`; "
+            f"`hasVirtualUnityUiTextSetterPattern={finished_candidate['hasVirtualUnityUiTextSetterPattern']}`"
+        )
+    if opening_candidate is not None:
+        lines.append(
+            f"- `openingChrystosEmporium.rva={opening_candidate['rva']}`; "
+            f"`callsStringCompose={len(opening_candidate['callsStringCompose'])}`; "
+            f"`callsRecoveredFinalBonusGetters={len(opening_candidate['callsRecoveredFinalBonusGetters'])}`; "
+            f"`callsRecoveredBonusWriters={len(opening_candidate['callsRecoveredBonusWriters'])}`; "
+            f"`hasVirtualUnityUiTextSetterPattern={opening_candidate['hasVirtualUnityUiTextSetterPattern']}`"
+        )
+    if default_candidate is not None:
+        lines.append(
+            f"- `emporiumDefaultText.rva={default_candidate['rva']}`; "
+            f"`callsStringCompose={len(default_candidate['callsStringCompose'])}`; "
+            f"`callsRecoveredFinalBonusGetters={len(default_candidate['callsRecoveredFinalBonusGetters'])}`; "
+            f"`callsRecoveredBonusWriters={len(default_candidate['callsRecoveredBonusWriters'])}`; "
+            f"`hasVirtualUnityUiTextSetterPattern={default_candidate['hasVirtualUnityUiTextSetterPattern']}`"
+        )
     lines.append(
         f"- `displayTextEmporiumMoveNext.rva={dialogue_candidate['rva']}`; "
         f"`callsStringCompose={len(dialogue_candidate['callsStringCompose'])}`; "

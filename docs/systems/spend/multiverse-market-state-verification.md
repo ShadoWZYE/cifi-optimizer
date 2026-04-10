@@ -328,7 +328,17 @@ Current grounded conclusion:
   - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, source their payload values from `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()`, pass through the now-partially named helper lane `GeneralFunctionsManager.BigDoubleToText` or `System.Int32.ToString` plus two still-unresolved RVAs, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
   - the same exact runtime surface also preserves `IS1BonusText` through `IS110BonusText`, `SetIS1BonusText` through `SetIS110BonusText`, `SetAllBonusTexts`, `IS1IDText` through `IS110IDText`, and `SetIS1IDText` through `SetIS110IDText`, while exposing no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family on `TextHandlerMarkets` and no `SetISNDescriptionText` family
   - the widened slot-name assembly search still does not recover any typed Assembly-CSharp owner exposing `CurrentBonusText` as a field or direct `Set*` slot-writer method
-  - the widened runtime search also checks `NavigationManager` and `TextHandlerShopNPCs` as the obvious Emporium-adjacent fallback owners for the current-value slot, but only recovers orchestration-side `Market` / `InscryptionList` / `UpdateInscryptionUI` and shop-dialogue-side `EmporiumDialogueText` / `EmporiumCurrentText` / `DisplayTextEmporium`, not any row-local `CurrentBonusText` producer
+  - the widened runtime search also exhausts the last plausible row-local fallback candidates for the current-value slot:
+    - `NavigationManager.UpdateInscryptionUI`
+    - `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`
+    - `NavigationManager+<InscEnum>d__186.MoveNext`
+    - `NavigationManager.DisableInscryptionObjects`
+    - `NavigationManager.OnAvailbleInscryptionsClick`
+    - `NavigationManager.OnFinishedInscryptionsClick`
+    - `TextHandlerShopNPCs.OpeningChrystosEmporium`
+    - `TextHandlerShopNPCs.EmporiumDefaultText`
+    - `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext`
+  - those checked candidates still only recover row-filter, row-toggle, coroutine-orchestration, and Emporium dialogue/current-string flow, not any row-local `CurrentBonusText` producer
   - that means the repo now recovers both the runtime base-bonus lane and a separate runtime effect-label writer family, while also closing `IDText` and `CurrentBonusText` away from the recovered effect-label sink
 - That still does not scale to the whole table as a recovered row-to-text join:
   - sparse direct anchors exist for rows `25`, `46`, `78`, and `83`
@@ -344,7 +354,7 @@ Current grounded conclusion:
 - the handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
 - the repo also now recovers a separate runtime effect-label writer family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
 - the recovered runtime families now close the row-local effect-label slot alias to `BonusDescriptionText`
-- `CurrentBonusText` remains narrowed away from that recovered effect-label family because the checked `TextHandlerMarkets` runtime surface has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family, and the widened runtime search also checks `NavigationManager` and `TextHandlerShopNPCs` without recovering a row-local CurrentBonusText producer there either
+- `CurrentBonusText` remains narrowed away from that recovered effect-label family because the checked `TextHandlerMarkets` runtime surface has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family, and the widened runtime search now exhausts `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext` without recovering a row-local CurrentBonusText producer there either
 - the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus `GeneralFunctionsManager.BigDoubleToText` / `System.Int32.ToString`, the runtime metadata-init helper, the null-reference throw helper, and `System.String.Concat`
 - the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane
 - the canonical import-safe subset stays empty

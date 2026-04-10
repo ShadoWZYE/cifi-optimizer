@@ -57,7 +57,17 @@ This note records the narrowest checked game-side path from a structurally settl
   - the same exact runtime surface now also preserves the wider `IS1BonusText` through `IS110BonusText` field family and `SetIS1BonusText` through `SetIS110BonusText` writer family on `TextHandlerMarkets`
   - that same runtime surface also preserves `IS1IDText` through `IS110IDText` and `SetIS1IDText` through `SetIS110IDText`, while exposing no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family and no `SetISNDescriptionText` family
   - the widened slot-name assembly search still does not recover any typed Assembly-CSharp owner exposing `CurrentBonusText` as a field or direct `Set*` slot-writer method
-  - the widened runtime search also checks `NavigationManager` and `TextHandlerShopNPCs` as the obvious Emporium-adjacent fallback owners for the current-value slot, but only recovers orchestration-side `Market` / `InscryptionList` / `UpdateInscryptionUI` and shop-dialogue-side `EmporiumDialogueText` / `EmporiumCurrentText` / `DisplayTextEmporium`, not any row-local `CurrentBonusText` producer
+  - the widened runtime search now exhausts the last plausible row-local fallback candidates too:
+    - `NavigationManager.UpdateInscryptionUI`
+    - `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`
+    - `NavigationManager+<InscEnum>d__186.MoveNext`
+    - `NavigationManager.DisableInscryptionObjects`
+    - `NavigationManager.OnAvailbleInscryptionsClick`
+    - `NavigationManager.OnFinishedInscryptionsClick`
+    - `TextHandlerShopNPCs.OpeningChrystosEmporium`
+    - `TextHandlerShopNPCs.EmporiumDefaultText`
+    - `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext`
+  - those checked candidates still only recover row-filter, row-toggle, coroutine-orchestration, and Emporium dialogue/current-string flow, not any row-local `CurrentBonusText` producer
   - that means the repo now recovers both a checked runtime base-bonus write lane and a separate checked runtime effect-label write lane, and can close the row-local effect-label slot alias by elimination to `BonusDescriptionText`
 - This means the repo can now name two checked game-side text-adjacent source classes:
   - direct Unity string anchors in the `TextHandlerMarkets` neighborhood
@@ -83,7 +93,7 @@ This note records the narrowest checked game-side path from a structurally settl
 ## Exact last missing layer
 
 - The isolated missing layer is now:
-  - the separate dedicated `CurrentBonusText` runtime writer lane
+  - the separate dedicated `CurrentBonusText` runtime writer lane, after the last plausible row-local update surfaces are exhausted
 - In practical terms, the repo still needs the step that turns:
   - `SetIS78BonusText`
   - `SetIS83BonusText`
@@ -98,7 +108,7 @@ This note records the narrowest checked game-side path from a structurally settl
   - `System.String.Concat`
   - into the now-closed row-local slot binding `BonusDescriptionText`
 - What is still not recovered is:
-  - the dedicated runtime method family, if any, that writes `CurrentBonusText`, after explicit negative checks against `TextHandlerMarkets`, `NavigationManager`, and `TextHandlerShopNPCs`
+  - the dedicated runtime method family, if any, that writes `CurrentBonusText`, after explicit negative checks against `TextHandlerMarkets`, `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext`
   - a broader typed join from that runtime path back to rows `69-74` or the rest of the Emporium table
 - The live local assets no longer look like the missing layer:
   - they do not serialize any producer-side `TextHandlerMarkets` or `MultiverseMarket` links into those text components
@@ -114,6 +124,6 @@ Current grounded conclusion:
 - the repo also now recovers a parallel runtime effect-label write family: `SetAllBonusTexts` -> `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
 - the row-local slot alias for that recovered effect-label family is now closed to `BonusDescriptionText`
 - the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus `GeneralFunctionsManager.BigDoubleToText` / `System.Int32.ToString`, the runtime metadata-init helper, the null-reference throw helper, and `System.String.Concat`
-- `CurrentBonusText` remains a separate unrecovered writer lane because `TextHandlerMarkets` has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family in the checked runtime surface, the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing `CurrentBonusText` directly, and the widened runtime search also checks `NavigationManager` and `TextHandlerShopNPCs` without recovering a row-local CurrentBonusText producer there either
+- `CurrentBonusText` remains a separate unrecovered writer lane because `TextHandlerMarkets` has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family in the checked runtime surface, the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing `CurrentBonusText` directly, and the widened runtime search now exhausts `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext` without recovering a row-local CurrentBonusText producer there either
 - the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane
 - compatibility-only import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked
