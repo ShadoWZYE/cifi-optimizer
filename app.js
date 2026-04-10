@@ -395,7 +395,7 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, datasetContract, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardCostModelBoundary, shardMilestoneRowModelBoundary, shardMilestoneTitleEffectBoundary, shardEffectTextHandlerBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, shardSceneMonoBehaviourProbe, shardCostParameterProbe, shardCostNativeProbe, shardBonusSlotProbe, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell] = await Promise.all([
+  const [snapshot, datasetContract, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardCostModelBoundary, shardMilestoneRowModelBoundary, shardMilestoneTitleEffectBoundary, shardEffectTextHandlerBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, shardSceneMonoBehaviourProbe, shardCostParameterProbe, shardCostNativeProbe, shardBonusSlotProbe, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell, tokenShopRowRemapBoundary] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/bundled-dataset-contract.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
@@ -436,7 +436,8 @@ async function bootstrap() {
     fetchJson("./data/token-shop-save-boundary.json"),
     fetchJson("./data/multiverse-market-save-boundary.json"),
     fetchJson("./data/multiverse-market-market-member-boundary.json"),
-    fetchJson("./data/token-bank-controller-shell.json")
+    fetchJson("./data/token-bank-controller-shell.json"),
+    fetchJson("./data/token-shop-row-remap-boundary.json")
   ]);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
@@ -488,7 +489,8 @@ async function bootstrap() {
     tokenShopSaveBoundary,
     multiverseMarketSaveBoundary,
     multiverseMarketMarketMemberBoundary,
-    tokenBankControllerShell
+    tokenBankControllerShell,
+    tokenShopRowRemapBoundary
   };
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile,
@@ -1849,6 +1851,11 @@ function renderSpendPlannerBoundary() {
   const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
   const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
   const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
+  const importedTokenShopState = compatibility.unmappedSystems?.tokenShop;
+  const groundedTokenShopRowPreview = getTokenShopGroundedRowPreviewSummary(
+    state.extractedMechanics?.tokenShopRowRemapBoundary,
+    importedTokenShopState
+  );
   const importedMarketPreview = getImportedMultiverseMarketPreview(
     importedMarketState,
     multiverseMarket,
@@ -1903,7 +1910,7 @@ function renderSpendPlannerBoundary() {
   const blockedInputs = [
     {
       label: "TokenShop current row levels",
-      reason: "Blocked until the recovered raw TokenShop ATU row levels are remapped onto grounded row identities. The save-side owner is now recovered, but canonical planner use is still blocked."
+      reason: "Blocked beyond the small grounded row preview. Only the checked ATU1, ATU2, ATU5, and ATU6 remap subset is surfaced as boundary-backed evidence; the rest of the recovered raw TokenShop ATU row family stays quarantined until the row remap clears more identities."
     },
     {
       label: "Token-bank cap and claimable tokens",
@@ -1933,6 +1940,11 @@ function renderSpendPlannerBoundary() {
         <ul class="research-step-list">${boundaryBackedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not imported yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
       </div>
       <div class="meta-stack">
+        <p class="snapshot-title">Grounded TokenShop rows only (boundary-backed preview)</p>
+        <ul class="research-step-list">${groundedTokenShopRowPreview.rows.map((row) => `<li>${escapeHtml(row.label)}: ${isBoundaryValuePresent(row.value) ? escapeHtml(formatBoundaryValue(row.value)) : "Not imported yet"} <code>${escapeHtml(row.path)}</code>. ${escapeHtml(row.note)}</li>`).join("")}</ul>
+        <p class="meta">${groundedTokenShopRowPreview.quarantineNote}</p>
+      </div>
+      <div class="meta-stack">
         <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
         <ul class="research-step-list">${blockedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${escapeHtml(input.reason)}</li>`).join("")}</ul>
       </div>
@@ -1953,6 +1965,7 @@ function renderSpendPlannerBoundary() {
       <div class="pill-row">
         <span class="pill">${canonicalInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${canonicalInputs.length} canonical inputs entered</span>
         <span class="pill">${boundaryBackedInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${boundaryBackedInputs.length} boundary-backed inputs imported</span>
+        <span class="pill">${groundedTokenShopRowPreview.importedCount}/${groundedTokenShopRowPreview.rows.length} grounded TokenShop rows imported</span>
         <span class="pill">${blockedInputs.length} blocked inputs surfaced</span>
         <span class="pill">Canonical boundary preserved</span>
         <span class="pill">Boundary-backed evidence labeled</span>
@@ -4587,6 +4600,48 @@ function getTokenShopSaveBoundarySummary(boundary) {
     ownerAnchor: "TokenShop",
     saveAnchor: "PlayerProfileData",
     overlapLabel: "zero overlap"
+  };
+}
+
+function getTokenShopGroundedRowPreviewSummary(boundary, tokenShopState) {
+  const resolvedTokenShopState = tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
+  const rowDefinitions = [
+    {
+      field: "ATU1Level",
+      slot: "ATU1",
+      identity: boundary?.adjacentFollowUp?.recoveredAdditionalBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.TokensBoost",
+      note: "Checked shell-to-prefab bridge only. This row preview stays non-canonical until a final player-facing title join is recovered."
+    },
+    {
+      field: "ATU2Level",
+      slot: "ATU2",
+      identity: boundary?.recoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.DiamondBoost",
+      note: "Checked shell-to-prefab bridge only. This row preview stays non-canonical until a final player-facing title join is recovered."
+    },
+    {
+      field: "ATU5Level",
+      slot: "ATU5",
+      identity: boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
+      note: "Checked shell-to-prefab bridge only. This row preview stays non-canonical until a final player-facing title join is recovered."
+    },
+    {
+      field: "ATU6Level",
+      slot: "ATU6",
+      identity: boundary?.verifiedTitleJoin?.titleProbeTitle || boundary?.boundedRecoveredBridgeFollowUp?.prefabIdentity || "Mk2 Generator Booster",
+      note: "Checked shell-to-prefab-to-title chain. This row preview is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
+    }
+  ];
+  const rows = rowDefinitions.map((row) => ({
+    label: `${row.identity} (${row.slot}, non-canonical row preview)`,
+    value: resolvedTokenShopState[row.field],
+    path: `compatibility.unmappedSystemState.tokenShop.${row.field}`,
+    note: row.note
+  }));
+
+  return {
+    rows,
+    importedCount: rows.filter((row) => isBoundaryValuePresent(row.value)).length,
+    quarantineNote: "Only rows with checked remap-boundary joins are surfaced here. Remaining `ATU*Level` rows stay quarantined under `compatibility.unmappedSystemState.tokenShop` until more grounded row identities clear."
   };
 }
 

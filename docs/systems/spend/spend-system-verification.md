@@ -75,8 +75,10 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - It is safe to describe its cost lane as token-bank token or tokenium spending, rather than as an unnamed generic spend pool.
 - It is safe to preserve raw `ATU1Level` through `ATU28Level` and `Tier2TokensUnlocked` through `Tier5TokensUnlocked` under `compatibility.unmappedSystemState.tokenShop`.
 - It is safe to say the repo now has grounded non-label clues around some `ATU` rows, including token, diamond, daily-token, shard, and late direct-buy hook evidence.
+- It is now also safe to show a small descriptive TokenShop row preview for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset as boundary-backed non-canonical evidence from `compatibility.unmappedSystemState.tokenShop`.
 - It is not yet safe to generate next-buy recommendations from player token budgets alone.
 - It is not yet safe to promote raw `ATU*Level` save fields into canonical `state.playerProfile` fields until the row-by-row remap is grounded.
+- The rest of the `ATU*Level` family should stay quarantined even when that small preview is shown; unresolved row identities are still a subset-remap blocker, not a reason to force a full-lane remap.
 - TokenShop-connected token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped` until saved-state owners are recovered.
 - `OR_TokenBankCap` and `OR_TokensFromChests` should currently be treated as grounded asset labels, not as recovered formula sources.
 - One key split is now grounded: claim actions resolve through `TokenShop`, token-bank cap display resolves through `BigStatisticPrefab.TokenBankCap`, and at least one daily-tokenium text path resolves through `TextHandlerLoopMods.SetLM244BonusText`.

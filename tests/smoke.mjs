@@ -199,7 +199,8 @@ assert.deepEqual(
     "tokenShopSaveBoundary",
     "multiverseMarketSaveBoundary",
     "multiverseMarketMarketMemberBoundary",
-    "tokenBankControllerShell"
+    "tokenBankControllerShell",
+    "tokenShopRowRemapBoundary"
   ],
   "bootstrap dataset destructuring changed unexpectedly"
 );
@@ -246,7 +247,8 @@ assert.deepEqual(
     "./data/token-shop-save-boundary.json",
     "./data/multiverse-market-save-boundary.json",
     "./data/multiverse-market-market-member-boundary.json",
-    "./data/token-bank-controller-shell.json"
+    "./data/token-bank-controller-shell.json",
+    "./data/token-shop-row-remap-boundary.json"
   ],
   "bootstrap fetch order changed unexpectedly"
 );
@@ -318,6 +320,7 @@ assert.match(appJs, /Spend planner first slice/);
 assert.match(appJs, /Bounded preview only\. This panel separates grounded canonical inputs, evidence-backed boundary inputs, and blocked planner inputs while owner recovery and remap work remain unresolved/);
 assert.match(appJs, /Grounded canonical inputs available now/);
 assert.match(appJs, /Evidence-backed boundary inputs available now/);
+assert.match(appJs, /Grounded TokenShop rows only \(boundary-backed preview\)/);
 assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Active Emporium import-surface decision/);
 assert.match(appJs, /Why recommendations stay unavailable/);
@@ -331,6 +334,12 @@ assert.match(appJs, /Daily Tokenium \(stored amount\)",\s*value: compatibility\.
 assert.match(appJs, /Exact SaveData\.DailyTokenium recovery plus the narrowed SaveData mission-persistence wrapper grounds the current Daily Tokenium stored amount as boundary-backed non-canonical evidence only/);
 assert.match(appJs, /Tokenium-cluster claimable evidence \(generic\)",\s*value: compatibility\.unmappedSystems\?\.tokenShop\?\.ClaimableTokenium/);
 assert.match(appJs, /Exact SaveData\.ClaimableTokenium recovery grounds a broader generic Tokenium-cluster claimable field as boundary-backed evidence only/);
+assert.match(appJs, /\.\/data\/token-shop-row-remap-boundary\.json/);
+assert.match(appJs, /boundary\?\.adjacentFollowUp\?\.recoveredAdditionalBridge\?\.prefabIdentity \|\| "NewTokenUPGPrefab\.T1\.TokensBoost"/);
+assert.match(appJs, /boundary\?\.recoveredBridge\?\.prefabIdentity \|\| "NewTokenUPGPrefab\.T1\.DiamondBoost"/);
+assert.match(appJs, /boundary\?\.boundedRecoveredBridge\?\.prefabIdentity \|\| "NewTokenUPGPrefab\.T1\.MK1Booster"/);
+assert.match(appJs, /boundary\?\.verifiedTitleJoin\?\.titleProbeTitle \|\| boundary\?\.boundedRecoveredBridgeFollowUp\?\.prefabIdentity \|\| "Mk2 Generator Booster"/);
+assert.match(appJs, /Only rows with checked remap-boundary joins are surfaced here/);
 assert.match(appJs, /TokenShop current row levels/);
 assert.match(appJs, /token-bank cap and claimable tokens/i);
 assert.match(appJs, /generic ClaimableTokenium evidence surfaced/);
@@ -1977,6 +1986,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   assert.match(track.goal, /minimal descriptive spend-planner panel/i);
   assert.match(track.currentSlice, /canonical `state\.playerProfile` spend-side inputs/);
   assert.match(track.currentSlice, /surfaces exact `SaveData\.BankedTokens`, exact `SaveData\.DailyTokenium`, and exact `SaveData\.ClaimableTokenium` as explicitly labeled boundary-backed spend evidence/);
+  assert.match(track.currentSlice, /small grounded TokenShop row preview for the already checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset only/);
   assert.match(track.currentSlice, /exact `SaveData\.DailyTokenium`, and exact `SaveData\.ClaimableTokenium` as explicitly labeled boundary-backed spend evidence from `compatibility\.unmappedSystemState\.tokenShop`/);
   assert.match(track.blockedBy, /TokenShop row remap, token-bank cap and claimable state, Daily Tokenium cap and Daily Tokenium-specific ready or claimable state, and Emporium owned progression fields/);
   assert.match(track.smallestShippableSlice, /top-level spend-planner panel/);
@@ -1997,6 +2007,10 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
     "expected spend first UI slice track to record generic ClaimableTokenium boundary-backed evidence"
   );
   assert.ok(
+    track.completedSteps.some((step) => /checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` TokenShop remap subset as non-canonical boundary-backed row preview evidence/.test(step)),
+    "expected spend first UI slice track to record grounded TokenShop row subset preview"
+  );
+  assert.ok(
     track.completedSteps.some((step) => /Label owner-dependent spend inputs as unavailable/.test(step)),
     "expected spend first UI slice track to record blocked-input labeling"
   );
@@ -2015,6 +2029,10 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   assert.ok(
     track.verified.some((line) => /Exact `SaveData\.ClaimableTokenium` recovery now grounds one broader generic Tokenium-cluster claimable clue strongly enough to show it as explicitly labeled boundary-backed evidence/.test(line)),
     "expected spend first UI slice track to record generic ClaimableTokenium evidence"
+  );
+  assert.ok(
+    track.verified.some((line) => /small preview-safe subset for `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`/.test(line)),
+    "expected spend first UI slice track to record grounded TokenShop row subset preview"
   );
   assert.ok(
     track.verified.some((line) => /descriptive spend-planner panel can ship without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs/.test(line)),
@@ -2979,6 +2997,8 @@ assert.match(tokenShopDoc, /Diamond-related upgrade lane inside TokenShop/);
 assert.match(tokenShopDoc, /## Future mapping signals/);
 assert.match(tokenShopDoc, /gameplay owner and saved-state family for the Academy or Farm Mission Daily Tokenium lane/);
 assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to affect/);
+assert.match(spendSystemVerificationDoc, /small descriptive TokenShop row preview for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset/);
+assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
 assert.match(multiverseMarketDoc, /## Integration status/);
 assert.match(multiverseMarketDoc, /CostBox-InscryptionsDone/);
@@ -3833,6 +3853,9 @@ assert.equal(
 
 const migratedFlatSpendStateProfile = normalizePlayerProfile({
   ATU1Level: "3",
+  ATU2Level: "4",
+  ATU5Level: "2",
+  ATU6Level: "7",
   ATU28Level: 1,
   Tier2TokensUnlocked: true,
   Tier4TokensUnlocked: false,
@@ -3856,6 +3879,9 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
 
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
   ATU1Level: 3,
+  ATU2Level: 4,
+  ATU5Level: 2,
+  ATU6Level: 7,
   ATU28Level: 1,
   Tier2TokensUnlocked: true,
   Tier4TokensUnlocked: false,
