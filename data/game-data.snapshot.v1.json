@@ -550,21 +550,22 @@
       "title": "Token-bank state owner recovery",
       "status": "active",
       "goal": "Recover the saved-state owner behind token-bank cap, fill, and claimable-bank state so token planning can use truthful player inputs.",
-      "currentSlice": "Keep exact `SaveData.BankedTokens` recovery as the current token-bank stored-amount owner while the checked TokenShop save-boundary, controller-shell, and derived-output artifacts keep cap and claimable-bank ownership narrowed away from `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and the `FinalTokenBank*` cluster and the remaining save-side search stays on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary.",
+      "currentSlice": "Keep exact `SaveData.BankedTokens` recovery as the current token-bank stored-amount owner while the checked TokenShop save-boundary, controller-shell, and derived-output artifacts keep cap and claimable-bank ownership narrowed away from `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and the `FinalTokenBank*` cluster, and the newly checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge still only expose generic `PlayerProfileData.Tokens` and `PlayerProfileData.Tokenium` wrapper strings rather than a bank-specific cap or claimable-bank input.",
       "exitCondition": "The repo either names the exact declaring save model for token-bank cap, fill, or claimable state or proves a narrower PlayerProfile-side wrapper/path than the current broad persistence-family boundary.",
-      "blockedBy": "Current evidence now recovers `SaveData.BankedTokens` for current stored amount and separates TokenShop controller hooks, display shells, and derived outputs from save-family clues, but still does not expose a direct declaring save type or narrower wrapper path for cap or claimable-bank state.",
-      "smallestShippableSlice": "A checked bank-state owner boundary that names exact `SaveData.BankedTokens` ownership for current stored amount while blocking `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and `FinalTokenBank*` as cap or claimable save-state owners and naming the current persistence-family boundary as the remaining grounded search path.",
+      "blockedBy": "Current evidence now recovers `SaveData.BankedTokens` for current stored amount, separates TokenShop controller hooks, display shells, and derived outputs from save-family clues, and checks the broader PlayerProfile persistence bridge through `saveInfoCache` plus `ConvertSaveDataToProfileData(...)`, but still does not expose a direct declaring save type or narrower bank-specific wrapper path for cap or claimable-bank state.",
+      "smallestShippableSlice": "A checked bank-state owner boundary that names exact `SaveData.BankedTokens` ownership for current stored amount while blocking `TokenShop`, `BigStatisticPrefab.TokenBankCap`, and `FinalTokenBank*` as cap or claimable save-state owners and proving that the checked `PlayerProfileData` wrapper still only exposes generic `Tokens` and `Tokenium` export strings in this lane.",
       "completedSteps": [
         "Recover the TokenShop controller-side bank methods for cap, claimable amount, fill, and claim behavior.",
         "Promote a TokenShop save-boundary dataset that preserves zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms.",
         "Promote a token-bank controller-shell dataset that keeps ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and adjacent controller methods in one local cluster.",
         "Promote a token-bank derived-output boundary that keeps FinalTokenBankCap and FinalTokenBankFillSpeed clustered as output-side accessors and backing fields without save-family joins.",
         "Narrow the current owner conclusion so TokenShop methods, BigStatisticPrefab.TokenBankCap, and FinalTokenBank-derived outputs are treated as non-owner surfaces while the remaining save-side search stays on the broader PlayerProfile persistence-family boundary.",
-        "Recover exact typed `SaveData.BankedTokens` ownership for the current token-bank stored amount without promoting cap or claimable state into canonical planner inputs."
+        "Recover exact typed `SaveData.BankedTokens` ownership for the current token-bank stored amount without promoting cap or claimable state into canonical planner inputs.",
+        "Check the broader PlayerProfile persistence neighborhood and preserve the exact typed `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge while confirming that the direct `PlayerProfileData` wrapper still only exposes generic `Tokens` and `Tokenium` strings for this lane."
       ],
       "nextSteps": [
         "Inspect the broader PlayerProfile persistence neighborhood for token-bank or banked-token field clues before assuming any FinalTokenBank output is the saved value owner.",
-        "Determine whether token-bank cap, fill, claimable, or banked-token state lives directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper.",
+        "Determine whether token-bank cap, fill, claimable, or banked-token state lives on a deeper declaring save model beyond the checked `PlayerProfileData` wrapper-export bridge.",
         "If a narrower wrapper or declaring owner is recovered, fork import-shape follow-up work instead of extending this track."
       ],
       "sources": [
@@ -585,11 +586,12 @@
         "The `FinalTokenBankCap` and `FinalTokenBankFillSpeed` cluster is still output-side and currently has no checked PlayerProfileData or CloudSavePlayerProfile join in its local context.",
         "The narrowed TokenShop owner shell currently preserves zero direct overlap with PlayerProfileData, GetPlayerProfileData, FillPlayerProfileData, and CloudSavePlayerProfile.",
         "The checked typed save tables do not currently expose `ClaimableBankTokens` or `TokenBankCap` on `SaveData` or `PlayerProfileData`.",
+        "Exact typed recovery now also confirms `PlayerProfileHandler.saveInfoCache: PlayerProfileData` and `ConvertSaveDataToProfileData(SaveData, System.DateTime) -> PlayerProfileData`, while the direct `PlayerProfileData` field table still only exposes generic `Tokens` and `Tokenium` strings in this lane.",
         "The remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary for token-bank cap and claimable state rather than on TokenShop-side or derived-output symbols."
       ],
       "uncertain": [
         "Which declaring save model actually owns current token-bank cap or claimable-bank state beyond the recovered `SaveData.BankedTokens` stored-amount field.",
-        "Whether cap or claimable state lives directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper.",
+        "Whether cap or claimable state lives on a deeper declaring save model beyond the checked `PlayerProfileData` wrapper-export bridge.",
         "Whether any distinct saved fill or ready-state field exists beyond `SaveData.BankedTokens`, or whether fill stays a controller-side or computed surface in the checked repo boundary."
       ]
     },

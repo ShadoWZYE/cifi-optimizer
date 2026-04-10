@@ -129,8 +129,10 @@ const multiverseMarketStateVerificationDoc = await readFile(new URL("../docs/sys
 const multiverseMarketMarketMemberBoundaryDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-market-member-boundary.md", import.meta.url), "utf8");
 const multiverseMarket6974AnomalyProvenanceDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-69-74-anomaly-provenance.md", import.meta.url), "utf8");
 const tokenBankStateDoc = await readFile(new URL("../docs/systems/spend/token-bank-state-verification.md", import.meta.url), "utf8");
+const spendSystemVerificationDoc = await readFile(new URL("../docs/systems/spend/spend-system-verification.md", import.meta.url), "utf8");
 const dailyTokeniumMissionDoc = await readFile(new URL("../docs/systems/spend/daily-tokenium-mission-lane-verification.md", import.meta.url), "utf8");
 const activeGroundingBoundariesDoc = await readFile(new URL("../docs/roadmap/active-grounding-boundaries.md", import.meta.url), "utf8");
+const unityOwnerMapDoc = await readFile(new URL("../docs/unity/unity-owner-map.md", import.meta.url), "utf8");
 const shardIngestDoc = await readFile(new URL("../docs/systems/shards/shard-milestones-grounding-ingest.md", import.meta.url), "utf8");
 const unityAuditPlaybook = await readFile(new URL("../docs/unity/unity-audit-playbook.md", import.meta.url), "utf8");
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
@@ -1505,6 +1507,35 @@ assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountField, "
 assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldType, "System.Single");
 assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldIndex, 214);
 assert.equal(tokenBankStateCluesData.exactSaveOwnerRecovery.storedAmountFieldOffset, 1800);
+assert.equal(tokenBankStateCluesData.playerProfilePersistenceBoundary.bridgeOwner, "PlayerProfileHandler");
+assert.equal(tokenBankStateCluesData.playerProfilePersistenceBoundary.bridgeMethod, "ConvertSaveDataToProfileData");
+assert.equal(tokenBankStateCluesData.playerProfilePersistenceBoundary.bridgeReturnType, "PlayerProfileData");
+assert.equal(
+  tokenBankStateCluesData.playerProfilePersistenceBoundary.bridgeSignature,
+  "PlayerProfileData ConvertSaveDataToProfileData(SaveData saveData, System.DateTime lastCloudSaveDate)"
+);
+assert.equal(tokenBankStateCluesData.playerProfilePersistenceBoundary.handlerField, "saveInfoCache");
+assert.equal(tokenBankStateCluesData.playerProfilePersistenceBoundary.handlerFieldType, "PlayerProfileData");
+assert.deepEqual(tokenBankStateCluesData.playerProfilePersistenceBoundary.wrapperFields, [
+  {
+    declaringType: "PlayerProfileData",
+    field: "Tokens",
+    fieldType: "System.String",
+    fieldIndex: 28,
+    fieldOffset: 240
+  },
+  {
+    declaringType: "PlayerProfileData",
+    field: "Tokenium",
+    fieldType: "System.String",
+    fieldIndex: 47,
+    fieldOffset: 392
+  }
+]);
+assert.match(
+  tokenBankStateCluesData.playerProfilePersistenceBoundary.blockedReason,
+  /only expose generic export strings, not token-bank-specific cap or claimable-bank fields/i
+);
 assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("SaveData.ClaimableBankTokens"));
 assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("SaveData.TokenBankCap"));
 assert.ok(tokenBankStateCluesData.negativeTypedOwnerChecks.includes("PlayerProfileData.BankedTokens"));
@@ -1953,7 +1984,7 @@ const tokenBankOwnerTrack = snapshot.researchTracks.find((track) => track.id ===
 withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", (track) => {
   assert.equal(track.status, "active");
   assert.match(track.currentSlice, /exact `SaveData\.BankedTokens` recovery as the current token-bank stored-amount owner/);
-  assert.match(track.currentSlice, /broader `PlayerProfileData` \/ `CloudSavePlayerProfile` persistence-family boundary/);
+  assert.match(track.currentSlice, /`PlayerProfileHandler\.saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge/);
   assert.ok(
     track.completedSteps.some((step) => /zero direct overlap between the narrowed TokenShop owner shell and the PlayerProfile save-family terms/.test(step)),
     "expected token-bank state-owner track to record TokenShop save-boundary separation"
@@ -1975,12 +2006,16 @@ withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", 
     "expected token-bank state-owner track to record typed negative cap and claimable checks"
   );
   assert.ok(
+    track.verified.some((line) => /`PlayerProfileHandler\.saveInfoCache: PlayerProfileData` and `ConvertSaveDataToProfileData\(SaveData, System\.DateTime\) -> PlayerProfileData`/.test(line)),
+    "expected token-bank state-owner track to record the checked PlayerProfile bridge"
+  );
+  assert.ok(
     track.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
     "expected token-bank state-owner track to record the narrowed broader save-family search path"
   );
   assert.ok(
-    track.uncertain.some((line) => /cap or claimable state lives directly on PlayerProfileData or on a narrower nested PlayerProfile-side wrapper/.test(line)),
-    "expected token-bank state-owner track to keep the PlayerProfile-side wrapper question unresolved"
+    track.uncertain.some((line) => /cap or claimable state lives on a deeper declaring save model beyond the checked `PlayerProfileData` wrapper-export bridge/.test(line)),
+    "expected token-bank state-owner track to keep the deeper save-model question unresolved"
   );
 });
 const feedTrack = snapshot.researchTracks.find((track) => track.id === "unified-feed-and-hardening");
@@ -2695,6 +2730,9 @@ assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs\.OpeningChrys
 assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/);
 assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
+assert.match(tokenBankStateDoc, /PlayerProfileHandler\.saveInfoCache: PlayerProfileData/);
+assert.match(tokenBankStateDoc, /ConvertSaveDataToProfileData\(SaveData, System\.DateTime\) -> PlayerProfileData/);
+assert.match(tokenBankStateDoc, /only exposes generic `Tokens: System\.String` and `Tokenium: System\.String` wrapper fields/i);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked typed-`Market` field result:/);
@@ -2705,6 +2743,9 @@ assert.match(multiverseMarketStateVerificationDoc, /(does not recover a typed `M
 assert.match(multiverseMarketStateVerificationDoc, /`SaveData` remains the exact declaring owner for the checked `IS\*Level` \/ trade-counter \/ mech run/);
 assert.match(activeGroundingBoundariesDoc, /the bare `Market` symbol is still only a metadata\/member-shell clue/);
 assert.match(activeGroundingBoundariesDoc, /does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
+assert.match(activeGroundingBoundariesDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings/i);
+assert.match(spendSystemVerificationDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge still only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings/i);
+assert.match(unityOwnerMapDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings/i);
 assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `PlayerProfileHandler`/i);
 assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `PlayerProfileData`/i);
 assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `SaveData`/i);
