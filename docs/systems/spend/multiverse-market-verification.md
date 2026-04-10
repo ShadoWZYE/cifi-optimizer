@@ -261,12 +261,13 @@ Current grounded conclusion:
 - The runtime code seam is now partially recovered:
   - `SetAllChrystosEmporiumTexts` directly calls `SetAllBaseBonusTexts`
   - `SetIS78BaseBonusText` and `SetIS83BaseBonusText` read `IS78BaseBonusText` / `IS83BaseBonusText`, compose strings, and end in the standard IL2CPP `UnityEngine.UI.Text` virtual-dispatch write pattern
-  - that narrows the recovered runtime write path to the base-bonus lane, not the live effect-label lane
+  - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, compose strings, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
+  - that means the repo now recovers both the runtime base-bonus lane and a separate runtime effect-label writer family
 - That still does not produce a reusable whole-table text join:
   - sparse direct anchors exist only for rows `25`, `46`, `78`, and `83`
   - no checked repo-local player-facing strings `Inscryption 69` through `Inscryption 74` are recovered
   - the live-asset walk reaches row-local slot objects and their `UnityEngine.UI.Text` components, but the assignment-site pass shows no serialized producer-side join back to `THMarkets` or `MultiverseMarket`
-  - the recovered `SetISNBaseBonusText` lane still does not explain the live effect-label text on slots like `CurrentBonusText` or `BonusDescriptionText`
+  - the recovered `SetISNBonusText` family still does not prove which recovered row-local slot carries that effect-label text, and no separate dedicated `CurrentBonusText` writer is recovered yet
 
 Current grounded conclusion:
 
@@ -274,7 +275,8 @@ Current grounded conclusion:
 - rows `78` and `83` are only partial text-adjacent controls, not completed live effect-text bindings
 - a control-row text-adjacent path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain
 - the handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
-- the exact remaining blocker is the unrecovered runtime-side effect-label assignment path that routes into row-local slots like `CurrentBonusText` and `BonusDescriptionText` and then into final live player-facing effect text
+- the repo also now recovers a separate runtime effect-label writer family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
+- the exact remaining blocker is the unrecovered typed row-local slot alias for that effect-label writer family, plus any separate dedicated `CurrentBonusText` writer, before final live player-facing effect text can be claimed
 - the canonical import-safe subset stays empty
 
 ## Still unresolved

@@ -163,7 +163,9 @@ def summarize_method(
     virtual_text_set_inference = False
     if instructions:
         for index, ins in enumerate(instructions):
-            if ins["mnemonic"] != "jmp" or str(ins["operand"]) != "r8":
+            is_virtual_tail = ins["mnemonic"] == "jmp" and str(ins["operand"]) == "r8"
+            is_virtual_call = ins["mnemonic"] == "call" and "qword ptr [rcx + 0x5e8]" in str(ins["operand"])
+            if not is_virtual_tail and not is_virtual_call:
                 continue
             window = instructions[max(0, index - 10): index + 1]
             has_text_object = any(
@@ -175,7 +177,11 @@ def summarize_method(
                 for call in calls
             )
             has_methodinfo_pair = any(
-                entry["mnemonic"] == "mov" and "qword ptr [rcx + 0x5e8]" in str(entry["operand"])
+                (
+                    entry["mnemonic"] == "mov" and "qword ptr [rcx + 0x5e8]" in str(entry["operand"])
+                ) or (
+                    entry["mnemonic"] == "call" and "qword ptr [rcx + 0x5e8]" in str(entry["operand"])
+                )
                 for entry in window
             ) and any(
                 entry["mnemonic"] == "mov" and "qword ptr [rcx + 0x5f0]" in str(entry["operand"])
@@ -221,6 +227,8 @@ def main() -> None:
         "SetAllBaseBonusTexts",
         "SetIS78BaseBonusText",
         "SetIS83BaseBonusText",
+        "SetIS78BonusText",
+        "SetIS83BonusText",
     ]
     summaries = [summarize_method(name, methods_by_rva, sorted_rvas, blob, field_map) for name in target_methods]
     by_name = {entry["name"]: entry for entry in summaries}
@@ -229,14 +237,17 @@ def main() -> None:
     set_all_base = by_name["SetAllBaseBonusTexts"]
     row78 = by_name["SetIS78BaseBonusText"]
     row83 = by_name["SetIS83BaseBonusText"]
+    row78_effect = by_name["SetIS78BonusText"]
+    row83_effect = by_name["SetIS83BonusText"]
 
     findings = [
         "The runtime probe now recovers typed TextHandlerMarkets field offsets and native RVAs for the exact Emporium text-handler family, without reopening the asset walk or shell-remap lane.",
         "SetAllChrystosEmporiumTexts directly calls SetAllBaseBonusTexts inside TextHandlerMarkets, which confirms a real runtime-only producer chain on the THMarkets side.",
         "SetIS78BaseBonusText and SetIS83BaseBonusText both read their row-local TextHandlerMarkets fields IS78BaseBonusText and IS83BaseBonusText, compose a string, and then end in the standard IL2CPP virtual-dispatch pattern that loads a UnityEngine.UI.Text method pair from the target object's class and jumps through it.",
         "Because UnityEngine.UI.Text.set_text is itself a virtual one-string setter in the recovered runtime surface, the narrowest defensible read is that the SetISNBaseBonusText family is a checked runtime assignment lane into UnityEngine.UI.Text components, but only as an inferred virtual setter bind rather than a named direct-call edge.",
-        "That recovered runtime write path is still specifically the base-bonus lane, not yet a recovered write path for the live effect-label text seen in screenshots.",
-        "The stronger remaining blocker is now narrower than generic TextHandlerMarkets binding: the repo still does not recover the separate runtime producer that writes effect-label payloads into row-local slots like CurrentBonusText or BonusDescriptionText for rows 78 and 83.",
+        "SetIS78BonusText and SetIS83BonusText form a second parallel runtime writer family: they read IS78BonusText and IS83BonusText, compose strings, and end in the same UnityEngine.UI.Text virtual-dispatch write pattern, which recovers a separate effect-label lane beyond the already checked base-bonus lane.",
+        "No CurrentBonusText-named or DescriptionText-named writer family is recovered in the TextHandlerMarkets runtime surface, so the strongest current inference is that ISNBonusText maps to the row-local effect-label slot most likely represented by BonusDescriptionText, while CurrentBonusText remains a separate current-value slot outside the recovered binder family.",
+        "The remaining seam is now narrower than a missing effect-label producer: the repo still does not recover a typed row-local alias that proves whether ISNBonusText binds to BonusDescriptionText directly, nor a separate dedicated current-value writer for CurrentBonusText.",
     ]
 
     result = {
@@ -250,6 +261,7 @@ def main() -> None:
             "producerType": "TextHandlerMarkets",
             "rootMethod": set_all,
             "baseBonusBatchMethod": set_all_base,
+            "effectLabelBatchMethodStatus": "no-separate-SetAllBonusTexts-method-recovered",
             "controlRows": [
                 {
                     "row": 78,
@@ -262,13 +274,31 @@ def main() -> None:
                     "boundFieldNames": sorted({hit["fieldName"] for hit in row83["fieldAccesses"]}),
                 },
             ],
+            "effectLabelControlRows": [
+                {
+                    "row": 78,
+                    "runtimeMethod": row78_effect,
+                    "boundFieldNames": sorted({hit["fieldName"] for hit in row78_effect["fieldAccesses"]}),
+                },
+                {
+                    "row": 83,
+                    "runtimeMethod": row83_effect,
+                    "boundFieldNames": sorted({hit["fieldName"] for hit in row83_effect["fieldAccesses"]}),
+                },
+            ],
+            "currentValueSlotStatus": {
+                "namedWriterFamilyRecovered": False,
+                "inferenceOnly": True,
+                "strongestCurrentInference": "ISNBonusText is the recovered effect-label writer family and most likely targets the row-local BonusDescriptionText slot, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets writer."
+            }
         },
         "findings": findings,
         "currentBoundary": [
             "Treat SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText through row payload ID or Level or ISObject as the settled row-identity chain.",
             "Treat TextHandlerMarkets.SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts through SetIS78BaseBonusText or SetIS83BaseBonusText as a checked runtime-only write path into UnityEngine.UI.Text for the base-bonus lane.",
-            "Do not treat that recovered base-bonus write path as a solved live effect-label binding for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
-            "Treat the exact remaining missing layer as the separate runtime producer or binding path that populates the live effect-label slots such as CurrentBonusText or BonusDescriptionText, not the already recovered ISNBaseBonusText assignment lane.",
+            "Treat TextHandlerMarkets.SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane.",
+            "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
+            "Treat the exact remaining missing layer as the typed row-local alias from ISNBonusText into the recovered row-local slot objects, with BonusDescriptionText as the strongest current inference and CurrentBonusText still outside the recovered dedicated writer family.",
             "Do not widen canonical import, planner behavior, or the shipped compatibility preview while that effect-label producer remains unrecovered.",
         ],
     }
@@ -286,6 +316,12 @@ def main() -> None:
     lines.extend(f"- {finding}" for finding in findings)
     lines.extend(["", "## Control methods", ""])
     for entry in result["methodChain"]["controlRows"]:
+        method = entry["runtimeMethod"]
+        lines.append(
+            f"- `row={entry['row']}`; `{method['name']}`; `rva={method['rva']}`; `callsDirectUnityUiSetText={method['callsDirectUnityUiSetText']}`; `virtualUnityUiTextSetterInference={method['virtualUnityUiTextSetterInference']}`; `boundFields={entry['boundFieldNames']}`"
+        )
+    lines.extend(["", "## Effect-label methods", ""])
+    for entry in result["methodChain"]["effectLabelControlRows"]:
         method = entry["runtimeMethod"]
         lines.append(
             f"- `row={entry['row']}`; `{method['name']}`; `rva={method['rva']}`; `callsDirectUnityUiSetText={method['callsDirectUnityUiSetText']}`; `virtualUnityUiTextSetterInference={method['virtualUnityUiTextSetterInference']}`; `boundFields={entry['boundFieldNames']}`"

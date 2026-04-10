@@ -2553,28 +2553,30 @@ assert.deepEqual(
 );
 assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesToWholeTable, false);
-assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "runtime-only effect-label assignment layer after the recovered TextHandlerMarkets base-bonus write path");
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "typed row-local effect-label slot alias and any separate CurrentBonusText writer after the recovered TextHandlerMarkets base-bonus and ISNBonusText write paths");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.currentlyRecoveredInputs,
-  ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetISNCostText", "SetISNBaseBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer"]
+  ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer"]
 );
 assert.match(multiverseMarketStateVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /Inscryption 78: Ouroboros Orbs/);
 assert.match(multiverseMarketStateVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketStateVerificationDoc, /SetAllChrystosEmporiumTexts/);
 assert.match(multiverseMarketStateVerificationDoc, /SetIS78BaseBonusText/);
+assert.match(multiverseMarketStateVerificationDoc, /SetIS78BonusText/);
 assert.match(multiverseMarketStateVerificationDoc, /CurrentBonusText/);
 assert.match(multiverseMarketStateVerificationDoc, /UnityEngine\.UI\.Text/);
 assert.match(multiverseMarketStateVerificationDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i);
-assert.match(multiverseMarketStateVerificationDoc, /effect-label assignment path that routes into row-local slots like `CurrentBonusText` and `BonusDescriptionText`/i);
+assert.match(multiverseMarketStateVerificationDoc, /typed row-local slot alias for that effect-label writer family, plus any separate dedicated `CurrentBonusText` writer/i);
 assert.match(multiverseMarketVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketVerificationDoc, /SetIS69BaseBonusText/);
 assert.match(multiverseMarketVerificationDoc, /SetIS78BaseBonusText/);
+assert.match(multiverseMarketVerificationDoc, /SetIS78BonusText/);
 assert.match(multiverseMarketVerificationDoc, /CurrentBonusText/);
 assert.match(multiverseMarketVerificationDoc, /UnityEngine\.UI\.Text/);
 assert.match(multiverseMarketVerificationDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i);
-assert.match(multiverseMarketVerificationDoc, /effect-label text on slots like `CurrentBonusText` or `BonusDescriptionText`/i);
+assert.match(multiverseMarketVerificationDoc, /typed row-local slot alias for that effect-label writer family, plus any separate dedicated `CurrentBonusText` writer/i);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);
