@@ -281,8 +281,8 @@ Current grounded conclusion:
 - the repo also now recovers a separate runtime effect-label writer family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
 - the recovered runtime families now close the row-local effect-label slot alias to `BonusDescriptionText`
 - `CurrentBonusText` remains narrowed away from that recovered effect-label family because the checked `TextHandlerMarkets` runtime surface has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family, and the widened runtime search also checks `NavigationManager` and `TextHandlerShopNPCs` without recovering a row-local CurrentBonusText producer there either
-- the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus `GeneralFunctionsManager.BigDoubleToText` / `System.Int32.ToString`, two still-unresolved helper RVAs, and `System.String.Concat`
-- the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane plus the two still-unresolved helper RVAs inside the already recovered `BonusDescriptionText` payload path
+- the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus `GeneralFunctionsManager.BigDoubleToText` / `System.Int32.ToString`, the runtime metadata-init helper, the null-reference throw helper, and `System.String.Concat`
+- the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane
 - the canonical import-safe subset stays empty
 
 ## Still unresolved

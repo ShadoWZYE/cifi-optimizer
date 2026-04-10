@@ -2553,10 +2553,10 @@ assert.deepEqual(
 );
 assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesToWholeTable, false);
-assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane, plus the two still-unresolved formatter-helper RVAs inside the already recovered BonusDescriptionText payload path");
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the BonusDescriptionText helper path is role-closed");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.currentlyRecoveredInputs,
-  ["TextHandlerMarkets", "THMarkets", "MultiverseMarket", "SetAllChrystosEmporiumTexts", "SetAllBonusTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "get_FinalIS78Bonus", "get_FinalIS83Bonus", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "GeneralFunctionsManager.BigDoubleToText", "System.Int32.ToString", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer", "System.String.Concat"]
+  ["TextHandlerMarkets", "THMarkets", "MultiverseMarket", "SetAllChrystosEmporiumTexts", "SetAllBonusTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "get_FinalIS78Bonus", "get_FinalIS83Bonus", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "GeneralFunctionsManager.BigDoubleToText", "System.Int32.ToString", "runtime metadata init helper", "null-reference throw helper", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer", "System.String.Concat"]
 );
 assert.match(multiverseMarketStateVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /Inscryption 78: Ouroboros Orbs/);
@@ -2574,6 +2574,8 @@ assert.match(multiverseMarketStateVerificationDoc, /get_FinalIS78Bonus|get_Final
 assert.match(multiverseMarketStateVerificationDoc, /SetAllBonusTexts/);
 assert.match(multiverseMarketStateVerificationDoc, /GeneralFunctionsManager\.BigDoubleToText/);
 assert.match(multiverseMarketStateVerificationDoc, /System\.Int32\.ToString|Int32\.ToString/);
+assert.match(multiverseMarketStateVerificationDoc, /runtime metadata-init helper|runtime metadata init helper/i);
+assert.match(multiverseMarketStateVerificationDoc, /null-reference throw helper/i);
 assert.match(multiverseMarketStateVerificationDoc, /separate `CurrentBonusText` writer lane/i);
 assert.match(multiverseMarketStateVerificationDoc, /NavigationManager/);
 assert.match(multiverseMarketStateVerificationDoc, /TextHandlerShopNPCs/);

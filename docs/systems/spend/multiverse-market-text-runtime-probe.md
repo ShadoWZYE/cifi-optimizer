@@ -14,7 +14,7 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 - The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.
 - That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, and the widened slot-name assembly search also fails to recover any typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. CurrentBonusText therefore remains a separate runtime-only lane with no recovered dedicated producer.
 - Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.
-- The unresolved formatter-helper seam is now narrower too: the targeted RVA lookup can name helper methods on the SetIS78BonusText and SetIS83BonusText payload path before System.String.Concat.
+- The last two anonymous helper RVAs on the BonusDescriptionText path are now role-closed too: 28277222 is the runtime metadata-init helper reached from one-time guard blocks, and 28277761 is the null-reference throw helper reached only from the row-local null-guard branches.
 
 ## Control methods
 
@@ -48,16 +48,16 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 - `rva=31777861`; `target=TextHandlerMarkets.SetAllCostTexts`
 - `rva=31778743`; `target=TextHandlerMarkets.SetAllBaseBonusTexts`
 - `rva=31779625`; `target=TextHandlerMarkets.SetAllBonusTexts`
-- `rva=28277222`; `target=unresolved`
+- `rva=28277222`; `target=runtime metadata init helper (il2cpp_codegen_initialize_runtime_metadata)`
 - `rva=37322803`; `target=MultiverseMarket.get_InscrpytionLevelsCount`
 - `rva=59968580`; `target=System.Int32.ToString`
 - `rva=37203408`; `target=MultiverseMarket.get_TotalInscryptionsAvailable`
 - `rva=59968580`; `target=System.Int32.ToString`
 - `rva=58520722`; `target=System.String.Concat`
-- `rva=28277761`; `target=unresolved`
-- `rva=28277222`; `target=unresolved`
+- `rva=28277761`; `target=null-reference throw helper (il2cpp_codegen_raise_null_reference_exception)`
+- `rva=28277222`; `target=runtime metadata init helper (il2cpp_codegen_initialize_runtime_metadata)`
 - `rva=30996655`; `target=unresolved`
-- `rva=28277761`; `target=unresolved`
+- `rva=28277761`; `target=null-reference throw helper (il2cpp_codegen_raise_null_reference_exception)`
 
 ## Slot alias resolution
 
@@ -70,14 +70,14 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 
 ## Helper-name narrowing
 
-- `row78Helpers=['unresolved@28277222', 'unresolved@28277222', 'GeneralFunctionsManager.BigDoubleToText', 'unresolved@28277761']`
-- `row83Helpers=['unresolved@28277222', 'System.Int32.ToString', 'unresolved@28277761']`
+- `row78Helpers=['runtime metadata init helper@28277222', 'runtime metadata init helper@28277222', 'GeneralFunctionsManager.BigDoubleToText', 'null-reference throw helper@28277761']`
+- `row83Helpers=['runtime metadata init helper@28277222', 'System.Int32.ToString', 'null-reference throw helper@28277761']`
 
 ## Current boundary
 
 - Treat SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText through row payload ID or Level or ISObject as the settled row-identity chain.
 - Treat TextHandlerMarkets.SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts through SetIS78BaseBonusText or SetIS83BaseBonusText as a checked runtime-only write path into UnityEngine.UI.Text for the base-bonus lane.
-- Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus helper methods that are now narrower than anonymous RVAs alone before System.String.Concat.
+- Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat.
 - Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.
 - Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family plus SetAllBonusTexts but no CurrentBonusText-named field or writer family, and the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct slot-writer method.
 - Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.

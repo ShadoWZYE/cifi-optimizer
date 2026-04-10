@@ -24,6 +24,21 @@ CALL_TARGET_RE = re.compile(r"^0x([0-9a-f]+)$")
 FIELD_ACCESS_RE = re.compile(r"\[(?P<base>[a-z0-9]+) \+ (?P<offset>0x[0-9a-f]+)\]")
 INSCRIPTION_NUMBER_RE = re.compile(r"IS(?P<number>\d+)")
 
+NATIVE_HELPER_INFERENCES: dict[int, dict[str, str]] = {
+    28277222: {
+        "roleName": "runtime metadata init helper",
+        "canonicalInference": "il2cpp_codegen_initialize_runtime_metadata",
+        "contribution": "initializes one-time runtime metadata/class references before the effect-label payload is composed",
+        "evidence": "called from one-time guard blocks immediately after lea rdi,[rip+...] and immediately before the guard byte flips to 1",
+    },
+    28277761: {
+        "roleName": "null-reference throw helper",
+        "canonicalInference": "il2cpp_codegen_raise_null_reference_exception",
+        "contribution": "raises the null-guard failure path when Market or the target UnityEngine.UI.Text sink is missing",
+        "evidence": "reached only from je branches after test-null checks in SetIS78BonusText and SetIS83BonusText",
+    },
+}
+
 
 def load_runtime_surface() -> dict[str, object]:
     return json.loads(RUNTIME_SURFACE_PATH.read_text(encoding="utf-8"))
@@ -364,6 +379,7 @@ def main() -> None:
                 "targetRva": call["targetRva"],
                 "operand": call["operand"],
                 "resolvedLookupMatches": rva_lookup_map.get(call["targetRva"], []),
+                "nativeHelperInference": NATIVE_HELPER_INFERENCES.get(call["targetRva"]),
             }
             for call in call_targets
             if call["targetRva"] is not None and call.get("resolvedTarget") is None
@@ -413,6 +429,9 @@ def main() -> None:
                     for match in matches
                     if isinstance(match, dict)
                 )
+            elif isinstance(helper.get("nativeHelperInference"), dict):
+                native = helper["nativeHelperInference"]
+                labels.append(f"{native.get('roleName')}@{helper['targetRva']}")
             else:
                 labels.append(f"unresolved@{helper['targetRva']}")
         return labels
@@ -434,7 +453,7 @@ def main() -> None:
     ]
     if row78_helper_labels or row83_helper_labels:
         findings.append(
-            "The unresolved formatter-helper seam is now narrower too: the targeted RVA lookup can name helper methods on the SetIS78BonusText and SetIS83BonusText payload path before System.String.Concat."
+            "The last two anonymous helper RVAs on the BonusDescriptionText path are now role-closed too: 28277222 is the runtime metadata-init helper reached from one-time guard blocks, and 28277761 is the null-reference throw helper reached only from the row-local null-guard branches."
         )
 
     result = {
@@ -538,7 +557,7 @@ def main() -> None:
         "currentBoundary": [
             "Treat SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText through row payload ID or Level or ISObject as the settled row-identity chain.",
             "Treat TextHandlerMarkets.SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts through SetIS78BaseBonusText or SetIS83BaseBonusText as a checked runtime-only write path into UnityEngine.UI.Text for the base-bonus lane.",
-            "Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus helper methods that are now narrower than anonymous RVAs alone before System.String.Concat.",
+            "Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat.",
             "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
             "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family plus SetAllBonusTexts but no CurrentBonusText-named field or writer family, and the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct slot-writer method.",
             "Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.",
@@ -602,6 +621,9 @@ def main() -> None:
                 f"{match['fullTypeName']}.{match['methodName']}"
                 for match in call["resolvedLookupMatches"]
             )
+        elif call["targetRva"] in NATIVE_HELPER_INFERENCES:
+            native = NATIVE_HELPER_INFERENCES[call["targetRva"]]
+            label = f"{native['roleName']} ({native['canonicalInference']})"
         else:
             label = "unresolved"
         lines.append(f"- `rva={call['targetRva']}`; `target={label}`")
