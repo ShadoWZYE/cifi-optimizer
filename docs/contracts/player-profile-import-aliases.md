@@ -82,7 +82,7 @@ Classification: `compatibility`
 
 Legacy or unmapped values preserved for migration safety only.
 
-Accepted alias paths: 31
+Accepted alias paths: 32
 
 | Field | Target path | Accepted aliases |
 |---|---|---|
@@ -95,7 +95,9 @@ Accepted alias paths: 31
 | `shardMilestones` | `compatibility.unmappedSystemState.shardMilestones` | `compatibility.unmappedSystemState.shardMilestones`, `systems.shardMilestones` |
 | `tokenShop` | `compatibility.unmappedSystemState.tokenShop` | `compatibility.unmappedSystemState.tokenShop`, `systems.tokenShop`, `systems.tokenBank`, `tokenShop`, `tokenBank` |
 | `multiverseMarket` | `compatibility.unmappedSystemState.multiverseMarket` | `compatibility.unmappedSystemState.multiverseMarket`, `systems.multiverseMarket`, `multiverseMarket` |
-| `tokenShopStateClues` | `compatibility.unmappedSystemState.tokenShop` | `TokenBankCap`, `ClaimableBankTokens`, `BankedTokens`, `DailyTokenium`, `DailyTokeniumCap`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `FinalDailyTokenBonus` |
+| `tokenShopStateClues` | `compatibility.unmappedSystemState.tokenShop` | `TokenBankCap`, `ClaimableBankTokens`, `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `DailyTokeniumCap`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `FinalDailyTokenBonus` |
+
+`ClaimableTokenium` stays a compatibility-only import clue for the broader generic Tokenium cluster. Preserving it here does not imply token-bank claimable ownership, Daily Tokenium-specific ready state, or canonical promotion.
 | `multiverseMarketStateClues` | `compatibility.unmappedSystemState.multiverseMarket` | `InscryptionsDone` |
 
 ## Ship Calibration Preservation

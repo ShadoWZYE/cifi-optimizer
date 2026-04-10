@@ -112,7 +112,8 @@ Import rule:
 - prefer explicit `compatibility.*` paths or namespaced legacy sources such as `stage.*` and `systems.metaProgression.*`
 - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
 - imported `systems.shardMilestones` or `compatibility.unmappedSystemState.shardMilestoneState` payloads must remain quarantined under `compatibility.unmappedSystemState.*` until the save owner, field mapping, and planner-safe recommendation gate are verified
-- flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, and the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked` may be quarantined under `compatibility.unmappedSystemState.*`
+- flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, and the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked` may be quarantined under `compatibility.unmappedSystemState.*`
+- quarantine for `ClaimableTokenium` is compatibility-only and descriptive; it must not be read as token-bank claimable ownership, Daily Tokenium-specific ready state, or canonical `player.*` truth
 
 Mapping gate before canonical promotion:
 
