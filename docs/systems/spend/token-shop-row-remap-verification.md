@@ -27,6 +27,11 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - checked action-lane clues preserve the matching direct buy hook through `BuyMK2TokenBoost`.
   - the checked `level0` prefab roster separately preserves `NewTokenUPGPrefab.T1.MK2Booster`.
   - taken together, that is enough to ground `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster` without forcing a full T1 generator-booster lane remap or inventing a final player-facing row title.
+- One concrete shell-to-prefab-to-title chain now also clears on the same row:
+  - the already grounded `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` bridge now has one checked title-side follow-through.
+  - the TokenShop text-handler search surface still runs through `SetAllTokenShopTexts` and `SetTokenTexts`, while the narrower checked title-side probe preserves the final player-facing title `Mk2 Generator Booster`.
+  - that same checked title-side surface also preserves matching MK2-generator upgrade text: `This upgrade provides a 30% increase to the output of MK2 Generators.`
+  - taken together, that is enough to preserve one concrete `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` -> `Mk2 Generator Booster` chain without widening the rest of the unresolved `ATU` family.
 - Checked probe output also preserves grounded non-label clues around some `ATU` rows:
   - effect hooks such as `ATU1TokenBonus`, `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU20TokenBonus`, `ATU21TokenDailiesBonus`, and `ATU24Bonus3Shards`
   - late direct-buy hooks such as `BuyATU24`, `BuyATU25`, `BuyATU26`, `BuyATU27`, and `BuyATU28`
@@ -54,6 +59,8 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`
   - `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster`
   - `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster`
+- One exact shell-to-prefab-to-final-title chain is now recovered:
+  - `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` -> `Mk2 Generator Booster`
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
 - Late `ATU` buy hooks also now sit inside a checked named tier-buy neighborhood instead of standing alone.
 - The generic TokenShop text-hook surface does not recover one additional shell-to-title or shell-to-prefab bridge.
@@ -66,15 +73,15 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
     - diamond-special surface: `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost`
     - token-prefab and title surface: `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells`
   - none of those committed surfaces currently provides a checked object or text join back to `ATU3Button` path id `15810`.
-  - `ATU5` and `ATU6` clearing do not change that rule:
+  - `ATU5` and `ATU6` clearing do not change that rule for the rest of the lane:
     - they clear because one exact owner-field block, one exact buy hook, and one exact token prefab converge on the same `MK1` or `MK2` family
-    - the repo still does not have a checked final title join for `ATU5Button` or `ATU6Button`
+    - the repo now has one checked final title join for `ATU6Button`, but still does not have one for `ATU5Button`
     - the neighboring `MK3` through `MK8` token rows stay unresolved until their own shell joins are checked individually
 
 The remaining missing pieces are still checked joins:
 
 - no checked repo artifact currently ties `ATU1Button` or `ATU2Button` directly to a final player-facing TokenShop row title string
-- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, `ATU5Button`, or `ATU6Button` directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, or `ATU5Button` directly to a final player-facing TokenShop row title string
 - no checked repo artifact currently joins the remaining `ATU*Button` or `ATU*Content` path ids directly to specific `NewTokenUPGPrefab.*` object identities
 - no checked repo artifact currently ties the remaining concrete `ATU` numbers directly to final player-facing TokenShop row titles
 - no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` token-menu or token-bank neighborhood to a specific `ATU` row number
@@ -114,6 +121,7 @@ Because those joins are still missing, the repo should not:
 - Canonical `state.playerProfile` promotion remains blocked for the unrecovered rows and for the recovered shell-to-prefab bridges unless a separate player-facing row-title join clears.
 - Planner-safe spend behavior remains blocked on row identity recovery, not on row-level owner recovery.
 - The remaining unrecovered `ATU` family should stay compatibility-only and out of planner logic until its own row-specific joins clear.
+- The new `ATU6Button` title join does not promote broader planner or canonical use by itself; it only preserves one checked final-title chain while the rest of the family stays blocked.
 
 ## Narrowest next slice
 

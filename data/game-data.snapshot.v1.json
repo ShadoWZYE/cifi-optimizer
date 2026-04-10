@@ -504,14 +504,15 @@
       "title": "TokenShop row remap",
       "status": "active",
       "goal": "Map recovered raw `ATU*Level` TokenShop save fields onto grounded row identities strongly enough for bounded non-speculative use beyond compatibility import.",
-      "currentSlice": "Keep raw `ATU*Level` fields in the compatibility TokenShop sink while the repo preserves the recovered ATU1, ATU2, ATU5, and ATU6 shell-to-prefab bridges and tests whether any additional checked object or text join can bind one more unresolved ATU-numbered row shell to grounded TokenShop row identity.",
+      "currentSlice": "Keep raw `ATU*Level` fields in the compatibility TokenShop sink while the repo preserves the recovered ATU1, ATU2, ATU5, and ATU6 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, and tests whether any additional checked object or text join can bind one more unresolved ATU-numbered row shell to grounded TokenShop row identity.",
       "exitCondition": "The repo has a checked TokenShop row-by-row remap boundary that ties the recovered `ATU*Level` family to grounded row identities without inventing player-facing labels.",
-      "blockedBy": "The exact `SaveData` owner is recovered and four ATU shell-to-prefab bridges are now grounded, but the repo still lacks checked joins from the remaining ATU-numbered row shells to specific prefab identities or final player-facing row titles.",
+      "blockedBy": "The exact `SaveData` owner is recovered, four ATU shell-to-prefab bridges are now grounded, and one ATU6 shell-to-prefab-to-title chain now clears, but the repo still lacks checked joins from the remaining ATU-numbered row shells to specific prefab identities or final player-facing row titles.",
       "smallestShippableSlice": "A checked identity-join boundary that proves which recovered `ATU` rows, if any, can be bound beyond compatibility-only import.",
       "completedSteps": [
         "Preserve the raw `ATU1Level` through `ATU28Level` family under the compatibility TokenShop sink while the row remap stays unresolved.",
         "Promote a TokenShop row-remap boundary artifact that records grounded ATU effect-domain clues, direct late-row buy hooks, and the missing object or text joins that still block row identity recovery.",
-        "Recover four bounded shell-to-prefab bridges: `ATU1Button` to `NewTokenUPGPrefab.T1.TokensBoost`, `ATU2Button` to `NewTokenUPGPrefab.T1.DiamondBoost`, `ATU5Button` to `NewTokenUPGPrefab.T1.MK1Booster`, and `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster`."
+        "Recover four bounded shell-to-prefab bridges: `ATU1Button` to `NewTokenUPGPrefab.T1.TokensBoost`, `ATU2Button` to `NewTokenUPGPrefab.T1.DiamondBoost`, `ATU5Button` to `NewTokenUPGPrefab.T1.MK1Booster`, and `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster`.",
+        "Recover one checked shell-to-prefab-to-title chain: `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster` to `Mk2 Generator Booster`."
       ],
       "nextSteps": [
         "Recover a checked bridge from one more unresolved `ATU*Button`, `ATU*Content`, or adjacent row-shell path id to one specific `NewTokenUPGPrefab.*` object before claiming any wider row identity.",
@@ -533,6 +534,7 @@
       "verified": [
         "The repo preserves the raw `ATU1Level` through `ATU28Level` save family on `SaveData` and the same numbering family on the grounded `TokenShop` owner payload.",
         "Four exact shell-to-prefab bridges are now recovered: `ATU1Button` to `NewTokenUPGPrefab.T1.TokensBoost`, `ATU2Button` to `NewTokenUPGPrefab.T1.DiamondBoost`, `ATU5Button` to `NewTokenUPGPrefab.T1.MK1Booster`, and `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster`.",
+        "One exact shell-to-prefab-to-title chain is now recovered: `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster` to `Mk2 Generator Booster`.",
         "Checked probe output also preserves grounded non-label clues such as `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU24Bonus3Shards`, and late direct buy hooks `BuyATU24` through `BuyATU28`.",
         "Checked prefab and player-facing row rosters both exist in repo artifacts, but they are still not joined back onto most ATU-numbered row shells."
       ],
