@@ -13,10 +13,36 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
 ## How to use it
 
 - read this first for current lane boundaries
+- use the lane contract first: user-facing question, minimum required inputs, explicit non-blockers, current true blocker, and smallest shippable tool slice
 - read `docs/roadmap/known-false-paths.md` next so ruled-out interpretations do not get reopened
 - then open only the lane notes and artifacts listed for the slice you are touching
 
+When restarting or handing off a lane, do not let adjacent unresolved systems become silent blockers unless the current slice actually consumes them.
+
 ## Active lanes
+
+### `spend-planner-first-ui-slice`
+
+- Status: `active`
+- User-facing question: what TokenShop rows can the player safely inspect from current repo-backed data right now, and what still stays blocked
+- Minimum required inputs:
+  - the checked TokenShop row-remap subset
+  - imported current levels for that same checked subset
+  - explicit blocked-state labeling for unresolved rows or inputs
+- Explicit non-blockers:
+  - token-bank cap or claimable-state recovery
+  - Daily Tokenium cap or ready-state recovery
+  - Emporium owned-state recovery
+  - unresolved TokenShop rows outside the checked subset
+  - recommendation math or new gameplay logic
+- Current true blocker:
+  - keeping the first slice subset-bound and player-facing instead of widening it into a full spend-planner dependency bundle
+- Smallest shippable tool slice:
+  - ship a normal app surface that shows the checked TokenShop row subset, current imported levels for that subset, and explicit blocked-input notes for everything still unresolved, with no recommendation math
+- Start here:
+  - `docs/systems/spend/spend-system-verification.md`
+  - `docs/systems/spend/token-shop-row-remap-verification.md`
+  - `docs/roadmap/research-tracks.md`
 
 ### `shard-milestone-payload-recovery`
 

@@ -6,7 +6,7 @@ Build a grounded MVP core that can expand into a unified replacement for fragmen
 
 ## North star
 
-Build one centralized local-first CIFI toolkit that gradually absorbs external tools by unifying player state, grounded data, planning workflows, and high-value decision support.
+Build one grounded local-first CIFI toolkit that gradually absorbs external tools by shipping small, high-value slices tied to real player questions.
 
 ## Current phase
 
@@ -26,6 +26,12 @@ Build a local-first CIFI toolkit whose first product surfaces help players answe
 > What should I do next, and why?
 
 The MVP is not a full simulator and does not assume all systems should converge into one surface up front.
+
+Default bias:
+- start from the narrow player question
+- identify the minimum grounded inputs needed to answer it
+- ship the smallest honest tool slice first
+- treat research, extraction, and decompilation as intake that supports that slice
 
 ## Local-first meaning
 
@@ -68,6 +74,18 @@ Core MVP modules:
 - keep external/community data visibly labeled
 - prefer shippable slices over broad refactors
 - treat research as intake, not silent scope expansion
+- do not let broader decompilation or adjacent lane recovery become an implicit blocker unless the current slice actually consumes that input
+
+## Lane contract
+
+Every active lane should declare:
+- the user-facing question it is trying to answer
+- the minimum required inputs
+- the explicit non-blockers
+- the current true blocker
+- the smallest shippable tool slice
+
+This contract is how work gets chosen, handed off, and promoted from research into implementation.
 
 ## Source priority
 
@@ -95,6 +113,7 @@ Prioritize roadmap work that does at least one of:
 - replaces a repeated external-tool workflow
 - increases grounded recommendation or planning coverage
 - reduces fragmentation without forcing premature UI unification
+- can ship as a small tool slice with a clear user-facing question
 
 ## Sequence
 
@@ -106,6 +125,7 @@ Prioritize roadmap work that does at least one of:
    - confirm owner, labels, currencies, and player-owned inputs
 4. Land MVP-safe slices
    - implement grounded improvements that solve real player painpoints
+   - keep the slice scoped to only the inputs it actually consumes
 5. Harden delivery
    - expand tests and make dataset drift fail fast
 
@@ -123,7 +143,8 @@ Goals:
 
 ### 3. Spend planner foundation
 Goals:
-- ship first MVP-safe token/diamond planning once spend systems pass mapping gates
+- ship the first MVP-safe spend tool slice against an explicit lane contract
+- evaluate TokenShop, token-bank, Daily Tokenium, and Emporium work as separate blockers unless one slice directly consumes another lane's inputs
 
 ### 4. Explainability and delivery hardening
 Goals:
@@ -146,6 +167,7 @@ A track can move into implementation only when:
 - classification is clear
 - MVP value is clear
 - the work can be cut into a shippable slice
+- the lane contract makes the true blocker and explicit non-blockers visible
 
 ## Definition of done
 
