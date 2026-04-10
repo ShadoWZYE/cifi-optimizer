@@ -7586,8 +7586,658 @@
         "TextHandlerSpaceAcademy",
         "TokenShop"
       ],
+      "narrowedEmporiumUiCandidateTypeNames": [
+        "AchievementManager+<CheckInscryptionsAchievementLimit>d__532",
+        "NavigationManager",
+        "NavigationManager+<InscEnum>d__186",
+        "NavigationManager+<LMBulkBuyAutomation>d__203",
+        "NavigationManager+<UpdateInscryptionUI>d__185",
+        "TextHandlerShopNPCs",
+        "TextHandlerShopNPCs+<DisplayTextBrincks>d__26",
+        "TextHandlerShopNPCs+<DisplayTextEmporium>d__22",
+        "TextHandlerShopNPCs+<DisplayTextEsoteric>d__24",
+        "TextHandlerShopNPCs+<DisplayTextNautallium>d__28",
+        "TextHandlerShopNPCs+<DisplayTextNecrum>d__30"
+      ],
+      "currentLaneCandidateChecks": {
+        "updateInscryptionUiMoveNext": {
+          "typeName": "NavigationManager+<UpdateInscryptionUI>d__185",
+          "name": "MoveNext",
+          "rva": 30192184,
+          "estimatedTrackedBodySize": 1024,
+          "signature": "System.Boolean MoveNext()",
+          "callTargets": [
+            {
+              "address": 30192215,
+              "operand": "0x1af79e6",
+              "targetRva": 28277222,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192227,
+              "operand": "0x1af79e6",
+              "targetRva": 28277222,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192239,
+              "operand": "0x1af79e6",
+              "targetRva": 28277222,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192333,
+              "operand": "0x31e9a10",
+              "targetRva": 52337168,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192376,
+              "operand": "0x1af7992",
+              "targetRva": 28277138,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192410,
+              "operand": "0x2eeb228",
+              "targetRva": 49197608,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192455,
+              "operand": "0x40ce154",
+              "targetRva": 67952980,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192484,
+              "operand": "0x40ce0af",
+              "targetRva": 67952815,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192504,
+              "operand": "0x40db94a",
+              "targetRva": 68008266,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192535,
+              "operand": "0x40db8a8",
+              "targetRva": 68008104,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192566,
+              "operand": "0x1af7992",
+              "targetRva": 28277138,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192589,
+              "operand": "0x1ccb54e",
+              "targetRva": 30192974,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192630,
+              "operand": "0x40cabbe",
+              "targetRva": 67939262,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192649,
+              "operand": "0x40db6f2",
+              "targetRva": 68007666,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192663,
+              "operand": "0x40cabbe",
+              "targetRva": 67939262,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192680,
+              "operand": "0x40dbfdd",
+              "targetRva": 68009949,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192698,
+              "operand": "0x40cad2b",
+              "targetRva": 67939627,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192713,
+              "operand": "0x40ce154",
+              "targetRva": 67952980,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192727,
+              "operand": "0x40cad2b",
+              "targetRva": 67939627,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192744,
+              "operand": "0x40ce0af",
+              "targetRva": 67952815,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192781,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192786,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192791,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192796,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192801,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192811,
+              "operand": "0x1926a96",
+              "targetRva": 26372758,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192819,
+              "operand": "0x1af7bfb",
+              "targetRva": 28277755,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192824,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192829,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192834,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192839,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192844,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192849,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192854,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192920,
+              "operand": "0x4437d80",
+              "targetRva": 71531904,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192933,
+              "operand": "0x4437d90",
+              "targetRva": 71531920,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192953,
+              "operand": "0x1926786",
+              "targetRva": 26371974,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192961,
+              "operand": "0x1be0130",
+              "targetRva": 29229360,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192969,
+              "operand": "0x1922357",
+              "targetRva": 26354519,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30192994,
+              "operand": "0x1af79e6",
+              "targetRva": 28277222,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193049,
+              "operand": "0x1af79f1",
+              "targetRva": 28277233,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193057,
+              "operand": "0x1af7bf1",
+              "targetRva": 28277745,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193070,
+              "operand": "0x3935b3e",
+              "targetRva": 59988798,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193082,
+              "operand": "0x1af79f1",
+              "targetRva": 28277233,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193093,
+              "operand": "0x1af7b03",
+              "targetRva": 28277507,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193123,
+              "operand": "0x1af79e6",
+              "targetRva": 28277222,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193168,
+              "operand": "0x1af7992",
+              "targetRva": 28277138,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193186,
+              "operand": "0x1ccb638",
+              "targetRva": 30193208,
+              "resolvedTarget": null
+            },
+            {
+              "address": 30193194,
+              "operand": "0x1cccbbb",
+              "targetRva": 30198715,
+              "resolvedTarget": null
+            }
+          ],
+          "callsStringCompose": [],
+          "callsRecoveredBonusWriters": [],
+          "callsRecoveredFinalBonusGetters": [],
+          "anonymousHelperRoles": [
+            "runtime metadata init helper",
+            "runtime metadata init helper",
+            "runtime metadata init helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "null-reference throw helper",
+            "runtime metadata init helper",
+            "runtime metadata init helper"
+          ],
+          "hasVirtualUnityUiTextSetterPattern": false
+        },
+        "displayTextEmporiumMoveNext": {
+          "typeName": "TextHandlerShopNPCs+<DisplayTextEmporium>d__22",
+          "name": "MoveNext",
+          "rva": 31339569,
+          "estimatedTrackedBodySize": 1024,
+          "signature": "System.Boolean MoveNext()",
+          "callTargets": [
+            {
+              "address": 31339596,
+              "operand": "0x1af79e6",
+              "targetRva": 28277222,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339704,
+              "operand": "0x37c990a",
+              "targetRva": 58497290,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339737,
+              "operand": "0x1af7b15",
+              "targetRva": 28277525,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339749,
+              "operand": "0x38a8102",
+              "targetRva": 59408642,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339762,
+              "operand": "0x37c2899",
+              "targetRva": 58468505,
+              "resolvedTarget": {
+                "typeName": "System.String",
+                "name": "Concat",
+                "returnType": "System.String",
+                "rva": 58468505,
+                "methodPointer": 58484889,
+                "signature": "System.String Concat(System.String str0, System.String str1)",
+                "parameters": [
+                  {
+                    "IsRefOrOut": false
+                  },
+                  {
+                    "IsRefOrOut": false
+                  }
+                ]
+              }
+            },
+            {
+              "address": 31339778,
+              "operand": "0x1af7992",
+              "targetRva": 28277138,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339808,
+              "operand": "qword ptr [rax + 0x5e8]",
+              "targetRva": null,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339837,
+              "operand": "0x1af7bf1",
+              "targetRva": 28277745,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339856,
+              "operand": "0x40d4fd9",
+              "targetRva": 67981273,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339872,
+              "operand": "0x1af7992",
+              "targetRva": 28277138,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339902,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339920,
+              "operand": "0x1af79f1",
+              "targetRva": 28277233,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339928,
+              "operand": "0x1af7bf1",
+              "targetRva": 28277745,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339941,
+              "operand": "0x3935b3e",
+              "targetRva": 59988798,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339953,
+              "operand": "0x1af79f1",
+              "targetRva": 28277233,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31339964,
+              "operand": "0x1af7b03",
+              "targetRva": 28277507,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340002,
+              "operand": "0x1af79e6",
+              "targetRva": 28277222,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340116,
+              "operand": "0x37c990a",
+              "targetRva": 58497290,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340149,
+              "operand": "0x1af7b15",
+              "targetRva": 28277525,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340161,
+              "operand": "0x38a8102",
+              "targetRva": 59408642,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340174,
+              "operand": "0x37c2899",
+              "targetRva": 58468505,
+              "resolvedTarget": {
+                "typeName": "System.String",
+                "name": "Concat",
+                "returnType": "System.String",
+                "rva": 58468505,
+                "methodPointer": 58484889,
+                "signature": "System.String Concat(System.String str0, System.String str1)",
+                "parameters": [
+                  {
+                    "IsRefOrOut": false
+                  },
+                  {
+                    "IsRefOrOut": false
+                  }
+                ]
+              }
+            },
+            {
+              "address": 31340193,
+              "operand": "0x1af7992",
+              "targetRva": 28277138,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340226,
+              "operand": "qword ptr [rax + 0x5e8]",
+              "targetRva": null,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340255,
+              "operand": "0x1af7bf1",
+              "targetRva": 28277745,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340274,
+              "operand": "0x40d4fd9",
+              "targetRva": 67981273,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340290,
+              "operand": "0x1af7992",
+              "targetRva": 28277138,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340320,
+              "operand": "0x1af7c01",
+              "targetRva": 28277761,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340338,
+              "operand": "0x1af79f1",
+              "targetRva": 28277233,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340346,
+              "operand": "0x1af7bf1",
+              "targetRva": 28277745,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340359,
+              "operand": "0x3935b3e",
+              "targetRva": 59988798,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340371,
+              "operand": "0x1af79f1",
+              "targetRva": 28277233,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340382,
+              "operand": "0x1af7b03",
+              "targetRva": 28277507,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340420,
+              "operand": "0x1af79e6",
+              "targetRva": 28277222,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340534,
+              "operand": "0x37c990a",
+              "targetRva": 58497290,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340567,
+              "operand": "0x1af7b15",
+              "targetRva": 28277525,
+              "resolvedTarget": null
+            },
+            {
+              "address": 31340579,
+              "operand": "0x38a8102",
+              "targetRva": 59408642,
+              "resolvedTarget": null
+            }
+          ],
+          "callsStringCompose": [
+            {
+              "address": 31339762,
+              "operand": "0x37c2899",
+              "targetRva": 58468505,
+              "resolvedTarget": {
+                "typeName": "System.String",
+                "name": "Concat",
+                "returnType": "System.String",
+                "rva": 58468505,
+                "methodPointer": 58484889,
+                "signature": "System.String Concat(System.String str0, System.String str1)",
+                "parameters": [
+                  {
+                    "IsRefOrOut": false
+                  },
+                  {
+                    "IsRefOrOut": false
+                  }
+                ]
+              }
+            },
+            {
+              "address": 31340174,
+              "operand": "0x37c2899",
+              "targetRva": 58468505,
+              "resolvedTarget": {
+                "typeName": "System.String",
+                "name": "Concat",
+                "returnType": "System.String",
+                "rva": 58468505,
+                "methodPointer": 58484889,
+                "signature": "System.String Concat(System.String str0, System.String str1)",
+                "parameters": [
+                  {
+                    "IsRefOrOut": false
+                  },
+                  {
+                    "IsRefOrOut": false
+                  }
+                ]
+              }
+            }
+          ],
+          "callsRecoveredBonusWriters": [],
+          "callsRecoveredFinalBonusGetters": [],
+          "anonymousHelperRoles": [
+            "runtime metadata init helper",
+            "null-reference throw helper",
+            "runtime metadata init helper",
+            "null-reference throw helper",
+            "runtime metadata init helper"
+          ],
+          "hasVirtualUnityUiTextSetterPattern": true
+        }
+      },
       "sameSinkAsRecoveredEffectLabelFamily": false,
-      "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime surface now also recovers SetAllBonusTexts as the batch entry for the ISNBonusText family, but still recovers no typed CurrentBonusText field, no SetCurrentBonusText writer family, and no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method."
+      "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime surface now also recovers SetAllBonusTexts as the batch entry for the ISNBonusText family, but still recovers no typed CurrentBonusText field, no SetCurrentBonusText writer family, and no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. The narrowed Emporium UI-updater fallback search also checks NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext, but only recovers row-toggle flow and shop-dialogue text flow rather than a row-local CurrentBonusText producer."
     },
     "effectLabelSlotAliasResolution": {
       "status": "closed-best-fit-typed-alias",
@@ -7618,6 +8268,7 @@
     "The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.",
     "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, and the widened slot-name assembly search also fails to recover any typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. CurrentBonusText therefore remains a separate runtime-only lane with no recovered dedicated producer.",
     "Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.",
+    "The narrowed Emporium UI-updater fallback search now surfaces NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as the last plausible non-TextHandlerMarkets runtime candidates. UpdateInscryptionUI.MoveNext iterates and toggles row objects without calling recovered MultiverseMarket final-bonus getters, recovered TextHandlerMarkets SetISN writers, or System.String.Concat, while DisplayTextEmporium.MoveNext does compose and write text but only in the shop-dialogue lane rather than a row-local CurrentBonusText lane.",
     "The last two anonymous helper RVAs on the BonusDescriptionText path are now role-closed too: 28277222 is the runtime metadata-init helper reached from one-time guard blocks, and 28277761 is the null-reference throw helper reached only from the row-local null-guard branches."
   ],
   "currentBoundary": [
@@ -7626,6 +8277,7 @@
     "Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat.",
     "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
     "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family plus SetAllBonusTexts but no CurrentBonusText-named field or writer family, and the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct slot-writer method.",
+    "Treat NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as checked negative fallback candidates for the CurrentBonusText lane: the former only iterates and toggles row objects, and the latter only composes and writes shop-dialogue text.",
     "Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.",
     "Do not widen canonical import, planner behavior, or the shipped compatibility preview while the separate CurrentBonusText writer lane remains unrecovered."
   ]

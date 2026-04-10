@@ -712,6 +712,43 @@ if (runtimeReportPath is not null)
                             "IDText",
                             "SetAll"
                         })
+                    ,
+                    BuildFilteredRuntimeAssemblySearchMetadata(
+                        "Assembly-CSharp",
+                        assemblyTypes,
+                        new[]
+                        {
+                            "NavigationManager",
+                            "UpdateInscryptionUI",
+                            "TextHandlerShopNPCs",
+                            "DisplayTextEmporium",
+                            "Inscrypt",
+                            "Chrystos",
+                            "Emporium"
+                        },
+                        new[]
+                        {
+                            "CurrentBonusText",
+                            "BonusDescriptionText",
+                            "PerLevelBonusText",
+                            "CostText",
+                            "DescText",
+                            "CurrencyBox",
+                            "InscryptionsList",
+                            "Market"
+                        },
+                        new[]
+                        {
+                            "MoveNext",
+                            "UpdateInscryptionUI",
+                            "DisplayTextEmporium",
+                            "CurrentBonus",
+                            "BonusText",
+                            "CostText",
+                            "DescriptionText",
+                            "SetAll",
+                            "SetIS"
+                        })
                 };
 
                 runtimeProbe["rvaLookups"] = BuildRuntimeRvaLookupMetadata(

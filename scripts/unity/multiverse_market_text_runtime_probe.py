@@ -39,6 +39,8 @@ NATIVE_HELPER_INFERENCES: dict[int, dict[str, str]] = {
     },
 }
 
+SEARCH_METHOD_WINDOW_BYTES = 1024
+
 
 def load_runtime_surface() -> dict[str, object]:
     return json.loads(RUNTIME_SURFACE_PATH.read_text(encoding="utf-8"))
@@ -97,6 +99,32 @@ def build_method_index(*targets: dict[str, object]) -> tuple[dict[int, dict[str,
                 "parameters": method.get("parameters", []),
             }
             methods_by_rva[rva] = entry
+            all_rvas.append(rva)
+    return methods_by_rva, sorted(set(all_rvas))
+
+
+def extend_method_index_with_search_hits(
+    methods_by_rva: dict[int, dict[str, object]],
+    all_rvas: list[int],
+    search: dict[str, object],
+) -> tuple[dict[int, dict[str, object]], list[int]]:
+    for match in search.get("matches", []):
+        type_name = str(match.get("fullName") or match.get("typeName"))
+        for method in match.get("methodHits", []):
+            props = method.get("methodProperties", {})
+            rva = props.get("Rva")
+            if not isinstance(rva, int):
+                continue
+            if rva not in methods_by_rva:
+                methods_by_rva[rva] = {
+                    "typeName": type_name,
+                    "name": method.get("name"),
+                    "returnType": method.get("returnType"),
+                    "rva": rva,
+                    "methodPointer": props.get("MethodPointer"),
+                    "signature": props.get("HumanReadableSignature"),
+                    "parameters": [],
+                }
             all_rvas.append(rva)
     return methods_by_rva, sorted(set(all_rvas))
 
@@ -254,6 +282,67 @@ def summarize_method(
     }
 
 
+def summarize_search_method(
+    full_type_name: str,
+    method_name: str,
+    search: dict[str, object],
+    methods_by_rva: dict[int, dict[str, object]],
+    sorted_rvas: list[int],
+    blob: bytes,
+) -> dict[str, object]:
+    method_hit = next(
+        method
+        for match in search.get("matches", [])
+        if match.get("fullName") == full_type_name
+        for method in match.get("methodHits", [])
+        if method.get("name") == method_name
+    )
+    props = method_hit["methodProperties"]
+    start = int(props["Rva"])
+    # Search-hit methods come from a sparse cross-type scan, so next_rva() can jump
+    # into unrelated code and wildly overstate what the candidate method actually does.
+    end = start + SEARCH_METHOD_WINDOW_BYTES
+    instructions = collect_instructions(blob, start, end)
+    calls = collect_calls(instructions, methods_by_rva)
+    return {
+        "typeName": full_type_name,
+        "name": method_name,
+        "rva": start,
+        "estimatedTrackedBodySize": end - start,
+        "signature": props.get("HumanReadableSignature"),
+        "callTargets": calls,
+        "callsStringCompose": [
+            call for call in calls
+            if isinstance(call.get("resolvedTarget"), dict)
+            and call["resolvedTarget"].get("typeName") == "System.String"
+        ],
+        "callsRecoveredBonusWriters": [
+            call for call in calls
+            if isinstance(call.get("resolvedTarget"), dict)
+            and call["resolvedTarget"].get("typeName") == "TextHandlerMarkets"
+            and str(call["resolvedTarget"].get("name", "")).startswith("SetIS")
+        ],
+        "callsRecoveredFinalBonusGetters": [
+            call for call in calls
+            if isinstance(call.get("resolvedTarget"), dict)
+            and call["resolvedTarget"].get("typeName") == "MultiverseMarket"
+            and str(call["resolvedTarget"].get("name", "")).startswith("get_FinalIS")
+        ],
+        "anonymousHelperRoles": [
+            NATIVE_HELPER_INFERENCES[call["targetRva"]]["roleName"]
+            for call in calls
+            if isinstance(call.get("targetRva"), int)
+            and call["targetRva"] in NATIVE_HELPER_INFERENCES
+        ],
+        "hasVirtualUnityUiTextSetterPattern": any(
+            ins["mnemonic"] == "call" and "qword ptr [rax + 0x5e8]" in str(ins["operand"])
+            or ins["mnemonic"] == "call" and "qword ptr [rcx + 0x5e8]" in str(ins["operand"])
+            or ins["mnemonic"] == "jmp" and str(ins["operand"]) == "r8"
+            for ins in instructions
+        ),
+    }
+
+
 def sort_inscription_names(names: list[str]) -> list[str]:
     def key(name: str) -> tuple[int, str]:
         match = INSCRIPTION_NUMBER_RE.search(name)
@@ -268,6 +357,8 @@ def main() -> None:
     rva_lookup_map = extract_rva_lookup_map(surface)
     text_handler = extract_target(surface, "textHandlerMarkets")
     multiverse_market = extract_target(surface, "multiverseMarket")
+    navigation_manager = extract_target(surface, "navigationManager")
+    text_handler_shop_npcs = extract_target(surface, "textHandlerShopNpcs")
     unity_text = extract_target(surface, "unityUiText")
     system_string = extract_target(surface, "string")
     current_search = extract_assembly_search(
@@ -291,8 +382,33 @@ def main() -> None:
             "IconBox",
         ],
     )
+    current_lane_candidate_search = extract_assembly_search(
+        surface,
+        [
+            "CurrentBonusText",
+            "BonusDescriptionText",
+            "PerLevelBonusText",
+            "CostText",
+            "DescText",
+            "CurrencyBox",
+            "InscryptionsList",
+            "Market",
+        ],
+    )
 
-    methods_by_rva, sorted_rvas = build_method_index(text_handler, multiverse_market, unity_text, system_string)
+    methods_by_rva, sorted_rvas = build_method_index(
+        text_handler,
+        multiverse_market,
+        navigation_manager,
+        text_handler_shop_npcs,
+        unity_text,
+        system_string,
+    )
+    methods_by_rva, sorted_rvas = extend_method_index_with_search_hits(
+        methods_by_rva,
+        sorted_rvas,
+        current_lane_candidate_search,
+    )
     field_map = build_field_offset_map(text_handler)
     blob = LIBIL2CPP_PATH.read_bytes()
     text_handler_fields = text_handler.get("fields", [])
@@ -409,6 +525,22 @@ def main() -> None:
 
     row78_effect_payload = summarize_effect_payload_path(row78_effect)
     row83_effect_payload = summarize_effect_payload_path(row83_effect)
+    update_inscryption_ui_move_next = summarize_search_method(
+        "NavigationManager+<UpdateInscryptionUI>d__185",
+        "MoveNext",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
+    display_text_emporium_move_next = summarize_search_method(
+        "TextHandlerShopNPCs+<DisplayTextEmporium>d__22",
+        "MoveNext",
+        current_lane_candidate_search,
+        methods_by_rva,
+        sorted_rvas,
+        blob,
+    )
     root_batch_call_resolution = [
         {
             "targetRva": call["targetRva"],
@@ -450,6 +582,7 @@ def main() -> None:
         "The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.",
         "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, and the widened slot-name assembly search also fails to recover any typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. CurrentBonusText therefore remains a separate runtime-only lane with no recovered dedicated producer.",
         "Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.",
+        "The narrowed Emporium UI-updater fallback search now surfaces NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as the last plausible non-TextHandlerMarkets runtime candidates. UpdateInscryptionUI.MoveNext iterates and toggles row objects without calling recovered MultiverseMarket final-bonus getters, recovered TextHandlerMarkets SetISN writers, or System.String.Concat, while DisplayTextEmporium.MoveNext does compose and write text but only in the shop-dialogue lane rather than a row-local CurrentBonusText lane.",
     ]
     if row78_helper_labels or row83_helper_labels:
         findings.append(
@@ -532,8 +665,17 @@ def main() -> None:
                     for match in slot_search_matches
                     if isinstance(match, dict)
                 ],
+                "narrowedEmporiumUiCandidateTypeNames": [
+                    match.get("fullName")
+                    for match in current_lane_candidate_search.get("matches", [])
+                    if isinstance(match, dict)
+                ],
+                "currentLaneCandidateChecks": {
+                    "updateInscryptionUiMoveNext": update_inscryption_ui_move_next,
+                    "displayTextEmporiumMoveNext": display_text_emporium_move_next,
+                },
                 "sameSinkAsRecoveredEffectLabelFamily": False,
-                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime surface now also recovers SetAllBonusTexts as the batch entry for the ISNBonusText family, but still recovers no typed CurrentBonusText field, no SetCurrentBonusText writer family, and no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method."
+                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime surface now also recovers SetAllBonusTexts as the batch entry for the ISNBonusText family, but still recovers no typed CurrentBonusText field, no SetCurrentBonusText writer family, and no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. The narrowed Emporium UI-updater fallback search also checks NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext, but only recovers row-toggle flow and shop-dialogue text flow rather than a row-local CurrentBonusText producer."
             },
             "effectLabelSlotAliasResolution": {
                 "status": "closed-best-fit-typed-alias",
@@ -560,6 +702,7 @@ def main() -> None:
             "Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat.",
             "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
             "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family plus SetAllBonusTexts but no CurrentBonusText-named field or writer family, and the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct slot-writer method.",
+            "Treat NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as checked negative fallback candidates for the CurrentBonusText lane: the former only iterates and toggles row objects, and the latter only composes and writes shop-dialogue text.",
             "Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.",
             "Do not widen canonical import, planner behavior, or the shipped compatibility preview while the separate CurrentBonusText writer lane remains unrecovered.",
         ],
@@ -610,6 +753,7 @@ def main() -> None:
         f"- `TextHandlerMarkets.SetCurrentBonusText writer present={result['methodChain']['currentValueSlotStatus']['textHandlerCurrentBonusTextWriterPresent']}`",
         f"- `Assembly-CSharp current-value search matches={result['methodChain']['currentValueSlotStatus']['assemblyCurrentSearchMatchCount']}`",
         f"- `Assembly-CSharp exact row-slot search matches={result['methodChain']['currentValueSlotStatus']['exactRowSlotSearchMatchCount']}`",
+        f"- `narrowedEmporiumUiCandidateTypeCount={len(result['methodChain']['currentValueSlotStatus']['narrowedEmporiumUiCandidateTypeNames'])}`",
     ])
     lines.extend(["", "## Root batch resolution", ""])
     for call in root_batch_call_resolution:
@@ -637,6 +781,24 @@ def main() -> None:
     lines.extend(["", "## Helper-name narrowing", ""])
     lines.append(f"- `row78Helpers={row78_helper_labels}`")
     lines.append(f"- `row83Helpers={row83_helper_labels}`")
+    lines.extend(["", "## Current lane fallback candidates", ""])
+    current_checks = result["methodChain"]["currentValueSlotStatus"]["currentLaneCandidateChecks"]
+    update_candidate = current_checks["updateInscryptionUiMoveNext"]
+    dialogue_candidate = current_checks["displayTextEmporiumMoveNext"]
+    lines.append(
+        f"- `updateInscryptionUiMoveNext.rva={update_candidate['rva']}`; "
+        f"`callsStringCompose={len(update_candidate['callsStringCompose'])}`; "
+        f"`callsRecoveredFinalBonusGetters={len(update_candidate['callsRecoveredFinalBonusGetters'])}`; "
+        f"`callsRecoveredBonusWriters={len(update_candidate['callsRecoveredBonusWriters'])}`; "
+        f"`hasVirtualUnityUiTextSetterPattern={update_candidate['hasVirtualUnityUiTextSetterPattern']}`"
+    )
+    lines.append(
+        f"- `displayTextEmporiumMoveNext.rva={dialogue_candidate['rva']}`; "
+        f"`callsStringCompose={len(dialogue_candidate['callsStringCompose'])}`; "
+        f"`callsRecoveredFinalBonusGetters={len(dialogue_candidate['callsRecoveredFinalBonusGetters'])}`; "
+        f"`callsRecoveredBonusWriters={len(dialogue_candidate['callsRecoveredBonusWriters'])}`; "
+        f"`hasVirtualUnityUiTextSetterPattern={dialogue_candidate['hasVirtualUnityUiTextSetterPattern']}`"
+    )
     lines.extend(["", "## Current boundary", ""])
     lines.extend(f"- {line}" for line in result["currentBoundary"])
     MD_OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")

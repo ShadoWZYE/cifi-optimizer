@@ -14,6 +14,7 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 - The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.
 - That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, and the widened slot-name assembly search also fails to recover any typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. CurrentBonusText therefore remains a separate runtime-only lane with no recovered dedicated producer.
 - Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.
+- The narrowed Emporium UI-updater fallback search now surfaces NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as the last plausible non-TextHandlerMarkets runtime candidates. UpdateInscryptionUI.MoveNext iterates and toggles row objects without calling recovered MultiverseMarket final-bonus getters, recovered TextHandlerMarkets SetISN writers, or System.String.Concat, while DisplayTextEmporium.MoveNext does compose and write text but only in the shop-dialogue lane rather than a row-local CurrentBonusText lane.
 - The last two anonymous helper RVAs on the BonusDescriptionText path are now role-closed too: 28277222 is the runtime metadata-init helper reached from one-time guard blocks, and 28277761 is the null-reference throw helper reached only from the row-local null-guard branches.
 
 ## Control methods
@@ -40,6 +41,7 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 - `TextHandlerMarkets.SetCurrentBonusText writer present=False`
 - `Assembly-CSharp current-value search matches=6`
 - `Assembly-CSharp exact row-slot search matches=19`
+- `narrowedEmporiumUiCandidateTypeCount=11`
 
 ## Root batch resolution
 
@@ -73,6 +75,11 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 - `row78Helpers=['runtime metadata init helper@28277222', 'runtime metadata init helper@28277222', 'GeneralFunctionsManager.BigDoubleToText', 'null-reference throw helper@28277761']`
 - `row83Helpers=['runtime metadata init helper@28277222', 'System.Int32.ToString', 'null-reference throw helper@28277761']`
 
+## Current lane fallback candidates
+
+- `updateInscryptionUiMoveNext.rva=30192184`; `callsStringCompose=0`; `callsRecoveredFinalBonusGetters=0`; `callsRecoveredBonusWriters=0`; `hasVirtualUnityUiTextSetterPattern=False`
+- `displayTextEmporiumMoveNext.rva=31339569`; `callsStringCompose=2`; `callsRecoveredFinalBonusGetters=0`; `callsRecoveredBonusWriters=0`; `hasVirtualUnityUiTextSetterPattern=True`
+
 ## Current boundary
 
 - Treat SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText through row payload ID or Level or ISObject as the settled row-identity chain.
@@ -80,5 +87,6 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 - Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat.
 - Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.
 - Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family plus SetAllBonusTexts but no CurrentBonusText-named field or writer family, and the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct slot-writer method.
+- Treat NavigationManager+<UpdateInscryptionUI>d__185.MoveNext and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as checked negative fallback candidates for the CurrentBonusText lane: the former only iterates and toggles row objects, and the latter only composes and writes shop-dialogue text.
 - Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.
 - Do not widen canonical import, planner behavior, or the shipped compatibility preview while the separate CurrentBonusText writer lane remains unrecovered.
