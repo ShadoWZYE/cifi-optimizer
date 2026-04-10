@@ -1886,6 +1886,12 @@ function renderSpendPlannerBoundary() {
       value: compatibility.unmappedSystems?.tokenShop?.BankedTokens,
       path: "compatibility.unmappedSystemState.tokenShop.BankedTokens",
       note: "Exact SaveData.BankedTokens recovery grounds the current stored token-bank amount as boundary-backed state only. Cap and claimable planning stay blocked."
+    },
+    {
+      label: "Daily Tokenium (stored amount)",
+      value: compatibility.unmappedSystems?.tokenShop?.DailyTokenium,
+      path: "compatibility.unmappedSystemState.tokenShop.DailyTokenium",
+      note: "Exact SaveData.DailyTokenium recovery plus the narrowed SaveData mission-persistence wrapper grounds the current Daily Tokenium stored amount as boundary-backed non-canonical evidence only. Cap and Daily Tokenium-specific ready or claimable planning stay blocked."
     }
   ];
   const blockedInputs = [
@@ -1898,8 +1904,8 @@ function renderSpendPlannerBoundary() {
       reason: "Blocked even with BankedTokens recovered. Current TokenShop and FinalTokenBank clues still do not name planner-safe cap or claimable saved values."
     },
     {
-      label: "Daily Tokenium current amount or cap",
-      reason: "Blocked until the Academy or Farm Mission save owner is recovered. The lane is grounded, but the saved reward state is still unresolved."
+      label: "Daily Tokenium cap and ready or claimable state",
+      reason: "Blocked even with the current stored amount recovered. The lane now narrows to a SaveData mission-persistence wrapper, but no checked DailyTokeniumCap field or Daily Tokenium-specific ready or claimable join is recovered yet."
     },
     {
       label: "Emporium owned progression and Inscryptions balance",

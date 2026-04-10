@@ -373,14 +373,15 @@
       "title": "Spend planner first UI slice",
       "status": "active",
       "goal": "Ship a minimal descriptive spend-planner panel that uses grounded canonical spend inputs plus explicitly labeled boundary-backed spend evidence while visibly blocking owner-dependent planner actions.",
-      "currentSlice": "Show a descriptive spend-planner panel that reads canonical `state.playerProfile` spend-side inputs, surfaces exact `SaveData.BankedTokens` as boundary-backed spend evidence, lists blocked owner-recovery inputs as unavailable, and keeps recommendation-safe planner actions disabled.",
+      "currentSlice": "Show a descriptive spend-planner panel that reads canonical `state.playerProfile` spend-side inputs, surfaces exact `SaveData.BankedTokens` plus exact `SaveData.DailyTokenium` as boundary-backed spend evidence from `compatibility.unmappedSystemState.tokenShop`, lists blocked owner-recovery inputs as unavailable, and keeps recommendation-safe planner actions disabled.",
       "exitCondition": "The app exposes a descriptive spend-planner panel that separates canonical spend inputs, limited-use boundary-backed evidence, and blocked owner-dependent inputs with reasons, while avoiding optimizer or recommendation claims.",
-      "blockedBy": "Planner-safe spend behavior is still blocked by unresolved TokenShop row remap, token-bank cap and claimable state, Daily Tokenium saved state, and Emporium owned progression fields.",
-      "smallestShippableSlice": "A top-level spend-planner panel that shows current canonical spend inputs, exact BankedTokens evidence as boundary-backed state, a blocked-input list with owner-recovery reasons, and a clear message that recommendations stay unavailable until the blocked owners are recovered.",
+      "blockedBy": "Planner-safe spend behavior is still blocked by unresolved TokenShop row remap, token-bank cap and claimable state, Daily Tokenium cap and Daily Tokenium-specific ready or claimable state, and Emporium owned progression fields.",
+      "smallestShippableSlice": "A top-level spend-planner panel that shows current canonical spend inputs, exact BankedTokens plus DailyTokenium stored-amount evidence as boundary-backed state, a blocked-input list with owner-recovery reasons, and a clear message that recommendations stay unavailable until the blocked owners are recovered.",
       "completedSteps": [
         "Fork a UI-only spend-planner lane so the app can ship descriptive spend visibility without reopening save-owner recovery.",
         "Ship a descriptive spend-planner panel that reads canonical `player.resources.*`, `player.loop.loopReset`, and profile-confidence inputs only.",
         "Surface exact `SaveData.BankedTokens` as boundary-backed token-bank stored-amount evidence without promoting it into canonical planner state.",
+        "Surface exact `SaveData.DailyTokenium` as boundary-backed Daily Tokenium stored-amount evidence from `compatibility.unmappedSystemState.tokenShop` without promoting it into canonical planner state.",
         "Label owner-dependent spend inputs as unavailable with grounded blocker reasons instead of inferring planner math or recommendations."
       ],
       "nextSteps": [
@@ -401,7 +402,8 @@
       "verified": [
         "Canonical spend-side inputs already available in `state.playerProfile` include `player.resources.tokens`, `player.resources.diamonds`, `player.loop.loopReset`, and importable `player.resources.academyRelics`.",
         "Exact `SaveData.BankedTokens` recovery now grounds the current token-bank stored amount strongly enough to show it as boundary-backed evidence without promoting it into canonical planner state.",
-        "Current spend owner-recovery blockers still live on separate TokenShop row-level, token-bank cap or claimable state-owner, Daily Tokenium, and Emporium save-model tracks.",
+        "Exact `SaveData.DailyTokenium` recovery plus the narrowed `SaveData` mission-persistence wrapper now grounds the current Daily Tokenium stored amount strongly enough to show it as boundary-backed non-canonical evidence without promoting it into canonical planner state.",
+        "Current spend owner-recovery blockers still live on separate TokenShop row-level, token-bank cap or claimable state-owner, Daily Tokenium cap or ready-state, and Emporium save-model tracks.",
         "A descriptive spend-planner panel can ship without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs."
       ],
       "uncertain": [

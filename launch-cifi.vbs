@@ -1,91 +1,38 @@
 Option Explicit
 
-Dim shell, fso, scriptDir, nodePath, launchUrl, healthUrl
+Dim shell, fso, scriptDir, batchPath, launchUrl, healthUrl
 Dim startedServer
 
 Set shell = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
-nodePath = ResolveNodePath()
+batchPath = fso.BuildPath(scriptDir, "launch-cifi.bat")
 launchUrl = "http://localhost:4173/?launch=1"
 healthUrl = "http://localhost:4173/api/healthz"
 startedServer = False
 
-If nodePath = "" Then
-  MsgBox "Node.js could not be found." & vbCrLf & vbCrLf & _
-    "CIFI needs Node.js 18+ installed." & vbCrLf & _
-    "Install Node.js from https://nodejs.org/ and make sure the installer adds Node to PATH, then try again." & vbCrLf & vbCrLf & _
-    "You can also use launch-cifi.bat to debug launcher startup.", vbExclamation, "CIFI Launcher"
+If Not fso.FileExists(batchPath) Then
+  MsgBox "launch-cifi.bat could not be found." & vbCrLf & vbCrLf & _
+    "Expected path:" & vbCrLf & batchPath, vbExclamation, "CIFI Launcher"
   WScript.Quit 1
 End If
 
 If Not IsServerRunning(healthUrl) Then
-  shell.Run "powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""Start-Process -WindowStyle Hidden -WorkingDirectory '" & Replace(scriptDir, "'", "''") & "' -FilePath '" & Replace(nodePath, "'", "''") & "' -ArgumentList '.\scripts\dev-server.mjs','--launcher-mode'""", 0, False
+  shell.Run "%ComSpec% /c """ & batchPath & """", 0, False
   startedServer = True
 End If
 
 If startedServer Then
   If Not WaitForServer(healthUrl, 30, 500) Then
     MsgBox "CIFI local server did not start within the expected time." & vbCrLf & vbCrLf & _
-      "Resolved Node.js path:" & vbCrLf & nodePath & vbCrLf & vbCrLf & _
+      "Launcher script:" & vbCrLf & batchPath & vbCrLf & vbCrLf & _
       "Try launch-cifi.bat to see debug output.", vbExclamation, "CIFI Launcher"
     WScript.Quit 1
   End If
 End If
 
 shell.Run launchUrl, 1, False
-
-Function ResolveNodePath()
-  Dim candidates, candidate, resolved
-
-  resolved = ResolveFromWhere("node.exe")
-  If resolved <> "" Then
-    ResolveNodePath = resolved
-    Exit Function
-  End If
-
-  candidates = Array( _
-    shell.ExpandEnvironmentStrings("%ProgramFiles%") & "\nodejs\node.exe", _
-    shell.ExpandEnvironmentStrings("%ProgramFiles(x86)%") & "\nodejs\node.exe", _
-    shell.ExpandEnvironmentStrings("%LocalAppData%") & "\Programs\nodejs\node.exe" _
-  )
-
-  For Each candidate In candidates
-    If fso.FileExists(candidate) Then
-      ResolveNodePath = candidate
-      Exit Function
-    End If
-  Next
-
-  ResolveNodePath = ""
-End Function
-
-Function ResolveFromWhere(executableName)
-  On Error Resume Next
-  Dim exec, line
-  Set exec = shell.Exec("%ComSpec% /c where " & executableName)
-
-  Do While exec.Status = 0
-    WScript.Sleep 20
-  Loop
-
-  If exec.ExitCode = 0 Then
-    line = Trim(exec.StdOut.ReadLine())
-    If line <> "" And fso.FileExists(line) Then
-      ResolveFromWhere = line
-      Set exec = Nothing
-      Err.Clear
-      On Error GoTo 0
-      Exit Function
-    End If
-  End If
-
-  ResolveFromWhere = ""
-  Set exec = Nothing
-  Err.Clear
-  On Error GoTo 0
-End Function
 
 Function IsServerRunning(url)
   On Error Resume Next

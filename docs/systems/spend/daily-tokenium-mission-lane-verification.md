@@ -87,6 +87,7 @@ Safe repo conclusion:
 ## Current app implication
 
 - Daily Tokenium current stored amount is now grounded at `SaveData.DailyTokenium`, but should stay outside canonical `state.playerProfile` until a justified import lane is chosen.
+- The current stored amount is narrow enough to show as explicitly labeled boundary-backed evidence from `compatibility.unmappedSystemState.tokenShop.DailyTokenium` in the descriptive spend-planner panel.
 - The current narrowest checked save wrapper is the `SaveData` mission-persistence neighborhood around mission counters and mission-active fields, but that wrapper is still not import-ready player state by itself.
 - Daily Tokenium cap and Daily Tokenium-specific ready or claimable state should remain `available but unmapped`.
 - Future spend-planner work should treat it as a cross-system mission lane, not as a simple TokenShop budget field.
