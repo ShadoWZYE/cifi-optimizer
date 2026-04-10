@@ -63,6 +63,10 @@ This pass did not close the full save boundary, but it did recover one exact cur
 - `ClaimableBankTokens` and `TokenBankCap`
   - The same checked typed save tables do not currently expose `ClaimableBankTokens` or `TokenBankCap` on `SaveData` or `PlayerProfileData`.
   - Why it matters: cap and claimable or ready state remain blocked even though `BankedTokens` is now grounded, so the repo should not collapse the whole lane into one resolved owner claim.
+- broader `PlayerProfile` persistence neighborhood
+  - Exact typed recovery now also preserves `PlayerProfileHandler.saveInfoCache: PlayerProfileData` and `PlayerProfileHandler.ConvertSaveDataToProfileData(SaveData, System.DateTime) -> PlayerProfileData`.
+  - The same checked direct `PlayerProfileData` field table still only exposes generic `Tokens: System.String` and `Tokenium: System.String` wrapper fields in this lane, not `BankedTokens`, `ClaimableBankTokens`, or `TokenBankCap`.
+  - Why it matters: the broader save-to-profile bridge is now checked tightly enough to rule out the obvious `PlayerProfileData` export surface as the missing exact bank-cap or claimable-bank owner.
 
 - `OR_TokenBankCap` and `OR_TokensFromChests`
   - Current evidence points to these being mechanic-named resource assets in `sharedassets0.assets`, not the underlying numeric formula objects.
@@ -76,6 +80,7 @@ Safe repo conclusion:
 
 - treat `SaveData.BankedTokens` as the current exact saved-state owner for token-bank stored amount only
 - do not treat that exact `BankedTokens` recovery as proof that cap or claimable or ready state are recovered too
+- do not treat `PlayerProfileData.Tokens` or `PlayerProfileData.Tokenium` as token-bank cap or claimable-bank owners; they are still only generic wrapper or export strings in the checked persistence neighborhood
 - do not treat `OR_TokenBankCap` or `OR_TokensFromChests` as recovered formulas
 - treat them as grounded naming or asset-family clues
 - keep the next extraction pass focused on the remaining save-side owner for token-bank cap and claimable state instead of reopening controller-only or derived-output surfaces
@@ -189,7 +194,7 @@ This lane already points to several future owner families that matter beyond the
 - It is now safe to say the current token-bank stored amount is grounded more narrowly as `SaveData.BankedTokens`, while cap and claimable or ready state remain blocked.
 - It is still not safe to put token-bank values into `state.playerProfile` as canonical fields until the saved-state owner and naming are recovered.
 - It is now safe to treat the TokenShop controller shell, the `BigStatisticPrefab.TokenBankCap` display shell, and the `FinalTokenBank*` derived-output cluster as non-owner surfaces for save-state recovery.
-- It is now safe to keep token-bank cap and claimable or ready-state recovery on the broader `PlayerProfileData` / `CloudSavePlayerProfile` persistence-family boundary instead of treating `TokenShop` methods or `FinalTokenBank*` symbols as recovered saved-state owners.
+- It is now safe to keep token-bank cap and claimable or ready-state recovery beyond the checked `PlayerProfileHandler.saveInfoCache` / `ConvertSaveDataToProfileData(...) -> PlayerProfileData` export bridge instead of treating `TokenShop` methods, direct `PlayerProfileData.Tokens` or `Tokenium` wrapper strings, or `FinalTokenBank*` symbols as recovered saved-state owners.
 - Any future planner or import work should treat token-bank state as `available but unmapped` until those owned fields are proven from assets.
 
 

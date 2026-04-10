@@ -93,8 +93,8 @@ Use these when the active lanes above close or split.
 ### `spend-token-bank-state-owner`
 
 - Goal: recover the saved-state owner behind token-bank cap, fill, and claimable-bank state
-- Current blocker: controller hooks and derived outputs are separated, but the saved-state owner is still unresolved
-- Smallest next slice: checked bank-state owner boundary
+- Current blocker: exact `SaveData.BankedTokens` recovery closes current stored amount and the broader checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData.Tokens` and `PlayerProfileData.Tokenium` wrapper strings, so bank-cap and claimable-bank ownership are still unresolved
+- Smallest next slice: checked bank-state owner boundary that either recovers a deeper declaring save model or proves a narrower non-`PlayerProfileData` wrapper than the current export bridge
 
 ### `spend-daily-tokenium-save-owner`
 
