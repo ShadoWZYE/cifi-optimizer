@@ -40,6 +40,7 @@ var il2cppPath = Path.Combine(root, "workbench", "apk", "base", "libil2cpp.so");
 var explicitTerms = new List<string>();
 var explicitSeeds = new List<string>();
 string reportPath = Path.Combine(root, "data", "uabea-probe-report.json");
+string? runtimeReportPath = null;
 var disableInterestingPatternFilter = false;
 
 for (var index = 0; index < args.Length; index++)
@@ -52,6 +53,13 @@ for (var index = 0; index < args.Length; index++)
                 throw new ArgumentException("Expected a value after --report.");
             }
             reportPath = Path.GetFullPath(Path.Combine(root, args[++index]));
+            break;
+        case "--runtime-report":
+            if (index + 1 >= args.Length)
+            {
+                throw new ArgumentException("Expected a value after --runtime-report.");
+            }
+            runtimeReportPath = Path.GetFullPath(Path.Combine(root, args[++index]));
             break;
         case "--term":
             if (index + 1 >= args.Length)
@@ -391,8 +399,139 @@ static Dictionary<string, object?> DescribeException(Exception ex)
     return values;
 }
 
+static object BuildRuntimeTypeMetadata(
+    string reportKey,
+    string assemblyName,
+    LibCpp2IL.Metadata.Il2CppTypeDefinition? type,
+    string[] methodPatterns)
+{
+    if (type is null)
+    {
+        return new
+        {
+            reportKey,
+            assemblyName,
+            found = false
+        };
+    }
+
+    return new
+    {
+        reportKey,
+        assemblyName,
+        found = true,
+        scriptName = type.Name,
+        fullName = type.FullName,
+        baseType = type.BaseType?.ToString(),
+        fieldCount = type.Fields.Length,
+        methodCount = type.Methods.Length,
+        fields = type.Fields
+            .Select((field, index) => new
+            {
+                index,
+                name = field.Name,
+                type = field.FieldType?.ToString(),
+                attributes = type.FieldAttributes[index].ToString(),
+                defaultValue = type.FieldDefaults.Length > index && type.FieldDefaults[index] is not null
+                    ? type.FieldDefaults[index]!.ToString()
+                    : null,
+                fieldOffset = type.FieldInfos.Length > index
+                    ? type.FieldInfos[index].FieldOffset
+                    : (int?)null
+            })
+            .ToArray(),
+        methods = type.Methods
+            .Where(method => methodPatterns.Length == 0 ||
+                             methodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
+            .Select((method, index) => new
+            {
+                index,
+                name = method.Name,
+                returnType = method.ReturnType?.ToString(),
+                parameterCount = method.Parameters?.Length ?? 0,
+                methodProperties = ReflectSerializablePublicProperties(method),
+                parameters = method.Parameters?.Select(parameter => ReflectSerializablePublicProperties(parameter)).ToArray() ?? Array.Empty<object>()
+            })
+            .ToArray()
+    };
+}
+
 var manager = new AssetsManager();
 manager.LoadClassPackage(Path.Combine(uabeaDir, "classdata.tpk"));
+
+var primaryCandidatePath = Path.Combine(dataDir, "globalgamemanagers");
+var primaryFile = manager.LoadAssetsFile(primaryCandidatePath, false);
+manager.LoadClassDatabaseFromPackage(primaryFile.file.Metadata.UnityVersion);
+
+if (runtimeReportPath is not null)
+{
+    var runtimeProbe = new Dictionary<string, object?>
+    {
+        ["dataset"] = "unity-runtime-surface-probe",
+        ["generatedAt"] = DateTime.UtcNow.ToString("yyyy-MM-dd"),
+        ["sources"] = new
+        {
+            metadata = Path.GetRelativePath(root, metadataPath).Replace('\\', '/'),
+            libIl2cpp = Path.GetRelativePath(root, il2cppPath).Replace('\\', '/'),
+            unityVersion = primaryFile.file.Metadata.UnityVersion
+        }
+    };
+
+    try
+    {
+        var unityVersion = AssetRipper.Primitives.UnityVersion.Parse(primaryFile.file.Metadata.UnityVersion);
+        var loadResult = LibCpp2IlMain.LoadFromFile(il2cppPath, metadataPath, unityVersion);
+        runtimeProbe["loadFromFileResult"] = loadResult;
+        runtimeProbe["binaryNullAfterLoad"] = LibCpp2IlMain.Binary is null;
+        runtimeProbe["metadataNullAfterLoad"] = LibCpp2IlMain.TheMetadata is null;
+
+        if (loadResult && LibCpp2IlMain.TheMetadata is not null)
+        {
+            var assemblies = LibCpp2IlMain.TheMetadata.AssemblyDefinitions
+                .ToDictionary(asm => asm.AssemblyName.Name, StringComparer.Ordinal);
+
+            var runtimeTargets = new[]
+            {
+                new { reportKey = "textHandlerMarkets", assemblyName = "Assembly-CSharp", lookupNames = new[] { "TextHandlerMarkets" }, methodPatterns = new[] { "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS", "ClearISObjects", "SetISMaxLevelObjects" } },
+                new { reportKey = "multiverseMarket", assemblyName = "Assembly-CSharp", lookupNames = new[] { "MultiverseMarket" }, methodPatterns = new[] { "BuyIS", "SetIS", "SetInscryptionsDoneText" } },
+                new { reportKey = "unityUiText", assemblyName = "UnityEngine.UI", lookupNames = new[] { "UnityEngine.UI.Text", "Text" }, methodPatterns = new[] { "set_text", "get_text", "set_supportRichText", "OnPopulateMesh" } },
+                new { reportKey = "string", assemblyName = "mscorlib", lookupNames = new[] { "System.String", "String" }, methodPatterns = new[] { "Concat", "Format" } }
+            };
+
+            var results = new List<object>();
+            foreach (var target in runtimeTargets)
+            {
+                if (!assemblies.TryGetValue(target.assemblyName, out var assembly))
+                {
+                    results.Add(new { target.reportKey, target.assemblyName, found = false, assemblyMissing = true });
+                    continue;
+                }
+
+                var type = (assembly.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>())
+                    .FirstOrDefault(t =>
+                        target.lookupNames.Any(lookupName =>
+                            string.Equals(t.Name, lookupName, StringComparison.Ordinal) ||
+                            string.Equals(t.FullName, lookupName, StringComparison.Ordinal) ||
+                            t.FullName.EndsWith("." + lookupName, StringComparison.Ordinal)));
+                results.Add(BuildRuntimeTypeMetadata(target.reportKey, target.assemblyName, type, target.methodPatterns));
+            }
+
+            runtimeProbe["targets"] = results.ToArray();
+        }
+    }
+    catch (Exception ex)
+    {
+        runtimeProbe["error"] = DescribeException(ex);
+    }
+
+    Directory.CreateDirectory(Path.GetDirectoryName(runtimeReportPath)!);
+    await File.WriteAllTextAsync(runtimeReportPath, JsonSerializer.Serialize(runtimeProbe, new JsonSerializerOptions
+    {
+        WriteIndented = true
+    }));
+    Console.WriteLine(runtimeReportPath);
+    return;
+}
 
 var candidateFiles = Directory
     .EnumerateFiles(joinedDir)
@@ -428,7 +567,7 @@ foreach (var path in candidateFiles)
     }
 }
 
-var primaryFile = loadedFiles.First(f => string.Equals(Path.GetFileName(f.path), "globalgamemanagers", StringComparison.OrdinalIgnoreCase));
+primaryFile = loadedFiles.First(f => string.Equals(Path.GetFileName(f.path), "globalgamemanagers", StringComparison.OrdinalIgnoreCase));
 manager.LoadClassDatabaseFromPackage(primaryFile.file.Metadata.UnityVersion);
 
 var cpp2IlStatus = new Dictionary<string, object?>

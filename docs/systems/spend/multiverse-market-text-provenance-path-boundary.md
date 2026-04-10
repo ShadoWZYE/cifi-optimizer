@@ -49,6 +49,10 @@ This note records the narrowest checked game-side path from a structurally settl
 - The deeper assignment-site scan now also answers the local serialized-binding question:
   - zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links point into the recovered row-local text components
   - the live asset graph stops at intrinsic component ownership around the row-local UI subtree
+- The runtime code seam is now partially recovered too:
+  - `SetAllChrystosEmporiumTexts` directly calls `SetAllBaseBonusTexts`
+  - `SetIS78BaseBonusText` and `SetIS83BaseBonusText` read `IS78BaseBonusText` / `IS83BaseBonusText`, compose strings, and end in the standard IL2CPP `UnityEngine.UI.Text` virtual-dispatch write pattern
+  - that is a checked runtime base-bonus write lane, not yet the live effect-label lane
 - This means the repo can now name two checked game-side text-adjacent source classes:
   - direct Unity string anchors in the `TextHandlerMarkets` neighborhood
   - row-local asset slots with `UnityEngine.UI.Text` components under the checked Emporium row objects
@@ -64,7 +68,7 @@ This note records the narrowest checked game-side path from a structurally settl
   - `SetIS69BaseBonusText`
 - That is a stronger scaling clue than the earlier generic text-provenance blocker.
 - It is still not a recovered row-to-text join:
-  - no checked repo-local consumer binds `SetISNBaseBonusText` to direct player-facing strings
+  - the recovered runtime `SetISNBaseBonusText` lane writes the base-bonus text, not the live effect-label text
   - no checked row-local string table or localization-key catalog is recovered
   - the live-asset walk does recover concrete row-local slot objects like `CurrentBonusText`, `BonusDescriptionText`, `PerLevelBonusText`, and `DescriptionText`, but the assignment-site scan shows only local ownership edges into their `UnityEngine.UI.Text` components
   - no direct strings `Inscryption 69` through `Inscryption 74` are recovered repo-locally
@@ -72,11 +76,11 @@ This note records the narrowest checked game-side path from a structurally settl
 ## Exact last missing layer
 
 - The isolated missing layer is now:
-  - the runtime-only payload-assignment layer after the row-local `UnityEngine.UI.Text` component ownership graph
+  - the runtime-only effect-label assignment layer after the recovered `TextHandlerMarkets` base-bonus write path
 - In practical terms, the repo still needs the step that turns:
   - `SetAllBaseBonusTexts`
   - `SetISNBaseBonusText`
-  - into recovered row-local text objects such as `CurrentBonusText`, `BonusDescriptionText`, `PerLevelBonusText`, and `DescriptionText`
+  - into the live effect-label slots such as `CurrentBonusText` and `BonusDescriptionText`, rather than only the recovered base-bonus lane
 into:
   - concrete player-facing effect text
   - or concrete localization keys
@@ -92,6 +96,6 @@ Current grounded conclusion:
 - the structural Emporium row model stays unchanged
 - rows `78` and `83` are only partial text-adjacent controls, not completed player-facing label bindings
 - a control-row text-adjacent path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain
-- the broader handler-side scaling clue is the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered runtime-side assignment path that routes those methods into the recovered row-local `UnityEngine.UI.Text` components and then into final live player-facing effect text
+- the broader handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
+- the exact remaining blocker is the unrecovered runtime-side effect-label assignment path that routes into slots like `CurrentBonusText` and `BonusDescriptionText` and then into final live player-facing effect text
 - compatibility-only import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked
