@@ -26,6 +26,11 @@ Do not use it as a substitute for:
 - Status: `active | queued | blocked | closed`
 - Date: `YYYY-MM-DD`
 - Scope: `<the narrow slice this handoff covers>`
+- User-facing question: `<what player question this slice is trying to answer>`
+- Minimum required inputs: `<only the inputs this slice actually consumes>`
+- Explicit non-blockers: `<adjacent lanes that should stay visible but should not block this slice>`
+- Current true blocker: `<single strongest blocker>`
+- Smallest shippable tool slice: `<smallest honest slice worth shipping>`
 
 ## Grounded carry-forward
 
@@ -42,14 +47,6 @@ Do not use it as a substitute for:
 - `<interpretation that should stay closed>`
 - `<interpretation that should stay closed>`
 
-## Current blocker
-
-- `<single strongest blocker>`
-
-## Smallest next slice
-
-- `<smallest shippable or narrowing follow-up>`
-
 ## Open sources
 
 - `<1-3 lane docs or artifacts to open first>`
@@ -58,9 +55,12 @@ Do not use it as a substitute for:
 ## Field guidance
 
 - `Lane`: use the existing `researchTracks` id when one exists
+- `User-facing question`: keep it player-facing and concrete
+- `Minimum required inputs`: list only consumed inputs, not every unresolved neighbor
+- `Explicit non-blockers`: name adjacent unresolved lanes that should stay separate
+- `Current true blocker`: use the strongest blocker, ideally the current `blockedBy`
+- `Smallest shippable tool slice`: describe the smallest useful tool or surface that can ship honestly
 - `Grounded carry-forward`: only facts already supported by repo-local evidence
 - `Boundary to preserve`: narrowed checked seams, not guesses
 - `Known false paths`: only ruled-out interpretations, not unresolved hypotheses
-- `Current blocker`: match the strongest blocker, ideally the current `blockedBy`
-- `Smallest next slice`: match the repo’s current smallest-shippable style
 - `Open sources`: keep this to the minimum set needed to restart work

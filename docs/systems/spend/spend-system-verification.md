@@ -6,9 +6,13 @@ It exists to enforce the repo rule that systems must be understood in-game and i
 
 Data being present in the repo is not enough. These systems should be treated as available but unmapped until their currencies, owned-state inputs, and player-facing labels are verified well enough for app integration.
 
+This is also a slice-selection document. Use it to decide the smallest honest spend tool slice, not to silently bundle every spend lane into one blocker.
+
 ## Integration rule
 
-Do not add spend-planner UI or recommendation logic until each system below has:
+For any proposed spend slice, verify only the inputs that slice actually consumes.
+
+Do not add spend-planner UI or recommendation logic until the consumed system inputs below have:
 
 1. verified in-game placement
 2. verified Unity/APK owner
@@ -17,6 +21,26 @@ Do not add spend-planner UI or recommendation logic until each system below has:
 5. verified or clearly labeled naming
 
 If any item is missing, the allowed work stays in docs, parser scripts, owner maps, or descriptive placeholders.
+
+## First-slice contract
+
+Until a broader planner is justified, evaluate the first TokenShop-facing slice against this contract:
+
+- User-facing question: what TokenShop rows can I safely inspect from my current data right now, and what is still blocked
+- Minimum required inputs:
+  - checked TokenShop row identity for the rows shown
+  - current imported levels for those same rows
+  - explicit blocked-state labeling for unresolved rows or missing planner inputs
+- Explicit non-blockers:
+  - token-bank cap or claimable-state recovery
+  - Daily Tokenium cap or ready-state recovery
+  - Emporium state recovery
+  - unresolved TokenShop rows outside the checked subset
+  - recommendation math or new gameplay logic
+- Current true blocker:
+  - keeping the first slice subset-bound instead of silently upgrading the requirement to a full spend planner
+- Smallest shippable tool slice:
+  - a normal app surface that shows the checked TokenShop subset, current imported levels for that subset, and blocked-input notes for unresolved rows, with no recommendation math
 
 ## TokenShop
 
@@ -50,11 +74,13 @@ If any item is missing, the allowed work stays in docs, parser scripts, owner ma
   - `resourceicons/resource_tokenium_cap`
   - token-bank controller labels such as `TokenBankDescriptionText` and `FinalTokenBankCap`
 
-### Not yet verified enough for app recommendations
+### Not yet verified enough for broader app recommendations
 
 - final remap from raw `ATU*Level` save fields to grounded player-facing TokenShop row labels
 - checked object or title joins from `ATU`-numbered row shells to specific prefab identities or final row titles
 - full rule set for moving from first-buy facts to true next-purchase planning
+
+These are broader-planner blockers, not automatic blockers for the first checked-row TokenShop slice above.
 
 ### Adjacent systems this signals
 
@@ -76,10 +102,11 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - It is safe to preserve raw `ATU1Level` through `ATU28Level` and `Tier2TokensUnlocked` through `Tier5TokensUnlocked` under `compatibility.unmappedSystemState.tokenShop`.
 - It is safe to say the repo now has grounded non-label clues around some `ATU` rows, including token, diamond, daily-token, shard, and late direct-buy hook evidence.
 - It is now also safe to show a small descriptive TokenShop row preview for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset as boundary-backed non-canonical evidence from `compatibility.unmappedSystemState.tokenShop`.
+- That checked-row subset is enough to evaluate a first TokenShop-facing tool slice that stays descriptive, explicit about uncertainty, and limited to the rows whose identity is already grounded.
 - It is not yet safe to generate next-buy recommendations from player token budgets alone.
 - It is not yet safe to promote raw `ATU*Level` save fields into canonical `state.playerProfile` fields until the row-by-row remap is grounded.
 - The rest of the `ATU*Level` family should stay quarantined even when that small preview is shown; unresolved row identities are still a subset-remap blocker, not a reason to force a full-lane remap.
-- TokenShop-connected token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped` until saved-state owners are recovered.
+- TokenShop-connected token-bank cap, fill, claim, and daily tokenium state should remain `available but unmapped` until saved-state owners are recovered, but they are not automatic blockers for a first TokenShop slice unless that slice consumes them.
 - `OR_TokenBankCap` and `OR_TokensFromChests` should currently be treated as grounded asset labels, not as recovered formula sources.
 - One key split is now grounded: claim actions resolve through `TokenShop`, token-bank cap display resolves through `BigStatisticPrefab.TokenBankCap`, and at least one daily-tokenium text path resolves through `TextHandlerLoopMods.SetLM244BonusText`.
 - `LM244` should currently be treated as a loop-mod text or explanation hook for daily tokenium, not as the recovered gameplay owner of that lane.
@@ -140,15 +167,14 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 
 ## Next allowed slice
 
-The next spend-track slice should verify missing integration inputs, not produce planner cards.
+The next spend-track slice should follow the first-slice contract above instead of inheriting every unresolved spend lane.
 
 Priority order:
 
-1. use the recovered `InscryptionsDone` and `IS*Level` metadata cluster plus the exact `PlayerProfileData` field table to determine which deeper serialized payload owns the multiverse-market lane after flat direct `PlayerProfileData` fields are ruled out
-2. if that save owner is recovered, map which owned `IS*Level` range actually covers the currently validated Emporium rows before promoting any import-ready state shape
-3. recover player-owned current-level inputs for TokenShop upgrade rows now that the cost lane is grounded as token or tokenium spending
-4. recover the saved-state owners behind token-bank cap, fill, claim, and the Academy or Farm Mission Daily Tokenium lane
-5. remap serialized ids to grounded player-facing labels
-6. only then add spend recommendations with explicit assumptions
+1. ship or validate the first checked-row TokenShop slice with explicit blocked-input notes and no recommendation math
+2. expand TokenShop row remap coverage only when more rows are actually needed by the next slice
+3. recover player-owned current-level inputs for any additional TokenShop rows the slice wants to show
+4. recover token-bank, Daily Tokenium, or Emporium state only when a planned slice directly consumes those inputs
+5. only after consumed inputs are grounded, consider broader spend recommendations with explicit assumptions
 
 

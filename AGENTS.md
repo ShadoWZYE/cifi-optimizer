@@ -8,7 +8,8 @@ Evolve this repo toward a grounded MVP core that can expand into a unified repla
 
 - make incremental, focused changes
 - preserve local-first browser behavior
-- prefer extraction and cleanup over redesign
+- prefer the smallest shippable tool slice that answers a real player question
+- use extraction, decompilation, and research as intake when they unblock a slice, not as the default product lane
 - do not introduce speculative mechanics or fake precision
 - keep verified game truth separate from planner helpers, external models, and compatibility data
 - keep diffs small unless broader change is clearly required
@@ -24,6 +25,17 @@ Prioritize:
 - explainable recommendation/planning outputs
 
 Do not assume all systems should converge into one surface. Converge surfaces only where that clearly improves user value, reduces fragmentation, or replaces an existing external-tool workflow.
+
+## Lane contract
+
+Every future lane should declare:
+- the user-facing question it is trying to answer
+- the minimum required inputs for that answer
+- the explicit non-blockers that should not hold the slice open
+- the current true blocker
+- the smallest shippable tool slice
+
+If a neighboring lane is not a consumed input for the current slice, keep it listed as a non-blocker instead of letting it silently block implementation.
 
 ## Grounding rule
 

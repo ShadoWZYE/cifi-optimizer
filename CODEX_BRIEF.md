@@ -10,7 +10,8 @@ Help build the grounded MVP core of a local-first CIFI toolkit that can replace 
 
 - keep diffs small and task-shaped
 - preserve local-first browser behavior
-- prefer extraction, mapping, validation, and bounded implementation slices over redesign
+- prefer the smallest shippable tool slice that answers a real player question
+- treat extraction, mapping, decompilation, and validation as intake that supports a slice, not as default product scope
 - do not invent formulas, labels, owners, or player-state fields
 - treat `state.playerProfile` as the shared state boundary
 - keep grounded game truth separate from planner helpers, compatibility data, and external/community inputs
@@ -23,9 +24,21 @@ Help build the grounded MVP core of a local-first CIFI toolkit that can replace 
 - use remote `origin/main` as the base source of truth unless the user says otherwise
 - never work directly on `main`
 - create or switch to one dedicated branch per PR
-- keep each branch scoped to one coherent grounded claim
+- keep each branch scoped to one coherent grounded claim or one small shippable tool slice
 - do not mix unrelated cleanup, planner integration, UI expansion, or parallel research lanes into the same PR
 - do not discard, reset, clean, or delete tracked work unless the user explicitly asks
+
+## Slice contract
+
+Every lane, PR, or handoff should declare:
+
+1. the user-facing question being answered
+2. the minimum required inputs
+3. the explicit non-blockers
+4. the current true blocker
+5. the smallest shippable tool slice
+
+Do not let adjacent research or extraction lanes block a slice unless they are consumed inputs for that slice.
 
 ## Grounding gate
 
@@ -48,6 +61,7 @@ A good PR should do one bounded thing, such as:
 - recover an owner
 - add a checked import or compatibility shape
 - harden validation around an existing grounded claim
+- ship one small tool slice that answers a real player question without pretending adjacent systems are solved
 
 If exact recovery is not possible, prefer a narrower honest boundary over fake closure.
 

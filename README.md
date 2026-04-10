@@ -4,11 +4,17 @@ Local-first CIFI toolkit in active development.
 
 ## North star
 
-Build one centralized system that can gradually replace fragmented external CiFi tools by unifying player state, grounded data, planning workflows, and recommendations.
+Build a grounded local-first toolkit that gradually replaces fragmented external CiFi tools by shipping small tool slices tied to real player questions.
 
 ## Current phase
 
 Build the grounded MVP core that makes later consolidation credible.
+
+Current repo bias:
+- start from a real player question
+- ship the smallest honest tool slice that answers it
+- use research, extraction, and decompilation to unblock that slice instead of letting them silently become the product
+- keep recommendation math and broad gameplay modeling behind grounded MVP needs
 
 Current MVP focus:
 - canonical `state.playerProfile`
@@ -19,6 +25,17 @@ Current MVP focus:
 - explainable recommendation/planning outputs
 
 This repo is not trying to force all systems into one UI or one recommendation surface up front. Surfaces should converge only where that clearly improves player value, reduces fragmentation, or replaces a real external-tool workflow.
+
+## Slice contract
+
+Every active lane should state:
+- the user-facing question it is trying to answer
+- the minimum required inputs
+- the explicit non-blockers
+- the current true blocker
+- the smallest shippable tool slice
+
+Adjacent lanes should only block a slice when they are actual consumed inputs for that slice.
 
 ## Local-first
 

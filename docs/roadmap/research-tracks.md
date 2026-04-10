@@ -32,6 +32,22 @@ A bad track becomes a container for multiple semi-independent problems, repeated
 
 ---
 
+## Lane contract rule
+
+Every active track should make five things explicit:
+
+- the user-facing question it is trying to answer
+- the minimum required inputs for that answer
+- the explicit non-blockers that should not hold the track open
+- the current true blocker
+- the smallest shippable tool slice
+
+Use this contract to keep research aligned to shipping.
+
+If a neighboring system is not a consumed input for the current slice, name it under non-blockers instead of letting it silently block the lane.
+
+---
+
 ## Forking rule
 
 Fork a new track when any of the following becomes true:
@@ -103,6 +119,9 @@ Each active track should include:
 - `title`
 - `status`
 - `goal`
+- `userQuestion`
+- `minimumRequiredInputs`
+- `explicitNonBlockers`
 - `currentSlice`
 - `exitCondition`
 - `blockedBy`
@@ -121,6 +140,15 @@ Each active track should include:
 ### `goal`
 Name the real player-value or implementation unlock, not just the research topic.
 
+### `userQuestion`
+Write the player-facing question the lane is trying to answer.
+
+### `minimumRequiredInputs`
+List only the inputs the current slice actually consumes.
+
+### `explicitNonBlockers`
+Name adjacent unresolved lanes that should stay visible but should not block the current slice.
+
 ### `currentSlice`
 Describe only the current narrow problem being worked.
 
@@ -133,7 +161,7 @@ Examples:
 - decided mech planning is deferred post-MVP
 
 ### `blockedBy`
-Name the single strongest blocker, not every uncertainty in the lane.
+Name the current true blocker, not every uncertainty in the lane.
 
 ### `smallestShippableSlice`
 Describe the smallest useful output that could ship without pretending the whole system is solved.
@@ -197,7 +225,12 @@ Current active or queued tracks:
 
 - `spend-planner-first-ui-slice`
   - status: `active`
-  - goal: ship a forked user-surface spend snapshot that shows canonical inputs plus explicitly labeled boundary-backed spend evidence while keeping blocked owner-dependent inputs unavailable
+  - goal: ship the first small spend tool slice around one real player question instead of treating the whole spend domain as one blocker
+  - user question: `What TokenShop rows can I safely inspect from my current data right now, and what is still blocked?`
+  - minimum required inputs: checked TokenShop row-remap subset, imported current levels for that same subset, and explicit blocked-state labeling
+  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, recommendation math
+  - current true blocker: landing the slice as a subset-bound descriptive or planning-adjacent tool without silently widening it into unrelated spend lanes
+  - smallest shippable slice: a normal app surface that shows current canonical spend inputs, a compatibility-backed TokenShop row subset for only the checked rows, explicit blocked-input notes for the rest, and no recommendation math
 - `shard-milestone-payload-recovery`
   - status: `active`
   - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
