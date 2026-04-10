@@ -37,19 +37,65 @@ var dataDir = Path.Combine(gameRoot, "assets", "bin", "Data");
 var joinedDir = Path.Combine(root, "workbench", "unity", "joined");
 var metadataPath = Path.Combine(root, "workbench", "apk", "base", "global-metadata.dat");
 var il2cppPath = Path.Combine(root, "workbench", "apk", "base", "libil2cpp.so");
-var reportPath = Path.Combine(root, "data", "uabea-probe-report.json");
+var explicitTerms = new List<string>();
+var explicitSeeds = new List<string>();
+string reportPath = Path.Combine(root, "data", "uabea-probe-report.json");
+var disableInterestingPatternFilter = false;
+
+for (var index = 0; index < args.Length; index++)
+{
+    switch (args[index])
+    {
+        case "--report":
+            if (index + 1 >= args.Length)
+            {
+                throw new ArgumentException("Expected a value after --report.");
+            }
+            reportPath = Path.GetFullPath(Path.Combine(root, args[++index]));
+            break;
+        case "--term":
+            if (index + 1 >= args.Length)
+            {
+                throw new ArgumentException("Expected a value after --term.");
+            }
+            explicitTerms.Add(args[++index]);
+            break;
+        case "--seed":
+            if (index + 1 >= args.Length)
+            {
+                throw new ArgumentException("Expected a value after --seed.");
+            }
+            explicitSeeds.Add(args[++index]);
+            break;
+        case "--no-interesting-filter":
+            disableInterestingPatternFilter = true;
+            break;
+        default:
+            throw new ArgumentException($"Unknown argument: {args[index]}");
+    }
+}
+
 var interestingPattern = new[]
 {
     "Upgrade", "Milestone", "Loop", "Shard", "Diamond", "Token",
     "Ouro", "Research", "Borge", "Chrystos", "Emporium", "Bonus", "Cost", "Level",
     "Generator", "Mission", "Prestige", "Reward", "Boon", "Ultima"
 };
+var effectiveInterestingPattern = interestingPattern
+    .Concat(explicitTerms)
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
+var explicitTermSet = new HashSet<string>(explicitTerms.Where(term => !string.IsNullOrWhiteSpace(term)), StringComparer.OrdinalIgnoreCase);
+var parsedSeeds = ParseSeedKeys(explicitSeeds).ToArray();
+var seedKeySet = new HashSet<string>(parsedSeeds.Select(seed => MakeAssetKey(seed.fileName, seed.pathId)), StringComparer.OrdinalIgnoreCase);
+var seededOnlyMode = seedKeySet.Count > 0 && explicitTermSet.Count == 0;
 var shardTargetScriptNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 {
     "ShardMining",
     "ShardPerLevelTextHandler",
     "TextHandlerShardMilestoneBonusesPerLevel",
-    "ShardUpgradeInfo"
+    "ShardUpgradeInfo",
+    "TextHandlerMarkets"
 };
 var shardTargetMethodPatterns = new[]
 {
@@ -118,6 +164,12 @@ var directTypeTargets = new[]
     },
     new
     {
+        reportKey = "textHandlerMarkets",
+        lookupNames = new[] { "TextHandlerMarkets" },
+        methodPatterns = new[] { "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS", "ClearISObjects", "SetISMaxLevelObjects" }
+    },
+    new
+    {
         reportKey = "multiverseMarketInscryption",
         lookupNames = new[] { "Inscryption", "MultiverseMarket+Inscryption" },
         methodPatterns = Array.Empty<string>()
@@ -140,6 +192,10 @@ var targetFileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 static bool MatchesInteresting(string? value, string[] patterns) =>
     !string.IsNullOrWhiteSpace(value) &&
     patterns.Any(pattern => value.Contains(pattern, StringComparison.OrdinalIgnoreCase));
+
+static bool MatchesExplicitTerm(string? value, HashSet<string> terms) =>
+    !string.IsNullOrWhiteSpace(value) &&
+    terms.Any(term => value.Contains(term, StringComparison.OrdinalIgnoreCase));
 
 static IEnumerable<AssetTypeValueField> ChildrenOf(AssetTypeValueField field)
 {
@@ -171,6 +227,76 @@ static IEnumerable<string> FlattenStrings(AssetTypeValueField field)
         {
             yield return nested;
         }
+    }
+}
+
+static IEnumerable<object> CollectPathReferences(AssetTypeValueField field, int depth = 0, string prefix = "")
+{
+    if (depth > 4)
+    {
+        yield break;
+    }
+
+    foreach (var child in field)
+    {
+        var fieldPath = string.IsNullOrWhiteSpace(prefix) ? child.FieldName : $"{prefix}.{child.FieldName}";
+        long? pathId = null;
+        int? fileId = null;
+        string? targetType = null;
+        try
+        {
+            var pathField = child["m_PathID"];
+            pathId = pathField.AsLong;
+            try
+            {
+                fileId = child["m_FileID"].AsInt;
+            }
+            catch
+            {
+            }
+            try
+            {
+                targetType = child.TypeName;
+            }
+            catch
+            {
+            }
+        }
+        catch
+        {
+        }
+
+        if (pathId.HasValue && pathId.Value != 0)
+        {
+            yield return new
+            {
+                fieldPath,
+                fileId,
+                pathId,
+                targetType
+            };
+        }
+
+        foreach (var nested in CollectPathReferences(child, depth + 1, fieldPath))
+        {
+            yield return nested;
+        }
+    }
+}
+
+static string MakeAssetKey(string fileName, long pathId) => $"{fileName}:{pathId}";
+
+static IEnumerable<(string fileName, long pathId)> ParseSeedKeys(IEnumerable<string> values)
+{
+    foreach (var value in values)
+    {
+        var parts = value.Split(':', 2, StringSplitOptions.TrimEntries);
+        if (parts.Length != 2 || !long.TryParse(parts[1], out var pathId))
+        {
+            throw new ArgumentException($"Invalid --seed value '{value}'. Expected format <fileName>:<pathId>.");
+        }
+
+        yield return (parts[0], pathId);
     }
 }
 
@@ -306,119 +432,134 @@ var cpp2IlStatus = new Dictionary<string, object?>
 
 var directLibCpp2IlProbe = new Dictionary<string, object?>
 {
-    ["attempted"] = true
+    ["attempted"] = !seededOnlyMode
 };
 var directTargetTypeMetadata = new List<object>();
-try
+if (!seededOnlyMode)
 {
-    var unityVersion = AssetRipper.Primitives.UnityVersion.Parse(primaryFile.file.Metadata.UnityVersion);
-    var directLoadResult = LibCpp2IlMain.LoadFromFile(il2cppPath, metadataPath, unityVersion);
-    directLibCpp2IlProbe["loadFromFileResult"] = directLoadResult;
-    directLibCpp2IlProbe["binaryNullAfterLoad"] = LibCpp2IlMain.Binary is null;
-    directLibCpp2IlProbe["metadataNullAfterLoad"] = LibCpp2IlMain.TheMetadata is null;
-
-    if (directLoadResult && LibCpp2IlMain.TheMetadata is not null)
+    try
     {
-        var assemblyCSharp = LibCpp2IlMain.TheMetadata.AssemblyDefinitions
-            .FirstOrDefault(asm => string.Equals(asm.AssemblyName.Name, "Assembly-CSharp", StringComparison.Ordinal));
-        directLibCpp2IlProbe["assemblyCSharpFound"] = assemblyCSharp is not null;
+        var unityVersion = AssetRipper.Primitives.UnityVersion.Parse(primaryFile.file.Metadata.UnityVersion);
+        var directLoadResult = LibCpp2IlMain.LoadFromFile(il2cppPath, metadataPath, unityVersion);
+        directLibCpp2IlProbe["loadFromFileResult"] = directLoadResult;
+        directLibCpp2IlProbe["binaryNullAfterLoad"] = LibCpp2IlMain.Binary is null;
+        directLibCpp2IlProbe["metadataNullAfterLoad"] = LibCpp2IlMain.TheMetadata is null;
 
-        if (assemblyCSharp is not null)
+        if (directLoadResult && LibCpp2IlMain.TheMetadata is not null)
         {
-            IEnumerable<LibCpp2IL.Metadata.Il2CppTypeDefinition> assemblyTypes =
-                assemblyCSharp.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>();
-            foreach (var target in directTypeTargets)
-            {
-                var type = assemblyTypes.FirstOrDefault(t =>
-                    target.lookupNames.Any(lookupName =>
-                        string.Equals(t.Name, lookupName, StringComparison.Ordinal) ||
-                        string.Equals(t.FullName, lookupName, StringComparison.Ordinal) ||
-                        t.FullName.EndsWith("." + lookupName, StringComparison.Ordinal)));
+            var assemblyCSharp = LibCpp2IlMain.TheMetadata.AssemblyDefinitions
+                .FirstOrDefault(asm => string.Equals(asm.AssemblyName.Name, "Assembly-CSharp", StringComparison.Ordinal));
+            directLibCpp2IlProbe["assemblyCSharpFound"] = assemblyCSharp is not null;
 
-                if (type is null)
+            if (assemblyCSharp is not null)
+            {
+                IEnumerable<LibCpp2IL.Metadata.Il2CppTypeDefinition> assemblyTypes =
+                    assemblyCSharp.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>();
+                foreach (var target in directTypeTargets)
                 {
+                    var type = assemblyTypes.FirstOrDefault(t =>
+                        target.lookupNames.Any(lookupName =>
+                            string.Equals(t.Name, lookupName, StringComparison.Ordinal) ||
+                            string.Equals(t.FullName, lookupName, StringComparison.Ordinal) ||
+                            t.FullName.EndsWith("." + lookupName, StringComparison.Ordinal)));
+
+                    if (type is null)
+                    {
+                        directTargetTypeMetadata.Add(new
+                        {
+                            reportKey = target.reportKey,
+                            scriptName = target.lookupNames[0],
+                            found = false
+                        });
+                        continue;
+                    }
+
                     directTargetTypeMetadata.Add(new
                     {
                         reportKey = target.reportKey,
                         scriptName = target.lookupNames[0],
-                        found = false
+                        found = true,
+                        fullName = type.FullName,
+                        baseType = type.BaseType?.ToString(),
+                        fieldCount = type.Fields.Length,
+                        methodCount = type.Methods.Length,
+                        fields = type.Fields
+                            .Select((field, index) => new
+                            {
+                                index,
+                                name = field.Name,
+                                type = field.FieldType?.ToString(),
+                                attributes = type.FieldAttributes[index].ToString(),
+                                defaultValue = type.FieldDefaults.Length > index && type.FieldDefaults[index] is not null
+                                    ? type.FieldDefaults[index]!.ToString()
+                                    : null,
+                                fieldOffset = type.FieldInfos.Length > index
+                                    ? type.FieldInfos[index].FieldOffset
+                                    : (int?)null
+                            })
+                            .ToArray(),
+                        methods = type.Methods
+                            .Where(method => target.methodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
+                            .Select((method, index) => new
+                            {
+                                index,
+                                name = method.Name,
+                                returnType = method.ReturnType?.ToString(),
+                                parameterCount = method.Parameters?.Length ?? 0,
+                                methodProperties = ReflectSerializablePublicProperties(method),
+                                parameters = method.Parameters?.Select(parameter => ReflectSerializablePublicProperties(parameter)).ToArray() ?? Array.Empty<object>()
+                            })
+                            .ToArray()
                     });
-                    continue;
                 }
-
-                directTargetTypeMetadata.Add(new
-                {
-                    reportKey = target.reportKey,
-                    scriptName = target.lookupNames[0],
-                    found = true,
-                    fullName = type.FullName,
-                    baseType = type.BaseType?.ToString(),
-                    fieldCount = type.Fields.Length,
-                    methodCount = type.Methods.Length,
-                    fields = type.Fields
-                        .Select((field, index) => new
-                        {
-                            index,
-                            name = field.Name,
-                            type = field.FieldType?.ToString(),
-                            attributes = type.FieldAttributes[index].ToString(),
-                            defaultValue = type.FieldDefaults.Length > index && type.FieldDefaults[index] is not null
-                                ? type.FieldDefaults[index]!.ToString()
-                                : null,
-                            fieldOffset = type.FieldInfos.Length > index
-                                ? type.FieldInfos[index].FieldOffset
-                                : (int?)null
-                        })
-                        .ToArray(),
-                    methods = type.Methods
-                        .Where(method => target.methodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
-                        .Select((method, index) => new
-                        {
-                            index,
-                            name = method.Name,
-                            returnType = method.ReturnType?.ToString(),
-                            parameterCount = method.Parameters?.Length ?? 0,
-                            methodProperties = ReflectSerializablePublicProperties(method),
-                            parameters = method.Parameters?.Select(parameter => ReflectSerializablePublicProperties(parameter)).ToArray() ?? Array.Empty<object>()
-                        })
-                        .ToArray()
-                });
             }
         }
     }
+    catch (Exception ex)
+    {
+        directLibCpp2IlProbe["loadFromFileResult"] = false;
+        directLibCpp2IlProbe["error"] = DescribeException(ex);
+    }
 }
-catch (Exception ex)
+else
 {
-    directLibCpp2IlProbe["loadFromFileResult"] = false;
-    directLibCpp2IlProbe["error"] = DescribeException(ex);
+    directLibCpp2IlProbe["skippedForSeededMode"] = true;
 }
 
 Cpp2IlTempGenerator? generator = null;
-try
-{
-    generator = new Cpp2IlTempGenerator(metadataPath, il2cppPath);
-    manager.MonoTempGenerator = generator;
-    cpp2IlStatus["initialized"] = true;
-}
-catch (Exception ex)
-{
-    cpp2IlStatus["initialized"] = false;
-    cpp2IlStatus["errorType"] = ex.GetType().FullName;
-    cpp2IlStatus["error"] = ex.Message;
-}
-
-if (generator is not null)
+if (!seededOnlyMode)
 {
     try
     {
-        generator.InitializeCpp2IL();
-        cpp2IlStatus["initializeCallSucceeded"] = true;
+        generator = new Cpp2IlTempGenerator(metadataPath, il2cppPath);
+        manager.MonoTempGenerator = generator;
+        cpp2IlStatus["initialized"] = true;
     }
     catch (Exception ex)
     {
-        cpp2IlStatus["initializeCallSucceeded"] = false;
-        cpp2IlStatus["initializeCallError"] = DescribeException(ex);
+        cpp2IlStatus["initialized"] = false;
+        cpp2IlStatus["errorType"] = ex.GetType().FullName;
+        cpp2IlStatus["error"] = ex.Message;
     }
+
+    if (generator is not null)
+    {
+        try
+        {
+            generator.InitializeCpp2IL();
+            cpp2IlStatus["initializeCallSucceeded"] = true;
+        }
+        catch (Exception ex)
+        {
+            cpp2IlStatus["initializeCallSucceeded"] = false;
+            cpp2IlStatus["initializeCallError"] = DescribeException(ex);
+        }
+    }
+}
+else
+{
+    cpp2IlStatus["initialized"] = false;
+    cpp2IlStatus["skippedForSeededMode"] = true;
 }
 
 Console.WriteLine($"Unity version: {primaryFile.file.Metadata.UnityVersion}");
@@ -448,10 +589,12 @@ var fileTypeSummaries = loadedFiles
 var textAssetHits = new List<object>();
 var namedObjectHits = new List<object>();
 var directMonoBehaviourFieldHits = new List<object>();
+var targetedReferenceWalkHits = new List<object>();
 var monoScriptByPath = new Dictionary<long, object>();
 var monoScriptHits = new List<object>();
 var shardTargetTypeTrees = new List<object>();
 var targetScriptForceFromCldbReads = new List<object>();
+var objectLookup = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 var fileScriptTypeSummaries = loadedFiles
     .Select(loaded => new
     {
@@ -469,13 +612,176 @@ var fileScriptTypeSummaries = loadedFiles
 
 var targetScriptIndexLookups = new List<object>();
 var targetScriptMonoBehaviourCounts = new List<object>();
+var seedDetails = new List<object>();
+var assetInfoLookup = loadedFiles.ToDictionary(
+    loaded => Path.GetFileName(loaded.path),
+    loaded => loaded.file.AssetInfos.ToDictionary(info => info.PathId, info => info));
 
-foreach (var loaded in loadedFiles)
+object SummarizeAsset(AssetsFileInstance loaded, AssetFileInfo info, AssetsManager assetManager, Dictionary<long, object> monoScriptsByPath, Dictionary<string, object> knownObjectLookup)
 {
-    foreach (var info in loaded.file.AssetInfos)
+    var readFlags = info.TypeId == (int)AssetClassID.MonoBehaviour
+        ? AssetReadFlags.ForceFromCldb
+        : AssetReadFlags.None;
+    var baseField = assetManager.GetBaseField(loaded, info, readFlags);
+    var fileName = Path.GetFileName(loaded.path);
+    var name = "";
+    try
+    {
+        name = baseField["m_Name"].AsString;
+    }
+    catch
+    {
+    }
+
+    long scriptPathId = 0;
+    string? scriptName = null;
+    ushort? scriptIndex = null;
+    long gameObjectPathId = 0;
+    if (info.TypeId == (int)AssetClassID.MonoBehaviour)
     {
         try
         {
+            scriptIndex = info.GetScriptIndex(loaded.file);
+        }
+        catch
+        {
+        }
+        try
+        {
+            scriptPathId = baseField["m_Script"]["m_PathID"].AsLong;
+            monoScriptsByPath.TryGetValue(scriptPathId, out var scriptSummary);
+            scriptName = scriptSummary?.GetType().GetProperty("scriptName")?.GetValue(scriptSummary) as string;
+        }
+        catch
+        {
+        }
+        try
+        {
+            gameObjectPathId = baseField["m_GameObject"]["m_PathID"].AsLong;
+        }
+        catch
+        {
+        }
+    }
+    else if (info.TypeId == (int)AssetClassID.GameObject)
+    {
+        gameObjectPathId = info.PathId;
+    }
+
+    knownObjectLookup[MakeAssetKey(fileName, info.PathId)] = new
+    {
+        fileName,
+        pathId = info.PathId,
+        typeId = info.TypeId,
+        typeName = ((AssetClassID)info.TypeId).ToString(),
+        name,
+        scriptPathId = scriptPathId == 0 ? (long?)null : scriptPathId,
+        scriptName,
+        scriptIndex,
+        gameObjectPathId = gameObjectPathId == 0 ? (long?)null : gameObjectPathId
+    };
+
+    var references = CollectPathReferences(baseField)
+        .Cast<dynamic>()
+        .Select(reference =>
+        {
+            var key = MakeAssetKey(fileName, (long)reference.pathId);
+            knownObjectLookup.TryGetValue(key, out var resolved);
+            return new
+            {
+                fieldPath = (string)reference.fieldPath,
+                fileId = (int?)reference.fileId,
+                pathId = (long?)reference.pathId,
+                targetType = (string?)reference.targetType,
+                resolved
+            };
+        })
+        .ToArray();
+
+    return new
+    {
+        fileName,
+        pathId = info.PathId,
+        typeId = info.TypeId,
+        typeName = ((AssetClassID)info.TypeId).ToString(),
+        name,
+        scriptPathId = scriptPathId == 0 ? (long?)null : scriptPathId,
+        scriptName,
+        scriptIndex,
+        gameObjectPathId = gameObjectPathId == 0 ? (long?)null : gameObjectPathId,
+        fieldNames = ChildrenOf(baseField)
+            .Select(child => child.FieldName)
+            .Where(fieldName => !string.IsNullOrWhiteSpace(fieldName))
+            .Distinct(StringComparer.Ordinal)
+            .Take(80)
+            .ToArray(),
+        references,
+        matchedStrings = FlattenStrings(baseField)
+            .Where(value => MatchesExplicitTerm(value, explicitTermSet))
+            .Distinct(StringComparer.Ordinal)
+            .Take(40)
+            .ToArray()
+    };
+}
+
+if (seededOnlyMode)
+{
+    foreach (var loaded in loadedFiles)
+    {
+        foreach (var info in loaded.file.GetAssetsOfType(AssetClassID.MonoScript))
+        {
+            try
+            {
+                var baseField = manager.GetBaseField(loaded, info, AssetReadFlags.None);
+                var assemblyName = "";
+                var namespaceName = "";
+                var className = "";
+                try
+                {
+                    assemblyName = baseField["m_AssemblyName"].AsString;
+                    namespaceName = baseField["m_Namespace"].AsString;
+                    className = baseField["m_ClassName"].AsString;
+                }
+                catch
+                {
+                }
+
+                monoScriptByPath[info.PathId] = new
+                {
+                    fileName = Path.GetFileName(loaded.path),
+                    pathId = info.PathId,
+                    scriptName = className,
+                    namespaceName,
+                    assemblyName
+                };
+            }
+            catch
+            {
+            }
+        }
+    }
+}
+
+foreach (var loaded in loadedFiles)
+{
+    var assetInfos = seededOnlyMode
+        ? loaded.file.AssetInfos.Where(info => seedKeySet.Contains(MakeAssetKey(Path.GetFileName(loaded.path), info.PathId)))
+        : loaded.file.AssetInfos;
+    foreach (var info in assetInfos)
+    {
+        try
+        {
+            var fileName = Path.GetFileName(loaded.path);
+            if (seedKeySet.Count > 0 && seedKeySet.Contains(MakeAssetKey(fileName, info.PathId)))
+            {
+                seedDetails.Add(SummarizeAsset(loaded, info, manager, monoScriptByPath, objectLookup));
+            }
+
+            if (seededOnlyMode)
+            {
+                continue;
+            }
+
             if (info.TypeId == (int)AssetClassID.TextAsset)
             {
                 var baseField = manager.GetBaseField(loaded, info, AssetReadFlags.None);
@@ -538,6 +844,21 @@ foreach (var loaded in loadedFiles)
                     : 0;
                 monoScriptByPath.TryGetValue(scriptPathId, out var scriptSummary);
                 var scriptName = scriptSummary?.GetType().GetProperty("scriptName")?.GetValue(scriptSummary) as string;
+                var gameObjectPathId = info.TypeId == (int)AssetClassID.MonoBehaviour
+                    ? baseField["m_GameObject"]["m_PathID"].AsLong
+                    : info.PathId;
+
+                objectLookup[$"{Path.GetFileName(loaded.path)}:{info.PathId}"] = new
+                {
+                    fileName = Path.GetFileName(loaded.path),
+                    pathId = info.PathId,
+                    typeId = info.TypeId,
+                    typeName = ((AssetClassID)info.TypeId).ToString(),
+                    name,
+                    scriptName,
+                    scriptPathId = scriptPathId == 0 ? (long?)null : scriptPathId,
+                    gameObjectPathId = gameObjectPathId == 0 ? (long?)null : gameObjectPathId
+                };
 
                 if ((shardTargetScriptNames.Contains(scriptName ?? string.Empty) || scriptIndex != ushort.MaxValue) &&
                     info.TypeId == (int)AssetClassID.MonoBehaviour)
@@ -614,6 +935,61 @@ foreach (var loaded in loadedFiles)
                             : fieldNames.Where(fieldName => MatchesInteresting(fieldName, interestingPattern)).ToArray()
                     });
                 }
+
+                var flattenedStrings = FlattenStrings(baseField)
+                    .Where(value => disableInterestingPatternFilter || MatchesInteresting(value, effectiveInterestingPattern))
+                    .Distinct(StringComparer.Ordinal)
+                    .Take(80)
+                    .ToArray();
+                var explicitStringMatches = flattenedStrings
+                    .Where(value => MatchesExplicitTerm(value, explicitTermSet))
+                    .Take(40)
+                    .ToArray();
+                var explicitFieldMatches = fieldNames
+                    .Where(fieldName => MatchesExplicitTerm(fieldName, explicitTermSet))
+                    .Take(40)
+                    .ToArray();
+                var explicitNameMatch = MatchesExplicitTerm(name, explicitTermSet);
+                var explicitScriptMatch = MatchesExplicitTerm(scriptName, explicitTermSet);
+
+                if (explicitTermSet.Count > 0 && (explicitNameMatch || explicitScriptMatch || explicitFieldMatches.Length > 0 || explicitStringMatches.Length > 0))
+                {
+                    var references = CollectPathReferences(baseField)
+                        .Cast<dynamic>()
+                        .Select(reference =>
+                        {
+                            var key = $"{Path.GetFileName(loaded.path)}:{reference.pathId}";
+                            objectLookup.TryGetValue(key, out var referencedObject);
+                            return new
+                            {
+                                fieldPath = (string)reference.fieldPath,
+                                fileId = (int?)reference.fileId,
+                                pathId = (long?)reference.pathId,
+                                targetType = (string?)reference.targetType,
+                                resolved = referencedObject
+                            };
+                        })
+                        .Take(120)
+                        .ToArray();
+
+                    targetedReferenceWalkHits.Add(new
+                    {
+                        fileName = Path.GetFileName(loaded.path),
+                        pathId = info.PathId,
+                        typeId = info.TypeId,
+                        typeName = ((AssetClassID)info.TypeId).ToString(),
+                        name,
+                        scriptName,
+                        scriptPathId = scriptPathId == 0 ? (long?)null : scriptPathId,
+                        scriptIndex = scriptIndex == ushort.MaxValue ? (ushort?)null : scriptIndex,
+                        gameObjectPathId = gameObjectPathId == 0 ? (long?)null : gameObjectPathId,
+                        explicitNameMatch,
+                        explicitScriptMatch,
+                        explicitFieldMatches,
+                        explicitStringMatches,
+                        references
+                    });
+                }
             }
         }
         catch
@@ -622,114 +998,169 @@ foreach (var loaded in loadedFiles)
     }
 }
 
-foreach (var loaded in loadedFiles)
+if (seedKeySet.Count > 0)
 {
-    if (loaded.file.Metadata.ScriptTypes.Count == 0)
+    var pending = new Queue<(string fileName, long pathId, int depth)>();
+    var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    foreach (var seed in parsedSeeds)
     {
-        continue;
+        pending.Enqueue((seed.fileName, seed.pathId, 0));
     }
 
-    var fileName = Path.GetFileName(loaded.path);
-    foreach (var scriptType in loaded.file.Metadata.ScriptTypes.Select((scriptType, index) => new { scriptType, index }))
+    var expanded = new List<object>();
+    while (pending.Count > 0)
     {
-        var properties = ReflectPublicProperties(scriptType.scriptType);
-        if (!properties.TryGetValue("PathId", out var pathIdValue) || pathIdValue is null)
+        var current = pending.Dequeue();
+        var currentKey = MakeAssetKey(current.fileName, current.pathId);
+        if (!visited.Add(currentKey))
         {
             continue;
         }
 
-        var pathId = Convert.ToInt64(pathIdValue);
-        if (!monoScriptByPath.TryGetValue(pathId, out var scriptSummary))
+        if (!assetInfoLookup.TryGetValue(current.fileName, out var byPathId) || !byPathId.TryGetValue(current.pathId, out var info))
         {
             continue;
         }
 
-        var scriptName = scriptSummary.GetType().GetProperty("scriptName")?.GetValue(scriptSummary) as string;
-        if (string.IsNullOrWhiteSpace(scriptName) || !shardTargetScriptNames.Contains(scriptName))
+        var loaded = loadedFiles.First(file => string.Equals(Path.GetFileName(file.path), current.fileName, StringComparison.OrdinalIgnoreCase));
+        var summary = SummarizeAsset(loaded, info, manager, monoScriptByPath, objectLookup);
+        expanded.Add(summary);
+
+        if (current.depth >= 4)
         {
             continue;
         }
 
-        var monoBehaviours = loaded.file.GetAssetsOfType(AssetClassID.MonoBehaviour, (ushort)scriptType.index);
-        targetScriptIndexLookups.Add(new
+        var references = summary.GetType().GetProperty("references")?.GetValue(summary) as System.Collections.IEnumerable;
+        if (references is null)
         {
-            fileName,
-            scriptIndex = scriptType.index,
-            scriptPathId = pathId,
-            scriptName,
-            monoBehaviourCount = monoBehaviours.Count
-        });
+            continue;
+        }
 
-        try
+        foreach (var reference in references)
         {
-            var typeTree = loaded.file.Metadata.FindTypeTreeTypeByScriptIndex((ushort)scriptType.index);
-            targetScriptMonoBehaviourCounts.Add(new
+            var pathIdValue = reference.GetType().GetProperty("pathId")?.GetValue(reference);
+            if (pathIdValue is long pathId && pathId != 0)
+            {
+                pending.Enqueue((current.fileName, pathId, current.depth + 1));
+            }
+        }
+    }
+
+    seedDetails = expanded;
+}
+
+if (!seededOnlyMode)
+{
+    foreach (var loaded in loadedFiles)
+    {
+        if (loaded.file.Metadata.ScriptTypes.Count == 0)
+        {
+            continue;
+        }
+
+        var fileName = Path.GetFileName(loaded.path);
+        foreach (var scriptType in loaded.file.Metadata.ScriptTypes.Select((scriptType, index) => new { scriptType, index }))
+        {
+            var properties = ReflectPublicProperties(scriptType.scriptType);
+            if (!properties.TryGetValue("PathId", out var pathIdValue) || pathIdValue is null)
+            {
+                continue;
+            }
+
+            var pathId = Convert.ToInt64(pathIdValue);
+            if (!monoScriptByPath.TryGetValue(pathId, out var scriptSummary))
+            {
+                continue;
+            }
+
+            var scriptName = scriptSummary.GetType().GetProperty("scriptName")?.GetValue(scriptSummary) as string;
+            if (string.IsNullOrWhiteSpace(scriptName) || !shardTargetScriptNames.Contains(scriptName))
+            {
+                continue;
+            }
+
+            var monoBehaviours = loaded.file.GetAssetsOfType(AssetClassID.MonoBehaviour, (ushort)scriptType.index);
+            targetScriptIndexLookups.Add(new
             {
                 fileName,
                 scriptIndex = scriptType.index,
                 scriptPathId = pathId,
                 scriptName,
-                monoBehaviourPathIds = monoBehaviours.Select(info => info.PathId).Take(50).ToArray(),
-                typeTreeFound = typeTree is not null,
-                typeTreeNodeCount = typeTree?.Nodes.Count ?? 0,
-                typeTreeFieldNames = typeTree?.Nodes
-                    .Select(node => GetNodeName(typeTree, node))
-                    .Where(nodeName => !string.IsNullOrWhiteSpace(nodeName))
-                    .Distinct(StringComparer.Ordinal)
-                    .Take(200)
-                    .ToArray() ?? Array.Empty<string>()
+                monoBehaviourCount = monoBehaviours.Count
             });
-        }
-        catch
-        {
-            targetScriptMonoBehaviourCounts.Add(new
-            {
-                fileName,
-                scriptIndex = scriptType.index,
-                scriptPathId = pathId,
-                scriptName,
-                monoBehaviourPathIds = monoBehaviours.Select(info => info.PathId).Take(50).ToArray(),
-                typeTreeFound = false,
-                typeTreeNodeCount = 0,
-                typeTreeFieldNames = Array.Empty<string>()
-            });
-        }
 
-        foreach (var monoBehaviour in monoBehaviours.Take(10))
-        {
             try
             {
-                var baseField = manager.GetBaseField(loaded, monoBehaviour, AssetReadFlags.ForceFromCldb);
-                var fieldNames = ChildrenOf(baseField)
-                    .Select(child => child.FieldName)
-                    .Where(fieldName => !string.IsNullOrWhiteSpace(fieldName))
-                    .Distinct(StringComparer.Ordinal)
-                    .Take(100)
-                    .ToArray();
-                targetScriptForceFromCldbReads.Add(new
+                var typeTree = loaded.file.Metadata.FindTypeTreeTypeByScriptIndex((ushort)scriptType.index);
+                targetScriptMonoBehaviourCounts.Add(new
                 {
                     fileName,
                     scriptIndex = scriptType.index,
                     scriptPathId = pathId,
                     scriptName,
-                    monoBehaviourPathId = monoBehaviour.PathId,
-                    success = true,
-                    fieldCount = fieldNames.Length,
-                    fieldNames
+                    monoBehaviourPathIds = monoBehaviours.Select(info => info.PathId).Take(50).ToArray(),
+                    typeTreeFound = typeTree is not null,
+                    typeTreeNodeCount = typeTree?.Nodes.Count ?? 0,
+                    typeTreeFieldNames = typeTree?.Nodes
+                        .Select(node => GetNodeName(typeTree, node))
+                        .Where(nodeName => !string.IsNullOrWhiteSpace(nodeName))
+                        .Distinct(StringComparer.Ordinal)
+                        .Take(200)
+                        .ToArray() ?? Array.Empty<string>()
                 });
             }
-            catch (Exception ex)
+            catch
             {
-                targetScriptForceFromCldbReads.Add(new
+                targetScriptMonoBehaviourCounts.Add(new
                 {
                     fileName,
                     scriptIndex = scriptType.index,
                     scriptPathId = pathId,
                     scriptName,
-                    monoBehaviourPathId = monoBehaviour.PathId,
-                    success = false,
-                    error = DescribeException(ex)
+                    monoBehaviourPathIds = monoBehaviours.Select(info => info.PathId).Take(50).ToArray(),
+                    typeTreeFound = false,
+                    typeTreeNodeCount = 0,
+                    typeTreeFieldNames = Array.Empty<string>()
                 });
+            }
+
+            foreach (var monoBehaviour in monoBehaviours.Take(10))
+            {
+                try
+                {
+                    var baseField = manager.GetBaseField(loaded, monoBehaviour, AssetReadFlags.ForceFromCldb);
+                    var fieldNames = ChildrenOf(baseField)
+                        .Select(child => child.FieldName)
+                        .Where(fieldName => !string.IsNullOrWhiteSpace(fieldName))
+                        .Distinct(StringComparer.Ordinal)
+                        .Take(100)
+                        .ToArray();
+                    targetScriptForceFromCldbReads.Add(new
+                    {
+                        fileName,
+                        scriptIndex = scriptType.index,
+                        scriptPathId = pathId,
+                        scriptName,
+                        monoBehaviourPathId = monoBehaviour.PathId,
+                        success = true,
+                        fieldCount = fieldNames.Length,
+                        fieldNames
+                    });
+                }
+                catch (Exception ex)
+                {
+                    targetScriptForceFromCldbReads.Add(new
+                    {
+                        fileName,
+                        scriptIndex = scriptType.index,
+                        scriptPathId = pathId,
+                        scriptName,
+                        monoBehaviourPathId = monoBehaviour.PathId,
+                        success = false,
+                        error = DescribeException(ex)
+                    });
+                }
             }
         }
     }
@@ -748,6 +1179,8 @@ var report = new
     targetScriptIndexLookups,
     targetScriptMonoBehaviourCounts,
     targetScriptForceFromCldbReads,
+    queryTerms = explicitTerms.ToArray(),
+    interestingPatternBypassed = disableInterestingPatternFilter,
     monoScriptHits = monoScriptHits.ToArray(),
     shardTargetTypeTrees = shardTargetTypeTrees.ToArray(),
     textAssetHits = textAssetHits
@@ -756,6 +1189,9 @@ var report = new
         .ToArray(),
     directMonoBehaviourFieldHits = directMonoBehaviourFieldHits
         .ToArray(),
+    targetedReferenceWalkHits = targetedReferenceWalkHits
+        .ToArray(),
+    seededReferenceWalk = seedDetails.ToArray(),
     shardTargetMonoBehaviours = directMonoBehaviourFieldHits
         .Where(hit =>
         {

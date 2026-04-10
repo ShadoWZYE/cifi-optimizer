@@ -299,7 +299,14 @@ Current grounded conclusion:
   - structural row chain: `IS78Level`, `IS78ID`, `BuyIS78`, `SetIS78CostText`
   - text-side shell: `THMarkets: TextHandlerMarkets`, `SetAllChrystosEmporiumTexts`
   - direct text-adjacent source: `Inscryption 78: Ouroboros Orbs`
-- This is a real text-adjacent path, but only as a sparse Unity string anchor in the `TextHandlerMarkets` neighborhood.
+- The live-asset seed walk now also recovers row-local slot objects beneath `ChrystosEmporiumUpgrade78-ID78` and `ChrystosEmporiumUpgrade83-ID83`:
+  - `CurrentBonusText`
+  - `BonusDescriptionText`
+  - `PerLevelBonusText`
+  - `DescriptionText`
+  - `IDText`
+  - `IconBox`
+- Those slot objects carry concrete UI components including `UnityEngine.UI.Text`, `UnityEngine.UI.Image`, `UnityEngine.UI.Outline`, and `UnityEngine.UI.Shadow`.
 - The new row `78` screenshot shows that the sparse anchor does not reproduce live effect text:
   - sparse anchor: `Inscryption 78: Ouroboros Orbs`
   - live screenshot text: `OUROBOROS POINTS GAINED`
@@ -313,16 +320,16 @@ Current grounded conclusion:
 - That still does not scale to the whole table as a recovered row-to-text join:
   - sparse direct anchors exist for rows `25`, `46`, `78`, and `83`
   - no checked repo-local player-facing strings `Inscryption 69` through `Inscryption 74` are recovered
-  - generic UI text-slot names `ActualBonusText`, `BonusText1`, and `TotalBonusText` are present repo-locally, but no checked join ties them specifically to `THMarkets` or ordered Emporium rows
-  - no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or an Emporium-specific row-local text catalog
+  - the live-asset walk reaches row-local slot objects and their `UnityEngine.UI.Text` components, but no checked join ties those slot-local components back to `THMarkets` or to a final text payload assignment
+  - no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or the recovered row-local `UnityEngine.UI.Text` components
 
 Current grounded conclusion:
 
 - the structural row model stays unchanged
 - rows `78` and `83` are only partial text-adjacent controls, not completed live effect-text bindings
-- a control-row text-adjacent source is recoverable, but only as a sparse Unity string anchor
+- a control-row text-adjacent path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain
 - the handler-side scaling clue is now tightened to the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered `TextHandlerMarkets` join that routes those methods into Emporium row-local text slots and then into final live player-facing effect text
+- the exact remaining blocker is the unrecovered `TextHandlerMarkets` join that routes those methods into the recovered row-local `UnityEngine.UI.Text` components and then into final live player-facing effect text
 - the canonical import-safe subset stays empty
 
 ## Alternate serialized-export indirect-join boundary
