@@ -2542,16 +2542,22 @@ assert.deepEqual(
 );
 assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesToWholeTable, false);
-assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "TextHandlerMarkets base-bonus text binding consumer");
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "TextHandlerMarkets base-bonus to row-text-slot binding join");
+assert.deepEqual(
+  multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.currentlyRecoveredInputs,
+  ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetISNCostText", "SetISNBaseBonusText", "InscryptionsList", "ActualBonusText", "BonusText1", "TotalBonusText"]
+);
 assert.match(multiverseMarketStateVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /Inscryption 78: Ouroboros Orbs/);
 assert.match(multiverseMarketStateVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketStateVerificationDoc, /SetAllBaseBonusTexts/);
-assert.match(multiverseMarketStateVerificationDoc, /unrecovered `TextHandlerMarkets` consumer or binding step/i);
+assert.match(multiverseMarketStateVerificationDoc, /ActualBonusText/);
+assert.match(multiverseMarketStateVerificationDoc, /unrecovered `TextHandlerMarkets` join that routes those methods into Emporium row-local text slots/i);
 assert.match(multiverseMarketVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketVerificationDoc, /SetIS69BaseBonusText/);
-assert.match(multiverseMarketVerificationDoc, /no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog/i);
+assert.match(multiverseMarketVerificationDoc, /ActualBonusText/);
+assert.match(multiverseMarketVerificationDoc, /no checked join ties them specifically to `THMarkets` or ordered Emporium rows/i);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);

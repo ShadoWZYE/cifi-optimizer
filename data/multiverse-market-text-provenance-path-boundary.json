@@ -80,11 +80,12 @@
     "whyNot": [
       "The repo recovers a broad TextHandlerMarkets-side SetAllBaseBonusTexts or SetISNBaseBonusText method family, but not the concrete text payloads those methods emit.",
       "The repo separately recovers sparse Unity string anchors for only a few control rows, including rows 78 and 83, but the row 78 screenshot now shows that the anchor text does not reproduce the live effect text.",
-      "No checked repo-local consumer or binding layer joins SetISNBaseBonusText to direct player-facing strings, localization keys, or a row-local live-effect-text catalog across the table."
+      "The repo also preserves generic UI text-slot names such as ActualBonusText, BonusText1, and TotalBonusText, but no checked repo-local join ties those slots specifically to THMarkets, ordered Emporium rows, or the live effect-text payloads.",
+      "No checked repo-local consumer or binding layer joins SetISNBaseBonusText to direct player-facing strings, localization keys, or an Emporium-specific row-local live-effect-text catalog across the table."
     ]
   },
   "lastMissingBindingLayer": {
-    "layerName": "TextHandlerMarkets base-bonus text binding consumer",
+    "layerName": "TextHandlerMarkets base-bonus to row-text-slot binding join",
     "currentlyRecoveredInputs": [
       "TextHandlerMarkets",
       "THMarkets",
@@ -92,20 +93,23 @@
       "SetAllBaseBonusTexts",
       "SetISNCostText",
       "SetISNBaseBonusText",
-      "InscryptionsList"
+      "InscryptionsList",
+      "ActualBonusText",
+      "BonusText1",
+      "TotalBonusText"
     ],
     "notYetRecovered": [
-      "the method body or adjacent consumer that resolves SetISNBaseBonusText into concrete live player-facing effect text",
+      "the Emporium-specific consumer or adjacent join that routes SetISNBaseBonusText into row-local text slots such as ActualBonusText, BonusText1, or TotalBonusText",
       "a row-local string table, localization key, or literal text payload read by that consumer",
       "a checked repo-local binding from that text payload back to rows 69-74 or the wider Emporium table"
     ],
-    "smallestDefensibleConclusion": "The isolated missing source class is no longer generic label provenance. It is the final TextHandlerMarkets-side consumer or binding step that turns the recovered SetISNBaseBonusText family into concrete live player-facing effect text."
+    "smallestDefensibleConclusion": "The isolated missing source class is no longer generic label provenance. It is the final TextHandlerMarkets-side join from the recovered SetISNBaseBonusText family into Emporium row-local text slots and then into concrete live player-facing effect text."
   },
   "currentBoundary": [
     "The current structural row model stays unchanged: row identity still rides SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText and row payload ID or Level or ISObject carriers.",
     "Rows 78 and 83 must now be treated as partial text-adjacent controls, not completed player-facing label bindings.",
     "A real text-adjacent control-row path is recoverable only as a sparse Unity string anchor in the TextHandlerMarkets neighborhood, not as a recovered scalable row-to-live-effect-text join.",
-    "The broadest checked handler-side scaling clue is SetAllBaseBonusTexts plus the SetISNBaseBonusText family, but the repo still lacks the consumer or binding layer that resolves those methods into concrete live player-facing effect text.",
+    "The broadest checked handler-side scaling clue is SetAllBaseBonusTexts plus the SetISNBaseBonusText family, but the repo still lacks the Emporium-specific join that routes those methods into row-local UI text slots and then into concrete live player-facing effect text.",
     "This does not widen canonical import, planner behavior, or the shipped compatibility preview. compatibility.unmappedSystemState.multiverseMarket stays compatibility-only, InscryptionsDone stays wrapper-only, and canonical state.playerProfile promotion stays blocked."
   ]
 }

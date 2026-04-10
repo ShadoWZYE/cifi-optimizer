@@ -44,15 +44,17 @@ This note records the narrowest checked game-side path from a structurally settl
 - It is still not a recovered row-to-text join:
   - no checked repo-local consumer binds `SetISNBaseBonusText` to direct player-facing strings
   - no checked row-local string table or localization-key catalog is recovered
+  - generic UI text-slot names like `ActualBonusText`, `BonusText1`, and `TotalBonusText` do appear in repo-local probes, but they are not yet tied specifically to `THMarkets` or ordered Emporium rows
   - no direct strings `Inscryption 69` through `Inscryption 74` are recovered repo-locally
 
 ## Exact last missing layer
 
 - The isolated missing layer is now:
-  - the `TextHandlerMarkets` base-bonus text binding consumer
+  - the `TextHandlerMarkets` base-bonus to row-text-slot binding join
 - In practical terms, the repo still needs the step that turns:
   - `SetAllBaseBonusTexts`
   - `SetISNBaseBonusText`
+  - into row-local text slots such as `ActualBonusText`, `BonusText1`, or `TotalBonusText`
 into:
   - concrete player-facing effect text
   - or concrete localization keys
@@ -64,5 +66,5 @@ Current grounded conclusion:
 - rows `78` and `83` are only partial text-adjacent controls, not completed player-facing label bindings
 - a control-row text-adjacent source is recoverable, but only as a sparse Unity string anchor
 - the broader handler-side scaling clue is the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final live player-facing effect text
+- the exact remaining blocker is the unrecovered `TextHandlerMarkets` join that routes those methods into Emporium row-local text slots and then into final live player-facing effect text
 - compatibility-only import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked

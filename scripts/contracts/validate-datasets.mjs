@@ -3589,23 +3589,31 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   );
   assert.deepEqual(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"], "multiverse market text-provenance path boundary missing checked-band strings drifted");
   assert.equal(boundary.scalingCheck.scalesToWholeTable, false, "multiverse market text-provenance path boundary scalesToWholeTable must remain false");
-  assert.equal(boundary.lastMissingBindingLayer.layerName, "TextHandlerMarkets base-bonus text binding consumer", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
-  assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /consumer or binding step/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
+  assert.equal(boundary.lastMissingBindingLayer.layerName, "TextHandlerMarkets base-bonus to row-text-slot binding join", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
+  assert.deepEqual(
+    boundary.lastMissingBindingLayer.currentlyRecoveredInputs,
+    ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetISNCostText", "SetISNBaseBonusText", "InscryptionsList", "ActualBonusText", "BonusText1", "TotalBonusText"],
+    "multiverse market text-provenance path boundary currentlyRecoveredInputs drifted"
+  );
+  assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /row-local text slots/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
 
   assert.match(boundaryDoc, /sparse Unity string anchor/i, "multiverse market text-provenance path boundary doc must preserve the sparse Unity string anchor conclusion");
   assert.match(boundaryDoc, /OUROBOROS POINTS GAINED/i, "multiverse market text-provenance path boundary doc must preserve the row 78 screenshot mismatch");
   assert.match(boundaryDoc, /SetAllBaseBonusTexts/i, "multiverse market text-provenance path boundary doc must preserve the broad handler family clue");
-  assert.match(boundaryDoc, /TextHandlerMarkets` consumer or binding step/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
+  assert.match(boundaryDoc, /ActualBonusText/, "multiverse market text-provenance path boundary doc must preserve the generic text-slot clue");
+  assert.match(boundaryDoc, /TextHandlerMarkets` join that routes those methods into Emporium row-local text slots/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
   assert.match(stateDoc, /## Checked control-row text-provenance path boundary/, "multiverse market state verification doc must expose the control-row text-provenance path boundary section");
   assert.match(stateDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market state verification doc must preserve the control row string anchor");
   assert.match(stateDoc, /OUROBOROS POINTS GAINED/i, "multiverse market state verification doc must preserve the row 78 live-text mismatch");
   assert.match(stateDoc, /SetAllBaseBonusTexts/, "multiverse market state verification doc must preserve the base-bonus family clue");
-  assert.match(stateDoc, /unrecovered `TextHandlerMarkets` consumer or binding step/i, "multiverse market state verification doc must preserve the exact remaining blocker");
+  assert.match(stateDoc, /ActualBonusText/, "multiverse market state verification doc must preserve the generic text-slot clue");
+  assert.match(stateDoc, /unrecovered `TextHandlerMarkets` join that routes those methods into Emporium row-local text slots/i, "multiverse market state verification doc must preserve the exact remaining blocker");
   assert.match(verificationDoc, /## Checked control-row text-provenance path boundary/, "multiverse market verification doc must expose the control-row text-provenance path boundary section");
   assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the control row string anchor");
   assert.match(verificationDoc, /OUROBOROS POINTS GAINED/i, "multiverse market verification doc must preserve the row 78 live-text mismatch");
   assert.match(verificationDoc, /SetIS69BaseBonusText/, "multiverse market verification doc must preserve the checked handler-side scaling clue");
-  assert.match(verificationDoc, /no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog/i, "multiverse market verification doc must preserve the binding-consumer blocker");
+  assert.match(verificationDoc, /ActualBonusText/, "multiverse market verification doc must preserve the generic text-slot clue");
+  assert.match(verificationDoc, /no checked join ties them specifically to `THMarkets` or ordered Emporium rows/i, "multiverse market verification doc must preserve the narrowed text-slot blocker");
 
   return {
     id: "multiverse-market-text-provenance-path-boundary",
@@ -3615,7 +3623,7 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
       "Control row 78 reaches only a partial text-adjacent control and fails against live screenshot text",
       `${boundary.scalingCheck.broadHandlerFamilyRecovered.length} checked base-bonus handler clues`,
       `${boundary.scalingCheck.playerFacingStringAnchorsRecovered.length} sparse player-facing string anchors`,
-      "The exact remaining blocker is the TextHandlerMarkets base-bonus text binding consumer"
+      "The exact remaining blocker is the TextHandlerMarkets base-bonus to row-text-slot binding join"
     ]
   };
 }

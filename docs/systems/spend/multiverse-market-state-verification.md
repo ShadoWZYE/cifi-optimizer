@@ -313,7 +313,8 @@ Current grounded conclusion:
 - That still does not scale to the whole table as a recovered row-to-text join:
   - sparse direct anchors exist for rows `25`, `46`, `78`, and `83`
   - no checked repo-local player-facing strings `Inscryption 69` through `Inscryption 74` are recovered
-  - no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog
+  - generic UI text-slot names `ActualBonusText`, `BonusText1`, and `TotalBonusText` are present repo-locally, but no checked join ties them specifically to `THMarkets` or ordered Emporium rows
+  - no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or an Emporium-specific row-local text catalog
 
 Current grounded conclusion:
 
@@ -321,7 +322,7 @@ Current grounded conclusion:
 - rows `78` and `83` are only partial text-adjacent controls, not completed live effect-text bindings
 - a control-row text-adjacent source is recoverable, but only as a sparse Unity string anchor
 - the handler-side scaling clue is now tightened to the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final live player-facing effect text
+- the exact remaining blocker is the unrecovered `TextHandlerMarkets` join that routes those methods into Emporium row-local text slots and then into final live player-facing effect text
 - the canonical import-safe subset stays empty
 
 ## Alternate serialized-export indirect-join boundary
