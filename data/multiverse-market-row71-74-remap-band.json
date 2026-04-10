@@ -79,7 +79,8 @@
     "nearestPositiveSameNumberLabels": [
       "Inscryption 78: Ouroboros Orbs",
       "Inscryption 83: Fast-Loop ML"
-    ]
+    ],
+    "status": "partial-text-adjacent-controls-only"
   },
   "liveUiComparison": {
     "visibleNeighbors": [

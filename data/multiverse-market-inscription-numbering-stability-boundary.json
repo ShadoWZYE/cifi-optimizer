@@ -114,7 +114,8 @@
       "serializedIdField": "IS78ID",
       "buyHook": "BuyIS78",
       "prefabName": "ChrystosEmporiumUpgrade78-ID78",
-      "playerFacingLabel": "Inscryption 78: Ouroboros Orbs"
+      "playerFacingLabel": "Inscryption 78: Ouroboros Orbs",
+      "controlStatus": "partial-text-adjacent-control"
     },
     {
       "orderedInscriptionRow": 83,
@@ -122,7 +123,8 @@
       "serializedIdField": "IS83ID",
       "buyHook": "BuyIS83",
       "prefabName": "ChrystosEmporiumUpgrade83-ID83",
-      "playerFacingLabel": "Inscryption 83: Fast-Loop ML"
+      "playerFacingLabel": "Inscryption 83: Fast-Loop ML",
+      "controlStatus": "partial-text-adjacent-control"
     },
     {
       "orderedInscriptionRow": 110,
@@ -140,7 +142,8 @@
     ],
     "sameNumberPrefabResumesAtRow": 75,
     "sameNumberPrefabStableThroughRow": 110,
-    "playerFacingIdentityRecoveredRows": [
+    "playerFacingIdentityRecoveredRows": [],
+    "partialTextAdjacentControlRows": [
       78,
       83
     ],
@@ -193,7 +196,7 @@
     "Across the larger checked IS69-110 run, ISNLevel, ISNID, and BuyISN stay same-number in repo-local probe output.",
     "The earliest checked same-number failure is prefab row 69, and prefab numbering stays remapped through row 74 as ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62.",
     "The same-number prefab chain resumes at row 75 and stays direct through row 110 in checked repo-local probe output.",
-    "Player-facing identity binding still requires a direct string anchor, and the checked repo-local anchors inside that resumed stable run are still only rows 78 and 83.",
+    "Player-facing effect text still requires more than a sparse direct string anchor, and the checked repo-local anchors inside that resumed stable run are still only partial text-adjacent controls at rows 78 and 83.",
     "This wider numbering-stability boundary does not ground new row identities for unresolved rows, so the canonical import-safe subset remains empty."
   ]
 }

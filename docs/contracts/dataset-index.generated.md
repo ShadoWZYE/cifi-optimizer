@@ -378,7 +378,7 @@ Validation command: `npm run verify:data`
 
 ### `multiverse-market-nearby-identity-binding-pattern`
 
-- Label: Multiverse market nearby identity-binding pattern
+- Label: Multiverse market nearby text-adjacent controls
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-nearby-identity-binding-pattern.json`

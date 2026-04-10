@@ -435,7 +435,7 @@
     },
     {
       "id": "multiverse-market-nearby-identity-binding-pattern",
-      "label": "Multiverse market nearby identity-binding pattern",
+      "label": "Multiverse market nearby text-adjacent controls",
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-nearby-identity-binding-pattern.json"

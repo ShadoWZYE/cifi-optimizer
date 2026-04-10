@@ -2449,16 +2449,18 @@ assert.deepEqual(
     [83, "IS83Level", "IS83ID", "BuyIS83", "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"]
   ]
 );
+assert.deepEqual(multiverseMarketNearbyIdentityBindingPatternData.checkedPositiveBindings.map((entry) => entry.controlStatus), ["partial-text-adjacent-control", "partial-text-adjacent-control"]);
 assert.deepEqual(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.checkedPositiveRows, [78, 83]);
+assert.equal(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.patternName, "same-number nearby text-adjacent control");
 assert.deepEqual(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.checkedNegativeCarryoverRows, [69, 70, 71, 72, 73, 74]);
 assert.equal(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.helpsRows6974, false);
 assert.deepEqual(multiverseMarketNearbyIdentityBindingPatternData.recoveredPattern.canonicalImportSafeSubset, []);
-assert.match(multiverseMarketStateVerificationDoc, /## Nearby checked inscription identity-binding pattern/);
+assert.match(multiverseMarketStateVerificationDoc, /## Nearby checked inscription text-adjacent controls/);
 assert.match(multiverseMarketStateVerificationDoc, /ChrystosEmporiumUpgrade78-ID78/);
 assert.match(multiverseMarketStateVerificationDoc, /ChrystosEmporiumUpgrade83-ID83/);
-assert.match(multiverseMarketVerificationDoc, /## Nearby checked identity-binding pattern/);
-assert.match(multiverseMarketVerificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`/);
-assert.match(multiverseMarketVerificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/);
+assert.match(multiverseMarketVerificationDoc, /## Nearby checked text-adjacent controls/);
+assert.match(multiverseMarketVerificationDoc, /sparse anchor: `Inscryption 78: Ouroboros Orbs`[\s\S]*live screenshot text: `OUROBOROS POINTS GAINED`/i);
+assert.match(multiverseMarketVerificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, sparse anchor `Inscryption 83: Fast-Loop ML`/);
 assert.match(multiverseMarketVerificationDoc, /does not recover the missing player-facing text provenance for rows `69-74`/i);
 assert.match(multiverseMarketVerificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i);
 assert.equal(multiverseMarket6974AnomalyProvenanceData.dataset, "multiverse-market-69-74-anomaly-provenance");
@@ -2528,6 +2530,8 @@ assert.deepEqual(
   [78, "IS78Level", "IS78ID", "BuyIS78", "SetIS78CostText"]
 );
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.textBearingSource.playerFacingLabel, "Inscryption 78: Ouroboros Orbs");
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.textBearingSource.status, "not-a-completed-live-effect-text-binding");
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.liveOutputCheck.displayedEffectText, "OUROBOROS POINTS GAINED");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.scalingCheck.broadHandlerFamilyRecovered,
   ["SetAllBaseBonusTexts", "SetIS1BaseBonusText", "SetIS25BaseBonusText", "SetIS50BaseBonusText", "SetIS68BaseBonusText", "SetIS69BaseBonusText"]
@@ -2541,9 +2545,11 @@ assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesT
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "TextHandlerMarkets base-bonus text binding consumer");
 assert.match(multiverseMarketStateVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /Inscryption 78: Ouroboros Orbs/);
+assert.match(multiverseMarketStateVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketStateVerificationDoc, /SetAllBaseBonusTexts/);
 assert.match(multiverseMarketStateVerificationDoc, /unrecovered `TextHandlerMarkets` consumer or binding step/i);
 assert.match(multiverseMarketVerificationDoc, /## Checked control-row text-provenance path boundary/);
+assert.match(multiverseMarketVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketVerificationDoc, /SetIS69BaseBonusText/);
 assert.match(multiverseMarketVerificationDoc, /no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog/i);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);

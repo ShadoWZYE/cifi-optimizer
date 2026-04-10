@@ -32,7 +32,7 @@ This note records the smallest checked wider boundary for where same-number insc
   - `Inscryption 46: Shards Gained`
   - `Inscryption 78: Ouroboros Orbs`
   - `Inscryption 83: Fast-Loop ML`
-- Inside the resumed `75-110` same-number prefab run, only rows `78` and `83` currently complete the checked same-number identity-binding chain.
+- Inside the resumed `75-110` same-number prefab run, rows `78` and `83` now only remain as sparse text-adjacent controls rather than completed same-number identity bindings.
 - Rows `71-74` remain settled as ordered-only mappings, and this wider boundary does not recover new player-facing identity for them.
 
 Current grounded conclusion:
@@ -40,5 +40,5 @@ Current grounded conclusion:
 - the earliest checked same-number prefab failure is row `69`
 - the checked broken same-number prefab band is rows `69-74`
 - the checked same-number prefab chain resumes at row `75` and stays direct through row `110`
-- this still does not ground new player-facing labels for unresolved rows
+- this still does not ground new live player-facing effect text for unresolved rows
 - the canonical import-safe subset stays empty

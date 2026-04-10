@@ -1,6 +1,6 @@
 # Multiverse Market Text-Provenance Path Boundary
 
-This note records the narrowest checked game-side path from a structurally settled Emporium row to player-facing text, and where that path stops scaling.
+This note records the narrowest checked game-side path from a structurally settled Emporium row to text-adjacent evidence, and where that path still fails to reproduce live effect text.
 
 ## Checked control row
 
@@ -15,17 +15,20 @@ This note records the narrowest checked game-side path from a structurally settl
   - `THMarkets: TextHandlerMarkets`
   - `SetAllChrystosEmporiumTexts`
   - `9\Assets\Scripts\Text\Text Ouroboros\TextHandlerMarkets.cs`
-- recovered text-bearing source:
+- recovered text-adjacent source:
   - `Inscryption 78: Ouroboros Orbs`
 
 ## What is actually recovered
 
-- A real text-bearing control-row path exists for row `78`.
+- A real text-adjacent control-row path exists for row `78`.
 - That path is still narrow:
   - the row stays grounded structurally by the same-number save and carrier chain
   - the text-side neighborhood is grounded by `TextHandlerMarkets`
-  - the actual player-facing text is only recovered as a sparse Unity string anchor
-- This means the repo can now name one checked game-side text-bearing source class:
+  - the only recovered text is a sparse Unity string anchor
+- The new row `78` screenshot shows that this is not a completed live effect-text binding:
+  - sparse anchor: `Inscryption 78: Ouroboros Orbs`
+  - live screenshot text: `OUROBOROS POINTS GAINED`
+- This means the repo can now name one checked game-side text-adjacent source class:
   - direct Unity string anchors in the `TextHandlerMarkets` neighborhood
 
 ## What does not scale yet
@@ -58,7 +61,8 @@ into:
 Current grounded conclusion:
 
 - the structural Emporium row model stays unchanged
-- a control-row text-bearing source is recoverable, but only as a sparse Unity string anchor
+- rows `78` and `83` are only partial text-adjacent controls, not completed player-facing label bindings
+- a control-row text-adjacent source is recoverable, but only as a sparse Unity string anchor
 - the broader handler-side scaling clue is the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final player-facing effect text
+- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final live player-facing effect text
 - compatibility-only import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked

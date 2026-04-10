@@ -3228,33 +3228,34 @@ function validateMultiverseMarketNearbyIdentityBindingPattern(pattern, stateDoc,
   pattern.checkedPositiveBindings.forEach((entry, index) => {
     assert.equal(entry.textHandlerOwner, "TextHandlerMarkets", `multiverse market nearby identity-binding pattern entry ${index} textHandlerOwner drifted`);
     assert.equal(entry.textHandlerScriptPath, "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs", `multiverse market nearby identity-binding pattern entry ${index} textHandlerScriptPath drifted`);
+    assert.equal(entry.controlStatus, "partial-text-adjacent-control", `multiverse market nearby identity-binding pattern entry ${index} controlStatus drifted`);
     expectArray(entry.evidence, `multiverse market nearby identity-binding pattern entry ${index} evidence must be an array`);
   });
-  assert.equal(pattern.recoveredPattern.patternName, "same-number nearby identity binding", "multiverse market nearby identity-binding pattern patternName drifted");
+  assert.equal(pattern.recoveredPattern.patternName, "same-number nearby text-adjacent control", "multiverse market nearby identity-binding pattern patternName drifted");
   assert.equal(pattern.recoveredPattern.orderedRowMappingStatus, "separate-input", "multiverse market nearby identity-binding pattern orderedRowMappingStatus drifted");
   assert.deepEqual(pattern.recoveredPattern.checkedPositiveRows, [78, 83], "multiverse market nearby identity-binding pattern checkedPositiveRows drifted");
   assert.deepEqual(pattern.recoveredPattern.checkedNegativeCarryoverRows, [69, 70, 71, 72, 73, 74], "multiverse market nearby identity-binding pattern checkedNegativeCarryoverRows drifted");
   assert.equal(pattern.recoveredPattern.helpsRows6974, false, "multiverse market nearby identity-binding pattern helpsRows6974 must remain false");
   assert.deepEqual(pattern.recoveredPattern.canonicalImportSafeSubset, [], "multiverse market nearby identity-binding pattern canonicalImportSafeSubset must remain empty");
 
-  assert.match(stateDoc, /## Nearby checked inscription identity-binding pattern/, "multiverse market state verification doc must expose the nearby inscription identity-binding pattern section");
+  assert.match(stateDoc, /## Nearby checked inscription text-adjacent controls/, "multiverse market state verification doc must expose the nearby inscription text-adjacent controls section");
   assert.match(stateDoc, /ChrystosEmporiumUpgrade78-ID78/, "multiverse market state verification doc must preserve the row 78 direct prefab binding");
   assert.match(stateDoc, /ChrystosEmporiumUpgrade83-ID83/, "multiverse market state verification doc must preserve the row 83 direct prefab binding");
   assert.match(stateDoc, /the canonical import-safe subset stays empty/i, "multiverse market state verification doc must preserve the empty canonical subset conclusion for the nearby binding pattern");
-  assert.match(verificationDoc, /## Nearby checked identity-binding pattern/, "multiverse market verification doc must expose the nearby identity-binding pattern section");
-  assert.match(verificationDoc, /IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`/, "multiverse market verification doc must preserve the row 78 same-number binding chain");
-  assert.match(verificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`/, "multiverse market verification doc must preserve the row 83 same-number binding chain");
+  assert.match(verificationDoc, /## Nearby checked text-adjacent controls/, "multiverse market verification doc must expose the nearby text-adjacent controls section");
+  assert.match(verificationDoc, /sparse anchor: `Inscryption 78: Ouroboros Orbs`[\s\S]*live screenshot text: `OUROBOROS POINTS GAINED`/i, "multiverse market verification doc must preserve the row 78 screenshot mismatch");
+  assert.match(verificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, sparse anchor `Inscryption 83: Fast-Loop ML`/, "multiverse market verification doc must preserve the row 83 partial control chain");
   assert.match(verificationDoc, /does not recover the missing player-facing text provenance for rows `69-74`/i, "multiverse market verification doc must preserve the negative carryover for rows 69-74");
   assert.match(verificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i, "multiverse market verification doc must preserve the recovered remap-band explanation");
 
   return {
     id: "multiverse-market-nearby-identity-binding-pattern",
-    label: "Multiverse market nearby identity-binding pattern",
+    label: "Multiverse market nearby text-adjacent controls",
     classification: "extracted-mechanics",
     stats: [
-      `${pattern.checkedPositiveBindings.length} checked positive binding examples`,
+      `${pattern.checkedPositiveBindings.length} checked partial text-adjacent controls`,
       `${pattern.recoveredPattern.checkedNegativeCarryoverRows.length} unresolved carryover rows`,
-      "Nearby identity binding now checks direct same-number joins without claiming the missing 69-74 text source"
+      "Nearby controls now check same-number joins without treating sparse anchors as completed live effect-text bindings"
     ]
   };
 }
@@ -3341,12 +3342,12 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
     "multiverse market inscription numbering-stability boundary brokenPrefabBand drifted"
   );
   assert.deepEqual(
-    boundary.stableResumeEvidence.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.prefabName, entry.playerFacingLabel ?? null]),
+    boundary.stableResumeEvidence.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.prefabName, entry.playerFacingLabel ?? null, entry.controlStatus ?? null]),
     [
-      [75, "IS75Level", "IS75ID", "BuyIS75", "ChrystosEmporiumUpgrade75-ID75", null],
-      [78, "IS78Level", "IS78ID", "BuyIS78", "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs"],
-      [83, "IS83Level", "IS83ID", "BuyIS83", "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"],
-      [110, "IS110Level", "IS110ID", "BuyIS110", "ChrystosEmporiumUpgrade110-ID110", null]
+      [75, "IS75Level", "IS75ID", "BuyIS75", "ChrystosEmporiumUpgrade75-ID75", null, null],
+      [78, "IS78Level", "IS78ID", "BuyIS78", "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs", "partial-text-adjacent-control"],
+      [83, "IS83Level", "IS83ID", "BuyIS83", "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML", "partial-text-adjacent-control"],
+      [110, "IS110Level", "IS110ID", "BuyIS110", "ChrystosEmporiumUpgrade110-ID110", null, null]
     ],
     "multiverse market inscription numbering-stability boundary stableResumeEvidence drifted"
   );
@@ -3354,7 +3355,8 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
   assert.deepEqual(boundary.identityBindingBoundary.brokenSameNumberPrefabBand, [69, 74], "multiverse market inscription numbering-stability boundary brokenSameNumberPrefabBand drifted");
   assert.equal(boundary.identityBindingBoundary.sameNumberPrefabResumesAtRow, 75, "multiverse market inscription numbering-stability boundary sameNumberPrefabResumesAtRow drifted");
   assert.equal(boundary.identityBindingBoundary.sameNumberPrefabStableThroughRow, 110, "multiverse market inscription numbering-stability boundary sameNumberPrefabStableThroughRow drifted");
-  assert.deepEqual(boundary.identityBindingBoundary.playerFacingIdentityRecoveredRows, [78, 83], "multiverse market inscription numbering-stability boundary playerFacingIdentityRecoveredRows drifted");
+  assert.deepEqual(boundary.identityBindingBoundary.playerFacingIdentityRecoveredRows, [], "multiverse market inscription numbering-stability boundary playerFacingIdentityRecoveredRows drifted");
+  assert.deepEqual(boundary.identityBindingBoundary.partialTextAdjacentControlRows, [78, 83], "multiverse market inscription numbering-stability boundary partialTextAdjacentControlRows drifted");
   assert.equal(boundary.identityBindingBoundary.helpsUnresolvedRows7174, false, "multiverse market inscription numbering-stability boundary helpsUnresolvedRows7174 must remain false");
   assert.deepEqual(boundary.identityBindingBoundary.canonicalImportSafeSubset, [], "multiverse market inscription numbering-stability boundary canonicalImportSafeSubset must remain empty");
 
@@ -3374,7 +3376,7 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
     stats: [
       "Same-number save, id, and buy hooks stay stable across checked IS69-110",
       "Prefab numbering breaks only in the checked 69-74 band and resumes at 75-110",
-      "Player-facing identity remains directly anchored only at rows 78 and 83"
+      "Rows 78 and 83 remain only sparse text-adjacent controls inside the resumed same-number run"
     ]
   };
 }
@@ -3573,6 +3575,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
     "multiverse market text-provenance path boundary text handler shell drifted"
   );
   assert.equal(boundary.controlRowTextPath.textBearingSource.playerFacingLabel, "Inscryption 78: Ouroboros Orbs", "multiverse market text-provenance path boundary control row label drifted");
+  assert.equal(boundary.controlRowTextPath.textBearingSource.status, "not-a-completed-live-effect-text-binding", "multiverse market text-provenance path boundary control row status drifted");
+  assert.equal(boundary.controlRowTextPath.liveOutputCheck.displayedEffectText, "OUROBOROS POINTS GAINED", "multiverse market text-provenance path boundary row 78 liveOutputCheck drifted");
   assert.deepEqual(
     boundary.scalingCheck.broadHandlerFamilyRecovered,
     ["SetAllBaseBonusTexts", "SetIS1BaseBonusText", "SetIS25BaseBonusText", "SetIS50BaseBonusText", "SetIS68BaseBonusText", "SetIS69BaseBonusText"],
@@ -3586,17 +3590,20 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.deepEqual(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"], "multiverse market text-provenance path boundary missing checked-band strings drifted");
   assert.equal(boundary.scalingCheck.scalesToWholeTable, false, "multiverse market text-provenance path boundary scalesToWholeTable must remain false");
   assert.equal(boundary.lastMissingBindingLayer.layerName, "TextHandlerMarkets base-bonus text binding consumer", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
-  assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /final TextHandlerMarkets-side binding step/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
+  assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /consumer or binding step/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
 
   assert.match(boundaryDoc, /sparse Unity string anchor/i, "multiverse market text-provenance path boundary doc must preserve the sparse Unity string anchor conclusion");
+  assert.match(boundaryDoc, /OUROBOROS POINTS GAINED/i, "multiverse market text-provenance path boundary doc must preserve the row 78 screenshot mismatch");
   assert.match(boundaryDoc, /SetAllBaseBonusTexts/i, "multiverse market text-provenance path boundary doc must preserve the broad handler family clue");
   assert.match(boundaryDoc, /TextHandlerMarkets` consumer or binding step/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
   assert.match(stateDoc, /## Checked control-row text-provenance path boundary/, "multiverse market state verification doc must expose the control-row text-provenance path boundary section");
   assert.match(stateDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market state verification doc must preserve the control row string anchor");
+  assert.match(stateDoc, /OUROBOROS POINTS GAINED/i, "multiverse market state verification doc must preserve the row 78 live-text mismatch");
   assert.match(stateDoc, /SetAllBaseBonusTexts/, "multiverse market state verification doc must preserve the base-bonus family clue");
   assert.match(stateDoc, /unrecovered `TextHandlerMarkets` consumer or binding step/i, "multiverse market state verification doc must preserve the exact remaining blocker");
   assert.match(verificationDoc, /## Checked control-row text-provenance path boundary/, "multiverse market verification doc must expose the control-row text-provenance path boundary section");
   assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the control row string anchor");
+  assert.match(verificationDoc, /OUROBOROS POINTS GAINED/i, "multiverse market verification doc must preserve the row 78 live-text mismatch");
   assert.match(verificationDoc, /SetIS69BaseBonusText/, "multiverse market verification doc must preserve the checked handler-side scaling clue");
   assert.match(verificationDoc, /no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or a row-local text catalog/i, "multiverse market verification doc must preserve the binding-consumer blocker");
 
@@ -3605,7 +3612,7 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
     label: "Multiverse market text-provenance path boundary",
     classification: "extracted-mechanics",
     stats: [
-      "Control row 78 reaches a real text-bearing source only as a sparse Unity string anchor",
+      "Control row 78 reaches only a partial text-adjacent control and fails against live screenshot text",
       `${boundary.scalingCheck.broadHandlerFamilyRecovered.length} checked base-bonus handler clues`,
       `${boundary.scalingCheck.playerFacingStringAnchorsRecovered.length} sparse player-facing string anchors`,
       "The exact remaining blocker is the TextHandlerMarkets base-bonus text binding consumer"

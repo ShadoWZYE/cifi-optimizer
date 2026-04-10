@@ -211,28 +211,34 @@ Current grounded conclusion:
 - this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally
 - the canonical import-safe subset stays empty
 
-## Nearby checked identity-binding pattern
+## Nearby checked text-adjacent controls
 
-- The nearest checked positive identity-binding examples are rows `78` and `83`.
+- The nearest checked partial text-adjacent controls are rows `78` and `83`.
 - Each row keeps the same number across the nearby checked chain:
-  - `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`
-  - `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`
+  - `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, sparse anchor `Inscryption 78: Ouroboros Orbs`
+  - `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, sparse anchor `Inscryption 83: Fast-Loop ML`
 - Repo-local metadata and probe evidence place those anchors in the `TextHandlerMarkets` neighborhood, including the checked source-path string `9\Assets\Scripts\Text\Text Ouroboros\TextHandlerMarkets.cs`.
+- The new row `78` screenshot mismatch means the sparse anchors cannot be treated as completed live effect-text bindings:
+  - sparse anchor: `Inscryption 78: Ouroboros Orbs`
+  - live screenshot text: `OUROBOROS POINTS GAINED`
 
 Current grounded conclusion:
 
-- nearby player-facing identity can be grounded when the same row number survives across `ISNLevel`, `ISNID`, `BuyISN`, direct prefab name `ChrystosEmporiumUpgradeN-IDN`, and `Inscryption N: ...`
-- this explains how nearby inscription rows bind to player-facing labels without widening beyond checked rows `78` and `83`
+- nearby partial text-adjacent controls can be grounded when the same row number survives across `ISNLevel`, `ISNID`, `BuyISN`, direct prefab name `ChrystosEmporiumUpgradeN-IDN`, and a sparse `Inscryption N: ...` anchor
+- this does not complete live effect-text binding for rows `78` or `83`
 - this pattern does not recover the missing player-facing text provenance for rows `69-74`; those rows already keep their ordered identity through the same-number chain while the prefab join stays remapped and no checked repo-local player-facing strings have been recovered
 - the canonical import-safe subset therefore stays empty
 
 ## Checked control-row text-provenance path boundary
 
-- A narrow game-side text-bearing path is now checked for control row `78`:
+- A narrow game-side text-adjacent path is now checked for control row `78`:
   - structural row chain: `IS78Level`, `IS78ID`, `BuyIS78`, `SetIS78CostText`
   - text-side shell: `THMarkets: TextHandlerMarkets`, `SetAllChrystosEmporiumTexts`
-  - direct text-bearing source: `Inscryption 78: Ouroboros Orbs`
-- This does recover one real text-bearing source, but only as a sparse Unity string anchor in the `TextHandlerMarkets` neighborhood.
+  - direct text-adjacent source: `Inscryption 78: Ouroboros Orbs`
+- This does recover one real text-adjacent source, but only as a sparse Unity string anchor in the `TextHandlerMarkets` neighborhood.
+- The new row `78` screenshot shows that the sparse anchor does not reproduce live effect text:
+  - sparse anchor: `Inscryption 78: Ouroboros Orbs`
+  - live screenshot text: `OUROBOROS POINTS GAINED`
 - The broadest handler-side scaling clue now checked repo-locally is:
   - `SetAllBaseBonusTexts`
   - `SetIS1BaseBonusText`
@@ -248,9 +254,10 @@ Current grounded conclusion:
 Current grounded conclusion:
 
 - the structural row model stays unchanged
-- a control-row text-bearing source is recoverable, but only as a sparse Unity string anchor
+- rows `78` and `83` are only partial text-adjacent controls, not completed live effect-text bindings
+- a control-row text-adjacent source is recoverable, but only as a sparse Unity string anchor
 - the handler-side scaling clue is now tightened to the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final player-facing effect text
+- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final live player-facing effect text
 - the canonical import-safe subset stays empty
 
 ## Still unresolved

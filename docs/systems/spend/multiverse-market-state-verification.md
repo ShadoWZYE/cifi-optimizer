@@ -295,11 +295,14 @@ Current grounded conclusion:
 
 ## Checked control-row text-provenance path boundary
 
-- A narrow game-side text-bearing path is now checked for control row `78`:
+- A narrow game-side text-adjacent path is now checked for control row `78`:
   - structural row chain: `IS78Level`, `IS78ID`, `BuyIS78`, `SetIS78CostText`
   - text-side shell: `THMarkets: TextHandlerMarkets`, `SetAllChrystosEmporiumTexts`
-  - direct text-bearing source: `Inscryption 78: Ouroboros Orbs`
-- This is a real text-bearing path, but only as a sparse Unity string anchor in the `TextHandlerMarkets` neighborhood.
+  - direct text-adjacent source: `Inscryption 78: Ouroboros Orbs`
+- This is a real text-adjacent path, but only as a sparse Unity string anchor in the `TextHandlerMarkets` neighborhood.
+- The new row `78` screenshot shows that the sparse anchor does not reproduce live effect text:
+  - sparse anchor: `Inscryption 78: Ouroboros Orbs`
+  - live screenshot text: `OUROBOROS POINTS GAINED`
 - The broadest handler-side scaling clue now checked repo-locally is:
   - `SetAllBaseBonusTexts`
   - `SetIS1BaseBonusText`
@@ -315,9 +318,10 @@ Current grounded conclusion:
 Current grounded conclusion:
 
 - the structural row model stays unchanged
-- a control-row text-bearing source is recoverable, but only as a sparse Unity string anchor
+- rows `78` and `83` are only partial text-adjacent controls, not completed live effect-text bindings
+- a control-row text-adjacent source is recoverable, but only as a sparse Unity string anchor
 - the handler-side scaling clue is now tightened to the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final player-facing effect text
+- the exact remaining blocker is the unrecovered `TextHandlerMarkets` consumer or binding step that resolves those methods into final live player-facing effect text
 - the canonical import-safe subset stays empty
 
 ## Alternate serialized-export indirect-join boundary
@@ -398,23 +402,24 @@ Current grounded conclusion:
 - this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally
 - the canonical import-safe subset stays empty
 
-## Nearby checked inscription identity-binding pattern
+## Nearby checked inscription text-adjacent controls
 
-- The nearest checked positive binding pattern now sits just outside the unresolved `69-74` band:
-  - row `78`: `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`
-  - row `83`: `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`
-- The smallest defensible pattern is a same-number nearby join recovered in the `TextHandlerMarkets` neighborhood:
+- The nearest checked partial controls now sit just outside the unresolved `69-74` band:
+  - row `78`: `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, sparse anchor `Inscryption 78: Ouroboros Orbs`
+  - row `83`: `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, sparse anchor `Inscryption 83: Fast-Loop ML`
+- The smallest defensible pattern is a same-number nearby control recovered in the `TextHandlerMarkets` neighborhood:
   - `ISNLevel`
   - `ISNID`
   - `BuyISN`
   - `ChrystosEmporiumUpgradeN-IDN`
   - `Inscryption N: ...`
 - This must stay distinct from ordered row mapping alone. Rows `69-74` still fail the direct prefab join because the visible shell is remapped as `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`, and no checked repo-local player-facing string currently names those rows.
+- The new row `78` screenshot mismatch also means the sparse anchors cannot be treated as completed live effect-text bindings.
 
 Current grounded conclusion:
 
-- nearby rows `78` and `83` now show how ordered inscription rows can bind to player-facing identity when the same-number chain is preserved
-- this recovered pattern does not ground rows `69-74` by itself; those rows now rely on live UI evidence instead
+- nearby rows `78` and `83` now only show partial text-adjacent controls when the same-number chain is preserved
+- this recovered pattern does not complete live effect-text binding for rows `78` or `83`, and it does not recover rows `69-74` either
 - the canonical import-safe subset stays empty
 
 ## Bounded SaveData import classification
