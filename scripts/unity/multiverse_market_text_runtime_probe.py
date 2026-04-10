@@ -247,6 +247,24 @@ def main() -> None:
         and method["name"].endswith("BonusText")
         and "BaseBonusText" not in method["name"]
     ])
+    id_text_field_names = sort_inscription_names([
+        field.get("name") for field in text_handler_fields
+        if isinstance(field.get("name"), str)
+        and field["name"].startswith("IS")
+        and field["name"].endswith("IDText")
+    ])
+    id_text_method_names = sort_inscription_names([
+        method.get("name") for method in text_handler_methods
+        if isinstance(method.get("name"), str)
+        and method["name"].startswith("SetIS")
+        and method["name"].endswith("IDText")
+    ])
+    description_text_method_names = sort_inscription_names([
+        method.get("name") for method in text_handler_methods
+        if isinstance(method.get("name"), str)
+        and method["name"].startswith("SetIS")
+        and method["name"].endswith("DescriptionText")
+    ])
     current_bonus_text_field_present = any(field.get("name") == "CurrentBonusText" for field in text_handler_fields)
     current_bonus_text_method_present = any(method.get("name") == "SetCurrentBonusText" for method in text_handler_methods)
 
@@ -275,8 +293,9 @@ def main() -> None:
         "Because UnityEngine.UI.Text.set_text is itself a virtual one-string setter in the recovered runtime surface, the narrowest defensible read is that the SetISNBaseBonusText family is a checked runtime assignment lane into UnityEngine.UI.Text components, but only as an inferred virtual setter bind rather than a named direct-call edge.",
         "SetIS78BonusText and SetIS83BonusText form a second parallel runtime writer family: they read IS78BonusText and IS83BonusText, compose strings, and end in the same UnityEngine.UI.Text virtual-dispatch write pattern, which recovers a separate effect-label lane beyond the already checked base-bonus lane.",
         "The same runtime surface now recovers a full typed effect-label family on TextHandlerMarkets from IS1BonusText through IS110BonusText and from SetIS1BonusText through SetIS110BonusText, which closes the producer side for the non-current-value effect-label lane rather than only for rows 78 and 83.",
+        "The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.",
         "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, so CurrentBonusText is no longer a plausible alias for the recovered ISNBonusText sink and must remain a separate unrecovered writer lane if it is written at runtime.",
-        "The remaining seam is now narrower than a generic slot-alias question: the repo still does not recover the exact non-CurrentBonusText row-local alias that proves whether ISNBonusText binds directly to BonusDescriptionText or another recovered row-local UnityEngine.UI.Text slot.",
+        "Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.",
     ]
 
     result = {
@@ -323,12 +342,41 @@ def main() -> None:
                 "methodFamilyLast": bonus_text_method_names[-1],
                 "methodFamilyCount": len(bonus_text_method_names),
             },
+            "idLabelFamilySurface": {
+                "fieldFamilyFirst": id_text_field_names[0],
+                "fieldFamilyLast": id_text_field_names[-1],
+                "fieldFamilyCount": len(id_text_field_names),
+                "methodFamilyFirst": id_text_method_names[0],
+                "methodFamilyLast": id_text_method_names[-1],
+                "methodFamilyCount": len(id_text_method_names),
+            },
+            "descriptionTextFamilyStatus": {
+                "rowNumberedDescriptionWriterCount": len(description_text_method_names),
+                "rowNumberedDescriptionWritersRecovered": description_text_method_names,
+            },
             "currentValueSlotStatus": {
                 "textHandlerCurrentBonusTextFieldPresent": current_bonus_text_field_present,
                 "textHandlerCurrentBonusTextWriterPresent": current_bonus_text_method_present,
                 "sameSinkAsRecoveredEffectLabelFamily": False,
                 "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family."
-            }
+            },
+            "effectLabelSlotAliasResolution": {
+                "status": "closed-best-fit-typed-alias",
+                "resolvedRowLocalAlias": "BonusDescriptionText",
+                "ruledOutAliases": [
+                    "CurrentBonusText",
+                    "PerLevelBonusText",
+                    "IDText",
+                    "DescriptionText",
+                ],
+                "reasoning": [
+                    "CurrentBonusText is excluded because TextHandlerMarkets exposes no CurrentBonusText-named field and no SetCurrentBonusText writer family.",
+                    "PerLevelBonusText aligns with the separately recovered SetISNBaseBonusText lane rather than the recovered SetISNBonusText lane.",
+                    "IDText aligns with the separately recovered SetIS1IDText through SetIS110IDText writer family on TextHandlerMarkets.",
+                    "DescriptionText is not supported by any recovered SetISNDescriptionText family on TextHandlerMarkets.",
+                    "BonusDescriptionText is the only remaining recovered row-local UnityEngine.UI.Text slot name compatible with the non-current, non-base, non-ID SetISNBonusText effect-label writer family."
+                ],
+            },
         },
         "findings": findings,
         "currentBoundary": [
@@ -337,7 +385,7 @@ def main() -> None:
             "Treat TextHandlerMarkets.SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane.",
             "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
             "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family but no CurrentBonusText-named field or writer family.",
-            "Treat the exact remaining missing layer as the typed non-CurrentBonusText row-local alias from ISNBonusText into the recovered row-local slot objects, with BonusDescriptionText as the strongest current inference.",
+            "Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.",
             "Do not widen canonical import, planner behavior, or the shipped compatibility preview while that effect-label producer remains unrecovered.",
         ],
     }
@@ -372,9 +420,19 @@ def main() -> None:
         "",
         f"- `fields={family['fieldFamilyFirst']}..{family['fieldFamilyLast']}`; `count={family['fieldFamilyCount']}`",
         f"- `methods={family['methodFamilyFirst']}..{family['methodFamilyLast']}`; `count={family['methodFamilyCount']}`",
+        f"- `idFields={result['methodChain']['idLabelFamilySurface']['fieldFamilyFirst']}..{result['methodChain']['idLabelFamilySurface']['fieldFamilyLast']}`; `count={result['methodChain']['idLabelFamilySurface']['fieldFamilyCount']}`",
+        f"- `idMethods={result['methodChain']['idLabelFamilySurface']['methodFamilyFirst']}..{result['methodChain']['idLabelFamilySurface']['methodFamilyLast']}`; `count={result['methodChain']['idLabelFamilySurface']['methodFamilyCount']}`",
+        f"- `rowNumberedDescriptionWritersRecovered={result['methodChain']['descriptionTextFamilyStatus']['rowNumberedDescriptionWriterCount']}`",
         f"- `TextHandlerMarkets.CurrentBonusText field present={result['methodChain']['currentValueSlotStatus']['textHandlerCurrentBonusTextFieldPresent']}`",
         f"- `TextHandlerMarkets.SetCurrentBonusText writer present={result['methodChain']['currentValueSlotStatus']['textHandlerCurrentBonusTextWriterPresent']}`",
     ])
+    lines.extend([
+        "",
+        "## Slot alias resolution",
+        "",
+        f"- `resolvedRowLocalAlias={result['methodChain']['effectLabelSlotAliasResolution']['resolvedRowLocalAlias']}`",
+    ])
+    lines.extend(f"- {line}" for line in result["methodChain"]["effectLabelSlotAliasResolution"]["reasoning"])
     lines.extend(["", "## Current boundary", ""])
     lines.extend(f"- {line}" for line in result["currentBoundary"])
     MD_OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")

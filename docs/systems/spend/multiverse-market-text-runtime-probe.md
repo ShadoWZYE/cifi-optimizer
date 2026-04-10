@@ -10,8 +10,9 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 - Because UnityEngine.UI.Text.set_text is itself a virtual one-string setter in the recovered runtime surface, the narrowest defensible read is that the SetISNBaseBonusText family is a checked runtime assignment lane into UnityEngine.UI.Text components, but only as an inferred virtual setter bind rather than a named direct-call edge.
 - SetIS78BonusText and SetIS83BonusText form a second parallel runtime writer family: they read IS78BonusText and IS83BonusText, compose strings, and end in the same UnityEngine.UI.Text virtual-dispatch write pattern, which recovers a separate effect-label lane beyond the already checked base-bonus lane.
 - The same runtime surface now recovers a full typed effect-label family on TextHandlerMarkets from IS1BonusText through IS110BonusText and from SetIS1BonusText through SetIS110BonusText, which closes the producer side for the non-current-value effect-label lane rather than only for rows 78 and 83.
+- The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.
 - That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, so CurrentBonusText is no longer a plausible alias for the recovered ISNBonusText sink and must remain a separate unrecovered writer lane if it is written at runtime.
-- The remaining seam is now narrower than a generic slot-alias question: the repo still does not recover the exact non-CurrentBonusText row-local alias that proves whether ISNBonusText binds directly to BonusDescriptionText or another recovered row-local UnityEngine.UI.Text slot.
+- Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.
 
 ## Control methods
 
@@ -27,8 +28,20 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 
 - `fields=IS1BonusText..IS110BonusText`; `count=110`
 - `methods=SetIS1BonusText..SetIS110BonusText`; `count=110`
+- `idFields=IS1IDText..IS110IDText`; `count=110`
+- `idMethods=SetIS1IDText..SetIS110IDText`; `count=110`
+- `rowNumberedDescriptionWritersRecovered=0`
 - `TextHandlerMarkets.CurrentBonusText field present=False`
 - `TextHandlerMarkets.SetCurrentBonusText writer present=False`
+
+## Slot alias resolution
+
+- `resolvedRowLocalAlias=BonusDescriptionText`
+- CurrentBonusText is excluded because TextHandlerMarkets exposes no CurrentBonusText-named field and no SetCurrentBonusText writer family.
+- PerLevelBonusText aligns with the separately recovered SetISNBaseBonusText lane rather than the recovered SetISNBonusText lane.
+- IDText aligns with the separately recovered SetIS1IDText through SetIS110IDText writer family on TextHandlerMarkets.
+- DescriptionText is not supported by any recovered SetISNDescriptionText family on TextHandlerMarkets.
+- BonusDescriptionText is the only remaining recovered row-local UnityEngine.UI.Text slot name compatible with the non-current, non-base, non-ID SetISNBonusText effect-label writer family.
 
 ## Current boundary
 
@@ -37,5 +50,5 @@ Source: [`data/unity-runtime-surface-probe.json`](data/unity-runtime-surface-pro
 - Treat TextHandlerMarkets.SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane.
 - Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.
 - Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family but no CurrentBonusText-named field or writer family.
-- Treat the exact remaining missing layer as the typed non-CurrentBonusText row-local alias from ISNBonusText into the recovered row-local slot objects, with BonusDescriptionText as the strongest current inference.
+- Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.
 - Do not widen canonical import, planner behavior, or the shipped compatibility preview while that effect-label producer remains unrecovered.
