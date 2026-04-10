@@ -44,7 +44,7 @@ const server = createServer(async (request, response) => {
       port,
       launcherMode,
       clientCount: getActiveClientCount(),
-      launchSignalSequence
+      launchSignalSequence: launcherSignalSequence
     });
     return;
   }
@@ -220,7 +220,7 @@ async function handleClientSessionTouch(request, response) {
     writeJson(response, 200, {
       ok: true,
       launcherMode,
-      launchSignalSequence
+      launchSignalSequence: launcherSignalSequence
     });
   } catch (error) {
     writeJson(response, 500, { error: error instanceof Error ? error.message : String(error) });
@@ -258,11 +258,11 @@ function handleLauncherReopen(response) {
   launcherSignalSequence += 1;
   broadcastLauncherEvent({
     type: "launcher-reopen",
-    launchSignalSequence
+    launchSignalSequence: launcherSignalSequence
   });
   writeJson(response, 202, {
     ok: true,
-    launchSignalSequence
+    launchSignalSequence: launcherSignalSequence
   });
 }
 
@@ -279,7 +279,7 @@ function handleClientEvents(request, response, requestUrl) {
     "Cache-Control": "no-cache, no-transform",
     Connection: "keep-alive"
   });
-  response.write(`event: ready\ndata: ${JSON.stringify({ launchSignalSequence })}\n\n`);
+  response.write(`event: ready\ndata: ${JSON.stringify({ launchSignalSequence: launcherSignalSequence })}\n\n`);
 
   const existingSession = clientSessions.get(clientId) || {};
   clientSessions.set(clientId, {
