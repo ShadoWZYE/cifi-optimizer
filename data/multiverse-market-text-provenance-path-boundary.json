@@ -153,6 +153,28 @@
       "The widened runtime pass closes the control payload source one step further, through MultiverseMarket.get_FinalIS78Bonus() and get_FinalIS83Bonus() plus GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat, so no whole-table current-value writer or canonical label/localization join is recoverable yet."
     ]
   },
+  "supportedRowLocalTextModel": {
+    "effectLabelLane": {
+      "slotAlias": "BonusDescriptionText",
+      "runtimeWriterFamily": "SetAllBonusTexts -> SetISNBonusText",
+      "status": "grounded-runtime-lane"
+    },
+    "baseBonusLane": {
+      "slotAlias": "PerLevelBonusText",
+      "runtimeWriterFamily": "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText",
+      "status": "grounded-runtime-lane"
+    },
+    "idLane": {
+      "slotAlias": "IDText",
+      "runtimeWriterFamily": "SetIS1IDText through SetIS110IDText",
+      "status": "grounded-runtime-lane"
+    },
+    "currentValueLane": {
+      "slotAlias": "CurrentBonusText",
+      "status": "quarantined-unrecovered-runtime-only-display-lane",
+      "reason": "No typed CurrentBonusText field, SetCurrentBonusText writer family, or recovered row-local producer is present in the checked runtime surface."
+    }
+  },
   "lastMissingBindingLayer": {
     "layerName": "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted",
     "currentlyRecoveredInputs": [
@@ -200,6 +222,7 @@
     "The current structural row model stays unchanged: row identity still rides SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText and row payload ID or Level or ISObject carriers.",
     "Rows 78 and 83 must now be treated as partial text-adjacent controls, not completed player-facing label bindings.",
     "A real text-adjacent control-row path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain, but not as a recovered scalable row-to-live-effect-text join.",
+    "The supported product-safe Emporium text model is now split explicitly: BonusDescriptionText is the grounded effect-label lane, PerLevelBonusText is the grounded base-bonus lane, IDText is the grounded id lane, and CurrentBonusText stays quarantined as a distinct unrecovered runtime-only display lane.",
     "The repo now recovers a typed runtime TextHandlerMarkets base-bonus lane from SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts into row-specific SetIS78BaseBonusText or SetIS83BaseBonusText, while the live-asset seed walk independently recovers row-local slot objects and UnityEngine.UI.Text components for rows 78 and 83.",
     "The deeper assignment-site probe shows that local serialized assets stop at row-local ownership edges, and the runtime probe narrows the remaining gap further: the unrecovered step is not the effect-label producer family itself and no longer includes CurrentBonusText, IDText, PerLevelBonusText, or DescriptionText as plausible aliases for that family, because the recovered runtime families close the SetISNBonusText sink to BonusDescriptionText, batch-root that lane at SetAllBonusTexts, narrow the control payload source to MultiverseMarket.get_FinalIS78Bonus() or get_FinalIS83Bonus() plus GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat, and exhaust NavigationManager.UpdateInscryptionUI, NavigationManager+<UpdateInscryptionUI>d__185.MoveNext, NavigationManager+<InscEnum>d__186.MoveNext, NavigationManager.DisableInscryptionObjects, NavigationManager.OnAvailbleInscryptionsClick, NavigationManager.OnFinishedInscryptionsClick, TextHandlerShopNPCs.OpeningChrystosEmporium, TextHandlerShopNPCs.EmporiumDefaultText, and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext as explicit negative fallback owners for CurrentBonusText.",
     "This does not widen canonical import, planner behavior, or the shipped compatibility preview. compatibility.unmappedSystemState.multiverseMarket stays compatibility-only, InscryptionsDone stays wrapper-only, and canonical state.playerProfile promotion stays blocked."

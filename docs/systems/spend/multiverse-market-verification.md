@@ -290,6 +290,8 @@ Current grounded conclusion:
 - the handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
 - the repo also now recovers a separate runtime effect-label writer family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
 - the recovered runtime families now close the row-local effect-label slot alias to `BonusDescriptionText`
+- `PerLevelBonusText` is now the grounded base-bonus lane for product-safe Emporium text wording
+- `IDText` is now the grounded id lane for product-safe Emporium text wording
 - `CurrentBonusText` remains narrowed away from that recovered effect-label family because the checked `TextHandlerMarkets` runtime surface has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family, and the widened runtime search now exhausts `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext` without recovering a row-local CurrentBonusText producer there either
 - the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus `GeneralFunctionsManager.BigDoubleToText` / `System.Int32.ToString`, the runtime metadata-init helper, the null-reference throw helper, and `System.String.Concat`
 - the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane

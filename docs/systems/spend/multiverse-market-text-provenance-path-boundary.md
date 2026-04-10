@@ -92,6 +92,15 @@ This note records the narrowest checked game-side path from a structurally settl
 
 ## Exact last missing layer
 
+- The supported product-safe row-local text model is now:
+  - `BonusDescriptionText`
+    - grounded effect-label lane via `SetAllBonusTexts -> SetISNBonusText`
+  - `PerLevelBonusText`
+    - grounded base-bonus lane via `SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText`
+  - `IDText`
+    - grounded id lane via `SetIS1IDText` through `SetIS110IDText`
+  - `CurrentBonusText`
+    - quarantined as a distinct unrecovered runtime-only display lane
 - The isolated missing layer is now:
   - the separate dedicated `CurrentBonusText` runtime writer lane, after the last plausible row-local update surfaces are exhausted
 - In practical terms, the repo still needs the step that turns:
@@ -123,6 +132,7 @@ Current grounded conclusion:
 - the broader handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
 - the repo also now recovers a parallel runtime effect-label write family: `SetAllBonusTexts` -> `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
 - the row-local slot alias for that recovered effect-label family is now closed to `BonusDescriptionText`
+- `PerLevelBonusText` is now the grounded base-bonus sink and `IDText` is now the grounded id sink for product-safe integration wording
 - the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus `GeneralFunctionsManager.BigDoubleToText` / `System.Int32.ToString`, the runtime metadata-init helper, the null-reference throw helper, and `System.String.Concat`
 - `CurrentBonusText` remains a separate unrecovered writer lane because `TextHandlerMarkets` has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family in the checked runtime surface, the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing `CurrentBonusText` directly, and the widened runtime search now exhausts `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext` without recovering a row-local CurrentBonusText producer there either
 - the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane

@@ -3602,6 +3602,32 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   );
   assert.deepEqual(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"], "multiverse market text-provenance path boundary missing checked-band strings drifted");
   assert.equal(boundary.scalingCheck.scalesToWholeTable, false, "multiverse market text-provenance path boundary scalesToWholeTable must remain false");
+  assert.deepEqual(
+    boundary.supportedRowLocalTextModel,
+    {
+      effectLabelLane: {
+        slotAlias: "BonusDescriptionText",
+        runtimeWriterFamily: "SetAllBonusTexts -> SetISNBonusText",
+        status: "grounded-runtime-lane"
+      },
+      baseBonusLane: {
+        slotAlias: "PerLevelBonusText",
+        runtimeWriterFamily: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText",
+        status: "grounded-runtime-lane"
+      },
+      idLane: {
+        slotAlias: "IDText",
+        runtimeWriterFamily: "SetIS1IDText through SetIS110IDText",
+        status: "grounded-runtime-lane"
+      },
+      currentValueLane: {
+        slotAlias: "CurrentBonusText",
+        status: "quarantined-unrecovered-runtime-only-display-lane",
+        reason: "No typed CurrentBonusText field, SetCurrentBonusText writer family, or recovered row-local producer is present in the checked runtime surface."
+      }
+    },
+    "multiverse market text-provenance path boundary supportedRowLocalTextModel drifted"
+  );
   assert.equal(boundary.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
   assert.deepEqual(
     boundary.lastMissingBindingLayer.currentlyRecoveredInputs,
@@ -3618,6 +3644,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(boundaryDoc, /SetAllChrystosEmporiumTexts/i, "multiverse market text-provenance path boundary doc must preserve the runtime producer clue");
   assert.match(boundaryDoc, /virtual-dispatch write pattern/i, "multiverse market text-provenance path boundary doc must preserve the runtime write-pattern result");
   assert.match(boundaryDoc, /BonusDescriptionText/, "multiverse market text-provenance path boundary doc must preserve the closed effect-label slot alias");
+  assert.match(boundaryDoc, /PerLevelBonusText/, "multiverse market text-provenance path boundary doc must preserve the grounded base-bonus lane");
+  assert.match(boundaryDoc, /IDText/, "multiverse market text-provenance path boundary doc must preserve the grounded id lane");
   assert.match(boundaryDoc, /separate dedicated `CurrentBonusText` runtime writer lane/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
   assert.match(boundaryDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market text-provenance path boundary doc must preserve the narrowed control payload source");
   assert.match(boundaryDoc, /SetAllBonusTexts/, "multiverse market text-provenance path boundary doc must preserve the recovered effect-label batch method");
@@ -3646,6 +3674,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(stateDoc, /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i, "multiverse market state verification doc must preserve the CurrentBonusText negative result");
   assert.match(stateDoc, /SetIS1IDText/, "multiverse market state verification doc must preserve the dedicated IDText family clue");
   assert.match(stateDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i, "multiverse market state verification doc must preserve the closed slot alias");
+  assert.match(stateDoc, /`PerLevelBonusText` is now the grounded base-bonus lane/i, "multiverse market state verification doc must preserve the grounded base-bonus wording");
+  assert.match(stateDoc, /`IDText` is now the grounded id lane/i, "multiverse market state verification doc must preserve the grounded id wording");
   assert.match(stateDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market state verification doc must preserve the narrowed control payload source");
   assert.match(stateDoc, /SetAllBonusTexts/, "multiverse market state verification doc must preserve the recovered effect-label batch method");
   assert.match(stateDoc, /GeneralFunctionsManager\.BigDoubleToText/, "multiverse market state verification doc must preserve the narrowed row 78 helper name");
@@ -3674,6 +3704,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(verificationDoc, /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i, "multiverse market verification doc must preserve the CurrentBonusText negative result");
   assert.match(verificationDoc, /SetIS1IDText/, "multiverse market verification doc must preserve the dedicated IDText family clue");
   assert.match(verificationDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i, "multiverse market verification doc must preserve the closed slot alias");
+  assert.match(verificationDoc, /`PerLevelBonusText` is now the grounded base-bonus lane/i, "multiverse market verification doc must preserve the grounded base-bonus wording");
+  assert.match(verificationDoc, /`IDText` is now the grounded id lane/i, "multiverse market verification doc must preserve the grounded id wording");
   assert.match(verificationDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market verification doc must preserve the narrowed control payload source");
   assert.match(verificationDoc, /SetAllBonusTexts/, "multiverse market verification doc must preserve the recovered effect-label batch method");
   assert.match(verificationDoc, /GeneralFunctionsManager\.BigDoubleToText/, "multiverse market verification doc must preserve the narrowed row 78 helper name");

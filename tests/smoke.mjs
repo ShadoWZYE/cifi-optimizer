@@ -2553,6 +2553,28 @@ assert.deepEqual(
 );
 assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesToWholeTable, false);
+assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.supportedRowLocalTextModel, {
+  effectLabelLane: {
+    slotAlias: "BonusDescriptionText",
+    runtimeWriterFamily: "SetAllBonusTexts -> SetISNBonusText",
+    status: "grounded-runtime-lane"
+  },
+  baseBonusLane: {
+    slotAlias: "PerLevelBonusText",
+    runtimeWriterFamily: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText",
+    status: "grounded-runtime-lane"
+  },
+  idLane: {
+    slotAlias: "IDText",
+    runtimeWriterFamily: "SetIS1IDText through SetIS110IDText",
+    status: "grounded-runtime-lane"
+  },
+  currentValueLane: {
+    slotAlias: "CurrentBonusText",
+    status: "quarantined-unrecovered-runtime-only-display-lane",
+    reason: "No typed CurrentBonusText field, SetCurrentBonusText writer family, or recovered row-local producer is present in the checked runtime surface."
+  }
+});
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.currentlyRecoveredInputs,
@@ -2570,6 +2592,8 @@ assert.match(multiverseMarketStateVerificationDoc, /zero serialized `TextHandler
 assert.match(multiverseMarketStateVerificationDoc, /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i);
 assert.match(multiverseMarketStateVerificationDoc, /SetIS1IDText/);
 assert.match(multiverseMarketStateVerificationDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i);
+assert.match(multiverseMarketStateVerificationDoc, /`PerLevelBonusText` is now the grounded base-bonus lane/i);
+assert.match(multiverseMarketStateVerificationDoc, /`IDText` is now the grounded id lane/i);
 assert.match(multiverseMarketStateVerificationDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i);
 assert.match(multiverseMarketStateVerificationDoc, /SetAllBonusTexts/);
 assert.match(multiverseMarketStateVerificationDoc, /GeneralFunctionsManager\.BigDoubleToText/);
@@ -2597,6 +2621,8 @@ assert.match(multiverseMarketVerificationDoc, /zero serialized `TextHandlerMarke
 assert.match(multiverseMarketVerificationDoc, /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i);
 assert.match(multiverseMarketVerificationDoc, /SetIS1IDText/);
 assert.match(multiverseMarketVerificationDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i);
+assert.match(multiverseMarketVerificationDoc, /`PerLevelBonusText` is now the grounded base-bonus lane/i);
+assert.match(multiverseMarketVerificationDoc, /`IDText` is now the grounded id lane/i);
 assert.match(multiverseMarketVerificationDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i);
 assert.match(multiverseMarketVerificationDoc, /SetAllBonusTexts/);
 assert.match(multiverseMarketVerificationDoc, /GeneralFunctionsManager\.BigDoubleToText/);
@@ -3059,6 +3085,12 @@ assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
 assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Emporium compatibility preview/);
+assert.match(appJs, /grounded Emporium text model is split/i);
+assert.match(appJs, /BonusDescriptionText/);
+assert.match(appJs, /PerLevelBonusText/);
+assert.match(appJs, /IDText/);
+assert.match(appJs, /CurrentBonusText/);
+assert.match(appJs, /distinct unrecovered runtime-only display lane/i);
 assert.match(appJs, /compatibility-only Emporium import state under <code>\$\{escapeHtml\(preview\.importTargetPath\)\}<\/code>\. It preserves the checked raw <code>\$\{escapeHtml\(preview\.typedSpanLabel\)\}<\/code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only\./i);
 assert.match(appJs, /wrapperOnlyFieldLabel\)\}<\/code> stays wrapper-only and is intentionally excluded from this preview/);
 assert.match(appJs, /Imported trade-counter quarantine currently covers \${escapeHtml\(preview\.tradeCounterLabel\)\} with \${preview\.importedTradeCounterCount} recovered fields\./);
