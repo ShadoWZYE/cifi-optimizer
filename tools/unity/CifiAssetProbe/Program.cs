@@ -531,6 +531,51 @@ static object BuildFilteredRuntimeAssemblySearchMetadata(
     return BuildRuntimeAssemblySearchMetadata(assemblyName, filteredTypes, fieldPatterns, methodPatterns);
 }
 
+static object BuildRuntimeRvaLookupMetadata(
+    IEnumerable<LibCpp2IL.Metadata.Il2CppAssemblyDefinition> assemblies,
+    IEnumerable<int> rvas)
+{
+    var requestedRvas = rvas
+        .Select(value => (ulong)value)
+        .Distinct()
+        .OrderBy(value => value)
+        .ToArray();
+
+    var methodByRva = assemblies
+        .SelectMany(assembly =>
+            (assembly.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>())
+                .SelectMany(type => type.Methods
+                    .Select(method => new { assembly, type, method })))
+        .Where(entry => entry.method.Rva > 0)
+        .GroupBy(entry => entry.method.Rva)
+        .ToDictionary(
+            group => group.Key,
+            group => group
+                .Select(entry => new
+                {
+                    assemblyName = entry.assembly.AssemblyName.Name,
+                    typeName = entry.type.Name,
+                    fullTypeName = entry.type.FullName,
+                    methodName = entry.method.Name,
+                    returnType = entry.method.ReturnType?.ToString(),
+                    methodProperties = ReflectSerializablePublicProperties(entry.method),
+                    parameters = entry.method.Parameters?.Select(parameter => ReflectSerializablePublicProperties(parameter)).ToArray() ?? Array.Empty<object>()
+                })
+                .ToArray());
+
+    return new
+    {
+        requestedRvas,
+        resolved = requestedRvas
+            .Select(rva => new
+            {
+                rva,
+                matches = methodByRva.TryGetValue(rva, out var matches) ? matches : Array.Empty<object>()
+            })
+            .ToArray()
+    };
+}
+
 var manager = new AssetsManager();
 manager.LoadClassPackage(Path.Combine(uabeaDir, "classdata.tpk"));
 
@@ -567,7 +612,7 @@ if (runtimeReportPath is not null)
 
             var runtimeTargets = new[]
             {
-                new { reportKey = "textHandlerMarkets", assemblyName = "Assembly-CSharp", lookupNames = new[] { "TextHandlerMarkets" }, methodPatterns = new[] { "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS", "ClearISObjects", "SetISMaxLevelObjects" } },
+                new { reportKey = "textHandlerMarkets", assemblyName = "Assembly-CSharp", lookupNames = new[] { "TextHandlerMarkets" }, methodPatterns = new[] { "SetAllChrystosEmporiumTexts", "SetAllMarketTexts", "SetAllCostTexts", "SetAllBaseBonusTexts", "SetAllBonusTexts", "SetAllIDTexts", "SetIS", "ClearISObjects", "SetISMaxLevelObjects" } },
                 new { reportKey = "textHandlerShopNpcs", assemblyName = "Assembly-CSharp", lookupNames = new[] { "TextHandlerShopNPCs" }, methodPatterns = new[] { "DisplayTextEmporium", "Emporium", "DisplayText" } },
                 new { reportKey = "navigationManager", assemblyName = "Assembly-CSharp", lookupNames = new[] { "NavigationManager" }, methodPatterns = new[] { "UpdateInscryptionUI", "Inscrypt", "Emporium" } },
                 new { reportKey = "multiverseMarket", assemblyName = "Assembly-CSharp", lookupNames = new[] { "MultiverseMarket" }, methodPatterns = Array.Empty<string>() },
@@ -620,6 +665,26 @@ if (runtimeReportPath is not null)
                             "TotalBonus",
                             "BonusText1"
                         }),
+                    BuildRuntimeAssemblySearchMetadata(
+                        "Assembly-CSharp",
+                        assemblyTypes,
+                        new[]
+                        {
+                            "CurrentBonusText",
+                            "BonusDescriptionText",
+                            "PerLevelBonusText",
+                            "DescriptionText",
+                            "IDText",
+                            "IconBox"
+                        },
+                        new[]
+                        {
+                            "SetCurrentBonusText",
+                            "SetBonusDescriptionText",
+                            "SetPerLevelBonusText",
+                            "SetDescriptionText",
+                            "SetIDText"
+                        }),
                     BuildFilteredRuntimeAssemblySearchMetadata(
                         "Assembly-CSharp",
                         assemblyTypes,
@@ -648,6 +713,20 @@ if (runtimeReportPath is not null)
                             "SetAll"
                         })
                 };
+
+                runtimeProbe["rvaLookups"] = BuildRuntimeRvaLookupMetadata(
+                    LibCpp2IlMain.TheMetadata.AssemblyDefinitions,
+                    new[]
+                    {
+                        31777557,
+                        31777729,
+                        31777861,
+                        31779625,
+                        28277222,
+                        28277761,
+                        30997230,
+                        59968580
+                    });
             }
         }
     }

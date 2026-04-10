@@ -2553,10 +2553,10 @@ assert.deepEqual(
 );
 assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesToWholeTable, false);
-assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane, plus the unresolved formatter-helper names inside the already recovered BonusDescriptionText payload path");
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane, plus the two still-unresolved formatter-helper RVAs inside the already recovered BonusDescriptionText payload path");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.currentlyRecoveredInputs,
-  ["TextHandlerMarkets", "THMarkets", "MultiverseMarket", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "get_FinalIS78Bonus", "get_FinalIS83Bonus", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer", "System.String.Concat"]
+  ["TextHandlerMarkets", "THMarkets", "MultiverseMarket", "SetAllChrystosEmporiumTexts", "SetAllBonusTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "get_FinalIS78Bonus", "get_FinalIS83Bonus", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "GeneralFunctionsManager.BigDoubleToText", "System.Int32.ToString", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer", "System.String.Concat"]
 );
 assert.match(multiverseMarketStateVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /Inscryption 78: Ouroboros Orbs/);
@@ -2571,6 +2571,9 @@ assert.match(multiverseMarketStateVerificationDoc, /no `CurrentBonusText`-named 
 assert.match(multiverseMarketStateVerificationDoc, /SetIS1IDText/);
 assert.match(multiverseMarketStateVerificationDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i);
 assert.match(multiverseMarketStateVerificationDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i);
+assert.match(multiverseMarketStateVerificationDoc, /SetAllBonusTexts/);
+assert.match(multiverseMarketStateVerificationDoc, /GeneralFunctionsManager\.BigDoubleToText/);
+assert.match(multiverseMarketStateVerificationDoc, /System\.Int32\.ToString|Int32\.ToString/);
 assert.match(multiverseMarketStateVerificationDoc, /separate `CurrentBonusText` writer lane/i);
 assert.match(multiverseMarketStateVerificationDoc, /NavigationManager/);
 assert.match(multiverseMarketStateVerificationDoc, /TextHandlerShopNPCs/);
@@ -2586,6 +2589,9 @@ assert.match(multiverseMarketVerificationDoc, /no `CurrentBonusText`-named field
 assert.match(multiverseMarketVerificationDoc, /SetIS1IDText/);
 assert.match(multiverseMarketVerificationDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i);
 assert.match(multiverseMarketVerificationDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i);
+assert.match(multiverseMarketVerificationDoc, /SetAllBonusTexts/);
+assert.match(multiverseMarketVerificationDoc, /GeneralFunctionsManager\.BigDoubleToText/);
+assert.match(multiverseMarketVerificationDoc, /System\.Int32\.ToString|Int32\.ToString/);
 assert.match(multiverseMarketVerificationDoc, /separate `CurrentBonusText` writer lane/i);
 assert.match(multiverseMarketVerificationDoc, /NavigationManager/);
 assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs/);

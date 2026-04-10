@@ -10,7 +10,7 @@
     "rootMethod": {
       "name": "SetAllChrystosEmporiumTexts",
       "rva": 31777507,
-      "estimatedTrackedBodySize": 1236,
+      "estimatedTrackedBodySize": 354,
       "signature": "System.Void SetAllChrystosEmporiumTexts()",
       "fieldAccesses": [
         {
@@ -139,7 +139,15 @@
           "address": 31777527,
           "operand": "0x1e4e445",
           "targetRva": 31777861,
-          "resolvedTarget": null
+          "resolvedTarget": {
+            "typeName": "TextHandlerMarkets",
+            "name": "SetAllCostTexts",
+            "returnType": "System.Void",
+            "rva": 31777861,
+            "methodPointer": 31794245,
+            "signature": "System.Void SetAllCostTexts()",
+            "parameters": []
+          }
         },
         {
           "address": 31777535,
@@ -159,7 +167,15 @@
           "address": 31777543,
           "operand": "0x1e4eb29",
           "targetRva": 31779625,
-          "resolvedTarget": null
+          "resolvedTarget": {
+            "typeName": "TextHandlerMarkets",
+            "name": "SetAllBonusTexts",
+            "returnType": "System.Void",
+            "rva": 31779625,
+            "methodPointer": 31796009,
+            "signature": "System.Void SetAllBonusTexts()",
+            "parameters": []
+          }
         },
         {
           "address": 31777585,
@@ -260,7 +276,44 @@
           "operand": "0x1af7c01",
           "targetRva": 28277761,
           "resolvedTarget": null
-        },
+        }
+      ],
+      "callsDirectUnityUiSetText": false,
+      "virtualUnityUiTextSetterInference": true,
+      "callsStringCompose": [
+        {
+          "address": 31777682,
+          "operand": "0x37cf492",
+          "targetRva": 58520722,
+          "resolvedTarget": {
+            "typeName": "System.String",
+            "name": "Concat",
+            "returnType": "System.String",
+            "rva": 58520722,
+            "methodPointer": 58537106,
+            "signature": "System.String Concat(System.String str0, System.String str1, System.String str2)",
+            "parameters": [
+              {
+                "IsRefOrOut": false
+              },
+              {
+                "IsRefOrOut": false
+              },
+              {
+                "IsRefOrOut": false
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "costBatchMethod": {
+      "name": "SetAllCostTexts",
+      "rva": 31777861,
+      "estimatedTrackedBodySize": 882,
+      "signature": "System.Void SetAllCostTexts()",
+      "fieldAccesses": [],
+      "callTargets": [
         {
           "address": 31777865,
           "operand": "0x1e4f20d",
@@ -1789,38 +1842,13 @@
         }
       ],
       "callsDirectUnityUiSetText": false,
-      "virtualUnityUiTextSetterInference": true,
-      "callsStringCompose": [
-        {
-          "address": 31777682,
-          "operand": "0x37cf492",
-          "targetRva": 58520722,
-          "resolvedTarget": {
-            "typeName": "System.String",
-            "name": "Concat",
-            "returnType": "System.String",
-            "rva": 58520722,
-            "methodPointer": 58537106,
-            "signature": "System.String Concat(System.String str0, System.String str1, System.String str2)",
-            "parameters": [
-              {
-                "IsRefOrOut": false
-              },
-              {
-                "IsRefOrOut": false
-              },
-              {
-                "IsRefOrOut": false
-              }
-            ]
-          }
-        }
-      ]
+      "virtualUnityUiTextSetterInference": false,
+      "callsStringCompose": []
     },
     "baseBonusBatchMethod": {
       "name": "SetAllBaseBonusTexts",
       "rva": 31778743,
-      "estimatedTrackedBodySize": 2646,
+      "estimatedTrackedBodySize": 882,
       "signature": "System.Void SetAllBaseBonusTexts()",
       "fieldAccesses": [],
       "callTargets": [
@@ -3349,7 +3377,19 @@
             "signature": "System.Void SetIS109BaseBonusText()",
             "parameters": []
           }
-        },
+        }
+      ],
+      "callsDirectUnityUiSetText": false,
+      "virtualUnityUiTextSetterInference": false,
+      "callsStringCompose": []
+    },
+    "effectLabelBatchMethod": {
+      "name": "SetAllBonusTexts",
+      "rva": 31779625,
+      "estimatedTrackedBodySize": 882,
+      "signature": "System.Void SetAllBonusTexts()",
+      "fieldAccesses": [],
+      "callTargets": [
         {
           "address": 31779629,
           "operand": "0x1e589e2",
@@ -4875,7 +4915,19 @@
             "signature": "System.Void SetIS109BonusText()",
             "parameters": []
           }
-        },
+        }
+      ],
+      "callsDirectUnityUiSetText": false,
+      "virtualUnityUiTextSetterInference": false,
+      "callsStringCompose": []
+    },
+    "idBatchMethod": {
+      "name": "SetAllIDTexts",
+      "rva": 31780507,
+      "estimatedTrackedBodySize": 882,
+      "signature": "System.Void SetAllIDTexts()",
+      "fieldAccesses": [],
+      "callTargets": [
         {
           "address": 31780511,
           "operand": "0x1e5d8da",
@@ -6407,7 +6459,315 @@
       "virtualUnityUiTextSetterInference": false,
       "callsStringCompose": []
     },
-    "effectLabelBatchMethodStatus": "no-separate-SetAllBonusTexts-method-recovered",
+    "rootBatchCallResolution": [
+      {
+        "targetRva": 31777557,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "TextHandlerMarkets",
+            "fullTypeName": "TextHandlerMarkets",
+            "methodName": "SetInscryptionsDoneText",
+            "returnType": "System.Void",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8420 }",
+              "Name": "SetInscryptionsDoneText",
+              "GlobalKey": "TextHandlerMarkets.SetInscryptionsDoneText()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.Void",
+              "DeclaringType": "Il2CppTypeDefinition[namespace='', name='TextHandlerMarkets', parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31793941,
+              "MethodOffsetInFile": 31777557,
+              "Rva": 31777557,
+              "HumanReadableSignature": "System.Void SetInscryptionsDoneText()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "targetRva": 31777729,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "TextHandlerMarkets",
+            "fullTypeName": "TextHandlerMarkets",
+            "methodName": "SetHellishBioMatterText",
+            "returnType": "System.Void",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8421 }",
+              "Name": "SetHellishBioMatterText",
+              "GlobalKey": "TextHandlerMarkets.SetHellishBioMatterText()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.Void",
+              "DeclaringType": "Il2CppTypeDefinition[namespace='', name='TextHandlerMarkets', parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31794113,
+              "MethodOffsetInFile": 31777729,
+              "Rva": 31777729,
+              "HumanReadableSignature": "System.Void SetHellishBioMatterText()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "targetRva": 31777861,
+        "resolvedTarget": {
+          "typeName": "TextHandlerMarkets",
+          "name": "SetAllCostTexts",
+          "returnType": "System.Void",
+          "rva": 31777861,
+          "methodPointer": 31794245,
+          "signature": "System.Void SetAllCostTexts()",
+          "parameters": []
+        },
+        "resolvedLookupMatches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "TextHandlerMarkets",
+            "fullTypeName": "TextHandlerMarkets",
+            "methodName": "SetAllCostTexts",
+            "returnType": "System.Void",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8423 }",
+              "Name": "SetAllCostTexts",
+              "GlobalKey": "TextHandlerMarkets.SetAllCostTexts()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.Void",
+              "DeclaringType": "Il2CppTypeDefinition[namespace='', name='TextHandlerMarkets', parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31794245,
+              "MethodOffsetInFile": 31777861,
+              "Rva": 31777861,
+              "HumanReadableSignature": "System.Void SetAllCostTexts()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "targetRva": 31778743,
+        "resolvedTarget": {
+          "typeName": "TextHandlerMarkets",
+          "name": "SetAllBaseBonusTexts",
+          "returnType": "System.Void",
+          "rva": 31778743,
+          "methodPointer": 31795127,
+          "signature": "System.Void SetAllBaseBonusTexts()",
+          "parameters": []
+        },
+        "resolvedLookupMatches": []
+      },
+      {
+        "targetRva": 31779625,
+        "resolvedTarget": {
+          "typeName": "TextHandlerMarkets",
+          "name": "SetAllBonusTexts",
+          "returnType": "System.Void",
+          "rva": 31779625,
+          "methodPointer": 31796009,
+          "signature": "System.Void SetAllBonusTexts()",
+          "parameters": []
+        },
+        "resolvedLookupMatches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "TextHandlerMarkets",
+            "fullTypeName": "TextHandlerMarkets",
+            "methodName": "SetAllBonusTexts",
+            "returnType": "System.Void",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8645 }",
+              "Name": "SetAllBonusTexts",
+              "GlobalKey": "TextHandlerMarkets.SetAllBonusTexts()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.Void",
+              "DeclaringType": "Il2CppTypeDefinition[namespace='', name='TextHandlerMarkets', parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31796009,
+              "MethodOffsetInFile": 31779625,
+              "Rva": 31779625,
+              "HumanReadableSignature": "System.Void SetAllBonusTexts()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "targetRva": 28277222,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": []
+      },
+      {
+        "targetRva": 37322803,
+        "resolvedTarget": {
+          "typeName": "MultiverseMarket",
+          "name": "get_InscrpytionLevelsCount",
+          "returnType": "System.Int32",
+          "rva": 37322803,
+          "methodPointer": 37339187,
+          "signature": "System.Int32 get_InscrpytionLevelsCount()",
+          "parameters": []
+        },
+        "resolvedLookupMatches": []
+      },
+      {
+        "targetRva": 59968580,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": [
+          {
+            "assemblyName": "mscorlib",
+            "typeName": "Int32",
+            "fullTypeName": "System.Int32",
+            "methodName": "ToString",
+            "returnType": "System.String",
+            "methodProperties": {
+              "Attributes": "Public, Virtual, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 31521 }",
+              "Name": "ToString",
+              "GlobalKey": "Int32.ToString()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.String",
+              "DeclaringType": "Il2CppTypeDefinition[namespace='System', name='Int32', parentType=System.ValueType, assembly=Il2CppImageDefinition[Name=mscorlib.dll]]",
+              "MethodPointer": 59984964,
+              "MethodOffsetInFile": 59968580,
+              "Rva": 59968580,
+              "HumanReadableSignature": "System.String ToString()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "targetRva": 37203408,
+        "resolvedTarget": {
+          "typeName": "MultiverseMarket",
+          "name": "get_TotalInscryptionsAvailable",
+          "returnType": "System.Int32",
+          "rva": 37203408,
+          "methodPointer": 37219792,
+          "signature": "System.Int32 get_TotalInscryptionsAvailable()",
+          "parameters": []
+        },
+        "resolvedLookupMatches": []
+      },
+      {
+        "targetRva": 59968580,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": [
+          {
+            "assemblyName": "mscorlib",
+            "typeName": "Int32",
+            "fullTypeName": "System.Int32",
+            "methodName": "ToString",
+            "returnType": "System.String",
+            "methodProperties": {
+              "Attributes": "Public, Virtual, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 31521 }",
+              "Name": "ToString",
+              "GlobalKey": "Int32.ToString()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.String",
+              "DeclaringType": "Il2CppTypeDefinition[namespace='System', name='Int32', parentType=System.ValueType, assembly=Il2CppImageDefinition[Name=mscorlib.dll]]",
+              "MethodPointer": 59984964,
+              "MethodOffsetInFile": 59968580,
+              "Rva": 59968580,
+              "HumanReadableSignature": "System.String ToString()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "targetRva": 58520722,
+        "resolvedTarget": {
+          "typeName": "System.String",
+          "name": "Concat",
+          "returnType": "System.String",
+          "rva": 58520722,
+          "methodPointer": 58537106,
+          "signature": "System.String Concat(System.String str0, System.String str1, System.String str2)",
+          "parameters": [
+            {
+              "IsRefOrOut": false
+            },
+            {
+              "IsRefOrOut": false
+            },
+            {
+              "IsRefOrOut": false
+            }
+          ]
+        },
+        "resolvedLookupMatches": []
+      },
+      {
+        "targetRva": 28277761,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": []
+      },
+      {
+        "targetRva": 28277222,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": []
+      },
+      {
+        "targetRva": 30996655,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": []
+      },
+      {
+        "targetRva": 28277761,
+        "resolvedTarget": null,
+        "resolvedLookupMatches": []
+      }
+    ],
     "controlRows": [
       {
         "row": 78,
@@ -6846,19 +7206,59 @@
           "formatterHelpers": [
             {
               "targetRva": 28277222,
-              "operand": "0x1af79e6"
+              "operand": "0x1af79e6",
+              "resolvedLookupMatches": []
             },
             {
               "targetRva": 28277222,
-              "operand": "0x1af79e6"
+              "operand": "0x1af79e6",
+              "resolvedLookupMatches": []
             },
             {
               "targetRva": 30997230,
-              "operand": "0x1d8faee"
+              "operand": "0x1d8faee",
+              "resolvedLookupMatches": [
+                {
+                  "assemblyName": "Assembly-CSharp",
+                  "typeName": "GeneralFunctionsManager",
+                  "fullTypeName": "GeneralFunctionsManager",
+                  "methodName": "BigDoubleToText",
+                  "returnType": "System.String",
+                  "methodProperties": {
+                    "Attributes": "Public, HideBySig",
+                    "IsStatic": false,
+                    "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 5818 }",
+                    "Name": "BigDoubleToText",
+                    "GlobalKey": "GeneralFunctionsManager.BigDoubleToText()",
+                    "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+                    "ReturnType": "System.String",
+                    "DeclaringType": "Il2CppTypeDefinition[namespace='', name='GeneralFunctionsManager', parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+                    "MethodPointer": 31013614,
+                    "MethodOffsetInFile": 30997230,
+                    "Rva": 30997230,
+                    "HumanReadableSignature": "System.String BigDoubleToText(BreakInfinity.BigDouble value, System.Boolean decimals)",
+                    "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+                    "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+                    "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+                    "GenericContainer": null,
+                    "IsUnmanagedCallersOnly": false,
+                    "MethodImplAttributes": "IL"
+                  },
+                  "parameters": [
+                    {
+                      "IsRefOrOut": false
+                    },
+                    {
+                      "IsRefOrOut": false
+                    }
+                  ]
+                }
+              ]
             },
             {
               "targetRva": 28277761,
-              "operand": "0x1af7c01"
+              "operand": "0x1af7c01",
+              "resolvedLookupMatches": []
             }
           ],
           "stringComposeMethods": [
@@ -7035,15 +7435,47 @@
           "formatterHelpers": [
             {
               "targetRva": 28277222,
-              "operand": "0x1af79e6"
+              "operand": "0x1af79e6",
+              "resolvedLookupMatches": []
             },
             {
               "targetRva": 59968580,
-              "operand": "0x3930c44"
+              "operand": "0x3930c44",
+              "resolvedLookupMatches": [
+                {
+                  "assemblyName": "mscorlib",
+                  "typeName": "Int32",
+                  "fullTypeName": "System.Int32",
+                  "methodName": "ToString",
+                  "returnType": "System.String",
+                  "methodProperties": {
+                    "Attributes": "Public, Virtual, HideBySig",
+                    "IsStatic": false,
+                    "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 31521 }",
+                    "Name": "ToString",
+                    "GlobalKey": "Int32.ToString()",
+                    "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+                    "ReturnType": "System.String",
+                    "DeclaringType": "Il2CppTypeDefinition[namespace='System', name='Int32', parentType=System.ValueType, assembly=Il2CppImageDefinition[Name=mscorlib.dll]]",
+                    "MethodPointer": 59984964,
+                    "MethodOffsetInFile": 59968580,
+                    "Rva": 59968580,
+                    "HumanReadableSignature": "System.String ToString()",
+                    "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+                    "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+                    "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+                    "GenericContainer": null,
+                    "IsUnmanagedCallersOnly": false,
+                    "MethodImplAttributes": "IL"
+                  },
+                  "parameters": []
+                }
+              ]
             },
             {
               "targetRva": 28277761,
-              "operand": "0x1af7c01"
+              "operand": "0x1af7c01",
+              "resolvedLookupMatches": []
             }
           ],
           "stringComposeMethods": [
@@ -7091,8 +7523,39 @@
     "currentValueSlotStatus": {
       "textHandlerCurrentBonusTextFieldPresent": false,
       "textHandlerCurrentBonusTextWriterPresent": false,
+      "assemblyCurrentSearchMatchCount": 6,
+      "assemblyCurrentSearchTypeNames": [
+        "ConstructionMilestones",
+        "ConstructionProjects",
+        "TextHandler",
+        "TextHandlerEsotericExchange",
+        "TextHandlerLoopMods",
+        "TextHandlerNecrumExchange"
+      ],
+      "exactRowSlotSearchMatchCount": 19,
+      "exactRowSlotSearchTypeNames": [
+        "AccountPanel",
+        "Cifi.OfflineHunt.Simulator",
+        "ConstructionProjects",
+        "DemoSceneController",
+        "EggstoneMain",
+        "Inventory",
+        "InventoryManager",
+        "OuroborosResetter",
+        "PlayerProfileUI",
+        "SaveSystem",
+        "SpaceAcademyMain",
+        "TextHandler",
+        "TextHandlerGemNodes",
+        "TextHandlerHunters",
+        "TextHandlerLoadouts",
+        "TextHandlerMarkets",
+        "TextHandlerResearch",
+        "TextHandlerSpaceAcademy",
+        "TokenShop"
+      ],
       "sameSinkAsRecoveredEffectLabelFamily": false,
-      "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime search also checks the obvious Emporium-adjacent fallback owners and still does not recover a row-local CurrentBonusText producer on NavigationManager or TextHandlerShopNPCs."
+      "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime surface now also recovers SetAllBonusTexts as the batch entry for the ISNBonusText family, but still recovers no typed CurrentBonusText field, no SetCurrentBonusText writer family, and no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method."
     },
     "effectLabelSlotAliasResolution": {
       "status": "closed-best-fit-typed-alias",
@@ -7119,17 +7582,18 @@
     "Because UnityEngine.UI.Text.set_text is itself a virtual one-string setter in the recovered runtime surface, the narrowest defensible read is that the SetISNBaseBonusText family is a checked runtime assignment lane into UnityEngine.UI.Text components, but only as an inferred virtual setter bind rather than a named direct-call edge.",
     "SetIS78BonusText and SetIS83BonusText form a second parallel runtime writer family: they read IS78BonusText and IS83BonusText, compose strings, and end in the same UnityEngine.UI.Text virtual-dispatch write pattern, which recovers a separate effect-label lane beyond the already checked base-bonus lane.",
     "The widened MultiverseMarket runtime surface now closes the row-78 and row-83 effect payload sources one step further: SetIS78BonusText calls MultiverseMarket.get_FinalIS78Bonus(), while SetIS83BonusText calls MultiverseMarket.get_FinalIS83Bonus(), before additional formatter helpers and System.String.Concat write into the recovered ISNBonusText sink.",
-    "The same runtime surface now recovers a full typed effect-label family on TextHandlerMarkets from IS1BonusText through IS110BonusText and from SetIS1BonusText through SetIS110BonusText, which closes the producer side for the non-current-value effect-label lane rather than only for rows 78 and 83.",
+    "The same runtime surface now recovers a full typed effect-label family on TextHandlerMarkets from IS1BonusText through IS110BonusText and from SetIS1BonusText through SetIS110BonusText, plus the batch-level SetAllBonusTexts method, which closes the producer side for the non-current-value effect-label lane rather than only for rows 78 and 83.",
     "The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.",
-    "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, so CurrentBonusText is no longer a plausible alias for the recovered ISNBonusText sink and must remain a separate unrecovered writer lane if it is written at runtime.",
-    "Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText."
+    "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, and the widened slot-name assembly search also fails to recover any typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. CurrentBonusText therefore remains a separate runtime-only lane with no recovered dedicated producer.",
+    "Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.",
+    "The unresolved formatter-helper seam is now narrower too: the targeted RVA lookup can name helper methods on the SetIS78BonusText and SetIS83BonusText payload path before System.String.Concat."
   ],
   "currentBoundary": [
     "Treat SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText through row payload ID or Level or ISObject as the settled row-identity chain.",
     "Treat TextHandlerMarkets.SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts through SetIS78BaseBonusText or SetIS83BaseBonusText as a checked runtime-only write path into UnityEngine.UI.Text for the base-bonus lane.",
-    "Treat TextHandlerMarkets.SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus unresolved formatter helpers and System.String.Concat.",
+    "Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus helper methods that are now narrower than anonymous RVAs alone before System.String.Concat.",
     "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
-    "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family but no CurrentBonusText-named field or writer family, while the widened runtime search also checks NavigationManager and TextHandlerShopNPCs without recovering a row-local CurrentBonusText producer there either.",
+    "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family plus SetAllBonusTexts but no CurrentBonusText-named field or writer family, and the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct slot-writer method.",
     "Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.",
     "Do not widen canonical import, planner behavior, or the shipped compatibility preview while the separate CurrentBonusText writer lane remains unrecovered."
   ]

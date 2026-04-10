@@ -36,6 +36,32 @@ def extract_target(surface: dict[str, object], report_key: str) -> dict[str, obj
     raise KeyError(f"Missing runtime surface target {report_key}")
 
 
+def extract_assembly_search(
+    surface: dict[str, object],
+    required_field_patterns: list[str],
+) -> dict[str, object]:
+    required = tuple(required_field_patterns)
+    for search in surface.get("assemblySearches", []):
+        if tuple(search.get("fieldPatterns", [])) == required:
+            return search
+    raise KeyError(f"Missing runtime surface assembly search {required}")
+
+
+def extract_rva_lookup_map(surface: dict[str, object]) -> dict[int, list[dict[str, object]]]:
+    mapping: dict[int, list[dict[str, object]]] = {}
+    lookup_root = surface.get("rvaLookups", {})
+    if not isinstance(lookup_root, dict):
+        return mapping
+    for entry in lookup_root.get("resolved", []):
+        if not isinstance(entry, dict):
+            continue
+        rva = entry.get("rva")
+        matches = entry.get("matches", [])
+        if isinstance(rva, int) and isinstance(matches, list):
+            mapping[rva] = [match for match in matches if isinstance(match, dict)]
+    return mapping
+
+
 def build_method_index(*targets: dict[str, object]) -> tuple[dict[int, dict[str, object]], list[int]]:
     methods_by_rva: dict[int, dict[str, object]] = {}
     all_rvas: list[int] = []
@@ -224,10 +250,32 @@ def sort_inscription_names(names: list[str]) -> list[str]:
 
 def main() -> None:
     surface = load_runtime_surface()
+    rva_lookup_map = extract_rva_lookup_map(surface)
     text_handler = extract_target(surface, "textHandlerMarkets")
     multiverse_market = extract_target(surface, "multiverseMarket")
     unity_text = extract_target(surface, "unityUiText")
     system_string = extract_target(surface, "string")
+    current_search = extract_assembly_search(
+        surface,
+        [
+            "CurrentBonusText",
+            "ActualBonusText",
+            "TotalBonusText",
+            "BonusText1",
+            "CurrentBonusPerLevelText",
+        ],
+    )
+    slot_search = extract_assembly_search(
+        surface,
+        [
+            "CurrentBonusText",
+            "BonusDescriptionText",
+            "PerLevelBonusText",
+            "DescriptionText",
+            "IDText",
+            "IconBox",
+        ],
+    )
 
     methods_by_rva, sorted_rvas = build_method_index(text_handler, multiverse_market, unity_text, system_string)
     field_map = build_field_offset_map(text_handler)
@@ -268,20 +316,32 @@ def main() -> None:
     ])
     current_bonus_text_field_present = any(field.get("name") == "CurrentBonusText" for field in text_handler_fields)
     current_bonus_text_method_present = any(method.get("name") == "SetCurrentBonusText" for method in text_handler_methods)
+    current_search_matches = current_search.get("matches", [])
+    slot_search_matches = slot_search.get("matches", [])
 
     target_methods = [
         "SetAllChrystosEmporiumTexts",
+        "SetAllCostTexts",
         "SetAllBaseBonusTexts",
+        "SetAllBonusTexts",
+        "SetAllIDTexts",
         "SetIS78BaseBonusText",
         "SetIS83BaseBonusText",
         "SetIS78BonusText",
         "SetIS83BonusText",
     ]
-    summaries = [summarize_method(name, methods_by_rva, sorted_rvas, blob, field_map) for name in target_methods]
+    summaries = [
+        summarize_method(name, methods_by_rva, sorted_rvas, blob, field_map)
+        for name in target_methods
+        if any(entry["name"] == name and entry["typeName"] == "TextHandlerMarkets" for entry in methods_by_rva.values())
+    ]
     by_name = {entry["name"]: entry for entry in summaries}
 
     set_all = by_name["SetAllChrystosEmporiumTexts"]
+    set_all_cost = by_name.get("SetAllCostTexts")
     set_all_base = by_name["SetAllBaseBonusTexts"]
+    set_all_bonus = by_name.get("SetAllBonusTexts")
+    set_all_id = by_name.get("SetAllIDTexts")
     row78 = by_name["SetIS78BaseBonusText"]
     row83 = by_name["SetIS83BaseBonusText"]
     row78_effect = by_name["SetIS78BonusText"]
@@ -303,6 +363,7 @@ def main() -> None:
             {
                 "targetRva": call["targetRva"],
                 "operand": call["operand"],
+                "resolvedLookupMatches": rva_lookup_map.get(call["targetRva"], []),
             }
             for call in call_targets
             if call["targetRva"] is not None and call.get("resolvedTarget") is None
@@ -332,6 +393,32 @@ def main() -> None:
 
     row78_effect_payload = summarize_effect_payload_path(row78_effect)
     row83_effect_payload = summarize_effect_payload_path(row83_effect)
+    root_batch_call_resolution = [
+        {
+            "targetRva": call["targetRva"],
+            "resolvedTarget": call.get("resolvedTarget"),
+            "resolvedLookupMatches": rva_lookup_map.get(call["targetRva"], []) if isinstance(call.get("targetRva"), int) else [],
+        }
+        for call in set_all["callTargets"]
+        if isinstance(call.get("targetRva"), int)
+    ]
+
+    def helper_labels(payload: dict[str, object]) -> list[str]:
+        labels: list[str] = []
+        for helper in payload["formatterHelpers"]:
+            matches = helper.get("resolvedLookupMatches", [])
+            if matches:
+                labels.extend(
+                    f"{match.get('fullTypeName')}.{match.get('methodName')}"
+                    for match in matches
+                    if isinstance(match, dict)
+                )
+            else:
+                labels.append(f"unresolved@{helper['targetRva']}")
+        return labels
+
+    row78_helper_labels = helper_labels(row78_effect_payload)
+    row83_helper_labels = helper_labels(row83_effect_payload)
 
     findings = [
         "The runtime probe now recovers typed TextHandlerMarkets field offsets and native RVAs for the exact Emporium text-handler family, without reopening the asset walk or shell-remap lane.",
@@ -340,11 +427,15 @@ def main() -> None:
         "Because UnityEngine.UI.Text.set_text is itself a virtual one-string setter in the recovered runtime surface, the narrowest defensible read is that the SetISNBaseBonusText family is a checked runtime assignment lane into UnityEngine.UI.Text components, but only as an inferred virtual setter bind rather than a named direct-call edge.",
         "SetIS78BonusText and SetIS83BonusText form a second parallel runtime writer family: they read IS78BonusText and IS83BonusText, compose strings, and end in the same UnityEngine.UI.Text virtual-dispatch write pattern, which recovers a separate effect-label lane beyond the already checked base-bonus lane.",
         "The widened MultiverseMarket runtime surface now closes the row-78 and row-83 effect payload sources one step further: SetIS78BonusText calls MultiverseMarket.get_FinalIS78Bonus(), while SetIS83BonusText calls MultiverseMarket.get_FinalIS83Bonus(), before additional formatter helpers and System.String.Concat write into the recovered ISNBonusText sink.",
-        "The same runtime surface now recovers a full typed effect-label family on TextHandlerMarkets from IS1BonusText through IS110BonusText and from SetIS1BonusText through SetIS110BonusText, which closes the producer side for the non-current-value effect-label lane rather than only for rows 78 and 83.",
+        "The same runtime surface now recovers a full typed effect-label family on TextHandlerMarkets from IS1BonusText through IS110BonusText and from SetIS1BonusText through SetIS110BonusText, plus the batch-level SetAllBonusTexts method, which closes the producer side for the non-current-value effect-label lane rather than only for rows 78 and 83.",
         "The same exact runtime surface also recovers a full IS1IDText through IS110IDText and SetIS1IDText through SetIS110IDText family on TextHandlerMarkets, which closes IDText off as its own dedicated row-label lane rather than as the sink for SetISNBonusText.",
-        "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, so CurrentBonusText is no longer a plausible alias for the recovered ISNBonusText sink and must remain a separate unrecovered writer lane if it is written at runtime.",
+        "That same exact typed runtime surface recovers no CurrentBonusText-named field and no SetCurrentBonusText-style writer family on TextHandlerMarkets, and the widened slot-name assembly search also fails to recover any typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method. CurrentBonusText therefore remains a separate runtime-only lane with no recovered dedicated producer.",
         "Because the row-local control-slot set is CurrentBonusText or BonusDescriptionText or PerLevelBonusText or DescriptionText or IDText, and the recovered runtime families now separately account for CurrentBonusText as absent, PerLevelBonusText via SetISNBaseBonusText, and IDText via SetISNIDText, while exposing no SetISNDescriptionText family at all, the narrowest typed repo-local slot alias for the recovered SetISNBonusText writer closes to BonusDescriptionText.",
     ]
+    if row78_helper_labels or row83_helper_labels:
+        findings.append(
+            "The unresolved formatter-helper seam is now narrower too: the targeted RVA lookup can name helper methods on the SetIS78BonusText and SetIS83BonusText payload path before System.String.Concat."
+        )
 
     result = {
         "dataset": "multiverse-market-text-runtime-probe",
@@ -356,8 +447,11 @@ def main() -> None:
         "methodChain": {
             "producerType": "TextHandlerMarkets",
             "rootMethod": set_all,
+            "costBatchMethod": set_all_cost,
             "baseBonusBatchMethod": set_all_base,
-            "effectLabelBatchMethodStatus": "no-separate-SetAllBonusTexts-method-recovered",
+            "effectLabelBatchMethod": set_all_bonus,
+            "idBatchMethod": set_all_id,
+            "rootBatchCallResolution": root_batch_call_resolution,
             "controlRows": [
                 {
                     "row": 78,
@@ -407,8 +501,20 @@ def main() -> None:
             "currentValueSlotStatus": {
                 "textHandlerCurrentBonusTextFieldPresent": current_bonus_text_field_present,
                 "textHandlerCurrentBonusTextWriterPresent": current_bonus_text_method_present,
+                "assemblyCurrentSearchMatchCount": len(current_search_matches),
+                "assemblyCurrentSearchTypeNames": [
+                    match.get("fullName")
+                    for match in current_search_matches
+                    if isinstance(match, dict)
+                ],
+                "exactRowSlotSearchMatchCount": len(slot_search_matches),
+                "exactRowSlotSearchTypeNames": [
+                    match.get("fullName")
+                    for match in slot_search_matches
+                    if isinstance(match, dict)
+                ],
                 "sameSinkAsRecoveredEffectLabelFamily": False,
-                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family."
+                "strongestCurrentInference": "The recovered ISNBonusText family is the non-current-value effect-label writer lane sourced from MultiverseMarket final-bonus getters, while CurrentBonusText remains a separate current-value slot with no recovered dedicated TextHandlerMarkets field or writer family. The widened runtime surface now also recovers SetAllBonusTexts as the batch entry for the ISNBonusText family, but still recovers no typed CurrentBonusText field, no SetCurrentBonusText writer family, and no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct Set* slot-writer method."
             },
             "effectLabelSlotAliasResolution": {
                 "status": "closed-best-fit-typed-alias",
@@ -432,9 +538,9 @@ def main() -> None:
         "currentBoundary": [
             "Treat SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText through row payload ID or Level or ISObject as the settled row-identity chain.",
             "Treat TextHandlerMarkets.SetAllChrystosEmporiumTexts through SetAllBaseBonusTexts through SetIS78BaseBonusText or SetIS83BaseBonusText as a checked runtime-only write path into UnityEngine.UI.Text for the base-bonus lane.",
-            "Treat TextHandlerMarkets.SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus unresolved formatter helpers and System.String.Concat.",
+            "Treat TextHandlerMarkets.SetAllBonusTexts through SetIS78BonusText or SetIS83BonusText as a separately recovered runtime-only effect-label write lane into UnityEngine.UI.Text, distinct from the base-bonus lane and sourced from MultiverseMarket.get_FinalIS78Bonus or get_FinalIS83Bonus plus helper methods that are now narrower than anonymous RVAs alone before System.String.Concat.",
             "Do not treat the recovered effect-label writer as completed canonical label truth for rows 78 or 83; the screenshot mismatch still falsifies sparse Inscryption N anchors as completed label truth.",
-            "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family but no CurrentBonusText-named field or writer family.",
+            "Treat CurrentBonusText as a separate unrecovered writer lane rather than as the sink for ISNBonusText, because TextHandlerMarkets now exposes a full ISNBonusText field and method family plus SetAllBonusTexts but no CurrentBonusText-named field or writer family, and the widened slot-name assembly search still recovers no typed Assembly-CSharp owner exposing CurrentBonusText as a field or direct slot-writer method.",
             "Treat BonusDescriptionText as the closed row-local slot alias for the recovered ISNBonusText effect-label writer family, because the same runtime surface separately accounts for IDText via SetISNIDText, PerLevelBonusText via SetISNBaseBonusText, and excludes CurrentBonusText while exposing no SetISNDescriptionText family.",
             "Do not widen canonical import, planner behavior, or the shipped compatibility preview while the separate CurrentBonusText writer lane remains unrecovered.",
         ],
@@ -477,12 +583,28 @@ def main() -> None:
         "",
         f"- `fields={family['fieldFamilyFirst']}..{family['fieldFamilyLast']}`; `count={family['fieldFamilyCount']}`",
         f"- `methods={family['methodFamilyFirst']}..{family['methodFamilyLast']}`; `count={family['methodFamilyCount']}`",
+        f"- `SetAllBonusTexts recovered={set_all_bonus is not None}`",
         f"- `idFields={result['methodChain']['idLabelFamilySurface']['fieldFamilyFirst']}..{result['methodChain']['idLabelFamilySurface']['fieldFamilyLast']}`; `count={result['methodChain']['idLabelFamilySurface']['fieldFamilyCount']}`",
         f"- `idMethods={result['methodChain']['idLabelFamilySurface']['methodFamilyFirst']}..{result['methodChain']['idLabelFamilySurface']['methodFamilyLast']}`; `count={result['methodChain']['idLabelFamilySurface']['methodFamilyCount']}`",
         f"- `rowNumberedDescriptionWritersRecovered={result['methodChain']['descriptionTextFamilyStatus']['rowNumberedDescriptionWriterCount']}`",
         f"- `TextHandlerMarkets.CurrentBonusText field present={result['methodChain']['currentValueSlotStatus']['textHandlerCurrentBonusTextFieldPresent']}`",
         f"- `TextHandlerMarkets.SetCurrentBonusText writer present={result['methodChain']['currentValueSlotStatus']['textHandlerCurrentBonusTextWriterPresent']}`",
+        f"- `Assembly-CSharp current-value search matches={result['methodChain']['currentValueSlotStatus']['assemblyCurrentSearchMatchCount']}`",
+        f"- `Assembly-CSharp exact row-slot search matches={result['methodChain']['currentValueSlotStatus']['exactRowSlotSearchMatchCount']}`",
     ])
+    lines.extend(["", "## Root batch resolution", ""])
+    for call in root_batch_call_resolution:
+        resolved = call["resolvedTarget"]
+        if isinstance(resolved, dict):
+            label = f"{resolved['typeName']}.{resolved['name']}"
+        elif call["resolvedLookupMatches"]:
+            label = ", ".join(
+                f"{match['fullTypeName']}.{match['methodName']}"
+                for match in call["resolvedLookupMatches"]
+            )
+        else:
+            label = "unresolved"
+        lines.append(f"- `rva={call['targetRva']}`; `target={label}`")
     lines.extend([
         "",
         "## Slot alias resolution",
@@ -490,6 +612,9 @@ def main() -> None:
         f"- `resolvedRowLocalAlias={result['methodChain']['effectLabelSlotAliasResolution']['resolvedRowLocalAlias']}`",
     ])
     lines.extend(f"- {line}" for line in result["methodChain"]["effectLabelSlotAliasResolution"]["reasoning"])
+    lines.extend(["", "## Helper-name narrowing", ""])
+    lines.append(f"- `row78Helpers={row78_helper_labels}`")
+    lines.append(f"- `row83Helpers={row83_helper_labels}`")
     lines.extend(["", "## Current boundary", ""])
     lines.extend(f"- {line}" for line in result["currentBoundary"])
     MD_OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")

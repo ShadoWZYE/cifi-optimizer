@@ -3584,6 +3584,33 @@
       "methods": [
         {
           "index": 0,
+          "name": "SetAllMarketTexts",
+          "returnType": "System.Void",
+          "parameterCount": 0,
+          "methodProperties": {
+            "Attributes": "Public, HideBySig",
+            "IsStatic": false,
+            "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8419 }",
+            "Name": "SetAllMarketTexts",
+            "GlobalKey": "TextHandlerMarkets.SetAllMarketTexts()",
+            "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+            "ReturnType": "System.Void",
+            "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027TextHandlerMarkets\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+            "MethodPointer": 31793886,
+            "MethodOffsetInFile": 31777502,
+            "Rva": 31777502,
+            "HumanReadableSignature": "System.Void SetAllMarketTexts()",
+            "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+            "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+            "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+            "GenericContainer": null,
+            "IsUnmanagedCallersOnly": false,
+            "MethodImplAttributes": "IL"
+          },
+          "parameters": []
+        },
+        {
+          "index": 1,
           "name": "SetAllChrystosEmporiumTexts",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3610,7 +3637,34 @@
           "parameters": []
         },
         {
-          "index": 1,
+          "index": 2,
+          "name": "SetAllCostTexts",
+          "returnType": "System.Void",
+          "parameterCount": 0,
+          "methodProperties": {
+            "Attributes": "Public, HideBySig",
+            "IsStatic": false,
+            "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8423 }",
+            "Name": "SetAllCostTexts",
+            "GlobalKey": "TextHandlerMarkets.SetAllCostTexts()",
+            "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+            "ReturnType": "System.Void",
+            "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027TextHandlerMarkets\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+            "MethodPointer": 31794245,
+            "MethodOffsetInFile": 31777861,
+            "Rva": 31777861,
+            "HumanReadableSignature": "System.Void SetAllCostTexts()",
+            "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+            "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+            "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+            "GenericContainer": null,
+            "IsUnmanagedCallersOnly": false,
+            "MethodImplAttributes": "IL"
+          },
+          "parameters": []
+        },
+        {
+          "index": 3,
           "name": "SetIS1CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3637,7 +3691,7 @@
           "parameters": []
         },
         {
-          "index": 2,
+          "index": 4,
           "name": "SetIS2CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3664,7 +3718,7 @@
           "parameters": []
         },
         {
-          "index": 3,
+          "index": 5,
           "name": "SetIS3CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3691,7 +3745,7 @@
           "parameters": []
         },
         {
-          "index": 4,
+          "index": 6,
           "name": "SetIS4CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3718,7 +3772,7 @@
           "parameters": []
         },
         {
-          "index": 5,
+          "index": 7,
           "name": "SetIS5CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3745,7 +3799,7 @@
           "parameters": []
         },
         {
-          "index": 6,
+          "index": 8,
           "name": "SetIS6CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3772,7 +3826,7 @@
           "parameters": []
         },
         {
-          "index": 7,
+          "index": 9,
           "name": "SetIS7CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3799,7 +3853,7 @@
           "parameters": []
         },
         {
-          "index": 8,
+          "index": 10,
           "name": "SetIS8CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3826,7 +3880,7 @@
           "parameters": []
         },
         {
-          "index": 9,
+          "index": 11,
           "name": "SetIS9CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3853,7 +3907,7 @@
           "parameters": []
         },
         {
-          "index": 10,
+          "index": 12,
           "name": "SetIS10CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3880,7 +3934,7 @@
           "parameters": []
         },
         {
-          "index": 11,
+          "index": 13,
           "name": "SetIS11CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3907,7 +3961,7 @@
           "parameters": []
         },
         {
-          "index": 12,
+          "index": 14,
           "name": "SetIS12CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3934,7 +3988,7 @@
           "parameters": []
         },
         {
-          "index": 13,
+          "index": 15,
           "name": "SetIS13CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3961,7 +4015,7 @@
           "parameters": []
         },
         {
-          "index": 14,
+          "index": 16,
           "name": "SetIS14CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -3988,7 +4042,7 @@
           "parameters": []
         },
         {
-          "index": 15,
+          "index": 17,
           "name": "SetIS15CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4015,7 +4069,7 @@
           "parameters": []
         },
         {
-          "index": 16,
+          "index": 18,
           "name": "SetIS16CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4042,7 +4096,7 @@
           "parameters": []
         },
         {
-          "index": 17,
+          "index": 19,
           "name": "SetIS17CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4069,7 +4123,7 @@
           "parameters": []
         },
         {
-          "index": 18,
+          "index": 20,
           "name": "SetIS18CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4096,7 +4150,7 @@
           "parameters": []
         },
         {
-          "index": 19,
+          "index": 21,
           "name": "SetIS19CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4123,7 +4177,7 @@
           "parameters": []
         },
         {
-          "index": 20,
+          "index": 22,
           "name": "SetIS20CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4150,7 +4204,7 @@
           "parameters": []
         },
         {
-          "index": 21,
+          "index": 23,
           "name": "SetIS21CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4177,7 +4231,7 @@
           "parameters": []
         },
         {
-          "index": 22,
+          "index": 24,
           "name": "SetIS22CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4204,7 +4258,7 @@
           "parameters": []
         },
         {
-          "index": 23,
+          "index": 25,
           "name": "SetIS23CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4231,7 +4285,7 @@
           "parameters": []
         },
         {
-          "index": 24,
+          "index": 26,
           "name": "SetIS24CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4258,7 +4312,7 @@
           "parameters": []
         },
         {
-          "index": 25,
+          "index": 27,
           "name": "SetIS25CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4285,7 +4339,7 @@
           "parameters": []
         },
         {
-          "index": 26,
+          "index": 28,
           "name": "SetIS26CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4312,7 +4366,7 @@
           "parameters": []
         },
         {
-          "index": 27,
+          "index": 29,
           "name": "SetIS27CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4339,7 +4393,7 @@
           "parameters": []
         },
         {
-          "index": 28,
+          "index": 30,
           "name": "SetIS28CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4366,7 +4420,7 @@
           "parameters": []
         },
         {
-          "index": 29,
+          "index": 31,
           "name": "SetIS29CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4393,7 +4447,7 @@
           "parameters": []
         },
         {
-          "index": 30,
+          "index": 32,
           "name": "SetIS30CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4420,7 +4474,7 @@
           "parameters": []
         },
         {
-          "index": 31,
+          "index": 33,
           "name": "SetIS31CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4447,7 +4501,7 @@
           "parameters": []
         },
         {
-          "index": 32,
+          "index": 34,
           "name": "SetIS32CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4474,7 +4528,7 @@
           "parameters": []
         },
         {
-          "index": 33,
+          "index": 35,
           "name": "SetIS33CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4501,7 +4555,7 @@
           "parameters": []
         },
         {
-          "index": 34,
+          "index": 36,
           "name": "SetIS34CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4528,7 +4582,7 @@
           "parameters": []
         },
         {
-          "index": 35,
+          "index": 37,
           "name": "SetIS35CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4555,7 +4609,7 @@
           "parameters": []
         },
         {
-          "index": 36,
+          "index": 38,
           "name": "SetIS36CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4582,7 +4636,7 @@
           "parameters": []
         },
         {
-          "index": 37,
+          "index": 39,
           "name": "SetIS37CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4609,7 +4663,7 @@
           "parameters": []
         },
         {
-          "index": 38,
+          "index": 40,
           "name": "SetIS38CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4636,7 +4690,7 @@
           "parameters": []
         },
         {
-          "index": 39,
+          "index": 41,
           "name": "SetIS39CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4663,7 +4717,7 @@
           "parameters": []
         },
         {
-          "index": 40,
+          "index": 42,
           "name": "SetIS40CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4690,7 +4744,7 @@
           "parameters": []
         },
         {
-          "index": 41,
+          "index": 43,
           "name": "SetIS41CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4717,7 +4771,7 @@
           "parameters": []
         },
         {
-          "index": 42,
+          "index": 44,
           "name": "SetIS42CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4744,7 +4798,7 @@
           "parameters": []
         },
         {
-          "index": 43,
+          "index": 45,
           "name": "SetIS43CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4771,7 +4825,7 @@
           "parameters": []
         },
         {
-          "index": 44,
+          "index": 46,
           "name": "SetIS44CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4798,7 +4852,7 @@
           "parameters": []
         },
         {
-          "index": 45,
+          "index": 47,
           "name": "SetIS45CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4825,7 +4879,7 @@
           "parameters": []
         },
         {
-          "index": 46,
+          "index": 48,
           "name": "SetIS46CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4852,7 +4906,7 @@
           "parameters": []
         },
         {
-          "index": 47,
+          "index": 49,
           "name": "SetIS47CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4879,7 +4933,7 @@
           "parameters": []
         },
         {
-          "index": 48,
+          "index": 50,
           "name": "SetIS48CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4906,7 +4960,7 @@
           "parameters": []
         },
         {
-          "index": 49,
+          "index": 51,
           "name": "SetIS49CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4933,7 +4987,7 @@
           "parameters": []
         },
         {
-          "index": 50,
+          "index": 52,
           "name": "SetIS50CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4960,7 +5014,7 @@
           "parameters": []
         },
         {
-          "index": 51,
+          "index": 53,
           "name": "SetIS51CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -4987,7 +5041,7 @@
           "parameters": []
         },
         {
-          "index": 52,
+          "index": 54,
           "name": "SetIS52CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5014,7 +5068,7 @@
           "parameters": []
         },
         {
-          "index": 53,
+          "index": 55,
           "name": "SetIS53CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5041,7 +5095,7 @@
           "parameters": []
         },
         {
-          "index": 54,
+          "index": 56,
           "name": "SetIS54CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5068,7 +5122,7 @@
           "parameters": []
         },
         {
-          "index": 55,
+          "index": 57,
           "name": "SetIS55CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5095,7 +5149,7 @@
           "parameters": []
         },
         {
-          "index": 56,
+          "index": 58,
           "name": "SetIS56CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5122,7 +5176,7 @@
           "parameters": []
         },
         {
-          "index": 57,
+          "index": 59,
           "name": "SetIS57CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5149,7 +5203,7 @@
           "parameters": []
         },
         {
-          "index": 58,
+          "index": 60,
           "name": "SetIS58CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5176,7 +5230,7 @@
           "parameters": []
         },
         {
-          "index": 59,
+          "index": 61,
           "name": "SetIS59CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5203,7 +5257,7 @@
           "parameters": []
         },
         {
-          "index": 60,
+          "index": 62,
           "name": "SetIS60CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5230,7 +5284,7 @@
           "parameters": []
         },
         {
-          "index": 61,
+          "index": 63,
           "name": "SetIS61CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5257,7 +5311,7 @@
           "parameters": []
         },
         {
-          "index": 62,
+          "index": 64,
           "name": "SetIS62CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5284,7 +5338,7 @@
           "parameters": []
         },
         {
-          "index": 63,
+          "index": 65,
           "name": "SetIS63CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5311,7 +5365,7 @@
           "parameters": []
         },
         {
-          "index": 64,
+          "index": 66,
           "name": "SetIS64CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5338,7 +5392,7 @@
           "parameters": []
         },
         {
-          "index": 65,
+          "index": 67,
           "name": "SetIS65CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5365,7 +5419,7 @@
           "parameters": []
         },
         {
-          "index": 66,
+          "index": 68,
           "name": "SetIS66CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5392,7 +5446,7 @@
           "parameters": []
         },
         {
-          "index": 67,
+          "index": 69,
           "name": "SetIS67CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5419,7 +5473,7 @@
           "parameters": []
         },
         {
-          "index": 68,
+          "index": 70,
           "name": "SetIS68CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5446,7 +5500,7 @@
           "parameters": []
         },
         {
-          "index": 69,
+          "index": 71,
           "name": "SetIS69CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5473,7 +5527,7 @@
           "parameters": []
         },
         {
-          "index": 70,
+          "index": 72,
           "name": "SetIS70CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5500,7 +5554,7 @@
           "parameters": []
         },
         {
-          "index": 71,
+          "index": 73,
           "name": "SetIS71CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5527,7 +5581,7 @@
           "parameters": []
         },
         {
-          "index": 72,
+          "index": 74,
           "name": "SetIS72CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5554,7 +5608,7 @@
           "parameters": []
         },
         {
-          "index": 73,
+          "index": 75,
           "name": "SetIS73CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5581,7 +5635,7 @@
           "parameters": []
         },
         {
-          "index": 74,
+          "index": 76,
           "name": "SetIS74CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5608,7 +5662,7 @@
           "parameters": []
         },
         {
-          "index": 75,
+          "index": 77,
           "name": "SetIS75CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5635,7 +5689,7 @@
           "parameters": []
         },
         {
-          "index": 76,
+          "index": 78,
           "name": "SetIS76CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5662,7 +5716,7 @@
           "parameters": []
         },
         {
-          "index": 77,
+          "index": 79,
           "name": "SetIS77CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5689,7 +5743,7 @@
           "parameters": []
         },
         {
-          "index": 78,
+          "index": 80,
           "name": "SetIS78CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5716,7 +5770,7 @@
           "parameters": []
         },
         {
-          "index": 79,
+          "index": 81,
           "name": "SetIS79CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5743,7 +5797,7 @@
           "parameters": []
         },
         {
-          "index": 80,
+          "index": 82,
           "name": "SetIS80CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5770,7 +5824,7 @@
           "parameters": []
         },
         {
-          "index": 81,
+          "index": 83,
           "name": "SetIS81CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5797,7 +5851,7 @@
           "parameters": []
         },
         {
-          "index": 82,
+          "index": 84,
           "name": "SetIS82CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5824,7 +5878,7 @@
           "parameters": []
         },
         {
-          "index": 83,
+          "index": 85,
           "name": "SetIS83CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5851,7 +5905,7 @@
           "parameters": []
         },
         {
-          "index": 84,
+          "index": 86,
           "name": "SetIS84CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5878,7 +5932,7 @@
           "parameters": []
         },
         {
-          "index": 85,
+          "index": 87,
           "name": "SetIS85CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5905,7 +5959,7 @@
           "parameters": []
         },
         {
-          "index": 86,
+          "index": 88,
           "name": "SetIS86CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5932,7 +5986,7 @@
           "parameters": []
         },
         {
-          "index": 87,
+          "index": 89,
           "name": "SetIS87CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5959,7 +6013,7 @@
           "parameters": []
         },
         {
-          "index": 88,
+          "index": 90,
           "name": "SetIS88CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -5986,7 +6040,7 @@
           "parameters": []
         },
         {
-          "index": 89,
+          "index": 91,
           "name": "SetIS89CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6013,7 +6067,7 @@
           "parameters": []
         },
         {
-          "index": 90,
+          "index": 92,
           "name": "SetIS90CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6040,7 +6094,7 @@
           "parameters": []
         },
         {
-          "index": 91,
+          "index": 93,
           "name": "SetIS91CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6067,7 +6121,7 @@
           "parameters": []
         },
         {
-          "index": 92,
+          "index": 94,
           "name": "SetIS92CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6094,7 +6148,7 @@
           "parameters": []
         },
         {
-          "index": 93,
+          "index": 95,
           "name": "SetIS93CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6121,7 +6175,7 @@
           "parameters": []
         },
         {
-          "index": 94,
+          "index": 96,
           "name": "SetIS94CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6148,7 +6202,7 @@
           "parameters": []
         },
         {
-          "index": 95,
+          "index": 97,
           "name": "SetIS95CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6175,7 +6229,7 @@
           "parameters": []
         },
         {
-          "index": 96,
+          "index": 98,
           "name": "SetIS96CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6202,7 +6256,7 @@
           "parameters": []
         },
         {
-          "index": 97,
+          "index": 99,
           "name": "SetIS97CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6229,7 +6283,7 @@
           "parameters": []
         },
         {
-          "index": 98,
+          "index": 100,
           "name": "SetIS98CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6256,7 +6310,7 @@
           "parameters": []
         },
         {
-          "index": 99,
+          "index": 101,
           "name": "SetIS99CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6283,7 +6337,7 @@
           "parameters": []
         },
         {
-          "index": 100,
+          "index": 102,
           "name": "SetIS100CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6310,7 +6364,7 @@
           "parameters": []
         },
         {
-          "index": 101,
+          "index": 103,
           "name": "SetIS101CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6337,7 +6391,7 @@
           "parameters": []
         },
         {
-          "index": 102,
+          "index": 104,
           "name": "SetIS102CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6364,7 +6418,7 @@
           "parameters": []
         },
         {
-          "index": 103,
+          "index": 105,
           "name": "SetIS103CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6391,7 +6445,7 @@
           "parameters": []
         },
         {
-          "index": 104,
+          "index": 106,
           "name": "SetIS104CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6418,7 +6472,7 @@
           "parameters": []
         },
         {
-          "index": 105,
+          "index": 107,
           "name": "SetIS105CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6445,7 +6499,7 @@
           "parameters": []
         },
         {
-          "index": 106,
+          "index": 108,
           "name": "SetIS106CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6472,7 +6526,7 @@
           "parameters": []
         },
         {
-          "index": 107,
+          "index": 109,
           "name": "SetIS107CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6499,7 +6553,7 @@
           "parameters": []
         },
         {
-          "index": 108,
+          "index": 110,
           "name": "SetIS108CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6526,7 +6580,7 @@
           "parameters": []
         },
         {
-          "index": 109,
+          "index": 111,
           "name": "SetIS109CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6553,7 +6607,7 @@
           "parameters": []
         },
         {
-          "index": 110,
+          "index": 112,
           "name": "SetIS110CostText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6580,7 +6634,7 @@
           "parameters": []
         },
         {
-          "index": 111,
+          "index": 113,
           "name": "SetAllBaseBonusTexts",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6607,7 +6661,7 @@
           "parameters": []
         },
         {
-          "index": 112,
+          "index": 114,
           "name": "SetIS1BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6634,7 +6688,7 @@
           "parameters": []
         },
         {
-          "index": 113,
+          "index": 115,
           "name": "SetIS2BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6661,7 +6715,7 @@
           "parameters": []
         },
         {
-          "index": 114,
+          "index": 116,
           "name": "SetIS3BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6688,7 +6742,7 @@
           "parameters": []
         },
         {
-          "index": 115,
+          "index": 117,
           "name": "SetIS4BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6715,7 +6769,7 @@
           "parameters": []
         },
         {
-          "index": 116,
+          "index": 118,
           "name": "SetIS5BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6742,7 +6796,7 @@
           "parameters": []
         },
         {
-          "index": 117,
+          "index": 119,
           "name": "SetIS6BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6769,7 +6823,7 @@
           "parameters": []
         },
         {
-          "index": 118,
+          "index": 120,
           "name": "SetIS7BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6796,7 +6850,7 @@
           "parameters": []
         },
         {
-          "index": 119,
+          "index": 121,
           "name": "SetIS8BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6823,7 +6877,7 @@
           "parameters": []
         },
         {
-          "index": 120,
+          "index": 122,
           "name": "SetIS9BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6850,7 +6904,7 @@
           "parameters": []
         },
         {
-          "index": 121,
+          "index": 123,
           "name": "SetIS10BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6877,7 +6931,7 @@
           "parameters": []
         },
         {
-          "index": 122,
+          "index": 124,
           "name": "SetIS11BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6904,7 +6958,7 @@
           "parameters": []
         },
         {
-          "index": 123,
+          "index": 125,
           "name": "SetIS12BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6931,7 +6985,7 @@
           "parameters": []
         },
         {
-          "index": 124,
+          "index": 126,
           "name": "SetIS13BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6958,7 +7012,7 @@
           "parameters": []
         },
         {
-          "index": 125,
+          "index": 127,
           "name": "SetIS14BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -6985,7 +7039,7 @@
           "parameters": []
         },
         {
-          "index": 126,
+          "index": 128,
           "name": "SetIS15BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7012,7 +7066,7 @@
           "parameters": []
         },
         {
-          "index": 127,
+          "index": 129,
           "name": "SetIS16BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7039,7 +7093,7 @@
           "parameters": []
         },
         {
-          "index": 128,
+          "index": 130,
           "name": "SetIS17BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7066,7 +7120,7 @@
           "parameters": []
         },
         {
-          "index": 129,
+          "index": 131,
           "name": "SetIS18BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7093,7 +7147,7 @@
           "parameters": []
         },
         {
-          "index": 130,
+          "index": 132,
           "name": "SetIS19BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7120,7 +7174,7 @@
           "parameters": []
         },
         {
-          "index": 131,
+          "index": 133,
           "name": "SetIS20BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7147,7 +7201,7 @@
           "parameters": []
         },
         {
-          "index": 132,
+          "index": 134,
           "name": "SetIS21BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7174,7 +7228,7 @@
           "parameters": []
         },
         {
-          "index": 133,
+          "index": 135,
           "name": "SetIS22BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7201,7 +7255,7 @@
           "parameters": []
         },
         {
-          "index": 134,
+          "index": 136,
           "name": "SetIS23BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7228,7 +7282,7 @@
           "parameters": []
         },
         {
-          "index": 135,
+          "index": 137,
           "name": "SetIS24BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7255,7 +7309,7 @@
           "parameters": []
         },
         {
-          "index": 136,
+          "index": 138,
           "name": "SetIS25BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7282,7 +7336,7 @@
           "parameters": []
         },
         {
-          "index": 137,
+          "index": 139,
           "name": "SetIS26BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7309,7 +7363,7 @@
           "parameters": []
         },
         {
-          "index": 138,
+          "index": 140,
           "name": "SetIS27BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7336,7 +7390,7 @@
           "parameters": []
         },
         {
-          "index": 139,
+          "index": 141,
           "name": "SetIS28BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7363,7 +7417,7 @@
           "parameters": []
         },
         {
-          "index": 140,
+          "index": 142,
           "name": "SetIS29BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7390,7 +7444,7 @@
           "parameters": []
         },
         {
-          "index": 141,
+          "index": 143,
           "name": "SetIS30BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7417,7 +7471,7 @@
           "parameters": []
         },
         {
-          "index": 142,
+          "index": 144,
           "name": "SetIS31BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7444,7 +7498,7 @@
           "parameters": []
         },
         {
-          "index": 143,
+          "index": 145,
           "name": "SetIS32BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7471,7 +7525,7 @@
           "parameters": []
         },
         {
-          "index": 144,
+          "index": 146,
           "name": "SetIS33BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7498,7 +7552,7 @@
           "parameters": []
         },
         {
-          "index": 145,
+          "index": 147,
           "name": "SetIS34BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7525,7 +7579,7 @@
           "parameters": []
         },
         {
-          "index": 146,
+          "index": 148,
           "name": "SetIS35BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7552,7 +7606,7 @@
           "parameters": []
         },
         {
-          "index": 147,
+          "index": 149,
           "name": "SetIS36BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7579,7 +7633,7 @@
           "parameters": []
         },
         {
-          "index": 148,
+          "index": 150,
           "name": "SetIS37BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7606,7 +7660,7 @@
           "parameters": []
         },
         {
-          "index": 149,
+          "index": 151,
           "name": "SetIS38BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7633,7 +7687,7 @@
           "parameters": []
         },
         {
-          "index": 150,
+          "index": 152,
           "name": "SetIS39BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7660,7 +7714,7 @@
           "parameters": []
         },
         {
-          "index": 151,
+          "index": 153,
           "name": "SetIS40BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7687,7 +7741,7 @@
           "parameters": []
         },
         {
-          "index": 152,
+          "index": 154,
           "name": "SetIS41BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7714,7 +7768,7 @@
           "parameters": []
         },
         {
-          "index": 153,
+          "index": 155,
           "name": "SetIS42BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7741,7 +7795,7 @@
           "parameters": []
         },
         {
-          "index": 154,
+          "index": 156,
           "name": "SetIS43BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7768,7 +7822,7 @@
           "parameters": []
         },
         {
-          "index": 155,
+          "index": 157,
           "name": "SetIS44BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7795,7 +7849,7 @@
           "parameters": []
         },
         {
-          "index": 156,
+          "index": 158,
           "name": "SetIS45BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7822,7 +7876,7 @@
           "parameters": []
         },
         {
-          "index": 157,
+          "index": 159,
           "name": "SetIS46BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7849,7 +7903,7 @@
           "parameters": []
         },
         {
-          "index": 158,
+          "index": 160,
           "name": "SetIS47BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7876,7 +7930,7 @@
           "parameters": []
         },
         {
-          "index": 159,
+          "index": 161,
           "name": "SetIS48BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7903,7 +7957,7 @@
           "parameters": []
         },
         {
-          "index": 160,
+          "index": 162,
           "name": "SetIS49BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7930,7 +7984,7 @@
           "parameters": []
         },
         {
-          "index": 161,
+          "index": 163,
           "name": "SetIS50BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7957,7 +8011,7 @@
           "parameters": []
         },
         {
-          "index": 162,
+          "index": 164,
           "name": "SetIS51BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -7984,7 +8038,7 @@
           "parameters": []
         },
         {
-          "index": 163,
+          "index": 165,
           "name": "SetIS52BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8011,7 +8065,7 @@
           "parameters": []
         },
         {
-          "index": 164,
+          "index": 166,
           "name": "SetIS53BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8038,7 +8092,7 @@
           "parameters": []
         },
         {
-          "index": 165,
+          "index": 167,
           "name": "SetIS54BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8065,7 +8119,7 @@
           "parameters": []
         },
         {
-          "index": 166,
+          "index": 168,
           "name": "SetIS55BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8092,7 +8146,7 @@
           "parameters": []
         },
         {
-          "index": 167,
+          "index": 169,
           "name": "SetIS56BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8119,7 +8173,7 @@
           "parameters": []
         },
         {
-          "index": 168,
+          "index": 170,
           "name": "SetIS57BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8146,7 +8200,7 @@
           "parameters": []
         },
         {
-          "index": 169,
+          "index": 171,
           "name": "SetIS58BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8173,7 +8227,7 @@
           "parameters": []
         },
         {
-          "index": 170,
+          "index": 172,
           "name": "SetIS59BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8200,7 +8254,7 @@
           "parameters": []
         },
         {
-          "index": 171,
+          "index": 173,
           "name": "SetIS60BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8227,7 +8281,7 @@
           "parameters": []
         },
         {
-          "index": 172,
+          "index": 174,
           "name": "SetIS61BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8254,7 +8308,7 @@
           "parameters": []
         },
         {
-          "index": 173,
+          "index": 175,
           "name": "SetIS62BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8281,7 +8335,7 @@
           "parameters": []
         },
         {
-          "index": 174,
+          "index": 176,
           "name": "SetIS63BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8308,7 +8362,7 @@
           "parameters": []
         },
         {
-          "index": 175,
+          "index": 177,
           "name": "SetIS64BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8335,7 +8389,7 @@
           "parameters": []
         },
         {
-          "index": 176,
+          "index": 178,
           "name": "SetIS65BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8362,7 +8416,7 @@
           "parameters": []
         },
         {
-          "index": 177,
+          "index": 179,
           "name": "SetIS66BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8389,7 +8443,7 @@
           "parameters": []
         },
         {
-          "index": 178,
+          "index": 180,
           "name": "SetIS67BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8416,7 +8470,7 @@
           "parameters": []
         },
         {
-          "index": 179,
+          "index": 181,
           "name": "SetIS68BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8443,7 +8497,7 @@
           "parameters": []
         },
         {
-          "index": 180,
+          "index": 182,
           "name": "SetIS69BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8470,7 +8524,7 @@
           "parameters": []
         },
         {
-          "index": 181,
+          "index": 183,
           "name": "SetIS70BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8497,7 +8551,7 @@
           "parameters": []
         },
         {
-          "index": 182,
+          "index": 184,
           "name": "SetIS71BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8524,7 +8578,7 @@
           "parameters": []
         },
         {
-          "index": 183,
+          "index": 185,
           "name": "SetIS72BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8551,7 +8605,7 @@
           "parameters": []
         },
         {
-          "index": 184,
+          "index": 186,
           "name": "SetIS73BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8578,7 +8632,7 @@
           "parameters": []
         },
         {
-          "index": 185,
+          "index": 187,
           "name": "SetIS74BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8605,7 +8659,7 @@
           "parameters": []
         },
         {
-          "index": 186,
+          "index": 188,
           "name": "SetIS75BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8632,7 +8686,7 @@
           "parameters": []
         },
         {
-          "index": 187,
+          "index": 189,
           "name": "SetIS76BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8659,7 +8713,7 @@
           "parameters": []
         },
         {
-          "index": 188,
+          "index": 190,
           "name": "SetIS77BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8686,7 +8740,7 @@
           "parameters": []
         },
         {
-          "index": 189,
+          "index": 191,
           "name": "SetIS78BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8713,7 +8767,7 @@
           "parameters": []
         },
         {
-          "index": 190,
+          "index": 192,
           "name": "SetIS79BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8740,7 +8794,7 @@
           "parameters": []
         },
         {
-          "index": 191,
+          "index": 193,
           "name": "SetIS80BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8767,7 +8821,7 @@
           "parameters": []
         },
         {
-          "index": 192,
+          "index": 194,
           "name": "SetIS81BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8794,7 +8848,7 @@
           "parameters": []
         },
         {
-          "index": 193,
+          "index": 195,
           "name": "SetIS82BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8821,7 +8875,7 @@
           "parameters": []
         },
         {
-          "index": 194,
+          "index": 196,
           "name": "SetIS83BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8848,7 +8902,7 @@
           "parameters": []
         },
         {
-          "index": 195,
+          "index": 197,
           "name": "SetIS84BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8875,7 +8929,7 @@
           "parameters": []
         },
         {
-          "index": 196,
+          "index": 198,
           "name": "SetIS85BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8902,7 +8956,7 @@
           "parameters": []
         },
         {
-          "index": 197,
+          "index": 199,
           "name": "SetIS86BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8929,7 +8983,7 @@
           "parameters": []
         },
         {
-          "index": 198,
+          "index": 200,
           "name": "SetIS87BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8956,7 +9010,7 @@
           "parameters": []
         },
         {
-          "index": 199,
+          "index": 201,
           "name": "SetIS88BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -8983,7 +9037,7 @@
           "parameters": []
         },
         {
-          "index": 200,
+          "index": 202,
           "name": "SetIS89BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9010,7 +9064,7 @@
           "parameters": []
         },
         {
-          "index": 201,
+          "index": 203,
           "name": "SetIS90BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9037,7 +9091,7 @@
           "parameters": []
         },
         {
-          "index": 202,
+          "index": 204,
           "name": "SetIS91BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9064,7 +9118,7 @@
           "parameters": []
         },
         {
-          "index": 203,
+          "index": 205,
           "name": "SetIS92BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9091,7 +9145,7 @@
           "parameters": []
         },
         {
-          "index": 204,
+          "index": 206,
           "name": "SetIS93BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9118,7 +9172,7 @@
           "parameters": []
         },
         {
-          "index": 205,
+          "index": 207,
           "name": "SetIS94BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9145,7 +9199,7 @@
           "parameters": []
         },
         {
-          "index": 206,
+          "index": 208,
           "name": "SetIS95BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9172,7 +9226,7 @@
           "parameters": []
         },
         {
-          "index": 207,
+          "index": 209,
           "name": "SetIS96BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9199,7 +9253,7 @@
           "parameters": []
         },
         {
-          "index": 208,
+          "index": 210,
           "name": "SetIS97BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9226,7 +9280,7 @@
           "parameters": []
         },
         {
-          "index": 209,
+          "index": 211,
           "name": "SetIS98BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9253,7 +9307,7 @@
           "parameters": []
         },
         {
-          "index": 210,
+          "index": 212,
           "name": "SetIS99BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9280,7 +9334,7 @@
           "parameters": []
         },
         {
-          "index": 211,
+          "index": 213,
           "name": "SetIS100BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9307,7 +9361,7 @@
           "parameters": []
         },
         {
-          "index": 212,
+          "index": 214,
           "name": "SetIS101BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9334,7 +9388,7 @@
           "parameters": []
         },
         {
-          "index": 213,
+          "index": 215,
           "name": "SetIS102BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9361,7 +9415,7 @@
           "parameters": []
         },
         {
-          "index": 214,
+          "index": 216,
           "name": "SetIS103BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9388,7 +9442,7 @@
           "parameters": []
         },
         {
-          "index": 215,
+          "index": 217,
           "name": "SetIS104BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9415,7 +9469,7 @@
           "parameters": []
         },
         {
-          "index": 216,
+          "index": 218,
           "name": "SetIS105BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9442,7 +9496,7 @@
           "parameters": []
         },
         {
-          "index": 217,
+          "index": 219,
           "name": "SetIS106BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9469,7 +9523,7 @@
           "parameters": []
         },
         {
-          "index": 218,
+          "index": 220,
           "name": "SetIS107BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9496,7 +9550,7 @@
           "parameters": []
         },
         {
-          "index": 219,
+          "index": 221,
           "name": "SetIS108BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9523,7 +9577,7 @@
           "parameters": []
         },
         {
-          "index": 220,
+          "index": 222,
           "name": "SetIS109BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9550,7 +9604,7 @@
           "parameters": []
         },
         {
-          "index": 221,
+          "index": 223,
           "name": "SetIS110BaseBonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9577,7 +9631,34 @@
           "parameters": []
         },
         {
-          "index": 222,
+          "index": 224,
+          "name": "SetAllBonusTexts",
+          "returnType": "System.Void",
+          "parameterCount": 0,
+          "methodProperties": {
+            "Attributes": "Public, HideBySig",
+            "IsStatic": false,
+            "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8645 }",
+            "Name": "SetAllBonusTexts",
+            "GlobalKey": "TextHandlerMarkets.SetAllBonusTexts()",
+            "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+            "ReturnType": "System.Void",
+            "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027TextHandlerMarkets\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+            "MethodPointer": 31796009,
+            "MethodOffsetInFile": 31779625,
+            "Rva": 31779625,
+            "HumanReadableSignature": "System.Void SetAllBonusTexts()",
+            "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+            "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+            "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+            "GenericContainer": null,
+            "IsUnmanagedCallersOnly": false,
+            "MethodImplAttributes": "IL"
+          },
+          "parameters": []
+        },
+        {
+          "index": 225,
           "name": "SetIS1BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9604,7 +9685,7 @@
           "parameters": []
         },
         {
-          "index": 223,
+          "index": 226,
           "name": "SetIS2BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9631,7 +9712,7 @@
           "parameters": []
         },
         {
-          "index": 224,
+          "index": 227,
           "name": "SetIS3BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9658,7 +9739,7 @@
           "parameters": []
         },
         {
-          "index": 225,
+          "index": 228,
           "name": "SetIS4BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9685,7 +9766,7 @@
           "parameters": []
         },
         {
-          "index": 226,
+          "index": 229,
           "name": "SetIS5BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9712,7 +9793,7 @@
           "parameters": []
         },
         {
-          "index": 227,
+          "index": 230,
           "name": "SetIS6BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9739,7 +9820,7 @@
           "parameters": []
         },
         {
-          "index": 228,
+          "index": 231,
           "name": "SetIS7BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9766,7 +9847,7 @@
           "parameters": []
         },
         {
-          "index": 229,
+          "index": 232,
           "name": "SetIS8BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9793,7 +9874,7 @@
           "parameters": []
         },
         {
-          "index": 230,
+          "index": 233,
           "name": "SetIS9BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9820,7 +9901,7 @@
           "parameters": []
         },
         {
-          "index": 231,
+          "index": 234,
           "name": "SetIS10BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9847,7 +9928,7 @@
           "parameters": []
         },
         {
-          "index": 232,
+          "index": 235,
           "name": "SetIS11BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9874,7 +9955,7 @@
           "parameters": []
         },
         {
-          "index": 233,
+          "index": 236,
           "name": "SetIS12BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9901,7 +9982,7 @@
           "parameters": []
         },
         {
-          "index": 234,
+          "index": 237,
           "name": "SetIS13BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9928,7 +10009,7 @@
           "parameters": []
         },
         {
-          "index": 235,
+          "index": 238,
           "name": "SetIS14BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9955,7 +10036,7 @@
           "parameters": []
         },
         {
-          "index": 236,
+          "index": 239,
           "name": "SetIS15BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -9982,7 +10063,7 @@
           "parameters": []
         },
         {
-          "index": 237,
+          "index": 240,
           "name": "SetIS16BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10009,7 +10090,7 @@
           "parameters": []
         },
         {
-          "index": 238,
+          "index": 241,
           "name": "SetIS17BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10036,7 +10117,7 @@
           "parameters": []
         },
         {
-          "index": 239,
+          "index": 242,
           "name": "SetIS18BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10063,7 +10144,7 @@
           "parameters": []
         },
         {
-          "index": 240,
+          "index": 243,
           "name": "SetIS19BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10090,7 +10171,7 @@
           "parameters": []
         },
         {
-          "index": 241,
+          "index": 244,
           "name": "SetIS20BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10117,7 +10198,7 @@
           "parameters": []
         },
         {
-          "index": 242,
+          "index": 245,
           "name": "SetIS21BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10144,7 +10225,7 @@
           "parameters": []
         },
         {
-          "index": 243,
+          "index": 246,
           "name": "SetIS22BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10171,7 +10252,7 @@
           "parameters": []
         },
         {
-          "index": 244,
+          "index": 247,
           "name": "SetIS23BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10198,7 +10279,7 @@
           "parameters": []
         },
         {
-          "index": 245,
+          "index": 248,
           "name": "SetIS24BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10225,7 +10306,7 @@
           "parameters": []
         },
         {
-          "index": 246,
+          "index": 249,
           "name": "SetIS25BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10252,7 +10333,7 @@
           "parameters": []
         },
         {
-          "index": 247,
+          "index": 250,
           "name": "SetIS26BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10279,7 +10360,7 @@
           "parameters": []
         },
         {
-          "index": 248,
+          "index": 251,
           "name": "SetIS27BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10306,7 +10387,7 @@
           "parameters": []
         },
         {
-          "index": 249,
+          "index": 252,
           "name": "SetIS28BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10333,7 +10414,7 @@
           "parameters": []
         },
         {
-          "index": 250,
+          "index": 253,
           "name": "SetIS29BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10360,7 +10441,7 @@
           "parameters": []
         },
         {
-          "index": 251,
+          "index": 254,
           "name": "SetIS30BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10387,7 +10468,7 @@
           "parameters": []
         },
         {
-          "index": 252,
+          "index": 255,
           "name": "SetIS31BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10414,7 +10495,7 @@
           "parameters": []
         },
         {
-          "index": 253,
+          "index": 256,
           "name": "SetIS32BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10441,7 +10522,7 @@
           "parameters": []
         },
         {
-          "index": 254,
+          "index": 257,
           "name": "SetIS33BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10468,7 +10549,7 @@
           "parameters": []
         },
         {
-          "index": 255,
+          "index": 258,
           "name": "SetIS34BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10495,7 +10576,7 @@
           "parameters": []
         },
         {
-          "index": 256,
+          "index": 259,
           "name": "SetIS35BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10522,7 +10603,7 @@
           "parameters": []
         },
         {
-          "index": 257,
+          "index": 260,
           "name": "SetIS36BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10549,7 +10630,7 @@
           "parameters": []
         },
         {
-          "index": 258,
+          "index": 261,
           "name": "SetIS37BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10576,7 +10657,7 @@
           "parameters": []
         },
         {
-          "index": 259,
+          "index": 262,
           "name": "SetIS38BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10603,7 +10684,7 @@
           "parameters": []
         },
         {
-          "index": 260,
+          "index": 263,
           "name": "SetIS39BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10630,7 +10711,7 @@
           "parameters": []
         },
         {
-          "index": 261,
+          "index": 264,
           "name": "SetIS40BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10657,7 +10738,7 @@
           "parameters": []
         },
         {
-          "index": 262,
+          "index": 265,
           "name": "SetIS41BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10684,7 +10765,7 @@
           "parameters": []
         },
         {
-          "index": 263,
+          "index": 266,
           "name": "SetIS42BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10711,7 +10792,7 @@
           "parameters": []
         },
         {
-          "index": 264,
+          "index": 267,
           "name": "SetIS43BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10738,7 +10819,7 @@
           "parameters": []
         },
         {
-          "index": 265,
+          "index": 268,
           "name": "SetIS44BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10765,7 +10846,7 @@
           "parameters": []
         },
         {
-          "index": 266,
+          "index": 269,
           "name": "SetIS45BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10792,7 +10873,7 @@
           "parameters": []
         },
         {
-          "index": 267,
+          "index": 270,
           "name": "SetIS46BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10819,7 +10900,7 @@
           "parameters": []
         },
         {
-          "index": 268,
+          "index": 271,
           "name": "SetIS47BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10846,7 +10927,7 @@
           "parameters": []
         },
         {
-          "index": 269,
+          "index": 272,
           "name": "SetIS48BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10873,7 +10954,7 @@
           "parameters": []
         },
         {
-          "index": 270,
+          "index": 273,
           "name": "SetIS49BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10900,7 +10981,7 @@
           "parameters": []
         },
         {
-          "index": 271,
+          "index": 274,
           "name": "SetIS50BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10927,7 +11008,7 @@
           "parameters": []
         },
         {
-          "index": 272,
+          "index": 275,
           "name": "SetIS51BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10954,7 +11035,7 @@
           "parameters": []
         },
         {
-          "index": 273,
+          "index": 276,
           "name": "SetIS52BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -10981,7 +11062,7 @@
           "parameters": []
         },
         {
-          "index": 274,
+          "index": 277,
           "name": "SetIS53BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11008,7 +11089,7 @@
           "parameters": []
         },
         {
-          "index": 275,
+          "index": 278,
           "name": "SetIS54BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11035,7 +11116,7 @@
           "parameters": []
         },
         {
-          "index": 276,
+          "index": 279,
           "name": "SetIS55BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11062,7 +11143,7 @@
           "parameters": []
         },
         {
-          "index": 277,
+          "index": 280,
           "name": "SetIS56BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11089,7 +11170,7 @@
           "parameters": []
         },
         {
-          "index": 278,
+          "index": 281,
           "name": "SetIS57BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11116,7 +11197,7 @@
           "parameters": []
         },
         {
-          "index": 279,
+          "index": 282,
           "name": "SetIS58BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11143,7 +11224,7 @@
           "parameters": []
         },
         {
-          "index": 280,
+          "index": 283,
           "name": "SetIS59BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11170,7 +11251,7 @@
           "parameters": []
         },
         {
-          "index": 281,
+          "index": 284,
           "name": "SetIS60BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11197,7 +11278,7 @@
           "parameters": []
         },
         {
-          "index": 282,
+          "index": 285,
           "name": "SetIS61BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11224,7 +11305,7 @@
           "parameters": []
         },
         {
-          "index": 283,
+          "index": 286,
           "name": "SetIS62BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11251,7 +11332,7 @@
           "parameters": []
         },
         {
-          "index": 284,
+          "index": 287,
           "name": "SetIS63BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11278,7 +11359,7 @@
           "parameters": []
         },
         {
-          "index": 285,
+          "index": 288,
           "name": "SetIS64BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11305,7 +11386,7 @@
           "parameters": []
         },
         {
-          "index": 286,
+          "index": 289,
           "name": "SetIS65BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11332,7 +11413,7 @@
           "parameters": []
         },
         {
-          "index": 287,
+          "index": 290,
           "name": "SetIS66BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11359,7 +11440,7 @@
           "parameters": []
         },
         {
-          "index": 288,
+          "index": 291,
           "name": "SetIS67BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11386,7 +11467,7 @@
           "parameters": []
         },
         {
-          "index": 289,
+          "index": 292,
           "name": "SetIS68BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11413,7 +11494,7 @@
           "parameters": []
         },
         {
-          "index": 290,
+          "index": 293,
           "name": "SetIS69BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11440,7 +11521,7 @@
           "parameters": []
         },
         {
-          "index": 291,
+          "index": 294,
           "name": "SetIS70BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11467,7 +11548,7 @@
           "parameters": []
         },
         {
-          "index": 292,
+          "index": 295,
           "name": "SetIS71BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11494,7 +11575,7 @@
           "parameters": []
         },
         {
-          "index": 293,
+          "index": 296,
           "name": "SetIS72BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11521,7 +11602,7 @@
           "parameters": []
         },
         {
-          "index": 294,
+          "index": 297,
           "name": "SetIS73BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11548,7 +11629,7 @@
           "parameters": []
         },
         {
-          "index": 295,
+          "index": 298,
           "name": "SetIS74BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11575,7 +11656,7 @@
           "parameters": []
         },
         {
-          "index": 296,
+          "index": 299,
           "name": "SetIS75BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11602,7 +11683,7 @@
           "parameters": []
         },
         {
-          "index": 297,
+          "index": 300,
           "name": "SetIS76BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11629,7 +11710,7 @@
           "parameters": []
         },
         {
-          "index": 298,
+          "index": 301,
           "name": "SetIS77BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11656,7 +11737,7 @@
           "parameters": []
         },
         {
-          "index": 299,
+          "index": 302,
           "name": "SetIS78BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11683,7 +11764,7 @@
           "parameters": []
         },
         {
-          "index": 300,
+          "index": 303,
           "name": "SetIS79BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11710,7 +11791,7 @@
           "parameters": []
         },
         {
-          "index": 301,
+          "index": 304,
           "name": "SetIS80BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11737,7 +11818,7 @@
           "parameters": []
         },
         {
-          "index": 302,
+          "index": 305,
           "name": "SetIS81BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11764,7 +11845,7 @@
           "parameters": []
         },
         {
-          "index": 303,
+          "index": 306,
           "name": "SetIS82BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11791,7 +11872,7 @@
           "parameters": []
         },
         {
-          "index": 304,
+          "index": 307,
           "name": "SetIS83BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11818,7 +11899,7 @@
           "parameters": []
         },
         {
-          "index": 305,
+          "index": 308,
           "name": "SetIS84BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11845,7 +11926,7 @@
           "parameters": []
         },
         {
-          "index": 306,
+          "index": 309,
           "name": "SetIS85BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11872,7 +11953,7 @@
           "parameters": []
         },
         {
-          "index": 307,
+          "index": 310,
           "name": "SetIS86BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11899,7 +11980,7 @@
           "parameters": []
         },
         {
-          "index": 308,
+          "index": 311,
           "name": "SetIS87BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11926,7 +12007,7 @@
           "parameters": []
         },
         {
-          "index": 309,
+          "index": 312,
           "name": "SetIS88BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11953,7 +12034,7 @@
           "parameters": []
         },
         {
-          "index": 310,
+          "index": 313,
           "name": "SetIS89BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -11980,7 +12061,7 @@
           "parameters": []
         },
         {
-          "index": 311,
+          "index": 314,
           "name": "SetIS90BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12007,7 +12088,7 @@
           "parameters": []
         },
         {
-          "index": 312,
+          "index": 315,
           "name": "SetIS91BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12034,7 +12115,7 @@
           "parameters": []
         },
         {
-          "index": 313,
+          "index": 316,
           "name": "SetIS92BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12061,7 +12142,7 @@
           "parameters": []
         },
         {
-          "index": 314,
+          "index": 317,
           "name": "SetIS93BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12088,7 +12169,7 @@
           "parameters": []
         },
         {
-          "index": 315,
+          "index": 318,
           "name": "SetIS94BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12115,7 +12196,7 @@
           "parameters": []
         },
         {
-          "index": 316,
+          "index": 319,
           "name": "SetIS95BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12142,7 +12223,7 @@
           "parameters": []
         },
         {
-          "index": 317,
+          "index": 320,
           "name": "SetIS96BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12169,7 +12250,7 @@
           "parameters": []
         },
         {
-          "index": 318,
+          "index": 321,
           "name": "SetIS97BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12196,7 +12277,7 @@
           "parameters": []
         },
         {
-          "index": 319,
+          "index": 322,
           "name": "SetIS98BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12223,7 +12304,7 @@
           "parameters": []
         },
         {
-          "index": 320,
+          "index": 323,
           "name": "SetIS99BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12250,7 +12331,7 @@
           "parameters": []
         },
         {
-          "index": 321,
+          "index": 324,
           "name": "SetIS100BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12277,7 +12358,7 @@
           "parameters": []
         },
         {
-          "index": 322,
+          "index": 325,
           "name": "SetIS101BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12304,7 +12385,7 @@
           "parameters": []
         },
         {
-          "index": 323,
+          "index": 326,
           "name": "SetIS102BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12331,7 +12412,7 @@
           "parameters": []
         },
         {
-          "index": 324,
+          "index": 327,
           "name": "SetIS103BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12358,7 +12439,7 @@
           "parameters": []
         },
         {
-          "index": 325,
+          "index": 328,
           "name": "SetIS104BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12385,7 +12466,7 @@
           "parameters": []
         },
         {
-          "index": 326,
+          "index": 329,
           "name": "SetIS105BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12412,7 +12493,7 @@
           "parameters": []
         },
         {
-          "index": 327,
+          "index": 330,
           "name": "SetIS106BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12439,7 +12520,7 @@
           "parameters": []
         },
         {
-          "index": 328,
+          "index": 331,
           "name": "SetIS107BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12466,7 +12547,7 @@
           "parameters": []
         },
         {
-          "index": 329,
+          "index": 332,
           "name": "SetIS108BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12493,7 +12574,7 @@
           "parameters": []
         },
         {
-          "index": 330,
+          "index": 333,
           "name": "SetIS109BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12520,7 +12601,7 @@
           "parameters": []
         },
         {
-          "index": 331,
+          "index": 334,
           "name": "SetIS110BonusText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12547,7 +12628,34 @@
           "parameters": []
         },
         {
-          "index": 332,
+          "index": 335,
+          "name": "SetAllIDTexts",
+          "returnType": "System.Void",
+          "parameterCount": 0,
+          "methodProperties": {
+            "Attributes": "Public, HideBySig",
+            "IsStatic": false,
+            "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8756 }",
+            "Name": "SetAllIDTexts",
+            "GlobalKey": "TextHandlerMarkets.SetAllIDTexts()",
+            "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+            "ReturnType": "System.Void",
+            "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027TextHandlerMarkets\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+            "MethodPointer": 31796891,
+            "MethodOffsetInFile": 31780507,
+            "Rva": 31780507,
+            "HumanReadableSignature": "System.Void SetAllIDTexts()",
+            "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+            "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+            "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+            "GenericContainer": null,
+            "IsUnmanagedCallersOnly": false,
+            "MethodImplAttributes": "IL"
+          },
+          "parameters": []
+        },
+        {
+          "index": 336,
           "name": "SetIS1IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12574,7 +12682,7 @@
           "parameters": []
         },
         {
-          "index": 333,
+          "index": 337,
           "name": "SetIS2IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12601,7 +12709,7 @@
           "parameters": []
         },
         {
-          "index": 334,
+          "index": 338,
           "name": "SetIS3IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12628,7 +12736,7 @@
           "parameters": []
         },
         {
-          "index": 335,
+          "index": 339,
           "name": "SetIS4IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12655,7 +12763,7 @@
           "parameters": []
         },
         {
-          "index": 336,
+          "index": 340,
           "name": "SetIS5IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12682,7 +12790,7 @@
           "parameters": []
         },
         {
-          "index": 337,
+          "index": 341,
           "name": "SetIS6IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12709,7 +12817,7 @@
           "parameters": []
         },
         {
-          "index": 338,
+          "index": 342,
           "name": "SetIS7IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12736,7 +12844,7 @@
           "parameters": []
         },
         {
-          "index": 339,
+          "index": 343,
           "name": "SetIS8IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12763,7 +12871,7 @@
           "parameters": []
         },
         {
-          "index": 340,
+          "index": 344,
           "name": "SetIS9IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12790,7 +12898,7 @@
           "parameters": []
         },
         {
-          "index": 341,
+          "index": 345,
           "name": "SetIS10IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12817,7 +12925,7 @@
           "parameters": []
         },
         {
-          "index": 342,
+          "index": 346,
           "name": "SetIS11IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12844,7 +12952,7 @@
           "parameters": []
         },
         {
-          "index": 343,
+          "index": 347,
           "name": "SetIS12IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12871,7 +12979,7 @@
           "parameters": []
         },
         {
-          "index": 344,
+          "index": 348,
           "name": "SetIS13IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12898,7 +13006,7 @@
           "parameters": []
         },
         {
-          "index": 345,
+          "index": 349,
           "name": "SetIS14IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12925,7 +13033,7 @@
           "parameters": []
         },
         {
-          "index": 346,
+          "index": 350,
           "name": "SetIS15IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12952,7 +13060,7 @@
           "parameters": []
         },
         {
-          "index": 347,
+          "index": 351,
           "name": "SetIS16IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -12979,7 +13087,7 @@
           "parameters": []
         },
         {
-          "index": 348,
+          "index": 352,
           "name": "SetIS17IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13006,7 +13114,7 @@
           "parameters": []
         },
         {
-          "index": 349,
+          "index": 353,
           "name": "SetIS18IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13033,7 +13141,7 @@
           "parameters": []
         },
         {
-          "index": 350,
+          "index": 354,
           "name": "SetIS19IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13060,7 +13168,7 @@
           "parameters": []
         },
         {
-          "index": 351,
+          "index": 355,
           "name": "SetIS20IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13087,7 +13195,7 @@
           "parameters": []
         },
         {
-          "index": 352,
+          "index": 356,
           "name": "SetIS21IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13114,7 +13222,7 @@
           "parameters": []
         },
         {
-          "index": 353,
+          "index": 357,
           "name": "SetIS22IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13141,7 +13249,7 @@
           "parameters": []
         },
         {
-          "index": 354,
+          "index": 358,
           "name": "SetIS23IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13168,7 +13276,7 @@
           "parameters": []
         },
         {
-          "index": 355,
+          "index": 359,
           "name": "SetIS24IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13195,7 +13303,7 @@
           "parameters": []
         },
         {
-          "index": 356,
+          "index": 360,
           "name": "SetIS25IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13222,7 +13330,7 @@
           "parameters": []
         },
         {
-          "index": 357,
+          "index": 361,
           "name": "SetIS26IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13249,7 +13357,7 @@
           "parameters": []
         },
         {
-          "index": 358,
+          "index": 362,
           "name": "SetIS27IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13276,7 +13384,7 @@
           "parameters": []
         },
         {
-          "index": 359,
+          "index": 363,
           "name": "SetIS28IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13303,7 +13411,7 @@
           "parameters": []
         },
         {
-          "index": 360,
+          "index": 364,
           "name": "SetIS29IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13330,7 +13438,7 @@
           "parameters": []
         },
         {
-          "index": 361,
+          "index": 365,
           "name": "SetIS30IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13357,7 +13465,7 @@
           "parameters": []
         },
         {
-          "index": 362,
+          "index": 366,
           "name": "SetIS31IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13384,7 +13492,7 @@
           "parameters": []
         },
         {
-          "index": 363,
+          "index": 367,
           "name": "SetIS32IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13411,7 +13519,7 @@
           "parameters": []
         },
         {
-          "index": 364,
+          "index": 368,
           "name": "SetIS33IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13438,7 +13546,7 @@
           "parameters": []
         },
         {
-          "index": 365,
+          "index": 369,
           "name": "SetIS34IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13465,7 +13573,7 @@
           "parameters": []
         },
         {
-          "index": 366,
+          "index": 370,
           "name": "SetIS35IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13492,7 +13600,7 @@
           "parameters": []
         },
         {
-          "index": 367,
+          "index": 371,
           "name": "SetIS36IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13519,7 +13627,7 @@
           "parameters": []
         },
         {
-          "index": 368,
+          "index": 372,
           "name": "SetIS37IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13546,7 +13654,7 @@
           "parameters": []
         },
         {
-          "index": 369,
+          "index": 373,
           "name": "SetIS38IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13573,7 +13681,7 @@
           "parameters": []
         },
         {
-          "index": 370,
+          "index": 374,
           "name": "SetIS39IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13600,7 +13708,7 @@
           "parameters": []
         },
         {
-          "index": 371,
+          "index": 375,
           "name": "SetIS40IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13627,7 +13735,7 @@
           "parameters": []
         },
         {
-          "index": 372,
+          "index": 376,
           "name": "SetIS41IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13654,7 +13762,7 @@
           "parameters": []
         },
         {
-          "index": 373,
+          "index": 377,
           "name": "SetIS42IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13681,7 +13789,7 @@
           "parameters": []
         },
         {
-          "index": 374,
+          "index": 378,
           "name": "SetIS43IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13708,7 +13816,7 @@
           "parameters": []
         },
         {
-          "index": 375,
+          "index": 379,
           "name": "SetIS44IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13735,7 +13843,7 @@
           "parameters": []
         },
         {
-          "index": 376,
+          "index": 380,
           "name": "SetIS45IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13762,7 +13870,7 @@
           "parameters": []
         },
         {
-          "index": 377,
+          "index": 381,
           "name": "SetIS46IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13789,7 +13897,7 @@
           "parameters": []
         },
         {
-          "index": 378,
+          "index": 382,
           "name": "SetIS47IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13816,7 +13924,7 @@
           "parameters": []
         },
         {
-          "index": 379,
+          "index": 383,
           "name": "SetIS48IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13843,7 +13951,7 @@
           "parameters": []
         },
         {
-          "index": 380,
+          "index": 384,
           "name": "SetIS49IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13870,7 +13978,7 @@
           "parameters": []
         },
         {
-          "index": 381,
+          "index": 385,
           "name": "SetIS50IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13897,7 +14005,7 @@
           "parameters": []
         },
         {
-          "index": 382,
+          "index": 386,
           "name": "SetIS51IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13924,7 +14032,7 @@
           "parameters": []
         },
         {
-          "index": 383,
+          "index": 387,
           "name": "SetIS52IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13951,7 +14059,7 @@
           "parameters": []
         },
         {
-          "index": 384,
+          "index": 388,
           "name": "SetIS53IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -13978,7 +14086,7 @@
           "parameters": []
         },
         {
-          "index": 385,
+          "index": 389,
           "name": "SetIS54IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14005,7 +14113,7 @@
           "parameters": []
         },
         {
-          "index": 386,
+          "index": 390,
           "name": "SetIS55IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14032,7 +14140,7 @@
           "parameters": []
         },
         {
-          "index": 387,
+          "index": 391,
           "name": "SetIS56IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14059,7 +14167,7 @@
           "parameters": []
         },
         {
-          "index": 388,
+          "index": 392,
           "name": "SetIS57IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14086,7 +14194,7 @@
           "parameters": []
         },
         {
-          "index": 389,
+          "index": 393,
           "name": "SetIS58IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14113,7 +14221,7 @@
           "parameters": []
         },
         {
-          "index": 390,
+          "index": 394,
           "name": "SetIS59IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14140,7 +14248,7 @@
           "parameters": []
         },
         {
-          "index": 391,
+          "index": 395,
           "name": "SetIS60IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14167,7 +14275,7 @@
           "parameters": []
         },
         {
-          "index": 392,
+          "index": 396,
           "name": "SetIS61IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14194,7 +14302,7 @@
           "parameters": []
         },
         {
-          "index": 393,
+          "index": 397,
           "name": "SetIS62IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14221,7 +14329,7 @@
           "parameters": []
         },
         {
-          "index": 394,
+          "index": 398,
           "name": "SetIS63IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14248,7 +14356,7 @@
           "parameters": []
         },
         {
-          "index": 395,
+          "index": 399,
           "name": "SetIS64IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14275,7 +14383,7 @@
           "parameters": []
         },
         {
-          "index": 396,
+          "index": 400,
           "name": "SetIS65IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14302,7 +14410,7 @@
           "parameters": []
         },
         {
-          "index": 397,
+          "index": 401,
           "name": "SetIS66IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14329,7 +14437,7 @@
           "parameters": []
         },
         {
-          "index": 398,
+          "index": 402,
           "name": "SetIS67IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14356,7 +14464,7 @@
           "parameters": []
         },
         {
-          "index": 399,
+          "index": 403,
           "name": "SetIS68IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14383,7 +14491,7 @@
           "parameters": []
         },
         {
-          "index": 400,
+          "index": 404,
           "name": "SetIS69IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14410,7 +14518,7 @@
           "parameters": []
         },
         {
-          "index": 401,
+          "index": 405,
           "name": "SetIS70IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14437,7 +14545,7 @@
           "parameters": []
         },
         {
-          "index": 402,
+          "index": 406,
           "name": "SetIS71IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14464,7 +14572,7 @@
           "parameters": []
         },
         {
-          "index": 403,
+          "index": 407,
           "name": "SetIS72IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14491,7 +14599,7 @@
           "parameters": []
         },
         {
-          "index": 404,
+          "index": 408,
           "name": "SetIS73IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14518,7 +14626,7 @@
           "parameters": []
         },
         {
-          "index": 405,
+          "index": 409,
           "name": "SetIS74IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14545,7 +14653,7 @@
           "parameters": []
         },
         {
-          "index": 406,
+          "index": 410,
           "name": "SetIS75IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14572,7 +14680,7 @@
           "parameters": []
         },
         {
-          "index": 407,
+          "index": 411,
           "name": "SetIS76IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14599,7 +14707,7 @@
           "parameters": []
         },
         {
-          "index": 408,
+          "index": 412,
           "name": "SetIS77IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14626,7 +14734,7 @@
           "parameters": []
         },
         {
-          "index": 409,
+          "index": 413,
           "name": "SetIS78IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14653,7 +14761,7 @@
           "parameters": []
         },
         {
-          "index": 410,
+          "index": 414,
           "name": "SetIS79IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14680,7 +14788,7 @@
           "parameters": []
         },
         {
-          "index": 411,
+          "index": 415,
           "name": "SetIS80IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14707,7 +14815,7 @@
           "parameters": []
         },
         {
-          "index": 412,
+          "index": 416,
           "name": "SetIS81IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14734,7 +14842,7 @@
           "parameters": []
         },
         {
-          "index": 413,
+          "index": 417,
           "name": "SetIS82IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14761,7 +14869,7 @@
           "parameters": []
         },
         {
-          "index": 414,
+          "index": 418,
           "name": "SetIS83IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14788,7 +14896,7 @@
           "parameters": []
         },
         {
-          "index": 415,
+          "index": 419,
           "name": "SetIS84IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14815,7 +14923,7 @@
           "parameters": []
         },
         {
-          "index": 416,
+          "index": 420,
           "name": "SetIS85IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14842,7 +14950,7 @@
           "parameters": []
         },
         {
-          "index": 417,
+          "index": 421,
           "name": "SetIS86IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14869,7 +14977,7 @@
           "parameters": []
         },
         {
-          "index": 418,
+          "index": 422,
           "name": "SetIS87IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14896,7 +15004,7 @@
           "parameters": []
         },
         {
-          "index": 419,
+          "index": 423,
           "name": "SetIS88IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14923,7 +15031,7 @@
           "parameters": []
         },
         {
-          "index": 420,
+          "index": 424,
           "name": "SetIS89IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14950,7 +15058,7 @@
           "parameters": []
         },
         {
-          "index": 421,
+          "index": 425,
           "name": "SetIS90IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -14977,7 +15085,7 @@
           "parameters": []
         },
         {
-          "index": 422,
+          "index": 426,
           "name": "SetIS91IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15004,7 +15112,7 @@
           "parameters": []
         },
         {
-          "index": 423,
+          "index": 427,
           "name": "SetIS92IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15031,7 +15139,7 @@
           "parameters": []
         },
         {
-          "index": 424,
+          "index": 428,
           "name": "SetIS93IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15058,7 +15166,7 @@
           "parameters": []
         },
         {
-          "index": 425,
+          "index": 429,
           "name": "SetIS94IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15085,7 +15193,7 @@
           "parameters": []
         },
         {
-          "index": 426,
+          "index": 430,
           "name": "SetIS95IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15112,7 +15220,7 @@
           "parameters": []
         },
         {
-          "index": 427,
+          "index": 431,
           "name": "SetIS96IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15139,7 +15247,7 @@
           "parameters": []
         },
         {
-          "index": 428,
+          "index": 432,
           "name": "SetIS97IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15166,7 +15274,7 @@
           "parameters": []
         },
         {
-          "index": 429,
+          "index": 433,
           "name": "SetIS98IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15193,7 +15301,7 @@
           "parameters": []
         },
         {
-          "index": 430,
+          "index": 434,
           "name": "SetIS99IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15220,7 +15328,7 @@
           "parameters": []
         },
         {
-          "index": 431,
+          "index": 435,
           "name": "SetIS100IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15247,7 +15355,7 @@
           "parameters": []
         },
         {
-          "index": 432,
+          "index": 436,
           "name": "SetIS101IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15274,7 +15382,7 @@
           "parameters": []
         },
         {
-          "index": 433,
+          "index": 437,
           "name": "SetIS102IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15301,7 +15409,7 @@
           "parameters": []
         },
         {
-          "index": 434,
+          "index": 438,
           "name": "SetIS103IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15328,7 +15436,7 @@
           "parameters": []
         },
         {
-          "index": 435,
+          "index": 439,
           "name": "SetIS104IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15355,7 +15463,7 @@
           "parameters": []
         },
         {
-          "index": 436,
+          "index": 440,
           "name": "SetIS105IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15382,7 +15490,7 @@
           "parameters": []
         },
         {
-          "index": 437,
+          "index": 441,
           "name": "SetIS106IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15409,7 +15517,7 @@
           "parameters": []
         },
         {
-          "index": 438,
+          "index": 442,
           "name": "SetIS107IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15436,7 +15544,7 @@
           "parameters": []
         },
         {
-          "index": 439,
+          "index": 443,
           "name": "SetIS108IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15463,7 +15571,7 @@
           "parameters": []
         },
         {
-          "index": 440,
+          "index": 444,
           "name": "SetIS109IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -15490,7 +15598,7 @@
           "parameters": []
         },
         {
-          "index": 441,
+          "index": 445,
           "name": "SetIS110IDText",
           "returnType": "System.Void",
           "parameterCount": 0,
@@ -47468,6 +47576,1170 @@
     {
       "assemblyName": "Assembly-CSharp",
       "fieldPatterns": [
+        "CurrentBonusText",
+        "BonusDescriptionText",
+        "PerLevelBonusText",
+        "DescriptionText",
+        "IDText",
+        "IconBox"
+      ],
+      "methodPatterns": [
+        "SetCurrentBonusText",
+        "SetBonusDescriptionText",
+        "SetPerLevelBonusText",
+        "SetDescriptionText",
+        "SetIDText"
+      ],
+      "matchCount": 19,
+      "matches": [
+        {
+          "typeName": "AccountPanel",
+          "fullName": "AccountPanel",
+          "fieldHits": [
+            {
+              "index": 6,
+              "name": "OctocubeIDText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "Simulator",
+          "fullName": "Cifi.OfflineHunt.Simulator",
+          "fieldHits": [
+            {
+              "index": 29,
+              "name": "VectidText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "ConstructionProjects",
+          "fullName": "ConstructionProjects",
+          "fieldHits": [
+            {
+              "index": 190,
+              "name": "ExpansionCurrentBonusText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "DemoSceneController",
+          "fullName": "DemoSceneController",
+          "fieldHits": [
+            {
+              "index": 3,
+              "name": "descriptionText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "EggstoneMain",
+          "fullName": "EggstoneMain",
+          "fieldHits": [
+            {
+              "index": 9,
+              "name": "EggStoneIDText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "Inventory",
+          "fullName": "Inventory",
+          "fieldHits": [
+            {
+              "index": 98,
+              "name": "DarkseidText",
+              "type": "UnityEngine.GameObject"
+            },
+            {
+              "index": 99,
+              "name": "DarkseidTextAmount",
+              "type": "UnityEngine.GameObject"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "InventoryManager",
+          "fullName": "InventoryManager",
+          "fieldHits": [
+            {
+              "index": 23,
+              "name": "DarkseidText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "OuroborosResetter",
+          "fullName": "OuroborosResetter",
+          "fieldHits": [
+            {
+              "index": 112,
+              "name": "MeltdownDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 114,
+              "name": "OuroCatchUpDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "PlayerProfileUI",
+          "fullName": "PlayerProfileUI",
+          "fieldHits": [
+            {
+              "index": 19,
+              "name": "OctocubeIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 79,
+              "name": "DarkseidText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 86,
+              "name": "VectidText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "SaveSystem",
+          "fullName": "SaveSystem",
+          "fieldHits": [
+            {
+              "index": 97,
+              "name": "DescriptionText",
+              "type": "System.String"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "SpaceAcademyMain",
+          "fullName": "SpaceAcademyMain",
+          "fieldHits": [
+            {
+              "index": 30,
+              "name": "MilestoneIDText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "TextHandler",
+          "fullName": "TextHandler",
+          "fieldHits": [
+            {
+              "index": 467,
+              "name": "TokenTier2DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 468,
+              "name": "TokenTier3DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 469,
+              "name": "TokenTier4DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 470,
+              "name": "TokenTier5DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 959,
+              "name": "AutomationMK1DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 960,
+              "name": "AutomationMK2DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 961,
+              "name": "AutomationMK3DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 962,
+              "name": "AutomationMK4DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 963,
+              "name": "AutomationMK5DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 964,
+              "name": "AutomationMK6DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 965,
+              "name": "AutomationMK7DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 966,
+              "name": "AutomationMK8DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 967,
+              "name": "AutomationMK9DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 986,
+              "name": "AutomationTech1HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 987,
+              "name": "AutomationTech2HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 988,
+              "name": "AutomationTech3HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 989,
+              "name": "AutomationTech4HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 990,
+              "name": "AutomationTech5HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 991,
+              "name": "AutomationTech6HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 992,
+              "name": "AutomationTech7HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 993,
+              "name": "AutomationTech8HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 994,
+              "name": "AutomationTech9HardwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1013,
+              "name": "AutomationTech1SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1014,
+              "name": "AutomationTech2SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1015,
+              "name": "AutomationTech3SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1016,
+              "name": "AutomationTech4SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1017,
+              "name": "AutomationTech5SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1018,
+              "name": "AutomationTech6SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1019,
+              "name": "AutomationTech7SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1020,
+              "name": "AutomationTech8SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1021,
+              "name": "AutomationTech9SoftwareDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1040,
+              "name": "AutomationShip1CrewDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1041,
+              "name": "AutomationShip2CrewDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1042,
+              "name": "AutomationShip3CrewDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1043,
+              "name": "AutomationShip4CrewDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1044,
+              "name": "AutomationShip5CrewDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1045,
+              "name": "AutomationShip6CrewDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1046,
+              "name": "AutomationShip7CrewDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1047,
+              "name": "AutomationShip8CrewDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1064,
+              "name": "AutomationResearchBioScientistDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1065,
+              "name": "AutomationResearchEquipmentDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1066,
+              "name": "AutomationResearchQuantumTechDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1871,
+              "name": "DailyCellCurrentBonusText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 1873,
+              "name": "DailyMPCurrentBonusText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "TextHandlerGemNodes",
+          "fullName": "TextHandlerGemNodes",
+          "fieldHits": [
+            {
+              "index": 41,
+              "name": "Attraction3DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "TextHandlerHunters",
+          "fullName": "TextHandlerHunters",
+          "fieldHits": [
+            {
+              "index": 207,
+              "name": "OzzyStatsVectidText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 314,
+              "name": "POM6DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "TextHandlerLoadouts",
+          "fullName": "TextHandlerLoadouts",
+          "fieldHits": [
+            {
+              "index": 7,
+              "name": "Ship1SelectedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "TextHandlerMarkets",
+          "fullName": "TextHandlerMarkets",
+          "fieldHits": [
+            {
+              "index": 335,
+              "name": "IS1IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 336,
+              "name": "IS2IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 337,
+              "name": "IS3IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 338,
+              "name": "IS4IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 339,
+              "name": "IS5IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 340,
+              "name": "IS6IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 341,
+              "name": "IS7IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 342,
+              "name": "IS8IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 343,
+              "name": "IS9IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 344,
+              "name": "IS10IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 345,
+              "name": "IS11IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 346,
+              "name": "IS12IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 347,
+              "name": "IS13IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 348,
+              "name": "IS14IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 349,
+              "name": "IS15IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 350,
+              "name": "IS16IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 351,
+              "name": "IS17IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 352,
+              "name": "IS18IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 353,
+              "name": "IS19IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 354,
+              "name": "IS20IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 355,
+              "name": "IS21IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 356,
+              "name": "IS22IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 357,
+              "name": "IS23IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 358,
+              "name": "IS24IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 359,
+              "name": "IS25IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 360,
+              "name": "IS26IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 361,
+              "name": "IS27IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 362,
+              "name": "IS28IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 363,
+              "name": "IS29IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 364,
+              "name": "IS30IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 365,
+              "name": "IS31IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 366,
+              "name": "IS32IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 367,
+              "name": "IS33IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 368,
+              "name": "IS34IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 369,
+              "name": "IS35IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 370,
+              "name": "IS36IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 371,
+              "name": "IS37IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 372,
+              "name": "IS38IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 373,
+              "name": "IS39IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 374,
+              "name": "IS40IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 375,
+              "name": "IS41IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 376,
+              "name": "IS42IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 377,
+              "name": "IS43IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 378,
+              "name": "IS44IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 379,
+              "name": "IS45IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 380,
+              "name": "IS46IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 381,
+              "name": "IS47IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 382,
+              "name": "IS48IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 383,
+              "name": "IS49IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 384,
+              "name": "IS50IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 385,
+              "name": "IS51IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 386,
+              "name": "IS52IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 387,
+              "name": "IS53IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 388,
+              "name": "IS54IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 389,
+              "name": "IS55IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 390,
+              "name": "IS56IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 391,
+              "name": "IS57IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 392,
+              "name": "IS58IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 393,
+              "name": "IS59IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 394,
+              "name": "IS60IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 395,
+              "name": "IS61IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 396,
+              "name": "IS62IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 397,
+              "name": "IS63IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 398,
+              "name": "IS64IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 399,
+              "name": "IS65IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 400,
+              "name": "IS66IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 401,
+              "name": "IS67IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 402,
+              "name": "IS68IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 403,
+              "name": "IS69IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 404,
+              "name": "IS70IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 405,
+              "name": "IS71IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 406,
+              "name": "IS72IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 407,
+              "name": "IS73IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 408,
+              "name": "IS74IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 409,
+              "name": "IS75IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 410,
+              "name": "IS76IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 411,
+              "name": "IS77IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 412,
+              "name": "IS78IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 413,
+              "name": "IS79IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 414,
+              "name": "IS80IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 415,
+              "name": "IS81IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 416,
+              "name": "IS82IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 417,
+              "name": "IS83IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 418,
+              "name": "IS84IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 419,
+              "name": "IS85IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 420,
+              "name": "IS86IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 421,
+              "name": "IS87IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 422,
+              "name": "IS88IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 423,
+              "name": "IS89IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 424,
+              "name": "IS90IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 425,
+              "name": "IS91IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 426,
+              "name": "IS92IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 427,
+              "name": "IS93IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 428,
+              "name": "IS94IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 429,
+              "name": "IS95IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 430,
+              "name": "IS96IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 431,
+              "name": "IS97IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 432,
+              "name": "IS98IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 433,
+              "name": "IS99IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 434,
+              "name": "IS100IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 435,
+              "name": "IS101IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 436,
+              "name": "IS102IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 437,
+              "name": "IS103IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 438,
+              "name": "IS104IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 439,
+              "name": "IS105IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 440,
+              "name": "IS106IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 441,
+              "name": "IS107IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 442,
+              "name": "IS108IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 443,
+              "name": "IS109IDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 444,
+              "name": "IS110IDText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "TextHandlerResearch",
+          "fullName": "TextHandlerResearch",
+          "fieldHits": [
+            {
+              "index": 14,
+              "name": "RLRPPerStudyDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "TextHandlerSpaceAcademy",
+          "fullName": "TextHandlerSpaceAcademy",
+          "fieldHits": [
+            {
+              "index": 120,
+              "name": "LootReportDarkseidText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 174,
+              "name": "Project1DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 182,
+              "name": "Project2DescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 692,
+              "name": "WCMMissionIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 694,
+              "name": "WFMMissionIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 696,
+              "name": "CCMMissionIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 698,
+              "name": "CFMMissionIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 700,
+              "name": "ECMMissionIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 702,
+              "name": "EFMMissionIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 704,
+              "name": "SCMMissionIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 706,
+              "name": "SFMMissionIDText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 707,
+              "name": "WCMMissionExpandedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 708,
+              "name": "WCMMissionSimpleDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 709,
+              "name": "WFMMissionExpandedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 710,
+              "name": "WFMMissionSimpleDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 711,
+              "name": "CCMMissionExpandedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 712,
+              "name": "CCMMissionSimpleDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 713,
+              "name": "CFMMissionExpandedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 714,
+              "name": "CFMMissionSimpleDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 715,
+              "name": "ECMMissionExpandedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 716,
+              "name": "ECMMissionSimpleDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 717,
+              "name": "EFMMissionExpandedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 718,
+              "name": "EFMMissionSimpleDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 719,
+              "name": "SCMMissionExpandedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 720,
+              "name": "SCMMissionSimpleDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 721,
+              "name": "SFMMissionExpandedDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            },
+            {
+              "index": 722,
+              "name": "SFMMissionSimpleDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        },
+        {
+          "typeName": "TokenShop",
+          "fullName": "TokenShop",
+          "fieldHits": [
+            {
+              "index": 24,
+              "name": "TokenBankDescriptionText",
+              "type": "UnityEngine.UI.Text"
+            }
+          ],
+          "methodHits": []
+        }
+      ]
+    },
+    {
+      "assemblyName": "Assembly-CSharp",
+      "fieldPatterns": [
         "Current",
         "ActualBonus",
         "TotalBonus",
@@ -57702,5 +58974,232 @@
         }
       ]
     }
-  ]
+  ],
+  "rvaLookups": {
+    "requestedRvas": [
+      28277222,
+      28277761,
+      30997230,
+      31777557,
+      31777729,
+      31777861,
+      31779625,
+      59968580
+    ],
+    "resolved": [
+      {
+        "rva": 28277222,
+        "matches": []
+      },
+      {
+        "rva": 28277761,
+        "matches": []
+      },
+      {
+        "rva": 30997230,
+        "matches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "GeneralFunctionsManager",
+            "fullTypeName": "GeneralFunctionsManager",
+            "methodName": "BigDoubleToText",
+            "returnType": "System.String",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 5818 }",
+              "Name": "BigDoubleToText",
+              "GlobalKey": "GeneralFunctionsManager.BigDoubleToText()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.String",
+              "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027GeneralFunctionsManager\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31013614,
+              "MethodOffsetInFile": 30997230,
+              "Rva": 30997230,
+              "HumanReadableSignature": "System.String BigDoubleToText(BreakInfinity.BigDouble value, System.Boolean decimals)",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": [
+              {
+                "IsRefOrOut": false
+              },
+              {
+                "IsRefOrOut": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "rva": 31777557,
+        "matches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "TextHandlerMarkets",
+            "fullTypeName": "TextHandlerMarkets",
+            "methodName": "SetInscryptionsDoneText",
+            "returnType": "System.Void",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8420 }",
+              "Name": "SetInscryptionsDoneText",
+              "GlobalKey": "TextHandlerMarkets.SetInscryptionsDoneText()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.Void",
+              "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027TextHandlerMarkets\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31793941,
+              "MethodOffsetInFile": 31777557,
+              "Rva": 31777557,
+              "HumanReadableSignature": "System.Void SetInscryptionsDoneText()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "rva": 31777729,
+        "matches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "TextHandlerMarkets",
+            "fullTypeName": "TextHandlerMarkets",
+            "methodName": "SetHellishBioMatterText",
+            "returnType": "System.Void",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8421 }",
+              "Name": "SetHellishBioMatterText",
+              "GlobalKey": "TextHandlerMarkets.SetHellishBioMatterText()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.Void",
+              "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027TextHandlerMarkets\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31794113,
+              "MethodOffsetInFile": 31777729,
+              "Rva": 31777729,
+              "HumanReadableSignature": "System.Void SetHellishBioMatterText()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "rva": 31777861,
+        "matches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "TextHandlerMarkets",
+            "fullTypeName": "TextHandlerMarkets",
+            "methodName": "SetAllCostTexts",
+            "returnType": "System.Void",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8423 }",
+              "Name": "SetAllCostTexts",
+              "GlobalKey": "TextHandlerMarkets.SetAllCostTexts()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.Void",
+              "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027TextHandlerMarkets\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31794245,
+              "MethodOffsetInFile": 31777861,
+              "Rva": 31777861,
+              "HumanReadableSignature": "System.Void SetAllCostTexts()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "rva": 31779625,
+        "matches": [
+          {
+            "assemblyName": "Assembly-CSharp",
+            "typeName": "TextHandlerMarkets",
+            "fullTypeName": "TextHandlerMarkets",
+            "methodName": "SetAllBonusTexts",
+            "returnType": "System.Void",
+            "methodProperties": {
+              "Attributes": "Public, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 8645 }",
+              "Name": "SetAllBonusTexts",
+              "GlobalKey": "TextHandlerMarkets.SetAllBonusTexts()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.Void",
+              "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027\u0027, name=\u0027TextHandlerMarkets\u0027, parentType=UnityEngine.MonoBehaviour, assembly=Il2CppImageDefinition[Name=Assembly-CSharp.dll]]",
+              "MethodPointer": 31796009,
+              "MethodOffsetInFile": 31779625,
+              "Rva": 31779625,
+              "HumanReadableSignature": "System.Void SetAllBonusTexts()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      },
+      {
+        "rva": 59968580,
+        "matches": [
+          {
+            "assemblyName": "mscorlib",
+            "typeName": "Int32",
+            "fullTypeName": "System.Int32",
+            "methodName": "ToString",
+            "returnType": "System.String",
+            "methodProperties": {
+              "Attributes": "Public, Virtual, HideBySig",
+              "IsStatic": false,
+              "MethodIndex": "Il2CppVariableWidthIndex { IsNull = False, IsNonNull = True, Value = 31521 }",
+              "Name": "ToString",
+              "GlobalKey": "Int32.ToString()",
+              "RawReturnType": "LibCpp2IL.BinaryStructures.Il2CppType",
+              "ReturnType": "System.String",
+              "DeclaringType": "Il2CppTypeDefinition[namespace=\u0027System\u0027, name=\u0027Int32\u0027, parentType=System.ValueType, assembly=Il2CppImageDefinition[Name=mscorlib.dll]]",
+              "MethodPointer": 59984964,
+              "MethodOffsetInFile": 59968580,
+              "Rva": 59968580,
+              "HumanReadableSignature": "System.String ToString()",
+              "InternalParameterData": "LibCpp2IL.Metadata.Il2CppParameterDefinition[]",
+              "InternalParameterTypes": "LibCpp2IL.BinaryStructures.Il2CppType[]",
+              "Parameters": "LibCpp2IL.Reflection.Il2CppParameterReflectionData[]",
+              "GenericContainer": null,
+              "IsUnmanagedCallersOnly": false,
+              "MethodImplAttributes": "IL"
+            },
+            "parameters": []
+          }
+        ]
+      }
+    ]
+  }
 }
