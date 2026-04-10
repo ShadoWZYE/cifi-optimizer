@@ -350,7 +350,7 @@ Validation command: `npm run verify:data`
 
 ### `multiverse-market-row69-74-identity-source-boundary`
 
-- Label: Multiverse market row 69-74 identity-source boundary
+- Label: Multiverse market row 69-74 text-provenance boundary
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-row69-74-identity-source-boundary.json`
@@ -378,7 +378,7 @@ Validation command: `npm run verify:data`
 
 ### `multiverse-market-nearby-identity-binding-pattern`
 
-- Label: Multiverse market nearby identity-binding pattern
+- Label: Multiverse market nearby text-adjacent controls
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-nearby-identity-binding-pattern.json`
@@ -396,6 +396,20 @@ Validation command: `npm run verify:data`
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-69-74-anomaly-provenance.json`
+
+### `multiverse-market-shell-row-prediction-boundary`
+
+- Label: Multiverse market shell-row prediction boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-shell-row-prediction-boundary.json`
+
+### `multiverse-market-text-provenance-path-boundary`
+
+- Label: Multiverse market text-provenance path boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/multiverse-market-text-provenance-path-boundary.json`
 
 ### `token-bank-controller-shell`
 

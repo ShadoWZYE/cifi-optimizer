@@ -100,6 +100,20 @@
     "MechsOwned",
     "GadgetLevels"
   ],
+  "typedInscryptionsDoneDualDeclaration": {
+    "playerProfileData": {
+      "fieldOwner": "PlayerProfileData",
+      "fieldName": "InscryptionsDone",
+      "fieldType": "System.String",
+      "fieldIndex": 62
+    },
+    "saveData": {
+      "fieldOwner": "SaveData",
+      "fieldName": "InscryptionsDone",
+      "fieldType": "System.Int32",
+      "fieldIndex": 3038
+    }
+  },
   "typedSaveDataProgressionOwnerSamples": [
     "IS71Level",
     "IS110Level",
@@ -175,9 +189,9 @@
     "currentUse": "accessor-member-shell-naming-only"
   },
   "deeperMarketOwnerStatus": {
-    "status": "unresolved",
-    "scope": "typed Market-named save-path owner beyond the checked accessor bridge",
-    "note": "The broader IS*Level / trade-counter / mech run is recovered separately on SaveData, but that wider owner recovery does not recover a typed Market field."
+    "status": "declaring-owner-closed-market-wrapper-still-unresolved",
+    "scope": "typed Market-named wrapper recovery beyond the checked accessor bridge, not the declaring owner for the checked InscryptionsDone / IS*Level cluster",
+    "note": "Exact typed recovery closes the checked declaring-owner question on SaveData for the broader InscryptionsDone / IS*Level / trade-counter / early mech cluster, but still does not recover a typed Market field on PlayerProfileHandler, PlayerProfileData, or SaveData."
   },
   "progressionPayloadFieldClues": [
     "IS71Level",
@@ -194,6 +208,7 @@
     "The same exact typed recovery also confirms that PlayerProfileHandler only exposes saveInfoCache as a typed PlayerProfileData field in the checked probe, and it does not recover a typed Market field on PlayerProfileHandler itself.",
     "Exact typed recovery now also confirms that PlayerProfileHandler declares ConvertSaveDataToProfileData(SaveData saveData, System.DateTime lastCloudSaveDate) -> PlayerProfileData, which gives the broader SaveData owner a checked conversion bridge back into the PlayerProfileData wrapper/export surface without recovering a typed Market field.",
     "Exact typed recovery separately confirms that PlayerProfileData directly declares InscryptionsDone, MechsOwned, and GadgetLevels as string fields, while the same checked probe still does not recover a typed Market or MultiverseMarket field on PlayerProfileData.",
+    "Exact typed recovery also now fixes the dual declaration on concrete types: PlayerProfileData.InscryptionsDone is recovered as System.String while SaveData.InscryptionsDone is recovered as System.Int32, which further narrows the PlayerProfileData copy to a flatter wrapper/export surface rather than a deeper typed Market-owned progression host.",
     "Exact typed recovery now also confirms that the checked PlayerProfileData field table has 89 direct fields and 1 method, and none of those direct fields are named IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted.",
     "The same exact typed PlayerProfileData probe only recovers PlayerProfileData+GemData as a nested typed child in the checked field table, which means the wider Emporium progression run is not recovered as a direct typed PlayerProfileData child beside the flat InscryptionsDone, MechsOwned, and GadgetLevels wrappers.",
     "Exact typed recovery now also confirms that SaveData declares a 4461-field save table with 1 method, and that same table directly carries IS71Level through IS110Level, InscryptionsDone, EsotericR1Trades, NecrumR1Trades, and early Mech1 progression fields such as Mech1Unlocked and Mech1MissionsCompleted.",
@@ -202,11 +217,11 @@
     "Exact typed recovery also confirms the first nested MultiverseMarket payload types are MultiverseMarket|Inscryption and MultiverseMarket|InscryptionTupleObject, and their recovered fields are row-local ID, Cost, Level, MaxLevel, ISObject, and transform carriers rather than the broader saved progression block.",
     "The same checked typed probe does not place that wider run directly on MultiverseMarket or on those first nested row-local payload types, which keeps MultiverseMarket grounded as the accessor-returned Emporium owner shell rather than the declaring save owner for the broader progression run.",
     "The checked boundary therefore separates three things explicitly: the typed accessor bridge is PlayerProfileHandler.get_Market -> MultiverseMarket, the bare Market symbol is still only a metadata/member-shell clue, and no typed Market-named field is recovered on PlayerProfileHandler, PlayerProfileData, or SaveData in this checked neighborhood.",
-    "SaveData remains the separately recovered declaring owner for the wider IS*Level / trade-counter / mech progression run, but that wider owner recovery does not convert the metadata-only Market shell into a checked typed field or resolve a deeper typed Market-named save-path owner.",
+    "SaveData remains the separately recovered declaring owner for the wider IS*Level / trade-counter / mech progression run, and the exact InscryptionsDone type split now closes that declaring-owner question for the checked cluster without converting the metadata-only Market shell into a checked typed field.",
     "The same narrowed bridge still preserves sibling market-side accessors get_BM, get_ZN, and get_TU beside get_Market, which keeps the metadata-side Market clue broader than one Emporium-only field family while the typed save-side owner remains SaveData rather than a typed Market member shell.",
     "The same repo-local metadata still exposes typed nested PlayerProfileData siblings such as PlayerProfileData|GemData and PlayerProfileData|GemNodeCombo without exposing an equivalent PlayerProfileData|Market or PlayerProfileData|Inscryption clue, which keeps the recovered SaveData owner separate from any exact typed Market-wrapper recovery on PlayerProfileData.",
     "The adjacent cloud-save neighborhood still preserves CloudSavePlayerProfile plus GetCurrentSaveFileInfo, GetPlayerProfileInfo, and CloudLoad as the current repo-local bridge into PlayerProfile persistence recovery, but the checked direct type probe still does not recover CloudSavePlayerProfile itself as one of the queried declaring types on this path.",
     "The nearest recovered market-side type family still clusters MultiverseMarket with Inscryption tuple types plus adjacent Ouroboros market and progression systems such as NecrumExchange, OuroborosResetter, TraitSpheres, ZeimarrNautallium, ResearchLaboratory, RewardLanes, and ShardMining.",
-    "This is enough to keep the checked direct-wrapper-versus-deeper-owner boundary canonical without widening support: PlayerProfileHandler.get_Market reaches MultiverseMarket, PlayerProfileHandler.ConvertSaveDataToProfileData gives SaveData a checked typed conversion bridge back into PlayerProfileData, the metadata-only Market shell still is not recovered as a typed save-path field, MultiverseMarket itself and its first nested row-local payloads are ruled out for the broader progression run, PlayerProfileData separately carries flat string wrappers such as InscryptionsDone or MechsOwned or GadgetLevels, SaveData exactly declares the checked IS*Level and trade-counter and mech progression cluster, and InscryptionsDone remains an exact dual declaration on both SaveData and PlayerProfileData."
+    "This is enough to keep the checked direct-wrapper-versus-deeper-owner boundary canonical without widening support: PlayerProfileHandler.get_Market reaches MultiverseMarket, PlayerProfileHandler.ConvertSaveDataToProfileData gives SaveData a checked typed conversion bridge back into PlayerProfileData, the metadata-only Market shell still is not recovered as a typed save-path field, MultiverseMarket itself and its first nested row-local payloads are ruled out for the broader progression run, PlayerProfileData separately carries flat string wrappers such as InscryptionsDone or MechsOwned or GadgetLevels, SaveData exactly declares the checked IS*Level and trade-counter and mech progression cluster, and the remaining unresolved seam is only whether any typed Market-wrapper exists beyond that checked bridge rather than who declares the checked cluster."
   ]
 }

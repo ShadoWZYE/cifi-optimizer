@@ -50,6 +50,7 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - the bare `Market` symbol is still only a metadata/member-shell clue in the checked boundary
   - exact typed recovery still does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`
   - `PlayerProfileData` is a flatter wrapper/export surface, not the declaring owner for the broader checked progression cluster, even though it also directly declares `InscryptionsDone`
+  - exact typed recovery also fixes the dual declaration on concrete types: `PlayerProfileData.InscryptionsDone` is `System.String` while `SaveData.InscryptionsDone` is `System.Int32`
   - exact typed recovery now also confirms `SaveData` as the declaring owner for the checked `IS*Level` / `EsotericR*Trades` / `NecrumR*Trades` / early `Mech*` cluster, with `InscryptionsDone` split out as an exact dual declaration on `SaveData` and `PlayerProfileData`
   - the exact SaveData-owned `IS1Level` through `IS110Level` span is now safe for compatibility-only raw Emporium import under `compatibility.unmappedSystemState.multiverseMarket`
   - validated Emporium rows `71-74` overlap the recovered save-side `IS*Level` run
@@ -57,8 +58,9 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
   - `InscryptionsDone` is wrapper/export-only for import decisions, not a new bounded canonical Emporium import
   - no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `state.playerProfile`
 - Still blocked:
-  - the `69-74` prefab anomaly and incomplete player-facing label remap still block canonical Emporium identity
+  - canonical Emporium import remains blocked even though row identity is now structurally grounded, because the repo recovers the runtime `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText` base-bonus lane, the parallel `SetISNBonusText` effect-label lane, the row-local slot alias for that effect-label writer as `BonusDescriptionText`, and the control-row payload source through `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()`, but still lacks the separate `CurrentBonusText` writer lane after explicit negative checks against `TextHandlerMarkets` and the last plausible row-local fallback surfaces `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext`, plus a broader canonical import-safe join
   - the recovered wider `SaveData` block still mixes Emporium-adjacent rows with trade-counter and early `Mech*` progression fields, so canonical import-safe identity stays empty even though the exact `IS1Level-IS110Level` span is compatibility-safe raw import
+  - the only remaining save-owner seam is whether the metadata-only `Market` shell ever resolves to a real typed wrapper field beyond the checked accessor bridge; the checked declaring owner for the current cluster is already closed on `SaveData`
 - Smallest next slice:
   - keep canonical promotion explicitly blocked unless new evidence grounds player-facing row identity or a narrower canonical `SaveData`-backed Emporium import slice
 - Start here:

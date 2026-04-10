@@ -55,7 +55,7 @@ Current grounded conclusion:
 - the checked prefab shell now stays direct through `ChrystosEmporiumUpgrade68` but switches to explicit overrides `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62`
 - label remap remains partial until the row-order and ID mapping are closed more completely
 
-## Narrow row 69-74 identity-source boundary
+## Narrow row 69-74 text-provenance boundary
 
 - The row numbering stays settled:
   - `IS69Level` -> row `69`
@@ -64,17 +64,22 @@ Current grounded conclusion:
   - `IS72Level` -> row `72`
   - `IS73Level` -> row `73`
   - `IS74Level` -> row `74`
-- The checked non-prefab identity-source candidates for those same rows are still negative-only:
+- The checked repo-local non-prefab identity-source candidates for those same rows are still negative-only:
   - `IS69ID` through `IS74ID`, `BuyIS69` through `BuyIS74`, and `SetIS69CostText` through `SetIS74CostText` confirm ordered row access plus same-number serialized-id field recovery, not final labels
   - `THMarkets: TextHandlerMarkets` and `InscryptionsList: List<GameObject>` recover a nearby UI population shell, not a checked row-to-label join
   - `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` explicitly point the visible prefab-number shell at serialized ids `57-62`, not at validated rows `69-74`
   - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
-  - the nearest checked player-facing inscription labels remain `Inscryption 78: Ouroboros Orbs` and `Inscryption 83: Fast-Loop ML`, which are outside rows `69-74`
+  - following that prefab remap back to earlier direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` is also still negative-only because the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
+  - the raw `tmp-multiverse-row-text-probe.json` continuation is now checked directly: `SetIS69BaseBonusText` stays inside a bonus-presentation family, while `ClearISObjects`, `ClearISMaxLevelObjects`, `SetISMaxLevelObjects`, `THMarkets`, and `InscryptionsList` stay structural UI-shell hooks rather than a row-label source
+  - the supplied live UI screenshots directly show `INSCRYPTION #69` through `INSCRYPTION #74` in order, between visible neighbors `INSCRYPTION #68` and `INSCRYPTION #75`
 
 Current grounded conclusion:
 
-- no stable player-facing identity source is currently recoverable repo-locally for rows `69-74`
-- rows `69-74` therefore remain unresolved for player-facing identity, not import-safe player-facing labels
+- row identity for rows `69-74` is already carried by the same-number chain `SaveData.ISNLevel -> ISNID -> BuyISN/SetISNCostText -> row payload ID/Level/ISObject`
+- the supplied live UI screenshots validate those player-facing rows directly
+- following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing text source either and therefore stays bounded as internal shell metadata only
+- the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation is now exhausted as a checked negative boundary for repo-local effect or label text recovery
+- the remaining unresolved lane is the actual game-side player-facing effect or label text source for Emporium rows
 - the canonical import-safe subset stays empty
 
 ## Checked 69-74 anomaly provenance boundary
@@ -86,13 +91,46 @@ Current grounded conclusion:
 - The repo-local derived datasets therefore inherit an already-split source shape:
   - same-number alignment holds on save/id/hook side
   - prefab numbering is broken only in the `69-74` band
-  - player-facing identity is still unresolved
+  - the repo-local player-facing label source is still unresolved even though live UI now grounds the visible row identities
 
 Current grounded conclusion:
 
 - the earliest checked appearance of the `69-74` anomaly is raw app-side evidence, not a repo-local recovery or normalization step
 - the anomaly must remain represented as inherited source truth
+- live UI evidence now grounds player-facing rows `69-74` directly, but that does not rewrite the inherited prefab anomaly
 - no dataset standardization is applied in this lane because rewriting the derived datasets to a newer same-number prefab shape would erase checked app-side evidence
+
+## Shell-to-SaveData row-prediction boundary
+
+- The strongest recoverable row-link structure now runs:
+  - `PlayerProfileHandler.get_Market -> MultiverseMarket`
+  - `SaveData.ISNLevel`
+  - `ISNID`
+  - `BuyISN`
+  - `SetISNCostText`
+  - `MultiverseMarket|Inscryption` and `MultiverseMarket|InscryptionTupleObject`
+  - `ID`, `Level`, and `ISObject`
+- For rows `69-74`, that ordered same-number chain predicts the displayed row number and the validated row payload predicts the live bonus magnitude.
+- The shell layer does not:
+  - `ChrystosEmporiumUpgrade69-ID57`
+  - `ChrystosEmporiumUpgrade70-ID58`
+  - `ChrystosEmporiumUpgrade71-ID59`
+  - `ChrystosEmporiumUpgrade72-ID60`
+  - `ChrystosEmporiumUpgrade73-ID61`
+  - `ChrystosEmporiumUpgrade74-ID62`
+- The bonus-value mismatch is explicit where earlier ids are validated:
+  - id `57` carries `0.05`, not row `69`'s `5qa`
+  - id `58` carries `5`, not row `70`'s `10b`
+  - id `59` carries `5`, not row `71`'s `0.02`
+- Control row `78` shows the same-number non-divergent case:
+  - `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`
+
+Current grounded conclusion:
+
+- the actual structure linking displayed inscription rows through to `SaveData` is the ordered same-number owner and row-carrier path, not the prefab shell suffix
+- the `57-62` relation is meaningful only as shell-local anomaly metadata
+- row payload carriers recover live bonus magnitudes for rows `69-74`, but not their player-facing bonus-text phrases
+- compatibility-only import and planner blocks remain unchanged
 
 ## Alternate serialized-export indirect-join boundary
 
@@ -135,12 +173,12 @@ Current grounded conclusion:
   - serialized-id fields: `IS71ID` through `IS74ID`
   - remapped prefab shells: `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62`
 - Repo-local probes also preserve earlier direct shells `ChrystosEmporiumUpgrade59`, `ChrystosEmporiumUpgrade60`, `ChrystosEmporiumUpgrade61`, and `ChrystosEmporiumUpgrade62`.
-- This means prefab numbers `71-74` are reused as shells for serialized ids `59-62`, so the nearby same-number join fails before a player-facing label can bind.
+- This means prefab numbers `71-74` are reused as shells for serialized ids `59-62`, but the supplied live UI screenshots still show player-facing rows `71-74` directly.
 
 Current grounded conclusion:
 
-- this recovers the remap-band relationship but not player-facing identity
-- rows `71-74` still stay unresolved for player-facing identity
+- this recovers the remap-band relationship while bounding `59-62` as internal shell metadata only
+- rows `71-74` stay player-facing rows `71-74` in live UI
 - the canonical import-safe subset stays empty
 
 ## Wider checked inscription numbering-stability boundary
@@ -170,27 +208,98 @@ Current grounded conclusion:
 - same-number prefab numbering is stable through row `68`
 - same-number prefab numbering is broken from rows `69-74`
 - same-number prefab numbering resumes at row `75` and stays direct through row `110`
-- this wider numbering boundary still does not ground new player-facing identity for unresolved rows, including `69-74`
+- this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally
 - the canonical import-safe subset stays empty
 
-## Nearby checked identity-binding pattern
+## Nearby checked text-adjacent controls
 
-- The nearest checked positive identity-binding examples are rows `78` and `83`.
+- The nearest checked partial text-adjacent controls are rows `78` and `83`.
 - Each row keeps the same number across the nearby checked chain:
-  - `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, `Inscryption 78: Ouroboros Orbs`
-  - `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, `Inscryption 83: Fast-Loop ML`
+  - `IS78Level`, `IS78ID`, `BuyIS78`, `ChrystosEmporiumUpgrade78-ID78`, sparse anchor `Inscryption 78: Ouroboros Orbs`
+  - `IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, sparse anchor `Inscryption 83: Fast-Loop ML`
 - Repo-local metadata and probe evidence place those anchors in the `TextHandlerMarkets` neighborhood, including the checked source-path string `9\Assets\Scripts\Text\Text Ouroboros\TextHandlerMarkets.cs`.
+- The new row `78` screenshot mismatch means the sparse anchors cannot be treated as completed live effect-text bindings:
+  - sparse anchor: `Inscryption 78: Ouroboros Orbs`
+  - live screenshot text: `OUROBOROS POINTS GAINED`
 
 Current grounded conclusion:
 
-- nearby player-facing identity can be grounded when the same row number survives across `ISNLevel`, `ISNID`, `BuyISN`, direct prefab name `ChrystosEmporiumUpgradeN-IDN`, and `Inscryption N: ...`
-- this explains how nearby inscription rows bind to player-facing labels without widening beyond checked rows `78` and `83`
-- this pattern still does not ground rows `69-74` because the prefab join is remapped there and no checked player-facing labels have been recovered for those rows
+- nearby partial text-adjacent controls can be grounded when the same row number survives across `ISNLevel`, `ISNID`, `BuyISN`, direct prefab name `ChrystosEmporiumUpgradeN-IDN`, and a sparse `Inscryption N: ...` anchor
+- this does not complete live effect-text binding for rows `78` or `83`
+- this pattern does not recover the missing player-facing text provenance for rows `69-74`; those rows already keep their ordered identity through the same-number chain while the prefab join stays remapped and no checked repo-local player-facing strings have been recovered
 - the canonical import-safe subset therefore stays empty
+
+## Checked control-row text-provenance path boundary
+
+- A narrow game-side text-adjacent path is now checked for control row `78`:
+  - structural row chain: `IS78Level`, `IS78ID`, `BuyIS78`, `SetIS78CostText`
+  - text-side shell: `THMarkets: TextHandlerMarkets`, `SetAllChrystosEmporiumTexts`
+  - direct text-adjacent source: `Inscryption 78: Ouroboros Orbs`
+- The live-asset seed walk now also recovers mirrored row-local slot objects under rows `78` and `83`:
+  - `CurrentBonusText`
+  - `BonusDescriptionText`
+  - `PerLevelBonusText`
+  - `DescriptionText`
+  - `IDText`
+  - `IconBox`
+- Those slot objects carry concrete UI components including `UnityEngine.UI.Text`, `UnityEngine.UI.Image`, `UnityEngine.UI.Outline`, and `UnityEngine.UI.Shadow`.
+- The deeper assignment-site pass shows that the local serialized graph stops at row-local ownership edges:
+  - `GameObject -> Text/Outline/Shadow/Image`
+  - `RectTransform -> m_GameObject`
+  - `CanvasRenderer -> m_GameObject`
+  - zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links into those row-local text components
+- The new row `78` screenshot shows that the sparse anchor does not reproduce live effect text:
+  - sparse anchor: `Inscryption 78: Ouroboros Orbs`
+  - live screenshot text: `OUROBOROS POINTS GAINED`
+- The broadest handler-side scaling clue now checked repo-locally is:
+  - `SetAllBaseBonusTexts`
+  - `SetIS1BaseBonusText`
+  - `SetIS25BaseBonusText`
+  - `SetIS50BaseBonusText`
+  - `SetIS68BaseBonusText`
+  - `SetIS69BaseBonusText`
+- The runtime code seam is now partially recovered:
+  - `SetAllChrystosEmporiumTexts` directly calls `SetAllBaseBonusTexts`
+  - `SetIS78BaseBonusText` and `SetIS83BaseBonusText` read `IS78BaseBonusText` / `IS83BaseBonusText`, compose strings, and end in the standard IL2CPP `UnityEngine.UI.Text` virtual-dispatch write pattern
+  - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, source their payload values from `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()`, pass through the now-partially named helper lane `GeneralFunctionsManager.BigDoubleToText` or `System.Int32.ToString` plus two still-unresolved RVAs, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
+  - the same exact runtime surface also preserves `IS1BonusText` through `IS110BonusText`, `SetIS1BonusText` through `SetIS110BonusText`, `SetAllBonusTexts`, `IS1IDText` through `IS110IDText`, and `SetIS1IDText` through `SetIS110IDText`, while exposing no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family on `TextHandlerMarkets` and no `SetISNDescriptionText` family
+  - the widened slot-name assembly search still does not recover any typed Assembly-CSharp owner exposing `CurrentBonusText` as a field or direct `Set*` slot-writer method
+  - the widened runtime search also exhausts the last plausible row-local fallback candidates for the current-value slot:
+    - `NavigationManager.UpdateInscryptionUI`
+    - `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`
+    - `NavigationManager+<InscEnum>d__186.MoveNext`
+    - `NavigationManager.DisableInscryptionObjects`
+    - `NavigationManager.OnAvailbleInscryptionsClick`
+    - `NavigationManager.OnFinishedInscryptionsClick`
+    - `TextHandlerShopNPCs.OpeningChrystosEmporium`
+    - `TextHandlerShopNPCs.EmporiumDefaultText`
+    - `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext`
+  - those checked candidates still only recover row-filter, row-toggle, coroutine-orchestration, and Emporium dialogue/current-string flow, not any row-local `CurrentBonusText` producer
+  - that means the repo now recovers both the runtime base-bonus lane and a separate runtime effect-label writer family, while also closing `IDText` and `CurrentBonusText` away from the recovered effect-label sink
+- That still does not produce a reusable whole-table text join:
+  - sparse direct anchors exist only for rows `25`, `46`, `78`, and `83`
+  - no checked repo-local player-facing strings `Inscryption 69` through `Inscryption 74` are recovered
+  - the live-asset walk reaches row-local slot objects and their `UnityEngine.UI.Text` components, but the assignment-site pass shows no serialized producer-side join back to `THMarkets` or `MultiverseMarket`
+  - the recovered `SetISNBonusText` family now closes to `BonusDescriptionText` as the only compatible row-local slot once `PerLevelBonusText`, `IDText`, `CurrentBonusText`, and `DescriptionText` are accounted for by typed runtime evidence
+
+Current grounded conclusion:
+
+- the structural row model stays unchanged
+- rows `78` and `83` are only partial text-adjacent controls, not completed live effect-text bindings
+- a control-row text-adjacent path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain
+- the handler-side scaling clue is now a checked runtime write family: `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText`
+- the repo also now recovers a separate runtime effect-label writer family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
+- the recovered runtime families now close the row-local effect-label slot alias to `BonusDescriptionText`
+- `PerLevelBonusText` is now the grounded base-bonus lane for product-safe Emporium text wording
+- `IDText` is now the grounded id lane for product-safe Emporium text wording
+- `CurrentBonusText` remains narrowed away from that recovered effect-label family because the checked `TextHandlerMarkets` runtime surface has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family, and the widened runtime search now exhausts `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext` without recovering a row-local CurrentBonusText producer there either
+- the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus `GeneralFunctionsManager.BigDoubleToText` / `System.Int32.ToString`, the runtime metadata-init helper, the null-reference throw helper, and `System.String.Concat`
+- the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane
+- the canonical import-safe subset stays empty
 
 ## Still unresolved
 
-- the bounded import-safe surface for the current `Inscryptions Done` balance beyond the existing `PlayerProfileData` wrapper and the wider `SaveData` declaring owner
+- whether any typed `Market`-wrapper exists beyond the existing `PlayerProfileData` string wrapper for `InscryptionsDone` and the wider `SaveData` declaring owner
 - player-owned current inscription levels or equivalent owned-state inputs for next-buy logic
 - full row coverage outside the currently validated late block
 - exact row-by-row remap from serialized `IS*` ids and prefab identities to final in-game labels
@@ -215,7 +324,7 @@ Current grounded conclusion:
 ## Current app implication
 
 - It is safe to treat `MultiverseMarket` as a real Emporium owner with a grounded `Inscryptions Done` cost-lane shell.
-- It is safe to treat the `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` override band as a real prefab-remap boundary that blocks naive label assumptions for validated ids `69-74`.
+- It is safe to treat the `ChrystosEmporiumUpgrade69-ID57` through `ChrystosEmporiumUpgrade74-ID62` override band as a real prefab-remap boundary whose `57-62` relation stays internal shell metadata rather than a player-facing remap for validated ids `69-74`.
 - It is safe to treat `SaveData` as the exact declaring save owner for the checked `IS*Level` / trade-counter / early `Mech*` progression cluster, while keeping `InscryptionsDone` split out as an exact dual declaration on `SaveData` and `PlayerProfileData`.
 - It is not safe to generate spend recommendations yet.
 - The spend-planner track should stop inferring this lane from diamonds or tokens.
@@ -225,7 +334,7 @@ Current grounded conclusion:
 
 1. keep the active lane on the bounded `SaveData` import-surface decision, preserve the exact typed `IS1Level` through `IS110Level` span as compatibility-only raw Emporium import truth, and leave the canonical Emporium import-safe subset explicitly empty unless stronger identity evidence appears
 2. keep any player-owned inscription-level preview descriptive and quarantined unless a narrower grounded canonical import slice is checked
-3. finish the inscription-number and prefab-to-label remap, especially across the `69-74` prefab override band, on its separate downstream lane
+3. keep any future Emporium follow-up focused on the actual missing source class: game-side player-facing effect or label text provenance beyond the recovered same-number row chain
 4. only then revisit whether any canonical Emporium import or spend-planner recommendation is justified
 
 

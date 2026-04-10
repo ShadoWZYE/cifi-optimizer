@@ -43,10 +43,42 @@ This is not a list of open hypotheses. It is a compact list of paths that should
 ### Do not treat direct `MultiverseMarket` ownership on `PlayerProfileData` as recovered canonical save truth
 
 - Current checked result: the stronger current handoff is a PlayerProfile-side `get_Market` member path or broader wrapper
-- Why this stays closed: the checked declaring owner for the `IS*Level` / trade-counter / early `Mech*` run is now `SaveData`, `InscryptionsDone` is split out as an exact dual declaration on `SaveData` and `PlayerProfileData`, and the typed `Market` field itself still stays unresolved on the checked save path
+- Why this stays closed: the checked declaring owner for the `IS*Level` / trade-counter / early `Mech*` run is now `SaveData`, `InscryptionsDone` is split out as an exact dual declaration on `SaveData` and `PlayerProfileData`, the exact dual declaration is also type-split as `PlayerProfileData.InscryptionsDone: System.String` versus `SaveData.InscryptionsDone: System.Int32`, and the typed `Market` field itself still stays unresolved on the checked save path
 - Source anchors:
   - `docs/systems/spend/multiverse-market-state-verification.md`
   - `data/multiverse-market-market-member-boundary.json`
+
+### Do not reopen a generic declaring-owner search behind `InscryptionsDone` and the nearby `IS*Level` cluster
+
+- Current checked result: the exact declaring owner for the checked cluster is already closed on `SaveData`
+- Why this stays closed: the remaining unresolved seam is only whether the metadata-only `Market` shell ever resolves to a typed wrapper field beyond the checked `PlayerProfileHandler.get_Market -> MultiverseMarket` bridge, not who declares the checked `InscryptionsDone` / `IS*Level` progression block
+- Source anchors:
+  - `docs/systems/spend/multiverse-market-market-member-boundary.md`
+  - `data/multiverse-market-market-member-boundary.json`
+
+### Do not treat the `69-74 -> 57-62` prefab shell relation as the live player-facing Emporium remap
+
+- Current checked result: the shell anomaly is real, but supplied in-game screenshots show the live UI still presenting rows `69-74` directly as `INSCRYPTION #69` through `INSCRYPTION #74`
+- Why this stays closed: the remapped prefab names remain useful only as internal shell metadata and anomaly provenance, not as the player-facing row identities
+- Source anchors:
+  - `docs/systems/spend/multiverse-market-row69-74-identity-source-boundary.md`
+  - `docs/systems/spend/multiverse-market-row71-74-remap-band.md`
+
+### Do not treat prefab shell numbering as the strongest link from displayed Emporium row identity back to `SaveData`
+
+- Current checked result: the stronger row-link structure is the same-number `SaveData.ISNLevel` plus `ISNID` or `BuyISN` or `SetISNCostText` chain with row payload carriers under `MultiverseMarket`
+- Why this stays closed: the shell layer diverges in rows `69-74`, while the ordered save-owner and row-payload path still predicts the displayed row number and bonus magnitude
+- Source anchors:
+  - `docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md`
+  - `data/multiverse-market-shell-row-prediction-boundary.json`
+
+### Do not keep treating rows `69-74` as identity-blocked by the shell anomaly
+
+- Current checked result: row identity is already carried by the same-number chain `SaveData.ISNLevel -> ISNID -> BuyISN/SetISNCostText -> row payload ID/Level/ISObject`
+- Why this stays closed: the remaining blocker is not row identity, but the actual game-side player-facing effect/label text source for Emporium rows
+- Source anchors:
+  - `docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md`
+  - `docs/systems/spend/multiverse-market-verification.md`
 
 ### Do not treat Daily Tokenium as a TokenShop-only lane
 

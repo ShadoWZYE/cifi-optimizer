@@ -1903,7 +1903,7 @@ function renderSpendPlannerBoundary() {
     },
     {
       label: "Emporium owned progression and Inscryptions balance",
-      reason: "Blocked for planner use. InscryptionsDone is still only a wrapper or export clue in this slice, and broader IS*Level import or remap decisions remain unresolved."
+      reason: "Blocked for planner use. The app may show a compatibility-only preview of the raw IS1Level through IS110Level span plus separate bounded trade-counter and early-mech quarantine ranges, but InscryptionsDone remains wrapper-only, the preview stays non-canonical, and no Emporium recommendation path is unlocked."
     }
   ];
   const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
@@ -4846,52 +4846,12 @@ function getMultiverseMarketValidatedCoverage(multiverseMarket) {
 }
 
 function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket, multiverseMarketRangeBoundary) {
-  const validatedRecords = Array.isArray(multiverseMarket?.records) ? multiverseMarket.records : [];
-  const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
   const overlapIds = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)
     ? [...new Set(multiverseMarketRangeBoundary.overlapIds.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
     : [];
-  const overlapIdSet = new Set(overlapIds);
   const importedState = typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
-  const rawBalance = importedState.InscryptionsDone;
-  const hasImportedBalance = isBoundaryValuePresent(rawBalance);
-  const balanceLabel = hasImportedBalance ? formatBoundaryValue(rawBalance) : "Not imported";
-  const importedValidatedRows = validatedRecords
-    .map((record) => {
-      const rowId = Number(record?.inscription_id);
-      const maxLevel = Number(record?.max_level);
-      const bonusValue = Number(record?.bonus_value);
-      const startCost = Number(record?.start_cost);
-      const costExponent = Number(record?.cost_exponent);
-      const rawLevel = importedState[`IS${rowId}Level`];
-      const level = Number(rawLevel);
-      if (!Number.isFinite(rowId) || !Number.isFinite(level)) {
-        return null;
-      }
-      return {
-        rowId,
-        level,
-        maxLevel: Number.isFinite(maxLevel) ? maxLevel : null,
-        bonusValue: Number.isFinite(bonusValue) ? bonusValue : null,
-        startCost: Number.isFinite(startCost) ? startCost : null,
-        costExponent: Number.isFinite(costExponent) ? costExponent : null,
-        remainingLevels: Number.isFinite(maxLevel) ? Math.max(0, maxLevel - level) : null,
-        isRecoveredMaxed: Number.isFinite(maxLevel) ? level >= maxLevel : false,
-        completionPercent: Number.isFinite(maxLevel) && maxLevel > 0
-          ? Math.min(100, Math.round((level / maxLevel) * 100))
-          : null
-      };
-    })
-    .filter(Boolean)
-    .sort((left, right) => left.rowId - right.rowId);
-  const importedOverlapRows = importedValidatedRows.filter((entry) => overlapIdSet.has(entry.rowId));
-  const previewRows = (importedOverlapRows.length ? importedOverlapRows : importedValidatedRows).slice(0, 8);
-  const importedValidatedIds = new Set(importedValidatedRows.map((entry) => entry.rowId));
-  const missingOverlapRows = overlapIds.filter((rowId) => !importedValidatedIds.has(rowId));
-  const missingValidatedRows = validatedRecords
-    .map((record) => Number(record?.inscription_id))
-    .filter((rowId) => Number.isFinite(rowId) && !importedValidatedIds.has(rowId));
-  const extraImportedRows = Object.entries(importedState)
+  const overlapIdSet = new Set(overlapIds);
+  const importedSpanRows = Object.entries(importedState)
     .map(([key, value]) => {
       const match = /^IS(\d+)Level$/u.exec(String(key));
       if (!match) {
@@ -4899,92 +4859,252 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
       }
       const rowId = Number(match[1]);
       const level = Number(value);
-      if (!Number.isFinite(rowId) || !Number.isFinite(level) || importedValidatedIds.has(rowId)) {
+      if (!Number.isFinite(rowId) || rowId < 1 || rowId > 110 || !Number.isFinite(level)) {
         return null;
       }
-      return { rowId, level };
+      return {
+        rowId,
+        level,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.IS${rowId}Level`
+      };
     })
     .filter(Boolean)
     .sort((left, right) => left.rowId - right.rowId);
-  const averageCompletion = importedValidatedRows.length
-    ? Math.round(
-      importedValidatedRows
-        .filter((entry) => Number.isFinite(entry.completionPercent))
-        .reduce((total, entry) => total + Number(entry.completionPercent || 0), 0)
-        / Math.max(importedValidatedRows.filter((entry) => Number.isFinite(entry.completionPercent)).length, 1)
-    )
-    : null;
+  const importedSpanIds = new Set(importedSpanRows.map((entry) => entry.rowId));
+  const importedOverlapRows = importedSpanRows.filter((entry) => overlapIdSet.has(entry.rowId));
+  const missingOverlapRows = overlapIds.filter((rowId) => !importedSpanIds.has(rowId));
+  const missingSpanRows = [];
+  for (let rowId = 1; rowId <= 110; rowId += 1) {
+    if (!importedSpanIds.has(rowId)) {
+      missingSpanRows.push(rowId);
+    }
+  }
+  const previewRows = importedSpanRows.slice(0, 12);
+  const trailingPreviewRows = importedSpanRows.slice(-4);
+  const importedTradeCounters = Object.entries(importedState)
+    .map(([key, value]) => {
+      const match = /^(Esoteric|Necrum)R([1-9])Trades$/u.exec(String(key));
+      if (!match) {
+        return null;
+      }
+      return {
+        family: match[1],
+        rank: Number(match[2]),
+        key,
+        value,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.${key}`
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => {
+      if (left.family !== right.family) {
+        return left.family.localeCompare(right.family);
+      }
+      return left.rank - right.rank;
+    });
+  const expectedTradeCounterKeys = [
+    ...Array.from({ length: 9 }, (_, index) => `EsotericR${index + 1}Trades`),
+    ...Array.from({ length: 9 }, (_, index) => `NecrumR${index + 1}Trades`)
+  ];
+  const importedTradeKeySet = new Set(importedTradeCounters.map((entry) => entry.key));
+  const missingTradeCounterKeys = expectedTradeCounterKeys.filter((key) => !importedTradeKeySet.has(key));
+  const tradeCounterFamilies = {
+    Esoteric: importedTradeCounters.filter((entry) => entry.family === "Esoteric"),
+    Necrum: importedTradeCounters.filter((entry) => entry.family === "Necrum")
+  };
+  const earlyMechWindowKeys = [
+    "Mech1Unlocked",
+    "Mech1Units",
+    "Mech1Upg1Level",
+    "Mech1Upg2Level",
+    "Mech1MissionsProgress",
+    "FinalMech1MainBonus",
+    "Mech1MissionsCompleted",
+    "Mech2Unlocked"
+  ];
+  const importedEarlyMechFields = earlyMechWindowKeys
+    .map((key) => {
+      const value = importedState[key];
+      if (!isBoundaryValuePresent(value)) {
+        return null;
+      }
+      return {
+        key,
+        value,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.${key}`
+      };
+    })
+    .filter(Boolean);
+  const importedEarlyMechKeySet = new Set(importedEarlyMechFields.map((entry) => entry.key));
+  const missingEarlyMechFields = earlyMechWindowKeys.filter((key) => !importedEarlyMechKeySet.has(key));
+  const supportedTextModel = {
+    effectLabelLane: "BonusDescriptionText",
+    baseBonusLane: "PerLevelBonusText",
+    idLane: "IDText",
+    quarantinedCurrentValueLane: "CurrentBonusText"
+  };
+  const rowSummaryShape = {
+    shapeId: "multiverse-market-row-local-text-summary",
+    groundedFields: [
+      {
+        key: "effectLabel",
+        slotAlias: supportedTextModel.effectLabelLane,
+        sourceLane: "SetAllBonusTexts -> SetISNBonusText"
+      },
+      {
+        key: "baseBonus",
+        slotAlias: supportedTextModel.baseBonusLane,
+        sourceLane: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText"
+      },
+      {
+        key: "rowIdLabel",
+        slotAlias: supportedTextModel.idLane,
+        sourceLane: "SetIS1IDText through SetIS110IDText"
+      }
+    ],
+    quarantinedFields: [
+      {
+        key: "currentValueDisplay",
+        slotAlias: supportedTextModel.quarantinedCurrentValueLane,
+        status: "quarantined-unrecovered-runtime-only-display-lane"
+      }
+    ]
+  };
+  const overlapRowSummaries = importedOverlapRows.map((entry) => ({
+    rowId: entry.rowId,
+    level: entry.level,
+    fieldPath: entry.fieldPath,
+    shapeId: rowSummaryShape.shapeId,
+    groundedFields: rowSummaryShape.groundedFields.map((field) => ({
+      ...field,
+      status: "grounded-compatibility-evidence"
+    })),
+    quarantinedFields: rowSummaryShape.quarantinedFields.map((field) => ({
+      ...field,
+      reason: "Distinct unrecovered runtime-only display lane"
+    }))
+  }));
 
   return {
-    hasImportedBalance,
-    balanceLabel,
+    hasImportedCompatibilityPreview: importedSpanRows.length > 0 || importedTradeCounters.length > 0 || importedEarlyMechFields.length > 0,
+    hasImportedSpanPreview: importedSpanRows.length > 0,
+    importTargetPath: "compatibility.unmappedSystemState.multiverseMarket",
+    wrapperOnlyFieldLabel: "InscryptionsDone",
+    typedSpanLabel: "IS1Level through IS110Level",
+    tradeCounterLabel: "EsotericR1Trades through EsotericR9Trades and NecrumR1Trades through NecrumR9Trades",
+    earlyMechWindowLabel: "Mech1Unlocked through Mech2Unlocked",
+    importedSpanRowCount: importedSpanRows.length,
+    totalSpanRowCount: 110,
+    importedRangeLabel: importedSpanRows.length ? formatNumericRanges(importedSpanRows.map((entry) => entry.rowId)) : "",
+    firstImportedRowLabel: importedSpanRows.length ? `IS${importedSpanRows[0].rowId}Level` : "",
+    lastImportedRowLabel: importedSpanRows.length ? `IS${importedSpanRows[importedSpanRows.length - 1].rowId}Level` : "",
+    missingSpanRows,
+    missingSpanCount: missingSpanRows.length,
+    missingSpanLabel: missingSpanRows.length
+      ? missingSpanRows.slice(0, 12).map((rowId) => `IS${rowId}Level`).join(", ")
+      : "none",
+    importedSpanRows,
     hasOverlapGroundedRows: overlapIds.length > 0,
     overlapRangeLabel: formatNumericRanges(overlapIds),
     overlapRowCount: overlapIds.length,
     hasOverlapLevelPreview: importedOverlapRows.length > 0,
     importedOverlapRowCount: importedOverlapRows.length,
     overlapPreviewRows: importedOverlapRows.slice(0, 4),
-    overlapMaxedCount: importedOverlapRows.filter((entry) => entry.isRecoveredMaxed).length,
+    overlapRowSummaries: overlapRowSummaries.slice(0, 4),
     missingOverlapRows,
     missingOverlapLabel: missingOverlapRows.length
-      ? missingOverlapRows.map((rowId) => `IS${rowId}`).join(", ")
+      ? missingOverlapRows.map((rowId) => `IS${rowId}Level`).join(", ")
       : "none",
-    hasValidatedLevelPreview: importedValidatedRows.length > 0,
-    importedValidatedRowCount: importedValidatedRows.length,
-    validatedRowCount: validatedRecords.length,
-    validatedRangeLabel: validatedCoverage.rangeLabel || "50-59 and 63-74",
-    maxedCount: importedValidatedRows.filter((entry) => Number.isFinite(entry.maxLevel) && entry.level >= entry.maxLevel).length,
-    averageCompletion,
-    previewRows,
-    missingValidatedRows,
-    extraImportedRows,
-    extraImportedLabel: extraImportedRows.length
-      ? extraImportedRows.slice(0, 8).map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}`).join(", ")
+    hasTradeCounterPreview: importedTradeCounters.length > 0,
+    importedTradeCounters,
+    importedTradeCounterCount: importedTradeCounters.length,
+    totalTradeCounterCount: expectedTradeCounterKeys.length,
+    missingTradeCounterKeys,
+    missingTradeCounterLabel: missingTradeCounterKeys.length ? missingTradeCounterKeys.slice(0, 12).join(", ") : "none",
+    tradeCounterFamilies,
+    tradeCounterSampleLine: importedTradeCounters.length
+      ? importedTradeCounters.slice(0, 6).map((entry) => `${entry.key} ${formatBoundaryValue(entry.value)}`).join(" | ")
       : "",
+    hasEarlyMechPreview: importedEarlyMechFields.length > 0,
+    importedEarlyMechFields,
+    importedEarlyMechCount: importedEarlyMechFields.length,
+    totalEarlyMechCount: earlyMechWindowKeys.length,
+    missingEarlyMechFields,
+    missingEarlyMechLabel: missingEarlyMechFields.length ? missingEarlyMechFields.join(", ") : "none",
+    previewRows,
+    trailingPreviewRows,
+    supportedTextModel,
+    rowSummaryShape,
     sampleLine: previewRows.length
-      ? previewRows.map((entry) => `IS${entry.rowId} ${formatShardNumber(entry.level)}${Number.isFinite(entry.maxLevel) ? `/${formatShardNumber(entry.maxLevel)}` : ""}`).join(" | ")
+      ? previewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | ")
       : ""
   };
 }
 
 function renderImportedMultiverseMarketPreviewCard(preview) {
-  if (!preview.hasImportedBalance && !preview.hasValidatedLevelPreview) {
+  if (!preview.hasImportedCompatibilityPreview) {
     return "";
   }
 
   return `
     <article class="preview-card">
-      <strong>Emporium import preview</strong>
-      <p class="meta">This is a descriptive preview of quarantined Emporium state for the validated row block only. It does not promote these values into canonical PlayerProfile truth or spend recommendations.</p>
+      <strong>Emporium compatibility preview</strong>
+      <p class="meta">This is a descriptive preview of compatibility-only Emporium import state under <code>${escapeHtml(preview.importTargetPath)}</code>. It preserves the checked raw <code>${escapeHtml(preview.typedSpanLabel)}</code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only.</p>
       <div class="pill-row">
-        <span class="pill">${preview.hasImportedBalance ? `InscryptionsDone ${escapeHtml(preview.balanceLabel)}` : "No imported InscryptionsDone"}</span>
-        <span class="pill">${preview.hasOverlapGroundedRows ? `${preview.importedOverlapRowCount}/${preview.overlapRowCount} overlap-grounded rows` : "No overlap-grounded rows"}</span>
-        ${preview.hasOverlapLevelPreview ? `<span class="pill">${preview.overlapMaxedCount} overlap rows maxed</span>` : ""}
-        <span class="pill">${preview.hasValidatedLevelPreview ? `${preview.importedValidatedRowCount}/${preview.validatedRowCount} validated rows` : "No validated Emporium levels"}</span>
-        ${preview.hasValidatedLevelPreview ? `<span class="pill">${preview.maxedCount} maxed imported rows</span>` : ""}
-        ${preview.hasValidatedLevelPreview && Number.isFinite(preview.averageCompletion) ? `<span class="pill">${preview.averageCompletion}% avg validated completion</span>` : ""}
-        ${preview.extraImportedRows.length ? `<span class="pill">${preview.extraImportedRows.length} extra imported rows quarantined</span>` : ""}
+        <span class="pill">${preview.importedSpanRowCount}/${preview.totalSpanRowCount} raw IS rows imported</span>
+        <span class="pill">${preview.importedTradeCounterCount}/${preview.totalTradeCounterCount} trade counters imported</span>
+        <span class="pill">${preview.importedEarlyMechCount}/${preview.totalEarlyMechCount} early-mech fields imported</span>
+        ${preview.hasOverlapGroundedRows ? `<span class="pill">${preview.importedOverlapRowCount}/${preview.overlapRowCount} ordered-overlap rows imported</span>` : ""}
+        <span class="pill">Compatibility only</span>
+        <span class="pill">Planner blocked</span>
       </div>
       <div class="meta-stack">
-        <p class="meta">${preview.hasOverlapGroundedRows ? `The first overlap-grounded Emporium rows are ${escapeHtml(preview.overlapRangeLabel)}.` : "No overlap-grounded Emporium row subset is available in this build."}</p>
-        <p class="meta">${preview.hasOverlapGroundedRows ? `Missing overlap-grounded imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "The overlap-grounded subset is not available for import preview."}</p>
-        <p class="meta">${preview.hasValidatedLevelPreview ? `Imported current levels are present for validated rows ${escapeHtml(preview.validatedRangeLabel)}.` : "Imported current levels are not present for the validated Emporium row block."}</p>
-        <p class="meta">${preview.hasValidatedLevelPreview ? `Missing validated imports: ${preview.missingValidatedRows.length ? escapeHtml(preview.missingValidatedRows.map((rowId) => `IS${rowId}`).join(", ")) : "none"}.` : "When imported IS*Level fields exist, this preview only surfaces the validated Emporium block and leaves the rest quarantined."}</p>
-        <p class="meta">${preview.extraImportedRows.length ? `Extra imported rows outside the grounded validated block stay quarantined: ${escapeHtml(preview.extraImportedLabel)}${preview.extraImportedRows.length > 8 ? "..." : ""}.` : "No extra imported rows were found outside the grounded validated block."}</p>
-        <p class="meta">${preview.hasOverlapLevelPreview ? "Imported overlap-grounded rows also show recovered row constants from the checked MultiverseMarket payload." : "Recovered row constants appear here once overlap-grounded rows are imported."}</p>
-        ${preview.hasOverlapLevelPreview ? `<div class="preview-stack">${preview.overlapPreviewRows.map((entry) => `
+        <p class="meta">Only compatibility-only evidence from the checked SaveData quarantine is shown here. This card does not reopen row-label recovery, row remap, planner logic, or canonical PlayerProfile promotion.</p>
+        <p class="meta"><code>${escapeHtml(preview.wrapperOnlyFieldLabel)}</code> stays wrapper-only and is intentionally excluded from this preview even when it exists in the imported compatibility blob.</p>
+        <p class="meta">The grounded Emporium text model is split: <code>${escapeHtml(preview.supportedTextModel.effectLabelLane)}</code> is the recovered effect-label lane, <code>${escapeHtml(preview.supportedTextModel.baseBonusLane)}</code> is the recovered base-bonus lane, and <code>${escapeHtml(preview.supportedTextModel.idLane)}</code> is the recovered id lane.</p>
+        <p class="meta"><code>${escapeHtml(preview.supportedTextModel.quarantinedCurrentValueLane)}</code> remains a distinct unrecovered runtime-only display lane. It is explicitly quarantined from the preview and is not treated as grounded Emporium truth, planner input, or canonical player state.</p>
+        <p class="meta">App-side Emporium row summaries now normalize only the grounded lanes into <code>${escapeHtml(preview.rowSummaryShape.shapeId)}</code>: ${preview.rowSummaryShape.groundedFields.map((field) => `<code>${escapeHtml(field.key)}</code> from <code>${escapeHtml(field.slotAlias)}</code>`).join(", ")}. ${preview.rowSummaryShape.quarantinedFields.map((field) => `<code>${escapeHtml(field.key)}</code> stays quarantined as <code>${escapeHtml(field.slotAlias)}</code>`).join(", ")}.</p>
+        <p class="meta">${preview.importedRangeLabel ? `Imported raw Emporium levels currently cover ${escapeHtml(preview.firstImportedRowLabel)} through ${escapeHtml(preview.lastImportedRowLabel)} across rows ${escapeHtml(preview.importedRangeLabel)}.` : "No raw Emporium level fields are currently imported from the checked compatibility span."}</p>
+        <p class="meta">${preview.missingSpanCount ? `Missing raw span fields still absent from this import: ${escapeHtml(preview.missingSpanLabel)}${preview.missingSpanCount > 12 ? "..." : ""}.` : "All raw fields in the checked IS1Level through IS110Level compatibility span are present in this import."}</p>
+        <p class="meta">${preview.hasTradeCounterPreview ? `Imported trade-counter quarantine currently covers ${escapeHtml(preview.tradeCounterLabel)} with ${preview.importedTradeCounterCount} recovered fields.` : "No adjacent trade-counter quarantine fields are currently imported from the checked compatibility envelope."}</p>
+        <p class="meta">${preview.missingTradeCounterKeys.length ? `Missing trade-counter quarantine fields: ${escapeHtml(preview.missingTradeCounterLabel)}${preview.missingTradeCounterKeys.length > 12 ? "..." : ""}.` : "All checked Esoteric and Necrum trade-counter quarantine fields are present in this import."}</p>
+        <p class="meta">${preview.hasEarlyMechPreview ? `Imported early-mech quarantine currently covers ${escapeHtml(preview.earlyMechWindowLabel)} with ${preview.importedEarlyMechCount} recovered fields.` : "No early-mech quarantine fields are currently imported from the checked compatibility envelope."}</p>
+        <p class="meta">${preview.missingEarlyMechFields.length ? `Missing early-mech quarantine fields: ${escapeHtml(preview.missingEarlyMechLabel)}.` : "All checked early-mech quarantine fields are present in this import."}</p>
+        <p class="meta">${preview.hasOverlapGroundedRows ? `The checked ordered-overlap support rows ${escapeHtml(preview.overlapRangeLabel)} are tracked only as boundary evidence. Missing ordered-overlap imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "No ordered-overlap support rows are available in this build."}</p>
+        <p class="meta">Planner use stays blocked. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence, not canonical player truth, not row-label claims, not complete live-text bindings, and not recommendation inputs.</p>
+        ${preview.hasOverlapLevelPreview ? `<div class="preview-stack">${preview.overlapRowSummaries.map((entry) => `
           <article class="preview-card">
-            <strong>IS${escapeHtml(String(entry.rowId))} overlap-grounded</strong>
-            <p class="meta">Imported level ${escapeHtml(formatShardNumber(entry.level))}${Number.isFinite(entry.maxLevel) ? ` / recovered max ${escapeHtml(formatShardNumber(entry.maxLevel))}` : ""}</p>
-            <p class="meta">${entry.isRecoveredMaxed ? "Recovered max reached for this overlap-grounded row." : Number.isFinite(entry.remainingLevels) ? `${escapeHtml(formatShardNumber(entry.remainingLevels))} recovered levels remaining to cap.` : "Recovered cap distance is not available in this build."}</p>
-            <p class="meta">Recovered row constants: Bonus ${escapeHtml(formatOptionalNumber(entry.bonusValue))} | StartCost ${escapeHtml(formatOptionalNumber(entry.startCost))} | CostExponent ${escapeHtml(formatOptionalNumber(entry.costExponent))}</p>
+            <strong>IS${escapeHtml(String(entry.rowId))}Level overlap support</strong>
+            <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))} at <code>${escapeHtml(entry.fieldPath)}</code>.</p>
+            <p class="meta">This row sits inside the checked ordered-overlap support band only. It is still not a recovered player-facing row label or canonical Emporium identity.</p>
+            <p class="meta">Structured compatibility evidence from <code>${escapeHtml(entry.shapeId)}</code>:</p>
+            <div class="meta-stack">
+              ${entry.groundedFields.map((field) => `<p class="meta"><code>${escapeHtml(field.key)}</code> -> <code>${escapeHtml(field.slotAlias)}</code> via <code>${escapeHtml(field.sourceLane)}</code> (${escapeHtml(field.status)})</p>`).join("")}
+              ${entry.quarantinedFields.map((field) => `<p class="meta"><code>${escapeHtml(field.key)}</code> -> <code>${escapeHtml(field.slotAlias)}</code> (${escapeHtml(field.status)}; ${escapeHtml(field.reason)})</p>`).join("")}
+            </div>
           </article>
         `).join("")}</div>` : ""}
-        ${preview.hasValidatedLevelPreview ? `<div class="preview-stack">${preview.previewRows.map((entry) => `
+        <div class="preview-stack">${preview.previewRows.map((entry) => `
           <article class="preview-card">
-            <strong>IS${escapeHtml(String(entry.rowId))}</strong>
-            <p class="meta">Imported level ${escapeHtml(formatShardNumber(entry.level))}${Number.isFinite(entry.maxLevel) ? ` / recovered max ${escapeHtml(formatShardNumber(entry.maxLevel))}` : ""}</p>
-            <p class="meta">${Number.isFinite(entry.completionPercent) ? `${escapeHtml(String(entry.completionPercent))}% of recovered max` : "Recovered max not available in this build"}</p>
+            <strong>IS${escapeHtml(String(entry.rowId))}Level</strong>
+            <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))}</p>
+            <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
+          </article>
+        `).join("")}</div>
+        ${preview.trailingPreviewRows.length && preview.importedSpanRowCount > preview.previewRows.length ? `<p class="meta">Trailing imported raw rows: ${escapeHtml(preview.trailingPreviewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | "))}</p>` : ""}
+        ${preview.hasTradeCounterPreview ? `<div class="preview-stack">${preview.importedTradeCounters.slice(0, 8).map((entry) => `
+          <article class="preview-card">
+            <strong>${escapeHtml(entry.key)}</strong>
+            <p class="meta">Imported raw count ${escapeHtml(formatBoundaryValue(entry.value))}</p>
+            <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
+          </article>
+        `).join("")}</div>` : ""}
+        ${preview.tradeCounterSampleLine ? `<p class="meta">Trade-counter sample: ${escapeHtml(preview.tradeCounterSampleLine)}${preview.importedTradeCounterCount > 6 ? "..." : ""}</p>` : ""}
+        ${preview.hasEarlyMechPreview ? `<div class="preview-stack">${preview.importedEarlyMechFields.map((entry) => `
+          <article class="preview-card">
+            <strong>${escapeHtml(entry.key)}</strong>
+            <p class="meta">Imported raw value ${escapeHtml(formatBoundaryValue(entry.value))}</p>
+            <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
           </article>
         `).join("")}</div>` : ""}
       </div>

@@ -1,0 +1,365 @@
+{
+  "generatedAt": "2026-04-10",
+  "dataset": "multiverse-market-shell-row-prediction-boundary",
+  "sources": {
+    "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
+    "saveDataImportBoundary": "data/multiverse-market-savedata-import-boundary.json",
+    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "values": "data/multiverse-market-values.json",
+    "actionShell": "data/multiverse-market-action-shell.json",
+    "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
+    "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
+    "serializedLabelSourceBoundary": "data/multiverse-market-serialized-label-source-boundary.json",
+    "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
+    "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
+    "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
+  },
+  "testedRows": [
+    {
+      "orderedInscriptionRow": 69,
+      "liveUiValidationTarget": {
+        "playerFacingLabel": "INSCRYPTION #69",
+        "bonusText": "CELLS GAINED",
+        "bonusPerInscryption": "x5.00qa"
+      },
+      "saveDataOwnerChain": {
+        "saveField": "IS69Level",
+        "serializedIdField": "IS69ID",
+        "buyHook": "BuyIS69",
+        "costTextHook": "SetIS69CostText"
+      },
+      "rowPayloadChain": {
+        "rowPayloadType": "MultiverseMarket|Inscryption",
+        "recordInscriptionId": 69,
+        "bonusValue": 5000000136282112.0,
+        "payloadCarriers": [
+          "<ID>k__BackingField",
+          "<Level>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      },
+      "shellMetadata": {
+        "prefabName": "ChrystosEmporiumUpgrade69-ID57",
+        "remappedSerializedId": 57,
+        "earlierShellName": "ChrystosEmporiumUpgrade57",
+        "earlierValidatedBonusValue": 0.05000000074505806
+      }
+    },
+    {
+      "orderedInscriptionRow": 70,
+      "liveUiValidationTarget": {
+        "playerFacingLabel": "INSCRYPTION #70",
+        "bonusText": "SCIENTISTS COST REDUCTION",
+        "bonusPerInscryption": "/10.00b"
+      },
+      "saveDataOwnerChain": {
+        "saveField": "IS70Level",
+        "serializedIdField": "IS70ID",
+        "buyHook": "BuyIS70",
+        "costTextHook": "SetIS70CostText"
+      },
+      "rowPayloadChain": {
+        "rowPayloadType": "MultiverseMarket|Inscryption",
+        "recordInscriptionId": 70,
+        "bonusValue": 10000000000.0,
+        "payloadCarriers": [
+          "<ID>k__BackingField",
+          "<Level>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      },
+      "shellMetadata": {
+        "prefabName": "ChrystosEmporiumUpgrade70-ID58",
+        "remappedSerializedId": 58,
+        "earlierShellName": "ChrystosEmporiumUpgrade58",
+        "earlierValidatedBonusValue": 5
+      }
+    },
+    {
+      "orderedInscriptionRow": 71,
+      "liveUiValidationTarget": {
+        "playerFacingLabel": "INSCRYPTION #71",
+        "bonusText": "KDIOS RESEARCH EQUIPMENT BONUS",
+        "bonusPerInscryption": "+0.02x"
+      },
+      "saveDataOwnerChain": {
+        "saveField": "IS71Level",
+        "serializedIdField": "IS71ID",
+        "buyHook": "BuyIS71",
+        "costTextHook": "SetIS71CostText"
+      },
+      "rowPayloadChain": {
+        "rowPayloadType": "MultiverseMarket|Inscryption",
+        "recordInscriptionId": 71,
+        "bonusValue": 0.019999999552965164,
+        "payloadCarriers": [
+          "<ID>k__BackingField",
+          "<Level>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      },
+      "shellMetadata": {
+        "prefabName": "ChrystosEmporiumUpgrade71-ID59",
+        "remappedSerializedId": 59,
+        "earlierShellName": "ChrystosEmporiumUpgrade59",
+        "earlierValidatedBonusValue": 5
+      }
+    },
+    {
+      "orderedInscriptionRow": 72,
+      "liveUiValidationTarget": {
+        "playerFacingLabel": "INSCRYPTION #72",
+        "bonusText": "TICKS PER TICK-LOOP REDUCTION",
+        "bonusPerInscryption": "-0.06"
+      },
+      "saveDataOwnerChain": {
+        "saveField": "IS72Level",
+        "serializedIdField": "IS72ID",
+        "buyHook": "BuyIS72",
+        "costTextHook": "SetIS72CostText"
+      },
+      "rowPayloadChain": {
+        "rowPayloadType": "MultiverseMarket|Inscryption",
+        "recordInscriptionId": 72,
+        "bonusValue": 0.05999999865889549,
+        "payloadCarriers": [
+          "<ID>k__BackingField",
+          "<Level>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      },
+      "shellMetadata": {
+        "prefabName": "ChrystosEmporiumUpgrade72-ID60",
+        "remappedSerializedId": 60,
+        "earlierShellName": "ChrystosEmporiumUpgrade60",
+        "earlierValidatedBonusValue": null
+      }
+    },
+    {
+      "orderedInscriptionRow": 73,
+      "liveUiValidationTarget": {
+        "playerFacingLabel": "INSCRYPTION #73",
+        "bonusText": "LEVEL POINTS (LP) GAINED",
+        "bonusPerInscryption": "+10"
+      },
+      "saveDataOwnerChain": {
+        "saveField": "IS73Level",
+        "serializedIdField": "IS73ID",
+        "buyHook": "BuyIS73",
+        "costTextHook": "SetIS73CostText"
+      },
+      "rowPayloadChain": {
+        "rowPayloadType": "MultiverseMarket|Inscryption",
+        "recordInscriptionId": 73,
+        "bonusValue": 10.0,
+        "payloadCarriers": [
+          "<ID>k__BackingField",
+          "<Level>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      },
+      "shellMetadata": {
+        "prefabName": "ChrystosEmporiumUpgrade73-ID61",
+        "remappedSerializedId": 61,
+        "earlierShellName": "ChrystosEmporiumUpgrade61",
+        "earlierValidatedBonusValue": null
+      }
+    },
+    {
+      "orderedInscriptionRow": 74,
+      "liveUiValidationTarget": {
+        "playerFacingLabel": "INSCRYPTION #74",
+        "bonusText": "LOOP REQUIREMENT REDUCTION",
+        "bonusPerInscryption": "-40"
+      },
+      "saveDataOwnerChain": {
+        "saveField": "IS74Level",
+        "serializedIdField": "IS74ID",
+        "buyHook": "BuyIS74",
+        "costTextHook": "SetIS74CostText"
+      },
+      "rowPayloadChain": {
+        "rowPayloadType": "MultiverseMarket|Inscryption",
+        "recordInscriptionId": 74,
+        "bonusValue": 40.0,
+        "payloadCarriers": [
+          "<ID>k__BackingField",
+          "<Level>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      },
+      "shellMetadata": {
+        "prefabName": "ChrystosEmporiumUpgrade74-ID62",
+        "remappedSerializedId": 62,
+        "earlierShellName": "ChrystosEmporiumUpgrade62",
+        "earlierValidatedBonusValue": null
+      }
+    },
+    {
+      "orderedInscriptionRow": 78,
+      "controlRowType": "same-number-positive-control",
+      "repoLocalIdentityTarget": {
+        "playerFacingLabel": "Inscryption 78: Ouroboros Orbs"
+      },
+      "saveDataOwnerChain": {
+        "saveField": "IS78Level",
+        "serializedIdField": "IS78ID",
+        "buyHook": "BuyIS78",
+        "costTextHook": "SetIS78CostText"
+      },
+      "rowPayloadChain": {
+        "rowPayloadType": "MultiverseMarket|Inscryption",
+        "recordInscriptionId": null,
+        "bonusValue": null,
+        "payloadCarriers": [
+          "<ID>k__BackingField",
+          "<Level>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      },
+      "shellMetadata": {
+        "prefabName": "ChrystosEmporiumUpgrade78-ID78",
+        "remappedSerializedId": 78,
+        "earlierShellName": null,
+        "earlierValidatedBonusValue": null
+      }
+    }
+  ],
+  "layerPredictionAssessment": {
+    "prefabShellLayer": {
+      "predictsDisplayedRowNumber": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74],
+          "status": "fails",
+          "why": "The visible shell names encode remapped ids 57-62 instead of the displayed rows 69-74."
+        },
+        {
+          "rows": [78],
+          "status": "passes",
+          "why": "ChrystosEmporiumUpgrade78-ID78 keeps the same number as the ordered row and the recovered player-facing label."
+        }
+      ],
+      "predictsBonusTextOrMagnitude": [
+        {
+          "rows": [69, 70, 71],
+          "status": "fails",
+          "why": "Earlier validated ids 57-59 carry bonus values 0.05, 5, and 5, which do not match the live row-69 to row-71 bonuses 5qa, 10b, and 0.02."
+        },
+        {
+          "rows": [72, 73, 74],
+          "status": "unchecked-for-earlier-id-bonus-values",
+          "why": "The shell points to ids 60-62, but the repo does not yet have validated row payload values for 60-62 to compare directly."
+        }
+      ]
+    },
+    "orderedCarrierLayer": {
+      "predictsDisplayedRowNumber": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74, 78],
+          "status": "passes",
+          "why": "SaveData.ISNLevel, MultiverseMarket.ISNID, BuyISN, and SetISNCostText stay same-number across these rows."
+        }
+      ],
+      "predictsBonusTextPhrase": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74],
+          "status": "fails",
+          "why": "The recovered same-number carrier chain confirms row access and order, not the player-facing bonus-text phrase."
+        },
+        {
+          "rows": [78],
+          "status": "passes-with-extra-string-anchor",
+          "why": "The same-number chain only reaches player-facing identity for 78 when the separate Unity string anchor Inscryption 78: Ouroboros Orbs is present."
+        }
+      ]
+    },
+    "rowPayloadLayer": {
+      "predictsDisplayedRowNumber": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74],
+          "status": "passes",
+          "why": "The validated MultiverseMarket row payload records themselves are keyed by inscription_id 69-74."
+        }
+      ],
+      "predictsBonusMagnitude": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74],
+          "status": "passes",
+          "why": "The validated row payload bonus values line up with the live bonus-per-inscription magnitudes 5qa, 10b, 0.02, 0.06, 10, and 40."
+        }
+      ],
+      "predictsBonusTextPhrase": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74, 78],
+          "status": "fails",
+          "why": "The recovered nested row payloads stop at ID, Cost, Level, MaxLevel, ISObject, and transform carriers and do not include label or text fields."
+        }
+      ]
+    },
+    "uiHookLayer": {
+      "predictsDisplayedRowNumber": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74, 78],
+          "status": "passes-for-row-access-only",
+          "why": "BuyISN and SetISNCostText place the UI on the same-number row family, but they do not by themselves recover a final label."
+        }
+      ],
+      "predictsBonusTextPhrase": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74],
+          "status": "unrecovered",
+          "why": "The repo only recovers the TextHandlerMarkets family and cost-text hooks for these rows, not their direct bonus-text phrases."
+        },
+        {
+          "rows": [78],
+          "status": "passes-with-unity-string-anchor",
+          "why": "The same TextHandlerMarkets neighborhood plus a Unity string anchor recovers the player-facing label Ouroboros Orbs at row 78."
+        }
+      ]
+    },
+    "saveDataOwnerLayer": {
+      "predictsDisplayedRowNumber": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74, 78],
+          "status": "passes-for-ordered-row-ownership",
+          "why": "SaveData.ISNLevel is the strongest recovered owner-side numbering layer and stays same-number through the checked run."
+        }
+      ],
+      "predictsBonusTextOrMagnitude": [
+        {
+          "rows": [69, 70, 71, 72, 73, 74, 78],
+          "status": "fails",
+          "why": "SaveData ownership only recovers the level field family, not the row payload values or player-facing text."
+        }
+      ]
+    }
+  },
+  "actualStructureConclusion": {
+    "displayedRowToSaveDataLink": [
+      "PlayerProfileHandler.get_Market reaches MultiverseMarket as the runtime owner shell.",
+      "SaveData.ISNLevel remains the declaring owner-side row numbering family.",
+      "The same-number carrier path continues through MultiverseMarket.ISNID, BuyISN, and SetISNCostText.",
+      "The nested row payload carriers MultiverseMarket|Inscryption and MultiverseMarket|InscryptionTupleObject preserve row-local ID, Level, and ISObject links.",
+      "The prefab GameObject pointed to by ISObject can diverge from displayed row numbering in the 69-74 shell band without breaking the ordered SaveData-to-row chain."
+    ],
+    "shellDivergenceBoundary": [
+      "The 57-62 relation is not the strongest predictor of displayed row identity.",
+      "It remains meaningful as shell-local prefab anomaly metadata because it records which GameObject names diverge in the UI object layer.",
+      "It is not the recovered structure that links displayed inscription row identity through to SaveData."
+    ],
+    "smallestDefensibleConclusion": [
+      "For rows 69-74, displayed row number follows the ordered same-number SaveData and row-carrier chain, not the prefab shell suffix.",
+      "For rows 69-74, displayed bonus magnitude follows the validated row payload record keyed by inscription_id 69-74, not the remapped prefab shell ids 57-62.",
+      "For rows 69-74, the player-facing bonus-text phrase itself is still not recovered repo-locally from shell or payload data; screenshots remain validation targets only.",
+      "Control row 78 shows the same chain in a non-divergent case: shell metadata, ordered carriers, and player-facing identity all keep the same row number."
+    ],
+    "canonicalImportSafeSubset": [],
+    "compatibilityOnlyImportPath": "compatibility.unmappedSystemState.multiverseMarket"
+  },
+  "currentBoundary": [
+    "Shell or prefab metadata and displayed row identity must stay separated in the 69-74 band.",
+    "The strongest recovered structure that links displayed inscription rows to SaveData is the same-number SaveData.ISNLevel plus ISNID and BuyISN or SetISNCostText carrier family, with row payload ID or Level or ISObject carriers under MultiverseMarket.",
+    "The prefab 69-74 to 57-62 relation is bounded as shell-local anomaly metadata only and is not the strongest predictor of displayed row number or live bonus magnitude.",
+    "This boundary does not widen canonical import or planner behavior: compatibility-only MultiverseMarket import stays quarantined under compatibility.unmappedSystemState.multiverseMarket, InscryptionsDone stays wrapper-only, and planner-safe use remains blocked."
+  ]
+}

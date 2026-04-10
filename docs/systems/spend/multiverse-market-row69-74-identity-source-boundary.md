@@ -1,6 +1,6 @@
 # Multiverse Market Row 69-74 Identity-Source Boundary
 
-This note records the checked player-facing identity-source boundary for the broken prefab band at rows `69-74`.
+This note now records the checked player-facing text-provenance boundary for the broken prefab band at rows `69-74`.
 
 ## Settled row facts carried into this boundary
 
@@ -14,7 +14,7 @@ This note records the checked player-facing identity-source boundary for the bro
   - `ChrystosEmporiumUpgrade73-ID61`
   - `ChrystosEmporiumUpgrade74-ID62`
 
-## Checked non-prefab identity sources
+## Checked repo-local evidence that stays structural only
 
 - Text/localization coverage:
   - `TextHandlerMarkets`
@@ -34,24 +34,34 @@ This note records the checked player-facing identity-source boundary for the bro
 - Alternate metadata joins:
   - `THMarkets: TextHandlerMarkets`
   - `InscryptionsList: List<GameObject>`
+- Checked negative repo-local boundary:
+  - the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`
+  - earlier direct prefab shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62` are preserved repo-locally, but still do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`
+  - `tmp-multiverse-row-text-probe.json` stays negative-only:
+    - `SetIS69BaseBonusText` stays inside a bonus or effect-presentation family
+    - `ClearISObjects`, `ClearISMaxLevelObjects`, `SetISMaxLevelObjects`, `THMarkets`, and `InscryptionsList` stay structural UI-shell hooks
+    - no row-title, localization-key, `StringId`, `Label`, `Name`, or direct player-facing `Inscryption 69` through `Inscryption 74` anchor is recovered repo-locally
 
-## Checked negative boundary
+## Checked live UI evidence
 
-- Those non-prefab sources are still not enough to bind rows `69-74` to player-facing inscription identity.
-- The checked repo-local probe artifacts do not recover direct player-facing strings:
-  - `Inscryption 69`
-  - `Inscryption 70`
-  - `Inscryption 71`
-  - `Inscryption 72`
-  - `Inscryption 73`
-  - `Inscryption 74`
-- The nearest checked positive same-number identity anchors remain outside the broken band:
-  - row `78`: `Inscryption 78: Ouroboros Orbs`
-  - row `83`: `Inscryption 83: Fast-Loop ML`
+- The supplied in-game screenshots show the player-facing row labels directly:
+  - row `68`: `INSCRYPTION #68` with `FREE KDIOS CREW`
+  - row `69`: `INSCRYPTION #69` with `CELLS GAINED`
+  - row `70`: `INSCRYPTION #70` with `SCIENTISTS COST REDUCTION`
+  - row `71`: `INSCRYPTION #71` with `KDIOS RESEARCH EQUIPMENT BONUS`
+  - row `72`: `INSCRYPTION #72` with `TICKS PER TICK-LOOP REDUCTION`
+  - row `73`: `INSCRYPTION #73` with `LEVEL POINTS (LP) GAINED`
+  - row `74`: `INSCRYPTION #74` with `LOOP REQUIREMENT REDUCTION`
+  - row `75`: `INSCRYPTION #75` with `TO MAX LV OF ALL ACCUMULATIVE LEVEL GROWTH MODULES (LOOP MODS)`
+- This matters because the visible neighboring order stays `68 -> 69 -> 70 -> 71 -> 72 -> 73 -> 74 -> 75`.
+- That live UI ordering and labeling does not reproduce a player-facing `57-62` row band.
 
 Current grounded conclusion:
 
-- save numbering, serialized-id numbering, prefab numbering, and player-facing identity source must remain separated
-- rows `69-74` have checked row access and UI-shell evidence, but no recovered repo-local player-facing identity source
-- rows `69-74` therefore remain unresolved for player-facing identity
-- the canonical import-safe subset stays empty
+- save numbering, serialized-id numbering, prefab numbering, and player-facing text provenance must stay separated
+- row identity for rows `69-74` is already carried by the same-number chain `SaveData.ISNLevel -> ISNID -> BuyISN/SetISNCostText -> row payload ID/Level/ISObject`
+- the supplied live UI screenshots validate that row identity directly, but do not by themselves become canonical text provenance
+- remapped serialized ids `57-62` still fail to recover a checked player-facing text or label source, so following the prefab remap does not narrow the missing text source any further
+- the `69-74 -> 57-62` relation is therefore bounded as internal shell metadata only, not as the live player-facing remap model
+- the actual missing source class is the game-side player-facing effect or label text path for Emporium rows, likely in the `TextHandlerMarkets` / bonus-text / localization layer beyond the recovered cost hooks and row payload carriers
+- canonical Emporium import remains blocked for separate reasons, so the canonical import-safe subset stays empty

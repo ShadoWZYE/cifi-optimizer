@@ -403,7 +403,7 @@
     },
     {
       "id": "multiverse-market-row69-74-identity-source-boundary",
-      "label": "Multiverse market row 69-74 identity-source boundary",
+      "label": "Multiverse market row 69-74 text-provenance boundary",
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-row69-74-identity-source-boundary.json"
@@ -435,7 +435,7 @@
     },
     {
       "id": "multiverse-market-nearby-identity-binding-pattern",
-      "label": "Multiverse market nearby identity-binding pattern",
+      "label": "Multiverse market nearby text-adjacent controls",
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-nearby-identity-binding-pattern.json"
@@ -455,6 +455,22 @@
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-69-74-anomaly-provenance.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-shell-row-prediction-boundary",
+      "label": "Multiverse market shell-row prediction boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-shell-row-prediction-boundary.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-text-provenance-path-boundary",
+      "label": "Multiverse market text-provenance path boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/multiverse-market-text-provenance-path-boundary.json"
       ]
     },
     {

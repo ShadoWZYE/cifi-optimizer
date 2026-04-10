@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-07",
+  "generatedAt": "2026-04-10",
   "dataset": "multiverse-market-69-74-anomaly-provenance",
   "sources": {
     "rawAppSideAsset": "workbench/unity/joined/level0",
@@ -9,6 +9,7 @@
     "derivedRow7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
     "derivedNumberingStabilityBoundary": "data/multiverse-market-inscription-numbering-stability-boundary.json",
     "derivedRow6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
+    "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md",
     "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md"
   },
@@ -34,7 +35,14 @@
       "73->61",
       "74->62"
     ],
-    "playerFacingIdentityRecoveredRowsInBand": []
+    "playerFacingIdentityRecoveredRowsInBand": [
+      69,
+      70,
+      71,
+      72,
+      73,
+      74
+    ]
   },
   "pipelineStages": [
     {
@@ -94,6 +102,6 @@
     "The 69-74 anomaly is inherited from preserved app-side evidence, not introduced by a checked repo-local normalization step.",
     "Same-number save, serialized-id, and buy-hook alignment already coexists with remapped prefab shells in raw repo-local probe captures.",
     "Because the anomaly is inherited source truth, the repo should preserve it in derived boundary datasets instead of normalizing it away.",
-    "Rows 69-74 still have no grounded player-facing identity, so provenance tracking must stay separate from player-facing remap work."
+    "The inherited prefab anomaly stays separate from player-facing identity: live UI evidence now grounds rows 69-74 directly while the raw 57-62 shell relation remains provenance-only metadata."
   ]
 }
