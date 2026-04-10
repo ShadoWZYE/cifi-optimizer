@@ -45,6 +45,7 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
       ["ClaimableBankTokens"],
       ["BankedTokens"],
       ["DailyTokenium"],
+      ["ClaimableTokenium"],
       ["DailyTokeniumCap"],
       ["FinalTokenBankCap"],
       ["FinalTokenBankFillSpeed"],

@@ -329,8 +329,11 @@ assert.match(appJs, /Banked tokens \(stored amount\)",\s*value: compatibility\.u
 assert.match(appJs, /Exact SaveData\.BankedTokens recovery grounds the current stored token-bank amount as boundary-backed state only/);
 assert.match(appJs, /Daily Tokenium \(stored amount\)",\s*value: compatibility\.unmappedSystems\?\.tokenShop\?\.DailyTokenium/);
 assert.match(appJs, /Exact SaveData\.DailyTokenium recovery plus the narrowed SaveData mission-persistence wrapper grounds the current Daily Tokenium stored amount as boundary-backed non-canonical evidence only/);
+assert.match(appJs, /Tokenium-cluster claimable evidence \(generic\)",\s*value: compatibility\.unmappedSystems\?\.tokenShop\?\.ClaimableTokenium/);
+assert.match(appJs, /Exact SaveData\.ClaimableTokenium recovery grounds a broader generic Tokenium-cluster claimable field as boundary-backed evidence only/);
 assert.match(appJs, /TokenShop current row levels/);
 assert.match(appJs, /token-bank cap and claimable tokens/i);
+assert.match(appJs, /generic ClaimableTokenium evidence surfaced/);
 assert.match(appJs, /Daily Tokenium cap and ready or claimable state/);
 assert.match(appJs, /no checked DailyTokeniumCap field or Daily Tokenium-specific ready or claimable join is recovered yet/);
 assert.match(appJs, /Emporium owned progression and Inscryptions balance/);
@@ -521,11 +524,12 @@ assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState.some((
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop.some((path) => path.join(".") === "systems.tokenBank"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.some((path) => path.join(".") === "FinalTokenBankFillSpeed"));
+assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.some((path) => path.join(".") === "ClaimableTokenium"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarketStateClues.some((path) => path.join(".") === "InscryptionsDone"));
 assert.equal(playerProfileAliasAuditData.version, "v1");
 assert.equal(playerProfileAliasAuditData.groupCount, 7);
 assert.equal(playerProfileAliasAuditData.aliasCount, 33);
-assert.equal(playerProfileAliasAuditData.acceptedPathCount, 83);
+assert.equal(playerProfileAliasAuditData.acceptedPathCount, 84);
 assert.deepEqual(
   playerProfileAliasAuditData.groups.map((group) => group.id),
   ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
@@ -535,7 +539,7 @@ assert.match(playerProfileAliasAuditDoc, /## Canonical Shared Truth/);
 assert.match(playerProfileAliasAuditDoc, /## Compatibility-only Migration Sinks/);
 assert.match(playerProfileAliasAuditDoc, /systems\.ship\.playerState/);
 assert.match(playerProfileAliasAuditDoc, /Accepted alias paths: 3/);
-assert.match(playerProfileAliasAuditDoc, /Accepted alias paths: 31/);
+assert.match(playerProfileAliasAuditDoc, /Accepted alias paths: 32/);
 assert.doesNotMatch(playerProfileAliasAuditDoc, /, `resourceFocus`/);
 assert.doesNotMatch(playerProfileAliasAuditDoc, /, `power`/);
 assert.doesNotMatch(playerProfileAliasAuditDoc, /, `hunterLevel` \|/);
@@ -1972,8 +1976,8 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   assert.equal(track.status, "active");
   assert.match(track.goal, /minimal descriptive spend-planner panel/i);
   assert.match(track.currentSlice, /canonical `state\.playerProfile` spend-side inputs/);
-  assert.match(track.currentSlice, /surfaces exact `SaveData\.BankedTokens` plus exact `SaveData\.DailyTokenium` as boundary-backed spend evidence/);
-  assert.match(track.currentSlice, /exact `SaveData\.DailyTokenium` as boundary-backed spend evidence from `compatibility\.unmappedSystemState\.tokenShop`/);
+  assert.match(track.currentSlice, /surfaces exact `SaveData\.BankedTokens`, exact `SaveData\.DailyTokenium`, and exact `SaveData\.ClaimableTokenium` as explicitly labeled boundary-backed spend evidence/);
+  assert.match(track.currentSlice, /exact `SaveData\.DailyTokenium`, and exact `SaveData\.ClaimableTokenium` as explicitly labeled boundary-backed spend evidence from `compatibility\.unmappedSystemState\.tokenShop`/);
   assert.match(track.blockedBy, /TokenShop row remap, token-bank cap and claimable state, Daily Tokenium cap and Daily Tokenium-specific ready or claimable state, and Emporium owned progression fields/);
   assert.match(track.smallestShippableSlice, /top-level spend-planner panel/);
   assert.ok(
@@ -1987,6 +1991,10 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   assert.ok(
     track.completedSteps.some((step) => /exact `SaveData\.DailyTokenium` as boundary-backed Daily Tokenium stored-amount evidence from `compatibility\.unmappedSystemState\.tokenShop`/.test(step)),
     "expected spend first UI slice track to record DailyTokenium boundary-backed evidence"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /exact `SaveData\.ClaimableTokenium` only as explicitly labeled broader generic Tokenium-cluster claimable evidence from `compatibility\.unmappedSystemState\.tokenShop`/.test(step)),
+    "expected spend first UI slice track to record generic ClaimableTokenium boundary-backed evidence"
   );
   assert.ok(
     track.completedSteps.some((step) => /Label owner-dependent spend inputs as unavailable/.test(step)),
@@ -2003,6 +2011,10 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   assert.ok(
     track.verified.some((line) => /Exact `SaveData\.DailyTokenium` recovery plus the narrowed `SaveData` mission-persistence wrapper now grounds the current Daily Tokenium stored amount strongly enough to show it as boundary-backed non-canonical evidence/.test(line)),
     "expected spend first UI slice track to record DailyTokenium as boundary-backed evidence"
+  );
+  assert.ok(
+    track.verified.some((line) => /Exact `SaveData\.ClaimableTokenium` recovery now grounds one broader generic Tokenium-cluster claimable clue strongly enough to show it as explicitly labeled boundary-backed evidence/.test(line)),
+    "expected spend first UI slice track to record generic ClaimableTokenium evidence"
   );
   assert.ok(
     track.verified.some((line) => /descriptive spend-planner panel can ship without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs/.test(line)),
@@ -2947,8 +2959,8 @@ assert.match(playerProfileSchemaDoc, /stage\.highestShipUnlocked/);
 assert.match(playerProfileSchemaDoc, /top-level `power`, `speed`, and `cargo` no longer migrate/);
 assert.match(playerProfileSchemaDoc, /planning\.gemNodeBudget`, `planning\.resourceFocus`, `planning\.researchHours`, and their flat helper forms are retired/);
 assert.match(playerProfileSchemaDoc, /flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically/);
-assert.match(playerProfileSchemaDoc, /flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, and the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked` may be quarantined/);
-assert.match(importMappingDoc, /`BankedTokens`, `DailyTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`/);
+assert.match(playerProfileSchemaDoc, /flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, and the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked` may be quarantined/);
+assert.match(importMappingDoc, /`BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`/);
 assert.match(importMappingDoc, /compatibility\.unmappedSystemState/);
 assert.match(importMappingDoc, /experimental helper imports now require explicit `externalModels\.experimental\.\*` paths/);
 assert.match(importMappingDoc, /externalModels\.communityTools\.shipOptimizer\.v1/);
@@ -2958,7 +2970,7 @@ assert.match(importMappingDoc, /must not silently populate canonical `player\.\*
 assert.match(importMappingDoc, /stage\.highestShipUnlocked`, `stage\.manualPhase`, and `systems\.metaProgression\.\*` aliases should normalize into compatibility-only fields/);
 assert.match(importMappingDoc, /flat unresolved aliases such as `hunterLevel`, `traitSphereCount`, `mechParts`, and `gemDust` are retired/);
 assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
-assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked`, `ATU\*Level`, `Tier\*TokensUnlocked`, `BankedTokens`, `DailyTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`, or `FinalTokenBankFillSpeed` may also be preserved/);
+assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked`, `ATU\*Level`, `Tier\*TokensUnlocked`, `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`, or `FinalTokenBankFillSpeed` may also be preserved/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
 assert.match(tokenShopDoc, /## Adjacent systems still to map/);
@@ -3826,6 +3838,7 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
   Tier4TokensUnlocked: false,
   TokenBankCap: "1200",
   ClaimableBankTokens: "450",
+  ClaimableTokenium: "275.5",
   FinalTokenBankFillSpeed: "1.25",
   DailyTokeniumCap: "2000",
   InscryptionsDone: "98",
@@ -3848,6 +3861,7 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
   Tier4TokensUnlocked: false,
   TokenBankCap: 1200,
   ClaimableBankTokens: 450,
+  ClaimableTokenium: 275.5,
   FinalTokenBankFillSpeed: 1.25,
   DailyTokeniumCap: 2000
 });

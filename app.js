@@ -1892,6 +1892,12 @@ function renderSpendPlannerBoundary() {
       value: compatibility.unmappedSystems?.tokenShop?.DailyTokenium,
       path: "compatibility.unmappedSystemState.tokenShop.DailyTokenium",
       note: "Exact SaveData.DailyTokenium recovery plus the narrowed SaveData mission-persistence wrapper grounds the current Daily Tokenium stored amount as boundary-backed non-canonical evidence only. Cap and Daily Tokenium-specific ready or claimable planning stay blocked."
+    },
+    {
+      label: "Tokenium-cluster claimable evidence (generic)",
+      value: compatibility.unmappedSystems?.tokenShop?.ClaimableTokenium,
+      path: "compatibility.unmappedSystemState.tokenShop.ClaimableTokenium",
+      note: "Exact SaveData.ClaimableTokenium recovery grounds a broader generic Tokenium-cluster claimable field as boundary-backed evidence only. It does not clear token-bank claimable tokens, Daily Tokenium-specific ready state, or canonical state.playerProfile promotion."
     }
   ];
   const blockedInputs = [
@@ -1901,11 +1907,11 @@ function renderSpendPlannerBoundary() {
     },
     {
       label: "Token-bank cap and claimable tokens",
-      reason: "Blocked even with BankedTokens recovered. Current TokenShop and FinalTokenBank clues still do not name planner-safe cap or claimable saved values."
+      reason: "Blocked even with BankedTokens recovered and generic ClaimableTokenium evidence surfaced. Current TokenShop and FinalTokenBank clues still do not name planner-safe cap or token-bank-specific claimable saved values."
     },
     {
       label: "Daily Tokenium cap and ready or claimable state",
-      reason: "Blocked even with the current stored amount recovered. The lane now narrows to a SaveData mission-persistence wrapper, but no checked DailyTokeniumCap field or Daily Tokenium-specific ready or claimable join is recovered yet."
+      reason: "Blocked even with the current stored amount recovered and generic ClaimableTokenium evidence surfaced. The lane now narrows to a SaveData mission-persistence wrapper, but no checked DailyTokeniumCap field or Daily Tokenium-specific ready or claimable join is recovered yet."
     },
     {
       label: "Emporium owned progression and Inscryptions balance",

@@ -3,7 +3,7 @@
   "generatedFrom": "player-profile.js",
   "groupCount": 7,
   "aliasCount": 33,
-  "acceptedPathCount": 83,
+  "acceptedPathCount": 84,
   "groups": [
     {
       "id": "meta",
@@ -310,6 +310,7 @@
             "ClaimableBankTokens",
             "BankedTokens",
             "DailyTokenium",
+            "ClaimableTokenium",
             "DailyTokeniumCap",
             "FinalTokenBankCap",
             "FinalTokenBankFillSpeed",
@@ -324,7 +325,7 @@
           ]
         }
       ],
-      "acceptedPathCount": 31
+      "acceptedPathCount": 32
     },
     {
       "id": "shipCalibration",

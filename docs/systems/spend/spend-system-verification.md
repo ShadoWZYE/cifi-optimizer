@@ -86,6 +86,7 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - Daily Tokenium is now better grounded as an Academy or Farm Mission reward lane that `TokenShop`, `LoopModifiers`, and the Collector pack all touch, not as a TokenShop-only mechanic.
 - The current narrowest checked save-side wrapper for that lane is the `SaveData` mission-persistence neighborhood around `MissionsCompleted*`, `*MissionActive`, and `WastaFarmActiveCount`; cap and Daily Tokenium-specific ready or claimable ownership still remain unresolved.
 - It is now safe to show imported `compatibility.unmappedSystemState.tokenShop.DailyTokenium` as explicitly labeled boundary-backed evidence in the descriptive spend-planner panel, but not as canonical `state.playerProfile` and not as planner-ready cap or claimable state.
+- It is now also safe to show imported `compatibility.unmappedSystemState.tokenShop.ClaimableTokenium` as explicitly labeled broader generic Tokenium-cluster claimable evidence in that same descriptive spend-planner panel, but not as token-bank claimable state, Daily Tokenium-specific ready state, or canonical `state.playerProfile`.
 
 ## MultiverseMarket
 
