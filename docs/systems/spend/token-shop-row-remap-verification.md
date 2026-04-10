@@ -17,6 +17,11 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - checked action-lane clues preserve the matching direct token buy family through `BuyTokenBoost`.
   - the checked `level0` prefab roster separately preserves `NewTokenUPGPrefab.T1.TokensBoost`.
   - taken together, that is enough to ground `ATU1Button` to the TokenShop `TokenBoost` or `NewTokenUPGPrefab.T1.TokensBoost` row family without relying on community naming, `OR_*` labels, or generic row-order similarity alone.
+- One additional bounded shell-to-prefab bridge also clears:
+  - `ATU5Button` sits directly after the exact `MK1TokenBoost*` owner fields in the checked `TokenShop` payload alignment.
+  - checked action-lane clues preserve the matching direct buy hook through `BuyMK1TokenBoost`.
+  - the checked `level0` prefab roster separately preserves `NewTokenUPGPrefab.T1.MK1Booster`.
+  - taken together, that is enough to ground `ATU5Button` to `NewTokenUPGPrefab.T1.MK1Booster` without forcing a full T1 generator-booster lane remap or inventing a final player-facing row title.
 - Checked probe output also preserves grounded non-label clues around some `ATU` rows:
   - effect hooks such as `ATU1TokenBonus`, `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU20TokenBonus`, `ATU21TokenDailiesBonus`, and `ATU24Bonus3Shards`
   - late direct-buy hooks such as `BuyATU24`, `BuyATU25`, `BuyATU26`, `BuyATU27`, and `BuyATU28`
@@ -39,9 +44,10 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 ## Grounded conclusion
 
 - The repo can now say more than “ATU is unnamed.”
-- Two exact shell-side bridges are now recovered:
+- Three exact shell-side bridges are now recovered:
   - `ATU1Button` -> TokenShop `TokenBoost` / `NewTokenUPGPrefab.T1.TokensBoost`
   - `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`
+  - `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster`
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
 - Late `ATU` buy hooks also now sit inside a checked named tier-buy neighborhood instead of standing alone.
 - The generic TokenShop text-hook surface does not recover one additional shell-to-title or shell-to-prefab bridge.
@@ -54,10 +60,15 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
     - diamond-special surface: `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost`
     - token-prefab and title surface: `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells`
   - none of those committed surfaces currently provides a checked object or text join back to `ATU3Button` path id `15810`.
+  - `ATU5` clearing does not change that rule:
+    - it clears because one exact owner-field block, one exact buy hook, and one exact token prefab all converge on the same `MK1` family
+    - the repo still does not have a checked final title join for `ATU5Button`
+    - the neighboring `MK2` through `MK8` token rows stay unresolved until their own shell joins are checked individually
 
 The remaining missing pieces are still checked joins:
 
 - no checked repo artifact currently ties `ATU1Button` or `ATU2Button` directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, or `ATU5Button` directly to a final player-facing TokenShop row title string
 - no checked repo artifact currently joins the remaining `ATU*Button` or `ATU*Content` path ids directly to specific `NewTokenUPGPrefab.*` object identities
 - no checked repo artifact currently ties the remaining concrete `ATU` numbers directly to final player-facing TokenShop row titles
 - no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` token-menu or token-bank neighborhood to a specific `ATU` row number
@@ -94,7 +105,7 @@ Because those joins are still missing, the repo should not:
 ## Allowed implication
 
 - Raw `ATU*Level` fields remain safe only under `compatibility.unmappedSystemState.tokenShop`.
-- Canonical `state.playerProfile` promotion remains blocked for the unrecovered rows.
+- Canonical `state.playerProfile` promotion remains blocked for the unrecovered rows and for the recovered shell-to-prefab bridges unless a separate player-facing row-title join clears.
 - Planner-safe spend behavior remains blocked on row identity recovery, not on row-level owner recovery.
 
 ## Narrowest next slice
