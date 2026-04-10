@@ -1190,6 +1190,7 @@ function renderOverview() {
     ...recommendationFeed.slice(0, 3).map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : item.module)),
     renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
+  $("#overviewSpendSnapshot").innerHTML = renderSpendPlannerBoundary();
 }
 
 function renderShipPlayerState() {
@@ -1889,19 +1890,19 @@ function renderSpendPlannerBoundary() {
   ];
   const boundaryBackedInputs = [
     {
-      label: "Banked tokens (stored amount)",
+      label: "Boundary-backed: Banked tokens (stored amount)",
       value: compatibility.unmappedSystems?.tokenShop?.BankedTokens,
       path: "compatibility.unmappedSystemState.tokenShop.BankedTokens",
       note: "Exact SaveData.BankedTokens recovery grounds the current stored token-bank amount as boundary-backed state only. Cap and claimable planning stay blocked."
     },
     {
-      label: "Daily Tokenium (stored amount)",
+      label: "Boundary-backed: Daily Tokenium (stored amount)",
       value: compatibility.unmappedSystems?.tokenShop?.DailyTokenium,
       path: "compatibility.unmappedSystemState.tokenShop.DailyTokenium",
       note: "Exact SaveData.DailyTokenium recovery plus the narrowed SaveData mission-persistence wrapper grounds the current Daily Tokenium stored amount as boundary-backed non-canonical evidence only. Cap and Daily Tokenium-specific ready or claimable planning stay blocked."
     },
     {
-      label: "Tokenium-cluster claimable evidence (generic)",
+      label: "Boundary-backed: Tokenium-cluster claimable evidence (generic)",
       value: compatibility.unmappedSystems?.tokenShop?.ClaimableTokenium,
       path: "compatibility.unmappedSystemState.tokenShop.ClaimableTokenium",
       note: "Exact SaveData.ClaimableTokenium recovery grounds a broader generic Tokenium-cluster claimable field as boundary-backed evidence only. It does not clear token-bank claimable tokens, Daily Tokenium-specific ready state, or canonical state.playerProfile promotion."
@@ -1928,51 +1929,63 @@ function renderSpendPlannerBoundary() {
   const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
 
   return `
-    <article class="validation-card warn">
-      <strong>Spend planner first slice</strong>
-      <p class="validation-status">Bounded preview only. This panel separates grounded canonical inputs, evidence-backed boundary inputs, and blocked planner inputs while owner recovery and remap work remain unresolved.</p>
-      <div class="meta-stack">
-        <p class="snapshot-title">Grounded canonical inputs available now</p>
+    <div class="meta-stack">
+      <p class="meta">Forked from the research-only spend-planner lane into a normal app surface. This snapshot stays descriptive, keeps blocked owner-dependent state explicit, and does not add recommendations, ranking, or optimizer math.</p>
+      <p class="meta">Non-canonical values shown here are explicitly labeled as boundary-backed or compatibility-only so the surface does not blur grounded app truth with quarantined evidence.</p>
+    </div>
+    <div class="meta-stack">
+      <p class="snapshot-title">Canonical spend inputs</p>
         <ul class="research-step-list">${canonicalInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not entered yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
-      </div>
-      <div class="meta-stack">
-        <p class="snapshot-title">Evidence-backed boundary inputs available now</p>
+    </div>
+    <div class="meta-stack">
+      <p class="snapshot-title">Boundary-backed spend evidence</p>
         <ul class="research-step-list">${boundaryBackedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not imported yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
-      </div>
-      <div class="meta-stack">
-        <p class="snapshot-title">Grounded TokenShop rows only (boundary-backed preview)</p>
+    </div>
+    <div class="meta-stack">
+      <p class="snapshot-title">Compatibility-only TokenShop subset preview</p>
         <ul class="research-step-list">${groundedTokenShopRowPreview.rows.map((row) => `<li>${escapeHtml(row.label)}: ${isBoundaryValuePresent(row.value) ? escapeHtml(formatBoundaryValue(row.value)) : "Not imported yet"} <code>${escapeHtml(row.path)}</code>. ${escapeHtml(row.note)}</li>`).join("")}</ul>
         <p class="meta">${groundedTokenShopRowPreview.quarantineNote}</p>
-      </div>
-      <div class="meta-stack">
+    </div>
+    <div class="meta-stack">
         <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
         <ul class="research-step-list">${blockedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${escapeHtml(input.reason)}</li>`).join("")}</ul>
-      </div>
-      <div class="meta-stack">
-        <p class="snapshot-title">Active Emporium import-surface decision</p>
+    </div>
+    <div class="meta-stack">
+        <p class="snapshot-title">Compatibility-only Emporium preview boundary</p>
         <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
         <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That keeps ${marketMemberSummary.canonicalHostLabel} as the checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is ${marketMemberSummary.exactSaveOwnerLabel}.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
         <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the active lane stays on bounded import admissibility rather than planner logic or row remap.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save path and needs review."}</p>
         <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Grounded SaveData overlap currently stops at ordered rows ${escapeHtml(importedMarketPreview.overlapRangeLabel)}, and ordered overlap is not an import-admissibility result, so the canonical Emporium import-safe subset stays empty.` : "The current build does not yet expose an overlap-grounded Emporium subset, so the canonical import-safe subset stays empty."}</p>
         <p class="meta">${Array.isArray(emporiumTrack?.nextSteps) && emporiumTrack.nextSteps.length ? `Emporium next step: ${escapeHtml(emporiumTrack.nextSteps[0])}` : "Emporium next step is still the bounded import-surface decision, not planner logic or generic owner recovery."}</p>
-      </div>
-      <div class="meta-stack">
+    </div>
+    <div class="meta-stack">
         <p class="snapshot-title">Why recommendations stay unavailable</p>
         <p class="meta">Unresolved owners still prevent planner-safe recommendations. This slice does not claim best-buy order, ROI, ETA, optimizer correctness, or route quality while the blocked spend inputs remain unrecovered.</p>
         <p class="meta">Confidence label: canonical PlayerProfile values and explicitly labeled boundary-backed evidence only. Unresolved owner-dependent inputs stay explicitly unavailable instead of being inferred from compatibility blobs, extracted constants, or UI text hooks.</p>
-      </div>
-      ${nextSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Current lane next steps</p><ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
-      <div class="pill-row">
+    </div>
+    ${nextSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Research lane remains separate</p><ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+    <div class="pill-row">
         <span class="pill">${canonicalInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${canonicalInputs.length} canonical inputs entered</span>
         <span class="pill">${boundaryBackedInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${boundaryBackedInputs.length} boundary-backed inputs imported</span>
         <span class="pill">${groundedTokenShopRowPreview.importedCount}/${groundedTokenShopRowPreview.rows.length} grounded TokenShop rows imported</span>
         <span class="pill">${blockedInputs.length} blocked inputs surfaced</span>
         <span class="pill">Canonical boundary preserved</span>
         <span class="pill">Boundary-backed evidence labeled</span>
+        <span class="pill">Compatibility-only preview labeled</span>
         <span class="pill">Uncertainty visible</span>
         <span class="pill">No spend recommendations yet</span>
-      </div>
-    </article>
+    </div>
+  `;
+}
+
+function renderSpendPlannerResearchForkNote() {
+  return `
+    <div class="meta-stack">
+      <p class="snapshot-title">Forked user-surface slice</p>
+      <p class="meta">The first spend snapshot now lives on the Overview page as a normal app surface instead of growing inside a research-only card.</p>
+      <p class="meta">That user surface is still descriptive only: it shows canonical spend inputs, explicitly labeled boundary-backed evidence, one compatibility-only TokenShop subset preview, and the existing blocked owner-dependent inputs without recommendations.</p>
+      <p class="meta">Future growth beyond this descriptive gating should fork into a new slice rather than reopening the shipped snapshot surface.</p>
+    </div>
   `;
 }
 
@@ -2117,6 +2130,10 @@ function renderResearchTrackContract(track) {
 }
 
 function renderResearchTrackSupport(track) {
+  if (track.id === "spend-planner-first-ui-slice") {
+    return renderSpendPlannerResearchForkNote();
+  }
+
   if (track.id === "shards-and-loop-guardrails" || track.id === "shard-milestone-payload-recovery") {
     const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
     const finalSuBoundary = getShardFinalSuBonusBoundarySummary(state.shardGrounding?.finalSuBonusBoundary);
@@ -4632,7 +4649,7 @@ function getTokenShopGroundedRowPreviewSummary(boundary, tokenShopState) {
     }
   ];
   const rows = rowDefinitions.map((row) => ({
-    label: `${row.identity} (${row.slot}, non-canonical row preview)`,
+    label: `Compatibility-only row preview: ${row.identity} (${row.slot})`,
     value: resolvedTokenShopState[row.field],
     path: `compatibility.unmappedSystemState.tokenShop.${row.field}`,
     note: row.note
