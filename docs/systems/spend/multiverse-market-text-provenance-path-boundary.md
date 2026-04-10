@@ -55,6 +55,7 @@ This note records the narrowest checked game-side path from a structurally settl
   - `SetIS78BonusText` and `SetIS83BonusText` also read `IS78BonusText` / `IS83BonusText`, source their payload values from `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()`, pass through unresolved formatter helpers, and end in the same `UnityEngine.UI.Text` virtual-dispatch write pattern
   - the same exact runtime surface now also preserves the wider `IS1BonusText` through `IS110BonusText` field family and `SetIS1BonusText` through `SetIS110BonusText` writer family on `TextHandlerMarkets`
   - that same runtime surface also preserves `IS1IDText` through `IS110IDText` and `SetIS1IDText` through `SetIS110IDText`, while exposing no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family and no `SetISNDescriptionText` family
+  - the widened runtime search also checks `NavigationManager` and `TextHandlerShopNPCs` as the obvious Emporium-adjacent fallback owners for the current-value slot, but only recovers orchestration-side `Market` / `InscryptionList` / `UpdateInscryptionUI` and shop-dialogue-side `EmporiumDialogueText` / `EmporiumCurrentText` / `DisplayTextEmporium`, not any row-local `CurrentBonusText` producer
   - that means the repo now recovers both a checked runtime base-bonus write lane and a separate checked runtime effect-label write lane, and can close the row-local effect-label slot alias by elimination to `BonusDescriptionText`
 - This means the repo can now name two checked game-side text-adjacent source classes:
   - direct Unity string anchors in the `TextHandlerMarkets` neighborhood
@@ -92,7 +93,7 @@ This note records the narrowest checked game-side path from a structurally settl
   - `System.String.Concat`
   - into the now-closed row-local slot binding `BonusDescriptionText`
 - What is still not recovered is:
-  - the dedicated runtime method family, if any, that writes `CurrentBonusText`
+  - the dedicated runtime method family, if any, that writes `CurrentBonusText`, after explicit negative checks against `TextHandlerMarkets`, `NavigationManager`, and `TextHandlerShopNPCs`
   - the exact helper/type names behind the remaining formatter RVAs inside the already recovered `BonusDescriptionText` payload path
   - a broader typed join from that runtime path back to rows `69-74` or the rest of the Emporium table
 - The live local assets no longer look like the missing layer:
@@ -109,6 +110,6 @@ Current grounded conclusion:
 - the repo also now recovers a parallel runtime effect-label write family: `SetIS78BonusText` / `SetIS83BonusText` / `SetISNBonusText`
 - the row-local slot alias for that recovered effect-label family is now closed to `BonusDescriptionText`
 - the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus unresolved formatter helpers and `System.String.Concat`
-- `CurrentBonusText` remains a separate unrecovered writer lane because `TextHandlerMarkets` has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family in the checked runtime surface
+- `CurrentBonusText` remains a separate unrecovered writer lane because `TextHandlerMarkets` has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family in the checked runtime surface, and the widened runtime search also checks `NavigationManager` and `TextHandlerShopNPCs` without recovering a row-local CurrentBonusText producer there either
 - the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane plus the unresolved helper-name layer inside the already recovered `BonusDescriptionText` payload path
 - compatibility-only import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked

@@ -3620,6 +3620,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(boundaryDoc, /BonusDescriptionText/, "multiverse market text-provenance path boundary doc must preserve the closed effect-label slot alias");
   assert.match(boundaryDoc, /separate dedicated `CurrentBonusText` runtime writer lane/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
   assert.match(boundaryDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market text-provenance path boundary doc must preserve the narrowed control payload source");
+  assert.match(boundaryDoc, /NavigationManager/, "multiverse market text-provenance path boundary doc must preserve the checked negative orchestration owner");
+  assert.match(boundaryDoc, /TextHandlerShopNPCs/, "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue owner");
   assert.match(stateDoc, /## Checked control-row text-provenance path boundary/, "multiverse market state verification doc must expose the control-row text-provenance path boundary section");
   assert.match(stateDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market state verification doc must preserve the control row string anchor");
   assert.match(stateDoc, /OUROBOROS POINTS GAINED/i, "multiverse market state verification doc must preserve the row 78 live-text mismatch");
@@ -3634,6 +3636,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(stateDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i, "multiverse market state verification doc must preserve the closed slot alias");
   assert.match(stateDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market state verification doc must preserve the narrowed control payload source");
   assert.match(stateDoc, /separate `CurrentBonusText` writer lane/i, "multiverse market state verification doc must preserve the exact remaining blocker");
+  assert.match(stateDoc, /NavigationManager/, "multiverse market state verification doc must preserve the checked negative orchestration owner");
+  assert.match(stateDoc, /TextHandlerShopNPCs/, "multiverse market state verification doc must preserve the checked negative dialogue owner");
   assert.match(verificationDoc, /## Checked control-row text-provenance path boundary/, "multiverse market verification doc must expose the control-row text-provenance path boundary section");
   assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the control row string anchor");
   assert.match(verificationDoc, /OUROBOROS POINTS GAINED/i, "multiverse market verification doc must preserve the row 78 live-text mismatch");
@@ -3648,6 +3652,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(verificationDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i, "multiverse market verification doc must preserve the closed slot alias");
   assert.match(verificationDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market verification doc must preserve the narrowed control payload source");
   assert.match(verificationDoc, /separate `CurrentBonusText` writer lane/i, "multiverse market verification doc must preserve the narrowed text-slot blocker");
+  assert.match(verificationDoc, /NavigationManager/, "multiverse market verification doc must preserve the checked negative orchestration owner");
+  assert.match(verificationDoc, /TextHandlerShopNPCs/, "multiverse market verification doc must preserve the checked negative dialogue owner");
 
   return {
     id: "multiverse-market-text-provenance-path-boundary",

@@ -456,6 +456,81 @@ static object BuildRuntimeTypeMetadata(
     };
 }
 
+static object BuildRuntimeAssemblySearchMetadata(
+    string assemblyName,
+    IEnumerable<LibCpp2IL.Metadata.Il2CppTypeDefinition> types,
+    string[] fieldPatterns,
+    string[] methodPatterns)
+{
+    var matches = types
+        .Select(type =>
+        {
+            var fieldHits = type.Fields
+                .Select((field, index) => new { field, index })
+                .Where(entry =>
+                    fieldPatterns.Any(pattern =>
+                        entry.field.Name.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+                .Select(entry => new
+                {
+                    index = entry.index,
+                    name = entry.field.Name,
+                    type = entry.field.FieldType?.ToString()
+                })
+                .ToArray();
+
+            var methodHits = type.Methods
+                .Where(method =>
+                    methodPatterns.Any(pattern =>
+                        method.Name.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+                .Select((method, index) => new
+                {
+                    index,
+                    name = method.Name,
+                    returnType = method.ReturnType?.ToString(),
+                    methodProperties = ReflectSerializablePublicProperties(method)
+                })
+                .ToArray();
+
+            return new
+            {
+                typeName = type.Name,
+                fullName = type.FullName,
+                fieldHits,
+                methodHits
+            };
+        })
+        .Where(entry => entry.fieldHits.Length > 0 || entry.methodHits.Length > 0)
+        .OrderBy(entry => entry.fullName, StringComparer.Ordinal)
+        .ToArray();
+
+    return new
+    {
+        assemblyName,
+        fieldPatterns,
+        methodPatterns,
+        matchCount = matches.Length,
+        matches
+    };
+}
+
+static object BuildFilteredRuntimeAssemblySearchMetadata(
+    string assemblyName,
+    IEnumerable<LibCpp2IL.Metadata.Il2CppTypeDefinition> types,
+    string[] typeNamePatterns,
+    string[] fieldPatterns,
+    string[] methodPatterns)
+{
+    var filteredTypes = types
+        .Where(type =>
+            typeNamePatterns.Length == 0 ||
+            typeNamePatterns.Any(pattern =>
+                type.FullName.Contains(pattern, StringComparison.OrdinalIgnoreCase) ||
+                type.Name.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+        .ToArray();
+
+    return BuildRuntimeAssemblySearchMetadata(assemblyName, filteredTypes, fieldPatterns, methodPatterns);
+}
+
 var manager = new AssetsManager();
 manager.LoadClassPackage(Path.Combine(uabeaDir, "classdata.tpk"));
 
@@ -493,6 +568,8 @@ if (runtimeReportPath is not null)
             var runtimeTargets = new[]
             {
                 new { reportKey = "textHandlerMarkets", assemblyName = "Assembly-CSharp", lookupNames = new[] { "TextHandlerMarkets" }, methodPatterns = new[] { "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetIS", "ClearISObjects", "SetISMaxLevelObjects" } },
+                new { reportKey = "textHandlerShopNpcs", assemblyName = "Assembly-CSharp", lookupNames = new[] { "TextHandlerShopNPCs" }, methodPatterns = new[] { "DisplayTextEmporium", "Emporium", "DisplayText" } },
+                new { reportKey = "navigationManager", assemblyName = "Assembly-CSharp", lookupNames = new[] { "NavigationManager" }, methodPatterns = new[] { "UpdateInscryptionUI", "Inscrypt", "Emporium" } },
                 new { reportKey = "multiverseMarket", assemblyName = "Assembly-CSharp", lookupNames = new[] { "MultiverseMarket" }, methodPatterns = Array.Empty<string>() },
                 new { reportKey = "unityUiText", assemblyName = "UnityEngine.UI", lookupNames = new[] { "UnityEngine.UI.Text", "Text" }, methodPatterns = new[] { "set_text", "get_text", "set_supportRichText", "OnPopulateMesh" } },
                 new { reportKey = "string", assemblyName = "mscorlib", lookupNames = new[] { "System.String", "String" }, methodPatterns = new[] { "Concat", "Format" } }
@@ -517,6 +594,61 @@ if (runtimeReportPath is not null)
             }
 
             runtimeProbe["targets"] = results.ToArray();
+
+            if (assemblies.TryGetValue("Assembly-CSharp", out var assemblyCSharp))
+            {
+                IEnumerable<LibCpp2IL.Metadata.Il2CppTypeDefinition> assemblyTypes =
+                    assemblyCSharp.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>();
+                runtimeProbe["assemblySearches"] = new[]
+                {
+                    BuildRuntimeAssemblySearchMetadata(
+                        "Assembly-CSharp",
+                        assemblyTypes,
+                        new[]
+                        {
+                            "CurrentBonusText",
+                            "ActualBonusText",
+                            "TotalBonusText",
+                            "BonusText1",
+                            "CurrentBonusPerLevelText"
+                        },
+                        new[]
+                        {
+                            "SetCurrentBonus",
+                            "CurrentBonus",
+                            "ActualBonus",
+                            "TotalBonus",
+                            "BonusText1"
+                        }),
+                    BuildFilteredRuntimeAssemblySearchMetadata(
+                        "Assembly-CSharp",
+                        assemblyTypes,
+                        new[]
+                        {
+                            "Market",
+                            "Inscrypt",
+                            "Chrystos",
+                            "Emporium"
+                        },
+                        new[]
+                        {
+                            "Current",
+                            "ActualBonus",
+                            "TotalBonus",
+                            "BonusText",
+                            "DescriptionText",
+                            "IDText"
+                        },
+                        new[]
+                        {
+                            "Current",
+                            "BonusText",
+                            "DescriptionText",
+                            "IDText",
+                            "SetAll"
+                        })
+                };
+            }
         }
     }
     catch (Exception ex)
@@ -662,6 +794,29 @@ if (!seededOnlyMode)
                             .ToArray()
                     });
                 }
+
+                directLibCpp2IlProbe["assemblySearches"] = new[]
+                {
+                    BuildRuntimeAssemblySearchMetadata(
+                        "Assembly-CSharp",
+                        assemblyTypes,
+                        new[]
+                        {
+                            "CurrentBonusText",
+                            "ActualBonusText",
+                            "TotalBonusText",
+                            "BonusText1",
+                            "CurrentBonusPerLevelText"
+                        },
+                        new[]
+                        {
+                            "SetCurrentBonus",
+                            "CurrentBonus",
+                            "ActualBonus",
+                            "TotalBonus",
+                            "BonusText1"
+                        })
+                };
             }
         }
     }
