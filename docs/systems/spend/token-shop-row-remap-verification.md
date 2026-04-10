@@ -73,6 +73,11 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
     - diamond-special surface: `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost`
     - token-prefab and title surface: `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells`
   - none of those committed surfaces currently provides a checked object or text join back to `ATU3Button` path id `15810`.
+  - the bounded ATU3 cells-domain disambiguation pass also now stays negative across the exact named candidates:
+    - `BuyCellBoost` stays a generic TokenShop action cluster with `StartCellBostHold` and `StopCellBostHold`, not a direct ATU3 identity bridge
+    - the diamond-special `CellsBoost` prefab and `>Diamond Upgrade 10 - CellsBoost` title remain a separate diamond lane
+    - the token-side `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` clues remain a separate token lane
+    - none of those checked surfaces crosses back to `ATU3Button` path id `15810`
   - `ATU5` and `ATU6` clearing do not change that rule for the rest of the lane:
     - they clear because one exact owner-field block, one exact buy hook, and one exact token prefab converge on the same `MK1` or `MK2` family
     - the repo now has one checked final title join for `ATU6Button`, but still does not have one for `ATU5Button`
@@ -108,6 +113,11 @@ Because those joins are still missing, the repo should not:
   - `NewDiamondUPGPrefab.Specials.CellsBoost` with `>Diamond Upgrade 10 - CellsBoost` proves one separate diamond-special identity surface
   - `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` prove separate token-prefab and title surfaces
   - no checked repo artifact joins any of those named cells surfaces directly to `ATU3Button` or path id `15810`
+- The new bounded ATU3 disambiguation pass does not change that blocked conclusion:
+  - the checked `BuyCellBoost` lane still preserves only a generic TokenShop action cluster with `StartCellBostHold`, `StopCellBostHold`, and nearby unlabeled percent strings
+  - the checked diamond-special surface still preserves `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost` as a separate lane
+  - the checked token-side surface still preserves `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` as a separate lane
+  - none of those exact candidate surfaces yields one concrete object or title join back to `ATU3Button` path id `15810`
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`
@@ -130,11 +140,8 @@ Recover one more checked identity bridge from the still-unresolved `ATU`-numbere
 - a specific `NewTokenUPGPrefab.*` object, or
 - a final player-facing row title
 
-The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, so the next honest candidate is specifically:
+The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, and the bounded ATU3 cells-domain pass is now also a negative result, so the next honest candidate is:
 
-- for `ATU3`, run a cells-domain disambiguation pass that tries to join `ATU3Button` path id `15810` to one of three exact committed surfaces:
-  - `BuyCellBoost`
-  - the diamond-special `CellsBoost` prefab or title surface
-  - the separate token-prefab or `Token Ultima: Cells` title surface
+- move to a different unresolved `ATU` shell and recover one more exact shell-to-prefab or shell-to-title bridge without reopening the ATU3 cells split unless a new committed artifact explicitly crosses back to path id `15810`
 
 If only one additional subset clears that bar, keep the rest of the `ATU` family quarantined instead of forcing a full remap.
