@@ -3628,6 +3628,37 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
     },
     "multiverse market text-provenance path boundary supportedRowLocalTextModel drifted"
   );
+  assert.deepEqual(
+    boundary.appSideRowSummaryShape,
+    {
+      shapeId: "multiverse-market-row-local-text-summary",
+      groundedFields: [
+        {
+          key: "effectLabel",
+          slotAlias: "BonusDescriptionText",
+          sourceLane: "SetAllBonusTexts -> SetISNBonusText"
+        },
+        {
+          key: "baseBonus",
+          slotAlias: "PerLevelBonusText",
+          sourceLane: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText"
+        },
+        {
+          key: "rowIdLabel",
+          slotAlias: "IDText",
+          sourceLane: "SetIS1IDText through SetIS110IDText"
+        }
+      ],
+      quarantinedFields: [
+        {
+          key: "currentValueDisplay",
+          slotAlias: "CurrentBonusText",
+          status: "quarantined-unrecovered-runtime-only-display-lane"
+        }
+      ]
+    },
+    "multiverse market text-provenance path boundary appSideRowSummaryShape drifted"
+  );
   assert.equal(boundary.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
   assert.deepEqual(
     boundary.lastMissingBindingLayer.currentlyRecoveredInputs,
@@ -3646,6 +3677,10 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   assert.match(boundaryDoc, /BonusDescriptionText/, "multiverse market text-provenance path boundary doc must preserve the closed effect-label slot alias");
   assert.match(boundaryDoc, /PerLevelBonusText/, "multiverse market text-provenance path boundary doc must preserve the grounded base-bonus lane");
   assert.match(boundaryDoc, /IDText/, "multiverse market text-provenance path boundary doc must preserve the grounded id lane");
+  assert.match(boundaryDoc, /`effectLabel`/, "multiverse market text-provenance path boundary doc must preserve the app-side effectLabel key");
+  assert.match(boundaryDoc, /`baseBonus`/, "multiverse market text-provenance path boundary doc must preserve the app-side baseBonus key");
+  assert.match(boundaryDoc, /`rowIdLabel`/, "multiverse market text-provenance path boundary doc must preserve the app-side rowIdLabel key");
+  assert.match(boundaryDoc, /`currentValueDisplay`/, "multiverse market text-provenance path boundary doc must preserve the quarantined app-side currentValueDisplay key");
   assert.match(boundaryDoc, /separate dedicated `CurrentBonusText` runtime writer lane/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
   assert.match(boundaryDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market text-provenance path boundary doc must preserve the narrowed control payload source");
   assert.match(boundaryDoc, /SetAllBonusTexts/, "multiverse market text-provenance path boundary doc must preserve the recovered effect-label batch method");

@@ -175,6 +175,33 @@
       "reason": "No typed CurrentBonusText field, SetCurrentBonusText writer family, or recovered row-local producer is present in the checked runtime surface."
     }
   },
+  "appSideRowSummaryShape": {
+    "shapeId": "multiverse-market-row-local-text-summary",
+    "groundedFields": [
+      {
+        "key": "effectLabel",
+        "slotAlias": "BonusDescriptionText",
+        "sourceLane": "SetAllBonusTexts -> SetISNBonusText"
+      },
+      {
+        "key": "baseBonus",
+        "slotAlias": "PerLevelBonusText",
+        "sourceLane": "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText"
+      },
+      {
+        "key": "rowIdLabel",
+        "slotAlias": "IDText",
+        "sourceLane": "SetIS1IDText through SetIS110IDText"
+      }
+    ],
+    "quarantinedFields": [
+      {
+        "key": "currentValueDisplay",
+        "slotAlias": "CurrentBonusText",
+        "status": "quarantined-unrecovered-runtime-only-display-lane"
+      }
+    ]
+  },
   "lastMissingBindingLayer": {
     "layerName": "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted",
     "currentlyRecoveredInputs": [

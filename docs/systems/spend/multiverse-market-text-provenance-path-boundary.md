@@ -101,6 +101,15 @@ This note records the narrowest checked game-side path from a structurally settl
     - grounded id lane via `SetIS1IDText` through `SetIS110IDText`
   - `CurrentBonusText`
     - quarantined as a distinct unrecovered runtime-only display lane
+- The smallest app-side row summary shape the repo can now support is:
+  - `effectLabel`
+    - from `BonusDescriptionText`
+  - `baseBonus`
+    - from `PerLevelBonusText`
+  - `rowIdLabel`
+    - from `IDText`
+  - `currentValueDisplay`
+    - reserved only as quarantined `CurrentBonusText`, not grounded product truth
 - The isolated missing layer is now:
   - the separate dedicated `CurrentBonusText` runtime writer lane, after the last plausible row-local update surfaces are exhausted
 - In practical terms, the repo still needs the step that turns:

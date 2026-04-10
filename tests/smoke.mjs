@@ -2575,6 +2575,33 @@ assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.supportedRowLoca
     reason: "No typed CurrentBonusText field, SetCurrentBonusText writer family, or recovered row-local producer is present in the checked runtime surface."
   }
 });
+assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.appSideRowSummaryShape, {
+  shapeId: "multiverse-market-row-local-text-summary",
+  groundedFields: [
+    {
+      key: "effectLabel",
+      slotAlias: "BonusDescriptionText",
+      sourceLane: "SetAllBonusTexts -> SetISNBonusText"
+    },
+    {
+      key: "baseBonus",
+      slotAlias: "PerLevelBonusText",
+      sourceLane: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText"
+    },
+    {
+      key: "rowIdLabel",
+      slotAlias: "IDText",
+      sourceLane: "SetIS1IDText through SetIS110IDText"
+    }
+  ],
+  quarantinedFields: [
+    {
+      key: "currentValueDisplay",
+      slotAlias: "CurrentBonusText",
+      status: "quarantined-unrecovered-runtime-only-display-lane"
+    }
+  ]
+});
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.currentlyRecoveredInputs,
@@ -3091,6 +3118,17 @@ assert.match(appJs, /PerLevelBonusText/);
 assert.match(appJs, /IDText/);
 assert.match(appJs, /CurrentBonusText/);
 assert.match(appJs, /distinct unrecovered runtime-only display lane/i);
+assert.match(appJs, /multiverse-market-row-local-text-summary/);
+assert.match(appJs, /effectLabel/);
+assert.match(appJs, /baseBonus/);
+assert.match(appJs, /rowIdLabel/);
+assert.match(appJs, /currentValueDisplay/);
+assert.match(appJs, /App-side Emporium row summaries now normalize only the grounded lanes/i);
+assert.match(appJs, /const overlapRowSummaries = importedOverlapRows\.map/);
+assert.match(appJs, /Structured compatibility evidence from <code>\$\{escapeHtml\(entry\.shapeId\)\}<\/code>:/);
+assert.match(appJs, /grounded-compatibility-evidence/);
+assert.match(appJs, /quarantined-unrecovered-runtime-only-display-lane/);
+assert.match(appJs, /Distinct unrecovered runtime-only display lane/);
 assert.match(appJs, /compatibility-only Emporium import state under <code>\$\{escapeHtml\(preview\.importTargetPath\)\}<\/code>\. It preserves the checked raw <code>\$\{escapeHtml\(preview\.typedSpanLabel\)\}<\/code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only\./i);
 assert.match(appJs, /wrapperOnlyFieldLabel\)\}<\/code> stays wrapper-only and is intentionally excluded from this preview/);
 assert.match(appJs, /Imported trade-counter quarantine currently covers \${escapeHtml\(preview\.tradeCounterLabel\)\} with \${preview\.importedTradeCounterCount} recovered fields\./);

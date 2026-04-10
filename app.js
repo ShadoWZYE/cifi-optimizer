@@ -4937,6 +4937,53 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     .filter(Boolean);
   const importedEarlyMechKeySet = new Set(importedEarlyMechFields.map((entry) => entry.key));
   const missingEarlyMechFields = earlyMechWindowKeys.filter((key) => !importedEarlyMechKeySet.has(key));
+  const supportedTextModel = {
+    effectLabelLane: "BonusDescriptionText",
+    baseBonusLane: "PerLevelBonusText",
+    idLane: "IDText",
+    quarantinedCurrentValueLane: "CurrentBonusText"
+  };
+  const rowSummaryShape = {
+    shapeId: "multiverse-market-row-local-text-summary",
+    groundedFields: [
+      {
+        key: "effectLabel",
+        slotAlias: supportedTextModel.effectLabelLane,
+        sourceLane: "SetAllBonusTexts -> SetISNBonusText"
+      },
+      {
+        key: "baseBonus",
+        slotAlias: supportedTextModel.baseBonusLane,
+        sourceLane: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText"
+      },
+      {
+        key: "rowIdLabel",
+        slotAlias: supportedTextModel.idLane,
+        sourceLane: "SetIS1IDText through SetIS110IDText"
+      }
+    ],
+    quarantinedFields: [
+      {
+        key: "currentValueDisplay",
+        slotAlias: supportedTextModel.quarantinedCurrentValueLane,
+        status: "quarantined-unrecovered-runtime-only-display-lane"
+      }
+    ]
+  };
+  const overlapRowSummaries = importedOverlapRows.map((entry) => ({
+    rowId: entry.rowId,
+    level: entry.level,
+    fieldPath: entry.fieldPath,
+    shapeId: rowSummaryShape.shapeId,
+    groundedFields: rowSummaryShape.groundedFields.map((field) => ({
+      ...field,
+      status: "grounded-compatibility-evidence"
+    })),
+    quarantinedFields: rowSummaryShape.quarantinedFields.map((field) => ({
+      ...field,
+      reason: "Distinct unrecovered runtime-only display lane"
+    }))
+  }));
 
   return {
     hasImportedCompatibilityPreview: importedSpanRows.length > 0 || importedTradeCounters.length > 0 || importedEarlyMechFields.length > 0,
@@ -4963,6 +5010,7 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     hasOverlapLevelPreview: importedOverlapRows.length > 0,
     importedOverlapRowCount: importedOverlapRows.length,
     overlapPreviewRows: importedOverlapRows.slice(0, 4),
+    overlapRowSummaries: overlapRowSummaries.slice(0, 4),
     missingOverlapRows,
     missingOverlapLabel: missingOverlapRows.length
       ? missingOverlapRows.map((rowId) => `IS${rowId}Level`).join(", ")
@@ -4985,12 +5033,8 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     missingEarlyMechLabel: missingEarlyMechFields.length ? missingEarlyMechFields.join(", ") : "none",
     previewRows,
     trailingPreviewRows,
-    supportedTextModel: {
-      effectLabelLane: "BonusDescriptionText",
-      baseBonusLane: "PerLevelBonusText",
-      idLane: "IDText",
-      quarantinedCurrentValueLane: "CurrentBonusText"
-    },
+    supportedTextModel,
+    rowSummaryShape,
     sampleLine: previewRows.length
       ? previewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | ")
       : ""
@@ -5019,6 +5063,7 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
         <p class="meta"><code>${escapeHtml(preview.wrapperOnlyFieldLabel)}</code> stays wrapper-only and is intentionally excluded from this preview even when it exists in the imported compatibility blob.</p>
         <p class="meta">The grounded Emporium text model is split: <code>${escapeHtml(preview.supportedTextModel.effectLabelLane)}</code> is the recovered effect-label lane, <code>${escapeHtml(preview.supportedTextModel.baseBonusLane)}</code> is the recovered base-bonus lane, and <code>${escapeHtml(preview.supportedTextModel.idLane)}</code> is the recovered id lane.</p>
         <p class="meta"><code>${escapeHtml(preview.supportedTextModel.quarantinedCurrentValueLane)}</code> remains a distinct unrecovered runtime-only display lane. It is explicitly quarantined from the preview and is not treated as grounded Emporium truth, planner input, or canonical player state.</p>
+        <p class="meta">App-side Emporium row summaries now normalize only the grounded lanes into <code>${escapeHtml(preview.rowSummaryShape.shapeId)}</code>: ${preview.rowSummaryShape.groundedFields.map((field) => `<code>${escapeHtml(field.key)}</code> from <code>${escapeHtml(field.slotAlias)}</code>`).join(", ")}. ${preview.rowSummaryShape.quarantinedFields.map((field) => `<code>${escapeHtml(field.key)}</code> stays quarantined as <code>${escapeHtml(field.slotAlias)}</code>`).join(", ")}.</p>
         <p class="meta">${preview.importedRangeLabel ? `Imported raw Emporium levels currently cover ${escapeHtml(preview.firstImportedRowLabel)} through ${escapeHtml(preview.lastImportedRowLabel)} across rows ${escapeHtml(preview.importedRangeLabel)}.` : "No raw Emporium level fields are currently imported from the checked compatibility span."}</p>
         <p class="meta">${preview.missingSpanCount ? `Missing raw span fields still absent from this import: ${escapeHtml(preview.missingSpanLabel)}${preview.missingSpanCount > 12 ? "..." : ""}.` : "All raw fields in the checked IS1Level through IS110Level compatibility span are present in this import."}</p>
         <p class="meta">${preview.hasTradeCounterPreview ? `Imported trade-counter quarantine currently covers ${escapeHtml(preview.tradeCounterLabel)} with ${preview.importedTradeCounterCount} recovered fields.` : "No adjacent trade-counter quarantine fields are currently imported from the checked compatibility envelope."}</p>
@@ -5027,11 +5072,16 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
         <p class="meta">${preview.missingEarlyMechFields.length ? `Missing early-mech quarantine fields: ${escapeHtml(preview.missingEarlyMechLabel)}.` : "All checked early-mech quarantine fields are present in this import."}</p>
         <p class="meta">${preview.hasOverlapGroundedRows ? `The checked ordered-overlap support rows ${escapeHtml(preview.overlapRangeLabel)} are tracked only as boundary evidence. Missing ordered-overlap imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "No ordered-overlap support rows are available in this build."}</p>
         <p class="meta">Planner use stays blocked. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence, not canonical player truth, not row-label claims, not complete live-text bindings, and not recommendation inputs.</p>
-        ${preview.hasOverlapLevelPreview ? `<div class="preview-stack">${preview.overlapPreviewRows.map((entry) => `
+        ${preview.hasOverlapLevelPreview ? `<div class="preview-stack">${preview.overlapRowSummaries.map((entry) => `
           <article class="preview-card">
             <strong>IS${escapeHtml(String(entry.rowId))}Level overlap support</strong>
             <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))} at <code>${escapeHtml(entry.fieldPath)}</code>.</p>
             <p class="meta">This row sits inside the checked ordered-overlap support band only. It is still not a recovered player-facing row label or canonical Emporium identity.</p>
+            <p class="meta">Structured compatibility evidence from <code>${escapeHtml(entry.shapeId)}</code>:</p>
+            <div class="meta-stack">
+              ${entry.groundedFields.map((field) => `<p class="meta"><code>${escapeHtml(field.key)}</code> -> <code>${escapeHtml(field.slotAlias)}</code> via <code>${escapeHtml(field.sourceLane)}</code> (${escapeHtml(field.status)})</p>`).join("")}
+              ${entry.quarantinedFields.map((field) => `<p class="meta"><code>${escapeHtml(field.key)}</code> -> <code>${escapeHtml(field.slotAlias)}</code> (${escapeHtml(field.status)}; ${escapeHtml(field.reason)})</p>`).join("")}
+            </div>
           </article>
         `).join("")}</div>` : ""}
         <div class="preview-stack">${preview.previewRows.map((entry) => `
