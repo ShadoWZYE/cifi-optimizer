@@ -10,6 +10,7 @@
     "unityProbeReport": "data/unity-probe-report.json",
     "rowSeededAssetProbe": "data/multiverse-market-row78-83-seeded-reference-probe.json",
     "textComponentProbe": "data/multiverse-market-row78-83-text-components-probe.json",
+    "assignmentSiteProbe": "data/multiverse-market-row78-83-assignment-site-probe.json",
     "tmpRowTextProbe": "tmp-multiverse-row-text-probe.json",
     "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
@@ -59,6 +60,24 @@
       ],
       "missingJoin": "No checked repo-local asset or typed-method join routes TextHandlerMarkets or SetISNBaseBonusText into the recovered row-local slot objects or into the final string payload assigned to their UnityEngine.UI.Text components."
     },
+    "assignmentSiteRecovery": {
+      "status": "serialized-row-local-ownership-only",
+      "artifact": "data/multiverse-market-row78-83-assignment-site-probe.json",
+      "candidateProducerScriptsChecked": [
+        "TextHandlerMarkets",
+        "MultiverseMarket"
+      ],
+      "seededAssignmentSiteHitCount": 70,
+      "recoveredSerializedOwnershipGraph": [
+        "GameObject -> attached Text, Outline, Shadow, and Image component ownership",
+        "RectTransform -> m_GameObject backlinks for row-local slot objects",
+        "CanvasRenderer -> m_GameObject backlinks for row-local slot objects"
+      ],
+      "candidateProducerSerializedHits": 0,
+      "externalSerializedProducerHits": 0,
+      "runtimeOnlyInference": true,
+      "conclusion": "The local serialized asset graph stops at row-local ownership and component attachment. No serialized TextHandlerMarkets or MultiverseMarket object points into the recovered row-local UnityEngine.UI.Text components, so the final effect-text assignment is most defensibly runtime-only code rather than a serialized live-asset binding."
+    },
     "liveOutputCheck": {
       "validationTarget": "user-supplied row 78 screenshot",
       "displayedRowLabel": "INSCRYPTION #78",
@@ -85,9 +104,13 @@
       {
         "artifact": "data/multiverse-market-row78-83-text-components-probe.json",
         "claim": "the seeded component walk recovers concrete UnityEngine.UI.Text components on the row-local CurrentBonusText, BonusDescriptionText, PerLevelBonusText, and DescriptionText objects, plus adjacent Image, Outline, and Shadow components"
+      },
+      {
+        "artifact": "data/multiverse-market-row78-83-assignment-site-probe.json",
+        "claim": "the assignment-site scan recovers only row-local ownership edges such as GameObject to Text or Outline or Shadow or Image plus RectTransform and CanvasRenderer backlinks, with zero serialized TextHandlerMarkets or MultiverseMarket producer links into those row-local text components"
       }
     ],
-    "conclusion": "A real text-adjacent path is recoverable for a control row as both a sparse Unity string anchor and a row-local asset-slot chain, but the repo still does not recover the typed or asset-side consumer that assigns final live effect text into those slot-local UnityEngine.UI.Text components."
+    "conclusion": "A real text-adjacent path is recoverable for a control row as both a sparse Unity string anchor and a row-local asset-slot chain, and the deeper assignment-site pass now shows that the local serialized assets stop at ownership links. The final live effect-text assignment is therefore still unrecovered repo-locally and most defensibly sits in runtime-only code."
   },
   "scalingCheck": {
     "broadHandlerFamilyRecovered": [
@@ -116,12 +139,12 @@
     "whyNot": [
       "The repo recovers a broad TextHandlerMarkets-side SetAllBaseBonusTexts or SetISNBaseBonusText method family, but not the concrete text payloads those methods emit.",
       "The repo separately recovers sparse Unity string anchors for only a few control rows, including rows 78 and 83, but the row 78 screenshot now shows that the anchor text does not reproduce the live effect text.",
-      "The live-asset seed walk now recovers mirrored row-local slot objects for rows 78 and 83, but that asset-side chain still stops at generic UnityEngine.UI.Text or Outline or Shadow components rather than a recovered text payload assignment.",
-      "No checked repo-local consumer or binding layer joins SetISNBaseBonusText to direct player-facing strings, localization keys, or the recovered row-local UnityEngine.UI.Text components across the table."
+      "The live-asset seed walk now recovers mirrored row-local slot objects for rows 78 and 83, and the assignment-site scan shows that the serialized asset graph stops at those objects' own Text or Outline or Shadow or Image component ownership.",
+      "No serialized TextHandlerMarkets or MultiverseMarket object links into the recovered row-local UnityEngine.UI.Text components, so no local serialized producer-side assignment path is recoverable across the table."
     ]
   },
   "lastMissingBindingLayer": {
-    "layerName": "TextHandlerMarkets to row-local UnityEngine.UI.Text payload-assignment join",
+    "layerName": "runtime-only payload-assignment layer after row-local UnityEngine.UI.Text component ownership graph",
     "currentlyRecoveredInputs": [
       "TextHandlerMarkets",
       "THMarkets",
@@ -137,22 +160,25 @@
       "IDText",
       "IconBox",
       "UnityEngine.UI.Text",
+      "UnityEngine.UI.Image",
       "UnityEngine.UI.Outline",
-      "UnityEngine.UI.Shadow"
+      "UnityEngine.UI.Shadow",
+      "RectTransform",
+      "CanvasRenderer"
     ],
     "notYetRecovered": [
-      "the Emporium-specific consumer or adjacent join that routes SetISNBaseBonusText or SetAllBaseBonusTexts into recovered row-local slot objects such as CurrentBonusText, BonusDescriptionText, PerLevelBonusText, or DescriptionText",
-      "the final string payload or localization-key assignment written into the recovered UnityEngine.UI.Text components on those slot objects",
+      "the runtime-side consumer or adjacent code path that routes SetISNBaseBonusText or SetAllBaseBonusTexts into recovered row-local slot objects such as CurrentBonusText, BonusDescriptionText, PerLevelBonusText, or DescriptionText",
+      "the final string payload or localization-key assignment written into the recovered UnityEngine.UI.Text components on those slot objects at runtime",
       "a checked repo-local binding from that payload-assignment step back to rows 69-74 or the wider Emporium table"
     ],
-    "smallestDefensibleConclusion": "The isolated missing source class is no longer generic label provenance or generic slot discovery. It is the final TextHandlerMarkets-side payload-assignment join from the recovered SetISNBaseBonusText family into the recovered row-local UnityEngine.UI.Text components and then into concrete live player-facing effect text."
+    "smallestDefensibleConclusion": "The isolated missing source class is no longer generic label provenance, generic slot discovery, or serialized asset binding. The live local assets recover only the row-local ownership graph, so the final assignment into the recovered UnityEngine.UI.Text components is most defensibly a runtime-only code path that remains unrecovered repo-locally."
   },
   "currentBoundary": [
     "The current structural row model stays unchanged: row identity still rides SaveData.ISNLevel through ISNID through BuyISN or SetISNCostText and row payload ID or Level or ISObject carriers.",
     "Rows 78 and 83 must now be treated as partial text-adjacent controls, not completed player-facing label bindings.",
     "A real text-adjacent control-row path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain, but not as a recovered scalable row-to-live-effect-text join.",
     "The broadest checked handler-side scaling clue is SetAllBaseBonusTexts plus the SetISNBaseBonusText family, while the live-asset seed walk independently recovers row-local slot objects and UnityEngine.UI.Text components for rows 78 and 83.",
-    "The repo still lacks the Emporium-specific join that routes those methods into the recovered row-local text objects and then into the final payload assigned to their UnityEngine.UI.Text components.",
+    "The deeper assignment-site probe now shows that local serialized assets stop at row-local ownership edges, with no serialized TextHandlerMarkets or MultiverseMarket producer links into those text components. The remaining assignment step is therefore most defensibly runtime-only code.",
     "This does not widen canonical import, planner behavior, or the shipped compatibility preview. compatibility.unmappedSystemState.multiverseMarket stays compatibility-only, InscryptionsDone stays wrapper-only, and canonical state.playerProfile promotion stays blocked."
   ]
 }

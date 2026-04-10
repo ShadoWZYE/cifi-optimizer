@@ -2539,6 +2539,9 @@ assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.rowLocalAssetBinding.recoveredComponentTypes,
   ["UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow"]
 );
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.assignmentSiteRecovery.candidateProducerSerializedHits, 0);
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.assignmentSiteRecovery.externalSerializedProducerHits, 0);
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.assignmentSiteRecovery.runtimeOnlyInference, true);
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.controlRowTextPath.liveOutputCheck.displayedEffectText, "OUROBOROS POINTS GAINED");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.scalingCheck.broadHandlerFamilyRecovered,
@@ -2550,10 +2553,10 @@ assert.deepEqual(
 );
 assert.deepEqual(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"]);
 assert.equal(multiverseMarketTextProvenancePathBoundaryData.scalingCheck.scalesToWholeTable, false);
-assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "TextHandlerMarkets to row-local UnityEngine.UI.Text payload-assignment join");
+assert.equal(multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.layerName, "runtime-only payload-assignment layer after row-local UnityEngine.UI.Text component ownership graph");
 assert.deepEqual(
   multiverseMarketTextProvenancePathBoundaryData.lastMissingBindingLayer.currentlyRecoveredInputs,
-  ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetISNCostText", "SetISNBaseBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow"]
+  ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetISNCostText", "SetISNBaseBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer"]
 );
 assert.match(multiverseMarketStateVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketStateVerificationDoc, /Inscryption 78: Ouroboros Orbs/);
@@ -2561,13 +2564,15 @@ assert.match(multiverseMarketStateVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketStateVerificationDoc, /SetAllBaseBonusTexts/);
 assert.match(multiverseMarketStateVerificationDoc, /CurrentBonusText/);
 assert.match(multiverseMarketStateVerificationDoc, /UnityEngine\.UI\.Text/);
-assert.match(multiverseMarketStateVerificationDoc, /unrecovered `TextHandlerMarkets` join that routes those methods into the recovered row-local `UnityEngine\.UI\.Text` components/i);
+assert.match(multiverseMarketStateVerificationDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i);
+assert.match(multiverseMarketStateVerificationDoc, /runtime-side assignment path that routes those methods into the recovered row-local `UnityEngine\.UI\.Text` components/i);
 assert.match(multiverseMarketVerificationDoc, /## Checked control-row text-provenance path boundary/);
 assert.match(multiverseMarketVerificationDoc, /OUROBOROS POINTS GAINED/i);
 assert.match(multiverseMarketVerificationDoc, /SetIS69BaseBonusText/);
 assert.match(multiverseMarketVerificationDoc, /CurrentBonusText/);
 assert.match(multiverseMarketVerificationDoc, /UnityEngine\.UI\.Text/);
-assert.match(multiverseMarketVerificationDoc, /no checked join ties those slot-local components back to `THMarkets` or to a final text payload assignment/i);
+assert.match(multiverseMarketVerificationDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i);
+assert.match(multiverseMarketVerificationDoc, /no serialized producer-side join back to `THMarkets` or `MultiverseMarket`/i);
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);

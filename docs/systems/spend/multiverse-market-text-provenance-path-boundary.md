@@ -29,6 +29,10 @@ This note records the narrowest checked game-side path from a structurally settl
   - `UnityEngine.UI.Image`
   - `UnityEngine.UI.Outline`
   - `UnityEngine.UI.Shadow`
+- recovered serialized ownership edges from the assignment-site pass:
+  - `GameObject -> Text/Outline/Shadow/Image` component ownership
+  - `RectTransform -> m_GameObject` backlinks
+  - `CanvasRenderer -> m_GameObject` backlinks
 
 ## What is actually recovered
 
@@ -42,6 +46,9 @@ This note records the narrowest checked game-side path from a structurally settl
   - sparse anchor: `Inscryption 78: Ouroboros Orbs`
   - live screenshot text: `OUROBOROS POINTS GAINED`
 - Rows `78` and `83` mirror the same slot family in the asset tree, so they remain useful falsifying controls, not solved labels.
+- The deeper assignment-site scan now also answers the local serialized-binding question:
+  - zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links point into the recovered row-local text components
+  - the live asset graph stops at intrinsic component ownership around the row-local UI subtree
 - This means the repo can now name two checked game-side text-adjacent source classes:
   - direct Unity string anchors in the `TextHandlerMarkets` neighborhood
   - row-local asset slots with `UnityEngine.UI.Text` components under the checked Emporium row objects
@@ -59,13 +66,13 @@ This note records the narrowest checked game-side path from a structurally settl
 - It is still not a recovered row-to-text join:
   - no checked repo-local consumer binds `SetISNBaseBonusText` to direct player-facing strings
   - no checked row-local string table or localization-key catalog is recovered
-  - the live-asset walk does recover concrete row-local slot objects like `CurrentBonusText`, `BonusDescriptionText`, `PerLevelBonusText`, and `DescriptionText`, but it still does not recover the payload assignment that fills their `UnityEngine.UI.Text` components
+  - the live-asset walk does recover concrete row-local slot objects like `CurrentBonusText`, `BonusDescriptionText`, `PerLevelBonusText`, and `DescriptionText`, but the assignment-site scan shows only local ownership edges into their `UnityEngine.UI.Text` components
   - no direct strings `Inscryption 69` through `Inscryption 74` are recovered repo-locally
 
 ## Exact last missing layer
 
 - The isolated missing layer is now:
-  - the `TextHandlerMarkets` to row-local `UnityEngine.UI.Text` payload-assignment join
+  - the runtime-only payload-assignment layer after the row-local `UnityEngine.UI.Text` component ownership graph
 - In practical terms, the repo still needs the step that turns:
   - `SetAllBaseBonusTexts`
   - `SetISNBaseBonusText`
@@ -75,6 +82,10 @@ into:
   - or concrete localization keys
   - written into the recovered `UnityEngine.UI.Text` components
   - tied back to ordered Emporium rows
+- The live local assets no longer look like the missing layer:
+  - they do not serialize any producer-side `TextHandlerMarkets` or `MultiverseMarket` links into those text components
+  - they only serialize the component graph around the row-local UI subtree
+  - the narrowest defensible remaining seam is therefore runtime-side code, not another unresolved local asset link
 
 Current grounded conclusion:
 
@@ -82,5 +93,5 @@ Current grounded conclusion:
 - rows `78` and `83` are only partial text-adjacent controls, not completed player-facing label bindings
 - a control-row text-adjacent path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain
 - the broader handler-side scaling clue is the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered `TextHandlerMarkets` join that routes those methods into the recovered row-local `UnityEngine.UI.Text` components and then into final live player-facing effect text
+- the exact remaining blocker is the unrecovered runtime-side assignment path that routes those methods into the recovered row-local `UnityEngine.UI.Text` components and then into final live player-facing effect text
 - compatibility-only import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked

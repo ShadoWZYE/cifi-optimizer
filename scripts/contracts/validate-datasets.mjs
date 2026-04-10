@@ -3586,6 +3586,9 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
     ["UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow"],
     "multiverse market text-provenance path boundary recoveredComponentTypes drifted"
   );
+  assert.equal(boundary.controlRowTextPath.assignmentSiteRecovery.candidateProducerSerializedHits, 0, "multiverse market text-provenance path boundary candidateProducerSerializedHits must stay zero");
+  assert.equal(boundary.controlRowTextPath.assignmentSiteRecovery.externalSerializedProducerHits, 0, "multiverse market text-provenance path boundary externalSerializedProducerHits must stay zero");
+  assert.equal(boundary.controlRowTextPath.assignmentSiteRecovery.runtimeOnlyInference, true, "multiverse market text-provenance path boundary runtimeOnlyInference must stay true");
   assert.equal(boundary.controlRowTextPath.liveOutputCheck.displayedEffectText, "OUROBOROS POINTS GAINED", "multiverse market text-provenance path boundary row 78 liveOutputCheck drifted");
   assert.deepEqual(
     boundary.scalingCheck.broadHandlerFamilyRecovered,
@@ -3599,34 +3602,37 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
   );
   assert.deepEqual(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"], "multiverse market text-provenance path boundary missing checked-band strings drifted");
   assert.equal(boundary.scalingCheck.scalesToWholeTable, false, "multiverse market text-provenance path boundary scalesToWholeTable must remain false");
-  assert.equal(boundary.lastMissingBindingLayer.layerName, "TextHandlerMarkets to row-local UnityEngine.UI.Text payload-assignment join", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
+  assert.equal(boundary.lastMissingBindingLayer.layerName, "runtime-only payload-assignment layer after row-local UnityEngine.UI.Text component ownership graph", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
   assert.deepEqual(
     boundary.lastMissingBindingLayer.currentlyRecoveredInputs,
-    ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetISNCostText", "SetISNBaseBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow"],
+    ["TextHandlerMarkets", "THMarkets", "SetAllChrystosEmporiumTexts", "SetAllBaseBonusTexts", "SetISNCostText", "SetISNBaseBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer"],
     "multiverse market text-provenance path boundary currentlyRecoveredInputs drifted"
   );
-  assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /UnityEngine\.UI\.Text components/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
+  assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /runtime-only code path/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
 
   assert.match(boundaryDoc, /sparse Unity string anchor/i, "multiverse market text-provenance path boundary doc must preserve the sparse Unity string anchor conclusion");
   assert.match(boundaryDoc, /OUROBOROS POINTS GAINED/i, "multiverse market text-provenance path boundary doc must preserve the row 78 screenshot mismatch");
   assert.match(boundaryDoc, /CurrentBonusText/, "multiverse market text-provenance path boundary doc must preserve the recovered row-local slot clue");
   assert.match(boundaryDoc, /UnityEngine\.UI\.Text/, "multiverse market text-provenance path boundary doc must preserve the recovered text-component clue");
+  assert.match(boundaryDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i, "multiverse market text-provenance path boundary doc must preserve the zero serialized producer-link result");
   assert.match(boundaryDoc, /SetAllBaseBonusTexts/i, "multiverse market text-provenance path boundary doc must preserve the broad handler family clue");
-  assert.match(boundaryDoc, /TextHandlerMarkets` join that routes those methods into the recovered row-local `UnityEngine\.UI\.Text` components/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
+  assert.match(boundaryDoc, /runtime-only payload-assignment layer after the row-local `UnityEngine\.UI\.Text` component ownership graph/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
   assert.match(stateDoc, /## Checked control-row text-provenance path boundary/, "multiverse market state verification doc must expose the control-row text-provenance path boundary section");
   assert.match(stateDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market state verification doc must preserve the control row string anchor");
   assert.match(stateDoc, /OUROBOROS POINTS GAINED/i, "multiverse market state verification doc must preserve the row 78 live-text mismatch");
   assert.match(stateDoc, /SetAllBaseBonusTexts/, "multiverse market state verification doc must preserve the base-bonus family clue");
   assert.match(stateDoc, /CurrentBonusText/, "multiverse market state verification doc must preserve the recovered row-local slot clue");
   assert.match(stateDoc, /UnityEngine\.UI\.Text/, "multiverse market state verification doc must preserve the recovered text-component clue");
-  assert.match(stateDoc, /unrecovered `TextHandlerMarkets` join that routes those methods into the recovered row-local `UnityEngine\.UI\.Text` components/i, "multiverse market state verification doc must preserve the exact remaining blocker");
+  assert.match(stateDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i, "multiverse market state verification doc must preserve the zero serialized producer-link result");
+  assert.match(stateDoc, /runtime-side assignment path that routes those methods into the recovered row-local `UnityEngine\.UI\.Text` components/i, "multiverse market state verification doc must preserve the exact remaining blocker");
   assert.match(verificationDoc, /## Checked control-row text-provenance path boundary/, "multiverse market verification doc must expose the control-row text-provenance path boundary section");
   assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the control row string anchor");
   assert.match(verificationDoc, /OUROBOROS POINTS GAINED/i, "multiverse market verification doc must preserve the row 78 live-text mismatch");
   assert.match(verificationDoc, /SetIS69BaseBonusText/, "multiverse market verification doc must preserve the checked handler-side scaling clue");
   assert.match(verificationDoc, /CurrentBonusText/, "multiverse market verification doc must preserve the recovered row-local slot clue");
   assert.match(verificationDoc, /UnityEngine\.UI\.Text/, "multiverse market verification doc must preserve the recovered text-component clue");
-  assert.match(verificationDoc, /no checked join ties those slot-local components back to `THMarkets` or to a final text payload assignment/i, "multiverse market verification doc must preserve the narrowed text-slot blocker");
+  assert.match(verificationDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i, "multiverse market verification doc must preserve the zero serialized producer-link result");
+  assert.match(verificationDoc, /no serialized producer-side join back to `THMarkets` or `MultiverseMarket`/i, "multiverse market verification doc must preserve the narrowed text-slot blocker");
 
   return {
     id: "multiverse-market-text-provenance-path-boundary",
@@ -3636,7 +3642,7 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
       "Control row 78 reaches only a partial text-adjacent control and fails against live screenshot text",
       `${boundary.scalingCheck.broadHandlerFamilyRecovered.length} checked base-bonus handler clues`,
       `${boundary.scalingCheck.playerFacingStringAnchorsRecovered.length} sparse player-facing string anchors`,
-      "The exact remaining blocker is the TextHandlerMarkets to row-local UnityEngine.UI.Text payload-assignment join"
+      "The exact remaining blocker is the runtime-only payload-assignment layer after the row-local UnityEngine.UI.Text component ownership graph"
     ]
   };
 }

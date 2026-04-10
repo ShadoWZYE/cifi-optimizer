@@ -300,6 +300,17 @@ static IEnumerable<(string fileName, long pathId)> ParseSeedKeys(IEnumerable<str
     }
 }
 
+static object? ResolveLocalReference(string fileName, int? fileId, long pathId, Dictionary<string, object> knownObjectLookup)
+{
+    if (fileId.HasValue && fileId.Value != 0)
+    {
+        return null;
+    }
+
+    knownObjectLookup.TryGetValue(MakeAssetKey(fileName, pathId), out var resolved);
+    return resolved;
+}
+
 static string GetNodeName(TypeTreeType typeTree, TypeTreeNode node) =>
     node.GetNameString(typeTree.StringBufferBytes, TypeTreeType.COMMON_STRING_TABLE);
 
@@ -613,6 +624,7 @@ var fileScriptTypeSummaries = loadedFiles
 var targetScriptIndexLookups = new List<object>();
 var targetScriptMonoBehaviourCounts = new List<object>();
 var seedDetails = new List<object>();
+var seededAssignmentSiteHits = new List<object>();
 var assetInfoLookup = loadedFiles.ToDictionary(
     loaded => Path.GetFileName(loaded.path),
     loaded => loaded.file.AssetInfos.ToDictionary(info => info.PathId, info => info));
@@ -685,15 +697,13 @@ object SummarizeAsset(AssetsFileInstance loaded, AssetFileInfo info, AssetsManag
         .Cast<dynamic>()
         .Select(reference =>
         {
-            var key = MakeAssetKey(fileName, (long)reference.pathId);
-            knownObjectLookup.TryGetValue(key, out var resolved);
             return new
             {
                 fieldPath = (string)reference.fieldPath,
                 fileId = (int?)reference.fileId,
                 pathId = (long?)reference.pathId,
                 targetType = (string?)reference.targetType,
-                resolved
+                resolved = ResolveLocalReference(fileName, (int?)reference.fileId, (long)reference.pathId, knownObjectLookup)
             };
         })
         .ToArray();
@@ -966,7 +976,9 @@ foreach (var loaded in loadedFiles)
                                 fileId = (int?)reference.fileId,
                                 pathId = (long?)reference.pathId,
                                 targetType = (string?)reference.targetType,
-                                resolved = referencedObject
+                                resolved = (int?)reference.fileId == 0 || (int?)reference.fileId is null
+                                    ? referencedObject
+                                    : null
                             };
                         })
                         .Take(120)
@@ -1048,6 +1060,162 @@ if (seedKeySet.Count > 0)
     }
 
     seedDetails = expanded;
+
+    var slotObjectNames = new HashSet<string>(new[]
+    {
+        "CurrentBonusText",
+        "BonusDescriptionText",
+        "PerLevelBonusText",
+        "DescriptionText",
+        "IDText",
+        "IconBox"
+    }, StringComparer.Ordinal);
+    var candidateProducerScripts = new HashSet<string>(new[]
+    {
+        "TextHandlerMarkets",
+        "MultiverseMarket"
+    }, StringComparer.OrdinalIgnoreCase);
+    var seededVisitedKeys = new HashSet<string>(
+        seedDetails
+            .Select(summary =>
+            {
+                var fileName = summary.GetType().GetProperty("fileName")?.GetValue(summary) as string;
+                var pathId = summary.GetType().GetProperty("pathId")?.GetValue(summary);
+                return fileName is not null && pathId is long longPathId
+                    ? MakeAssetKey(fileName, longPathId)
+                    : null;
+            })
+            .Where(key => key is not null)!
+            .Cast<string>(),
+        StringComparer.OrdinalIgnoreCase);
+    var slotObjectKeys = new HashSet<string>(
+        seedDetails
+            .Where(summary =>
+            {
+                var typeName = summary.GetType().GetProperty("typeName")?.GetValue(summary) as string;
+                var name = summary.GetType().GetProperty("name")?.GetValue(summary) as string;
+                return string.Equals(typeName, "GameObject", StringComparison.Ordinal) && slotObjectNames.Contains(name ?? string.Empty);
+            })
+            .Select(summary =>
+            {
+                var fileName = summary.GetType().GetProperty("fileName")?.GetValue(summary) as string;
+                var pathId = summary.GetType().GetProperty("pathId")?.GetValue(summary);
+                return fileName is not null && pathId is long longPathId
+                    ? MakeAssetKey(fileName, longPathId)
+                    : null;
+            })
+            .Where(key => key is not null)!
+            .Cast<string>(),
+        StringComparer.OrdinalIgnoreCase);
+    var slotGameObjectIds = new HashSet<long>(
+        seedDetails
+            .Where(summary =>
+            {
+                var typeName = summary.GetType().GetProperty("typeName")?.GetValue(summary) as string;
+                var name = summary.GetType().GetProperty("name")?.GetValue(summary) as string;
+                return string.Equals(typeName, "GameObject", StringComparison.Ordinal) && slotObjectNames.Contains(name ?? string.Empty);
+            })
+            .Select(summary => summary.GetType().GetProperty("pathId")?.GetValue(summary))
+            .Where(value => value is long)
+            .Cast<long>());
+    var assignmentTargetKeys = new HashSet<string>(slotObjectKeys, StringComparer.OrdinalIgnoreCase);
+    foreach (var summary in seedDetails)
+    {
+        var typeName = summary.GetType().GetProperty("typeName")?.GetValue(summary) as string;
+        var scriptName = summary.GetType().GetProperty("scriptName")?.GetValue(summary) as string;
+        var fileName = summary.GetType().GetProperty("fileName")?.GetValue(summary) as string;
+        var pathIdValue = summary.GetType().GetProperty("pathId")?.GetValue(summary);
+        var gameObjectPathIdValue = summary.GetType().GetProperty("gameObjectPathId")?.GetValue(summary);
+        if (!string.Equals(typeName, "MonoBehaviour", StringComparison.Ordinal) ||
+            fileName is null ||
+            pathIdValue is not long pathId ||
+            gameObjectPathIdValue is not long gameObjectPathId ||
+            !slotGameObjectIds.Contains(gameObjectPathId))
+        {
+            continue;
+        }
+
+        if (string.Equals(scriptName, "Text", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(scriptName, "Image", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(scriptName, "Outline", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(scriptName, "Shadow", StringComparison.OrdinalIgnoreCase))
+        {
+            assignmentTargetKeys.Add(MakeAssetKey(fileName, pathId));
+        }
+    }
+
+    var assignmentScanTypeIds = new HashSet<int>
+    {
+        (int)AssetClassID.MonoBehaviour,
+        (int)AssetClassID.GameObject,
+        (int)AssetClassID.RectTransform,
+        (int)AssetClassID.CanvasRenderer
+    };
+
+    foreach (var loaded in loadedFiles)
+    {
+        var fileName = Path.GetFileName(loaded.path);
+        foreach (var info in loaded.file.AssetInfos.Where(info => assignmentScanTypeIds.Contains(info.TypeId)))
+        {
+            try
+            {
+                var summary = SummarizeAsset(loaded, info, manager, monoScriptByPath, objectLookup);
+                var references = summary.GetType().GetProperty("references")?.GetValue(summary) as System.Collections.IEnumerable;
+                if (references is null)
+                {
+                    continue;
+                }
+
+                var matchingReferences = new List<object>();
+                foreach (var reference in references)
+                {
+                    var fileIdValue = reference.GetType().GetProperty("fileId")?.GetValue(reference);
+                    var pathIdValue = reference.GetType().GetProperty("pathId")?.GetValue(reference);
+                    if (pathIdValue is not long refPathId)
+                    {
+                        continue;
+                    }
+
+                    var refFileId = fileIdValue as int?;
+                    if (refFileId.HasValue && refFileId.Value != 0)
+                    {
+                        continue;
+                    }
+
+                    if (!assignmentTargetKeys.Contains(MakeAssetKey(fileName, refPathId)))
+                    {
+                        continue;
+                    }
+
+                    matchingReferences.Add(reference);
+                }
+
+                if (matchingReferences.Count == 0)
+                {
+                    continue;
+                }
+
+                var sourceKey = MakeAssetKey(fileName, info.PathId);
+                var sourceScriptName = summary.GetType().GetProperty("scriptName")?.GetValue(summary) as string;
+                seededAssignmentSiteHits.Add(new
+                {
+                    fileName,
+                    pathId = info.PathId,
+                    typeId = info.TypeId,
+                    typeName = summary.GetType().GetProperty("typeName")?.GetValue(summary) as string,
+                    name = summary.GetType().GetProperty("name")?.GetValue(summary) as string,
+                    scriptName = sourceScriptName,
+                    gameObjectPathId = summary.GetType().GetProperty("gameObjectPathId")?.GetValue(summary),
+                    sourceInsideSeededWalk = seededVisitedKeys.Contains(sourceKey),
+                    candidateProducerScript = !string.IsNullOrWhiteSpace(sourceScriptName) && candidateProducerScripts.Contains(sourceScriptName),
+                    matchingReferences = matchingReferences.ToArray()
+                });
+            }
+            catch
+            {
+            }
+        }
+    }
 }
 
 if (!seededOnlyMode)
@@ -1192,6 +1360,7 @@ var report = new
     targetedReferenceWalkHits = targetedReferenceWalkHits
         .ToArray(),
     seededReferenceWalk = seedDetails.ToArray(),
+    seededAssignmentSiteHits = seededAssignmentSiteHits.ToArray(),
     shardTargetMonoBehaviours = directMonoBehaviourFieldHits
         .Where(hit =>
         {

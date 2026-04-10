@@ -243,6 +243,11 @@ Current grounded conclusion:
   - `IDText`
   - `IconBox`
 - Those slot objects carry concrete UI components including `UnityEngine.UI.Text`, `UnityEngine.UI.Image`, `UnityEngine.UI.Outline`, and `UnityEngine.UI.Shadow`.
+- The deeper assignment-site pass shows that the local serialized graph stops at row-local ownership edges:
+  - `GameObject -> Text/Outline/Shadow/Image`
+  - `RectTransform -> m_GameObject`
+  - `CanvasRenderer -> m_GameObject`
+  - zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links into those row-local text components
 - The new row `78` screenshot shows that the sparse anchor does not reproduce live effect text:
   - sparse anchor: `Inscryption 78: Ouroboros Orbs`
   - live screenshot text: `OUROBOROS POINTS GAINED`
@@ -256,7 +261,7 @@ Current grounded conclusion:
 - That still does not produce a reusable whole-table text join:
   - sparse direct anchors exist only for rows `25`, `46`, `78`, and `83`
   - no checked repo-local player-facing strings `Inscryption 69` through `Inscryption 74` are recovered
-  - the live-asset walk reaches row-local slot objects and their `UnityEngine.UI.Text` components, but no checked join ties those slot-local components back to `THMarkets` or to a final text payload assignment
+  - the live-asset walk reaches row-local slot objects and their `UnityEngine.UI.Text` components, but the assignment-site pass shows no serialized producer-side join back to `THMarkets` or `MultiverseMarket`
   - no checked repo-local consumer binds `SetISNBaseBonusText` to direct strings, localization keys, or the recovered row-local `UnityEngine.UI.Text` components
 
 Current grounded conclusion:
@@ -265,7 +270,7 @@ Current grounded conclusion:
 - rows `78` and `83` are only partial text-adjacent controls, not completed live effect-text bindings
 - a control-row text-adjacent path is recoverable as a sparse Unity string anchor plus a row-local asset-slot chain
 - the handler-side scaling clue is now tightened to the `SetAllBaseBonusTexts` / `SetISNBaseBonusText` family
-- the exact remaining blocker is the unrecovered `TextHandlerMarkets` join that routes those methods into the recovered row-local `UnityEngine.UI.Text` components and then into final live player-facing effect text
+- the exact remaining blocker is the unrecovered runtime-side assignment path that routes those methods into the recovered row-local `UnityEngine.UI.Text` components and then into final live player-facing effect text
 - the canonical import-safe subset stays empty
 
 ## Still unresolved
