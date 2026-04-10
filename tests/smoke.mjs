@@ -1538,6 +1538,13 @@ assert.deepEqual(tokenBankStateCluesData.playerProfilePersistenceBoundary.wrappe
     fieldOffset: 392
   }
 ]);
+assert.equal(tokenBankStateCluesData.genericTokeniumClaimableBoundary.declaringType, "SaveData");
+assert.equal(tokenBankStateCluesData.genericTokeniumClaimableBoundary.field, "ClaimableTokenium");
+assert.equal(tokenBankStateCluesData.genericTokeniumClaimableBoundary.fieldType, "System.Double");
+assert.equal(tokenBankStateCluesData.genericTokeniumClaimableBoundary.fieldIndex, 2022);
+assert.equal(tokenBankStateCluesData.genericTokeniumClaimableBoundary.fieldOffset, 12064);
+assert.equal(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.scriptName, "CloudSavePlayerProfile");
+assert.equal(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.typedTargetFound, false);
 assert.match(
   tokenBankStateCluesData.playerProfilePersistenceBoundary.blockedReason,
   /only expose generic export strings, not token-bank-specific cap or claimable-bank fields/i
@@ -2755,6 +2762,8 @@ assert.match(multiverseMarketVerificationDoc, /TextHandlerShopNPCs\+<DisplayText
 assert.match(tokenBankStateDoc, /LM244` should currently be treated as a presentation or explanation hook, not as the recovered gameplay owner for daily tokenium/);
 assert.match(tokenBankStateDoc, /PlayerProfileHandler\.saveInfoCache: PlayerProfileData/);
 assert.match(tokenBankStateDoc, /ConvertSaveDataToProfileData\(SaveData, System\.DateTime\) -> PlayerProfileData/);
+assert.match(tokenBankStateDoc, /SaveData\.ClaimableTokenium/);
+assert.match(tokenBankStateDoc, /CloudSavePlayerProfile/);
 assert.match(tokenBankStateDoc, /only exposes generic `Tokens: System\.String` and `Tokenium: System\.String` wrapper fields/i);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /checked accessor bridge:/);
 assert.match(multiverseMarketMarketMemberBoundaryDoc, /metadata\/member-shell clue:/);
@@ -2768,7 +2777,11 @@ assert.match(activeGroundingBoundariesDoc, /the bare `Market` symbol is still on
 assert.match(activeGroundingBoundariesDoc, /does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
 assert.match(activeGroundingBoundariesDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings/i);
 assert.match(spendSystemVerificationDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge still only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings/i);
+assert.match(spendSystemVerificationDoc, /SaveData\.ClaimableTokenium/);
+assert.match(spendSystemVerificationDoc, /CloudSavePlayerProfile/);
 assert.match(unityOwnerMapDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings/i);
+assert.match(unityOwnerMapDoc, /SaveData\.ClaimableTokenium/);
+assert.match(unityOwnerMapDoc, /CloudSavePlayerProfile/);
 assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `PlayerProfileHandler`/i);
 assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `PlayerProfileData`/i);
 assert.doesNotMatch(multiverseMarketMarketMemberBoundaryDoc, /typed `Market` field recovered on `SaveData`/i);
