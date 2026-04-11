@@ -64,6 +64,7 @@ Repo-local npm probe wrappers:
   - regenerates `data/unity-trace-bundle.json` and `docs/unity/unity-trace-bundle.md`
   - reads committed `workbench/apk/base/global-metadata.dat`, `data/token-shop-values.json`, `data/daily-tokenium-lane-probe.json`, `data/uabea-probe-report.json`, `data/unity-probe-report.json`, and `data/lm244-targeted-probe.json`
   - preserves target-driven cross-surface joins across metadata neighborhoods, owner-payload shells, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle before any remap-boundary promotion
+  - records explicit typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape from committed sources so the bundle can say which join exists, which join is missing, and which artifact proved each claim
   - the current checked target is `token-shop-atu3-cells`, which intentionally stays a negative trace unless one new committed artifact crosses back to `ATU3Button` or path id `15810`
 
 Important primary files:

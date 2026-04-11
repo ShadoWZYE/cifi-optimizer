@@ -21,6 +21,7 @@ UTF16_RE = re.compile(rb"(?:[\x20-\x7E]\x00){4,}")
 SOURCE_PATHS = {
     "metadata": METADATA_PATH,
     "tokenShopExtract": ROOT / "data" / "token-shop-values.json",
+    "tokenShopRowRemapBoundary": ROOT / "data" / "token-shop-row-remap-boundary.json",
     "dailyTokeniumLaneProbe": ROOT / "data" / "daily-tokenium-lane-probe.json",
     "uabeaProbe": ROOT / "data" / "uabea-probe-report.json",
     "unityProbe": ROOT / "data" / "unity-probe-report.json",
@@ -240,6 +241,524 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, terms: list[s
     }
 
 
+def find_surface(surfaces: list[dict[str, Any]], surface_id: str) -> dict[str, Any]:
+    return next(surface for surface in surfaces if surface["id"] == surface_id)
+
+
+def find_source_entry(surface: dict[str, Any], source_id: str) -> dict[str, Any]:
+    return next(source for source in surface["sources"] if source["sourceId"] == source_id)
+
+
+def find_hit(source_entry: dict[str, Any], term: str) -> dict[str, Any]:
+    return next(hit for hit in source_entry["hits"] if hit["term"] == term)
+
+
+def cite_hit(source_entry: dict[str, Any], hit: dict[str, Any], note: str | None = None) -> dict[str, Any]:
+    locator = f"metadata offset {hit['offset']}" if source_entry["sourceId"] == "metadata" else hit["jsonPath"]
+    citation = {
+        "sourceId": source_entry["sourceId"],
+        "sourcePath": source_entry["sourcePath"],
+        "term": hit["term"],
+        "locator": locator,
+    }
+    if note:
+        citation["note"] = note
+    return citation
+
+
+def cite_row_boundary(source_id: str, path: str, detail: str, note: str | None = None) -> dict[str, Any]:
+    citation = {
+        "sourceId": source_id,
+        "sourcePath": repo_relative(SOURCE_PATHS[source_id]),
+        "term": detail,
+        "locator": path,
+    }
+    if note:
+        citation["note"] = note
+    return citation
+
+
+def make_node(node_id: str, node_type: str, label: str, status: str, summary: str) -> dict[str, Any]:
+    return {
+        "id": node_id,
+        "type": node_type,
+        "label": label,
+        "status": status,
+        "summary": summary,
+    }
+
+
+def make_edge(
+    edge_id: str,
+    from_node: str,
+    to_node: str,
+    edge_type: str,
+    status: str,
+    provenance_strength: str,
+    statement: str,
+    proved_by: list[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "id": edge_id,
+        "from": from_node,
+        "to": to_node,
+        "type": edge_type,
+        "status": status,
+        "provenanceStrength": provenance_strength,
+        "statement": statement,
+        "provedBy": proved_by,
+    }
+
+
+def build_trace_graph(
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    row_remap_boundary: dict[str, Any],
+) -> dict[str, Any]:
+    metadata_surface = find_surface(surfaces, "metadata-neighborhood")
+    action_surface = find_surface(surfaces, "action-lane")
+    diamond_surface = find_surface(surfaces, "diamond-special")
+    token_surface = find_surface(surfaces, "token-lane")
+    text_surface = find_surface(surfaces, "text-hooks")
+
+    metadata_source = find_source_entry(metadata_surface, "metadata")
+    action_source = find_source_entry(action_surface, "dailyTokeniumLaneProbe")
+    unity_diamond_source = find_source_entry(diamond_surface, "unityProbe")
+    unity_token_source = find_source_entry(token_surface, "unityProbe")
+    uabea_token_source = find_source_entry(token_surface, "uabeaProbe")
+    unity_text_source = find_source_entry(text_surface, "unityProbe")
+    lm244_source = find_source_entry(diamond_surface, "lm244TargetedProbe")
+
+    metadata_atu3_hit = find_hit(metadata_source, "ATU3Button")
+    metadata_cell_hit = find_hit(metadata_source, "CellBoostStartCost")
+    action_buy_hit = find_hit(action_source, "BuyCellBoost")
+    diamond_prefab_hit = find_hit(unity_diamond_source, "NewDiamondUPGPrefab.Specials.CellsBoost")
+    diamond_title_hit = find_hit(unity_diamond_source, ">Diamond Upgrade 10 - CellsBoost")
+    token_prefab_hit = find_hit(uabea_token_source, "NewTokenUPGPrefab.T1.CellsPerChestBooster")
+    token_prefab_alt_hit = find_hit(unity_token_source, "NewTokenUPGPrefab.T5.UltimaCells")
+    token_title_hit = find_hit(unity_token_source, "Token Ultima: Cells")
+    text_hook_hit = find_hit(unity_text_source, "SetAllTokenShopTexts")
+    text_hook_alt_hit = find_hit(unity_text_source, "SetTokenTexts")
+
+    shell_node = "target-shell"
+    owner_node = "owner-field-block"
+    metadata_node = "metadata-neighborhood"
+    action_node = "generic-action-hook"
+    diamond_prefab_node = "diamond-special-prefab"
+    diamond_title_node = "diamond-special-title"
+    token_prefab_node = "token-prefab-candidates"
+    token_title_node = "token-title-candidate"
+    text_hook_node = "generic-text-hooks"
+
+    nodes = [
+        make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
+        make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
+        make_node(metadata_node, "metadata-neighborhood", "ATU3Button + CellBoost metadata neighborhood", "present", "Metadata still keeps the shell anchor and cells-family declaration area together."),
+        make_node(action_node, "action-hook-cluster", "BuyCellBoost generic cells-domain action cluster", "present", "The committed lane probe keeps the generic buy hook but not an ATU3-specific exact join."),
+        make_node(diamond_prefab_node, "prefab-candidate", "NewDiamondUPGPrefab.Specials.CellsBoost", "present", "A detached diamond-special prefab candidate is preserved."),
+        make_node(diamond_title_node, "title-candidate", ">Diamond Upgrade 10 - CellsBoost", "present", "A detached diamond-special title candidate is preserved."),
+        make_node(token_prefab_node, "prefab-candidate", "NewTokenUPGPrefab.T1.CellsPerChestBooster and NewTokenUPGPrefab.T5.UltimaCells", "present", "Detached token-side prefab candidates are preserved."),
+        make_node(token_title_node, "title-candidate", "Token Ultima: Cells", "present", "A detached token-side title candidate is preserved."),
+        make_node(text_hook_node, "text-hook-cluster", "SetAllTokenShopTexts / SetTokenTexts", "present", "The generic TokenShop text side is preserved as a separate surface."),
+    ]
+
+    edges = [
+        make_edge(
+            "shell-to-owner-block",
+            shell_node,
+            owner_node,
+            "serialized-adjacency",
+            "present",
+            "direct",
+            "The target shell still sits directly beside the CellBoost owner-field block in the committed TokenShop extract.",
+            [
+                cite_row_boundary(
+                    "tokenShopExtract",
+                    "$.fields",
+                    f"{shell_window['shellField']} path_id {shell_window['shellPathId']}",
+                    "Shell window recovered from the exact TokenShop payload.",
+                )
+            ],
+        ),
+        make_edge(
+            "owner-block-to-metadata",
+            owner_node,
+            metadata_node,
+            "declaration-neighborhood",
+            "present",
+            "contextual",
+            "The metadata neighborhood keeps ATU3Button and the CellBoost declaration block in one raw declaration area.",
+            [
+                cite_hit(metadata_source, metadata_cell_hit),
+                cite_hit(metadata_source, metadata_atu3_hit),
+            ],
+        ),
+        make_edge(
+            "owner-block-to-action-cluster",
+            owner_node,
+            action_node,
+            "family-action-cluster",
+            "present",
+            "supporting",
+            "The cells-domain action lane preserves BuyCellBoost as the nearest named buy hook for the same family, but only as a generic cluster.",
+            [cite_hit(action_source, action_buy_hit)],
+        ),
+        make_edge(
+            "diamond-surface-prefab",
+            metadata_node,
+            diamond_prefab_node,
+            "candidate-prefab-surface",
+            "present",
+            "direct",
+            "A separate diamond-special CellsBoost prefab candidate is preserved on committed probe surfaces.",
+            [
+                cite_hit(unity_diamond_source, diamond_prefab_hit),
+                cite_hit(lm244_source, find_hit(lm244_source, "NewDiamondUPGPrefab.Specials.CellsBoost")),
+            ],
+        ),
+        make_edge(
+            "diamond-surface-title",
+            diamond_prefab_node,
+            diamond_title_node,
+            "candidate-title-surface",
+            "present",
+            "direct",
+            "The same detached diamond-special surface also preserves one final title candidate.",
+            [cite_hit(unity_diamond_source, diamond_title_hit)],
+        ),
+        make_edge(
+            "token-surface-prefab",
+            action_node,
+            token_prefab_node,
+            "candidate-prefab-surface",
+            "present",
+            "direct",
+            "Separate token-side prefab identities for cells-domain upgrades are preserved, but not joined back to the target shell.",
+            [
+                cite_hit(uabea_token_source, token_prefab_hit),
+                cite_hit(unity_token_source, token_prefab_alt_hit),
+            ],
+        ),
+        make_edge(
+            "token-surface-title",
+            token_prefab_node,
+            token_title_node,
+            "candidate-title-surface",
+            "present",
+            "direct",
+            "The token-side candidate surface also preserves one detached title clue.",
+            [cite_hit(unity_token_source, token_title_hit)],
+        ),
+        make_edge(
+            "text-hook-surface",
+            action_node,
+            text_hook_node,
+            "generic-text-hook-cluster",
+            "present",
+            "supporting",
+            "The generic TokenShop text hooks are preserved as a separate surface, but they do not close the ATU3 join.",
+            [
+                cite_hit(unity_text_source, text_hook_hit),
+                cite_hit(unity_text_source, text_hook_alt_hit),
+            ],
+        ),
+    ]
+
+    negative_edges = [
+        make_edge(
+            "missing-shell-to-exact-action",
+            shell_node,
+            action_node,
+            "exact-shell-to-action-hook",
+            "missing",
+            "negative",
+            "No committed source proves one ATU3-specific direct buy or effect hook; the nearest named action surface stays the generic BuyCellBoost cluster.",
+            [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]",
+                    "No checked repo artifact in this lane currently preserves an ATU3-specific effect hook.",
+                ),
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]",
+                    "No checked repo artifact in this lane currently preserves an ATU3-specific direct buy hook.",
+                ),
+            ],
+        ),
+        make_edge(
+            "missing-shell-to-diamond-prefab",
+            shell_node,
+            diamond_prefab_node,
+            "exact-shell-to-prefab",
+            "missing",
+            "negative",
+            "No committed source proves that the ATU3 shell or path id 15810 crosses directly into the detached diamond-special CellsBoost prefab candidate.",
+            [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CellsDisambiguationPass.testedSurfaces[1].missingJoin",
+                    row_remap_boundary["atu3CellsDisambiguationPass"]["testedSurfaces"][1]["missingJoin"],
+                )
+            ],
+        ),
+        make_edge(
+            "missing-shell-to-token-prefab",
+            shell_node,
+            token_prefab_node,
+            "exact-shell-to-prefab",
+            "missing",
+            "negative",
+            "No committed source proves that the ATU3 shell or path id 15810 crosses directly into one exact token-side prefab identity.",
+            [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]",
+                    row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]["missingLinks"][2],
+                ),
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CellsDisambiguationPass.testedSurfaces[2].missingJoin",
+                    row_remap_boundary["atu3CellsDisambiguationPass"]["testedSurfaces"][2]["missingJoin"],
+                ),
+            ],
+        ),
+        make_edge(
+            "missing-shell-to-title",
+            shell_node,
+            token_title_node,
+            "exact-shell-to-title",
+            "missing",
+            "negative",
+            "No committed source proves one exact ATU3 shell-to-final-title join across either the diamond-special or token-side title candidates.",
+            [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CellsDisambiguationPass.groundedConclusion",
+                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
+                )
+            ],
+        ),
+    ]
+
+    claim_ledger = [
+        {
+            "id": "claim-shell-window",
+            "status": "proved",
+            "statement": "The exact ATU3 shell window exists in committed TokenShop data.",
+            "edgeIds": ["shell-to-owner-block"],
+            "provedBy": edges[0]["provedBy"],
+        },
+        {
+            "id": "claim-metadata-neighborhood",
+            "status": "proved",
+            "statement": "The metadata neighborhood keeps ATU3Button in the same declaration area as the CellBoost family.",
+            "edgeIds": ["owner-block-to-metadata"],
+            "provedBy": edges[1]["provedBy"],
+        },
+        {
+            "id": "claim-cells-action-cluster",
+            "status": "proved",
+            "statement": "The generic cells-domain action cluster preserves BuyCellBoost, but not as an exact ATU3-specific join.",
+            "edgeIds": ["owner-block-to-action-cluster"],
+            "provedBy": edges[2]["provedBy"],
+        },
+        {
+            "id": "claim-detached-candidate-surfaces",
+            "status": "proved",
+            "statement": "Detached prefab, title, and text-hook candidate surfaces still exist on committed probes.",
+            "edgeIds": ["diamond-surface-prefab", "diamond-surface-title", "token-surface-prefab", "token-surface-title", "text-hook-surface"],
+            "provedBy": [citation for edge in edges[3:] for citation in edge["provedBy"]],
+        },
+        {
+            "id": "claim-missing-bridge",
+            "status": "missing",
+            "statement": "The exact shell-to-action, shell-to-prefab, and shell-to-title joins required to clear the ATU3 bridge are still missing.",
+            "edgeIds": [edge["id"] for edge in negative_edges],
+            "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
+        },
+    ]
+
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "negativeEdges": negative_edges,
+        "claimLedger": claim_ledger,
+    }
+
+
+def build_solved_vs_blocked_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
+    baseline = row_remap_boundary["adjacentFollowUp"]["recoveredAdditionalBridge"]
+    blocked = row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]
+    baseline_edges = [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU1Button sits directly after the TokenBoost owner-field block.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.recoveredAdditionalBridge.ownerFieldBlock",
+                    ", ".join(baseline["ownerFieldBlock"]),
+                )
+            ],
+        },
+        {
+            "type": "supporting-effect-hook",
+            "status": "present",
+            "provenanceStrength": "supporting",
+            "statement": "The solved bridge preserves one exact ATU1-specific effect hook.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.recoveredAdditionalBridge.supportingEffectHook",
+                    baseline["supportingEffectHook"],
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-action-hook",
+            "status": "present",
+            "provenanceStrength": "supporting",
+            "statement": "The solved bridge preserves one checked row-specific buy hook.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook",
+                    baseline["supportingActionHook"],
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-prefab",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The solved bridge preserves one exact prefab identity on the same row family.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity",
+                    baseline["prefabIdentity"],
+                )
+            ],
+        },
+    ]
+    blocked_edges = [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU3Button still sits directly beside the CellBoost owner-field block.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.adjacentOwnerFieldBlock",
+                    ", ".join(blocked["adjacentOwnerFieldBlock"]),
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-action-hook",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-specific effect or buy hook.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]",
+                    blocked["missingLinks"][0],
+                ),
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]",
+                    blocked["missingLinks"][1],
+                ),
+            ],
+        },
+        {
+            "type": "exact-shell-to-prefab",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-to-prefab identity join.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]",
+                    blocked["missingLinks"][2],
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-title",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-to-final-title join.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CellsDisambiguationPass.groundedConclusion",
+                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
+                )
+            ],
+        },
+    ]
+    shared_present = sorted(
+        {
+            edge["type"]
+            for edge in baseline_edges
+            if edge["status"] == "present"
+        }.intersection(
+            {
+                edge["type"]
+                for edge in blocked_edges
+                if edge["status"] == "present"
+            }
+        )
+    )
+    baseline_only = sorted(
+        {
+            edge["type"]
+            for edge in baseline_edges
+            if edge["status"] == "present"
+        } - set(shared_present)
+    )
+    blocked_missing = [edge["type"] for edge in blocked_edges if edge["status"] == "missing"]
+
+    return {
+        "baseline": {
+            "id": "atu1-checked-row-bridge",
+            "label": "ATU1 checked row bridge",
+            "status": "cleared",
+            "sourcePath": repo_relative(SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": baseline["shellField"],
+            "shellPathId": baseline["shellPathId"],
+            "comparisonShape": baseline_edges,
+            "groundedConclusion": baseline["groundedConclusion"],
+        },
+        "blockedTarget": {
+            "id": target_id,
+            "label": target["label"],
+            "status": "blocked",
+            "sourcePath": repo_relative(SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": blocked["shellField"],
+            "shellPathId": blocked["shellPathId"],
+            "comparisonShape": blocked_edges,
+            "groundedConclusion": blocked["groundedConclusion"],
+        },
+        "delta": {
+            "sharedPresentEdgeTypes": shared_present,
+            "baselineOnlyPresentEdgeTypes": baseline_only,
+            "blockedMissingEdgeTypes": blocked_missing,
+            "solvedVsBlockedSummary": [
+                "Both rows preserve the direct serialized shell-to-owner-block adjacency.",
+                "The solved ATU1 baseline also preserves one exact row-specific effect hook, one checked row-specific buy hook, and one exact prefab identity.",
+                "The blocked ATU3 target stays missing the exact shell-to-action-hook, shell-to-prefab, and shell-to-title joins, so the cells-domain clues remain split instead of forming one checked bridge.",
+            ],
+        },
+    }
+
+
 def has_exact_bridge(shell_window: dict[str, Any], surfaces: list[dict[str, Any]], candidate_terms: list[str]) -> tuple[bool, list[dict[str, Any]]]:
     shell_signatures = {str(shell_window["shellField"]), str(shell_window["shellPathId"])}
     bridge_hits: list[dict[str, Any]] = []
@@ -277,6 +796,8 @@ def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
         )
 
     bridge_cleared, bridge_hits = has_exact_bridge(shell_window, surfaces, target["bridgeCandidateTerms"])
+    trace_graph = build_trace_graph(shell_window, surfaces, documents["tokenShopRowRemapBoundary"])
+    solved_vs_blocked_diff = build_solved_vs_blocked_diff(target_id, target, documents["tokenShopRowRemapBoundary"])
     return {
         "dataset": "unity-trace-bundle",
         "generatedAt": str(date.today()),
@@ -297,6 +818,11 @@ def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
                 "sourceId": "tokenShopExtract",
                 "path": repo_relative(SOURCE_PATHS["tokenShopExtract"]),
                 "role": "Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser.",
+            },
+            {
+                "sourceId": "tokenShopRowRemapBoundary",
+                "path": repo_relative(SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+                "role": "Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing.",
             },
             {
                 "sourceId": "dailyTokeniumLaneProbe",
@@ -327,6 +853,7 @@ def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
         },
         "shellWindow": shell_window,
         "surfaces": surfaces,
+        "traceGraph": trace_graph,
         "bridgePromotionRule": "Only promote a remap or owner boundary when one committed artifact preserves an exact shell-side anchor together with one exact prefab identity or final player-facing title in the same local container.",
         "bridgeCheck": {
             "candidateTerms": target["bridgeCandidateTerms"],
@@ -334,11 +861,13 @@ def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
             "bridgeHits": bridge_hits,
             "result": "checked object-or-title bridge recovered" if bridge_cleared else "no checked object-or-title bridge recovered",
         },
+        "solvedVsBlockedDiff": solved_vs_blocked_diff,
         "lostStructure": target["lostStructure"],
         "groundedConclusion": target["groundedConclusion"],
         "currentBoundary": [
             "This is a target-driven trace workflow, not a remap promotion by itself.",
-            "It keeps declaration anchors, owner-payload shells, action hooks, targeted string hits, and prefab or title surfaces in one checked artifact bundle so unresolved joins can be judged from one place.",
+            "It now keeps declaration anchors, owner-payload shells, action hooks, targeted string hits, prefab or title surfaces, and explicit typed graph edges in one checked artifact bundle so unresolved joins can be judged from one place.",
+            "The graph records both proved joins and negative joins, with provenance-strength tags and source citations for each claim.",
             "If no committed source preserves both the shell-side anchor and one exact prefab or title candidate in the same local container, the result stays negative and downstream boundaries should not advance.",
         ],
     }
@@ -395,6 +924,41 @@ def write_markdown(dataset: dict[str, Any]) -> None:
     ])
     if not dataset["bridgeCheck"]["bridgeHits"]:
         lines.append("- No committed source keeps the shell-side anchor and one exact prefab or title in the same local container.")
+    lines.extend([
+        "",
+        "## Trace graph",
+        "",
+        f"- Present typed edges: `{len(dataset['traceGraph']['edges'])}`",
+        f"- Negative typed edges: `{len(dataset['traceGraph']['negativeEdges'])}`",
+        "",
+        "### Proved joins",
+        "",
+    ])
+    for edge in dataset["traceGraph"]["edges"]:
+        lines.append(f"- `{edge['type']}`: {edge['statement']} [{edge['provenanceStrength']}]")
+        for citation in edge["provedBy"]:
+            lines.append(f"  - `{citation['sourceId']}` at `{citation['locator']}` proves `{citation['term']}`")
+    lines.extend([
+        "",
+        "### Missing joins",
+        "",
+    ])
+    for edge in dataset["traceGraph"]["negativeEdges"]:
+        lines.append(f"- `{edge['type']}`: {edge['statement']} [{edge['provenanceStrength']}]")
+        for citation in edge["provedBy"]:
+            lines.append(f"  - `{citation['sourceId']}` at `{citation['locator']}` records `{citation['term']}`")
+    lines.extend([
+        "",
+        "## Solved vs blocked",
+        "",
+        f"- Baseline: `{dataset['solvedVsBlockedDiff']['baseline']['shellField']}` path id `{dataset['solvedVsBlockedDiff']['baseline']['shellPathId']}` stays cleared as the comparison shape.",
+        f"- Blocked target: `{dataset['solvedVsBlockedDiff']['blockedTarget']['shellField']}` path id `{dataset['solvedVsBlockedDiff']['blockedTarget']['shellPathId']}` stays blocked.",
+        f"- Shared present edge types: `{', '.join(dataset['solvedVsBlockedDiff']['delta']['sharedPresentEdgeTypes'])}`",
+        f"- Baseline-only present edge types: `{', '.join(dataset['solvedVsBlockedDiff']['delta']['baselineOnlyPresentEdgeTypes'])}`",
+        f"- Blocked missing edge types: `{', '.join(dataset['solvedVsBlockedDiff']['delta']['blockedMissingEdgeTypes'])}`",
+        "",
+    ])
+    lines.extend(f"- {line}" for line in dataset["solvedVsBlockedDiff"]["delta"]["solvedVsBlockedSummary"])
     lines.extend([
         "",
         "## Current loss",

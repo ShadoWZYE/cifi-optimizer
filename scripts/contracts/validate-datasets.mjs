@@ -2522,10 +2522,12 @@ function validateUnityTraceBundle(bundle) {
   expectRecord(bundle.shellWindow, "unity trace bundle shellWindow must be an object");
   expectArray(bundle.sourceRoles, "unity trace bundle sourceRoles must be an array");
   expectArray(bundle.surfaces, "unity trace bundle surfaces must be an array");
+  expectRecord(bundle.traceGraph, "unity trace bundle traceGraph must be an object");
   expectRecord(bundle.bridgeCheck, "unity trace bundle bridgeCheck must be an object");
+  expectRecord(bundle.solvedVsBlockedDiff, "unity trace bundle solvedVsBlockedDiff must be an object");
   expectArray(bundle.lostStructure, "unity trace bundle lostStructure must be an array");
   expectArray(bundle.currentBoundary, "unity trace bundle currentBoundary must be an array");
-  ["metadata", "tokenShopExtract", "dailyTokeniumLaneProbe", "uabeaProbe", "unityProbe", "lm244TargetedProbe"].forEach((field) => {
+  ["metadata", "tokenShopExtract", "tokenShopRowRemapBoundary", "dailyTokeniumLaneProbe", "uabeaProbe", "unityProbe", "lm244TargetedProbe"].forEach((field) => {
     expectNonEmptyString(bundle.sources[field], `unity trace bundle sources.${field} must be present`);
   });
 
@@ -2547,10 +2549,22 @@ function validateUnityTraceBundle(bundle) {
   assert.ok(bundle.surfaces.some((surface) => surface.id === "diamond-special"), "unity trace bundle missing diamond-special lane");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "token-lane"), "unity trace bundle missing token lane");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "text-hooks"), "unity trace bundle missing text-hook lane");
+  assert.equal(bundle.traceGraph.edges.length, 8, "unity trace bundle proved edge count drifted");
+  assert.equal(bundle.traceGraph.negativeEdges.length, 4, "unity trace bundle negative edge count drifted");
+  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"), "unity trace bundle missing direct serialized adjacency edge");
+  assert.ok(bundle.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-prefab"), "unity trace bundle missing negative shell-to-prefab edge");
+  assert.ok(bundle.traceGraph.claimLedger.some((claim) => claim.id === "claim-missing-bridge" && claim.status === "missing"), "unity trace bundle missing missing-bridge claim");
+  assert.equal(bundle.solvedVsBlockedDiff.baseline.shellField, "ATU1Button", "unity trace bundle baseline shell drifted");
+  assert.equal(bundle.solvedVsBlockedDiff.baseline.shellPathId, 15839, "unity trace bundle baseline shell path drifted");
+  assert.equal(bundle.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button", "unity trace bundle blocked shell drifted");
+  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency"], "unity trace bundle shared edge diff drifted");
+  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes, ["exact-shell-to-action-hook", "exact-shell-to-prefab", "supporting-effect-hook"], "unity trace bundle baseline-only diff drifted");
+  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"], "unity trace bundle blocked missing diff drifted");
   assert.ok(bundle.lostStructure.some((line) => /metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area/i.test(line)), "unity trace bundle must preserve metadata-loss explanation");
   assert.ok(bundle.lostStructure.some((line) => /direct cross-surface join back to 15810/i.test(line)), "unity trace bundle must preserve join-loss explanation");
   assert.match(bundle.groundedConclusion, /ATU3Button or 15810 trace stays negative/i, "unity trace bundle grounded conclusion drifted");
   assert.ok(bundle.currentBoundary.some((line) => /target-driven trace workflow/i.test(line)), "unity trace bundle must preserve workflow framing");
+  assert.ok(bundle.currentBoundary.some((line) => /negative joins/i.test(line)), "unity trace bundle must preserve graph negative-join framing");
 
   return {
     id: "unity-trace-bundle",

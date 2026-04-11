@@ -17,6 +17,8 @@
   - Preserves raw declaration-side string neighborhoods from global-metadata.dat.
 - `tokenShopExtract`: [`data/token-shop-values.json`](data/token-shop-values.json)
   - Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser.
+- `tokenShopRowRemapBoundary`: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json)
+  - Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing.
 - `dailyTokeniumLaneProbe`: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json)
   - Preserves named action-hook neighborhoods from the committed targeted string probe outputs.
 - `uabeaProbe`: [`data/uabea-probe-report.json`](data/uabea-probe-report.json)
@@ -100,6 +102,59 @@
 
 - Result: `no checked object-or-title bridge recovered`
 - No committed source keeps the shell-side anchor and one exact prefab or title in the same local container.
+
+## Trace graph
+
+- Present typed edges: `8`
+- Negative typed edges: `4`
+
+### Proved joins
+
+- `serialized-adjacency`: The target shell still sits directly beside the CellBoost owner-field block in the committed TokenShop extract. [direct]
+  - `tokenShopExtract` at `$.fields` proves `ATU3Button path_id 15810`
+- `declaration-neighborhood`: The metadata neighborhood keeps ATU3Button and the CellBoost declaration block in one raw declaration area. [contextual]
+  - `metadata` at `metadata offset 662261` proves `CellBoostStartCost`
+  - `metadata` at `metadata offset 662349` proves `ATU3Button`
+- `family-action-cluster`: The cells-domain action lane preserves BuyCellBoost as the nearest named buy hook for the same family, but only as a generic cluster. [supporting]
+  - `dailyTokeniumLaneProbe` at `$[0].matches[101].entry_context[28].value` proves `BuyCellBoost`
+- `candidate-prefab-surface`: A separate diamond-special CellsBoost prefab candidate is preserved on committed probe surfaces. [direct]
+  - `unityProbe` at `$.apk_results[7].keyword_hits.diamond[16]` proves `NewDiamondUPGPrefab.Specials.CellsBoost`
+  - `lm244TargetedProbe` at `$[0].matches[23].byte_context[89].value` proves `NewDiamondUPGPrefab.Specials.CellsBoost`
+- `candidate-title-surface`: The same detached diamond-special surface also preserves one final title candidate. [direct]
+  - `unityProbe` at `$.apk_results[0].keyword_hits.diamond[45]` proves `>Diamond Upgrade 10 - CellsBoost`
+- `candidate-prefab-surface`: Separate token-side prefab identities for cells-domain upgrades are preserved, but not joined back to the target shell. [direct]
+  - `uabeaProbe` at `$.namedObjectHits[10371].name` proves `NewTokenUPGPrefab.T1.CellsPerChestBooster`
+  - `unityProbe` at `$.apk_results[7].keyword_hits.token[38]` proves `NewTokenUPGPrefab.T5.UltimaCells`
+- `candidate-title-surface`: The token-side candidate surface also preserves one detached title clue. [direct]
+  - `unityProbe` at `$.apk_results[23].keyword_hits.token[25]` proves `Token Ultima: Cells`
+- `generic-text-hook-cluster`: The generic TokenShop text hooks are preserved as a separate surface, but they do not close the ATU3 join. [supporting]
+  - `unityProbe` at `$.apk_results[32].keyword_hits.token[6]` proves `SetAllTokenShopTexts`
+  - `unityProbe` at `$.apk_results[32].keyword_hits.token[7]` proves `SetTokenTexts`
+
+### Missing joins
+
+- `exact-shell-to-action-hook`: No committed source proves one ATU3-specific direct buy or effect hook; the nearest named action surface stays the generic BuyCellBoost cluster. [negative]
+  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]` records `No checked repo artifact in this lane currently preserves an ATU3-specific effect hook.`
+  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]` records `No checked repo artifact in this lane currently preserves an ATU3-specific direct buy hook.`
+- `exact-shell-to-prefab`: No committed source proves that the ATU3 shell or path id 15810 crosses directly into the detached diamond-special CellsBoost prefab candidate. [negative]
+  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.testedSurfaces[1].missingJoin` records `The checked diamond-special surface still preserves a separate CellsBoost prefab and title lane, but it does not preserve any ATU3 shell, path id 15810, or exact bridge from the ATU3 owner block into that diamond-special identity surface.`
+- `exact-shell-to-prefab`: No committed source proves that the ATU3 shell or path id 15810 crosses directly into one exact token-side prefab identity. [negative]
+  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]` records `No checked repo artifact in this lane currently joins ATU3Button directly to one exact NewTokenUPGPrefab.* object identity.`
+  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.testedSurfaces[2].missingJoin` records `The checked token-side surface still preserves separate token prefab and title clues for cells-domain upgrades, but it does not preserve any direct ATU3 shell join or one concrete object or title bridge back to path id 15810.`
+- `exact-shell-to-title`: No committed source proves one exact ATU3 shell-to-final-title join across either the diamond-special or token-side title candidates. [negative]
+  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.groundedConclusion` records `The bounded ATU3 cells-domain disambiguation pass stays negative. Across the exact BuyCellBoost, diamond-special CellsBoost, and token-side CellsPerChestBooster or Token Ultima: Cells search surfaces, the repo still preserves only separate cells-domain clusters rather than one checked object-or-title join back to ATU3Button path id 15810.`
+
+## Solved vs blocked
+
+- Baseline: `ATU1Button` path id `15839` stays cleared as the comparison shape.
+- Blocked target: `ATU3Button` path id `15810` stays blocked.
+- Shared present edge types: `serialized-adjacency`
+- Baseline-only present edge types: `exact-shell-to-action-hook, exact-shell-to-prefab, supporting-effect-hook`
+- Blocked missing edge types: `exact-shell-to-action-hook, exact-shell-to-prefab, exact-shell-to-title`
+
+- Both rows preserve the direct serialized shell-to-owner-block adjacency.
+- The solved ATU1 baseline also preserves one exact row-specific effect hook, one checked row-specific buy hook, and one exact prefab identity.
+- The blocked ATU3 target stays missing the exact shell-to-action-hook, shell-to-prefab, and shell-to-title joins, so the cells-domain clues remain split instead of forming one checked bridge.
 
 ## Current loss
 

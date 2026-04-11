@@ -1796,6 +1796,22 @@ assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "action
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "diamond-special"));
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "token-lane"));
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "text-hooks"));
+assert.equal(unityTraceBundleData.traceGraph.edges.length, 8);
+assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 4);
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"));
+assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-title"));
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU1Button");
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 15839);
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button");
+assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency"]);
+assert.deepEqual(
+  unityTraceBundleData.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes,
+  ["exact-shell-to-action-hook", "exact-shell-to-prefab", "supporting-effect-hook"]
+);
+assert.deepEqual(
+  unityTraceBundleData.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes,
+  ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"]
+);
 assert.ok(unityTraceBundleData.lostStructure.some((line) => /raw declaration area/i.test(line)));
 assert.ok(unityTraceBundleData.lostStructure.some((line) => /direct cross-surface join back to 15810/i.test(line)));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
@@ -3139,6 +3155,10 @@ assert.match(tokenShopRowRemapVerificationDoc, /no committed source carries one 
 assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-cells`/);
 assert.match(unityTraceBundleDoc, /Result: `no checked object-or-title bridge recovered`/);
 assert.match(unityTraceBundleDoc, /Shell field: `ATU3Button`/);
+assert.match(unityTraceBundleDoc, /## Trace graph/);
+assert.match(unityTraceBundleDoc, /exact-shell-to-prefab/);
+assert.match(unityTraceBundleDoc, /## Solved vs blocked/);
+assert.match(unityTraceBundleDoc, /Baseline: `ATU1Button` path id `15839`/);
 assert.match(multiverseMarketDoc, /## Integration status/);
 assert.match(multiverseMarketDoc, /CostBox-InscryptionsDone/);
 assert.match(multiverseMarketDoc, /saved-state owner or runtime balance field behind the `Inscryptions Done` cost lane/);
@@ -3567,6 +3587,7 @@ assert.match(unityAuditPlaybook, /api\.nuget\.org/);
 assert.match(unityAuditPlaybook, /`npm run probe:trace -- --target <target-id> --anchor <anchor>`/);
 assert.match(unityAuditPlaybook, /data\/unity-trace-bundle\.json/);
 assert.match(unityAuditPlaybook, /metadata neighborhoods, owner-payload shells, UABEA\/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces/);
+assert.match(unityAuditPlaybook, /typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape/);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);
