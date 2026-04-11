@@ -2517,6 +2517,8 @@ function validateUnityTraceBundle(bundle) {
   expectNonEmptyString(bundle.generatedAt, "unity trace bundle generatedAt must be present");
   expectNonEmptyString(bundle.dataset, "unity trace bundle dataset must be present");
   expectRecord(bundle.traceWorkflow, "unity trace bundle traceWorkflow must be an object");
+  expectRecord(bundle.plannerResolution, "unity trace bundle plannerResolution must be an object");
+  expectArray(bundle.executionAnchors, "unity trace bundle executionAnchors must be an array");
   expectRecord(bundle.traceRegistry, "unity trace bundle traceRegistry must be an object");
   expectRecord(bundle.sources, "unity trace bundle sources must be an object");
   expectRecord(bundle.target, "unity trace bundle target must be an object");
@@ -2534,11 +2536,24 @@ function validateUnityTraceBundle(bundle) {
   });
 
   assert.equal(bundle.dataset, "unity-trace-bundle", "unity trace bundle dataset id drifted");
-  assert.equal(bundle.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>", "unity trace bundle command drifted");
+  assert.equal(bundle.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]", "unity trace bundle command drifted");
+  assert.equal(bundle.traceWorkflow.plannerExample, "node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>", "unity trace bundle planner example drifted");
+  assert.equal(bundle.plannerResolution.selectionMode, "query-planner", "unity trace bundle planner selection mode drifted");
+  assert.equal(bundle.plannerResolution.matchedFamilyId, "token-shop", "unity trace bundle planner family drifted");
+  assert.equal(bundle.plannerResolution.runMode, "compare", "unity trace bundle planner run mode drifted");
+  assert.equal(bundle.plannerResolution.comparePresetId, "token-shop-atu3-vs-atu1", "unity trace bundle planner compare preset drifted");
+  assert.ok(bundle.plannerResolution.expandedAnchors.includes("Cells"), "unity trace bundle planner anchors must preserve query term");
+  assert.ok(bundle.plannerResolution.expandedAnchors.includes("BuyCellBoost"), "unity trace bundle planner anchors must preserve family expansion");
+  assert.ok(bundle.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle planner anchor typing drifted");
+  assert.match(bundle.plannerResolution.decisionNote, /TokenShop/i, "unity trace bundle planner decision note must preserve chosen family");
+  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle execution path-id anchor drifted");
+  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"), "unity trace bundle execution method anchor drifted");
   assert.equal(bundle.traceRegistry.path, "data/unity-trace-target-registry.json", "unity trace bundle registry path drifted");
   assert.equal(bundle.traceRegistry.selectedFamilyId, "token-shop", "unity trace bundle selected family drifted");
   assert.equal(bundle.target.id, "token-shop-atu3-cells", "unity trace bundle target id drifted");
-  assert.deepEqual(bundle.target.anchors, ["ATU3Button", "15810"], "unity trace bundle target anchors drifted");
+  assert.ok(bundle.target.anchors.includes("ATU3Button"), "unity trace bundle target anchors must preserve shell field");
+  assert.ok(bundle.target.anchors.includes("15810"), "unity trace bundle target anchors must preserve shell path id");
+  assert.ok(bundle.target.anchors.includes("BuyCellBoost"), "unity trace bundle target anchors must preserve family expansion");
   assert.equal(bundle.shellWindow.shellField, "ATU3Button", "unity trace bundle shell field drifted");
   assert.equal(bundle.shellWindow.shellPathId, 15810, "unity trace bundle shell path id drifted");
   assert.deepEqual(
@@ -2553,6 +2568,15 @@ function validateUnityTraceBundle(bundle) {
   assert.ok(bundle.surfaces.some((surface) => surface.id === "diamond-special"), "unity trace bundle missing diamond-special lane");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "token-lane"), "unity trace bundle missing token lane");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "text-hooks"), "unity trace bundle missing text-hook lane");
+  const metadataSurface = bundle.surfaces.find((surface) => surface.id === "metadata-neighborhood");
+  assert.ok(metadataSurface.anchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle metadata surface must preserve typed path-id anchor");
+  const metadataSource = metadataSurface.sources.find((source) => source.sourceId === "metadata");
+  assert.deepEqual(metadataSource.searchModes, ["exact-string", "bounded-containment"], "unity trace bundle metadata search modes drifted");
+  assert.equal(metadataSource.highSignalHitCount, 0, "unity trace bundle metadata high-signal count drifted");
+  assert.equal(metadataSource.supportingHitCount, 3, "unity trace bundle metadata supporting count drifted");
+  assert.equal(metadataSource.incidentalHitCount, 4, "unity trace bundle metadata incidental count drifted");
+  assert.ok(metadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)), "unity trace bundle metadata hits should suppress public-key noise");
+  assert.ok(metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")), "unity trace bundle metadata hits should not treat path ids as free-text anchors");
   assert.equal(bundle.traceGraph.edges.length, 8, "unity trace bundle proved edge count drifted");
   assert.equal(bundle.traceGraph.negativeEdges.length, 4, "unity trace bundle negative edge count drifted");
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"), "unity trace bundle missing direct serialized adjacency edge");
@@ -2587,15 +2611,21 @@ function validateUnityTraceBundle(bundle) {
 function validateUnityTraceTargetRegistry(registry) {
   expectNonEmptyString(registry.dataset, "unity trace target registry dataset must be present");
   expectRecord(registry.sourceFamilies, "unity trace target registry sourceFamilies must be an object");
+  expectRecord(registry.planner, "unity trace target registry planner must be an object");
+  expectRecord(registry.planner.families, "unity trace target registry planner.families must be an object");
   expectRecord(registry.comparisonPresets, "unity trace target registry comparisonPresets must be an object");
   expectRecord(registry.targets, "unity trace target registry targets must be an object");
   assert.equal(registry.dataset, "unity-trace-target-registry", "unity trace target registry dataset id drifted");
   ["token-shop", "shard-cost", "multiverse-market-save-owner"].forEach((familyId) => {
     assert.ok(registry.sourceFamilies[familyId], `unity trace target registry missing family ${familyId}`);
+    assert.ok(registry.planner.families[familyId], `unity trace target registry planner missing family ${familyId}`);
   });
   ["token-shop-atu3-cells", "shard-cost-su0-structure", "multiverse-market-save-owner-boundary"].forEach((targetId) => {
     assert.ok(registry.targets[targetId], `unity trace target registry missing target ${targetId}`);
   });
+  assert.equal(registry.planner.families["token-shop"].defaultTargetId, "token-shop-atu3-cells", "unity trace target registry token-shop planner target drifted");
+  assert.equal(registry.planner.families["shard-cost"].defaultRunMode, "trace", "unity trace target registry shard planner mode drifted");
+  assert.equal(registry.planner.families["multiverse-market-save-owner"].defaultRunMode, "compare", "unity trace target registry market planner mode drifted");
   assert.equal(registry.targets["token-shop-atu3-cells"].comparisonPresetId, "token-shop-atu3-vs-atu1", "unity trace target registry token-shop comparison preset drifted");
   assert.equal(registry.targets["shard-cost-su0-structure"].comparisonPresetId, "shard-cost-structure-vs-planner", "unity trace target registry shard comparison preset drifted");
   assert.equal(registry.targets["multiverse-market-save-owner-boundary"].comparisonPresetId, "multiverse-market-save-owner-vs-canonical-import", "unity trace target registry market comparison preset drifted");

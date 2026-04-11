@@ -18,6 +18,9 @@ METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
 
 ASCII_RE = re.compile(rb"[ -~]{4,}")
 UTF16_RE = re.compile(rb"(?:[\x20-\x7E]\x00){4,}")
+NUMERIC_RE = re.compile(r"^\d+$")
+METHOD_RE = re.compile(r"^(?:get_|set_|Buy|Claim|Check|Start|Stop|Set|Fill|Open|Close|Display|Convert|Attach|Initialize|Update|On)[A-Za-z0-9_<>]+$")
+CLASSLIKE_RE = re.compile(r"^[A-Z][A-Za-z0-9_<>]+$")
 
 ALL_SOURCE_PATHS = {
     "metadata": METADATA_PATH,
@@ -73,6 +76,280 @@ def load_registry() -> dict[str, Any]:
     return registry
 
 
+def normalize_planner_term(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+
+def unique_strings(values: list[str]) -> list[str]:
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        trimmed = value.strip()
+        if not trimmed or trimmed in seen:
+            continue
+        seen.add(trimmed)
+        output.append(trimmed)
+    return output
+
+
+def infer_anchor_kind(value: str) -> str:
+    if NUMERIC_RE.fullmatch(value):
+        return "path id"
+    if METHOD_RE.fullmatch(value) or (value.startswith("<") and ">" in value):
+        return "method"
+    if CLASSLIKE_RE.fullmatch(value):
+        return "class"
+    return "string"
+
+
+def build_anchor_specs(values: list[str], origin: str) -> list[dict[str, Any]]:
+    specs: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for value in values:
+        trimmed = value.strip()
+        if not trimmed or trimmed in seen:
+            continue
+        seen.add(trimmed)
+        specs.append(
+            {
+                "value": trimmed,
+                "kind": infer_anchor_kind(trimmed),
+                "origin": origin,
+            }
+        )
+    return specs
+
+
+def get_signal_tier(score: int) -> str:
+    if score >= 100:
+        return "high-signal"
+    if score >= 65:
+        return "supporting"
+    return "incidental"
+
+
+def get_source_search_modes(source_id: str) -> list[str]:
+    return ["exact-structured"] if source_id != "metadata" else ["exact-string", "bounded-containment"]
+
+
+def is_obvious_noise(value: str) -> list[str]:
+    lower_value = value.lower()
+    flags: list[str] = []
+    if "publickey=" in lower_value:
+        flags.append("assembly-public-key-blob")
+    if "begin certificate" in lower_value or "end certificate" in lower_value:
+        flags.append("certificate-blob")
+    if len(value) >= 280:
+        flags.append("long-string-blob")
+    return flags
+
+
+def format_signal_reason(match_mode: str, source_id: str, matched_anchor_values: list[str], noise_flags: list[str], local_signal: str | None = None) -> str:
+    anchor_label = ", ".join(matched_anchor_values)
+    parts = [f"{match_mode} match on {anchor_label} via {source_id}"]
+    if local_signal:
+        parts.append(local_signal)
+    if noise_flags:
+        parts.append(f"noise flags: {', '.join(noise_flags)}")
+    return "; ".join(parts)
+
+
+def format_anchor_specs(anchor_specs: list[dict[str, Any]]) -> str:
+    return ", ".join(f"{item['value']} ({item['kind']})" for item in anchor_specs)
+
+
+def flatten_planner_terms(family_plan: dict[str, Any]) -> list[str]:
+    values = list(family_plan.get("queryTerms", [])) + list(family_plan.get("anchorExpansionTerms", []))
+    for term_list in family_plan.get("synonymSets", {}).values():
+        values.extend(term_list)
+    return unique_strings(values)
+
+
+def score_planner_family(family_id: str, family_plan: dict[str, Any], inputs: list[str]) -> dict[str, Any]:
+    matched_terms: list[str] = []
+    matched_inputs: list[str] = []
+    score = 0
+    for term in flatten_planner_terms(family_plan):
+        normalized_term = normalize_planner_term(term)
+        if not normalized_term:
+            continue
+        best_input: str | None = None
+        best_score = 0
+        for input_value in inputs:
+            normalized_input = normalize_planner_term(input_value)
+            if not normalized_input:
+                continue
+            if normalized_input == normalized_term:
+                best_input = input_value
+                best_score = 6
+                break
+            if normalized_input in normalized_term or normalized_term in normalized_input:
+                if best_score < 3:
+                    best_input = input_value
+                    best_score = 3
+        if best_input is None:
+            continue
+        score += best_score
+        matched_terms.append(term)
+        if best_input not in matched_inputs:
+            matched_inputs.append(best_input)
+    return {
+        "familyId": family_id,
+        "score": score,
+        "matchedTerms": matched_terms,
+        "matchedInputs": matched_inputs,
+    }
+
+
+def choose_best_family(registry: dict[str, Any], inputs: list[str]) -> dict[str, Any]:
+    planner = registry["planner"]
+    scored = [
+        score_planner_family(family_id, planner["families"][family_id], inputs)
+        for family_id in planner["familyOrder"]
+    ]
+    scored.sort(key=lambda item: (-int(item["score"]), -len(item["matchedTerms"]), planner["familyOrder"].index(item["familyId"])))
+    best = scored[0]
+    if int(best["score"]) <= 0:
+        available = ", ".join(planner["familyOrder"])
+        raise ValueError(f"Could not resolve a trace family from query inputs {inputs}. Checked planner families: {available}.")
+    return best
+
+
+def pick_synonym_sets(family_plan: dict[str, Any], inputs: list[str], matched_terms: list[str]) -> list[dict[str, Any]]:
+    matched_set = set(matched_terms)
+    selected: list[dict[str, Any]] = []
+    for set_id, terms in family_plan.get("synonymSets", {}).items():
+        set_matches = [term for term in terms if term in matched_set]
+        if not set_matches:
+            normalized_terms = [normalize_planner_term(term) for term in terms]
+            set_matches = [
+                term
+                for term, normalized_term in zip(terms, normalized_terms)
+                if any(normalized_term and normalized_term in normalize_planner_term(input_value) for input_value in inputs)
+            ]
+        if not set_matches:
+            continue
+        selected.append({"id": set_id, "matchedTerms": unique_strings(set_matches), "terms": terms})
+    return selected
+
+
+def choose_run_mode(family_plan: dict[str, Any], inputs: list[str], explicit_target: bool) -> str:
+    if explicit_target:
+        return "trace"
+    normalized_inputs = [normalize_planner_term(value) for value in inputs if normalize_planner_term(value)]
+    direct_terms = [normalize_planner_term(term) for term in family_plan.get("directTraceTerms", [])]
+    compare_terms = [normalize_planner_term(term) for term in family_plan.get("compareTerms", [])]
+    if any(term and term in normalized_inputs for term in direct_terms):
+        return "trace"
+    if any(term and term in normalized_inputs for term in compare_terms):
+        return "compare"
+    return str(family_plan["defaultRunMode"])
+
+
+def expand_anchor_terms(target: dict[str, Any], family_plan: dict[str, Any], queries: list[str], anchors: list[str], synonym_sets_used: list[dict[str, Any]]) -> list[str]:
+    values = list(target["defaultAnchors"]) + queries + anchors + list(family_plan.get("anchorExpansionTerms", []))
+    for synonym_set in synonym_sets_used:
+        values.extend(synonym_set["terms"])
+    return unique_strings(values)
+
+
+def build_planner_decision_note(
+    selection_mode: str,
+    family_plan: dict[str, Any],
+    resolution: dict[str, Any],
+    target: dict[str, Any],
+) -> str:
+    family_label = family_plan["label"]
+    selected_target_id = resolution["selectedTargetId"]
+    if selection_mode == "explicit-target":
+        return (
+            f"Used explicit target {selected_target_id} in the {family_label} family and kept family-aware anchor expansion "
+            f"so the backend records the same checked synonym surface deterministically."
+        )
+    matched_inputs = ", ".join(resolution["matchedInputs"]) if resolution["matchedInputs"] else family_label
+    synonym_labels = ", ".join(item["id"] for item in resolution["synonymSetsUsed"]) or "family defaults"
+    if resolution["runMode"] == "compare":
+        return (
+            f"Matched {matched_inputs} to {family_label} through {synonym_labels} and chose the bounded "
+            f"{target['comparisonPresetId']} compare run because this query is better grounded as one checked solved-vs-blocked family trace."
+        )
+    return (
+        f"Matched {matched_inputs} to {family_label} through {synonym_labels} and chose the single "
+        f"{selected_target_id} trace because the query already points at one checked family target."
+    )
+
+
+def resolve_planner_selection(
+    registry: dict[str, Any],
+    explicit_target_id: str | None,
+    queries: list[str],
+    anchors: list[str],
+) -> dict[str, Any]:
+    requested_queries = unique_strings(queries)
+    requested_anchors = unique_strings(anchors)
+    if explicit_target_id:
+        target = registry["targets"][explicit_target_id]
+        family_id = target["familyId"]
+        family_plan = registry["planner"]["families"][family_id]
+        combined_inputs = unique_strings([*requested_queries, *requested_anchors])
+        synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, combined_inputs)
+        expanded_anchors = expand_anchor_terms(target, family_plan, requested_queries, requested_anchors, synonym_sets_used)
+        resolution = {
+            "selectionMode": "explicit-target",
+            "requestedQueries": requested_queries,
+            "requestedAnchors": requested_anchors,
+            "matchedInputs": combined_inputs,
+            "matchedTerms": combined_inputs,
+            "matchedFamilyId": family_id,
+            "matchedFamilyLabel": family_plan["label"],
+            "selectedTargetId": explicit_target_id,
+            "selectedRunMode": choose_run_mode(family_plan, combined_inputs, explicit_target=True),
+            "selectedComparePresetId": None,
+            "synonymSetsUsed": synonym_sets_used,
+            "expandedAnchors": expanded_anchors,
+        }
+        resolution["decisionNote"] = build_planner_decision_note("explicit-target", family_plan, {
+            "selectedTargetId": resolution["selectedTargetId"],
+            "matchedInputs": resolution["matchedInputs"],
+            "synonymSetsUsed": resolution["synonymSetsUsed"],
+            "runMode": resolution["selectedRunMode"],
+        }, target)
+        return resolution
+
+    combined_inputs = unique_strings([*requested_queries, *requested_anchors])
+    if not combined_inputs:
+        raise ValueError("Pass --target or at least one --query/--anchor to resolve a unity trace.")
+    best_family = choose_best_family(registry, combined_inputs)
+    family_id = best_family["familyId"]
+    family_plan = registry["planner"]["families"][family_id]
+    target_id = family_plan["defaultTargetId"]
+    target = registry["targets"][target_id]
+    synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, best_family["matchedTerms"])
+    run_mode = choose_run_mode(family_plan, combined_inputs, explicit_target=False)
+    expanded_anchors = expand_anchor_terms(target, family_plan, requested_queries, requested_anchors, synonym_sets_used)
+    resolution = {
+        "selectionMode": "query-planner",
+        "requestedQueries": requested_queries,
+        "requestedAnchors": requested_anchors,
+        "matchedInputs": best_family["matchedInputs"],
+        "matchedTerms": best_family["matchedTerms"],
+        "matchedFamilyId": family_id,
+        "matchedFamilyLabel": family_plan["label"],
+        "selectedTargetId": target_id,
+        "selectedRunMode": run_mode,
+        "selectedComparePresetId": target["comparisonPresetId"] if run_mode == "compare" else None,
+        "synonymSetsUsed": synonym_sets_used,
+        "expandedAnchors": expanded_anchors,
+    }
+    resolution["decisionNote"] = build_planner_decision_note("query-planner", family_plan, {
+        "selectedTargetId": resolution["selectedTargetId"],
+        "matchedInputs": resolution["matchedInputs"],
+        "synonymSetsUsed": resolution["synonymSetsUsed"],
+        "runMode": resolution["selectedRunMode"],
+    }, target)
+    return resolution
+
+
 def resolve_source_catalog(registry: dict[str, Any], family_ids: list[str]) -> tuple[dict[str, Path], list[dict[str, Any]]]:
     source_paths: dict[str, Path] = {}
     source_roles: list[dict[str, Any]] = []
@@ -105,28 +382,64 @@ def extract_strings(blob: bytes) -> list[dict[str, Any]]:
     return sorted(entries, key=lambda entry: int(entry["offset"]))
 
 
-def collect_metadata_hits(terms: list[str], context: int = 8) -> list[dict[str, Any]]:
+def collect_metadata_hits(anchor_specs: list[dict[str, Any]], context: int = 8) -> tuple[list[dict[str, Any]], int]:
     entries = extract_strings(METADATA_PATH.read_bytes())
     hits: list[dict[str, Any]] = []
-    lower_terms = [term.lower() for term in terms]
+    executable_specs = [spec for spec in anchor_specs if spec["kind"] != "path id"]
+    counts: dict[str, int] = {spec["value"]: 0 for spec in executable_specs}
+    suppressed_count = 0
     for index, entry in enumerate(entries):
         value = str(entry["value"])
-        matched = [terms[position] for position, lower in enumerate(lower_terms) if lower in value.lower()]
-        if not matched:
+        matched_specs: list[dict[str, Any]] = []
+        match_modes: list[str] = []
+        for spec in executable_specs:
+            anchor = spec["value"]
+            if value == anchor:
+                matched_specs.append(spec)
+                match_modes.append("exact-string")
+                continue
+            if anchor.lower() in value.lower():
+                matched_specs.append(spec)
+                match_modes.append("bounded-containment")
+        if not matched_specs:
+            continue
+        matched_anchor_values = [spec["value"] for spec in matched_specs]
+        if all(counts[anchor] >= 4 for anchor in matched_anchor_values):
+            continue
+        noise_flags = is_obvious_noise(value)
+        score = max(90 if mode == "exact-string" else 45 for mode in match_modes)
+        if noise_flags:
+            score -= 40
+        if score < 20:
+            suppressed_count += 1
             continue
         start = max(index - context, 0)
         end = min(index + context + 1, len(entries))
         hits.append(
             {
                 "term": value,
-                "matchedTerms": matched,
+                "matchedTerms": matched_anchor_values,
+                "matchedAnchorKinds": unique_strings([spec["kind"] for spec in matched_specs]),
+                "matchMode": "exact-string" if "exact-string" in match_modes else "bounded-containment",
                 "offset": entry["offset"],
                 "context": entries[start:end],
+                "signalScore": score,
+                "signalTier": get_signal_tier(score),
+                "noiseFlags": noise_flags,
+                "signalReason": format_signal_reason(
+                    "exact-string" if "exact-string" in match_modes else "bounded-containment",
+                    "metadata",
+                    matched_anchor_values,
+                    noise_flags,
+                ),
             }
         )
-        if len(hits) >= 8:
+        for matched_term in matched_anchor_values:
+            counts[matched_term] += 1
+        if all(count >= 4 for count in counts.values()):
             break
-    return hits
+    hits.sort(key=lambda item: (-int(item["signalScore"]), int(item["offset"])))
+    return hits, suppressed_count
 
 
 def path_to_string(path_parts: list[str | int]) -> str:
@@ -181,12 +494,15 @@ def walk_json(value: Any, path_parts: list[str | int], parent: Any, key_or_index
     )
 
 
-def collect_exact_hits(document: Any, terms: list[str], max_hits_per_term: int = 4) -> list[dict[str, Any]]:
+def collect_exact_hits(document: Any, anchor_specs: list[dict[str, Any]], source_id: str, shell_window: dict[str, Any] | None, max_hits_per_term: int = 4) -> tuple[list[dict[str, Any]], int]:
     hits: list[dict[str, Any]] = []
-    walk_json(document, [], None, None, set(terms), hits)
+    exact_terms = [spec["value"] for spec in anchor_specs]
+    walk_json(document, [], None, None, set(exact_terms), hits)
+    spec_by_value = {spec["value"]: spec for spec in anchor_specs}
     counts: dict[str, int] = {}
     filtered: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
+    suppressed_count = 0
     for hit in hits:
         identity = (hit["term"], hit["jsonPath"])
         if identity in seen:
@@ -195,9 +511,53 @@ def collect_exact_hits(document: Any, terms: list[str], max_hits_per_term: int =
         counts.setdefault(hit["term"], 0)
         if counts[hit["term"]] >= max_hits_per_term:
             continue
+        spec = spec_by_value[hit["term"]]
+        container_text = json.dumps(hit.get("containerSummary") or {}, sort_keys=True)
+        shell_field = str(shell_window["shellField"]) if shell_window else None
+        shell_path = str(shell_window["shellPathId"]) if shell_window else None
+        owner_fields = set(shell_window["ownerFieldBlock"]) if shell_window else set()
+        local_signal: str | None = None
+        score = 85
+        if spec["kind"] == "path id":
+            score += 15
+        if source_id == "tokenShopExtract":
+            score += 25
+        elif source_id in {"dailyTokeniumLaneProbe", "uabeaProbe"}:
+            score += 15
+        else:
+            score += 10
+        if shell_field and hit["term"] == shell_field:
+            score += 25
+            local_signal = "shell-local exact anchor"
+        elif shell_path and hit["term"] == shell_path:
+            score += 30
+            local_signal = "shell-local path id"
+        elif hit["term"] in owner_fields:
+            score += 25
+            local_signal = "owner-local exact field"
+        elif shell_field and shell_field in container_text:
+            score += 10
+            local_signal = "container keeps shell anchor nearby"
+        elif owner_fields and any(field in container_text for field in owner_fields):
+            score += 10
+            local_signal = "container keeps owner-local fields nearby"
+        noise_flags = is_obvious_noise(hit["term"])
+        if noise_flags:
+            score -= 40
+        if score < 20:
+            suppressed_count += 1
+            continue
+        hit["matchedTerms"] = [spec["value"]]
+        hit["matchedAnchorKinds"] = [spec["kind"]]
+        hit["matchMode"] = "exact-structured"
+        hit["signalScore"] = score
+        hit["signalTier"] = get_signal_tier(score)
+        hit["noiseFlags"] = noise_flags
+        hit["signalReason"] = format_signal_reason("exact-structured", source_id, [spec["value"]], noise_flags, local_signal)
         counts[hit["term"]] += 1
         filtered.append(hit)
-    return filtered
+    filtered.sort(key=lambda item: (-int(item["signalScore"]), item["jsonPath"]))
+    return filtered, suppressed_count
 
 
 def get_shell_window(token_shop_extract: dict[str, Any], shell_field: str, radius: int) -> dict[str, Any]:
@@ -224,20 +584,30 @@ def get_shell_window(token_shop_extract: dict[str, Any], shell_field: str, radiu
     }
 
 
-def collect_source_hits(documents: dict[str, Any], source_id: str, terms: list[str]) -> dict[str, Any]:
+def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs: list[dict[str, Any]], shell_window: dict[str, Any] | None = None) -> dict[str, Any]:
     if source_id == "metadata":
-        hits = collect_metadata_hits(terms)
+        hits, suppressed_count = collect_metadata_hits(anchor_specs)
         return {
             "sourceId": source_id,
             "sourcePath": repo_relative(ALL_SOURCE_PATHS[source_id]),
+            "searchModes": get_source_search_modes(source_id),
             "hitCount": len(hits),
+            "highSignalHitCount": sum(1 for hit in hits if hit["signalTier"] == "high-signal"),
+            "supportingHitCount": sum(1 for hit in hits if hit["signalTier"] == "supporting"),
+            "incidentalHitCount": sum(1 for hit in hits if hit["signalTier"] == "incidental"),
+            "suppressedNoiseCount": suppressed_count,
             "hits": hits,
         }
-    hits = collect_exact_hits(documents[source_id], terms)
+    hits, suppressed_count = collect_exact_hits(documents[source_id], anchor_specs, source_id, shell_window)
     return {
         "sourceId": source_id,
         "sourcePath": repo_relative(ALL_SOURCE_PATHS[source_id]),
+        "searchModes": get_source_search_modes(source_id),
         "hitCount": len(hits),
+        "highSignalHitCount": sum(1 for hit in hits if hit["signalTier"] == "high-signal"),
+        "supportingHitCount": sum(1 for hit in hits if hit["signalTier"] == "supporting"),
+        "incidentalHitCount": sum(1 for hit in hits if hit["signalTier"] == "incidental"),
+        "suppressedNoiseCount": suppressed_count,
         "hits": hits,
     }
 
@@ -251,7 +621,11 @@ def find_source_entry(surface: dict[str, Any], source_id: str) -> dict[str, Any]
 
 
 def find_hit(source_entry: dict[str, Any], term: str) -> dict[str, Any]:
-    return next(hit for hit in source_entry["hits"] if hit["term"] == term)
+    return next(
+        hit
+        for hit in source_entry["hits"]
+        if hit["term"] == term or term in hit.get("matchedTerms", [])
+    )
 
 
 def cite_hit(source_entry: dict[str, Any], hit: dict[str, Any], note: str | None = None) -> dict[str, Any]:
@@ -797,12 +1171,14 @@ def build_token_shop_trace(target_id: str, target: dict[str, Any], anchors: list
     surfaces = []
     for surface in config["surfaces"]:
         terms = list(dict.fromkeys([*surface["terms"], *anchors]))
+        anchor_specs = build_anchor_specs(terms, "surface-search")
         surfaces.append(
             {
                 "id": surface["id"],
                 "label": surface["label"],
                 "terms": terms,
-                "sources": [collect_source_hits(documents, source_id, terms) for source_id in surface["sourceIds"]],
+                "anchorSpecs": anchor_specs,
+                "sources": [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in surface["sourceIds"]],
             }
         )
     bridge_cleared, bridge_hits = has_exact_bridge(shell_window, surfaces, config["bridgeCandidateTerms"])
@@ -1140,25 +1516,48 @@ def build_decision_summary(target: dict[str, Any], trace_payload: dict[str, Any]
     }
 
 
-def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
+def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list[str]) -> dict[str, Any]:
     registry = load_registry()
-    target = registry["targets"][target_id]
-    anchors = list(dict.fromkeys([*target["defaultAnchors"], *extra_anchors]))
+    planner_resolution = resolve_planner_selection(registry, target_id, queries, extra_anchors)
+    selected_target_id = str(planner_resolution["selectedTargetId"])
+    target = registry["targets"][selected_target_id]
+    family_plan = registry["planner"]["families"][target["familyId"]]
+    anchors = unique_strings([*target["defaultAnchors"], *extra_anchors, *family_plan.get("anchorExpansionTerms", [])])
+    execution_anchor_specs = build_anchor_specs(anchors, "execution-anchor")
+    expanded_anchor_specs = build_anchor_specs(planner_resolution["expandedAnchors"], "planner-expanded-anchor")
     source_paths, source_roles = resolve_source_catalog(registry, target["requiredSourceFamilies"])
     documents = {source_id: load_json(path) for source_id, path in source_paths.items() if source_id != "metadata"}
-    trace_payload = build_trace_payload(target_id, target, anchors, documents)
+    trace_payload = build_trace_payload(selected_target_id, target, anchors, documents)
     return {
         "dataset": "unity-trace-bundle",
         "generatedAt": str(date.today()),
         "traceWorkflow": {
-            "command": "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>",
+            "command": "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]",
+            "directExample": "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>",
+            "plannerExample": "node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>",
             "acceptedAnchors": target["acceptedAnchors"],
-            "targetResolution": "checked repo-local target preset plus anchor list",
+            "targetResolution": "explicit target or checked query planner plus family-aware anchor expansion",
             "readsCommittedSourcesOnly": True,
         },
+        "plannerResolution": {
+            "selectionMode": planner_resolution["selectionMode"],
+            "requestedQueries": planner_resolution["requestedQueries"],
+            "requestedAnchors": planner_resolution["requestedAnchors"],
+            "matchedInputs": planner_resolution["matchedInputs"],
+            "matchedTerms": planner_resolution["matchedTerms"],
+            "matchedFamilyId": planner_resolution["matchedFamilyId"],
+            "matchedFamilyLabel": planner_resolution["matchedFamilyLabel"],
+            "runMode": planner_resolution["selectedRunMode"],
+            "comparePresetId": planner_resolution["selectedComparePresetId"],
+            "synonymSetsUsed": planner_resolution["synonymSetsUsed"],
+            "expandedAnchors": planner_resolution["expandedAnchors"],
+            "expandedAnchorSpecs": expanded_anchor_specs,
+            "decisionNote": planner_resolution["decisionNote"],
+        },
+        "executionAnchors": execution_anchor_specs,
         "traceRegistry": {
             "path": repo_relative(REGISTRY_PATH),
-            "selectedTargetId": target_id,
+            "selectedTargetId": selected_target_id,
             "selectedFamilyId": target["familyId"],
             "requiredSourceFamilies": target["requiredSourceFamilies"],
             "solvedBaselineTargetId": target["solvedBaselineTargetId"],
@@ -1168,7 +1567,7 @@ def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
         "sources": {source_id: repo_relative(path) for source_id, path in source_paths.items()},
         "sourceRoles": source_roles,
         "target": {
-            "id": target_id,
+            "id": selected_target_id,
             "label": target["label"],
             "familyId": target["familyId"],
             "anchors": anchors,
@@ -1199,9 +1598,25 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         f"- Anchors: `{', '.join(dataset['target']['anchors'])}`",
         f"- Join goal: {dataset['target']['joinGoal']}",
         "",
+        "## Planner resolution",
+        "",
+        f"- Selection mode: `{dataset['plannerResolution']['selectionMode']}`",
+        f"- Matched family: `{dataset['plannerResolution']['matchedFamilyId']}` ({dataset['plannerResolution']['matchedFamilyLabel']})",
+        f"- Run mode: `{dataset['plannerResolution']['runMode']}`",
+        f"- Requested queries: `{', '.join(dataset['plannerResolution']['requestedQueries']) or 'none'}`",
+        f"- Requested anchors: `{', '.join(dataset['plannerResolution']['requestedAnchors']) or 'none'}`",
+        f"- Expanded anchor kinds: `{format_anchor_specs(dataset['plannerResolution']['expandedAnchorSpecs'])}`",
+        f"- Decision note: {dataset['plannerResolution']['decisionNote']}",
+        "",
+        "## Execution anchors",
+        "",
+        f"- Typed execution anchors: `{format_anchor_specs(dataset['executionAnchors'])}`",
+        "",
         "## Workflow",
         "",
         f"- Command: `{dataset['traceWorkflow']['command']}`",
+        f"- Direct example: `{dataset['traceWorkflow']['directExample']}`",
+        f"- Planner example: `{dataset['traceWorkflow']['plannerExample']}`",
         f"- Accepted anchor kinds: `{', '.join(dataset['traceWorkflow']['acceptedAnchors'])}`",
         "- Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.",
         f"- Registry target: `{dataset['traceRegistry']['selectedTargetId']}` from `{dataset['traceRegistry']['selectedFamilyId']}` via {md_link(ROOT / dataset['traceRegistry']['path'])}",
@@ -1227,13 +1642,25 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         lines.append(f"### {surface['label']}")
         lines.append("")
         lines.append(f"- Search terms: `{', '.join(surface['terms'])}`")
+        lines.append(f"- Typed anchors: `{format_anchor_specs(surface.get('anchorSpecs', []))}`")
         for source_entry in surface["sources"]:
             lines.append(f"- Source: {md_link(ROOT / source_entry['sourcePath'])} ({source_entry['hitCount']} hits)")
+            lines.append(
+                f"  - Signal summary: {source_entry['highSignalHitCount']} high-signal, "
+                f"{source_entry['supportingHitCount']} supporting, {source_entry['incidentalHitCount']} incidental, "
+                f"{source_entry['suppressedNoiseCount']} suppressed-noise"
+            )
             for hit in source_entry["hits"]:
                 if source_entry["sourceId"] == "metadata":
-                    lines.append(f"  - `{hit['term']}` at metadata offset `{hit['offset']}`")
+                    lines.append(
+                        f"  - `{hit['term']}` at metadata offset `{hit['offset']}` "
+                        f"[{hit['signalTier']}, score {hit['signalScore']}, {hit['matchMode']}]"
+                    )
                 else:
-                    lines.append(f"  - `{hit['term']}` at `{hit['jsonPath']}`")
+                    lines.append(
+                        f"  - `{hit['term']}` at `{hit['jsonPath']}` "
+                        f"[{hit['signalTier']}, score {hit['signalScore']}, {hit['matchMode']}]"
+                    )
         lines.append("")
     lines.extend([
         "## Bridge check",
@@ -1304,12 +1731,15 @@ def write_markdown(dataset: dict[str, Any]) -> None:
 def main() -> None:
     registry = load_registry()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--target", required=True, choices=sorted(registry["targets"].keys()))
+    parser.add_argument("--target", choices=sorted(registry["targets"].keys()))
+    parser.add_argument("--query", action="append", default=[])
     parser.add_argument("--anchor", action="append", default=[])
     parser.add_argument("--json-out", type=Path, default=JSON_OUT)
     parser.add_argument("--md-out", type=Path, default=MD_OUT)
     args = parser.parse_args()
-    dataset = build_dataset(args.target, args.anchor)
+    if not args.target and not args.query and not args.anchor:
+        parser.error("pass --target or at least one --query/--anchor")
+    dataset = build_dataset(args.target, args.query, args.anchor)
     args.json_out.write_text(json.dumps(dataset, indent=2) + "\n", encoding="utf-8")
     write_markdown(dataset)
 
