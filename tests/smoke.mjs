@@ -79,6 +79,7 @@ const tokenShopOwnerShellData = JSON.parse(await readFile(new URL("../data/token
 const tokenShopSaveBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-save-boundary.json", import.meta.url), "utf8"));
 const tokenShopRowLevelOwnerData = JSON.parse(await readFile(new URL("../data/token-shop-row-level-owner.json", import.meta.url), "utf8"));
 const tokenShopRowRemapBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-row-remap-boundary.json", import.meta.url), "utf8"));
+const tokenShopLateAtuBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-late-atu-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketMarketMemberBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-market-member-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveDataImportBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-savedata-import-boundary.json", import.meta.url), "utf8"));
@@ -484,6 +485,7 @@ const expectedBundledDatasetIds = [
   "token-shop-save-boundary",
   "token-shop-row-level-owner",
   "token-shop-row-remap-boundary",
+  "token-shop-late-atu-boundary",
   "multiverse-market-save-boundary",
   "multiverse-market-market-member-boundary",
   "multiverse-market-savedata-import-boundary",
@@ -1754,6 +1756,25 @@ assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((l
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /four checked TokenShop row bridges/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /checked ATU6 shell-to-prefab-to-title chain/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 cells-domain disambiguation pass also stays negative/i.test(line)));
+assert.equal(tokenShopLateAtuBoundaryData.dataset, "token-shop-late-atu-boundary");
+assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.saveFieldRange, "ATU24Level through ATU28Level");
+assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.shellFieldRange, "ATU24Button through ATU28Button");
+assert.deepEqual(
+  tokenShopLateAtuBoundaryData.lateRows.map((row) => row.shellField),
+  ["ATU24Button", "ATU25Button", "ATU26Button", "ATU27Button", "ATU28Button"]
+);
+assert.deepEqual(
+  tokenShopLateAtuBoundaryData.actionNeighborhood.preservedLateHooks,
+  ["BuyATU24", "BuyATU25", "BuyATU26", "BuyATU27", "BuyATU28"]
+);
+assert.ok(tokenShopLateAtuBoundaryData.titleRosterBoundary.localTitleCluster.some((entry) => entry.title === "Academy Booster"));
+assert.ok(tokenShopLateAtuBoundaryData.prefabRosterBoundary.localPrefabCluster.some((entry) => entry.identity === "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"));
+assert.equal(tokenShopLateAtuBoundaryData.prefabRosterBoundary.separateEffectSidePrefab.identity, "NewTokenUPGPrefab.T5.CampaignFragments");
+assert.ok(tokenShopLateAtuBoundaryData.effectSideBoundary.preservedEffectClues.includes("ATU24Bonus3Shards"));
+assert.equal(tokenShopLateAtuBoundaryData.result, "no concrete late-row object-or-title join cleared");
+assert.match(tokenShopLateAtuBoundaryData.groundedConclusion, /tighter bounded negative result/);
+assert.ok(tokenShopLateAtuBoundaryData.currentBoundary.some((line) => /ATU24Level through ATU28Level/i.test(line)));
+assert.ok(tokenShopLateAtuBoundaryData.currentBoundary.some((line) => /do not infer ATU24 through ATU28 row identity/i.test(line)));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -2922,7 +2943,7 @@ assert.match(spendSystemVerificationDoc, /compatibility\.unmappedSystemState\.to
 assert.match(activeGroundingBoundariesDoc, /narrows the save-side wrapper to the nearby mission-persistence block in `SaveData`/);
 assert.match(unityOwnerMapDoc, /narrowest checked save wrapper -> `SaveData` mission-persistence neighborhood/);
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
-assert.match(activeGroundingBoundariesDoc, /four checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU5Button`, and `ATU6Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, and the bounded ATU3 cells-domain disambiguation pass is now also a clean negative result/);
+assert.match(activeGroundingBoundariesDoc, /four checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU5Button`, and `ATU6Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, and both the bounded ATU3 cells-domain disambiguation pass and the late ATU24-ATU28 shell neighborhood are now clean negative results/);
 assert.match(activeGroundingBoundariesDoc, /recover one more checked bridge from a different unresolved `ATU\*Button`, `ATU\*Content`, or adjacent shell neighborhood/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
@@ -2930,11 +2951,13 @@ assert.match(tokenShopDoc, /base TokenShop costs should currently be described a
 const tokenShopRowRemapTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-shop-row-remap");
 assert.ok(tokenShopRowRemapTrack, "Expected snapshot research track spend-token-shop-row-remap");
 assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /ATU1, ATU2, ATU5, and ATU6 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, treats the bounded ATU3 cells-domain disambiguation pass as a clean negative result/);
-assert.match(tokenShopRowRemapTrack?.blockedBy ?? "", /bounded ATU3 cells-domain pass stays negative/);
+assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /late ATU24-ATU28 shell neighborhood as a tighter bounded negative result/);
+assert.match(tokenShopRowRemapTrack?.blockedBy ?? "", /ATU3 cells-domain pass.*late ATU24-ATU28 shell neighborhood.*negative/);
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU5Button` to `NewTokenUPGPrefab\.T1\.MK1Booster/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU3 cells-domain disambiguation pass stays negative/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster` to `Mk2 Generator Booster`/.test(line)));
+assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /late ATU24-ATU28 shell neighborhood now also has a tighter bounded negative result/.test(line)));
 assert.match(tokenShopDoc, /Daily Tokenium should stay separated as the Academy or Farm Mission reward lane that TokenShop modifies/);
 assert.match(shardVerificationDoc, /# Shard System Verification Gate/);
 assert.match(shardVerificationDoc, /community-grounded descriptive data/);

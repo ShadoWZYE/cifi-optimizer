@@ -1,0 +1,207 @@
+{
+  "generatedAt": "2026-04-12",
+  "dataset": "token-shop-late-atu-boundary",
+  "sources": {
+    "tokenShopExtract": "data/token-shop-values.json",
+    "tokenShopRowRemapBoundary": "data/token-shop-row-remap-boundary.json",
+    "uabeaProbe": "data/uabea-probe-report.json",
+    "unityProbe": "data/unity-probe-report.json",
+    "dailyTokeniumLaneProbe": "data/daily-tokenium-lane-probe.json",
+    "dailyTokeniumOwnerProbe": "data/daily-tokenium-owner-probe.json",
+    "lm244TargetedProbe": "data/lm244-targeted-probe.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0"
+  },
+  "targetNeighborhood": {
+    "saveFieldRange": "ATU24Level through ATU28Level",
+    "shellFieldRange": "ATU24Button through ATU28Button",
+    "numericFieldRange": "ATU24StartCost through ATU28Fill",
+    "group": "tier4plus"
+  },
+  "lateRows": [
+    {
+      "field": "ATU24Level",
+      "shellField": "ATU24Button",
+      "shellPathId": 15797,
+      "startHoldHook": "StartATU24Hold",
+      "stopHoldHook": "StopATU24Hold",
+      "buyHook": "BuyATU24",
+      "ownerFields": [
+        "ATU24StartCost",
+        "ATU24Bonus1",
+        "ATU24Bonus2",
+        "ATU24Bonus3",
+        "ATU24Bonus4",
+        "ATU24Bonus5",
+        "ATU24Fill"
+      ]
+    },
+    {
+      "field": "ATU25Level",
+      "shellField": "ATU25Button",
+      "shellPathId": 15820,
+      "startHoldHook": "StartATU25Hold",
+      "stopHoldHook": "StopATU25Hold",
+      "buyHook": "BuyATU25",
+      "ownerFields": [
+        "ATU25StartCost",
+        "ATU25AdditiveCost",
+        "ATU25Bonus",
+        "ATU25MaxLevel",
+        "ATU25Fill"
+      ]
+    },
+    {
+      "field": "ATU26Level",
+      "shellField": "ATU26Button",
+      "shellPathId": 15840,
+      "startHoldHook": "StartATU26Hold",
+      "stopHoldHook": "StopATU26Hold",
+      "buyHook": "BuyATU26",
+      "ownerFields": [
+        "ATU26StartCost",
+        "ATU26AdditiveCost",
+        "ATU26Bonus",
+        "ATU26MaxLevel",
+        "ATU26Fill"
+      ]
+    },
+    {
+      "field": "ATU27Level",
+      "shellField": "ATU27Button",
+      "shellPathId": 15832,
+      "startHoldHook": "StartATU27Hold",
+      "stopHoldHook": "StopATU27Hold",
+      "buyHook": "BuyATU27",
+      "ownerFields": [
+        "ATU27StartCost",
+        "ATU27AdditiveCost",
+        "ATU27Bonus",
+        "ATU27MaxLevel",
+        "ATU27Fill"
+      ]
+    },
+    {
+      "field": "ATU28Level",
+      "shellField": "ATU28Button",
+      "shellPathId": 15813,
+      "startHoldHook": "StartATU28Hold",
+      "stopHoldHook": "StopATU28Hold",
+      "buyHook": "BuyATU28",
+      "ownerFields": [
+        "ATU28StartCost",
+        "ATU28AdditiveCost",
+        "ATU28Bonus",
+        "ATU28MaxLevel",
+        "ATU28Fill"
+      ]
+    }
+  ],
+  "actionNeighborhood": {
+    "preservedLateHooks": [
+      "BuyATU24",
+      "BuyATU25",
+      "BuyATU26",
+      "BuyATU27",
+      "BuyATU28"
+    ],
+    "adjacentNamedTierHooks": [
+      "BuyTokenT3",
+      "BuyTokenDailyT3",
+      "BuyTrio1Boost",
+      "BuyTrio2Boost"
+    ],
+    "groundedConclusion": "The late ATU24-ATU28 shell neighborhood now has one clean action-side boundary: each shell preserves its own Start or Stop hold pair plus direct BuyATU24 through BuyATU28 hooks, and those hooks sit beside named tier-buy families instead of as isolated unlabeled methods.",
+    "missingJoin": "That tighter action shell still does not preserve any final row title, any NewTokenUPGPrefab object identity, or any checked bridge from BuyATU24 through BuyATU28 back to one exact player-facing TokenShop row name."
+  },
+  "titleRosterBoundary": {
+    "localTitleCluster": [
+      {
+        "title": "Duo Booster Four",
+        "offset": 30209356
+      },
+      {
+        "title": "Trinity Booster One",
+        "offset": 30218028
+      },
+      {
+        "title": "Academy Booster",
+        "offset": 30218572
+      },
+      {
+        "title": "Trinity Oom Booster",
+        "offset": 30219116
+      },
+      {
+        "title": "Tokens Booster T3",
+        "offset": 30220796
+      },
+      {
+        "title": "Tier 3 Max Level Increaser",
+        "offset": 30221340
+      }
+    ],
+    "groundedConclusion": "Committed level0 string neighborhoods now preserve a tighter late title-side roster instead of one vague title cloud. The same local window keeps six plausible late TokenShop titles in one run: Duo Booster Four, Trinity Booster One, Academy Booster, Trinity Oom Booster, Tokens Booster T3, and Tier 3 Max Level Increaser.",
+    "missingJoin": "That title roster still does not preserve any ATU24Button through ATU28Button shell, any exact shell path id, or any checked object bridge proving which late ATU shell owns which title."
+  },
+  "prefabRosterBoundary": {
+    "localPrefabCluster": [
+      {
+        "identity": "NewTokenUPGPrefab.T3.TokensBoost",
+        "pathId": 48831
+      },
+      {
+        "identity": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+        "pathId": 48832
+      },
+      {
+        "identity": "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+        "pathId": 48834
+      },
+      {
+        "identity": "NewTokenUPGPrefab.T5.TrinityOomBooster",
+        "pathId": 48837
+      },
+      {
+        "identity": "NewTokenUPGPrefab.T2.DuoBoosterFour",
+        "pathId": 48842
+      }
+    ],
+    "separateEffectSidePrefab": {
+      "identity": "NewTokenUPGPrefab.T5.CampaignFragments",
+      "pathId": 48819
+    },
+    "groundedConclusion": "Committed level0 object neighborhoods also preserve a tighter late prefab-side roster: T3 TokensBoost, T4 Tier3MaxLevelIncreaser, T3 TrinityBoosterOne, T5 TrinityOomBooster, and T2 DuoBoosterFour all survive as exact named TokenShop prefabs, while T5 CampaignFragments survives on a separate effect-side surface.",
+    "missingJoin": "That prefab roster still does not preserve any ATU24Button through ATU28Button shell, any exact shell path id, or any checked one-to-one bridge from the late ATU shell family into one exact prefab identity."
+  },
+  "effectSideBoundary": {
+    "preservedEffectClues": [
+      "ATU24Bonus3Shards",
+      "LV. 1 - x1.1 Campaign Fragments",
+      "LV. 3 - Academy Points x3",
+      "Every Rank Install on the Ouroboros Ship increases Campaign Fragments Gained by x1.01"
+    ],
+    "groundedConclusion": "The late ATU neighborhood also preserves effect-side clues rather than only button shells: ATU24Bonus3Shards survives on the ATU-numbered metadata side, while separate owner and lane probes preserve Campaign Fragments and Academy Points effect text on downstream title-side surfaces.",
+    "missingJoin": "Those effect-side clues still do not cross back to one exact ATU24Button through ATU28Button shell, so they narrow the effect domain but do not recover one row identity."
+  },
+  "rowOrderTrap": {
+    "unsafeInferenceSources": [
+      "row-order similarity inside the late title roster",
+      "row-order similarity inside the late prefab roster",
+      "title-to-prefab name similarity without an ATU shell join",
+      "effect-side string similarity without an ATU shell join"
+    ],
+    "groundedConclusion": "The late neighborhood is now a tighter negative result, not a bridge. The action shell, title roster, prefab roster, and effect-side strings all preserve the same general late TokenShop lane, but they remain separate local clusters. The title roster includes Academy Booster while the local prefab roster does not, and Campaign Fragments survives on a separate effect-side prefab and text surface rather than inside the same local cluster. That means the repo still cannot safely map ATU24 through ATU28 by row order, cardinality, or loose name similarity."
+  },
+  "result": "no concrete late-row object-or-title join cleared",
+  "groundedConclusion": "The ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result. The repo preserves exact SaveData row levels, exact TokenShop shell path ids, direct BuyATU24 through BuyATU28 hooks, one local late title roster, one local late prefab roster, and separate Campaign Fragments or Academy effect-side strings, but no committed artifact crosses those surfaces back to one exact ATU24Button through ATU28Button shell. This neighborhood therefore narrows the unresolved late tier4plus seam without recovering one new checked shell-to-prefab or shell-to-title bridge.",
+  "currentBoundary": [
+    "The repo now preserves one exact late shell neighborhood around ATU24Level through ATU28Level, ATU24Button through ATU28Button, and the same tier4plus owner-field range from ATU24StartCost through ATU28Fill.",
+    "Each late shell also now has a direct action-side boundary: StartATU24Hold through StartATU28Hold, matching StopATU24Hold through StopATU28Hold, and direct BuyATU24 through BuyATU28 hooks all survive in committed probe output.",
+    "Committed level0 title neighborhoods preserve a tighter late row-title roster with Duo Booster Four, Trinity Booster One, Academy Booster, Trinity Oom Booster, Tokens Booster T3, and Tier 3 Max Level Increaser, but that local title cluster still does not preserve any ATU shell field or exact shell path id.",
+    "Committed level0 object neighborhoods preserve a tighter late prefab roster with NewTokenUPGPrefab.T3.TokensBoost, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, NewTokenUPGPrefab.T3.TrinityBoosterOne, NewTokenUPGPrefab.T5.TrinityOomBooster, and NewTokenUPGPrefab.T2.DuoBoosterFour, while NewTokenUPGPrefab.T5.CampaignFragments stays on a separate effect-side surface.",
+    "Committed effect-side evidence also narrows the same late lane through ATU24Bonus3Shards, Campaign Fragments strings, and Academy Points strings, but those clues still do not cross back to one exact ATU24Button through ATU28Button shell.",
+    "Because the late action shell, title roster, prefab roster, and effect-side strings remain separate local clusters, the repo still cannot honestly recover one concrete ATU24 through ATU28 row identity from this neighborhood.",
+    "This new late-shell pass therefore records a tighter negative result instead of widening the remap: do not infer ATU24 through ATU28 row identity from row order, nearby roster size, loose title similarity, or prefab-only naming."
+  ]
+}

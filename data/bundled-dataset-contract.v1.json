@@ -378,6 +378,14 @@
       ]
     },
     {
+      "id": "token-shop-late-atu-boundary",
+      "label": "Token shop late ATU boundary",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/token-shop-late-atu-boundary.json"
+      ]
+    },
+    {
       "id": "multiverse-market-save-boundary",
       "label": "Multiverse market save boundary",
       "classification": "extracted-mechanics",

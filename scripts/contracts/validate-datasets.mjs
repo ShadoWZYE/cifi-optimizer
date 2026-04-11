@@ -2434,6 +2434,85 @@ function validateTokenShopRowRemapBoundary(boundary) {
   };
 }
 
+function validateTokenShopLateAtuBoundary(boundary) {
+  expectNonEmptyString(boundary.generatedAt, "token shop late ATU boundary generatedAt must be present");
+  expectNonEmptyString(boundary.dataset, "token shop late ATU boundary dataset must be present");
+  expectRecord(boundary.sources, "token shop late ATU boundary sources must be an object");
+  ["tokenShopExtract", "tokenShopRowRemapBoundary", "uabeaProbe", "unityProbe", "dailyTokeniumLaneProbe", "dailyTokeniumOwnerProbe", "lm244TargetedProbe", "metadata", "level0"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `token shop late ATU boundary sources.${field} must be present`);
+  });
+  expectRecord(boundary.targetNeighborhood, "token shop late ATU boundary targetNeighborhood must be an object");
+  expectArray(boundary.lateRows, "token shop late ATU boundary lateRows must be an array");
+  expectRecord(boundary.actionNeighborhood, "token shop late ATU boundary actionNeighborhood must be an object");
+  expectRecord(boundary.titleRosterBoundary, "token shop late ATU boundary titleRosterBoundary must be an object");
+  expectRecord(boundary.prefabRosterBoundary, "token shop late ATU boundary prefabRosterBoundary must be an object");
+  expectRecord(boundary.effectSideBoundary, "token shop late ATU boundary effectSideBoundary must be an object");
+  expectRecord(boundary.rowOrderTrap, "token shop late ATU boundary rowOrderTrap must be an object");
+  expectArray(boundary.actionNeighborhood.preservedLateHooks, "token shop late ATU boundary preservedLateHooks must be an array");
+  expectArray(boundary.actionNeighborhood.adjacentNamedTierHooks, "token shop late ATU boundary adjacentNamedTierHooks must be an array");
+  expectArray(boundary.titleRosterBoundary.localTitleCluster, "token shop late ATU boundary localTitleCluster must be an array");
+  expectArray(boundary.prefabRosterBoundary.localPrefabCluster, "token shop late ATU boundary localPrefabCluster must be an array");
+  expectArray(boundary.effectSideBoundary.preservedEffectClues, "token shop late ATU boundary preservedEffectClues must be an array");
+  expectArray(boundary.rowOrderTrap.unsafeInferenceSources, "token shop late ATU boundary unsafeInferenceSources must be an array");
+  expectArray(boundary.currentBoundary, "token shop late ATU boundary currentBoundary must be an array");
+
+  assert.equal(boundary.dataset, "token-shop-late-atu-boundary", "token shop late ATU boundary dataset id drifted");
+  assert.equal(boundary.targetNeighborhood.saveFieldRange, "ATU24Level through ATU28Level", "token shop late ATU boundary save field range drifted");
+  assert.equal(boundary.targetNeighborhood.shellFieldRange, "ATU24Button through ATU28Button", "token shop late ATU boundary shell field range drifted");
+  assert.equal(boundary.targetNeighborhood.numericFieldRange, "ATU24StartCost through ATU28Fill", "token shop late ATU boundary numeric field range drifted");
+  assert.equal(boundary.targetNeighborhood.group, "tier4plus", "token shop late ATU boundary group drifted");
+  assert.deepEqual(
+    boundary.lateRows.map((row) => row.shellField),
+    ["ATU24Button", "ATU25Button", "ATU26Button", "ATU27Button", "ATU28Button"],
+    "token shop late ATU boundary shell set drifted"
+  );
+  assert.deepEqual(
+    boundary.lateRows.map((row) => row.shellPathId),
+    [15797, 15820, 15840, 15832, 15813],
+    "token shop late ATU boundary shell path ids drifted"
+  );
+  assert.deepEqual(
+    boundary.actionNeighborhood.preservedLateHooks,
+    ["BuyATU24", "BuyATU25", "BuyATU26", "BuyATU27", "BuyATU28"],
+    "token shop late ATU boundary preserved late hooks drifted"
+  );
+  ["BuyTokenT3", "BuyTokenDailyT3", "BuyTrio1Boost", "BuyTrio2Boost"].forEach((name) => {
+    assert.ok(boundary.actionNeighborhood.adjacentNamedTierHooks.includes(name), `token shop late ATU boundary missing adjacent named tier hook ${name}`);
+  });
+  ["Duo Booster Four", "Trinity Booster One", "Academy Booster", "Trinity Oom Booster", "Tokens Booster T3", "Tier 3 Max Level Increaser"].forEach((name) => {
+    assert.ok(boundary.titleRosterBoundary.localTitleCluster.some((entry) => entry.title === name), `token shop late ATU boundary missing title cluster entry ${name}`);
+  });
+  [
+    "NewTokenUPGPrefab.T3.TokensBoost",
+    "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+    "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+    "NewTokenUPGPrefab.T5.TrinityOomBooster",
+    "NewTokenUPGPrefab.T2.DuoBoosterFour"
+  ].forEach((name) => {
+    assert.ok(boundary.prefabRosterBoundary.localPrefabCluster.some((entry) => entry.identity === name), `token shop late ATU boundary missing local prefab cluster entry ${name}`);
+  });
+  assert.equal(boundary.prefabRosterBoundary.separateEffectSidePrefab.identity, "NewTokenUPGPrefab.T5.CampaignFragments", "token shop late ATU boundary effect-side prefab drifted");
+  ["ATU24Bonus3Shards", "LV. 1 - x1.1 Campaign Fragments", "LV. 3 - Academy Points x3"].forEach((name) => {
+    assert.ok(boundary.effectSideBoundary.preservedEffectClues.includes(name), `token shop late ATU boundary missing effect-side clue ${name}`);
+  });
+  assert.equal(boundary.result, "no concrete late-row object-or-title join cleared", "token shop late ATU boundary result drifted");
+  assert.match(boundary.groundedConclusion, /ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result/i, "token shop late ATU boundary grounded conclusion drifted");
+  assert.ok(boundary.rowOrderTrap.unsafeInferenceSources.includes("row-order similarity inside the late title roster"), "token shop late ATU boundary must preserve row-order title trap");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU24Level through ATU28Level/i.test(line)), "token shop late ATU boundary must preserve late save field range conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /do not infer ATU24 through ATU28 row identity/i.test(line)), "token shop late ATU boundary must preserve anti-inference conclusion");
+
+  return {
+    id: "token-shop-late-atu-boundary",
+    label: "Token shop late ATU boundary",
+    classification: "extracted-mechanics",
+    stats: [
+      boundary.targetNeighborhood.saveFieldRange,
+      `${boundary.lateRows.length} late shell rows checked`,
+      "Late ATU24-ATU28 action, title, prefab, and effect surfaces now narrow one shell neighborhood without clearing a join"
+    ]
+  };
+}
+
 function validateMultiverseMarketSaveBoundary(boundary) {
   expectNonEmptyString(boundary.generatedAt, "multiverse market save boundary generatedAt must be present");
   expectRecord(boundary.sources, "multiverse market save boundary sources must be an object");
@@ -3834,7 +3913,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 57, "bundled dataset contract must track the fifty-seven shipped dataset groups");
+  assert.equal(contract.datasets.length, 58, "bundled dataset contract must track the fifty-eight shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -3940,6 +4019,7 @@ export async function validateBundledDatasets() {
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
   const tokenShopRowLevelOwner = await readJson("../../data/token-shop-row-level-owner.json");
   const tokenShopRowRemapBoundary = await readJson("../../data/token-shop-row-remap-boundary.json");
+  const tokenShopLateAtuBoundary = await readJson("../../data/token-shop-late-atu-boundary.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
   const multiverseMarketSaveDataImportBoundary = await readJson("../../data/multiverse-market-savedata-import-boundary.json");
@@ -4007,6 +4087,7 @@ export async function validateBundledDatasets() {
     validateTokenShopSaveBoundary(tokenShopSaveBoundary),
     validateTokenShopRowLevelOwner(tokenShopRowLevelOwner),
     validateTokenShopRowRemapBoundary(tokenShopRowRemapBoundary),
+    validateTokenShopLateAtuBoundary(tokenShopLateAtuBoundary),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateMultiverseMarketSaveDataImportBoundary(multiverseMarketSaveDataImportBoundary, multiverseMarketStateVerificationDoc),
