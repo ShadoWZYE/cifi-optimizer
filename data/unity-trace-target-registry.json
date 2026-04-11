@@ -221,6 +221,16 @@
         "exact shell-to-title join"
       ]
     },
+    "token-shop-atu4-vs-atu3": {
+      "label": "TokenShop ATU4 trace bridge vs ATU3 blocked trace",
+      "solvedBaselineTargetId": "token-shop-atu4-mod",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "summaryFocus": [
+        "exact shell-to-action-hook join",
+        "exact shell-to-prefab join",
+        "exact shell-to-title join"
+      ]
+    },
     "shard-cost-structure-vs-planner": {
       "label": "Shard-cost direct structure vs planner-safe output",
       "solvedBaselineTargetId": "shard-cost-su0-structure",
@@ -243,6 +253,104 @@
     }
   },
   "targets": {
+    "token-shop-atu4-mod": {
+      "label": "TokenShop ATU4 mod bridge",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu4-mod",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU4Button",
+        "15796"
+      ],
+      "joinGoal": "Recover one checked ATU4Button or path id 15796 bridge to one exact prefab identity, and keep the missing title join explicit if it still stays detached.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-atu4-mod",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "comparisonPresetId": "token-shop-atu4-vs-atu3",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "exact-shell-to-title"
+          ]
+        },
+        "messages": {
+          "wire": "One exact shell-to-prefab and title chain cleared cleanly enough to wire the traced boundary.",
+          "quarantine": "The trace now preserves one exact shell-to-prefab bridge, but the missing title join still keeps this ATU4 row quarantined to remap evidence.",
+          "research": "The trace is still too incomplete to preserve one exact ATU4 bridge."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU4Button",
+        "shellPathId": 15796,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU4Button",
+              "ModBoost",
+              "BuyModBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "dailyTokeniumLaneProbe"
+            ],
+            "terms": [
+              "BuyModBoost"
+            ]
+          },
+          {
+            "id": "prefab-lane",
+            "label": "Prefab identity lane",
+            "sourceIds": [
+              "uabeaProbe",
+              "unityProbe",
+              "lm244TargetedProbe"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.ModPointsBooster"
+            ]
+          },
+          {
+            "id": "title-lane",
+            "label": "Mod title lane",
+            "sourceIds": [
+              "unityProbe"
+            ],
+            "terms": [
+              "Token Ultima: MP",
+              ":Diamond Upgrade 11 - ModBoost"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window survives only in the TokenShop extract, where ATU4Button path id 15796 stays adjacent to the ModBoost owner block.",
+          "The exact BuyModBoost action hook and NewTokenUPGPrefab.T1.ModPointsBooster prefab now converge on the same traced row family, but the final player-facing title still survives only as a detached mod-domain title surface.",
+          "Because the title-side join is still missing, the recovered ATU4 bridge is safe for row-remap evidence only and should not widen into canonical or planner behavior."
+        ],
+        "groundedConclusion": "The ATU4Button or 15796 trace now preserves one checked shell-to-action-hook-to-prefab bridge to NewTokenUPGPrefab.T1.ModPointsBooster, but the final player-facing title join is still unresolved and must stay quarantined."
+      }
+    },
     "token-shop-atu3-cells": {
       "label": "TokenShop ATU3 cells split",
       "familyId": "token-shop",

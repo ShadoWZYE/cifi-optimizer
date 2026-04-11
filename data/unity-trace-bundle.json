@@ -15,55 +15,36 @@
     "readsCommittedSourcesOnly": true
   },
   "plannerResolution": {
-    "selectionMode": "query-planner",
-    "requestedQueries": [
-      "Cells"
-    ],
+    "selectionMode": "explicit-target",
+    "requestedQueries": [],
     "requestedAnchors": [],
-    "matchedInputs": [
-      "Cells"
-    ],
-    "matchedTerms": [
-      "Cells",
-      "CellsBoost",
-      "CellsPerChestBooster",
-      "UltimaCells"
-    ],
+    "matchedInputs": [],
+    "matchedTerms": [],
     "matchedFamilyId": "token-shop",
     "matchedFamilyLabel": "TokenShop",
-    "runMode": "compare",
-    "comparePresetId": "token-shop-atu3-vs-atu1",
-    "synonymSetsUsed": [
-      {
-        "id": "cells-domain",
-        "matchedTerms": [
-          "Cells",
-          "CellsBoost",
-          "CellsPerChestBooster",
-          "UltimaCells"
-        ],
-        "terms": [
-          "Cells",
-          "CellBoost",
-          "BuyCellBoost",
-          "CellsBoost",
-          "CellsPerChestBooster",
-          "UltimaCells"
-        ]
-      }
-    ],
+    "runMode": "trace",
+    "comparePresetId": null,
+    "synonymSetsUsed": [],
     "expandedAnchors": [
+      "ATU4Button",
+      "15796",
       "ATU3Button",
       "15810",
-      "Cells",
       "CellBoost",
       "BuyCellBoost",
-      "SetAllTokenShopTexts",
-      "CellsBoost",
-      "CellsPerChestBooster",
-      "UltimaCells"
+      "SetAllTokenShopTexts"
     ],
     "expandedAnchorSpecs": [
+      {
+        "value": "ATU4Button",
+        "kind": "class",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "15796",
+        "kind": "path id",
+        "origin": "planner-expanded-anchor"
+      },
       {
         "value": "ATU3Button",
         "kind": "class",
@@ -72,11 +53,6 @@
       {
         "value": "15810",
         "kind": "path id",
-        "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "Cells",
-        "kind": "class",
         "origin": "planner-expanded-anchor"
       },
       {
@@ -93,26 +69,21 @@
         "value": "SetAllTokenShopTexts",
         "kind": "method",
         "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "CellsBoost",
-        "kind": "class",
-        "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "CellsPerChestBooster",
-        "kind": "class",
-        "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "UltimaCells",
-        "kind": "class",
-        "origin": "planner-expanded-anchor"
       }
     ],
-    "decisionNote": "Matched Cells to TokenShop through cells-domain and chose the bounded token-shop-atu3-vs-atu1 compare run because this query is better grounded as one checked solved-vs-blocked family trace."
+    "decisionNote": "Used explicit target token-shop-atu4-mod in the TokenShop family and kept family-aware anchor expansion so the backend records the same checked synonym surface deterministically."
   },
   "executionAnchors": [
+    {
+      "value": "ATU4Button",
+      "kind": "class",
+      "origin": "execution-anchor"
+    },
+    {
+      "value": "15796",
+      "kind": "path id",
+      "origin": "execution-anchor"
+    },
     {
       "value": "ATU3Button",
       "kind": "class",
@@ -141,16 +112,16 @@
   ],
   "traceRegistry": {
     "path": "data/unity-trace-target-registry.json",
-    "selectedTargetId": "token-shop-atu3-cells",
+    "selectedTargetId": "token-shop-atu4-mod",
     "selectedFamilyId": "token-shop",
     "requiredSourceFamilies": [
       "token-shop"
     ],
-    "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
+    "solvedBaselineTargetId": "token-shop-atu4-mod",
     "blockedTargetId": "token-shop-atu3-cells",
     "comparisonPreset": {
-      "label": "TokenShop ATU1 solved bridge vs ATU3 blocked trace",
-      "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
+      "label": "TokenShop ATU4 trace bridge vs ATU3 blocked trace",
+      "solvedBaselineTargetId": "token-shop-atu4-mod",
       "blockedTargetId": "token-shop-atu3-cells",
       "summaryFocus": [
         "exact shell-to-action-hook join",
@@ -220,84 +191,100 @@
     }
   ],
   "target": {
-    "id": "token-shop-atu3-cells",
-    "label": "TokenShop ATU3 cells split",
+    "id": "token-shop-atu4-mod",
+    "label": "TokenShop ATU4 mod bridge",
     "familyId": "token-shop",
     "anchors": [
+      "ATU4Button",
+      "15796",
       "ATU3Button",
       "15810",
       "CellBoost",
       "BuyCellBoost",
       "SetAllTokenShopTexts"
     ],
-    "joinGoal": "Recover one checked ATU3Button or path id 15810 bridge to one exact prefab identity or final player-facing title.",
+    "joinGoal": "Recover one checked ATU4Button or path id 15796 bridge to one exact prefab identity, and keep the missing title join explicit if it still stays detached.",
     "requiredSourceFamilies": [
       "token-shop"
     ],
-    "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
+    "solvedBaselineTargetId": "token-shop-atu4-mod",
     "blockedTargetId": "token-shop-atu3-cells"
   },
   "shellWindow": {
     "source": "data/token-shop-values.json",
-    "shellField": "ATU3Button",
-    "shellPathId": 15810,
-    "shellObjectOffset": 452,
+    "shellField": "ATU4Button",
+    "shellPathId": 15796,
+    "shellObjectOffset": 504,
     "ownerFieldBlock": [
-      "CellBoostStartCost",
-      "CellBoostAdditiveCost",
-      "CellBoostBonus",
-      "CellBoostMaxLevel",
-      "CellBoostFill"
+      "ModBoostStartCost",
+      "ModBoostAdditiveCost",
+      "ModBoostBonus",
+      "ModBoostMaxLevel",
+      "ModBoostFill"
     ],
     "window": [
-      {
-        "field": "CellBoostBonus",
-        "group": "tier1",
-        "kind": "number",
-        "objectOffset": 432,
-        "value": 1
-      },
-      {
-        "field": "CellBoostMaxLevel",
-        "group": "tier1",
-        "kind": "number",
-        "objectOffset": 436,
-        "value": 60
-      },
-      {
-        "field": "CellBoostFill",
-        "group": "tier1",
-        "kind": "pointer",
-        "objectOffset": 440,
-        "pathId": 294990
-      },
-      {
-        "field": "ATU3Button",
-        "group": "controller",
-        "kind": "pointer",
-        "objectOffset": 452,
-        "pathId": 15810
-      },
-      {
-        "field": "ATU3MaxOverlay",
-        "group": "controller",
-        "kind": "pointer",
-        "objectOffset": 464,
-        "pathId": 49488
-      },
-      {
-        "field": "ModBoostStartCost",
-        "group": "tier1",
-        "kind": "number",
-        "objectOffset": 476,
-        "value": 10.0
-      },
       {
         "field": "ModBoostAdditiveCost",
         "group": "tier1",
         "kind": "number",
         "objectOffset": 480,
         "value": 2.0
+      },
+      {
+        "field": "ModBoostBonus",
+        "group": "tier1",
+        "kind": "number",
+        "objectOffset": 484,
+        "value": 1.0099999904632568
+      },
+      {
+        "field": "ModBoostMaxLevel",
+        "group": "tier1",
+        "kind": "number",
+        "objectOffset": 488,
+        "value": 200
+      },
+      {
+        "field": "ModBoostFill",
+        "group": "tier1",
+        "kind": "pointer",
+        "objectOffset": 492,
+        "pathId": 295004
+      },
+      {
+        "field": "ATU4Button",
+        "group": "controller",
+        "kind": "pointer",
+        "objectOffset": 504,
+        "pathId": 15796
+      },
+      {
+        "field": "ATU4MaxOverlay",
+        "group": "controller",
+        "kind": "pointer",
+        "objectOffset": 516,
+        "pathId": 49474
+      },
+      {
+        "field": "ATU4Content",
+        "group": "controller",
+        "kind": "pointer",
+        "objectOffset": 528,
+        "pathId": 33007
+      },
+      {
+        "field": "ATU4Overlay",
+        "group": "controller",
+        "kind": "pointer",
+        "objectOffset": 540,
+        "pathId": 32827
+      },
+      {
+        "field": "MK1TokenBoostStartCost",
+        "group": "tier1",
+        "kind": "number",
+        "objectOffset": 552,
+        "value": 1.0
       }
     ]
   },
@@ -306,16 +293,45 @@
       "id": "metadata-neighborhood",
       "label": "Metadata neighborhood",
       "terms": [
+        "ATU4Button",
+        "ModBoost",
+        "BuyModBoost",
+        "15796",
         "ATU3Button",
+        "15810",
         "CellBoost",
         "BuyCellBoost",
-        "15810",
         "SetAllTokenShopTexts"
       ],
       "anchorSpecs": [
         {
+          "value": "ATU4Button",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "ModBoost",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "BuyModBoost",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15796",
+          "kind": "path id",
+          "origin": "surface-search"
+        },
+        {
           "value": "ATU3Button",
           "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15810",
+          "kind": "path id",
           "origin": "surface-search"
         },
         {
@@ -326,11 +342,6 @@
         {
           "value": "BuyCellBoost",
           "kind": "method",
-          "origin": "surface-search"
-        },
-        {
-          "value": "15810",
-          "kind": "path id",
           "origin": "surface-search"
         },
         {
@@ -347,10 +358,10 @@
             "exact-string",
             "bounded-containment"
           ],
-          "hitCount": 7,
+          "hitCount": 12,
           "highSignalHitCount": 0,
-          "supportingHitCount": 3,
-          "incidentalHitCount": 4,
+          "supportingHitCount": 5,
+          "incidentalHitCount": 7,
           "suppressedNoiseCount": 0,
           "hits": [
             {
@@ -458,6 +469,110 @@
               "signalReason": "exact-string match on CellBoost, BuyCellBoost via metadata"
             },
             {
+              "term": "BuyModBoost",
+              "matchedTerms": [
+                "ModBoost",
+                "BuyModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "class",
+                "method"
+              ],
+              "matchMode": "exact-string",
+              "offset": 659767,
+              "context": [
+                {
+                  "offset": 659606,
+                  "encoding": "ascii",
+                  "value": "CheckATU8LockedOverlay"
+                },
+                {
+                  "offset": 659629,
+                  "encoding": "ascii",
+                  "value": "CheckATU9LockedOverlay"
+                },
+                {
+                  "offset": 659652,
+                  "encoding": "ascii",
+                  "value": "CheckATU10LockedOverlay"
+                },
+                {
+                  "offset": 659676,
+                  "encoding": "ascii",
+                  "value": "CheckATU11LockedOverlay"
+                },
+                {
+                  "offset": 659700,
+                  "encoding": "ascii",
+                  "value": "CheckATU12LockedOverlay"
+                },
+                {
+                  "offset": 659724,
+                  "encoding": "ascii",
+                  "value": "BuyTokenBoost"
+                },
+                {
+                  "offset": 659738,
+                  "encoding": "ascii",
+                  "value": "BuyDiamondBoost"
+                },
+                {
+                  "offset": 659754,
+                  "encoding": "ascii",
+                  "value": "BuyCellBoost"
+                },
+                {
+                  "offset": 659767,
+                  "encoding": "ascii",
+                  "value": "BuyModBoost"
+                },
+                {
+                  "offset": 659779,
+                  "encoding": "ascii",
+                  "value": "BuyMK1TokenBoost"
+                },
+                {
+                  "offset": 659796,
+                  "encoding": "ascii",
+                  "value": "BuyMK2TokenBoost"
+                },
+                {
+                  "offset": 659813,
+                  "encoding": "ascii",
+                  "value": "BuyMK3TokenBoost"
+                },
+                {
+                  "offset": 659830,
+                  "encoding": "ascii",
+                  "value": "BuyMK4TokenBoost"
+                },
+                {
+                  "offset": 659847,
+                  "encoding": "ascii",
+                  "value": "BuyMK5TokenBoost"
+                },
+                {
+                  "offset": 659864,
+                  "encoding": "ascii",
+                  "value": "BuyMK6TokenBoost"
+                },
+                {
+                  "offset": 659881,
+                  "encoding": "ascii",
+                  "value": "BuyMK7TokenBoost"
+                },
+                {
+                  "offset": 659898,
+                  "encoding": "ascii",
+                  "value": "BuyMK8TokenBoost"
+                }
+              ],
+              "signalScore": 90,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-string match on ModBoost, BuyModBoost via metadata"
+            },
+            {
               "term": "ATU3Button",
               "matchedTerms": [
                 "ATU3Button"
@@ -560,6 +675,108 @@
               "signalReason": "exact-string match on ATU3Button via metadata"
             },
             {
+              "term": "ATU4Button",
+              "matchedTerms": [
+                "ATU4Button"
+              ],
+              "matchedAnchorKinds": [
+                "class"
+              ],
+              "matchMode": "exact-string",
+              "offset": 662458,
+              "context": [
+                {
+                  "offset": 662335,
+                  "encoding": "ascii",
+                  "value": "CellBoostFill"
+                },
+                {
+                  "offset": 662349,
+                  "encoding": "ascii",
+                  "value": "ATU3Button"
+                },
+                {
+                  "offset": 662360,
+                  "encoding": "ascii",
+                  "value": "ATU3MaxOverlay"
+                },
+                {
+                  "offset": 662375,
+                  "encoding": "ascii",
+                  "value": "ModBoostStartCost"
+                },
+                {
+                  "offset": 662393,
+                  "encoding": "ascii",
+                  "value": "ModBoostAdditiveCost"
+                },
+                {
+                  "offset": 662414,
+                  "encoding": "ascii",
+                  "value": "ModBoostBonus"
+                },
+                {
+                  "offset": 662428,
+                  "encoding": "ascii",
+                  "value": "ModBoostMaxLevel"
+                },
+                {
+                  "offset": 662445,
+                  "encoding": "ascii",
+                  "value": "ModBoostFill"
+                },
+                {
+                  "offset": 662458,
+                  "encoding": "ascii",
+                  "value": "ATU4Button"
+                },
+                {
+                  "offset": 662469,
+                  "encoding": "ascii",
+                  "value": "ATU4MaxOverlay"
+                },
+                {
+                  "offset": 662484,
+                  "encoding": "ascii",
+                  "value": "ATU4Content"
+                },
+                {
+                  "offset": 662496,
+                  "encoding": "ascii",
+                  "value": "ATU4Overlay"
+                },
+                {
+                  "offset": 662508,
+                  "encoding": "ascii",
+                  "value": "MK1TokenBoostStartCost"
+                },
+                {
+                  "offset": 662531,
+                  "encoding": "ascii",
+                  "value": "MK1TokenBoostAdditiveCost"
+                },
+                {
+                  "offset": 662557,
+                  "encoding": "ascii",
+                  "value": "MK1TokenBoostBonus"
+                },
+                {
+                  "offset": 662576,
+                  "encoding": "ascii",
+                  "value": "MK1TokenBoostFillMaxLevel"
+                },
+                {
+                  "offset": 662602,
+                  "encoding": "ascii",
+                  "value": "MK1TokenBoostFill"
+                }
+              ],
+              "signalScore": 90,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-string match on ATU4Button via metadata"
+            },
+            {
               "term": "SetAllTokenShopTexts",
               "matchedTerms": [
                 "SetAllTokenShopTexts"
@@ -660,6 +877,108 @@
               "signalTier": "supporting",
               "noiseFlags": [],
               "signalReason": "exact-string match on SetAllTokenShopTexts via metadata"
+            },
+            {
+              "term": "get_FinalModBoostMaxLevel",
+              "matchedTerms": [
+                "ModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "class"
+              ],
+              "matchMode": "bounded-containment",
+              "offset": 657205,
+              "context": [
+                {
+                  "offset": 657093,
+                  "encoding": "ascii",
+                  "value": "<Awake>d__3"
+                },
+                {
+                  "offset": 657105,
+                  "encoding": "ascii",
+                  "value": "stateMachine"
+                },
+                {
+                  "offset": 657118,
+                  "encoding": "ascii",
+                  "value": "SetStateMachine"
+                },
+                {
+                  "offset": 657134,
+                  "encoding": "ascii",
+                  "value": "<>t__builder"
+                },
+                {
+                  "offset": 657147,
+                  "encoding": "ascii",
+                  "value": "<>u__1"
+                },
+                {
+                  "offset": 657154,
+                  "encoding": "ascii",
+                  "value": "TokenShop"
+                },
+                {
+                  "offset": 657164,
+                  "encoding": "ascii",
+                  "value": "get_TokenBankCap"
+                },
+                {
+                  "offset": 657181,
+                  "encoding": "ascii",
+                  "value": "get_ClaimableBankTokens"
+                },
+                {
+                  "offset": 657205,
+                  "encoding": "ascii",
+                  "value": "get_FinalModBoostMaxLevel"
+                },
+                {
+                  "offset": 657231,
+                  "encoding": "ascii",
+                  "value": "get_FinalMK1TokenBoostFillMaxLevel"
+                },
+                {
+                  "offset": 657266,
+                  "encoding": "ascii",
+                  "value": "get_FinalMK2TokenBoostFillMaxLevel"
+                },
+                {
+                  "offset": 657301,
+                  "encoding": "ascii",
+                  "value": "get_FinalMK3TokenBoostFillMaxLevel"
+                },
+                {
+                  "offset": 657336,
+                  "encoding": "ascii",
+                  "value": "get_FinalMK4TokenBoostFillMaxLevel"
+                },
+                {
+                  "offset": 657371,
+                  "encoding": "ascii",
+                  "value": "get_FinalMK5TokenBoostFillMaxLevel"
+                },
+                {
+                  "offset": 657406,
+                  "encoding": "ascii",
+                  "value": "get_FinalMK6TokenBoostFillMaxLevel"
+                },
+                {
+                  "offset": 657441,
+                  "encoding": "ascii",
+                  "value": "get_FinalMK7TokenBoostFillMaxLevel"
+                },
+                {
+                  "offset": 657476,
+                  "encoding": "ascii",
+                  "value": "get_FinalMK8TokenBoostFillMaxLevel"
+                }
+              ],
+              "signalScore": 45,
+              "signalTier": "incidental",
+              "noiseFlags": [],
+              "signalReason": "bounded-containment match on ModBoost via metadata"
             },
             {
               "term": "BuyCellBoostEnum",
@@ -970,6 +1289,210 @@
               "signalReason": "bounded-containment match on CellBoost via metadata"
             },
             {
+              "term": "ModBoostStartCost",
+              "matchedTerms": [
+                "ModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "class"
+              ],
+              "matchMode": "bounded-containment",
+              "offset": 662375,
+              "context": [
+                {
+                  "offset": 662246,
+                  "encoding": "ascii",
+                  "value": "ATU2MaxOverlay"
+                },
+                {
+                  "offset": 662261,
+                  "encoding": "ascii",
+                  "value": "CellBoostStartCost"
+                },
+                {
+                  "offset": 662280,
+                  "encoding": "ascii",
+                  "value": "CellBoostAdditiveCost"
+                },
+                {
+                  "offset": 662302,
+                  "encoding": "ascii",
+                  "value": "CellBoostBonus"
+                },
+                {
+                  "offset": 662317,
+                  "encoding": "ascii",
+                  "value": "CellBoostMaxLevel"
+                },
+                {
+                  "offset": 662335,
+                  "encoding": "ascii",
+                  "value": "CellBoostFill"
+                },
+                {
+                  "offset": 662349,
+                  "encoding": "ascii",
+                  "value": "ATU3Button"
+                },
+                {
+                  "offset": 662360,
+                  "encoding": "ascii",
+                  "value": "ATU3MaxOverlay"
+                },
+                {
+                  "offset": 662375,
+                  "encoding": "ascii",
+                  "value": "ModBoostStartCost"
+                },
+                {
+                  "offset": 662393,
+                  "encoding": "ascii",
+                  "value": "ModBoostAdditiveCost"
+                },
+                {
+                  "offset": 662414,
+                  "encoding": "ascii",
+                  "value": "ModBoostBonus"
+                },
+                {
+                  "offset": 662428,
+                  "encoding": "ascii",
+                  "value": "ModBoostMaxLevel"
+                },
+                {
+                  "offset": 662445,
+                  "encoding": "ascii",
+                  "value": "ModBoostFill"
+                },
+                {
+                  "offset": 662458,
+                  "encoding": "ascii",
+                  "value": "ATU4Button"
+                },
+                {
+                  "offset": 662469,
+                  "encoding": "ascii",
+                  "value": "ATU4MaxOverlay"
+                },
+                {
+                  "offset": 662484,
+                  "encoding": "ascii",
+                  "value": "ATU4Content"
+                },
+                {
+                  "offset": 662496,
+                  "encoding": "ascii",
+                  "value": "ATU4Overlay"
+                }
+              ],
+              "signalScore": 45,
+              "signalTier": "incidental",
+              "noiseFlags": [],
+              "signalReason": "bounded-containment match on ModBoost via metadata"
+            },
+            {
+              "term": "ModBoostAdditiveCost",
+              "matchedTerms": [
+                "ModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "class"
+              ],
+              "matchMode": "bounded-containment",
+              "offset": 662393,
+              "context": [
+                {
+                  "offset": 662261,
+                  "encoding": "ascii",
+                  "value": "CellBoostStartCost"
+                },
+                {
+                  "offset": 662280,
+                  "encoding": "ascii",
+                  "value": "CellBoostAdditiveCost"
+                },
+                {
+                  "offset": 662302,
+                  "encoding": "ascii",
+                  "value": "CellBoostBonus"
+                },
+                {
+                  "offset": 662317,
+                  "encoding": "ascii",
+                  "value": "CellBoostMaxLevel"
+                },
+                {
+                  "offset": 662335,
+                  "encoding": "ascii",
+                  "value": "CellBoostFill"
+                },
+                {
+                  "offset": 662349,
+                  "encoding": "ascii",
+                  "value": "ATU3Button"
+                },
+                {
+                  "offset": 662360,
+                  "encoding": "ascii",
+                  "value": "ATU3MaxOverlay"
+                },
+                {
+                  "offset": 662375,
+                  "encoding": "ascii",
+                  "value": "ModBoostStartCost"
+                },
+                {
+                  "offset": 662393,
+                  "encoding": "ascii",
+                  "value": "ModBoostAdditiveCost"
+                },
+                {
+                  "offset": 662414,
+                  "encoding": "ascii",
+                  "value": "ModBoostBonus"
+                },
+                {
+                  "offset": 662428,
+                  "encoding": "ascii",
+                  "value": "ModBoostMaxLevel"
+                },
+                {
+                  "offset": 662445,
+                  "encoding": "ascii",
+                  "value": "ModBoostFill"
+                },
+                {
+                  "offset": 662458,
+                  "encoding": "ascii",
+                  "value": "ATU4Button"
+                },
+                {
+                  "offset": 662469,
+                  "encoding": "ascii",
+                  "value": "ATU4MaxOverlay"
+                },
+                {
+                  "offset": 662484,
+                  "encoding": "ascii",
+                  "value": "ATU4Content"
+                },
+                {
+                  "offset": 662496,
+                  "encoding": "ascii",
+                  "value": "ATU4Overlay"
+                },
+                {
+                  "offset": 662508,
+                  "encoding": "ascii",
+                  "value": "MK1TokenBoostStartCost"
+                }
+              ],
+              "signalScore": 45,
+              "signalTier": "incidental",
+              "noiseFlags": [],
+              "signalReason": "bounded-containment match on ModBoost via metadata"
+            },
+            {
               "term": "<BuyCellBoostEnum>d__630",
               "matchedTerms": [
                 "CellBoost",
@@ -1081,28 +1604,29 @@
       "id": "action-lane",
       "label": "Action hook lane",
       "terms": [
-        "StartCellBostHold",
-        "StopCellBostHold",
-        "BuyCellBoost",
+        "BuyModBoost",
+        "ATU4Button",
+        "15796",
         "ATU3Button",
         "15810",
         "CellBoost",
+        "BuyCellBoost",
         "SetAllTokenShopTexts"
       ],
       "anchorSpecs": [
         {
-          "value": "StartCellBostHold",
+          "value": "BuyModBoost",
           "kind": "method",
           "origin": "surface-search"
         },
         {
-          "value": "StopCellBostHold",
-          "kind": "method",
+          "value": "ATU4Button",
+          "kind": "class",
           "origin": "surface-search"
         },
         {
-          "value": "BuyCellBoost",
-          "kind": "method",
+          "value": "15796",
+          "kind": "path id",
           "origin": "surface-search"
         },
         {
@@ -1121,6 +1645,11 @@
           "origin": "surface-search"
         },
         {
+          "value": "BuyCellBoost",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
           "value": "SetAllTokenShopTexts",
           "kind": "method",
           "origin": "surface-search"
@@ -1133,78 +1662,12 @@
           "searchModes": [
             "exact-structured"
           ],
-          "hitCount": 16,
-          "highSignalHitCount": 16,
+          "hitCount": 12,
+          "highSignalHitCount": 12,
           "supportingHitCount": 0,
           "incidentalHitCount": 0,
           "suppressedNoiseCount": 0,
           "hits": [
-            {
-              "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[101].byte_context[30].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StartCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "StopCellBostHold",
-              "jsonPath": "$[0].matches[101].byte_context[33].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114544
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StopCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StopCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StopCellBostHold via dailyTokeniumLaneProbe"
-            },
             {
               "term": "BuyCellBoost",
               "jsonPath": "$[0].matches[101].byte_context[41].value",
@@ -1237,72 +1700,6 @@
               "signalTier": "high-signal",
               "noiseFlags": [],
               "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[101].entry_context[17].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StartCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "StopCellBostHold",
-              "jsonPath": "$[0].matches[101].entry_context[20].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114544
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StopCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StopCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StopCellBostHold via dailyTokeniumLaneProbe"
             },
             {
               "term": "BuyCellBoost",
@@ -1338,72 +1735,6 @@
               "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
             },
             {
-              "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[102].byte_context[29].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StartCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "StopCellBostHold",
-              "jsonPath": "$[0].matches[102].byte_context[32].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114544
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StopCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StopCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StopCellBostHold via dailyTokeniumLaneProbe"
-            },
-            {
               "term": "BuyCellBoost",
               "jsonPath": "$[0].matches[102].byte_context[40].value",
               "containerSummary": {
@@ -1435,72 +1766,6 @@
               "signalTier": "high-signal",
               "noiseFlags": [],
               "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[102].entry_context[14].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StartCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "StopCellBostHold",
-              "jsonPath": "$[0].matches[102].entry_context[17].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114544
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StopCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StopCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StopCellBostHold via dailyTokeniumLaneProbe"
             },
             {
               "term": "BuyCellBoost",
@@ -1666,17 +1931,150 @@
               "signalTier": "high-signal",
               "noiseFlags": [],
               "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
+            },
+            {
+              "term": "BuyModBoost",
+              "jsonPath": "$[0].matches[68].byte_context[52].value",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "value",
+                "scalarEntries": [
+                  {
+                    "key": "offset",
+                    "value": 31087432
+                  },
+                  {
+                    "key": "kind",
+                    "value": "ascii"
+                  },
+                  {
+                    "key": "value",
+                    "value": "BuyModBoost"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "BuyModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on BuyModBoost via dailyTokeniumLaneProbe"
+            },
+            {
+              "term": "BuyModBoost",
+              "jsonPath": "$[0].matches[68].entry_context[28].value",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "value",
+                "scalarEntries": [
+                  {
+                    "key": "offset",
+                    "value": 31087432
+                  },
+                  {
+                    "key": "kind",
+                    "value": "ascii"
+                  },
+                  {
+                    "key": "value",
+                    "value": "BuyModBoost"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "BuyModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on BuyModBoost via dailyTokeniumLaneProbe"
+            },
+            {
+              "term": "BuyModBoost",
+              "jsonPath": "$[0].matches[69].byte_context[52].value",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "value",
+                "scalarEntries": [
+                  {
+                    "key": "offset",
+                    "value": 31087432
+                  },
+                  {
+                    "key": "kind",
+                    "value": "ascii"
+                  },
+                  {
+                    "key": "value",
+                    "value": "BuyModBoost"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "BuyModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on BuyModBoost via dailyTokeniumLaneProbe"
+            },
+            {
+              "term": "BuyModBoost",
+              "jsonPath": "$[0].matches[69].entry_context[25].value",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "value",
+                "scalarEntries": [
+                  {
+                    "key": "offset",
+                    "value": 31087432
+                  },
+                  {
+                    "key": "kind",
+                    "value": "ascii"
+                  },
+                  {
+                    "key": "value",
+                    "value": "BuyModBoost"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "BuyModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on BuyModBoost via dailyTokeniumLaneProbe"
             }
           ]
         }
       ]
     },
     {
-      "id": "diamond-special",
-      "label": "Diamond-special prefab or title lane",
+      "id": "prefab-lane",
+      "label": "Prefab identity lane",
       "terms": [
-        "NewDiamondUPGPrefab.Specials.CellsBoost",
-        ">Diamond Upgrade 10 - CellsBoost",
+        "NewTokenUPGPrefab.T1.ModPointsBooster",
+        "ATU4Button",
+        "15796",
         "ATU3Button",
         "15810",
         "CellBoost",
@@ -1685,13 +2083,18 @@
       ],
       "anchorSpecs": [
         {
-          "value": "NewDiamondUPGPrefab.Specials.CellsBoost",
+          "value": "NewTokenUPGPrefab.T1.ModPointsBooster",
           "kind": "string",
           "origin": "surface-search"
         },
         {
-          "value": ">Diamond Upgrade 10 - CellsBoost",
-          "kind": "string",
+          "value": "ATU4Button",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15796",
+          "kind": "path id",
           "origin": "surface-search"
         },
         {
@@ -1721,6 +2124,230 @@
         }
       ],
       "sources": [
+        {
+          "sourceId": "uabeaProbe",
+          "sourcePath": "data/uabea-probe-report.json",
+          "searchModes": [
+            "exact-structured"
+          ],
+          "hitCount": 2,
+          "highSignalHitCount": 2,
+          "supportingHitCount": 0,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
+          "hits": [
+            {
+              "term": "15796",
+              "jsonPath": "$.directTargetTypeMetadata[6].fields[3106].fieldOffset",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "fieldOffset",
+                "scalarEntries": [
+                  {
+                    "key": "index",
+                    "value": 3106
+                  },
+                  {
+                    "key": "name",
+                    "value": "Mech8Unlocked"
+                  },
+                  {
+                    "key": "type",
+                    "value": "System.Boolean"
+                  },
+                  {
+                    "key": "attributes",
+                    "value": "Public"
+                  },
+                  {
+                    "key": "defaultValue",
+                    "value": null
+                  },
+                  {
+                    "key": "fieldOffset",
+                    "value": 15796
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "15796"
+              ],
+              "matchedAnchorKinds": [
+                "path id"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 145,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on 15796 via uabeaProbe; shell-local path id"
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "jsonPath": "$.namedObjectHits[10353].name",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "name",
+                "scalarEntries": [
+                  {
+                    "key": "fileName",
+                    "value": "level0"
+                  },
+                  {
+                    "key": "pathId",
+                    "value": 48812
+                  },
+                  {
+                    "key": "typeId",
+                    "value": 1
+                  },
+                  {
+                    "key": "typeName",
+                    "value": "GameObject"
+                  },
+                  {
+                    "key": "name",
+                    "value": "NewTokenUPGPrefab.T1.ModPointsBooster"
+                  },
+                  {
+                    "key": "scriptPathId",
+                    "value": null
+                  },
+                  {
+                    "key": "scriptName",
+                    "value": null
+                  },
+                  {
+                    "key": "scriptIndex",
+                    "value": null
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "NewTokenUPGPrefab.T1.ModPointsBooster"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.ModPointsBooster via uabeaProbe"
+            }
+          ]
+        },
+        {
+          "sourceId": "unityProbe",
+          "sourcePath": "data/unity-probe-report.json",
+          "searchModes": [
+            "exact-structured"
+          ],
+          "hitCount": 2,
+          "highSignalHitCount": 0,
+          "supportingHitCount": 2,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
+          "hits": [
+            {
+              "term": "SetAllTokenShopTexts",
+              "jsonPath": "$.apk_results[32].keyword_hits.token[6]",
+              "containerSummary": {
+                "containerType": "array",
+                "matchedIndex": 6,
+                "nearbyScalarValues": [
+                  {
+                    "index": 3,
+                    "value": "LV. 1 - (Tokens In Bank)^1.19"
+                  },
+                  {
+                    "index": 4,
+                    "value": "LV. 1 - (Tokens In Bank)^1.29"
+                  },
+                  {
+                    "index": 5,
+                    "value": "LV. 1 - Token Bank Capacity x2"
+                  },
+                  {
+                    "index": 6,
+                    "value": "SetAllTokenShopTexts"
+                  },
+                  {
+                    "index": 7,
+                    "value": "SetTokenTexts"
+                  },
+                  {
+                    "index": 8,
+                    "value": "TokenClaimRecolor"
+                  },
+                  {
+                    "index": 9,
+                    "value": "TokenShop, Assembly-CSharp"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "jsonPath": "$.apk_results[7].keyword_hits.token[14]",
+              "containerSummary": {
+                "containerType": "array",
+                "matchedIndex": 14,
+                "nearbyScalarValues": [
+                  {
+                    "index": 11,
+                    "value": "NewTokenUPGPrefab.T1.MK6Booster"
+                  },
+                  {
+                    "index": 12,
+                    "value": "NewTokenUPGPrefab.T1.MK7Booster"
+                  },
+                  {
+                    "index": 13,
+                    "value": "NewTokenUPGPrefab.T1.MK8Booster"
+                  },
+                  {
+                    "index": 14,
+                    "value": "NewTokenUPGPrefab.T1.ModPointsBooster"
+                  },
+                  {
+                    "index": 15,
+                    "value": "NewTokenUPGPrefab.T1.TokensBoost"
+                  },
+                  {
+                    "index": 16,
+                    "value": "NewTokenUPGPrefab.T2.DailyTokens"
+                  },
+                  {
+                    "index": 17,
+                    "value": "NewTokenUPGPrefab.T2.DuoBoosterFive"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "NewTokenUPGPrefab.T1.ModPointsBooster"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.ModPointsBooster via unityProbe"
+            }
+          ]
+        },
         {
           "sourceId": "lm244TargetedProbe",
           "sourcePath": "data/lm244-targeted-probe.json",
@@ -1767,15 +2394,15 @@
               "signalReason": "exact-structured match on SetAllTokenShopTexts via lm244TargetedProbe"
             },
             {
-              "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-              "jsonPath": "$[0].matches[23].byte_context[89].value",
+              "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "jsonPath": "$[0].matches[23].byte_context[90].value",
               "containerSummary": {
                 "containerType": "object",
                 "matchedKey": "value",
                 "scalarEntries": [
                   {
                     "key": "offset",
-                    "value": 13672324
+                    "value": 13672404
                   },
                   {
                     "key": "kind",
@@ -1783,12 +2410,12 @@
                   },
                   {
                     "key": "value",
-                    "value": "NewDiamondUPGPrefab.Specials.CellsBoost"
+                    "value": "NewTokenUPGPrefab.T1.ModPointsBooster"
                   }
                 ]
               },
               "matchedTerms": [
-                "NewDiamondUPGPrefab.Specials.CellsBoost"
+                "NewTokenUPGPrefab.T1.ModPointsBooster"
               ],
               "matchedAnchorKinds": [
                 "string"
@@ -1797,296 +2424,20 @@
               "signalScore": 95,
               "signalTier": "supporting",
               "noiseFlags": [],
-              "signalReason": "exact-structured match on NewDiamondUPGPrefab.Specials.CellsBoost via lm244TargetedProbe"
-            }
-          ]
-        },
-        {
-          "sourceId": "unityProbe",
-          "sourcePath": "data/unity-probe-report.json",
-          "searchModes": [
-            "exact-structured"
-          ],
-          "hitCount": 4,
-          "highSignalHitCount": 0,
-          "supportingHitCount": 4,
-          "incidentalHitCount": 0,
-          "suppressedNoiseCount": 0,
-          "hits": [
-            {
-              "term": ">Diamond Upgrade 10 - CellsBoost",
-              "jsonPath": "$.apk_results[0].keyword_hits.diamond[45]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 45,
-                "nearbyScalarValues": [
-                  {
-                    "index": 42,
-                    "value": "<PopUpDiamonds>d__305"
-                  },
-                  {
-                    "index": 43,
-                    "value": "<PopUpDiamonds>d__774"
-                  },
-                  {
-                    "index": 44,
-                    "value": ">Diamond Upgrade - Gen Amplifier"
-                  },
-                  {
-                    "index": 45,
-                    "value": ">Diamond Upgrade 10 - CellsBoost"
-                  },
-                  {
-                    "index": 46,
-                    "value": ">Diamond Upgrade 22 - Loot Boost"
-                  },
-                  {
-                    "index": 47,
-                    "value": ">Diamond Upgrade 23 - Ouro Boost"
-                  },
-                  {
-                    "index": 48,
-                    "value": ">Diamond Upgrade 9 - TokensBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                ">Diamond Upgrade 10 - CellsBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on >Diamond Upgrade 10 - CellsBoost via unityProbe"
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$.apk_results[32].keyword_hits.token[6]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 6,
-                "nearbyScalarValues": [
-                  {
-                    "index": 3,
-                    "value": "LV. 1 - (Tokens In Bank)^1.19"
-                  },
-                  {
-                    "index": 4,
-                    "value": "LV. 1 - (Tokens In Bank)^1.29"
-                  },
-                  {
-                    "index": 5,
-                    "value": "LV. 1 - Token Bank Capacity x2"
-                  },
-                  {
-                    "index": 6,
-                    "value": "SetAllTokenShopTexts"
-                  },
-                  {
-                    "index": 7,
-                    "value": "SetTokenTexts"
-                  },
-                  {
-                    "index": 8,
-                    "value": "TokenClaimRecolor"
-                  },
-                  {
-                    "index": 9,
-                    "value": "TokenShop, Assembly-CSharp"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
-            },
-            {
-              "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-              "jsonPath": "$.apk_results[7].keyword_hits.diamond[16]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 16,
-                "nearbyScalarValues": [
-                  {
-                    "index": 13,
-                    "value": "NewDiamondUPGPrefab.Generators.MK9Booster"
-                  },
-                  {
-                    "index": 14,
-                    "value": "NewDiamondUPGPrefab.Specials.APBoost"
-                  },
-                  {
-                    "index": 15,
-                    "value": "NewDiamondUPGPrefab.Specials.AllGensBoost"
-                  },
-                  {
-                    "index": 16,
-                    "value": "NewDiamondUPGPrefab.Specials.CellsBoost"
-                  },
-                  {
-                    "index": 17,
-                    "value": "NewDiamondUPGPrefab.Specials.HunterLootBoost"
-                  },
-                  {
-                    "index": 18,
-                    "value": "NewDiamondUPGPrefab.Specials.HunterReviveBoost"
-                  },
-                  {
-                    "index": 19,
-                    "value": "NewDiamondUPGPrefab.Specials.MPBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewDiamondUPGPrefab.Specials.CellsBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewDiamondUPGPrefab.Specials.CellsBoost via unityProbe"
-            },
-            {
-              "term": ">Diamond Upgrade 10 - CellsBoost",
-              "jsonPath": "$.file_results[0].keyword_hits.diamond[45]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 45,
-                "nearbyScalarValues": [
-                  {
-                    "index": 42,
-                    "value": "<PopUpDiamonds>d__305"
-                  },
-                  {
-                    "index": 43,
-                    "value": "<PopUpDiamonds>d__774"
-                  },
-                  {
-                    "index": 44,
-                    "value": ">Diamond Upgrade - Gen Amplifier"
-                  },
-                  {
-                    "index": 45,
-                    "value": ">Diamond Upgrade 10 - CellsBoost"
-                  },
-                  {
-                    "index": 46,
-                    "value": ">Diamond Upgrade 22 - Loot Boost"
-                  },
-                  {
-                    "index": 47,
-                    "value": ">Diamond Upgrade 23 - Ouro Boost"
-                  },
-                  {
-                    "index": 48,
-                    "value": ">Diamond Upgrade 9 - TokensBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                ">Diamond Upgrade 10 - CellsBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on >Diamond Upgrade 10 - CellsBoost via unityProbe"
-            }
-          ]
-        },
-        {
-          "sourceId": "uabeaProbe",
-          "sourcePath": "data/uabea-probe-report.json",
-          "searchModes": [
-            "exact-structured"
-          ],
-          "hitCount": 1,
-          "highSignalHitCount": 1,
-          "supportingHitCount": 0,
-          "incidentalHitCount": 0,
-          "suppressedNoiseCount": 0,
-          "hits": [
-            {
-              "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-              "jsonPath": "$.namedObjectHits[10352].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48811
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewDiamondUPGPrefab.Specials.CellsBoost"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewDiamondUPGPrefab.Specials.CellsBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewDiamondUPGPrefab.Specials.CellsBoost via uabeaProbe"
+              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.ModPointsBooster via lm244TargetedProbe"
             }
           ]
         }
       ]
     },
     {
-      "id": "token-lane",
-      "label": "Token prefab or title lane",
+      "id": "title-lane",
+      "label": "Mod title lane",
       "terms": [
-        "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-        "NewTokenUPGPrefab.T5.UltimaCells",
-        "Token Ultima: Cells",
+        "Token Ultima: MP",
+        ":Diamond Upgrade 11 - ModBoost",
+        "ATU4Button",
+        "15796",
         "ATU3Button",
         "15810",
         "CellBoost",
@@ -2095,18 +2446,23 @@
       ],
       "anchorSpecs": [
         {
-          "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+          "value": "Token Ultima: MP",
           "kind": "string",
           "origin": "surface-search"
         },
         {
-          "value": "NewTokenUPGPrefab.T5.UltimaCells",
+          "value": ":Diamond Upgrade 11 - ModBoost",
           "kind": "string",
           "origin": "surface-search"
         },
         {
-          "value": "Token Ultima: Cells",
-          "kind": "string",
+          "value": "ATU4Button",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15796",
+          "kind": "path id",
           "origin": "surface-search"
         },
         {
@@ -2137,148 +2493,73 @@
       ],
       "sources": [
         {
-          "sourceId": "uabeaProbe",
-          "sourcePath": "data/uabea-probe-report.json",
-          "searchModes": [
-            "exact-structured"
-          ],
-          "hitCount": 2,
-          "highSignalHitCount": 2,
-          "supportingHitCount": 0,
-          "incidentalHitCount": 0,
-          "suppressedNoiseCount": 0,
-          "hits": [
-            {
-              "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-              "jsonPath": "$.namedObjectHits[10371].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48830
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.CellsPerChestBooster via uabeaProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T5.UltimaCells",
-              "jsonPath": "$.namedObjectHits[10395].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48854
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T5.UltimaCells"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T5.UltimaCells"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T5.UltimaCells via uabeaProbe"
-            }
-          ]
-        },
-        {
           "sourceId": "unityProbe",
           "sourcePath": "data/unity-probe-report.json",
           "searchModes": [
             "exact-structured"
           ],
-          "hitCount": 6,
+          "hitCount": 5,
           "highSignalHitCount": 0,
-          "supportingHitCount": 6,
+          "supportingHitCount": 5,
           "incidentalHitCount": 0,
           "suppressedNoiseCount": 0,
           "hits": [
             {
-              "term": "Token Ultima: Cells",
-              "jsonPath": "$.apk_results[23].keyword_hits.token[25]",
+              "term": ":Diamond Upgrade 11 - ModBoost",
+              "jsonPath": "$.apk_results[0].keyword_hits.diamond[22]",
               "containerSummary": {
                 "containerType": "array",
-                "matchedIndex": 25,
+                "matchedIndex": 22,
                 "nearbyScalarValues": [
                   {
-                    "index": 22,
-                    "value": "T4 Token Shop is now here!"
+                    "index": 19,
+                    "value": "0Diamond Ultima Milestone"
                   },
+                  {
+                    "index": 20,
+                    "value": "4Diamond One-Timer Upgrades"
+                  },
+                  {
+                    "index": 21,
+                    "value": "6Gen Amplifier Diamond Boost"
+                  },
+                  {
+                    "index": 22,
+                    "value": ":Diamond Upgrade 11 - ModBoost"
+                  },
+                  {
+                    "index": 23,
+                    "value": "<AllDiamondUltimas>k__BackingField"
+                  },
+                  {
+                    "index": 24,
+                    "value": "<BuyAutoDiamondClicker>b__241_0"
+                  },
+                  {
+                    "index": 25,
+                    "value": "<BuyDiamondBoostEnum>d__629"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                ":Diamond Upgrade 11 - ModBoost"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on :Diamond Upgrade 11 - ModBoost via unityProbe"
+            },
+            {
+              "term": "Token Ultima: MP",
+              "jsonPath": "$.apk_results[23].keyword_hits.token[26]",
+              "containerSummary": {
+                "containerType": "array",
+                "matchedIndex": 26,
+                "nearbyScalarValues": [
                   {
                     "index": 23,
                     "value": "The Collectors Pack increases <b><color=#B5927F>Mission Materials</b></color> gained & the <b>Daily Cap of farmable <color=#FFD056>Tokenium</b></color> in the <b><color=#78B2FF>Academy Menu</b></color>, as well as an instant transmission of <b><color=#FF7ACB>Diamonds</b></color>."
@@ -2302,11 +2583,15 @@
                   {
                     "index": 28,
                     "value": "Tokens Booster T1"
+                  },
+                  {
+                    "index": 29,
+                    "value": "Tokens Booster T2"
                   }
                 ]
               },
               "matchedTerms": [
-                "Token Ultima: Cells"
+                "Token Ultima: MP"
               ],
               "matchedAnchorKinds": [
                 "string"
@@ -2315,19 +2600,15 @@
               "signalScore": 95,
               "signalTier": "supporting",
               "noiseFlags": [],
-              "signalReason": "exact-structured match on Token Ultima: Cells via unityProbe"
+              "signalReason": "exact-structured match on Token Ultima: MP via unityProbe"
             },
             {
-              "term": "Token Ultima: Cells",
-              "jsonPath": "$.apk_results[23].keyword_hits.ultima[5]",
+              "term": "Token Ultima: MP",
+              "jsonPath": "$.apk_results[23].keyword_hits.ultima[6]",
               "containerSummary": {
                 "containerType": "array",
-                "matchedIndex": 5,
+                "matchedIndex": 6,
                 "nearbyScalarValues": [
-                  {
-                    "index": 2,
-                    "value": "- New <b>\"Ultima\" Talent</b> unlocks when a hunter reaches level 70!"
-                  },
                   {
                     "index": 3,
                     "value": "- Trait Sphere #09, #11, #12 & #14 now gives +1 additional Ultima Max Level"
@@ -2347,7 +2628,7 @@
                 ]
               },
               "matchedTerms": [
-                "Token Ultima: Cells"
+                "Token Ultima: MP"
               ],
               "matchedAnchorKinds": [
                 "string"
@@ -2356,7 +2637,7 @@
               "signalScore": 95,
               "signalTier": "supporting",
               "noiseFlags": [],
-              "signalReason": "exact-structured match on Token Ultima: Cells via unityProbe"
+              "signalReason": "exact-structured match on Token Ultima: MP via unityProbe"
             },
             {
               "term": "SetAllTokenShopTexts",
@@ -2408,44 +2689,44 @@
               "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
             },
             {
-              "term": "NewTokenUPGPrefab.T5.UltimaCells",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[38]",
+              "term": ":Diamond Upgrade 11 - ModBoost",
+              "jsonPath": "$.file_results[0].keyword_hits.diamond[22]",
               "containerSummary": {
                 "containerType": "array",
-                "matchedIndex": 38,
+                "matchedIndex": 22,
                 "nearbyScalarValues": [
                   {
-                    "index": 35,
-                    "value": "NewTokenUPGPrefab.T5.OzzyLoot"
+                    "index": 19,
+                    "value": "0Diamond Ultima Milestone"
                   },
                   {
-                    "index": 36,
-                    "value": "NewTokenUPGPrefab.T5.TrinityOomBooster"
+                    "index": 20,
+                    "value": "4Diamond One-Timer Upgrades"
                   },
                   {
-                    "index": 37,
-                    "value": "NewTokenUPGPrefab.T5.UltimaAP"
+                    "index": 21,
+                    "value": "6Gen Amplifier Diamond Boost"
                   },
                   {
-                    "index": 38,
-                    "value": "NewTokenUPGPrefab.T5.UltimaCells"
+                    "index": 22,
+                    "value": ":Diamond Upgrade 11 - ModBoost"
                   },
                   {
-                    "index": 39,
-                    "value": "NewTokenUPGPrefab.T5.UltimaMP"
+                    "index": 23,
+                    "value": "<AllDiamondUltimas>k__BackingField"
                   },
                   {
-                    "index": 40,
-                    "value": "NewTokenUPGPrefab.T5.UltimaRP"
+                    "index": 24,
+                    "value": "<BuyAutoDiamondClicker>b__241_0"
                   },
                   {
-                    "index": 41,
-                    "value": "NewTokenUPGPrefab.T5.UltimaShards"
+                    "index": 25,
+                    "value": "<BuyDiamondBoostEnum>d__629"
                   }
                 ]
               },
               "matchedTerms": [
-                "NewTokenUPGPrefab.T5.UltimaCells"
+                ":Diamond Upgrade 11 - ModBoost"
               ],
               "matchedAnchorKinds": [
                 "string"
@@ -2454,259 +2735,7 @@
               "signalScore": 95,
               "signalTier": "supporting",
               "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T5.UltimaCells via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[4]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 4,
-                "nearbyScalarValues": [
-                  {
-                    "index": 1,
-                    "value": "CellmasPresent_Token_Prefab1"
-                  },
-                  {
-                    "index": 2,
-                    "value": "MessagePrefab.Tokenium"
-                  },
-                  {
-                    "index": 3,
-                    "value": "NewDiamondUPGPrefab.Specials.TokensBoost"
-                  },
-                  {
-                    "index": 4,
-                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-                  },
-                  {
-                    "index": 5,
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
-                  },
-                  {
-                    "index": 6,
-                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
-                  },
-                  {
-                    "index": 7,
-                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.CellsPerChestBooster via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T5.UltimaCells",
-              "jsonPath": "$.apk_results[7].keyword_hits.ultima[2]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 2,
-                "nearbyScalarValues": [
-                  {
-                    "index": 0,
-                    "value": "NewTokenUPGPrefab.T4.Ultima"
-                  },
-                  {
-                    "index": 1,
-                    "value": "NewTokenUPGPrefab.T5.UltimaAP"
-                  },
-                  {
-                    "index": 2,
-                    "value": "NewTokenUPGPrefab.T5.UltimaCells"
-                  },
-                  {
-                    "index": 3,
-                    "value": "NewTokenUPGPrefab.T5.UltimaMP"
-                  },
-                  {
-                    "index": 4,
-                    "value": "NewTokenUPGPrefab.T5.UltimaRP"
-                  },
-                  {
-                    "index": 5,
-                    "value": "NewTokenUPGPrefab.T5.UltimaShards"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T5.UltimaCells"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T5.UltimaCells via unityProbe"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "text-hooks",
-      "label": "Generic TokenShop text-hook lane",
-      "terms": [
-        "SetAllTokenShopTexts",
-        "SetTokenTexts",
-        "ATU3Button",
-        "15810",
-        "CellBoost",
-        "BuyCellBoost"
-      ],
-      "anchorSpecs": [
-        {
-          "value": "SetAllTokenShopTexts",
-          "kind": "method",
-          "origin": "surface-search"
-        },
-        {
-          "value": "SetTokenTexts",
-          "kind": "method",
-          "origin": "surface-search"
-        },
-        {
-          "value": "ATU3Button",
-          "kind": "class",
-          "origin": "surface-search"
-        },
-        {
-          "value": "15810",
-          "kind": "path id",
-          "origin": "surface-search"
-        },
-        {
-          "value": "CellBoost",
-          "kind": "class",
-          "origin": "surface-search"
-        },
-        {
-          "value": "BuyCellBoost",
-          "kind": "method",
-          "origin": "surface-search"
-        }
-      ],
-      "sources": [
-        {
-          "sourceId": "unityProbe",
-          "sourcePath": "data/unity-probe-report.json",
-          "searchModes": [
-            "exact-structured"
-          ],
-          "hitCount": 2,
-          "highSignalHitCount": 0,
-          "supportingHitCount": 2,
-          "incidentalHitCount": 0,
-          "suppressedNoiseCount": 0,
-          "hits": [
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$.apk_results[32].keyword_hits.token[6]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 6,
-                "nearbyScalarValues": [
-                  {
-                    "index": 3,
-                    "value": "LV. 1 - (Tokens In Bank)^1.19"
-                  },
-                  {
-                    "index": 4,
-                    "value": "LV. 1 - (Tokens In Bank)^1.29"
-                  },
-                  {
-                    "index": 5,
-                    "value": "LV. 1 - Token Bank Capacity x2"
-                  },
-                  {
-                    "index": 6,
-                    "value": "SetAllTokenShopTexts"
-                  },
-                  {
-                    "index": 7,
-                    "value": "SetTokenTexts"
-                  },
-                  {
-                    "index": 8,
-                    "value": "TokenClaimRecolor"
-                  },
-                  {
-                    "index": 9,
-                    "value": "TokenShop, Assembly-CSharp"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
-            },
-            {
-              "term": "SetTokenTexts",
-              "jsonPath": "$.apk_results[32].keyword_hits.token[7]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 7,
-                "nearbyScalarValues": [
-                  {
-                    "index": 4,
-                    "value": "LV. 1 - (Tokens In Bank)^1.29"
-                  },
-                  {
-                    "index": 5,
-                    "value": "LV. 1 - Token Bank Capacity x2"
-                  },
-                  {
-                    "index": 6,
-                    "value": "SetAllTokenShopTexts"
-                  },
-                  {
-                    "index": 7,
-                    "value": "SetTokenTexts"
-                  },
-                  {
-                    "index": 8,
-                    "value": "TokenClaimRecolor"
-                  },
-                  {
-                    "index": 9,
-                    "value": "TokenShop, Assembly-CSharp"
-                  },
-                  {
-                    "index": 10,
-                    "value": "TokenShopRecoloring"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetTokenTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetTokenTexts via unityProbe"
+              "signalReason": "exact-structured match on :Diamond Upgrade 11 - ModBoost via unityProbe"
             }
           ]
         }
@@ -2718,65 +2747,44 @@
       {
         "id": "target-shell",
         "type": "shell-anchor",
-        "label": "ATU3Button path_id 15810",
+        "label": "ATU4Button path_id 15796",
         "status": "present",
         "summary": "The exact target shell survives in the committed TokenShop payload."
       },
       {
         "id": "owner-field-block",
         "type": "owner-field-block",
-        "label": "CellBoostStartCost, CellBoostAdditiveCost, CellBoostBonus, CellBoostMaxLevel, CellBoostFill",
+        "label": "ModBoostStartCost, ModBoostAdditiveCost, ModBoostBonus, ModBoostMaxLevel, ModBoostFill",
         "status": "present",
         "summary": "The exact adjacent owner-field block remains serialized next to the target shell."
       },
       {
         "id": "metadata-neighborhood",
         "type": "metadata-neighborhood",
-        "label": "ATU3Button + CellBoost metadata neighborhood",
+        "label": "ATU4Button + ModBoost metadata neighborhood",
         "status": "present",
-        "summary": "Metadata still keeps the shell anchor and cells-family declaration area together."
+        "summary": "Metadata still keeps the shell anchor and ModBoost declaration area together."
       },
       {
-        "id": "generic-action-hook",
-        "type": "action-hook-cluster",
-        "label": "BuyCellBoost generic cells-domain action cluster",
+        "id": "action-hook",
+        "type": "action-hook",
+        "label": "BuyModBoost",
         "status": "present",
-        "summary": "The committed lane probe keeps the generic buy hook but not an ATU3-specific exact join."
+        "summary": "The committed probe set preserves the matching ModBoost buy hook."
       },
       {
-        "id": "diamond-special-prefab",
-        "type": "prefab-candidate",
-        "label": "NewDiamondUPGPrefab.Specials.CellsBoost",
+        "id": "prefab-identity",
+        "type": "prefab-identity",
+        "label": "NewTokenUPGPrefab.T1.ModPointsBooster",
         "status": "present",
-        "summary": "A detached diamond-special prefab candidate is preserved."
+        "summary": "The exact token prefab identity is preserved."
       },
       {
-        "id": "diamond-special-title",
+        "id": "title-candidate",
         "type": "title-candidate",
-        "label": ">Diamond Upgrade 10 - CellsBoost",
+        "label": "Token Ultima: MP",
         "status": "present",
-        "summary": "A detached diamond-special title candidate is preserved."
-      },
-      {
-        "id": "token-prefab-candidates",
-        "type": "prefab-candidate",
-        "label": "NewTokenUPGPrefab.T1.CellsPerChestBooster and NewTokenUPGPrefab.T5.UltimaCells",
-        "status": "present",
-        "summary": "Detached token-side prefab candidates are preserved."
-      },
-      {
-        "id": "token-title-candidate",
-        "type": "title-candidate",
-        "label": "Token Ultima: Cells",
-        "status": "present",
-        "summary": "A detached token-side title candidate is preserved."
-      },
-      {
-        "id": "generic-text-hooks",
-        "type": "text-hook-cluster",
-        "label": "SetAllTokenShopTexts / SetTokenTexts",
-        "status": "present",
-        "summary": "The generic TokenShop text side is preserved as a separate surface."
+        "summary": "A detached mod-domain title candidate is preserved."
       }
     ],
     "edges": [
@@ -2787,12 +2795,12 @@
         "type": "serialized-adjacency",
         "status": "present",
         "provenanceStrength": "direct",
-        "statement": "The target shell still sits directly beside the CellBoost owner-field block in the committed TokenShop extract.",
+        "statement": "The target shell still sits directly beside the ModBoost owner-field block in the committed TokenShop extract.",
         "provedBy": [
           {
             "sourceId": "tokenShopExtract",
             "sourcePath": "data/token-shop-values.json",
-            "term": "ATU3Button path_id 15810",
+            "term": "ATU4Button path_id 15796",
             "locator": "$.fields",
             "note": "Shell window recovered from the exact TokenShop payload."
           }
@@ -2805,399 +2813,196 @@
         "type": "declaration-neighborhood",
         "status": "present",
         "provenanceStrength": "contextual",
-        "statement": "The metadata neighborhood keeps ATU3Button and the CellBoost declaration block in one raw declaration area.",
+        "statement": "The metadata neighborhood keeps ATU4Button and the ModBoost declaration block in one raw declaration area.",
         "provedBy": [
           {
             "sourceId": "metadata",
             "sourcePath": "workbench/apk/base/global-metadata.dat",
-            "term": "CellBoostStartCost",
-            "locator": "metadata offset 662261"
+            "term": "ATU4Button",
+            "locator": "metadata offset 662458"
           },
           {
             "sourceId": "metadata",
             "sourcePath": "workbench/apk/base/global-metadata.dat",
-            "term": "ATU3Button",
-            "locator": "metadata offset 662349"
+            "term": "ModBoostStartCost",
+            "locator": "metadata offset 662375"
           }
         ]
       },
       {
-        "id": "owner-block-to-action-cluster",
-        "from": "owner-field-block",
-        "to": "generic-action-hook",
-        "type": "family-action-cluster",
+        "id": "shell-to-action-hook",
+        "from": "target-shell",
+        "to": "action-hook",
+        "type": "exact-shell-to-action-hook",
         "status": "present",
         "provenanceStrength": "supporting",
-        "statement": "The cells-domain action lane preserves BuyCellBoost as the nearest named buy hook for the same family, but only as a generic cluster.",
+        "statement": "The checked action lane preserves the matching direct buy hook BuyModBoost for the same ModBoost row family.",
         "provedBy": [
+          {
+            "sourceId": "tokenShopRowRemapBoundary",
+            "sourcePath": "data/token-shop-row-remap-boundary.json",
+            "term": "BuyModBoost",
+            "locator": "$.traceFollowUp.recoveredBridge.supportingActionHook"
+          },
           {
             "sourceId": "dailyTokeniumLaneProbe",
             "sourcePath": "data/daily-tokenium-lane-probe.json",
-            "term": "BuyCellBoost",
-            "locator": "$[0].matches[101].byte_context[41].value"
+            "term": "BuyModBoost",
+            "locator": "$[0].matches[68].byte_context[52].value"
           }
         ]
       },
       {
-        "id": "diamond-surface-prefab",
-        "from": "metadata-neighborhood",
-        "to": "diamond-special-prefab",
-        "type": "candidate-prefab-surface",
+        "id": "action-hook-to-prefab",
+        "from": "action-hook",
+        "to": "prefab-identity",
+        "type": "exact-shell-to-prefab",
         "status": "present",
         "provenanceStrength": "direct",
-        "statement": "A separate diamond-special CellsBoost prefab candidate is preserved on committed probe surfaces.",
+        "statement": "The checked prefab roster preserves the exact ModPointsBooster identity on the same traced row family.",
         "provedBy": [
           {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-            "locator": "$.apk_results[7].keyword_hits.diamond[16]"
+            "sourceId": "tokenShopRowRemapBoundary",
+            "sourcePath": "data/token-shop-row-remap-boundary.json",
+            "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+            "locator": "$.traceFollowUp.recoveredBridge.prefabIdentity"
           },
-          {
-            "sourceId": "lm244TargetedProbe",
-            "sourcePath": "data/lm244-targeted-probe.json",
-            "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-            "locator": "$[0].matches[23].byte_context[89].value"
-          }
-        ]
-      },
-      {
-        "id": "diamond-surface-title",
-        "from": "diamond-special-prefab",
-        "to": "diamond-special-title",
-        "type": "candidate-title-surface",
-        "status": "present",
-        "provenanceStrength": "direct",
-        "statement": "The same detached diamond-special surface also preserves one final title candidate.",
-        "provedBy": [
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": ">Diamond Upgrade 10 - CellsBoost",
-            "locator": "$.apk_results[0].keyword_hits.diamond[45]"
-          }
-        ]
-      },
-      {
-        "id": "token-surface-prefab",
-        "from": "generic-action-hook",
-        "to": "token-prefab-candidates",
-        "type": "candidate-prefab-surface",
-        "status": "present",
-        "provenanceStrength": "direct",
-        "statement": "Separate token-side prefab identities for cells-domain upgrades are preserved, but not joined back to the target shell.",
-        "provedBy": [
           {
             "sourceId": "uabeaProbe",
             "sourcePath": "data/uabea-probe-report.json",
-            "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-            "locator": "$.namedObjectHits[10371].name"
-          },
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "NewTokenUPGPrefab.T5.UltimaCells",
-            "locator": "$.apk_results[7].keyword_hits.token[38]"
+            "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+            "locator": "$.namedObjectHits[10353].name"
           }
         ]
       },
       {
-        "id": "token-surface-title",
-        "from": "token-prefab-candidates",
-        "to": "token-title-candidate",
-        "type": "candidate-title-surface",
-        "status": "present",
-        "provenanceStrength": "direct",
-        "statement": "The token-side candidate surface also preserves one detached title clue.",
-        "provedBy": [
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "Token Ultima: Cells",
-            "locator": "$.apk_results[23].keyword_hits.token[25]"
-          }
-        ]
-      },
-      {
-        "id": "text-hook-surface",
-        "from": "generic-action-hook",
-        "to": "generic-text-hooks",
-        "type": "generic-text-hook-cluster",
+        "id": "prefab-to-title-candidate",
+        "from": "prefab-identity",
+        "to": "title-candidate",
+        "type": "title-candidate-surface",
         "status": "present",
         "provenanceStrength": "supporting",
-        "statement": "The generic TokenShop text hooks are preserved as a separate surface, but they do not close the ATU3 join.",
+        "statement": "A separate mod-domain title candidate is still preserved, but only as a detached title surface.",
         "provedBy": [
           {
             "sourceId": "unityProbe",
             "sourcePath": "data/unity-probe-report.json",
-            "term": "SetAllTokenShopTexts",
-            "locator": "$.apk_results[32].keyword_hits.token[6]"
-          },
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "SetTokenTexts",
-            "locator": "$.apk_results[32].keyword_hits.token[7]"
+            "term": "Token Ultima: MP",
+            "locator": "$.apk_results[23].keyword_hits.token[26]"
           }
         ]
       }
     ],
     "negativeEdges": [
       {
-        "id": "missing-shell-to-exact-action",
-        "from": "target-shell",
-        "to": "generic-action-hook",
-        "type": "exact-shell-to-action-hook",
-        "status": "missing",
-        "provenanceStrength": "negative",
-        "statement": "No committed source proves one ATU3-specific direct buy or effect hook; the nearest named action surface stays the generic BuyCellBoost cluster.",
-        "provedBy": [
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "No checked repo artifact in this lane currently preserves an ATU3-specific effect hook.",
-            "locator": "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]"
-          },
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "No checked repo artifact in this lane currently preserves an ATU3-specific direct buy hook.",
-            "locator": "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]"
-          }
-        ]
-      },
-      {
-        "id": "missing-shell-to-diamond-prefab",
-        "from": "target-shell",
-        "to": "diamond-special-prefab",
-        "type": "exact-shell-to-prefab",
-        "status": "missing",
-        "provenanceStrength": "negative",
-        "statement": "No committed source proves that the ATU3 shell or path id 15810 crosses directly into the detached diamond-special CellsBoost prefab candidate.",
-        "provedBy": [
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "The checked diamond-special surface still preserves a separate CellsBoost prefab and title lane, but it does not preserve any ATU3 shell, path id 15810, or exact bridge from the ATU3 owner block into that diamond-special identity surface.",
-            "locator": "$.atu3CellsDisambiguationPass.testedSurfaces[1].missingJoin"
-          }
-        ]
-      },
-      {
-        "id": "missing-shell-to-token-prefab",
-        "from": "target-shell",
-        "to": "token-prefab-candidates",
-        "type": "exact-shell-to-prefab",
-        "status": "missing",
-        "provenanceStrength": "negative",
-        "statement": "No committed source proves that the ATU3 shell or path id 15810 crosses directly into one exact token-side prefab identity.",
-        "provedBy": [
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "No checked repo artifact in this lane currently joins ATU3Button directly to one exact NewTokenUPGPrefab.* object identity.",
-            "locator": "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]"
-          },
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "The checked token-side surface still preserves separate token prefab and title clues for cells-domain upgrades, but it does not preserve any direct ATU3 shell join or one concrete object or title bridge back to path id 15810.",
-            "locator": "$.atu3CellsDisambiguationPass.testedSurfaces[2].missingJoin"
-          }
-        ]
-      },
-      {
         "id": "missing-shell-to-title",
         "from": "target-shell",
-        "to": "token-title-candidate",
+        "to": "title-candidate",
         "type": "exact-shell-to-title",
         "status": "missing",
         "provenanceStrength": "negative",
-        "statement": "No committed source proves one exact ATU3 shell-to-final-title join across either the diamond-special or token-side title candidates.",
+        "statement": "No committed source proves one exact ATU4 shell-to-final-title join; the surviving Token Ultima: MP title remains detached from the shell-side row neighborhood.",
         "provedBy": [
           {
             "sourceId": "tokenShopRowRemapBoundary",
             "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "The bounded ATU3 cells-domain disambiguation pass stays negative. Across the exact BuyCellBoost, diamond-special CellsBoost, and token-side CellsPerChestBooster or Token Ultima: Cells search surfaces, the repo still preserves only separate cells-domain clusters rather than one checked object-or-title join back to ATU3Button path id 15810.",
-            "locator": "$.atu3CellsDisambiguationPass.groundedConclusion"
+            "term": "No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving Token Ultima: MP title clue stays detached from the traced ATU4 shell neighborhood.",
+            "locator": "$.traceFollowUp.blockedTitleJoin.missingJoin"
+          },
+          {
+            "sourceId": "unityProbe",
+            "sourcePath": "data/unity-probe-report.json",
+            "term": "Token Ultima: MP",
+            "locator": "$.apk_results[23].keyword_hits.token[26]"
           }
         ]
       }
     ],
     "claimLedger": [
       {
-        "id": "claim-shell-window",
+        "id": "claim-trace-recovered-bridge",
         "status": "proved",
-        "statement": "The exact ATU3 shell window exists in committed TokenShop data.",
+        "statement": "The ATU4 trace now preserves one exact shell-to-prefab bridge through the ModBoost row family.",
         "edgeIds": [
-          "shell-to-owner-block"
+          "shell-to-owner-block",
+          "shell-to-action-hook",
+          "action-hook-to-prefab"
         ],
         "provedBy": [
           {
             "sourceId": "tokenShopExtract",
             "sourcePath": "data/token-shop-values.json",
-            "term": "ATU3Button path_id 15810",
+            "term": "ATU4Button path_id 15796",
             "locator": "$.fields",
             "note": "Shell window recovered from the exact TokenShop payload."
-          }
-        ]
-      },
-      {
-        "id": "claim-metadata-neighborhood",
-        "status": "proved",
-        "statement": "The metadata neighborhood keeps ATU3Button in the same declaration area as the CellBoost family.",
-        "edgeIds": [
-          "owner-block-to-metadata"
-        ],
-        "provedBy": [
-          {
-            "sourceId": "metadata",
-            "sourcePath": "workbench/apk/base/global-metadata.dat",
-            "term": "CellBoostStartCost",
-            "locator": "metadata offset 662261"
           },
           {
             "sourceId": "metadata",
             "sourcePath": "workbench/apk/base/global-metadata.dat",
-            "term": "ATU3Button",
-            "locator": "metadata offset 662349"
-          }
-        ]
-      },
-      {
-        "id": "claim-cells-action-cluster",
-        "status": "proved",
-        "statement": "The generic cells-domain action cluster preserves BuyCellBoost, but not as an exact ATU3-specific join.",
-        "edgeIds": [
-          "owner-block-to-action-cluster"
-        ],
-        "provedBy": [
+            "term": "ATU4Button",
+            "locator": "metadata offset 662458"
+          },
+          {
+            "sourceId": "metadata",
+            "sourcePath": "workbench/apk/base/global-metadata.dat",
+            "term": "ModBoostStartCost",
+            "locator": "metadata offset 662375"
+          },
+          {
+            "sourceId": "tokenShopRowRemapBoundary",
+            "sourcePath": "data/token-shop-row-remap-boundary.json",
+            "term": "BuyModBoost",
+            "locator": "$.traceFollowUp.recoveredBridge.supportingActionHook"
+          },
           {
             "sourceId": "dailyTokeniumLaneProbe",
             "sourcePath": "data/daily-tokenium-lane-probe.json",
-            "term": "BuyCellBoost",
-            "locator": "$[0].matches[101].byte_context[41].value"
-          }
-        ]
-      },
-      {
-        "id": "claim-detached-candidate-surfaces",
-        "status": "proved",
-        "statement": "Detached prefab, title, and text-hook candidate surfaces still exist on committed probes.",
-        "edgeIds": [
-          "diamond-surface-prefab",
-          "diamond-surface-title",
-          "token-surface-prefab",
-          "token-surface-title",
-          "text-hook-surface"
-        ],
-        "provedBy": [
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-            "locator": "$.apk_results[7].keyword_hits.diamond[16]"
+            "term": "BuyModBoost",
+            "locator": "$[0].matches[68].byte_context[52].value"
           },
           {
-            "sourceId": "lm244TargetedProbe",
-            "sourcePath": "data/lm244-targeted-probe.json",
-            "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-            "locator": "$[0].matches[23].byte_context[89].value"
-          },
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": ">Diamond Upgrade 10 - CellsBoost",
-            "locator": "$.apk_results[0].keyword_hits.diamond[45]"
+            "sourceId": "tokenShopRowRemapBoundary",
+            "sourcePath": "data/token-shop-row-remap-boundary.json",
+            "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+            "locator": "$.traceFollowUp.recoveredBridge.prefabIdentity"
           },
           {
             "sourceId": "uabeaProbe",
             "sourcePath": "data/uabea-probe-report.json",
-            "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-            "locator": "$.namedObjectHits[10371].name"
-          },
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "NewTokenUPGPrefab.T5.UltimaCells",
-            "locator": "$.apk_results[7].keyword_hits.token[38]"
-          },
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "Token Ultima: Cells",
-            "locator": "$.apk_results[23].keyword_hits.token[25]"
-          },
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "SetAllTokenShopTexts",
-            "locator": "$.apk_results[32].keyword_hits.token[6]"
-          },
-          {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
-            "term": "SetTokenTexts",
-            "locator": "$.apk_results[32].keyword_hits.token[7]"
+            "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+            "locator": "$.namedObjectHits[10353].name"
           }
         ]
       },
       {
-        "id": "claim-missing-bridge",
+        "id": "claim-missing-title-join",
         "status": "missing",
-        "statement": "The exact shell-to-action, shell-to-prefab, and shell-to-title joins required to clear the ATU3 bridge are still missing.",
+        "statement": "The exact shell-to-final-title join for ATU4 is still missing.",
         "edgeIds": [
-          "missing-shell-to-exact-action",
-          "missing-shell-to-diamond-prefab",
-          "missing-shell-to-token-prefab",
           "missing-shell-to-title"
         ],
         "provedBy": [
           {
             "sourceId": "tokenShopRowRemapBoundary",
             "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "No checked repo artifact in this lane currently preserves an ATU3-specific effect hook.",
-            "locator": "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]"
+            "term": "No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving Token Ultima: MP title clue stays detached from the traced ATU4 shell neighborhood.",
+            "locator": "$.traceFollowUp.blockedTitleJoin.missingJoin"
           },
           {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "No checked repo artifact in this lane currently preserves an ATU3-specific direct buy hook.",
-            "locator": "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]"
-          },
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "The checked diamond-special surface still preserves a separate CellsBoost prefab and title lane, but it does not preserve any ATU3 shell, path id 15810, or exact bridge from the ATU3 owner block into that diamond-special identity surface.",
-            "locator": "$.atu3CellsDisambiguationPass.testedSurfaces[1].missingJoin"
-          },
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "No checked repo artifact in this lane currently joins ATU3Button directly to one exact NewTokenUPGPrefab.* object identity.",
-            "locator": "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]"
-          },
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "The checked token-side surface still preserves separate token prefab and title clues for cells-domain upgrades, but it does not preserve any direct ATU3 shell join or one concrete object or title bridge back to path id 15810.",
-            "locator": "$.atu3CellsDisambiguationPass.testedSurfaces[2].missingJoin"
-          },
-          {
-            "sourceId": "tokenShopRowRemapBoundary",
-            "sourcePath": "data/token-shop-row-remap-boundary.json",
-            "term": "The bounded ATU3 cells-domain disambiguation pass stays negative. Across the exact BuyCellBoost, diamond-special CellsBoost, and token-side CellsPerChestBooster or Token Ultima: Cells search surfaces, the repo still preserves only separate cells-domain clusters rather than one checked object-or-title join back to ATU3Button path id 15810.",
-            "locator": "$.atu3CellsDisambiguationPass.groundedConclusion"
+            "sourceId": "unityProbe",
+            "sourcePath": "data/unity-probe-report.json",
+            "term": "Token Ultima: MP",
+            "locator": "$.apk_results[23].keyword_hits.token[26]"
           }
         ]
       }
     ]
   },
   "decisionSummary": {
-    "verdict": "keep researching",
-    "summary": "The trace still preserves only split cells-domain clues, so keep researching and do not wire or quarantine product behavior from this join.",
-    "provedEdgeCount": 8,
-    "negativeEdgeCount": 4,
+    "verdict": "quarantine",
+    "summary": "The trace now preserves one exact shell-to-prefab bridge, but the missing title join still keeps this ATU4 row quarantined to remap evidence.",
+    "provedEdgeCount": 5,
+    "negativeEdgeCount": 1,
     "baselineGap": [
       "exact-shell-to-action-hook",
       "exact-shell-to-prefab",
@@ -3206,67 +3011,55 @@
     "supportingEdgeTypes": [
       "serialized-adjacency",
       "declaration-neighborhood",
-      "family-action-cluster",
-      "candidate-prefab-surface",
-      "candidate-title-surface",
-      "candidate-prefab-surface",
-      "candidate-title-surface",
-      "generic-text-hook-cluster"
-    ],
-    "blockedEdgeTypes": [
       "exact-shell-to-action-hook",
       "exact-shell-to-prefab",
-      "exact-shell-to-prefab",
+      "title-candidate-surface"
+    ],
+    "blockedEdgeTypes": [
       "exact-shell-to-title"
     ]
   },
-  "bridgePromotionRule": "Only promote a remap or owner boundary when one committed artifact preserves an exact shell-side anchor together with one exact prefab identity or final player-facing title in the same local container.",
+  "bridgePromotionRule": "Only promote a TokenShop row remap past compatibility-only import when one checked shell-side owner block, one row-specific action hook, and one exact prefab or final-title surface converge on the same row family.",
   "bridgeCheck": {
     "candidateTerms": [
-      "NewDiamondUPGPrefab.Specials.CellsBoost",
-      ">Diamond Upgrade 10 - CellsBoost",
-      "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-      "NewTokenUPGPrefab.T5.UltimaCells",
-      "Token Ultima: Cells"
+      "BuyModBoost",
+      "NewTokenUPGPrefab.T1.ModPointsBooster"
     ],
-    "bridgeCleared": false,
-    "bridgeHits": [],
-    "result": "no checked object-or-title bridge recovered"
+    "bridgeCleared": true,
+    "bridgeHits": [
+      {
+        "surfaceId": "action-lane",
+        "sourcePath": "data/daily-tokenium-lane-probe.json",
+        "term": "BuyModBoost"
+      },
+      {
+        "surfaceId": "prefab-lane",
+        "sourcePath": "data/uabea-probe-report.json",
+        "term": "NewTokenUPGPrefab.T1.ModPointsBooster"
+      }
+    ],
+    "result": "checked object bridge recovered"
   },
   "solvedVsBlockedDiff": {
     "baseline": {
-      "id": "atu1-checked-row-bridge",
-      "label": "ATU1 checked row bridge",
+      "id": "atu4-trace-row-bridge",
+      "label": "ATU4 trace-backed row bridge",
       "status": "cleared",
       "sourcePath": "data/token-shop-row-remap-boundary.json",
-      "shellField": "ATU1Button",
-      "shellPathId": 15839,
+      "shellField": "ATU4Button",
+      "shellPathId": 15796,
       "comparisonShape": [
         {
           "type": "serialized-adjacency",
           "status": "present",
           "provenanceStrength": "direct",
-          "statement": "ATU1Button sits directly after the TokenBoost owner-field block.",
+          "statement": "ATU4Button sits directly after the ModBoost owner-field block.",
           "provedBy": [
             {
               "sourceId": "tokenShopRowRemapBoundary",
               "sourcePath": "data/token-shop-row-remap-boundary.json",
-              "term": "TokenBoostStartCost, TokenBoostAdditiveCost, TokenBoostBonus, TokenBoostMaxLevel, TokenBoostFill",
-              "locator": "$.adjacentFollowUp.recoveredAdditionalBridge.ownerFieldBlock"
-            }
-          ]
-        },
-        {
-          "type": "supporting-effect-hook",
-          "status": "present",
-          "provenanceStrength": "supporting",
-          "statement": "The solved bridge preserves one exact ATU1-specific effect hook.",
-          "provedBy": [
-            {
-              "sourceId": "tokenShopRowRemapBoundary",
-              "sourcePath": "data/token-shop-row-remap-boundary.json",
-              "term": "ATU1TokenBonus",
-              "locator": "$.adjacentFollowUp.recoveredAdditionalBridge.supportingEffectHook"
+              "term": "ModBoostStartCost, ModBoostAdditiveCost, ModBoostBonus, ModBoostMaxLevel, ModBoostFill",
+              "locator": "$.traceFollowUp.recoveredBridge.ownerFieldBlock"
             }
           ]
         },
@@ -3279,8 +3072,8 @@
             {
               "sourceId": "tokenShopRowRemapBoundary",
               "sourcePath": "data/token-shop-row-remap-boundary.json",
-              "term": "BuyTokenBoost",
-              "locator": "$.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook"
+              "term": "BuyModBoost",
+              "locator": "$.traceFollowUp.recoveredBridge.supportingActionHook"
             }
           ]
         },
@@ -3293,17 +3086,31 @@
             {
               "sourceId": "tokenShopRowRemapBoundary",
               "sourcePath": "data/token-shop-row-remap-boundary.json",
-              "term": "NewTokenUPGPrefab.T1.TokensBoost",
-              "locator": "$.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity"
+              "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "locator": "$.traceFollowUp.recoveredBridge.prefabIdentity"
+            }
+          ]
+        },
+        {
+          "type": "exact-shell-to-title",
+          "status": "missing",
+          "provenanceStrength": "negative",
+          "statement": "ATU4 still lacks one exact shell-to-final-title join.",
+          "provedBy": [
+            {
+              "sourceId": "tokenShopRowRemapBoundary",
+              "sourcePath": "data/token-shop-row-remap-boundary.json",
+              "term": "No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving Token Ultima: MP title clue stays detached from the traced ATU4 shell neighborhood.",
+              "locator": "$.traceFollowUp.blockedTitleJoin.missingJoin"
             }
           ]
         }
       ],
-      "groundedConclusion": "ATU1Button now has one additional checked bridge to the TokenShop TokenBoost or NewTokenUPGPrefab.T1.TokensBoost row family because the exact TokenShop owner payload places ATU1Button directly after the TokenBoost field family, broader probes preserve ATU1TokenBonus, checked action-lane clues preserve BuyTokenBoost, and the checked level0 prefab roster preserves the exact T1 TokensBoost prefab identity."
+      "groundedConclusion": "ATU4Button now has one checked trace-backed bridge to NewTokenUPGPrefab.T1.ModPointsBooster because the exact TokenShop owner payload places ATU4Button directly after the ModBoost field family, checked action-lane clues preserve BuyModBoost, and the checked prefab roster preserves the exact ModPointsBooster token prefab identity."
     },
     "blockedTarget": {
-      "id": "token-shop-atu3-cells",
-      "label": "TokenShop ATU3 cells split",
+      "id": "token-shop-atu4-mod",
+      "label": "TokenShop ATU4 mod bridge",
       "status": "blocked",
       "sourcePath": "data/token-shop-row-remap-boundary.json",
       "shellField": "ATU3Button",
@@ -3380,8 +3187,7 @@
       ],
       "baselineOnlyPresentEdgeTypes": [
         "exact-shell-to-action-hook",
-        "exact-shell-to-prefab",
-        "supporting-effect-hook"
+        "exact-shell-to-prefab"
       ],
       "blockedMissingEdgeTypes": [
         "exact-shell-to-action-hook",
@@ -3390,22 +3196,20 @@
       ],
       "solvedVsBlockedSummary": [
         "Both rows preserve the direct serialized shell-to-owner-block adjacency.",
-        "The solved ATU1 baseline also preserves one exact row-specific effect hook, one checked row-specific buy hook, and one exact prefab identity.",
-        "The blocked ATU3 target stays missing the exact shell-to-action-hook, shell-to-prefab, and shell-to-title joins, so the cells-domain clues remain split instead of forming one checked bridge."
+        "The solved ATU4 trace now preserves one checked row-specific buy hook and one exact ModPointsBooster prefab identity.",
+        "ATU4 still lacks a final title join, but ATU3 remains narrower and more blocked because its action, prefab, and title clues still do not converge on one exact shell join."
       ]
     }
   },
   "lostStructure": [
-    "The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
-    "The metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area, but it does not keep one checked prefab identity or final title in the same local container.",
-    "The action lane survives only as a generic named buy cluster in the daily-tokenium lane probe, with StartCellBostHold, StopCellBostHold, and BuyCellBoost but no shell-side path id.",
-    "Prefab identities survive as detached UABEA, targeted-string, or unity-probe hits, and final titles survive as separate unity-probe buckets, so the current extraction still loses the direct cross-surface join back to 15810."
+    "The shell-side owner window survives only in the TokenShop extract, where ATU4Button path id 15796 stays adjacent to the ModBoost owner block.",
+    "The exact BuyModBoost action hook and NewTokenUPGPrefab.T1.ModPointsBooster prefab now converge on the same traced row family, but the final player-facing title still survives only as a detached mod-domain title surface.",
+    "Because the title-side join is still missing, the recovered ATU4 bridge is safe for row-remap evidence only and should not widen into canonical or planner behavior."
   ],
-  "groundedConclusion": "The ATU3Button or 15810 trace stays negative. The trace workflow now preserves shell, metadata, action-hook, prefab, title, and text-hook surfaces in one checked bundle, but no committed source carries one exact ATU3Button or path id 15810 bridge together with one exact prefab identity or final player-facing title.",
+  "groundedConclusion": "The ATU4Button or 15796 trace now preserves one checked shell-to-action-hook-to-prefab bridge to NewTokenUPGPrefab.T1.ModPointsBooster, but the final player-facing title join is still unresolved and must stay quarantined.",
   "currentBoundary": [
-    "This is a target-driven trace workflow, not a remap promotion by itself.",
-    "It now keeps declaration anchors, owner-payload shells, action hooks, targeted string hits, prefab or title surfaces, and explicit typed graph edges in one checked artifact bundle so unresolved joins can be judged from one place.",
-    "The graph records both proved joins and negative joins, with provenance-strength tags and source citations for each claim.",
-    "If no committed source preserves both the shell-side anchor and one exact prefab or title candidate in the same local container, the result stays negative and downstream boundaries should not advance."
+    "This is a target-driven trace workflow, not a full-lane TokenShop remap promotion by itself.",
+    "It now preserves one exact ATU4 shell-to-action-hook-to-prefab bridge in the same checked trace bundle while keeping the missing title join explicit.",
+    "Keep the recovered ATU4 bridge quarantined to row-remap evidence until a separate final player-facing title join clears."
   ]
 }

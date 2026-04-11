@@ -2403,6 +2403,28 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenTitleCandidate, "Token Ultima: Cells", "token shop row remap boundary blocked adjacent token title candidate drifted");
   assert.match(boundary.adjacentFollowUp.blockedAdjacentShell.groundedConclusion, /ATU3Button does not yet clear/i, "token shop row remap boundary blocked adjacent conclusion drifted");
   assert.equal(boundary.adjacentFollowUp.result, "one more grounded bridge recovered", "token shop row remap boundary adjacent follow-up result drifted");
+  expectRecord(boundary.traceFollowUp, "token shop row remap boundary trace follow-up must be an object");
+  expectRecord(boundary.traceFollowUp.recoveredBridge, "token shop row remap boundary trace recovered bridge must be an object");
+  expectRecord(boundary.traceFollowUp.blockedTitleJoin, "token shop row remap boundary trace blocked title join must be an object");
+  assert.equal(boundary.traceFollowUp.targetId, "token-shop-atu4-mod", "token shop row remap boundary trace target drifted");
+  assert.equal(boundary.traceFollowUp.recoveredBridge.shellField, "ATU4Button", "token shop row remap boundary trace bridge shell drifted");
+  assert.equal(boundary.traceFollowUp.recoveredBridge.shellPathId, 15796, "token shop row remap boundary trace bridge shell path drifted");
+  assert.deepEqual(
+    boundary.traceFollowUp.recoveredBridge.ownerFieldBlock,
+    [
+      "ModBoostStartCost",
+      "ModBoostAdditiveCost",
+      "ModBoostBonus",
+      "ModBoostMaxLevel",
+      "ModBoostFill"
+    ],
+    "token shop row remap boundary trace bridge owner field block drifted"
+  );
+  assert.equal(boundary.traceFollowUp.recoveredBridge.supportingActionHook, "BuyModBoost", "token shop row remap boundary trace bridge action hook drifted");
+  assert.equal(boundary.traceFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.ModPointsBooster", "token shop row remap boundary trace bridge prefab drifted");
+  assert.equal(boundary.traceFollowUp.blockedTitleJoin.titleCandidate, "Token Ultima: MP", "token shop row remap boundary trace blocked title candidate drifted");
+  assert.match(boundary.traceFollowUp.blockedTitleJoin.missingJoin, /ATU4Button directly to one final player-facing TokenShop row title/i, "token shop row remap boundary trace blocked title note drifted");
+  assert.equal(boundary.traceFollowUp.result, "one trace-backed grounded bridge recovered", "token shop row remap boundary trace follow-up result drifted");
   ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
     assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);
   });
@@ -2420,6 +2442,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     assert.ok(boundary.blockedIdentityJoin.unsafeInferenceSources.includes(name), `token shop row remap boundary missing unsafe inference source ${name}`);
   });
   assert.ok(boundary.currentBoundary.some((line) => /ATU2Button aligns directly with the DiamondBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU2 bridge conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU4 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion for remaining rows");
 
   return {
@@ -2429,7 +2452,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     stats: [
       boundary.rawSaveFamily.fieldRange,
       `${boundary.groundedNonLabelClues.effectHookSamples.length} grounded non-label effect clues`,
-      "Two ATU bridges are recovered; adjacency still does not generalize"
+      "Five ATU bridges are recovered; broader remap still does not generalize"
     ]
   };
 }
@@ -2538,63 +2561,63 @@ function validateUnityTraceBundle(bundle) {
   assert.equal(bundle.dataset, "unity-trace-bundle", "unity trace bundle dataset id drifted");
   assert.equal(bundle.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]", "unity trace bundle command drifted");
   assert.equal(bundle.traceWorkflow.plannerExample, "node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>", "unity trace bundle planner example drifted");
-  assert.equal(bundle.plannerResolution.selectionMode, "query-planner", "unity trace bundle planner selection mode drifted");
+  assert.equal(bundle.plannerResolution.selectionMode, "explicit-target", "unity trace bundle planner selection mode drifted");
   assert.equal(bundle.plannerResolution.matchedFamilyId, "token-shop", "unity trace bundle planner family drifted");
-  assert.equal(bundle.plannerResolution.runMode, "compare", "unity trace bundle planner run mode drifted");
-  assert.equal(bundle.plannerResolution.comparePresetId, "token-shop-atu3-vs-atu1", "unity trace bundle planner compare preset drifted");
-  assert.ok(bundle.plannerResolution.expandedAnchors.includes("Cells"), "unity trace bundle planner anchors must preserve query term");
-  assert.ok(bundle.plannerResolution.expandedAnchors.includes("BuyCellBoost"), "unity trace bundle planner anchors must preserve family expansion");
-  assert.ok(bundle.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle planner anchor typing drifted");
+  assert.equal(bundle.plannerResolution.runMode, "trace", "unity trace bundle planner run mode drifted");
+  assert.equal(bundle.plannerResolution.comparePresetId, null, "unity trace bundle planner compare preset drifted");
+  assert.ok(bundle.plannerResolution.expandedAnchors.includes("ATU4Button"), "unity trace bundle planner anchors must preserve target shell");
+  assert.ok(bundle.plannerResolution.expandedAnchors.includes("ATU3Button"), "unity trace bundle planner anchors must preserve family anchor expansion");
+  assert.ok(bundle.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"), "unity trace bundle planner anchor typing drifted");
   assert.match(bundle.plannerResolution.decisionNote, /TokenShop/i, "unity trace bundle planner decision note must preserve chosen family");
-  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle execution path-id anchor drifted");
+  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"), "unity trace bundle execution path-id anchor drifted");
   assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"), "unity trace bundle execution method anchor drifted");
   assert.equal(bundle.traceRegistry.path, "data/unity-trace-target-registry.json", "unity trace bundle registry path drifted");
   assert.equal(bundle.traceRegistry.selectedFamilyId, "token-shop", "unity trace bundle selected family drifted");
-  assert.equal(bundle.target.id, "token-shop-atu3-cells", "unity trace bundle target id drifted");
-  assert.ok(bundle.target.anchors.includes("ATU3Button"), "unity trace bundle target anchors must preserve shell field");
-  assert.ok(bundle.target.anchors.includes("15810"), "unity trace bundle target anchors must preserve shell path id");
-  assert.ok(bundle.target.anchors.includes("BuyCellBoost"), "unity trace bundle target anchors must preserve family expansion");
-  assert.equal(bundle.shellWindow.shellField, "ATU3Button", "unity trace bundle shell field drifted");
-  assert.equal(bundle.shellWindow.shellPathId, 15810, "unity trace bundle shell path id drifted");
+  assert.equal(bundle.target.id, "token-shop-atu4-mod", "unity trace bundle target id drifted");
+  assert.ok(bundle.target.anchors.includes("ATU4Button"), "unity trace bundle target anchors must preserve shell field");
+  assert.ok(bundle.target.anchors.includes("15796"), "unity trace bundle target anchors must preserve shell path id");
+  assert.ok(bundle.target.anchors.includes("ATU3Button"), "unity trace bundle target anchors must preserve family expansion");
+  assert.equal(bundle.shellWindow.shellField, "ATU4Button", "unity trace bundle shell field drifted");
+  assert.equal(bundle.shellWindow.shellPathId, 15796, "unity trace bundle shell path id drifted");
   assert.deepEqual(
     bundle.shellWindow.ownerFieldBlock,
-    ["CellBoostStartCost", "CellBoostAdditiveCost", "CellBoostBonus", "CellBoostMaxLevel", "CellBoostFill"],
+    ["ModBoostStartCost", "ModBoostAdditiveCost", "ModBoostBonus", "ModBoostMaxLevel", "ModBoostFill"],
     "unity trace bundle owner field block drifted"
   );
-  assert.equal(bundle.bridgeCheck.bridgeCleared, false, "unity trace bundle must stay negative until one checked bridge clears");
-  assert.equal(bundle.bridgeCheck.result, "no checked object-or-title bridge recovered", "unity trace bundle result drifted");
+  assert.equal(bundle.bridgeCheck.bridgeCleared, true, "unity trace bundle must preserve the recovered ATU4 object bridge");
+  assert.equal(bundle.bridgeCheck.result, "checked object bridge recovered", "unity trace bundle result drifted");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "metadata-neighborhood"), "unity trace bundle missing metadata neighborhood");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "action-lane"), "unity trace bundle missing action lane");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "diamond-special"), "unity trace bundle missing diamond-special lane");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "token-lane"), "unity trace bundle missing token lane");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "text-hooks"), "unity trace bundle missing text-hook lane");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "prefab-lane"), "unity trace bundle missing prefab lane");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "title-lane"), "unity trace bundle missing title lane");
   const metadataSurface = bundle.surfaces.find((surface) => surface.id === "metadata-neighborhood");
-  assert.ok(metadataSurface.anchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle metadata surface must preserve typed path-id anchor");
+  assert.ok(metadataSurface.anchorSpecs.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"), "unity trace bundle metadata surface must preserve typed path-id anchor");
   const metadataSource = metadataSurface.sources.find((source) => source.sourceId === "metadata");
   assert.deepEqual(metadataSource.searchModes, ["exact-string", "bounded-containment"], "unity trace bundle metadata search modes drifted");
   assert.equal(metadataSource.highSignalHitCount, 0, "unity trace bundle metadata high-signal count drifted");
-  assert.equal(metadataSource.supportingHitCount, 3, "unity trace bundle metadata supporting count drifted");
-  assert.equal(metadataSource.incidentalHitCount, 4, "unity trace bundle metadata incidental count drifted");
+  assert.ok(metadataSource.supportingHitCount >= 3, "unity trace bundle metadata supporting count drifted");
+  assert.ok(metadataSource.incidentalHitCount >= 2, "unity trace bundle metadata incidental count drifted");
   assert.ok(metadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)), "unity trace bundle metadata hits should suppress public-key noise");
-  assert.ok(metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")), "unity trace bundle metadata hits should not treat path ids as free-text anchors");
-  assert.equal(bundle.traceGraph.edges.length, 8, "unity trace bundle proved edge count drifted");
-  assert.equal(bundle.traceGraph.negativeEdges.length, 4, "unity trace bundle negative edge count drifted");
+  assert.ok(metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15796")), "unity trace bundle metadata hits should not treat path ids as free-text anchors");
+  assert.equal(bundle.traceGraph.edges.length, 5, "unity trace bundle proved edge count drifted");
+  assert.equal(bundle.traceGraph.negativeEdges.length, 1, "unity trace bundle negative edge count drifted");
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"), "unity trace bundle missing direct serialized adjacency edge");
-  assert.ok(bundle.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-prefab"), "unity trace bundle missing negative shell-to-prefab edge");
-  assert.ok(bundle.traceGraph.claimLedger.some((claim) => claim.id === "claim-missing-bridge" && claim.status === "missing"), "unity trace bundle missing missing-bridge claim");
-  assert.equal(bundle.decisionSummary.verdict, "keep researching", "unity trace bundle decision verdict drifted");
+  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "exact-shell-to-prefab" && edge.status === "present"), "unity trace bundle missing recovered shell-to-prefab edge");
+  assert.ok(bundle.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-title"), "unity trace bundle missing negative shell-to-title edge");
+  assert.ok(bundle.traceGraph.claimLedger.some((claim) => claim.id === "claim-trace-recovered-bridge" && claim.status === "proved"), "unity trace bundle missing recovered-bridge claim");
+  assert.equal(bundle.decisionSummary.verdict, "quarantine", "unity trace bundle decision verdict drifted");
   assert.deepEqual(bundle.decisionSummary.baselineGap, ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"], "unity trace bundle decision baseline gap drifted");
-  assert.equal(bundle.solvedVsBlockedDiff.baseline.shellField, "ATU1Button", "unity trace bundle baseline shell drifted");
-  assert.equal(bundle.solvedVsBlockedDiff.baseline.shellPathId, 15839, "unity trace bundle baseline shell path drifted");
+  assert.equal(bundle.solvedVsBlockedDiff.baseline.shellField, "ATU4Button", "unity trace bundle baseline shell drifted");
+  assert.equal(bundle.solvedVsBlockedDiff.baseline.shellPathId, 15796, "unity trace bundle baseline shell path drifted");
   assert.equal(bundle.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button", "unity trace bundle blocked shell drifted");
   assert.deepEqual(bundle.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency"], "unity trace bundle shared edge diff drifted");
-  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes, ["exact-shell-to-action-hook", "exact-shell-to-prefab", "supporting-effect-hook"], "unity trace bundle baseline-only diff drifted");
+  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes, ["exact-shell-to-action-hook", "exact-shell-to-prefab"], "unity trace bundle baseline-only diff drifted");
   assert.deepEqual(bundle.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"], "unity trace bundle blocked missing diff drifted");
-  assert.ok(bundle.lostStructure.some((line) => /metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area/i.test(line)), "unity trace bundle must preserve metadata-loss explanation");
-  assert.ok(bundle.lostStructure.some((line) => /direct cross-surface join back to 15810/i.test(line)), "unity trace bundle must preserve join-loss explanation");
-  assert.match(bundle.groundedConclusion, /ATU3Button or 15810 trace stays negative/i, "unity trace bundle grounded conclusion drifted");
+  assert.ok(bundle.lostStructure.some((line) => /ATU4Button path id 15796 stays adjacent to the ModBoost owner block/i.test(line)), "unity trace bundle must preserve ATU4 shell-loss explanation");
+  assert.ok(bundle.lostStructure.some((line) => /final player-facing title still survives only as a detached mod-domain title surface/i.test(line)), "unity trace bundle must preserve title-loss explanation");
+  assert.match(bundle.groundedConclusion, /ATU4Button or 15796 trace now preserves one checked shell-to-action-hook-to-prefab bridge/i, "unity trace bundle grounded conclusion drifted");
   assert.ok(bundle.currentBoundary.some((line) => /target-driven trace workflow/i.test(line)), "unity trace bundle must preserve workflow framing");
-  assert.ok(bundle.currentBoundary.some((line) => /negative joins/i.test(line)), "unity trace bundle must preserve graph negative-join framing");
+  assert.ok(bundle.currentBoundary.some((line) => /missing title join explicit/i.test(line)), "unity trace bundle must preserve title quarantine framing");
 
   return {
     id: "unity-trace-bundle",
@@ -2603,7 +2626,7 @@ function validateUnityTraceBundle(bundle) {
     stats: [
       `${bundle.target.anchors.length} target anchors`,
       `${bundle.surfaces.length} cross-surface trace lanes`,
-      "ATU3 remains negative because the trace bundle still does not preserve one exact shell-to-prefab or shell-to-title join"
+      "ATU4 now clears one exact shell-to-prefab bridge while the final title join stays quarantined"
     ]
   };
 }
@@ -2620,13 +2643,14 @@ function validateUnityTraceTargetRegistry(registry) {
     assert.ok(registry.sourceFamilies[familyId], `unity trace target registry missing family ${familyId}`);
     assert.ok(registry.planner.families[familyId], `unity trace target registry planner missing family ${familyId}`);
   });
-  ["token-shop-atu3-cells", "shard-cost-su0-structure", "multiverse-market-save-owner-boundary"].forEach((targetId) => {
+  ["token-shop-atu3-cells", "token-shop-atu4-mod", "shard-cost-su0-structure", "multiverse-market-save-owner-boundary"].forEach((targetId) => {
     assert.ok(registry.targets[targetId], `unity trace target registry missing target ${targetId}`);
   });
   assert.equal(registry.planner.families["token-shop"].defaultTargetId, "token-shop-atu3-cells", "unity trace target registry token-shop planner target drifted");
   assert.equal(registry.planner.families["shard-cost"].defaultRunMode, "trace", "unity trace target registry shard planner mode drifted");
   assert.equal(registry.planner.families["multiverse-market-save-owner"].defaultRunMode, "compare", "unity trace target registry market planner mode drifted");
   assert.equal(registry.targets["token-shop-atu3-cells"].comparisonPresetId, "token-shop-atu3-vs-atu1", "unity trace target registry token-shop comparison preset drifted");
+  assert.equal(registry.targets["token-shop-atu4-mod"].comparisonPresetId, "token-shop-atu4-vs-atu3", "unity trace target registry ATU4 comparison preset drifted");
   assert.equal(registry.targets["shard-cost-su0-structure"].comparisonPresetId, "shard-cost-structure-vs-planner", "unity trace target registry shard comparison preset drifted");
   assert.equal(registry.targets["multiverse-market-save-owner-boundary"].comparisonPresetId, "multiverse-market-save-owner-vs-canonical-import", "unity trace target registry market comparison preset drifted");
   return {

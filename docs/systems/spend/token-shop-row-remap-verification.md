@@ -23,6 +23,11 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - the checked `level0` prefab roster separately preserves `NewTokenUPGPrefab.T1.MK1Booster`.
   - taken together, that is enough to ground `ATU5Button` to `NewTokenUPGPrefab.T1.MK1Booster` without forcing a full T1 generator-booster lane remap or inventing a final player-facing row title.
 - One more bounded shell-to-prefab bridge also clears:
+  - `ATU4Button` sits directly after the exact `ModBoost*` owner fields in the checked `TokenShop` payload alignment.
+  - checked action-lane clues preserve the matching direct buy hook through `BuyModBoost`.
+  - the checked prefab roster separately preserves `NewTokenUPGPrefab.T1.ModPointsBooster`.
+  - taken together, that is enough to ground `ATU4Button` to `NewTokenUPGPrefab.T1.ModPointsBooster` without forcing a full mod-domain title remap or inventing a final player-facing row title.
+- One more bounded shell-to-prefab bridge also clears:
   - `ATU6Button` sits directly after the exact `MK2TokenBoost*` owner fields in the checked `TokenShop` payload alignment.
   - checked action-lane clues preserve the matching direct buy hook through `BuyMK2TokenBoost`.
   - the checked `level0` prefab roster separately preserves `NewTokenUPGPrefab.T1.MK2Booster`.
@@ -54,9 +59,10 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 ## Grounded conclusion
 
 - The repo can now say more than “ATU is unnamed.”
-- Four exact shell-side bridges are now recovered:
+- Five exact shell-side bridges are now recovered:
   - `ATU1Button` -> TokenShop `TokenBoost` / `NewTokenUPGPrefab.T1.TokensBoost`
   - `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`
+  - `ATU4Button` -> `NewTokenUPGPrefab.T1.ModPointsBooster`
   - `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster`
   - `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster`
 - One exact shell-to-prefab-to-final-title chain is now recovered:
@@ -78,15 +84,16 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
     - the diamond-special `CellsBoost` prefab and `>Diamond Upgrade 10 - CellsBoost` title remain a separate diamond lane
     - the token-side `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` clues remain a separate token lane
     - none of those checked surfaces crosses back to `ATU3Button` path id `15810`
-  - `ATU5` and `ATU6` clearing do not change that rule for the rest of the lane:
-    - they clear because one exact owner-field block, one exact buy hook, and one exact token prefab converge on the same `MK1` or `MK2` family
+  - `ATU4`, `ATU5`, and `ATU6` clearing do not change that rule for the rest of the lane:
+    - they clear because one exact owner-field block, one exact buy hook, and one exact token prefab converge on the same `ModBoost`, `MK1`, or `MK2` family
+    - `ATU4Button` now clears the same shell-to-prefab bar through `BuyModBoost` and `NewTokenUPGPrefab.T1.ModPointsBooster`, but still does not have a checked final player-facing row title
     - the repo now has one checked final title join for `ATU6Button`, but still does not have one for `ATU5Button`
     - the neighboring `MK3` through `MK8` token rows stay unresolved until their own shell joins are checked individually
 
 The remaining missing pieces are still checked joins:
 
 - no checked repo artifact currently ties `ATU1Button` or `ATU2Button` directly to a final player-facing TokenShop row title string
-- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, or `ATU5Button` directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, `ATU4Button`, or `ATU5Button` directly to a final player-facing TokenShop row title string
 - no checked repo artifact currently joins the remaining `ATU*Button` or `ATU*Content` path ids directly to specific `NewTokenUPGPrefab.*` object identities
 - no checked repo artifact currently ties the remaining concrete `ATU` numbers directly to final player-facing TokenShop row titles
 - no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` token-menu or token-bank neighborhood to a specific `ATU` row number
@@ -118,12 +125,14 @@ Because those joins are still missing, the repo should not:
   - the checked diamond-special surface still preserves `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost` as a separate lane
   - the checked token-side surface still preserves `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` as a separate lane
   - none of those exact candidate surfaces yields one concrete object or title join back to `ATU3Button` path id `15810`
-- The upgraded join-preservation probe also now makes the current extraction loss explicit instead of scattering it across multiple artifacts:
+- The upgraded join-preservation probe also now makes the current extraction state explicit instead of scattering it across multiple artifacts:
+  - the generated `data/unity-trace-bundle.json` artifact now preserves one checked `ATU4Button` -> `BuyModBoost` -> `NewTokenUPGPrefab.T1.ModPointsBooster` bridge inside the generic `probe:trace` workflow
+  - that same trace still keeps the missing `ATU4Button` final-title join explicit, because the surviving `Token Ultima: MP` title clue remains detached from the shell-side row neighborhood
   - the shell-side owner window still survives only in `data/token-shop-values.json`
   - the `BuyCellBoost` action cluster still survives only in `data/daily-tokenium-lane-probe.json`
   - the surviving prefab identities still survive only as detached `lm244`, `UABEA`, or `unity-probe` hits
   - the surviving player-facing titles and generic `SetAllTokenShopTexts` or `SetTokenTexts` hooks still survive only as detached unity-probe string buckets
-  - the generated `data/unity-trace-bundle.json` artifact now keeps those exact surfaces together for ATU3 inside the generic `probe:trace` workflow, and it still stays negative because no committed source carries one exact shell id together with one exact prefab identity or final title in the same local container
+  - the same generic trace workflow still keeps the older ATU3 cells split negative, because no committed source carries one exact ATU3 shell id together with one exact prefab identity or final title in the same local container
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`

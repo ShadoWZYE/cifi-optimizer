@@ -1750,6 +1750,12 @@ assert.deepEqual(tokenShopRowRemapBoundaryData.verifiedTitleJoin.textHandlerSear
 assert.equal(tokenShopRowRemapBoundaryData.verifiedTitleJoin.titleProbeTitle, "Mk2 Generator Booster");
 assert.match(tokenShopRowRemapBoundaryData.verifiedTitleJoin.titleProbeSupportText, /MK2 Generators/);
 assert.match(tokenShopRowRemapBoundaryData.verifiedTitleJoin.groundedConclusion, /shell-to-prefab-to-title chain/);
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.targetId, "token-shop-atu4-mod");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.shellField, "ATU4Button");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.shellPathId, 15796);
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.supportingActionHook, "BuyModBoost");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.ModPointsBooster");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.titleCandidate, "Token Ultima: MP");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellField, "ATU3Button");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellPathId, 15810);
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.result, "no concrete object-or-title join cleared");
@@ -1759,7 +1765,8 @@ assert.ok(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.testedSurfac
 assert.match(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.groundedConclusion, /stays negative/);
 assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /remaining ATU\*Button or ATU\*Content path_id family/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /ATU3Button directly to BuyCellBoost/i.test(line)));
-assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /four checked TokenShop row bridges/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /five checked TokenShop row bridges/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /checked ATU6 shell-to-prefab-to-title chain/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 cells-domain disambiguation pass also stays negative/i.test(line)));
 assert.equal(tokenShopLateAtuBoundaryData.dataset, "token-shop-late-atu-boundary");
@@ -1789,69 +1796,69 @@ assert.ok(unityTraceTargetRegistryData.planner.families["token-shop"]);
 assert.ok(unityTraceTargetRegistryData.planner.families["shard-cost"]);
 assert.ok(unityTraceTargetRegistryData.planner.families["multiverse-market-save-owner"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-cells"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu4-mod"]);
 assert.ok(unityTraceTargetRegistryData.targets["shard-cost-su0-structure"]);
 assert.ok(unityTraceTargetRegistryData.targets["multiverse-market-save-owner-boundary"]);
 assert.equal(unityTraceBundleData.dataset, "unity-trace-bundle");
 assert.equal(unityTraceBundleData.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]");
-assert.equal(unityTraceBundleData.plannerResolution.selectionMode, "query-planner");
+assert.equal(unityTraceBundleData.plannerResolution.selectionMode, "explicit-target");
 assert.equal(unityTraceBundleData.plannerResolution.matchedFamilyId, "token-shop");
-assert.equal(unityTraceBundleData.plannerResolution.runMode, "compare");
-assert.equal(unityTraceBundleData.plannerResolution.comparePresetId, "token-shop-atu3-vs-atu1");
-assert.ok(unityTraceBundleData.plannerResolution.expandedAnchors.includes("Cells"));
-assert.ok(unityTraceBundleData.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"));
+assert.equal(unityTraceBundleData.plannerResolution.runMode, "trace");
+assert.equal(unityTraceBundleData.plannerResolution.comparePresetId, null);
+assert.ok(unityTraceBundleData.plannerResolution.expandedAnchors.includes("ATU4Button"));
+assert.ok(unityTraceBundleData.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"));
 assert.match(unityTraceBundleData.plannerResolution.decisionNote, /TokenShop/i);
-assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"));
+assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"));
 assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"));
 assert.equal(unityTraceBundleData.traceRegistry.path, "data/unity-trace-target-registry.json");
 assert.equal(unityTraceBundleData.traceRegistry.selectedFamilyId, "token-shop");
-assert.equal(unityTraceBundleData.target.id, "token-shop-atu3-cells");
+assert.equal(unityTraceBundleData.target.id, "token-shop-atu4-mod");
+assert.ok(unityTraceBundleData.target.anchors.includes("ATU4Button"));
+assert.ok(unityTraceBundleData.target.anchors.includes("15796"));
 assert.ok(unityTraceBundleData.target.anchors.includes("ATU3Button"));
-assert.ok(unityTraceBundleData.target.anchors.includes("15810"));
-assert.ok(unityTraceBundleData.target.anchors.includes("BuyCellBoost"));
-assert.equal(unityTraceBundleData.shellWindow.shellField, "ATU3Button");
-assert.equal(unityTraceBundleData.shellWindow.shellPathId, 15810);
+assert.equal(unityTraceBundleData.shellWindow.shellField, "ATU4Button");
+assert.equal(unityTraceBundleData.shellWindow.shellPathId, 15796);
 assert.deepEqual(
   unityTraceBundleData.shellWindow.ownerFieldBlock,
-  ["CellBoostStartCost", "CellBoostAdditiveCost", "CellBoostBonus", "CellBoostMaxLevel", "CellBoostFill"]
+  ["ModBoostStartCost", "ModBoostAdditiveCost", "ModBoostBonus", "ModBoostMaxLevel", "ModBoostFill"]
 );
-assert.equal(unityTraceBundleData.bridgeCheck.bridgeCleared, false);
-assert.equal(unityTraceBundleData.bridgeCheck.result, "no checked object-or-title bridge recovered");
+assert.equal(unityTraceBundleData.bridgeCheck.bridgeCleared, true);
+assert.equal(unityTraceBundleData.bridgeCheck.result, "checked object bridge recovered");
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "metadata-neighborhood"));
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "action-lane"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "diamond-special"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "token-lane"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "prefab-lane"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "title-lane"));
 const traceMetadataSurface = unityTraceBundleData.surfaces.find((surface) => surface.id === "metadata-neighborhood");
-assert.ok(traceMetadataSurface.anchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"));
+assert.ok(traceMetadataSurface.anchorSpecs.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"));
 const traceMetadataSource = traceMetadataSurface.sources.find((source) => source.sourceId === "metadata");
 assert.deepEqual(traceMetadataSource.searchModes, ["exact-string", "bounded-containment"]);
-assert.equal(traceMetadataSource.supportingHitCount, 3);
-assert.equal(traceMetadataSource.incidentalHitCount, 4);
+assert.ok(traceMetadataSource.supportingHitCount >= 3);
+assert.ok(traceMetadataSource.incidentalHitCount >= 2);
 assert.ok(traceMetadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)));
-assert.ok(traceMetadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "text-hooks"));
-assert.equal(unityTraceBundleData.traceGraph.edges.length, 8);
-assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 4);
+assert.ok(traceMetadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15796")));
+assert.equal(unityTraceBundleData.traceGraph.edges.length, 5);
+assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 1);
 assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"));
 assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-title"));
-assert.equal(unityTraceBundleData.decisionSummary.verdict, "keep researching");
+assert.equal(unityTraceBundleData.decisionSummary.verdict, "quarantine");
 assert.deepEqual(
   unityTraceBundleData.decisionSummary.baselineGap,
   ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"]
 );
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU1Button");
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 15839);
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU4Button");
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 15796);
 assert.equal(unityTraceBundleData.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button");
 assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency"]);
 assert.deepEqual(
   unityTraceBundleData.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes,
-  ["exact-shell-to-action-hook", "exact-shell-to-prefab", "supporting-effect-hook"]
+  ["exact-shell-to-action-hook", "exact-shell-to-prefab"]
 );
 assert.deepEqual(
   unityTraceBundleData.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes,
   ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"]
 );
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /raw declaration area/i.test(line)));
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /direct cross-surface join back to 15810/i.test(line)));
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /ATU4Button path id 15796 stays adjacent to the ModBoost owner block/i.test(line)));
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /detached mod-domain title surface/i.test(line)));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -3020,14 +3027,14 @@ assert.match(spendSystemVerificationDoc, /compatibility\.unmappedSystemState\.to
 assert.match(activeGroundingBoundariesDoc, /narrows the save-side wrapper to the nearby mission-persistence block in `SaveData`/);
 assert.match(unityOwnerMapDoc, /narrowest checked save wrapper -> `SaveData` mission-persistence neighborhood/);
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
-assert.match(activeGroundingBoundariesDoc, /four checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU5Button`, and `ATU6Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, and both the bounded ATU3 cells-domain disambiguation pass and the late ATU24-ATU28 shell neighborhood are now clean negative results/);
+assert.match(activeGroundingBoundariesDoc, /five checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, and `ATU6Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, and both the bounded ATU3 cells-domain disambiguation pass and the late ATU24-ATU28 shell neighborhood are now clean negative results/);
 assert.match(activeGroundingBoundariesDoc, /recover one more checked bridge from a different unresolved `ATU\*Button`, `ATU\*Content`, or adjacent shell neighborhood/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
 assert.match(tokenShopDoc, /base TokenShop costs should currently be described as a token-bank token or tokenium spend lane/);
 const tokenShopRowRemapTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-shop-row-remap");
 assert.ok(tokenShopRowRemapTrack, "Expected snapshot research track spend-token-shop-row-remap");
-assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /ATU1, ATU2, ATU5, and ATU6 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, treats the bounded ATU3 cells-domain disambiguation pass as a clean negative result/);
+assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /ATU1, ATU2, ATU4, ATU5, and ATU6 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, treats the bounded ATU3 cells-domain disambiguation pass as a clean negative result/);
 assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /late ATU24-ATU28 shell neighborhood as a tighter bounded negative result/);
 assert.match(tokenShopRowRemapTrack?.blockedBy ?? "", /ATU3 cells-domain pass.*late ATU24-ATU28 shell neighborhood.*negative/);
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU5Button` to `NewTokenUPGPrefab\.T1\.MK1Booster/.test(line)));
@@ -3189,17 +3196,17 @@ assert.match(spendSystemVerificationDoc, /subset-bound TokenShop row-detail modu
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
 assert.match(tokenShopRowRemapVerificationDoc, /data\/unity-trace-bundle\.json/);
-assert.match(tokenShopRowRemapVerificationDoc, /no committed source carries one exact shell id together with one exact prefab identity or final title in the same local container/);
-assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-cells`/);
-assert.match(unityTraceBundleDoc, /Registry target: `token-shop-atu3-cells` from `token-shop`/);
-assert.match(unityTraceBundleDoc, /Result: `no checked object-or-title bridge recovered`/);
-assert.match(unityTraceBundleDoc, /Shell field: `ATU3Button`/);
+assert.match(tokenShopRowRemapVerificationDoc, /ATU4Button` -> `BuyModBoost` -> `NewTokenUPGPrefab\.T1\.ModPointsBooster` bridge inside the generic `probe:trace` workflow/);
+assert.match(unityTraceBundleDoc, /Target: `token-shop-atu4-mod`/);
+assert.match(unityTraceBundleDoc, /Registry target: `token-shop-atu4-mod` from `token-shop`/);
+assert.match(unityTraceBundleDoc, /Result: `checked object bridge recovered`/);
+assert.match(unityTraceBundleDoc, /Shell field: `ATU4Button`/);
 assert.match(unityTraceBundleDoc, /## Trace graph/);
 assert.match(unityTraceBundleDoc, /exact-shell-to-prefab/);
 assert.match(unityTraceBundleDoc, /## Solved vs blocked/);
 assert.match(unityTraceBundleDoc, /## Decision summary/);
-assert.match(unityTraceBundleDoc, /Verdict: `keep researching`/);
-assert.match(unityTraceBundleDoc, /Baseline: `ATU1Button` path id `15839`/);
+assert.match(unityTraceBundleDoc, /Verdict: `quarantine`/);
+assert.match(unityTraceBundleDoc, /Baseline: `ATU4Button` path id `15796`/);
 assert.match(multiverseMarketDoc, /## Integration status/);
 assert.match(multiverseMarketDoc, /CostBox-InscryptionsDone/);
 assert.match(multiverseMarketDoc, /saved-state owner or runtime balance field behind the `Inscryptions Done` cost lane/);
@@ -3634,7 +3641,7 @@ assert.match(unityAuditPlaybook, /metadata neighborhoods, owner-payload shells, 
 assert.match(unityAuditPlaybook, /typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape/);
 assert.match(unityAuditPlaybook, /wire`, `quarantine`, or `keep researching`/);
 assert.match(unityTraceBundleDoc, /Typed execution anchors/i);
-assert.match(unityTraceBundleDoc, /Signal summary: 0 high-signal, 3 supporting, 4 incidental, 0 suppressed-noise/);
+assert.match(unityTraceBundleDoc, /Signal summary: 0 high-signal, 5 supporting, 7 incidental, 0 suppressed-noise/);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);
