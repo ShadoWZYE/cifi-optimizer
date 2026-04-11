@@ -263,6 +263,14 @@ Superseded parent:
   - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math, next-purchase recommendation rules
   - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
   - smallest shippable slice: a separate Overview module that keeps the fixed grounded row order `ATU1`, `ATU2`, `ATU5`, `ATU6`, then shows each row's grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change without optimizer claims or canonical `ATU*Level` promotion
+- `progression-token-shop-editor-first-slice`
+  - status: `archived`
+  - goal: move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop editor slice
+  - user question: `What do the grounded upgrades I can already inspect actually do at my current level and on the next level?`
+  - minimum required inputs: checked TokenShop row-remap subset for `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`, local non-canonical editor levels for that same subset, compatibility import as prefill only, and checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields for those same rows
+  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math, next-purchase recommendation rules
+  - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
+  - smallest shippable slice: a dedicated TokenShop category under the Progression selector that keeps row order fixed to `ATU1`, `ATU2`, `ATU5`, `ATU6`, saves local checked-row current levels under a non-canonical planner path, uses compatibility import only as prefill, and shows grounded identity, next known cost, known max-level status, and current-vs-next extracted bonus-step change without optimizer claims or canonical `ATU*Level` promotion
 - `spend-planner-from-extracted-data`
   - status: `archived`
   - reason: it mixed multiple independent spend blockers that now have distinct exit conditions and should no longer share one queue item

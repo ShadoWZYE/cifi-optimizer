@@ -40,7 +40,7 @@ Now that the first checked-row affordability preview has shipped, evaluate the n
 - Current true blocker:
   - keeping the row-detail slice subset-bound, fixed-order, and non-optimizer instead of silently widening it into a next-purchase planner
 - Smallest shippable tool slice:
-  - a separate normal app module that shows the checked TokenShop subset, current imported levels for that subset, next known cost, known max-level status, and current-vs-next grounded bonus-step change from shipped TokenShop values data only, with no recommendation math
+  - a first Progression-side TokenShop editor that shows the checked TokenShop subset, keeps local non-canonical current levels for that subset, uses compatibility import only as prefill, and shows next known cost, known max-level status, and current-vs-next grounded bonus-step change from shipped TokenShop values data only, with no recommendation math
 
 ## TokenShop
 
@@ -102,7 +102,8 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - It is safe to preserve raw `ATU1Level` through `ATU28Level` and `Tier2TokensUnlocked` through `Tier5TokensUnlocked` under `compatibility.unmappedSystemState.tokenShop`.
 - It is safe to say the repo now has grounded non-label clues around some `ATU` rows, including token, diamond, daily-token, shard, and late direct-buy hook evidence.
 - It is now also safe to ship one subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset, as long as those rows stay compatibility-only and the module reads imported subset levels plus checked row constants only.
-- That checked-row subset is enough to answer one next TokenShop-facing player question by showing row identity, current level, next known cost, known max-level status, and current-vs-next grounded bonus-step change for those rows only, while staying explicit about uncertainty and keeping the rest of the family quarantined.
+- It is now also safe to move that checked-row subset into the Progression area as the first real TokenShop editor slice, as long as local row levels stay non-canonical, compatibility import stays prefill-only, and the rest of the family remains quarantined.
+- That checked-row subset is enough to answer one next TokenShop-facing player question by showing row identity, local current level or compatibility-prefill fallback, next known cost, known max-level status, and current-vs-next grounded bonus-step change for those rows only, while staying explicit about uncertainty and keeping the rest of the family quarantined.
 - It is not yet safe to generate next-buy recommendations from player token budgets alone.
 - It is not yet safe to promote raw `ATU*Level` save fields into canonical `state.playerProfile` fields until the row-by-row remap is grounded.
 - The rest of the `ATU*Level` family should stay quarantined even when that small preview is shown; unresolved row identities are still a subset-remap blocker, not a reason to force a full-lane remap.

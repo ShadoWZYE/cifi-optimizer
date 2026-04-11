@@ -18,7 +18,8 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
     totalShardMilestoneLevels: [["planning", "shards", "totalMilestoneLevels"], ["systems", "shards", "totalMilestoneLevels"], ["totalShardMilestoneLevels"]],
     shardFocusMilestoneId: [["planning", "shards", "focusMilestoneId"], ["systems", "shards", "focusMilestoneId"], ["planning", "shardFocusMilestoneId"], ["shardFocusMilestoneId"]],
     shardFocusMilestoneLevel: [["planning", "shards", "focusMilestoneLevel"], ["systems", "shards", "focusMilestoneLevel"], ["planning", "shardFocusMilestoneLevel"], ["shardFocusMilestoneLevel"]],
-    shardObservedLevelsByMilestone: [["planning", "shards", "observedLevelsByMilestone"], ["systems", "shards", "observedLevelsByMilestone"]]
+    shardObservedLevelsByMilestone: [["planning", "shards", "observedLevelsByMilestone"], ["systems", "shards", "observedLevelsByMilestone"]],
+    tokenShopCheckedSubsetLevels: [["planning", "tokenShop", "checkedSubsetLevels"]]
   },
   externalModel: {
     shipPower: [["externalModels", "shipPlanner", "summary", "power"], ["systems", "ship", "power"]],
@@ -61,6 +62,7 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
 
 const PROFILE_CONFIDENCE_VALUES = new Set(["manual", "mixed", "verified"]);
 const FARMING_FOCUS_VALUES = new Set(["credits", "alloy", "research", "shards"]);
+const TOKEN_SHOP_CHECKED_SUBSET_FIELDS = ["ATU1Level", "ATU2Level", "ATU5Level", "ATU6Level"];
 const MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN = /^IS(?:[1-9]|[1-9]\d|10\d|110)Level$/u;
 const MULTIVERSE_MARKET_TRADE_COUNTER_PATTERN = /^(?:Esoteric|Necrum)R[1-9]Trades$/u;
 const MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS = {
@@ -291,6 +293,21 @@ function coerceObservedShardLevels(value) {
   }, {});
 }
 
+function createTokenShopCheckedSubsetState() {
+  return Object.fromEntries(TOKEN_SHOP_CHECKED_SUBSET_FIELDS.map((field) => [field, null]));
+}
+
+function coerceTokenShopCheckedSubsetState(value) {
+  const base = createTokenShopCheckedSubsetState();
+  if (!isRecord(value)) {
+    return base;
+  }
+  TOKEN_SHOP_CHECKED_SUBSET_FIELDS.forEach((field) => {
+    base[field] = coerceNullableNumber(value[field]);
+  });
+  return base;
+}
+
 function coerceQuarantinedShardMilestoneState(value) {
   const importedState = isRecord(value?.importedState) ? cloneValue(value.importedState) : (isRecord(value) ? cloneValue(value) : null);
   if (!importedState) {
@@ -391,6 +408,9 @@ export function createDefaultPlayerProfile(baselineShipPlayerState = {}) {
         focusMilestoneId: null,
         focusMilestoneLevel: null,
         observedLevelsByMilestone: {}
+      },
+      tokenShop: {
+        checkedSubsetLevels: createTokenShopCheckedSubsetState()
       }
     },
     notes: {
@@ -465,6 +485,9 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   normalized.planning.shards.focusMilestoneLevel = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel));
   normalized.planning.shards.observedLevelsByMilestone = coerceObservedShardLevels(
     readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardObservedLevelsByMilestone)
+  );
+  normalized.planning.tokenShop.checkedSubsetLevels = coerceTokenShopCheckedSubsetState(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.tokenShopCheckedSubsetLevels)
   );
   if (
     normalized.planning.shards.focusMilestoneId

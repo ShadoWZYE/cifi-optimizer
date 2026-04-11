@@ -321,7 +321,7 @@ assert.match(appJs, /Forked from the research-only spend-planner lane into a nor
 assert.match(appJs, /Non-canonical values shown here are explicitly labeled as boundary-backed or compatibility-only/);
 assert.match(appJs, /Canonical spend inputs/);
 assert.match(appJs, /Boundary-backed spend evidence/);
-assert.match(appJs, /Compatibility-only TokenShop subset boundary/);
+assert.match(appJs, /TokenShop progression handoff/);
 assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Compatibility-only Emporium preview boundary/);
 assert.match(appJs, /Why recommendations stay unavailable/);
@@ -340,21 +340,23 @@ assert.match(appJs, /boundary\?\.adjacentFollowUp\?\.recoveredAdditionalBridge\?
 assert.match(appJs, /boundary\?\.recoveredBridge\?\.prefabIdentity \|\| "NewTokenUPGPrefab\.T1\.DiamondBoost"/);
 assert.match(appJs, /boundary\?\.boundedRecoveredBridge\?\.prefabIdentity \|\| "NewTokenUPGPrefab\.T1\.MK1Booster"/);
 assert.match(appJs, /boundary\?\.verifiedTitleJoin\?\.titleProbeTitle \|\| boundary\?\.boundedRecoveredBridgeFollowUp\?\.prefabIdentity \|\| "Mk2 Generator Booster"/);
-assert.match(appJs, /Compatibility-only subset level: \$\{row\.identity\} \(\$\{row\.slot\}\)/);
-assert.match(appJs, /function renderTokenShopGroundedSubsetAffordability/);
+assert.match(appJs, /function renderTokenShopProgressionEditor/);
 assert.match(appJs, /function getTokenShopGroundedSubsetRowDetailSummary/);
 assert.match(appJs, /function formatTokenShopBonusStep/);
-assert.match(appJs, /Grounded TokenShop subset row details/);
-assert.match(appJs, /Player question: What do the grounded upgrades I can already inspect actually do at my current level and on the next level\?/);
+assert.match(appJs, /Grounded TokenShop checked-row editor/);
+assert.match(appJs, /Default level 0/);
+assert.match(appJs, /Prefill local rows from compatibility import/);
 assert.match(appJs, /Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU5, ATU6\./);
 assert.match(appJs, /This module is explicitly non-optimizer\./);
 assert.match(appJs, /No canonical ATU promotion/);
 assert.match(appJs, /Known cost inputs: start \$\{formatBoundaryValue\(row\.startCost\)\} \+ additive \$\{formatBoundaryValue\(row\.additiveCost\)\} x current level\./);
 assert.match(appJs, /Current vs next bonus/);
 assert.match(appJs, /adds one more extracted bonus step only/);
-assert.match(html, /id="overviewTokenShopAffordability"/);
-assert.match(appJs, /Only rows with checked remap-boundary joins are surfaced here/);
-assert.match(appJs, /TokenShop current row levels/);
+assert.match(html, /id="tokenShopProgressionStatus"/);
+assert.match(appJs, /TokenShop keeps its own Progression category so it does not get mixed into the Shard Mining surface/);
+assert.match(appJs, /TokenShop \(\$\{counts\.tokenShop\}\)/);
+assert.match(appJs, /Checked subset only\. Local row levels drive this editor, compatibility import is prefill only/);
+assert.match(appJs, /TokenShop recommendations beyond the checked editor subset/);
 assert.match(appJs, /token-bank cap and claimable tokens/i);
 assert.match(appJs, /generic ClaimableTokenium evidence surfaced/);
 assert.match(appJs, /Daily Tokenium cap and ready or claimable state/);
@@ -369,7 +371,7 @@ assert.match(appJs, /Compatibility-only preview labeled/);
 assert.match(appJs, /Uncertainty visible/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /function renderSpendPlannerResearchForkNote/);
-assert.match(appJs, /The Overview page now keeps two separate spend-side user surfaces: one descriptive boundary snapshot and one grounded TokenShop checked-row detail tool/);
+assert.match(appJs, /The Overview page now keeps the descriptive spend boundary only, while the first real TokenShop-facing checked-row editor slice now lives on the Progression page/);
 assert.match(appJs, /function getRecommendationExplainabilitySummary/);
 assert.match(appJs, /function getRecommendationContractSummary/);
 assert.match(appJs, /function getRecommendationExplainabilityAudit/);
@@ -499,6 +501,12 @@ const expectedBundledDatasetIds = [
 
 const defaultProfile = createDefaultPlayerProfile();
 assert.deepEqual(defaultProfile.planning.shards.observedLevelsByMilestone, {});
+assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetLevels, {
+  ATU1Level: null,
+  ATU2Level: null,
+  ATU5Level: null,
+  ATU6Level: null
+});
 assert.deepEqual(defaultProfile.externalModels.communityTools.shipOptimizer, {});
 assert.deepEqual(defaultProfile.externalModels.communityTools.shardOptimizer, {});
 assert.deepEqual(defaultProfile.externalModels.communityTools.modTreeOptimizer, {});
@@ -545,6 +553,10 @@ assert.deepEqual(
 );
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel.some((path) => path.join(".") === "systems.shards.focusMilestoneLevel"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.planner.shardObservedLevelsByMilestone.some((path) => path.join(".") === "systems.shards.observedLevelsByMilestone"));
+assert.deepEqual(
+  PLAYER_PROFILE_IMPORT_ALIASES.planner.tokenShopCheckedSubsetLevels.map((path) => path.join(".")),
+  ["planning.tokenShop.checkedSubsetLevels"]
+);
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState.some((path) => path.join(".") === "compatibility.unmappedSystemState.shardMilestoneState"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState.some((path) => path.join(".") === "systems.shardMilestones"));
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState.some((path) => path.join(".") === "externalModels.shipPlanner.communityToolState"));
@@ -554,8 +566,8 @@ assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.some((
 assert.ok(PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarketStateClues.some((path) => path.join(".") === "InscryptionsDone"));
 assert.equal(playerProfileAliasAuditData.version, "v1");
 assert.equal(playerProfileAliasAuditData.groupCount, 7);
-assert.equal(playerProfileAliasAuditData.aliasCount, 33);
-assert.equal(playerProfileAliasAuditData.acceptedPathCount, 84);
+assert.equal(playerProfileAliasAuditData.aliasCount, 34);
+assert.equal(playerProfileAliasAuditData.acceptedPathCount, 85);
 assert.deepEqual(
   playerProfileAliasAuditData.groups.map((group) => group.id),
   ["meta", "canonical", "planner", "externalModel", "experimental", "compatibility", "shipCalibration"]
@@ -2087,6 +2099,27 @@ withRequiredValue(tokenShopRowDetailSliceTrack, "expected TokenShop row-detail s
     "expected TokenShop row-detail slice track to keep broader planner behavior blocked"
   );
 });
+const tokenShopProgressionEditorTrack = snapshot.researchTracks.find((track) => track.id === "progression-token-shop-editor-first-slice");
+withRequiredValue(tokenShopProgressionEditorTrack, "expected Progression TokenShop editor first slice track", (track) => {
+  assert.equal(track.status, "archived");
+  assert.match(track.goal, /Progression-side TokenShop editor slice/i);
+  assert.match(track.currentSlice, /planning\.tokenShop\.checkedSubsetLevels\.\*/);
+  assert.match(track.currentSlice, /compatibility\.unmappedSystemState\.tokenShop\.\*` as prefill only/);
+  assert.match(track.exitCondition, /first real TokenShop-facing editor slice lives under Progression/i);
+  assert.match(track.smallestShippableSlice, /persists local checked-row levels under a non-canonical planning path/);
+  assert.ok(
+    track.completedSteps.some((step) => /Move the checked TokenShop subset UI out of the Overview-bound spend boundary panel/.test(step)),
+    "expected Progression TokenShop editor slice track to record the surface move"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /level-1 and other locally entered checked-row values visible/.test(step)),
+    "expected Progression TokenShop editor slice track to record local row visibility"
+  );
+  assert.ok(
+    track.verified.some((line) => /Local checked-row levels under `planning\.tokenShop\.checkedSubsetLevels\.\*` stay non-canonical/.test(line)),
+    "expected Progression TokenShop editor slice track to preserve the non-canonical local editor boundary"
+  );
+});
 const tokenBankOwnerTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-bank-state-owner");
 withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", (track) => {
   assert.equal(track.status, "active");
@@ -3091,9 +3124,9 @@ assert.doesNotMatch(html, /<label for="shardRatePerHour">Shard income \/ hour<\/
 assert.match(html, /Profile readiness/);
 assert.doesNotMatch(html, /Rank shard milestones/);
 assert.match(html, /Shard milestones \(disabled pending verified schema\)/);
-assert.match(html, /Shard Mining and Loop Prestige/);
+assert.match(html, /Shard Mining, Loop Prestige, and TokenShop/);
 assert.match(html, /Progression controls/);
-assert.match(html, /Choose a progression view/);
+assert.match(html, /Choose a progression category/);
 assert.doesNotMatch(html, /Refresh progression/);
 assert.match(html, /id="progressionSubsystemToggle"/);
 assert.doesNotMatch(html, /id="progressionCalibrationPanel"/);
