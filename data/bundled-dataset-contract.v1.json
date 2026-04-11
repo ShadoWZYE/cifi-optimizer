@@ -386,6 +386,14 @@
       ]
     },
     {
+      "id": "unity-trace-target-registry",
+      "label": "Unity trace target registry",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/unity-trace-target-registry.json"
+      ]
+    },
+    {
       "id": "unity-trace-bundle",
       "label": "Unity trace bundle",
       "classification": "extracted-mechanics",

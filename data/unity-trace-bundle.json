@@ -12,6 +12,26 @@
     "targetResolution": "checked repo-local target preset plus anchor list",
     "readsCommittedSourcesOnly": true
   },
+  "traceRegistry": {
+    "path": "data/unity-trace-target-registry.json",
+    "selectedTargetId": "token-shop-atu3-cells",
+    "selectedFamilyId": "token-shop",
+    "requiredSourceFamilies": [
+      "token-shop"
+    ],
+    "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
+    "blockedTargetId": "token-shop-atu3-cells",
+    "comparisonPreset": {
+      "label": "TokenShop ATU1 solved bridge vs ATU3 blocked trace",
+      "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "summaryFocus": [
+        "exact shell-to-action-hook join",
+        "exact shell-to-prefab join",
+        "exact shell-to-title join"
+      ]
+    }
+  },
   "sources": {
     "metadata": "workbench/apk/base/global-metadata.dat",
     "tokenShopExtract": "data/token-shop-values.json",
@@ -25,47 +45,67 @@
     {
       "sourceId": "metadata",
       "path": "workbench/apk/base/global-metadata.dat",
+      "familyId": "token-shop",
+      "familyLabel": "TokenShop",
       "role": "Preserves raw declaration-side string neighborhoods from global-metadata.dat."
     },
     {
       "sourceId": "tokenShopExtract",
       "path": "data/token-shop-values.json",
+      "familyId": "token-shop",
+      "familyLabel": "TokenShop",
       "role": "Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser."
     },
     {
       "sourceId": "tokenShopRowRemapBoundary",
       "path": "data/token-shop-row-remap-boundary.json",
+      "familyId": "token-shop",
+      "familyLabel": "TokenShop",
       "role": "Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing."
     },
     {
       "sourceId": "dailyTokeniumLaneProbe",
       "path": "data/daily-tokenium-lane-probe.json",
+      "familyId": "token-shop",
+      "familyLabel": "TokenShop",
       "role": "Preserves named action-hook neighborhoods from the committed targeted string probe outputs."
     },
     {
       "sourceId": "uabeaProbe",
       "path": "data/uabea-probe-report.json",
-      "role": "Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities."
+      "familyId": "token-shop",
+      "familyLabel": "TokenShop",
+      "role": "Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities or typed field tables."
     },
     {
       "sourceId": "unityProbe",
       "path": "data/unity-probe-report.json",
+      "familyId": "token-shop",
+      "familyLabel": "TokenShop",
       "role": "Preserves broader committed unity string buckets including title or text-hook surfaces."
     },
     {
       "sourceId": "lm244TargetedProbe",
       "path": "data/lm244-targeted-probe.json",
+      "familyId": "token-shop",
+      "familyLabel": "TokenShop",
       "role": "Preserves targeted string-hit neighborhoods from the local lm244 follow-up probe lane."
     }
   ],
   "target": {
     "id": "token-shop-atu3-cells",
     "label": "TokenShop ATU3 cells split",
+    "familyId": "token-shop",
     "anchors": [
       "ATU3Button",
       "15810"
     ],
-    "joinGoal": "Recover one checked ATU3Button or path id 15810 bridge to one exact prefab identity or final player-facing title."
+    "joinGoal": "Recover one checked ATU3Button or path id 15810 bridge to one exact prefab identity or final player-facing title.",
+    "requiredSourceFamilies": [
+      "token-shop"
+    ],
+    "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
+    "blockedTargetId": "token-shop-atu3-cells"
   },
   "shellWindow": {
     "source": "data/token-shop-values.json",
@@ -2263,6 +2303,33 @@
           }
         ]
       }
+    ]
+  },
+  "decisionSummary": {
+    "verdict": "keep researching",
+    "summary": "The trace still preserves only split cells-domain clues, so keep researching and do not wire or quarantine product behavior from this join.",
+    "provedEdgeCount": 8,
+    "negativeEdgeCount": 4,
+    "baselineGap": [
+      "exact-shell-to-action-hook",
+      "exact-shell-to-prefab",
+      "exact-shell-to-title"
+    ],
+    "supportingEdgeTypes": [
+      "serialized-adjacency",
+      "declaration-neighborhood",
+      "family-action-cluster",
+      "candidate-prefab-surface",
+      "candidate-title-surface",
+      "candidate-prefab-surface",
+      "candidate-title-surface",
+      "generic-text-hook-cluster"
+    ],
+    "blockedEdgeTypes": [
+      "exact-shell-to-action-hook",
+      "exact-shell-to-prefab",
+      "exact-shell-to-prefab",
+      "exact-shell-to-title"
     ]
   },
   "bridgePromotionRule": "Only promote a remap or owner boundary when one committed artifact preserves an exact shell-side anchor together with one exact prefab identity or final player-facing title in the same local container.",

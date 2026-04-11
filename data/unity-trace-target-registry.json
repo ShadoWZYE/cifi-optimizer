@@ -1,0 +1,302 @@
+{
+  "dataset": "unity-trace-target-registry",
+  "generatedAt": "2026-04-11",
+  "sourceFamilies": {
+    "token-shop": {
+      "label": "TokenShop",
+      "sourceIds": [
+        "metadata",
+        "tokenShopExtract",
+        "tokenShopRowRemapBoundary",
+        "dailyTokeniumLaneProbe",
+        "uabeaProbe",
+        "unityProbe",
+        "lm244TargetedProbe"
+      ]
+    },
+    "shard-cost": {
+      "label": "Shard cost",
+      "sourceIds": [
+        "shardCostModelBoundary",
+        "shardCostParameterProbe",
+        "shardCostMethodProbe",
+        "shardCostNativeProbe",
+        "shardCostFormulaModel",
+        "shardMilestoneSaveOwnerCandidates"
+      ]
+    },
+    "multiverse-market-save-owner": {
+      "label": "Multiverse market/save-owner",
+      "sourceIds": [
+        "multiverseMarketMemberBoundary",
+        "multiverseMarketSaveDataImportBoundary",
+        "multiverseMarketRangeBoundary",
+        "multiverseMarketRowTextCoverage",
+        "multiverseMarketActionShell",
+        "uabeaProbe"
+      ]
+    }
+  },
+  "comparisonPresets": {
+    "token-shop-atu3-vs-atu1": {
+      "label": "TokenShop ATU1 solved bridge vs ATU3 blocked trace",
+      "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "summaryFocus": [
+        "exact shell-to-action-hook join",
+        "exact shell-to-prefab join",
+        "exact shell-to-title join"
+      ]
+    },
+    "shard-cost-structure-vs-planner": {
+      "label": "Shard-cost direct structure vs planner-safe output",
+      "solvedBaselineTargetId": "shard-cost-su0-structure",
+      "blockedTargetId": "shard-cost-planner-safe-output",
+      "summaryFocus": [
+        "getter-to-parameter-shell structure",
+        "deterministic evaluator support",
+        "planner-safe output approval"
+      ]
+    },
+    "multiverse-market-save-owner-vs-canonical-import": {
+      "label": "Multiverse save-owner boundary vs canonical import admissibility",
+      "solvedBaselineTargetId": "multiverse-market-save-owner-boundary",
+      "blockedTargetId": "multiverse-market-canonical-import",
+      "summaryFocus": [
+        "typed accessor bridge",
+        "typed SaveData owner span",
+        "canonical import admissibility"
+      ]
+    }
+  },
+  "targets": {
+    "token-shop-atu3-cells": {
+      "label": "TokenShop ATU3 cells split",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu3-cells",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU3Button",
+        "15810"
+      ],
+      "joinGoal": "Recover one checked ATU3Button or path id 15810 bridge to one exact prefab identity or final player-facing title.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "comparisonPresetId": "token-shop-atu3-vs-atu1",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "exact-shell-to-title"
+          ]
+        },
+        "messages": {
+          "wire": "One exact shell-to-prefab or shell-to-title join cleared cleanly enough to wire the traced boundary.",
+          "quarantine": "The trace is structurally grounded but still needs quarantine because one bounded title-side join remains open.",
+          "research": "The trace still preserves only split cells-domain clues, so keep researching and do not wire or quarantine product behavior from this join."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU3Button",
+              "CellBoost",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "dailyTokeniumLaneProbe"
+            ],
+            "terms": [
+              "StartCellBostHold",
+              "StopCellBostHold",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "diamond-special",
+            "label": "Diamond-special prefab or title lane",
+            "sourceIds": [
+              "lm244TargetedProbe",
+              "unityProbe",
+              "uabeaProbe"
+            ],
+            "terms": [
+              "NewDiamondUPGPrefab.Specials.CellsBoost",
+              ">Diamond Upgrade 10 - CellsBoost"
+            ]
+          },
+          {
+            "id": "token-lane",
+            "label": "Token prefab or title lane",
+            "sourceIds": [
+              "uabeaProbe",
+              "unityProbe"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "NewTokenUPGPrefab.T5.UltimaCells",
+              "Token Ultima: Cells"
+            ]
+          },
+          {
+            "id": "text-hooks",
+            "label": "Generic TokenShop text-hook lane",
+            "sourceIds": [
+              "unityProbe"
+            ],
+            "terms": [
+              "SetAllTokenShopTexts",
+              "SetTokenTexts"
+            ]
+          }
+        ],
+        "bridgeCandidateTerms": [
+          "NewDiamondUPGPrefab.Specials.CellsBoost",
+          ">Diamond Upgrade 10 - CellsBoost",
+          "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+          "NewTokenUPGPrefab.T5.UltimaCells",
+          "Token Ultima: Cells"
+        ],
+        "lostStructure": [
+          "The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
+          "The metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area, but it does not keep one checked prefab identity or final title in the same local container.",
+          "The action lane survives only as a generic named buy cluster in the daily-tokenium lane probe, with StartCellBostHold, StopCellBostHold, and BuyCellBoost but no shell-side path id.",
+          "Prefab identities survive as detached UABEA, targeted-string, or unity-probe hits, and final titles survive as separate unity-probe buckets, so the current extraction still loses the direct cross-surface join back to 15810."
+        ],
+        "groundedConclusion": "The ATU3Button or 15810 trace stays negative. The trace workflow now preserves shell, metadata, action-hook, prefab, title, and text-hook surfaces in one checked bundle, but no committed source carries one exact ATU3Button or path id 15810 bridge together with one exact prefab identity or final player-facing title."
+      }
+    },
+    "shard-cost-su0-structure": {
+      "label": "Shard SU0 cost structure",
+      "familyId": "shard-cost",
+      "strategy": "shard-cost-su0-structure",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "field",
+        "dataset"
+      ],
+      "defaultAnchors": [
+        "ShardUpgradeInfo",
+        "get_SU0Cost",
+        "SU0StartCost"
+      ],
+      "joinGoal": "Recover one checked shard-cost getter-to-parameter-shell structure chain that is safe for descriptive quarantine but not planner promotion.",
+      "requiredSourceFamilies": [
+        "shard-cost"
+      ],
+      "solvedBaselineTargetId": "shard-cost-su0-structure",
+      "blockedTargetId": "shard-cost-planner-safe-output",
+      "comparisonPresetId": "shard-cost-structure-vs-planner",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 4,
+          "allowedNegativeEdgeTypes": [
+            "automated-calibration-closure",
+            "planner-safe-cost-output",
+            "save-owner-recovery"
+          ]
+        },
+        "messages": {
+          "wire": "The shard-cost trace is complete enough to wire direct app behavior.",
+          "quarantine": "The shard-cost structure is grounded enough to preserve in quarantined descriptive tooling, but not to wire planner-safe cost outputs.",
+          "research": "The shard-cost trace is still too incomplete to preserve even a quarantined structural verdict."
+        }
+      },
+      "strategyConfig": {
+        "accessor": "get_SU0Cost",
+        "ownerType": "ShardUpgradeInfo",
+        "parameterShell": [
+          "SU0StartCost",
+          "SU0CostExponent",
+          "SU0GrowthExponent",
+          "SU0GrowthExponent2",
+          "SU0GrowthExponent3"
+        ]
+      }
+    },
+    "multiverse-market-save-owner-boundary": {
+      "label": "Multiverse market SaveData owner boundary",
+      "familyId": "multiverse-market-save-owner",
+      "strategy": "multiverse-market-save-owner-boundary",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "field",
+        "dataset"
+      ],
+      "defaultAnchors": [
+        "get_Market",
+        "SaveData",
+        "IS71Level"
+      ],
+      "joinGoal": "Recover one checked accessor-to-save-owner boundary that keeps compatibility-only import truth separate from canonical PlayerProfile promotion.",
+      "requiredSourceFamilies": [
+        "multiverse-market-save-owner"
+      ],
+      "solvedBaselineTargetId": "multiverse-market-save-owner-boundary",
+      "blockedTargetId": "multiverse-market-canonical-import",
+      "comparisonPresetId": "multiverse-market-save-owner-vs-canonical-import",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 4,
+          "allowedNegativeEdgeTypes": [
+            "typed-market-field-recovery",
+            "canonical-import-admissibility",
+            "broad-row-identity-remap"
+          ]
+        },
+        "messages": {
+          "wire": "The save-owner trace is complete enough to wire canonical import behavior.",
+          "quarantine": "The save-owner boundary is grounded enough to preserve as quarantined compatibility truth, but not to wire canonical import or planner behavior.",
+          "research": "The save-owner trace still lacks enough checked owner-boundary recovery to preserve even a quarantined verdict."
+        }
+      },
+      "strategyConfig": {
+        "accessorBridge": "PlayerProfileHandler.get_Market -> MultiverseMarket",
+        "saveOwner": "SaveData",
+        "typedSpan": "IS1Level through IS110Level",
+        "orderedOverlap": [
+          71,
+          72,
+          73,
+          74
+        ]
+      }
+    }
+  }
+}

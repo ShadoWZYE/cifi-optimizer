@@ -8,8 +8,9 @@
 ## Workflow
 
 - Command: `node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>`
-- Accepted anchor kinds: `class`, `method`, `string`, `path id`
+- Accepted anchor kinds: `class, method, string, path id`
 - Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.
+- Registry target: `token-shop-atu3-cells` from `token-shop` via [`data/unity-trace-target-registry.json`](data/unity-trace-target-registry.json)
 
 ## Source reads
 
@@ -22,7 +23,7 @@
 - `dailyTokeniumLaneProbe`: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json)
   - Preserves named action-hook neighborhoods from the committed targeted string probe outputs.
 - `uabeaProbe`: [`data/uabea-probe-report.json`](data/uabea-probe-report.json)
-  - Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities.
+  - Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities or typed field tables.
 - `unityProbe`: [`data/unity-probe-report.json`](data/unity-probe-report.json)
   - Preserves broader committed unity string buckets including title or text-hook surfaces.
 - `lm244TargetedProbe`: [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json)
@@ -155,6 +156,14 @@
 - Both rows preserve the direct serialized shell-to-owner-block adjacency.
 - The solved ATU1 baseline also preserves one exact row-specific effect hook, one checked row-specific buy hook, and one exact prefab identity.
 - The blocked ATU3 target stays missing the exact shell-to-action-hook, shell-to-prefab, and shell-to-title joins, so the cells-domain clues remain split instead of forming one checked bridge.
+
+## Decision summary
+
+- Verdict: `keep researching`
+- Summary: The trace still preserves only split cells-domain clues, so keep researching and do not wire or quarantine product behavior from this join.
+- Proved edges: `8`
+- Negative edges: `4`
+- Baseline gap: `exact-shell-to-action-hook, exact-shell-to-prefab, exact-shell-to-title`
 
 ## Current loss
 

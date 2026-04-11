@@ -2517,12 +2517,14 @@ function validateUnityTraceBundle(bundle) {
   expectNonEmptyString(bundle.generatedAt, "unity trace bundle generatedAt must be present");
   expectNonEmptyString(bundle.dataset, "unity trace bundle dataset must be present");
   expectRecord(bundle.traceWorkflow, "unity trace bundle traceWorkflow must be an object");
+  expectRecord(bundle.traceRegistry, "unity trace bundle traceRegistry must be an object");
   expectRecord(bundle.sources, "unity trace bundle sources must be an object");
   expectRecord(bundle.target, "unity trace bundle target must be an object");
   expectRecord(bundle.shellWindow, "unity trace bundle shellWindow must be an object");
   expectArray(bundle.sourceRoles, "unity trace bundle sourceRoles must be an array");
   expectArray(bundle.surfaces, "unity trace bundle surfaces must be an array");
   expectRecord(bundle.traceGraph, "unity trace bundle traceGraph must be an object");
+  expectRecord(bundle.decisionSummary, "unity trace bundle decisionSummary must be an object");
   expectRecord(bundle.bridgeCheck, "unity trace bundle bridgeCheck must be an object");
   expectRecord(bundle.solvedVsBlockedDiff, "unity trace bundle solvedVsBlockedDiff must be an object");
   expectArray(bundle.lostStructure, "unity trace bundle lostStructure must be an array");
@@ -2533,6 +2535,8 @@ function validateUnityTraceBundle(bundle) {
 
   assert.equal(bundle.dataset, "unity-trace-bundle", "unity trace bundle dataset id drifted");
   assert.equal(bundle.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>", "unity trace bundle command drifted");
+  assert.equal(bundle.traceRegistry.path, "data/unity-trace-target-registry.json", "unity trace bundle registry path drifted");
+  assert.equal(bundle.traceRegistry.selectedFamilyId, "token-shop", "unity trace bundle selected family drifted");
   assert.equal(bundle.target.id, "token-shop-atu3-cells", "unity trace bundle target id drifted");
   assert.deepEqual(bundle.target.anchors, ["ATU3Button", "15810"], "unity trace bundle target anchors drifted");
   assert.equal(bundle.shellWindow.shellField, "ATU3Button", "unity trace bundle shell field drifted");
@@ -2554,6 +2558,8 @@ function validateUnityTraceBundle(bundle) {
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"), "unity trace bundle missing direct serialized adjacency edge");
   assert.ok(bundle.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-prefab"), "unity trace bundle missing negative shell-to-prefab edge");
   assert.ok(bundle.traceGraph.claimLedger.some((claim) => claim.id === "claim-missing-bridge" && claim.status === "missing"), "unity trace bundle missing missing-bridge claim");
+  assert.equal(bundle.decisionSummary.verdict, "keep researching", "unity trace bundle decision verdict drifted");
+  assert.deepEqual(bundle.decisionSummary.baselineGap, ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"], "unity trace bundle decision baseline gap drifted");
   assert.equal(bundle.solvedVsBlockedDiff.baseline.shellField, "ATU1Button", "unity trace bundle baseline shell drifted");
   assert.equal(bundle.solvedVsBlockedDiff.baseline.shellPathId, 15839, "unity trace bundle baseline shell path drifted");
   assert.equal(bundle.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button", "unity trace bundle blocked shell drifted");
@@ -2574,6 +2580,33 @@ function validateUnityTraceBundle(bundle) {
       `${bundle.target.anchors.length} target anchors`,
       `${bundle.surfaces.length} cross-surface trace lanes`,
       "ATU3 remains negative because the trace bundle still does not preserve one exact shell-to-prefab or shell-to-title join"
+    ]
+  };
+}
+
+function validateUnityTraceTargetRegistry(registry) {
+  expectNonEmptyString(registry.dataset, "unity trace target registry dataset must be present");
+  expectRecord(registry.sourceFamilies, "unity trace target registry sourceFamilies must be an object");
+  expectRecord(registry.comparisonPresets, "unity trace target registry comparisonPresets must be an object");
+  expectRecord(registry.targets, "unity trace target registry targets must be an object");
+  assert.equal(registry.dataset, "unity-trace-target-registry", "unity trace target registry dataset id drifted");
+  ["token-shop", "shard-cost", "multiverse-market-save-owner"].forEach((familyId) => {
+    assert.ok(registry.sourceFamilies[familyId], `unity trace target registry missing family ${familyId}`);
+  });
+  ["token-shop-atu3-cells", "shard-cost-su0-structure", "multiverse-market-save-owner-boundary"].forEach((targetId) => {
+    assert.ok(registry.targets[targetId], `unity trace target registry missing target ${targetId}`);
+  });
+  assert.equal(registry.targets["token-shop-atu3-cells"].comparisonPresetId, "token-shop-atu3-vs-atu1", "unity trace target registry token-shop comparison preset drifted");
+  assert.equal(registry.targets["shard-cost-su0-structure"].comparisonPresetId, "shard-cost-structure-vs-planner", "unity trace target registry shard comparison preset drifted");
+  assert.equal(registry.targets["multiverse-market-save-owner-boundary"].comparisonPresetId, "multiverse-market-save-owner-vs-canonical-import", "unity trace target registry market comparison preset drifted");
+  return {
+    id: "unity-trace-target-registry",
+    label: "Unity trace target registry",
+    classification: "extracted-mechanics",
+    stats: [
+      `${Object.keys(registry.sourceFamilies).length} trace source families`,
+      `${Object.keys(registry.targets).length} trace targets`,
+      "TokenShop, shard-cost, and multiverse-market/save-owner families are registry-seeded"
     ]
   };
 }
@@ -3978,7 +4011,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 59, "bundled dataset contract must track the fifty-nine shipped dataset groups");
+  assert.equal(contract.datasets.length, 60, "bundled dataset contract must track the sixty shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -4085,6 +4118,7 @@ export async function validateBundledDatasets() {
   const tokenShopRowLevelOwner = await readJson("../../data/token-shop-row-level-owner.json");
   const tokenShopRowRemapBoundary = await readJson("../../data/token-shop-row-remap-boundary.json");
   const tokenShopLateAtuBoundary = await readJson("../../data/token-shop-late-atu-boundary.json");
+  const unityTraceTargetRegistry = await readJson("../../data/unity-trace-target-registry.json");
   const unityTraceBundle = await readJson("../../data/unity-trace-bundle.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
@@ -4154,6 +4188,7 @@ export async function validateBundledDatasets() {
     validateTokenShopRowLevelOwner(tokenShopRowLevelOwner),
     validateTokenShopRowRemapBoundary(tokenShopRowRemapBoundary),
     validateTokenShopLateAtuBoundary(tokenShopLateAtuBoundary),
+    validateUnityTraceTargetRegistry(unityTraceTargetRegistry),
     validateUnityTraceBundle(unityTraceBundle),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),

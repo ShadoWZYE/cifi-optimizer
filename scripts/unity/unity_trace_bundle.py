@@ -13,12 +13,13 @@ from portable_paths import md_link, repo_relative
 ROOT = Path(__file__).resolve().parents[2]
 JSON_OUT = ROOT / "data" / "unity-trace-bundle.json"
 MD_OUT = ROOT / "docs" / "unity" / "unity-trace-bundle.md"
+REGISTRY_PATH = ROOT / "data" / "unity-trace-target-registry.json"
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
 
 ASCII_RE = re.compile(rb"[ -~]{4,}")
 UTF16_RE = re.compile(rb"(?:[\x20-\x7E]\x00){4,}")
 
-SOURCE_PATHS = {
+ALL_SOURCE_PATHS = {
     "metadata": METADATA_PATH,
     "tokenShopExtract": ROOT / "data" / "token-shop-values.json",
     "tokenShopRowRemapBoundary": ROOT / "data" / "token-shop-row-remap-boundary.json",
@@ -26,73 +27,73 @@ SOURCE_PATHS = {
     "uabeaProbe": ROOT / "data" / "uabea-probe-report.json",
     "unityProbe": ROOT / "data" / "unity-probe-report.json",
     "lm244TargetedProbe": ROOT / "data" / "lm244-targeted-probe.json",
+    "shardCostModelBoundary": ROOT / "data" / "shard-cost-model-boundary.v1.json",
+    "shardCostParameterProbe": ROOT / "data" / "shard-cost-parameter-probe.v1.json",
+    "shardCostMethodProbe": ROOT / "data" / "shard-cost-method-probe.v1.json",
+    "shardCostNativeProbe": ROOT / "data" / "shard-cost-native-probe.v1.json",
+    "shardCostFormulaModel": ROOT / "data" / "shard-cost-formula-model.v1.json",
+    "shardMilestoneSaveOwnerCandidates": ROOT / "data" / "shard-milestone-save-owner-candidates.v1.json",
+    "multiverseMarketMemberBoundary": ROOT / "data" / "multiverse-market-market-member-boundary.json",
+    "multiverseMarketSaveDataImportBoundary": ROOT / "data" / "multiverse-market-savedata-import-boundary.json",
+    "multiverseMarketRangeBoundary": ROOT / "data" / "multiverse-market-range-boundary.json",
+    "multiverseMarketRowTextCoverage": ROOT / "data" / "multiverse-market-row-text-coverage.json",
+    "multiverseMarketActionShell": ROOT / "data" / "multiverse-market-action-shell.json",
 }
 
-TRACE_TARGETS: dict[str, dict[str, Any]] = {
-    "token-shop-atu3-cells": {
-        "label": "TokenShop ATU3 cells split",
-        "anchors": ["ATU3Button", "15810"],
-        "joinGoal": "Recover one checked ATU3Button or path id 15810 bridge to one exact prefab identity or final player-facing title.",
-        "shellField": "ATU3Button",
-        "shellPathId": 15810,
-        "shellWindowSource": "tokenShopExtract",
-        "shellWindowRadius": 3,
-        "surfaces": [
-            {
-                "id": "metadata-neighborhood",
-                "label": "Metadata neighborhood",
-                "sourceIds": ["metadata"],
-                "terms": ["ATU3Button", "CellBoost", "BuyCellBoost"],
-            },
-            {
-                "id": "action-lane",
-                "label": "Action hook lane",
-                "sourceIds": ["dailyTokeniumLaneProbe"],
-                "terms": ["StartCellBostHold", "StopCellBostHold", "BuyCellBoost"],
-            },
-            {
-                "id": "diamond-special",
-                "label": "Diamond-special prefab or title lane",
-                "sourceIds": ["lm244TargetedProbe", "unityProbe", "uabeaProbe"],
-                "terms": ["NewDiamondUPGPrefab.Specials.CellsBoost", ">Diamond Upgrade 10 - CellsBoost"],
-            },
-            {
-                "id": "token-lane",
-                "label": "Token prefab or title lane",
-                "sourceIds": ["uabeaProbe", "unityProbe"],
-                "terms": [
-                    "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-                    "NewTokenUPGPrefab.T5.UltimaCells",
-                    "Token Ultima: Cells",
-                ],
-            },
-            {
-                "id": "text-hooks",
-                "label": "Generic TokenShop text-hook lane",
-                "sourceIds": ["unityProbe"],
-                "terms": ["SetAllTokenShopTexts", "SetTokenTexts"],
-            },
-        ],
-        "bridgeCandidateTerms": [
-            "NewDiamondUPGPrefab.Specials.CellsBoost",
-            ">Diamond Upgrade 10 - CellsBoost",
-            "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-            "NewTokenUPGPrefab.T5.UltimaCells",
-            "Token Ultima: Cells",
-        ],
-        "lostStructure": [
-            "The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
-            "The metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area, but it does not keep one checked prefab identity or final title in the same local container.",
-            "The action lane survives only as a generic named buy cluster in the daily-tokenium lane probe, with StartCellBostHold, StopCellBostHold, and BuyCellBoost but no shell-side path id.",
-            "Prefab identities survive as detached UABEA, targeted-string, or unity-probe hits, and final titles survive as separate unity-probe buckets, so the current extraction still loses the direct cross-surface join back to 15810.",
-        ],
-        "groundedConclusion": "The ATU3Button or 15810 trace stays negative. The trace workflow now preserves shell, metadata, action-hook, prefab, title, and text-hook surfaces in one checked bundle, but no committed source carries one exact ATU3Button or path id 15810 bridge together with one exact prefab identity or final player-facing title.",
-    }
+SOURCE_ROLE_TEXT = {
+    "metadata": "Preserves raw declaration-side string neighborhoods from global-metadata.dat.",
+    "tokenShopExtract": "Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser.",
+    "tokenShopRowRemapBoundary": "Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing.",
+    "dailyTokeniumLaneProbe": "Preserves named action-hook neighborhoods from the committed targeted string probe outputs.",
+    "uabeaProbe": "Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities or typed field tables.",
+    "unityProbe": "Preserves broader committed unity string buckets including title or text-hook surfaces.",
+    "lm244TargetedProbe": "Preserves targeted string-hit neighborhoods from the local lm244 follow-up probe lane.",
+    "shardCostModelBoundary": "Preserves the grounded shard cost-model boundary around ShardUpgradeInfo, sampled get_SU* accessors, and the SU0 parameter shell.",
+    "shardCostParameterProbe": "Preserves direct shard cost parameter offsets and field names recovered from committed APK/Unity evidence.",
+    "shardCostMethodProbe": "Preserves the getter-family and helper-method structure for shard cost accessors.",
+    "shardCostNativeProbe": "Preserves native getter field-read evidence tying get_SU* methods to specific shard cost parameters.",
+    "shardCostFormulaModel": "Preserves the canonical shard-cost evaluator structure model and completion flags without claiming planner-safe closure.",
+    "shardMilestoneSaveOwnerCandidates": "Preserves the still-blocked shard save-owner candidate narrowing used to keep structural cost work separate from save-side promotion.",
+    "multiverseMarketMemberBoundary": "Preserves the checked PlayerProfileHandler.get_Market to MultiverseMarket accessor bridge and the exact SaveData owner boundary clues.",
+    "multiverseMarketSaveDataImportBoundary": "Preserves the bounded compatibility-only Emporium import decision and the blocked canonical-import framing.",
+    "multiverseMarketRangeBoundary": "Preserves the checked row-range overlap between validated Emporium rows and the wider IS* typed span.",
+    "multiverseMarketRowTextCoverage": "Preserves the checked SetIS* cost-text coverage that anchors ordered row overlap without claiming full row identity recovery.",
+    "multiverseMarketActionShell": "Preserves the checked BuyIS* action-shell coverage across the wider Emporium row family.",
 }
 
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_registry() -> dict[str, Any]:
+    registry = load_json(REGISTRY_PATH)
+    if registry.get("dataset") != "unity-trace-target-registry":
+        raise ValueError("unity trace target registry dataset id drifted")
+    return registry
+
+
+def resolve_source_catalog(registry: dict[str, Any], family_ids: list[str]) -> tuple[dict[str, Path], list[dict[str, Any]]]:
+    source_paths: dict[str, Path] = {}
+    source_roles: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for family_id in family_ids:
+        family = registry["sourceFamilies"][family_id]
+        for source_id in family["sourceIds"]:
+            if source_id in seen:
+                continue
+            seen.add(source_id)
+            source_paths[source_id] = ALL_SOURCE_PATHS[source_id]
+            source_roles.append(
+                {
+                    "sourceId": source_id,
+                    "path": repo_relative(ALL_SOURCE_PATHS[source_id]),
+                    "familyId": family_id,
+                    "familyLabel": family["label"],
+                    "role": SOURCE_ROLE_TEXT[source_id],
+                }
+            )
+    return source_paths, source_roles
 
 
 def extract_strings(blob: bytes) -> list[dict[str, Any]]:
@@ -214,7 +215,7 @@ def get_shell_window(token_shop_extract: dict[str, Any], shell_field: str, radiu
             compact["value"] = field.get("value")
         window.append(compact)
     return {
-        "source": repo_relative(SOURCE_PATHS["tokenShopExtract"]),
+        "source": repo_relative(ALL_SOURCE_PATHS["tokenShopExtract"]),
         "shellField": shell_entry.get("field"),
         "shellPathId": shell_entry.get("path_id"),
         "shellObjectOffset": shell_entry.get("object_offset"),
@@ -228,14 +229,14 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, terms: list[s
         hits = collect_metadata_hits(terms)
         return {
             "sourceId": source_id,
-            "sourcePath": repo_relative(SOURCE_PATHS[source_id]),
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS[source_id]),
             "hitCount": len(hits),
             "hits": hits,
         }
     hits = collect_exact_hits(documents[source_id], terms)
     return {
         "sourceId": source_id,
-        "sourcePath": repo_relative(SOURCE_PATHS[source_id]),
+        "sourcePath": repo_relative(ALL_SOURCE_PATHS[source_id]),
         "hitCount": len(hits),
         "hits": hits,
     }
@@ -269,7 +270,7 @@ def cite_hit(source_entry: dict[str, Any], hit: dict[str, Any], note: str | None
 def cite_row_boundary(source_id: str, path: str, detail: str, note: str | None = None) -> dict[str, Any]:
     citation = {
         "sourceId": source_id,
-        "sourcePath": repo_relative(SOURCE_PATHS[source_id]),
+        "sourcePath": repo_relative(ALL_SOURCE_PATHS[source_id]),
         "term": detail,
         "locator": path,
     }
@@ -730,7 +731,7 @@ def build_solved_vs_blocked_diff(target_id: str, target: dict[str, Any], row_rem
             "id": "atu1-checked-row-bridge",
             "label": "ATU1 checked row bridge",
             "status": "cleared",
-            "sourcePath": repo_relative(SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": baseline["shellField"],
             "shellPathId": baseline["shellPathId"],
             "comparisonShape": baseline_edges,
@@ -740,7 +741,7 @@ def build_solved_vs_blocked_diff(target_id: str, target: dict[str, Any], row_rem
             "id": target_id,
             "label": target["label"],
             "status": "blocked",
-            "sourcePath": repo_relative(SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": blocked["shellField"],
             "shellPathId": blocked["shellPathId"],
             "comparisonShape": blocked_edges,
@@ -777,14 +778,24 @@ def has_exact_bridge(shell_window: dict[str, Any], surfaces: list[dict[str, Any]
     return len(bridge_hits) > 0, bridge_hits
 
 
-def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
-    target = TRACE_TARGETS[target_id]
-    anchors = list(dict.fromkeys([*target["anchors"], *extra_anchors]))
-    documents = {source_id: load_json(path) for source_id, path in SOURCE_PATHS.items() if source_id != "metadata"}
-    shell_window = get_shell_window(documents["tokenShopExtract"], target["shellField"], target["shellWindowRadius"])
+def make_surface_source(source_id: str, hits: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "sourceId": source_id,
+        "sourcePath": repo_relative(ALL_SOURCE_PATHS[source_id]),
+        "hitCount": len(hits),
+        "hits": hits,
+    }
 
+
+def make_surface_hit(term: str, json_path: str) -> dict[str, Any]:
+    return {"term": term, "jsonPath": json_path}
+
+
+def build_token_shop_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    config = target["strategyConfig"]
+    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
     surfaces = []
-    for surface in target["surfaces"]:
+    for surface in config["surfaces"]:
         terms = list(dict.fromkeys([*surface["terms"], *anchors]))
         surfaces.append(
             {
@@ -794,82 +805,388 @@ def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
                 "sources": [collect_source_hits(documents, source_id, terms) for source_id in surface["sourceIds"]],
             }
         )
-
-    bridge_cleared, bridge_hits = has_exact_bridge(shell_window, surfaces, target["bridgeCandidateTerms"])
-    trace_graph = build_trace_graph(shell_window, surfaces, documents["tokenShopRowRemapBoundary"])
-    solved_vs_blocked_diff = build_solved_vs_blocked_diff(target_id, target, documents["tokenShopRowRemapBoundary"])
+    bridge_cleared, bridge_hits = has_exact_bridge(shell_window, surfaces, config["bridgeCandidateTerms"])
     return {
-        "dataset": "unity-trace-bundle",
-        "generatedAt": str(date.today()),
-        "traceWorkflow": {
-            "command": "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>",
-            "acceptedAnchors": ["class", "method", "string", "path id"],
-            "targetResolution": "checked repo-local target preset plus anchor list",
-            "readsCommittedSourcesOnly": True,
-        },
-        "sources": {source_id: repo_relative(path) for source_id, path in SOURCE_PATHS.items()},
-        "sourceRoles": [
-            {
-                "sourceId": "metadata",
-                "path": repo_relative(SOURCE_PATHS["metadata"]),
-                "role": "Preserves raw declaration-side string neighborhoods from global-metadata.dat.",
-            },
-            {
-                "sourceId": "tokenShopExtract",
-                "path": repo_relative(SOURCE_PATHS["tokenShopExtract"]),
-                "role": "Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser.",
-            },
-            {
-                "sourceId": "tokenShopRowRemapBoundary",
-                "path": repo_relative(SOURCE_PATHS["tokenShopRowRemapBoundary"]),
-                "role": "Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing.",
-            },
-            {
-                "sourceId": "dailyTokeniumLaneProbe",
-                "path": repo_relative(SOURCE_PATHS["dailyTokeniumLaneProbe"]),
-                "role": "Preserves named action-hook neighborhoods from the committed targeted string probe outputs.",
-            },
-            {
-                "sourceId": "uabeaProbe",
-                "path": repo_relative(SOURCE_PATHS["uabeaProbe"]),
-                "role": "Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities.",
-            },
-            {
-                "sourceId": "unityProbe",
-                "path": repo_relative(SOURCE_PATHS["unityProbe"]),
-                "role": "Preserves broader committed unity string buckets including title or text-hook surfaces.",
-            },
-            {
-                "sourceId": "lm244TargetedProbe",
-                "path": repo_relative(SOURCE_PATHS["lm244TargetedProbe"]),
-                "role": "Preserves targeted string-hit neighborhoods from the local lm244 follow-up probe lane.",
-            },
-        ],
-        "target": {
-            "id": target_id,
-            "label": target["label"],
-            "anchors": anchors,
-            "joinGoal": target["joinGoal"],
-        },
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "traceGraph": trace_graph,
+        "traceGraph": build_trace_graph(shell_window, surfaces, documents["tokenShopRowRemapBoundary"]),
         "bridgePromotionRule": "Only promote a remap or owner boundary when one committed artifact preserves an exact shell-side anchor together with one exact prefab identity or final player-facing title in the same local container.",
         "bridgeCheck": {
-            "candidateTerms": target["bridgeCandidateTerms"],
+            "candidateTerms": config["bridgeCandidateTerms"],
             "bridgeCleared": bridge_cleared,
             "bridgeHits": bridge_hits,
             "result": "checked object-or-title bridge recovered" if bridge_cleared else "no checked object-or-title bridge recovered",
         },
-        "solvedVsBlockedDiff": solved_vs_blocked_diff,
-        "lostStructure": target["lostStructure"],
-        "groundedConclusion": target["groundedConclusion"],
+        "solvedVsBlockedDiff": build_solved_vs_blocked_diff(target_id, target, documents["tokenShopRowRemapBoundary"]),
+        "lostStructure": config["lostStructure"],
+        "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
             "This is a target-driven trace workflow, not a remap promotion by itself.",
             "It now keeps declaration anchors, owner-payload shells, action hooks, targeted string hits, prefab or title surfaces, and explicit typed graph edges in one checked artifact bundle so unresolved joins can be judged from one place.",
             "The graph records both proved joins and negative joins, with provenance-strength tags and source citations for each claim.",
             "If no committed source preserves both the shell-side anchor and one exact prefab or title candidate in the same local container, the result stays negative and downstream boundaries should not advance.",
         ],
+    }
+
+
+def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    config = target["strategyConfig"]
+    cost_model = documents["shardCostModelBoundary"]
+    parameter_probe = documents["shardCostParameterProbe"]
+    native_probe = documents["shardCostNativeProbe"]
+    formula_model = documents["shardCostFormulaModel"]
+    save_owner_candidates = documents["shardMilestoneSaveOwnerCandidates"]
+    shell_window = {
+        "source": repo_relative(ALL_SOURCE_PATHS["shardCostModelBoundary"]),
+        "shellField": config["accessor"],
+        "shellPathId": "runtime-getter",
+        "shellObjectOffset": None,
+        "ownerFieldBlock": config["parameterShell"],
+        "window": [{"field": field, "group": "row0-parameter-shell", "kind": "field"} for field in config["parameterShell"]],
+    }
+    surfaces = [
+        {
+            "id": "cost-model-boundary",
+            "label": "Shard cost-model boundary",
+            "terms": anchors,
+            "sources": [
+                make_surface_source(
+                    "shardCostModelBoundary",
+                    [
+                        make_surface_hit(config["ownerType"], "$.dataCarrier"),
+                        make_surface_hit(config["accessor"], "$.sampleCostAccessorWindows[0].accessors[0]"),
+                        *[make_surface_hit(field, "$.row0CostFields") for field in config["parameterShell"][:3]],
+                    ],
+                )
+            ],
+        },
+        {
+            "id": "native-getter",
+            "label": "Shard native getter probe",
+            "terms": [config["accessor"], *config["parameterShell"][:3]],
+            "sources": [
+                make_surface_source(
+                    "shardCostNativeProbe",
+                    [
+                        make_surface_hit(config["accessor"], "$.rows[0].name"),
+                        *[make_surface_hit(field, "$.rows[0].operandFieldNames") for field in native_probe["rows"][0]["operandFieldNames"]],
+                    ],
+                )
+            ],
+        },
+        {
+            "id": "formula-model",
+            "label": "Shard formula model",
+            "terms": ["GetShardCostList", "UpdateShardCostList", "MilestoneCostList"],
+            "sources": [
+                make_surface_source(
+                    "shardCostFormulaModel",
+                    [
+                        make_surface_hit("GetShardCostList", "$.runtimeGetterRules.cacheLifecycle.listBuilderMethod"),
+                        make_surface_hit("UpdateShardCostList", "$.runtimeGetterRules.cacheLifecycle.refreshMethod"),
+                        make_surface_hit("MilestoneCostList", "$.runtimeGetterRules.cacheLifecycle.cacheField"),
+                    ],
+                )
+            ],
+        },
+    ]
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "traceGraph": {
+            "nodes": [
+                make_node("shard-owner", "owner-type", config["ownerType"], "present", "ShardUpgradeInfo remains the checked shard-local data carrier."),
+                make_node("shard-getter", "getter", config["accessor"], "present", "The row0 shard cost accessor is preserved in committed structure probes."),
+                make_node("shard-parameter-shell", "parameter-shell", ", ".join(config["parameterShell"]), "present", "The row0 shard parameter shell is preserved as direct field names."),
+                make_node("shard-evaluator", "evaluator-structure", "deterministic evaluator structure", "present", "The canonical shard-cost structure model and deterministic evaluator exist."),
+            ],
+            "edges": [
+                make_edge(
+                    "shard-owner-to-getter",
+                    "shard-owner",
+                    "shard-getter",
+                    "getter-family",
+                    "present",
+                    "direct",
+                    "The cost-model boundary preserves get_SU0Cost on the ShardUpgradeInfo mechanic family.",
+                    [
+                        cite_row_boundary("shardCostModelBoundary", "$.dataCarrier", cost_model["dataCarrier"]),
+                        cite_row_boundary("shardCostModelBoundary", "$.sampleCostAccessorWindows[0].accessors[0]", config["accessor"]),
+                    ],
+                ),
+                make_edge(
+                    "shard-getter-to-parameter-shell",
+                    "shard-getter",
+                    "shard-parameter-shell",
+                    "getter-to-parameter-shell",
+                    "present",
+                    "direct",
+                    "The checked shard boundary preserves the SU0 cost parameter shell beside get_SU0Cost.",
+                    [
+                        cite_row_boundary("shardCostModelBoundary", "$.row0CostFields", ", ".join(cost_model["row0CostFields"])),
+                        cite_row_boundary("shardCostParameterProbe", "$.dataset", parameter_probe["dataset"]),
+                    ],
+                ),
+                make_edge(
+                    "shard-native-to-parameter-shell",
+                    "shard-getter",
+                    "shard-parameter-shell",
+                    "native-parameter-read",
+                    "present",
+                    "direct",
+                    "The native getter probe directly reads SU0StartCost, SU0CostExponent, and SU0GrowthExponent from the row0 getter body.",
+                    [cite_row_boundary("shardCostNativeProbe", "$.rows[0].operandFieldNames", ", ".join(native_probe["rows"][0]["operandFieldNames"]))],
+                ),
+                make_edge(
+                    "shard-parameter-shell-to-evaluator",
+                    "shard-parameter-shell",
+                    "shard-evaluator",
+                    "deterministic-evaluator",
+                    "present",
+                    "supporting",
+                    "The canonical shard-cost formula model and deterministic evaluator preserve the same getter family as a checked structural model.",
+                    [
+                        cite_row_boundary("shardCostFormulaModel", "$.completionFlags.canonicalDatasetShipped", str(formula_model["completionFlags"]["canonicalDatasetShipped"])),
+                        cite_row_boundary("shardCostFormulaModel", "$.completionFlags.deterministicEvaluatorImplemented", str(formula_model["completionFlags"]["deterministicEvaluatorImplemented"])),
+                    ],
+                ),
+            ],
+            "negativeEdges": [
+                make_edge("shard-missing-calibration", "shard-evaluator", "shard-evaluator", "automated-calibration-closure", "missing", "negative", "Automated calibration is not yet implemented, so the structural evaluator is not calibration-closed.", [cite_row_boundary("shardCostFormulaModel", "$.completionFlags.automatedCalibrationImplemented", str(formula_model["completionFlags"]["automatedCalibrationImplemented"]))]),
+                make_edge("shard-missing-planner-safe-output", "shard-evaluator", "shard-evaluator", "planner-safe-cost-output", "missing", "negative", "Planner-safe shard cost output is still explicitly unapproved.", [cite_row_boundary("shardCostFormulaModel", "$.completionFlags.plannerSafeCostOutputApproved", str(formula_model["completionFlags"]["plannerSafeCostOutputApproved"]))]),
+                make_edge("shard-missing-save-owner", "shard-owner", "shard-evaluator", "save-owner-recovery", "missing", "negative", "Shard save-owner recovery is still unresolved and must stay separate from the structural cost model.", [cite_row_boundary("shardMilestoneSaveOwnerCandidates", "$.warnings[0]", save_owner_candidates["warnings"][0])]),
+            ],
+            "claimLedger": [],
+        },
+        "bridgePromotionRule": "Only promote shard cost output past descriptive quarantine when calibration closure, planner-safe approval, and save-owner boundaries are all checked explicitly.",
+        "bridgeCheck": {
+            "candidateTerms": config["parameterShell"],
+            "bridgeCleared": True,
+            "bridgeHits": [{"surfaceId": "native-getter", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardCostNativeProbe"]), "term": config["accessor"]}],
+            "result": "checked getter-to-parameter-shell structure recovered",
+        },
+        "solvedVsBlockedDiff": {
+            "baseline": {"id": "shard-cost-su0-structure", "label": "Shard SU0 structural baseline", "status": "cleared", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardCostFormulaModel"]), "shellField": config["accessor"], "shellPathId": "runtime-getter", "comparisonShape": [{"type": "getter-family", "status": "present"}, {"type": "getter-to-parameter-shell", "status": "present"}, {"type": "native-parameter-read", "status": "present"}, {"type": "deterministic-evaluator", "status": "present"}], "groundedConclusion": "The shard SU0 getter-to-parameter-shell structure is grounded enough to preserve as a quarantined structural baseline."},
+            "blockedTarget": {"id": "shard-cost-planner-safe-output", "label": "Shard planner-safe cost output", "status": "blocked", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardCostFormulaModel"]), "shellField": config["accessor"], "shellPathId": "planner-output", "comparisonShape": [{"type": "automated-calibration-closure", "status": "missing"}, {"type": "planner-safe-cost-output", "status": "missing"}, {"type": "save-owner-recovery", "status": "missing"}], "groundedConclusion": "The shard planner-safe output target remains blocked by calibration, approval, and save-owner recovery."},
+            "delta": {
+                "sharedPresentEdgeTypes": ["getter-family", "getter-to-parameter-shell", "native-parameter-read"],
+                "baselineOnlyPresentEdgeTypes": ["deterministic-evaluator"],
+                "blockedMissingEdgeTypes": ["automated-calibration-closure", "planner-safe-cost-output", "save-owner-recovery"],
+                "solvedVsBlockedSummary": [
+                    "The solved shard baseline preserves one direct getter-family, parameter-shell, and native-field-read chain.",
+                    "The same family also preserves one deterministic evaluator structure model.",
+                    "Planner-safe output stays blocked because calibration, approval, and save-owner recovery are still explicitly negative.",
+                ],
+            },
+        },
+        "lostStructure": [cost_model["optimizerBoundary"]["blockedNow"][0], cost_model["optimizerBoundary"]["blockedNow"][1], save_owner_candidates["warnings"][0]],
+        "groundedConclusion": "The shard SU0 cost trace is structurally grounded. The repo preserves one checked getter-to-parameter-shell chain and one deterministic evaluator structure, but calibration closure, planner-safe cost output, and save-owner recovery all remain blocked.",
+        "currentBoundary": [
+            "This target preserves shard-cost structure only.",
+            "It is appropriate for descriptive or quarantined structural reads, not planner-safe cost output or save-owner promotion.",
+            "Keep shard cost structure separated from shard save-owner recovery until direct save-side evidence appears.",
+        ],
+    }
+
+
+def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    config = target["strategyConfig"]
+    member_boundary = documents["multiverseMarketMemberBoundary"]
+    import_boundary = documents["multiverseMarketSaveDataImportBoundary"]
+    range_boundary = documents["multiverseMarketRangeBoundary"]
+    row_text_coverage = documents["multiverseMarketRowTextCoverage"]
+    action_shell = documents["multiverseMarketActionShell"]
+    shell_window = {
+        "source": repo_relative(ALL_SOURCE_PATHS["multiverseMarketMemberBoundary"]),
+        "shellField": config["accessorBridge"],
+        "shellPathId": "typed-accessor",
+        "shellObjectOffset": None,
+        "ownerFieldBlock": [config["saveOwner"], config["typedSpan"], "InscryptionsDone"],
+        "window": [
+            {"field": "bridgeAccessor", "group": "typed-boundary", "kind": "method", "value": config["accessorBridge"]},
+            {"field": "declaringOwner", "group": "typed-boundary", "kind": "type", "value": config["saveOwner"]},
+            {"field": "typedSpan", "group": "typed-boundary", "kind": "field-range", "value": config["typedSpan"]},
+        ],
+    }
+    surfaces = [
+        {
+            "id": "accessor-bridge",
+            "label": "Accessor bridge",
+            "terms": anchors,
+            "sources": [
+                make_surface_source(
+                    "multiverseMarketMemberBoundary",
+                    [
+                        make_surface_hit("PlayerProfileHandler", "$.typedBridgeRecovery.bridgeOwner"),
+                        make_surface_hit("get_Market", "$.typedBridgeRecovery.bridgeAccessor"),
+                        make_surface_hit("MultiverseMarket", "$.typedBridgeRecovery.bridgeReturnType"),
+                    ],
+                )
+            ],
+        },
+        {
+            "id": "save-owner-span",
+            "label": "SaveData owner span",
+            "terms": [config["saveOwner"], config["typedSpan"], "InscryptionsDone"],
+            "sources": [
+                make_surface_source(
+                    "multiverseMarketSaveDataImportBoundary",
+                    [
+                        make_surface_hit(config["saveOwner"], "$.typedSpanBoundary.declaringOwner"),
+                        make_surface_hit(config["typedSpan"], "$.typedSpanBoundary.contiguousLevelSpan"),
+                        make_surface_hit("compatibility.unmappedSystemState.multiverseMarket", "$.boundedImportConclusion.importTargetPath"),
+                    ],
+                )
+            ],
+        },
+        {
+            "id": "ordered-overlap",
+            "label": "Ordered overlap",
+            "terms": [str(item) for item in config["orderedOverlap"]],
+            "sources": [
+                make_surface_source("multiverseMarketRangeBoundary", [make_surface_hit(str(item), "$.overlapIds") for item in range_boundary["overlapIds"]]),
+                make_surface_source("multiverseMarketRowTextCoverage", [make_surface_hit("SetIS71CostText", "$.validatedRowCostTexts")]),
+                make_surface_source("multiverseMarketActionShell", [make_surface_hit("BuyIS71", "$.validatedBuyHooks")]),
+            ],
+        },
+    ]
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "traceGraph": {
+            "nodes": [
+                make_node("market-accessor", "accessor-bridge", config["accessorBridge"], "present", "The checked PlayerProfileHandler.get_Market accessor bridge is preserved."),
+                make_node("market-owner", "declaring-owner", config["saveOwner"], "present", "SaveData remains the exact checked wider owner."),
+                make_node("market-span", "typed-span", config["typedSpan"], "present", "The exact contiguous IS1Level through IS110Level span is preserved."),
+                make_node("market-import", "compatibility-import", "compatibility.unmappedSystemState.multiverseMarket", "present", "The compatibility-only import target is preserved."),
+            ],
+            "edges": [
+                make_edge("market-accessor-to-owner", "market-accessor", "market-owner", "accessor-bridge", "present", "direct", "The checked accessor bridge still leads from PlayerProfileHandler.get_Market to MultiverseMarket while wider typed ownership stays on SaveData.", [cite_row_boundary("multiverseMarketMemberBoundary", "$.typedBridgeRecovery.bridgeAccessor", member_boundary["typedBridgeRecovery"]["bridgeAccessor"]), cite_row_boundary("multiverseMarketSaveDataImportBoundary", "$.typedSpanBoundary.declaringOwner", import_boundary["typedSpanBoundary"]["declaringOwner"])]),
+                make_edge("market-owner-to-span", "market-owner", "market-span", "typed-save-owner", "present", "direct", "SaveData directly preserves the contiguous IS1Level through IS110Level span.", [cite_row_boundary("multiverseMarketSaveDataImportBoundary", "$.typedSpanBoundary.contiguousLevelSpan", import_boundary["typedSpanBoundary"]["contiguousLevelSpan"])]),
+                make_edge("market-span-to-import", "market-span", "market-import", "compatibility-import-span", "present", "supporting", "The exact IS span is preserved as compatibility-only raw Emporium truth, not canonical PlayerProfile import.", [cite_row_boundary("multiverseMarketSaveDataImportBoundary", "$.boundedImportConclusion.importTargetPath", import_boundary["boundedImportConclusion"]["importTargetPath"])]),
+                make_edge("market-overlap-support", "market-span", "market-import", "ordered-row-overlap", "present", "supporting", "Rows 71-74 still anchor the wider IS span to checked Emporium ordering and cost-text/action surfaces.", [cite_row_boundary("multiverseMarketRangeBoundary", "$.overlapIds", ", ".join(str(item) for item in range_boundary["overlapIds"])), cite_row_boundary("multiverseMarketRowTextCoverage", "$.validatedRowCostTexts", "SetIS71CostText"), cite_row_boundary("multiverseMarketActionShell", "$.validatedBuyHooks", "BuyIS71")]),
+            ],
+            "negativeEdges": [
+                make_edge("market-missing-typed-market-field", "market-accessor", "market-owner", "typed-market-field-recovery", "missing", "negative", "No typed Market or MultiverseMarket field is recovered directly on PlayerProfileHandler, PlayerProfileData, or SaveData.", [cite_row_boundary("multiverseMarketMemberBoundary", "$.negativeTypedSaveDataMarketChecks", ", ".join(member_boundary["negativeTypedSaveDataMarketChecks"]))]),
+                make_edge("market-missing-canonical-import", "market-span", "market-import", "canonical-import-admissibility", "missing", "negative", "Canonical import remains explicitly empty even though the compatibility-only import target is preserved.", [cite_row_boundary("multiverseMarketSaveDataImportBoundary", "$.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel", import_boundary["boundedImportConclusion"]["exactCanonicalImportSafeSubsetLabel"])]),
+                make_edge("market-missing-broad-row-remap", "market-span", "market-import", "broad-row-identity-remap", "missing", "negative", "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap.", [cite_row_boundary("multiverseMarketSaveDataImportBoundary", "$.checkedIsToRowOrderBoundary.blockedWiderMapping[0]", import_boundary["checkedIsToRowOrderBoundary"]["blockedWiderMapping"][0])]),
+            ],
+            "claimLedger": [],
+        },
+        "bridgePromotionRule": "Only promote the Emporium save-owner boundary past compatibility quarantine when canonical import admissibility and broader row identity are both checked explicitly.",
+        "bridgeCheck": {
+            "candidateTerms": [config["accessorBridge"], config["saveOwner"], config["typedSpan"]],
+            "bridgeCleared": True,
+            "bridgeHits": [{"surfaceId": "accessor-bridge", "sourcePath": repo_relative(ALL_SOURCE_PATHS["multiverseMarketMemberBoundary"]), "term": config["accessorBridge"]}],
+            "result": "checked accessor-to-save-owner boundary recovered",
+        },
+        "solvedVsBlockedDiff": {
+            "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": repo_relative(ALL_SOURCE_PATHS["multiverseMarketSaveDataImportBoundary"]), "shellField": config["accessorBridge"], "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
+            "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": repo_relative(ALL_SOURCE_PATHS["multiverseMarketSaveDataImportBoundary"]), "shellField": config["saveOwner"], "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
+            "delta": {
+                "sharedPresentEdgeTypes": ["accessor-bridge", "typed-save-owner"],
+                "baselineOnlyPresentEdgeTypes": ["compatibility-import-span"],
+                "blockedMissingEdgeTypes": ["typed-market-field-recovery", "canonical-import-admissibility", "broad-row-identity-remap"],
+                "solvedVsBlockedSummary": [
+                    "The solved save-owner baseline preserves the typed accessor bridge and exact SaveData-owned IS span.",
+                    "The same target also preserves one compatibility-only import span for quarantined state.",
+                    "Canonical import stays blocked because typed Market field recovery, canonical admissibility, and broader row identity are still negative.",
+                ],
+            },
+        },
+        "lostStructure": [import_boundary["checkedIsToRowOrderBoundary"]["blockedWiderMapping"][0], import_boundary["checkedIsToRowOrderBoundary"]["blockedWiderMapping"][1], import_boundary["boundedImportConclusion"]["blockedBy"][2]],
+        "groundedConclusion": "The multiverse-market save-owner trace is grounded enough to preserve a checked accessor-to-SaveData owner boundary and a compatibility-only IS1Level through IS110Level span, but canonical import and broader row identity remain blocked.",
+        "currentBoundary": [
+            "This target preserves save-owner and compatibility-import truth only.",
+            "Do not promote canonical PlayerProfile import, planner behavior, or row remap claims from this target alone.",
+            "Keep the checked accessor bridge, exact SaveData owner, and bounded compatibility-only import span separate from downstream row identity or planner work.",
+        ],
+    }
+
+
+def build_trace_payload(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    strategy = target["strategy"]
+    if strategy == "token-shop-atu3-cells":
+        return build_token_shop_trace(target_id, target, anchors, documents)
+    if strategy == "shard-cost-su0-structure":
+        return build_shard_cost_trace(target, anchors, documents)
+    if strategy == "multiverse-market-save-owner-boundary":
+        return build_multiverse_market_save_owner_trace(target, anchors, documents)
+    raise ValueError(f"Unsupported unity trace strategy: {strategy}")
+
+
+def build_decision_summary(target: dict[str, Any], trace_payload: dict[str, Any]) -> dict[str, Any]:
+    proved_edges = list(trace_payload["traceGraph"]["edges"])
+    negative_edges = list(trace_payload["traceGraph"]["negativeEdges"])
+    diff = trace_payload["solvedVsBlockedDiff"]["delta"]
+    rules = target["outputSummaryRules"]
+    negative_types = [edge["type"] for edge in negative_edges]
+    wire = rules["wire"]
+    quarantine = rules["quarantine"]
+    if len(proved_edges) >= int(wire["minPresentEdges"]) and len(negative_edges) <= int(wire["maxNegativeEdges"]):
+        verdict = "wire"
+    elif len(proved_edges) >= int(quarantine["minPresentEdges"]) and all(edge_type in quarantine["allowedNegativeEdgeTypes"] for edge_type in negative_types):
+        verdict = "quarantine"
+    else:
+        verdict = "keep researching"
+    return {
+        "verdict": verdict,
+        "summary": rules["messages"]["research" if verdict == "keep researching" else verdict],
+        "provedEdgeCount": len(proved_edges),
+        "negativeEdgeCount": len(negative_edges),
+        "baselineGap": diff["blockedMissingEdgeTypes"],
+        "supportingEdgeTypes": [edge["type"] for edge in proved_edges],
+        "blockedEdgeTypes": negative_types,
+    }
+
+
+def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
+    registry = load_registry()
+    target = registry["targets"][target_id]
+    anchors = list(dict.fromkeys([*target["defaultAnchors"], *extra_anchors]))
+    source_paths, source_roles = resolve_source_catalog(registry, target["requiredSourceFamilies"])
+    documents = {source_id: load_json(path) for source_id, path in source_paths.items() if source_id != "metadata"}
+    trace_payload = build_trace_payload(target_id, target, anchors, documents)
+    return {
+        "dataset": "unity-trace-bundle",
+        "generatedAt": str(date.today()),
+        "traceWorkflow": {
+            "command": "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>",
+            "acceptedAnchors": target["acceptedAnchors"],
+            "targetResolution": "checked repo-local target preset plus anchor list",
+            "readsCommittedSourcesOnly": True,
+        },
+        "traceRegistry": {
+            "path": repo_relative(REGISTRY_PATH),
+            "selectedTargetId": target_id,
+            "selectedFamilyId": target["familyId"],
+            "requiredSourceFamilies": target["requiredSourceFamilies"],
+            "solvedBaselineTargetId": target["solvedBaselineTargetId"],
+            "blockedTargetId": target["blockedTargetId"],
+            "comparisonPreset": registry["comparisonPresets"][target["comparisonPresetId"]],
+        },
+        "sources": {source_id: repo_relative(path) for source_id, path in source_paths.items()},
+        "sourceRoles": source_roles,
+        "target": {
+            "id": target_id,
+            "label": target["label"],
+            "familyId": target["familyId"],
+            "anchors": anchors,
+            "joinGoal": target["joinGoal"],
+            "requiredSourceFamilies": target["requiredSourceFamilies"],
+            "solvedBaselineTargetId": target["solvedBaselineTargetId"],
+            "blockedTargetId": target["blockedTargetId"],
+        },
+        "shellWindow": trace_payload["shellWindow"],
+        "surfaces": trace_payload["surfaces"],
+        "traceGraph": trace_payload["traceGraph"],
+        "decisionSummary": build_decision_summary(target, trace_payload),
+        "bridgePromotionRule": trace_payload["bridgePromotionRule"],
+        "bridgeCheck": trace_payload["bridgeCheck"],
+        "solvedVsBlockedDiff": trace_payload["solvedVsBlockedDiff"],
+        "lostStructure": trace_payload["lostStructure"],
+        "groundedConclusion": trace_payload["groundedConclusion"],
+        "currentBoundary": trace_payload["currentBoundary"],
     }
 
 
@@ -885,8 +1202,9 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         "## Workflow",
         "",
         f"- Command: `{dataset['traceWorkflow']['command']}`",
-        "- Accepted anchor kinds: `class`, `method`, `string`, `path id`",
+        f"- Accepted anchor kinds: `{', '.join(dataset['traceWorkflow']['acceptedAnchors'])}`",
         "- Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.",
+        f"- Registry target: `{dataset['traceRegistry']['selectedTargetId']}` from `{dataset['traceRegistry']['selectedFamilyId']}` via {md_link(ROOT / dataset['traceRegistry']['path'])}",
         "",
         "## Source reads",
         "",
@@ -961,6 +1279,14 @@ def write_markdown(dataset: dict[str, Any]) -> None:
     lines.extend(f"- {line}" for line in dataset["solvedVsBlockedDiff"]["delta"]["solvedVsBlockedSummary"])
     lines.extend([
         "",
+        "## Decision summary",
+        "",
+        f"- Verdict: `{dataset['decisionSummary']['verdict']}`",
+        f"- Summary: {dataset['decisionSummary']['summary']}",
+        f"- Proved edges: `{dataset['decisionSummary']['provedEdgeCount']}`",
+        f"- Negative edges: `{dataset['decisionSummary']['negativeEdgeCount']}`",
+        f"- Baseline gap: `{', '.join(dataset['decisionSummary']['baselineGap'])}`",
+        "",
         "## Current loss",
         "",
     ])
@@ -976,8 +1302,9 @@ def write_markdown(dataset: dict[str, Any]) -> None:
 
 
 def main() -> None:
+    registry = load_registry()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--target", required=True, choices=sorted(TRACE_TARGETS.keys()))
+    parser.add_argument("--target", required=True, choices=sorted(registry["targets"].keys()))
     parser.add_argument("--anchor", action="append", default=[])
     parser.add_argument("--json-out", type=Path, default=JSON_OUT)
     parser.add_argument("--md-out", type=Path, default=MD_OUT)

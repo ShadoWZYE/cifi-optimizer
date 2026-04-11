@@ -334,6 +334,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/token-shop-late-atu-boundary.json`
 
+### `unity-trace-target-registry`
+
+- Label: Unity trace target registry
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/unity-trace-target-registry.json`
+
 ### `unity-trace-bundle`
 
 - Label: Unity trace bundle
