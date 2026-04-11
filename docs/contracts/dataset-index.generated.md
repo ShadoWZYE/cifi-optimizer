@@ -327,6 +327,20 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/token-shop-row-remap-boundary.json`
 
+### `token-shop-late-atu-boundary`
+
+- Label: Token shop late ATU boundary
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/token-shop-late-atu-boundary.json`
+
+### `unity-trace-bundle`
+
+- Label: Unity trace bundle
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/unity-trace-bundle.json`
+
 ### `multiverse-market-save-boundary`
 
 - Label: Multiverse market save boundary

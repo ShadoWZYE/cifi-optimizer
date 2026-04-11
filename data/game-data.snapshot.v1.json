@@ -420,6 +420,96 @@
       ]
     },
     {
+      "id": "spend-token-shop-row-detail-slice",
+      "title": "TokenShop checked-row detail slice",
+      "status": "archived",
+      "goal": "Extend the shipped checked-row TokenShop panel into the next small grounded row-detail tool for the same verified subset only.",
+      "currentSlice": "Ship a separate Overview module that reads imported compatibility-only levels for the already checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` subset plus the same rows' checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from the shipped TokenShop values data, then shows each grounded row's identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change in fixed grounded slot order.",
+      "exitCondition": "The app answers the player question `What do the grounded upgrades I can already inspect actually do at my current level and on the next level?` with a separate user-facing module that uses only consumed grounded inputs, keeps one fixed display rule, and avoids best-buy, ROI, ranking, next-purchase logic, or canonical `ATU*Level` promotion claims.",
+      "blockedBy": "Archived after ship. Broader planner-safe spend behavior remains blocked on separate lanes for additional TokenShop row remap coverage and a true next-purchase rule set, while token-bank, Daily Tokenium, and Emporium state remain separate non-consumed blockers.",
+      "smallestShippableSlice": "A separate Overview module that keeps row order fixed to the grounded subset, reads imported compatibility-only subset levels plus checked TokenShop row constants, shows grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change, and leaves all unresolved rows and systems outside the module.",
+      "completedSteps": [
+        "Keep the checked TokenShop subset fixed to `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` instead of widening the consumed-input contract.",
+        "Reuse the already shipped checked-row panel as the boundary-safe shell for the next user-facing TokenShop tool slice.",
+        "Drop canonical Tokens from the consumed-input contract because this row-detail slice no longer answers an affordability question.",
+        "Read only the checked subset levels plus the same rows' extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from `data/token-shop-values.json`.",
+        "Show each grounded subset row's identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change in fixed `ATU1`, `ATU2`, `ATU5`, `ATU6` order.",
+        "Keep the row-detail surface explicitly non-optimizer and outside any best-buy, ROI, ranking, or next-purchase recommendation math.",
+        "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, Emporium state, and unresolved `ATU*` remap work outside the shipped module."
+      ],
+      "nextSteps": [
+        "Expand TokenShop row coverage only when another user-facing slice actually consumes more grounded rows.",
+        "Keep broader next-purchase behavior blocked until row identity coverage and a true purchase-rule set are grounded.",
+        "Do not reopen token-bank, Daily Tokenium, or Emporium owner-recovery lanes unless a future slice directly consumes those inputs."
+      ],
+      "sources": [
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/systems/spend/token-shop-values.md",
+        "docs/roadmap/research-tracks.md"
+      ],
+      "artifacts": [
+        "data/game-data.snapshot.v1.json",
+        "app.js",
+        "tests/smoke.mjs"
+      ],
+      "verified": [
+        "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`.",
+        "The shipped TokenShop values data already preserves the checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields needed by this slice for the same subset rows.",
+        "Imported compatibility-only current levels for that same checked subset are enough to show current level and current-vs-next extracted bonus-step change without promoting those rows into canonical state.",
+        "A fixed grounded slot-order row-detail tool can answer one real player question without introducing affordability labels, best-buy logic, ranking, or any planner-safe recommendation claim.",
+        "Broader planner-safe spend behavior remains separately blocked on row identity coverage and a true next-purchase rule set rather than on token-bank, Daily Tokenium, or Emporium state for this slice."
+      ],
+      "uncertain": [
+        "Which additional TokenShop row will be the next safe remap candidate after the checked four-row subset.",
+        "When the repo will recover enough grounded rule behavior to move from row-detail inspection into a truthful next-purchase surface."
+      ]
+    },
+    {
+      "id": "progression-token-shop-editor-first-slice",
+      "title": "Progression TokenShop editor first slice",
+      "status": "archived",
+      "goal": "Move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop editor slice.",
+      "currentSlice": "Ship a dedicated TokenShop category under the Progression selector that reads local non-canonical levels under `planning.tokenShop.checkedSubsetLevels.*` for the already checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` subset, treats `compatibility.unmappedSystemState.tokenShop.*` as prefill only, and shows each grounded row's identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change in fixed grounded slot order.",
+      "exitCondition": "The first real TokenShop-facing editor slice lives under Progression, keeps checked-row local levels separate from compatibility import, preserves quarantine language for the checked subset, and avoids best-buy, ROI, ranking, next-purchase logic, or canonical `ATU*Level` promotion claims.",
+      "blockedBy": "Archived after ship. Broader planner-safe spend behavior remains blocked on separate lanes for additional TokenShop row remap coverage and a true next-purchase rule set, while token-bank, Daily Tokenium, and Emporium state remain separate non-consumed blockers.",
+      "smallestShippableSlice": "A dedicated TokenShop category under the Progression selector that keeps row order fixed to the grounded subset, persists local checked-row levels under a non-canonical planning path, uses compatibility import as prefill only, shows grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change, and leaves all unresolved rows and systems outside the module.",
+      "completedSteps": [
+        "Move the checked TokenShop subset UI out of the Overview-bound spend boundary panel and into its own TokenShop category under the Progression selector.",
+        "Keep the checked row subset fixed to `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` instead of widening the consumed-input contract.",
+        "Persist local checked-row editor values under `planning.tokenShop.checkedSubsetLevels.*` as non-canonical progression state.",
+        "Treat `compatibility.unmappedSystemState.tokenShop.*` as prefill only instead of as the only live UI state for the checked subset.",
+        "Keep level-1 and other locally entered checked-row values visible in the row-detail render path instead of hiding them behind missing-import behavior.",
+        "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, Emporium state, and unresolved `ATU*` remap work outside the shipped editor."
+      ],
+      "nextSteps": [
+        "Expand TokenShop row coverage only when another user-facing slice actually consumes more grounded rows.",
+        "Keep broader next-purchase behavior blocked until row identity coverage and a true purchase-rule set are grounded.",
+        "Do not reopen token-bank, Daily Tokenium, or Emporium owner-recovery lanes unless a future slice directly consumes those inputs."
+      ],
+      "sources": [
+        "docs/contracts/player-profile-schema.md",
+        "docs/systems/spend/spend-system-verification.md",
+        "docs/roadmap/research-tracks.md"
+      ],
+      "artifacts": [
+        "data/game-data.snapshot.v1.json",
+        "app.js",
+        "index.html",
+        "tests/smoke.mjs"
+      ],
+      "verified": [
+        "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`.",
+        "The first real TokenShop-facing checked-row editor slice can live under Progression without promoting unresolved row levels into canonical player state.",
+        "Local checked-row levels under `planning.tokenShop.checkedSubsetLevels.*` stay non-canonical while compatibility TokenShop import remains available as prefill only.",
+        "The shipped TokenShop values data already preserves the checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields needed by this slice for the same subset rows.",
+        "Broader planner-safe spend behavior remains separately blocked on row identity coverage and a true next-purchase rule set rather than on the checked editor-state handoff itself."
+      ],
+      "uncertain": [
+        "Which additional TokenShop row will be the next safe remap candidate after the checked four-row subset.",
+        "When the repo will recover enough grounded rule behavior to move from checked-row inspection into a truthful next-purchase surface."
+      ]
+    },
+    {
       "id": "spend-multiverse-savedata-import-surface",
       "title": "MultiverseMarket SaveData import-surface decision",
       "status": "active",
@@ -514,20 +604,21 @@
       "title": "TokenShop row remap",
       "status": "active",
       "goal": "Map recovered raw `ATU*Level` TokenShop save fields onto grounded row identities strongly enough for bounded non-speculative use beyond compatibility import.",
-      "currentSlice": "Keep raw `ATU*Level` fields in the compatibility TokenShop sink while the repo preserves the recovered ATU1, ATU2, ATU5, and ATU6 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, treats the bounded ATU3 cells-domain disambiguation pass as a clean negative result, and tests whether any additional checked object or text join can bind one more unresolved ATU-numbered row shell to grounded TokenShop row identity.",
+      "currentSlice": "Keep raw `ATU*Level` fields in the compatibility TokenShop sink while the repo preserves the recovered ATU1, ATU2, ATU5, and ATU6 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, treats the bounded ATU3 cells-domain disambiguation pass as a clean negative result, records the late ATU24-ATU28 shell neighborhood as a tighter bounded negative result, and then keeps searching for any different unresolved ATU shell that can still clear one exact object or title join.",
       "exitCondition": "The repo has a checked TokenShop row-by-row remap boundary that ties the recovered `ATU*Level` family to grounded row identities without inventing player-facing labels.",
-      "blockedBy": "The exact `SaveData` owner is recovered, four ATU shell-to-prefab bridges are now grounded, one ATU6 shell-to-prefab-to-title chain now clears, and the bounded ATU3 cells-domain pass stays negative, but the repo still lacks checked joins from the remaining ATU-numbered row shells to specific prefab identities or final player-facing row titles.",
+      "blockedBy": "The exact `SaveData` owner is recovered, four ATU shell-to-prefab bridges are now grounded, one ATU6 shell-to-prefab-to-title chain now clears, and both the bounded ATU3 cells-domain pass and the late ATU24-ATU28 shell neighborhood now stay negative, but the repo still lacks checked joins from the remaining ATU-numbered row shells to specific prefab identities or final player-facing row titles.",
       "smallestShippableSlice": "A checked identity-join boundary that proves which recovered `ATU` rows, if any, can be bound beyond compatibility-only import.",
       "completedSteps": [
         "Preserve the raw `ATU1Level` through `ATU28Level` family under the compatibility TokenShop sink while the row remap stays unresolved.",
         "Promote a TokenShop row-remap boundary artifact that records grounded ATU effect-domain clues, direct late-row buy hooks, and the missing object or text joins that still block row identity recovery.",
         "Recover four bounded shell-to-prefab bridges: `ATU1Button` to `NewTokenUPGPrefab.T1.TokensBoost`, `ATU2Button` to `NewTokenUPGPrefab.T1.DiamondBoost`, `ATU5Button` to `NewTokenUPGPrefab.T1.MK1Booster`, and `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster`.",
         "Recover one checked shell-to-prefab-to-title chain: `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster` to `Mk2 Generator Booster`.",
-        "Run the bounded ATU3 cells-domain disambiguation pass and preserve a negative result across `BuyCellBoost`, the diamond-special `CellsBoost` lane, and the token-side `CellsPerChestBooster` / `Token Ultima: Cells` lane."
+        "Run the bounded ATU3 cells-domain disambiguation pass and preserve a negative result across `BuyCellBoost`, the diamond-special `CellsBoost` lane, and the token-side `CellsPerChestBooster` / `Token Ultima: Cells` lane.",
+        "Run one late-shell remap pass across `ATU24` through `ATU28` and preserve a tighter negative result showing that the late action shell, title roster, prefab roster, and effect-side strings still do not cross back to one exact shell join."
       ],
       "nextSteps": [
-        "Recover a checked bridge from a different unresolved `ATU*Button`, `ATU*Content`, or adjacent row-shell path id to one specific `NewTokenUPGPrefab.*` object before claiming any wider row identity.",
-        "Recover a checked bridge from ATU-numbered row shells to final player-facing TokenShop row title text before promoting any player-facing remap.",
+        "Recover a checked bridge from a different unresolved `ATU*Button`, `ATU*Content`, or adjacent row-shell path id outside the already-bounded ATU3 and ATU24-ATU28 negatives to one specific `NewTokenUPGPrefab.*` object before claiming any wider row identity.",
+        "Recover a checked bridge from one unresolved ATU-numbered row shell to final player-facing TokenShop row title text before promoting any player-facing remap.",
         "If only a subset clears that join, keep the remaining ATU rows quarantined instead of forcing a whole-lane remap."
       ],
       "sources": [
@@ -536,17 +627,21 @@
         "data/token-shop-values.json",
         "data/uabea-probe-report.json",
         "data/unity-probe-report.json",
-        "data/daily-tokenium-lane-probe.json"
+        "data/daily-tokenium-lane-probe.json",
+        "data/daily-tokenium-owner-probe.json",
+        "data/lm244-targeted-probe.json"
       ],
       "artifacts": [
         "data/token-shop-row-level-owner.json",
-        "data/token-shop-row-remap-boundary.json"
+        "data/token-shop-row-remap-boundary.json",
+        "data/token-shop-late-atu-boundary.json"
       ],
       "verified": [
         "The repo preserves the raw `ATU1Level` through `ATU28Level` save family on `SaveData` and the same numbering family on the grounded `TokenShop` owner payload.",
         "Four exact shell-to-prefab bridges are now recovered: `ATU1Button` to `NewTokenUPGPrefab.T1.TokensBoost`, `ATU2Button` to `NewTokenUPGPrefab.T1.DiamondBoost`, `ATU5Button` to `NewTokenUPGPrefab.T1.MK1Booster`, and `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster`.",
         "One exact shell-to-prefab-to-title chain is now recovered: `ATU6Button` to `NewTokenUPGPrefab.T1.MK2Booster` to `Mk2 Generator Booster`.",
         "The bounded ATU3 cells-domain disambiguation pass stays negative: `BuyCellBoost`, the diamond-special `CellsBoost` lane, and the token-side `CellsPerChestBooster` / `Token Ultima: Cells` lane still do not cross back to `ATU3Button` path id `15810`.",
+        "The late ATU24-ATU28 shell neighborhood now also has a tighter bounded negative result: exact shell rows, exact buy hooks, a local title roster, a local prefab roster, and separate Campaign Fragments / Academy effect-side strings all survive, but no committed artifact crosses those surfaces back to one exact `ATU24Button` through `ATU28Button` shell.",
         "Checked probe output also preserves grounded non-label clues such as `ATU2DiamondsBonus`, `ATU14TokenDailiesBonus`, `ATU24Bonus3Shards`, and late direct buy hooks `BuyATU24` through `BuyATU28`.",
         "Checked prefab and player-facing row rosters both exist in repo artifacts, but they are still not joined back onto most ATU-numbered row shells."
       ],

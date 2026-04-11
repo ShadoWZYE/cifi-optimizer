@@ -888,6 +888,10 @@ function getExperimentalProfileState() {
   };
 }
 
+function getTokenShopProgressionProfileState() {
+  return state.playerProfile.planning?.tokenShop ?? {};
+}
+
 function getCompatibilityProfileState() {
   return {
     legacyStage: state.playerProfile.compatibility.legacyStage,
@@ -1100,6 +1104,24 @@ function bindOptimizerActions() {
     renderProgressionResults(runProgressionOptimization());
   });
   $("#progressionResults").addEventListener("click", (event) => {
+    const prefillButton = event.target.closest("[data-token-shop-prefill]");
+    if (prefillButton) {
+      prefillTokenShopProgressionEditorFromCompatibility();
+      return;
+    }
+    const clearButton = event.target.closest("[data-token-shop-clear-local]");
+    if (clearButton) {
+      clearTokenShopProgressionEditorLevels();
+      return;
+    }
+    const tokenShopBuyButton = event.target.closest("[data-token-shop-buy-field]");
+    if (tokenShopBuyButton) {
+      const fieldName = tokenShopBuyButton.dataset.tokenShopBuyField;
+      const levelField = tokenShopBuyButton.closest(".token-shop-buy-panel")?.querySelector("[data-token-shop-level-field]");
+      const currentLevel = coerceInputValue(levelField?.value ?? tokenShopBuyButton.dataset.tokenShopCurrentLevel ?? "0");
+      saveTokenShopProgressionLevel(fieldName, currentLevel + 1);
+      return;
+    }
     const focusButton = event.target.closest("[data-shard-focus-id]");
     if (focusButton) {
       const milestoneId = focusButton.dataset.shardFocusId || null;
@@ -1115,6 +1137,11 @@ function bindOptimizerActions() {
     }
   }, true);
   $("#progressionResults").addEventListener("change", (event) => {
+    const tokenShopLevelField = event.target.closest("[data-token-shop-level-field]");
+    if (tokenShopLevelField) {
+      saveTokenShopProgressionLevel(tokenShopLevelField.dataset.tokenShopLevelField, coerceInputValue(tokenShopLevelField.value ?? ""));
+      return;
+    }
     const levelField = event.target.closest("[data-shard-focus-level]");
     if (!levelField) {
       return;
@@ -1191,7 +1218,6 @@ function renderOverview() {
     renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
   $("#overviewSpendSnapshot").innerHTML = renderSpendPlannerBoundary();
-  $("#overviewTokenShopAffordability").innerHTML = renderTokenShopGroundedSubsetAffordability();
 }
 
 function renderShipPlayerState() {
@@ -1521,7 +1547,6 @@ function renderProgressionResults(results) {
   const recommendationFeedSupport = recommendationFeedPartition.invalid;
   const subsystemFeed = getProgressionSubsystemPartition(recommendationFeed);
   const selectedSubsystem = getSelectedProgressionSubsystem();
-  renderShardPlannerControls();
   renderProgressionSubsystemToggle(subsystemFeed);
   const sectionMarkup = {
     shards: renderShardSubsystemSection(subsystemFeed.shards),
@@ -1531,13 +1556,22 @@ function renderProgressionResults(results) {
       "These cards stay warning-oriented. They are pacing and anti-bricking notes around Loop Prestige, not reset optimizers.",
       subsystemFeed.loop,
       "warning"
-    )
+    ),
+    tokenShop: renderTokenShopSubsystemSection()
   };
+  const subsystemHeader = selectedSubsystem === "tokenShop"
+    ? ""
+    : `
+      ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
+      ${renderRecommendationFeedSupportNotice(recommendationFeedSupport, "progression")}
+    `;
   $("#progressionResults").innerHTML = `
-    ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
-    ${renderRecommendationFeedSupportNotice(recommendationFeedSupport, "progression")}
+    ${subsystemHeader}
     ${sectionMarkup[selectedSubsystem]}
   `;
+  if (selectedSubsystem === "shards") {
+    renderShardPlannerControls();
+  }
 }
 
 function renderShardSubsystemSection(items) {
@@ -1853,11 +1887,6 @@ function renderSpendPlannerBoundary() {
   const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
   const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
   const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
-  const importedTokenShopState = compatibility.unmappedSystems?.tokenShop;
-  const groundedTokenShopRowPreview = getTokenShopGroundedSubsetPreviewSummary(
-    state.extractedMechanics?.tokenShopRowRemapBoundary,
-    importedTokenShopState
-  );
   const importedMarketPreview = getImportedMultiverseMarketPreview(
     importedMarketState,
     multiverseMarket,
@@ -1911,8 +1940,8 @@ function renderSpendPlannerBoundary() {
   ];
   const blockedInputs = [
     {
-      label: "TokenShop current row levels",
-      reason: "Blocked beyond the small grounded row preview. Only the checked ATU1, ATU2, ATU5, and ATU6 remap subset is surfaced as boundary-backed evidence; the rest of the recovered raw TokenShop ATU row family stays quarantined until the row remap clears more identities."
+      label: "TokenShop recommendations beyond the checked editor subset",
+      reason: "The checked ATU1, ATU2, ATU5, and ATU6 remap subset now lives on the Progression page as a non-canonical local editor, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
     },
     {
       label: "Token-bank cap and claimable tokens",
@@ -1943,9 +1972,9 @@ function renderSpendPlannerBoundary() {
         <ul class="research-step-list">${boundaryBackedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not imported yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
     </div>
     <div class="meta-stack">
-      <p class="snapshot-title">Compatibility-only TokenShop subset boundary</p>
-        <ul class="research-step-list">${groundedTokenShopRowPreview.rows.map((row) => `<li>${escapeHtml(row.label)}: ${isBoundaryValuePresent(row.value) ? escapeHtml(formatBoundaryValue(row.value)) : "Not imported yet"} <code>${escapeHtml(row.path)}</code>. ${escapeHtml(row.note)}</li>`).join("")}</ul>
-        <p class="meta">${groundedTokenShopRowPreview.quarantineNote}</p>
+      <p class="snapshot-title">TokenShop progression handoff</p>
+      <p class="meta">The checked TokenShop subset editor now lives on the Progression page instead of inside this Overview-bound spend boundary panel.</p>
+      <p class="meta">Its local row levels stay non-canonical under <code>planning.tokenShop.checkedSubsetLevels.*</code>, compatibility imports remain prefill only, and the rest of the raw <code>ATU*Level</code> family stays quarantined under <code>compatibility.unmappedSystemState.tokenShop</code>.</p>
     </div>
     <div class="meta-stack">
         <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
@@ -1968,7 +1997,6 @@ function renderSpendPlannerBoundary() {
     <div class="pill-row">
         <span class="pill">${canonicalInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${canonicalInputs.length} canonical inputs entered</span>
         <span class="pill">${boundaryBackedInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${boundaryBackedInputs.length} boundary-backed inputs imported</span>
-        <span class="pill">${groundedTokenShopRowPreview.importedCount}/${groundedTokenShopRowPreview.rows.length} grounded TokenShop subset levels imported</span>
         <span class="pill">${blockedInputs.length} blocked inputs surfaced</span>
         <span class="pill">Canonical boundary preserved</span>
         <span class="pill">Boundary-backed evidence labeled</span>
@@ -1983,10 +2011,25 @@ function renderSpendPlannerResearchForkNote() {
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Forked user-surface slice</p>
-      <p class="meta">The Overview page now keeps two separate spend-side user surfaces: one descriptive boundary snapshot and one grounded TokenShop subset affordability module.</p>
-      <p class="meta">The TokenShop module answers one real player question for the checked subset only: what grounded TokenShop upgrades are affordable right now from current canonical Tokens plus imported compatibility-only subset levels.</p>
+      <p class="meta">The Overview page now keeps the descriptive spend boundary only, while the first real TokenShop-facing checked-row editor slice now lives on the Progression page.</p>
+      <p class="meta">The TokenShop module answers one real player question for the checked subset only: what do the grounded upgrades I can already inspect actually do at my current level and on the next level?</p>
       <p class="meta">Anything beyond that consumed-input contract should fork into a new slice rather than reopening the shipped surfaces with optimizer behavior.</p>
     </div>
+  `;
+}
+
+function renderTokenShopSubsystemSection() {
+  return `
+    <section class="meta-stack">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">TokenShop</p>
+          <h3>TokenShop</h3>
+        </div>
+      </div>
+      <p class="meta">TokenShop keeps its own Progression category so it does not get mixed into the Shard Mining surface or force an endlessly scrolling page.</p>
+      ${renderTokenShopProgressionEditor()}
+    </section>
   `;
 }
 
@@ -4630,7 +4673,10 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       identitySource: "Checked prefab identity",
       startCostField: "TokenBoostStartCost",
       additiveCostField: "TokenBoostAdditiveCost",
+      bonusField: "TokenBoostBonus",
       maxLevelField: "TokenBoostMaxLevel",
+      bonusStepLabel: "Tokens Gained from Token Chests",
+      bonusStepMode: "additive",
       note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
@@ -4640,7 +4686,10 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       identitySource: "Checked prefab identity",
       startCostField: "DiamondBoostStartCost",
       additiveCostField: "DiamondBoostAdditiveCost",
+      bonusField: "DiamondBoostBonus",
       maxLevelField: "DiamondBoostMaxLevel",
+      bonusStepLabel: "Diamonds Gained from Diamond Chests",
+      bonusStepMode: "additive",
       note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
@@ -4650,7 +4699,10 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       identitySource: "Checked prefab identity",
       startCostField: "MK1TokenBoostStartCost",
       additiveCostField: "MK1TokenBoostAdditiveCost",
+      bonusField: "MK1TokenBoostBonus",
       maxLevelField: "MK1TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk1 Output",
+      bonusStepMode: "multiplier",
       note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
@@ -4660,7 +4712,10 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       identitySource: boundary?.verifiedTitleJoin?.titleProbeTitle ? "Checked final title" : "Checked prefab identity",
       startCostField: "MK2TokenBoostStartCost",
       additiveCostField: "MK2TokenBoostAdditiveCost",
+      bonusField: "MK2TokenBoostBonus",
       maxLevelField: "MK2TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk2 Output",
+      bonusStepMode: "multiplier",
       note: "Checked shell-to-prefab-to-title chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     }
   ];
@@ -4688,119 +4743,337 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
   };
 }
 
-function getTokenShopGroundedSubsetAffordabilitySummary(boundary, tokenShopState, canonicalTokens, tokenShop) {
-  const resolvedTokenShopState = tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
-  const tokenBudget = typeof canonicalTokens === "number" && Number.isFinite(canonicalTokens) ? canonicalTokens : null;
+function resolveTokenShopProgressionLevelSource(fieldName, progressionState, compatibilityLevels) {
+  const localOverrideValue = progressionState?.checkedSubsetLevels?.[fieldName];
+  if (typeof localOverrideValue === "number" && Number.isFinite(localOverrideValue)) {
+    return {
+      value: localOverrideValue,
+      sourceLabel: "Local progression override",
+      path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
+    };
+  }
+  const playerStateValue = progressionState?.checkedSubsetPlayerState?.[fieldName];
+  if (typeof playerStateValue === "number" && Number.isFinite(playerStateValue)) {
+    return {
+      value: playerStateValue,
+      sourceLabel: "Checked player state",
+      path: `planning.tokenShop.checkedSubsetPlayerState.${fieldName}`
+    };
+  }
+  const compatibilityValue = compatibilityLevels?.[fieldName];
+  if (typeof compatibilityValue === "number" && Number.isFinite(compatibilityValue)) {
+    return {
+      value: compatibilityValue,
+      sourceLabel: "Compatibility fallback",
+      path: `compatibility.unmappedSystemState.tokenShop.${fieldName}`
+    };
+  }
+  return {
+    value: 0,
+    sourceLabel: "Default level 0",
+    path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
+  };
+}
+
+function formatTokenShopBonusStep(row, bonusValue) {
+  if (typeof bonusValue !== "number" || !Number.isFinite(bonusValue)) {
+    return "Unknown bonus step";
+  }
+  if (row?.bonusStepMode === "additive") {
+    return `+${formatBoundaryValue(bonusValue)} ${row.bonusStepLabel}`;
+  }
+  return `x${formatBoundaryValue(bonusValue)} to ${row?.bonusStepLabel || "the grounded lane"}`;
+}
+
+function getTokenShopKnownMaxStatus(currentLevel, maxLevel) {
+  if (typeof maxLevel !== "number" || !Number.isFinite(maxLevel)) {
+    return {
+      label: "Known max unavailable",
+      note: "The checked TokenShop values payload does not expose a usable max-level field for this row in the current build."
+    };
+  }
+  if (currentLevel >= maxLevel) {
+    return {
+      label: "At or above known cap",
+      note: `Imported level ${formatBoundaryValue(currentLevel)} already meets or exceeds the checked max ${formatBoundaryValue(maxLevel)} in the current values payload.`
+    };
+  }
+  return {
+    label: "Below known cap",
+    note: `${formatBoundaryValue(maxLevel - currentLevel)} known level(s) remain before the checked cap ${formatBoundaryValue(maxLevel)}.`
+  };
+}
+
+function getTokenShopCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonusValue) {
+  const bonusStep = formatTokenShopBonusStep(row, bonusValue);
+  if (typeof maxLevel === "number" && Number.isFinite(maxLevel) && currentLevel >= maxLevel) {
+    return {
+      currentLabel: `${formatBoundaryValue(currentLevel)} extracted bonus step(s) of ${bonusStep}`,
+      nextLabel: "No next bonus within known cap",
+      detail: `The imported level already meets or exceeds the checked cap ${formatBoundaryValue(maxLevel)}, so the row-detail tool stops at the current extracted bonus-step count instead of inventing overflow behavior.`
+    };
+  }
+
+  const nextLevel = currentLevel + 1;
+  return {
+    currentLabel: `${formatBoundaryValue(currentLevel)} extracted bonus step(s) of ${bonusStep}`,
+    nextLabel: `${formatBoundaryValue(nextLevel)} extracted bonus step(s) of ${bonusStep}`,
+    detail: `Current level ${formatBoundaryValue(currentLevel)} to next level ${formatBoundaryValue(nextLevel)} adds one more extracted bonus step only. This view does not infer compounding, best-buy value, or optimizer math.`
+  };
+}
+
+function getTokenShopRowDisplayTitle(row) {
+  if (row?.identitySource === "Checked final title" && row?.identity) {
+    return row.identity;
+  }
+  const rawIdentity = String(row?.identity || "")
+    .split(".")
+    .pop()
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .trim();
+  return rawIdentity || row?.slot || "TokenShop row";
+}
+
+function formatTokenShopEffectLine(row) {
+  return formatTokenShopBonusStep(row, row?.bonusValue);
+}
+
+function getTokenShopActionLabel(row) {
+  return row?.isMaxed ? "MAXED" : "BUY";
+}
+
+function formatTokenShopBonusMagnitude(value, mode) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return mode === "multiplier" ? "x?" : "?";
+  }
+  if (mode === "multiplier") {
+    return `x${value.toFixed(2)}`;
+  }
+  return value.toFixed(2);
+}
+
+function getTokenShopBonusStripEntries(row) {
+  const currentLevel = typeof row?.currentLevel === "number" && Number.isFinite(row.currentLevel) ? row.currentLevel : 0;
+  const bonusValue = typeof row?.bonusValue === "number" && Number.isFinite(row.bonusValue) ? row.bonusValue : 0;
+  const currentMagnitude = row?.bonusStepMode === "multiplier"
+    ? Math.pow(bonusValue || 1, currentLevel)
+    : bonusValue * currentLevel;
+  const nextMagnitude = row?.isMaxed
+    ? null
+    : row?.bonusStepMode === "multiplier"
+      ? Math.pow(bonusValue || 1, currentLevel + 1)
+      : bonusValue * (currentLevel + 1);
+
+  return [
+    {
+      label: row?.bonusStepLabel || "Bonus",
+      currentLabel: formatTokenShopBonusMagnitude(currentMagnitude, row?.bonusStepMode),
+      nextLabel: nextMagnitude === null ? "MAX" : formatTokenShopBonusMagnitude(nextMagnitude, row?.bonusStepMode)
+    }
+  ];
+}
+
+function getTokenShopProgressionModel() {
+  const progressionState = getTokenShopProgressionProfileState();
+  const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
+  const boundary = state.extractedMechanics?.tokenShopRowRemapBoundary;
+  const tokenShop = state.extractedMechanics?.tokenShop;
+  const currentTokens = state.playerProfile.player.resources.tokens;
   const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => {
-    const currentLevel = resolvedTokenShopState[row.field];
+    const levelSource = resolveTokenShopProgressionLevelSource(row.field, progressionState, compatibilityLevels);
+    const currentLevel = levelSource.value;
     const startCost = getTokenShopNumericFieldValue(tokenShop, row.startCostField);
     const additiveCost = getTokenShopNumericFieldValue(tokenShop, row.additiveCostField);
+    const bonusValue = getTokenShopNumericFieldValue(tokenShop, row.bonusField);
     const maxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
     const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
     const isMaxed = hasLevel && typeof maxLevel === "number" && currentLevel >= maxLevel;
     const nextKnownCost = hasLevel && !isMaxed && typeof startCost === "number" && typeof additiveCost === "number"
       ? startCost + (additiveCost * currentLevel)
       : null;
-    const affordable = tokenBudget !== null && typeof nextKnownCost === "number"
-      ? tokenBudget >= nextKnownCost
+    const isAffordable = typeof nextKnownCost === "number" && typeof currentTokens === "number"
+      ? currentTokens >= nextKnownCost
       : null;
 
     return {
       ...row,
       currentLevel,
-      currentLevelPath: `compatibility.unmappedSystemState.tokenShop.${row.field}`,
+      currentLevelPath: levelSource.path,
+      currentLevelSourceLabel: levelSource.sourceLabel,
       startCost,
       additiveCost,
+      bonusValue,
       nextKnownCost,
-      affordable,
+      isAffordable,
       isMaxed,
-      maxLevel
+      maxLevel,
+      maxStatus: getTokenShopKnownMaxStatus(currentLevel, maxLevel),
+      currentVsNextBonus: getTokenShopCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonusValue)
     };
   });
 
   return {
+    currentTokens,
     displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU5, ATU6.",
-    tokenBudget,
     rows,
-    importedCount: rows.filter((row) => typeof row.currentLevel === "number" && Number.isFinite(row.currentLevel)).length,
-    affordableCount: rows.filter((row) => row.affordable === true).length
+    localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override").length,
+    playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state").length,
+    compatibilityCount: rows.filter((row) => row.currentLevelSourceLabel === "Compatibility fallback").length,
+    defaultCount: rows.filter((row) => row.currentLevelSourceLabel === "Default level 0").length,
+    affordableCount: rows.filter((row) => row.isAffordable === true).length,
+    knownCapCount: rows.filter((row) => row.maxStatus.label === "At or above known cap").length
   };
 }
 
-function renderTokenShopGroundedSubsetAffordability() {
-  const canonical = getCanonicalProfileState();
-  const compatibility = getCompatibilityProfileState();
-  const summary = getTokenShopGroundedSubsetAffordabilitySummary(
-    state.extractedMechanics?.tokenShopRowRemapBoundary,
-    compatibility.unmappedSystems?.tokenShop,
-    canonical.tokens,
-    state.extractedMechanics?.tokenShop
+function saveTokenShopProgressionLevel(fieldName, value) {
+  if (!fieldName) {
+    return;
+  }
+  setProfileValue(["planning", "tokenShop", "checkedSubsetLevels", fieldName], value, state.playerProfile);
+  persistPlayerProfile();
+  setStatus("tokenShopProgressionStatus", `Saved ${fieldName} for the checked TokenShop subset editor.`, "success");
+  renderProgressionResults(runProgressionOptimization());
+}
+
+function prefillTokenShopProgressionEditorFromCompatibility() {
+  const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
+  const subsetFields = getTokenShopGroundedSubsetDefinitions(state.extractedMechanics?.tokenShopRowRemapBoundary).map((row) => row.field);
+  let importedCount = 0;
+  subsetFields.forEach((fieldName) => {
+    const importedValue = compatibilityLevels?.[fieldName];
+    if (typeof importedValue === "number" && Number.isFinite(importedValue)) {
+      setProfileValue(["planning", "tokenShop", "checkedSubsetLevels", fieldName], importedValue, state.playerProfile);
+      importedCount += 1;
+    }
+  });
+  persistPlayerProfile();
+  setStatus(
+    "tokenShopProgressionStatus",
+    importedCount
+      ? `Prefilled ${importedCount} checked TokenShop row level${importedCount === 1 ? "" : "s"} from compatibility import state.`
+      : "No imported checked TokenShop subset levels were available to prefill.",
+    importedCount ? "success" : "warning"
   );
-  const tokenBudgetLabel = summary.tokenBudget === null ? "Not entered yet" : formatBoundaryValue(summary.tokenBudget);
+  renderProgressionResults(runProgressionOptimization());
+}
+
+function clearTokenShopProgressionEditorLevels() {
+  getTokenShopGroundedSubsetDefinitions(state.extractedMechanics?.tokenShopRowRemapBoundary).forEach((row) => {
+    setProfileValue(["planning", "tokenShop", "checkedSubsetLevels", row.field], null, state.playerProfile);
+  });
+  persistPlayerProfile();
+  setStatus("tokenShopProgressionStatus", "Cleared local TokenShop editor levels. Compatibility imports remain available as prefill only.", "success");
+  renderProgressionResults(runProgressionOptimization());
+}
+
+function renderTokenShopProgressionEditor() {
+  const summary = getTokenShopProgressionModel();
 
   return `
     <article class="validation-card warn">
-      <strong>Grounded TokenShop subset affordability</strong>
-      <p class="meta">Player question: what grounded TokenShop upgrades can I buy right now from the subset we actually know?</p>
-      <p class="meta">Consumed inputs only: canonical <code>player.resources.tokens</code> plus imported compatibility-only levels for the checked <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU5Level</code>, and <code>ATU6Level</code> subset.</p>
-      <p class="meta">${escapeHtml(summary.displayRule)}</p>
-      <p class="meta">This module is explicitly non-optimizer. It shows current subset affordability only and does not claim best-buy order, ROI, route quality, or any planner-safe ranking.</p>
+      <strong>Grounded TokenShop checked-row editor</strong>
+      <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
+      <p class="meta">This module is explicitly non-optimizer and stays fixed to the shipped <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU5Level</code>, and <code>ATU6Level</code> subset.</p>
+      <div class="profile-actions">
+        <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
+        <button class="button button-ghost" type="button" data-token-shop-clear-local>Clear local row levels</button>
+      </div>
       <div class="pill-row">
-        <span class="pill">Tokens budget: ${escapeHtml(tokenBudgetLabel)}</span>
-        <span class="pill">${summary.importedCount}/${summary.rows.length} subset levels imported</span>
-        <span class="pill">${summary.affordableCount} affordable now</span>
-        <span class="pill">Compatibility-only subset levels</span>
+        <span class="pill">${summary.localCount}/${summary.rows.length} local overrides active</span>
+        <span class="pill">${summary.playerStateCount}/${summary.rows.length} checked player-state rows active</span>
+        <span class="pill">${summary.compatibilityCount}/${summary.rows.length} compatibility fallback rows active</span>
+        <span class="pill">${summary.defaultCount}/${summary.rows.length} defaulted to level 0</span>
+        <span class="pill">${typeof summary.currentTokens === "number" ? `${summary.affordableCount}/${summary.rows.length} affordable from ${formatBoundaryValue(summary.currentTokens)} Tokens` : "Affordability gated by missing Tokens"}</span>
+        <span class="pill">${summary.knownCapCount} at or above known cap</span>
+        <span class="pill">${escapeHtml(summary.displayRule)}</span>
         <span class="pill">No canonical ATU promotion</span>
       </div>
       <div class="preview-stack">
         ${summary.rows.map((row) => {
-          const affordabilityLabel = row.affordable === true
-            ? "Affordable now"
-            : row.affordable === false
-              ? "Not affordable"
-              : row.isMaxed
-                ? "Already at known cap"
-                : "Affordability unavailable";
-          const affordabilityTone = row.affordable === true ? "pass" : "warn";
-          const currentLevelLabel = typeof row.currentLevel === "number" && Number.isFinite(row.currentLevel)
-            ? formatBoundaryValue(row.currentLevel)
-            : "Not imported yet";
+          const displayTitle = getTokenShopRowDisplayTitle(row);
+          const currentLevelLabel = formatBoundaryValue(row.currentLevel);
+          const effectLine = formatTokenShopEffectLine(row);
+          const actionLabel = getTokenShopActionLabel(row);
+          const bonusStripEntries = getTokenShopBonusStripEntries(row);
           const nextKnownCostLabel = row.isMaxed
             ? "No next cost within known cap"
             : typeof row.nextKnownCost === "number"
               ? formatBoundaryValue(row.nextKnownCost)
-              : "Unavailable until current level is imported";
+              : "No known next cost";
+          const affordabilityLine = row.isMaxed
+            ? "No next purchase within known cap."
+            : row.isAffordable === true
+              ? "Affordable from current Tokens."
+              : row.isAffordable === false && typeof row.nextKnownCost === "number" && typeof summary.currentTokens === "number"
+                ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+                : "Affordability unavailable until Tokens are entered.";
           const costFormulaLine = typeof row.startCost === "number" && typeof row.additiveCost === "number"
             ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
             : "Known cost inputs are incomplete in this build.";
 
           return `
             <article class="preview-card token-shop-affordability-card">
-              <div class="token-shop-affordability-head">
-                <div class="meta-stack">
-                  <strong>${escapeHtml(row.identity)}</strong>
-                  <p class="meta">${escapeHtml(row.slot)} • ${escapeHtml(row.identitySource)}</p>
+              <div class="token-shop-game-row">
+                <div class="token-shop-level-ring">
+                  <span class="token-shop-level-value">${escapeHtml(currentLevelLabel)}</span>
+                  <span class="token-shop-level-divider">/</span>
+                  <span class="token-shop-level-cap">${typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel) ? escapeHtml(formatBoundaryValue(row.maxLevel)) : "?"}</span>
                 </div>
-                <span class="score">${escapeHtml(affordabilityLabel)}</span>
-              </div>
-              <div class="token-shop-affordability-grid">
-                <div class="validation-card ${affordabilityTone}">
-                  <span class="snapshot-title">Current level</span>
-                  <strong>${escapeHtml(currentLevelLabel)}</strong>
-                  <p class="meta"><code>${escapeHtml(row.currentLevelPath)}</code></p>
+                <div class="token-shop-main-lane">
+                  <div class="token-shop-top-band">
+                    <div class="token-shop-affordability-head">
+                      <div class="meta-stack">
+                        <strong>${escapeHtml(displayTitle)}</strong>
+                        <p class="meta">${escapeHtml(effectLine)}.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="token-shop-stat-strip">
+                    ${bonusStripEntries.map((entry) => `
+                      <div class="validation-card warn token-shop-stat-card">
+                        <span class="snapshot-title">Current vs next bonus • ${escapeHtml(entry.label)}</span>
+                        <strong>${escapeHtml(entry.currentLabel)}</strong>
+                        <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
+                      </div>
+                    `).join("")}
+                  </div>
+                  <div class="token-shop-editor-strip">
+                    <div class="token-shop-editor-meta">
+                      <p class="meta">Level ${escapeHtml(currentLevelLabel)} • ${escapeHtml(row.currentLevelSourceLabel)}</p>
+                      <p class="meta">${escapeHtml(costFormulaLine)}</p>
+                    </div>
+                  </div>
                 </div>
-                <div class="validation-card ${affordabilityTone}">
-                  <span class="snapshot-title">Next known cost</span>
+                <div class="token-shop-buy-panel">
+                  <span class="token-shop-buy-label">${escapeHtml(actionLabel)}</span>
                   <strong>${escapeHtml(nextKnownCostLabel)}</strong>
-                  <p class="meta">${escapeHtml(costFormulaLine)}</p>
+                  <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
+                  <p class="meta">${escapeHtml(affordabilityLine)}</p>
+                  <label class="mini-field token-shop-level-editor token-shop-level-editor-buy">
+                    <span>Set current level</span>
+                    <input
+                      data-token-shop-level-field="${escapeHtml(row.field)}"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value="${escapeHtml(String(row.currentLevel))}"
+                      placeholder="0"
+                    >
+                  </label>
+                  <button
+                    type="button"
+                    class="token-shop-buy-button"
+                    data-token-shop-buy-field="${escapeHtml(row.field)}"
+                    data-token-shop-current-level="${escapeHtml(String(row.currentLevel))}"
+                    ${row.isMaxed ? "disabled" : ""}
+                  >Buy +1 lvl</button>
                 </div>
               </div>
-              <p class="meta">${escapeHtml(row.note)}</p>
             </article>
           `;
         }).join("")}
       </div>
-      <p class="meta">Unresolved TokenShop rows remain outside this module. The app still does not promote raw <code>ATU*Level</code> fields into canonical <code>state.playerProfile</code> and does not rank purchases beyond the declared slot-order display rule.</p>
+      <p class="meta">Non-canonical checked-row progression seam only. Broader TokenShop remap, token-bank, Daily Tokenium, Emporium, and ROI or ranking logic stay outside this surface.</p>
     </article>
   `;
 }
@@ -5396,23 +5669,26 @@ function getProgressionSubsystemPartition(items) {
   });
   return {
     shards: shardItems,
-    loop: loopItems
+    loop: loopItems,
+    tokenShop: getTokenShopGroundedSubsetDefinitions(state.extractedMechanics?.tokenShopRowRemapBoundary)
   };
 }
 
 function getSelectedProgressionSubsystem() {
-  return ["shards", "loop"].includes(state.progressionView) ? state.progressionView : "shards";
+  return ["shards", "loop", "tokenShop"].includes(state.progressionView) ? state.progressionView : "shards";
 }
 
 function renderProgressionSubsystemToggle(subsystemFeed) {
   const counts = {
     shards: Array.isArray(subsystemFeed?.shards) ? subsystemFeed.shards.length : 0,
-    loop: Array.isArray(subsystemFeed?.loop) ? subsystemFeed.loop.length : 0
+    loop: Array.isArray(subsystemFeed?.loop) ? subsystemFeed.loop.length : 0,
+    tokenShop: Array.isArray(subsystemFeed?.tokenShop) ? subsystemFeed.tokenShop.length : 0
   };
   const selected = getSelectedProgressionSubsystem();
   $("#progressionSubsystemToggle").innerHTML = [
     { id: "shards", label: `Shard Mining (${counts.shards})` },
-    { id: "loop", label: `Loop Prestige (${counts.loop})` }
+    { id: "loop", label: `Loop Prestige (${counts.loop})` },
+    { id: "tokenShop", label: `TokenShop (${counts.tokenShop})` }
   ].map((item) => `
     <button class="button${selected === item.id ? " is-active" : ""}" type="button" data-progression-view="${escapeHtml(item.id)}" role="tab" aria-selected="${selected === item.id}">
       ${escapeHtml(item.label)}

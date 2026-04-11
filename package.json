@@ -14,6 +14,7 @@
     "probe:shards:type-metadata": "node ./scripts/unity/run_probe.mjs shards:type-metadata",
     "probe:shards:method": "node ./scripts/unity/run_probe.mjs shards:method",
     "probe:shards:cost-native": "node ./scripts/unity/run_probe.mjs shards:cost-native",
+    "probe:trace": "node ./scripts/unity/run_probe.mjs trace",
     "shards:calibration-report": "node ./scripts/shards/calibration-report.mjs",
     "verify:data": "node ./scripts/contracts/validate-datasets.mjs",
     "verify:vendoring": "node ./scripts/contracts/verify-vendoring-layout.mjs",

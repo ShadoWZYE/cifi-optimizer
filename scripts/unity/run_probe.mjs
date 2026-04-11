@@ -57,6 +57,9 @@ const commandSets = {
     ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]],
     ["python", [path.join(root, "scripts", "unity", "shard_cost_native_probe.py")]],
   ],
+  "trace": [
+    ["python", [path.join(root, "scripts", "unity", "unity_trace_bundle.py")]],
+  ],
 };
 
 function formatRepoPath(targetPath) {
@@ -169,6 +172,7 @@ function printUsage() {
 }
 
 const commandName = process.argv[2];
+const extraArgs = process.argv.slice(3);
 if (!commandName || !(commandName in commandSets)) {
   printUsage();
   process.exit(commandName ? 1 : 0);
@@ -178,6 +182,8 @@ if ((commandName === "uabea" || commandName.startsWith("shards:")) && !existsSyn
   throw new Error(`Missing probe project: ${probeProject}`);
 }
 
-for (const [command, args] of commandSets[commandName]) {
-  runCommand(command, args);
+const pipeline = commandSets[commandName];
+for (const [index, [command, args]] of pipeline.entries()) {
+  const finalArgs = index === pipeline.length - 1 ? [...args, ...extraArgs] : args;
+  runCommand(command, finalArgs);
 }

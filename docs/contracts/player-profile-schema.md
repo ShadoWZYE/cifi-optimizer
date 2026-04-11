@@ -56,12 +56,19 @@ Stored in `state.playerProfile`, but not canonical truth:
 | Total shard milestone levels | `planning.shards.totalMilestoneLevels` | unlock-watch helper |
 | Focus milestone | `planning.shards.focusMilestoneId` | manual target |
 | Focus milestone level | `planning.shards.focusMilestoneLevel` | manual target |
+| Checked TokenShop subset player-state seam | `planning.tokenShop.checkedSubsetPlayerState.ATU1Level` through `ATU6Level` checked subset | truthful saved/player-state-backed levels for the grounded TokenShop subset only; still non-canonical and subset-bound |
+| Checked TokenShop subset editor levels | `planning.tokenShop.checkedSubsetLevels.ATU1Level` through `ATU6Level` checked subset | non-canonical local progression editor state for the grounded TokenShop subset only |
 
 Import-only or retired active helpers:
 
 | Field | Path | Notes |
 |---|---|---|
 | Shard income / hour | `planning.shards.ratePerHour` | descriptive derived helper, not directly visible in game, so removed from the active form |
+
+Planner rule:
+
+- checked TokenShop editor levels stay under `planning.tokenShop.checkedSubsetLevels.*` and remain non-canonical until broader row remap and planner gates clear
+- checked TokenShop player-state-backed subset levels stay under `planning.tokenShop.checkedSubsetPlayerState.*` for the already cleared four-row seam only and do not promote the wider raw `ATU*Level` family into canonical state
 
 ## External-model implementation state
 

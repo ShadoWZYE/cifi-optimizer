@@ -244,6 +244,7 @@ Prevent:
   - `data/spend-action-lane-clues.json`
   - `data/token-shop-owner-shell.json`
   - `data/token-shop-save-boundary.json`
+  - `data/unity-trace-bundle.json`
   - `data/token-bank-controller-shell.json`
 - classification: `extracted-mechanics`
 - must contain source paths, explicit grounded boundaries, and unresolved-gap-safe framing

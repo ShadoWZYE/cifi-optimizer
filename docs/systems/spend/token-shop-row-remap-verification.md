@@ -118,12 +118,33 @@ Because those joins are still missing, the repo should not:
   - the checked diamond-special surface still preserves `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost` as a separate lane
   - the checked token-side surface still preserves `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` as a separate lane
   - none of those exact candidate surfaces yields one concrete object or title join back to `ATU3Button` path id `15810`
+- The upgraded join-preservation probe also now makes the current extraction loss explicit instead of scattering it across multiple artifacts:
+  - the shell-side owner window still survives only in `data/token-shop-values.json`
+  - the `BuyCellBoost` action cluster still survives only in `data/daily-tokenium-lane-probe.json`
+  - the surviving prefab identities still survive only as detached `lm244`, `UABEA`, or `unity-probe` hits
+  - the surviving player-facing titles and generic `SetAllTokenShopTexts` or `SetTokenTexts` hooks still survive only as detached unity-probe string buckets
+  - the generated `data/unity-trace-bundle.json` artifact now keeps those exact surfaces together for ATU3 inside the generic `probe:trace` workflow, and it still stays negative because no committed source carries one exact shell id together with one exact prefab identity or final title in the same local container
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`
   - the checked prefab roster remains separate and includes names such as `NewTokenUPGPrefab.T2.DailyTokens`, `NewTokenUPGPrefab.T2.DuoBoosterFour`, `NewTokenUPGPrefab.T3.TrinityBoosterOne`, `NewTokenUPGPrefab.T5.CampaignFragments`, and `NewTokenUPGPrefab.T5.UltimaCells`
   - the checked player-facing title roster remains separate and includes names such as `Token Ultima: Cells`, `Tokens Booster T2`, `Tokens Booster T3`, `Trinity Booster One`, and `Academy Booster`
   - no checked repo artifact crosses from that generic text-hook cluster to one concrete `ATU` shell, exact prefab identity, or final player-facing row title
+
+## Grounded late-shell follow-up conclusion
+
+- The late `ATU24` through `ATU28` shell neighborhood also does not yet clear as one grounded bridge.
+- The repo now has a tighter late-shell negative result than the older generic “late ATU clues exist” summary:
+  - committed TokenShop owner payload data preserves the exact shell-side neighborhood through `ATU24Button` path id `15797`, `ATU25Button` `15820`, `ATU26Button` `15840`, `ATU27Button` `15832`, and `ATU28Button` `15813`
+  - the same checked neighborhood also preserves direct `StartATU24Hold` through `StartATU28Hold`, matching `StopATU24Hold` through `StopATU28Hold`, and direct `BuyATU24` through `BuyATU28`
+  - committed `level0` title neighborhoods preserve one tighter local roster with `Duo Booster Four`, `Trinity Booster One`, `Academy Booster`, `Trinity Oom Booster`, `Tokens Booster T3`, and `Tier 3 Max Level Increaser`
+  - committed `level0` object neighborhoods preserve one tighter local prefab roster with `NewTokenUPGPrefab.T3.TokensBoost`, `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser`, `NewTokenUPGPrefab.T3.TrinityBoosterOne`, `NewTokenUPGPrefab.T5.TrinityOomBooster`, and `NewTokenUPGPrefab.T2.DuoBoosterFour`, while `NewTokenUPGPrefab.T5.CampaignFragments` remains on a separate effect-side surface
+  - committed effect-side probes also preserve narrower late-lane clues such as `ATU24Bonus3Shards`, `LV. 1 - x1.1 Campaign Fragments`, and `LV. 3 - Academy Points x3`
+- That still does not clear one concrete late-row remap:
+  - no checked repo artifact crosses the late title roster back to `ATU24Button` through `ATU28Button`
+  - no checked repo artifact crosses the late prefab roster back to `ATU24Button` through `ATU28Button`
+  - the late title roster and late prefab roster are also not one clean shell-local one-to-one match, because `Academy Booster` survives in the local title cluster while `Campaign Fragments` survives on a separate effect-side prefab and text surface
+  - that means the repo still cannot honestly map `ATU24` through `ATU28` from row order, title similarity, prefab-only naming, or effect-text similarity
 
 ## Allowed implication
 
@@ -140,7 +161,7 @@ Recover one more checked identity bridge from the still-unresolved `ATU`-numbere
 - a specific `NewTokenUPGPrefab.*` object, or
 - a final player-facing row title
 
-The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, and the bounded ATU3 cells-domain pass is now also a negative result, so the next honest candidate is:
+The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, the bounded ATU3 cells-domain pass is now also a negative result, and the late ATU24-ATU28 shell neighborhood is now a tighter negative result too, so the next honest candidate is:
 
 - move to a different unresolved `ATU` shell and recover one more exact shell-to-prefab or shell-to-title bridge without reopening the ATU3 cells split unless a new committed artifact explicitly crosses back to path id `15810`
 

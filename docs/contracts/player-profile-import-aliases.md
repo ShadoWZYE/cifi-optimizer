@@ -39,7 +39,7 @@ Classification: `planner`
 
 Descriptive helper inputs that stay outside canonical account truth.
 
-Accepted alias paths: 14
+Accepted alias paths: 17
 
 | Field | Target path | Accepted aliases |
 |---|---|---|
@@ -47,6 +47,8 @@ Accepted alias paths: 14
 | `totalShardMilestoneLevels` | `planning.shards.totalMilestoneLevels` | `planning.shards.totalMilestoneLevels`, `systems.shards.totalMilestoneLevels`, `totalShardMilestoneLevels` |
 | `shardFocusMilestoneId` | `planning.shards.focusMilestoneId` | `planning.shards.focusMilestoneId`, `systems.shards.focusMilestoneId`, `planning.shardFocusMilestoneId`, `shardFocusMilestoneId` |
 | `shardFocusMilestoneLevel` | `planning.shards.focusMilestoneLevel` | `planning.shards.focusMilestoneLevel`, `systems.shards.focusMilestoneLevel`, `planning.shardFocusMilestoneLevel`, `shardFocusMilestoneLevel` |
+| `shardObservedLevelsByMilestone` | `planning.shards.observedLevelsByMilestone` | `planning.shards.observedLevelsByMilestone`, `systems.shards.observedLevelsByMilestone` |
+| `tokenShopCheckedSubsetLevels` | `planning.tokenShop.checkedSubsetLevels` | `planning.tokenShop.checkedSubsetLevels` |
 
 ## External-model Implementation State
 

@@ -489,6 +489,12 @@ textarea {
 
 .token-shop-affordability-card {
   gap: 12px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, rgba(55, 33, 9, 0.96), rgba(40, 24, 8, 0.96)),
+    linear-gradient(90deg, rgba(210, 159, 45, 0.08), transparent 55%);
+  border-color: rgba(208, 157, 41, 0.28);
+  color: #f5ead3;
 }
 
 .token-shop-affordability-head {
@@ -502,6 +508,177 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.token-shop-game-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 136px;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.token-shop-level-ring {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  border-radius: 26px;
+  border: 3px solid rgba(241, 186, 65, 0.9);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(87, 101, 132, 0.78), rgba(21, 27, 42, 0.98) 70%),
+    linear-gradient(180deg, rgba(255, 214, 97, 0.2), rgba(82, 55, 11, 0.18));
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 238, 173, 0.16),
+    0 0 0 3px rgba(105, 66, 9, 0.32);
+}
+
+.token-shop-level-value,
+.token-shop-level-cap,
+.token-shop-level-divider {
+  font-family: "IBM Plex Mono", monospace;
+  color: #fff7e8;
+}
+
+.token-shop-level-value,
+.token-shop-level-cap {
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.token-shop-level-divider {
+  font-size: 0.92rem;
+  opacity: 0.8;
+}
+
+.token-shop-level-editor {
+  width: 100%;
+  margin-top: 4px;
+  gap: 4px;
+}
+
+.token-shop-level-editor span {
+  text-align: center;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 238, 203, 0.8);
+}
+
+.token-shop-level-editor input {
+  padding: 8px 6px;
+  text-align: center;
+  border-radius: 10px;
+  background: rgba(255, 248, 233, 0.96);
+}
+
+.token-shop-main-lane {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.token-shop-top-band {
+  display: block;
+}
+
+.token-shop-main-lane .validation-card {
+  background: rgba(28, 32, 49, 0.78);
+  border-color: rgba(196, 151, 54, 0.18);
+}
+
+.token-shop-main-lane .validation-card strong,
+.token-shop-main-lane .validation-card .snapshot-title,
+.token-shop-main-lane .validation-card .meta,
+.token-shop-affordability-card strong {
+  color: #f5ead3;
+}
+
+.token-shop-buy-panel {
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto;
+  align-items: start;
+  justify-items: stretch;
+  gap: 8px;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(62, 181, 207, 0.42);
+  background: linear-gradient(180deg, rgba(30, 126, 152, 0.98), rgba(18, 77, 102, 0.98));
+  text-align: center;
+  height: 100%;
+}
+
+.token-shop-buy-label {
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #effcff;
+}
+
+.token-shop-buy-panel strong {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.token-shop-buy-panel .meta {
+  font-size: 0.76rem;
+  color: rgba(232, 249, 255, 0.88);
+}
+
+.token-shop-stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.token-shop-stat-card {
+  min-height: 88px;
+}
+
+.token-shop-editor-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.token-shop-editor-meta {
+  display: grid;
+  gap: 4px;
+}
+
+.token-shop-level-editor-buy {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.token-shop-level-editor-buy span {
+  text-align: left;
+}
+
+.token-shop-buy-button {
+  width: 100%;
+  margin-top: auto;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 231, 168, 0.98), rgba(231, 177, 55, 0.98));
+  color: #17313d;
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.token-shop-buy-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.token-shop-affordability-card .score {
+  display: none;
 }
 
 .shard-threshold-grid,

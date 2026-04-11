@@ -2,8 +2,8 @@
   "version": "v1",
   "generatedFrom": "player-profile.js",
   "groupCount": 7,
-  "aliasCount": 33,
-  "acceptedPathCount": 84,
+  "aliasCount": 34,
+  "acceptedPathCount": 85,
   "groups": [
     {
       "id": "meta",
@@ -153,9 +153,16 @@
             "planning.shards.observedLevelsByMilestone",
             "systems.shards.observedLevelsByMilestone"
           ]
+        },
+        {
+          "field": "tokenShopCheckedSubsetLevels",
+          "targetPath": "planning.tokenShop.checkedSubsetLevels",
+          "acceptedPaths": [
+            "planning.tokenShop.checkedSubsetLevels"
+          ]
         }
       ],
-      "acceptedPathCount": 16
+      "acceptedPathCount": 17
     },
     {
       "id": "externalModel",

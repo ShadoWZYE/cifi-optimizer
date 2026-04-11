@@ -23,6 +23,11 @@ Not yet verified enough for app recommendations:
 - final remap from serialized ids to grounded player-facing labels
 - full next-purchase logic beyond extracted constants
 
+Verified enough for the current checked-row detail slice:
+
+- imported compatibility-only levels for the already checked `ATU1`, `ATU2`, `ATU5`, and `ATU6` subset can be paired with the extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields for those same rows
+- that subset is enough to describe current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change without introducing optimizer math
+
 ## Adjacent systems still to map
 
 The extracted `TokenShop` payload is not isolated. Its field names and nearby Unity labels show several adjacent system families that should be mapped before TokenShop can become a native planner surface:
@@ -123,6 +128,31 @@ The extracted TokenShop families do not only touch token income. Unity title/eff
   - Mapping implication: TokenShop reaches into Ouroboros progression too, which confirms the user’s point that these systems are cross-interacting and need explicit boundaries.
 
 The safe repo conclusion is that TokenShop is a canonical cross-system modifier hub. That makes system mapping more important, not less: every downstream label above needs a verified owner and naming path before TokenShop recommendations can be truthful.
+
+## Current checked-row tool slice
+
+The current app-facing TokenShop slice should stay narrower than a recommendation tool:
+
+- User-facing question: `What do the grounded upgrades I can already inspect actually do at my current level and on the next level?`
+- Safe consumed inputs:
+  - compatibility-only current levels for checked rows `ATU1`, `ATU2`, `ATU5`, and `ATU6`
+  - extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields for those same rows
+- Safe output shape:
+  - grounded identity
+  - current level
+  - next known cost
+  - known max-level status
+  - current-vs-next extracted bonus-step change
+- Current user-facing home:
+  - the first checked-row TokenShop slice now lives on the Progression page as a local editor for the checked subset
+  - `planning.tokenShop.checkedSubsetLevels.*` is the local non-canonical editor path
+  - `compatibility.unmappedSystemState.tokenShop.*` stays available as prefill only, not as the only live UI state
+- Explicit non-goals:
+  - best buy
+  - ROI
+  - ranking beyond fixed `ATU1`, `ATU2`, `ATU5`, `ATU6` display order
+  - canonical `state.playerProfile` promotion for unresolved rows
+  - widening into token-bank, Daily Tokenium, Emporium, or unresolved `ATU*` remap work
 
 ## Selected values
 
