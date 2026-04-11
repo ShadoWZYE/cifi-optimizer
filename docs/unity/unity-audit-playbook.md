@@ -60,6 +60,10 @@ Repo-local npm probe wrappers:
   - refreshes `data/uabea-probe-report.json` first, then regenerates `data/shard-cost-method-probe.v1.json` and `docs/systems/shards/shard-cost-method-probe.md`
 - `npm run probe:shards:cost-native`
   - refreshes `data/uabea-probe-report.json`, then regenerates the shard method, parameter, and native probe outputs in dependency order
+- `npm run probe:token-shop:remap-joins`
+  - regenerates `data/token-shop-remap-join-probe.json` and `docs/systems/spend/token-shop-remap-join-probe.md`
+  - reads committed `data/token-shop-values.json`, `data/daily-tokenium-lane-probe.json`, `data/uabea-probe-report.json`, `data/unity-probe-report.json`, and `data/lm244-targeted-probe.json`
+  - preserves unresolved TokenShop shell-local join attempts in one artifact family so exact shell ids, nearby action hooks, prefab identities, and final title or text surfaces can be rechecked together before any remap-boundary promotion
 
 Important primary files:
 

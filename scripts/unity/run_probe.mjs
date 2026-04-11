@@ -57,6 +57,9 @@ const commandSets = {
     ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]],
     ["python", [path.join(root, "scripts", "unity", "shard_cost_native_probe.py")]],
   ],
+  "token-shop:remap-joins": [
+    ["python", [path.join(root, "scripts", "unity", "token_shop_remap_join_probe.py")]],
+  ],
 };
 
 function formatRepoPath(targetPath) {

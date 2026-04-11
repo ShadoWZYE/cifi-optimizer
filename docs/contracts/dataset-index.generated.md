@@ -334,6 +334,13 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/token-shop-late-atu-boundary.json`
 
+### `token-shop-remap-join-probe`
+
+- Label: Token shop remap join probe
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/token-shop-remap-join-probe.json`
+
 ### `multiverse-market-save-boundary`
 
 - Label: Multiverse market save boundary

@@ -2513,6 +2513,53 @@ function validateTokenShopLateAtuBoundary(boundary) {
   };
 }
 
+function validateTokenShopRemapJoinProbe(probe) {
+  expectNonEmptyString(probe.generatedAt, "token shop remap join probe generatedAt must be present");
+  expectNonEmptyString(probe.dataset, "token shop remap join probe dataset must be present");
+  expectRecord(probe.probeMethod, "token shop remap join probe probeMethod must be an object");
+  expectRecord(probe.sources, "token shop remap join probe sources must be an object");
+  expectArray(probe.sourceRoles, "token shop remap join probe sourceRoles must be an array");
+  expectArray(probe.neighborhoods, "token shop remap join probe neighborhoods must be an array");
+  expectArray(probe.currentBoundary, "token shop remap join probe currentBoundary must be an array");
+  ["tokenShopExtract", "dailyTokeniumLaneProbe", "uabeaProbe", "unityProbe", "lm244TargetedProbe"].forEach((field) => {
+    expectNonEmptyString(probe.sources[field], `token shop remap join probe sources.${field} must be present`);
+  });
+
+  assert.equal(probe.dataset, "token-shop-remap-join-probe", "token shop remap join probe dataset id drifted");
+  assert.equal(probe.probeMethod.command, "node scripts/unity/run_probe.mjs token-shop:remap-joins", "token shop remap join probe command drifted");
+  assert.equal(probe.neighborhoods.length, 1, "token shop remap join probe must stay on one bounded neighborhood for now");
+  const atu3 = probe.neighborhoods[0];
+  assert.equal(atu3.id, "atu3-cells-domain", "token shop remap join probe target id drifted");
+  assert.equal(atu3.shellWindow.shellField, "ATU3Button", "token shop remap join probe shell field drifted");
+  assert.equal(atu3.shellWindow.shellPathId, 15810, "token shop remap join probe shell path id drifted");
+  assert.deepEqual(
+    atu3.shellWindow.ownerFieldBlock,
+    ["CellBoostStartCost", "CellBoostAdditiveCost", "CellBoostBonus", "CellBoostMaxLevel", "CellBoostFill"],
+    "token shop remap join probe owner field block drifted"
+  );
+  assert.equal(atu3.bridgeCheck.bridgeCleared, false, "token shop remap join probe must stay negative until one container clears a join");
+  assert.equal(atu3.bridgeCheck.result, "no checked object-or-title bridge recovered", "token shop remap join probe result drifted");
+  assert.ok(atu3.surfaces.some((surface) => surface.id === "action-lane"), "token shop remap join probe missing action lane");
+  assert.ok(atu3.surfaces.some((surface) => surface.id === "diamond-special"), "token shop remap join probe missing diamond-special lane");
+  assert.ok(atu3.surfaces.some((surface) => surface.id === "token-lane"), "token shop remap join probe missing token lane");
+  assert.ok(atu3.surfaces.some((surface) => surface.id === "text-hooks"), "token shop remap join probe missing text-hook lane");
+  assert.ok(atu3.lostStructure.some((line) => /shell-side owner window survives only in the TokenShop extract/i.test(line)), "token shop remap join probe must preserve shell-loss explanation");
+  assert.ok(atu3.lostStructure.some((line) => /Final titles and generic text hooks survive as separate unity-probe string buckets/i.test(line)), "token shop remap join probe must preserve title-loss explanation");
+  assert.match(atu3.groundedConclusion, /upgraded ATU3 remap join probe stays negative/i, "token shop remap join probe grounded conclusion drifted");
+  assert.ok(probe.currentBoundary.some((line) => /join-preservation surface, not a remap promotion/i.test(line)), "token shop remap join probe must preserve non-promotion framing");
+
+  return {
+    id: "token-shop-remap-join-probe",
+    label: "Token shop remap join probe",
+    classification: "extracted-mechanics",
+    stats: [
+      `${probe.neighborhoods.length} unresolved shell neighborhood preserved`,
+      `${atu3.surfaces.length} split surfaces tracked for ATU3`,
+      "ATU3 remains negative because shell, action, prefab, and title surfaces are still detached across committed artifacts"
+    ]
+  };
+}
+
 function validateMultiverseMarketSaveBoundary(boundary) {
   expectNonEmptyString(boundary.generatedAt, "multiverse market save boundary generatedAt must be present");
   expectRecord(boundary.sources, "multiverse market save boundary sources must be an object");
@@ -3913,7 +3960,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 58, "bundled dataset contract must track the fifty-eight shipped dataset groups");
+  assert.equal(contract.datasets.length, 59, "bundled dataset contract must track the fifty-nine shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -4020,6 +4067,7 @@ export async function validateBundledDatasets() {
   const tokenShopRowLevelOwner = await readJson("../../data/token-shop-row-level-owner.json");
   const tokenShopRowRemapBoundary = await readJson("../../data/token-shop-row-remap-boundary.json");
   const tokenShopLateAtuBoundary = await readJson("../../data/token-shop-late-atu-boundary.json");
+  const tokenShopRemapJoinProbe = await readJson("../../data/token-shop-remap-join-probe.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
   const multiverseMarketSaveDataImportBoundary = await readJson("../../data/multiverse-market-savedata-import-boundary.json");
@@ -4088,6 +4136,7 @@ export async function validateBundledDatasets() {
     validateTokenShopRowLevelOwner(tokenShopRowLevelOwner),
     validateTokenShopRowRemapBoundary(tokenShopRowRemapBoundary),
     validateTokenShopLateAtuBoundary(tokenShopLateAtuBoundary),
+    validateTokenShopRemapJoinProbe(tokenShopRemapJoinProbe),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateMultiverseMarketSaveDataImportBoundary(multiverseMarketSaveDataImportBoundary, multiverseMarketStateVerificationDoc),

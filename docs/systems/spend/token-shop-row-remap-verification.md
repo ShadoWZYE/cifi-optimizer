@@ -118,6 +118,12 @@ Because those joins are still missing, the repo should not:
   - the checked diamond-special surface still preserves `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost` as a separate lane
   - the checked token-side surface still preserves `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` as a separate lane
   - none of those exact candidate surfaces yields one concrete object or title join back to `ATU3Button` path id `15810`
+- The upgraded join-preservation probe also now makes the current extraction loss explicit instead of scattering it across multiple artifacts:
+  - the shell-side owner window still survives only in `data/token-shop-values.json`
+  - the `BuyCellBoost` action cluster still survives only in `data/daily-tokenium-lane-probe.json`
+  - the surviving prefab identities still survive only as detached `lm244`, `UABEA`, or `unity-probe` hits
+  - the surviving player-facing titles and generic `SetAllTokenShopTexts` or `SetTokenTexts` hooks still survive only as detached unity-probe string buckets
+  - the generated `data/token-shop-remap-join-probe.json` artifact now keeps those exact surfaces together for ATU3, and it still stays negative because no committed source carries one exact shell id together with one exact prefab identity or final title in the same local container
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`
