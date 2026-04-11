@@ -342,12 +342,16 @@ assert.match(appJs, /boundary\?\.boundedRecoveredBridge\?\.prefabIdentity \|\| "
 assert.match(appJs, /boundary\?\.verifiedTitleJoin\?\.titleProbeTitle \|\| boundary\?\.boundedRecoveredBridgeFollowUp\?\.prefabIdentity \|\| "Mk2 Generator Booster"/);
 assert.match(appJs, /Compatibility-only subset level: \$\{row\.identity\} \(\$\{row\.slot\}\)/);
 assert.match(appJs, /function renderTokenShopGroundedSubsetAffordability/);
-assert.match(appJs, /Grounded TokenShop subset affordability/);
-assert.match(appJs, /Player question: what grounded TokenShop upgrades can I buy right now from the subset we actually know\?/);
+assert.match(appJs, /function getTokenShopGroundedSubsetRowDetailSummary/);
+assert.match(appJs, /function formatTokenShopBonusStep/);
+assert.match(appJs, /Grounded TokenShop subset row details/);
+assert.match(appJs, /Player question: What do the grounded upgrades I can already inspect actually do at my current level and on the next level\?/);
 assert.match(appJs, /Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU5, ATU6\./);
 assert.match(appJs, /This module is explicitly non-optimizer\./);
 assert.match(appJs, /No canonical ATU promotion/);
 assert.match(appJs, /Known cost inputs: start \$\{formatBoundaryValue\(row\.startCost\)\} \+ additive \$\{formatBoundaryValue\(row\.additiveCost\)\} x current level\./);
+assert.match(appJs, /Current vs next bonus/);
+assert.match(appJs, /adds one more extracted bonus step only/);
 assert.match(html, /id="overviewTokenShopAffordability"/);
 assert.match(appJs, /Only rows with checked remap-boundary joins are surfaced here/);
 assert.match(appJs, /TokenShop current row levels/);
@@ -365,7 +369,7 @@ assert.match(appJs, /Compatibility-only preview labeled/);
 assert.match(appJs, /Uncertainty visible/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /function renderSpendPlannerResearchForkNote/);
-assert.match(appJs, /The Overview page now keeps two separate spend-side user surfaces: one descriptive boundary snapshot and one grounded TokenShop subset affordability module/);
+assert.match(appJs, /The Overview page now keeps two separate spend-side user surfaces: one descriptive boundary snapshot and one grounded TokenShop checked-row detail tool/);
 assert.match(appJs, /function getRecommendationExplainabilitySummary/);
 assert.match(appJs, /function getRecommendationContractSummary/);
 assert.match(appJs, /function getRecommendationExplainabilityAudit/);
@@ -2057,6 +2061,32 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   );
   assert.ok(track.nextSteps.length <= 3, "expected spend first UI slice next-step count");
 });
+const tokenShopRowDetailSliceTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-shop-row-detail-slice");
+withRequiredValue(tokenShopRowDetailSliceTrack, "expected TokenShop row-detail slice track", (track) => {
+  assert.equal(track.status, "archived");
+  assert.match(track.goal, /next small grounded row-detail tool/i);
+  assert.match(track.currentSlice, /checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields/);
+  assert.match(track.currentSlice, /known max-level status, and current-vs-next extracted bonus-step change/);
+  assert.match(track.exitCondition, /What do the grounded upgrades I can already inspect actually do at my current level and on the next level\?/);
+  assert.match(track.blockedBy, /true next-purchase rule set/);
+  assert.match(track.smallestShippableSlice, /grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change/);
+  assert.ok(
+    track.completedSteps.some((step) => /Drop canonical Tokens from the consumed-input contract/.test(step)),
+    "expected TokenShop row-detail slice track to record the narrower consumed-input contract"
+  );
+  assert.ok(
+    track.completedSteps.some((step) => /current-vs-next extracted bonus-step change/.test(step)),
+    "expected TokenShop row-detail slice track to record the row-detail output shape"
+  );
+  assert.ok(
+    track.verified.some((line) => /checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields/.test(line)),
+    "expected TokenShop row-detail slice track to record the shipped values inputs"
+  );
+  assert.ok(
+    track.verified.some((line) => /true next-purchase rule set/.test(line)),
+    "expected TokenShop row-detail slice track to keep broader planner behavior blocked"
+  );
+});
 const tokenBankOwnerTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-bank-state-owner");
 withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", (track) => {
   assert.equal(track.status, "active");
@@ -3008,13 +3038,15 @@ assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are reti
 assert.match(importMappingDoc, /flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked`, `ATU\*Level`, `Tier\*TokensUnlocked`, `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`, or `FinalTokenBankFillSpeed` may also be preserved/);
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
+assert.match(tokenShopDoc, /## Current checked-row tool slice/);
+assert.match(tokenShopDoc, /What do the grounded upgrades I can already inspect actually do at my current level and on the next level\?/);
 assert.match(tokenShopDoc, /## Adjacent systems still to map/);
 assert.match(tokenShopDoc, /Academy \/ farm mission tokenium lane/);
 assert.match(tokenShopDoc, /Diamond-related upgrade lane inside TokenShop/);
 assert.match(tokenShopDoc, /## Future mapping signals/);
 assert.match(tokenShopDoc, /gameplay owner and saved-state family for the Academy or Farm Mission Daily Tokenium lane/);
 assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to affect/);
-assert.match(spendSystemVerificationDoc, /subset-bound TokenShop affordability module for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset/);
+assert.match(spendSystemVerificationDoc, /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset/);
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
 assert.match(multiverseMarketDoc, /## Integration status/);
