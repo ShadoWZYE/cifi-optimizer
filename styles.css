@@ -487,6 +487,23 @@ textarea {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.token-shop-affordability-card {
+  gap: 12px;
+}
+
+.token-shop-affordability-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.token-shop-affordability-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .shard-threshold-grid,
 .shard-bonus-list {
   display: grid;
@@ -913,6 +930,14 @@ textarea {
 }
 
 @media (max-width: 780px) {
+  .token-shop-affordability-head {
+    flex-direction: column;
+  }
+
+  .token-shop-affordability-grid {
+    grid-template-columns: 1fr;
+  }
+
   .shard-milestone-summary {
     flex-direction: column;
   }

@@ -223,14 +223,6 @@ The repo's active unresolved queue currently lives in [`data/game-data.snapshot.
 
 Current active or queued tracks:
 
-- `spend-planner-first-ui-slice`
-  - status: `active`
-  - goal: ship the first small spend tool slice around one real player question instead of treating the whole spend domain as one blocker
-  - user question: `What TokenShop rows can I safely inspect from my current data right now, and what is still blocked?`
-  - minimum required inputs: checked TokenShop row-remap subset, imported current levels for that same subset, and explicit blocked-state labeling
-  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, recommendation math
-  - current true blocker: landing the slice as a subset-bound descriptive or planning-adjacent tool without silently widening it into unrelated spend lanes
-  - smallest shippable slice: a normal app surface that shows current canonical spend inputs, a compatibility-backed TokenShop row subset for only the checked rows, explicit blocked-input notes for the rest, and no recommendation math
 - `shard-milestone-payload-recovery`
   - status: `active`
   - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
@@ -255,6 +247,14 @@ Current active or queued tracks:
 
 Superseded parent:
 
+- `spend-planner-first-ui-slice`
+  - status: `archived`
+  - goal: shipped the first real TokenShop tool slice around one real player question instead of treating the whole spend domain as one blocker
+  - user question: `What grounded TokenShop upgrades can I buy right now from the subset we actually know?`
+  - minimum required inputs: canonical Tokens, checked TokenShop row-remap subset for `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`, imported current levels for that same subset, and checked `StartCost` / `AdditiveCost` values for those same rows
+  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math
+  - current true blocker: closed for this slice; broader planner-safe spend behavior remains on separate owner and remap lanes
+  - smallest shippable slice: a separate Overview module that shows each grounded subset row's identity, current level, next known cost, and current affordability in fixed grounded slot order, without optimizer claims or canonical `ATU*Level` promotion
 - `spend-planner-from-extracted-data`
   - status: `archived`
   - reason: it mixed multiple independent spend blockers that now have distinct exit conditions and should no longer share one queue item

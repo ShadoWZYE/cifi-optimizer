@@ -1191,6 +1191,7 @@ function renderOverview() {
     renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
   $("#overviewSpendSnapshot").innerHTML = renderSpendPlannerBoundary();
+  $("#overviewTokenShopAffordability").innerHTML = renderTokenShopGroundedSubsetAffordability();
 }
 
 function renderShipPlayerState() {
@@ -1853,7 +1854,7 @@ function renderSpendPlannerBoundary() {
   const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
   const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
   const importedTokenShopState = compatibility.unmappedSystems?.tokenShop;
-  const groundedTokenShopRowPreview = getTokenShopGroundedRowPreviewSummary(
+  const groundedTokenShopRowPreview = getTokenShopGroundedSubsetPreviewSummary(
     state.extractedMechanics?.tokenShopRowRemapBoundary,
     importedTokenShopState
   );
@@ -1942,7 +1943,7 @@ function renderSpendPlannerBoundary() {
         <ul class="research-step-list">${boundaryBackedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not imported yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
     </div>
     <div class="meta-stack">
-      <p class="snapshot-title">Compatibility-only TokenShop subset preview</p>
+      <p class="snapshot-title">Compatibility-only TokenShop subset boundary</p>
         <ul class="research-step-list">${groundedTokenShopRowPreview.rows.map((row) => `<li>${escapeHtml(row.label)}: ${isBoundaryValuePresent(row.value) ? escapeHtml(formatBoundaryValue(row.value)) : "Not imported yet"} <code>${escapeHtml(row.path)}</code>. ${escapeHtml(row.note)}</li>`).join("")}</ul>
         <p class="meta">${groundedTokenShopRowPreview.quarantineNote}</p>
     </div>
@@ -1967,7 +1968,7 @@ function renderSpendPlannerBoundary() {
     <div class="pill-row">
         <span class="pill">${canonicalInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${canonicalInputs.length} canonical inputs entered</span>
         <span class="pill">${boundaryBackedInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${boundaryBackedInputs.length} boundary-backed inputs imported</span>
-        <span class="pill">${groundedTokenShopRowPreview.importedCount}/${groundedTokenShopRowPreview.rows.length} grounded TokenShop rows imported</span>
+        <span class="pill">${groundedTokenShopRowPreview.importedCount}/${groundedTokenShopRowPreview.rows.length} grounded TokenShop subset levels imported</span>
         <span class="pill">${blockedInputs.length} blocked inputs surfaced</span>
         <span class="pill">Canonical boundary preserved</span>
         <span class="pill">Boundary-backed evidence labeled</span>
@@ -1982,9 +1983,9 @@ function renderSpendPlannerResearchForkNote() {
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Forked user-surface slice</p>
-      <p class="meta">The first spend snapshot now lives on the Overview page as a normal app surface instead of growing inside a research-only card.</p>
-      <p class="meta">That user surface is still descriptive only: it shows canonical spend inputs, explicitly labeled boundary-backed evidence, one compatibility-only TokenShop subset preview, and the existing blocked owner-dependent inputs without recommendations.</p>
-      <p class="meta">Future growth beyond this descriptive gating should fork into a new slice rather than reopening the shipped snapshot surface.</p>
+      <p class="meta">The Overview page now keeps two separate spend-side user surfaces: one descriptive boundary snapshot and one grounded TokenShop subset affordability module.</p>
+      <p class="meta">The TokenShop module answers one real player question for the checked subset only: what grounded TokenShop upgrades are affordable right now from current canonical Tokens plus imported compatibility-only subset levels.</p>
+      <p class="meta">Anything beyond that consumed-input contract should fork into a new slice rather than reopening the shipped surfaces with optimizer behavior.</p>
     </div>
   `;
 }
@@ -4620,36 +4621,61 @@ function getTokenShopSaveBoundarySummary(boundary) {
   };
 }
 
-function getTokenShopGroundedRowPreviewSummary(boundary, tokenShopState) {
-  const resolvedTokenShopState = tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
-  const rowDefinitions = [
+function getTokenShopGroundedSubsetDefinitions(boundary) {
+  return [
     {
       field: "ATU1Level",
       slot: "ATU1",
       identity: boundary?.adjacentFollowUp?.recoveredAdditionalBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.TokensBoost",
-      note: "Checked shell-to-prefab bridge only. This row preview stays non-canonical until a final player-facing title join is recovered."
+      identitySource: "Checked prefab identity",
+      startCostField: "TokenBoostStartCost",
+      additiveCostField: "TokenBoostAdditiveCost",
+      maxLevelField: "TokenBoostMaxLevel",
+      note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
       field: "ATU2Level",
       slot: "ATU2",
       identity: boundary?.recoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.DiamondBoost",
-      note: "Checked shell-to-prefab bridge only. This row preview stays non-canonical until a final player-facing title join is recovered."
+      identitySource: "Checked prefab identity",
+      startCostField: "DiamondBoostStartCost",
+      additiveCostField: "DiamondBoostAdditiveCost",
+      maxLevelField: "DiamondBoostMaxLevel",
+      note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
       field: "ATU5Level",
       slot: "ATU5",
       identity: boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
-      note: "Checked shell-to-prefab bridge only. This row preview stays non-canonical until a final player-facing title join is recovered."
+      identitySource: "Checked prefab identity",
+      startCostField: "MK1TokenBoostStartCost",
+      additiveCostField: "MK1TokenBoostAdditiveCost",
+      maxLevelField: "MK1TokenBoostFillMaxLevel",
+      note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
       field: "ATU6Level",
       slot: "ATU6",
       identity: boundary?.verifiedTitleJoin?.titleProbeTitle || boundary?.boundedRecoveredBridgeFollowUp?.prefabIdentity || "Mk2 Generator Booster",
-      note: "Checked shell-to-prefab-to-title chain. This row preview is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
+      identitySource: boundary?.verifiedTitleJoin?.titleProbeTitle ? "Checked final title" : "Checked prefab identity",
+      startCostField: "MK2TokenBoostStartCost",
+      additiveCostField: "MK2TokenBoostAdditiveCost",
+      maxLevelField: "MK2TokenBoostFillMaxLevel",
+      note: "Checked shell-to-prefab-to-title chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     }
   ];
-  const rows = rowDefinitions.map((row) => ({
-    label: `Compatibility-only row preview: ${row.identity} (${row.slot})`,
+}
+
+function getTokenShopNumericFieldValue(tokenShop, fieldName) {
+  const fields = Array.isArray(tokenShop?.fields) ? tokenShop.fields : [];
+  const entry = fields.find((field) => field?.field === fieldName && field?.kind === "number");
+  return typeof entry?.value === "number" ? entry.value : null;
+}
+
+function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
+  const resolvedTokenShopState = tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
+  const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => ({
+    label: `Compatibility-only subset level: ${row.identity} (${row.slot})`,
     value: resolvedTokenShopState[row.field],
     path: `compatibility.unmappedSystemState.tokenShop.${row.field}`,
     note: row.note
@@ -4660,6 +4686,123 @@ function getTokenShopGroundedRowPreviewSummary(boundary, tokenShopState) {
     importedCount: rows.filter((row) => isBoundaryValuePresent(row.value)).length,
     quarantineNote: "Only rows with checked remap-boundary joins are surfaced here. Remaining `ATU*Level` rows stay quarantined under `compatibility.unmappedSystemState.tokenShop` until more grounded row identities clear."
   };
+}
+
+function getTokenShopGroundedSubsetAffordabilitySummary(boundary, tokenShopState, canonicalTokens, tokenShop) {
+  const resolvedTokenShopState = tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
+  const tokenBudget = typeof canonicalTokens === "number" && Number.isFinite(canonicalTokens) ? canonicalTokens : null;
+  const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => {
+    const currentLevel = resolvedTokenShopState[row.field];
+    const startCost = getTokenShopNumericFieldValue(tokenShop, row.startCostField);
+    const additiveCost = getTokenShopNumericFieldValue(tokenShop, row.additiveCostField);
+    const maxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
+    const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
+    const isMaxed = hasLevel && typeof maxLevel === "number" && currentLevel >= maxLevel;
+    const nextKnownCost = hasLevel && !isMaxed && typeof startCost === "number" && typeof additiveCost === "number"
+      ? startCost + (additiveCost * currentLevel)
+      : null;
+    const affordable = tokenBudget !== null && typeof nextKnownCost === "number"
+      ? tokenBudget >= nextKnownCost
+      : null;
+
+    return {
+      ...row,
+      currentLevel,
+      currentLevelPath: `compatibility.unmappedSystemState.tokenShop.${row.field}`,
+      startCost,
+      additiveCost,
+      nextKnownCost,
+      affordable,
+      isMaxed,
+      maxLevel
+    };
+  });
+
+  return {
+    displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU5, ATU6.",
+    tokenBudget,
+    rows,
+    importedCount: rows.filter((row) => typeof row.currentLevel === "number" && Number.isFinite(row.currentLevel)).length,
+    affordableCount: rows.filter((row) => row.affordable === true).length
+  };
+}
+
+function renderTokenShopGroundedSubsetAffordability() {
+  const canonical = getCanonicalProfileState();
+  const compatibility = getCompatibilityProfileState();
+  const summary = getTokenShopGroundedSubsetAffordabilitySummary(
+    state.extractedMechanics?.tokenShopRowRemapBoundary,
+    compatibility.unmappedSystems?.tokenShop,
+    canonical.tokens,
+    state.extractedMechanics?.tokenShop
+  );
+  const tokenBudgetLabel = summary.tokenBudget === null ? "Not entered yet" : formatBoundaryValue(summary.tokenBudget);
+
+  return `
+    <article class="validation-card warn">
+      <strong>Grounded TokenShop subset affordability</strong>
+      <p class="meta">Player question: what grounded TokenShop upgrades can I buy right now from the subset we actually know?</p>
+      <p class="meta">Consumed inputs only: canonical <code>player.resources.tokens</code> plus imported compatibility-only levels for the checked <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU5Level</code>, and <code>ATU6Level</code> subset.</p>
+      <p class="meta">${escapeHtml(summary.displayRule)}</p>
+      <p class="meta">This module is explicitly non-optimizer. It shows current subset affordability only and does not claim best-buy order, ROI, route quality, or any planner-safe ranking.</p>
+      <div class="pill-row">
+        <span class="pill">Tokens budget: ${escapeHtml(tokenBudgetLabel)}</span>
+        <span class="pill">${summary.importedCount}/${summary.rows.length} subset levels imported</span>
+        <span class="pill">${summary.affordableCount} affordable now</span>
+        <span class="pill">Compatibility-only subset levels</span>
+        <span class="pill">No canonical ATU promotion</span>
+      </div>
+      <div class="preview-stack">
+        ${summary.rows.map((row) => {
+          const affordabilityLabel = row.affordable === true
+            ? "Affordable now"
+            : row.affordable === false
+              ? "Not affordable"
+              : row.isMaxed
+                ? "Already at known cap"
+                : "Affordability unavailable";
+          const affordabilityTone = row.affordable === true ? "pass" : "warn";
+          const currentLevelLabel = typeof row.currentLevel === "number" && Number.isFinite(row.currentLevel)
+            ? formatBoundaryValue(row.currentLevel)
+            : "Not imported yet";
+          const nextKnownCostLabel = row.isMaxed
+            ? "No next cost within known cap"
+            : typeof row.nextKnownCost === "number"
+              ? formatBoundaryValue(row.nextKnownCost)
+              : "Unavailable until current level is imported";
+          const costFormulaLine = typeof row.startCost === "number" && typeof row.additiveCost === "number"
+            ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
+            : "Known cost inputs are incomplete in this build.";
+
+          return `
+            <article class="preview-card token-shop-affordability-card">
+              <div class="token-shop-affordability-head">
+                <div class="meta-stack">
+                  <strong>${escapeHtml(row.identity)}</strong>
+                  <p class="meta">${escapeHtml(row.slot)} • ${escapeHtml(row.identitySource)}</p>
+                </div>
+                <span class="score">${escapeHtml(affordabilityLabel)}</span>
+              </div>
+              <div class="token-shop-affordability-grid">
+                <div class="validation-card ${affordabilityTone}">
+                  <span class="snapshot-title">Current level</span>
+                  <strong>${escapeHtml(currentLevelLabel)}</strong>
+                  <p class="meta"><code>${escapeHtml(row.currentLevelPath)}</code></p>
+                </div>
+                <div class="validation-card ${affordabilityTone}">
+                  <span class="snapshot-title">Next known cost</span>
+                  <strong>${escapeHtml(nextKnownCostLabel)}</strong>
+                  <p class="meta">${escapeHtml(costFormulaLine)}</p>
+                </div>
+              </div>
+              <p class="meta">${escapeHtml(row.note)}</p>
+            </article>
+          `;
+        }).join("")}
+      </div>
+      <p class="meta">Unresolved TokenShop rows remain outside this module. The app still does not promote raw <code>ATU*Level</code> fields into canonical <code>state.playerProfile</code> and does not rank purchases beyond the declared slot-order display rule.</p>
+    </article>
+  `;
 }
 
 function getTokenBankControllerShellSummary(shell) {

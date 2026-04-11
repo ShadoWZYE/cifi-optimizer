@@ -26,21 +26,22 @@ If any item is missing, the allowed work stays in docs, parser scripts, owner ma
 
 Until a broader planner is justified, evaluate the first TokenShop-facing slice against this contract:
 
-- User-facing question: what TokenShop rows can I safely inspect from my current data right now, and what is still blocked
+- User-facing question: what grounded TokenShop upgrades can I buy right now from the subset we actually know?
 - Minimum required inputs:
+  - canonical current Tokens
   - checked TokenShop row identity for the rows shown
   - current imported levels for those same rows
-  - explicit blocked-state labeling for unresolved rows or missing planner inputs
+  - checked `StartCost` and `AdditiveCost` values for those same rows
 - Explicit non-blockers:
   - token-bank cap or claimable-state recovery
   - Daily Tokenium cap or ready-state recovery
   - Emporium state recovery
   - unresolved TokenShop rows outside the checked subset
-  - recommendation math or new gameplay logic
+  - best-buy ranking, ROI math, or new gameplay logic
 - Current true blocker:
-  - keeping the first slice subset-bound instead of silently upgrading the requirement to a full spend planner
+  - keeping the first slice subset-bound and non-optimizer instead of silently upgrading it to a full spend planner
 - Smallest shippable tool slice:
-  - a normal app surface that shows the checked TokenShop subset, current imported levels for that subset, and blocked-input notes for unresolved rows, with no recommendation math
+  - a separate normal app module that shows the checked TokenShop subset, current imported levels for that subset, next known cost from grounded row constants, and current affordability from canonical Tokens only, with no recommendation math
 
 ## TokenShop
 
@@ -101,8 +102,8 @@ These are not yet planner-ready integrations. They are dependency notes so futur
 - It is safe to describe its cost lane as token-bank token or tokenium spending, rather than as an unnamed generic spend pool.
 - It is safe to preserve raw `ATU1Level` through `ATU28Level` and `Tier2TokensUnlocked` through `Tier5TokensUnlocked` under `compatibility.unmappedSystemState.tokenShop`.
 - It is safe to say the repo now has grounded non-label clues around some `ATU` rows, including token, diamond, daily-token, shard, and late direct-buy hook evidence.
-- It is now also safe to show a small descriptive TokenShop row preview for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset as boundary-backed non-canonical evidence from `compatibility.unmappedSystemState.tokenShop`.
-- That checked-row subset is enough to evaluate a first TokenShop-facing tool slice that stays descriptive, explicit about uncertainty, and limited to the rows whose identity is already grounded.
+- It is now also safe to ship one subset-bound TokenShop affordability module for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset, as long as those rows stay compatibility-only and the module reads canonical Tokens plus imported subset levels only.
+- That checked-row subset is enough to answer one first TokenShop-facing player question by showing row identity, current level, next known cost, and current affordability for those rows only, while staying explicit about uncertainty and keeping the rest of the family quarantined.
 - It is not yet safe to generate next-buy recommendations from player token budgets alone.
 - It is not yet safe to promote raw `ATU*Level` save fields into canonical `state.playerProfile` fields until the row-by-row remap is grounded.
 - The rest of the `ATU*Level` family should stay quarantined even when that small preview is shown; unresolved row identities are still a subset-remap blocker, not a reason to force a full-lane remap.
@@ -171,9 +172,9 @@ The next spend-track slice should follow the first-slice contract above instead 
 
 Priority order:
 
-1. ship or validate the first checked-row TokenShop slice with explicit blocked-input notes and no recommendation math
+1. keep the shipped checked-row TokenShop affordability slice subset-bound and non-optimizer
 2. expand TokenShop row remap coverage only when more rows are actually needed by the next slice
-3. recover player-owned current-level inputs for any additional TokenShop rows the slice wants to show
+3. recover player-owned current-level inputs for any additional TokenShop rows the next slice wants to show
 4. recover token-bank, Daily Tokenium, or Emporium state only when a planned slice directly consumes those inputs
 5. only after consumed inputs are grounded, consider broader spend recommendations with explicit assumptions
 
