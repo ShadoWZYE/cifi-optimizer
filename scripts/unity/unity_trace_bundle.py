@@ -73,6 +73,214 @@ def load_registry() -> dict[str, Any]:
     return registry
 
 
+def normalize_planner_term(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+
+def unique_strings(values: list[str]) -> list[str]:
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        trimmed = value.strip()
+        if not trimmed or trimmed in seen:
+            continue
+        seen.add(trimmed)
+        output.append(trimmed)
+    return output
+
+
+def flatten_planner_terms(family_plan: dict[str, Any]) -> list[str]:
+    values = list(family_plan.get("queryTerms", [])) + list(family_plan.get("anchorExpansionTerms", []))
+    for term_list in family_plan.get("synonymSets", {}).values():
+        values.extend(term_list)
+    return unique_strings(values)
+
+
+def score_planner_family(family_id: str, family_plan: dict[str, Any], inputs: list[str]) -> dict[str, Any]:
+    matched_terms: list[str] = []
+    matched_inputs: list[str] = []
+    score = 0
+    for term in flatten_planner_terms(family_plan):
+        normalized_term = normalize_planner_term(term)
+        if not normalized_term:
+            continue
+        best_input: str | None = None
+        best_score = 0
+        for input_value in inputs:
+            normalized_input = normalize_planner_term(input_value)
+            if not normalized_input:
+                continue
+            if normalized_input == normalized_term:
+                best_input = input_value
+                best_score = 6
+                break
+            if normalized_input in normalized_term or normalized_term in normalized_input:
+                if best_score < 3:
+                    best_input = input_value
+                    best_score = 3
+        if best_input is None:
+            continue
+        score += best_score
+        matched_terms.append(term)
+        if best_input not in matched_inputs:
+            matched_inputs.append(best_input)
+    return {
+        "familyId": family_id,
+        "score": score,
+        "matchedTerms": matched_terms,
+        "matchedInputs": matched_inputs,
+    }
+
+
+def choose_best_family(registry: dict[str, Any], inputs: list[str]) -> dict[str, Any]:
+    planner = registry["planner"]
+    scored = [
+        score_planner_family(family_id, planner["families"][family_id], inputs)
+        for family_id in planner["familyOrder"]
+    ]
+    scored.sort(key=lambda item: (-int(item["score"]), -len(item["matchedTerms"]), planner["familyOrder"].index(item["familyId"])))
+    best = scored[0]
+    if int(best["score"]) <= 0:
+        available = ", ".join(planner["familyOrder"])
+        raise ValueError(f"Could not resolve a trace family from query inputs {inputs}. Checked planner families: {available}.")
+    return best
+
+
+def pick_synonym_sets(family_plan: dict[str, Any], inputs: list[str], matched_terms: list[str]) -> list[dict[str, Any]]:
+    matched_set = set(matched_terms)
+    selected: list[dict[str, Any]] = []
+    for set_id, terms in family_plan.get("synonymSets", {}).items():
+        set_matches = [term for term in terms if term in matched_set]
+        if not set_matches:
+            normalized_terms = [normalize_planner_term(term) for term in terms]
+            set_matches = [
+                term
+                for term, normalized_term in zip(terms, normalized_terms)
+                if any(normalized_term and normalized_term in normalize_planner_term(input_value) for input_value in inputs)
+            ]
+        if not set_matches:
+            continue
+        selected.append({"id": set_id, "matchedTerms": unique_strings(set_matches), "terms": terms})
+    return selected
+
+
+def choose_run_mode(family_plan: dict[str, Any], inputs: list[str], explicit_target: bool) -> str:
+    if explicit_target:
+        return "trace"
+    normalized_inputs = [normalize_planner_term(value) for value in inputs if normalize_planner_term(value)]
+    direct_terms = [normalize_planner_term(term) for term in family_plan.get("directTraceTerms", [])]
+    compare_terms = [normalize_planner_term(term) for term in family_plan.get("compareTerms", [])]
+    if any(term and term in normalized_inputs for term in direct_terms):
+        return "trace"
+    if any(term and term in normalized_inputs for term in compare_terms):
+        return "compare"
+    return str(family_plan["defaultRunMode"])
+
+
+def expand_anchor_terms(target: dict[str, Any], family_plan: dict[str, Any], queries: list[str], anchors: list[str], synonym_sets_used: list[dict[str, Any]]) -> list[str]:
+    values = list(target["defaultAnchors"]) + queries + anchors + list(family_plan.get("anchorExpansionTerms", []))
+    for synonym_set in synonym_sets_used:
+        values.extend(synonym_set["terms"])
+    return unique_strings(values)
+
+
+def build_planner_decision_note(
+    selection_mode: str,
+    family_plan: dict[str, Any],
+    resolution: dict[str, Any],
+    target: dict[str, Any],
+) -> str:
+    family_label = family_plan["label"]
+    selected_target_id = resolution["selectedTargetId"]
+    if selection_mode == "explicit-target":
+        return (
+            f"Used explicit target {selected_target_id} in the {family_label} family and kept family-aware anchor expansion "
+            f"so the backend records the same checked synonym surface deterministically."
+        )
+    matched_inputs = ", ".join(resolution["matchedInputs"]) if resolution["matchedInputs"] else family_label
+    synonym_labels = ", ".join(item["id"] for item in resolution["synonymSetsUsed"]) or "family defaults"
+    if resolution["runMode"] == "compare":
+        return (
+            f"Matched {matched_inputs} to {family_label} through {synonym_labels} and chose the bounded "
+            f"{target['comparisonPresetId']} compare run because this query is better grounded as one checked solved-vs-blocked family trace."
+        )
+    return (
+        f"Matched {matched_inputs} to {family_label} through {synonym_labels} and chose the single "
+        f"{selected_target_id} trace because the query already points at one checked family target."
+    )
+
+
+def resolve_planner_selection(
+    registry: dict[str, Any],
+    explicit_target_id: str | None,
+    queries: list[str],
+    anchors: list[str],
+) -> dict[str, Any]:
+    requested_queries = unique_strings(queries)
+    requested_anchors = unique_strings(anchors)
+    if explicit_target_id:
+        target = registry["targets"][explicit_target_id]
+        family_id = target["familyId"]
+        family_plan = registry["planner"]["families"][family_id]
+        combined_inputs = unique_strings([*requested_queries, *requested_anchors])
+        synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, combined_inputs)
+        expanded_anchors = expand_anchor_terms(target, family_plan, requested_queries, requested_anchors, synonym_sets_used)
+        resolution = {
+            "selectionMode": "explicit-target",
+            "requestedQueries": requested_queries,
+            "requestedAnchors": requested_anchors,
+            "matchedInputs": combined_inputs,
+            "matchedTerms": combined_inputs,
+            "matchedFamilyId": family_id,
+            "matchedFamilyLabel": family_plan["label"],
+            "selectedTargetId": explicit_target_id,
+            "selectedRunMode": choose_run_mode(family_plan, combined_inputs, explicit_target=True),
+            "selectedComparePresetId": None,
+            "synonymSetsUsed": synonym_sets_used,
+            "expandedAnchors": expanded_anchors,
+        }
+        resolution["decisionNote"] = build_planner_decision_note("explicit-target", family_plan, {
+            "selectedTargetId": resolution["selectedTargetId"],
+            "matchedInputs": resolution["matchedInputs"],
+            "synonymSetsUsed": resolution["synonymSetsUsed"],
+            "runMode": resolution["selectedRunMode"],
+        }, target)
+        return resolution
+
+    combined_inputs = unique_strings([*requested_queries, *requested_anchors])
+    if not combined_inputs:
+        raise ValueError("Pass --target or at least one --query/--anchor to resolve a unity trace.")
+    best_family = choose_best_family(registry, combined_inputs)
+    family_id = best_family["familyId"]
+    family_plan = registry["planner"]["families"][family_id]
+    target_id = family_plan["defaultTargetId"]
+    target = registry["targets"][target_id]
+    synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, best_family["matchedTerms"])
+    run_mode = choose_run_mode(family_plan, combined_inputs, explicit_target=False)
+    expanded_anchors = expand_anchor_terms(target, family_plan, requested_queries, requested_anchors, synonym_sets_used)
+    resolution = {
+        "selectionMode": "query-planner",
+        "requestedQueries": requested_queries,
+        "requestedAnchors": requested_anchors,
+        "matchedInputs": best_family["matchedInputs"],
+        "matchedTerms": best_family["matchedTerms"],
+        "matchedFamilyId": family_id,
+        "matchedFamilyLabel": family_plan["label"],
+        "selectedTargetId": target_id,
+        "selectedRunMode": run_mode,
+        "selectedComparePresetId": target["comparisonPresetId"] if run_mode == "compare" else None,
+        "synonymSetsUsed": synonym_sets_used,
+        "expandedAnchors": expanded_anchors,
+    }
+    resolution["decisionNote"] = build_planner_decision_note("query-planner", family_plan, {
+        "selectedTargetId": resolution["selectedTargetId"],
+        "matchedInputs": resolution["matchedInputs"],
+        "synonymSetsUsed": resolution["synonymSetsUsed"],
+        "runMode": resolution["selectedRunMode"],
+    }, target)
+    return resolution
+
+
 def resolve_source_catalog(registry: dict[str, Any], family_ids: list[str]) -> tuple[dict[str, Path], list[dict[str, Any]]]:
     source_paths: dict[str, Path] = {}
     source_roles: list[dict[str, Any]] = []
@@ -109,10 +317,13 @@ def collect_metadata_hits(terms: list[str], context: int = 8) -> list[dict[str, 
     entries = extract_strings(METADATA_PATH.read_bytes())
     hits: list[dict[str, Any]] = []
     lower_terms = [term.lower() for term in terms]
+    counts: dict[str, int] = {term: 0 for term in terms}
     for index, entry in enumerate(entries):
         value = str(entry["value"])
         matched = [terms[position] for position, lower in enumerate(lower_terms) if lower in value.lower()]
         if not matched:
+            continue
+        if all(counts[term] >= 4 for term in matched):
             continue
         start = max(index - context, 0)
         end = min(index + context + 1, len(entries))
@@ -124,7 +335,9 @@ def collect_metadata_hits(terms: list[str], context: int = 8) -> list[dict[str, 
                 "context": entries[start:end],
             }
         )
-        if len(hits) >= 8:
+        for matched_term in matched:
+            counts[matched_term] += 1
+        if all(count >= 4 for count in counts.values()):
             break
     return hits
 
@@ -251,7 +464,11 @@ def find_source_entry(surface: dict[str, Any], source_id: str) -> dict[str, Any]
 
 
 def find_hit(source_entry: dict[str, Any], term: str) -> dict[str, Any]:
-    return next(hit for hit in source_entry["hits"] if hit["term"] == term)
+    return next(
+        hit
+        for hit in source_entry["hits"]
+        if hit["term"] == term or term in hit.get("matchedTerms", [])
+    )
 
 
 def cite_hit(source_entry: dict[str, Any], hit: dict[str, Any], note: str | None = None) -> dict[str, Any]:
@@ -1140,25 +1357,44 @@ def build_decision_summary(target: dict[str, Any], trace_payload: dict[str, Any]
     }
 
 
-def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
+def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list[str]) -> dict[str, Any]:
     registry = load_registry()
-    target = registry["targets"][target_id]
-    anchors = list(dict.fromkeys([*target["defaultAnchors"], *extra_anchors]))
+    planner_resolution = resolve_planner_selection(registry, target_id, queries, extra_anchors)
+    selected_target_id = str(planner_resolution["selectedTargetId"])
+    target = registry["targets"][selected_target_id]
+    family_plan = registry["planner"]["families"][target["familyId"]]
+    anchors = unique_strings([*target["defaultAnchors"], *extra_anchors, *family_plan.get("anchorExpansionTerms", [])])
     source_paths, source_roles = resolve_source_catalog(registry, target["requiredSourceFamilies"])
     documents = {source_id: load_json(path) for source_id, path in source_paths.items() if source_id != "metadata"}
-    trace_payload = build_trace_payload(target_id, target, anchors, documents)
+    trace_payload = build_trace_payload(selected_target_id, target, anchors, documents)
     return {
         "dataset": "unity-trace-bundle",
         "generatedAt": str(date.today()),
         "traceWorkflow": {
-            "command": "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>",
+            "command": "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]",
+            "directExample": "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>",
+            "plannerExample": "node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>",
             "acceptedAnchors": target["acceptedAnchors"],
-            "targetResolution": "checked repo-local target preset plus anchor list",
+            "targetResolution": "explicit target or checked query planner plus family-aware anchor expansion",
             "readsCommittedSourcesOnly": True,
+        },
+        "plannerResolution": {
+            "selectionMode": planner_resolution["selectionMode"],
+            "requestedQueries": planner_resolution["requestedQueries"],
+            "requestedAnchors": planner_resolution["requestedAnchors"],
+            "matchedInputs": planner_resolution["matchedInputs"],
+            "matchedTerms": planner_resolution["matchedTerms"],
+            "matchedFamilyId": planner_resolution["matchedFamilyId"],
+            "matchedFamilyLabel": planner_resolution["matchedFamilyLabel"],
+            "runMode": planner_resolution["selectedRunMode"],
+            "comparePresetId": planner_resolution["selectedComparePresetId"],
+            "synonymSetsUsed": planner_resolution["synonymSetsUsed"],
+            "expandedAnchors": planner_resolution["expandedAnchors"],
+            "decisionNote": planner_resolution["decisionNote"],
         },
         "traceRegistry": {
             "path": repo_relative(REGISTRY_PATH),
-            "selectedTargetId": target_id,
+            "selectedTargetId": selected_target_id,
             "selectedFamilyId": target["familyId"],
             "requiredSourceFamilies": target["requiredSourceFamilies"],
             "solvedBaselineTargetId": target["solvedBaselineTargetId"],
@@ -1168,7 +1404,7 @@ def build_dataset(target_id: str, extra_anchors: list[str]) -> dict[str, Any]:
         "sources": {source_id: repo_relative(path) for source_id, path in source_paths.items()},
         "sourceRoles": source_roles,
         "target": {
-            "id": target_id,
+            "id": selected_target_id,
             "label": target["label"],
             "familyId": target["familyId"],
             "anchors": anchors,
@@ -1199,9 +1435,20 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         f"- Anchors: `{', '.join(dataset['target']['anchors'])}`",
         f"- Join goal: {dataset['target']['joinGoal']}",
         "",
+        "## Planner resolution",
+        "",
+        f"- Selection mode: `{dataset['plannerResolution']['selectionMode']}`",
+        f"- Matched family: `{dataset['plannerResolution']['matchedFamilyId']}` ({dataset['plannerResolution']['matchedFamilyLabel']})",
+        f"- Run mode: `{dataset['plannerResolution']['runMode']}`",
+        f"- Requested queries: `{', '.join(dataset['plannerResolution']['requestedQueries']) or 'none'}`",
+        f"- Requested anchors: `{', '.join(dataset['plannerResolution']['requestedAnchors']) or 'none'}`",
+        f"- Decision note: {dataset['plannerResolution']['decisionNote']}",
+        "",
         "## Workflow",
         "",
         f"- Command: `{dataset['traceWorkflow']['command']}`",
+        f"- Direct example: `{dataset['traceWorkflow']['directExample']}`",
+        f"- Planner example: `{dataset['traceWorkflow']['plannerExample']}`",
         f"- Accepted anchor kinds: `{', '.join(dataset['traceWorkflow']['acceptedAnchors'])}`",
         "- Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.",
         f"- Registry target: `{dataset['traceRegistry']['selectedTargetId']}` from `{dataset['traceRegistry']['selectedFamilyId']}` via {md_link(ROOT / dataset['traceRegistry']['path'])}",
@@ -1304,12 +1551,15 @@ def write_markdown(dataset: dict[str, Any]) -> None:
 def main() -> None:
     registry = load_registry()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--target", required=True, choices=sorted(registry["targets"].keys()))
+    parser.add_argument("--target", choices=sorted(registry["targets"].keys()))
+    parser.add_argument("--query", action="append", default=[])
     parser.add_argument("--anchor", action="append", default=[])
     parser.add_argument("--json-out", type=Path, default=JSON_OUT)
     parser.add_argument("--md-out", type=Path, default=MD_OUT)
     args = parser.parse_args()
-    dataset = build_dataset(args.target, args.anchor)
+    if not args.target and not args.query and not args.anchor:
+        parser.error("pass --target or at least one --query/--anchor")
+    dataset = build_dataset(args.target, args.query, args.anchor)
     args.json_out.write_text(json.dumps(dataset, indent=2) + "\n", encoding="utf-8")
     write_markdown(dataset)
 

@@ -60,15 +60,17 @@ Repo-local npm probe wrappers:
   - refreshes `data/uabea-probe-report.json` first, then regenerates `data/shard-cost-method-probe.v1.json` and `docs/systems/shards/shard-cost-method-probe.md`
 - `npm run probe:shards:cost-native`
   - refreshes `data/uabea-probe-report.json`, then regenerates the shard method, parameter, and native probe outputs in dependency order
-- `npm run probe:trace -- --target <target-id> --anchor <anchor>`
+- `npm run probe:trace -- --query <query> --anchor <anchor>`
+  - or pin an exact preset with `npm run probe:trace -- --target <target-id> --anchor <anchor>`
   - regenerates `data/unity-trace-bundle.json` and `docs/unity/unity-trace-bundle.md`
   - reads the checked target registry in `data/unity-trace-target-registry.json`
+  - resolves loose Codex-first queries through the checked planner block in `data/unity-trace-target-registry.json`, expands them into family-aware anchors and synonym sets, then chooses either one single trace or one bounded compare run
   - reads committed `workbench/apk/base/global-metadata.dat`, `data/token-shop-values.json`, `data/daily-tokenium-lane-probe.json`, `data/uabea-probe-report.json`, `data/unity-probe-report.json`, and `data/lm244-targeted-probe.json`
   - preserves target-driven cross-surface joins across metadata neighborhoods, owner-payload shells, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle before any remap-boundary promotion
   - records explicit typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape from committed sources so the bundle can say which join exists, which join is missing, and which artifact proved each claim
-  - emits a compact decision summary verdict such as `wire`, `quarantine`, or `keep researching` so Codex can read the bundle without manually reinterpreting the full graph first
+  - emits a compact planner decision note plus a summary verdict such as `wire`, `quarantine`, or `keep researching` so Codex can read the bundle without manually reinterpreting the full graph first
   - current seeded trace families: `token-shop`, `shard-cost`, and `multiverse-market-save-owner`
-  - the current checked target is `token-shop-atu3-cells`, which intentionally stays a negative trace unless one new committed artifact crosses back to `ATU3Button` or path id `15810`
+  - the current committed planner example resolves `Cells` to `token-shop-atu3-cells` and intentionally stays a negative compare trace unless one new committed artifact crosses back to `ATU3Button` or path id `15810`
 
 Important primary files:
 

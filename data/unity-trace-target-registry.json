@@ -37,6 +37,179 @@
       ]
     }
   },
+  "planner": {
+    "resolutionVersion": "v1",
+    "boundedRunModes": [
+      "trace",
+      "compare"
+    ],
+    "resolutionOrder": [
+      "explicit-target",
+      "family-query-match",
+      "family-default-target"
+    ],
+    "familyOrder": [
+      "token-shop",
+      "shard-cost",
+      "multiverse-market-save-owner"
+    ],
+    "families": {
+      "token-shop": {
+        "label": "TokenShop",
+        "defaultTargetId": "token-shop-atu3-cells",
+        "defaultRunMode": "compare",
+        "queryTerms": [
+          "TokenShop",
+          "Token Shop",
+          "ATU",
+          "ATU3Button",
+          "BuyCellBoost",
+          "Cells",
+          "Currency"
+        ],
+        "anchorExpansionTerms": [
+          "ATU3Button",
+          "15810",
+          "CellBoost",
+          "BuyCellBoost",
+          "SetAllTokenShopTexts"
+        ],
+        "directTraceTerms": [
+          "BuyCellBoost",
+          "ATU3Button",
+          "15810"
+        ],
+        "compareTerms": [
+          "TokenShop",
+          "Token Shop",
+          "ATU",
+          "Cells",
+          "Currency"
+        ],
+        "synonymSets": {
+          "cells-domain": [
+            "Cells",
+            "CellBoost",
+            "BuyCellBoost",
+            "CellsBoost",
+            "CellsPerChestBooster",
+            "UltimaCells"
+          ],
+          "token-shop-shell": [
+            "TokenShop",
+            "ATU",
+            "ATU1Button",
+            "ATU3Button",
+            "15810"
+          ],
+          "currency-lane": [
+            "Currency",
+            "Tokens",
+            "Tokenium",
+            "Diamond Upgrade"
+          ]
+        }
+      },
+      "shard-cost": {
+        "label": "Shard cost",
+        "defaultTargetId": "shard-cost-su0-structure",
+        "defaultRunMode": "trace",
+        "queryTerms": [
+          "Shard",
+          "Shard Cost",
+          "ShardUpgradeInfo",
+          "SU0",
+          "get_SU0Cost",
+          "SU0StartCost"
+        ],
+        "anchorExpansionTerms": [
+          "ShardUpgradeInfo",
+          "get_SU0Cost",
+          "SU0StartCost",
+          "SU0CostExponent"
+        ],
+        "directTraceTerms": [
+          "ShardUpgradeInfo",
+          "get_SU0Cost",
+          "SU0",
+          "SU0StartCost"
+        ],
+        "compareTerms": [
+          "Shard Cost",
+          "planner-safe",
+          "planner safe",
+          "planner output"
+        ],
+        "synonymSets": {
+          "su0-structure": [
+            "SU0",
+            "get_SU0Cost",
+            "SU0StartCost",
+            "SU0CostExponent"
+          ],
+          "shard-owner-shell": [
+            "Shard",
+            "ShardUpgradeInfo",
+            "ShardMining"
+          ],
+          "planner-safe-gap": [
+            "planner-safe",
+            "planner safe",
+            "planner output",
+            "cost output"
+          ]
+        }
+      },
+      "multiverse-market-save-owner": {
+        "label": "Multiverse market/save-owner",
+        "defaultTargetId": "multiverse-market-save-owner-boundary",
+        "defaultRunMode": "compare",
+        "queryTerms": [
+          "Multiverse",
+          "MultiverseMarket",
+          "Emporium",
+          "SaveData",
+          "get_Market",
+          "IS71Level"
+        ],
+        "anchorExpansionTerms": [
+          "get_Market",
+          "SaveData",
+          "IS71Level",
+          "IS72Level",
+          "InscryptionsDone"
+        ],
+        "directTraceTerms": [
+          "get_Market",
+          "SaveData"
+        ],
+        "compareTerms": [
+          "Multiverse",
+          "MultiverseMarket",
+          "Emporium",
+          "IS71Level"
+        ],
+        "synonymSets": {
+          "save-owner-span": [
+            "SaveData",
+            "IS1Level",
+            "IS71Level",
+            "IS110Level"
+          ],
+          "market-accessor": [
+            "get_Market",
+            "PlayerProfileHandler",
+            "MultiverseMarket"
+          ],
+          "emporium-shell": [
+            "Emporium",
+            "InscryptionsDone",
+            "BuyIS71"
+          ]
+        }
+      }
+    }
+  },
   "comparisonPresets": {
     "token-shop-atu3-vs-atu1": {
       "label": "TokenShop ATU1 solved bridge vs ATU3 blocked trace",
