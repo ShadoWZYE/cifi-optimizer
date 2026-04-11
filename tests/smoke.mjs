@@ -341,13 +341,13 @@ assert.match(appJs, /boundary\?\.recoveredBridge\?\.prefabIdentity \|\| "NewToke
 assert.match(appJs, /boundary\?\.boundedRecoveredBridge\?\.prefabIdentity \|\| "NewTokenUPGPrefab\.T1\.MK1Booster"/);
 assert.match(appJs, /boundary\?\.verifiedTitleJoin\?\.titleProbeTitle \|\| boundary\?\.boundedRecoveredBridgeFollowUp\?\.prefabIdentity \|\| "Mk2 Generator Booster"/);
 assert.match(appJs, /function renderTokenShopProgressionEditor/);
-assert.match(appJs, /function getTokenShopGroundedSubsetRowDetailSummary/);
+assert.match(appJs, /function getTokenShopProgressionModel/);
 assert.match(appJs, /function formatTokenShopBonusStep/);
 assert.match(appJs, /Grounded TokenShop checked-row editor/);
 assert.match(appJs, /Default level 0/);
 assert.match(appJs, /Prefill local rows from compatibility import/);
 assert.match(appJs, /Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU5, ATU6\./);
-assert.match(appJs, /This module is explicitly non-optimizer\./);
+assert.match(appJs, /This module is explicitly non-optimizer/);
 assert.match(appJs, /No canonical ATU promotion/);
 assert.match(appJs, /Known cost inputs: start \$\{formatBoundaryValue\(row\.startCost\)\} \+ additive \$\{formatBoundaryValue\(row\.additiveCost\)\} x current level\./);
 assert.match(appJs, /Current vs next bonus/);
@@ -355,7 +355,7 @@ assert.match(appJs, /adds one more extracted bonus step only/);
 assert.match(html, /id="tokenShopProgressionStatus"/);
 assert.match(appJs, /TokenShop keeps its own Progression category so it does not get mixed into the Shard Mining surface/);
 assert.match(appJs, /TokenShop \(\$\{counts\.tokenShop\}\)/);
-assert.match(appJs, /Checked subset only\. Local row levels drive this editor, compatibility import is prefill only/);
+assert.match(appJs, /Checked subset only\. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool\./);
 assert.match(appJs, /TokenShop recommendations beyond the checked editor subset/);
 assert.match(appJs, /token-bank cap and claimable tokens/i);
 assert.match(appJs, /generic ClaimableTokenium evidence surfaced/);
@@ -502,6 +502,12 @@ const expectedBundledDatasetIds = [
 const defaultProfile = createDefaultPlayerProfile();
 assert.deepEqual(defaultProfile.planning.shards.observedLevelsByMilestone, {});
 assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetLevels, {
+  ATU1Level: null,
+  ATU2Level: null,
+  ATU5Level: null,
+  ATU6Level: null
+});
+assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU1Level: null,
   ATU2Level: null,
   ATU5Level: null,
@@ -3959,6 +3965,12 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
   IS111Level: "9"
 });
 
+assert.deepEqual(migratedFlatSpendStateProfile.planning.tokenShop.checkedSubsetPlayerState, {
+  ATU1Level: 3,
+  ATU2Level: 4,
+  ATU5Level: 2,
+  ATU6Level: 7
+});
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
   ATU1Level: 3,
   ATU2Level: 4,

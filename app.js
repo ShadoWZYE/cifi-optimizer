@@ -888,8 +888,8 @@ function getExperimentalProfileState() {
   };
 }
 
-function getTokenShopProgressionEditorState() {
-  return state.playerProfile.planning?.tokenShop?.checkedSubsetLevels ?? {};
+function getTokenShopProgressionProfileState() {
+  return state.playerProfile.planning?.tokenShop ?? {};
 }
 
 function getCompatibilityProfileState() {
@@ -4743,20 +4743,28 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
   };
 }
 
-function resolveTokenShopProgressionLevelSource(fieldName, localLevels, compatibilityLevels) {
-  const localValue = localLevels?.[fieldName];
-  if (typeof localValue === "number" && Number.isFinite(localValue)) {
+function resolveTokenShopProgressionLevelSource(fieldName, progressionState, compatibilityLevels) {
+  const localOverrideValue = progressionState?.checkedSubsetLevels?.[fieldName];
+  if (typeof localOverrideValue === "number" && Number.isFinite(localOverrideValue)) {
     return {
-      value: localValue,
-      sourceLabel: "Local progression editor",
+      value: localOverrideValue,
+      sourceLabel: "Local progression override",
       path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
     };
   }
-  const importedValue = compatibilityLevels?.[fieldName];
-  if (typeof importedValue === "number" && Number.isFinite(importedValue)) {
+  const playerStateValue = progressionState?.checkedSubsetPlayerState?.[fieldName];
+  if (typeof playerStateValue === "number" && Number.isFinite(playerStateValue)) {
     return {
-      value: importedValue,
-      sourceLabel: "Compatibility prefill",
+      value: playerStateValue,
+      sourceLabel: "Checked player state",
+      path: `planning.tokenShop.checkedSubsetPlayerState.${fieldName}`
+    };
+  }
+  const compatibilityValue = compatibilityLevels?.[fieldName];
+  if (typeof compatibilityValue === "number" && Number.isFinite(compatibilityValue)) {
+    return {
+      value: compatibilityValue,
+      sourceLabel: "Compatibility fallback",
       path: `compatibility.unmappedSystemState.tokenShop.${fieldName}`
     };
   }
@@ -4865,11 +4873,14 @@ function getTokenShopBonusStripEntries(row) {
   ];
 }
 
-function getTokenShopGroundedSubsetRowDetailSummary(boundary, localLevels, compatibilityLevels, tokenShop) {
-  const resolvedLocalLevels = localLevels && typeof localLevels === "object" ? localLevels : {};
-  const resolvedCompatibilityLevels = compatibilityLevels && typeof compatibilityLevels === "object" ? compatibilityLevels : {};
+function getTokenShopProgressionModel() {
+  const progressionState = getTokenShopProgressionProfileState();
+  const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
+  const boundary = state.extractedMechanics?.tokenShopRowRemapBoundary;
+  const tokenShop = state.extractedMechanics?.tokenShop;
+  const currentTokens = state.playerProfile.player.resources.tokens;
   const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => {
-    const levelSource = resolveTokenShopProgressionLevelSource(row.field, resolvedLocalLevels, resolvedCompatibilityLevels);
+    const levelSource = resolveTokenShopProgressionLevelSource(row.field, progressionState, compatibilityLevels);
     const currentLevel = levelSource.value;
     const startCost = getTokenShopNumericFieldValue(tokenShop, row.startCostField);
     const additiveCost = getTokenShopNumericFieldValue(tokenShop, row.additiveCostField);
@@ -4879,6 +4890,9 @@ function getTokenShopGroundedSubsetRowDetailSummary(boundary, localLevels, compa
     const isMaxed = hasLevel && typeof maxLevel === "number" && currentLevel >= maxLevel;
     const nextKnownCost = hasLevel && !isMaxed && typeof startCost === "number" && typeof additiveCost === "number"
       ? startCost + (additiveCost * currentLevel)
+      : null;
+    const isAffordable = typeof nextKnownCost === "number" && typeof currentTokens === "number"
+      ? currentTokens >= nextKnownCost
       : null;
 
     return {
@@ -4890,6 +4904,7 @@ function getTokenShopGroundedSubsetRowDetailSummary(boundary, localLevels, compa
       additiveCost,
       bonusValue,
       nextKnownCost,
+      isAffordable,
       isMaxed,
       maxLevel,
       maxStatus: getTokenShopKnownMaxStatus(currentLevel, maxLevel),
@@ -4898,11 +4913,14 @@ function getTokenShopGroundedSubsetRowDetailSummary(boundary, localLevels, compa
   });
 
   return {
+    currentTokens,
     displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU5, ATU6.",
     rows,
-    importedCount: rows.filter((row) => typeof row.currentLevel === "number" && Number.isFinite(row.currentLevel)).length,
-    localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression editor").length,
-    prefillCount: rows.filter((row) => row.currentLevelSourceLabel === "Compatibility prefill").length,
+    localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override").length,
+    playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state").length,
+    compatibilityCount: rows.filter((row) => row.currentLevelSourceLabel === "Compatibility fallback").length,
+    defaultCount: rows.filter((row) => row.currentLevelSourceLabel === "Default level 0").length,
+    affordableCount: rows.filter((row) => row.isAffordable === true).length,
     knownCapCount: rows.filter((row) => row.maxStatus.label === "At or above known cap").length
   };
 }
@@ -4949,28 +4967,23 @@ function clearTokenShopProgressionEditorLevels() {
 }
 
 function renderTokenShopProgressionEditor() {
-  const localLevels = getTokenShopProgressionEditorState();
-  const compatibility = getCompatibilityProfileState();
-  const summary = getTokenShopGroundedSubsetRowDetailSummary(
-    state.extractedMechanics?.tokenShopRowRemapBoundary,
-    localLevels,
-    compatibility.unmappedSystems?.tokenShop,
-    state.extractedMechanics?.tokenShop
-  );
+  const summary = getTokenShopProgressionModel();
 
   return `
     <article class="validation-card warn">
       <strong>Grounded TokenShop checked-row editor</strong>
-      <p class="meta">Checked subset only. Local row levels drive this editor, compatibility import is prefill only, and unresolved <code>ATU*Level</code> rows stay quarantined.</p>
-      <p class="meta">This module is explicitly non-optimizer.</p>
+      <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
+      <p class="meta">This module is explicitly non-optimizer and stays fixed to the shipped <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU5Level</code>, and <code>ATU6Level</code> subset.</p>
       <div class="profile-actions">
         <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
         <button class="button button-ghost" type="button" data-token-shop-clear-local>Clear local row levels</button>
       </div>
       <div class="pill-row">
-        <span class="pill">${summary.localCount}/${summary.rows.length} local row levels set</span>
-        <span class="pill">${summary.prefillCount}/${summary.rows.length} compatibility-prefill rows active</span>
-        <span class="pill">${summary.rows.filter((row) => row.currentLevelSourceLabel === "Default level 0").length}/${summary.rows.length} defaulted to level 0</span>
+        <span class="pill">${summary.localCount}/${summary.rows.length} local overrides active</span>
+        <span class="pill">${summary.playerStateCount}/${summary.rows.length} checked player-state rows active</span>
+        <span class="pill">${summary.compatibilityCount}/${summary.rows.length} compatibility fallback rows active</span>
+        <span class="pill">${summary.defaultCount}/${summary.rows.length} defaulted to level 0</span>
+        <span class="pill">${typeof summary.currentTokens === "number" ? `${summary.affordableCount}/${summary.rows.length} affordable from ${formatBoundaryValue(summary.currentTokens)} Tokens` : "Affordability gated by missing Tokens"}</span>
         <span class="pill">${summary.knownCapCount} at or above known cap</span>
         <span class="pill">${escapeHtml(summary.displayRule)}</span>
         <span class="pill">No canonical ATU promotion</span>
@@ -4987,6 +5000,13 @@ function renderTokenShopProgressionEditor() {
             : typeof row.nextKnownCost === "number"
               ? formatBoundaryValue(row.nextKnownCost)
               : "No known next cost";
+          const affordabilityLine = row.isMaxed
+            ? "No next purchase within known cap."
+            : row.isAffordable === true
+              ? "Affordable from current Tokens."
+              : row.isAffordable === false && typeof row.nextKnownCost === "number" && typeof summary.currentTokens === "number"
+                ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+                : "Affordability unavailable until Tokens are entered.";
           const costFormulaLine = typeof row.startCost === "number" && typeof row.additiveCost === "number"
             ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
             : "Known cost inputs are incomplete in this build.";
@@ -5028,6 +5048,7 @@ function renderTokenShopProgressionEditor() {
                   <span class="token-shop-buy-label">${escapeHtml(actionLabel)}</span>
                   <strong>${escapeHtml(nextKnownCostLabel)}</strong>
                   <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
+                  <p class="meta">${escapeHtml(affordabilityLine)}</p>
                   <label class="mini-field token-shop-level-editor token-shop-level-editor-buy">
                     <span>Set current level</span>
                     <input
@@ -5052,7 +5073,7 @@ function renderTokenShopProgressionEditor() {
           `;
         }).join("")}
       </div>
-      <p class="meta">Non-canonical checked-row editor only. Recommendations, broader planner logic, token-bank, Daily Tokenium, Emporium, and unresolved <code>ATU*</code> remap work stay outside this surface.</p>
+      <p class="meta">Non-canonical checked-row progression seam only. Broader TokenShop remap, token-bank, Daily Tokenium, Emporium, and ROI or ranking logic stay outside this surface.</p>
     </article>
   `;
 }
