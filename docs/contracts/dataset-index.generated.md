@@ -334,12 +334,12 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/token-shop-late-atu-boundary.json`
 
-### `token-shop-remap-join-probe`
+### `unity-trace-bundle`
 
-- Label: Token shop remap join probe
+- Label: Unity trace bundle
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/token-shop-remap-join-probe.json`
+  - `data/unity-trace-bundle.json`
 
 ### `multiverse-market-save-boundary`
 

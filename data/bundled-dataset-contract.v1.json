@@ -386,11 +386,11 @@
       ]
     },
     {
-      "id": "token-shop-remap-join-probe",
-      "label": "Token shop remap join probe",
+      "id": "unity-trace-bundle",
+      "label": "Unity trace bundle",
       "classification": "extracted-mechanics",
       "files": [
-        "data/token-shop-remap-join-probe.json"
+        "data/unity-trace-bundle.json"
       ]
     },
     {

@@ -2513,49 +2513,53 @@ function validateTokenShopLateAtuBoundary(boundary) {
   };
 }
 
-function validateTokenShopRemapJoinProbe(probe) {
-  expectNonEmptyString(probe.generatedAt, "token shop remap join probe generatedAt must be present");
-  expectNonEmptyString(probe.dataset, "token shop remap join probe dataset must be present");
-  expectRecord(probe.probeMethod, "token shop remap join probe probeMethod must be an object");
-  expectRecord(probe.sources, "token shop remap join probe sources must be an object");
-  expectArray(probe.sourceRoles, "token shop remap join probe sourceRoles must be an array");
-  expectArray(probe.neighborhoods, "token shop remap join probe neighborhoods must be an array");
-  expectArray(probe.currentBoundary, "token shop remap join probe currentBoundary must be an array");
-  ["tokenShopExtract", "dailyTokeniumLaneProbe", "uabeaProbe", "unityProbe", "lm244TargetedProbe"].forEach((field) => {
-    expectNonEmptyString(probe.sources[field], `token shop remap join probe sources.${field} must be present`);
+function validateUnityTraceBundle(bundle) {
+  expectNonEmptyString(bundle.generatedAt, "unity trace bundle generatedAt must be present");
+  expectNonEmptyString(bundle.dataset, "unity trace bundle dataset must be present");
+  expectRecord(bundle.traceWorkflow, "unity trace bundle traceWorkflow must be an object");
+  expectRecord(bundle.sources, "unity trace bundle sources must be an object");
+  expectRecord(bundle.target, "unity trace bundle target must be an object");
+  expectRecord(bundle.shellWindow, "unity trace bundle shellWindow must be an object");
+  expectArray(bundle.sourceRoles, "unity trace bundle sourceRoles must be an array");
+  expectArray(bundle.surfaces, "unity trace bundle surfaces must be an array");
+  expectRecord(bundle.bridgeCheck, "unity trace bundle bridgeCheck must be an object");
+  expectArray(bundle.lostStructure, "unity trace bundle lostStructure must be an array");
+  expectArray(bundle.currentBoundary, "unity trace bundle currentBoundary must be an array");
+  ["metadata", "tokenShopExtract", "dailyTokeniumLaneProbe", "uabeaProbe", "unityProbe", "lm244TargetedProbe"].forEach((field) => {
+    expectNonEmptyString(bundle.sources[field], `unity trace bundle sources.${field} must be present`);
   });
 
-  assert.equal(probe.dataset, "token-shop-remap-join-probe", "token shop remap join probe dataset id drifted");
-  assert.equal(probe.probeMethod.command, "node scripts/unity/run_probe.mjs token-shop:remap-joins", "token shop remap join probe command drifted");
-  assert.equal(probe.neighborhoods.length, 1, "token shop remap join probe must stay on one bounded neighborhood for now");
-  const atu3 = probe.neighborhoods[0];
-  assert.equal(atu3.id, "atu3-cells-domain", "token shop remap join probe target id drifted");
-  assert.equal(atu3.shellWindow.shellField, "ATU3Button", "token shop remap join probe shell field drifted");
-  assert.equal(atu3.shellWindow.shellPathId, 15810, "token shop remap join probe shell path id drifted");
+  assert.equal(bundle.dataset, "unity-trace-bundle", "unity trace bundle dataset id drifted");
+  assert.equal(bundle.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>", "unity trace bundle command drifted");
+  assert.equal(bundle.target.id, "token-shop-atu3-cells", "unity trace bundle target id drifted");
+  assert.deepEqual(bundle.target.anchors, ["ATU3Button", "15810"], "unity trace bundle target anchors drifted");
+  assert.equal(bundle.shellWindow.shellField, "ATU3Button", "unity trace bundle shell field drifted");
+  assert.equal(bundle.shellWindow.shellPathId, 15810, "unity trace bundle shell path id drifted");
   assert.deepEqual(
-    atu3.shellWindow.ownerFieldBlock,
+    bundle.shellWindow.ownerFieldBlock,
     ["CellBoostStartCost", "CellBoostAdditiveCost", "CellBoostBonus", "CellBoostMaxLevel", "CellBoostFill"],
-    "token shop remap join probe owner field block drifted"
+    "unity trace bundle owner field block drifted"
   );
-  assert.equal(atu3.bridgeCheck.bridgeCleared, false, "token shop remap join probe must stay negative until one container clears a join");
-  assert.equal(atu3.bridgeCheck.result, "no checked object-or-title bridge recovered", "token shop remap join probe result drifted");
-  assert.ok(atu3.surfaces.some((surface) => surface.id === "action-lane"), "token shop remap join probe missing action lane");
-  assert.ok(atu3.surfaces.some((surface) => surface.id === "diamond-special"), "token shop remap join probe missing diamond-special lane");
-  assert.ok(atu3.surfaces.some((surface) => surface.id === "token-lane"), "token shop remap join probe missing token lane");
-  assert.ok(atu3.surfaces.some((surface) => surface.id === "text-hooks"), "token shop remap join probe missing text-hook lane");
-  assert.ok(atu3.lostStructure.some((line) => /shell-side owner window survives only in the TokenShop extract/i.test(line)), "token shop remap join probe must preserve shell-loss explanation");
-  assert.ok(atu3.lostStructure.some((line) => /Final titles and generic text hooks survive as separate unity-probe string buckets/i.test(line)), "token shop remap join probe must preserve title-loss explanation");
-  assert.match(atu3.groundedConclusion, /upgraded ATU3 remap join probe stays negative/i, "token shop remap join probe grounded conclusion drifted");
-  assert.ok(probe.currentBoundary.some((line) => /join-preservation surface, not a remap promotion/i.test(line)), "token shop remap join probe must preserve non-promotion framing");
+  assert.equal(bundle.bridgeCheck.bridgeCleared, false, "unity trace bundle must stay negative until one checked bridge clears");
+  assert.equal(bundle.bridgeCheck.result, "no checked object-or-title bridge recovered", "unity trace bundle result drifted");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "metadata-neighborhood"), "unity trace bundle missing metadata neighborhood");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "action-lane"), "unity trace bundle missing action lane");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "diamond-special"), "unity trace bundle missing diamond-special lane");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "token-lane"), "unity trace bundle missing token lane");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "text-hooks"), "unity trace bundle missing text-hook lane");
+  assert.ok(bundle.lostStructure.some((line) => /metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area/i.test(line)), "unity trace bundle must preserve metadata-loss explanation");
+  assert.ok(bundle.lostStructure.some((line) => /direct cross-surface join back to 15810/i.test(line)), "unity trace bundle must preserve join-loss explanation");
+  assert.match(bundle.groundedConclusion, /ATU3Button or 15810 trace stays negative/i, "unity trace bundle grounded conclusion drifted");
+  assert.ok(bundle.currentBoundary.some((line) => /target-driven trace workflow/i.test(line)), "unity trace bundle must preserve workflow framing");
 
   return {
-    id: "token-shop-remap-join-probe",
-    label: "Token shop remap join probe",
+    id: "unity-trace-bundle",
+    label: "Unity trace bundle",
     classification: "extracted-mechanics",
     stats: [
-      `${probe.neighborhoods.length} unresolved shell neighborhood preserved`,
-      `${atu3.surfaces.length} split surfaces tracked for ATU3`,
-      "ATU3 remains negative because shell, action, prefab, and title surfaces are still detached across committed artifacts"
+      `${bundle.target.anchors.length} target anchors`,
+      `${bundle.surfaces.length} cross-surface trace lanes`,
+      "ATU3 remains negative because the trace bundle still does not preserve one exact shell-to-prefab or shell-to-title join"
     ]
   };
 }
@@ -4067,7 +4071,7 @@ export async function validateBundledDatasets() {
   const tokenShopRowLevelOwner = await readJson("../../data/token-shop-row-level-owner.json");
   const tokenShopRowRemapBoundary = await readJson("../../data/token-shop-row-remap-boundary.json");
   const tokenShopLateAtuBoundary = await readJson("../../data/token-shop-late-atu-boundary.json");
-  const tokenShopRemapJoinProbe = await readJson("../../data/token-shop-remap-join-probe.json");
+  const unityTraceBundle = await readJson("../../data/unity-trace-bundle.json");
   const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
   const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
   const multiverseMarketSaveDataImportBoundary = await readJson("../../data/multiverse-market-savedata-import-boundary.json");
@@ -4136,7 +4140,7 @@ export async function validateBundledDatasets() {
     validateTokenShopRowLevelOwner(tokenShopRowLevelOwner),
     validateTokenShopRowRemapBoundary(tokenShopRowRemapBoundary),
     validateTokenShopLateAtuBoundary(tokenShopLateAtuBoundary),
-    validateTokenShopRemapJoinProbe(tokenShopRemapJoinProbe),
+    validateUnityTraceBundle(unityTraceBundle),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateMultiverseMarketSaveDataImportBoundary(multiverseMarketSaveDataImportBoundary, multiverseMarketStateVerificationDoc),

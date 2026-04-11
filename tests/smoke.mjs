@@ -80,7 +80,7 @@ const tokenShopSaveBoundaryData = JSON.parse(await readFile(new URL("../data/tok
 const tokenShopRowLevelOwnerData = JSON.parse(await readFile(new URL("../data/token-shop-row-level-owner.json", import.meta.url), "utf8"));
 const tokenShopRowRemapBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-row-remap-boundary.json", import.meta.url), "utf8"));
 const tokenShopLateAtuBoundaryData = JSON.parse(await readFile(new URL("../data/token-shop-late-atu-boundary.json", import.meta.url), "utf8"));
-const tokenShopRemapJoinProbeData = JSON.parse(await readFile(new URL("../data/token-shop-remap-join-probe.json", import.meta.url), "utf8"));
+const unityTraceBundleData = JSON.parse(await readFile(new URL("../data/unity-trace-bundle.json", import.meta.url), "utf8"));
 const multiverseMarketSaveBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketMarketMemberBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-market-member-boundary.json", import.meta.url), "utf8"));
 const multiverseMarketSaveDataImportBoundaryData = JSON.parse(await readFile(new URL("../data/multiverse-market-savedata-import-boundary.json", import.meta.url), "utf8"));
@@ -126,7 +126,7 @@ const datasetIndexGeneratedDoc = await readFile(new URL("../docs/contracts/datas
 const shardResearchNote = await readFile(new URL("../docs/research/shard-milestones-grounded-2026-03-28.md", import.meta.url), "utf8");
 const tokenShopDoc = await readFile(new URL("../docs/systems/spend/token-shop-values.md", import.meta.url), "utf8");
 const tokenShopRowRemapVerificationDoc = await readFile(new URL("../docs/systems/spend/token-shop-row-remap-verification.md", import.meta.url), "utf8");
-const tokenShopRemapJoinProbeDoc = await readFile(new URL("../docs/systems/spend/token-shop-remap-join-probe.md", import.meta.url), "utf8");
+const unityTraceBundleDoc = await readFile(new URL("../docs/unity/unity-trace-bundle.md", import.meta.url), "utf8");
 const multiverseMarketDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-values.md", import.meta.url), "utf8");
 const multiverseMarketVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-verification.md", import.meta.url), "utf8");
 const multiverseMarketStateVerificationDoc = await readFile(new URL("../docs/systems/spend/multiverse-market-state-verification.md", import.meta.url), "utf8");
@@ -489,7 +489,7 @@ const expectedBundledDatasetIds = [
   "token-shop-row-level-owner",
   "token-shop-row-remap-boundary",
   "token-shop-late-atu-boundary",
-  "token-shop-remap-join-probe",
+  "unity-trace-bundle",
   "multiverse-market-save-boundary",
   "multiverse-market-market-member-boundary",
   "multiverse-market-savedata-import-boundary",
@@ -1779,24 +1779,25 @@ assert.equal(tokenShopLateAtuBoundaryData.result, "no concrete late-row object-o
 assert.match(tokenShopLateAtuBoundaryData.groundedConclusion, /tighter bounded negative result/);
 assert.ok(tokenShopLateAtuBoundaryData.currentBoundary.some((line) => /ATU24Level through ATU28Level/i.test(line)));
 assert.ok(tokenShopLateAtuBoundaryData.currentBoundary.some((line) => /do not infer ATU24 through ATU28 row identity/i.test(line)));
-assert.equal(tokenShopRemapJoinProbeData.dataset, "token-shop-remap-join-probe");
-assert.equal(tokenShopRemapJoinProbeData.probeMethod.command, "node scripts/unity/run_probe.mjs token-shop:remap-joins");
-assert.equal(tokenShopRemapJoinProbeData.neighborhoods.length, 1);
-assert.equal(tokenShopRemapJoinProbeData.neighborhoods[0].id, "atu3-cells-domain");
-assert.equal(tokenShopRemapJoinProbeData.neighborhoods[0].shellWindow.shellField, "ATU3Button");
-assert.equal(tokenShopRemapJoinProbeData.neighborhoods[0].shellWindow.shellPathId, 15810);
+assert.equal(unityTraceBundleData.dataset, "unity-trace-bundle");
+assert.equal(unityTraceBundleData.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>");
+assert.equal(unityTraceBundleData.target.id, "token-shop-atu3-cells");
+assert.deepEqual(unityTraceBundleData.target.anchors, ["ATU3Button", "15810"]);
+assert.equal(unityTraceBundleData.shellWindow.shellField, "ATU3Button");
+assert.equal(unityTraceBundleData.shellWindow.shellPathId, 15810);
 assert.deepEqual(
-  tokenShopRemapJoinProbeData.neighborhoods[0].shellWindow.ownerFieldBlock,
+  unityTraceBundleData.shellWindow.ownerFieldBlock,
   ["CellBoostStartCost", "CellBoostAdditiveCost", "CellBoostBonus", "CellBoostMaxLevel", "CellBoostFill"]
 );
-assert.equal(tokenShopRemapJoinProbeData.neighborhoods[0].bridgeCheck.bridgeCleared, false);
-assert.equal(tokenShopRemapJoinProbeData.neighborhoods[0].bridgeCheck.result, "no checked object-or-title bridge recovered");
-assert.ok(tokenShopRemapJoinProbeData.neighborhoods[0].surfaces.some((surface) => surface.id === "action-lane"));
-assert.ok(tokenShopRemapJoinProbeData.neighborhoods[0].surfaces.some((surface) => surface.id === "diamond-special"));
-assert.ok(tokenShopRemapJoinProbeData.neighborhoods[0].surfaces.some((surface) => surface.id === "token-lane"));
-assert.ok(tokenShopRemapJoinProbeData.neighborhoods[0].surfaces.some((surface) => surface.id === "text-hooks"));
-assert.ok(tokenShopRemapJoinProbeData.neighborhoods[0].lostStructure.some((line) => /shell-side owner window survives only in the TokenShop extract/i.test(line)));
-assert.ok(tokenShopRemapJoinProbeData.neighborhoods[0].lostStructure.some((line) => /separate unity-probe string buckets/i.test(line)));
+assert.equal(unityTraceBundleData.bridgeCheck.bridgeCleared, false);
+assert.equal(unityTraceBundleData.bridgeCheck.result, "no checked object-or-title bridge recovered");
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "metadata-neighborhood"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "action-lane"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "diamond-special"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "token-lane"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "text-hooks"));
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /raw declaration area/i.test(line)));
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /direct cross-surface join back to 15810/i.test(line)));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -3133,11 +3134,11 @@ assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to a
 assert.match(spendSystemVerificationDoc, /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset/);
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
-assert.match(tokenShopRowRemapVerificationDoc, /data\/token-shop-remap-join-probe\.json/);
+assert.match(tokenShopRowRemapVerificationDoc, /data\/unity-trace-bundle\.json/);
 assert.match(tokenShopRowRemapVerificationDoc, /no committed source carries one exact shell id together with one exact prefab identity or final title in the same local container/);
-assert.match(tokenShopRemapJoinProbeDoc, /ATU3 cells-domain neighborhood/);
-assert.match(tokenShopRemapJoinProbeDoc, /Result: `no checked object-or-title bridge recovered`/);
-assert.match(tokenShopRemapJoinProbeDoc, /Shell field: `ATU3Button`/);
+assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-cells`/);
+assert.match(unityTraceBundleDoc, /Result: `no checked object-or-title bridge recovered`/);
+assert.match(unityTraceBundleDoc, /Shell field: `ATU3Button`/);
 assert.match(multiverseMarketDoc, /## Integration status/);
 assert.match(multiverseMarketDoc, /CostBox-InscryptionsDone/);
 assert.match(multiverseMarketDoc, /saved-state owner or runtime balance field behind the `Inscryptions Done` cost lane/);
@@ -3556,15 +3557,16 @@ assert.match(probeRunner, /npm run probe:build/);
 assert.match(probeRunner, /dotnet", \["restore", probeProject\]/);
 assert.match(probeRunner, /readdirSync\(probeSourceDir\)/);
 assert.match(probeRunner, /\.NET 8 SDK was not found on PATH/);
-assert.match(probeRunner, /"token-shop:remap-joins": \[/);
-assert.match(pkg.scripts["probe:token-shop:remap-joins"], /run_probe\.mjs token-shop:remap-joins/);
+assert.match(probeRunner, /"trace": \[/);
+assert.match(probeRunner, /const extraArgs = process\.argv\.slice\(3\)/);
+assert.match(pkg.scripts["probe:trace"], /run_probe\.mjs trace/);
 assert.match(unityAuditPlaybook, /`npm run probe:build`/);
 assert.match(unityAuditPlaybook, /fails fast and tells you to run `npm run probe:build`/);
 assert.match(unityAuditPlaybook, /no longer silently reuses a stale cached build/);
 assert.match(unityAuditPlaybook, /api\.nuget\.org/);
-assert.match(unityAuditPlaybook, /`npm run probe:token-shop:remap-joins`/);
-assert.match(unityAuditPlaybook, /data\/token-shop-remap-join-probe\.json/);
-assert.match(unityAuditPlaybook, /exact shell ids, nearby action hooks, prefab identities, and final title or text surfaces/);
+assert.match(unityAuditPlaybook, /`npm run probe:trace -- --target <target-id> --anchor <anchor>`/);
+assert.match(unityAuditPlaybook, /data\/unity-trace-bundle\.json/);
+assert.match(unityAuditPlaybook, /metadata neighborhoods, owner-payload shells, UABEA\/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces/);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);
@@ -3614,7 +3616,7 @@ assert.match(datasetContractsDoc, /Source-priority metadata/);
 assert.match(datasetContractsDoc, /APK\/Unity artifacts and repo extraction outputs first/);
 assert.match(datasetContractsDoc, /spend-boundary datasets/);
 assert.match(datasetContractsDoc, /data\/multiverse-market-prefab-remap-boundary\.json/);
-assert.match(datasetContractsDoc, /data\/token-shop-remap-join-probe\.json/);
+assert.match(datasetContractsDoc, /data\/unity-trace-bundle\.json/);
 assert.match(datasetContractsDoc, /editing `data\/bundled-dataset-contract\.v1\.json`/);
 assert.match(datasetRefreshChecklistDoc, /# Dataset Refresh Checklist/);
 assert.match(datasetRefreshChecklistDoc, /Record the shipped dataset in `data\/bundled-dataset-contract\.v1\.json`/);

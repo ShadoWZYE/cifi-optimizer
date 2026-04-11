@@ -60,10 +60,11 @@ Repo-local npm probe wrappers:
   - refreshes `data/uabea-probe-report.json` first, then regenerates `data/shard-cost-method-probe.v1.json` and `docs/systems/shards/shard-cost-method-probe.md`
 - `npm run probe:shards:cost-native`
   - refreshes `data/uabea-probe-report.json`, then regenerates the shard method, parameter, and native probe outputs in dependency order
-- `npm run probe:token-shop:remap-joins`
-  - regenerates `data/token-shop-remap-join-probe.json` and `docs/systems/spend/token-shop-remap-join-probe.md`
-  - reads committed `data/token-shop-values.json`, `data/daily-tokenium-lane-probe.json`, `data/uabea-probe-report.json`, `data/unity-probe-report.json`, and `data/lm244-targeted-probe.json`
-  - preserves unresolved TokenShop shell-local join attempts in one artifact family so exact shell ids, nearby action hooks, prefab identities, and final title or text surfaces can be rechecked together before any remap-boundary promotion
+- `npm run probe:trace -- --target <target-id> --anchor <anchor>`
+  - regenerates `data/unity-trace-bundle.json` and `docs/unity/unity-trace-bundle.md`
+  - reads committed `workbench/apk/base/global-metadata.dat`, `data/token-shop-values.json`, `data/daily-tokenium-lane-probe.json`, `data/uabea-probe-report.json`, `data/unity-probe-report.json`, and `data/lm244-targeted-probe.json`
+  - preserves target-driven cross-surface joins across metadata neighborhoods, owner-payload shells, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle before any remap-boundary promotion
+  - the current checked target is `token-shop-atu3-cells`, which intentionally stays a negative trace unless one new committed artifact crosses back to `ATU3Button` or path id `15810`
 
 Important primary files:
 

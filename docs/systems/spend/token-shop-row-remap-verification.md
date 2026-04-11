@@ -123,7 +123,7 @@ Because those joins are still missing, the repo should not:
   - the `BuyCellBoost` action cluster still survives only in `data/daily-tokenium-lane-probe.json`
   - the surviving prefab identities still survive only as detached `lm244`, `UABEA`, or `unity-probe` hits
   - the surviving player-facing titles and generic `SetAllTokenShopTexts` or `SetTokenTexts` hooks still survive only as detached unity-probe string buckets
-  - the generated `data/token-shop-remap-join-probe.json` artifact now keeps those exact surfaces together for ATU3, and it still stays negative because no committed source carries one exact shell id together with one exact prefab identity or final title in the same local container
+  - the generated `data/unity-trace-bundle.json` artifact now keeps those exact surfaces together for ATU3 inside the generic `probe:trace` workflow, and it still stays negative because no committed source carries one exact shell id together with one exact prefab identity or final title in the same local container
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`
