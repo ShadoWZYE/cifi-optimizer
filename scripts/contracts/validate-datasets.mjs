@@ -2518,6 +2518,7 @@ function validateUnityTraceBundle(bundle) {
   expectNonEmptyString(bundle.dataset, "unity trace bundle dataset must be present");
   expectRecord(bundle.traceWorkflow, "unity trace bundle traceWorkflow must be an object");
   expectRecord(bundle.plannerResolution, "unity trace bundle plannerResolution must be an object");
+  expectArray(bundle.executionAnchors, "unity trace bundle executionAnchors must be an array");
   expectRecord(bundle.traceRegistry, "unity trace bundle traceRegistry must be an object");
   expectRecord(bundle.sources, "unity trace bundle sources must be an object");
   expectRecord(bundle.target, "unity trace bundle target must be an object");
@@ -2543,7 +2544,10 @@ function validateUnityTraceBundle(bundle) {
   assert.equal(bundle.plannerResolution.comparePresetId, "token-shop-atu3-vs-atu1", "unity trace bundle planner compare preset drifted");
   assert.ok(bundle.plannerResolution.expandedAnchors.includes("Cells"), "unity trace bundle planner anchors must preserve query term");
   assert.ok(bundle.plannerResolution.expandedAnchors.includes("BuyCellBoost"), "unity trace bundle planner anchors must preserve family expansion");
+  assert.ok(bundle.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle planner anchor typing drifted");
   assert.match(bundle.plannerResolution.decisionNote, /TokenShop/i, "unity trace bundle planner decision note must preserve chosen family");
+  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle execution path-id anchor drifted");
+  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"), "unity trace bundle execution method anchor drifted");
   assert.equal(bundle.traceRegistry.path, "data/unity-trace-target-registry.json", "unity trace bundle registry path drifted");
   assert.equal(bundle.traceRegistry.selectedFamilyId, "token-shop", "unity trace bundle selected family drifted");
   assert.equal(bundle.target.id, "token-shop-atu3-cells", "unity trace bundle target id drifted");
@@ -2564,6 +2568,15 @@ function validateUnityTraceBundle(bundle) {
   assert.ok(bundle.surfaces.some((surface) => surface.id === "diamond-special"), "unity trace bundle missing diamond-special lane");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "token-lane"), "unity trace bundle missing token lane");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "text-hooks"), "unity trace bundle missing text-hook lane");
+  const metadataSurface = bundle.surfaces.find((surface) => surface.id === "metadata-neighborhood");
+  assert.ok(metadataSurface.anchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle metadata surface must preserve typed path-id anchor");
+  const metadataSource = metadataSurface.sources.find((source) => source.sourceId === "metadata");
+  assert.deepEqual(metadataSource.searchModes, ["exact-string", "bounded-containment"], "unity trace bundle metadata search modes drifted");
+  assert.equal(metadataSource.highSignalHitCount, 0, "unity trace bundle metadata high-signal count drifted");
+  assert.equal(metadataSource.supportingHitCount, 3, "unity trace bundle metadata supporting count drifted");
+  assert.equal(metadataSource.incidentalHitCount, 4, "unity trace bundle metadata incidental count drifted");
+  assert.ok(metadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)), "unity trace bundle metadata hits should suppress public-key noise");
+  assert.ok(metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")), "unity trace bundle metadata hits should not treat path ids as free-text anchors");
   assert.equal(bundle.traceGraph.edges.length, 8, "unity trace bundle proved edge count drifted");
   assert.equal(bundle.traceGraph.negativeEdges.length, 4, "unity trace bundle negative edge count drifted");
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"), "unity trace bundle missing direct serialized adjacency edge");

@@ -63,8 +63,82 @@
       "CellsPerChestBooster",
       "UltimaCells"
     ],
+    "expandedAnchorSpecs": [
+      {
+        "value": "ATU3Button",
+        "kind": "class",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "15810",
+        "kind": "path id",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "Cells",
+        "kind": "class",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "CellBoost",
+        "kind": "class",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "BuyCellBoost",
+        "kind": "method",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "SetAllTokenShopTexts",
+        "kind": "method",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "CellsBoost",
+        "kind": "class",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "CellsPerChestBooster",
+        "kind": "class",
+        "origin": "planner-expanded-anchor"
+      },
+      {
+        "value": "UltimaCells",
+        "kind": "class",
+        "origin": "planner-expanded-anchor"
+      }
+    ],
     "decisionNote": "Matched Cells to TokenShop through cells-domain and chose the bounded token-shop-atu3-vs-atu1 compare run because this query is better grounded as one checked solved-vs-blocked family trace."
   },
+  "executionAnchors": [
+    {
+      "value": "ATU3Button",
+      "kind": "class",
+      "origin": "execution-anchor"
+    },
+    {
+      "value": "15810",
+      "kind": "path id",
+      "origin": "execution-anchor"
+    },
+    {
+      "value": "CellBoost",
+      "kind": "class",
+      "origin": "execution-anchor"
+    },
+    {
+      "value": "BuyCellBoost",
+      "kind": "method",
+      "origin": "execution-anchor"
+    },
+    {
+      "value": "SetAllTokenShopTexts",
+      "kind": "method",
+      "origin": "execution-anchor"
+    }
+  ],
   "traceRegistry": {
     "path": "data/unity-trace-target-registry.json",
     "selectedTargetId": "token-shop-atu3-cells",
@@ -238,11 +312,46 @@
         "15810",
         "SetAllTokenShopTexts"
       ],
+      "anchorSpecs": [
+        {
+          "value": "ATU3Button",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "CellBoost",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "BuyCellBoost",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15810",
+          "kind": "path id",
+          "origin": "surface-search"
+        },
+        {
+          "value": "SetAllTokenShopTexts",
+          "kind": "method",
+          "origin": "surface-search"
+        }
+      ],
       "sources": [
         {
           "sourceId": "metadata",
           "sourcePath": "workbench/apk/base/global-metadata.dat",
-          "hitCount": 11,
+          "searchModes": [
+            "exact-string",
+            "bounded-containment"
+          ],
+          "hitCount": 7,
+          "highSignalHitCount": 0,
+          "supportingHitCount": 3,
+          "incidentalHitCount": 4,
+          "suppressedNoiseCount": 0,
           "hits": [
             {
               "term": "BuyCellBoost",
@@ -250,6 +359,11 @@
                 "CellBoost",
                 "BuyCellBoost"
               ],
+              "matchedAnchorKinds": [
+                "class",
+                "method"
+              ],
+              "matchMode": "exact-string",
               "offset": 659754,
               "context": [
                 {
@@ -337,296 +451,21 @@
                   "encoding": "ascii",
                   "value": "BuyMK7TokenBoost"
                 }
-              ]
-            },
-            {
-              "term": "BuyCellBoostEnum",
-              "matchedTerms": [
-                "CellBoost",
-                "BuyCellBoost"
               ],
-              "offset": 661133,
-              "context": [
-                {
-                  "offset": 661006,
-                  "encoding": "ascii",
-                  "value": "StopTrio2BoostHold"
-                },
-                {
-                  "offset": 661025,
-                  "encoding": "ascii",
-                  "value": "StopATU24Hold"
-                },
-                {
-                  "offset": 661039,
-                  "encoding": "ascii",
-                  "value": "StopATU25Hold"
-                },
-                {
-                  "offset": 661053,
-                  "encoding": "ascii",
-                  "value": "StopATU26Hold"
-                },
-                {
-                  "offset": 661067,
-                  "encoding": "ascii",
-                  "value": "StopATU27Hold"
-                },
-                {
-                  "offset": 661081,
-                  "encoding": "ascii",
-                  "value": "StopATU28Hold"
-                },
-                {
-                  "offset": 661095,
-                  "encoding": "ascii",
-                  "value": "BuyTokenBoostEnum"
-                },
-                {
-                  "offset": 661113,
-                  "encoding": "ascii",
-                  "value": "BuyDiamondBoostEnum"
-                },
-                {
-                  "offset": 661133,
-                  "encoding": "ascii",
-                  "value": "BuyCellBoostEnum"
-                },
-                {
-                  "offset": 661150,
-                  "encoding": "ascii",
-                  "value": "BuyMPBoostEnum"
-                },
-                {
-                  "offset": 661165,
-                  "encoding": "ascii",
-                  "value": "BuyMK1BoostEnum"
-                },
-                {
-                  "offset": 661181,
-                  "encoding": "ascii",
-                  "value": "BuyMK2BoostEnum"
-                },
-                {
-                  "offset": 661197,
-                  "encoding": "ascii",
-                  "value": "BuyMK3BoostEnum"
-                },
-                {
-                  "offset": 661213,
-                  "encoding": "ascii",
-                  "value": "BuyMK4BoostEnum"
-                },
-                {
-                  "offset": 661229,
-                  "encoding": "ascii",
-                  "value": "BuyMK5BoostEnum"
-                },
-                {
-                  "offset": 661245,
-                  "encoding": "ascii",
-                  "value": "BuyMK6BoostEnum"
-                },
-                {
-                  "offset": 661261,
-                  "encoding": "ascii",
-                  "value": "BuyMK7BoostEnum"
-                }
-              ]
-            },
-            {
-              "term": "CellBoostStartCost",
-              "matchedTerms": [
-                "CellBoost"
-              ],
-              "offset": 662261,
-              "context": [
-                {
-                  "offset": 662117,
-                  "encoding": "ascii",
-                  "value": "ATU1MaxOverlay"
-                },
-                {
-                  "offset": 662132,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostStartCost"
-                },
-                {
-                  "offset": 662154,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostAdditiveCost"
-                },
-                {
-                  "offset": 662179,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostBonus"
-                },
-                {
-                  "offset": 662197,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostMaxLevel"
-                },
-                {
-                  "offset": 662218,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostFill"
-                },
-                {
-                  "offset": 662235,
-                  "encoding": "ascii",
-                  "value": "ATU2Button"
-                },
-                {
-                  "offset": 662246,
-                  "encoding": "ascii",
-                  "value": "ATU2MaxOverlay"
-                },
-                {
-                  "offset": 662261,
-                  "encoding": "ascii",
-                  "value": "CellBoostStartCost"
-                },
-                {
-                  "offset": 662280,
-                  "encoding": "ascii",
-                  "value": "CellBoostAdditiveCost"
-                },
-                {
-                  "offset": 662302,
-                  "encoding": "ascii",
-                  "value": "CellBoostBonus"
-                },
-                {
-                  "offset": 662317,
-                  "encoding": "ascii",
-                  "value": "CellBoostMaxLevel"
-                },
-                {
-                  "offset": 662335,
-                  "encoding": "ascii",
-                  "value": "CellBoostFill"
-                },
-                {
-                  "offset": 662349,
-                  "encoding": "ascii",
-                  "value": "ATU3Button"
-                },
-                {
-                  "offset": 662360,
-                  "encoding": "ascii",
-                  "value": "ATU3MaxOverlay"
-                },
-                {
-                  "offset": 662375,
-                  "encoding": "ascii",
-                  "value": "ModBoostStartCost"
-                },
-                {
-                  "offset": 662393,
-                  "encoding": "ascii",
-                  "value": "ModBoostAdditiveCost"
-                }
-              ]
-            },
-            {
-              "term": "CellBoostAdditiveCost",
-              "matchedTerms": [
-                "CellBoost"
-              ],
-              "offset": 662280,
-              "context": [
-                {
-                  "offset": 662132,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostStartCost"
-                },
-                {
-                  "offset": 662154,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostAdditiveCost"
-                },
-                {
-                  "offset": 662179,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostBonus"
-                },
-                {
-                  "offset": 662197,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostMaxLevel"
-                },
-                {
-                  "offset": 662218,
-                  "encoding": "ascii",
-                  "value": "DiamondBoostFill"
-                },
-                {
-                  "offset": 662235,
-                  "encoding": "ascii",
-                  "value": "ATU2Button"
-                },
-                {
-                  "offset": 662246,
-                  "encoding": "ascii",
-                  "value": "ATU2MaxOverlay"
-                },
-                {
-                  "offset": 662261,
-                  "encoding": "ascii",
-                  "value": "CellBoostStartCost"
-                },
-                {
-                  "offset": 662280,
-                  "encoding": "ascii",
-                  "value": "CellBoostAdditiveCost"
-                },
-                {
-                  "offset": 662302,
-                  "encoding": "ascii",
-                  "value": "CellBoostBonus"
-                },
-                {
-                  "offset": 662317,
-                  "encoding": "ascii",
-                  "value": "CellBoostMaxLevel"
-                },
-                {
-                  "offset": 662335,
-                  "encoding": "ascii",
-                  "value": "CellBoostFill"
-                },
-                {
-                  "offset": 662349,
-                  "encoding": "ascii",
-                  "value": "ATU3Button"
-                },
-                {
-                  "offset": 662360,
-                  "encoding": "ascii",
-                  "value": "ATU3MaxOverlay"
-                },
-                {
-                  "offset": 662375,
-                  "encoding": "ascii",
-                  "value": "ModBoostStartCost"
-                },
-                {
-                  "offset": 662393,
-                  "encoding": "ascii",
-                  "value": "ModBoostAdditiveCost"
-                },
-                {
-                  "offset": 662414,
-                  "encoding": "ascii",
-                  "value": "ModBoostBonus"
-                }
-              ]
+              "signalScore": 90,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-string match on CellBoost, BuyCellBoost via metadata"
             },
             {
               "term": "ATU3Button",
               "matchedTerms": [
                 "ATU3Button"
               ],
+              "matchedAnchorKinds": [
+                "class"
+              ],
+              "matchMode": "exact-string",
               "offset": 662349,
               "context": [
                 {
@@ -714,108 +553,21 @@
                   "encoding": "ascii",
                   "value": "ATU4MaxOverlay"
                 }
-              ]
-            },
-            {
-              "term": "<BuyCellBoostEnum>d__630",
-              "matchedTerms": [
-                "CellBoost",
-                "BuyCellBoost"
               ],
-              "offset": 668194,
-              "context": [
-                {
-                  "offset": 668037,
-                  "encoding": "ascii",
-                  "value": "T4Requirement"
-                },
-                {
-                  "offset": 668051,
-                  "encoding": "ascii",
-                  "value": "CheckValue"
-                },
-                {
-                  "offset": 668062,
-                  "encoding": "ascii",
-                  "value": "BankedTokensIncreaseAmount"
-                },
-                {
-                  "offset": 668089,
-                  "encoding": "ascii",
-                  "value": "<BuyATU24Enum>d__651"
-                },
-                {
-                  "offset": 668110,
-                  "encoding": "ascii",
-                  "value": "<BuyATU25Enum>d__652"
-                },
-                {
-                  "offset": 668131,
-                  "encoding": "ascii",
-                  "value": "<BuyATU26Enum>d__653"
-                },
-                {
-                  "offset": 668152,
-                  "encoding": "ascii",
-                  "value": "<BuyATU27Enum>d__654"
-                },
-                {
-                  "offset": 668173,
-                  "encoding": "ascii",
-                  "value": "<BuyATU28Enum>d__655"
-                },
-                {
-                  "offset": 668194,
-                  "encoding": "ascii",
-                  "value": "<BuyCellBoostEnum>d__630"
-                },
-                {
-                  "offset": 668219,
-                  "encoding": "ascii",
-                  "value": "<BuyDiamondBoostEnum>d__629"
-                },
-                {
-                  "offset": 668247,
-                  "encoding": "ascii",
-                  "value": "<BuyDuo1BoostEnum>d__642"
-                },
-                {
-                  "offset": 668272,
-                  "encoding": "ascii",
-                  "value": "<BuyDuo2BoostEnum>d__643"
-                },
-                {
-                  "offset": 668297,
-                  "encoding": "ascii",
-                  "value": "<BuyDuo3BoostEnum>d__644"
-                },
-                {
-                  "offset": 668322,
-                  "encoding": "ascii",
-                  "value": "<BuyDuo4BoostEnum>d__645"
-                },
-                {
-                  "offset": 668347,
-                  "encoding": "ascii",
-                  "value": "<BuyDuo5BoostEnum>d__646"
-                },
-                {
-                  "offset": 668372,
-                  "encoding": "ascii",
-                  "value": "<BuyMK1BoostEnum>d__632"
-                },
-                {
-                  "offset": 668396,
-                  "encoding": "ascii",
-                  "value": "<BuyMK2BoostEnum>d__633"
-                }
-              ]
+              "signalScore": 90,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-string match on ATU3Button via metadata"
             },
             {
               "term": "SetAllTokenShopTexts",
               "matchedTerms": [
                 "SetAllTokenShopTexts"
               ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-string",
               "offset": 979315,
               "context": [
                 {
@@ -903,383 +655,423 @@
                   "encoding": "ascii",
                   "value": "SetAllStatTexts"
                 }
-              ]
+              ],
+              "signalScore": 90,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-string match on SetAllTokenShopTexts via metadata"
             },
             {
-              "term": "System, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB",
+              "term": "BuyCellBoostEnum",
               "matchedTerms": [
-                "15810"
+                "CellBoost",
+                "BuyCellBoost"
               ],
-              "offset": 12245177,
+              "matchedAnchorKinds": [
+                "class",
+                "method"
+              ],
+              "matchMode": "bounded-containment",
+              "offset": 661133,
               "context": [
                 {
-                  "offset": 12244954,
+                  "offset": 661006,
                   "encoding": "ascii",
-                  "value": "*Mono development team"
+                  "value": "StopTrio2BoostHold"
                 },
                 {
-                  "offset": 12244980,
+                  "offset": 661025,
                   "encoding": "ascii",
-                  "value": "FMono Common Language Infrastructure"
+                  "value": "StopATU24Hold"
                 },
                 {
-                  "offset": 12245020,
+                  "offset": 661039,
                   "encoding": "ascii",
-                  "value": "0(c) Various Mono authors"
+                  "value": "StopATU25Hold"
                 },
                 {
-                  "offset": 12245050,
+                  "offset": 661053,
                   "encoding": "ascii",
-                  "value": "4.0.30319.17020"
+                  "value": "StopATU26Hold"
                 },
                 {
-                  "offset": 12245070,
+                  "offset": 661067,
                   "encoding": "ascii",
-                  "value": "4.0.0.0"
+                  "value": "StopATU27Hold"
                 },
                 {
-                  "offset": 12245082,
+                  "offset": 661081,
                   "encoding": "ascii",
-                  "value": "en-US"
+                  "value": "StopATU28Hold"
                 },
                 {
-                  "offset": 12245102,
+                  "offset": 661095,
                   "encoding": "ascii",
-                  "value": "../ecma.pub"
+                  "value": "BuyTokenBoostEnum"
                 },
                 {
-                  "offset": 12245130,
+                  "offset": 661113,
                   "encoding": "ascii",
-                  "value": "4.0.30319.17020"
+                  "value": "BuyDiamondBoostEnum"
                 },
                 {
-                  "offset": 12245177,
+                  "offset": 661133,
                   "encoding": "ascii",
-                  "value": "System, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB"
+                  "value": "BuyCellBoostEnum"
                 },
                 {
-                  "offset": 12245521,
+                  "offset": 661150,
                   "encoding": "ascii",
-                  "value": "System.Core, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB"
+                  "value": "BuyMPBoostEnum"
                 },
                 {
-                  "offset": 12245870,
+                  "offset": 661165,
                   "encoding": "ascii",
-                  "value": "System.Security, PublicKey=002400000480000094000000060200000024000052534131000400000100010007d1fa57c4aed9f0a32e84aa0faefd0de9e8fd6aec8f87fb03766c834c99921eb23be79ad9d5dcc1dd9ad236132102900b723cf980957fc4e177108fc607774f29e8320e92ea05ece4e821c0a5efe8f1645c4c0c93c1ab99285d622caa652c1dfad63d745d6f2de5f17e5eaf0fc4963d261c8a12436518206dc093344d5ad293"
+                  "value": "BuyMK1BoostEnum"
                 },
                 {
-                  "offset": 12246223,
+                  "offset": 661181,
                   "encoding": "ascii",
-                  "value": "System.Runtime.WindowsRuntime, PublicKey=00000000000000000400000000000000"
+                  "value": "BuyMK2BoostEnum"
                 },
                 {
-                  "offset": 12246302,
+                  "offset": 661197,
                   "encoding": "ascii",
-                  "value": "System.Runtime.WindowsRuntime.UI.Xaml, PublicKey=00000000000000000400000000000000"
+                  "value": "BuyMK3BoostEnum"
                 },
                 {
-                  "offset": 12246389,
+                  "offset": 661213,
                   "encoding": "ascii",
-                  "value": "System.Net.Http, PublicKey=002400000480000094000000060200000024000052534131000400000100010007d1fa57c4aed9f0a32e84aa0faefd0de9e8fd6aec8f87fb03766c834c99921eb23be79ad9d5dcc1dd9ad236132102900b723cf980957fc4e177108fc607774f29e8320e92ea05ece4e821c0a5efe8f1645c4c0c93c1ab99285d622caa652c1dfad63d745d6f2de5f17e5eaf0fc4963d261c8a12436518206dc093344d5ad293"
+                  "value": "BuyMK4BoostEnum"
                 },
                 {
-                  "offset": 12246743,
+                  "offset": 661229,
                   "encoding": "ascii",
-                  "value": "HBED7F4EA-1A96-11D2-8F08-00A0C9A6186D"
+                  "value": "BuyMK5BoostEnum"
                 },
                 {
-                  "offset": 12246873,
+                  "offset": 661245,
                   "encoding": "ascii",
-                  "value": "HUnityEditor.UIToolkitAuthoringModule"
+                  "value": "BuyMK6BoostEnum"
                 },
                 {
-                  "offset": 12246922,
+                  "offset": 661261,
                   "encoding": "ascii",
-                  "value": "HUnityEditor.UIToolkitAuthoringModule"
+                  "value": "BuyMK7BoostEnum"
                 }
-              ]
+              ],
+              "signalScore": 45,
+              "signalTier": "incidental",
+              "noiseFlags": [],
+              "signalReason": "bounded-containment match on CellBoost, BuyCellBoost via metadata"
             },
             {
-              "term": "System.Core, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB",
+              "term": "CellBoostStartCost",
               "matchedTerms": [
-                "15810"
+                "CellBoost"
               ],
-              "offset": 12245521,
+              "matchedAnchorKinds": [
+                "class"
+              ],
+              "matchMode": "bounded-containment",
+              "offset": 662261,
               "context": [
                 {
-                  "offset": 12244980,
+                  "offset": 662117,
                   "encoding": "ascii",
-                  "value": "FMono Common Language Infrastructure"
+                  "value": "ATU1MaxOverlay"
                 },
                 {
-                  "offset": 12245020,
+                  "offset": 662132,
                   "encoding": "ascii",
-                  "value": "0(c) Various Mono authors"
+                  "value": "DiamondBoostStartCost"
                 },
                 {
-                  "offset": 12245050,
+                  "offset": 662154,
                   "encoding": "ascii",
-                  "value": "4.0.30319.17020"
+                  "value": "DiamondBoostAdditiveCost"
                 },
                 {
-                  "offset": 12245070,
+                  "offset": 662179,
                   "encoding": "ascii",
-                  "value": "4.0.0.0"
+                  "value": "DiamondBoostBonus"
                 },
                 {
-                  "offset": 12245082,
+                  "offset": 662197,
                   "encoding": "ascii",
-                  "value": "en-US"
+                  "value": "DiamondBoostMaxLevel"
                 },
                 {
-                  "offset": 12245102,
+                  "offset": 662218,
                   "encoding": "ascii",
-                  "value": "../ecma.pub"
+                  "value": "DiamondBoostFill"
                 },
                 {
-                  "offset": 12245130,
+                  "offset": 662235,
                   "encoding": "ascii",
-                  "value": "4.0.30319.17020"
+                  "value": "ATU2Button"
                 },
                 {
-                  "offset": 12245177,
+                  "offset": 662246,
                   "encoding": "ascii",
-                  "value": "System, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB"
+                  "value": "ATU2MaxOverlay"
                 },
                 {
-                  "offset": 12245521,
+                  "offset": 662261,
                   "encoding": "ascii",
-                  "value": "System.Core, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB"
+                  "value": "CellBoostStartCost"
                 },
                 {
-                  "offset": 12245870,
+                  "offset": 662280,
                   "encoding": "ascii",
-                  "value": "System.Security, PublicKey=002400000480000094000000060200000024000052534131000400000100010007d1fa57c4aed9f0a32e84aa0faefd0de9e8fd6aec8f87fb03766c834c99921eb23be79ad9d5dcc1dd9ad236132102900b723cf980957fc4e177108fc607774f29e8320e92ea05ece4e821c0a5efe8f1645c4c0c93c1ab99285d622caa652c1dfad63d745d6f2de5f17e5eaf0fc4963d261c8a12436518206dc093344d5ad293"
+                  "value": "CellBoostAdditiveCost"
                 },
                 {
-                  "offset": 12246223,
+                  "offset": 662302,
                   "encoding": "ascii",
-                  "value": "System.Runtime.WindowsRuntime, PublicKey=00000000000000000400000000000000"
+                  "value": "CellBoostBonus"
                 },
                 {
-                  "offset": 12246302,
+                  "offset": 662317,
                   "encoding": "ascii",
-                  "value": "System.Runtime.WindowsRuntime.UI.Xaml, PublicKey=00000000000000000400000000000000"
+                  "value": "CellBoostMaxLevel"
                 },
                 {
-                  "offset": 12246389,
+                  "offset": 662335,
                   "encoding": "ascii",
-                  "value": "System.Net.Http, PublicKey=002400000480000094000000060200000024000052534131000400000100010007d1fa57c4aed9f0a32e84aa0faefd0de9e8fd6aec8f87fb03766c834c99921eb23be79ad9d5dcc1dd9ad236132102900b723cf980957fc4e177108fc607774f29e8320e92ea05ece4e821c0a5efe8f1645c4c0c93c1ab99285d622caa652c1dfad63d745d6f2de5f17e5eaf0fc4963d261c8a12436518206dc093344d5ad293"
+                  "value": "CellBoostFill"
                 },
                 {
-                  "offset": 12246743,
+                  "offset": 662349,
                   "encoding": "ascii",
-                  "value": "HBED7F4EA-1A96-11D2-8F08-00A0C9A6186D"
+                  "value": "ATU3Button"
                 },
                 {
-                  "offset": 12246873,
+                  "offset": 662360,
                   "encoding": "ascii",
-                  "value": "HUnityEditor.UIToolkitAuthoringModule"
+                  "value": "ATU3MaxOverlay"
                 },
                 {
-                  "offset": 12246922,
+                  "offset": 662375,
                   "encoding": "ascii",
-                  "value": "HUnityEditor.UIToolkitAuthoringModule"
+                  "value": "ModBoostStartCost"
                 },
                 {
-                  "offset": 12246970,
+                  "offset": 662393,
                   "encoding": "ascii",
-                  "value": "UxmlFactory is deprecated and will be removed. Use UxmlElementAttribute instead."
+                  "value": "ModBoostAdditiveCost"
                 }
-              ]
+              ],
+              "signalScore": 45,
+              "signalTier": "incidental",
+              "noiseFlags": [],
+              "signalReason": "bounded-containment match on CellBoost via metadata"
             },
             {
-              "term": "System.ServiceModel.Web, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB",
+              "term": "CellBoostAdditiveCost",
               "matchedTerms": [
-                "15810"
+                "CellBoost"
               ],
-              "offset": 12324129,
+              "matchedAnchorKinds": [
+                "class"
+              ],
+              "matchMode": "bounded-containment",
+              "offset": 662280,
               "context": [
                 {
-                  "offset": 12323934,
+                  "offset": 662132,
                   "encoding": "ascii",
-                  "value": "System.Xml.dll"
+                  "value": "DiamondBoostStartCost"
                 },
                 {
-                  "offset": 12323952,
+                  "offset": 662154,
                   "encoding": "ascii",
-                  "value": "*Mono development team"
+                  "value": "DiamondBoostAdditiveCost"
                 },
                 {
-                  "offset": 12323978,
+                  "offset": 662179,
                   "encoding": "ascii",
-                  "value": "FMono Common Language Infrastructure"
+                  "value": "DiamondBoostBonus"
                 },
                 {
-                  "offset": 12324018,
+                  "offset": 662197,
                   "encoding": "ascii",
-                  "value": "0(c) Various Mono authors"
+                  "value": "DiamondBoostMaxLevel"
                 },
                 {
-                  "offset": 12324048,
+                  "offset": 662218,
                   "encoding": "ascii",
-                  "value": "4.0.0.0"
+                  "value": "DiamondBoostFill"
                 },
                 {
-                  "offset": 12324060,
+                  "offset": 662235,
                   "encoding": "ascii",
-                  "value": "4.0.30319.17020"
+                  "value": "ATU2Button"
                 },
                 {
-                  "offset": 12324080,
+                  "offset": 662246,
                   "encoding": "ascii",
-                  "value": "en-US"
+                  "value": "ATU2MaxOverlay"
                 },
                 {
-                  "offset": 12324104,
+                  "offset": 662261,
                   "encoding": "ascii",
-                  "value": "$../silverlight.pub"
+                  "value": "CellBoostStartCost"
                 },
                 {
-                  "offset": 12324129,
+                  "offset": 662280,
                   "encoding": "ascii",
-                  "value": "System.ServiceModel.Web, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB"
+                  "value": "CellBoostAdditiveCost"
                 },
                 {
-                  "offset": 12324490,
+                  "offset": 662302,
                   "encoding": "ascii",
-                  "value": "System.Xml.Linq, PublicKey=0024000004800000940000000602000000240000525341310004000001000100B5FC90E7027F67871E773A8FDE8938C81DD402BA65B9201D60593E96C492651E889CC13F1415EBB53FAC1131AE0BD333C5EE6021672D9718EA31A8AEBD0DA0072F25D87DBA6FC90FFD598ED4DA35E44C398C454307E8E33B8426143DAEC9F596836F97C8F74750E5975C64E2189F45DEF46B2A2B1247ADC3652BF5C308055DA9"
+                  "value": "CellBoostBonus"
                 },
                 {
-                  "offset": 12324845,
+                  "offset": 662317,
                   "encoding": "ascii",
-                  "value": "4.0.30319.17020"
+                  "value": "CellBoostMaxLevel"
                 },
                 {
-                  "offset": 12324894,
+                  "offset": 662335,
                   "encoding": "ascii",
-                  "value": "MONOTOUCH"
+                  "value": "CellBoostFill"
                 },
                 {
-                  "offset": 12324907,
+                  "offset": 662349,
                   "encoding": "ascii",
-                  "value": " FULL_AOT_RUNTIME"
+                  "value": "ATU3Button"
                 },
                 {
-                  "offset": 12324929,
+                  "offset": 662360,
                   "encoding": "ascii",
-                  "value": "UNITY"
+                  "value": "ATU3MaxOverlay"
                 },
                 {
-                  "offset": 12325679,
+                  "offset": 662375,
                   "encoding": "ascii",
-                  "value": "Elapsed"
+                  "value": "ModBoostStartCost"
                 },
                 {
-                  "offset": 12325691,
+                  "offset": 662393,
                   "encoding": "ascii",
-                  "value": "Interval"
+                  "value": "ModBoostAdditiveCost"
                 },
                 {
-                  "offset": 12325740,
+                  "offset": 662414,
                   "encoding": "ascii",
-                  "value": "Count = {Count}"
+                  "value": "ModBoostBonus"
                 }
-              ]
+              ],
+              "signalScore": 45,
+              "signalTier": "incidental",
+              "noiseFlags": [],
+              "signalReason": "bounded-containment match on CellBoost via metadata"
             },
             {
-              "term": "System, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB",
+              "term": "<BuyCellBoostEnum>d__630",
               "matchedTerms": [
-                "15810"
+                "CellBoost",
+                "BuyCellBoost"
               ],
-              "offset": 12891503,
+              "matchedAnchorKinds": [
+                "class",
+                "method"
+              ],
+              "matchMode": "bounded-containment",
+              "offset": 668194,
               "context": [
                 {
-                  "offset": 12891063,
+                  "offset": 668037,
                   "encoding": "ascii",
-                  "value": "<Do not use outside System.dll!"
+                  "value": "T4Requirement"
                 },
                 {
-                  "offset": 12891251,
+                  "offset": 668051,
                   "encoding": "ascii",
-                  "value": "<Do not use outside System.dll!"
+                  "value": "CheckValue"
                 },
                 {
-                  "offset": 12891359,
+                  "offset": 668062,
                   "encoding": "ascii",
-                  "value": "*MONO development team"
+                  "value": "BankedTokensIncreaseAmount"
                 },
                 {
-                  "offset": 12891385,
+                  "offset": 668089,
                   "encoding": "ascii",
-                  "value": ":(c) 2003-2004 Various Authors"
+                  "value": "<BuyATU24Enum>d__651"
                 },
                 {
-                  "offset": 12891419,
+                  "offset": 668110,
                   "encoding": "ascii",
-                  "value": "\"Mono.Security.dll"
+                  "value": "<BuyATU25Enum>d__652"
                 },
                 {
-                  "offset": 12891442,
+                  "offset": 668131,
                   "encoding": "ascii",
-                  "value": "MONO CLI"
+                  "value": "<BuyATU26Enum>d__653"
                 },
                 {
-                  "offset": 12891454,
+                  "offset": 668152,
                   "encoding": "ascii",
-                  "value": "\"Mono.Security.dll"
+                  "value": "<BuyATU27Enum>d__654"
                 },
                 {
-                  "offset": 12891487,
+                  "offset": 668173,
                   "encoding": "ascii",
-                  "value": "en-US"
+                  "value": "<BuyATU28Enum>d__655"
                 },
                 {
-                  "offset": 12891503,
+                  "offset": 668194,
                   "encoding": "ascii",
-                  "value": "System, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB"
+                  "value": "<BuyCellBoostEnum>d__630"
                 },
                 {
-                  "offset": 12891870,
+                  "offset": 668219,
                   "encoding": "ascii",
-                  "value": "bUnity.MonoScriptGenerator.MonoScriptInfoGenerator"
+                  "value": "<BuyDiamondBoostEnum>d__629"
                 },
                 {
-                  "offset": 12892768,
+                  "offset": 668247,
                   "encoding": "ascii",
-                  "value": "Item"
+                  "value": "<BuyDuo1BoostEnum>d__642"
                 },
                 {
-                  "offset": 12892868,
+                  "offset": 668272,
                   "encoding": "ascii",
-                  "value": "8UnityEngine.UIElementsModule"
+                  "value": "<BuyDuo2BoostEnum>d__643"
                 },
                 {
-                  "offset": 12892944,
+                  "offset": 668297,
                   "encoding": "ascii",
-                  "value": "8UnityEditor.PropertiesModule"
+                  "value": "<BuyDuo3BoostEnum>d__644"
                 },
                 {
-                  "offset": 12894643,
+                  "offset": 668322,
                   "encoding": "ascii",
-                  "value": "UnityEngine"
+                  "value": "<BuyDuo4BoostEnum>d__645"
                 },
                 {
-                  "offset": 12894661,
+                  "offset": 668347,
                   "encoding": "ascii",
-                  "value": "8UnityEditor.PropertiesModule"
+                  "value": "<BuyDuo5BoostEnum>d__646"
                 },
                 {
-                  "offset": 12894694,
+                  "offset": 668372,
                   "encoding": "ascii",
-                  "value": "8PropertyBags.GenerationTests"
+                  "value": "<BuyMK1BoostEnum>d__632"
                 },
                 {
-                  "offset": 12894730,
+                  "offset": 668396,
                   "encoding": "ascii",
-                  "value": "BUnity.Properties.Reflection.Tests"
+                  "value": "<BuyMK2BoostEnum>d__633"
                 }
-              ]
+              ],
+              "signalScore": 45,
+              "signalTier": "incidental",
+              "noiseFlags": [],
+              "signalReason": "bounded-containment match on CellBoost, BuyCellBoost via metadata"
             }
           ]
         }
@@ -1297,78 +1089,56 @@
         "CellBoost",
         "SetAllTokenShopTexts"
       ],
+      "anchorSpecs": [
+        {
+          "value": "StartCellBostHold",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "StopCellBostHold",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "BuyCellBoost",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "ATU3Button",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15810",
+          "kind": "path id",
+          "origin": "surface-search"
+        },
+        {
+          "value": "CellBoost",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "SetAllTokenShopTexts",
+          "kind": "method",
+          "origin": "surface-search"
+        }
+      ],
       "sources": [
         {
           "sourceId": "dailyTokeniumLaneProbe",
           "sourcePath": "data/daily-tokenium-lane-probe.json",
+          "searchModes": [
+            "exact-structured"
+          ],
           "hitCount": 16,
+          "highSignalHitCount": 16,
+          "supportingHitCount": 0,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
           "hits": [
-            {
-              "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[101].entry_context[17].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              }
-            },
-            {
-              "term": "StopCellBostHold",
-              "jsonPath": "$[0].matches[101].entry_context[20].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114544
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StopCellBostHold"
-                  }
-                ]
-              }
-            },
-            {
-              "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[101].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              }
-            },
             {
               "term": "StartCellBostHold",
               "jsonPath": "$[0].matches[101].byte_context[30].value",
@@ -1389,7 +1159,18 @@
                     "value": "StartCellBostHold"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "StartCellBostHold"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
             },
             {
               "term": "StopCellBostHold",
@@ -1411,7 +1192,18 @@
                     "value": "StopCellBostHold"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "StopCellBostHold"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on StopCellBostHold via dailyTokeniumLaneProbe"
             },
             {
               "term": "BuyCellBoost",
@@ -1433,11 +1225,22 @@
                     "value": "BuyCellBoost"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "BuyCellBoost"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
             },
             {
               "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[102].entry_context[14].value",
+              "jsonPath": "$[0].matches[101].entry_context[17].value",
               "containerSummary": {
                 "containerType": "object",
                 "matchedKey": "value",
@@ -1455,11 +1258,22 @@
                     "value": "StartCellBostHold"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "StartCellBostHold"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
             },
             {
               "term": "StopCellBostHold",
-              "jsonPath": "$[0].matches[102].entry_context[17].value",
+              "jsonPath": "$[0].matches[101].entry_context[20].value",
               "containerSummary": {
                 "containerType": "object",
                 "matchedKey": "value",
@@ -1477,11 +1291,22 @@
                     "value": "StopCellBostHold"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "StopCellBostHold"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on StopCellBostHold via dailyTokeniumLaneProbe"
             },
             {
               "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[102].entry_context[25].value",
+              "jsonPath": "$[0].matches[101].entry_context[28].value",
               "containerSummary": {
                 "containerType": "object",
                 "matchedKey": "value",
@@ -1499,7 +1324,18 @@
                     "value": "BuyCellBoost"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "BuyCellBoost"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
             },
             {
               "term": "StartCellBostHold",
@@ -1521,7 +1357,18 @@
                     "value": "StartCellBostHold"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "StartCellBostHold"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
             },
             {
               "term": "StopCellBostHold",
@@ -1543,7 +1390,18 @@
                     "value": "StopCellBostHold"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "StopCellBostHold"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on StopCellBostHold via dailyTokeniumLaneProbe"
             },
             {
               "term": "BuyCellBoost",
@@ -1565,18 +1423,29 @@
                     "value": "BuyCellBoost"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "BuyCellBoost"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
             },
             {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[312].value",
+              "term": "StartCellBostHold",
+              "jsonPath": "$[0].matches[102].entry_context[14].value",
               "containerSummary": {
                 "containerType": "object",
                 "matchedKey": "value",
                 "scalarEntries": [
                   {
                     "key": "offset",
-                    "value": 37825208
+                    "value": 32114396
                   },
                   {
                     "key": "kind",
@@ -1584,21 +1453,32 @@
                   },
                   {
                     "key": "value",
-                    "value": "SetAllTokenShopTexts"
+                    "value": "StartCellBostHold"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "StartCellBostHold"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
             },
             {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[312].entry_context[16].value",
+              "term": "StopCellBostHold",
+              "jsonPath": "$[0].matches[102].entry_context[17].value",
               "containerSummary": {
                 "containerType": "object",
                 "matchedKey": "value",
                 "scalarEntries": [
                   {
                     "key": "offset",
-                    "value": 37825208
+                    "value": 32114544
                   },
                   {
                     "key": "kind",
@@ -1606,10 +1486,54 @@
                   },
                   {
                     "key": "value",
-                    "value": "SetAllTokenShopTexts"
+                    "value": "StopCellBostHold"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "StopCellBostHold"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on StopCellBostHold via dailyTokeniumLaneProbe"
+            },
+            {
+              "term": "BuyCellBoost",
+              "jsonPath": "$[0].matches[102].entry_context[25].value",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "value",
+                "scalarEntries": [
+                  {
+                    "key": "offset",
+                    "value": 32115000
+                  },
+                  {
+                    "key": "kind",
+                    "value": "ascii"
+                  },
+                  {
+                    "key": "value",
+                    "value": "BuyCellBoost"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "BuyCellBoost"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
             },
             {
               "term": "SetAllTokenShopTexts",
@@ -1631,7 +1555,84 @@
                     "value": "SetAllTokenShopTexts"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
+            },
+            {
+              "term": "SetAllTokenShopTexts",
+              "jsonPath": "$[0].matches[312].entry_context[16].value",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "value",
+                "scalarEntries": [
+                  {
+                    "key": "offset",
+                    "value": 37825208
+                  },
+                  {
+                    "key": "kind",
+                    "value": "ascii"
+                  },
+                  {
+                    "key": "value",
+                    "value": "SetAllTokenShopTexts"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
+            },
+            {
+              "term": "SetAllTokenShopTexts",
+              "jsonPath": "$[0].matches[312].value",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "value",
+                "scalarEntries": [
+                  {
+                    "key": "offset",
+                    "value": 37825208
+                  },
+                  {
+                    "key": "kind",
+                    "value": "ascii"
+                  },
+                  {
+                    "key": "value",
+                    "value": "SetAllTokenShopTexts"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
             },
             {
               "term": "SetAllTokenShopTexts",
@@ -1653,7 +1654,18 @@
                     "value": "SetAllTokenShopTexts"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
             }
           ]
         }
@@ -1671,34 +1683,56 @@
         "BuyCellBoost",
         "SetAllTokenShopTexts"
       ],
+      "anchorSpecs": [
+        {
+          "value": "NewDiamondUPGPrefab.Specials.CellsBoost",
+          "kind": "string",
+          "origin": "surface-search"
+        },
+        {
+          "value": ">Diamond Upgrade 10 - CellsBoost",
+          "kind": "string",
+          "origin": "surface-search"
+        },
+        {
+          "value": "ATU3Button",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15810",
+          "kind": "path id",
+          "origin": "surface-search"
+        },
+        {
+          "value": "CellBoost",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "BuyCellBoost",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "SetAllTokenShopTexts",
+          "kind": "method",
+          "origin": "surface-search"
+        }
+      ],
       "sources": [
         {
           "sourceId": "lm244TargetedProbe",
           "sourcePath": "data/lm244-targeted-probe.json",
+          "searchModes": [
+            "exact-structured"
+          ],
           "hitCount": 2,
+          "highSignalHitCount": 0,
+          "supportingHitCount": 2,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
           "hits": [
-            {
-              "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-              "jsonPath": "$[0].matches[23].byte_context[89].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 13672324
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "NewDiamondUPGPrefab.Specials.CellsBoost"
-                  }
-                ]
-              }
-            },
             {
               "term": "SetAllTokenShopTexts",
               "jsonPath": "$[0].matches[225].byte_context[48].value",
@@ -1719,14 +1753,65 @@
                     "value": "SetAllTokenShopTexts"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via lm244TargetedProbe"
+            },
+            {
+              "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
+              "jsonPath": "$[0].matches[23].byte_context[89].value",
+              "containerSummary": {
+                "containerType": "object",
+                "matchedKey": "value",
+                "scalarEntries": [
+                  {
+                    "key": "offset",
+                    "value": 13672324
+                  },
+                  {
+                    "key": "kind",
+                    "value": "ascii"
+                  },
+                  {
+                    "key": "value",
+                    "value": "NewDiamondUPGPrefab.Specials.CellsBoost"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "NewDiamondUPGPrefab.Specials.CellsBoost"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewDiamondUPGPrefab.Specials.CellsBoost via lm244TargetedProbe"
             }
           ]
         },
         {
           "sourceId": "unityProbe",
           "sourcePath": "data/unity-probe-report.json",
+          "searchModes": [
+            "exact-structured"
+          ],
           "hitCount": 4,
+          "highSignalHitCount": 0,
+          "supportingHitCount": 4,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
           "hits": [
             {
               "term": ">Diamond Upgrade 10 - CellsBoost",
@@ -1764,45 +1849,18 @@
                     "value": ">Diamond Upgrade 9 - TokensBoost"
                   }
                 ]
-              }
-            },
-            {
-              "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
-              "jsonPath": "$.apk_results[7].keyword_hits.diamond[16]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 16,
-                "nearbyScalarValues": [
-                  {
-                    "index": 13,
-                    "value": "NewDiamondUPGPrefab.Generators.MK9Booster"
-                  },
-                  {
-                    "index": 14,
-                    "value": "NewDiamondUPGPrefab.Specials.APBoost"
-                  },
-                  {
-                    "index": 15,
-                    "value": "NewDiamondUPGPrefab.Specials.AllGensBoost"
-                  },
-                  {
-                    "index": 16,
-                    "value": "NewDiamondUPGPrefab.Specials.CellsBoost"
-                  },
-                  {
-                    "index": 17,
-                    "value": "NewDiamondUPGPrefab.Specials.HunterLootBoost"
-                  },
-                  {
-                    "index": 18,
-                    "value": "NewDiamondUPGPrefab.Specials.HunterReviveBoost"
-                  },
-                  {
-                    "index": 19,
-                    "value": "NewDiamondUPGPrefab.Specials.MPBoost"
-                  }
-                ]
-              }
+              },
+              "matchedTerms": [
+                ">Diamond Upgrade 10 - CellsBoost"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on >Diamond Upgrade 10 - CellsBoost via unityProbe"
             },
             {
               "term": "SetAllTokenShopTexts",
@@ -1840,7 +1898,67 @@
                     "value": "TokenShop, Assembly-CSharp"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
+            },
+            {
+              "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
+              "jsonPath": "$.apk_results[7].keyword_hits.diamond[16]",
+              "containerSummary": {
+                "containerType": "array",
+                "matchedIndex": 16,
+                "nearbyScalarValues": [
+                  {
+                    "index": 13,
+                    "value": "NewDiamondUPGPrefab.Generators.MK9Booster"
+                  },
+                  {
+                    "index": 14,
+                    "value": "NewDiamondUPGPrefab.Specials.APBoost"
+                  },
+                  {
+                    "index": 15,
+                    "value": "NewDiamondUPGPrefab.Specials.AllGensBoost"
+                  },
+                  {
+                    "index": 16,
+                    "value": "NewDiamondUPGPrefab.Specials.CellsBoost"
+                  },
+                  {
+                    "index": 17,
+                    "value": "NewDiamondUPGPrefab.Specials.HunterLootBoost"
+                  },
+                  {
+                    "index": 18,
+                    "value": "NewDiamondUPGPrefab.Specials.HunterReviveBoost"
+                  },
+                  {
+                    "index": 19,
+                    "value": "NewDiamondUPGPrefab.Specials.MPBoost"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "NewDiamondUPGPrefab.Specials.CellsBoost"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewDiamondUPGPrefab.Specials.CellsBoost via unityProbe"
             },
             {
               "term": ">Diamond Upgrade 10 - CellsBoost",
@@ -1878,14 +1996,32 @@
                     "value": ">Diamond Upgrade 9 - TokensBoost"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                ">Diamond Upgrade 10 - CellsBoost"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on >Diamond Upgrade 10 - CellsBoost via unityProbe"
             }
           ]
         },
         {
           "sourceId": "uabeaProbe",
           "sourcePath": "data/uabea-probe-report.json",
+          "searchModes": [
+            "exact-structured"
+          ],
           "hitCount": 1,
+          "highSignalHitCount": 1,
+          "supportingHitCount": 0,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
           "hits": [
             {
               "term": "NewDiamondUPGPrefab.Specials.CellsBoost",
@@ -1927,7 +2063,18 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "NewDiamondUPGPrefab.Specials.CellsBoost"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewDiamondUPGPrefab.Specials.CellsBoost via uabeaProbe"
             }
           ]
         }
@@ -1946,11 +2093,60 @@
         "BuyCellBoost",
         "SetAllTokenShopTexts"
       ],
+      "anchorSpecs": [
+        {
+          "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+          "kind": "string",
+          "origin": "surface-search"
+        },
+        {
+          "value": "NewTokenUPGPrefab.T5.UltimaCells",
+          "kind": "string",
+          "origin": "surface-search"
+        },
+        {
+          "value": "Token Ultima: Cells",
+          "kind": "string",
+          "origin": "surface-search"
+        },
+        {
+          "value": "ATU3Button",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15810",
+          "kind": "path id",
+          "origin": "surface-search"
+        },
+        {
+          "value": "CellBoost",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "BuyCellBoost",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "SetAllTokenShopTexts",
+          "kind": "method",
+          "origin": "surface-search"
+        }
+      ],
       "sources": [
         {
           "sourceId": "uabeaProbe",
           "sourcePath": "data/uabea-probe-report.json",
+          "searchModes": [
+            "exact-structured"
+          ],
           "hitCount": 2,
+          "highSignalHitCount": 2,
+          "supportingHitCount": 0,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
           "hits": [
             {
               "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
@@ -1992,7 +2188,18 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "NewTokenUPGPrefab.T1.CellsPerChestBooster"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.CellsPerChestBooster via uabeaProbe"
             },
             {
               "term": "NewTokenUPGPrefab.T5.UltimaCells",
@@ -2034,52 +2241,171 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "NewTokenUPGPrefab.T5.UltimaCells"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 100,
+              "signalTier": "high-signal",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewTokenUPGPrefab.T5.UltimaCells via uabeaProbe"
             }
           ]
         },
         {
           "sourceId": "unityProbe",
           "sourcePath": "data/unity-probe-report.json",
+          "searchModes": [
+            "exact-structured"
+          ],
           "hitCount": 6,
+          "highSignalHitCount": 0,
+          "supportingHitCount": 6,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
           "hits": [
             {
-              "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[4]",
+              "term": "Token Ultima: Cells",
+              "jsonPath": "$.apk_results[23].keyword_hits.token[25]",
               "containerSummary": {
                 "containerType": "array",
-                "matchedIndex": 4,
+                "matchedIndex": 25,
                 "nearbyScalarValues": [
                   {
-                    "index": 1,
-                    "value": "CellmasPresent_Token_Prefab1"
+                    "index": 22,
+                    "value": "T4 Token Shop is now here!"
                   },
                   {
+                    "index": 23,
+                    "value": "The Collectors Pack increases <b><color=#B5927F>Mission Materials</b></color> gained & the <b>Daily Cap of farmable <color=#FFD056>Tokenium</b></color> in the <b><color=#78B2FF>Academy Menu</b></color>, as well as an instant transmission of <b><color=#FF7ACB>Diamonds</b></color>."
+                  },
+                  {
+                    "index": 24,
+                    "value": "Token Ultima"
+                  },
+                  {
+                    "index": 25,
+                    "value": "Token Ultima: Cells"
+                  },
+                  {
+                    "index": 26,
+                    "value": "Token Ultima: MP"
+                  },
+                  {
+                    "index": 27,
+                    "value": "Tokens Booster"
+                  },
+                  {
+                    "index": 28,
+                    "value": "Tokens Booster T1"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "Token Ultima: Cells"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on Token Ultima: Cells via unityProbe"
+            },
+            {
+              "term": "Token Ultima: Cells",
+              "jsonPath": "$.apk_results[23].keyword_hits.ultima[5]",
+              "containerSummary": {
+                "containerType": "array",
+                "matchedIndex": 5,
+                "nearbyScalarValues": [
+                  {
                     "index": 2,
-                    "value": "MessagePrefab.Tokenium"
+                    "value": "- New <b>\"Ultima\" Talent</b> unlocks when a hunter reaches level 70!"
                   },
                   {
                     "index": 3,
-                    "value": "NewDiamondUPGPrefab.Specials.TokensBoost"
+                    "value": "- Trait Sphere #09, #11, #12 & #14 now gives +1 additional Ultima Max Level"
                   },
                   {
                     "index": 4,
-                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
+                    "value": "Token Ultima"
                   },
                   {
                     "index": 5,
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
+                    "value": "Token Ultima: Cells"
                   },
                   {
                     "index": 6,
-                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
+                    "value": "Token Ultima: MP"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "Token Ultima: Cells"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on Token Ultima: Cells via unityProbe"
+            },
+            {
+              "term": "SetAllTokenShopTexts",
+              "jsonPath": "$.apk_results[32].keyword_hits.token[6]",
+              "containerSummary": {
+                "containerType": "array",
+                "matchedIndex": 6,
+                "nearbyScalarValues": [
+                  {
+                    "index": 3,
+                    "value": "LV. 1 - (Tokens In Bank)^1.19"
+                  },
+                  {
+                    "index": 4,
+                    "value": "LV. 1 - (Tokens In Bank)^1.29"
+                  },
+                  {
+                    "index": 5,
+                    "value": "LV. 1 - Token Bank Capacity x2"
+                  },
+                  {
+                    "index": 6,
+                    "value": "SetAllTokenShopTexts"
                   },
                   {
                     "index": 7,
-                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
+                    "value": "SetTokenTexts"
+                  },
+                  {
+                    "index": 8,
+                    "value": "TokenClaimRecolor"
+                  },
+                  {
+                    "index": 9,
+                    "value": "TokenShop, Assembly-CSharp"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
             },
             {
               "term": "NewTokenUPGPrefab.T5.UltimaCells",
@@ -2117,7 +2443,67 @@
                     "value": "NewTokenUPGPrefab.T5.UltimaShards"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "NewTokenUPGPrefab.T5.UltimaCells"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewTokenUPGPrefab.T5.UltimaCells via unityProbe"
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "jsonPath": "$.apk_results[7].keyword_hits.token[4]",
+              "containerSummary": {
+                "containerType": "array",
+                "matchedIndex": 4,
+                "nearbyScalarValues": [
+                  {
+                    "index": 1,
+                    "value": "CellmasPresent_Token_Prefab1"
+                  },
+                  {
+                    "index": 2,
+                    "value": "MessagePrefab.Tokenium"
+                  },
+                  {
+                    "index": 3,
+                    "value": "NewDiamondUPGPrefab.Specials.TokensBoost"
+                  },
+                  {
+                    "index": 4,
+                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
+                  },
+                  {
+                    "index": 5,
+                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
+                  },
+                  {
+                    "index": 6,
+                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
+                  },
+                  {
+                    "index": 7,
+                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
+                  }
+                ]
+              },
+              "matchedTerms": [
+                "NewTokenUPGPrefab.T1.CellsPerChestBooster"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.CellsPerChestBooster via unityProbe"
             },
             {
               "term": "NewTokenUPGPrefab.T5.UltimaCells",
@@ -2151,113 +2537,18 @@
                     "value": "NewTokenUPGPrefab.T5.UltimaShards"
                   }
                 ]
-              }
-            },
-            {
-              "term": "Token Ultima: Cells",
-              "jsonPath": "$.apk_results[23].keyword_hits.token[25]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 25,
-                "nearbyScalarValues": [
-                  {
-                    "index": 22,
-                    "value": "T4 Token Shop is now here!"
-                  },
-                  {
-                    "index": 23,
-                    "value": "The Collectors Pack increases <b><color=#B5927F>Mission Materials</b></color> gained & the <b>Daily Cap of farmable <color=#FFD056>Tokenium</b></color> in the <b><color=#78B2FF>Academy Menu</b></color>, as well as an instant transmission of <b><color=#FF7ACB>Diamonds</b></color>."
-                  },
-                  {
-                    "index": 24,
-                    "value": "Token Ultima"
-                  },
-                  {
-                    "index": 25,
-                    "value": "Token Ultima: Cells"
-                  },
-                  {
-                    "index": 26,
-                    "value": "Token Ultima: MP"
-                  },
-                  {
-                    "index": 27,
-                    "value": "Tokens Booster"
-                  },
-                  {
-                    "index": 28,
-                    "value": "Tokens Booster T1"
-                  }
-                ]
-              }
-            },
-            {
-              "term": "Token Ultima: Cells",
-              "jsonPath": "$.apk_results[23].keyword_hits.ultima[5]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 5,
-                "nearbyScalarValues": [
-                  {
-                    "index": 2,
-                    "value": "- New <b>\"Ultima\" Talent</b> unlocks when a hunter reaches level 70!"
-                  },
-                  {
-                    "index": 3,
-                    "value": "- Trait Sphere #09, #11, #12 & #14 now gives +1 additional Ultima Max Level"
-                  },
-                  {
-                    "index": 4,
-                    "value": "Token Ultima"
-                  },
-                  {
-                    "index": 5,
-                    "value": "Token Ultima: Cells"
-                  },
-                  {
-                    "index": 6,
-                    "value": "Token Ultima: MP"
-                  }
-                ]
-              }
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$.apk_results[32].keyword_hits.token[6]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 6,
-                "nearbyScalarValues": [
-                  {
-                    "index": 3,
-                    "value": "LV. 1 - (Tokens In Bank)^1.19"
-                  },
-                  {
-                    "index": 4,
-                    "value": "LV. 1 - (Tokens In Bank)^1.29"
-                  },
-                  {
-                    "index": 5,
-                    "value": "LV. 1 - Token Bank Capacity x2"
-                  },
-                  {
-                    "index": 6,
-                    "value": "SetAllTokenShopTexts"
-                  },
-                  {
-                    "index": 7,
-                    "value": "SetTokenTexts"
-                  },
-                  {
-                    "index": 8,
-                    "value": "TokenClaimRecolor"
-                  },
-                  {
-                    "index": 9,
-                    "value": "TokenShop, Assembly-CSharp"
-                  }
-                ]
-              }
+              },
+              "matchedTerms": [
+                "NewTokenUPGPrefab.T5.UltimaCells"
+              ],
+              "matchedAnchorKinds": [
+                "string"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on NewTokenUPGPrefab.T5.UltimaCells via unityProbe"
             }
           ]
         }
@@ -2274,11 +2565,50 @@
         "CellBoost",
         "BuyCellBoost"
       ],
+      "anchorSpecs": [
+        {
+          "value": "SetAllTokenShopTexts",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "SetTokenTexts",
+          "kind": "method",
+          "origin": "surface-search"
+        },
+        {
+          "value": "ATU3Button",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "15810",
+          "kind": "path id",
+          "origin": "surface-search"
+        },
+        {
+          "value": "CellBoost",
+          "kind": "class",
+          "origin": "surface-search"
+        },
+        {
+          "value": "BuyCellBoost",
+          "kind": "method",
+          "origin": "surface-search"
+        }
+      ],
       "sources": [
         {
           "sourceId": "unityProbe",
           "sourcePath": "data/unity-probe-report.json",
+          "searchModes": [
+            "exact-structured"
+          ],
           "hitCount": 2,
+          "highSignalHitCount": 0,
+          "supportingHitCount": 2,
+          "incidentalHitCount": 0,
+          "suppressedNoiseCount": 0,
           "hits": [
             {
               "term": "SetAllTokenShopTexts",
@@ -2316,7 +2646,18 @@
                     "value": "TokenShop, Assembly-CSharp"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "SetAllTokenShopTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
             },
             {
               "term": "SetTokenTexts",
@@ -2354,7 +2695,18 @@
                     "value": "TokenShopRecoloring"
                   }
                 ]
-              }
+              },
+              "matchedTerms": [
+                "SetTokenTexts"
+              ],
+              "matchedAnchorKinds": [
+                "method"
+              ],
+              "matchMode": "exact-structured",
+              "signalScore": 95,
+              "signalTier": "supporting",
+              "noiseFlags": [],
+              "signalReason": "exact-structured match on SetTokenTexts via unityProbe"
             }
           ]
         }
@@ -2482,7 +2834,7 @@
             "sourceId": "dailyTokeniumLaneProbe",
             "sourcePath": "data/daily-tokenium-lane-probe.json",
             "term": "BuyCellBoost",
-            "locator": "$[0].matches[101].entry_context[28].value"
+            "locator": "$[0].matches[101].byte_context[41].value"
           }
         ]
       },
@@ -2724,7 +3076,7 @@
             "sourceId": "dailyTokeniumLaneProbe",
             "sourcePath": "data/daily-tokenium-lane-probe.json",
             "term": "BuyCellBoost",
-            "locator": "$[0].matches[101].entry_context[28].value"
+            "locator": "$[0].matches[101].byte_context[41].value"
           }
         ]
       },

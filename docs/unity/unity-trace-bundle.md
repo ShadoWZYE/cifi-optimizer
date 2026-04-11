@@ -12,7 +12,12 @@
 - Run mode: `compare`
 - Requested queries: `Cells`
 - Requested anchors: `none`
+- Expanded anchor kinds: `ATU3Button (class), 15810 (path id), Cells (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method), CellsBoost (class), CellsPerChestBooster (class), UltimaCells (class)`
 - Decision note: Matched Cells to TokenShop through cells-domain and chose the bounded token-shop-atu3-vs-atu1 compare run because this query is better grounded as one checked solved-vs-blocked family trace.
+
+## Execution anchors
+
+- Typed execution anchors: `ATU3Button (class), 15810 (path id), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
 
 ## Workflow
 
@@ -51,74 +56,83 @@
 ### Metadata neighborhood
 
 - Search terms: `ATU3Button, CellBoost, BuyCellBoost, 15810, SetAllTokenShopTexts`
-- Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) (11 hits)
-  - `BuyCellBoost` at metadata offset `659754`
-  - `BuyCellBoostEnum` at metadata offset `661133`
-  - `CellBoostStartCost` at metadata offset `662261`
-  - `CellBoostAdditiveCost` at metadata offset `662280`
-  - `ATU3Button` at metadata offset `662349`
-  - `<BuyCellBoostEnum>d__630` at metadata offset `668194`
-  - `SetAllTokenShopTexts` at metadata offset `979315`
-  - `System, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB` at metadata offset `12245177`
-  - `System.Core, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB` at metadata offset `12245521`
-  - `System.ServiceModel.Web, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB` at metadata offset `12324129`
-  - `System, PublicKey=00240000048000009400000006020000002400005253413100040000010001008D56C76F9E8649383049F383C44BE0EC204181822A6C31CF5EB7EF486944D032188EA1D3920763712CCB12D75FB77E9811149E6148E5D32FBAAB37611C1878DDC19E20EF135D0CB2CFF2BFEC3D115810C3D9069638FE4BE215DBF795861920E5AB6F7DB2E2CEEF136AC23D5DD2BF031700AEC232F6C6B1C785B4305C123B37AB` at metadata offset `12891503`
+- Typed anchors: `ATU3Button (class), CellBoost (class), BuyCellBoost (method), 15810 (path id), SetAllTokenShopTexts (method)`
+- Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) (7 hits)
+  - Signal summary: 0 high-signal, 3 supporting, 4 incidental, 0 suppressed-noise
+  - `BuyCellBoost` at metadata offset `659754` [supporting, score 90, exact-string]
+  - `ATU3Button` at metadata offset `662349` [supporting, score 90, exact-string]
+  - `SetAllTokenShopTexts` at metadata offset `979315` [supporting, score 90, exact-string]
+  - `BuyCellBoostEnum` at metadata offset `661133` [incidental, score 45, bounded-containment]
+  - `CellBoostStartCost` at metadata offset `662261` [incidental, score 45, bounded-containment]
+  - `CellBoostAdditiveCost` at metadata offset `662280` [incidental, score 45, bounded-containment]
+  - `<BuyCellBoostEnum>d__630` at metadata offset `668194` [incidental, score 45, bounded-containment]
 
 ### Action hook lane
 
 - Search terms: `StartCellBostHold, StopCellBostHold, BuyCellBoost, ATU3Button, 15810, CellBoost, SetAllTokenShopTexts`
+- Typed anchors: `StartCellBostHold (method), StopCellBostHold (method), BuyCellBoost (method), ATU3Button (class), 15810 (path id), CellBoost (class), SetAllTokenShopTexts (method)`
 - Source: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json) (16 hits)
-  - `StartCellBostHold` at `$[0].matches[101].entry_context[17].value`
-  - `StopCellBostHold` at `$[0].matches[101].entry_context[20].value`
-  - `BuyCellBoost` at `$[0].matches[101].entry_context[28].value`
-  - `StartCellBostHold` at `$[0].matches[101].byte_context[30].value`
-  - `StopCellBostHold` at `$[0].matches[101].byte_context[33].value`
-  - `BuyCellBoost` at `$[0].matches[101].byte_context[41].value`
-  - `StartCellBostHold` at `$[0].matches[102].entry_context[14].value`
-  - `StopCellBostHold` at `$[0].matches[102].entry_context[17].value`
-  - `BuyCellBoost` at `$[0].matches[102].entry_context[25].value`
-  - `StartCellBostHold` at `$[0].matches[102].byte_context[29].value`
-  - `StopCellBostHold` at `$[0].matches[102].byte_context[32].value`
-  - `BuyCellBoost` at `$[0].matches[102].byte_context[40].value`
-  - `SetAllTokenShopTexts` at `$[0].matches[312].value`
-  - `SetAllTokenShopTexts` at `$[0].matches[312].entry_context[16].value`
-  - `SetAllTokenShopTexts` at `$[0].matches[312].byte_context[118].value`
-  - `SetAllTokenShopTexts` at `$[0].matches[313].entry_context[4].value`
+  - Signal summary: 16 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `StartCellBostHold` at `$[0].matches[101].byte_context[30].value` [high-signal, score 100, exact-structured]
+  - `StopCellBostHold` at `$[0].matches[101].byte_context[33].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[101].byte_context[41].value` [high-signal, score 100, exact-structured]
+  - `StartCellBostHold` at `$[0].matches[101].entry_context[17].value` [high-signal, score 100, exact-structured]
+  - `StopCellBostHold` at `$[0].matches[101].entry_context[20].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[101].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `StartCellBostHold` at `$[0].matches[102].byte_context[29].value` [high-signal, score 100, exact-structured]
+  - `StopCellBostHold` at `$[0].matches[102].byte_context[32].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[102].byte_context[40].value` [high-signal, score 100, exact-structured]
+  - `StartCellBostHold` at `$[0].matches[102].entry_context[14].value` [high-signal, score 100, exact-structured]
+  - `StopCellBostHold` at `$[0].matches[102].entry_context[17].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[102].entry_context[25].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].byte_context[118].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].entry_context[16].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[313].entry_context[4].value` [high-signal, score 100, exact-structured]
 
 ### Diamond-special prefab or title lane
 
 - Search terms: `NewDiamondUPGPrefab.Specials.CellsBoost, >Diamond Upgrade 10 - CellsBoost, ATU3Button, 15810, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
+- Typed anchors: `NewDiamondUPGPrefab.Specials.CellsBoost (string), >Diamond Upgrade 10 - CellsBoost (string), ATU3Button (class), 15810 (path id), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
 - Source: [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json) (2 hits)
-  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$[0].matches[23].byte_context[89].value`
-  - `SetAllTokenShopTexts` at `$[0].matches[225].byte_context[48].value`
+  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
+  - `SetAllTokenShopTexts` at `$[0].matches[225].byte_context[48].value` [supporting, score 95, exact-structured]
+  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$[0].matches[23].byte_context[89].value` [supporting, score 95, exact-structured]
 - Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (4 hits)
-  - `>Diamond Upgrade 10 - CellsBoost` at `$.apk_results[0].keyword_hits.diamond[45]`
-  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$.apk_results[7].keyword_hits.diamond[16]`
-  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]`
-  - `>Diamond Upgrade 10 - CellsBoost` at `$.file_results[0].keyword_hits.diamond[45]`
+  - Signal summary: 0 high-signal, 4 supporting, 0 incidental, 0 suppressed-noise
+  - `>Diamond Upgrade 10 - CellsBoost` at `$.apk_results[0].keyword_hits.diamond[45]` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$.apk_results[7].keyword_hits.diamond[16]` [supporting, score 95, exact-structured]
+  - `>Diamond Upgrade 10 - CellsBoost` at `$.file_results[0].keyword_hits.diamond[45]` [supporting, score 95, exact-structured]
 - Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) (1 hits)
-  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$.namedObjectHits[10352].name`
+  - Signal summary: 1 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$.namedObjectHits[10352].name` [high-signal, score 100, exact-structured]
 
 ### Token prefab or title lane
 
 - Search terms: `NewTokenUPGPrefab.T1.CellsPerChestBooster, NewTokenUPGPrefab.T5.UltimaCells, Token Ultima: Cells, ATU3Button, 15810, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
+- Typed anchors: `NewTokenUPGPrefab.T1.CellsPerChestBooster (string), NewTokenUPGPrefab.T5.UltimaCells (string), Token Ultima: Cells (string), ATU3Button (class), 15810 (path id), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
 - Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) (2 hits)
-  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.namedObjectHits[10371].name`
-  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.namedObjectHits[10395].name`
+  - Signal summary: 2 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.namedObjectHits[10371].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.namedObjectHits[10395].name` [high-signal, score 100, exact-structured]
 - Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (6 hits)
-  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.apk_results[7].keyword_hits.token[4]`
-  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.apk_results[7].keyword_hits.token[38]`
-  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.apk_results[7].keyword_hits.ultima[2]`
-  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.token[25]`
-  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.ultima[5]`
-  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]`
+  - Signal summary: 0 high-signal, 6 supporting, 0 incidental, 0 suppressed-noise
+  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.token[25]` [supporting, score 95, exact-structured]
+  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.ultima[5]` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.apk_results[7].keyword_hits.token[38]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.apk_results[7].keyword_hits.token[4]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.apk_results[7].keyword_hits.ultima[2]` [supporting, score 95, exact-structured]
 
 ### Generic TokenShop text-hook lane
 
 - Search terms: `SetAllTokenShopTexts, SetTokenTexts, ATU3Button, 15810, CellBoost, BuyCellBoost`
+- Typed anchors: `SetAllTokenShopTexts (method), SetTokenTexts (method), ATU3Button (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
 - Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (2 hits)
-  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]`
-  - `SetTokenTexts` at `$.apk_results[32].keyword_hits.token[7]`
+  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$.apk_results[32].keyword_hits.token[7]` [supporting, score 95, exact-structured]
 
 ## Bridge check
 
@@ -138,7 +152,7 @@
   - `metadata` at `metadata offset 662261` proves `CellBoostStartCost`
   - `metadata` at `metadata offset 662349` proves `ATU3Button`
 - `family-action-cluster`: The cells-domain action lane preserves BuyCellBoost as the nearest named buy hook for the same family, but only as a generic cluster. [supporting]
-  - `dailyTokeniumLaneProbe` at `$[0].matches[101].entry_context[28].value` proves `BuyCellBoost`
+  - `dailyTokeniumLaneProbe` at `$[0].matches[101].byte_context[41].value` proves `BuyCellBoost`
 - `candidate-prefab-surface`: A separate diamond-special CellsBoost prefab candidate is preserved on committed probe surfaces. [direct]
   - `unityProbe` at `$.apk_results[7].keyword_hits.diamond[16]` proves `NewDiamondUPGPrefab.Specials.CellsBoost`
   - `lm244TargetedProbe` at `$[0].matches[23].byte_context[89].value` proves `NewDiamondUPGPrefab.Specials.CellsBoost`
