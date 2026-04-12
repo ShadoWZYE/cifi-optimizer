@@ -2597,7 +2597,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-internal read conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)), "token shop row remap boundary must preserve bounded ATU4 title-side negative");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU5 title-side pass also stays negative/i.test(line)), "token shop row remap boundary must preserve bounded ATU5 title-side negative");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU5 last-title-blocker pass now narrows cleanly/i.test(line)), "token shop row remap boundary must preserve narrowed ATU5 last-title blocker");
   assert.ok(boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion for remaining rows");
 
   return {

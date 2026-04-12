@@ -99,7 +99,7 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - `ATU4`, `ATU5`, `ATU6`, `ATU7`, and `ATU8` clearing do not change that rule for the rest of the lane:
     - they clear because one exact owner-field block, one exact buy hook, and one exact token prefab converge on the same `ModBoost`, `MK1`, `MK2`, or `MK3` family
     - `ATU4Button` now clears the same shell-to-prefab bar through `BuyModBoost` and `NewTokenUPGPrefab.T1.ModPointsBooster`, but still does not have a checked final player-facing row title
-    - the repo now has one checked final title join for `ATU6Button`, but still does not have one for `ATU5Button`
+    - the repo now has one checked final title join for `ATU6Button`, while `ATU5Button` now also has one checked named identity and support-text chain but still does not have one exact final player-facing row-title string
     - `ATU7Button` now clears the same shell-to-prefab bar through `BuyMK3TokenBoost` and `NewTokenUPGPrefab.T1.MK3Booster`, but this pass does not attempt a final player-facing row title
     - `ATU8Button` now also clears the same shell-to-prefab bar through `BuyMK4TokenBoost` and `NewTokenUPGPrefab.T1.MK4Booster`, but this pass does not attempt a final player-facing row title
     - the neighboring `MK5` through `MK8` token rows stay unresolved until their own shell joins are checked individually
@@ -173,12 +173,12 @@ Because those joins are still missing, the repo should not:
   - the token-side mod title clue `Token Ultima: MP` still survives only as a detached title surface
   - the diamond-side mod title clue `:Diamond Upgrade 11 - ModBoost` still survives only as a separate title surface
   - none of those committed title-side surfaces crosses back to `ATU4Button` or path id `15796`
-- The bounded ATU5 title-side pass also now stays negative across the exact MK1 generator title surfaces:
+- The bounded ATU5 last-title-blocker pass now narrows cleanly across the exact MK1 generator title surfaces:
   - the generic TokenShop text-hook surface still preserves `SetAllTokenShopTexts` and `SetTokenTexts`, but does not preserve any `ATU5Button` shell, path id `15831`, or exact row-local title join
   - the surviving MK1 generator title-side clues now do preserve one bounded detached text chain for the same row family through `1. MK1 Generator Output,`, `This upgrade divides the cost of MK1 Generators by 1500.`, and `This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)`
   - that same detached MK1 text cluster is now also enough to preserve one checked player-facing named identity join on `1. MK1 Generator Output,` for the already grounded `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster` row family
   - the checked owner-side generator title roster still preserves neighboring `Mk2 Generator Booster`, `Mk3 Generator Booster`, and `Mk5 Generator Booster` titles, but does not preserve one exact `Mk1 Generator Booster`
-  - that is enough to preserve one bounded `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster` -> MK1 Generator Output named-identity and support-text chain, but not enough to recover one final player-facing row title
+  - that is enough to preserve one bounded `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster` -> MK1 Generator Output named-identity and support-text chain, and the remaining blocker is now only the absent exact final player-facing row-title string
 - The bounded ATU7 bridge-only pass now clears without reopening title localization:
   - the exact `TokenShop` owner payload keeps `ATU7Button` path id `15792` directly beside the `MK3TokenBoost*` owner block
   - the checked action lane preserves `BuyMK3TokenBoost`

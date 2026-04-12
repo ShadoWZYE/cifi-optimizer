@@ -1864,7 +1864,7 @@ assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /new effe
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)));
-assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU5 title-side pass also stays negative/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU5 last-title-blocker pass now narrows cleanly/i.test(line)));
 assert.equal(tokenShopLateAtuBoundaryData.dataset, "token-shop-late-atu-boundary");
 assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.saveFieldRange, "ATU24Level through ATU28Level");
 assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.shellFieldRange, "ATU24Button through ATU28Button");
@@ -3135,7 +3135,7 @@ assert.match(spendSystemVerificationDoc, /compatibility\.unmappedSystemState\.to
 assert.match(activeGroundingBoundariesDoc, /narrows the save-side wrapper to the nearby mission-persistence block in `SaveData`/);
 assert.match(unityOwnerMapDoc, /narrowest checked save wrapper -> `SaveData` mission-persistence neighborhood/);
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
-assert.match(activeGroundingBoundariesDoc, /seven checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, `ATU7Button`, and `ATU8Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, one bounded `ATU5Button` -> `NewTokenUPGPrefab\.T1\.MK1Booster` -> `1\. MK1 Generator Output,` named-identity and title-side text chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain/i);
+assert.match(activeGroundingBoundariesDoc, /seven checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, `ATU7Button`, and `ATU8Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, one bounded `ATU5Button` -> `NewTokenUPGPrefab\.T1\.MK1Booster` -> `1\. MK1 Generator Output,` named-identity and title-side text chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain.*remaining ATU5 blocker is now only the absent exact final row-title string/i);
 assert.match(activeGroundingBoundariesDoc, /exact `CellBoostBonus` read-site or typed-field handoff into that internal shell/i);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
@@ -3149,7 +3149,7 @@ assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU5Button` to `NewT
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU7Button` to `NewTokenUPGPrefab\.T1\.MK3Booster/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU8Button` to `NewTokenUPGPrefab\.T1\.MK4Booster/.test(line)));
-assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU4 title-side pass stays negative, and the ATU5 final-title pass also stays negative/.test(line)));
+assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /remaining ATU5 blocker is now only the absent exact final player-facing row-title string/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU3 cells-domain disambiguation pass stays negative for prefab-or-title identity/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)`/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster` to `Mk2 Generator Booster`/.test(line)));
