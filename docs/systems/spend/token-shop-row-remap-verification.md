@@ -180,6 +180,7 @@ Because those joins are still missing, the repo should not:
   - the token-side mod title clue `Token Ultima: MP` still survives only as a detached title surface
   - the diamond-side mod title clue `:Diamond Upgrade 11 - ModBoost` still survives only as a separate title surface
   - none of those committed title-side surfaces crosses back to `ATU4Button` or path id `15796`
+  - the last honest blocker is now explicit: one exact shell-local join is still missing from either detached mod-domain title clue back to `ATU4Button` path id `15796`
 - The bounded ATU5 last-title-blocker pass now narrows cleanly across the exact MK1 generator title surfaces:
   - the generic TokenShop text-hook surface still preserves `SetAllTokenShopTexts` and `SetTokenTexts`, but does not preserve any `ATU5Button` shell, path id `15831`, or exact row-local title join
   - the surviving MK1 generator title-side clues now do preserve one bounded detached text chain for the same row family through `1. MK1 Generator Output,`, `This upgrade divides the cost of MK1 Generators by 1500.`, and `This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)`

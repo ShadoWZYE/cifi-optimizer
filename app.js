@@ -4902,6 +4902,11 @@ function sanitizeTokenShopRichText(value) {
 }
 
 function getTokenShopRowDisplayTitle(row) {
+  if ((typeof row?.identitySource === "string" && /(final title|title-side text chain|named identity)/i.test(row.identitySource)) || row?.rowType === "effect-driven") {
+    if (row?.identity) {
+      return sanitizeTokenShopRichText(row.identity);
+    }
+  }
   if ((row?.identitySource === "Checked final title" || row?.rowType === "effect-driven") && row?.identity) {
     return sanitizeTokenShopRichText(row.identity);
   }
