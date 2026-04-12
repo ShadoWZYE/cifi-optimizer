@@ -373,7 +373,7 @@
       "title": "Spend planner first UI slice",
       "status": "archived",
       "goal": "Ship the first real TokenShop-facing user module around one grounded player question instead of growing the spend area as research-only descriptive surface.",
-      "currentSlice": "Ship a separate Overview module that reads canonical `state.playerProfile.player.resources.tokens` plus imported compatibility-only levels for the already checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` subset, then shows each grounded row's identity, current level, next known cost, and whether it is affordable right now, while the existing spend snapshot stays boundary-oriented and non-optimizer.",
+      "currentSlice": "Ship a separate Overview module that reads canonical `state.playerProfile.player.resources.tokens` plus imported compatibility-only levels for the already checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` subset, then shows each grounded row's identity, current level, next known cost, and whether it is affordable right now, while the existing spend snapshot stays boundary-oriented and non-optimizer.",
       "exitCondition": "The app answers the player question `what grounded TokenShop upgrades can I buy right now from the subset we actually know?` with a separate user-facing module that uses only consumed grounded inputs, declares one simple display rule, and avoids best-buy, ROI, ranking, or canonical `ATU*Level` promotion claims.",
       "blockedBy": "Archived after ship. Broader planner-safe spend behavior remains blocked on separate lanes for additional TokenShop row remap, token-bank cap and claimable state, Daily Tokenium cap and ready or claimable state, and Emporium owned progression.",
       "smallestShippableSlice": "A separate Overview module that keeps row order fixed to the grounded ATU subset, reads canonical Tokens plus compatibility-only subset levels, computes next known cost from checked `StartCost + AdditiveCost * currentLevel` inputs for those same rows only, labels affordability without optimizer claims, and leaves all unresolved rows outside the module.",
@@ -384,7 +384,7 @@
         "Surface exact `SaveData.BankedTokens` as boundary-backed token-bank stored-amount evidence without promoting it into canonical planner state.",
         "Surface exact `SaveData.DailyTokenium` as boundary-backed Daily Tokenium stored-amount evidence from `compatibility.unmappedSystemState.tokenShop` without promoting it into canonical planner state.",
         "Surface exact `SaveData.ClaimableTokenium` only as explicitly labeled broader generic Tokenium-cluster claimable evidence from `compatibility.unmappedSystemState.tokenShop`, without promoting it into token-bank, Daily Tokenium-specific, or canonical planner state.",
-        "Surface only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` TokenShop remap subset as compatibility-only non-canonical row evidence while keeping the remaining `ATU*Level` family quarantined.",
+        "Surface only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` TokenShop remap subset as compatibility-only non-canonical row evidence while keeping the remaining `ATU*Level` family quarantined.",
         "Ship a separate TokenShop subset affordability module that answers one player question from canonical Tokens plus the checked compatibility-only subset levels only.",
         "Show each grounded subset row's identity, current level, next known cost, and current affordability without best-buy, ROI, ranking, or planner claims.",
         "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, and Emporium state outside the shipped module instead of silently widening the consumed-input contract."
@@ -409,7 +409,7 @@
         "Exact `SaveData.BankedTokens` recovery now grounds the current token-bank stored amount strongly enough to show it as boundary-backed evidence without promoting it into canonical planner state.",
         "Exact `SaveData.DailyTokenium` recovery plus the narrowed `SaveData` mission-persistence wrapper now grounds the current Daily Tokenium stored amount strongly enough to show it as boundary-backed non-canonical evidence without promoting it into canonical planner state.",
         "Exact `SaveData.ClaimableTokenium` recovery now grounds one broader generic Tokenium-cluster claimable clue strongly enough to show it as explicitly labeled boundary-backed evidence without promoting it into token-bank claimable state, Daily Tokenium-specific ready state, or canonical planner state.",
-        "The checked TokenShop row-remap boundary now clears a small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`, so those rows can appear in a separate affordability module while the rest of the `ATU*Level` family stays quarantined.",
+        "The checked TokenShop row-remap boundary now clears a small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level`, so those rows can appear in a separate affordability module while the rest of the `ATU*Level` family stays quarantined.",
         "The grounded TokenShop extract already preserves the checked cost inputs needed by this slice, so next known cost for that subset can stay on the exact `StartCost + AdditiveCost * currentLevel` contract without claiming broader planner logic.",
         "Current spend owner-recovery blockers still live on separate TokenShop row-level, token-bank cap or claimable state-owner, Daily Tokenium cap or ready-state, and Emporium save-model tracks.",
         "A separate TokenShop subset affordability module can ship on a normal app surface without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs."
@@ -424,12 +424,12 @@
       "title": "TokenShop checked-row detail slice",
       "status": "archived",
       "goal": "Extend the shipped checked-row TokenShop panel into the next small grounded row-detail tool for the same verified subset only.",
-      "currentSlice": "Ship a separate Overview module that reads imported compatibility-only levels for the already checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` subset plus the same rows' checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from the shipped TokenShop values data, then shows each grounded row's identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change in fixed grounded slot order.",
+      "currentSlice": "Ship a separate Overview module that reads imported compatibility-only levels for the already checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` subset plus the same rows' checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from the shipped TokenShop values data, then shows each grounded row's identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change in fixed grounded slot order.",
       "exitCondition": "The app answers the player question `What do the grounded upgrades I can already inspect actually do at my current level and on the next level?` with a separate user-facing module that uses only consumed grounded inputs, keeps one fixed display rule, and avoids best-buy, ROI, ranking, next-purchase logic, or canonical `ATU*Level` promotion claims.",
       "blockedBy": "Archived after ship. Broader planner-safe spend behavior remains blocked on separate lanes for additional TokenShop row remap coverage and a true next-purchase rule set, while token-bank, Daily Tokenium, and Emporium state remain separate non-consumed blockers.",
       "smallestShippableSlice": "A separate Overview module that keeps row order fixed to the grounded subset, reads imported compatibility-only subset levels plus checked TokenShop row constants, shows grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change, and leaves all unresolved rows and systems outside the module.",
       "completedSteps": [
-        "Keep the checked TokenShop subset fixed to `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` instead of widening the consumed-input contract.",
+        "Keep the checked TokenShop subset fixed to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` instead of widening the consumed-input contract.",
         "Reuse the already shipped checked-row panel as the boundary-safe shell for the next user-facing TokenShop tool slice.",
         "Drop canonical Tokens from the consumed-input contract because this row-detail slice no longer answers an affordability question.",
         "Read only the checked subset levels plus the same rows' extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from `data/token-shop-values.json`.",
@@ -453,7 +453,7 @@
         "tests/smoke.mjs"
       ],
       "verified": [
-        "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`.",
+        "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level`.",
         "The shipped TokenShop values data already preserves the checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields needed by this slice for the same subset rows.",
         "Imported compatibility-only current levels for that same checked subset are enough to show current level and current-vs-next extracted bonus-step change without promoting those rows into canonical state.",
         "A fixed grounded slot-order row-detail tool can answer one real player question without introducing affordability labels, best-buy logic, ranking, or any planner-safe recommendation claim.",
@@ -469,13 +469,13 @@
       "title": "Progression TokenShop editor first slice",
       "status": "archived",
       "goal": "Move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop editor slice.",
-      "currentSlice": "Ship a dedicated TokenShop category under the Progression selector that reads local non-canonical levels under `planning.tokenShop.checkedSubsetLevels.*` for the already checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` subset, treats `compatibility.unmappedSystemState.tokenShop.*` as prefill only, and shows each grounded row's identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change in fixed grounded slot order.",
+      "currentSlice": "Ship a dedicated TokenShop category under the Progression selector that reads local non-canonical levels under `planning.tokenShop.checkedSubsetLevels.*` for the already checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` subset, treats `compatibility.unmappedSystemState.tokenShop.*` as prefill only, and shows each grounded row's identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change in fixed grounded slot order.",
       "exitCondition": "The first real TokenShop-facing editor slice lives under Progression, keeps checked-row local levels separate from compatibility import, preserves quarantine language for the checked subset, and avoids best-buy, ROI, ranking, next-purchase logic, or canonical `ATU*Level` promotion claims.",
       "blockedBy": "Archived after ship. Broader planner-safe spend behavior remains blocked on separate lanes for additional TokenShop row remap coverage and a true next-purchase rule set, while token-bank, Daily Tokenium, and Emporium state remain separate non-consumed blockers.",
       "smallestShippableSlice": "A dedicated TokenShop category under the Progression selector that keeps row order fixed to the grounded subset, persists local checked-row levels under a non-canonical planning path, uses compatibility import as prefill only, shows grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change, and leaves all unresolved rows and systems outside the module.",
       "completedSteps": [
         "Move the checked TokenShop subset UI out of the Overview-bound spend boundary panel and into its own TokenShop category under the Progression selector.",
-        "Keep the checked row subset fixed to `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` instead of widening the consumed-input contract.",
+        "Keep the checked row subset fixed to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` instead of widening the consumed-input contract.",
         "Persist local checked-row editor values under `planning.tokenShop.checkedSubsetLevels.*` as non-canonical progression state.",
         "Treat `compatibility.unmappedSystemState.tokenShop.*` as prefill only instead of as the only live UI state for the checked subset.",
         "Keep level-1 and other locally entered checked-row values visible in the row-detail render path instead of hiding them behind missing-import behavior.",
@@ -498,7 +498,7 @@
         "tests/smoke.mjs"
       ],
       "verified": [
-        "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`.",
+        "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level`.",
         "The first real TokenShop-facing checked-row editor slice can live under Progression without promoting unresolved row levels into canonical player state.",
         "Local checked-row levels under `planning.tokenShop.checkedSubsetLevels.*` stay non-canonical while compatibility TokenShop import remains available as prefill only.",
         "The shipped TokenShop values data already preserves the checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields needed by this slice for the same subset rows.",

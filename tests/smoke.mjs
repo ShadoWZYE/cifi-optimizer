@@ -351,12 +351,18 @@ assert.match(appJs, /function formatTokenShopBonusStep/);
 assert.match(appJs, /Grounded TokenShop checked-row editor/);
 assert.match(appJs, /Default level 0/);
 assert.match(appJs, /Prefill local rows from compatibility import/);
-assert.match(appJs, /Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU5, ATU6\./);
+assert.match(appJs, /Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU5, ATU6\./);
+assert.match(appJs, /Effect-driven checked row/);
+assert.match(appJs, /Prefab-driven checked row/);
+assert.match(appJs, /ATU3 remains effect-driven and is not promoted into a prefab or final-title remap\./);
+assert.match(appJs, /function sanitizeTokenShopRichText/);
+assert.match(appJs, /<details class="token-shop-evidence-note">/);
+assert.match(appJs, /boundary\?\.atu3CrossSystemEffectTrace\?\.recoveredActionEffectChain/);
 assert.match(appJs, /This module is explicitly non-optimizer/);
 assert.match(appJs, /No canonical ATU promotion/);
 assert.match(appJs, /Known cost inputs: start \$\{formatBoundaryValue\(row\.startCost\)\} \+ additive \$\{formatBoundaryValue\(row\.additiveCost\)\} x current level\./);
 assert.match(appJs, /Current vs next bonus/);
-assert.match(appJs, /adds one more extracted bonus step only/);
+assert.match(appJs, /"checked effect step" : "extracted bonus step"/);
 assert.match(html, /id="tokenShopProgressionStatus"/);
 assert.match(appJs, /TokenShop keeps its own Progression category so it does not get mixed into the Shard Mining surface/);
 assert.match(appJs, /TokenShop \(\$\{counts\.tokenShop\}\)/);
@@ -512,12 +518,14 @@ assert.deepEqual(defaultProfile.planning.shards.observedLevelsByMilestone, {});
 assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetLevels, {
   ATU1Level: null,
   ATU2Level: null,
+  ATU3Level: null,
   ATU5Level: null,
   ATU6Level: null
 });
 assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU1Level: null,
   ATU2Level: null,
+  ATU3Level: null,
   ATU5Level: null,
   ATU6Level: null
 });
@@ -2200,7 +2208,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   assert.match(track.goal, /first real TokenShop-facing user module/i);
   assert.match(track.currentSlice, /separate Overview module/);
   assert.match(track.currentSlice, /canonical `state\.playerProfile\.player\.resources\.tokens`/);
-  assert.match(track.currentSlice, /`ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` subset/);
+  assert.match(track.currentSlice, /`ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` subset/);
   assert.match(track.currentSlice, /row's identity, current level, next known cost, and whether it is affordable right now/);
   assert.match(track.blockedBy, /Archived after ship/);
   assert.match(track.smallestShippableSlice, /computes next known cost from checked `StartCost \+ AdditiveCost \* currentLevel` inputs/);
@@ -2225,7 +2233,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
     "expected spend first UI slice track to record generic ClaimableTokenium boundary-backed evidence"
   );
   assert.ok(
-    track.completedSteps.some((step) => /checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(step)),
+    track.completedSteps.some((step) => /checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(step)),
     "expected spend first UI slice track to record grounded TokenShop row subset evidence"
   );
   assert.ok(
@@ -2249,7 +2257,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
     "expected spend first UI slice track to record generic ClaimableTokenium evidence"
   );
   assert.ok(
-    track.verified.some((line) => /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`/.test(line)),
+    track.verified.some((line) => /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level`/.test(line)),
     "expected spend first UI slice track to record grounded TokenShop row subset"
   );
   assert.ok(
@@ -2263,16 +2271,16 @@ withRequiredValue(tokenShopRowDetailSliceTrack, "expected TokenShop row-detail s
   assert.equal(track.status, "archived");
   assert.match(track.goal, /next small grounded row-detail tool/i);
   assert.match(track.currentSlice, /checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields/);
-  assert.match(track.currentSlice, /known max-level status, and current-vs-next extracted bonus-step change/);
+  assert.match(track.currentSlice, /known max-level status, and current-vs-next extracted(?: or checked-effect)? bonus-step change|known max-level status, and current-vs-next extracted or checked-effect step change/);
   assert.match(track.exitCondition, /What do the grounded upgrades I can already inspect actually do at my current level and on the next level\?/);
   assert.match(track.blockedBy, /true next-purchase rule set/);
-  assert.match(track.smallestShippableSlice, /grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change/);
+  assert.match(track.smallestShippableSlice, /grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted(?: or checked-effect)? bonus-step change|grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change/);
   assert.ok(
     track.completedSteps.some((step) => /Drop canonical Tokens from the consumed-input contract/.test(step)),
     "expected TokenShop row-detail slice track to record the narrower consumed-input contract"
   );
   assert.ok(
-    track.completedSteps.some((step) => /current-vs-next extracted bonus-step change/.test(step)),
+    track.completedSteps.some((step) => /current-vs-next extracted(?: or checked-effect)? bonus-step change|current-vs-next extracted or checked-effect step change/.test(step)),
     "expected TokenShop row-detail slice track to record the row-detail output shape"
   );
   assert.ok(
@@ -3269,7 +3277,7 @@ assert.match(tokenShopDoc, /Diamond-related upgrade lane inside TokenShop/);
 assert.match(tokenShopDoc, /## Future mapping signals/);
 assert.match(tokenShopDoc, /gameplay owner and saved-state family for the Academy or Farm Mission Daily Tokenium lane/);
 assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to affect/);
-assert.match(spendSystemVerificationDoc, /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset/);
+assert.match(spendSystemVerificationDoc, /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` remap subset/);
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
 assert.match(tokenShopRowRemapVerificationDoc, /data\/unity-trace-bundle\.json/);
@@ -4157,6 +4165,7 @@ assert.equal(
 const migratedFlatSpendStateProfile = normalizePlayerProfile({
   ATU1Level: "3",
   ATU2Level: "4",
+  ATU3Level: "5",
   ATU5Level: "2",
   ATU6Level: "7",
   ATU28Level: 1,
@@ -4183,12 +4192,14 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
 assert.deepEqual(migratedFlatSpendStateProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU1Level: 3,
   ATU2Level: 4,
+  ATU3Level: 5,
   ATU5Level: 2,
   ATU6Level: 7
 });
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
   ATU1Level: 3,
   ATU2Level: 4,
+  ATU3Level: 5,
   ATU5Level: 2,
   ATU6Level: 7,
   ATU28Level: 1,
