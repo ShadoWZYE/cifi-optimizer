@@ -126,18 +126,25 @@ Because those joins are still missing, the repo should not:
   - the checked token-side surface still preserves `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` as a separate lane
   - none of those exact candidate surfaces yields one concrete object or title join back to `ATU3Button` path id `15810`
 - The upgraded join-preservation probe also now makes the current extraction state explicit instead of scattering it across multiple artifacts:
-  - the generated `data/unity-trace-bundle.json` artifact now preserves one checked `ATU4Button` -> `BuyModBoost` -> `NewTokenUPGPrefab.T1.ModPointsBooster` bridge inside the generic `probe:trace` workflow
-  - that same trace still keeps the missing `ATU4Button` final-title join explicit, because the generic `SetAllTokenShopTexts` or `SetTokenTexts` surface and the surviving `Token Ultima: MP` plus `:Diamond Upgrade 11 - ModBoost` title clues all remain detached from the shell-side row neighborhood
+  - the generated `data/unity-trace-bundle.json` artifact now preserves one bounded TokenShop family-structure trace audit inside the generic `probe:trace` workflow
+  - that audit now groups the solved `ATU1`, `ATU2`, `ATU4`, `ATU5`, and `ATU6` shells beside the bounded `ATU3` and late `ATU24`-`ATU28` negatives so repeated proved edges and repeated missing edges can be judged from one checked bundle
+  - the strongest repeated solved pattern is still shell adjacency plus one row-family proxy hook and one exact prefab identity, while `ATU6Button` remains the only exact shell-to-prefab-to-title exemplar through `Mk2 Generator Booster`
+  - the repeated missing pattern is still title localization: `ATU1Button`, `ATU2Button`, `ATU4Button`, and `ATU5Button` still stop short of one final player-facing row title join, while `ATU3Button` and the late `ATU24`-`ATU28` block still fail exact identity localization outright
   - the shell-side owner window still survives only in `data/token-shop-values.json`
   - the `BuyCellBoost` action cluster still survives only in `data/daily-tokenium-lane-probe.json`
   - the surviving prefab identities still survive only as detached `lm244`, `UABEA`, or `unity-probe` hits
-  - the surviving player-facing titles and generic `SetAllTokenShopTexts` or `SetTokenTexts` hooks still survive only as detached unity-probe string buckets
+  - the surviving player-facing titles, support text, and generic `SetAllTokenShopTexts` or `SetTokenTexts` hooks still survive only as detached owner-probe or unity-probe string buckets
   - the same generic trace workflow still keeps the older ATU3 cells split negative, because no committed source carries one exact ATU3 shell id together with one exact prefab identity or final title in the same local container
 - The bounded ATU4 title-side pass now stays negative across the exact mod-domain title surfaces:
   - the generic TokenShop text-hook surface still preserves `SetAllTokenShopTexts` and `SetTokenTexts`, but does not preserve any `ATU4Button` shell, path id `15796`, or exact row-local title join
   - the token-side mod title clue `Token Ultima: MP` still survives only as a detached title surface
   - the diamond-side mod title clue `:Diamond Upgrade 11 - ModBoost` still survives only as a separate title surface
   - none of those committed title-side surfaces crosses back to `ATU4Button` or path id `15796`
+- The bounded ATU5 title-side pass also now stays negative across the exact MK1 generator title surfaces:
+  - the generic TokenShop text-hook surface still preserves `SetAllTokenShopTexts` and `SetTokenTexts`, but does not preserve any `ATU5Button` shell, path id `15831`, or exact row-local title join
+  - the surviving MK1 generator title-side clues still preserve only detached support text such as `1. MK1 Generator Output,`, `This upgrade divides the cost of MK1 Generators by 1500.`, and `This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)`
+  - the checked owner-side generator title roster still preserves neighboring `Mk2 Generator Booster`, `Mk3 Generator Booster`, and `Mk5 Generator Booster` titles, but does not preserve one exact `Mk1 Generator Booster`
+  - none of those committed title-side surfaces crosses back to `ATU5Button` or path id `15831`
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`

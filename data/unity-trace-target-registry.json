@@ -8,7 +8,9 @@
         "metadata",
         "tokenShopExtract",
         "tokenShopRowRemapBoundary",
+        "tokenShopLateAtuBoundary",
         "dailyTokeniumLaneProbe",
+        "dailyTokeniumOwnerProbe",
         "uabeaProbe",
         "unityProbe",
         "lm244TargetedProbe"
@@ -231,6 +233,26 @@
         "exact shell-to-title join"
       ]
     },
+    "token-shop-atu5-vs-atu3": {
+      "label": "TokenShop ATU5 trace bridge vs ATU3 blocked trace",
+      "solvedBaselineTargetId": "token-shop-atu5-mk1-title",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "summaryFocus": [
+        "exact shell-to-action-hook join",
+        "exact shell-to-prefab join",
+        "exact shell-to-title join"
+      ]
+    },
+    "token-shop-family-structure-vs-unresolved": {
+      "label": "TokenShop family structure audit vs unresolved ATU neighborhoods",
+      "solvedBaselineTargetId": "token-shop-family-structure",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "summaryFocus": [
+        "repeated solved shell-to-proxy-to-prefab structure",
+        "repeated title-localization gap",
+        "standout strongest row neighborhood"
+      ]
+    },
     "shard-cost-structure-vs-planner": {
       "label": "Shard-cost direct structure vs planner-safe output",
       "solvedBaselineTargetId": "shard-cost-su0-structure",
@@ -362,6 +384,280 @@
           "Because the title-side join is still missing, the recovered ATU4 bridge is safe for row-remap evidence only and should not widen into canonical or planner behavior."
         ],
         "groundedConclusion": "The ATU4Button or 15796 title-side trace stays negative. The row still preserves one checked shell-to-action-hook-to-prefab bridge to NewTokenUPGPrefab.T1.ModPointsBooster, but neither the generic TokenShop text hooks nor the detached mod-domain title candidates provide one exact final player-facing title join."
+      }
+    },
+    "token-shop-atu5-mk1-title": {
+      "label": "TokenShop ATU5 MK1 title pass",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu5-mk1-title",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU5Button",
+        "15831"
+      ],
+      "joinGoal": "Recover one checked final player-facing title join for the already grounded ATU5Button or path id 15831 row, and keep the title-side result bounded if it still stays detached.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-atu5-mk1-title",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "comparisonPresetId": "token-shop-atu5-vs-atu3",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "exact-shell-to-title"
+          ]
+        },
+        "messages": {
+          "wire": "One exact shell-to-prefab and title chain cleared cleanly enough to wire the traced boundary.",
+          "quarantine": "The trace now preserves the ATU5 shell-to-prefab bridge, but the title-side pass stays bounded negative so this row remains quarantined to remap evidence.",
+          "research": "The trace is still too incomplete to preserve one bounded ATU5 title-side verdict."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU5Button",
+        "shellPathId": 15831,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU5Button",
+              "MK1TokenBoost",
+              "BuyMK1TokenBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "dailyTokeniumLaneProbe"
+            ],
+            "terms": [
+              "BuyMK1TokenBoost"
+            ]
+          },
+          {
+            "id": "prefab-lane",
+            "label": "Prefab identity lane",
+            "sourceIds": [
+              "uabeaProbe",
+              "unityProbe"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.MK1Booster"
+            ]
+          },
+          {
+            "id": "support-text-lane",
+            "label": "MK1 generator support-text lane",
+            "sourceIds": [
+              "unityProbe",
+              "dailyTokeniumLaneProbe",
+              "dailyTokeniumOwnerProbe",
+              "lm244TargetedProbe"
+            ],
+            "terms": [
+              "1. MK1 Generator Output,",
+              "This upgrade divides the cost of MK1 Generators by 1500.",
+              "This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)"
+            ]
+          },
+          {
+            "id": "title-roster-gap",
+            "label": "Neighboring generator title roster",
+            "sourceIds": [
+              "dailyTokeniumOwnerProbe"
+            ],
+            "terms": [
+              "Mk2 Generator Booster",
+              "Mk3 Generator Booster",
+              "Mk5 Generator Booster"
+            ]
+          },
+          {
+            "id": "text-hooks",
+            "label": "Generic TokenShop text-hook lane",
+            "sourceIds": [
+              "unityProbe",
+              "dailyTokeniumLaneProbe",
+              "lm244TargetedProbe"
+            ],
+            "terms": [
+              "SetAllTokenShopTexts",
+              "SetTokenTexts"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window survives only in the TokenShop extract, where ATU5Button path id 15831 stays adjacent to the MK1TokenBoost owner block.",
+          "The exact BuyMK1TokenBoost action hook and NewTokenUPGPrefab.T1.MK1Booster prefab now converge on the same traced row family, but the final player-facing title still survives only as detached MK1 generator support text and neighboring generator-booster title-roster surfaces.",
+          "Because the title-side join is still missing, the recovered ATU5 bridge is safe for row-remap evidence only and should not widen into canonical or planner behavior."
+        ],
+        "groundedConclusion": "The ATU5Button or 15831 title-side trace stays negative. The row still preserves one checked shell-to-action-hook-to-prefab bridge to NewTokenUPGPrefab.T1.MK1Booster, but neither the generic TokenShop text hooks nor the detached MK1 generator support-text and neighboring title-roster surfaces provide one exact final player-facing title join."
+      }
+    },
+    "token-shop-family-structure": {
+      "label": "TokenShop family structure audit",
+      "familyId": "token-shop",
+      "strategy": "token-shop-family-structure",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU1Button",
+        "ATU2Button",
+        "ATU4Button",
+        "ATU5Button",
+        "ATU6Button",
+        "ATU3Button",
+        "ATU24Button",
+        "SetAllTokenShopTexts"
+      ],
+      "joinGoal": "Audit the whole TokenShop ATU shell family for repeated proved joins and repeated missing joins across shell ids, bridge-proxy hooks, prefab identities, and title or text surfaces without promoting any new remaps.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-family-structure",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "comparisonPresetId": "token-shop-family-structure-vs-unresolved",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 6,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 6,
+          "allowedNegativeEdgeTypes": [
+            "repeated-shell-to-title-localization-gap",
+            "repeated-unresolved-shell-identity-gap"
+          ]
+        },
+        "messages": {
+          "wire": "The family audit found a fully localized repeated row-identity pattern, but this target should still remain descriptive only.",
+          "quarantine": "The family audit preserves a repeated shell-to-proxy-to-prefab pattern and one standout ATU6 title-chain exemplar, but repeated title-localization gaps still quarantine the broader family.",
+          "research": "The family audit is still too incomplete to summarize a stable cross-row TokenShop structure pattern."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU1Button through ATU28Button",
+        "shellPathId": "family-range",
+        "shellWindowSource": "tokenShopExtract",
+        "surfaces": [
+          {
+            "id": "family-shells",
+            "label": "Family shell range",
+            "sourceIds": [
+              "tokenShopExtract",
+              "metadata"
+            ],
+            "terms": [
+              "ATU1Button",
+              "ATU2Button",
+              "ATU3Button",
+              "ATU4Button",
+              "ATU5Button",
+              "ATU6Button",
+              "ATU24Button",
+              "ATU28Button"
+            ]
+          },
+          {
+            "id": "bridge-proxies",
+            "label": "Bridge-proxy lane",
+            "sourceIds": [
+              "tokenShopRowRemapBoundary",
+              "dailyTokeniumLaneProbe"
+            ],
+            "terms": [
+              "BuyTokenBoost",
+              "ATU2DiamondsBonus",
+              "BuyModBoost",
+              "BuyMK1TokenBoost",
+              "BuyMK2TokenBoost",
+              "BuyCellBoost",
+              "BuyATU24"
+            ]
+          },
+          {
+            "id": "prefab-roster",
+            "label": "Prefab identity roster",
+            "sourceIds": [
+              "tokenShopRowRemapBoundary",
+              "tokenShopLateAtuBoundary",
+              "uabeaProbe",
+              "unityProbe"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.TokensBoost",
+              "NewTokenUPGPrefab.T1.DiamondBoost",
+              "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "NewTokenUPGPrefab.T1.MK1Booster",
+              "NewTokenUPGPrefab.T1.MK2Booster",
+              "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
+            ]
+          },
+          {
+            "id": "title-text-surfaces",
+            "label": "Title and text surfaces",
+            "sourceIds": [
+              "tokenShopRowRemapBoundary",
+              "tokenShopLateAtuBoundary",
+              "unityProbe",
+              "dailyTokeniumOwnerProbe"
+            ],
+            "terms": [
+              "SetAllTokenShopTexts",
+              "SetTokenTexts",
+              "Mk2 Generator Booster",
+              "Token Ultima: MP",
+              "1. MK1 Generator Output,",
+              "Token Ultima: Cells",
+              "Academy Booster"
+            ]
+          },
+          {
+            "id": "negative-neighborhoods",
+            "label": "Bounded unresolved neighborhoods",
+            "sourceIds": [
+              "tokenShopRowRemapBoundary",
+              "tokenShopLateAtuBoundary",
+              "dailyTokeniumLaneProbe"
+            ],
+            "terms": [
+              "ATU3Button",
+              "BuyCellBoost",
+              "ATU24Button",
+              "BuyATU24",
+              "StartCellBostHold"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The family audit confirms that shell-side ATU serialization survives much more often than row-local title localization does.",
+          "The strongest repeated solved pattern is shell adjacency plus one row-family proxy hook and one exact prefab identity, but the title-side surfaces usually remain detached into generic text hooks, support text, or loose title rosters.",
+          "ATU6 remains the standout strongest neighborhood because it is still the only row that carries one checked shell-to-prefab-to-title chain; ATU4 and ATU5 stay structurally stronger than ATU3 and the late ATU24-ATU28 block, but still stop short of final title localization."
+        ],
+        "groundedConclusion": "The TokenShop family audit is structurally informative but still quarantined. The repo repeatedly preserves shell-side ATU neighborhoods plus row-family proxy hooks and prefab identities on the solved subset, but repeated title-localization gaps remain for ATU1, ATU2, ATU4, and ATU5, while ATU3 and the late ATU24-ATU28 block still fail the exact identity join entirely. ATU6 remains the strongest standout row neighborhood."
       }
     },
     "token-shop-atu3-cells": {

@@ -1762,6 +1762,18 @@ assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.titleC
 assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.alternateTitleCandidate, ":Diamond Upgrade 11 - ModBoost");
 assert.match(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.missingJoin, /generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues/i);
 assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.result, "checked object bridge recovered but no concrete title join cleared");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.targetId, "token-shop-atu5-mk1-title");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.recoveredBridge.shellField, "ATU5Button");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.recoveredBridge.shellPathId, 15831);
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.recoveredBridge.supportingActionHook, "BuyMK1TokenBoost");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster");
+assert.ok(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"));
+assert.ok(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "MK1 generator support-text cluster"));
+assert.ok(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "neighboring generator title roster gap"));
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.supportTextCandidate, "1. MK1 Generator Output,");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.alternateSupportTextCandidate, "This upgrade divides the cost of MK1 Generators by 1500.");
+assert.match(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.missingJoin, /generic text hooks, the detached MK1 generator support-text cluster, and the neighboring generator title roster/i);
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.result, "checked object bridge recovered but no concrete title join cleared");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellField, "ATU3Button");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellPathId, 15810);
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.result, "no concrete object-or-title join cleared");
@@ -1776,6 +1788,7 @@ assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4Butt
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /checked ATU6 shell-to-prefab-to-title chain/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 cells-domain disambiguation pass also stays negative/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU5 title-side pass also stays negative/i.test(line)));
 assert.equal(tokenShopLateAtuBoundaryData.dataset, "token-shop-late-atu-boundary");
 assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.saveFieldRange, "ATU24Level through ATU28Level");
 assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.shellFieldRange, "ATU24Button through ATU28Button");
@@ -1804,6 +1817,8 @@ assert.ok(unityTraceTargetRegistryData.planner.families["shard-cost"]);
 assert.ok(unityTraceTargetRegistryData.planner.families["multiverse-market-save-owner"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-cells"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu4-mod"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu5-mk1-title"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-family-structure"]);
 assert.ok(unityTraceTargetRegistryData.targets["shard-cost-su0-structure"]);
 assert.ok(unityTraceTargetRegistryData.targets["multiverse-market-save-owner-boundary"]);
 assert.equal(unityTraceBundleData.dataset, "unity-trace-bundle");
@@ -1812,63 +1827,70 @@ assert.equal(unityTraceBundleData.plannerResolution.selectionMode, "explicit-tar
 assert.equal(unityTraceBundleData.plannerResolution.matchedFamilyId, "token-shop");
 assert.equal(unityTraceBundleData.plannerResolution.runMode, "trace");
 assert.equal(unityTraceBundleData.plannerResolution.comparePresetId, null);
-assert.ok(unityTraceBundleData.plannerResolution.expandedAnchors.includes("ATU4Button"));
-assert.ok(unityTraceBundleData.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"));
+assert.ok(unityTraceBundleData.plannerResolution.expandedAnchors.includes("ATU5Button"));
+assert.ok(unityTraceBundleData.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"));
 assert.match(unityTraceBundleData.plannerResolution.decisionNote, /TokenShop/i);
-assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"));
+assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "ATU24Button" && anchor.kind === "class"));
 assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"));
 assert.equal(unityTraceBundleData.traceRegistry.path, "data/unity-trace-target-registry.json");
 assert.equal(unityTraceBundleData.traceRegistry.selectedFamilyId, "token-shop");
-assert.equal(unityTraceBundleData.target.id, "token-shop-atu4-mod");
-assert.ok(unityTraceBundleData.target.anchors.includes("ATU4Button"));
-assert.ok(unityTraceBundleData.target.anchors.includes("15796"));
+assert.equal(unityTraceBundleData.target.id, "token-shop-family-structure");
+assert.ok(unityTraceBundleData.target.anchors.includes("ATU5Button"));
+assert.ok(unityTraceBundleData.target.anchors.includes("ATU24Button"));
 assert.ok(unityTraceBundleData.target.anchors.includes("ATU3Button"));
-assert.equal(unityTraceBundleData.shellWindow.shellField, "ATU4Button");
-assert.equal(unityTraceBundleData.shellWindow.shellPathId, 15796);
+assert.equal(unityTraceBundleData.shellWindow.shellField, "ATU1Button through ATU28Button");
+assert.equal(unityTraceBundleData.shellWindow.shellPathId, "family-range");
 assert.deepEqual(
   unityTraceBundleData.shellWindow.ownerFieldBlock,
-  ["ModBoostStartCost", "ModBoostAdditiveCost", "ModBoostBonus", "ModBoostMaxLevel", "ModBoostFill"]
+  [
+    "TokenBoost / DiamondBoost / ModBoost / MK1TokenBoost / MK2TokenBoost solved-row windows",
+    "ATU3 cells-domain split window",
+    "ATU24Button through ATU28Button late shell neighborhood"
+  ]
 );
 assert.equal(unityTraceBundleData.bridgeCheck.bridgeCleared, true);
-assert.equal(unityTraceBundleData.bridgeCheck.result, "checked object bridge recovered");
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "metadata-neighborhood"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "action-lane"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "prefab-lane"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "title-lane"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "text-hooks"));
-const traceMetadataSurface = unityTraceBundleData.surfaces.find((surface) => surface.id === "metadata-neighborhood");
-assert.ok(traceMetadataSurface.anchorSpecs.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"));
+assert.equal(unityTraceBundleData.bridgeCheck.result, "checked family structure audit recovered");
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "family-shells"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "bridge-proxies"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "prefab-roster"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "title-text-surfaces"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "negative-neighborhoods"));
+const traceMetadataSurface = unityTraceBundleData.surfaces.find((surface) => surface.id === "family-shells");
+assert.ok(traceMetadataSurface.anchorSpecs.some((anchor) => anchor.value === "ATU24Button" && anchor.kind === "class"));
 const traceMetadataSource = traceMetadataSurface.sources.find((source) => source.sourceId === "metadata");
 assert.deepEqual(traceMetadataSource.searchModes, ["exact-string", "bounded-containment"]);
-assert.ok(traceMetadataSource.supportingHitCount >= 3);
+assert.ok(traceMetadataSource.supportingHitCount >= 8);
 assert.ok(traceMetadataSource.incidentalHitCount >= 2);
 assert.ok(traceMetadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)));
-assert.ok(traceMetadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15796")));
+assert.ok(traceMetadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")));
 assert.equal(unityTraceBundleData.traceGraph.edges.length, 6);
-assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 1);
-assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"));
-assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "generic-text-hook-cluster"));
-assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-title"));
+assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 2);
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "repeated-serialized-shell-adjacency" && edge.provenanceStrength === "direct"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "repeated-row-family-proxy-lane"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "repeated-title-text-surface"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "exact-shell-to-title-exemplar"));
+assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "repeated-shell-to-title-localization-gap"));
+assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "repeated-unresolved-shell-identity-gap"));
 assert.equal(unityTraceBundleData.decisionSummary.verdict, "quarantine");
 assert.deepEqual(
   unityTraceBundleData.decisionSummary.baselineGap,
-  ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"]
+  ["repeated-shell-to-prefab-subset", "exact-shell-to-title-exemplar"]
 );
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU4Button");
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 15796);
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button");
-assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency"]);
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button");
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, "solved-subset");
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button plus ATU24Button through ATU28Button");
+assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["repeated-row-family-proxy-lane", "repeated-serialized-shell-adjacency"]);
 assert.deepEqual(
   unityTraceBundleData.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes,
-  ["exact-shell-to-action-hook", "exact-shell-to-prefab"]
+  ["exact-shell-to-title-exemplar", "repeated-shell-to-prefab-subset"]
 );
 assert.deepEqual(
   unityTraceBundleData.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes,
-  ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"]
+  ["repeated-shell-to-prefab-subset", "exact-shell-to-title-exemplar"]
 );
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /ATU4Button path id 15796 stays adjacent to the ModBoost owner block/i.test(line)));
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /detached mod-domain title and generic text-hook surfaces/i.test(line)));
-assert.match(unityTraceBundleData.groundedConclusion, /ATU4Button or 15796 title-side trace stays negative/i);
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /shell-side ATU serialization survives much more often than row-local title localization/i.test(line)));
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /ATU6 remains the standout strongest neighborhood/i.test(line)));
+assert.match(unityTraceBundleData.groundedConclusion, /TokenShop family audit is structurally informative but still quarantined/i);
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -3037,7 +3059,7 @@ assert.match(spendSystemVerificationDoc, /compatibility\.unmappedSystemState\.to
 assert.match(activeGroundingBoundariesDoc, /narrows the save-side wrapper to the nearby mission-persistence block in `SaveData`/);
 assert.match(unityOwnerMapDoc, /narrowest checked save wrapper -> `SaveData` mission-persistence neighborhood/);
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
-assert.match(activeGroundingBoundariesDoc, /five checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, and `ATU6Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, and both the bounded ATU3 cells-domain disambiguation pass and the late ATU24-ATU28 shell neighborhood are now clean negative results/);
+assert.match(activeGroundingBoundariesDoc, /five checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, and `ATU6Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, both the bounded ATU4 and ATU5 title-side passes now stay negative, and a bounded TokenShop family-structure trace audit now confirms the repeated shell-to-proxy-to-prefab pattern plus the repeated title-localization gap/i);
 assert.match(activeGroundingBoundariesDoc, /recover one more checked bridge from a different unresolved `ATU\*Button`, `ATU\*Content`, or adjacent shell neighborhood/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
@@ -3049,6 +3071,7 @@ assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /late ATU24-ATU28 shell
 assert.match(tokenShopRowRemapTrack?.blockedBy ?? "", /ATU3 cells-domain pass.*late ATU24-ATU28 shell neighborhood.*negative/);
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU5Button` to `NewTokenUPGPrefab\.T1\.MK1Booster/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster/.test(line)));
+assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU4 and ATU5 title-side passes both stay negative/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU3 cells-domain disambiguation pass stays negative/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster` to `Mk2 Generator Booster`/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /late ATU24-ATU28 shell neighborhood now also has a tighter bounded negative result/.test(line)));
@@ -3206,17 +3229,18 @@ assert.match(spendSystemVerificationDoc, /subset-bound TokenShop row-detail modu
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
 assert.match(tokenShopRowRemapVerificationDoc, /data\/unity-trace-bundle\.json/);
-assert.match(tokenShopRowRemapVerificationDoc, /ATU4Button` -> `BuyModBoost` -> `NewTokenUPGPrefab\.T1\.ModPointsBooster` bridge inside the generic `probe:trace` workflow/);
-assert.match(unityTraceBundleDoc, /Target: `token-shop-atu4-mod`/);
-assert.match(unityTraceBundleDoc, /Registry target: `token-shop-atu4-mod` from `token-shop`/);
-assert.match(unityTraceBundleDoc, /Result: `checked object bridge recovered`/);
-assert.match(unityTraceBundleDoc, /Shell field: `ATU4Button`/);
+assert.match(tokenShopRowRemapVerificationDoc, /bounded TokenShop family-structure trace audit/i);
+assert.match(tokenShopRowRemapVerificationDoc, /solved `ATU1`, `ATU2`, `ATU4`, `ATU5`, and `ATU6` shells beside the bounded `ATU3` and late `ATU24`-`ATU28` negatives/i);
+assert.match(unityTraceBundleDoc, /Target: `token-shop-family-structure`/);
+assert.match(unityTraceBundleDoc, /Registry target: `token-shop-family-structure` from `token-shop`/);
+assert.match(unityTraceBundleDoc, /Result: `checked family structure audit recovered`/);
+assert.match(unityTraceBundleDoc, /Shell field: `ATU1Button through ATU28Button`/);
 assert.match(unityTraceBundleDoc, /## Trace graph/);
-assert.match(unityTraceBundleDoc, /exact-shell-to-prefab/);
+assert.match(unityTraceBundleDoc, /repeated-shell-to-prefab-subset/);
 assert.match(unityTraceBundleDoc, /## Solved vs blocked/);
 assert.match(unityTraceBundleDoc, /## Decision summary/);
 assert.match(unityTraceBundleDoc, /Verdict: `quarantine`/);
-assert.match(unityTraceBundleDoc, /Baseline: `ATU4Button` path id `15796`/);
+assert.match(unityTraceBundleDoc, /Baseline: `ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button` path id `solved-subset`/);
 assert.match(multiverseMarketDoc, /## Integration status/);
 assert.match(multiverseMarketDoc, /CostBox-InscryptionsDone/);
 assert.match(multiverseMarketDoc, /saved-state owner or runtime balance field behind the `Inscryptions Done` cost lane/);
@@ -3651,7 +3675,7 @@ assert.match(unityAuditPlaybook, /metadata neighborhoods, owner-payload shells, 
 assert.match(unityAuditPlaybook, /typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape/);
 assert.match(unityAuditPlaybook, /wire`, `quarantine`, or `keep researching`/);
 assert.match(unityTraceBundleDoc, /Typed execution anchors/i);
-assert.match(unityTraceBundleDoc, /Signal summary: 0 high-signal, 5 supporting, 7 incidental, 0 suppressed-noise/);
+assert.match(unityTraceBundleDoc, /Signal summary: 0 high-signal, 10 supporting, 4 incidental, 0 suppressed-noise/);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);
