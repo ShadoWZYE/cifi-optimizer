@@ -4776,6 +4776,21 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       bonusStepLabel: "Mk3 Output",
       bonusStepMode: "multiplier",
       note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
+    },
+    {
+      field: "ATU8Level",
+      slot: "ATU8",
+      identity: boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle || boundary?.atu8BridgeFollowUp?.recoveredBridge?.prefabIdentity || "Mk4 Generator Booster",
+      identitySource: boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ? "Checked title-side text chain" : "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "MK4TokenBoostStartCost",
+      additiveCostField: "MK4TokenBoostAdditiveCost",
+      bonusField: "MK4TokenBoostBonus",
+      maxLevelField: "MK4TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk4 Output",
+      bonusStepMode: "multiplier",
+      note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     }
   ];
 }
@@ -4999,7 +5014,7 @@ function getTokenShopProgressionModel() {
 
   return {
     currentTokens,
-    displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7.",
+    displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8.",
     rows,
     localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override").length,
     playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state").length,
@@ -5058,7 +5073,7 @@ function renderTokenShopProgressionEditor() {
     <article class="validation-card warn">
       <strong>Grounded TokenShop checked-row editor</strong>
       <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
-      <p class="meta">This module is explicitly non-optimizer and stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, and <code>ATU7Level</code>.</p>
+      <p class="meta">This module is explicitly non-optimizer and stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, and <code>ATU8Level</code>.</p>
       <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown separately inside the same bounded subset. ATU3 remains effect-driven and is not promoted into a prefab or final-title remap. The rest of the unresolved ATU family stays quarantined outside this editor.</p>
       <div class="profile-actions">
         <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
