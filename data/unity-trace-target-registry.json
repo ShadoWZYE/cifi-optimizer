@@ -253,6 +253,16 @@
         "exact shell-to-title join"
       ]
     },
+    "token-shop-atu3-effect-vs-split": {
+      "label": "TokenShop ATU3 effect-chain vs prefab or title split",
+      "solvedBaselineTargetId": "token-shop-atu3-cells-effect",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "summaryFocus": [
+        "shared effect-system chain",
+        "derived player-facing effect surface",
+        "remaining typed effect-owner break"
+      ]
+    },
     "token-shop-family-structure-vs-unresolved": {
       "label": "TokenShop family structure audit vs unresolved ATU neighborhoods",
       "solvedBaselineTargetId": "token-shop-family-structure",
@@ -757,6 +767,121 @@
           "Because the rest of the MK-family shells still lack their own checked joins, keep ATU7 as one bounded remap bridge and leave the neighboring unresolved rows quarantined."
         ],
         "groundedConclusion": "The ATU7Button or 15792 bridge clears as one exact shell-to-action-hook-to-prefab join. The row preserves direct shell adjacency to the MK3TokenBoost owner block, the checked action lane preserves BuyMK3TokenBoost, and checked prefab surfaces preserve NewTokenUPGPrefab.T1.MK3Booster, but this pass does not promote any title-side identity claim."
+      }
+    },
+    "token-shop-atu3-cells-effect": {
+      "label": "TokenShop ATU3 cells effect trace",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu3-cells-effect",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU3Button",
+        "15810"
+      ],
+      "joinGoal": "Recover one checked ATU3Button or path id 15810 chain from the TokenShop shell through BuyCellBoost into the shared cells-from-chests effect surface, and keep any remaining typed effect-owner gap bounded if it still does not clear.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-atu3-cells-effect",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "comparisonPresetId": "token-shop-atu3-effect-vs-split",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "typed-shared-effect-owner"
+          ]
+        },
+        "messages": {
+          "wire": "One exact ATU3 shell-to-action-hook-to-shared-effect chain cleared cleanly enough to preserve the effect-driven row behavior.",
+          "quarantine": "The trace preserves one ATU3 shell-to-action-hook-to-shared-effect chain, but the exact typed gameplay owner for the chest-effect applier still stays unresolved so this row remains quarantined to descriptive remap evidence.",
+          "research": "The ATU3 cross-system trace still breaks before one stable shared effect-system verdict can be preserved."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU3Button",
+              "CellBoost",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "dailyTokeniumLaneProbe"
+            ],
+            "terms": [
+              "StartCellBostHold",
+              "StopCellBostHold",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "shared-effect-title",
+            "label": "Shared effect title lane",
+            "sourceIds": [
+              "dailyTokeniumOwnerProbe"
+            ],
+            "terms": [
+              "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"
+            ]
+          },
+          {
+            "id": "shared-effect-text",
+            "label": "Shared effect text lane",
+            "sourceIds": [
+              "dailyTokeniumLaneProbe",
+              "unityProbe"
+            ],
+            "terms": [
+              "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."
+            ]
+          },
+          {
+            "id": "detached-identity-surfaces",
+            "label": "Detached cells identity surfaces",
+            "sourceIds": [
+              "lm244TargetedProbe",
+              "unityProbe",
+              "uabeaProbe"
+            ],
+            "terms": [
+              "BuyCellsBoost",
+              "NewDiamondUPGPrefab.Specials.CellsBoost",
+              ">Diamond Upgrade 10 - CellsBoost",
+              "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "NewTokenUPGPrefab.T5.UltimaCells",
+              "Token Ultima: Cells"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
+          "The shared effect chain now reaches the Cells Booster (Chests) title and the +1 Seconds timeskip to Cells Gained from Token & Diamond Chests text, but no committed source yet names the exact typed gameplay owner that consumes CellBoostBonus inside that chest-effect system.",
+          "The older diamond-side CellsBoost and token-side CellsPerChestBooster or Token Ultima: Cells surfaces still survive as detached identity clues, so this pass must stay effect-driven rather than pretending the row is a standard shell-to-prefab-to-title remap."
+        ],
+        "groundedConclusion": "The ATU3Button or 15810 cross-system trace clears one checked shell-to-action-hook-to-shared-effect chain. The row preserves direct shell adjacency to the CellBoost owner block, the checked action lane preserves BuyCellBoost, the shared title and effect-text surfaces preserve the Cells Booster (Chests) chest-effect lane, and the raw CellBoostBonus value of 1 is consistent with the surviving +1-second player-facing effect text. The remaining break is the exact typed gameplay owner or chest-reward applier that consumes that parameter."
       }
     },
     "token-shop-atu3-cells": {

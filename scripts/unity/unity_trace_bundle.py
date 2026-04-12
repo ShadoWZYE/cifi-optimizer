@@ -1480,6 +1480,198 @@ def build_mk3_bridge_trace_graph(
     }
 
 
+def build_atu3_effect_trace_graph(
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    row_remap_boundary: dict[str, Any],
+) -> dict[str, Any]:
+    metadata_surface = find_surface(surfaces, "metadata-neighborhood")
+    action_surface = find_surface(surfaces, "action-lane")
+    title_surface = find_surface(surfaces, "shared-effect-title")
+    text_surface = find_surface(surfaces, "shared-effect-text")
+    detached_surface = find_surface(surfaces, "detached-identity-surfaces")
+
+    metadata_source = find_source_entry(metadata_surface, "metadata")
+    action_source = find_source_entry(action_surface, "dailyTokeniumLaneProbe")
+    owner_title_source = find_source_entry(title_surface, "dailyTokeniumOwnerProbe")
+    lane_text_source = find_source_entry(text_surface, "dailyTokeniumLaneProbe")
+    unity_text_source = find_source_entry(text_surface, "unityProbe")
+    lm244_detached_source = find_source_entry(detached_surface, "lm244TargetedProbe")
+    unity_detached_source = find_source_entry(detached_surface, "unityProbe")
+    uabea_detached_source = find_source_entry(detached_surface, "uabeaProbe")
+
+    metadata_shell_hit = find_hit(metadata_source, "ATU3Button")
+    metadata_owner_hit = find_hit(metadata_source, "CellBoostStartCost")
+    action_buy_hit = find_hit(action_source, "BuyCellBoost")
+    title_hit = find_hit(owner_title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")
+    lane_text_hit = find_hit(lane_text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
+    unity_text_hit = find_hit(unity_text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
+    diamond_prefab_hit = find_hit(unity_detached_source, "NewDiamondUPGPrefab.Specials.CellsBoost")
+    diamond_title_hit = find_hit(unity_detached_source, ">Diamond Upgrade 10 - CellsBoost")
+    token_prefab_hit = find_hit(uabea_detached_source, "NewTokenUPGPrefab.T1.CellsPerChestBooster")
+    token_ultima_hit = find_hit(unity_detached_source, "NewTokenUPGPrefab.T5.UltimaCells")
+    token_title_hit = find_hit(unity_detached_source, "Token Ultima: Cells")
+    buy_cells_boost_hit = find_hit(lm244_detached_source, "BuyCellsBoost")
+
+    effect_trace = row_remap_boundary["atu3CrossSystemEffectTrace"]["recoveredActionEffectChain"]
+    detached_identities = row_remap_boundary["atu3CrossSystemEffectTrace"]["detachedIdentitySurfaces"]
+    missing_owner = row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]
+
+    shell_node = "target-shell"
+    owner_node = "owner-field-block"
+    action_node = "action-hook"
+    shared_system_node = "shared-effect-system"
+    effect_text_node = "player-effect-text"
+    parameter_node = "parameter-surface"
+    detached_node = "detached-identity-surfaces"
+
+    edges = [
+        make_edge(
+            "shell-to-owner-block",
+            shell_node,
+            owner_node,
+            "serialized-adjacency",
+            "present",
+            "direct",
+            "The target shell still sits directly beside the CellBoost owner-field block in the committed TokenShop extract.",
+            [
+                cite_row_boundary(
+                    "tokenShopExtract",
+                    "$.fields",
+                    f"{shell_window['shellField']} path_id {shell_window['shellPathId']}",
+                    "Shell window recovered from the exact TokenShop payload.",
+                )
+            ],
+        ),
+        make_edge(
+            "owner-block-to-action-hook",
+            owner_node,
+            action_node,
+            "exact-shell-to-action-hook",
+            "present",
+            "supporting",
+            "The metadata neighborhood and checked lane probe preserve BuyCellBoost as the exact named action hook for the same CellBoost family.",
+            [
+                cite_hit(metadata_source, metadata_shell_hit),
+                cite_hit(metadata_source, metadata_owner_hit),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook", effect_trace["supportingActionHook"]),
+                cite_hit(action_source, action_buy_hit),
+            ],
+        ),
+        make_edge(
+            "action-hook-to-shared-effect-system",
+            action_node,
+            shared_system_node,
+            "shared-effect-system",
+            "present",
+            "direct",
+            "The checked cross-system effect surface preserves the shared Cells Booster (Chests) title for the same cells-from-chests gameplay lane.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle", effect_trace["sharedEffectTitle"]),
+                cite_hit(owner_title_source, title_hit),
+            ],
+        ),
+        make_edge(
+            "shared-effect-system-to-player-effect-text",
+            shared_system_node,
+            effect_text_node,
+            "derived-player-effect-surface",
+            "present",
+            "direct",
+            "The same shared effect lane preserves one exact player-facing effect string for cells gained from Token and Diamond chests.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectText", effect_trace["sharedEffectText"]),
+                cite_hit(lane_text_source, lane_text_hit),
+                cite_hit(unity_text_source, unity_text_hit),
+            ],
+        ),
+        make_edge(
+            "owner-block-to-parameter-surface",
+            owner_node,
+            parameter_node,
+            "parameter-surface",
+            "present",
+            "direct",
+            "The raw CellBoost parameter surface preserves the bonus value and max-level cap that bound the shared chest-effect lane.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.derivedReading", effect_trace["parameterSurface"]["derivedReading"]),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.field", effect_trace["parameterSurface"]["field"]),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.supportingField", effect_trace["parameterSurface"]["supportingField"]),
+            ],
+        ),
+        make_edge(
+            "action-hook-to-detached-identity-surfaces",
+            action_node,
+            detached_node,
+            "detached-identity-contrast",
+            "present",
+            "supporting",
+            "The older diamond-side and token-side Cells identity surfaces still survive as detached contrast evidence, but they are no longer the main success criterion for this ATU3 pass.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.groundedConclusion", detached_identities["groundedConclusion"]),
+                cite_hit(lm244_detached_source, buy_cells_boost_hit),
+                cite_hit(unity_detached_source, diamond_prefab_hit),
+                cite_hit(unity_detached_source, diamond_title_hit),
+                cite_hit(uabea_detached_source, token_prefab_hit),
+                cite_hit(unity_detached_source, token_ultima_hit),
+                cite_hit(unity_detached_source, token_title_hit),
+            ],
+        ),
+    ]
+
+    negative_edges = [
+        make_edge(
+            "missing-typed-effect-owner",
+            shared_system_node,
+            effect_text_node,
+            "typed-shared-effect-owner",
+            "missing",
+            "negative",
+            "No committed source currently names the exact runtime chest-reward applier or typed gameplay owner that consumes CellBoostBonus inside the shared Token and Diamond chest cells-gain system.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin", missing_owner["missingJoin"]),
+            ],
+        ),
+    ]
+
+    return {
+        "nodes": [
+            make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
+            make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
+            make_node(action_node, "action-hook", "BuyCellBoost", "present", "The committed probe set preserves the matching cells buy hook."),
+            make_node(shared_system_node, "shared-effect-system", "Cells Booster (Chests)", "present", "A shared cells-from-chests gameplay effect surface is preserved."),
+            make_node(effect_text_node, "player-effect-text", "+1 Seconds timeskip to Cells Gained from Token & Diamond Chests", "present", "The player-facing effect text survives on the same shared chest-effect lane."),
+            make_node(parameter_node, "parameter-surface", "CellBoostBonus = 1, CellBoostMaxLevel = 60", "present", "The raw CellBoost parameter surface bounds the effect lane without naming the applier."),
+            make_node(detached_node, "detached-identity-surfaces", "diamond CellsBoost + token CellsPerChestBooster / Token Ultima: Cells", "present", "Older detached identity surfaces remain preserved as contrast evidence."),
+        ],
+        "edges": edges,
+        "negativeEdges": negative_edges,
+        "claimLedger": [
+            {
+                "id": "claim-atu3-effect-chain",
+                "status": "proved",
+                "statement": "ATU3 now preserves one shell-to-action-hook-to-shared-effect chain into the cells-from-chests gameplay lane.",
+                "edgeIds": ["shell-to-owner-block", "owner-block-to-action-hook", "action-hook-to-shared-effect-system", "shared-effect-system-to-player-effect-text", "owner-block-to-parameter-surface"],
+                "provedBy": [citation for edge in edges[:5] for citation in edge["provedBy"]],
+            },
+            {
+                "id": "claim-detached-identity-surfaces",
+                "status": "proved",
+                "statement": "The older diamond-side and token-side Cells identity surfaces still survive, but only as detached contrast evidence.",
+                "edgeIds": ["action-hook-to-detached-identity-surfaces"],
+                "provedBy": list(edges[5]["provedBy"]),
+            },
+            {
+                "id": "claim-missing-typed-owner",
+                "status": "missing",
+                "statement": "The exact typed gameplay owner or chest-effect applier still is not recovered.",
+                "edgeIds": [edge["id"] for edge in negative_edges],
+                "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
+            },
+        ],
+    }
+
+
 def build_solved_vs_blocked_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
     baseline = row_remap_boundary["adjacentFollowUp"]["recoveredAdditionalBridge"]
     blocked = row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]
@@ -2168,6 +2360,199 @@ def build_mk3_vs_blocked_diff(target_id: str, target: dict[str, Any], row_remap_
     }
 
 
+def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
+    baseline = row_remap_boundary["atu3CrossSystemEffectTrace"]["recoveredActionEffectChain"]
+    blocked = row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]
+    baseline_edges = [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU3Button still sits directly after the CellBoost owner-field block.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.ownerFieldBlock",
+                    ", ".join(baseline["ownerFieldBlock"]),
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-action-hook",
+            "status": "present",
+            "provenanceStrength": "supporting",
+            "statement": "The effect-driven trace now preserves one checked row-family action hook.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook",
+                    baseline["supportingActionHook"],
+                )
+            ],
+        },
+        {
+            "type": "shared-effect-system",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The effect-driven trace now preserves one shared cells-from-chests effect system surface.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle",
+                    baseline["sharedEffectTitle"],
+                )
+            ],
+        },
+        {
+            "type": "derived-player-effect-surface",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The effect-driven trace now preserves one exact player-facing effect string for the shared chest-effect lane.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectText",
+                    baseline["sharedEffectText"],
+                )
+            ],
+        },
+        {
+            "type": "parameter-surface",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The effect-driven trace now preserves a bounded CellBoost parameter surface.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.derivedReading",
+                    baseline["parameterSurface"]["derivedReading"],
+                )
+            ],
+        },
+        {
+            "type": "typed-shared-effect-owner",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The exact typed gameplay owner for the shared chest-effect applier still remains unresolved.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
+                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                )
+            ],
+        },
+    ]
+    blocked_edges = [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU3Button still sits directly beside the CellBoost owner-field block.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.adjacentOwnerFieldBlock",
+                    ", ".join(blocked["adjacentOwnerFieldBlock"]),
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-action-hook",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The older split trace only preserved a generic action cluster, not an effect-chain verdict.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]",
+                    blocked["missingLinks"][1],
+                )
+            ],
+        },
+        {
+            "type": "shared-effect-system",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The older split trace did not preserve one checked shared effect-system join.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CellsDisambiguationPass.groundedConclusion",
+                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
+                )
+            ],
+        },
+        {
+            "type": "derived-player-effect-surface",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The older split trace did not treat the surviving player-facing effect as one checked derived surface.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CellsDisambiguationPass.groundedConclusion",
+                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
+                )
+            ],
+        },
+    ]
+    shared_present = sorted(
+        {
+            edge["type"]
+            for edge in baseline_edges
+            if edge["status"] == "present"
+        }.intersection(
+            {
+                edge["type"]
+                for edge in blocked_edges
+                if edge["status"] == "present"
+            }
+        )
+    )
+    baseline_only = sorted(
+        {
+            edge["type"]
+            for edge in baseline_edges
+            if edge["status"] == "present"
+        } - set(shared_present)
+    )
+    blocked_missing = [edge["type"] for edge in blocked_edges if edge["status"] == "missing"]
+
+    return {
+        "baseline": {
+            "id": "atu3-effect-driven-chain",
+            "label": "ATU3 effect-driven chain",
+            "status": "cleared",
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": baseline["shellField"],
+            "shellPathId": baseline["shellPathId"],
+            "comparisonShape": baseline_edges,
+            "groundedConclusion": baseline["groundedConclusion"],
+        },
+        "blockedTarget": {
+            "id": target_id,
+            "label": "ATU3 prefab/title split",
+            "status": "blocked",
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": blocked["shellField"],
+            "shellPathId": blocked["shellPathId"],
+            "comparisonShape": blocked_edges,
+            "groundedConclusion": blocked["groundedConclusion"],
+        },
+        "delta": {
+            "sharedPresentEdgeTypes": shared_present,
+            "baselineOnlyPresentEdgeTypes": baseline_only,
+            "blockedMissingEdgeTypes": blocked_missing,
+            "solvedVsBlockedSummary": [
+                "Both ATU3 traces preserve the direct serialized shell-to-owner-block adjacency.",
+                "The new effect-driven trace adds one checked BuyCellBoost-to-shared-cells-effect chain plus a bounded parameter surface.",
+                "The older split trace still remains useful as detached identity contrast, but it does not clear the shared chest-effect lane or the derived player-facing effect surface.",
+            ],
+        },
+    }
+
+
 def build_family_structure_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
@@ -2733,6 +3118,49 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
     }
 
 
+def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    config = target["strategyConfig"]
+    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
+    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    surfaces = []
+    for surface in config["surfaces"]:
+        terms = list(dict.fromkeys([*surface["terms"], *anchors]))
+        anchor_specs = build_anchor_specs(terms, "surface-search")
+        surfaces.append(
+            {
+                "id": surface["id"],
+                "label": surface["label"],
+                "terms": terms,
+                "anchorSpecs": anchor_specs,
+                "sources": [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in surface["sourceIds"]],
+            }
+        )
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "traceGraph": build_atu3_effect_trace_graph(shell_window, surfaces, row_remap_boundary),
+        "bridgePromotionRule": "Only preserve ATU3 as an effect-driven row when one checked shell-side owner block, one exact row-family action hook, and one shared chest-effect title or text surface converge on the same cells-from-chests lane; keep typed gameplay owner claims blocked unless the applier is recovered explicitly.",
+        "bridgeCheck": {
+            "candidateTerms": [config["shellField"], "BuyCellBoost", "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."],
+            "bridgeCleared": True,
+            "bridgeHits": [
+                {"surfaceId": "action-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["dailyTokeniumLaneProbe"]), "term": "BuyCellBoost"},
+                {"surfaceId": "shared-effect-title", "sourcePath": repo_relative(ALL_SOURCE_PATHS["dailyTokeniumOwnerProbe"]), "term": "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"},
+                {"surfaceId": "shared-effect-text", "sourcePath": repo_relative(ALL_SOURCE_PATHS["unityProbe"]), "term": "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."},
+            ],
+            "result": "checked action-to-shared-effect chain recovered",
+        },
+        "solvedVsBlockedDiff": build_atu3_effect_vs_split_diff(target_id, target, row_remap_boundary),
+        "lostStructure": list(config["lostStructure"]),
+        "groundedConclusion": config["groundedConclusion"],
+        "currentBoundary": [
+            "This is a target-driven trace workflow, not a standard prefab-or-title TokenShop remap promotion by itself.",
+            "It now preserves one exact ATU3 shell-to-action-hook-to-shared-effect chain for the cells-from-chests gameplay lane while keeping the detached diamond-side and token-side identity surfaces explicit as contrast evidence.",
+            "Keep the ATU3 result quarantined to effect-driven remap evidence until the exact typed gameplay owner or chest-effect applier is recovered.",
+        ],
+    }
+
+
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = target["strategyConfig"]
     row_remap_boundary = documents["tokenShopRowRemapBoundary"]
@@ -3091,6 +3519,8 @@ def build_trace_payload(target_id: str, target: dict[str, Any], anchors: list[st
         return build_token_shop_mk1_trace(target_id, target, anchors, documents)
     if strategy == "token-shop-atu7-mk3-bridge":
         return build_token_shop_mk3_bridge_trace(target_id, target, anchors, documents)
+    if strategy == "token-shop-atu3-cells-effect":
+        return build_token_shop_atu3_effect_trace(target_id, target, anchors, documents)
     if strategy == "token-shop-family-structure":
         return build_token_shop_family_structure_trace(target_id, target, anchors, documents)
     if strategy == "shard-cost-su0-structure":

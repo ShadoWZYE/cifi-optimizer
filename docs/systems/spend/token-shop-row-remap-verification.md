@@ -132,11 +132,19 @@ Because those joins are still missing, the repo should not:
   - the checked diamond-special surface still preserves `NewDiamondUPGPrefab.Specials.CellsBoost` and `>Diamond Upgrade 10 - CellsBoost` as a separate lane
   - the checked token-side surface still preserves `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` as a separate lane
   - none of those exact candidate surfaces yields one concrete object or title join back to `ATU3Button` path id `15810`
+- The repo now also preserves one separate ATU3 effect-driven trace that does clear, but only as a cross-system gameplay lane instead of a standard prefab-or-title row remap:
+  - the exact `TokenShop` owner payload still keeps `ATU3Button` path id `15810` directly beside the `CellBoost*` owner block
+  - the checked action lane preserves `BuyCellBoost`
+  - the shared effect-title surface preserves `Cells Booster <size="22"><i><color=#B5B5B5>(Chests)</i></color></size>`
+  - the checked player-facing effect text preserves `<b>+1</b> Seconds "timeskip" to Cells Gained from Token & Diamond Chests.`
+  - the raw parameter surface preserves `CellBoostBonus = 1` and `CellBoostMaxLevel = 60`, which is consistent with the surviving `+1` second derived effect text and the bounded level cap for the same row family
+  - that is enough to preserve one bounded `ATU3Button` -> `BuyCellBoost` -> shared chest-effect lane chain, while still keeping the older diamond-side `CellsBoost` and token-side `CellsPerChestBooster` / `Token Ultima: Cells` clues as detached contrast surfaces
+  - the remaining honest blocker is narrower: no committed source yet names the exact typed gameplay owner or chest-reward applier that consumes the `CellBoostBonus` parameter inside that shared Token & Diamond chest cells-gain system
 - The upgraded join-preservation probe also now makes the current extraction state explicit instead of scattering it across multiple artifacts:
   - the generated `data/unity-trace-bundle.json` artifact now preserves one bounded TokenShop family-structure trace audit inside the generic `probe:trace` workflow
   - that audit now groups the solved `ATU1`, `ATU2`, `ATU4`, `ATU5`, and `ATU6` shells beside the bounded `ATU3` and late `ATU24`-`ATU28` negatives so repeated proved edges and repeated missing edges can be judged from one checked bundle
   - the strongest repeated solved pattern is still shell adjacency plus one row-family proxy hook and one exact prefab identity, while `ATU6Button` remains the only exact shell-to-prefab-to-title exemplar through `Mk2 Generator Booster`
-  - the repeated missing pattern is still title localization: `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, and `ATU7Button` still stop short of one final player-facing row title join, while `ATU3Button` and the late `ATU24`-`ATU28` block still fail exact identity localization outright
+  - the repeated missing pattern is still title localization: `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, and `ATU7Button` still stop short of one final player-facing row title join, while `ATU3Button` and the late `ATU24`-`ATU28` block still fail exact prefab-or-title identity localization outright
   - the shell-side owner window still survives only in `data/token-shop-values.json`
   - the `BuyCellBoost` action cluster still survives only in `data/daily-tokenium-lane-probe.json`
   - the surviving prefab identities still survive only as detached `lm244`, `UABEA`, or `unity-probe` hits
@@ -194,8 +202,8 @@ Recover one more checked identity bridge from the still-unresolved `ATU`-numbere
 - a specific `NewTokenUPGPrefab.*` object, or
 - a final player-facing row title
 
-The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, the bounded ATU3 cells-domain pass is now also a negative result, and the late ATU24-ATU28 shell neighborhood is now a tighter negative result too, so the next honest candidate is:
+The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, the bounded ATU3 prefab-or-title pass is negative but the separate ATU3 effect-driven chain is preserved, and the late ATU24-ATU28 shell neighborhood is now a tighter negative result too, so the next honest candidate is:
 
-- move to a different unresolved `ATU` shell and recover one more exact shell-to-prefab or shell-to-title bridge without reopening the ATU3 cells split unless a new committed artifact explicitly crosses back to path id `15810`
+- either tighten the remaining typed gameplay-owner break inside the preserved `ATU3Button` -> `BuyCellBoost` -> shared chest-effect lane without promoting a prefab-or-title remap, or move to a different unresolved `ATU` shell and recover one more exact shell-to-prefab or shell-to-title bridge without reopening the already-bounded ATU3 identity split unless a new committed artifact explicitly crosses back to path id `15810`
 
 If only one additional subset clears that bar, keep the rest of the `ATU` family quarantined instead of forcing a full remap.
