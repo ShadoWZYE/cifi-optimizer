@@ -175,9 +175,9 @@ Because those joins are still missing, the repo should not:
   - none of those committed title-side surfaces crosses back to `ATU4Button` or path id `15796`
 - The bounded ATU5 title-side pass also now stays negative across the exact MK1 generator title surfaces:
   - the generic TokenShop text-hook surface still preserves `SetAllTokenShopTexts` and `SetTokenTexts`, but does not preserve any `ATU5Button` shell, path id `15831`, or exact row-local title join
-  - the surviving MK1 generator title-side clues still preserve only detached support text such as `1. MK1 Generator Output,`, `This upgrade divides the cost of MK1 Generators by 1500.`, and `This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)`
+  - the surviving MK1 generator title-side clues now do preserve one bounded detached text chain for the same row family through `1. MK1 Generator Output,`, `This upgrade divides the cost of MK1 Generators by 1500.`, and `This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)`
   - the checked owner-side generator title roster still preserves neighboring `Mk2 Generator Booster`, `Mk3 Generator Booster`, and `Mk5 Generator Booster` titles, but does not preserve one exact `Mk1 Generator Booster`
-  - none of those committed title-side surfaces crosses back to `ATU5Button` or path id `15831`
+  - that is enough to preserve one bounded `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster` -> MK1 generator support-text chain, but not enough to recover one final player-facing row title
 - The bounded ATU7 bridge-only pass now clears without reopening title localization:
   - the exact `TokenShop` owner payload keeps `ATU7Button` path id `15792` directly beside the `MK3TokenBoost*` owner block
   - the checked action lane preserves `BuyMK3TokenBoost`
@@ -217,6 +217,7 @@ Because those joins are still missing, the repo should not:
 - Planner-safe spend behavior remains blocked on row identity recovery, not on row-level owner recovery.
 - The remaining unrecovered `ATU` family should stay compatibility-only and out of planner logic until its own row-specific joins clear.
 - The new `ATU6Button` title join does not promote broader planner or canonical use by itself; it only preserves one checked final-title chain while the rest of the family stays blocked.
+- The new ATU5 title-side text chain also does not promote broader planner or canonical use by itself; it preserves one bounded text-side follow-through without recovering a final player-facing row title.
 
 ## Narrowest next slice
 
