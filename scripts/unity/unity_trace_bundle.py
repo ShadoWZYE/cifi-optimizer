@@ -2770,6 +2770,207 @@ def build_atu3_chest_consumer_trace_graph(
         ],
     }
 
+def build_atu3_chest_consumer_read_trace_graph(
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    row_remap_boundary: dict[str, Any],
+) -> dict[str, Any]:
+    metadata_surface = find_surface(surfaces, "metadata-neighborhood")
+    consumer_surface = find_surface(surfaces, "consumer-family")
+    routine_surface = find_surface(surfaces, "consumer-routines")
+    getter_surface = find_surface(surfaces, "cell-gain-getters")
+    booster_surface = find_surface(surfaces, "booster-bonus-shell")
+    final_surface = find_surface(surfaces, "final-chest-bonus-shell")
+
+    metadata_source = find_source_entry(metadata_surface, "metadata")
+    lane_consumer_source = find_source_entry(consumer_surface, "dailyTokeniumLaneProbe")
+    lm244_consumer_source = find_source_entry(consumer_surface, "lm244TargetedProbe")
+    metadata_routine_source = find_source_entry(routine_surface, "metadata")
+    unity_routine_source = find_source_entry(routine_surface, "unityProbe")
+    getter_source = find_source_entry(getter_surface, "metadata")
+    booster_source = find_source_entry(booster_surface, "metadata")
+    final_source = find_source_entry(final_surface, "unityProbe")
+
+    metadata_shell_hit = find_hit(metadata_source, "ATU3Button")
+    metadata_owner_hit = find_hit(metadata_source, "CellBoostStartCost")
+    ad_manager_hit = find_hit(lane_consumer_source, "AdManager, Assembly-CSharp")
+    set_texts_hit = find_hit(lane_consumer_source, "SetAdChestTexts")
+    offline_hit = find_hit(lm244_consumer_source, "OfflineManager, Assembly-CSharp")
+    checker_hit = find_hit(lm244_consumer_source, "DailyAndAdCounterChecker")
+    start_token_hit = find_hit(metadata_routine_source, "StartTokenRoutine")
+    token_routine_hit = find_hit(unity_routine_source, "<TokenChestRoutine>d__149")
+    start_diamond_hit = find_hit(metadata_routine_source, "StartDiamondRoutine")
+    diamond_routine_hit = find_hit(unity_routine_source, "<DiamondChestRoutine>d__155")
+    small_getter_hit = find_hit(getter_source, "get_SmallAdCellGains")
+    big_getter_hit = find_hit(getter_source, "get_BigAdCellGains")
+    set_booster_hit = find_hit(booster_source, "SetBoosterAdBonus")
+    final_booster_getter_hit = find_hit(booster_source, "get_FinalBoosterAdBonus")
+    small_cells_hit = find_hit(booster_source, "SmallAdCellGains")
+    big_cells_hit = find_hit(booster_source, "BigAdCellGains")
+    final_booster_hit = find_hit(booster_source, "FinalBoosterAdBonus")
+    booster_routine_hit = find_hit(booster_source, "<BoosterAdRoutine>d__158")
+    final_token_bonus_hit = find_hit(final_source, "<FinalAdTokenChestBonus>k__BackingField")
+    final_diamond_bonus_hit = find_hit(final_source, "<FinalDiamondChestBonus>k__BackingField")
+
+    read_trace = row_remap_boundary["atu3ChestConsumerReadTrace"]["recoveredInternalReadShell"]
+    missing_seam = row_remap_boundary["atu3ChestConsumerReadTrace"]["missingExactReadSiteSeam"]
+
+    shell_node = "target-shell"
+    owner_node = "owner-field-block"
+    consumer_family_node = "consumer-family"
+    routine_family_node = "chest-routine-family"
+    getter_node = "cell-gain-getters"
+    booster_node = "booster-bonus-shell"
+    final_bonus_node = "final-chest-bonus-shell"
+
+    edges = [
+        make_edge(
+            "shell-to-owner-block",
+            shell_node,
+            owner_node,
+            "serialized-adjacency",
+            "present",
+            "direct",
+            "The target shell still sits directly beside the CellBoost owner-field block in the committed TokenShop extract.",
+            [
+                cite_row_boundary(
+                    "tokenShopExtract",
+                    "$.fields",
+                    f"{shell_window['shellField']} path_id {shell_window['shellPathId']}",
+                    "Shell window recovered from the exact TokenShop payload.",
+                )
+            ],
+        ),
+        make_edge(
+            "owner-block-to-consumer-family",
+            owner_node,
+            consumer_family_node,
+            "shared-effect-to-consumer-family",
+            "present",
+            "derived",
+            "The already checked ATU3 effect-driven lane remains grounded inside the AdManager chest consumer family.",
+            [
+                cite_hit(metadata_source, metadata_shell_hit),
+                cite_hit(metadata_source, metadata_owner_hit),
+                cite_hit(lane_consumer_source, ad_manager_hit),
+                cite_hit(lane_consumer_source, set_texts_hit),
+                cite_hit(lm244_consumer_source, offline_hit),
+                cite_hit(lm244_consumer_source, checker_hit),
+            ],
+        ),
+        make_edge(
+            "consumer-family-to-routines",
+            consumer_family_node,
+            routine_family_node,
+            "consumer-family-to-chest-routines",
+            "present",
+            "direct",
+            "The consumer family still preserves the token and diamond chest routine neighborhood.",
+            [
+                cite_hit(metadata_routine_source, start_token_hit),
+                cite_hit(unity_routine_source, token_routine_hit),
+                cite_hit(metadata_routine_source, start_diamond_hit),
+                cite_hit(unity_routine_source, diamond_routine_hit),
+            ],
+        ),
+        make_edge(
+            "consumer-family-to-getters",
+            consumer_family_node,
+            getter_node,
+            "consumer-family-to-cell-gain-getters",
+            "present",
+            "direct",
+            "The same internal runtime neighborhood preserves both chest cell-gain getters.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerReadTrace.recoveredInternalReadShell.cellGainGetterFamily", ", ".join(read_trace["cellGainGetterFamily"])),
+                cite_hit(getter_source, small_getter_hit),
+                cite_hit(getter_source, big_getter_hit),
+            ],
+        ),
+        make_edge(
+            "getters-to-booster-shell",
+            getter_node,
+            booster_node,
+            "cell-gain-getters-to-booster-bonus-shell",
+            "present",
+            "direct",
+            "Committed metadata preserves the cell-gain getters beside the booster bonus aggregation shell.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerReadTrace.recoveredInternalReadShell.boosterAdBonusShell", ", ".join(read_trace["boosterAdBonusShell"])),
+                cite_hit(booster_source, set_booster_hit),
+                cite_hit(booster_source, final_booster_getter_hit),
+                cite_hit(booster_source, small_cells_hit),
+                cite_hit(booster_source, big_cells_hit),
+                cite_hit(booster_source, final_booster_hit),
+                cite_hit(booster_source, booster_routine_hit),
+            ],
+        ),
+        make_edge(
+            "booster-shell-to-final-shell",
+            booster_node,
+            final_bonus_node,
+            "booster-bonus-shell-to-final-chest-bonus-shell",
+            "present",
+            "derived",
+            "The booster bonus aggregation shell remains adjacent to the final token and diamond chest bonus backing-field shell preserved in probe output.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerReadTrace.recoveredInternalReadShell.finalChestBonusShell", ", ".join(read_trace["finalChestBonusShell"])),
+                cite_hit(final_source, final_token_bonus_hit),
+                cite_hit(final_source, final_diamond_bonus_hit),
+            ],
+        ),
+    ]
+
+    negative_edges = [
+        make_edge(
+            "cellboost-read-site-break",
+            owner_node,
+            booster_node,
+            "exact-cellboost-to-booster-bonus-handoff",
+            "missing",
+            "negative",
+            missing_seam["missingJoin"],
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin", missing_seam["missingJoin"]),
+                cite_hit(getter_source, small_getter_hit),
+                cite_hit(getter_source, big_getter_hit),
+                cite_hit(booster_source, set_booster_hit),
+                cite_hit(booster_source, final_booster_getter_hit),
+                cite_hit(booster_source, final_booster_hit),
+            ],
+        ),
+    ]
+
+    return {
+        "nodes": [
+            make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
+            make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
+            make_node(consumer_family_node, "consumer-family", "AdManager, Assembly-CSharp + chest support systems", "present", "The concrete chest consumer family is preserved in committed probe artifacts."),
+            make_node(routine_family_node, "consumer-routine-family", "TokenChestRoutine + DiamondChestRoutine neighborhood", "present", "The token and diamond chest routine family is preserved."),
+            make_node(getter_node, "cell-gain-getter-shell", "get_SmallAdCellGains + get_BigAdCellGains", "present", "The chest cell-gain getter shell survives in committed metadata."),
+            make_node(booster_node, "booster-bonus-shell", "SetBoosterAdBonus + get_FinalBoosterAdBonus + FinalBoosterAdBonus", "present", "The internal booster bonus aggregation shell is preserved."),
+            make_node(final_bonus_node, "final-chest-bonus-shell", "Final token + diamond chest bonus backing fields", "present", "The final chest bonus shell is preserved in committed probe output."),
+        ],
+        "edges": edges,
+        "negativeEdges": negative_edges,
+        "claimLedger": [
+            {
+                "id": "claim-atu3-consumer-internal-shell",
+                "status": "proved",
+                "statement": "ATU3 now preserves one internal bonus-aggregation shell inside the concrete AdManager chest consumer family.",
+                "edgeIds": [edge["id"] for edge in edges],
+                "provedBy": [citation for edge in edges for citation in edge["provedBy"]],
+            },
+            {
+                "id": "claim-missing-exact-cellboost-read-site",
+                "status": "missing",
+                "statement": "The exact CellBoostBonus read site or typed field handoff into the internal bonus shell still is not recovered.",
+                "edgeIds": [edge["id"] for edge in negative_edges],
+                "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
+            },
+        ],
+    }
+
 
 def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
     baseline = row_remap_boundary["atu3ChestConsumerTrace"]["recoveredConsumerHandoff"]
@@ -3655,6 +3856,104 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
     }
 
 
+def build_atu3_consumer_read_vs_consumer_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
+    baseline = row_remap_boundary["atu3ChestConsumerReadTrace"]["recoveredInternalReadShell"]
+    blocked = row_remap_boundary["atu3ChestConsumerTrace"]["recoveredConsumerHandoff"]
+    baseline_edges = [
+        "serialized-adjacency",
+        "shared-effect-to-consumer-family",
+        "consumer-family-to-chest-routines",
+        "consumer-family-to-cell-gain-getters",
+        "cell-gain-getters-to-booster-bonus-shell",
+        "booster-bonus-shell-to-final-chest-bonus-shell",
+    ]
+    blocked_edges = [
+        "serialized-adjacency",
+        "shared-effect-to-consumer-family",
+        "consumer-family-to-chest-routines",
+        "consumer-family-to-bonus-shell",
+    ]
+    shared_present = [edge for edge in baseline_edges if edge in blocked_edges]
+    baseline_only = [edge for edge in baseline_edges if edge not in blocked_edges]
+    blocked_missing = ["exact-cellboost-to-booster-bonus-handoff"]
+    return {
+        "baseline": {
+            "id": "atu3-consumer-internal-read",
+            "label": "ATU3 consumer-internal read shell",
+            "status": "cleared",
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": baseline["shellField"],
+            "shellPathId": baseline["shellPathId"],
+            "comparisonShape": baseline_edges,
+            "groundedConclusion": baseline["groundedConclusion"],
+        },
+        "blockedTarget": {
+            "id": target_id,
+            "label": "ATU3 chest consumer seam",
+            "status": "blocked",
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": blocked["shellField"],
+            "shellPathId": blocked["shellPathId"],
+            "comparisonShape": blocked_edges,
+            "groundedConclusion": blocked["groundedConclusion"],
+        },
+        "delta": {
+            "sharedPresentEdgeTypes": shared_present,
+            "baselineOnlyPresentEdgeTypes": baseline_only,
+            "blockedMissingEdgeTypes": blocked_missing,
+            "solvedVsBlockedSummary": [
+                "Both ATU3 consumer traces preserve the direct serialized shell-to-owner-block adjacency and the shared effect-to-consumer-family handoff.",
+                "The new internal read trace adds one checked getter-to-booster bonus aggregation shell inside the AdManager chest consumer family.",
+                "The remaining bounded break is no longer the outer chest routine family but the exact CellBoostBonus read-site handoff into that internal bonus shell.",
+            ],
+        },
+    }
+
+
+def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    config = target["strategyConfig"]
+    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
+    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    surfaces = []
+    for surface in config["surfaces"]:
+        terms = list(dict.fromkeys([*surface["terms"], *anchors]))
+        anchor_specs = build_anchor_specs(terms, "surface-search")
+        surfaces.append(
+            {
+                "id": surface["id"],
+                "label": surface["label"],
+                "terms": terms,
+                "anchorSpecs": anchor_specs,
+                "sources": [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in surface["sourceIds"]],
+            }
+        )
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "traceGraph": build_atu3_chest_consumer_read_trace_graph(shell_window, surfaces, row_remap_boundary),
+        "bridgePromotionRule": "Only preserve ATU3 as a consumer-internal read trace when one checked chest consumer family, one chest routine neighborhood, one cell-gain getter shell, and one booster bonus aggregation shell converge on the same cells-from-chests lane; keep the exact CellBoostBonus runtime read blocked unless that handoff is recovered explicitly.",
+        "bridgeCheck": {
+            "candidateTerms": [config["shellField"], "AdManager, Assembly-CSharp", "get_SmallAdCellGains", "SetBoosterAdBonus", "get_FinalBoosterAdBonus"],
+            "bridgeCleared": True,
+            "bridgeHits": [
+                {"surfaceId": "consumer-family", "sourcePath": repo_relative(ALL_SOURCE_PATHS["dailyTokeniumLaneProbe"]), "term": "AdManager, Assembly-CSharp"},
+                {"surfaceId": "cell-gain-getters", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "get_SmallAdCellGains"},
+                {"surfaceId": "booster-bonus-shell", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "SetBoosterAdBonus"},
+                {"surfaceId": "booster-bonus-shell", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "get_FinalBoosterAdBonus"},
+            ],
+            "result": "checked consumer-internal bonus shell recovered",
+        },
+        "solvedVsBlockedDiff": build_atu3_consumer_read_vs_consumer_diff(target_id, target, row_remap_boundary),
+        "lostStructure": list(config["lostStructure"]),
+        "groundedConclusion": config["groundedConclusion"],
+        "currentBoundary": [
+            "This is a target-driven cross-system trace workflow, not a standard prefab-or-title TokenShop remap promotion by itself.",
+            "It now preserves one exact ATU3 consumer-internal bonus shell inside the AdManager chest consumer family while keeping the exact CellBoostBonus runtime read explicit as the only remaining break.",
+            "Keep the ATU3 result quarantined to effect-chain completion evidence until one committed source recovers the exact CellBoostBonus read site or typed field handoff.",
+        ],
+    }
+
+
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = target["strategyConfig"]
     row_remap_boundary = documents["tokenShopRowRemapBoundary"]
@@ -4017,6 +4316,8 @@ def build_trace_payload(target_id: str, target: dict[str, Any], anchors: list[st
         return build_token_shop_atu3_effect_trace(target_id, target, anchors, documents)
     if strategy == "token-shop-atu3-chest-consumer":
         return build_token_shop_atu3_chest_consumer_trace(target_id, target, anchors, documents)
+    if strategy == "token-shop-atu3-chest-consumer-read":
+        return build_token_shop_atu3_chest_consumer_read_trace(target_id, target, anchors, documents)
     if strategy == "token-shop-family-structure":
         return build_token_shop_family_structure_trace(target_id, target, anchors, documents)
     if strategy == "shard-cost-su0-structure":

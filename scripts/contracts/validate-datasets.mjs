@@ -2506,6 +2506,23 @@ function validateTokenShopRowRemapBoundary(boundary) {
   });
   assert.match(boundary.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin, /CellBoostBonus.*AdManager chest routine family/i, "token shop row remap boundary ATU3 consumer seam gap drifted");
   assert.equal(boundary.atu3ChestConsumerTrace.result, "checked shared-effect-to-consumer-family handoff recovered but exact CellBoostBonus consumer method remains unresolved", "token shop row remap boundary ATU3 chest consumer result drifted");
+  expectRecord(boundary.atu3ChestConsumerReadTrace, "token shop row remap boundary ATU3 chest consumer read trace must be an object");
+  expectRecord(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell, "token shop row remap boundary ATU3 recovered internal read shell must be an object");
+  expectRecord(boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam, "token shop row remap boundary ATU3 missing exact read site seam must be an object");
+  assert.equal(boundary.atu3ChestConsumerReadTrace.targetId, "token-shop-atu3-chest-consumer-read", "token shop row remap boundary ATU3 chest consumer read target drifted");
+  assert.equal(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.shellField, "ATU3Button", "token shop row remap boundary ATU3 chest consumer read shell drifted");
+  assert.equal(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.shellPathId, 15810, "token shop row remap boundary ATU3 chest consumer read shell path drifted");
+  ["get_SmallAdCellGains", "get_BigAdCellGains"].forEach((name) => {
+    assert.ok(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.cellGainGetterFamily.includes(name), `token shop row remap boundary ATU3 cell gain getter drifted for ${name}`);
+  });
+  ["SetBoosterAdBonus", "get_FinalBoosterAdBonus", "SmallAdCellGains", "BigAdCellGains", "FinalBoosterAdBonus", "<BoosterAdRoutine>d__158"].forEach((name) => {
+    assert.ok(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.boosterAdBonusShell.includes(name), `token shop row remap boundary ATU3 booster bonus shell drifted for ${name}`);
+  });
+  ["<FinalAdTokenChestBonus>k__BackingField", "<FinalDiamondChestBonus>k__BackingField"].forEach((name) => {
+    assert.ok(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.finalChestBonusShell.includes(name), `token shop row remap boundary ATU3 final chest bonus shell drifted for ${name}`);
+  });
+  assert.match(boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin, /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i, "token shop row remap boundary ATU3 internal read seam gap drifted");
+  assert.equal(boundary.atu3ChestConsumerReadTrace.result, "checked consumer-internal bonus shell recovered but exact CellBoostBonus read site remains unresolved", "token shop row remap boundary ATU3 chest consumer read result drifted");
   ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
     assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);
   });
@@ -2519,7 +2536,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     assert.ok(boundary.groundedNonLabelClues.directBuyHookSamples.includes(name), `token shop row remap boundary missing direct buy hook sample ${name}`);
   });
   assert.ok(boundary.blockedIdentityJoin.missingLinks.some((line) => /remaining ATU\*Button or ATU\*Content/i.test(line)), "token shop row remap boundary must preserve narrowed remaining ATU button join blocker");
-  assert.ok(boundary.blockedIdentityJoin.missingLinks.some((line) => /CellBoostBonus read or typed field handoff inside the AdManager chest routine family/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam blocker");
+  assert.ok(boundary.blockedIdentityJoin.missingLinks.some((line) => /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam blocker");
   ["row-order similarity alone", "OR_* labels", "community naming", "prefab-only naming without a checked object join"].forEach((name) => {
     assert.ok(boundary.blockedIdentityJoin.unsafeInferenceSources.includes(name), `token shop row remap boundary missing unsafe inference source ${name}`);
   });
@@ -2529,6 +2546,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.ok(boundary.currentBoundary.some((line) => /ATU7Button aligns directly with the MK3TokenBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU7 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button/i.test(line)), "token shop row remap boundary must preserve ATU3 effect-chain conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-internal read conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)), "token shop row remap boundary must preserve bounded ATU4 title-side negative");
   assert.ok(boundary.currentBoundary.some((line) => /ATU5 title-side pass also stays negative/i.test(line)), "token shop row remap boundary must preserve bounded ATU5 title-side negative");
   assert.ok(boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion for remaining rows");
@@ -2657,10 +2675,10 @@ function validateUnityTraceBundle(bundle) {
   assert.ok(bundle.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle planner anchor typing drifted");
   assert.match(bundle.plannerResolution.decisionNote, /TokenShop/i, "unity trace bundle planner decision note must preserve chosen family");
   assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"), "unity trace bundle execution shell anchor drifted");
-  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"), "unity trace bundle execution method anchor drifted");
+  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "get_SmallAdCellGains" && anchor.kind === "method"), "unity trace bundle execution method anchor drifted");
   assert.equal(bundle.traceRegistry.path, "data/unity-trace-target-registry.json", "unity trace bundle registry path drifted");
   assert.equal(bundle.traceRegistry.selectedFamilyId, "token-shop", "unity trace bundle selected family drifted");
-  assert.equal(bundle.target.id, "token-shop-atu3-chest-consumer", "unity trace bundle target id drifted");
+  assert.equal(bundle.target.id, "token-shop-atu3-chest-consumer-read", "unity trace bundle target id drifted");
   assert.ok(bundle.target.anchors.includes("ATU3Button"), "unity trace bundle target anchors must preserve solved shell field");
   assert.equal(bundle.shellWindow.shellField, "ATU3Button", "unity trace bundle shell field drifted");
   assert.equal(bundle.shellWindow.shellPathId, 15810, "unity trace bundle shell path id drifted");
@@ -2676,13 +2694,13 @@ function validateUnityTraceBundle(bundle) {
     "unity trace bundle owner field block drifted"
   );
   assert.equal(bundle.bridgeCheck.bridgeCleared, true, "unity trace bundle must preserve the ATU3 effect-chain result");
-  assert.equal(bundle.bridgeCheck.result, "checked shared-effect-to-consumer-family handoff recovered", "unity trace bundle result drifted");
+  assert.equal(bundle.bridgeCheck.result, "checked consumer-internal bonus shell recovered", "unity trace bundle result drifted");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "metadata-neighborhood"), "unity trace bundle missing metadata surface");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "shared-effect-title"), "unity trace bundle missing shared effect title surface");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "shared-effect-text"), "unity trace bundle missing shared effect text surface");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "consumer-family"), "unity trace bundle missing consumer-family surface");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "consumer-routines"), "unity trace bundle missing consumer-routines surface");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "chest-objects"), "unity trace bundle missing chest-objects surface");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "cell-gain-getters"), "unity trace bundle missing cell-gain-getters surface");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "booster-bonus-shell"), "unity trace bundle missing booster-bonus-shell surface");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "final-chest-bonus-shell"), "unity trace bundle missing final-chest-bonus-shell surface");
   const metadataSurface = bundle.surfaces.find((surface) => surface.id === "metadata-neighborhood");
   assert.ok(metadataSurface.anchorSpecs.some((anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"), "unity trace bundle metadata surface must preserve ATU3 anchor");
   const metadataSource = metadataSurface.sources.find((source) => source.sourceId === "metadata");
@@ -2692,28 +2710,28 @@ function validateUnityTraceBundle(bundle) {
   assert.ok(metadataSource.incidentalHitCount >= 1, "unity trace bundle metadata incidental count drifted");
   assert.ok(metadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)), "unity trace bundle metadata hits should suppress public-key noise");
   assert.ok(metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")), "unity trace bundle metadata hits should not treat path ids as free-text anchors");
-  assert.equal(bundle.traceGraph.edges.length, 7, "unity trace bundle proved edge count drifted");
+  assert.equal(bundle.traceGraph.edges.length, 6, "unity trace bundle proved edge count drifted");
   assert.equal(bundle.traceGraph.negativeEdges.length, 1, "unity trace bundle negative edge count drifted");
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"), "unity trace bundle missing serialized adjacency edge");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "shared-effect-system"), "unity trace bundle missing shared effect-system edge");
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "shared-effect-to-consumer-family"), "unity trace bundle missing consumer-family handoff edge");
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-chest-routines"), "unity trace bundle missing chest-routine edge");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-bonus-shell"), "unity trace bundle missing bonus-shell edge");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-chest-objects"), "unity trace bundle missing chest-objects edge");
-  assert.ok(bundle.traceGraph.negativeEdges.some((edge) => edge.type === "exact-cellboost-consumer-method"), "unity trace bundle missing exact CellBoost consumer negative edge");
-  assert.ok(bundle.traceGraph.claimLedger.some((claim) => claim.id === "claim-atu3-consumer-family" && claim.status === "proved"), "unity trace bundle missing ATU3 consumer-family claim");
+  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-cell-gain-getters"), "unity trace bundle missing cell-gain getter edge");
+  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "cell-gain-getters-to-booster-bonus-shell"), "unity trace bundle missing booster aggregation edge");
+  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "booster-bonus-shell-to-final-chest-bonus-shell"), "unity trace bundle missing final chest bonus shell edge");
+  assert.ok(bundle.traceGraph.negativeEdges.some((edge) => edge.type === "exact-cellboost-to-booster-bonus-handoff"), "unity trace bundle missing exact CellBoost consumer negative edge");
+  assert.ok(bundle.traceGraph.claimLedger.some((claim) => claim.id === "claim-atu3-consumer-internal-shell" && claim.status === "proved"), "unity trace bundle missing ATU3 consumer-internal claim");
   assert.equal(bundle.decisionSummary.verdict, "quarantine", "unity trace bundle decision verdict drifted");
-  assert.deepEqual(bundle.decisionSummary.baselineGap, ["shared-effect-to-consumer-family", "consumer-family-to-chest-routines", "consumer-family-to-bonus-shell", "consumer-family-to-chest-objects"], "unity trace bundle decision baseline gap drifted");
+  assert.deepEqual(bundle.decisionSummary.baselineGap, ["exact-cellboost-to-booster-bonus-handoff"], "unity trace bundle decision baseline gap drifted");
   assert.equal(bundle.solvedVsBlockedDiff.baseline.shellField, "ATU3Button", "unity trace bundle baseline shell drifted");
   assert.equal(bundle.solvedVsBlockedDiff.baseline.shellPathId, 15810, "unity trace bundle baseline shell path drifted");
   assert.equal(bundle.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button", "unity trace bundle blocked shell drifted");
-  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency", "shared-effect-system"], "unity trace bundle shared edge diff drifted");
-  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes, ["consumer-family-to-bonus-shell", "consumer-family-to-chest-objects", "consumer-family-to-chest-routines", "shared-effect-to-consumer-family"], "unity trace bundle baseline-only diff drifted");
-  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, ["shared-effect-to-consumer-family", "consumer-family-to-chest-routines", "consumer-family-to-bonus-shell", "consumer-family-to-chest-objects"], "unity trace bundle blocked missing diff drifted");
-  assert.ok(bundle.lostStructure.some((line) => /ATU3Button path id 15810 stays adjacent to the CellBoost owner block/i.test(line)), "unity trace bundle must preserve ATU3 shell-loss explanation");
-  assert.ok(bundle.lostStructure.some((line) => /exact CellBoostBonus read or typed field handoff/i.test(line)), "unity trace bundle must preserve exact consumer-seam gap framing");
-  assert.match(bundle.groundedConclusion, /ATU3Button or 15810 consumer-seam trace now clears/i, "unity trace bundle grounded conclusion drifted");
-  assert.ok(bundle.currentBoundary.some((line) => /Keep the ATU3 result quarantined to effect-driven remap evidence/i.test(line)), "unity trace bundle must preserve ATU3 quarantine framing");
+  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency", "shared-effect-to-consumer-family", "consumer-family-to-chest-routines"], "unity trace bundle shared edge diff drifted");
+  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes, ["consumer-family-to-cell-gain-getters", "cell-gain-getters-to-booster-bonus-shell", "booster-bonus-shell-to-final-chest-bonus-shell"], "unity trace bundle baseline-only diff drifted");
+  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, ["exact-cellboost-to-booster-bonus-handoff"], "unity trace bundle blocked missing diff drifted");
+  assert.ok(bundle.lostStructure.some((line) => /checked ATU3 chain now reaches the concrete AdManager consumer family/i.test(line)), "unity trace bundle must preserve ATU3 shell-loss explanation");
+  assert.ok(bundle.lostStructure.some((line) => /exact CellBoostBonus read-site or typed-field handoff/i.test(line)), "unity trace bundle must preserve exact consumer-seam gap framing");
+  assert.match(bundle.groundedConclusion, /ATU3 consumer-internal read trace now preserves/i, "unity trace bundle grounded conclusion drifted");
+  assert.ok(bundle.currentBoundary.some((line) => /Keep the ATU3 result quarantined to effect-chain completion evidence/i.test(line)), "unity trace bundle must preserve ATU3 quarantine framing");
 
   return {
     id: "unity-trace-bundle",
@@ -2722,7 +2740,7 @@ function validateUnityTraceBundle(bundle) {
     stats: [
       `${bundle.target.anchors.length} target anchors`,
       `${bundle.surfaces.length} cross-surface trace lanes`,
-      "ATU3 trace preserves one bounded shared-effect-to-consumer-family handoff"
+      "ATU3 trace preserves one bounded consumer-internal bonus shell"
     ]
   };
 }
@@ -2739,7 +2757,7 @@ function validateUnityTraceTargetRegistry(registry) {
     assert.ok(registry.sourceFamilies[familyId], `unity trace target registry missing family ${familyId}`);
     assert.ok(registry.planner.families[familyId], `unity trace target registry planner missing family ${familyId}`);
   });
-  ["token-shop-atu3-cells", "token-shop-atu3-cells-effect", "token-shop-atu3-chest-consumer", "token-shop-atu4-mod", "token-shop-atu5-mk1-title", "token-shop-atu7-mk3-bridge", "token-shop-family-structure", "shard-cost-su0-structure", "multiverse-market-save-owner-boundary"].forEach((targetId) => {
+  ["token-shop-atu3-cells", "token-shop-atu3-cells-effect", "token-shop-atu3-chest-consumer", "token-shop-atu3-chest-consumer-read", "token-shop-atu4-mod", "token-shop-atu5-mk1-title", "token-shop-atu7-mk3-bridge", "token-shop-family-structure", "shard-cost-su0-structure", "multiverse-market-save-owner-boundary"].forEach((targetId) => {
     assert.ok(registry.targets[targetId], `unity trace target registry missing target ${targetId}`);
   });
   assert.equal(registry.planner.families["token-shop"].defaultTargetId, "token-shop-atu3-cells", "unity trace target registry token-shop planner target drifted");
@@ -2751,6 +2769,7 @@ function validateUnityTraceTargetRegistry(registry) {
   assert.equal(registry.targets["token-shop-atu7-mk3-bridge"].comparisonPresetId, "token-shop-atu7-vs-atu3", "unity trace target registry ATU7 comparison preset drifted");
   assert.equal(registry.targets["token-shop-atu3-cells-effect"].comparisonPresetId, "token-shop-atu3-effect-vs-split", "unity trace target registry ATU3 effect comparison preset drifted");
   assert.equal(registry.targets["token-shop-atu3-chest-consumer"].comparisonPresetId, "token-shop-atu3-consumer-vs-effect", "unity trace target registry ATU3 consumer comparison preset drifted");
+  assert.equal(registry.targets["token-shop-atu3-chest-consumer-read"].comparisonPresetId, "token-shop-atu3-consumer-read-vs-consumer", "unity trace target registry ATU3 consumer read comparison preset drifted");
   assert.equal(registry.targets["token-shop-family-structure"].comparisonPresetId, "token-shop-family-structure-vs-unresolved", "unity trace target registry family-structure comparison preset drifted");
   assert.equal(registry.targets["shard-cost-su0-structure"].comparisonPresetId, "shard-cost-structure-vs-planner", "unity trace target registry shard comparison preset drifted");
   assert.equal(registry.targets["multiverse-market-save-owner-boundary"].comparisonPresetId, "multiverse-market-save-owner-vs-canonical-import", "unity trace target registry market comparison preset drifted");

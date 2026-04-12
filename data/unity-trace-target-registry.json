@@ -263,16 +263,26 @@
         "remaining typed effect-owner break"
       ]
     },
-    "token-shop-atu3-consumer-vs-effect": {
-      "label": "TokenShop ATU3 chest-consumer seam vs shared effect chain",
-      "solvedBaselineTargetId": "token-shop-atu3-chest-consumer",
-      "blockedTargetId": "token-shop-atu3-cells-effect",
-      "summaryFocus": [
-        "shared effect-to-consumer-family handoff",
-        "consumer-family chest routine neighborhood",
-        "remaining exact CellBoostBonus handoff break"
-      ]
-    },
+      "token-shop-atu3-consumer-vs-effect": {
+        "label": "TokenShop ATU3 chest-consumer seam vs shared effect chain",
+        "solvedBaselineTargetId": "token-shop-atu3-chest-consumer",
+        "blockedTargetId": "token-shop-atu3-cells-effect",
+        "summaryFocus": [
+          "shared effect-to-consumer-family handoff",
+          "consumer-family chest routine neighborhood",
+          "remaining exact CellBoostBonus handoff break"
+        ]
+      },
+      "token-shop-atu3-consumer-read-vs-consumer": {
+        "label": "TokenShop ATU3 internal chest read shell vs chest-consumer seam",
+        "solvedBaselineTargetId": "token-shop-atu3-chest-consumer-read",
+        "blockedTargetId": "token-shop-atu3-chest-consumer",
+        "summaryFocus": [
+          "consumer-internal bonus shell",
+          "getter-to-bonus aggregation shell",
+          "exact CellBoostBonus read-site break"
+        ]
+      },
     "token-shop-family-structure-vs-unresolved": {
       "label": "TokenShop family structure audit vs unresolved ATU neighborhoods",
       "solvedBaselineTargetId": "token-shop-family-structure",
@@ -894,7 +904,7 @@
         "groundedConclusion": "The ATU3Button or 15810 cross-system trace clears one checked shell-to-action-hook-to-shared-effect chain. The row preserves direct shell adjacency to the CellBoost owner block, the checked action lane preserves BuyCellBoost, the shared title and effect-text surfaces preserve the Cells Booster (Chests) chest-effect lane, and the raw CellBoostBonus value of 1 is consistent with the surviving +1-second player-facing effect text. The remaining break is the exact typed gameplay owner or chest-reward applier that consumes that parameter."
       }
     },
-    "token-shop-atu3-chest-consumer": {
+      "token-shop-atu3-chest-consumer": {
       "label": "TokenShop ATU3 chest consumer seam",
       "familyId": "token-shop",
       "strategy": "token-shop-atu3-chest-consumer",
@@ -1025,6 +1035,141 @@
           "Because the exact CellBoostBonus consumer seam is still missing, keep ATU3 quarantined as an effect-driven row and do not convert this target into a standard prefab-or-title TokenShop remap claim."
         ],
         "groundedConclusion": "The ATU3Button or 15810 consumer-seam trace now clears one checked shared-effect-to-consumer-family handoff. The row preserves direct shell adjacency to the CellBoost owner block, the already-grounded shared Cells Booster (Chests) effect lane, the concrete AdManager chest routine family, the final chest-bonus shell, and the TokenChest or DiamondChest objects, but the exact CellBoostBonus read or typed field handoff inside that consumer family still remains unresolved."
+      }
+    },
+    "token-shop-atu3-chest-consumer-read": {
+      "label": "TokenShop ATU3 chest consumer internal read seam",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu3-chest-consumer-read",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU3Button",
+        "15810",
+        "get_SmallAdCellGains",
+        "SetBoosterAdBonus",
+        "get_FinalBoosterAdBonus"
+      ],
+      "joinGoal": "Recover one checked internal handoff from the ATU3 shared Cells Booster (Chests) effect lane into the concrete chest consumer bonus-aggregation shell, and keep the exact CellBoostBonus read site bounded if it still does not clear.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-atu3-chest-consumer-read",
+      "blockedTargetId": "token-shop-atu3-chest-consumer",
+      "comparisonPresetId": "token-shop-atu3-consumer-read-vs-consumer",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 6,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 6,
+          "allowedNegativeEdgeTypes": [
+            "exact-cellboost-to-booster-bonus-handoff"
+          ]
+        },
+        "messages": {
+          "wire": "One exact ATU3 cells-from-chests handoff clears into the concrete chest bonus-aggregation shell cleanly enough to preserve the runtime applier.",
+          "quarantine": "The trace now preserves the internal ATU3 chest bonus-aggregation shell, but the exact CellBoostBonus read site stays bounded negative.",
+          "research": "The ATU3 consumer-internal read trace still breaks before one stable bonus-aggregation handoff verdict can be preserved."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU3Button",
+              "CellBoost",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "consumer-family",
+            "label": "Chest consumer family",
+            "sourceIds": [
+              "dailyTokeniumLaneProbe",
+              "lm244TargetedProbe"
+            ],
+            "terms": [
+              "AdManager, Assembly-CSharp",
+              "SetAdChestTexts",
+              "OfflineManager, Assembly-CSharp",
+              "DailyAndAdCounterChecker"
+            ]
+          },
+          {
+            "id": "consumer-routines",
+            "label": "Chest consumer routines",
+            "sourceIds": [
+              "metadata",
+              "unityProbe"
+            ],
+            "terms": [
+              "StartTokenRoutine",
+              "<TokenChestRoutine>d__149",
+              "GoToClosedTokenChest",
+              "StartDiamondRoutine",
+              "<DiamondChestRoutine>d__155",
+              "GoToClosedDiamondChest"
+            ]
+          },
+          {
+            "id": "cell-gain-getters",
+            "label": "Chest cell-gain getter shell",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "get_SmallAdCellGains",
+              "get_BigAdCellGains"
+            ]
+          },
+          {
+            "id": "booster-bonus-shell",
+            "label": "Booster bonus aggregation shell",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "SetBoosterAdBonus",
+              "get_FinalBoosterAdBonus",
+              "SmallAdCellGains",
+              "BigAdCellGains",
+              "FinalBoosterAdBonus",
+              "<BoosterAdRoutine>d__158"
+            ]
+          },
+          {
+            "id": "final-chest-bonus-shell",
+            "label": "Final chest bonus shell",
+            "sourceIds": [
+              "unityProbe"
+            ],
+            "terms": [
+              "<FinalAdTokenChestBonus>k__BackingField",
+              "<FinalDiamondChestBonus>k__BackingField"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The checked ATU3 chain now reaches the concrete AdManager consumer family and one tighter internal bonus-aggregation shell, but no committed source yet shows the exact CellBoostBonus read-site or typed-field handoff into that shell.",
+          "The getter family and the booster bonus aggregation shell survive together in committed metadata, while the final token and diamond chest bonus backing fields survive in committed probe output, so the remaining runtime seam is narrow enough to stay quarantined to one exact internal handoff break.",
+          "Because the exact CellBoostBonus runtime read is still missing, this trace should stay as effect-chain completion evidence only and should not widen into prefab, title, or planner promotion."
+        ],
+        "groundedConclusion": "The ATU3 consumer-internal read trace now preserves one checked internal bonus-aggregation shell inside the AdManager chest consumer family, but no committed source yet shows the exact CellBoostBonus read or typed field handoff into that shell."
       }
     },
     "token-shop-atu3-cells": {

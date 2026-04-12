@@ -1803,6 +1803,7 @@ assert.ok(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.detachedIdent
 assert.match(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin, /typed gameplay owner|chest-reward applier/i);
 assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.result, "checked action-to-shared-effect chain recovered but typed gameplay owner remains unresolved");
 assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.targetId, "token-shop-atu3-chest-consumer");
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.targetId, "token-shop-atu3-chest-consumer-read");
 assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellField, "ATU3Button");
 assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellPathId, 15810);
 assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerSystem, "AdManager, Assembly-CSharp");
@@ -1816,15 +1817,18 @@ assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsu
   assert.ok(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.supportingChestObjects.includes(name));
 });
 assert.match(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin, /CellBoostBonus.*AdManager chest routine family/i);
+assert.match(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin, /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i);
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.result, "checked consumer-internal bonus shell recovered but exact CellBoostBonus read site remains unresolved");
 assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.result, "checked shared-effect-to-consumer-family handoff recovered but exact CellBoostBonus consumer method remains unresolved");
 assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /remaining ATU\*Button or ATU\*Content path_id family/i.test(line)));
-assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /CellBoostBonus read or typed field handoff inside the AdManager chest routine family/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /six checked TokenShop row bridges/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU7Button aligns directly with the MK3TokenBoost owner-field block/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /checked ATU6 shell-to-prefab-to-title chain/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU5 title-side pass also stays negative/i.test(line)));
 assert.equal(tokenShopLateAtuBoundaryData.dataset, "token-shop-late-atu-boundary");
@@ -1856,6 +1860,7 @@ assert.ok(unityTraceTargetRegistryData.planner.families["multiverse-market-save-
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-cells"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-cells-effect"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-chest-consumer"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-chest-consumer-read"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu4-mod"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu5-mk1-title"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu7-mk3-bridge"]);
@@ -1875,7 +1880,7 @@ assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value ==
 assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"));
 assert.equal(unityTraceBundleData.traceRegistry.path, "data/unity-trace-target-registry.json");
 assert.equal(unityTraceBundleData.traceRegistry.selectedFamilyId, "token-shop");
-assert.equal(unityTraceBundleData.target.id, "token-shop-atu3-chest-consumer");
+assert.equal(unityTraceBundleData.target.id, "token-shop-atu3-chest-consumer-read");
 assert.ok(unityTraceBundleData.target.anchors.includes("ATU3Button"));
 assert.equal(unityTraceBundleData.shellWindow.shellField, "ATU3Button");
 assert.equal(unityTraceBundleData.shellWindow.shellPathId, 15810);
@@ -1890,13 +1895,13 @@ assert.deepEqual(
   ]
 );
 assert.equal(unityTraceBundleData.bridgeCheck.bridgeCleared, true);
-assert.equal(unityTraceBundleData.bridgeCheck.result, "checked shared-effect-to-consumer-family handoff recovered");
+assert.equal(unityTraceBundleData.bridgeCheck.result, "checked consumer-internal bonus shell recovered");
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "metadata-neighborhood"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "shared-effect-title"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "shared-effect-text"));
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "consumer-family"));
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "consumer-routines"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "chest-objects"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "cell-gain-getters"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "booster-bonus-shell"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "final-chest-bonus-shell"));
 const traceMetadataSurface = unityTraceBundleData.surfaces.find((surface) => surface.id === "metadata-neighborhood");
 assert.ok(traceMetadataSurface.anchorSpecs.some((anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"));
 const traceMetadataSource = traceMetadataSurface.sources.find((source) => source.sourceId === "metadata");
@@ -1905,35 +1910,29 @@ assert.ok(traceMetadataSource.supportingHitCount >= 3);
 assert.ok(traceMetadataSource.incidentalHitCount >= 1);
 assert.ok(traceMetadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)));
 assert.ok(traceMetadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")));
-assert.equal(unityTraceBundleData.traceGraph.edges.length, 7);
+assert.equal(unityTraceBundleData.traceGraph.edges.length, 6);
 assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 1);
 assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"));
-assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "shared-effect-system"));
 assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "shared-effect-to-consumer-family"));
 assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-chest-routines"));
-assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-bonus-shell"));
-assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-chest-objects"));
-assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "exact-cellboost-consumer-method"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-cell-gain-getters"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "cell-gain-getters-to-booster-bonus-shell"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "booster-bonus-shell-to-final-chest-bonus-shell"));
+assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "exact-cellboost-to-booster-bonus-handoff"));
 assert.equal(unityTraceBundleData.decisionSummary.verdict, "quarantine");
-assert.deepEqual(
-  unityTraceBundleData.decisionSummary.baselineGap,
-  ["shared-effect-to-consumer-family", "consumer-family-to-chest-routines", "consumer-family-to-bonus-shell", "consumer-family-to-chest-objects"]
-);
+assert.deepEqual(unityTraceBundleData.decisionSummary.baselineGap, ["exact-cellboost-to-booster-bonus-handoff"]);
 assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU3Button");
 assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 15810);
 assert.equal(unityTraceBundleData.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button");
-assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency", "shared-effect-system"]);
+assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency", "shared-effect-to-consumer-family", "consumer-family-to-chest-routines"]);
 assert.deepEqual(
   unityTraceBundleData.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes,
-  ["consumer-family-to-bonus-shell", "consumer-family-to-chest-objects", "consumer-family-to-chest-routines", "shared-effect-to-consumer-family"]
+  ["consumer-family-to-cell-gain-getters", "cell-gain-getters-to-booster-bonus-shell", "booster-bonus-shell-to-final-chest-bonus-shell"]
 );
-assert.deepEqual(
-  unityTraceBundleData.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes,
-  ["shared-effect-to-consumer-family", "consumer-family-to-chest-routines", "consumer-family-to-bonus-shell", "consumer-family-to-chest-objects"]
-);
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /ATU3Button path id 15810 stays adjacent to the CellBoost owner block/i.test(line)));
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /exact CellBoostBonus read or typed field handoff/i.test(line)));
-assert.match(unityTraceBundleData.groundedConclusion, /ATU3Button or 15810 consumer-seam trace now clears/i);
+assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, ["exact-cellboost-to-booster-bonus-handoff"]);
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /checked ATU3 chain now reaches the concrete AdManager consumer family/i.test(line)));
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /exact CellBoostBonus read-site or typed-field handoff/i.test(line)));
+assert.match(unityTraceBundleData.groundedConclusion, /ATU3 consumer-internal read trace now preserves/i);
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -3103,7 +3102,7 @@ assert.match(activeGroundingBoundariesDoc, /narrows the save-side wrapper to the
 assert.match(unityOwnerMapDoc, /narrowest checked save wrapper -> `SaveData` mission-persistence neighborhood/);
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
 assert.match(activeGroundingBoundariesDoc, /six checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, and `ATU7Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain/i);
-assert.match(activeGroundingBoundariesDoc, /exact `CellBoostBonus` read or typed field handoff inside that consumer family/i);
+assert.match(activeGroundingBoundariesDoc, /exact `CellBoostBonus` read-site or typed-field handoff into that internal shell/i);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
 assert.match(tokenShopDoc, /base TokenShop costs should currently be described as a token-bank token or tokenium spend lane/);
@@ -3111,7 +3110,7 @@ const tokenShopRowRemapTrack = snapshot.researchTracks.find((track) => track.id 
 assert.ok(tokenShopRowRemapTrack, "Expected snapshot research track spend-token-shop-row-remap");
 assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /ATU1, ATU2, ATU4, ATU5, ATU6, and ATU7 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, keeps the bounded ATU3 prefab-or-title disambiguation pass negative but also preserves one separate ATU3 cross-system/i);
 assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /late ATU24-ATU28 shell neighborhood as a tighter bounded negative result/);
-assert.match(tokenShopRowRemapTrack?.blockedBy ?? "", /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain and one tighter shared-effect-to-consumer-family handoff while still failing exact prefab-or-title localization.*late ATU24-ATU28 shell neighborhood now stays negative/);
+assert.match(tokenShopRowRemapTrack?.blockedBy ?? "", /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain, one tighter shared-effect-to-consumer-family handoff, and one checked internal bonus-aggregation shell while still failing exact prefab-or-title localization.*late ATU24-ATU28 shell neighborhood now stays negative/);
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU5Button` to `NewTokenUPGPrefab\.T1\.MK1Booster/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU7Button` to `NewTokenUPGPrefab\.T1\.MK3Booster/.test(line)));
@@ -3278,12 +3277,12 @@ assert.match(tokenShopRowRemapVerificationDoc, /bounded TokenShop family-structu
 assert.match(tokenShopRowRemapVerificationDoc, /bounded `ATU7Button` -> `NewTokenUPGPrefab\.T1\.MK3Booster` bridge/i);
 assert.match(tokenShopRowRemapVerificationDoc, /ATU3Button` -> `BuyCellBoost` -> shared chest-effect lane chain/i);
 assert.match(tokenShopRowRemapVerificationDoc, /AdManager, Assembly-CSharp.*chest consumer family/i);
-assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-chest-consumer`/);
-assert.match(unityTraceBundleDoc, /Registry target: `token-shop-atu3-chest-consumer` from `token-shop`/);
-assert.match(unityTraceBundleDoc, /Result: `checked shared-effect-to-consumer-family handoff recovered`/);
+assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-chest-consumer-read`/);
+assert.match(unityTraceBundleDoc, /Registry target: `token-shop-atu3-chest-consumer-read` from `token-shop`/);
+assert.match(unityTraceBundleDoc, /Result: `checked consumer-internal bonus shell recovered`/);
 assert.match(unityTraceBundleDoc, /Shell field: `ATU3Button`/);
 assert.match(unityTraceBundleDoc, /## Trace graph/);
-assert.match(unityTraceBundleDoc, /shared-effect-to-consumer-family/);
+assert.match(unityTraceBundleDoc, /cell-gain-getters-to-booster-bonus-shell/);
 assert.match(unityTraceBundleDoc, /## Solved vs blocked/);
 assert.match(unityTraceBundleDoc, /## Decision summary/);
 assert.match(unityTraceBundleDoc, /Verdict: `quarantine`/);
@@ -3722,7 +3721,7 @@ assert.match(unityAuditPlaybook, /metadata neighborhoods, owner-payload shells, 
 assert.match(unityAuditPlaybook, /typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape/);
 assert.match(unityAuditPlaybook, /wire`, `quarantine`, or `keep researching`/);
 assert.match(unityTraceBundleDoc, /Typed execution anchors/i);
-assert.match(unityTraceBundleDoc, /Signal summary: 0 high-signal, 3 supporting, 4 incidental, 0 suppressed-noise/);
+assert.match(unityTraceBundleDoc, /Signal summary: 0 high-signal, 6 supporting, 4 incidental, 0 suppressed-noise/);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);

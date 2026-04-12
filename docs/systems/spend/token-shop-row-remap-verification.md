@@ -146,6 +146,11 @@ Because those joins are still missing, the repo should not:
   - the same runtime shell also preserves `get_SmallAdCellGains`, `get_BigAdCellGains`, `<FinalAdTokenChestBonus>k__BackingField`, and `<FinalDiamondChestBonus>k__BackingField`
   - committed object output also preserves the concrete `TokenChest` and `DiamondChest` game objects for the same family
   - that is enough to preserve one bounded shared-effect-to-consumer-family handoff for ATU3, while the remaining honest blocker is now only the exact `CellBoostBonus` read or typed field handoff inside that consumer family
+- The next bounded ATU3 consumer-internal read pass now tightens the same break one step further without widening back into row remap work:
+  - the same internal runtime neighborhood preserves `get_SmallAdCellGains` and `get_BigAdCellGains`
+  - committed metadata also preserves `SetBoosterAdBonus`, `get_FinalBoosterAdBonus`, `SmallAdCellGains`, `BigAdCellGains`, `FinalBoosterAdBonus`, and `<BoosterAdRoutine>d__158` in the same bonus-aggregation shell
+  - committed probe output still preserves `<FinalAdTokenChestBonus>k__BackingField` and `<FinalDiamondChestBonus>k__BackingField` as the adjacent final chest-bonus shell
+  - that is enough to preserve one bounded consumer-internal bonus shell for ATU3, while the remaining honest blocker is now only one exact `CellBoostBonus` read-site or typed-field handoff into that internal bonus-aggregation shell
 - The upgraded join-preservation probe also now makes the current extraction state explicit instead of scattering it across multiple artifacts:
   - the generated `data/unity-trace-bundle.json` artifact now preserves one bounded TokenShop family-structure trace audit inside the generic `probe:trace` workflow
   - that audit now groups the solved `ATU1`, `ATU2`, `ATU4`, `ATU5`, and `ATU6` shells beside the bounded `ATU3` and late `ATU24`-`ATU28` negatives so repeated proved edges and repeated missing edges can be judged from one checked bundle
