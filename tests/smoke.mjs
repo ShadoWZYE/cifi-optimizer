@@ -1813,7 +1813,16 @@ assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.recoveredBridge.sh
 assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK4TokenBoost");
 assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster");
 assert.match(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU8Button now has one checked bridge/);
-assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.result, "checked object bridge recovered");
+assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.verifiedTitleTextChain.shellField, "ATU8Button");
+assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.verifiedTitleTextChain.shellPathId, 15795);
+assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.verifiedTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster");
+assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle, "Mk4 Generator Booster");
+assert.deepEqual(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText, [
+  "This upgrade divides the cost of MK4 Generators by 400m.",
+  "This upgrade provides a 1% increase to MK4 Generator Output for each Loop Reset you've done (multiplicative)"
+]);
+assert.match(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.verifiedTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i);
+assert.equal(tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.result, "checked object bridge plus title-side text chain recovered");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellField, "ATU3Button");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellPathId, 15810);
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.result, "no concrete object-or-title join cleared");
@@ -3135,7 +3144,7 @@ assert.match(spendSystemVerificationDoc, /compatibility\.unmappedSystemState\.to
 assert.match(activeGroundingBoundariesDoc, /narrows the save-side wrapper to the nearby mission-persistence block in `SaveData`/);
 assert.match(unityOwnerMapDoc, /narrowest checked save wrapper -> `SaveData` mission-persistence neighborhood/);
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
-assert.match(activeGroundingBoundariesDoc, /seven checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, `ATU7Button`, and `ATU8Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, one bounded `ATU5Button` -> `NewTokenUPGPrefab\.T1\.MK1Booster` -> `1\. MK1 Generator Output,` named-identity and title-side text chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain.*remaining ATU5 blocker is now only the absent exact final row-title string/i);
+assert.match(activeGroundingBoundariesDoc, /seven checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, `ATU7Button`, and `ATU8Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, one bounded `ATU5Button` -> `NewTokenUPGPrefab\.T1\.MK1Booster` -> `1\. MK1 Generator Output,` named-identity and title-side text chain, one bounded `ATU8Button` -> `NewTokenUPGPrefab\.T1\.MK4Booster` -> `Mk4 Generator Booster` title-side text chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain.*remaining ATU5 blocker is now only the absent exact final row-title string/i);
 assert.match(activeGroundingBoundariesDoc, /exact `CellBoostBonus` read-site or typed-field handoff into that internal shell/i);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
@@ -3153,6 +3162,7 @@ assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /remaining ATU5 block
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU3 cells-domain disambiguation pass stays negative for prefab-or-title identity/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)`/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster` to `Mk2 Generator Booster`/.test(line)));
+assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU8Button` to `NewTokenUPGPrefab\.T1\.MK4Booster` to `Mk4 Generator Booster`/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /late ATU24-ATU28 shell neighborhood now also has a tighter bounded negative result/.test(line)));
 assert.match(tokenShopDoc, /Daily Tokenium should stay separated as the Academy or Farm Mission reward lane that TokenShop modifies/);
 assert.match(shardVerificationDoc, /# Shard System Verification Gate/);
@@ -3310,7 +3320,8 @@ assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/)
 assert.match(tokenShopRowRemapVerificationDoc, /data\/unity-trace-bundle\.json/);
 assert.match(tokenShopRowRemapVerificationDoc, /bounded TokenShop family-structure trace audit/i);
 assert.match(tokenShopRowRemapVerificationDoc, /bounded `ATU7Button` -> `NewTokenUPGPrefab\.T1\.MK3Booster` bridge/i);
-assert.match(tokenShopRowRemapVerificationDoc, /bounded `ATU8Button` -> `NewTokenUPGPrefab\.T1\.MK4Booster` bridge/i);
+assert.match(tokenShopRowRemapVerificationDoc, /bounded `ATU8Button` -> `NewTokenUPGPrefab\.T1\.MK4Booster` -> `Mk4 Generator Booster` title-side text chain/i);
+assert.match(tokenShopRowRemapVerificationDoc, /bounded `ATU8Button` -> `NewTokenUPGPrefab\.T1\.MK4Booster` -> `Mk4 Generator Booster` title-side text chain/i);
 assert.match(tokenShopRowRemapVerificationDoc, /ATU3Button` -> `BuyCellBoost` -> shared chest-effect lane chain/i);
 assert.match(tokenShopRowRemapVerificationDoc, /AdManager, Assembly-CSharp.*chest consumer family/i);
 assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-chest-consumer-read`/);

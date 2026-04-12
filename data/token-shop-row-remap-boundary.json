@@ -319,7 +319,18 @@
       "prefabIdentity": "NewTokenUPGPrefab.T1.MK4Booster",
       "groundedConclusion": "ATU8Button now has one checked bridge to NewTokenUPGPrefab.T1.MK4Booster because the exact TokenShop owner payload places ATU8Button directly after the MK4TokenBoost field family, checked action-lane clues preserve BuyMK4TokenBoost, and the checked prefab roster preserves the exact MK4Booster token prefab identity."
     },
-    "result": "checked object bridge recovered"
+    "verifiedTitleTextChain": {
+      "shellField": "ATU8Button",
+      "shellPathId": 15795,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK4Booster",
+      "titleProbeTitle": "Mk4 Generator Booster",
+      "titleProbeSupportText": [
+        "This upgrade divides the cost of MK4 Generators by 400m.",
+        "This upgrade provides a 1% increase to MK4 Generator Output for each Loop Reset you've done (multiplicative)"
+      ],
+      "groundedConclusion": "ATU8Button now has one checked shell-to-prefab-to-title-side-text chain because the exact TokenShop owner payload already grounds ATU8Button to the MK4TokenBoost field family, checked action-lane clues preserve BuyMK4TokenBoost, the checked prefab roster preserves NewTokenUPGPrefab.T1.MK4Booster, and the checked title-side surface preserves the player-facing title Mk4 Generator Booster with matching MK4 cost-divider and loop-reset output text."
+    },
+    "result": "checked object bridge plus title-side text chain recovered"
   },
   "verifiedTitleJoin": {
     "shellField": "ATU6Button",
@@ -553,7 +564,7 @@
       "The new ATU3 consumer-seam pass now also recovers one checked handoff from that shared chest-effect lane into the concrete AdManager chest routine family: committed metadata preserves StartTokenRoutine, TokenChestRoutine, StartDiamondRoutine, DiamondChestRoutine, GoToClosedTokenChest, and GoToClosedDiamondChest in one chest-handling neighborhood, probe output preserves the same route beside AdManager, SetAdChestTexts, OfflineManager, and DailyAndAdCounterChecker, and the same runtime shell preserves get_SmallAdCellGains, get_BigAdCellGains, FinalAdTokenChestBonus, and FinalDiamondChestBonus.",
       "The ATU3 consumer-internal read pass now tightens that seam one step further: committed metadata also preserves get_SmallAdCellGains and get_BigAdCellGains beside SetBoosterAdBonus, get_FinalBoosterAdBonus, SmallAdCellGains, BigAdCellGains, FinalBoosterAdBonus, and <BoosterAdRoutine>d__158, while probe output still preserves the final token and diamond chest bonus backing fields. The remaining blocker is no longer the outer chest routine family; it is only the exact CellBoostBonus handoff into that internal bonus-aggregation shell.",
     "One grounded shell-to-prefab-to-title chain now clears on the MK2 row: ATU6Button aligns directly with the MK2TokenBoost owner-field block, checked action-lane clues preserve BuyMK2TokenBoost, the checked prefab roster preserves NewTokenUPGPrefab.T1.MK2Booster, and the title-side TokenShop probe surface preserves the final player-facing title Mk2 Generator Booster with matching MK2-generator upgrade text.",
-    "The neighboring grounded shell-side rows still remain more limited: ATU5Button now preserves one bounded player-facing named identity join through 1. MK1 Generator Output plus the matching detached MK1 generator support text, but it still lacks one checked exact final player-facing row-title string, ATU7Button and ATU8Button still clear only as bounded shell-to-prefab results without checked final player-facing row titles, and the neighboring MK5-MK8 token rows remain unresolved even though the same owner payload preserves their numbered shells and the broader action lane preserves BuyMK5TokenBoost through BuyMK8TokenBoost.",
+    "The neighboring grounded shell-side rows still remain more limited: ATU5Button now preserves one bounded player-facing named identity join through 1. MK1 Generator Output plus the matching detached MK1 generator support text, but it still lacks one checked exact final player-facing row-title string; ATU8Button now also preserves one bounded title-side chain through Mk4 Generator Booster with matching MK4 support text, while ATU7Button still clears only as a bounded shell-to-prefab result without a checked final player-facing row title, and the neighboring MK5-MK8 token rows remain unresolved even though the same owner payload preserves their numbered shells and the broader action lane preserves BuyMK5TokenBoost through BuyMK8TokenBoost.",
     "Grounded metadata neighborhoods now tighten the late-row shell further: BuyATU24 through BuyATU28 sit beside named tier-buy hooks like BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, while getter neighborhoods preserve ATU1TokenBonus, ATU2DiamondsBonus, ATU14TokenDailiesBonus, and ATU24Bonus3Shards through ATU24Bonus5AP in one ATU-numbered family.",
     "Grounded level0 neighborhoods now tighten the text-hook blocker further: SetAllTokenShopTexts and SetTokenTexts sit in a token-menu or token-bank text-handler cluster with CheckFirstTokenMenuTime, ClaimTokenium, token-bank formula strings, TokenClaimRecolor, and TokenShopRecoloring, while most NewTokenUPGPrefab.* names remain one separate prefab roster cluster and player-facing titles such as Trinity Booster One, Academy Booster, Tokens Booster T3, and Campaign Fragments remain a separate title cluster.",
     "The bounded ATU4 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface remains a separate text-handler cluster, while Token Ultima: MP and :Diamond Upgrade 11 - ModBoost remain detached title candidates instead of one exact shell-local final title join.",

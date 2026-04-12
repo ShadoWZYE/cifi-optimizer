@@ -2496,6 +2496,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.atu7BridgeFollowUp.result, "checked object bridge recovered", "token shop row remap boundary ATU7 trace result drifted");
   expectRecord(boundary.atu8BridgeFollowUp, "token shop row remap boundary ATU8 bridge follow-up must be an object");
   expectRecord(boundary.atu8BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU8 recovered bridge must be an object");
+  expectRecord(boundary.atu8BridgeFollowUp.verifiedTitleTextChain, "token shop row remap boundary ATU8 title text chain must be an object");
   assert.equal(boundary.atu8BridgeFollowUp.targetId, "token-shop-atu8-mk4-bridge", "token shop row remap boundary ATU8 trace target drifted");
   assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.shellField, "ATU8Button", "token shop row remap boundary ATU8 trace bridge shell drifted");
   assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.shellPathId, 15795, "token shop row remap boundary ATU8 trace bridge shell path drifted");
@@ -2513,7 +2514,20 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK4TokenBoost", "token shop row remap boundary ATU8 trace bridge action hook drifted");
   assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster", "token shop row remap boundary ATU8 trace bridge prefab drifted");
   assert.match(boundary.atu8BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU8Button now has one checked bridge/i, "token shop row remap boundary ATU8 conclusion drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.result, "checked object bridge recovered", "token shop row remap boundary ATU8 trace result drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.shellField, "ATU8Button", "token shop row remap boundary ATU8 title text shell drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.shellPathId, 15795, "token shop row remap boundary ATU8 title text shell path drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster", "token shop row remap boundary ATU8 title text prefab drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle, "Mk4 Generator Booster", "token shop row remap boundary ATU8 title text title drifted");
+  assert.deepEqual(
+    boundary.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+    [
+      "This upgrade divides the cost of MK4 Generators by 400m.",
+      "This upgrade provides a 1% increase to MK4 Generator Output for each Loop Reset you've done (multiplicative)"
+    ],
+    "token shop row remap boundary ATU8 title text support drifted"
+  );
+  assert.match(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU8 title text conclusion drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.result, "checked object bridge plus title-side text chain recovered", "token shop row remap boundary ATU8 trace result drifted");
   expectRecord(boundary.atu3CrossSystemEffectTrace, "token shop row remap boundary ATU3 cross-system effect trace must be an object");
   expectRecord(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain, "token shop row remap boundary ATU3 recovered action-effect chain must be an object");
   expectRecord(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface, "token shop row remap boundary ATU3 parameter surface must be an object");
