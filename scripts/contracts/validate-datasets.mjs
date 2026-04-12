@@ -2432,20 +2432,48 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.traceFollowUp.result, "checked object bridge recovered but no concrete title join cleared", "token shop row remap boundary trace follow-up result drifted");
   expectRecord(boundary.atu5TitleFollowUp, "token shop row remap boundary ATU5 title follow-up must be an object");
   expectRecord(boundary.atu5TitleFollowUp.recoveredBridge, "token shop row remap boundary ATU5 recovered bridge must be an object");
+  expectRecord(boundary.atu5TitleFollowUp.recoveredTitleTextChain, "token shop row remap boundary ATU5 recovered title text chain must be an object");
+  expectRecord(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin, "token shop row remap boundary ATU5 named identity join must be an object");
   expectRecord(boundary.atu5TitleFollowUp.blockedTitleJoin, "token shop row remap boundary ATU5 blocked title join must be an object");
   assert.equal(boundary.atu5TitleFollowUp.targetId, "token-shop-atu5-mk1-title", "token shop row remap boundary ATU5 trace target drifted");
   assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.shellField, "ATU5Button", "token shop row remap boundary ATU5 trace bridge shell drifted");
   assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.shellPathId, 15831, "token shop row remap boundary ATU5 trace bridge shell path drifted");
   assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.supportingActionHook, "BuyMK1TokenBoost", "token shop row remap boundary ATU5 trace bridge action hook drifted");
   assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster", "token shop row remap boundary ATU5 trace bridge prefab drifted");
+  assert.equal(boundary.atu5TitleFollowUp.recoveredTitleTextChain.shellField, "ATU5Button", "token shop row remap boundary ATU5 title text shell drifted");
+  assert.equal(boundary.atu5TitleFollowUp.recoveredTitleTextChain.shellPathId, 15831, "token shop row remap boundary ATU5 title text shell path drifted");
+  assert.equal(boundary.atu5TitleFollowUp.recoveredTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster", "token shop row remap boundary ATU5 title text prefab drifted");
+  assert.deepEqual(
+    boundary.atu5TitleFollowUp.recoveredTitleTextChain.titleSideTextSurface,
+    [
+      "1. MK1 Generator Output,",
+      "This upgrade divides the cost of MK1 Generators by 1500.",
+      "This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)"
+    ],
+    "token shop row remap boundary ATU5 title text surface drifted"
+  );
+  assert.match(boundary.atu5TitleFollowUp.recoveredTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU5 title text conclusion drifted");
+  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellField, "ATU5Button", "token shop row remap boundary ATU5 named identity shell drifted");
+  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellPathId, 15831, "token shop row remap boundary ATU5 named identity shell path drifted");
+  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster", "token shop row remap boundary ATU5 named identity prefab drifted");
+  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.namedIdentity, "1. MK1 Generator Output,", "token shop row remap boundary ATU5 named identity drifted");
+  assert.deepEqual(
+    boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.supportingTitleTextSurface,
+    [
+      "This upgrade divides the cost of MK1 Generators by 1500.",
+      "This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)"
+    ],
+    "token shop row remap boundary ATU5 named identity support text drifted"
+  );
+  assert.match(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.groundedConclusion, /player-facing-named-identity join/i, "token shop row remap boundary ATU5 named identity conclusion drifted");
   expectArray(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces, "token shop row remap boundary ATU5 blocked title tested surfaces must be an array");
   assert.equal(boundary.atu5TitleFollowUp.blockedTitleJoin.supportTextCandidate, "1. MK1 Generator Output,", "token shop row remap boundary ATU5 support candidate drifted");
   assert.equal(boundary.atu5TitleFollowUp.blockedTitleJoin.alternateSupportTextCandidate, "This upgrade divides the cost of MK1 Generators by 1500.", "token shop row remap boundary ATU5 alternate support candidate drifted");
   assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"), "token shop row remap boundary ATU5 text-hook surface drifted");
   assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "MK1 generator support-text cluster"), "token shop row remap boundary ATU5 support-text surface drifted");
   assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "neighboring generator title roster gap"), "token shop row remap boundary ATU5 title-roster surface drifted");
-  assert.match(boundary.atu5TitleFollowUp.blockedTitleJoin.missingJoin, /generic text hooks, the detached MK1 generator support-text cluster, and the neighboring generator title roster/i, "token shop row remap boundary ATU5 blocked title note drifted");
-  assert.equal(boundary.atu5TitleFollowUp.result, "checked object bridge recovered but no concrete title join cleared", "token shop row remap boundary ATU5 title follow-up result drifted");
+  assert.match(boundary.atu5TitleFollowUp.blockedTitleJoin.missingJoin, /generic text hooks and neighboring generator title roster still stay detached.*named MK1 Generator Output identity join/i, "token shop row remap boundary ATU5 blocked title note drifted");
+  assert.equal(boundary.atu5TitleFollowUp.result, "checked object bridge plus named identity and title-side text chain recovered but no final title join cleared", "token shop row remap boundary ATU5 title follow-up result drifted");
   expectRecord(boundary.atu7BridgeFollowUp, "token shop row remap boundary ATU7 bridge follow-up must be an object");
   expectRecord(boundary.atu7BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU7 recovered bridge must be an object");
   assert.equal(boundary.atu7BridgeFollowUp.targetId, "token-shop-atu7-mk3-bridge", "token shop row remap boundary ATU7 trace target drifted");
@@ -2466,6 +2494,40 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster", "token shop row remap boundary ATU7 trace bridge prefab drifted");
   assert.match(boundary.atu7BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU7Button now has one checked trace-backed bridge/i, "token shop row remap boundary ATU7 conclusion drifted");
   assert.equal(boundary.atu7BridgeFollowUp.result, "checked object bridge recovered", "token shop row remap boundary ATU7 trace result drifted");
+  expectRecord(boundary.atu8BridgeFollowUp, "token shop row remap boundary ATU8 bridge follow-up must be an object");
+  expectRecord(boundary.atu8BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU8 recovered bridge must be an object");
+  expectRecord(boundary.atu8BridgeFollowUp.verifiedTitleTextChain, "token shop row remap boundary ATU8 title text chain must be an object");
+  assert.equal(boundary.atu8BridgeFollowUp.targetId, "token-shop-atu8-mk4-bridge", "token shop row remap boundary ATU8 trace target drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.shellField, "ATU8Button", "token shop row remap boundary ATU8 trace bridge shell drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.shellPathId, 15795, "token shop row remap boundary ATU8 trace bridge shell path drifted");
+  assert.deepEqual(
+    boundary.atu8BridgeFollowUp.recoveredBridge.ownerFieldBlock,
+    [
+      "MK4TokenBoostStartCost",
+      "MK4TokenBoostAdditiveCost",
+      "MK4TokenBoostBonus",
+      "MK4TokenBoostFillMaxLevel",
+      "MK4TokenBoostFill"
+    ],
+    "token shop row remap boundary ATU8 trace bridge owner field block drifted"
+  );
+  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK4TokenBoost", "token shop row remap boundary ATU8 trace bridge action hook drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster", "token shop row remap boundary ATU8 trace bridge prefab drifted");
+  assert.match(boundary.atu8BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU8Button now has one checked bridge/i, "token shop row remap boundary ATU8 conclusion drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.shellField, "ATU8Button", "token shop row remap boundary ATU8 title text shell drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.shellPathId, 15795, "token shop row remap boundary ATU8 title text shell path drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster", "token shop row remap boundary ATU8 title text prefab drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle, "Mk4 Generator Booster", "token shop row remap boundary ATU8 title text title drifted");
+  assert.deepEqual(
+    boundary.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+    [
+      "This upgrade divides the cost of MK4 Generators by 400m.",
+      "This upgrade provides a 1% increase to MK4 Generator Output for each Loop Reset you've done (multiplicative)"
+    ],
+    "token shop row remap boundary ATU8 title text support drifted"
+  );
+  assert.match(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU8 title text conclusion drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.result, "checked object bridge plus title-side text chain recovered", "token shop row remap boundary ATU8 trace result drifted");
   expectRecord(boundary.atu3CrossSystemEffectTrace, "token shop row remap boundary ATU3 cross-system effect trace must be an object");
   expectRecord(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain, "token shop row remap boundary ATU3 recovered action-effect chain must be an object");
   expectRecord(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface, "token shop row remap boundary ATU3 parameter surface must be an object");
@@ -2540,15 +2602,16 @@ function validateTokenShopRowRemapBoundary(boundary) {
   ["row-order similarity alone", "OR_* labels", "community naming", "prefab-only naming without a checked object join"].forEach((name) => {
     assert.ok(boundary.blockedIdentityJoin.unsafeInferenceSources.includes(name), `token shop row remap boundary missing unsafe inference source ${name}`);
   });
-  assert.ok(boundary.currentBoundary.some((line) => /six checked TokenShop row bridges/i.test(line)), "token shop row remap boundary must preserve recovered bridge count");
+  assert.ok(boundary.currentBoundary.some((line) => /seven checked TokenShop row bridges/i.test(line)), "token shop row remap boundary must preserve recovered bridge count");
   assert.ok(boundary.currentBoundary.some((line) => /ATU2Button aligns directly with the DiamondBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU2 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU4 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU7Button aligns directly with the MK3TokenBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU7 bridge conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU8Button aligns directly with the MK4TokenBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU8 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button/i.test(line)), "token shop row remap boundary must preserve ATU3 effect-chain conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-internal read conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)), "token shop row remap boundary must preserve bounded ATU4 title-side negative");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU5 title-side pass also stays negative/i.test(line)), "token shop row remap boundary must preserve bounded ATU5 title-side negative");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU5 last-title-blocker pass now narrows cleanly/i.test(line)), "token shop row remap boundary must preserve narrowed ATU5 last-title blocker");
   assert.ok(boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion for remaining rows");
 
   return {
@@ -2558,7 +2621,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     stats: [
       boundary.rawSaveFamily.fieldRange,
       `${boundary.groundedNonLabelClues.effectHookSamples.length} grounded non-label effect clues`,
-      "Six ATU bridges are recovered and ATU3 preserves one effect-driven trace; broader remap still does not generalize"
+      "Seven ATU bridges are recovered and ATU3 preserves one effect-driven trace; broader remap still does not generalize"
     ]
   };
 }
