@@ -2433,6 +2433,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   expectRecord(boundary.atu5TitleFollowUp, "token shop row remap boundary ATU5 title follow-up must be an object");
   expectRecord(boundary.atu5TitleFollowUp.recoveredBridge, "token shop row remap boundary ATU5 recovered bridge must be an object");
   expectRecord(boundary.atu5TitleFollowUp.recoveredTitleTextChain, "token shop row remap boundary ATU5 recovered title text chain must be an object");
+  expectRecord(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin, "token shop row remap boundary ATU5 named identity join must be an object");
   expectRecord(boundary.atu5TitleFollowUp.blockedTitleJoin, "token shop row remap boundary ATU5 blocked title join must be an object");
   assert.equal(boundary.atu5TitleFollowUp.targetId, "token-shop-atu5-mk1-title", "token shop row remap boundary ATU5 trace target drifted");
   assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.shellField, "ATU5Button", "token shop row remap boundary ATU5 trace bridge shell drifted");
@@ -2452,14 +2453,27 @@ function validateTokenShopRowRemapBoundary(boundary) {
     "token shop row remap boundary ATU5 title text surface drifted"
   );
   assert.match(boundary.atu5TitleFollowUp.recoveredTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU5 title text conclusion drifted");
+  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellField, "ATU5Button", "token shop row remap boundary ATU5 named identity shell drifted");
+  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellPathId, 15831, "token shop row remap boundary ATU5 named identity shell path drifted");
+  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster", "token shop row remap boundary ATU5 named identity prefab drifted");
+  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.namedIdentity, "1. MK1 Generator Output,", "token shop row remap boundary ATU5 named identity drifted");
+  assert.deepEqual(
+    boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.supportingTitleTextSurface,
+    [
+      "This upgrade divides the cost of MK1 Generators by 1500.",
+      "This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)"
+    ],
+    "token shop row remap boundary ATU5 named identity support text drifted"
+  );
+  assert.match(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.groundedConclusion, /player-facing-named-identity join/i, "token shop row remap boundary ATU5 named identity conclusion drifted");
   expectArray(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces, "token shop row remap boundary ATU5 blocked title tested surfaces must be an array");
   assert.equal(boundary.atu5TitleFollowUp.blockedTitleJoin.supportTextCandidate, "1. MK1 Generator Output,", "token shop row remap boundary ATU5 support candidate drifted");
   assert.equal(boundary.atu5TitleFollowUp.blockedTitleJoin.alternateSupportTextCandidate, "This upgrade divides the cost of MK1 Generators by 1500.", "token shop row remap boundary ATU5 alternate support candidate drifted");
   assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"), "token shop row remap boundary ATU5 text-hook surface drifted");
   assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "MK1 generator support-text cluster"), "token shop row remap boundary ATU5 support-text surface drifted");
   assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "neighboring generator title roster gap"), "token shop row remap boundary ATU5 title-roster surface drifted");
-  assert.match(boundary.atu5TitleFollowUp.blockedTitleJoin.missingJoin, /generic text hooks and neighboring generator title roster still stay detached.*title-side text chain/i, "token shop row remap boundary ATU5 blocked title note drifted");
-  assert.equal(boundary.atu5TitleFollowUp.result, "checked object bridge plus title-side text chain recovered but no final title join cleared", "token shop row remap boundary ATU5 title follow-up result drifted");
+  assert.match(boundary.atu5TitleFollowUp.blockedTitleJoin.missingJoin, /generic text hooks and neighboring generator title roster still stay detached.*named MK1 Generator Output identity join/i, "token shop row remap boundary ATU5 blocked title note drifted");
+  assert.equal(boundary.atu5TitleFollowUp.result, "checked object bridge plus named identity and title-side text chain recovered but no final title join cleared", "token shop row remap boundary ATU5 title follow-up result drifted");
   expectRecord(boundary.atu7BridgeFollowUp, "token shop row remap boundary ATU7 bridge follow-up must be an object");
   expectRecord(boundary.atu7BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU7 recovered bridge must be an object");
   assert.equal(boundary.atu7BridgeFollowUp.targetId, "token-shop-atu7-mk3-bridge", "token shop row remap boundary ATU7 trace target drifted");
