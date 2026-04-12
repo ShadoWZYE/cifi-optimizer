@@ -243,6 +243,16 @@
         "exact shell-to-title join"
       ]
     },
+    "token-shop-atu7-vs-atu3": {
+      "label": "TokenShop ATU7 trace bridge vs ATU3 blocked trace",
+      "solvedBaselineTargetId": "token-shop-atu7-mk3-bridge",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "summaryFocus": [
+        "exact shell-to-action-hook join",
+        "exact shell-to-prefab join",
+        "exact shell-to-title join"
+      ]
+    },
     "token-shop-family-structure-vs-unresolved": {
       "label": "TokenShop family structure audit vs unresolved ATU neighborhoods",
       "solvedBaselineTargetId": "token-shop-family-structure",
@@ -528,6 +538,7 @@
         "ATU4Button",
         "ATU5Button",
         "ATU6Button",
+        "ATU7Button",
         "ATU3Button",
         "ATU24Button",
         "SetAllTokenShopTexts"
@@ -576,6 +587,7 @@
               "ATU4Button",
               "ATU5Button",
               "ATU6Button",
+              "ATU7Button",
               "ATU24Button",
               "ATU28Button"
             ]
@@ -593,6 +605,7 @@
               "BuyModBoost",
               "BuyMK1TokenBoost",
               "BuyMK2TokenBoost",
+              "BuyMK3TokenBoost",
               "BuyCellBoost",
               "BuyATU24"
             ]
@@ -612,6 +625,7 @@
               "NewTokenUPGPrefab.T1.ModPointsBooster",
               "NewTokenUPGPrefab.T1.MK1Booster",
               "NewTokenUPGPrefab.T1.MK2Booster",
+              "NewTokenUPGPrefab.T1.MK3Booster",
               "NewTokenUPGPrefab.T1.CellsPerChestBooster",
               "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
             ]
@@ -655,9 +669,94 @@
         "lostStructure": [
           "The family audit confirms that shell-side ATU serialization survives much more often than row-local title localization does.",
           "The strongest repeated solved pattern is shell adjacency plus one row-family proxy hook and one exact prefab identity, but the title-side surfaces usually remain detached into generic text hooks, support text, or loose title rosters.",
-          "ATU6 remains the standout strongest neighborhood because it is still the only row that carries one checked shell-to-prefab-to-title chain; ATU4 and ATU5 stay structurally stronger than ATU3 and the late ATU24-ATU28 block, but still stop short of final title localization."
+          "ATU6 remains the standout strongest neighborhood because it is still the only row that carries one checked shell-to-prefab-to-title chain; ATU4, ATU5, and ATU7 stay structurally stronger than ATU3 and the late ATU24-ATU28 block, but still stop short of final title localization."
         ],
-        "groundedConclusion": "The TokenShop family audit is structurally informative but still quarantined. The repo repeatedly preserves shell-side ATU neighborhoods plus row-family proxy hooks and prefab identities on the solved subset, but repeated title-localization gaps remain for ATU1, ATU2, ATU4, and ATU5, while ATU3 and the late ATU24-ATU28 block still fail the exact identity join entirely. ATU6 remains the strongest standout row neighborhood."
+        "groundedConclusion": "The TokenShop family audit is structurally informative but still quarantined. The repo repeatedly preserves shell-side ATU neighborhoods plus row-family proxy hooks and prefab identities on the solved subset, but repeated title-localization gaps remain for ATU1, ATU2, ATU4, ATU5, and ATU7, while ATU3 and the late ATU24-ATU28 block still fail the exact identity join entirely. ATU6 remains the strongest standout row neighborhood."
+      }
+    },
+    "token-shop-atu7-mk3-bridge": {
+      "label": "TokenShop ATU7 MK3 bridge pass",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu7-mk3-bridge",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU7Button",
+        "15792"
+      ],
+      "joinGoal": "Recover one checked shell-to-prefab bridge for the unresolved ATU7Button or path id 15792 row without widening into title-side promotion or broader family remap claims.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-atu7-mk3-bridge",
+      "blockedTargetId": "token-shop-atu3-cells",
+      "comparisonPresetId": "token-shop-atu7-vs-atu3",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 4,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 3,
+          "allowedNegativeEdgeTypes": []
+        },
+        "messages": {
+          "wire": "One exact shell-to-prefab bridge cleared cleanly enough to preserve the ATU7 row as checked remap evidence.",
+          "quarantine": "The trace preserves only part of the ATU7 bridge and should remain descriptive until the prefab join clears cleanly.",
+          "research": "The trace is still too incomplete to preserve one bounded ATU7 bridge verdict."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU7Button",
+        "shellPathId": 15792,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU7Button",
+              "MK3TokenBoost",
+              "BuyMK3TokenBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "dailyTokeniumLaneProbe"
+            ],
+            "terms": [
+              "BuyMK3TokenBoost"
+            ]
+          },
+          {
+            "id": "prefab-lane",
+            "label": "Prefab identity lane",
+            "sourceIds": [
+              "uabeaProbe",
+              "unityProbe",
+              "lm244TargetedProbe"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.MK3Booster"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window still survives only in the TokenShop extract, where ATU7Button path id 15792 stays adjacent to the MK3TokenBoost owner block.",
+          "This pass checks only the shell-to-action-hook-to-prefab bridge and does not promote any final player-facing title join for ATU7.",
+          "Because the rest of the MK-family shells still lack their own checked joins, keep ATU7 as one bounded remap bridge and leave the neighboring unresolved rows quarantined."
+        ],
+        "groundedConclusion": "The ATU7Button or 15792 bridge clears as one exact shell-to-action-hook-to-prefab join. The row preserves direct shell adjacency to the MK3TokenBoost owner block, the checked action lane preserves BuyMK3TokenBoost, and checked prefab surfaces preserve NewTokenUPGPrefab.T1.MK3Booster, but this pass does not promote any title-side identity claim."
       }
     },
     "token-shop-atu3-cells": {

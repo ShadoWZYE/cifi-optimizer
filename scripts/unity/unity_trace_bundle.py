@@ -1346,6 +1346,140 @@ def build_mk1_trace_graph(
     }
 
 
+def build_mk3_bridge_trace_graph(
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    row_remap_boundary: dict[str, Any],
+) -> dict[str, Any]:
+    metadata_surface = find_surface(surfaces, "metadata-neighborhood")
+    action_surface = find_surface(surfaces, "action-lane")
+    prefab_surface = find_surface(surfaces, "prefab-lane")
+
+    metadata_source = find_source_entry(metadata_surface, "metadata")
+    action_source = find_source_entry(action_surface, "dailyTokeniumLaneProbe")
+    uabea_prefab_source = find_source_entry(prefab_surface, "uabeaProbe")
+    unity_prefab_source = find_source_entry(prefab_surface, "unityProbe")
+    lm244_prefab_source = find_source_entry(prefab_surface, "lm244TargetedProbe")
+
+    metadata_shell_hit = find_hit(metadata_source, "ATU7Button")
+    metadata_owner_hit = find_hit(metadata_source, "MK3TokenBoostStartCost")
+    action_buy_hit = find_hit(action_source, "BuyMK3TokenBoost")
+    uabea_prefab_hit = find_hit(uabea_prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
+    unity_prefab_hit = find_hit(unity_prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
+    lm244_prefab_hit = find_hit(lm244_prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
+
+    trace_bridge = row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]
+
+    shell_node = "target-shell"
+    owner_node = "owner-field-block"
+    metadata_node = "metadata-neighborhood"
+    action_node = "action-hook"
+    prefab_node = "prefab-identity"
+    corroboration_node = "prefab-corroboration"
+
+    edges = [
+        make_edge(
+            "shell-to-owner-block",
+            shell_node,
+            owner_node,
+            "serialized-adjacency",
+            "present",
+            "direct",
+            "The target shell still sits directly beside the MK3TokenBoost owner-field block in the committed TokenShop extract.",
+            [
+                cite_row_boundary(
+                    "tokenShopExtract",
+                    "$.fields",
+                    f"{shell_window['shellField']} path_id {shell_window['shellPathId']}",
+                    "Shell window recovered from the exact TokenShop payload.",
+                )
+            ],
+        ),
+        make_edge(
+            "owner-block-to-metadata",
+            owner_node,
+            metadata_node,
+            "declaration-neighborhood",
+            "present",
+            "contextual",
+            "The metadata neighborhood keeps ATU7Button and the MK3TokenBoost declaration block in one raw declaration area.",
+            [
+                cite_hit(metadata_source, metadata_shell_hit),
+                cite_hit(metadata_source, metadata_owner_hit),
+            ],
+        ),
+        make_edge(
+            "shell-to-action-hook",
+            shell_node,
+            action_node,
+            "exact-shell-to-action-hook",
+            "present",
+            "supporting",
+            "The checked action lane preserves the matching direct buy hook BuyMK3TokenBoost for the same MK3 row family.",
+            [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook",
+                    trace_bridge["supportingActionHook"],
+                ),
+                cite_hit(action_source, action_buy_hit),
+            ],
+        ),
+        make_edge(
+            "action-hook-to-prefab",
+            action_node,
+            prefab_node,
+            "exact-shell-to-prefab",
+            "present",
+            "direct",
+            "The checked prefab roster preserves the exact MK3Booster identity on the same traced row family.",
+            [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity",
+                    trace_bridge["prefabIdentity"],
+                ),
+                cite_hit(uabea_prefab_source, uabea_prefab_hit),
+            ],
+        ),
+        make_edge(
+            "prefab-corroboration",
+            prefab_node,
+            corroboration_node,
+            "multi-probe-prefab-corroboration",
+            "present",
+            "supporting",
+            "Independent unity-probe and LM244-targeted surfaces preserve the same MK3Booster prefab identity, strengthening the bounded shell-to-prefab join without opening title-side inference.",
+            [
+                cite_hit(unity_prefab_source, unity_prefab_hit),
+                cite_hit(lm244_prefab_source, lm244_prefab_hit),
+            ],
+        ),
+    ]
+
+    return {
+        "nodes": [
+            make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
+            make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
+            make_node(metadata_node, "metadata-neighborhood", "ATU7Button + MK3TokenBoost metadata neighborhood", "present", "Metadata still keeps the shell anchor and MK3TokenBoost declaration area together."),
+            make_node(action_node, "action-hook", "BuyMK3TokenBoost", "present", "The committed probe set preserves the matching MK3 buy hook."),
+            make_node(prefab_node, "prefab-identity", "NewTokenUPGPrefab.T1.MK3Booster", "present", "The exact token prefab identity is preserved."),
+            make_node(corroboration_node, "prefab-corroboration", "unity-probe + lm244 MK3Booster hits", "present", "Multiple checked prefab surfaces preserve the same MK3Booster identity."),
+        ],
+        "edges": edges,
+        "negativeEdges": [],
+        "claimLedger": [
+            {
+                "id": "claim-trace-recovered-bridge",
+                "status": "proved",
+                "statement": "The ATU7 trace now preserves one exact shell-to-prefab bridge through the MK3TokenBoost row family.",
+                "edgeIds": [edge["id"] for edge in edges],
+                "provedBy": [citation for edge in edges for citation in edge["provedBy"]],
+            }
+        ],
+    }
+
+
 def build_solved_vs_blocked_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
     baseline = row_remap_boundary["adjacentFollowUp"]["recoveredAdditionalBridge"]
     blocked = row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]
@@ -1862,6 +1996,178 @@ def build_mk1_vs_blocked_diff(target_id: str, target: dict[str, Any], row_remap_
     }
 
 
+def build_mk3_vs_blocked_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
+    baseline = row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]
+    blocked = row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]
+    baseline_edges = [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU7Button sits directly after the MK3TokenBoost owner-field block.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu7BridgeFollowUp.recoveredBridge.ownerFieldBlock",
+                    ", ".join(baseline["ownerFieldBlock"]),
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-action-hook",
+            "status": "present",
+            "provenanceStrength": "supporting",
+            "statement": "The solved bridge preserves one checked row-specific buy hook.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook",
+                    baseline["supportingActionHook"],
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-prefab",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The solved bridge preserves one exact prefab identity on the same row family.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity",
+                    baseline["prefabIdentity"],
+                )
+            ],
+        },
+        {
+            "type": "multi-probe-prefab-corroboration",
+            "status": "present",
+            "provenanceStrength": "supporting",
+            "statement": "The solved bridge is corroborated by multiple checked prefab surfaces.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu7BridgeFollowUp.recoveredBridge.groundedConclusion",
+                    baseline["groundedConclusion"],
+                )
+            ],
+        },
+    ]
+    blocked_edges = [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU3Button still sits directly beside the CellBoost owner-field block.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.adjacentOwnerFieldBlock",
+                    ", ".join(blocked["adjacentOwnerFieldBlock"]),
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-action-hook",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-specific effect or buy hook.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]",
+                    blocked["missingLinks"][0],
+                ),
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]",
+                    blocked["missingLinks"][1],
+                ),
+            ],
+        },
+        {
+            "type": "exact-shell-to-prefab",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-to-prefab identity join.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]",
+                    blocked["missingLinks"][2],
+                )
+            ],
+        },
+        {
+            "type": "exact-shell-to-title",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-to-final-title join.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CellsDisambiguationPass.groundedConclusion",
+                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
+                )
+            ],
+        },
+    ]
+    shared_present = sorted(
+        {
+            edge["type"]
+            for edge in baseline_edges
+            if edge["status"] == "present"
+        }.intersection(
+            {
+                edge["type"]
+                for edge in blocked_edges
+                if edge["status"] == "present"
+            }
+        )
+    )
+    baseline_only = sorted(
+        {
+            edge["type"]
+            for edge in baseline_edges
+            if edge["status"] == "present"
+        } - set(shared_present)
+    )
+    blocked_missing = [edge["type"] for edge in blocked_edges if edge["status"] == "missing"]
+
+    return {
+        "baseline": {
+            "id": "atu7-trace-row-bridge",
+            "label": "ATU7 trace-backed row bridge",
+            "status": "cleared",
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": baseline["shellField"],
+            "shellPathId": baseline["shellPathId"],
+            "comparisonShape": baseline_edges,
+            "groundedConclusion": baseline["groundedConclusion"],
+        },
+        "blockedTarget": {
+            "id": target_id,
+            "label": target["label"],
+            "status": "blocked",
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": blocked["shellField"],
+            "shellPathId": blocked["shellPathId"],
+            "comparisonShape": blocked_edges,
+            "groundedConclusion": blocked["groundedConclusion"],
+        },
+        "delta": {
+            "sharedPresentEdgeTypes": shared_present,
+            "baselineOnlyPresentEdgeTypes": baseline_only,
+            "blockedMissingEdgeTypes": blocked_missing,
+            "solvedVsBlockedSummary": [
+                "Both rows preserve the direct serialized shell-to-owner-block adjacency.",
+                "The solved ATU7 trace now preserves one checked row-specific buy hook, one exact MK3Booster prefab identity, and multi-probe prefab corroboration.",
+                "ATU3 remains narrower and more blocked because its action, prefab, and title clues still do not converge on one exact shell join.",
+            ],
+        },
+    }
+
+
 def build_family_structure_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
@@ -1883,14 +2189,17 @@ def build_family_structure_graph(
 
     atu1_shell_hit = find_hit(extract_source, "ATU1Button")
     atu6_shell_hit = find_hit(extract_source, "ATU6Button")
+    atu7_shell_hit = find_hit(extract_source, "ATU7Button")
     atu24_shell_hit = find_hit(extract_source, "ATU24Button")
     buy_token_hit = find_hit(proxy_lane_source, "BuyTokenBoost")
     buy_mk1_hit = find_hit(proxy_lane_source, "BuyMK1TokenBoost")
     buy_mk2_hit = find_hit(proxy_lane_source, "BuyMK2TokenBoost")
+    buy_mk3_hit = find_hit(proxy_lane_source, "BuyMK3TokenBoost")
     buy_mod_hit = find_hit(proxy_lane_source, "BuyModBoost")
     buy_late_hit = find_hit(unresolved_lane_source, "BuyATU24")
     prefab_token_hit = find_hit(uabea_prefab_source, "NewTokenUPGPrefab.T1.TokensBoost")
     prefab_mk2_hit = find_hit(uabea_prefab_source, "NewTokenUPGPrefab.T1.MK2Booster")
+    prefab_mk3_hit = find_hit(uabea_prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
     title_mk2_hit = find_hit(owner_title_source, "Mk2 Generator Booster")
     text_hook_hit = find_hit(unity_title_source, "SetAllTokenShopTexts")
     mod_title_hit = find_hit(unity_title_source, "Token Ultima: MP")
@@ -1916,6 +2225,7 @@ def build_family_structure_graph(
             [
                 cite_hit(extract_source, atu1_shell_hit),
                 cite_hit(extract_source, atu6_shell_hit),
+                cite_hit(extract_source, atu7_shell_hit),
                 cite_hit(extract_source, atu24_shell_hit),
                 cite_row_boundary("tokenShopLateAtuBoundary", "$.targetNeighborhood.shellFieldRange", late_boundary["targetNeighborhood"]["shellFieldRange"]),
             ],
@@ -1934,10 +2244,12 @@ def build_family_structure_graph(
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.traceFollowUp.recoveredBridge.supportingActionHook", row_remap_boundary["traceFollowUp"]["recoveredBridge"]["supportingActionHook"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.atu5TitleFollowUp.recoveredBridge.supportingActionHook", row_remap_boundary["atu5TitleFollowUp"]["recoveredBridge"]["supportingActionHook"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.boundedRecoveredBridgeFollowUp.supportingActionHook", row_remap_boundary["boundedRecoveredBridgeFollowUp"]["supportingActionHook"]),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook", row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]["supportingActionHook"]),
                 cite_hit(proxy_lane_source, buy_token_hit),
                 cite_hit(proxy_lane_source, buy_mod_hit),
                 cite_hit(proxy_lane_source, buy_mk1_hit),
                 cite_hit(proxy_lane_source, buy_mk2_hit),
+                cite_hit(proxy_lane_source, buy_mk3_hit),
             ],
         ),
         make_edge(
@@ -1954,8 +2266,10 @@ def build_family_structure_graph(
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.traceFollowUp.recoveredBridge.prefabIdentity", row_remap_boundary["traceFollowUp"]["recoveredBridge"]["prefabIdentity"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.atu5TitleFollowUp.recoveredBridge.prefabIdentity", row_remap_boundary["atu5TitleFollowUp"]["recoveredBridge"]["prefabIdentity"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.boundedRecoveredBridgeFollowUp.prefabIdentity", row_remap_boundary["boundedRecoveredBridgeFollowUp"]["prefabIdentity"]),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity", row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]["prefabIdentity"]),
                 cite_hit(uabea_prefab_source, prefab_token_hit),
                 cite_hit(uabea_prefab_source, prefab_mk2_hit),
+                cite_hit(uabea_prefab_source, prefab_mk3_hit),
             ],
         ),
         make_edge(
@@ -2011,11 +2325,12 @@ def build_family_structure_graph(
             "repeated-shell-to-title-localization-gap",
             "missing",
             "negative",
-            "Outside ATU6, the solved shell subset still does not repeatedly localize final player-facing row titles: ATU1, ATU2, ATU4, and ATU5 all stop short of one exact shell-to-title join.",
+            "Outside ATU6, the solved shell subset still does not repeatedly localize final player-facing row titles: ATU1, ATU2, ATU4, ATU5, and ATU7 all stop short of one exact shell-to-title join.",
             [
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.blockedIdentityJoin.missingLinks[1]", row_remap_boundary["blockedIdentityJoin"]["missingLinks"][1]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.traceFollowUp.blockedTitleJoin.missingJoin", row_remap_boundary["traceFollowUp"]["blockedTitleJoin"]["missingJoin"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.atu5TitleFollowUp.blockedTitleJoin.missingJoin", row_remap_boundary["atu5TitleFollowUp"]["blockedTitleJoin"]["missingJoin"]),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu7BridgeFollowUp.recoveredBridge.groundedConclusion", row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]["groundedConclusion"]),
             ],
         ),
         make_edge(
@@ -2037,9 +2352,9 @@ def build_family_structure_graph(
     return {
         "nodes": [
             make_node(shell_node, "shell-family", shell_window["shellField"], "present", "The ATU shell family is preserved as one exact serialized TokenShop range."),
-            make_node(solved_node, "solved-shell-subset", "ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button", "present", "Five shell neighborhoods now preserve checked row-family structure."),
-            make_node(proxy_node, "row-family-proxy-lane", "BuyTokenBoost, ATU2DiamondsBonus, BuyModBoost, BuyMK1TokenBoost, BuyMK2TokenBoost", "present", "Row-family proxy hooks survive on the strongest solved subset."),
-            make_node(prefab_node, "prefab-roster", "TokensBoost, DiamondBoost, ModPointsBooster, MK1Booster, MK2Booster", "present", "Exact prefab identities survive for the solved subset."),
+            make_node(solved_node, "solved-shell-subset", "ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button", "present", "Six shell neighborhoods now preserve checked row-family structure."),
+            make_node(proxy_node, "row-family-proxy-lane", "BuyTokenBoost, ATU2DiamondsBonus, BuyModBoost, BuyMK1TokenBoost, BuyMK2TokenBoost, BuyMK3TokenBoost", "present", "Row-family proxy hooks survive on the strongest solved subset."),
+            make_node(prefab_node, "prefab-roster", "TokensBoost, DiamondBoost, ModPointsBooster, MK1Booster, MK2Booster, MK3Booster", "present", "Exact prefab identities survive for the solved subset."),
             make_node(title_node, "title-text-surfaces", "SetAllTokenShopTexts, SetTokenTexts, Token Ultima: MP, 1. MK1 Generator Output,", "present", "Title and text surfaces survive repeatedly, but usually as detached clusters."),
             make_node(exemplar_node, "exact-title-exemplar", "ATU6Button -> Mk2 Generator Booster", "present", "ATU6 is the only fully localized shell-to-prefab-to-title chain."),
             make_node(unresolved_node, "bounded-unresolved-neighborhoods", "ATU3Button plus ATU24Button through ATU28Button", "present", "The main unresolved neighborhoods are already checked as bounded negatives."),
@@ -2083,6 +2398,7 @@ def build_family_structure_diff(target_id: str, target: dict[str, Any], row_rema
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.adjacentFollowUp.recoveredAdditionalBridge.ownerFieldBlock", ", ".join(row_remap_boundary["adjacentFollowUp"]["recoveredAdditionalBridge"]["ownerFieldBlock"])),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.traceFollowUp.recoveredBridge.ownerFieldBlock", ", ".join(row_remap_boundary["traceFollowUp"]["recoveredBridge"]["ownerFieldBlock"])),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.atu5TitleFollowUp.recoveredBridge.ownerFieldBlock", ", ".join(row_remap_boundary["atu5TitleFollowUp"]["recoveredBridge"]["ownerFieldBlock"])),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu7BridgeFollowUp.recoveredBridge.ownerFieldBlock", ", ".join(row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]["ownerFieldBlock"])),
             ],
         },
         {
@@ -2094,6 +2410,7 @@ def build_family_structure_diff(target_id: str, target: dict[str, Any], row_rema
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook", row_remap_boundary["adjacentFollowUp"]["recoveredAdditionalBridge"]["supportingActionHook"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.recoveredBridge.supportingEffectHook", row_remap_boundary["recoveredBridge"]["supportingEffectHook"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.boundedRecoveredBridgeFollowUp.supportingActionHook", row_remap_boundary["boundedRecoveredBridgeFollowUp"]["supportingActionHook"]),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook", row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]["supportingActionHook"]),
             ],
         },
         {
@@ -2105,6 +2422,7 @@ def build_family_structure_diff(target_id: str, target: dict[str, Any], row_rema
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity", row_remap_boundary["adjacentFollowUp"]["recoveredAdditionalBridge"]["prefabIdentity"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.recoveredBridge.prefabIdentity", row_remap_boundary["recoveredBridge"]["prefabIdentity"]),
                 cite_row_boundary("tokenShopRowRemapBoundary", "$.verifiedTitleJoin.prefabIdentity", row_remap_boundary["verifiedTitleJoin"]["prefabIdentity"]),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity", row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]["prefabIdentity"]),
             ],
         },
         {
@@ -2186,7 +2504,7 @@ def build_family_structure_diff(target_id: str, target: dict[str, Any], row_rema
             "label": "TokenShop solved family structure",
             "status": "cleared",
             "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": "ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button",
+            "shellField": "ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button",
             "shellPathId": "solved-subset",
             "comparisonShape": baseline_edges,
             "groundedConclusion": "The strongest solved TokenShop subset repeatedly preserves shell adjacency, one row-family proxy lane, and one exact prefab identity, with ATU6 adding one exact title-chain exemplar.",
@@ -2372,6 +2690,49 @@ def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: 
     }
 
 
+def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    config = target["strategyConfig"]
+    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
+    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    surfaces = []
+    for surface in config["surfaces"]:
+        terms = list(dict.fromkeys([*surface["terms"], *anchors]))
+        anchor_specs = build_anchor_specs(terms, "surface-search")
+        surfaces.append(
+            {
+                "id": surface["id"],
+                "label": surface["label"],
+                "terms": terms,
+                "anchorSpecs": anchor_specs,
+                "sources": [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in surface["sourceIds"]],
+            }
+        )
+    trace_bridge = row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "traceGraph": build_mk3_bridge_trace_graph(shell_window, surfaces, row_remap_boundary),
+        "bridgePromotionRule": "Only promote the traced ATU7 row as one bounded remap bridge when one checked shell-side owner block, one row-specific action hook, and one exact prefab identity converge on the same row family; do not infer any final title from this pass.",
+        "bridgeCheck": {
+            "candidateTerms": [config["shellField"], trace_bridge["supportingActionHook"], trace_bridge["prefabIdentity"]],
+            "bridgeCleared": True,
+            "bridgeHits": [
+                {"surfaceId": "action-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["dailyTokeniumLaneProbe"]), "term": trace_bridge["supportingActionHook"]},
+                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["uabeaProbe"]), "term": trace_bridge["prefabIdentity"]},
+            ],
+            "result": "checked object bridge recovered",
+        },
+        "solvedVsBlockedDiff": build_mk3_vs_blocked_diff(target_id, target, row_remap_boundary),
+        "lostStructure": list(config["lostStructure"]),
+        "groundedConclusion": config["groundedConclusion"],
+        "currentBoundary": [
+            "This is a target-driven trace workflow, not a full-lane TokenShop remap promotion by itself.",
+            "It now preserves one exact ATU7 shell-to-action-hook-to-prefab bridge in the same checked trace bundle without reopening title-side localization first.",
+            "Keep the recovered ATU7 bridge bounded to row-remap evidence and leave the rest of the unresolved MK-family shells quarantined until their own exact joins clear.",
+        ],
+    }
+
+
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = target["strategyConfig"]
     row_remap_boundary = documents["tokenShopRowRemapBoundary"]
@@ -2439,7 +2800,7 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
             "This is a bounded TokenShop family structure audit, not a remap promotion pass.",
-            "The audit groups the solved ATU1, ATU2, ATU4, ATU5, and ATU6 shells alongside the bounded ATU3 and late ATU24-ATU28 negatives so repeated joins and repeated gaps can be compared in one checked bundle.",
+            "The audit groups the solved ATU1, ATU2, ATU4, ATU5, ATU6, and ATU7 shells alongside the bounded ATU3 and late ATU24-ATU28 negatives so repeated joins and repeated gaps can be compared in one checked bundle.",
             "Do not infer new row identity from row order, loose title-roster similarity, generic text hooks, or this audit alone.",
         ],
     }
@@ -2728,6 +3089,8 @@ def build_trace_payload(target_id: str, target: dict[str, Any], anchors: list[st
         return build_token_shop_mod_trace(target_id, target, anchors, documents)
     if strategy == "token-shop-atu5-mk1-title":
         return build_token_shop_mk1_trace(target_id, target, anchors, documents)
+    if strategy == "token-shop-atu7-mk3-bridge":
+        return build_token_shop_mk3_bridge_trace(target_id, target, anchors, documents)
     if strategy == "token-shop-family-structure":
         return build_token_shop_family_structure_trace(target_id, target, anchors, documents)
     if strategy == "shard-cost-su0-structure":
