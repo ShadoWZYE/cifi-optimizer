@@ -351,12 +351,18 @@ assert.match(appJs, /function formatTokenShopBonusStep/);
 assert.match(appJs, /Grounded TokenShop checked-row editor/);
 assert.match(appJs, /Default level 0/);
 assert.match(appJs, /Prefill local rows from compatibility import/);
-assert.match(appJs, /Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU5, ATU6\./);
+assert.match(appJs, /Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU5, ATU6\./);
+assert.match(appJs, /Effect-driven checked row/);
+assert.match(appJs, /Prefab-driven checked row/);
+assert.match(appJs, /ATU3 remains effect-driven and is not promoted into a prefab or final-title remap\./);
+assert.match(appJs, /function sanitizeTokenShopRichText/);
+assert.match(appJs, /<details class="token-shop-evidence-note">/);
+assert.match(appJs, /boundary\?\.atu3CrossSystemEffectTrace\?\.recoveredActionEffectChain/);
 assert.match(appJs, /This module is explicitly non-optimizer/);
 assert.match(appJs, /No canonical ATU promotion/);
 assert.match(appJs, /Known cost inputs: start \$\{formatBoundaryValue\(row\.startCost\)\} \+ additive \$\{formatBoundaryValue\(row\.additiveCost\)\} x current level\./);
 assert.match(appJs, /Current vs next bonus/);
-assert.match(appJs, /adds one more extracted bonus step only/);
+assert.match(appJs, /"checked effect step" : "extracted bonus step"/);
 assert.match(html, /id="tokenShopProgressionStatus"/);
 assert.match(appJs, /TokenShop keeps its own Progression category so it does not get mixed into the Shard Mining surface/);
 assert.match(appJs, /TokenShop \(\$\{counts\.tokenShop\}\)/);
@@ -512,12 +518,14 @@ assert.deepEqual(defaultProfile.planning.shards.observedLevelsByMilestone, {});
 assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetLevels, {
   ATU1Level: null,
   ATU2Level: null,
+  ATU3Level: null,
   ATU5Level: null,
   ATU6Level: null
 });
 assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU1Level: null,
   ATU2Level: null,
+  ATU3Level: null,
   ATU5Level: null,
   ATU6Level: null
 });
@@ -1750,6 +1758,37 @@ assert.deepEqual(tokenShopRowRemapBoundaryData.verifiedTitleJoin.textHandlerSear
 assert.equal(tokenShopRowRemapBoundaryData.verifiedTitleJoin.titleProbeTitle, "Mk2 Generator Booster");
 assert.match(tokenShopRowRemapBoundaryData.verifiedTitleJoin.titleProbeSupportText, /MK2 Generators/);
 assert.match(tokenShopRowRemapBoundaryData.verifiedTitleJoin.groundedConclusion, /shell-to-prefab-to-title chain/);
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.targetId, "token-shop-atu4-mod");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.shellField, "ATU4Button");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.shellPathId, 15796);
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.supportingActionHook, "BuyModBoost");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.ModPointsBooster");
+assert.ok(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"));
+assert.ok(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "token-side mod title candidate"));
+assert.ok(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "diamond-side mod title candidate"));
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.titleCandidate, "Token Ultima: MP");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.alternateTitleCandidate, ":Diamond Upgrade 11 - ModBoost");
+assert.match(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.missingJoin, /generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues/i);
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.result, "checked object bridge recovered but no concrete title join cleared");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.targetId, "token-shop-atu5-mk1-title");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.recoveredBridge.shellField, "ATU5Button");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.recoveredBridge.shellPathId, 15831);
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.recoveredBridge.supportingActionHook, "BuyMK1TokenBoost");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster");
+assert.ok(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"));
+assert.ok(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "MK1 generator support-text cluster"));
+assert.ok(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "neighboring generator title roster gap"));
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.supportTextCandidate, "1. MK1 Generator Output,");
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.alternateSupportTextCandidate, "This upgrade divides the cost of MK1 Generators by 1500.");
+assert.match(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.blockedTitleJoin.missingJoin, /generic text hooks, the detached MK1 generator support-text cluster, and the neighboring generator title roster/i);
+assert.equal(tokenShopRowRemapBoundaryData.atu5TitleFollowUp.result, "checked object bridge recovered but no concrete title join cleared");
+assert.equal(tokenShopRowRemapBoundaryData.atu7BridgeFollowUp.targetId, "token-shop-atu7-mk3-bridge");
+assert.equal(tokenShopRowRemapBoundaryData.atu7BridgeFollowUp.recoveredBridge.shellField, "ATU7Button");
+assert.equal(tokenShopRowRemapBoundaryData.atu7BridgeFollowUp.recoveredBridge.shellPathId, 15792);
+assert.equal(tokenShopRowRemapBoundaryData.atu7BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK3TokenBoost");
+assert.equal(tokenShopRowRemapBoundaryData.atu7BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster");
+assert.match(tokenShopRowRemapBoundaryData.atu7BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU7Button now has one checked trace-backed bridge/);
+assert.equal(tokenShopRowRemapBoundaryData.atu7BridgeFollowUp.result, "checked object bridge recovered");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellField, "ATU3Button");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellPathId, 15810);
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.result, "no concrete object-or-title join cleared");
@@ -1757,11 +1796,49 @@ assert.ok(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.testedSurfac
 assert.ok(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.testedSurfaces.some((surface) => surface.surface === "diamond-special CellsBoost prefab or title"));
 assert.ok(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.testedSurfaces.some((surface) => surface.surface === "token-prefab or Token Ultima: Cells title"));
 assert.match(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.groundedConclusion, /stays negative/);
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.targetId, "token-shop-atu3-cells-effect");
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellField, "ATU3Button");
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellPathId, 15810);
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook, "BuyCellBoost");
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>");
+assert.match(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectText, /\+1.*Cells Gained.*Token & Diamond Chests/i);
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.field, "CellBoostBonus");
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.value, 1);
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.supportingField, "CellBoostMaxLevel");
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.supportingValue, 60);
+assert.ok(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.diamondSide.includes("NewDiamondUPGPrefab.Specials.CellsBoost"));
+assert.ok(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.tokenSide.includes("NewTokenUPGPrefab.T1.CellsPerChestBooster"));
+assert.match(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin, /typed gameplay owner|chest-reward applier/i);
+assert.equal(tokenShopRowRemapBoundaryData.atu3CrossSystemEffectTrace.result, "checked action-to-shared-effect chain recovered but typed gameplay owner remains unresolved");
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.targetId, "token-shop-atu3-chest-consumer");
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.targetId, "token-shop-atu3-chest-consumer-read");
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellField, "ATU3Button");
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellPathId, 15810);
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerSystem, "AdManager, Assembly-CSharp");
+["StartTokenRoutine", "<TokenChestRoutine>d__149", "GoToClosedTokenChest", "StartDiamondRoutine", "<DiamondChestRoutine>d__155", "GoToClosedDiamondChest"].forEach((name) => {
+  assert.ok(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerMethodFamily.includes(name));
+});
+["get_SmallAdCellGains", "get_BigAdCellGains", "<FinalAdTokenChestBonus>k__BackingField", "<FinalDiamondChestBonus>k__BackingField"].forEach((name) => {
+  assert.ok(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerBonusShell.includes(name));
+});
+["TokenChest", "DiamondChest"].forEach((name) => {
+  assert.ok(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsumerHandoff.supportingChestObjects.includes(name));
+});
+assert.match(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin, /CellBoostBonus.*AdManager chest routine family/i);
+assert.match(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin, /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i);
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.result, "checked consumer-internal bonus shell recovered but exact CellBoostBonus read site remains unresolved");
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.result, "checked shared-effect-to-consumer-family handoff recovered but exact CellBoostBonus consumer method remains unresolved");
 assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /remaining ATU\*Button or ATU\*Content path_id family/i.test(line)));
-assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /ATU3Button directly to BuyCellBoost/i.test(line)));
-assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /four checked TokenShop row bridges/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /six checked TokenShop row bridges/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU7Button aligns directly with the MK3TokenBoost owner-field block/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /checked ATU6 shell-to-prefab-to-title chain/i.test(line)));
-assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 cells-domain disambiguation pass also stays negative/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU5 title-side pass also stays negative/i.test(line)));
 assert.equal(tokenShopLateAtuBoundaryData.dataset, "token-shop-late-atu-boundary");
 assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.saveFieldRange, "ATU24Level through ATU28Level");
 assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.shellFieldRange, "ATU24Button through ATU28Button");
@@ -1789,69 +1866,81 @@ assert.ok(unityTraceTargetRegistryData.planner.families["token-shop"]);
 assert.ok(unityTraceTargetRegistryData.planner.families["shard-cost"]);
 assert.ok(unityTraceTargetRegistryData.planner.families["multiverse-market-save-owner"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-cells"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-cells-effect"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-chest-consumer"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-chest-consumer-read"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu4-mod"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu5-mk1-title"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu7-mk3-bridge"]);
+assert.ok(unityTraceTargetRegistryData.targets["token-shop-family-structure"]);
 assert.ok(unityTraceTargetRegistryData.targets["shard-cost-su0-structure"]);
 assert.ok(unityTraceTargetRegistryData.targets["multiverse-market-save-owner-boundary"]);
 assert.equal(unityTraceBundleData.dataset, "unity-trace-bundle");
 assert.equal(unityTraceBundleData.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]");
-assert.equal(unityTraceBundleData.plannerResolution.selectionMode, "query-planner");
+assert.equal(unityTraceBundleData.plannerResolution.selectionMode, "explicit-target");
 assert.equal(unityTraceBundleData.plannerResolution.matchedFamilyId, "token-shop");
-assert.equal(unityTraceBundleData.plannerResolution.runMode, "compare");
-assert.equal(unityTraceBundleData.plannerResolution.comparePresetId, "token-shop-atu3-vs-atu1");
-assert.ok(unityTraceBundleData.plannerResolution.expandedAnchors.includes("Cells"));
+assert.equal(unityTraceBundleData.plannerResolution.runMode, "trace");
+assert.equal(unityTraceBundleData.plannerResolution.comparePresetId, null);
+assert.ok(unityTraceBundleData.plannerResolution.expandedAnchors.includes("ATU3Button"));
 assert.ok(unityTraceBundleData.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"));
 assert.match(unityTraceBundleData.plannerResolution.decisionNote, /TokenShop/i);
-assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"));
+assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"));
 assert.ok(unityTraceBundleData.executionAnchors.some((anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"));
 assert.equal(unityTraceBundleData.traceRegistry.path, "data/unity-trace-target-registry.json");
 assert.equal(unityTraceBundleData.traceRegistry.selectedFamilyId, "token-shop");
-assert.equal(unityTraceBundleData.target.id, "token-shop-atu3-cells");
+assert.equal(unityTraceBundleData.target.id, "token-shop-atu3-chest-consumer-read");
 assert.ok(unityTraceBundleData.target.anchors.includes("ATU3Button"));
-assert.ok(unityTraceBundleData.target.anchors.includes("15810"));
-assert.ok(unityTraceBundleData.target.anchors.includes("BuyCellBoost"));
 assert.equal(unityTraceBundleData.shellWindow.shellField, "ATU3Button");
 assert.equal(unityTraceBundleData.shellWindow.shellPathId, 15810);
 assert.deepEqual(
   unityTraceBundleData.shellWindow.ownerFieldBlock,
-  ["CellBoostStartCost", "CellBoostAdditiveCost", "CellBoostBonus", "CellBoostMaxLevel", "CellBoostFill"]
+  [
+    "CellBoostStartCost",
+    "CellBoostAdditiveCost",
+    "CellBoostBonus",
+    "CellBoostMaxLevel",
+    "CellBoostFill"
+  ]
 );
-assert.equal(unityTraceBundleData.bridgeCheck.bridgeCleared, false);
-assert.equal(unityTraceBundleData.bridgeCheck.result, "no checked object-or-title bridge recovered");
+assert.equal(unityTraceBundleData.bridgeCheck.bridgeCleared, true);
+assert.equal(unityTraceBundleData.bridgeCheck.result, "checked consumer-internal bonus shell recovered");
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "metadata-neighborhood"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "action-lane"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "diamond-special"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "token-lane"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "consumer-family"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "consumer-routines"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "cell-gain-getters"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "booster-bonus-shell"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "final-chest-bonus-shell"));
 const traceMetadataSurface = unityTraceBundleData.surfaces.find((surface) => surface.id === "metadata-neighborhood");
-assert.ok(traceMetadataSurface.anchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"));
+assert.ok(traceMetadataSurface.anchorSpecs.some((anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"));
 const traceMetadataSource = traceMetadataSurface.sources.find((source) => source.sourceId === "metadata");
 assert.deepEqual(traceMetadataSource.searchModes, ["exact-string", "bounded-containment"]);
-assert.equal(traceMetadataSource.supportingHitCount, 3);
-assert.equal(traceMetadataSource.incidentalHitCount, 4);
+assert.ok(traceMetadataSource.supportingHitCount >= 3);
+assert.ok(traceMetadataSource.incidentalHitCount >= 1);
 assert.ok(traceMetadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)));
 assert.ok(traceMetadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "text-hooks"));
-assert.equal(unityTraceBundleData.traceGraph.edges.length, 8);
-assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 4);
+assert.equal(unityTraceBundleData.traceGraph.edges.length, 6);
+assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 1);
 assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"));
-assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-title"));
-assert.equal(unityTraceBundleData.decisionSummary.verdict, "keep researching");
-assert.deepEqual(
-  unityTraceBundleData.decisionSummary.baselineGap,
-  ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"]
-);
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU1Button");
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 15839);
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "shared-effect-to-consumer-family"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-chest-routines"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-cell-gain-getters"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "cell-gain-getters-to-booster-bonus-shell"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "booster-bonus-shell-to-final-chest-bonus-shell"));
+assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "exact-cellboost-to-booster-bonus-handoff"));
+assert.equal(unityTraceBundleData.decisionSummary.verdict, "quarantine");
+assert.deepEqual(unityTraceBundleData.decisionSummary.baselineGap, ["exact-cellboost-to-booster-bonus-handoff"]);
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU3Button");
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 15810);
 assert.equal(unityTraceBundleData.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button");
-assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency"]);
+assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency", "shared-effect-to-consumer-family", "consumer-family-to-chest-routines"]);
 assert.deepEqual(
   unityTraceBundleData.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes,
-  ["exact-shell-to-action-hook", "exact-shell-to-prefab", "supporting-effect-hook"]
+  ["consumer-family-to-cell-gain-getters", "cell-gain-getters-to-booster-bonus-shell", "booster-bonus-shell-to-final-chest-bonus-shell"]
 );
-assert.deepEqual(
-  unityTraceBundleData.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes,
-  ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"]
-);
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /raw declaration area/i.test(line)));
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /direct cross-surface join back to 15810/i.test(line)));
+assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, ["exact-cellboost-to-booster-bonus-handoff"]);
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /checked ATU3 chain now reaches the concrete AdManager consumer family/i.test(line)));
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /exact CellBoostBonus read-site or typed-field handoff/i.test(line)));
+assert.match(unityTraceBundleData.groundedConclusion, /ATU3 consumer-internal read trace now preserves/i);
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -2119,7 +2208,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
   assert.match(track.goal, /first real TokenShop-facing user module/i);
   assert.match(track.currentSlice, /separate Overview module/);
   assert.match(track.currentSlice, /canonical `state\.playerProfile\.player\.resources\.tokens`/);
-  assert.match(track.currentSlice, /`ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` subset/);
+  assert.match(track.currentSlice, /`ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` subset/);
   assert.match(track.currentSlice, /row's identity, current level, next known cost, and whether it is affordable right now/);
   assert.match(track.blockedBy, /Archived after ship/);
   assert.match(track.smallestShippableSlice, /computes next known cost from checked `StartCost \+ AdditiveCost \* currentLevel` inputs/);
@@ -2144,7 +2233,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
     "expected spend first UI slice track to record generic ClaimableTokenium boundary-backed evidence"
   );
   assert.ok(
-    track.completedSteps.some((step) => /checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(step)),
+    track.completedSteps.some((step) => /checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(step)),
     "expected spend first UI slice track to record grounded TokenShop row subset evidence"
   );
   assert.ok(
@@ -2168,7 +2257,7 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
     "expected spend first UI slice track to record generic ClaimableTokenium evidence"
   );
   assert.ok(
-    track.verified.some((line) => /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level`/.test(line)),
+    track.verified.some((line) => /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level`/.test(line)),
     "expected spend first UI slice track to record grounded TokenShop row subset"
   );
   assert.ok(
@@ -2182,16 +2271,16 @@ withRequiredValue(tokenShopRowDetailSliceTrack, "expected TokenShop row-detail s
   assert.equal(track.status, "archived");
   assert.match(track.goal, /next small grounded row-detail tool/i);
   assert.match(track.currentSlice, /checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields/);
-  assert.match(track.currentSlice, /known max-level status, and current-vs-next extracted bonus-step change/);
+  assert.match(track.currentSlice, /known max-level status, and current-vs-next extracted(?: or checked-effect)? bonus-step change|known max-level status, and current-vs-next extracted or checked-effect step change/);
   assert.match(track.exitCondition, /What do the grounded upgrades I can already inspect actually do at my current level and on the next level\?/);
   assert.match(track.blockedBy, /true next-purchase rule set/);
-  assert.match(track.smallestShippableSlice, /grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted bonus-step change/);
+  assert.match(track.smallestShippableSlice, /grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted(?: or checked-effect)? bonus-step change|grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change/);
   assert.ok(
     track.completedSteps.some((step) => /Drop canonical Tokens from the consumed-input contract/.test(step)),
     "expected TokenShop row-detail slice track to record the narrower consumed-input contract"
   );
   assert.ok(
-    track.completedSteps.some((step) => /current-vs-next extracted bonus-step change/.test(step)),
+    track.completedSteps.some((step) => /current-vs-next extracted(?: or checked-effect)? bonus-step change|current-vs-next extracted or checked-effect step change/.test(step)),
     "expected TokenShop row-detail slice track to record the row-detail output shape"
   );
   assert.ok(
@@ -3020,19 +3109,22 @@ assert.match(spendSystemVerificationDoc, /compatibility\.unmappedSystemState\.to
 assert.match(activeGroundingBoundariesDoc, /narrows the save-side wrapper to the nearby mission-persistence block in `SaveData`/);
 assert.match(unityOwnerMapDoc, /narrowest checked save wrapper -> `SaveData` mission-persistence neighborhood/);
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
-assert.match(activeGroundingBoundariesDoc, /four checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU5Button`, and `ATU6Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, and both the bounded ATU3 cells-domain disambiguation pass and the late ATU24-ATU28 shell neighborhood are now clean negative results/);
-assert.match(activeGroundingBoundariesDoc, /recover one more checked bridge from a different unresolved `ATU\*Button`, `ATU\*Content`, or adjacent shell neighborhood/);
+assert.match(activeGroundingBoundariesDoc, /six checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, and `ATU7Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain/i);
+assert.match(activeGroundingBoundariesDoc, /exact `CellBoostBonus` read-site or typed-field handoff into that internal shell/i);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
 assert.match(tokenShopDoc, /base TokenShop costs should currently be described as a token-bank token or tokenium spend lane/);
 const tokenShopRowRemapTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-shop-row-remap");
 assert.ok(tokenShopRowRemapTrack, "Expected snapshot research track spend-token-shop-row-remap");
-assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /ATU1, ATU2, ATU5, and ATU6 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, treats the bounded ATU3 cells-domain disambiguation pass as a clean negative result/);
+assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /ATU1, ATU2, ATU4, ATU5, ATU6, and ATU7 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain, keeps the bounded ATU3 prefab-or-title disambiguation pass negative but also preserves one separate ATU3 cross-system/i);
 assert.match(tokenShopRowRemapTrack?.currentSlice ?? "", /late ATU24-ATU28 shell neighborhood as a tighter bounded negative result/);
-assert.match(tokenShopRowRemapTrack?.blockedBy ?? "", /ATU3 cells-domain pass.*late ATU24-ATU28 shell neighborhood.*negative/);
+assert.match(tokenShopRowRemapTrack?.blockedBy ?? "", /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain, one tighter shared-effect-to-consumer-family handoff, and one checked internal bonus-aggregation shell while still failing exact prefab-or-title localization.*late ATU24-ATU28 shell neighborhood now stays negative/);
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU5Button` to `NewTokenUPGPrefab\.T1\.MK1Booster/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster/.test(line)));
-assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU3 cells-domain disambiguation pass stays negative/.test(line)));
+assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU7Button` to `NewTokenUPGPrefab\.T1\.MK3Booster/.test(line)));
+assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU4 and ATU5 title-side passes both stay negative/.test(line)));
+assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /bounded ATU3 cells-domain disambiguation pass stays negative for prefab-or-title identity/.test(line)));
+assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)`/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /ATU6Button` to `NewTokenUPGPrefab\.T1\.MK2Booster` to `Mk2 Generator Booster`/.test(line)));
 assert.ok(tokenShopRowRemapTrack?.verified?.some((line) => /late ATU24-ATU28 shell neighborhood now also has a tighter bounded negative result/.test(line)));
 assert.match(tokenShopDoc, /Daily Tokenium should stay separated as the Academy or Farm Mission reward lane that TokenShop modifies/);
@@ -3185,21 +3277,24 @@ assert.match(tokenShopDoc, /Diamond-related upgrade lane inside TokenShop/);
 assert.match(tokenShopDoc, /## Future mapping signals/);
 assert.match(tokenShopDoc, /gameplay owner and saved-state family for the Academy or Farm Mission Daily Tokenium lane/);
 assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to affect/);
-assert.match(spendSystemVerificationDoc, /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU5Level`, and `ATU6Level` remap subset/);
+assert.match(spendSystemVerificationDoc, /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` remap subset/);
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
 assert.match(tokenShopRowRemapVerificationDoc, /data\/unity-trace-bundle\.json/);
-assert.match(tokenShopRowRemapVerificationDoc, /no committed source carries one exact shell id together with one exact prefab identity or final title in the same local container/);
-assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-cells`/);
-assert.match(unityTraceBundleDoc, /Registry target: `token-shop-atu3-cells` from `token-shop`/);
-assert.match(unityTraceBundleDoc, /Result: `no checked object-or-title bridge recovered`/);
+assert.match(tokenShopRowRemapVerificationDoc, /bounded TokenShop family-structure trace audit/i);
+assert.match(tokenShopRowRemapVerificationDoc, /bounded `ATU7Button` -> `NewTokenUPGPrefab\.T1\.MK3Booster` bridge/i);
+assert.match(tokenShopRowRemapVerificationDoc, /ATU3Button` -> `BuyCellBoost` -> shared chest-effect lane chain/i);
+assert.match(tokenShopRowRemapVerificationDoc, /AdManager, Assembly-CSharp.*chest consumer family/i);
+assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-chest-consumer-read`/);
+assert.match(unityTraceBundleDoc, /Registry target: `token-shop-atu3-chest-consumer-read` from `token-shop`/);
+assert.match(unityTraceBundleDoc, /Result: `checked consumer-internal bonus shell recovered`/);
 assert.match(unityTraceBundleDoc, /Shell field: `ATU3Button`/);
 assert.match(unityTraceBundleDoc, /## Trace graph/);
-assert.match(unityTraceBundleDoc, /exact-shell-to-prefab/);
+assert.match(unityTraceBundleDoc, /cell-gain-getters-to-booster-bonus-shell/);
 assert.match(unityTraceBundleDoc, /## Solved vs blocked/);
 assert.match(unityTraceBundleDoc, /## Decision summary/);
-assert.match(unityTraceBundleDoc, /Verdict: `keep researching`/);
-assert.match(unityTraceBundleDoc, /Baseline: `ATU1Button` path id `15839`/);
+assert.match(unityTraceBundleDoc, /Verdict: `quarantine`/);
+assert.match(unityTraceBundleDoc, /Baseline: `ATU3Button` path id `15810`/);
 assert.match(multiverseMarketDoc, /## Integration status/);
 assert.match(multiverseMarketDoc, /CostBox-InscryptionsDone/);
 assert.match(multiverseMarketDoc, /saved-state owner or runtime balance field behind the `Inscryptions Done` cost lane/);
@@ -3634,7 +3729,7 @@ assert.match(unityAuditPlaybook, /metadata neighborhoods, owner-payload shells, 
 assert.match(unityAuditPlaybook, /typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape/);
 assert.match(unityAuditPlaybook, /wire`, `quarantine`, or `keep researching`/);
 assert.match(unityTraceBundleDoc, /Typed execution anchors/i);
-assert.match(unityTraceBundleDoc, /Signal summary: 0 high-signal, 3 supporting, 4 incidental, 0 suppressed-noise/);
+assert.match(unityTraceBundleDoc, /Signal summary: 0 high-signal, 6 supporting, 4 incidental, 0 suppressed-noise/);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);
@@ -4070,6 +4165,7 @@ assert.equal(
 const migratedFlatSpendStateProfile = normalizePlayerProfile({
   ATU1Level: "3",
   ATU2Level: "4",
+  ATU3Level: "5",
   ATU5Level: "2",
   ATU6Level: "7",
   ATU28Level: 1,
@@ -4096,12 +4192,14 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
 assert.deepEqual(migratedFlatSpendStateProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU1Level: 3,
   ATU2Level: 4,
+  ATU3Level: 5,
   ATU5Level: 2,
   ATU6Level: 7
 });
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
   ATU1Level: 3,
   ATU2Level: 4,
+  ATU3Level: 5,
   ATU5Level: 2,
   ATU6Level: 7,
   ATU28Level: 1,

@@ -579,6 +579,36 @@ textarea {
   min-width: 0;
 }
 
+.token-shop-row-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.token-shop-row-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 220, 144, 0.14);
+  border: 1px solid rgba(240, 187, 72, 0.28);
+  color: #f8ecd3;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+}
+
+.token-shop-row-tag-muted {
+  background: rgba(164, 209, 224, 0.12);
+  border-color: rgba(135, 190, 209, 0.26);
+  color: rgba(232, 247, 255, 0.9);
+}
+
+.token-shop-effect-line {
+  font-size: 0.98rem;
+  color: rgba(245, 234, 211, 0.9);
+}
+
 .token-shop-top-band {
   display: block;
 }
@@ -646,6 +676,24 @@ textarea {
 .token-shop-editor-meta {
   display: grid;
   gap: 4px;
+}
+
+.token-shop-evidence-note {
+  margin-top: 4px;
+  padding-top: 2px;
+}
+
+.token-shop-evidence-note summary {
+  cursor: pointer;
+  color: rgba(255, 224, 165, 0.96);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.token-shop-evidence-note[open] summary {
+  margin-bottom: 6px;
 }
 
 .token-shop-level-editor-buy {
