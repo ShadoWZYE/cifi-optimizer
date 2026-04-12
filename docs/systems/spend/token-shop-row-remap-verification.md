@@ -37,6 +37,11 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - checked action-lane clues preserve the matching direct buy hook through `BuyMK3TokenBoost`.
   - the checked prefab roster separately preserves `NewTokenUPGPrefab.T1.MK3Booster`.
   - taken together, that is enough to ground `ATU7Button` to `NewTokenUPGPrefab.T1.MK3Booster` without forcing a full T1 generator-booster lane remap or inventing a final player-facing row title.
+- One more bounded shell-to-prefab bridge also clears:
+  - `ATU8Button` sits directly after the exact `MK4TokenBoost*` owner fields in the checked `TokenShop` payload alignment.
+  - checked action-lane clues preserve the matching direct buy hook through `BuyMK4TokenBoost`.
+  - the checked prefab roster separately preserves `NewTokenUPGPrefab.T1.MK4Booster`.
+  - taken together, that is enough to ground `ATU8Button` to `NewTokenUPGPrefab.T1.MK4Booster` without forcing a full T1 generator-booster lane remap or inventing a final player-facing row title.
 - One concrete shell-to-prefab-to-title chain now also clears on the same row:
   - the already grounded `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` bridge now has one checked title-side follow-through.
   - the TokenShop text-handler search surface still runs through `SetAllTokenShopTexts` and `SetTokenTexts`, while the narrower checked title-side probe preserves the final player-facing title `Mk2 Generator Booster`.
@@ -64,13 +69,14 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 ## Grounded conclusion
 
 - The repo can now say more than “ATU is unnamed.”
-- Six exact shell-side bridges are now recovered:
+- Seven exact shell-side bridges are now recovered:
   - `ATU1Button` -> TokenShop `TokenBoost` / `NewTokenUPGPrefab.T1.TokensBoost`
   - `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`
   - `ATU4Button` -> `NewTokenUPGPrefab.T1.ModPointsBooster`
   - `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster`
   - `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster`
   - `ATU7Button` -> `NewTokenUPGPrefab.T1.MK3Booster`
+  - `ATU8Button` -> `NewTokenUPGPrefab.T1.MK4Booster`
 - One exact shell-to-prefab-to-final-title chain is now recovered:
   - `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` -> `Mk2 Generator Booster`
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
@@ -90,17 +96,18 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
     - the diamond-special `CellsBoost` prefab and `>Diamond Upgrade 10 - CellsBoost` title remain a separate diamond lane
     - the token-side `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` clues remain a separate token lane
     - none of those checked surfaces crosses back to `ATU3Button` path id `15810`
-  - `ATU4`, `ATU5`, `ATU6`, and `ATU7` clearing do not change that rule for the rest of the lane:
+  - `ATU4`, `ATU5`, `ATU6`, `ATU7`, and `ATU8` clearing do not change that rule for the rest of the lane:
     - they clear because one exact owner-field block, one exact buy hook, and one exact token prefab converge on the same `ModBoost`, `MK1`, `MK2`, or `MK3` family
     - `ATU4Button` now clears the same shell-to-prefab bar through `BuyModBoost` and `NewTokenUPGPrefab.T1.ModPointsBooster`, but still does not have a checked final player-facing row title
     - the repo now has one checked final title join for `ATU6Button`, but still does not have one for `ATU5Button`
     - `ATU7Button` now clears the same shell-to-prefab bar through `BuyMK3TokenBoost` and `NewTokenUPGPrefab.T1.MK3Booster`, but this pass does not attempt a final player-facing row title
-    - the neighboring `MK4` through `MK8` token rows stay unresolved until their own shell joins are checked individually
+    - `ATU8Button` now also clears the same shell-to-prefab bar through `BuyMK4TokenBoost` and `NewTokenUPGPrefab.T1.MK4Booster`, but this pass does not attempt a final player-facing row title
+    - the neighboring `MK5` through `MK8` token rows stay unresolved until their own shell joins are checked individually
 
 The remaining missing pieces are still checked joins:
 
 - no checked repo artifact currently ties `ATU1Button` or `ATU2Button` directly to a final player-facing TokenShop row title string
-- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, or `ATU7Button` directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU7Button`, or `ATU8Button` directly to a final player-facing TokenShop row title string
 - no checked repo artifact currently joins the remaining `ATU*Button` or `ATU*Content` path ids directly to specific `NewTokenUPGPrefab.*` object identities
 - no checked repo artifact currently ties the remaining concrete `ATU` numbers directly to final player-facing TokenShop row titles
 - no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` token-menu or token-bank neighborhood to a specific `ATU` row number
@@ -155,7 +162,7 @@ Because those joins are still missing, the repo should not:
   - the generated `data/unity-trace-bundle.json` artifact now preserves one bounded TokenShop family-structure trace audit inside the generic `probe:trace` workflow
   - that audit now groups the solved `ATU1`, `ATU2`, `ATU4`, `ATU5`, and `ATU6` shells beside the bounded `ATU3` and late `ATU24`-`ATU28` negatives so repeated proved edges and repeated missing edges can be judged from one checked bundle
   - the strongest repeated solved pattern is still shell adjacency plus one row-family proxy hook and one exact prefab identity, while `ATU6Button` remains the only exact shell-to-prefab-to-title exemplar through `Mk2 Generator Booster`
-  - the repeated missing pattern is still title localization: `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, and `ATU7Button` still stop short of one final player-facing row title join, while `ATU3Button` and the late `ATU24`-`ATU28` block still fail exact prefab-or-title identity localization outright
+  - the repeated missing pattern is still title localization: `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU7Button`, and `ATU8Button` still stop short of one final player-facing row title join, while `ATU3Button` and the late `ATU24`-`ATU28` block still fail exact prefab-or-title identity localization outright
   - the shell-side owner window still survives only in `data/token-shop-values.json`
   - the `BuyCellBoost` action cluster still survives only in `data/daily-tokenium-lane-probe.json`
   - the surviving prefab identities still survive only as detached `lm244`, `UABEA`, or `unity-probe` hits
@@ -176,6 +183,11 @@ Because those joins are still missing, the repo should not:
   - the checked action lane preserves `BuyMK3TokenBoost`
   - checked prefab surfaces preserve `NewTokenUPGPrefab.T1.MK3Booster` across `UABEA`, `unity-probe`, and `lm244` artifacts
   - that is enough to preserve one bounded `ATU7Button` -> `NewTokenUPGPrefab.T1.MK3Booster` bridge without making any final player-facing title claim
+- The bounded ATU8 bridge-only pass now also clears without reopening title localization:
+  - the exact `TokenShop` owner payload keeps `ATU8Button` path id `15795` directly beside the `MK4TokenBoost*` owner block
+  - the checked action lane preserves `BuyMK4TokenBoost`
+  - checked prefab surfaces preserve `NewTokenUPGPrefab.T1.MK4Booster` across `UABEA`, `unity-probe`, and `lm244` artifacts
+  - that is enough to preserve one bounded `ATU8Button` -> `NewTokenUPGPrefab.T1.MK4Booster` bridge without making any final player-facing title claim
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`

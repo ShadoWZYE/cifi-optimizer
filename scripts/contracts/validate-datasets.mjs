@@ -2466,6 +2466,26 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster", "token shop row remap boundary ATU7 trace bridge prefab drifted");
   assert.match(boundary.atu7BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU7Button now has one checked trace-backed bridge/i, "token shop row remap boundary ATU7 conclusion drifted");
   assert.equal(boundary.atu7BridgeFollowUp.result, "checked object bridge recovered", "token shop row remap boundary ATU7 trace result drifted");
+  expectRecord(boundary.atu8BridgeFollowUp, "token shop row remap boundary ATU8 bridge follow-up must be an object");
+  expectRecord(boundary.atu8BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU8 recovered bridge must be an object");
+  assert.equal(boundary.atu8BridgeFollowUp.targetId, "token-shop-atu8-mk4-bridge", "token shop row remap boundary ATU8 trace target drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.shellField, "ATU8Button", "token shop row remap boundary ATU8 trace bridge shell drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.shellPathId, 15795, "token shop row remap boundary ATU8 trace bridge shell path drifted");
+  assert.deepEqual(
+    boundary.atu8BridgeFollowUp.recoveredBridge.ownerFieldBlock,
+    [
+      "MK4TokenBoostStartCost",
+      "MK4TokenBoostAdditiveCost",
+      "MK4TokenBoostBonus",
+      "MK4TokenBoostFillMaxLevel",
+      "MK4TokenBoostFill"
+    ],
+    "token shop row remap boundary ATU8 trace bridge owner field block drifted"
+  );
+  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK4TokenBoost", "token shop row remap boundary ATU8 trace bridge action hook drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster", "token shop row remap boundary ATU8 trace bridge prefab drifted");
+  assert.match(boundary.atu8BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU8Button now has one checked bridge/i, "token shop row remap boundary ATU8 conclusion drifted");
+  assert.equal(boundary.atu8BridgeFollowUp.result, "checked object bridge recovered", "token shop row remap boundary ATU8 trace result drifted");
   expectRecord(boundary.atu3CrossSystemEffectTrace, "token shop row remap boundary ATU3 cross-system effect trace must be an object");
   expectRecord(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain, "token shop row remap boundary ATU3 recovered action-effect chain must be an object");
   expectRecord(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface, "token shop row remap boundary ATU3 parameter surface must be an object");
@@ -2540,10 +2560,11 @@ function validateTokenShopRowRemapBoundary(boundary) {
   ["row-order similarity alone", "OR_* labels", "community naming", "prefab-only naming without a checked object join"].forEach((name) => {
     assert.ok(boundary.blockedIdentityJoin.unsafeInferenceSources.includes(name), `token shop row remap boundary missing unsafe inference source ${name}`);
   });
-  assert.ok(boundary.currentBoundary.some((line) => /six checked TokenShop row bridges/i.test(line)), "token shop row remap boundary must preserve recovered bridge count");
+  assert.ok(boundary.currentBoundary.some((line) => /seven checked TokenShop row bridges/i.test(line)), "token shop row remap boundary must preserve recovered bridge count");
   assert.ok(boundary.currentBoundary.some((line) => /ATU2Button aligns directly with the DiamondBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU2 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU4 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU7Button aligns directly with the MK3TokenBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU7 bridge conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU8Button aligns directly with the MK4TokenBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU8 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button/i.test(line)), "token shop row remap boundary must preserve ATU3 effect-chain conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-internal read conclusion");
@@ -2558,7 +2579,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     stats: [
       boundary.rawSaveFamily.fieldRange,
       `${boundary.groundedNonLabelClues.effectHookSamples.length} grounded non-label effect clues`,
-      "Six ATU bridges are recovered and ATU3 preserves one effect-driven trace; broader remap still does not generalize"
+      "Seven ATU bridges are recovered and ATU3 preserves one effect-driven trace; broader remap still does not generalize"
     ]
   };
 }
