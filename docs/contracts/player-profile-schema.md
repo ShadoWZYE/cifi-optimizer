@@ -56,8 +56,8 @@ Stored in `state.playerProfile`, but not canonical truth:
 | Total shard milestone levels | `planning.shards.totalMilestoneLevels` | unlock-watch helper |
 | Focus milestone | `planning.shards.focusMilestoneId` | manual target |
 | Focus milestone level | `planning.shards.focusMilestoneLevel` | manual target |
-| Checked TokenShop subset player-state seam | `planning.tokenShop.checkedSubsetPlayerState.ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` checked subset | truthful saved/player-state-backed levels for the grounded TokenShop subset only; still non-canonical, subset-bound, and allowed to mix prefab-driven plus effect-driven checked rows |
-| Checked TokenShop subset editor levels | `planning.tokenShop.checkedSubsetLevels.ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU5Level`, and `ATU6Level` checked subset | non-canonical local progression editor state for the grounded TokenShop subset only, including the ATU3 effect-driven row without promoting it into canonical identity |
+| Checked TokenShop subset player-state seam | `planning.tokenShop.checkedSubsetPlayerState.ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, and `ATU7Level` checked subset | truthful saved/player-state-backed levels for the grounded TokenShop subset only; still non-canonical, subset-bound, and allowed to mix prefab-driven plus effect-driven checked rows |
+| Checked TokenShop subset editor levels | `planning.tokenShop.checkedSubsetLevels.ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, and `ATU7Level` checked subset | non-canonical local progression editor state for the grounded TokenShop subset only, including the ATU3 effect-driven row without promoting it into canonical identity |
 
 Import-only or retired active helpers:
 

@@ -62,7 +62,7 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
 
 const PROFILE_CONFIDENCE_VALUES = new Set(["manual", "mixed", "verified"]);
 const FARMING_FOCUS_VALUES = new Set(["credits", "alloy", "research", "shards"]);
-const TOKEN_SHOP_CHECKED_SUBSET_FIELDS = ["ATU1Level", "ATU2Level", "ATU3Level", "ATU5Level", "ATU6Level"];
+const TOKEN_SHOP_CHECKED_SUBSET_FIELDS = ["ATU1Level", "ATU2Level", "ATU3Level", "ATU4Level", "ATU5Level", "ATU6Level", "ATU7Level"];
 const TOKEN_SHOP_CHECKED_SUBSET_PLAYER_STATE_ALIASES = Object.fromEntries(
   TOKEN_SHOP_CHECKED_SUBSET_FIELDS.map((field) => [
     field,

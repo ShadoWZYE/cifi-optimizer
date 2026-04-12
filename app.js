@@ -4718,6 +4718,21 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
         : "Supporting evidence only: the shared effect lane stops at the checked action-to-effect chain and does not claim a typed gameplay-owner handoff."
     },
     {
+      field: "ATU4Level",
+      slot: "ATU4",
+      identity: boundary?.traceFollowUp?.recoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.ModPointsBooster",
+      identitySource: "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "ModBoostStartCost",
+      additiveCostField: "ModBoostAdditiveCost",
+      bonusField: "ModBoostBonus",
+      maxLevelField: "ModBoostMaxLevel",
+      bonusStepLabel: "Mod Points Gained",
+      bonusStepMode: "multiplier",
+      note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
+    },
+    {
       field: "ATU5Level",
       slot: "ATU5",
       identity: boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
@@ -4746,6 +4761,21 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       bonusStepLabel: "Mk2 Output",
       bonusStepMode: "multiplier",
       note: "Checked shell-to-prefab-to-title chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
+    },
+    {
+      field: "ATU7Level",
+      slot: "ATU7",
+      identity: boundary?.atu7BridgeFollowUp?.recoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK3Booster",
+      identitySource: "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "MK3TokenBoostStartCost",
+      additiveCostField: "MK3TokenBoostAdditiveCost",
+      bonusField: "MK3TokenBoostBonus",
+      maxLevelField: "MK3TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk3 Output",
+      bonusStepMode: "multiplier",
+      note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     }
   ];
 }
@@ -4969,7 +4999,7 @@ function getTokenShopProgressionModel() {
 
   return {
     currentTokens,
-    displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU5, ATU6.",
+    displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7.",
     rows,
     localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override").length,
     playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state").length,
@@ -5028,8 +5058,8 @@ function renderTokenShopProgressionEditor() {
     <article class="validation-card warn">
       <strong>Grounded TokenShop checked-row editor</strong>
       <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
-      <p class="meta">This module is explicitly non-optimizer and stays fixed to the shipped <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU5Level</code>, and <code>ATU6Level</code> subset.</p>
-      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown separately inside the same bounded subset. ATU3 remains effect-driven and is not promoted into a prefab or final-title remap.</p>
+      <p class="meta">This module is explicitly non-optimizer and stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, and <code>ATU7Level</code>.</p>
+      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown separately inside the same bounded subset. ATU3 remains effect-driven and is not promoted into a prefab or final-title remap. The rest of the unresolved ATU family stays quarantined outside this editor.</p>
       <div class="profile-actions">
         <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
         <button class="button button-ghost" type="button" data-token-shop-clear-local>Clear local row levels</button>
