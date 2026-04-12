@@ -127,12 +127,17 @@ Because those joins are still missing, the repo should not:
   - none of those exact candidate surfaces yields one concrete object or title join back to `ATU3Button` path id `15810`
 - The upgraded join-preservation probe also now makes the current extraction state explicit instead of scattering it across multiple artifacts:
   - the generated `data/unity-trace-bundle.json` artifact now preserves one checked `ATU4Button` -> `BuyModBoost` -> `NewTokenUPGPrefab.T1.ModPointsBooster` bridge inside the generic `probe:trace` workflow
-  - that same trace still keeps the missing `ATU4Button` final-title join explicit, because the surviving `Token Ultima: MP` title clue remains detached from the shell-side row neighborhood
+  - that same trace still keeps the missing `ATU4Button` final-title join explicit, because the generic `SetAllTokenShopTexts` or `SetTokenTexts` surface and the surviving `Token Ultima: MP` plus `:Diamond Upgrade 11 - ModBoost` title clues all remain detached from the shell-side row neighborhood
   - the shell-side owner window still survives only in `data/token-shop-values.json`
   - the `BuyCellBoost` action cluster still survives only in `data/daily-tokenium-lane-probe.json`
   - the surviving prefab identities still survive only as detached `lm244`, `UABEA`, or `unity-probe` hits
   - the surviving player-facing titles and generic `SetAllTokenShopTexts` or `SetTokenTexts` hooks still survive only as detached unity-probe string buckets
   - the same generic trace workflow still keeps the older ATU3 cells split negative, because no committed source carries one exact ATU3 shell id together with one exact prefab identity or final title in the same local container
+- The bounded ATU4 title-side pass now stays negative across the exact mod-domain title surfaces:
+  - the generic TokenShop text-hook surface still preserves `SetAllTokenShopTexts` and `SetTokenTexts`, but does not preserve any `ATU4Button` shell, path id `15796`, or exact row-local title join
+  - the token-side mod title clue `Token Ultima: MP` still survives only as a detached title surface
+  - the diamond-side mod title clue `:Diamond Upgrade 11 - ModBoost` still survives only as a separate title surface
+  - none of those committed title-side surfaces crosses back to `ATU4Button` or path id `15796`
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`

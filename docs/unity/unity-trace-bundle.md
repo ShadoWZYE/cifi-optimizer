@@ -1,9 +1,9 @@
 # Unity Trace Bundle
 
 - Target: `token-shop-atu4-mod`
-- Label: TokenShop ATU4 mod bridge
+- Label: TokenShop ATU4 mod title pass
 - Anchors: `ATU4Button, 15796, ATU3Button, 15810, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
-- Join goal: Recover one checked ATU4Button or path id 15796 bridge to one exact prefab identity, and keep the missing title join explicit if it still stays detached.
+- Join goal: Recover one checked final player-facing title join for the already grounded ATU4Button or path id 15796 row, and keep the title-side result bounded if it still stays detached.
 
 ## Planner resolution
 
@@ -120,13 +120,40 @@
   - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
   - `:Diamond Upgrade 11 - ModBoost` at `$.file_results[0].keyword_hits.diamond[22]` [supporting, score 95, exact-structured]
 
+### Generic TokenShop text-hook lane
+
+- Search terms: `SetAllTokenShopTexts, SetTokenTexts, ATU4Button, 15796, ATU3Button, 15810, CellBoost, BuyCellBoost`
+- Typed anchors: `SetAllTokenShopTexts (method), SetTokenTexts (method), ATU4Button (class), 15796 (path id), ATU3Button (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (2 hits)
+  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$.apk_results[32].keyword_hits.token[7]` [supporting, score 95, exact-structured]
+- Source: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json) (12 hits)
+  - Signal summary: 12 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `BuyCellBoost` at `$[0].matches[101].byte_context[41].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[101].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[102].byte_context[40].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[102].entry_context[25].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].byte_context[118].value` [high-signal, score 100, exact-structured]
+  - `SetTokenTexts` at `$[0].matches[312].byte_context[121].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].entry_context[16].value` [high-signal, score 100, exact-structured]
+  - `SetTokenTexts` at `$[0].matches[312].entry_context[19].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].value` [high-signal, score 100, exact-structured]
+  - `SetTokenTexts` at `$[0].matches[313].byte_context[109].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[313].entry_context[4].value` [high-signal, score 100, exact-structured]
+  - `SetTokenTexts` at `$[0].matches[313].entry_context[7].value` [high-signal, score 100, exact-structured]
+- Source: [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json) (2 hits)
+  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
+  - `SetAllTokenShopTexts` at `$[0].matches[225].byte_context[48].value` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$[0].matches[225].byte_context[51].value` [supporting, score 95, exact-structured]
+
 ## Bridge check
 
 - Result: `checked object bridge recovered`
 
 ## Trace graph
 
-- Present typed edges: `5`
+- Present typed edges: `6`
 - Negative typed edges: `1`
 
 ### Proved joins
@@ -144,12 +171,17 @@
   - `uabeaProbe` at `$.namedObjectHits[10353].name` proves `NewTokenUPGPrefab.T1.ModPointsBooster`
 - `title-candidate-surface`: A separate mod-domain title candidate is still preserved, but only as a detached title surface. [supporting]
   - `unityProbe` at `$.apk_results[23].keyword_hits.token[26]` proves `Token Ultima: MP`
+  - `unityProbe` at `$.apk_results[0].keyword_hits.diamond[22]` proves `:Diamond Upgrade 11 - ModBoost`
+- `generic-text-hook-cluster`: The generic TokenShop text hooks survive as a separate title-side surface, but they do not close the ATU4 title join. [supporting]
+  - `unityProbe` at `$.apk_results[32].keyword_hits.token[6]` proves `SetAllTokenShopTexts`
 
 ### Missing joins
 
-- `exact-shell-to-title`: No committed source proves one exact ATU4 shell-to-final-title join; the surviving Token Ultima: MP title remains detached from the shell-side row neighborhood. [negative]
-  - `tokenShopRowRemapBoundary` at `$.traceFollowUp.blockedTitleJoin.missingJoin` records `No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving Token Ultima: MP title clue stays detached from the traced ATU4 shell neighborhood.`
+- `exact-shell-to-title`: No committed source proves one exact ATU4 shell-to-final-title join; the surviving generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title candidates remain detached from the shell-side row neighborhood. [negative]
+  - `tokenShopRowRemapBoundary` at `$.traceFollowUp.blockedTitleJoin.missingJoin` records `No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues stay detached from the traced ATU4 shell neighborhood.`
   - `unityProbe` at `$.apk_results[23].keyword_hits.token[26]` records `Token Ultima: MP`
+  - `unityProbe` at `$.apk_results[0].keyword_hits.diamond[22]` records `:Diamond Upgrade 11 - ModBoost`
+  - `unityProbe` at `$.apk_results[32].keyword_hits.token[6]` records `SetAllTokenShopTexts`
 
 ## Solved vs blocked
 
@@ -166,17 +198,17 @@
 ## Decision summary
 
 - Verdict: `quarantine`
-- Summary: The trace now preserves one exact shell-to-prefab bridge, but the missing title join still keeps this ATU4 row quarantined to remap evidence.
-- Proved edges: `5`
+- Summary: The trace now preserves the ATU4 shell-to-prefab bridge, but the title-side pass stays bounded negative so this row remains quarantined to remap evidence.
+- Proved edges: `6`
 - Negative edges: `1`
 - Baseline gap: `exact-shell-to-action-hook, exact-shell-to-prefab, exact-shell-to-title`
 
 ## Current loss
 
 - The shell-side owner window survives only in the TokenShop extract, where ATU4Button path id 15796 stays adjacent to the ModBoost owner block.
-- The exact BuyModBoost action hook and NewTokenUPGPrefab.T1.ModPointsBooster prefab now converge on the same traced row family, but the final player-facing title still survives only as a detached mod-domain title surface.
+- The exact BuyModBoost action hook and NewTokenUPGPrefab.T1.ModPointsBooster prefab now converge on the same traced row family, but the final player-facing title still survives only as detached mod-domain title and generic text-hook surfaces.
 - Because the title-side join is still missing, the recovered ATU4 bridge is safe for row-remap evidence only and should not widen into canonical or planner behavior.
 
 ## Conclusion
 
-- The ATU4Button or 15796 trace now preserves one checked shell-to-action-hook-to-prefab bridge to NewTokenUPGPrefab.T1.ModPointsBooster, but the final player-facing title join is still unresolved and must stay quarantined.
+- The ATU4Button or 15796 title-side trace stays negative. The row still preserves one checked shell-to-action-hook-to-prefab bridge to NewTokenUPGPrefab.T1.ModPointsBooster, but neither the generic TokenShop text hooks nor the detached mod-domain title candidates provide one exact final player-facing title join.

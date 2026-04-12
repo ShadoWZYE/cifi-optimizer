@@ -1755,7 +1755,13 @@ assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.shellFi
 assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.shellPathId, 15796);
 assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.supportingActionHook, "BuyModBoost");
 assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.ModPointsBooster");
+assert.ok(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"));
+assert.ok(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "token-side mod title candidate"));
+assert.ok(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "diamond-side mod title candidate"));
 assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.titleCandidate, "Token Ultima: MP");
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.alternateTitleCandidate, ":Diamond Upgrade 11 - ModBoost");
+assert.match(tokenShopRowRemapBoundaryData.traceFollowUp.blockedTitleJoin.missingJoin, /generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues/i);
+assert.equal(tokenShopRowRemapBoundaryData.traceFollowUp.result, "checked object bridge recovered but no concrete title join cleared");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellField, "ATU3Button");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellPathId, 15810);
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.result, "no concrete object-or-title join cleared");
@@ -1769,6 +1775,7 @@ assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /five che
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /checked ATU6 shell-to-prefab-to-title chain/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU3 cells-domain disambiguation pass also stays negative/i.test(line)));
+assert.ok(tokenShopRowRemapBoundaryData.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)));
 assert.equal(tokenShopLateAtuBoundaryData.dataset, "token-shop-late-atu-boundary");
 assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.saveFieldRange, "ATU24Level through ATU28Level");
 assert.equal(tokenShopLateAtuBoundaryData.targetNeighborhood.shellFieldRange, "ATU24Button through ATU28Button");
@@ -1828,6 +1835,7 @@ assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "metada
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "action-lane"));
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "prefab-lane"));
 assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "title-lane"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "text-hooks"));
 const traceMetadataSurface = unityTraceBundleData.surfaces.find((surface) => surface.id === "metadata-neighborhood");
 assert.ok(traceMetadataSurface.anchorSpecs.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"));
 const traceMetadataSource = traceMetadataSurface.sources.find((source) => source.sourceId === "metadata");
@@ -1836,9 +1844,10 @@ assert.ok(traceMetadataSource.supportingHitCount >= 3);
 assert.ok(traceMetadataSource.incidentalHitCount >= 2);
 assert.ok(traceMetadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)));
 assert.ok(traceMetadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15796")));
-assert.equal(unityTraceBundleData.traceGraph.edges.length, 5);
+assert.equal(unityTraceBundleData.traceGraph.edges.length, 6);
 assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 1);
 assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"));
+assert.ok(unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "generic-text-hook-cluster"));
 assert.ok(unityTraceBundleData.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-title"));
 assert.equal(unityTraceBundleData.decisionSummary.verdict, "quarantine");
 assert.deepEqual(
@@ -1858,7 +1867,8 @@ assert.deepEqual(
   ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"]
 );
 assert.ok(unityTraceBundleData.lostStructure.some((line) => /ATU4Button path id 15796 stays adjacent to the ModBoost owner block/i.test(line)));
-assert.ok(unityTraceBundleData.lostStructure.some((line) => /detached mod-domain title surface/i.test(line)));
+assert.ok(unityTraceBundleData.lostStructure.some((line) => /detached mod-domain title and generic text-hook surfaces/i.test(line)));
+assert.match(unityTraceBundleData.groundedConclusion, /ATU4Button or 15796 title-side trace stays negative/i);
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));

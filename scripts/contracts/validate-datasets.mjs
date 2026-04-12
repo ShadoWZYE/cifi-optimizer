@@ -2422,9 +2422,14 @@ function validateTokenShopRowRemapBoundary(boundary) {
   );
   assert.equal(boundary.traceFollowUp.recoveredBridge.supportingActionHook, "BuyModBoost", "token shop row remap boundary trace bridge action hook drifted");
   assert.equal(boundary.traceFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.ModPointsBooster", "token shop row remap boundary trace bridge prefab drifted");
+  expectArray(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces, "token shop row remap boundary trace blocked title tested surfaces must be an array");
   assert.equal(boundary.traceFollowUp.blockedTitleJoin.titleCandidate, "Token Ultima: MP", "token shop row remap boundary trace blocked title candidate drifted");
-  assert.match(boundary.traceFollowUp.blockedTitleJoin.missingJoin, /ATU4Button directly to one final player-facing TokenShop row title/i, "token shop row remap boundary trace blocked title note drifted");
-  assert.equal(boundary.traceFollowUp.result, "one trace-backed grounded bridge recovered", "token shop row remap boundary trace follow-up result drifted");
+  assert.equal(boundary.traceFollowUp.blockedTitleJoin.alternateTitleCandidate, ":Diamond Upgrade 11 - ModBoost", "token shop row remap boundary trace alternate title candidate drifted");
+  assert.ok(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"), "token shop row remap boundary trace text-hook surface drifted");
+  assert.ok(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "token-side mod title candidate"), "token shop row remap boundary trace token title surface drifted");
+  assert.ok(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "diamond-side mod title candidate"), "token shop row remap boundary trace diamond title surface drifted");
+  assert.match(boundary.traceFollowUp.blockedTitleJoin.missingJoin, /generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues/i, "token shop row remap boundary trace blocked title note drifted");
+  assert.equal(boundary.traceFollowUp.result, "checked object bridge recovered but no concrete title join cleared", "token shop row remap boundary trace follow-up result drifted");
   ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
     assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);
   });
@@ -2443,6 +2448,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   });
   assert.ok(boundary.currentBoundary.some((line) => /ATU2Button aligns directly with the DiamondBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU2 bridge conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU4 bridge conclusion");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)), "token shop row remap boundary must preserve bounded ATU4 title-side negative");
   assert.ok(boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion for remaining rows");
 
   return {
@@ -2590,6 +2596,7 @@ function validateUnityTraceBundle(bundle) {
   assert.ok(bundle.surfaces.some((surface) => surface.id === "action-lane"), "unity trace bundle missing action lane");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "prefab-lane"), "unity trace bundle missing prefab lane");
   assert.ok(bundle.surfaces.some((surface) => surface.id === "title-lane"), "unity trace bundle missing title lane");
+  assert.ok(bundle.surfaces.some((surface) => surface.id === "text-hooks"), "unity trace bundle missing text-hook lane");
   const metadataSurface = bundle.surfaces.find((surface) => surface.id === "metadata-neighborhood");
   assert.ok(metadataSurface.anchorSpecs.some((anchor) => anchor.value === "15796" && anchor.kind === "path id"), "unity trace bundle metadata surface must preserve typed path-id anchor");
   const metadataSource = metadataSurface.sources.find((source) => source.sourceId === "metadata");
@@ -2599,10 +2606,11 @@ function validateUnityTraceBundle(bundle) {
   assert.ok(metadataSource.incidentalHitCount >= 2, "unity trace bundle metadata incidental count drifted");
   assert.ok(metadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)), "unity trace bundle metadata hits should suppress public-key noise");
   assert.ok(metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15796")), "unity trace bundle metadata hits should not treat path ids as free-text anchors");
-  assert.equal(bundle.traceGraph.edges.length, 5, "unity trace bundle proved edge count drifted");
+  assert.equal(bundle.traceGraph.edges.length, 6, "unity trace bundle proved edge count drifted");
   assert.equal(bundle.traceGraph.negativeEdges.length, 1, "unity trace bundle negative edge count drifted");
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"), "unity trace bundle missing direct serialized adjacency edge");
   assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "exact-shell-to-prefab" && edge.status === "present"), "unity trace bundle missing recovered shell-to-prefab edge");
+  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "generic-text-hook-cluster"), "unity trace bundle missing title-side text-hook edge");
   assert.ok(bundle.traceGraph.negativeEdges.some((edge) => edge.type === "exact-shell-to-title"), "unity trace bundle missing negative shell-to-title edge");
   assert.ok(bundle.traceGraph.claimLedger.some((claim) => claim.id === "claim-trace-recovered-bridge" && claim.status === "proved"), "unity trace bundle missing recovered-bridge claim");
   assert.equal(bundle.decisionSummary.verdict, "quarantine", "unity trace bundle decision verdict drifted");
@@ -2614,10 +2622,10 @@ function validateUnityTraceBundle(bundle) {
   assert.deepEqual(bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes, ["exact-shell-to-action-hook", "exact-shell-to-prefab"], "unity trace bundle baseline-only diff drifted");
   assert.deepEqual(bundle.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, ["exact-shell-to-action-hook", "exact-shell-to-prefab", "exact-shell-to-title"], "unity trace bundle blocked missing diff drifted");
   assert.ok(bundle.lostStructure.some((line) => /ATU4Button path id 15796 stays adjacent to the ModBoost owner block/i.test(line)), "unity trace bundle must preserve ATU4 shell-loss explanation");
-  assert.ok(bundle.lostStructure.some((line) => /final player-facing title still survives only as a detached mod-domain title surface/i.test(line)), "unity trace bundle must preserve title-loss explanation");
-  assert.match(bundle.groundedConclusion, /ATU4Button or 15796 trace now preserves one checked shell-to-action-hook-to-prefab bridge/i, "unity trace bundle grounded conclusion drifted");
+  assert.ok(bundle.lostStructure.some((line) => /detached mod-domain title and generic text-hook surfaces/i.test(line)), "unity trace bundle must preserve title-loss explanation");
+  assert.match(bundle.groundedConclusion, /ATU4Button or 15796 title-side trace stays negative/i, "unity trace bundle grounded conclusion drifted");
   assert.ok(bundle.currentBoundary.some((line) => /target-driven trace workflow/i.test(line)), "unity trace bundle must preserve workflow framing");
-  assert.ok(bundle.currentBoundary.some((line) => /missing title join explicit/i.test(line)), "unity trace bundle must preserve title quarantine framing");
+  assert.ok(bundle.currentBoundary.some((line) => /title-side text-hook and title-candidate surfaces explicit/i.test(line)), "unity trace bundle must preserve title quarantine framing");
 
   return {
     id: "unity-trace-bundle",
@@ -2626,7 +2634,7 @@ function validateUnityTraceBundle(bundle) {
     stats: [
       `${bundle.target.anchors.length} target anchors`,
       `${bundle.surfaces.length} cross-surface trace lanes`,
-      "ATU4 now clears one exact shell-to-prefab bridge while the final title join stays quarantined"
+      "ATU4 title-side trace stays negative while the recovered shell-to-prefab bridge remains quarantined"
     ]
   };
 }

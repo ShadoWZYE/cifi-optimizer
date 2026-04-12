@@ -157,10 +157,46 @@
       "groundedConclusion": "ATU4Button now has one checked trace-backed bridge to NewTokenUPGPrefab.T1.ModPointsBooster because the exact TokenShop owner payload places ATU4Button directly after the ModBoost field family, checked action-lane clues preserve BuyModBoost, and the checked prefab roster preserves the exact ModPointsBooster token prefab identity."
     },
     "blockedTitleJoin": {
+      "testedSurfaces": [
+        {
+          "surface": "generic TokenShop text hooks",
+          "checkedArtifacts": [
+            "data/unity-probe-report.json",
+            "data/daily-tokenium-lane-probe.json",
+            "data/lm244-targeted-probe.json"
+          ],
+          "preservedNeighbors": [
+            "SetAllTokenShopTexts",
+            "SetTokenTexts"
+          ],
+          "missingJoin": "The generic TokenShop text-hook surface still preserves SetAllTokenShopTexts and SetTokenTexts as a separate text-handler cluster, but it does not preserve any ATU4 shell, path id 15796, or exact row-local title join."
+        },
+        {
+          "surface": "token-side mod title candidate",
+          "checkedArtifacts": [
+            "data/unity-probe-report.json"
+          ],
+          "preservedNeighbors": [
+            "Token Ultima: MP"
+          ],
+          "missingJoin": "The surviving Token Ultima: MP title clue remains a detached token-side mod-domain title surface and does not preserve any direct ATU4 shell join."
+        },
+        {
+          "surface": "diamond-side mod title candidate",
+          "checkedArtifacts": [
+            "data/unity-probe-report.json"
+          ],
+          "preservedNeighbors": [
+            ":Diamond Upgrade 11 - ModBoost"
+          ],
+          "missingJoin": "The surviving :Diamond Upgrade 11 - ModBoost title clue remains a separate diamond-side title surface and does not preserve any direct ATU4 shell join."
+        }
+      ],
       "titleCandidate": "Token Ultima: MP",
-      "missingJoin": "No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving Token Ultima: MP title clue stays detached from the traced ATU4 shell neighborhood."
+      "alternateTitleCandidate": ":Diamond Upgrade 11 - ModBoost",
+      "missingJoin": "No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues stay detached from the traced ATU4 shell neighborhood."
     },
-    "result": "one trace-backed grounded bridge recovered"
+    "result": "checked object bridge recovered but no concrete title join cleared"
   },
   "verifiedTitleJoin": {
     "shellField": "ATU6Button",
@@ -284,6 +320,7 @@
     "The neighboring grounded shell-side rows still remain more limited: ATU5Button is still only a bounded shell-to-prefab result without a checked final player-facing row title, and the neighboring MK3-MK8 token rows remain unresolved even though the same owner payload preserves their numbered shells and the broader action lane preserves BuyMK3TokenBoost through BuyMK8TokenBoost.",
     "Grounded metadata neighborhoods now tighten the late-row shell further: BuyATU24 through BuyATU28 sit beside named tier-buy hooks like BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, while getter neighborhoods preserve ATU1TokenBonus, ATU2DiamondsBonus, ATU14TokenDailiesBonus, and ATU24Bonus3Shards through ATU24Bonus5AP in one ATU-numbered family.",
     "Grounded level0 neighborhoods now tighten the text-hook blocker further: SetAllTokenShopTexts and SetTokenTexts sit in a token-menu or token-bank text-handler cluster with CheckFirstTokenMenuTime, ClaimTokenium, token-bank formula strings, TokenClaimRecolor, and TokenShopRecoloring, while most NewTokenUPGPrefab.* names remain one separate prefab roster cluster and player-facing titles such as Trinity Booster One, Academy Booster, Tokens Booster T3, and Campaign Fragments remain a separate title cluster.",
+    "The bounded ATU4 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface remains a separate text-handler cluster, while Token Ultima: MP and :Diamond Upgrade 11 - ModBoost remain detached title candidates instead of one exact shell-local final title join.",
     "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU1, ATU2, ATU4, ATU5, and ATU6 bridges plus the one checked ATU6 shell-to-prefab-to-title chain, and the unrecovered ATU family should stay compatibility-only instead of entering planner logic or canonical state.playerProfile.",
     "The narrowest honest next slice is no longer a general TokenShop row-remap search. The generic text-hook surface is now a bounded negative result, and the explicit ATU3 cells-domain pass is also now a bounded negative result, so the next unresolved shell slice should move to a different exact shell-to-prefab or shell-to-title bridge without promoting the rest of the family."
   ]

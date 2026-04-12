@@ -971,17 +971,21 @@ def build_mod_trace_graph(
     action_surface = find_surface(surfaces, "action-lane")
     prefab_surface = find_surface(surfaces, "prefab-lane")
     title_surface = find_surface(surfaces, "title-lane")
+    text_surface = find_surface(surfaces, "text-hooks")
 
     metadata_source = find_source_entry(metadata_surface, "metadata")
     action_source = find_source_entry(action_surface, "dailyTokeniumLaneProbe")
     uabea_prefab_source = find_source_entry(prefab_surface, "uabeaProbe")
     unity_title_source = find_source_entry(title_surface, "unityProbe")
+    unity_text_source = find_source_entry(text_surface, "unityProbe")
 
     metadata_shell_hit = find_hit(metadata_source, "ATU4Button")
     metadata_owner_hit = find_hit(metadata_source, "ModBoostStartCost")
     action_buy_hit = find_hit(action_source, "BuyModBoost")
     prefab_hit = find_hit(uabea_prefab_source, "NewTokenUPGPrefab.T1.ModPointsBooster")
     title_hit = find_hit(unity_title_source, "Token Ultima: MP")
+    diamond_title_hit = find_hit(unity_title_source, ":Diamond Upgrade 11 - ModBoost")
+    text_hook_hit = find_hit(unity_text_source, "SetAllTokenShopTexts")
 
     trace_bridge = row_remap_boundary["traceFollowUp"]["recoveredBridge"]
     unresolved_title = row_remap_boundary["traceFollowUp"]["blockedTitleJoin"]
@@ -992,6 +996,7 @@ def build_mod_trace_graph(
     action_node = "action-hook"
     prefab_node = "prefab-identity"
     title_node = "title-candidate"
+    text_node = "text-hook-cluster"
 
     edges = [
         make_edge(
@@ -1068,6 +1073,19 @@ def build_mod_trace_graph(
             "A separate mod-domain title candidate is still preserved, but only as a detached title surface.",
             [
                 cite_hit(unity_title_source, title_hit),
+                cite_hit(unity_title_source, diamond_title_hit),
+            ],
+        ),
+        make_edge(
+            "prefab-to-text-hook-cluster",
+            prefab_node,
+            text_node,
+            "generic-text-hook-cluster",
+            "present",
+            "supporting",
+            "The generic TokenShop text hooks survive as a separate title-side surface, but they do not close the ATU4 title join.",
+            [
+                cite_hit(unity_text_source, text_hook_hit),
             ],
         ),
     ]
@@ -1080,7 +1098,7 @@ def build_mod_trace_graph(
             "exact-shell-to-title",
             "missing",
             "negative",
-            "No committed source proves one exact ATU4 shell-to-final-title join; the surviving Token Ultima: MP title remains detached from the shell-side row neighborhood.",
+            "No committed source proves one exact ATU4 shell-to-final-title join; the surviving generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title candidates remain detached from the shell-side row neighborhood.",
             [
                 cite_row_boundary(
                     "tokenShopRowRemapBoundary",
@@ -1088,6 +1106,8 @@ def build_mod_trace_graph(
                     unresolved_title["missingJoin"],
                 ),
                 cite_hit(unity_title_source, title_hit),
+                cite_hit(unity_title_source, diamond_title_hit),
+                cite_hit(unity_text_source, text_hook_hit),
             ],
         ),
     ]
@@ -1100,6 +1120,7 @@ def build_mod_trace_graph(
             make_node(action_node, "action-hook", "BuyModBoost", "present", "The committed probe set preserves the matching ModBoost buy hook."),
             make_node(prefab_node, "prefab-identity", "NewTokenUPGPrefab.T1.ModPointsBooster", "present", "The exact token prefab identity is preserved."),
             make_node(title_node, "title-candidate", "Token Ultima: MP", "present", "A detached mod-domain title candidate is preserved."),
+            make_node(text_node, "text-hook-cluster", "SetAllTokenShopTexts / SetTokenTexts", "present", "The generic TokenShop text hooks survive as a separate title-side surface."),
         ],
         "edges": edges,
         "negativeEdges": negative_edges,
@@ -1114,7 +1135,7 @@ def build_mod_trace_graph(
             {
                 "id": "claim-missing-title-join",
                 "status": "missing",
-                "statement": "The exact shell-to-final-title join for ATU4 is still missing.",
+                "statement": "The exact shell-to-final-title join for ATU4 is still missing across the detached title and generic text-hook surfaces.",
                 "edgeIds": [edge["id"] for edge in negative_edges],
                 "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
             },
@@ -1575,7 +1596,7 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
             "This is a target-driven trace workflow, not a full-lane TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU4 shell-to-action-hook-to-prefab bridge in the same checked trace bundle while keeping the missing title join explicit.",
+            "It now preserves one exact ATU4 shell-to-action-hook-to-prefab bridge in the same checked trace bundle while keeping the title-side text-hook and title-candidate surfaces explicit.",
             "Keep the recovered ATU4 bridge quarantined to row-remap evidence until a separate final player-facing title join clears.",
         ],
     }
