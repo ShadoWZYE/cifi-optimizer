@@ -140,6 +140,12 @@ Because those joins are still missing, the repo should not:
   - the raw parameter surface preserves `CellBoostBonus = 1` and `CellBoostMaxLevel = 60`, which is consistent with the surviving `+1` second derived effect text and the bounded level cap for the same row family
   - that is enough to preserve one bounded `ATU3Button` -> `BuyCellBoost` -> shared chest-effect lane chain, while still keeping the older diamond-side `CellsBoost` and token-side `CellsPerChestBooster` / `Token Ultima: Cells` clues as detached contrast surfaces
   - the remaining honest blocker is narrower: no committed source yet names the exact typed gameplay owner or chest-reward applier that consumes the `CellBoostBonus` parameter inside that shared Token & Diamond chest cells-gain system
+- The next bounded ATU3 consumer-seam pass now tightens that break one step further without converting the row back into a prefab-or-title promotion:
+  - the same shared `Cells Booster (Chests)` lane now has one checked handoff into the concrete `AdManager, Assembly-CSharp` chest consumer family
+  - that consumer family preserves `StartTokenRoutine`, `<TokenChestRoutine>d__149`, `GoToClosedTokenChest`, `StartDiamondRoutine`, `<DiamondChestRoutine>d__155`, and `GoToClosedDiamondChest`
+  - the same runtime shell also preserves `get_SmallAdCellGains`, `get_BigAdCellGains`, `<FinalAdTokenChestBonus>k__BackingField`, and `<FinalDiamondChestBonus>k__BackingField`
+  - committed object output also preserves the concrete `TokenChest` and `DiamondChest` game objects for the same family
+  - that is enough to preserve one bounded shared-effect-to-consumer-family handoff for ATU3, while the remaining honest blocker is now only the exact `CellBoostBonus` read or typed field handoff inside that consumer family
 - The upgraded join-preservation probe also now makes the current extraction state explicit instead of scattering it across multiple artifacts:
   - the generated `data/unity-trace-bundle.json` artifact now preserves one bounded TokenShop family-structure trace audit inside the generic `probe:trace` workflow
   - that audit now groups the solved `ATU1`, `ATU2`, `ATU4`, `ATU5`, and `ATU6` shells beside the bounded `ATU3` and late `ATU24`-`ATU28` negatives so repeated proved edges and repeated missing edges can be judged from one checked bundle
@@ -202,8 +208,8 @@ Recover one more checked identity bridge from the still-unresolved `ATU`-numbere
 - a specific `NewTokenUPGPrefab.*` object, or
 - a final player-facing row title
 
-The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, the bounded ATU3 prefab-or-title pass is negative but the separate ATU3 effect-driven chain is preserved, and the late ATU24-ATU28 shell neighborhood is now a tighter negative result too, so the next honest candidate is:
+The strongest next candidate is no longer “find any first bridge.” The generic text-hook surface is now a bounded negative result, the bounded ATU3 prefab-or-title pass is negative, the separate ATU3 effect-driven chain now reaches the concrete `AdManager` chest routine family, and the late ATU24-ATU28 shell neighborhood is now a tighter negative result too, so the next honest candidate is:
 
-- either tighten the remaining typed gameplay-owner break inside the preserved `ATU3Button` -> `BuyCellBoost` -> shared chest-effect lane without promoting a prefab-or-title remap, or move to a different unresolved `ATU` shell and recover one more exact shell-to-prefab or shell-to-title bridge without reopening the already-bounded ATU3 identity split unless a new committed artifact explicitly crosses back to path id `15810`
+- either tighten the remaining exact `CellBoostBonus` read or typed field handoff inside the preserved `ATU3Button` consumer family without promoting a prefab-or-title remap, or move to a different unresolved `ATU` shell and recover one more exact shell-to-prefab or shell-to-title bridge without reopening the already-bounded ATU3 identity split unless a new committed artifact explicitly crosses back to path id `15810`
 
 If only one additional subset clears that bar, keep the rest of the `ATU` family quarantined instead of forcing a full remap.

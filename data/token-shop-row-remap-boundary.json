@@ -380,6 +380,45 @@
     },
     "result": "checked action-to-shared-effect chain recovered but typed gameplay owner remains unresolved"
   },
+  "atu3ChestConsumerTrace": {
+    "targetId": "token-shop-atu3-chest-consumer",
+    "recoveredConsumerHandoff": {
+      "shellField": "ATU3Button",
+      "shellPathId": 15810,
+      "sharedEffectTitle": "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>",
+      "sharedEffectText": "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.",
+      "consumerSystem": "AdManager, Assembly-CSharp",
+      "consumerMethodFamily": [
+        "StartTokenRoutine",
+        "<TokenChestRoutine>d__149",
+        "GoToClosedTokenChest",
+        "StartDiamondRoutine",
+        "<DiamondChestRoutine>d__155",
+        "GoToClosedDiamondChest"
+      ],
+      "consumerBonusShell": [
+        "get_SmallAdCellGains",
+        "get_BigAdCellGains",
+        "<FinalAdTokenChestBonus>k__BackingField",
+        "<FinalDiamondChestBonus>k__BackingField"
+      ],
+      "supportingChestObjects": [
+        "TokenChest",
+        "DiamondChest"
+      ],
+      "adjacentSupportSystems": [
+        "SetAdChestTexts",
+        "TextHandler, Assembly-CSharp",
+        "OfflineManager, Assembly-CSharp",
+        "DailyAndAdCounterChecker"
+      ],
+      "groundedConclusion": "The ATU3 shared Cells Booster (Chests) lane now has one checked handoff into the chest-reward consumer family because committed metadata preserves StartTokenRoutine, TokenChestRoutine, StartDiamondRoutine, DiamondChestRoutine, and the closed-chest route methods in one chest-handling neighborhood, committed probe output preserves the same route beside AdManager, SetAdChestTexts, OfflineManager, and DailyAndAdCounterChecker, the same runtime shell also preserves get_SmallAdCellGains, get_BigAdCellGains, FinalAdTokenChestBonus, and FinalDiamondChestBonus, and committed level0 object output preserves the concrete TokenChest and DiamondChest game objects. That is enough to narrow the consumer seam to the AdManager chest routine family rather than a generic shared-effect text surface."
+    },
+    "missingParameterConsumerSeam": {
+      "missingJoin": "No committed source yet shows the exact CellBoostBonus read or typed field handoff inside the AdManager chest routine family that applies the ATU3 cells-from-chests timeskip effect. The checked trace now reaches the concrete chest consumer family, its token and diamond chest routine methods, and the final chest-bonus shell, but still stops short of one exact CellBoostBonus -> TokenChestRoutine, DiamondChestRoutine, FinalAdTokenChestBonus, or FinalDiamondChestBonus handoff."
+    },
+    "result": "checked shared-effect-to-consumer-family handoff recovered but exact CellBoostBonus consumer method remains unresolved"
+  },
   "textHookFollowUp": {
     "testedHooks": [
       "SetAllTokenShopTexts",
@@ -421,7 +460,7 @@
     "missingLinks": [
       "No checked repo artifact currently ties ATU1Button or ATU2Button directly to a final player-facing TokenShop row title string.",
       "No checked repo artifact currently ties ATU1Button, ATU2Button, ATU4Button, ATU5Button, or ATU7Button directly to a final player-facing TokenShop row title string.",
-      "No checked repo artifact currently names the exact typed gameplay owner that consumes the ATU3 CellBoost bonus inside the shared Token & Diamond chest cells-gain system.",
+      "No checked repo artifact currently shows the exact CellBoostBonus read or typed field handoff inside the AdManager chest routine family that applies the ATU3 shared Token & Diamond chest cells-gain effect.",
       "No checked repo artifact currently joins the remaining ATU*Button or ATU*Content path_id family directly to specific NewTokenUPGPrefab.* object identities.",
       "The prefab roster and player-facing string roster are both present, but the repo still has not recovered a verified one-to-one bridge for the rest of the ATU numbering family.",
       "Checked metadata neighborhoods now preserve BuyATU24 through BuyATU28 beside named tier-buy hooks such as BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, but that local method cluster still does not include any final row title.",
@@ -442,6 +481,7 @@
     "The immediate adjacency test also now has a split result on the cells row: the older prefab-or-title remap pass still tightens into a bounded cells-domain split, but the new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button through BuyCellBoost into the Cells Booster (Chests) chest-effect lane.",
     "The explicit ATU3 cells-domain disambiguation pass still stays negative for standard prefab-or-title remap work: BuyCellBoost remains a generic TokenShop buy cluster with StartCellBostHold and StopCellBostHold, the diamond-special CellsBoost prefab and title remain a separate diamond lane, and the token-side CellsPerChestBooster or Token Ultima: Cells clues remain a separate token lane, but none of those checked identity surfaces crosses back to path id 15810 as one standard shell-to-prefab-to-title remap.",
     "ATU3 now also preserves one checked effect-driven chain outside the standard prefab-or-title pattern: the exact TokenShop owner payload keeps ATU3Button beside the CellBoost owner block, the checked action lane preserves BuyCellBoost, the shared cross-system effect surface preserves Cells Booster (Chests), the surviving effect text preserves +1 Seconds timeskip to Cells Gained from Token & Diamond Chests, and the raw CellBoostBonus value of 1 plus CellBoostMaxLevel 60 provide the honest parameter surface for that chest-effect lane.",
+    "The new ATU3 consumer-seam pass now also recovers one checked handoff from that shared chest-effect lane into the concrete AdManager chest routine family: committed metadata preserves StartTokenRoutine, TokenChestRoutine, StartDiamondRoutine, DiamondChestRoutine, GoToClosedTokenChest, and GoToClosedDiamondChest in one chest-handling neighborhood, probe output preserves the same route beside AdManager, SetAdChestTexts, OfflineManager, and DailyAndAdCounterChecker, and the same runtime shell preserves get_SmallAdCellGains, get_BigAdCellGains, FinalAdTokenChestBonus, and FinalDiamondChestBonus.",
     "One grounded shell-to-prefab-to-title chain now clears on the MK2 row: ATU6Button aligns directly with the MK2TokenBoost owner-field block, checked action-lane clues preserve BuyMK2TokenBoost, the checked prefab roster preserves NewTokenUPGPrefab.T1.MK2Booster, and the title-side TokenShop probe surface preserves the final player-facing title Mk2 Generator Booster with matching MK2-generator upgrade text.",
     "The neighboring grounded shell-side rows still remain more limited: ATU5Button is still only a bounded shell-to-prefab result without a checked final player-facing row title, ATU7Button now also clears only as a bounded shell-to-prefab result without a checked final player-facing row title, and the neighboring MK4-MK8 token rows remain unresolved even though the same owner payload preserves their numbered shells and the broader action lane preserves BuyMK4TokenBoost through BuyMK8TokenBoost.",
     "Grounded metadata neighborhoods now tighten the late-row shell further: BuyATU24 through BuyATU28 sit beside named tier-buy hooks like BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, while getter neighborhoods preserve ATU1TokenBonus, ATU2DiamondsBonus, ATU14TokenDailiesBonus, and ATU24Bonus3Shards through ATU24Bonus5AP in one ATU-numbered family.",
@@ -449,6 +489,6 @@
     "The bounded ATU4 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface remains a separate text-handler cluster, while Token Ultima: MP and :Diamond Upgrade 11 - ModBoost remain detached title candidates instead of one exact shell-local final title join.",
     "The bounded ATU5 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface, the detached MK1 generator support-text cluster, and the neighboring Mk2 or Mk3 or Mk5 generator-booster title roster still do not cross back to ATU5Button path id 15831 or one exact Mk1 Generator Booster title join.",
     "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU1, ATU2, ATU4, ATU5, ATU6, and ATU7 bridges plus the one checked ATU6 shell-to-prefab-to-title chain, and the unrecovered ATU family should stay compatibility-only instead of entering planner logic or canonical state.playerProfile.",
-    "The narrowest honest next slice is no longer a general TokenShop row-remap search. The generic text-hook surface is now a bounded negative result, the explicit ATU3 prefab-or-title remap pass stays bounded negative, and the new ATU3 effect-driven trace now ends at a shared chest-effect surface rather than a typed gameplay owner, so the next follow-up should only tighten that remaining typed effect-owner break or move to a different unresolved shell without promoting the rest of the family."
+    "The narrowest honest next slice is no longer a general TokenShop row-remap search. The generic text-hook surface is now a bounded negative result, the explicit ATU3 prefab-or-title remap pass stays bounded negative, the ATU3 effect-driven trace now reaches the AdManager chest consumer family, and the remaining honest blocker is only the exact CellBoostBonus read or typed field handoff inside that consumer family, so the next follow-up should only tighten that remaining consumer seam or move to a different unresolved shell without promoting the rest of the family."
   ]
 }

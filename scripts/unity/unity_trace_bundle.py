@@ -2553,6 +2553,456 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
     }
 
 
+def build_atu3_chest_consumer_trace_graph(
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    row_remap_boundary: dict[str, Any],
+) -> dict[str, Any]:
+    metadata_surface = find_surface(surfaces, "metadata-neighborhood")
+    title_surface = find_surface(surfaces, "shared-effect-title")
+    text_surface = find_surface(surfaces, "shared-effect-text")
+    consumer_surface = find_surface(surfaces, "consumer-family")
+    routine_surface = find_surface(surfaces, "consumer-routines")
+    chest_surface = find_surface(surfaces, "chest-objects")
+
+    metadata_source = find_source_entry(metadata_surface, "metadata")
+    title_source = find_source_entry(title_surface, "dailyTokeniumOwnerProbe")
+    lane_text_source = find_source_entry(text_surface, "dailyTokeniumLaneProbe")
+    unity_text_source = find_source_entry(text_surface, "unityProbe")
+    lane_consumer_source = find_source_entry(consumer_surface, "dailyTokeniumLaneProbe")
+    lm244_consumer_source = find_source_entry(consumer_surface, "lm244TargetedProbe")
+    unity_routine_source = find_source_entry(routine_surface, "unityProbe")
+    metadata_routine_source = find_source_entry(routine_surface, "metadata")
+    chest_source = find_source_entry(chest_surface, "uabeaProbe")
+
+    metadata_shell_hit = find_hit(metadata_source, "ATU3Button")
+    metadata_owner_hit = find_hit(metadata_source, "CellBoostStartCost")
+    title_hit = find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")
+    lane_text_hit = find_hit(lane_text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
+    unity_text_hit = find_hit(unity_text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
+    ad_manager_hit = find_hit(lane_consumer_source, "AdManager, Assembly-CSharp")
+    set_texts_hit = find_hit(lane_consumer_source, "SetAdChestTexts")
+    offline_hit = find_hit(lm244_consumer_source, "OfflineManager, Assembly-CSharp")
+    checker_hit = find_hit(lm244_consumer_source, "DailyAndAdCounterChecker")
+    start_token_hit = find_hit(metadata_routine_source, "StartTokenRoutine")
+    token_routine_hit = find_hit(unity_routine_source, "<TokenChestRoutine>d__149")
+    closed_token_hit = find_hit(metadata_routine_source, "GoToClosedTokenChest")
+    start_diamond_hit = find_hit(metadata_routine_source, "StartDiamondRoutine")
+    diamond_routine_hit = find_hit(unity_routine_source, "<DiamondChestRoutine>d__155")
+    closed_diamond_hit = find_hit(metadata_routine_source, "GoToClosedDiamondChest")
+    small_cells_hit = find_hit(metadata_routine_source, "get_SmallAdCellGains")
+    big_cells_hit = find_hit(metadata_routine_source, "get_BigAdCellGains")
+    final_token_bonus_hit = find_hit(unity_routine_source, "<FinalAdTokenChestBonus>k__BackingField")
+    final_diamond_bonus_hit = find_hit(unity_routine_source, "<FinalDiamondChestBonus>k__BackingField")
+    token_chest_hit = find_hit(chest_source, "TokenChest")
+    diamond_chest_hit = find_hit(chest_source, "DiamondChest")
+
+    consumer_trace = row_remap_boundary["atu3ChestConsumerTrace"]["recoveredConsumerHandoff"]
+    missing_seam = row_remap_boundary["atu3ChestConsumerTrace"]["missingParameterConsumerSeam"]
+
+    shell_node = "target-shell"
+    owner_node = "owner-field-block"
+    shared_effect_node = "shared-effect-lane"
+    consumer_family_node = "consumer-family"
+    routine_family_node = "chest-routine-family"
+    bonus_shell_node = "consumer-bonus-shell"
+    chest_objects_node = "chest-objects"
+
+    edges = [
+        make_edge(
+            "shell-to-owner-block",
+            shell_node,
+            owner_node,
+            "serialized-adjacency",
+            "present",
+            "direct",
+            "The target shell still sits directly beside the CellBoost owner-field block in the committed TokenShop extract.",
+            [
+                cite_row_boundary(
+                    "tokenShopExtract",
+                    "$.fields",
+                    f"{shell_window['shellField']} path_id {shell_window['shellPathId']}",
+                    "Shell window recovered from the exact TokenShop payload.",
+                )
+            ],
+        ),
+        make_edge(
+            "owner-block-to-shared-effect",
+            owner_node,
+            shared_effect_node,
+            "shared-effect-system",
+            "present",
+            "direct",
+            "The already-grounded ATU3 effect lane preserves the shared Cells Booster (Chests) title and player-facing chest-effect text.",
+            [
+                cite_hit(metadata_source, metadata_shell_hit),
+                cite_hit(metadata_source, metadata_owner_hit),
+                cite_hit(title_source, title_hit),
+                cite_hit(lane_text_source, lane_text_hit),
+                cite_hit(unity_text_source, unity_text_hit),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.sharedEffectTitle", consumer_trace["sharedEffectTitle"]),
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.sharedEffectText", consumer_trace["sharedEffectText"]),
+            ],
+        ),
+        make_edge(
+            "shared-effect-to-consumer-family",
+            shared_effect_node,
+            consumer_family_node,
+            "shared-effect-to-consumer-family",
+            "present",
+            "direct",
+            "The ATU3 shared chest-effect lane now hands off into the concrete AdManager chest consumer family.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerSystem", consumer_trace["consumerSystem"]),
+                cite_hit(lane_consumer_source, ad_manager_hit),
+                cite_hit(lane_consumer_source, set_texts_hit),
+                cite_hit(lm244_consumer_source, offline_hit),
+                cite_hit(lm244_consumer_source, checker_hit),
+            ],
+        ),
+        make_edge(
+            "consumer-family-to-routines",
+            consumer_family_node,
+            routine_family_node,
+            "consumer-family-to-chest-routines",
+            "present",
+            "direct",
+            "The same consumer family preserves the token and diamond chest routine neighborhood.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerMethodFamily", ", ".join(consumer_trace["consumerMethodFamily"])),
+                cite_hit(metadata_routine_source, start_token_hit),
+                cite_hit(unity_routine_source, token_routine_hit),
+                cite_hit(metadata_routine_source, closed_token_hit),
+                cite_hit(metadata_routine_source, start_diamond_hit),
+                cite_hit(unity_routine_source, diamond_routine_hit),
+                cite_hit(metadata_routine_source, closed_diamond_hit),
+            ],
+        ),
+        make_edge(
+            "consumer-family-to-bonus-shell",
+            consumer_family_node,
+            bonus_shell_node,
+            "consumer-family-to-bonus-shell",
+            "present",
+            "direct",
+            "The same runtime shell preserves the chest-reward bonus and cell-gain shell adjacent to the ATU3 consumer family.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerBonusShell", ", ".join(consumer_trace["consumerBonusShell"])),
+                cite_hit(metadata_routine_source, small_cells_hit),
+                cite_hit(metadata_routine_source, big_cells_hit),
+                cite_hit(unity_routine_source, final_token_bonus_hit),
+                cite_hit(unity_routine_source, final_diamond_bonus_hit),
+            ],
+        ),
+        make_edge(
+            "consumer-family-to-chest-objects",
+            consumer_family_node,
+            chest_objects_node,
+            "consumer-family-to-chest-objects",
+            "present",
+            "supporting",
+            "Committed object output preserves the concrete token and diamond chest objects used by the same consumer family.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.supportingChestObjects", ", ".join(consumer_trace["supportingChestObjects"])),
+                cite_hit(chest_source, token_chest_hit),
+                cite_hit(chest_source, diamond_chest_hit),
+            ],
+        ),
+        make_edge(
+            "shared-effect-to-routine-family",
+            shared_effect_node,
+            routine_family_node,
+            "derived-player-effect-surface",
+            "present",
+            "supporting",
+            "The preserved +1 seconds cells-from-chests effect surface now narrows onto the same token and diamond chest routine family rather than floating as detached text.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.groundedConclusion", consumer_trace["groundedConclusion"]),
+                cite_hit(title_source, title_hit),
+                cite_hit(unity_routine_source, token_routine_hit),
+                cite_hit(unity_routine_source, diamond_routine_hit),
+            ],
+        ),
+    ]
+
+    negative_edges = [
+        make_edge(
+            "missing-exact-cellboost-consumer-method",
+            owner_node,
+            bonus_shell_node,
+            "exact-cellboost-consumer-method",
+            "missing",
+            "negative",
+            "No committed source yet shows the exact CellBoostBonus read or typed field handoff inside the AdManager chest routine family that applies the ATU3 cells-from-chests timeskip effect.",
+            [
+                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin", missing_seam["missingJoin"]),
+            ],
+        ),
+    ]
+
+    return {
+        "nodes": [
+            make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
+            make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
+            make_node(shared_effect_node, "shared-effect-system", "Cells Booster (Chests) + +1 seconds cells-from-chests text", "present", "The ATU3 row now preserves one grounded shared chest-effect lane."),
+            make_node(consumer_family_node, "consumer-family", "AdManager, Assembly-CSharp + chest support systems", "present", "The concrete chest consumer family is preserved in committed probe artifacts."),
+            make_node(routine_family_node, "consumer-routine-family", "TokenChestRoutine + DiamondChestRoutine neighborhood", "present", "The token and diamond chest routine family is preserved."),
+            make_node(bonus_shell_node, "consumer-bonus-shell", "get_SmallAdCellGains/get_BigAdCellGains + Final chest bonus fields", "present", "The chest reward bonus shell survives beside the consumer family."),
+            make_node(chest_objects_node, "chest-objects", "TokenChest + DiamondChest", "present", "Committed object output preserves the concrete chest game objects."),
+        ],
+        "edges": edges,
+        "negativeEdges": negative_edges,
+        "claimLedger": [
+            {
+                "id": "claim-atu3-consumer-family",
+                "status": "proved",
+                "statement": "ATU3 now preserves one shared-effect-to-consumer-family handoff into the concrete AdManager chest reward neighborhood.",
+                "edgeIds": [edge["id"] for edge in edges],
+                "provedBy": [citation for edge in edges for citation in edge["provedBy"]],
+            },
+            {
+                "id": "claim-missing-exact-cellboost-handoff",
+                "status": "missing",
+                "statement": "The exact CellBoostBonus read or typed field handoff inside the consumer family still is not recovered.",
+                "edgeIds": [edge["id"] for edge in negative_edges],
+                "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
+            },
+        ],
+    }
+
+
+def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
+    baseline = row_remap_boundary["atu3ChestConsumerTrace"]["recoveredConsumerHandoff"]
+    blocked = row_remap_boundary["atu3CrossSystemEffectTrace"]["recoveredActionEffectChain"]
+    baseline_edges = [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU3Button still sits directly after the CellBoost owner-field block.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.ownerFieldBlock",
+                    ", ".join(blocked["ownerFieldBlock"]),
+                )
+            ],
+        },
+        {
+            "type": "shared-effect-system",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The shared Cells Booster (Chests) effect lane remains preserved.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.sharedEffectTitle",
+                    baseline["sharedEffectTitle"],
+                )
+            ],
+        },
+        {
+            "type": "shared-effect-to-consumer-family",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The new trace now preserves one handoff into the AdManager chest consumer family.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerSystem",
+                    baseline["consumerSystem"],
+                )
+            ],
+        },
+        {
+            "type": "consumer-family-to-chest-routines",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The new trace now preserves the token and diamond chest routine family.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerMethodFamily",
+                    ", ".join(baseline["consumerMethodFamily"]),
+                )
+            ],
+        },
+        {
+            "type": "consumer-family-to-bonus-shell",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The new trace now preserves the final chest-bonus shell.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerBonusShell",
+                    ", ".join(baseline["consumerBonusShell"]),
+                )
+            ],
+        },
+        {
+            "type": "consumer-family-to-chest-objects",
+            "status": "present",
+            "provenanceStrength": "supporting",
+            "statement": "The new trace now preserves the concrete token and diamond chest objects.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.supportingChestObjects",
+                    ", ".join(baseline["supportingChestObjects"]),
+                )
+            ],
+        },
+        {
+            "type": "exact-cellboost-consumer-method",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The exact CellBoostBonus read or typed field handoff inside the consumer family still remains unresolved.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin",
+                    row_remap_boundary["atu3ChestConsumerTrace"]["missingParameterConsumerSeam"]["missingJoin"],
+                )
+            ],
+        },
+    ]
+    blocked_edges = [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU3Button still sits directly after the CellBoost owner-field block.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.ownerFieldBlock",
+                    ", ".join(blocked["ownerFieldBlock"]),
+                )
+            ],
+        },
+        {
+            "type": "shared-effect-system",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "The older effect-driven trace already preserved the shared Cells Booster (Chests) effect lane.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle",
+                    blocked["sharedEffectTitle"],
+                )
+            ],
+        },
+        {
+            "type": "shared-effect-to-consumer-family",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The older effect trace stopped at the shared effect surface and did not preserve one concrete consumer-family handoff.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
+                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                )
+            ],
+        },
+        {
+            "type": "consumer-family-to-chest-routines",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The older effect trace did not preserve the token and diamond chest routine family.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
+                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                )
+            ],
+        },
+        {
+            "type": "consumer-family-to-bonus-shell",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The older effect trace did not preserve the concrete chest-bonus shell.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
+                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                )
+            ],
+        },
+        {
+            "type": "consumer-family-to-chest-objects",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "The older effect trace did not preserve the concrete chest-object handoff.",
+            "provedBy": [
+                cite_row_boundary(
+                    "tokenShopRowRemapBoundary",
+                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
+                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                )
+            ],
+        },
+    ]
+    shared_present = sorted(
+        {
+            edge["type"]
+            for edge in baseline_edges
+            if edge["status"] == "present"
+        }.intersection(
+            {
+                edge["type"]
+                for edge in blocked_edges
+                if edge["status"] == "present"
+            }
+        )
+    )
+    baseline_only = sorted(
+        {
+            edge["type"]
+            for edge in baseline_edges
+            if edge["status"] == "present"
+        } - set(shared_present)
+    )
+    blocked_missing = [edge["type"] for edge in blocked_edges if edge["status"] == "missing"]
+
+    return {
+        "baseline": {
+            "id": "atu3-chest-consumer-handoff",
+            "label": "ATU3 chest consumer handoff",
+            "status": "cleared",
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": baseline["shellField"],
+            "shellPathId": baseline["shellPathId"],
+            "comparisonShape": baseline_edges,
+            "groundedConclusion": baseline["groundedConclusion"],
+        },
+        "blockedTarget": {
+            "id": "atu3-effect-driven-chain",
+            "label": "ATU3 effect-driven chain",
+            "status": "blocked",
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "shellField": blocked["shellField"],
+            "shellPathId": blocked["shellPathId"],
+            "comparisonShape": blocked_edges,
+            "groundedConclusion": blocked["groundedConclusion"],
+        },
+        "delta": {
+            "sharedPresentEdgeTypes": shared_present,
+            "baselineOnlyPresentEdgeTypes": baseline_only,
+            "blockedMissingEdgeTypes": blocked_missing,
+            "solvedVsBlockedSummary": [
+                "Both ATU3 traces preserve the direct serialized shell-to-owner-block adjacency and the shared Cells Booster (Chests) effect lane.",
+                "The new consumer-seam trace adds one checked handoff into the AdManager chest consumer family, its chest-routine neighborhood, the final chest-bonus shell, and the concrete chest objects.",
+                "The remaining honest blocker is now only the exact CellBoostBonus read or typed field handoff inside that consumer family.",
+            ],
+        },
+    }
+
+
 def build_family_structure_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
@@ -3161,6 +3611,50 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
     }
 
 
+def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    config = target["strategyConfig"]
+    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
+    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    surfaces = []
+    for surface in config["surfaces"]:
+        terms = list(dict.fromkeys([*surface["terms"], *anchors]))
+        anchor_specs = build_anchor_specs(terms, "surface-search")
+        surfaces.append(
+            {
+                "id": surface["id"],
+                "label": surface["label"],
+                "terms": terms,
+                "anchorSpecs": anchor_specs,
+                "sources": [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in surface["sourceIds"]],
+            }
+        )
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "traceGraph": build_atu3_chest_consumer_trace_graph(shell_window, surfaces, row_remap_boundary),
+        "bridgePromotionRule": "Only preserve ATU3 as a consumer-seam row when one checked shared chest-effect lane, one concrete chest consumer family, one chest-routine neighborhood, and one chest-bonus shell converge on the same cells-from-chests lane; keep exact CellBoostBonus consumer-method claims blocked unless that handoff is recovered explicitly.",
+        "bridgeCheck": {
+            "candidateTerms": [config["shellField"], "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "AdManager, Assembly-CSharp", "<TokenChestRoutine>d__149", "<FinalDiamondChestBonus>k__BackingField"],
+            "bridgeCleared": True,
+            "bridgeHits": [
+                {"surfaceId": "shared-effect-title", "sourcePath": repo_relative(ALL_SOURCE_PATHS["dailyTokeniumOwnerProbe"]), "term": "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"},
+                {"surfaceId": "consumer-family", "sourcePath": repo_relative(ALL_SOURCE_PATHS["dailyTokeniumLaneProbe"]), "term": "AdManager, Assembly-CSharp"},
+                {"surfaceId": "consumer-routines", "sourcePath": repo_relative(ALL_SOURCE_PATHS["unityProbe"]), "term": "<TokenChestRoutine>d__149"},
+                {"surfaceId": "consumer-routines", "sourcePath": repo_relative(ALL_SOURCE_PATHS["unityProbe"]), "term": "<FinalDiamondChestBonus>k__BackingField"},
+            ],
+            "result": "checked shared-effect-to-consumer-family handoff recovered",
+        },
+        "solvedVsBlockedDiff": build_atu3_consumer_vs_effect_diff(target_id, target, row_remap_boundary),
+        "lostStructure": list(config["lostStructure"]),
+        "groundedConclusion": config["groundedConclusion"],
+        "currentBoundary": [
+            "This is a target-driven cross-system trace workflow, not a standard prefab-or-title TokenShop remap promotion by itself.",
+            "It now preserves one exact ATU3 shared-effect-to-consumer-family handoff into the AdManager chest routine neighborhood while keeping the exact CellBoostBonus read or typed field handoff explicit as the only remaining break.",
+            "Keep the ATU3 result quarantined to effect-driven remap evidence until one committed source recovers the exact CellBoostBonus consumer method or typed field handoff.",
+        ],
+    }
+
+
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = target["strategyConfig"]
     row_remap_boundary = documents["tokenShopRowRemapBoundary"]
@@ -3521,6 +4015,8 @@ def build_trace_payload(target_id: str, target: dict[str, Any], anchors: list[st
         return build_token_shop_mk3_bridge_trace(target_id, target, anchors, documents)
     if strategy == "token-shop-atu3-cells-effect":
         return build_token_shop_atu3_effect_trace(target_id, target, anchors, documents)
+    if strategy == "token-shop-atu3-chest-consumer":
+        return build_token_shop_atu3_chest_consumer_trace(target_id, target, anchors, documents)
     if strategy == "token-shop-family-structure":
         return build_token_shop_family_structure_trace(target_id, target, anchors, documents)
     if strategy == "shard-cost-su0-structure":
