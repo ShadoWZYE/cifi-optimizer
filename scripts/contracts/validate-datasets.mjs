@@ -2493,7 +2493,21 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK3TokenBoost", "token shop row remap boundary ATU7 trace bridge action hook drifted");
   assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster", "token shop row remap boundary ATU7 trace bridge prefab drifted");
   assert.match(boundary.atu7BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU7Button now has one checked trace-backed bridge/i, "token shop row remap boundary ATU7 conclusion drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.result, "checked object bridge recovered", "token shop row remap boundary ATU7 trace result drifted");
+  expectRecord(boundary.atu7BridgeFollowUp.verifiedTitleTextChain, "token shop row remap boundary ATU7 title text chain must be an object");
+  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.shellField, "ATU7Button", "token shop row remap boundary ATU7 title text shell drifted");
+  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.shellPathId, 15792, "token shop row remap boundary ATU7 title text shell path drifted");
+  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster", "token shop row remap boundary ATU7 title text prefab drifted");
+  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle, "Mk3 Generator Booster", "token shop row remap boundary ATU7 title text title drifted");
+  assert.deepEqual(
+    boundary.atu7BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+    [
+      "This upgrade divides the cost of MK3 Generators by 3m",
+      "This upgrade provides a 30% increase to the output of MK3 Generators."
+    ],
+    "token shop row remap boundary ATU7 title text support drifted"
+  );
+  assert.match(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU7 title text conclusion drifted");
+  assert.equal(boundary.atu7BridgeFollowUp.result, "checked object bridge plus title-side text chain recovered", "token shop row remap boundary ATU7 trace result drifted");
   expectRecord(boundary.atu8BridgeFollowUp, "token shop row remap boundary ATU8 bridge follow-up must be an object");
   expectRecord(boundary.atu8BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU8 recovered bridge must be an object");
   expectRecord(boundary.atu8BridgeFollowUp.verifiedTitleTextChain, "token shop row remap boundary ATU8 title text chain must be an object");

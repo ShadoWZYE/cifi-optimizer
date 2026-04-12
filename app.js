@@ -4765,8 +4765,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU7Level",
       slot: "ATU7",
-      identity: boundary?.atu7BridgeFollowUp?.recoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK3Booster",
-      identitySource: "Checked prefab identity",
+      identity: boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle || boundary?.atu7BridgeFollowUp?.recoveredBridge?.prefabIdentity || "Mk3 Generator Booster",
+      identitySource: boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ? "Checked title-side text chain" : "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
       startCostField: "MK3TokenBoostStartCost",
