@@ -31,15 +31,15 @@ jobs:
 
       - name: Check out repository
         if: ${{ !github.event.repository.private }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Initialize CodeQL
         if: ${{ !github.event.repository.private }}
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
       - name: Perform CodeQL analysis
         if: ${{ !github.event.repository.private }}
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
