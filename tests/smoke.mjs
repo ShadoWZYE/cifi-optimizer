@@ -310,6 +310,10 @@ const importNormalizationSupportModule = await readFile(
   new URL("../import-normalization-support.js", import.meta.url),
   "utf8"
 );
+const researchValidationSupportModule = await readFile(
+  new URL("../research-validation-support.js", import.meta.url),
+  "utf8"
+);
 const playerProfileBoundarySupportModule = await readFile(
   new URL("../player-profile-boundary-support.js", import.meta.url),
   "utf8"
@@ -527,6 +531,9 @@ const normalizedAppJs = collapseWhitespace(appJs);
 const normalizedImportNormalizationSupportModule = collapseWhitespace(
   importNormalizationSupportModule
 );
+const normalizedResearchValidationSupportModule = collapseWhitespace(
+  researchValidationSupportModule
+);
 const normalizedPlayerProfileBoundarySupportModule = collapseWhitespace(
   playerProfileBoundarySupportModule
 );
@@ -664,15 +671,15 @@ assert.match(appJs, /data-research-view="archived"/);
 assert.match(appJs, /function bindResearchViewSelector\(\)/);
 assert.match(appJs, /track\.status === "archived" : track\.status !== "archived"/);
 assert.match(styles, /\.research-view-toggle/);
-assert.match(appJs, /Active roadmap slice/);
-assert.match(appJs, /Queued behind mapping gate/);
-assert.match(appJs, /Queued after gate/);
-assert.match(appJs, /Sequence 1\/5/);
-assert.match(appJs, /Sequence 4\/5/);
-assert.match(appJs, /PR 3 then PR 5 hardening/);
+assert.match(researchValidationSupportModule, /Active roadmap slice/);
+assert.match(researchValidationSupportModule, /Queued behind mapping gate/);
+assert.match(researchValidationSupportModule, /Queued after gate/);
+assert.match(researchValidationSupportModule, /Sequence 1\/5/);
+assert.match(researchValidationSupportModule, /Sequence 4\/5/);
+assert.match(researchValidationSupportModule, /PR 3 then PR 5 hardening/);
 assert.match(appJs, /APK\/Unity first/);
-assert.match(appJs, /Integration contract/);
-assert.match(appJs, /In research/);
+assert.match(researchValidationSupportModule, /Integration contract/);
+assert.match(researchValidationSupportModule, /In research/);
 assert.match(appJs, /checked APK or Unity evidence/);
 assert.match(appJs, /Confidence, uncertainty, and classification are explicit/);
 assert.match(appJs, /Sources/);
@@ -680,11 +687,11 @@ assert.match(appJs, /Repo artifacts/);
 assert.match(appJs, /Verified now/);
 assert.match(appJs, /Still uncertain/);
 assert.match(appJs, /Smallest shippable slice/);
-assert.match(appJs, /Research intake only/);
-assert.match(appJs, /"hunter-related-planning"/);
-assert.match(appJs, /"mech-related-planning"/);
-assert.match(appJs, /"input-automation-intake"/);
-assert.match(appJs, /"external-model-integration-intake"/);
+assert.match(researchValidationSupportModule, /Research intake only/);
+assert.match(researchValidationSupportModule, /"hunter-related-planning"/);
+assert.match(researchValidationSupportModule, /"mech-related-planning"/);
+assert.match(researchValidationSupportModule, /"input-automation-intake"/);
+assert.match(researchValidationSupportModule, /"external-model-integration-intake"/);
 assert.match(appJs, /function renderResearchGuidance/);
 assert.match(appJs, /Tracks stay in intake until they are mature enough for roadmap work/);
 assert.match(appJs, /Not a product commitment/);
@@ -7957,15 +7964,29 @@ assert.match(appJs, /function renderShardMilestoneDirectory/);
 assert.match(appJs, /function renderShardWorkflowReference/);
 assert.match(appJs, /function renderResearchTrackSupport/);
 assert.match(appJs, /function renderResearchTrackProgress/);
-assert.match(appJs, /function getResearchTrackOrder/);
-assert.match(appJs, /function getResearchTrackLane/);
-assert.match(appJs, /if \(track\.status === "archived"\) \{\s*return "Foundation archive";\s*\}/);
+assert.match(appJs, /from "\.\/research-validation-support\.js"/);
+assert.doesNotMatch(appJs, /function getResearchTrackOrder/);
+assert.doesNotMatch(appJs, /function getResearchTrackLane/);
+assert.doesNotMatch(appJs, /function getResearchTrackStatus/);
+assert.doesNotMatch(appJs, /function getResearchTrackProgressLabel/);
+assert.match(researchValidationSupportModule, /export function getResearchTrackOrder/);
+assert.match(researchValidationSupportModule, /export function getResearchTrackLane/);
+assert.match(researchValidationSupportModule, /export function getResearchTrackStatus/);
+assert.match(
+  normalizedResearchValidationSupportModule,
+  /return "Foundation archive";/
+);
 assert.match(appJs, /Archived foundation cards may still appear here as historical context/);
-assert.match(appJs, /function getResearchTrackStatus/);
-assert.match(appJs, /function getResearchTrackProgressLabel/);
+assert.match(researchValidationSupportModule, /export function getResearchTrackProgressLabel/);
+assert.match(researchValidationSupportModule, /export function buildSnapshotValidationCases/);
+assert.match(researchValidationSupportModule, /export function getValidationScopeMeta/);
+assert.match(researchValidationSupportModule, /export function getDatasetBadgeMetaFromEntry/);
 assert.match(appJs, /from "\.\/recommendation-contract\.js"/);
-assert.match(appJs, /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/);
-assert.match(appJs, /"spend-multiverse-savedata-import-surface": "PR 4 successor"/);
+assert.match(researchValidationSupportModule, /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/);
+assert.match(
+  researchValidationSupportModule,
+  /"spend-multiverse-savedata-import-surface": "PR 4 successor"/
+);
 assert.match(appJs, /function importPlayerProfileJson/);
 assert.match(appJs, /function exportPlayerProfileJson/);
 assert.match(appJs, /function renderPlayerProfileBoundarySummary/);

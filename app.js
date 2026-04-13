@@ -6,6 +6,22 @@ import {
   parseCsv
 } from "./import-normalization-support.js";
 import {
+  buildResearchTrackContractModel,
+  buildResearchTrackProgressModel,
+  buildSnapshotValidationCases,
+  getDatasetBadgeMetaFromEntry,
+  getResearchTrackLane,
+  getResearchTrackOrder,
+  getResearchTrackPhase,
+  getResearchTrackProgressLabel,
+  getResearchTrackSource,
+  getResearchTrackStatus,
+  getShardBadgeMetaFromLabel,
+  getValidationScopeMeta,
+  getValidationStatusMeta,
+  partitionValidationResults
+} from "./research-validation-support.js";
+import {
   PLAYER_PROFILE_SCHEMA_VERSION,
   createDefaultPlayerProfile,
   normalizePlayerProfile
@@ -1402,9 +1418,8 @@ function renderOverview() {
   $("#profileCompletionValue").textContent = `${getProfileCompletion(state.playerProfile, ACTIVE_PROFILE_FORM_FIELD_PATHS)}%`;
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
   const validation = runValidationCases();
-  const mvpValidation = validation.filter((item) => item.scope === "MVP");
-  const apkValidation = validation.filter((item) => item.scope === "APK");
-  const supportValidation = validation.filter((item) => item.scope === "Support");
+  const { mvp: mvpValidation, apk: apkValidation, support: supportValidation } =
+    partitionValidationResults(validation);
   const recommendationFeed = getActiveMvpRecommendationFeed();
   const recommendationFeedSupport = getActiveMvpRecommendationFeedSupport();
   $("#validationStatusValue").textContent =
@@ -2363,98 +2378,36 @@ function renderResearchGuidance() {
   `;
 }
 
-function getResearchTrackOrder(track) {
-  const order = [
-    "data-contracts-and-apk-pipeline",
-    "playerprofile-boundary-and-imports",
-    "shard-milestone-payload-recovery",
-    "shards-and-loop-guardrails",
-    "unified-feed-and-hardening",
-    "spend-planner-first-ui-slice",
-    "spend-multiverse-savedata-import-surface",
-    "spend-multiverse-save-model-recovery",
-    "hunter-related-planning",
-    "mech-related-planning",
-    "input-automation-intake",
-    "external-model-integration-intake"
-  ];
-  const index = order.indexOf(track.id);
-  return index === -1 ? order.length : index;
-}
-
-function getResearchTrackSequenceLabel(track) {
-  const labelsById = {
-    "data-contracts-and-apk-pipeline": "Sequence 1/5",
-    "playerprofile-boundary-and-imports": "Sequence 1/5",
-    "shard-milestone-payload-recovery": "Sequence 2/5",
-    "shards-and-loop-guardrails": "Sequence 2/5",
-    "unified-feed-and-hardening": "Sequence 3/5",
-    "spend-planner-first-ui-slice": "Sequence 4/5",
-    "spend-multiverse-savedata-import-surface": "Sequence 4/5",
-    "spend-multiverse-save-model-recovery": "Sequence 4/5",
-    "hunter-related-planning": "Research intake",
-    "mech-related-planning": "Research intake",
-    "input-automation-intake": "Research intake",
-    "external-model-integration-intake": "Research intake"
-  };
-  return labelsById[track.id] || "Research";
-}
-
 function renderResearchTrackProgress(track) {
-  const completedSteps = Array.isArray(track.completedSteps) ? track.completedSteps : [];
-  const remainingSteps = Array.isArray(track.nextSteps) ? track.nextSteps : [];
-  const totalSteps = completedSteps.length + remainingSteps.length;
-  const percent = totalSteps ? Math.round((completedSteps.length / totalSteps) * 100) : 0;
+  const model = buildResearchTrackProgressModel(track);
 
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Track status</p>
-      <p class="meta">${escapeHtml(track.currentSlice || "Current slice not recorded yet.")}</p>
-      <p class="meta">${escapeHtml(getResearchTrackSequenceLabel(track))} | ${escapeHtml(getResearchTrackPhase(track))}</p>
-      <p class="meta">${completedSteps.length} done | ${remainingSteps.length} left | ${percent}% complete</p>
-      ${completedSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Done in repo</p><ul class="research-step-list">${completedSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
+      <p class="meta">${escapeHtml(model.currentSlice)}</p>
+      <p class="meta">${escapeHtml(model.sequenceLabel)} | ${escapeHtml(model.phaseLabel)}</p>
+      <p class="meta">${model.completedCount} done | ${model.remainingCount} left | ${model.percent}% complete</p>
+      ${model.completedSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Done in repo</p><ul class="research-step-list">${model.completedSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
     </div>
   `;
 }
 
 function renderResearchTrackContract(track) {
-  const sources = Array.isArray(track.sources) ? track.sources : [];
-  const artifacts = Array.isArray(track.artifacts) ? track.artifacts : [];
-  const verified = Array.isArray(track.verified) ? track.verified : [];
-  const uncertain = Array.isArray(track.uncertain) ? track.uncertain : [];
-  const metaBits = [
-    track.classification ? `<span class="pill">${escapeHtml(track.classification)}</span>` : "",
-    track.category ? `<span class="pill">${escapeHtml(track.category)}</span>` : "",
-    track.implementationRelevance
-      ? `<span class="pill">${escapeHtml(track.implementationRelevance)}</span>`
-      : "",
-    typeof track.apkUnityPathChecked === "boolean"
-      ? `<span class="pill">${escapeHtml(track.apkUnityPathChecked ? "APK/Unity first" : "APK/Unity not yet checked")}</span>`
-      : ""
-  ].filter(Boolean);
+  const model = buildResearchTrackContractModel(track);
 
-  if (
-    !metaBits.length &&
-    !track.exitCondition &&
-    !track.blockedBy &&
-    !track.smallestShippableSlice &&
-    !sources.length &&
-    !artifacts.length &&
-    !verified.length &&
-    !uncertain.length
-  ) {
+  if (!model.hasContent) {
     return "";
   }
 
   return `
-    ${metaBits.length ? `<div class="pill-row">${metaBits.join("")}</div>` : ""}
-    ${track.exitCondition ? `<div class="meta-stack"><p class="snapshot-title">Exit condition</p><p class="meta">${escapeHtml(track.exitCondition)}</p></div>` : ""}
-    ${track.blockedBy ? `<div class="meta-stack"><p class="snapshot-title">Current blocker</p><p class="meta">${escapeHtml(track.blockedBy)}</p></div>` : ""}
-    ${track.smallestShippableSlice ? `<div class="meta-stack"><p class="snapshot-title">Smallest shippable slice</p><p class="meta">${escapeHtml(track.smallestShippableSlice)}</p></div>` : ""}
-    ${sources.length ? `<div class="meta-stack"><p class="snapshot-title">Sources</p><ul class="research-step-list">${sources.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
-    ${artifacts.length ? `<div class="meta-stack"><p class="snapshot-title">Repo artifacts</p><ul class="research-step-list">${artifacts.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
-    ${verified.length ? `<div class="meta-stack"><p class="snapshot-title">Verified now</p><ul class="research-step-list">${verified.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
-    ${uncertain.length ? `<div class="meta-stack"><p class="snapshot-title">Still uncertain</p><ul class="research-step-list">${uncertain.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${model.metaLabels.length ? `<div class="pill-row">${model.metaLabels.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")}</div>` : ""}
+    ${model.exitCondition ? `<div class="meta-stack"><p class="snapshot-title">Exit condition</p><p class="meta">${escapeHtml(model.exitCondition)}</p></div>` : ""}
+    ${model.blockedBy ? `<div class="meta-stack"><p class="snapshot-title">Current blocker</p><p class="meta">${escapeHtml(model.blockedBy)}</p></div>` : ""}
+    ${model.smallestShippableSlice ? `<div class="meta-stack"><p class="snapshot-title">Smallest shippable slice</p><p class="meta">${escapeHtml(model.smallestShippableSlice)}</p></div>` : ""}
+    ${model.sources.length ? `<div class="meta-stack"><p class="snapshot-title">Sources</p><ul class="research-step-list">${model.sources.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${model.artifacts.length ? `<div class="meta-stack"><p class="snapshot-title">Repo artifacts</p><ul class="research-step-list">${model.artifacts.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${model.verified.length ? `<div class="meta-stack"><p class="snapshot-title">Verified now</p><ul class="research-step-list">${model.verified.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
+    ${model.uncertain.length ? `<div class="meta-stack"><p class="snapshot-title">Still uncertain</p><ul class="research-step-list">${model.uncertain.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : ""}
   `;
 }
 
@@ -2671,69 +2624,6 @@ function getTopExtractionCandidate(trackId = null) {
     return candidates[0] || null;
   }
   return candidates.find((candidate) => candidate.track === trackId) || null;
-}
-
-function getResearchTrackLane(track) {
-  if (track.status === "archived") {
-    return "Foundation archive";
-  }
-  if (track.status === "active") {
-    return "Active roadmap slice";
-  }
-  return "Queued behind mapping gate";
-}
-
-function getResearchTrackStatus(track) {
-  const statusById = {
-    active: "Active",
-    queued: "Queued after gate",
-    research: "In research",
-    archived: "Archived"
-  };
-  return statusById[track.status] || "Queued after gate";
-}
-
-function getResearchTrackProgressLabel(track) {
-  const completedSteps = Array.isArray(track.completedSteps) ? track.completedSteps.length : 0;
-  const remainingSteps = Array.isArray(track.nextSteps) ? track.nextSteps.length : 0;
-  const totalSteps = completedSteps + remainingSteps;
-  return `${completedSteps}/${totalSteps} done`;
-}
-
-function getResearchTrackPhase(track) {
-  const phaseById = {
-    "data-contracts-and-apk-pipeline": "PR 1",
-    "playerprofile-boundary-and-imports": "PR 1",
-    "shard-milestone-payload-recovery": "PR 2 successor",
-    "shards-and-loop-guardrails": "PR 2",
-    "unified-feed-and-hardening": "PR 3 then PR 5 hardening",
-    "spend-planner-first-ui-slice": "PR 6 prep slice",
-    "spend-multiverse-savedata-import-surface": "PR 4 successor",
-    "spend-multiverse-save-model-recovery": "PR 4 successor",
-    "hunter-related-planning": "Research intake only",
-    "mech-related-planning": "Research intake only",
-    "input-automation-intake": "Research intake only",
-    "external-model-integration-intake": "Research intake only"
-  };
-  return phaseById[track.id] || "Research";
-}
-
-function getResearchTrackSource(track) {
-  const sourceById = {
-    "data-contracts-and-apk-pipeline": "APK/Unity first",
-    "playerprofile-boundary-and-imports": "Schema boundary",
-    "shard-milestone-payload-recovery": "Grounded shard data",
-    "shards-and-loop-guardrails": "Grounded shard data",
-    "spend-planner-first-ui-slice": "Canonical PlayerProfile spend inputs",
-    "spend-multiverse-savedata-import-surface": "Extracted Emporium save-side data",
-    "spend-multiverse-save-model-recovery": "Extracted Emporium save-side data",
-    "unified-feed-and-hardening": "Integration contract",
-    "hunter-related-planning": "Research intake",
-    "mech-related-planning": "Research intake",
-    "input-automation-intake": "Research intake",
-    "external-model-integration-intake": "Research intake"
-  };
-  return sourceById[track.id] || "Research";
 }
 
 function collectProfileForm() {
@@ -3790,29 +3680,9 @@ function getBundledDatasetContractEntry(id) {
   return datasets.find((entry) => entry?.id === id) || null;
 }
 
-function mapDatasetClassificationToShardStatus(classification, fallback = "Unmapped") {
-  const statusByClassification = {
-    "canonical-app-snapshot": "Integrated",
-    "grounded-descriptive": "Integrated",
-    "extracted-mechanics": "Available",
-    "community-derived": "Unmapped"
-  };
-  return statusByClassification[classification] || fallback;
-}
-
 function getDatasetBadgeMeta(datasetId, fallbackLabel = "Unmapped") {
   const entry = getBundledDatasetContractEntry(datasetId);
-  const label = mapDatasetClassificationToShardStatus(entry?.classification, fallbackLabel);
-  return getShardBadgeMetaFromLabel(label, entry?.classification || null);
-}
-
-function getShardBadgeMetaFromLabel(label, classification = null) {
-  return {
-    label,
-    cardClass: `shard-status-card-${label.toLowerCase()}`,
-    pillClass: `shard-status-pill-${label.toLowerCase()}`,
-    classification
-  };
+  return getDatasetBadgeMetaFromEntry(entry, fallbackLabel);
 }
 
 function renderShardMilestoneDirectory() {
@@ -3964,13 +3834,11 @@ function runValidationCases() {
         : "Contract gaps in active feed",
     gem: runGemOptimization()[0]?.title ?? "None"
   };
-  const appCases = state.snapshot.validationCases.map((item) => ({
-    title: item.title,
-    expected: item.expected,
-    actual: current[item.module],
-    pass: item.expected === current[item.module],
-    scope: SUPPORT_SURFACE_VALIDATION_MODULES.has(item.module) ? "Support" : "MVP"
-  }));
+  const appCases = buildSnapshotValidationCases(
+    state.snapshot.validationCases,
+    current,
+    SUPPORT_SURFACE_VALIDATION_MODULES
+  );
 
   return [...appCases, ...buildApkGroundingValidationCases()];
 }
@@ -5805,8 +5673,8 @@ function renderValidationSection(title, description, results) {
             (item) => `
           <article class="validation-card ${item.pass ? "pass" : "warn"}">
             <strong>${item.title}</strong>
-            <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : item.scope === "APK" ? "| extracted grounding gate" : "| grounded MVP surface"}</p>
-            <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
+            <p class="meta">${getValidationScopeMeta(item.scope)}</p>
+            <p class="validation-status">${getValidationStatusMeta(item)}</p>
             <p class="meta">${item.actual}</p>
           </article>
         `

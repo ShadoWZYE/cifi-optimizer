@@ -27,6 +27,7 @@ const includedRootFiles = new Set([
   "player-profile.js",
   "recommendation-contract.js",
   "recommendation-feed-support.js",
+  "research-validation-support.js",
   "shard-evidence-support.js",
   "ship-planner-support.js",
   "spend-boundary-summary.js"
