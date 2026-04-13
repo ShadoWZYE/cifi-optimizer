@@ -4946,6 +4946,39 @@ assert.match(
   tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin,
   /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i
 );
+[
+  "<TokenChestRoutine>d__149",
+  "<DiamondChestRoutine>d__155",
+  "<FinalAdTokenChestBonus>k__BackingField",
+  "<FinalDiamondChestBonus>k__BackingField"
+].forEach((name) => {
+  assert.ok(
+    tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.ruledOutDirectConsumerTargets.includes(
+      name
+    )
+  );
+});
+[
+  "get_SmallAdCellGains",
+  "get_BigAdCellGains",
+  "SetBoosterAdBonus",
+  "get_FinalBoosterAdBonus"
+].forEach((name) => {
+  assert.ok(
+    tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.remainingExactReadTargets.includes(
+      name
+    )
+  );
+});
+["set_FinalBoosterAdBonus", "FinalBoosterAdBonus", "<FinalBoosterAdBonus>k__BackingField"].forEach(
+  (name) => {
+    assert.ok(
+      tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.remainingTypedFieldTargets.includes(
+        name
+      )
+    );
+  }
+);
 assert.equal(
   tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.result,
   "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site"
@@ -7549,7 +7582,11 @@ assert.match(
 );
 assert.match(
   activeGroundingBoundariesDoc,
-  /exact `CellBoostBonus` read-site or typed-field handoff into that internal shell/i
+  /exact `CellBoostBonus` read-site seam inside that remaining getter-or-booster aggregation shell or the `FinalBoosterAdBonus` setter-or-backing-field surfaces/i
+);
+assert.match(
+  activeGroundingBoundariesDoc,
+  /rules out the outer chest routines plus the final token-or-diamond chest bonus backing fields as the direct handoff point/i
 );
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
@@ -7575,7 +7612,7 @@ assert.match(
 );
 assert.match(
   tokenShopRowRemapTrack?.blockedBy ?? "",
-  /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain, one tighter shared-effect-to-consumer-family handoff, and one checked internal bonus-aggregation shell while still failing exact prefab-or-title localization.*late ATU24-ATU28 shell neighborhood now stays negative/
+  /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain, one tighter shared-effect-to-consumer-family handoff, and one checked internal bonus-aggregation shell while still failing exact prefab-or-title localization.*rules out the outer chest routines plus the final token-or-diamond chest bonus backing fields as the direct handoff point.*late ATU24-ATU28 shell neighborhood now stays negative/
 );
 assert.ok(
   tokenShopRowRemapTrack?.verified?.some((line) =>

@@ -8347,6 +8347,42 @@ function validateTokenShopRowRemapBoundary(boundary) {
     /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i,
     "token shop row remap boundary ATU3 internal read seam gap drifted"
   );
+  [
+    "<TokenChestRoutine>d__149",
+    "<DiamondChestRoutine>d__155",
+    "<FinalAdTokenChestBonus>k__BackingField",
+    "<FinalDiamondChestBonus>k__BackingField"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.ruledOutDirectConsumerTargets.includes(
+        name
+      ),
+      `token shop row remap boundary ATU3 ruled-out direct consumer target drifted for ${name}`
+    );
+  });
+  [
+    "get_SmallAdCellGains",
+    "get_BigAdCellGains",
+    "SetBoosterAdBonus",
+    "get_FinalBoosterAdBonus"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.remainingExactReadTargets.includes(
+        name
+      ),
+      `token shop row remap boundary ATU3 remaining exact read target drifted for ${name}`
+    );
+  });
+  ["set_FinalBoosterAdBonus", "FinalBoosterAdBonus", "<FinalBoosterAdBonus>k__BackingField"].forEach(
+    (name) => {
+      assert.ok(
+        boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.remainingTypedFieldTargets.includes(
+          name
+        ),
+        `token shop row remap boundary ATU3 remaining typed field target drifted for ${name}`
+      );
+    }
+  );
   assert.equal(
     boundary.atu3ChestConsumerReadTrace.result,
     "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site",

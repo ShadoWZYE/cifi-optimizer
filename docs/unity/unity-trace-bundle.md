@@ -255,13 +255,14 @@
 
 ### Missing joins
 
-- `exact-cellboost-to-booster-bonus-handoff`: No committed source yet shows one exact CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell that contains get_SmallAdCellGains, get_BigAdCellGains, SetBoosterAdBonus, get_FinalBoosterAdBonus, SmallAdCellGains, BigAdCellGains, FinalBoosterAdBonus, and <BoosterAdRoutine>d__158. The checked trace now narrows the unresolved runtime seam past the outer chest routines and final chest-bonus backing fields, but it still stops short of one exact CellBoostBonus -> SmallAdCellGains, BigAdCellGains, SetBoosterAdBonus, get_FinalBoosterAdBonus, or FinalBoosterAdBonus handoff. [negative]
-  - `tokenShopRowRemapBoundary` at `$.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin` records `No committed source yet shows one exact CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell that contains get_SmallAdCellGains, get_BigAdCellGains, SetBoosterAdBonus, get_FinalBoosterAdBonus, SmallAdCellGains, BigAdCellGains, FinalBoosterAdBonus, and <BoosterAdRoutine>d__158. The checked trace now narrows the unresolved runtime seam past the outer chest routines and final chest-bonus backing fields, but it still stops short of one exact CellBoostBonus -> SmallAdCellGains, BigAdCellGains, SetBoosterAdBonus, get_FinalBoosterAdBonus, or FinalBoosterAdBonus handoff.`
+- `exact-cellboost-to-booster-bonus-handoff`: No committed source yet shows one exact CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell that contains get_SmallAdCellGains, get_BigAdCellGains, SetBoosterAdBonus, get_FinalBoosterAdBonus, SmallAdCellGains, BigAdCellGains, FinalBoosterAdBonus, and <BoosterAdRoutine>d__158. The checked trace now makes both sides of that seam explicit in committed metadata, rules out a direct handoff at the outer chest routines and final token-or-diamond chest bonus backing fields, and leaves only the getter/booster aggregation shell plus FinalBoosterAdBonus setter-or-backing-field surfaces as the remaining exact read-site seam. [negative]
+  - `tokenShopRowRemapBoundary` at `$.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin` records `No committed source yet shows one exact CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell that contains get_SmallAdCellGains, get_BigAdCellGains, SetBoosterAdBonus, get_FinalBoosterAdBonus, SmallAdCellGains, BigAdCellGains, FinalBoosterAdBonus, and <BoosterAdRoutine>d__158. The checked trace now makes both sides of that seam explicit in committed metadata, rules out a direct handoff at the outer chest routines and final token-or-diamond chest bonus backing fields, and leaves only the getter/booster aggregation shell plus FinalBoosterAdBonus setter-or-backing-field surfaces as the remaining exact read-site seam.`
   - `metadata` at `metadata offset 615771` records `get_SmallAdCellGains`
   - `metadata` at `metadata offset 615792` records `get_BigAdCellGains`
   - `metadata` at `metadata offset 615811` records `SetBoosterAdBonus`
   - `metadata` at `metadata offset 615829` records `get_FinalBoosterAdBonus`
-  - `metadata` at `metadata offset 615829` records `get_FinalBoosterAdBonus`
+  - `metadata` at `metadata offset 615853` records `set_FinalBoosterAdBonus`
+  - `metadata` at `metadata offset 617854` records `<FinalBoosterAdBonus>k__BackingField`
 
 ## Solved vs blocked
 
@@ -273,19 +274,19 @@
 
 - Both ATU3 consumer traces preserve the direct serialized shell-to-owner-block adjacency and the shared effect-to-consumer-family handoff.
 - The new internal read trace adds one checked getter-to-booster bonus aggregation shell inside the AdManager chest consumer family.
-- The remaining bounded break is no longer the outer chest routine family but the exact CellBoostBonus read-site handoff into that internal bonus shell.
+- The remaining bounded break is no longer the outer chest routine family or the final token-or-diamond chest bonus backing-field shell but the exact CellBoostBonus read-site handoff inside the getter-or-booster aggregation shell or the FinalBoosterAdBonus setter-or-backing-field surfaces.
 
 ## Decision summary
 
 - Verdict: `quarantine`
-- Summary: The trace now preserves the internal ATU3 chest bonus-aggregation shell, but the exact CellBoostBonus read site stays bounded negative.
+- Summary: The trace now preserves the internal ATU3 chest bonus-aggregation shell, rules out the outer chest routines plus final token-or-diamond chest bonus backing fields as the direct handoff point, but the exact CellBoostBonus read site still stays bounded negative inside the remaining getter-or-booster aggregation shell.
 - Proved edges: `6`
 - Negative edges: `1`
 - Baseline gap: `exact-cellboost-to-booster-bonus-handoff`
 
 ## Current loss
 
-- The checked ATU3 chain now reaches the concrete AdManager consumer family and one tighter internal bonus-aggregation shell, but no committed source yet shows the exact CellBoostBonus read-site or typed-field handoff into that shell.
+- The checked ATU3 chain now reaches the concrete AdManager consumer family and one tighter internal bonus-aggregation shell, rules out the outer chest routines plus final token-or-diamond chest bonus backing fields as the direct handoff point, but no committed source yet shows the exact CellBoostBonus read-site or typed-field handoff inside the remaining getter-or-booster aggregation shell or the FinalBoosterAdBonus setter-or-backing-field surfaces.
 - The getter family and the booster bonus aggregation shell survive together in committed metadata, while the final token and diamond chest bonus backing fields survive in committed probe output, so the remaining runtime seam is narrow enough to stay quarantined to one exact internal handoff break.
 - Because the exact CellBoostBonus runtime read is still missing, this trace should stay as effect-chain completion evidence only and should not widen into prefab, title, or planner promotion.
 
