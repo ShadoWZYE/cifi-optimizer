@@ -307,35 +307,35 @@ const tokenBankControllerShellData = JSON.parse(
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const importNormalizationSupportModule = await readFile(
-  new URL("../import-normalization-support.js", import.meta.url),
+  new URL("../support/import-normalization-support.js", import.meta.url),
   "utf8"
 );
 const researchValidationSupportModule = await readFile(
-  new URL("../research-validation-support.js", import.meta.url),
+  new URL("../support/research-validation-support.js", import.meta.url),
   "utf8"
 );
 const shardBoundarySummarySupportModule = await readFile(
-  new URL("../shard-boundary-summary-support.js", import.meta.url),
+  new URL("../support/shard-boundary-summary-support.js", import.meta.url),
   "utf8"
 );
 const playerProfileBoundarySupportModule = await readFile(
-  new URL("../player-profile-boundary-support.js", import.meta.url),
+  new URL("../support/player-profile-boundary-support.js", import.meta.url),
   "utf8"
 );
 const recommendationFeedSupportModule = await readFile(
-  new URL("../recommendation-feed-support.js", import.meta.url),
+  new URL("../support/recommendation-feed-support.js", import.meta.url),
   "utf8"
 );
 const shardEvidenceSupportModule = await readFile(
-  new URL("../shard-evidence-support.js", import.meta.url),
+  new URL("../support/shard-evidence-support.js", import.meta.url),
   "utf8"
 );
 const shipPlannerSupportModule = await readFile(
-  new URL("../ship-planner-support.js", import.meta.url),
+  new URL("../support/ship-planner-support.js", import.meta.url),
   "utf8"
 );
 const spendBoundarySummaryJs = await readFile(
-  new URL("../spend-boundary-summary.js", import.meta.url),
+  new URL("../support/spend-boundary-summary.js", import.meta.url),
   "utf8"
 );
 const tokenShopProgressionModel = await readFile(
@@ -880,12 +880,12 @@ assert.match(
   tokenShopUiSupport,
   /Grounded as a checked shell-to-prefab-to-player-facing-title row\./
 );
-assert.match(appJs, /from "\.\/recommendation-feed-support\.js"/);
+assert.match(appJs, /from "\.\/support\/recommendation-feed-support\.js"/);
 assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilitySummary/);
 assert.match(recommendationFeedSupportModule, /function getRecommendationContractSummary/);
 assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilityAudit/);
-assert.match(appJs, /from "\.\/ship-planner-support\.js"/);
-assert.match(appJs, /from "\.\/player-profile-boundary-support\.js"/);
+assert.match(appJs, /from "\.\/support\/ship-planner-support\.js"/);
+assert.match(appJs, /from "\.\/support\/player-profile-boundary-support\.js"/);
 assert.match(
   playerProfileBoundarySupportModule,
   /export function buildPlayerProfileBoundaryGroups/
@@ -7977,7 +7977,7 @@ assert.match(appJs, /function renderShardMilestoneDirectory/);
 assert.match(appJs, /function renderShardWorkflowReference/);
 assert.match(appJs, /function renderResearchTrackSupport/);
 assert.match(appJs, /function renderResearchTrackProgress/);
-assert.match(appJs, /from "\.\/research-validation-support\.js"/);
+assert.match(appJs, /from "\.\/support\/research-validation-support\.js"/);
 assert.doesNotMatch(appJs, /function getResearchTrackOrder/);
 assert.doesNotMatch(appJs, /function getResearchTrackLane/);
 assert.doesNotMatch(appJs, /function getResearchTrackStatus/);
@@ -8028,7 +8028,7 @@ assert.match(appJs, /function renderSupportSurfaceNotice/);
 assert.match(appJs, /function renderValidationSection/);
 assert.match(appJs, /function toRecommendationAction/);
 assert.match(appJs, /function sanitizeRecommendationLines/);
-assert.match(appJs, /from "\.\/shard-boundary-summary-support\.js"/);
+assert.match(appJs, /from "\.\/support\/shard-boundary-summary-support\.js"/);
 assert.doesNotMatch(appJs, /function getShardMilestonePayloadBoundarySummary/);
 assert.doesNotMatch(appJs, /function getShardCostModelBoundarySummary/);
 assert.doesNotMatch(appJs, /function getShardMilestoneRowModelBoundarySummary/);
@@ -8065,7 +8065,7 @@ assert.match(
 assert.match(recommendationContractModule, /export function toRecommendationAction/);
 assert.match(recommendationContractModule, /export function sortRecommendationFeed/);
 assert.match(recommendationContractModule, /export function getRecommendationContractIssues/);
-assert.match(appJs, /from "\.\/shard-evidence-support\.js"/);
+assert.match(appJs, /from "\.\/support\/shard-evidence-support\.js"/);
 assert.match(shardEvidenceSupportModule, /getSourceTitlesForIds/);
 assert.match(shardEvidenceSupportModule, /getMilestoneSourceLabel/);
 assert.match(shardEvidenceSupportModule, /getProvenanceConflictNote/);
@@ -8076,7 +8076,7 @@ assert.match(appJs, /function getShardFocusLevelForMilestone/);
 assert.match(shardEvidenceSupportModule, /getShardMilestoneGroundedSummary/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
-assert.match(appJs, /from "\.\/import-normalization-support\.js"/);
+assert.match(appJs, /from "\.\/support\/import-normalization-support\.js"/);
 assert.doesNotMatch(appJs, /function normalizeImportRow/);
 assert.match(importNormalizationSupportModule, /export function parseCsv/);
 assert.match(importNormalizationSupportModule, /export function normalizeImportRow/);
@@ -8242,7 +8242,7 @@ assert.match(appJs, /function renderSpendPlannerBoundary/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /compatibility\.unmappedSystemState/);
 assert.match(spendBoundarySummaryJs, /function getTokeniumNamingSummary/);
-assert.match(appJs, /from "\.\/spend-boundary-summary\.js"/);
+assert.match(appJs, /from "\.\/support\/spend-boundary-summary\.js"/);
 assert.match(spendBoundarySummaryJs, /function getTokenBankStateSummary/);
 assert.match(spendBoundarySummaryJs, /function getDailyTokeniumLaneSummary/);
 assert.match(spendBoundarySummaryJs, /function getTokenBankFormulaBoundarySummary/);

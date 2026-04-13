@@ -9,7 +9,7 @@ import {
   normalizeImportRow,
   parseCsv,
   slugify
-} from "../import-normalization-support.js";
+} from "../support/import-normalization-support.js";
 
 test("parseCsv keeps quoted commas and normalizeImportRow shapes import datasets", () => {
   assert.deepEqual(parseCsv('title,goal\n"Track, Alpha",Focus'), [

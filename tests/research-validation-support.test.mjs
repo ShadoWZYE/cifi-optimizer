@@ -12,7 +12,7 @@ import {
   getValidationScopeMeta,
   getValidationStatusMeta,
   partitionValidationResults
-} from "../research-validation-support.js";
+} from "../support/research-validation-support.js";
 
 test("research track helpers preserve ordering and progress or contract shaping", () => {
   const track = {

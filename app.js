@@ -4,7 +4,7 @@ import {
   normalizeGeneratorTierKey,
   normalizeImportRow,
   parseCsv
-} from "./import-normalization-support.js";
+} from "./support/import-normalization-support.js";
 import {
   buildResearchTrackContractModel,
   buildResearchTrackProgressModel,
@@ -20,7 +20,7 @@ import {
   getValidationScopeMeta,
   getValidationStatusMeta,
   partitionValidationResults
-} from "./research-validation-support.js";
+} from "./support/research-validation-support.js";
 import {
   PLAYER_PROFILE_SCHEMA_VERSION,
   createDefaultPlayerProfile,
@@ -32,7 +32,7 @@ import {
   getPlannerHelperCompletion,
   getPlayerProfileBoundaryAudit,
   getProfileCompletion
-} from "./player-profile-boundary-support.js";
+} from "./support/player-profile-boundary-support.js";
 import {
   getRecommendationContractIssues as getNormalizedRecommendationContractIssues,
   sanitizeRecommendationLines as sanitizeNormalizedRecommendationLines,
@@ -47,7 +47,7 @@ import {
   getRecommendationExplainabilitySummary,
   getRecommendationFeedSummaryModel,
   getRecommendationFeedSupportNoticeLines
-} from "./recommendation-feed-support.js";
+} from "./support/recommendation-feed-support.js";
 import {
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
@@ -59,8 +59,8 @@ import {
   getShardMilestoneTitleEffectBoundarySummary,
   getShardOwnerFamilyBoundarySummary,
   getShardSaveBoundarySummary
-} from "./shard-boundary-summary-support.js";
-import { createShardEvidenceSupport } from "./shard-evidence-support.js";
+} from "./support/shard-boundary-summary-support.js";
+import { createShardEvidenceSupport } from "./support/shard-evidence-support.js";
 import {
   formatNumericRanges,
   getDailyTokeniumLaneSummary,
@@ -83,8 +83,8 @@ import {
   getTokenShopCostLaneSummary,
   getTokenShopOwnerShellSummary,
   getTokenShopSaveBoundarySummary
-} from "./spend-boundary-summary.js";
-import { createShipPlannerSupport } from "./ship-planner-support.js";
+} from "./support/spend-boundary-summary.js";
+import { createShipPlannerSupport } from "./support/ship-planner-support.js";
 import { buildTokenShopProgressionModel } from "./token-shop-progression-model.js";
 import { createTokenShopUiSupport } from "./token-shop-ui-support.js";
 

@@ -7,7 +7,7 @@ import {
   getRecommendationExplainabilityAudit,
   getRecommendationFeedSupportNoticeLines,
   getRecommendationFeedSummaryModel
-} from "../recommendation-feed-support.js";
+} from "../support/recommendation-feed-support.js";
 
 test("getProgressionRecommendationFeedPartition keeps only valid shard and loop items in the main feed", () => {
   const partition = getProgressionRecommendationFeedPartition([

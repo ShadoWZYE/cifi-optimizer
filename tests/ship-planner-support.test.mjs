@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { createShipPlannerSupport } from "../ship-planner-support.js";
+import { createShipPlannerSupport } from "../support/ship-planner-support.js";
 
 function createSupport(overrides = {}) {
   const activeLoadout =

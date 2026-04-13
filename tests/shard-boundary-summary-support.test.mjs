@@ -5,7 +5,7 @@ import {
   getShardCostModelBoundarySummary,
   getShardOwnerFamilyBoundarySummary,
   getShardSaveBoundarySummary
-} from "../shard-boundary-summary-support.js";
+} from "../support/shard-boundary-summary-support.js";
 
 test("shard owner-family and save-boundary summaries preserve descriptive gate labels", () => {
   assert.deepEqual(

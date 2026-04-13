@@ -1,4 +1,4 @@
-import { getRecommendationContractIssues } from "./recommendation-contract.js";
+import { getRecommendationContractIssues } from "../recommendation-contract.js";
 
 export function getProgressionRecommendationFeedPartition(items) {
   const all = Array.isArray(items)

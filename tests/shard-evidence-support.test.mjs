@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { createShardEvidenceSupport } from "../shard-evidence-support.js";
+import { createShardEvidenceSupport } from "../support/shard-evidence-support.js";
 
 function createTestSupport(overrides = {}) {
   const grounding = overrides.grounding ?? {};

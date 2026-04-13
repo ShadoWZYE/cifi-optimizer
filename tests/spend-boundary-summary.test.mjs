@@ -9,7 +9,7 @@ import {
   getTokenBankStateSummary,
   getTokenShopCoverageSummary,
   getTokenShopCostLaneSummary
-} from "../spend-boundary-summary.js";
+} from "../support/spend-boundary-summary.js";
 
 test("formatNumericRanges groups sorted unique values into joined ranges", () => {
   assert.equal(formatNumericRanges([7, 4, 5, 9, 7, 6, 11]), "4-7 and 9 and 11");

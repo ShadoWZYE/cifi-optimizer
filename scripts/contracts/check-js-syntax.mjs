@@ -22,18 +22,10 @@ const ignoredDirectories = new Set([
 ]);
 const includedRootFiles = new Set([
   "app.js",
-  "import-normalization-support.js",
-  "player-profile-boundary-support.js",
   "player-profile.js",
   "recommendation-contract.js",
-  "recommendation-feed-support.js",
-  "research-validation-support.js",
-  "shard-boundary-summary-support.js",
-  "shard-evidence-support.js",
-  "ship-planner-support.js",
-  "spend-boundary-summary.js"
 ]);
-const includedRootDirectories = new Set(["scripts", "tests"]);
+const includedRootDirectories = new Set(["scripts", "support", "tests"]);
 const syntaxLinter = new Linter();
 
 const files = await collectFirstPartyJsFiles(root);

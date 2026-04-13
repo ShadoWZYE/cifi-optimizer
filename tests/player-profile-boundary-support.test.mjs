@@ -7,7 +7,7 @@ import {
   getPlannerHelperCompletion,
   getPlayerProfileBoundaryAudit,
   getProfileCompletion
-} from "../player-profile-boundary-support.js";
+} from "../support/player-profile-boundary-support.js";
 
 test("player profile boundary groups preserve canonical, planner, and compatibility slices", () => {
   const groups = buildPlayerProfileBoundaryGroups({
