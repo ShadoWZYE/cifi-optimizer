@@ -2251,7 +2251,7 @@ function renderSpendPlannerBoundary() {
     {
       label: "TokenShop recommendations beyond the checked editor subset",
       reason:
-        "The checked ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, and ATU8 remap subset can now appear on shipped Overview and Progression surfaces, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
+        "The checked ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, and ATU9 remap subset can now appear on shipped Overview and Progression surfaces, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
     },
     {
       label: "Token-bank cap and claimable tokens",
@@ -4673,6 +4673,26 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       bonusStepLabel: "Mk4 Output",
       bonusStepMode: "multiplier",
       note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
+    },
+    {
+      field: "ATU9Level",
+      slot: "ATU9",
+      identity:
+        boundary?.atu9BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
+        boundary?.atu9BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
+        "Mk5 Generator Booster",
+      identitySource: boundary?.atu9BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle
+        ? "Checked title-side text chain"
+        : "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "MK5TokenBoostStartCost",
+      additiveCostField: "MK5TokenBoostAdditiveCost",
+      bonusField: "MK5TokenBoostBonus",
+      maxLevelField: "MK5TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk5 Output",
+      bonusStepMode: "multiplier",
+      note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     }
   ];
 }
@@ -4717,7 +4737,7 @@ function renderTokenShopOverviewAffordabilityModule() {
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Overview TokenShop affordability</p>
-      <p class="meta">This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, and <code>ATU8Level</code>.</p>
+      <p class="meta">This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, <code>ATU8Level</code>, and <code>ATU9Level</code>.</p>
       <p class="meta">Checked player-facing names are preferred where they exist, grounded prefab identity is used where they do not, and the rest of the unresolved <code>ATU*Level</code> family stays quarantined outside this module.</p>
       <p class="meta">${escapeHtml(sourceLine)}</p>
       <div class="pill-row">
@@ -4879,7 +4899,7 @@ function renderTokenShopProgressionEditor() {
     <article class="validation-card warn">
       <strong>Grounded TokenShop checked-row editor</strong>
       <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
-      <p class="meta">This module is explicitly non-optimizer and stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, and <code>ATU8Level</code>.</p>
+      <p class="meta">This module is explicitly non-optimizer and stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, <code>ATU8Level</code>, and <code>ATU9Level</code>.</p>
       <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown separately inside the same bounded subset. ATU3 remains effect-driven and is not promoted into a prefab or final-title remap. The rest of the unresolved ATU family stays quarantined outside this editor.</p>
       <div class="profile-actions">
         <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>

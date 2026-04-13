@@ -7972,6 +7972,97 @@ function validateTokenShopRowRemapBoundary(boundary) {
     "token shop row remap boundary ATU8 trace result drifted"
   );
   expectRecord(
+    boundary.atu9BridgeFollowUp,
+    "token shop row remap boundary ATU9 bridge follow-up must be an object"
+  );
+  expectRecord(
+    boundary.atu9BridgeFollowUp.recoveredBridge,
+    "token shop row remap boundary ATU9 recovered bridge must be an object"
+  );
+  expectRecord(
+    boundary.atu9BridgeFollowUp.verifiedTitleTextChain,
+    "token shop row remap boundary ATU9 title text chain must be an object"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.targetId,
+    "token-shop-atu9-mk5-bridge",
+    "token shop row remap boundary ATU9 trace target drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.recoveredBridge.shellField,
+    "ATU9Button",
+    "token shop row remap boundary ATU9 trace bridge shell drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.recoveredBridge.shellPathId,
+    15845,
+    "token shop row remap boundary ATU9 trace bridge shell path drifted"
+  );
+  assert.deepEqual(
+    boundary.atu9BridgeFollowUp.recoveredBridge.ownerFieldBlock,
+    [
+      "MK5TokenBoostStartCost",
+      "MK5TokenBoostAdditiveCost",
+      "MK5TokenBoostBonus",
+      "MK5TokenBoostFillMaxLevel",
+      "MK5TokenBoostFill"
+    ],
+    "token shop row remap boundary ATU9 trace bridge owner field block drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.recoveredBridge.supportingActionHook,
+    "BuyMK5TokenBoost",
+    "token shop row remap boundary ATU9 trace bridge action hook drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.recoveredBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK5Booster",
+    "token shop row remap boundary ATU9 trace bridge prefab drifted"
+  );
+  assert.match(
+    boundary.atu9BridgeFollowUp.recoveredBridge.groundedConclusion,
+    /ATU9Button now has one checked bridge/i,
+    "token shop row remap boundary ATU9 conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.verifiedTitleTextChain.shellField,
+    "ATU9Button",
+    "token shop row remap boundary ATU9 title text shell drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.verifiedTitleTextChain.shellPathId,
+    15845,
+    "token shop row remap boundary ATU9 title text shell path drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.verifiedTitleTextChain.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK5Booster",
+    "token shop row remap boundary ATU9 title text prefab drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
+    "Mk5 Generator Booster",
+    "token shop row remap boundary ATU9 title text title drifted"
+  );
+  assert.deepEqual(
+    boundary.atu9BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+    [
+      "This upgrade divides the cost of MK5 Generators by 50b.",
+      "This upgrade provides a 30% increase to the output of MK5 Generators."
+    ],
+    "token shop row remap boundary ATU9 title text support drifted"
+  );
+  assert.match(
+    boundary.atu9BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
+    /shell-to-prefab-to-title-side-text chain/i,
+    "token shop row remap boundary ATU9 title text conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu9BridgeFollowUp.result,
+    "checked object bridge plus title-side text chain recovered",
+    "token shop row remap boundary ATU9 trace result drifted"
+  );
+  expectRecord(
     boundary.atu3CrossSystemEffectTrace,
     "token shop row remap boundary ATU3 cross-system effect trace must be an object"
   );
@@ -8319,7 +8410,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     );
   });
   assert.ok(
-    boundary.currentBoundary.some((line) => /seven checked TokenShop row bridges/i.test(line)),
+    boundary.currentBoundary.some((line) => /eight checked TokenShop row bridges/i.test(line)),
     "token shop row remap boundary must preserve recovered bridge count"
   );
   assert.ok(
@@ -8345,6 +8436,12 @@ function validateTokenShopRowRemapBoundary(boundary) {
       /ATU8Button aligns directly with the MK4TokenBoost owner-field block/i.test(line)
     ),
     "token shop row remap boundary must preserve recovered ATU8 bridge conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU9Button aligns directly with the MK5TokenBoost owner-field block/i.test(line)
+    ),
+    "token shop row remap boundary must preserve recovered ATU9 bridge conclusion"
   );
   assert.ok(
     boundary.currentBoundary.some((line) =>

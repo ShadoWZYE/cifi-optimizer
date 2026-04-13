@@ -49,6 +49,13 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - the checked title-side surface preserves the player-facing title `Mk4 Generator Booster`.
   - that same checked title-side surface also preserves matching MK4-generator support text through `This upgrade divides the cost of MK4 Generators by 400m.` and `This upgrade provides a 1% increase to MK4 Generator Output for each Loop Reset you've done (multiplicative)`.
   - taken together, that is enough to preserve one bounded `ATU8Button` -> `NewTokenUPGPrefab.T1.MK4Booster` -> `Mk4 Generator Booster` title-side text chain without widening the rest of the unresolved `ATU` family.
+- One more bounded shell-to-prefab-to-title-side-text chain also clears:
+  - `ATU9Button` sits directly after the exact `MK5TokenBoost*` owner fields in the checked `TokenShop` payload alignment.
+  - checked action-lane clues preserve the matching direct buy hook through `BuyMK5TokenBoost`.
+  - the checked prefab roster separately preserves `NewTokenUPGPrefab.T1.MK5Booster`.
+  - the checked title-side surface now also preserves the player-facing title `Mk5 Generator Booster`.
+  - that same checked title-side surface also preserves matching MK5-generator support text through `This upgrade divides the cost of MK5 Generators by 50b.` and `This upgrade provides a 30% increase to the output of MK5 Generators.`
+  - taken together, that is enough to preserve one bounded `ATU9Button` -> `NewTokenUPGPrefab.T1.MK5Booster` -> `Mk5 Generator Booster` title-side text chain without widening the rest of the unresolved `ATU` family.
 - One concrete shell-to-prefab-to-title chain now also clears on the same row:
   - the already grounded `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` bridge now has one checked title-side follow-through.
   - the TokenShop text-handler search surface still runs through `SetAllTokenShopTexts` and `SetTokenTexts`, while the narrower checked title-side probe preserves the final player-facing title `Mk2 Generator Booster`.
@@ -76,7 +83,7 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 ## Grounded conclusion
 
 - The repo can now say more than “ATU is unnamed.”
-- Seven exact shell-side bridges are now recovered:
+- Eight exact shell-side bridges are now recovered:
   - `ATU1Button` -> TokenShop `TokenBoost` / `NewTokenUPGPrefab.T1.TokensBoost`
   - `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`
   - `ATU4Button` -> `NewTokenUPGPrefab.T1.ModPointsBooster`
@@ -84,6 +91,7 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster`
   - `ATU7Button` -> `NewTokenUPGPrefab.T1.MK3Booster`
   - `ATU8Button` -> `NewTokenUPGPrefab.T1.MK4Booster`
+  - `ATU9Button` -> `NewTokenUPGPrefab.T1.MK5Booster`
 - One exact shell-to-prefab-to-final-title chain is now recovered:
   - `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` -> `Mk2 Generator Booster`
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
@@ -103,13 +111,14 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
     - the diamond-special `CellsBoost` prefab and `>Diamond Upgrade 10 - CellsBoost` title remain a separate diamond lane
     - the token-side `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` clues remain a separate token lane
     - none of those checked surfaces crosses back to `ATU3Button` path id `15810`
-  - `ATU4`, `ATU5`, `ATU6`, `ATU7`, and `ATU8` clearing do not change that rule for the rest of the lane:
+  - `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, and `ATU9` clearing do not change that rule for the rest of the lane:
     - they clear because one exact owner-field block, one exact buy hook, and one exact token prefab converge on the same `ModBoost`, `MK1`, `MK2`, or `MK3` family
     - `ATU4Button` now clears the same shell-to-prefab bar through `BuyModBoost` and `NewTokenUPGPrefab.T1.ModPointsBooster`, but still does not have a checked final player-facing row title
     - the repo now has one checked final title join for `ATU6Button`, while `ATU5Button` now also has one checked named identity and support-text chain but still does not have one exact final player-facing row-title string
     - `ATU7Button` now also clears one bounded title-side text chain through `BuyMK3TokenBoost`, `NewTokenUPGPrefab.T1.MK3Booster`, and `Mk3 Generator Booster`, but this pass does not promote broader row-pattern claims or another shell
     - `ATU8Button` now also clears the same shell-to-prefab bar through `BuyMK4TokenBoost` and `NewTokenUPGPrefab.T1.MK4Booster`, and now also has one bounded `Mk4 Generator Booster` title-side text chain, but this pass does not promote broader row-pattern claims or another shell
-    - the neighboring `MK5` through `MK8` token rows stay unresolved until their own shell joins are checked individually
+    - `ATU9Button` now also clears the same shell-to-prefab bar through `BuyMK5TokenBoost` and `NewTokenUPGPrefab.T1.MK5Booster`, and now also has one bounded `Mk5 Generator Booster` title-side text chain, but this pass does not promote broader row-pattern claims or another shell
+    - the neighboring `MK6` through `MK8` token rows stay unresolved until their own shell joins are checked individually
 
 The remaining missing pieces are still checked joins:
 
@@ -205,6 +214,12 @@ Because those joins are still missing, the repo should not:
   - checked prefab surfaces preserve `NewTokenUPGPrefab.T1.MK4Booster` across `UABEA`, `unity-probe`, and `lm244` artifacts
   - checked title-side surfaces now also preserve `Mk4 Generator Booster` plus the matching `MK4 Generators by 400m` and MK4 loop-reset output text
   - that is enough to preserve one bounded `ATU8Button` -> `NewTokenUPGPrefab.T1.MK4Booster` -> `Mk4 Generator Booster` title-side text chain without reopening another shell or claiming broader pattern reuse
+- The bounded ATU9 bridge-only pass now also clears without reopening title localization:
+  - the exact `TokenShop` owner payload keeps `ATU9Button` path id `15845` directly beside the `MK5TokenBoost*` owner block
+  - the checked action lane preserves `BuyMK5TokenBoost`
+  - checked prefab surfaces preserve `NewTokenUPGPrefab.T1.MK5Booster` across `UABEA`, `unity-probe`, and `lm244` artifacts
+  - checked title-side surfaces now also preserve `Mk5 Generator Booster` plus the matching `MK5 Generators by 50b` and MK5 output text
+  - that is enough to preserve one bounded `ATU9Button` -> `NewTokenUPGPrefab.T1.MK5Booster` -> `Mk5 Generator Booster` title-side text chain without reopening another shell or claiming broader pattern reuse
 - The repo also now has a tighter blocked conclusion for the generic text-hook search surface:
   - committed `level0` evidence places `SetAllTokenShopTexts` and `SetTokenTexts` in a token-menu or token-bank text-handler cluster
   - that cluster includes `CheckFirstTokenMenuTime`, `ClaimTokenium`, `LV. 1 - (Tokens In Bank)^1.05`, `LV. 1 - Token Bank Capacity x2`, `TokenClaimRecolor`, and `TokenShopRecoloring`
