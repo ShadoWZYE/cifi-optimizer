@@ -11,12 +11,14 @@ Build a grounded local-first toolkit that gradually replaces fragmented external
 Build the grounded MVP core that makes later consolidation credible.
 
 Current repo bias:
+
 - start from a real player question
 - ship the smallest honest tool slice that answers it
 - use research, extraction, and decompilation to unblock that slice instead of letting them silently become the product
 - keep recommendation math and broad gameplay modeling behind grounded MVP needs
 
 Current MVP focus:
+
 - canonical `state.playerProfile`
 - guided/manual import
 - grounded shard workflow
@@ -29,6 +31,7 @@ This repo is not trying to force all systems into one UI or one recommendation s
 ## Slice contract
 
 Every active lane should state:
+
 - the user-facing question it is trying to answer
 - the minimum required inputs
 - the explicit non-blockers
@@ -42,6 +45,7 @@ Adjacent lanes should only block a slice when they are actual consumed inputs fo
 Local-first means the core app works from locally controlled player state and shipped repo data by default.
 
 Player state may be:
+
 - entered manually
 - guided through the UI
 - imported from helper flows
@@ -52,6 +56,7 @@ The requirement is that canonical state lands in the app’s local model and rem
 ## Grounding rule
 
 Do not treat a mechanic, field, or formula as canonical CIFI truth unless it is:
+
 1. a grounded in-game concept, or
 2. a clearly labeled external/community-derived input
 

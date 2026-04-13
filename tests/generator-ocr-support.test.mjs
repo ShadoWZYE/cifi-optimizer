@@ -41,11 +41,9 @@ test("createMissingGeneratorOcrScriptError names every checked path", () => {
 });
 
 test("createGeneratorOcrStageError classifies python and tesseract hints", () => {
-  const payload = createGeneratorOcrStageError(
-    "python",
-    new Error("No module named cv2"),
-    { stderr: "pytesseract could not find tesseract.exe" }
-  );
+  const payload = createGeneratorOcrStageError("python", new Error("No module named cv2"), {
+    stderr: "pytesseract could not find tesseract.exe"
+  });
 
   assert.equal(payload.stage, "python");
   assert.ok(payload.hints.some((hint) => hint.includes("Python")));

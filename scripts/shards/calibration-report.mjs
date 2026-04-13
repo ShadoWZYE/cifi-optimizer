@@ -28,7 +28,9 @@ function buildReport() {
     lines.push(`  Title: ${result.title}`);
     lines.push(`  Expected: ${result.expectedLabel}`);
     lines.push(`  Actual: ${result.actualLabel}`);
-    lines.push(`  Row class: ${rowClass?.id ?? "unknown"} (${rowClass?.nativeFormulaClass ?? "unknown"})`);
+    lines.push(
+      `  Row class: ${rowClass?.id ?? "unknown"} (${rowClass?.nativeFormulaClass ?? "unknown"})`
+    );
     lines.push(`  Stage coverage: ${formatStageList(result.evaluation.stageCoverage)}`);
     lines.push(`  Active stages: ${formatStageList(result.evaluation.activeStages)}`);
     lines.push(`  Runtime getter: ${result.evaluation.runtimeRule.getterName}`);

@@ -130,13 +130,23 @@ const markdown = [
     "",
     "| Field | Target path | Accepted aliases |",
     "|---|---|---|",
-    ...group.aliases.map((alias) => `| \`${alias.field}\` | \`${alias.targetPath}\` | ${alias.acceptedPaths.map((path) => `\`${path}\``).join(", ")} |`),
+    ...group.aliases.map(
+      (alias) =>
+        `| \`${alias.field}\` | \`${alias.targetPath}\` | ${alias.acceptedPaths.map((path) => `\`${path}\``).join(", ")} |`
+    ),
     ""
   ])
 ].join("\n");
 
-await writeFile(new URL("../../data/player-profile-import-aliases.v1.json", import.meta.url), `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-await writeFile(new URL("../../docs/contracts/player-profile-import-aliases.md", import.meta.url), `${markdown}\n`, "utf8");
+await writeFile(
+  new URL("../../data/player-profile-import-aliases.v1.json", import.meta.url),
+  `${JSON.stringify(payload, null, 2)}\n`,
+  "utf8"
+);
+await writeFile(
+  new URL("../../docs/contracts/player-profile-import-aliases.md", import.meta.url),
+  `${markdown}\n`,
+  "utf8"
+);
 
 console.log(`PlayerProfile alias audit written under ${repoRoot}`);
-

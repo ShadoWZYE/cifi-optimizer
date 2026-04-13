@@ -55,22 +55,28 @@ function getGeneratorOcrHints(stage, combinedText) {
   const hints = new Set();
 
   if (stage === "powershell") {
-    hints.add("Ensure PowerShell is available on PATH and the OCR script exists under scripts/ocr.");
+    hints.add(
+      "Ensure PowerShell is available on PATH and the OCR script exists under scripts/ocr."
+    );
   }
 
   if (
-    text.includes("python")
-    || text.includes("pytesseract")
-    || text.includes("cv2")
-    || text.includes("numpy")
-    || stage === "python"
+    text.includes("python") ||
+    text.includes("pytesseract") ||
+    text.includes("cv2") ||
+    text.includes("numpy") ||
+    stage === "python"
   ) {
     hints.add("Ensure Python is installed and available on PATH for optional OCR tooling.");
-    hints.add("Install the OCR Python packages required by scripts/ocr/generator-ocr.py: opencv-python, pytesseract, and numpy.");
+    hints.add(
+      "Install the OCR Python packages required by scripts/ocr/generator-ocr.py: opencv-python, pytesseract, and numpy."
+    );
   }
 
   if (text.includes("tesseract")) {
-    hints.add("Install Tesseract OCR and ensure the executable path used by scripts/ocr/generator-ocr.py is valid on this machine.");
+    hints.add(
+      "Install Tesseract OCR and ensure the executable path used by scripts/ocr/generator-ocr.py is valid on this machine."
+    );
   }
 
   if (hints.size === 0) {

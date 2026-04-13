@@ -7,40 +7,114 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
   },
   canonical: {
     loopReset: [["player", "loop", "loopReset"], ["systems", "loop", "loopReset"], ["loopReset"]],
-    diamonds: [["player", "resources", "diamonds"], ["resources", "diamonds"], ["resources", "gems"], ["gems"]],
+    diamonds: [
+      ["player", "resources", "diamonds"],
+      ["resources", "diamonds"],
+      ["resources", "gems"],
+      ["gems"]
+    ],
     tokens: [["player", "resources", "tokens"], ["resources", "tokens"], ["tokens"]],
-    academyRelics: [["player", "resources", "academyRelics"], ["resources", "academyRelics"], ["resources", "relics"], ["relics"]],
+    academyRelics: [
+      ["player", "resources", "academyRelics"],
+      ["resources", "academyRelics"],
+      ["resources", "relics"],
+      ["relics"]
+    ],
     shards: [["player", "resources", "shards"], ["resources", "shards"], ["shards"]],
     notes: [["notes", "profile"], ["notes"]]
   },
   planner: {
-    shardRatePerHour: [["planning", "shards", "ratePerHour"], ["systems", "shards", "ratePerHour"], ["shardRatePerHour"]],
-    totalShardMilestoneLevels: [["planning", "shards", "totalMilestoneLevels"], ["systems", "shards", "totalMilestoneLevels"], ["totalShardMilestoneLevels"]],
-    shardFocusMilestoneId: [["planning", "shards", "focusMilestoneId"], ["systems", "shards", "focusMilestoneId"], ["planning", "shardFocusMilestoneId"], ["shardFocusMilestoneId"]],
-    shardFocusMilestoneLevel: [["planning", "shards", "focusMilestoneLevel"], ["systems", "shards", "focusMilestoneLevel"], ["planning", "shardFocusMilestoneLevel"], ["shardFocusMilestoneLevel"]],
-    shardObservedLevelsByMilestone: [["planning", "shards", "observedLevelsByMilestone"], ["systems", "shards", "observedLevelsByMilestone"]],
+    shardRatePerHour: [
+      ["planning", "shards", "ratePerHour"],
+      ["systems", "shards", "ratePerHour"],
+      ["shardRatePerHour"]
+    ],
+    totalShardMilestoneLevels: [
+      ["planning", "shards", "totalMilestoneLevels"],
+      ["systems", "shards", "totalMilestoneLevels"],
+      ["totalShardMilestoneLevels"]
+    ],
+    shardFocusMilestoneId: [
+      ["planning", "shards", "focusMilestoneId"],
+      ["systems", "shards", "focusMilestoneId"],
+      ["planning", "shardFocusMilestoneId"],
+      ["shardFocusMilestoneId"]
+    ],
+    shardFocusMilestoneLevel: [
+      ["planning", "shards", "focusMilestoneLevel"],
+      ["systems", "shards", "focusMilestoneLevel"],
+      ["planning", "shardFocusMilestoneLevel"],
+      ["shardFocusMilestoneLevel"]
+    ],
+    shardObservedLevelsByMilestone: [
+      ["planning", "shards", "observedLevelsByMilestone"],
+      ["systems", "shards", "observedLevelsByMilestone"]
+    ],
     tokenShopCheckedSubsetLevels: [["planning", "tokenShop", "checkedSubsetLevels"]]
   },
   externalModel: {
-    shipPower: [["externalModels", "shipPlanner", "summary", "power"], ["systems", "ship", "power"]],
-    shipSpeed: [["externalModels", "shipPlanner", "summary", "speed"], ["systems", "ship", "speed"]],
-    shipCargo: [["externalModels", "shipPlanner", "summary", "cargo"], ["systems", "ship", "cargo"]]
+    shipPower: [
+      ["externalModels", "shipPlanner", "summary", "power"],
+      ["systems", "ship", "power"]
+    ],
+    shipSpeed: [
+      ["externalModels", "shipPlanner", "summary", "speed"],
+      ["systems", "ship", "speed"]
+    ],
+    shipCargo: [
+      ["externalModels", "shipPlanner", "summary", "cargo"],
+      ["systems", "ship", "cargo"]
+    ]
   },
   experimental: {
     gemNodeBudget: [["externalModels", "experimental", "gemNodes", "budget"]],
-    primaryFarmingFocus: [["externalModels", "experimental", "profileHints", "primaryFarmingFocus"]],
+    primaryFarmingFocus: [
+      ["externalModels", "experimental", "profileHints", "primaryFarmingFocus"]
+    ],
     researchHours: [["externalModels", "experimental", "profileHints", "researchHours"]]
   },
   compatibility: {
-    highestShipUnlocked: [["compatibility", "legacyStage", "highestShipUnlocked"], ["stage", "highestShipUnlocked"]],
-    manualPhase: [["compatibility", "legacyStage", "manualPhase"], ["stage", "manualPhase"]],
-    gemDust: [["compatibility", "unresolvedProfileFields", "gemDust"], ["resources", "gemDust"]],
-    hunterLevel: [["compatibility", "unresolvedProfileFields", "hunterLevel"], ["systems", "metaProgression", "hunterLevel"]],
-    traitSphereCount: [["compatibility", "unresolvedProfileFields", "traitSphereCount"], ["systems", "metaProgression", "traitSphereCount"]],
-    mechParts: [["compatibility", "unresolvedProfileFields", "mechParts"], ["systems", "metaProgression", "mechParts"]],
-    shardMilestoneState: [["compatibility", "unmappedSystemState", "shardMilestoneState"], ["compatibility", "unmappedSystemState", "shardMilestones"], ["systems", "shardMilestones"]],
-    tokenShop: [["compatibility", "unmappedSystemState", "tokenShop"], ["systems", "tokenShop"], ["systems", "tokenBank"], ["tokenShop"], ["tokenBank"]],
-    multiverseMarket: [["compatibility", "unmappedSystemState", "multiverseMarket"], ["systems", "multiverseMarket"], ["multiverseMarket"]],
+    highestShipUnlocked: [
+      ["compatibility", "legacyStage", "highestShipUnlocked"],
+      ["stage", "highestShipUnlocked"]
+    ],
+    manualPhase: [
+      ["compatibility", "legacyStage", "manualPhase"],
+      ["stage", "manualPhase"]
+    ],
+    gemDust: [
+      ["compatibility", "unresolvedProfileFields", "gemDust"],
+      ["resources", "gemDust"]
+    ],
+    hunterLevel: [
+      ["compatibility", "unresolvedProfileFields", "hunterLevel"],
+      ["systems", "metaProgression", "hunterLevel"]
+    ],
+    traitSphereCount: [
+      ["compatibility", "unresolvedProfileFields", "traitSphereCount"],
+      ["systems", "metaProgression", "traitSphereCount"]
+    ],
+    mechParts: [
+      ["compatibility", "unresolvedProfileFields", "mechParts"],
+      ["systems", "metaProgression", "mechParts"]
+    ],
+    shardMilestoneState: [
+      ["compatibility", "unmappedSystemState", "shardMilestoneState"],
+      ["compatibility", "unmappedSystemState", "shardMilestones"],
+      ["systems", "shardMilestones"]
+    ],
+    tokenShop: [
+      ["compatibility", "unmappedSystemState", "tokenShop"],
+      ["systems", "tokenShop"],
+      ["systems", "tokenBank"],
+      ["tokenShop"],
+      ["tokenBank"]
+    ],
+    multiverseMarket: [
+      ["compatibility", "unmappedSystemState", "multiverseMarket"],
+      ["systems", "multiverseMarket"],
+      ["multiverseMarket"]
+    ],
     tokenShopStateClues: [
       ["TokenBankCap"],
       ["ClaimableBankTokens"],
@@ -62,7 +136,16 @@ export const PLAYER_PROFILE_IMPORT_ALIASES = {
 
 const PROFILE_CONFIDENCE_VALUES = new Set(["manual", "mixed", "verified"]);
 const FARMING_FOCUS_VALUES = new Set(["credits", "alloy", "research", "shards"]);
-const TOKEN_SHOP_CHECKED_SUBSET_FIELDS = ["ATU1Level", "ATU2Level", "ATU3Level", "ATU4Level", "ATU5Level", "ATU6Level", "ATU7Level", "ATU8Level"];
+const TOKEN_SHOP_CHECKED_SUBSET_FIELDS = [
+  "ATU1Level",
+  "ATU2Level",
+  "ATU3Level",
+  "ATU4Level",
+  "ATU5Level",
+  "ATU6Level",
+  "ATU7Level",
+  "ATU8Level"
+];
 const TOKEN_SHOP_CHECKED_SUBSET_PLAYER_STATE_ALIASES = Object.fromEntries(
   TOKEN_SHOP_CHECKED_SUBSET_FIELDS.map((field) => [
     field,
@@ -220,7 +303,9 @@ function formatCiNormalizedNumber(mantissa, exponent) {
 }
 
 function trimTrailingZeros(value) {
-  return String(value).replace(/(\.\d*?[1-9])0+$/u, "$1").replace(/\.0+$/u, "");
+  return String(value)
+    .replace(/(\.\d*?[1-9])0+$/u, "$1")
+    .replace(/\.0+$/u, "");
 }
 
 function coerceNullableString(value) {
@@ -275,13 +360,16 @@ function coerceCommunityTools(value) {
       return record;
     }
 
-    const normalizedVersions = Object.entries(versions).reduce((versionRecord, [versionKey, payload]) => {
-      const normalizedPayload = coerceCommunityToolPayload(payload);
-      if (normalizedPayload) {
-        versionRecord[versionKey] = normalizedPayload;
-      }
-      return versionRecord;
-    }, {});
+    const normalizedVersions = Object.entries(versions).reduce(
+      (versionRecord, [versionKey, payload]) => {
+        const normalizedPayload = coerceCommunityToolPayload(payload);
+        if (normalizedPayload) {
+          versionRecord[versionKey] = normalizedPayload;
+        }
+        return versionRecord;
+      },
+      {}
+    );
 
     if (Object.keys(normalizedVersions).length > 0) {
       record[toolKey] = normalizedVersions;
@@ -320,7 +408,11 @@ function coerceTokenShopCheckedSubsetState(value) {
 }
 
 function coerceQuarantinedShardMilestoneState(value) {
-  const importedState = isRecord(value?.importedState) ? cloneValue(value.importedState) : (isRecord(value) ? cloneValue(value) : null);
+  const importedState = isRecord(value?.importedState)
+    ? cloneValue(value.importedState)
+    : isRecord(value)
+      ? cloneValue(value)
+      : null;
   if (!importedState) {
     return null;
   }
@@ -477,24 +569,46 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   const source = isRecord(profile) ? profile : {};
   const normalized = createDefaultPlayerProfile(baselineShipPlayerState);
 
-  normalized.meta.profileName = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.meta.profileName));
-  normalized.meta.updatedAt = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.meta.updatedAt));
+  normalized.meta.profileName = coerceNullableString(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.meta.profileName)
+  );
+  normalized.meta.updatedAt = coerceNullableString(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.meta.updatedAt)
+  );
   normalized.meta.dataConfidence = coerceEnum(
     readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.meta.dataConfidence),
     PROFILE_CONFIDENCE_VALUES,
     normalized.meta.dataConfidence
   );
 
-  normalized.player.loop.loopReset = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.loopReset));
-  normalized.player.resources.diamonds = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.diamonds));
-  normalized.player.resources.tokens = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.tokens));
-  normalized.player.resources.academyRelics = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.academyRelics));
-  normalized.player.resources.shards = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.shards));
+  normalized.player.loop.loopReset = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.loopReset)
+  );
+  normalized.player.resources.diamonds = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.diamonds)
+  );
+  normalized.player.resources.tokens = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.tokens)
+  );
+  normalized.player.resources.academyRelics = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.academyRelics)
+  );
+  normalized.player.resources.shards = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.shards)
+  );
 
-  normalized.planning.shards.ratePerHour = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardRatePerHour));
-  normalized.planning.shards.totalMilestoneLevels = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.totalShardMilestoneLevels));
-  normalized.planning.shards.focusMilestoneId = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneId));
-  normalized.planning.shards.focusMilestoneLevel = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel));
+  normalized.planning.shards.ratePerHour = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardRatePerHour)
+  );
+  normalized.planning.shards.totalMilestoneLevels = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.totalShardMilestoneLevels)
+  );
+  normalized.planning.shards.focusMilestoneId = coerceNullableString(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneId)
+  );
+  normalized.planning.shards.focusMilestoneLevel = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardFocusMilestoneLevel)
+  );
   normalized.planning.shards.observedLevelsByMilestone = coerceObservedShardLevels(
     readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.shardObservedLevelsByMilestone)
   );
@@ -505,69 +619,126 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
     readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.planner.tokenShopCheckedSubsetLevels)
   );
   if (
-    normalized.planning.shards.focusMilestoneId
-    && normalized.planning.shards.focusMilestoneLevel !== null
-    && normalized.planning.shards.observedLevelsByMilestone[normalized.planning.shards.focusMilestoneId] === undefined
+    normalized.planning.shards.focusMilestoneId &&
+    normalized.planning.shards.focusMilestoneLevel !== null &&
+    normalized.planning.shards.observedLevelsByMilestone[
+      normalized.planning.shards.focusMilestoneId
+    ] === undefined
   ) {
-    normalized.planning.shards.observedLevelsByMilestone[normalized.planning.shards.focusMilestoneId] = normalized.planning.shards.focusMilestoneLevel;
+    normalized.planning.shards.observedLevelsByMilestone[
+      normalized.planning.shards.focusMilestoneId
+    ] = normalized.planning.shards.focusMilestoneLevel;
   }
 
-  normalized.notes.profile = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.notes));
+  normalized.notes.profile = coerceNullableString(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.canonical.notes)
+  );
 
-  normalized.externalModels.shipPlanner.summary.power = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipPower));
-  normalized.externalModels.shipPlanner.summary.speed = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipSpeed));
-  normalized.externalModels.shipPlanner.summary.cargo = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipCargo));
+  normalized.externalModels.shipPlanner.summary.power = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipPower)
+  );
+  normalized.externalModels.shipPlanner.summary.speed = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipSpeed)
+  );
+  normalized.externalModels.shipPlanner.summary.cargo = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.externalModel.shipCargo)
+  );
 
-  normalized.externalModels.experimental.gemNodes.budget = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.gemNodeBudget));
+  normalized.externalModels.experimental.gemNodes.budget = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.gemNodeBudget)
+  );
   normalized.externalModels.experimental.profileHints.primaryFarmingFocus = coerceEnum(
     readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.primaryFarmingFocus),
     FARMING_FOCUS_VALUES
   );
-  normalized.externalModels.experimental.profileHints.researchHours = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.researchHours));
+  normalized.externalModels.experimental.profileHints.researchHours = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.experimental.researchHours)
+  );
   normalized.externalModels.communityTools = mergeDeep(
     normalized.externalModels.communityTools,
     coerceCommunityTools(source.externalModels?.communityTools)
   );
 
-  normalized.compatibility.legacyStage.highestShipUnlocked = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.highestShipUnlocked));
-  normalized.compatibility.legacyStage.manualPhase = coerceNullableString(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.manualPhase));
-  normalized.compatibility.unresolvedProfileFields.gemDust = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.gemDust));
-  normalized.compatibility.unresolvedProfileFields.hunterLevel = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel));
-  normalized.compatibility.unresolvedProfileFields.traitSphereCount = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.traitSphereCount));
-  normalized.compatibility.unresolvedProfileFields.mechParts = coerceNullableNumber(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.mechParts));
-  normalized.compatibility.unmappedSystemState.shardMilestoneState = coerceQuarantinedShardMilestoneState(
-    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState)
+  normalized.compatibility.legacyStage.highestShipUnlocked = coerceNullableString(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.highestShipUnlocked)
   );
+  normalized.compatibility.legacyStage.manualPhase = coerceNullableString(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.manualPhase)
+  );
+  normalized.compatibility.unresolvedProfileFields.gemDust = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.gemDust)
+  );
+  normalized.compatibility.unresolvedProfileFields.hunterLevel = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.hunterLevel)
+  );
+  normalized.compatibility.unresolvedProfileFields.traitSphereCount = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.traitSphereCount)
+  );
+  normalized.compatibility.unresolvedProfileFields.mechParts = coerceNullableNumber(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.mechParts)
+  );
+  normalized.compatibility.unmappedSystemState.shardMilestoneState =
+    coerceQuarantinedShardMilestoneState(
+      readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.shardMilestoneState)
+    );
   normalized.compatibility.unmappedSystemState.shardMilestones = cloneValue(
     normalized.compatibility.unmappedSystemState.shardMilestoneState
   );
 
   const tokenShopStateAliases = Object.fromEntries(
-    PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.map((path) => [path[path.length - 1], [path]])
+    PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShopStateClues.map((path) => [
+      path[path.length - 1],
+      [path]
+    ])
   );
-  const importedTokenShopRecord = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop));
-  const importedTokenShopStateClues = collectAliasedCompatibilityFields(source, tokenShopStateAliases);
+  const importedTokenShopRecord = coerceRecordOrNull(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.tokenShop)
+  );
+  const importedTokenShopStateClues = collectAliasedCompatibilityFields(
+    source,
+    tokenShopStateAliases
+  );
   const importedTokenShopLevels = collectTopLevelCompatibilityPattern(source, /^ATU\d+Level$/u);
-  const importedTokenShopTierUnlocks = collectTopLevelCompatibilityPattern(source, /^Tier[2-5]TokensUnlocked$/u);
+  const importedTokenShopTierUnlocks = collectTopLevelCompatibilityPattern(
+    source,
+    /^Tier[2-5]TokensUnlocked$/u
+  );
   normalized.compatibility.unmappedSystemState.tokenShop = mergeCompatibilityRecord(
     importedTokenShopRecord,
-    mergeCompatibilityRecord(importedTokenShopStateClues, mergeCompatibilityRecord(importedTokenShopLevels, importedTokenShopTierUnlocks))
+    mergeCompatibilityRecord(
+      importedTokenShopStateClues,
+      mergeCompatibilityRecord(importedTokenShopLevels, importedTokenShopTierUnlocks)
+    )
   );
 
-  const importedMultiverseMarketRecord = coerceRecordOrNull(readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarket));
+  const importedMultiverseMarketRecord = coerceRecordOrNull(
+    readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarket)
+  );
   const importedMultiverseMarketStateClues = collectAliasedCompatibilityFields(source, {
     InscryptionsDone: PLAYER_PROFILE_IMPORT_ALIASES.compatibility.multiverseMarketStateClues
   });
-  const importedMultiverseMarketLevels = collectTopLevelCompatibilityPattern(source, MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN);
-  const importedMultiverseMarketTradeCounters = collectTopLevelCompatibilityPattern(source, MULTIVERSE_MARKET_TRADE_COUNTER_PATTERN);
-  const importedMultiverseMarketAdjacentMechWindow = collectAliasedCompatibilityFields(source, MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS);
+  const importedMultiverseMarketLevels = collectTopLevelCompatibilityPattern(
+    source,
+    MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN
+  );
+  const importedMultiverseMarketTradeCounters = collectTopLevelCompatibilityPattern(
+    source,
+    MULTIVERSE_MARKET_TRADE_COUNTER_PATTERN
+  );
+  const importedMultiverseMarketAdjacentMechWindow = collectAliasedCompatibilityFields(
+    source,
+    MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS
+  );
   normalized.compatibility.unmappedSystemState.multiverseMarket = mergeCompatibilityRecord(
     importedMultiverseMarketRecord,
     mergeCompatibilityRecord(
       importedMultiverseMarketStateClues,
       mergeCompatibilityRecord(
         importedMultiverseMarketLevels,
-        mergeCompatibilityRecord(importedMultiverseMarketTradeCounters, importedMultiverseMarketAdjacentMechWindow)
+        mergeCompatibilityRecord(
+          importedMultiverseMarketTradeCounters,
+          importedMultiverseMarketAdjacentMechWindow
+        )
       )
     )
   );
@@ -575,8 +746,12 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
   const mergedShipToolState = mergeDeep(
     baselineShipPlayerState,
     mergeDeep(
-      readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.legacyShipPlayerState) ?? {},
-      readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState) ?? {}
+      readAliasedValue(
+        source,
+        PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.legacyShipPlayerState
+      ) ?? {},
+      readAliasedValue(source, PLAYER_PROFILE_IMPORT_ALIASES.shipCalibration.communityToolState) ??
+        {}
     )
   );
   normalized.externalModels.shipPlanner.communityToolState = mergedShipToolState;
