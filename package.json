@@ -19,6 +19,7 @@
     "probe:shards:cost-native": "node ./scripts/unity/run_probe.mjs shards:cost-native",
     "probe:trace": "node ./scripts/unity/run_probe.mjs trace",
     "shards:calibration-report": "node ./scripts/shards/calibration-report.mjs",
+    "verify": "npm run verify:data && npm run verify:vendoring && npm run check:syntax && npm run lint:docs && npm run format:check && npm run lint",
     "verify:data": "node ./scripts/contracts/validate-datasets.mjs",
     "verify:vendoring": "node ./scripts/contracts/verify-vendoring-layout.mjs",
     "test": "node ./tests/smoke.mjs",

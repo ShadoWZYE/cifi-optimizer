@@ -93,20 +93,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate datasets
-        run: npm run verify:data
-
-      - name: Verify vendoring layout
-        run: npm run verify:vendoring
+      - name: Run first-party verification
+        run: npm run verify
 
       - name: Run tests
         run: npm test
 
       - name: Run unit tests
         run: npm run test:unit
-
-      - name: Syntax check first-party JS
-        run: npm run check:syntax
-
-      - name: Lint docs portability
-        run: npm run lint:docs
