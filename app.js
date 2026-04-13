@@ -9,6 +9,7 @@ import {
   sortRecommendationFeed as sortNormalizedRecommendationFeed,
   toRecommendationAction as normalizeRecommendationAction
 } from "./recommendation-contract.js";
+import { createTokenShopUiSupport } from "./token-shop-ui-support.js";
 
 const STORAGE_KEYS = {
   playerProfile: "cifi-suite.player-profile",
@@ -39,6 +40,9 @@ const SERVER_SESSION_ENDPOINTS = {
   close: "/api/client/close",
   events: "/api/client/events"
 };
+const tokenShopUi = createTokenShopUiSupport({
+  formatValue: formatBoundaryValue
+});
 const SERVER_CAPABILITIES = getServerCapabilities();
 
 const CANONICAL_PROFILE_FIELD_PATHS = {
@@ -5758,157 +5762,6 @@ function resolveTokenShopProgressionLevelSource(fieldName, progressionState, com
   };
 }
 
-function formatTokenShopBonusStep(row, bonusValue) {
-  if (typeof bonusValue !== "number" || !Number.isFinite(bonusValue)) {
-    return "Unknown bonus step";
-  }
-  if (row?.bonusStepMode === "additive") {
-    return `+${formatBoundaryValue(bonusValue)} ${row.bonusStepLabel}`;
-  }
-  return `x${formatBoundaryValue(bonusValue)} to ${row?.bonusStepLabel || "the grounded lane"}`;
-}
-
-function getTokenShopKnownMaxStatus(currentLevel, maxLevel) {
-  if (typeof maxLevel !== "number" || !Number.isFinite(maxLevel)) {
-    return {
-      label: "Known max unavailable",
-      note: "The checked TokenShop values payload does not expose a usable max-level field for this row in the current build."
-    };
-  }
-  if (currentLevel >= maxLevel) {
-    return {
-      label: "At or above known cap",
-      note: `Imported level ${formatBoundaryValue(currentLevel)} already meets or exceeds the checked max ${formatBoundaryValue(maxLevel)} in the current values payload.`
-    };
-  }
-  return {
-    label: "Below known cap",
-    note: `${formatBoundaryValue(maxLevel - currentLevel)} known level(s) remain before the checked cap ${formatBoundaryValue(maxLevel)}.`
-  };
-}
-
-function getTokenShopCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonusValue) {
-  const bonusStep = formatTokenShopBonusStep(row, bonusValue);
-  const stepLabel =
-    row?.rowType === "effect-driven" ? "checked effect step(s)" : "extracted bonus step(s)";
-  if (typeof maxLevel === "number" && Number.isFinite(maxLevel) && currentLevel >= maxLevel) {
-    return {
-      currentLabel: `${formatBoundaryValue(currentLevel)} ${stepLabel} of ${bonusStep}`,
-      nextLabel: "No next bonus within known cap",
-      detail: `The imported level already meets or exceeds the checked cap ${formatBoundaryValue(maxLevel)}, so the row-detail tool stops at the current ${row?.rowType === "effect-driven" ? "checked effect-step" : "extracted bonus-step"} count instead of inventing overflow behavior.`
-    };
-  }
-
-  const nextLevel = currentLevel + 1;
-  return {
-    currentLabel: `${formatBoundaryValue(currentLevel)} ${stepLabel} of ${bonusStep}`,
-    nextLabel: `${formatBoundaryValue(nextLevel)} ${stepLabel} of ${bonusStep}`,
-    detail: `Current level ${formatBoundaryValue(currentLevel)} to next level ${formatBoundaryValue(nextLevel)} adds one more ${row?.rowType === "effect-driven" ? "checked effect step" : "extracted bonus step"} only. This view does not infer compounding, best-buy value, or optimizer math.`
-  };
-}
-
-function sanitizeTokenShopRichText(value) {
-  return String(value || "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getTokenShopRowDisplayTitle(row) {
-  if (
-    (typeof row?.identitySource === "string" &&
-      /(final title|title-side text chain|named identity)/i.test(row.identitySource)) ||
-    row?.rowType === "effect-driven"
-  ) {
-    if (row?.identity) {
-      return sanitizeTokenShopRichText(row.identity);
-    }
-  }
-  if (
-    (row?.identitySource === "Checked final title" || row?.rowType === "effect-driven") &&
-    row?.identity
-  ) {
-    return sanitizeTokenShopRichText(row.identity);
-  }
-  const rawIdentity = sanitizeTokenShopRichText(row?.identity || "")
-    .split(".")
-    .pop()
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .trim();
-  return rawIdentity || row?.slot || "TokenShop row";
-}
-
-function formatTokenShopEffectLine(row) {
-  if (row?.rowType === "effect-driven" && row?.effectText) {
-    return sanitizeTokenShopRichText(row.effectText);
-  }
-  return formatTokenShopBonusStep(row, row?.bonusValue);
-}
-
-function getTokenShopRowGroundingSummary(row) {
-  if (row?.rowType === "effect-driven") {
-    return "Grounded as an effect-driven row from checked shell, action, and shared-effect evidence.";
-  }
-  if (
-    typeof row?.identitySource === "string" &&
-    /(final title|title-side text chain|named identity)/i.test(row.identitySource)
-  ) {
-    return "Grounded as a checked shell-to-prefab-to-player-facing-title row.";
-  }
-  return "Grounded as a checked shell-to-prefab row while the final title remains unresolved.";
-}
-
-function formatTokenShopSentence(value) {
-  const text = sanitizeTokenShopRichText(value);
-  if (!text) {
-    return "";
-  }
-  return /[.!?]$/u.test(text) ? text : `${text}.`;
-}
-
-function getTokenShopActionLabel(row) {
-  return row?.isMaxed ? "MAXED" : "BUY";
-}
-
-function formatTokenShopBonusMagnitude(value, mode) {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return mode === "multiplier" ? "x?" : "?";
-  }
-  if (mode === "multiplier") {
-    return `x${value.toFixed(2)}`;
-  }
-  return value.toFixed(2);
-}
-
-function getTokenShopBonusStripEntries(row) {
-  const currentLevel =
-    typeof row?.currentLevel === "number" && Number.isFinite(row.currentLevel)
-      ? row.currentLevel
-      : 0;
-  const bonusValue =
-    typeof row?.bonusValue === "number" && Number.isFinite(row.bonusValue) ? row.bonusValue : 0;
-  const currentMagnitude =
-    row?.bonusStepMode === "multiplier"
-      ? Math.pow(bonusValue || 1, currentLevel)
-      : bonusValue * currentLevel;
-  const nextMagnitude = row?.isMaxed
-    ? null
-    : row?.bonusStepMode === "multiplier"
-      ? Math.pow(bonusValue || 1, currentLevel + 1)
-      : bonusValue * (currentLevel + 1);
-
-  return [
-    {
-      label: row?.bonusStepLabel || "Bonus",
-      currentLabel: formatTokenShopBonusMagnitude(currentMagnitude, row?.bonusStepMode),
-      nextLabel:
-        nextMagnitude === null
-          ? "MAX"
-          : formatTokenShopBonusMagnitude(nextMagnitude, row?.bonusStepMode)
-    }
-  ];
-}
-
 function getTokenShopProgressionModel() {
   const progressionState = getTokenShopProgressionProfileState();
   const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
@@ -5949,8 +5802,8 @@ function getTokenShopProgressionModel() {
       isAffordable,
       isMaxed,
       maxLevel,
-      maxStatus: getTokenShopKnownMaxStatus(currentLevel, maxLevel),
-      currentVsNextBonus: getTokenShopCurrentVsNextBonusSummary(
+      maxStatus: tokenShopUi.getTokenShopKnownMaxStatus(currentLevel, maxLevel),
+      currentVsNextBonus: tokenShopUi.getTokenShopCurrentVsNextBonusSummary(
         row,
         currentLevel,
         maxLevel,
@@ -6000,8 +5853,8 @@ function renderTokenShopOverviewAffordabilityModule() {
       <div class="preview-stack">
         ${summary.rows
           .map((row) => {
-            const displayTitle = getTokenShopRowDisplayTitle(row);
-            const bonusStripEntries = getTokenShopBonusStripEntries(row);
+            const displayTitle = tokenShopUi.getTokenShopRowDisplayTitle(row);
+            const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
             const nextKnownCostLabel = row.isMaxed
               ? "No next cost within known cap"
               : typeof row.nextKnownCost === "number"
@@ -6034,7 +5887,7 @@ function renderTokenShopOverviewAffordabilityModule() {
                           <span class="token-shop-row-tag">${escapeHtml(row.rowTypeLabel || "Checked row")}</span>
                           ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
                         </div>
-                        <p class="meta token-shop-effect-line">${escapeHtml(formatTokenShopSentence(formatTokenShopEffectLine(row)))}</p>
+                        <p class="meta token-shop-effect-line">${escapeHtml(tokenShopUi.formatTokenShopSentence(tokenShopUi.formatTokenShopEffectLine(row)))}</p>
                       </div>
                     </div>
                   </div>
@@ -6054,14 +5907,14 @@ function renderTokenShopOverviewAffordabilityModule() {
                   <div class="token-shop-editor-strip">
                     <div class="token-shop-editor-meta">
                       <p class="meta">Level ${escapeHtml(formatBoundaryValue(row.currentLevel))} • ${escapeHtml(row.currentLevelSourceLabel)}</p>
-                      <p class="meta">${escapeHtml(getTokenShopRowGroundingSummary(row))}</p>
+                      <p class="meta">${escapeHtml(tokenShopUi.getTokenShopRowGroundingSummary(row))}</p>
                       <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
                       <p class="meta">${escapeHtml(row.currentVsNextBonus.detail)}</p>
                     </div>
                   </div>
                 </div>
                 <div class="token-shop-buy-panel">
-                  <span class="token-shop-buy-label">${escapeHtml(getTokenShopActionLabel(row))}</span>
+                  <span class="token-shop-buy-label">${escapeHtml(tokenShopUi.getTokenShopActionLabel(row))}</span>
                   <strong>${escapeHtml(nextKnownCostLabel)}</strong>
                   <p class="meta">${escapeHtml(affordabilityLine)}</p>
                 </div>
@@ -6167,12 +6020,14 @@ function renderTokenShopProgressionEditor() {
       <div class="preview-stack">
         ${summary.rows
           .map((row) => {
-            const displayTitle = getTokenShopRowDisplayTitle(row);
+            const displayTitle = tokenShopUi.getTokenShopRowDisplayTitle(row);
             const currentLevelLabel = formatBoundaryValue(row.currentLevel);
-            const effectLine = formatTokenShopSentence(formatTokenShopEffectLine(row));
-            const actionLabel = getTokenShopActionLabel(row);
-            const bonusStripEntries = getTokenShopBonusStripEntries(row);
-            const groundingSummary = getTokenShopRowGroundingSummary(row);
+            const effectLine = tokenShopUi.formatTokenShopSentence(
+              tokenShopUi.formatTokenShopEffectLine(row)
+            );
+            const actionLabel = tokenShopUi.getTokenShopActionLabel(row);
+            const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
+            const groundingSummary = tokenShopUi.getTokenShopRowGroundingSummary(row);
             const nextKnownCostLabel = row.isMaxed
               ? "No next cost within known cap"
               : typeof row.nextKnownCost === "number"
