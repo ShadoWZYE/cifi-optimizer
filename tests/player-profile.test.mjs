@@ -33,7 +33,10 @@ test("normalizePlayerProfile converts invalid numeric strings to null", () => {
 test("normalizePlayerProfile preserves only allowed meta.dataConfidence values", () => {
   assert.equal(normalizePlayerProfile({ confidence: "verified" }).meta.dataConfidence, "verified");
   assert.equal(normalizePlayerProfile({ confidence: "guessed" }).meta.dataConfidence, "manual");
-  assert.equal(normalizePlayerProfile({ automationConfidence: "mixed" }).meta.dataConfidence, "mixed");
+  assert.equal(
+    normalizePlayerProfile({ automationConfidence: "mixed" }).meta.dataConfidence,
+    "mixed"
+  );
 });
 
 test("normalizePlayerProfile keeps only the exact typed bounded multiverse market SaveData ranges quarantined", () => {
@@ -63,10 +66,16 @@ test("normalizePlayerProfile keeps only the exact typed bounded multiverse marke
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS72Level, 5);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.EsotericR1Trades, 6);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.NecrumR9Trades, 7);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.EsotericR10Trades, undefined);
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.EsotericR10Trades,
+    undefined
+  );
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech1Unlocked, true);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech1Units, 9);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.FinalMech1MainBonus, 125000);
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.FinalMech1MainBonus,
+    125000
+  );
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech2Unlocked, false);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech2Units, undefined);
   assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS111Level, undefined);

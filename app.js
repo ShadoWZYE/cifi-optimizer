@@ -96,20 +96,20 @@ const SHIP_LABELS = {
   Ze: "Zeus"
 };
 
-  const INSTALL_DATA = {
-    C: [
-      { name: "Mitosis Enhancements", effectTypes: ["cells"], icon: "ME" },
-      { name: "Improved Timing Belts", effectTypes: ["gens"], icon: "TB" },
-      { name: "Improved Printing Engines", effectTypes: ["gens"], icon: "PE" },
-      { name: "Printer Tweaks", effectTypes: ["gens"], icon: "PT" },
-      { name: "Improved Capacitors", effectTypes: ["gens"], icon: "IC" },
-      { name: "Improved Cooling Systems", effectTypes: ["gens"], icon: "CS" },
-      { name: "Printer Modulization", effectTypes: ["gens"], icon: "PM" },
-      { name: "Molecule Infusing Tech", effectTypes: ["gens"], icon: "MI" },
-      { name: "Improved Generator Equipment", effectTypes: ["rp"], icon: "GE" },
-      { name: "On-Site Mining Printers", effectTypes: ["shards"], icon: "MP" },
-      { name: "Brain Capacity Genetics", effectTypes: ["cells"], icon: "BG" }
-    ],
+const INSTALL_DATA = {
+  C: [
+    { name: "Mitosis Enhancements", effectTypes: ["cells"], icon: "ME" },
+    { name: "Improved Timing Belts", effectTypes: ["gens"], icon: "TB" },
+    { name: "Improved Printing Engines", effectTypes: ["gens"], icon: "PE" },
+    { name: "Printer Tweaks", effectTypes: ["gens"], icon: "PT" },
+    { name: "Improved Capacitors", effectTypes: ["gens"], icon: "IC" },
+    { name: "Improved Cooling Systems", effectTypes: ["gens"], icon: "CS" },
+    { name: "Printer Modulization", effectTypes: ["gens"], icon: "PM" },
+    { name: "Molecule Infusing Tech", effectTypes: ["gens"], icon: "MI" },
+    { name: "Improved Generator Equipment", effectTypes: ["rp"], icon: "GE" },
+    { name: "On-Site Mining Printers", effectTypes: ["shards"], icon: "MP" },
+    { name: "Brain Capacity Genetics", effectTypes: ["cells"], icon: "BG" }
+  ],
   A: [
     { name: "Improved Tech Software", effectTypes: ["gens"], icon: "TS" },
     { name: "Improved Tech Hardware", effectTypes: ["gens"], icon: "TH" },
@@ -162,19 +162,19 @@ const SHIP_LABELS = {
     { name: "On-Site GPR Hotspot Scanners", effectTypes: ["shards"], icon: "GS" },
     { name: "On-Site Printing Vehicles", effectTypes: ["cells"], icon: "PV" }
   ],
-    K: [
-      { name: "The Venn Hypothesis", effectTypes: ["cells"], icon: "VH" },
-      { name: "Unobtanium Drills", effectTypes: ["shards"], icon: "UD" },
-      { name: "Modification Thesis", effectTypes: ["mp"], icon: "MT" },
-      { name: "The Study of Threesium", effectTypes: ["gens"], icon: "ST" },
-      { name: "The Big Brainium Thesis", effectTypes: ["rp"], icon: "BT" },
-      { name: "The Connectivity Thesis", effectTypes: ["mp", "shards"], icon: "CT" },
-      { name: "The Overclocking Thesis", effectTypes: ["gens"], icon: "OT" },
-      { name: "Factory Maintainer Drone", effectTypes: ["gens"], icon: "FD" },
-      { name: "Robo-Research Assistants", effectTypes: ["rp"], icon: "RA" },
-      { name: "Shard Scanning Breakthrough", effectTypes: ["shards"], icon: "SB" },
-      { name: "Improved Mk1 Printing Fuel", effectTypes: ["cells"], icon: "PF" }
-    ],
+  K: [
+    { name: "The Venn Hypothesis", effectTypes: ["cells"], icon: "VH" },
+    { name: "Unobtanium Drills", effectTypes: ["shards"], icon: "UD" },
+    { name: "Modification Thesis", effectTypes: ["mp"], icon: "MT" },
+    { name: "The Study of Threesium", effectTypes: ["gens"], icon: "ST" },
+    { name: "The Big Brainium Thesis", effectTypes: ["rp"], icon: "BT" },
+    { name: "The Connectivity Thesis", effectTypes: ["mp", "shards"], icon: "CT" },
+    { name: "The Overclocking Thesis", effectTypes: ["gens"], icon: "OT" },
+    { name: "Factory Maintainer Drone", effectTypes: ["gens"], icon: "FD" },
+    { name: "Robo-Research Assistants", effectTypes: ["rp"], icon: "RA" },
+    { name: "Shard Scanning Breakthrough", effectTypes: ["shards"], icon: "SB" },
+    { name: "Improved Mk1 Printing Fuel", effectTypes: ["cells"], icon: "PF" }
+  ],
   Ze: [
     { name: "Academy Janitor Bots", effectTypes: ["cells"], icon: "JB" },
     { name: "Perfect Student Blueprint", effectTypes: ["ap"], icon: "PB" },
@@ -217,113 +217,113 @@ const SHIP_PLAYER_STATE_HIDDEN_FIELDS = {
   technical: new Set(["LongRun"])
 };
 
-  const INSTALL_LAYOUT = [
-    [8, 4, 6, 9],
-    [2, 1, 3],
-    [10, 7, 5, 11]
-  ];
+const INSTALL_LAYOUT = [
+  [8, 4, 6, 9],
+  [2, 1, 3],
+  [10, 7, 5, 11]
+];
 
-  const SHIP_INSTALL_INDEX_LAYOUTS = {
-    default: [
-      [7, 3, 5, 10],
-      [1, 0, 2],
-      [9, 6, 4, 8]
-    ]
-  };
+const SHIP_INSTALL_INDEX_LAYOUTS = {
+  default: [
+    [7, 3, 5, 10],
+    [1, 0, 2],
+    [9, 6, 4, 8]
+  ]
+};
 
-  const DESMOS_INSTALL_WEIGHT_MAPS = {
-    C: [
-      ["cells"],
-      ["cells"],
-      ["gens"],
-      ["cells"],
-      ["gens"],
-      ["gens"],
-      ["gens"],
-      ["gens"],
-      ["rp"],
-      ["shards"],
-      ["cells"]
-    ],
-    A: [
-      ["gens"],
-      ["gens"],
-      ["cells"],
-      ["cells"],
-      ["gens"],
-      ["gens"],
-      ["gens"],
-      ["gens"],
-      ["rp"],
-      ["shards"],
-      ["cells"]
-    ],
-    Zg: [
-      ["cells"],
-      ["gens"],
-      ["mods"],
-      ["gens"],
-      ["gens"],
-      ["gens"],
-      ["gens"],
-      ["gens"],
-      ["rp"],
-      ["shards"],
-      ["cells"]
-    ],
-    H: [
-      ["gens"],
-      ["gens"],
-      ["mods"],
-      ["cells"],
-      ["cells"],
-      ["mods"],
-      ["gens"],
-      ["gens"],
-      ["rp"],
-      ["shards"],
-      ["cells"]
-    ],
-    D: [
-      ["cells", "mods", "shards", "rp", "ap", "materials"],
-      ["shards"],
-      ["cells"],
-      ["gens"],
-      ["gens"],
-      ["mods"],
-      ["gens"],
-      ["gens"],
-      ["rp"],
-      ["shards"],
-      ["cells"]
-    ],
-    K: [
-      ["cells"],
-      ["shards"],
-      ["mods"],
-      ["gens"],
-      ["rp"],
-      ["mods", "shards"],
-      ["gens"],
-      ["gens"],
-      ["rp"],
-      ["shards"],
-      ["cells"]
-    ],
-    Ze: [
-      ["cells"],
-      ["ap"],
-      ["materials"],
-      ["cells", "shards"],
-      ["cells", "rp"],
-      ["mods", "materials"],
-      ["gens", "ap"],
-      ["gens"],
-      ["rp"],
-      ["shards"],
-      ["cells"]
-    ]
-  };
+const DESMOS_INSTALL_WEIGHT_MAPS = {
+  C: [
+    ["cells"],
+    ["cells"],
+    ["gens"],
+    ["cells"],
+    ["gens"],
+    ["gens"],
+    ["gens"],
+    ["gens"],
+    ["rp"],
+    ["shards"],
+    ["cells"]
+  ],
+  A: [
+    ["gens"],
+    ["gens"],
+    ["cells"],
+    ["cells"],
+    ["gens"],
+    ["gens"],
+    ["gens"],
+    ["gens"],
+    ["rp"],
+    ["shards"],
+    ["cells"]
+  ],
+  Zg: [
+    ["cells"],
+    ["gens"],
+    ["mods"],
+    ["gens"],
+    ["gens"],
+    ["gens"],
+    ["gens"],
+    ["gens"],
+    ["rp"],
+    ["shards"],
+    ["cells"]
+  ],
+  H: [
+    ["gens"],
+    ["gens"],
+    ["mods"],
+    ["cells"],
+    ["cells"],
+    ["mods"],
+    ["gens"],
+    ["gens"],
+    ["rp"],
+    ["shards"],
+    ["cells"]
+  ],
+  D: [
+    ["cells", "mods", "shards", "rp", "ap", "materials"],
+    ["shards"],
+    ["cells"],
+    ["gens"],
+    ["gens"],
+    ["mods"],
+    ["gens"],
+    ["gens"],
+    ["rp"],
+    ["shards"],
+    ["cells"]
+  ],
+  K: [
+    ["cells"],
+    ["shards"],
+    ["mods"],
+    ["gens"],
+    ["rp"],
+    ["mods", "shards"],
+    ["gens"],
+    ["gens"],
+    ["rp"],
+    ["shards"],
+    ["cells"]
+  ],
+  Ze: [
+    ["cells"],
+    ["ap"],
+    ["materials"],
+    ["cells", "shards"],
+    ["cells", "rp"],
+    ["mods", "materials"],
+    ["gens", "ap"],
+    ["gens"],
+    ["rp"],
+    ["shards"],
+    ["cells"]
+  ]
+};
 
 const SHIP_FILTER_LABELS = {
   cells: "Cells (& Gen1)",
@@ -395,7 +395,52 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, datasetContract, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardCostModelBoundary, shardMilestoneRowModelBoundary, shardMilestoneTitleEffectBoundary, shardEffectTextHandlerBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, shardSceneMonoBehaviourProbe, shardCostParameterProbe, shardCostNativeProbe, shardBonusSlotProbe, shardRowVerificationSu1, shardRowVerificationSu2, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell, tokenShopRowRemapBoundary] = await Promise.all([
+  const [
+    snapshot,
+    datasetContract,
+    shipBaseline,
+    groundedShardMilestones,
+    groundedShardObservedBehaviors,
+    groundedShardProvenance,
+    shardAssetGrounding,
+    shardOwnerFamilyBoundary,
+    shardFinalSuBonusBoundary,
+    shardMilestonePayloadBoundary,
+    shardCostModelBoundary,
+    shardMilestoneRowModelBoundary,
+    shardMilestoneTitleEffectBoundary,
+    shardEffectTextHandlerBoundary,
+    shardMilestoneRowShellBoundary,
+    shardMilestoneRowAlignmentBoundary,
+    shardSaveBoundary,
+    shardSceneMonoBehaviourProbe,
+    shardCostParameterProbe,
+    shardCostNativeProbe,
+    shardBonusSlotProbe,
+    shardRowVerificationSu1,
+    shardRowVerificationSu2,
+    extractionCandidateRanking,
+    tokenShopValues,
+    multiverseMarketValues,
+    multiverseMarketMetadataNeighborhood,
+    tokeniumNamingClues,
+    tokenBankStateClues,
+    dailyTokeniumLaneClues,
+    tokenBankFormulaBoundary,
+    multiverseMarketRangeBoundary,
+    multiverseMarketRowTextCoverage,
+    multiverseMarketPrefabRemapBoundary,
+    tokenShopCostLanes,
+    spendActionLaneClues,
+    multiverseMarketActionShell,
+    multiverseMarketOwnerFamily,
+    tokenShopOwnerShell,
+    tokenShopSaveBoundary,
+    multiverseMarketSaveBoundary,
+    multiverseMarketMarketMemberBoundary,
+    tokenBankControllerShell,
+    tokenShopRowRemapBoundary
+  ] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/bundled-dataset-contract.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
@@ -620,13 +665,17 @@ async function initServerSession() {
   session.heartbeatId = window.setInterval(() => {
     postServerSession(SERVER_SESSION_ENDPOINTS.heartbeat, session.id);
   }, APP_LAUNCH_HEARTBEAT_MS);
-  session.events = new EventSource(`${SERVER_SESSION_ENDPOINTS.events}?clientId=${encodeURIComponent(session.id)}`);
+  session.events = new EventSource(
+    `${SERVER_SESSION_ENDPOINTS.events}?clientId=${encodeURIComponent(session.id)}`
+  );
   session.events.addEventListener("ready", (event) => {
     const payload = parseServerEvent(event);
     if (!payload) {
       return;
     }
-    session.launchSignalSequence = Number(payload.launchSignalSequence || session.launchSignalSequence || 0);
+    session.launchSignalSequence = Number(
+      payload.launchSignalSequence || session.launchSignalSequence || 0
+    );
   });
   session.events.addEventListener("launch", (event) => {
     const payload = parseServerEvent(event);
@@ -688,7 +737,10 @@ function closeServerSession(session = state.serverSession) {
   session.enabled = false;
   const payload = JSON.stringify({ clientId: session.id });
   if (navigator.sendBeacon) {
-    navigator.sendBeacon(SERVER_SESSION_ENDPOINTS.close, new Blob([payload], { type: "application/json" }));
+    navigator.sendBeacon(
+      SERVER_SESSION_ENDPOINTS.close,
+      new Blob([payload], { type: "application/json" })
+    );
     return;
   }
 
@@ -725,7 +777,7 @@ function getActivePrimaryLease() {
   if (!lease?.id || !lease?.updatedAt) {
     return null;
   }
-  return (Date.now() - Number(lease.updatedAt)) <= APP_LAUNCH_STALE_MS ? lease : null;
+  return Date.now() - Number(lease.updatedAt) <= APP_LAUNCH_STALE_MS ? lease : null;
 }
 
 function syncPrimaryLease(coordinator) {
@@ -786,7 +838,10 @@ function handlePrimaryReopen() {
 
 function refreshFromPersistentState() {
   const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, state.playerProfile);
-  state.playerProfile = normalizePlayerProfile(storedPlayerProfile, createDefaultShipPlayerState(state.shipBaseline));
+  state.playerProfile = normalizePlayerProfile(
+    storedPlayerProfile,
+    createDefaultShipPlayerState(state.shipBaseline)
+  );
   state.snapshot = loadStoredJson(STORAGE_KEYS.snapshot, state.snapshot);
   state.shipConfig = buildShipConfig(loadStoredJson(STORAGE_KEYS.shipConfig, state.shipConfig));
   fillProfileForm();
@@ -886,7 +941,8 @@ function getShipPlannerState() {
 function getExperimentalProfileState() {
   return {
     gemNodeBudget: state.playerProfile.externalModels.experimental.gemNodes.budget,
-    primaryFarmingFocus: state.playerProfile.externalModels.experimental.profileHints.primaryFarmingFocus,
+    primaryFarmingFocus:
+      state.playerProfile.externalModels.experimental.profileHints.primaryFarmingFocus,
     researchHours: state.playerProfile.externalModels.experimental.profileHints.researchHours
   };
 }
@@ -926,11 +982,13 @@ function buildShipTemplates(baseline) {
         caps: [...shipData.caps],
         reserveThresholds: [...shipData.reserveThresholds],
         powerTerms: [...shipData.powerTerms],
-        installs: INSTALL_DATA[shipKey] ?? shipData.caps.map((_, index) => ({
-          name: `Install ${index + 1}`,
-          effectTypes: ["other"],
-          icon: `${index + 1}`
-        }))
+        installs:
+          INSTALL_DATA[shipKey] ??
+          shipData.caps.map((_, index) => ({
+            name: `Install ${index + 1}`,
+            effectTypes: ["other"],
+            icon: `${index + 1}`
+          }))
       }
     ])
   );
@@ -941,17 +999,20 @@ function buildShipConfig(stored = loadStoredJson(STORAGE_KEYS.shipConfig, null))
   const defaultLoadouts = Array.from({ length: baseline.loadoutSlots }, (_, index) => ({
     name: `Loadout ${index + 1}`,
     ships: Object.fromEntries(
-      Object.entries(baseline.shipInstalls).map(([shipKey, shipData]) => [shipKey, [...shipData.current]])
+      Object.entries(baseline.shipInstalls).map(([shipKey, shipData]) => [
+        shipKey,
+        [...shipData.current]
+      ])
     ),
     history: []
   }));
 
-    return {
-      weights: stored?.weights ? { ...baseline.weights, ...stored.weights } : { ...baseline.weights },
-      loadouts: hydrateLoadouts(stored?.loadouts, defaultLoadouts, stored?.filters),
-      activeLoadoutIndex: clampNumber(stored?.activeLoadoutIndex ?? 0, 0, baseline.loadoutSlots - 1),
-      selectedShipKey: SHIP_LABELS[stored?.selectedShipKey] ? stored.selectedShipKey : "C",
-      pointPerTap: stored?.pointPerTap ?? 1
+  return {
+    weights: stored?.weights ? { ...baseline.weights, ...stored.weights } : { ...baseline.weights },
+    loadouts: hydrateLoadouts(stored?.loadouts, defaultLoadouts, stored?.filters),
+    activeLoadoutIndex: clampNumber(stored?.activeLoadoutIndex ?? 0, 0, baseline.loadoutSlots - 1),
+    selectedShipKey: SHIP_LABELS[stored?.selectedShipKey] ? stored.selectedShipKey : "C",
+    pointPerTap: stored?.pointPerTap ?? 1
   };
 }
 
@@ -972,7 +1033,9 @@ function hydrateLoadouts(storedLoadouts, defaultLoadouts, legacyFilters) {
       ships: Object.fromEntries(
         Object.entries(fallback.ships).map(([shipKey, values]) => [
           shipKey,
-          Array.isArray(stored.ships?.[shipKey]) ? stored.ships[shipKey].map((value) => Number(value) || 0) : [...values]
+          Array.isArray(stored.ships?.[shipKey])
+            ? stored.ships[shipKey].map((value) => Number(value) || 0)
+            : [...values]
         ])
       )
     };
@@ -987,7 +1050,13 @@ function normalizeLoadoutName(candidate, fallback) {
 function mergeDeep(base, patch) {
   const output = structuredClone(base);
   Object.entries(patch).forEach(([key, value]) => {
-    if (value && typeof value === "object" && !Array.isArray(value) && output[key] && typeof output[key] === "object") {
+    if (
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      output[key] &&
+      typeof output[key] === "object"
+    ) {
       output[key] = mergeDeep(output[key], value);
     } else {
       output[key] = structuredClone(value);
@@ -1016,7 +1085,10 @@ function bindProfileActions() {
   });
 
   $("#restoreDefaultsBtn").addEventListener("click", () => {
-    state.playerProfile = normalizePlayerProfile(createDefaultPlayerProfile(), createDefaultShipPlayerState(state.shipBaseline));
+    state.playerProfile = normalizePlayerProfile(
+      createDefaultPlayerProfile(),
+      createDefaultShipPlayerState(state.shipBaseline)
+    );
     persistPlayerProfile();
     fillProfileForm();
     setStatus("profileStatus", "Profile reset to blank values.", "success");
@@ -1044,7 +1116,11 @@ function bindProfileActions() {
       return;
     }
     $("#playerProfileImportText").value = await file.text();
-    setStatus("playerProfileImportStatus", `Loaded ${file.name}. Review the JSON, then import it.`, "success");
+    setStatus(
+      "playerProfileImportStatus",
+      `Loaded ${file.name}. Review the JSON, then import it.`,
+      "success"
+    );
   });
 
   $("#importPlayerProfileBtn").addEventListener("click", () => {
@@ -1062,7 +1138,8 @@ function bindProfileActions() {
       const group = input.dataset.shipGroup;
       const field = input.dataset.shipField;
       const current = shipPlayerState[group][field];
-      shipPlayerState[group][field] = typeof current === "boolean" ? input.checked : coerceInputValue(input.value);
+      shipPlayerState[group][field] =
+        typeof current === "boolean" ? input.checked : coerceInputValue(input.value);
     });
     persistPlayerProfile();
     setStatus("shipPlayerStateStatus", "Community-tool ship calibration saved.", "success");
@@ -1120,29 +1197,42 @@ function bindOptimizerActions() {
     const tokenShopBuyButton = event.target.closest("[data-token-shop-buy-field]");
     if (tokenShopBuyButton) {
       const fieldName = tokenShopBuyButton.dataset.tokenShopBuyField;
-      const levelField = tokenShopBuyButton.closest(".token-shop-buy-panel")?.querySelector("[data-token-shop-level-field]");
-      const currentLevel = coerceInputValue(levelField?.value ?? tokenShopBuyButton.dataset.tokenShopCurrentLevel ?? "0");
+      const levelField = tokenShopBuyButton
+        .closest(".token-shop-buy-panel")
+        ?.querySelector("[data-token-shop-level-field]");
+      const currentLevel = coerceInputValue(
+        levelField?.value ?? tokenShopBuyButton.dataset.tokenShopCurrentLevel ?? "0"
+      );
       saveTokenShopProgressionLevel(fieldName, currentLevel + 1);
       return;
     }
     const focusButton = event.target.closest("[data-shard-focus-id]");
     if (focusButton) {
       const milestoneId = focusButton.dataset.shardFocusId || null;
-      const levelField = focusButton.closest(".shard-milestone-card")?.querySelector("[data-shard-focus-level]");
+      const levelField = focusButton
+        .closest(".shard-milestone-card")
+        ?.querySelector("[data-shard-focus-level]");
       const milestoneLevel = coerceInputValue(levelField?.value ?? "");
       saveShardPlannerInputs(milestoneId, milestoneLevel);
     }
   });
-  $("#progressionResults").addEventListener("toggle", (event) => {
-    const card = event.target.closest("[data-shard-milestone-card]");
-    if (card) {
-      syncShardMilestoneOpenState(card.dataset.shardMilestoneCard, card.open);
-    }
-  }, true);
+  $("#progressionResults").addEventListener(
+    "toggle",
+    (event) => {
+      const card = event.target.closest("[data-shard-milestone-card]");
+      if (card) {
+        syncShardMilestoneOpenState(card.dataset.shardMilestoneCard, card.open);
+      }
+    },
+    true
+  );
   $("#progressionResults").addEventListener("change", (event) => {
     const tokenShopLevelField = event.target.closest("[data-token-shop-level-field]");
     if (tokenShopLevelField) {
-      saveTokenShopProgressionLevel(tokenShopLevelField.dataset.tokenShopLevelField, coerceInputValue(tokenShopLevelField.value ?? ""));
+      saveTokenShopProgressionLevel(
+        tokenShopLevelField.dataset.tokenShopLevelField,
+        coerceInputValue(tokenShopLevelField.value ?? "")
+      );
       return;
     }
     const levelField = event.target.closest("[data-shard-focus-level]");
@@ -1158,7 +1248,11 @@ function bindOptimizerActions() {
   $("#runValidationSuite").addEventListener("click", renderValidationResults);
   $("#saveShipConfigBtn").addEventListener("click", () => {
     persistShipConfig();
-    setStatus("shipConfigStatus", "Community-tool ship planner weights and loadouts saved.", "success");
+    setStatus(
+      "shipConfigStatus",
+      "Community-tool ship planner weights and loadouts saved.",
+      "success"
+    );
   });
 }
 
@@ -1213,11 +1307,16 @@ function renderOverview() {
   const supportValidation = validation.filter((item) => item.scope === "Support");
   const recommendationFeed = getActiveMvpRecommendationFeed();
   const recommendationFeedSupport = getActiveMvpRecommendationFeedSupport();
-  $("#validationStatusValue").textContent = `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
+  $("#validationStatusValue").textContent =
+    `${mvpValidation.filter((item) => item.pass).length}/${mvpValidation.length}`;
   $("#overviewHighlights").innerHTML = [
     renderRecommendationFeedSummary(recommendationFeed, "overview"),
     renderRecommendationFeedSupportNotice(recommendationFeedSupport, "overview"),
-    ...recommendationFeed.slice(0, 3).map((item) => makeRecommendationCard(item, item.module === "loop" ? "warning" : item.module)),
+    ...recommendationFeed
+      .slice(0, 3)
+      .map((item) =>
+        makeRecommendationCard(item, item.module === "loop" ? "warning" : item.module)
+      ),
     renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
   $("#overviewSpendSnapshot").innerHTML = renderSpendPlannerBoundary();
@@ -1233,21 +1332,23 @@ function renderShipPlayerState() {
       .map(([fieldKey, value]) => {
         const displayLabel = labelMap[fieldKey] ?? fieldKey;
         if (typeof value === "boolean") {
-        const fieldClass = groupKey === "innovation" ? "mini-field mini-field-toggle" : "mini-field";
-        return `<label class="${fieldClass}"><span>${displayLabel}</span><input data-ship-group="${groupKey}" data-ship-field="${fieldKey}" type="checkbox" ${value ? "checked" : ""}></label>`;
+          const fieldClass =
+            groupKey === "innovation" ? "mini-field mini-field-toggle" : "mini-field";
+          return `<label class="${fieldClass}"><span>${displayLabel}</span><input data-ship-group="${groupKey}" data-ship-field="${fieldKey}" type="checkbox" ${value ? "checked" : ""}></label>`;
         }
-      return `<label class="mini-field"><span>${displayLabel}</span><input data-ship-group="${groupKey}" data-ship-field="${fieldKey}" type="number" step="any" value="${value}"></label>`;
-      }).join("");
+        return `<label class="mini-field"><span>${displayLabel}</span><input data-ship-group="${groupKey}" data-ship-field="${fieldKey}" type="number" step="any" value="${value}"></label>`;
+      })
+      .join("");
 
     const gridClass = groupKey === "innovation" ? "mini-grid mini-grid-stacked" : "mini-grid";
 
-      return `
+    return `
         <article class="snapshot-card">
           <span class="snapshot-title">${label}</span>
           <div class="${gridClass}">${fields}</div>
         </article>
       `;
-    }).join("");
+  }).join("");
 }
 
 function renderSourceRegistry() {
@@ -1264,36 +1365,44 @@ function renderSourceRegistry() {
     }))
   ];
 
-  $("#sourceRegistry").innerHTML = records.map((record) => `
+  $("#sourceRegistry").innerHTML = records
+    .map(
+      (record) => `
     <article class="validation-card ${record.detail.includes("Reference") ? "pass" : "warn"}">
       <strong>${record.title}</strong>
       <p class="validation-status">${record.meta}</p>
       <p class="meta">${record.detail}</p>
     </article>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
-  function renderShipPanels() {
-    renderShipWeights();
-    renderShipToolbar();
-    renderShipSelector();
-    renderShipEditor();
-    renderShipActions();
-    renderShipResults();
-  }
-  
-    function renderShipWeights() {
-      $("#shipWeightsPanel").innerHTML = `
+function renderShipPanels() {
+  renderShipWeights();
+  renderShipToolbar();
+  renderShipSelector();
+  renderShipEditor();
+  renderShipActions();
+  renderShipResults();
+}
+
+function renderShipWeights() {
+  $("#shipWeightsPanel").innerHTML = `
         <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
           <span class="snapshot-title">Resource priority weights</span>
         <p class="meta">These weights drive the current ship-planner implementation while the repo remaps tool labels to grounded in-game terminology.</p>
         <div class="mini-grid">
-          ${Object.entries(state.shipConfig.weights).map(([key, value]) => `
+          ${Object.entries(state.shipConfig.weights)
+            .map(
+              ([key, value]) => `
             <label class="mini-field">
             <span>${key}</span>
             <input data-weight-key="${key}" type="number" step="any" value="${value}">
           </label>
-          `).join("")}
+          `
+            )
+            .join("")}
         </div>
         </article>
           <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
@@ -1320,34 +1429,42 @@ function renderSourceRegistry() {
     });
   });
 
-    $("#shipSoftCapToggle").addEventListener("change", (event) => {
-      getShipCommunityToolState().innovation.softCap = event.target.checked;
-      persistPlayerProfile();
-      renderShipPanels();
-    });
+  $("#shipSoftCapToggle").addEventListener("change", (event) => {
+    getShipCommunityToolState().innovation.softCap = event.target.checked;
+    persistPlayerProfile();
+    renderShipPanels();
+  });
 
-    $("#shipMeltdownInput").addEventListener("change", (event) => {
-      getShipCommunityToolState().technical.Meltdown = coerceInputValue(event.target.value);
-      persistPlayerProfile();
-      renderShipPlayerState();
-      renderShipPanels();
-    });
-  }
+  $("#shipMeltdownInput").addEventListener("change", (event) => {
+    getShipCommunityToolState().technical.Meltdown = coerceInputValue(event.target.value);
+    persistPlayerProfile();
+    renderShipPlayerState();
+    renderShipPanels();
+  });
+}
 
-  function renderShipToolbar() {
-    const loadoutButtons = state.shipConfig.loadouts.map((loadout, index) => `
+function renderShipToolbar() {
+  const loadoutButtons = state.shipConfig.loadouts
+    .map(
+      (loadout, index) => `
       <button class="segment-button ${index === state.shipConfig.activeLoadoutIndex ? "is-active" : ""}" data-loadout-index="${index}">
         ${loadout.name}
       </button>
-  `).join("");
+  `
+    )
+    .join("");
 
-    const tapButtons = [1, 5, 10, "MAX"].map((value) => `
+  const tapButtons = [1, 5, 10, "MAX"]
+    .map(
+      (value) => `
       <button class="segment-button ${value === state.shipConfig.pointPerTap ? "is-active" : ""}" data-tap-value="${value}">
         ${value === "MAX" ? "MAX" : `x${value}`}
       </button>
-    `).join("");
+    `
+    )
+    .join("");
 
-    $("#shipLoadoutToolbar").innerHTML = `
+  $("#shipLoadoutToolbar").innerHTML = `
       <div class="ship-editor-surface ship-editor-surface-subtle">
         <span class="snapshot-title">Loadout slots</span>
         <div class="loadout-switches">${loadoutButtons}</div>
@@ -1368,7 +1485,8 @@ function renderSourceRegistry() {
 
   $$("#shipLoadoutToolbar [data-tap-value]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.shipConfig.pointPerTap = button.dataset.tapValue === "MAX" ? "MAX" : Number(button.dataset.tapValue);
+      state.shipConfig.pointPerTap =
+        button.dataset.tapValue === "MAX" ? "MAX" : Number(button.dataset.tapValue);
       persistShipConfig(false);
       renderShipToolbar();
       renderShipEditor();
@@ -1376,16 +1494,20 @@ function renderSourceRegistry() {
   });
 }
 
-  function renderShipSelector() {
-    $("#shipSelectorPanel").innerHTML = `
+function renderShipSelector() {
+  $("#shipSelectorPanel").innerHTML = `
       <div class="ship-editor-surface ship-editor-surface-subtle">
         <span class="snapshot-title">Select ship</span>
         <div class="ship-chip-row">
-          ${Object.entries(SHIP_LABELS).map(([shipKey, label]) => `
+          ${Object.entries(SHIP_LABELS)
+            .map(
+              ([shipKey, label]) => `
             <button class="ship-chip ship-theme-${shipKey} ${shipKey === state.shipConfig.selectedShipKey ? "is-active" : ""}" data-ship-key="${shipKey}">
               ${label}
           </button>
-        `).join("")}
+        `
+            )
+            .join("")}
       </div>
     </div>
   `;
@@ -1399,17 +1521,17 @@ function renderSourceRegistry() {
   });
 }
 
-  function renderShipEditor() {
+function renderShipEditor() {
   const shipKey = state.shipConfig.selectedShipKey;
-    const active = getActiveLoadout();
-    const values = active.ships[shipKey];
-    const template = state.shipTemplates[shipKey];
-      const bestInstall = getBestNextInstall(shipKey);
-      const bestIndexes = new Set(bestInstall?.indexes ?? []);
-      const installTotal = sum(values);
-      const installLayout = getShipInstallLayout(shipKey);
+  const active = getActiveLoadout();
+  const values = active.ships[shipKey];
+  const template = state.shipTemplates[shipKey];
+  const bestInstall = getBestNextInstall(shipKey);
+  const bestIndexes = new Set(bestInstall?.indexes ?? []);
+  const installTotal = sum(values);
+  const installLayout = getShipInstallLayout(shipKey);
 
-    $("#shipEditorPanel").innerHTML = `
+  $("#shipEditorPanel").innerHTML = `
       <div class="ship-editor-surface ship-editor-stage ship-theme-${shipKey}">
         <div class="recommendation-head">
           <div>
@@ -1419,44 +1541,57 @@ function renderSourceRegistry() {
           <span class="score">Next best: ${bestInstall ? bestInstall.indexes.map((index) => template.installs[index].name).join(" | ") : "Capped"}</span>
       </div>
         <div class="install-layout">
-          ${installLayout.map((row, rowIndex) => `
+          ${installLayout
+            .map(
+              (row, rowIndex) => `
             <div class="install-row install-row-${rowIndex + 1}">
-                ${row.map((index) => {
-                  const install = template.installs[index];
-                  const value = values[index];
-                  const effectiveCap = getEffectiveCap(template.caps[index]);
-                  const reserveThreshold = template.reserveThresholds[index];
-                  const available = canInstallPoint(shipKey, index);
-                  const gain = getInstallGain(shipKey, index);
+                ${row
+                  .map((index) => {
+                    const install = template.installs[index];
+                    const value = values[index];
+                    const effectiveCap = getEffectiveCap(template.caps[index]);
+                    const reserveThreshold = template.reserveThresholds[index];
+                    const available = canInstallPoint(shipKey, index);
+                    const gain = getInstallGain(shipKey, index);
                     const isBest = bestIndexes.has(index);
-                  const effectTypes = getInstallEffectTypes(shipKey, index);
-                  const primaryEffect = getPrimaryEffectClass(effectTypes);
-                  const isCapped = value >= effectiveCap;
-                  const valueLabel = isCapped
-                    ? "Capped"
-                    : available
-                      ? formatPercentGain(gain.rawGain)
-                      : `Unlock @ ${reserveThreshold}`;
-                  const title = isCapped
-                    ? "Install cap reached. Ctrl+click or Shift+click to remove points."
-                    : available
-                      ? "Click to assign the next points. Ctrl+click or Shift+click to remove points."
-                      : `Needs ${reserveThreshold} total installs`;
-                  const isInteractable = available || isCapped || value > 0;
-                  return `
+                    const effectTypes = getInstallEffectTypes(shipKey, index);
+                    const primaryEffect = getPrimaryEffectClass(effectTypes);
+                    const isCapped = value >= effectiveCap;
+                    const valueLabel = isCapped
+                      ? "Capped"
+                      : available
+                        ? formatPercentGain(gain.rawGain)
+                        : `Unlock @ ${reserveThreshold}`;
+                    const title = isCapped
+                      ? "Install cap reached. Ctrl+click or Shift+click to remove points."
+                      : available
+                        ? "Click to assign the next points. Ctrl+click or Shift+click to remove points."
+                        : `Needs ${reserveThreshold} total installs`;
+                    const isInteractable = available || isCapped || value > 0;
+                    return `
                     <button class="install-card ship-theme-${shipKey} ${isBest ? "is-active" : ""} ${isInteractable ? "" : "is-locked"} ${isCapped ? "is-capped" : ""}" data-install-index="${index}" title="${title}" ${isInteractable ? "" : "disabled"}>
                       <div class="install-icon">${install.icon}</div>
                       <strong>${install.name}</strong>
                     <span class="snapshot-title">${value}/${effectiveCap}</span>
-                    ${available && !isCapped
-                      ? `<div class="effect-line-stack">${getDisplayEffectTypes(effectTypes).map((effectType) => `<span class="effect-line effect-${effectType}">${valueLabel}</span>`).join("")}</div>`
-                      : `<span class="effect-line effect-${primaryEffect}">${valueLabel}</span>`}
+                    ${
+                      available && !isCapped
+                        ? `<div class="effect-line-stack">${getDisplayEffectTypes(effectTypes)
+                            .map(
+                              (effectType) =>
+                                `<span class="effect-line effect-${effectType}">${valueLabel}</span>`
+                            )
+                            .join("")}</div>`
+                        : `<span class="effect-line effect-${primaryEffect}">${valueLabel}</span>`
+                    }
                       ${isBest ? `<span class="pill">Next best +${bestInstall.delta}</span>` : ""}
                   </button>
               `;
-            }).join("")}
+                  })
+                  .join("")}
             </div>
-          `).join("")}
+          `
+            )
+            .join("")}
         </div>
         <div class="ship-filter-strip">
           <div class="ship-filter-head">
@@ -1464,34 +1599,38 @@ function renderSourceRegistry() {
             <p class="meta">Disable resource lanes to avoid those installs. With <code>softCap</code> on, filtered installs stay available only when they outperform by a large margin.</p>
           </div>
           <div class="ship-filter-grid">
-              ${Object.entries(SHIP_FILTER_LABELS).map(([key, label]) => `
+              ${Object.entries(SHIP_FILTER_LABELS)
+                .map(
+                  ([key, label]) => `
                 <button class="filter-chip effect-${key} ${active.filters[key] ? "is-active" : "is-muted"}" data-filter-key="${key}">
                   <span class="filter-dot"></span>
                   <span>${label}</span>
                 </button>
-              `).join("")}
+              `
+                )
+                .join("")}
           </div>
         </div>
       </div>
     `;
 
-    $$("#shipEditorPanel [data-install-index]").forEach((button) => {
-      button.addEventListener("click", (event) => {
-        const direction = event.ctrlKey || event.shiftKey ? -1 : 1;
-        applyInstallTap(Number(button.dataset.installIndex), direction);
-      });
+  $$("#shipEditorPanel [data-install-index]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const direction = event.ctrlKey || event.shiftKey ? -1 : 1;
+      applyInstallTap(Number(button.dataset.installIndex), direction);
     });
+  });
 
-    $$("#shipEditorPanel [data-filter-key]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const key = button.dataset.filterKey;
-        getActiveLoadout().filters[key] = !getActiveLoadout().filters[key];
-        persistShipConfig(false);
-        renderShipEditor();
-        renderShipResults();
-      });
+  $$("#shipEditorPanel [data-filter-key]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.filterKey;
+      getActiveLoadout().filters[key] = !getActiveLoadout().filters[key];
+      persistShipConfig(false);
+      renderShipEditor();
+      renderShipResults();
     });
-  }
+  });
+}
 
 function renderShipActions() {
   $("#shipActionPanel").innerHTML = `
@@ -1521,26 +1660,28 @@ function renderShipActions() {
   });
 }
 
-  function renderShipResults() {
-    const bestInstall = getBestNextInstall(state.shipConfig.selectedShipKey);
-    const shipRankings = rankShipTargets();
-    const leadCard = bestInstall ? {
-      title: `Next best install: ${bestInstall.indexes.map((index) => state.shipTemplates[state.shipConfig.selectedShipKey].installs[index].name).join(" | ")}`,
-      subtitle: SHIP_LABELS[state.shipConfig.selectedShipKey],
-      score: bestInstall.score,
-      confidence: 0.58,
-      notes: `Adds ${bestInstall.delta} point(s) on ${state.shipConfig.loadouts[state.shipConfig.activeLoadoutIndex].name}.`
-  } : null;
+function renderShipResults() {
+  const bestInstall = getBestNextInstall(state.shipConfig.selectedShipKey);
+  const shipRankings = rankShipTargets();
+  const leadCard = bestInstall
+    ? {
+        title: `Next best install: ${bestInstall.indexes.map((index) => state.shipTemplates[state.shipConfig.selectedShipKey].installs[index].name).join(" | ")}`,
+        subtitle: SHIP_LABELS[state.shipConfig.selectedShipKey],
+        score: bestInstall.score,
+        confidence: 0.58,
+        notes: `Adds ${bestInstall.delta} point(s) on ${state.shipConfig.loadouts[state.shipConfig.activeLoadoutIndex].name}.`
+      }
+    : null;
 
   $("#shipResults").innerHTML = `
-    ${renderSupportSurfaceNotice(
-      "Canonical ship system, provisional implementation",
-      [
-        "These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels.",
-        "Treat the ship output as canonical-domain planning with external-model wiring still being remapped."
-      ]
-    )}
-    ${[leadCard, ...shipRankings.slice(0, 3)].filter(Boolean).map((item) => makeRecommendationCard(item, "ship")).join("")}
+    ${renderSupportSurfaceNotice("Canonical ship system, provisional implementation", [
+      "These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels.",
+      "Treat the ship output as canonical-domain planning with external-model wiring still being remapped."
+    ])}
+    ${[leadCard, ...shipRankings.slice(0, 3)]
+      .filter(Boolean)
+      .map((item) => makeRecommendationCard(item, "ship"))
+      .join("")}
   `;
 }
 
@@ -1562,9 +1703,10 @@ function renderProgressionResults(results) {
     ),
     tokenShop: renderTokenShopSubsystemSection()
   };
-  const subsystemHeader = selectedSubsystem === "tokenShop"
-    ? ""
-    : `
+  const subsystemHeader =
+    selectedSubsystem === "tokenShop"
+      ? ""
+      : `
       ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
       ${renderRecommendationFeedSupportNotice(recommendationFeedSupport, "progression")}
     `;
@@ -1578,7 +1720,9 @@ function renderProgressionResults(results) {
 }
 
 function renderShardSubsystemSection(items) {
-  const cards = (Array.isArray(items) ? items : []).map((item) => makeRecommendationCard(item, "shards")).join("");
+  const cards = (Array.isArray(items) ? items : [])
+    .map((item) => makeRecommendationCard(item, "shards"))
+    .join("");
   return `
     <section class="meta-stack">
       <div class="panel-header">
@@ -1602,26 +1746,31 @@ function renderGemResults(results) {
   const boundaryNotes = [];
 
   if (budget === 0) {
-    boundaryNotes.push("Gem-node rankings are using a zero planner budget until you enter an experimental gem-node budget in PlayerProfile JSON.");
+    boundaryNotes.push(
+      "Gem-node rankings are using a zero planner budget until you enter an experimental gem-node budget in PlayerProfile JSON."
+    );
   }
   if (legacyGemDust != null) {
-    boundaryNotes.push(`Legacy gemDust is preserved under compatibility (${formatOptionalNumber(legacyGemDust)}) and is not used as active planner budget.`);
+    boundaryNotes.push(
+      `Legacy gemDust is preserved under compatibility (${formatOptionalNumber(legacyGemDust)}) and is not used as active planner budget.`
+    );
   }
 
   $("#gemResults").innerHTML = `
-    ${renderSupportSurfaceNotice(
-      "Experimental gem results",
-      [
-        "Gem-node rankings remain an experimental support surface outside the grounded MVP path.",
-        "Use them only as labeled helper output, not as verified CIFI recommendation truth."
-      ]
-    )}
-    ${boundaryNotes.length ? `
+    ${renderSupportSurfaceNotice("Experimental gem results", [
+      "Gem-node rankings remain an experimental support surface outside the grounded MVP path.",
+      "Use them only as labeled helper output, not as verified CIFI recommendation truth."
+    ])}
+    ${
+      boundaryNotes.length
+        ? `
       <article class="validation-card warn">
         <strong>Experimental budget boundary</strong>
         ${boundaryNotes.map((note) => `<p class="meta">${escapeHtml(note)}</p>`).join("")}
       </article>
-    ` : ""}
+    `
+        : ""
+    }
     <div class="recommendation-list">${results.map((item) => makeRecommendationCard(item, "gem")).join("")}</div>
   `;
 }
@@ -1653,12 +1802,14 @@ function renderValidationResults() {
 
 function renderSpendSaveSideBoundary() {
   const multiverseMarket = state.extractedMechanics?.multiverseMarket;
-  const multiverseMarketMetadataNeighborhood = state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
+  const multiverseMarketMetadataNeighborhood =
+    state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
   const dailyTokeniumLaneClues = state.extractedMechanics?.dailyTokeniumLaneClues;
   const tokenBankFormulaBoundary = state.extractedMechanics?.tokenBankFormulaBoundary;
   const multiverseMarketRangeBoundary = state.extractedMechanics?.multiverseMarketRangeBoundary;
   const multiverseMarketRowTextCoverage = state.extractedMechanics?.multiverseMarketRowTextCoverage;
-  const multiverseMarketPrefabRemapBoundary = state.extractedMechanics?.multiverseMarketPrefabRemapBoundary;
+  const multiverseMarketPrefabRemapBoundary =
+    state.extractedMechanics?.multiverseMarketPrefabRemapBoundary;
   if (!multiverseMarket && !multiverseMarketMetadataNeighborhood) {
     return "";
   }
@@ -1667,11 +1818,21 @@ function renderSpendSaveSideBoundary() {
   const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
   const dailyTokeniumSummary = getDailyTokeniumLaneSummary(dailyTokeniumLaneClues);
   const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenBankFormulaBoundary);
-  const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(multiverseMarketRangeBoundary);
-  const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(multiverseMarketRowTextCoverage);
-  const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(multiverseMarketPrefabRemapBoundary);
-  const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(state.extractedMechanics?.multiverseMarketOwnerFamily);
-  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
+  const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
+    multiverseMarketRangeBoundary
+  );
+  const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
+    multiverseMarketRowTextCoverage
+  );
+  const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(
+    multiverseMarketPrefabRemapBoundary
+  );
+  const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
+    state.extractedMechanics?.multiverseMarketOwnerFamily
+  );
+  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
+    state.extractedMechanics?.multiverseMarketMarketMemberBoundary
+  );
   return `
     <section class="meta-stack">
       <div class="panel-header">
@@ -1774,9 +1935,11 @@ function renderResearch() {
       ${renderResearchTrackSupport(track)}
       <div class="meta-stack">
         <p class="snapshot-title">${nextSteps.length ? "Remaining work" : "Archive note"}</p>
-        ${nextSteps.length
-          ? `<ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>`
-          : `<p class="meta">No active remaining work. This card stays here only as delivered foundation context for later roadmap slices.</p>`}
+        ${
+          nextSteps.length
+            ? `<ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>`
+            : `<p class="meta">No active remaining work. This card stays here only as delivered foundation context for later roadmap slices.</p>`
+        }
       </div>
     </article>
   `;
@@ -1790,9 +1953,11 @@ function renderResearch() {
           <strong>${escapeHtml(state.researchView === "archived" ? "No archived foundation cards" : "No active research tracks")}</strong>
         </div>
       </div>
-      <p class="meta">${escapeHtml(state.researchView === "archived"
-        ? "Archived research foundations will appear here when the repo keeps delivered context cards in the snapshot."
-        : "No open research cards match the current filter. Switch to Archived to review delivered foundation context.")}</p>
+      <p class="meta">${escapeHtml(
+        state.researchView === "archived"
+          ? "Archived research foundations will appear here when the repo keeps delivered context cards in the snapshot."
+          : "No open research cards match the current filter. Switch to Archived to review delivered foundation context."
+      )}</p>
     </article>
   `
       : ""
@@ -1838,20 +2003,22 @@ function bindResearchViewSelector() {
 }
 
 function renderDatasetRefreshHardening() {
-  const contract = state.snapshot ? {
-    validationCommand: "npm run verify:data",
-    sourcePriority: [
-      "APK/Unity artifacts and repo extraction outputs first",
-      "Official/public corroboration second",
-      "Community gap-filling last"
-    ],
-    classifications: [
-      "canonical-app-snapshot",
-      "grounded-descriptive",
-      "extracted-mechanics",
-      "community-derived"
-    ]
-  } : null;
+  const contract = state.snapshot
+    ? {
+        validationCommand: "npm run verify:data",
+        sourcePriority: [
+          "APK/Unity artifacts and repo extraction outputs first",
+          "Official/public corroboration second",
+          "Community gap-filling last"
+        ],
+        classifications: [
+          "canonical-app-snapshot",
+          "grounded-descriptive",
+          "extracted-mechanics",
+          "community-derived"
+        ]
+      }
+    : null;
 
   if (!contract) {
     return "";
@@ -1884,11 +2051,17 @@ function renderDatasetRefreshHardening() {
 function renderSpendPlannerBoundary() {
   const canonical = getCanonicalProfileState();
   const compatibility = getCompatibilityProfileState();
-  const spendTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-planner-first-ui-slice");
-  const emporiumTrack = state.snapshot?.researchTracks?.find((track) => track.id === "spend-multiverse-savedata-import-surface");
+  const spendTrack = state.snapshot?.researchTracks?.find(
+    (track) => track.id === "spend-planner-first-ui-slice"
+  );
+  const emporiumTrack = state.snapshot?.researchTracks?.find(
+    (track) => track.id === "spend-multiverse-savedata-import-surface"
+  );
   const tokenShop = state.extractedMechanics?.tokenShop ?? {};
   const multiverseMarket = state.extractedMechanics?.multiverseMarket ?? {};
-  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
+  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
+    state.extractedMechanics?.multiverseMarketMarketMemberBoundary
+  );
   const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
   const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
   const importedMarketPreview = getImportedMultiverseMarketPreview(
@@ -1945,19 +2118,23 @@ function renderSpendPlannerBoundary() {
   const blockedInputs = [
     {
       label: "TokenShop recommendations beyond the checked editor subset",
-      reason: "The checked ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, and ATU8 remap subset can now appear on shipped Overview and Progression surfaces, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
+      reason:
+        "The checked ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, and ATU8 remap subset can now appear on shipped Overview and Progression surfaces, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
     },
     {
       label: "Token-bank cap and claimable tokens",
-      reason: "Blocked even with BankedTokens recovered and generic ClaimableTokenium evidence surfaced. Current TokenShop and FinalTokenBank clues still do not name planner-safe cap or token-bank-specific claimable saved values."
+      reason:
+        "Blocked even with BankedTokens recovered and generic ClaimableTokenium evidence surfaced. Current TokenShop and FinalTokenBank clues still do not name planner-safe cap or token-bank-specific claimable saved values."
     },
     {
       label: "Daily Tokenium cap and ready or claimable state",
-      reason: "Blocked even with the current stored amount recovered and generic ClaimableTokenium evidence surfaced. The lane now narrows to a SaveData mission-persistence wrapper, but no checked DailyTokeniumCap field or Daily Tokenium-specific ready or claimable join is recovered yet."
+      reason:
+        "Blocked even with the current stored amount recovered and generic ClaimableTokenium evidence surfaced. The lane now narrows to a SaveData mission-persistence wrapper, but no checked DailyTokeniumCap field or Daily Tokenium-specific ready or claimable join is recovered yet."
     },
     {
       label: "Emporium owned progression and Inscryptions balance",
-      reason: "Blocked for planner use. The app may show a compatibility-only preview of the raw IS1Level through IS110Level span plus separate bounded trade-counter and early-mech quarantine ranges, but InscryptionsDone remains wrapper-only, the preview stays non-canonical, and no Emporium recommendation path is unlocked."
+      reason:
+        "Blocked for planner use. The app may show a compatibility-only preview of the raw IS1Level through IS110Level span plus separate bounded trade-counter and early-mech quarantine ranges, but InscryptionsDone remains wrapper-only, the preview stays non-canonical, and no Emporium recommendation path is unlocked."
     }
   ];
   const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
@@ -2147,21 +2324,23 @@ function renderResearchTrackContract(track) {
   const metaBits = [
     track.classification ? `<span class="pill">${escapeHtml(track.classification)}</span>` : "",
     track.category ? `<span class="pill">${escapeHtml(track.category)}</span>` : "",
-    track.implementationRelevance ? `<span class="pill">${escapeHtml(track.implementationRelevance)}</span>` : "",
+    track.implementationRelevance
+      ? `<span class="pill">${escapeHtml(track.implementationRelevance)}</span>`
+      : "",
     typeof track.apkUnityPathChecked === "boolean"
       ? `<span class="pill">${escapeHtml(track.apkUnityPathChecked ? "APK/Unity first" : "APK/Unity not yet checked")}</span>`
       : ""
   ].filter(Boolean);
 
   if (
-    !metaBits.length
-    && !track.exitCondition
-    && !track.blockedBy
-    && !track.smallestShippableSlice
-    && !sources.length
-    && !artifacts.length
-    && !verified.length
-    && !uncertain.length
+    !metaBits.length &&
+    !track.exitCondition &&
+    !track.blockedBy &&
+    !track.smallestShippableSlice &&
+    !sources.length &&
+    !artifacts.length &&
+    !verified.length &&
+    !uncertain.length
   ) {
     return "";
   }
@@ -2183,16 +2362,37 @@ function renderResearchTrackSupport(track) {
     return renderSpendPlannerResearchForkNote();
   }
 
-  if (track.id === "shards-and-loop-guardrails" || track.id === "shard-milestone-payload-recovery") {
-    const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
-    const finalSuBoundary = getShardFinalSuBonusBoundarySummary(state.shardGrounding?.finalSuBonusBoundary);
-    const payloadBoundary = getShardMilestonePayloadBoundarySummary(state.shardGrounding?.milestonePayloadBoundary);
-    const costModelBoundary = getShardCostModelBoundarySummary(state.shardGrounding?.costModelBoundary);
-    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(state.shardGrounding?.rowModelBoundary);
-    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(state.shardGrounding?.titleEffectBoundary);
-    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(state.shardGrounding?.effectTextHandlerBoundary);
-    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(state.shardGrounding?.milestoneRowShellBoundary);
-    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(state.shardGrounding?.milestoneRowAlignmentBoundary);
+  if (
+    track.id === "shards-and-loop-guardrails" ||
+    track.id === "shard-milestone-payload-recovery"
+  ) {
+    const ownerBoundary = getShardOwnerFamilyBoundarySummary(
+      state.shardGrounding?.ownerFamilyBoundary
+    );
+    const finalSuBoundary = getShardFinalSuBonusBoundarySummary(
+      state.shardGrounding?.finalSuBonusBoundary
+    );
+    const payloadBoundary = getShardMilestonePayloadBoundarySummary(
+      state.shardGrounding?.milestonePayloadBoundary
+    );
+    const costModelBoundary = getShardCostModelBoundarySummary(
+      state.shardGrounding?.costModelBoundary
+    );
+    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
+      state.shardGrounding?.rowModelBoundary
+    );
+    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
+      state.shardGrounding?.titleEffectBoundary
+    );
+    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
+      state.shardGrounding?.effectTextHandlerBoundary
+    );
+    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(
+      state.shardGrounding?.milestoneRowShellBoundary
+    );
+    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(
+      state.shardGrounding?.milestoneRowAlignmentBoundary
+    );
     const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
     return `
       <div class="meta-stack">
@@ -2228,23 +2428,57 @@ function renderResearchTrackSupport(track) {
 
   if (track.id === "spend-multiverse-savedata-import-surface") {
     const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
-    const validatedCoverage = getMultiverseMarketValidatedCoverage(state.extractedMechanics?.multiverseMarket);
-    const metadataSummary = getMultiverseMarketMetadataSummary(state.extractedMechanics?.multiverseMarketMetadataNeighborhood);
-    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(state.extractedMechanics?.multiverseMarketMarketMemberBoundary);
-    const tokeniumNamingSummary = getTokeniumNamingSummary(state.extractedMechanics?.tokeniumNamingClues);
-    const tokenBankStateSummary = getTokenBankStateSummary(state.extractedMechanics?.tokenBankStateClues);
-    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(state.extractedMechanics?.dailyTokeniumLaneClues);
-    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(state.extractedMechanics?.tokenBankFormulaBoundary);
-    const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(state.extractedMechanics?.multiverseMarketRangeBoundary);
-    const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(state.extractedMechanics?.multiverseMarketRowTextCoverage);
-    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(state.extractedMechanics?.tokenShopCostLanes);
-    const spendActionLaneSummary = getSpendActionLaneSummary(state.extractedMechanics?.spendActionLaneClues);
-    const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(state.extractedMechanics?.multiverseMarketActionShell);
-    const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(state.extractedMechanics?.multiverseMarketOwnerFamily);
-    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(state.extractedMechanics?.tokenShopOwnerShell);
-    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(state.extractedMechanics?.tokenShopSaveBoundary);
-    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(state.extractedMechanics?.multiverseMarketSaveBoundary);
-    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(state.extractedMechanics?.tokenBankControllerShell);
+    const validatedCoverage = getMultiverseMarketValidatedCoverage(
+      state.extractedMechanics?.multiverseMarket
+    );
+    const metadataSummary = getMultiverseMarketMetadataSummary(
+      state.extractedMechanics?.multiverseMarketMetadataNeighborhood
+    );
+    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
+      state.extractedMechanics?.multiverseMarketMarketMemberBoundary
+    );
+    const tokeniumNamingSummary = getTokeniumNamingSummary(
+      state.extractedMechanics?.tokeniumNamingClues
+    );
+    const tokenBankStateSummary = getTokenBankStateSummary(
+      state.extractedMechanics?.tokenBankStateClues
+    );
+    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(
+      state.extractedMechanics?.dailyTokeniumLaneClues
+    );
+    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
+      state.extractedMechanics?.tokenBankFormulaBoundary
+    );
+    const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
+      state.extractedMechanics?.multiverseMarketRangeBoundary
+    );
+    const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
+      state.extractedMechanics?.multiverseMarketRowTextCoverage
+    );
+    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(
+      state.extractedMechanics?.tokenShopCostLanes
+    );
+    const spendActionLaneSummary = getSpendActionLaneSummary(
+      state.extractedMechanics?.spendActionLaneClues
+    );
+    const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(
+      state.extractedMechanics?.multiverseMarketActionShell
+    );
+    const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
+      state.extractedMechanics?.multiverseMarketOwnerFamily
+    );
+    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(
+      state.extractedMechanics?.tokenShopOwnerShell
+    );
+    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(
+      state.extractedMechanics?.tokenShopSaveBoundary
+    );
+    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(
+      state.extractedMechanics?.multiverseMarketSaveBoundary
+    );
+    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
+      state.extractedMechanics?.tokenBankControllerShell
+    );
     return `
       <div class="meta-stack">
         <p class="snapshot-title">Grounded spend inputs</p>
@@ -2294,11 +2528,21 @@ function renderResearchTrackSupport(track) {
   }
 
   if (track.id === "spend-token-bank-state-owner") {
-    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(state.extractedMechanics?.tokenShopOwnerShell);
-    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(state.extractedMechanics?.tokenShopSaveBoundary);
-    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(state.extractedMechanics?.tokenBankControllerShell);
-    const tokenBankStateSummary = getTokenBankStateSummary(state.extractedMechanics?.tokenBankStateClues);
-    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(state.extractedMechanics?.tokenBankFormulaBoundary);
+    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(
+      state.extractedMechanics?.tokenShopOwnerShell
+    );
+    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(
+      state.extractedMechanics?.tokenShopSaveBoundary
+    );
+    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
+      state.extractedMechanics?.tokenBankControllerShell
+    );
+    const tokenBankStateSummary = getTokenBankStateSummary(
+      state.extractedMechanics?.tokenBankStateClues
+    );
+    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
+      state.extractedMechanics?.tokenBankFormulaBoundary
+    );
     return `
       <div class="meta-stack">
         <p class="snapshot-title">Current owner narrowing</p>
@@ -2415,20 +2659,35 @@ function fillProfileForm() {
 function importPlayerProfileJson() {
   const raw = $("#playerProfileImportText").value.trim();
   if (!raw) {
-    setStatus("playerProfileImportStatus", "Paste PlayerProfile JSON or choose a file first.", "warning");
+    setStatus(
+      "playerProfileImportStatus",
+      "Paste PlayerProfile JSON or choose a file first.",
+      "warning"
+    );
     return;
   }
 
   try {
     const parsed = JSON.parse(raw);
     const sourceProfile = parsed?.playerProfile ?? parsed;
-    state.playerProfile = normalizePlayerProfile(sourceProfile, createDefaultShipPlayerState(state.shipBaseline));
+    state.playerProfile = normalizePlayerProfile(
+      sourceProfile,
+      createDefaultShipPlayerState(state.shipBaseline)
+    );
     persistPlayerProfile();
     fillProfileForm();
     renderAll();
-    setStatus("playerProfileImportStatus", "PlayerProfile JSON imported through the grounded normalizer. Review the boundary audit before using recommendations.", "success");
+    setStatus(
+      "playerProfileImportStatus",
+      "PlayerProfile JSON imported through the grounded normalizer. Review the boundary audit before using recommendations.",
+      "success"
+    );
   } catch (error) {
-    setStatus("playerProfileImportStatus", `PlayerProfile import failed: ${error.message}`, "warning");
+    setStatus(
+      "playerProfileImportStatus",
+      `PlayerProfile import failed: ${error.message}`,
+      "warning"
+    );
   }
 }
 
@@ -2469,9 +2728,7 @@ function renderPlayerProfileBoundarySummary() {
     {
       title: "Import-only or aggregated profile fields",
       note: "Real profile values that are not currently direct active-form inputs because they are aggregated, derived, or not quickly readable in-game.",
-      items: [
-        ["Academy relics", canonical.academyRelics]
-      ]
+      items: [["Academy relics", canonical.academyRelics]]
     },
     {
       title: "Planner-only helpers",
@@ -2528,19 +2785,23 @@ function renderPlayerProfileBoundarySummary() {
     state.extractedMechanics?.multiverseMarketRangeBoundary
   );
 
-  $("#playerProfileImportSummary").innerHTML = groups.map((group) => {
-    const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value));
-    return `
+  $("#playerProfileImportSummary").innerHTML = groups
+    .map((group) => {
+      const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value));
+      return `
       <article class="preview-card">
         <strong>${escapeHtml(group.title)}</strong>
         <p class="meta">${escapeHtml(group.note)}</p>
         <p class="meta">${populated.length}/${group.items.length} populated</p>
-        ${populated.length
-          ? `<div class="meta-stack">${populated.map(([label, value]) => `<p class="meta">${escapeHtml(label)}: ${escapeHtml(formatBoundaryValue(value))}</p>`).join("")}</div>`
-          : `<p class="meta">No populated fields in this namespace.</p>`}
+        ${
+          populated.length
+            ? `<div class="meta-stack">${populated.map(([label, value]) => `<p class="meta">${escapeHtml(label)}: ${escapeHtml(formatBoundaryValue(value))}</p>`).join("")}</div>`
+            : `<p class="meta">No populated fields in this namespace.</p>`
+        }
       </article>
     `;
-  }).join("");
+    })
+    .join("");
 
   $("#playerProfileImportSummary").innerHTML = `
     <article class="preview-card">
@@ -2572,17 +2833,25 @@ function getPlayerProfileBoundaryAudit(groups, context) {
   const notes = [];
 
   if (unmappedSystemEntries.length) {
-    notes.push(`Quarantined unmapped system blobs preserved: ${unmappedSystemEntries.join(", ")}. Keep these descriptive until owner mapping and player-owned inputs are grounded.`);
+    notes.push(
+      `Quarantined unmapped system blobs preserved: ${unmappedSystemEntries.join(", ")}. Keep these descriptive until owner mapping and player-owned inputs are grounded.`
+    );
   } else {
     notes.push("No quarantined unmapped system blobs are present in this import.");
   }
 
-  if (Object.values(context.shipPlanner.summary || {}).some((value) => isBoundaryValuePresent(value))) {
-    notes.push("Ship planner values are preserved as external-model implementation state, not as canonical shared profile truth.");
+  if (
+    Object.values(context.shipPlanner.summary || {}).some((value) => isBoundaryValuePresent(value))
+  ) {
+    notes.push(
+      "Ship planner values are preserved as external-model implementation state, not as canonical shared profile truth."
+    );
   }
 
   if (unresolvedEntries.length) {
-    notes.push(`Compatibility-only leftovers preserved: ${unresolvedEntries.join(", ")}. These remain migration sinks, not active recommendation inputs.`);
+    notes.push(
+      `Compatibility-only leftovers preserved: ${unresolvedEntries.join(", ")}. These remain migration sinks, not active recommendation inputs.`
+    );
   } else {
     notes.push("No compatibility-only leftover fields were populated by this import.");
   }
@@ -2604,9 +2873,8 @@ function applyInstallTap(installIndex, direction = 1) {
     return;
   }
   pushHistorySnapshot(loadout);
-  loadout.ships[shipKey][installIndex] = direction > 0
-    ? Math.min(cap, current + delta)
-    : Math.max(0, current - delta);
+  loadout.ships[shipKey][installIndex] =
+    direction > 0 ? Math.min(cap, current + delta) : Math.max(0, current - delta);
   persistShipConfig(false);
   renderShipPanels();
 }
@@ -2667,7 +2935,10 @@ function getShipInstallTotal(shipKey) {
 function canInstallPoint(shipKey, installIndex) {
   const template = state.shipTemplates[shipKey];
   const current = getActiveLoadout().ships[shipKey][installIndex];
-  return current < getEffectiveCap(template.caps[installIndex]) && getShipInstallTotal(shipKey) >= template.reserveThresholds[installIndex];
+  return (
+    current < getEffectiveCap(template.caps[installIndex]) &&
+    getShipInstallTotal(shipKey) >= template.reserveThresholds[installIndex]
+  );
 }
 
 function getTapDelta(shipKey, installIndex, direction = 1) {
@@ -2680,110 +2951,141 @@ function getTapDelta(shipKey, installIndex, direction = 1) {
       return removable;
     }
     const total = getShipInstallTotal(shipKey);
-    const nextThreshold = template.reserveThresholds.filter((threshold) => threshold > total).sort((left, right) => left - right)[0];
+    const nextThreshold = template.reserveThresholds
+      .filter((threshold) => threshold > total)
+      .sort((left, right) => left - right)[0];
     return Math.min(capRemaining, Math.max((nextThreshold ?? total) - total, 0));
   }
   const step = Number(state.shipConfig.pointPerTap) || 0;
   return direction > 0 ? Math.min(capRemaining, step) : Math.min(removable, step);
 }
 
-  function getInstallGain(shipKey, installIndex) {
-    const crew = getShipCrew(shipKey);
-    const baseMultiplier = getInstallBaseMultiplier(shipKey, installIndex);
-    const exponent = scorePowerTerm(state.shipTemplates[shipKey].powerTerms[installIndex], state.shipConfig.weights, Number(getShipCommunityToolState().technical.Meltdown || 0));
-    const currentLevel = getActiveLoadout().ships[shipKey][installIndex];
-    const denom = (crew * baseMultiplier * currentLevel) + 1;
-    const numer = (crew * baseMultiplier * (currentLevel + 1)) + 1;
-    const rawGain = canInstallPoint(shipKey, installIndex) ? (Math.pow(numer / denom, exponent) - 1) : 0;
-    const weightedGain = rawGain * getInstallWeight(shipKey, installIndex, state.shipConfig.weights);
-    return { rawGain, weightedGain };
-  }
+function getInstallGain(shipKey, installIndex) {
+  const crew = getShipCrew(shipKey);
+  const baseMultiplier = getInstallBaseMultiplier(shipKey, installIndex);
+  const exponent = scorePowerTerm(
+    state.shipTemplates[shipKey].powerTerms[installIndex],
+    state.shipConfig.weights,
+    Number(getShipCommunityToolState().technical.Meltdown || 0)
+  );
+  const currentLevel = getActiveLoadout().ships[shipKey][installIndex];
+  const denom = crew * baseMultiplier * currentLevel + 1;
+  const numer = crew * baseMultiplier * (currentLevel + 1) + 1;
+  const rawGain = canInstallPoint(shipKey, installIndex)
+    ? Math.pow(numer / denom, exponent) - 1
+    : 0;
+  const weightedGain = rawGain * getInstallWeight(shipKey, installIndex, state.shipConfig.weights);
+  return { rawGain, weightedGain };
+}
 
-  function getBestNextInstall(shipKey) {
-    const active = getActiveLoadout();
-    const current = active.ships[shipKey];
-    const scored = current.map((_, index) => {
+function getBestNextInstall(shipKey) {
+  const active = getActiveLoadout();
+  const current = active.ships[shipKey];
+  const scored = current
+    .map((_, index) => {
       if (!canInstallPoint(shipKey, index)) {
-      return null;
-    }
-    const gain = getInstallGain(shipKey, index);
+        return null;
+      }
+      const gain = getInstallGain(shipKey, index);
       const delta = getTapDelta(shipKey, index);
       return { index, score: gain.weightedGain * Math.max(delta, 1), rawGain: gain.rawGain, delta };
-    }).filter(Boolean);
+    })
+    .filter(Boolean);
 
-    const sorted = scored.sort((left, right) => right.score - left.score);
-    const leader = sorted[0];
-    if (!leader) {
-      return null;
-    }
-    const epsilon = Math.max(Math.abs(leader.score) * 1e-9, 1e-12);
-    const ties = sorted.filter((item) => Math.abs(item.score - leader.score) <= epsilon);
-    return {
-      ...leader,
-      indexes: ties.map((item) => item.index)
-    };
+  const sorted = scored.sort((left, right) => right.score - left.score);
+  const leader = sorted[0];
+  if (!leader) {
+    return null;
   }
+  const epsilon = Math.max(Math.abs(leader.score) * 1e-9, 1e-12);
+  const ties = sorted.filter((item) => Math.abs(item.score - leader.score) <= epsilon);
+  return {
+    ...leader,
+    indexes: ties.map((item) => item.index)
+  };
+}
 
 function rankShipTargets() {
-  return Object.entries(getActiveLoadout().ships).map(([shipKey, values]) => ({
-    title: SHIP_LABELS[shipKey],
-    subtitle: `${sum(values)} installs assigned`,
-    score: values.reduce((total, value, index) => {
-      const cap = getEffectiveCap(state.shipTemplates[shipKey].caps[index]);
-      return total + ((value / Math.max(cap, 1)) * 100);
-    }, 0),
-    confidence: 0.48,
-    notes: `Persistent ${getActiveLoadout().name} state.`
-  })).sort((left, right) => right.score - left.score);
+  return Object.entries(getActiveLoadout().ships)
+    .map(([shipKey, values]) => ({
+      title: SHIP_LABELS[shipKey],
+      subtitle: `${sum(values)} installs assigned`,
+      score: values.reduce((total, value, index) => {
+        const cap = getEffectiveCap(state.shipTemplates[shipKey].caps[index]);
+        return total + (value / Math.max(cap, 1)) * 100;
+      }, 0),
+      confidence: 0.48,
+      notes: `Persistent ${getActiveLoadout().name} state.`
+    }))
+    .sort((left, right) => right.score - left.score);
 }
 
 function runShipOptimization() {
   const ship = getShipPlannerState().summary;
-  return [...state.snapshot.shipLoadouts].map((loadout) => ({
-    title: loadout.name,
-    subtitle: loadout.notes,
-    score:
-      (Number(ship.power || 0) * loadout.powerScale * state.snapshot.resourceGoals.credits.powerWeight) +
-      (Number(ship.speed || 0) * loadout.speedScale * state.snapshot.resourceGoals.credits.speedWeight * 10) +
-      (Number(ship.cargo || 0) * loadout.cargoScale * state.snapshot.resourceGoals.credits.cargoWeight) +
-      (loadout.resourceBias === "credits" ? 45 : 0),
-    confidence: loadout.risk === "safe" ? 0.72 : 0.61,
-    notes: loadout.notes
-  })).sort((left, right) => right.score - left.score);
+  return [...state.snapshot.shipLoadouts]
+    .map((loadout) => ({
+      title: loadout.name,
+      subtitle: loadout.notes,
+      score:
+        Number(ship.power || 0) *
+          loadout.powerScale *
+          state.snapshot.resourceGoals.credits.powerWeight +
+        Number(ship.speed || 0) *
+          loadout.speedScale *
+          state.snapshot.resourceGoals.credits.speedWeight *
+          10 +
+        Number(ship.cargo || 0) *
+          loadout.cargoScale *
+          state.snapshot.resourceGoals.credits.cargoWeight +
+        (loadout.resourceBias === "credits" ? 45 : 0),
+      confidence: loadout.risk === "safe" ? 0.72 : 0.61,
+      notes: loadout.notes
+    }))
+    .sort((left, right) => right.score - left.score);
 }
 
 function runProgressionOptimization() {
-  const groundedResults = buildGroundedShardRecommendations().map((item) => toRecommendationAction(item, "shards"));
-  const loopWarnings = buildLoopGuardrailRecommendations().map((item) => toRecommendationAction(item, "loop"));
+  const groundedResults = buildGroundedShardRecommendations().map((item) =>
+    toRecommendationAction(item, "shards")
+  );
+  const loopWarnings = buildLoopGuardrailRecommendations().map((item) =>
+    toRecommendationAction(item, "loop")
+  );
   if (groundedResults.length) {
     return sortRecommendationFeed([...groundedResults, ...loopWarnings]);
   }
 
-  return sortRecommendationFeed([toRecommendationAction({
-    id: "shard-module-grounding-warning",
-    module: "shards",
-    kind: "warning",
-    title: "Shard milestone planner pending verified data",
-    subtitle: "Descriptive mode",
-    score: 40,
-    confidence: 0.24,
-    benefit: [
-      "Keeps shard guidance visible without implying extracted milestone planner math."
-    ],
-    whyNow: [
-      "Shard Milestones are a real CIFI system, but this repo does not yet ship a verified milestone table.",
-      "The previous shard ranking path relied on unsourced milestone identities, cost curves, and value scoring."
-    ],
-    assumptions: [
-      "Current shards remain canonical shared player state.",
-      "Shard income stays available only as a labeled planner input."
-    ],
-    warnings: [
-      "No shard milestone recommendations are being ranked in this build.",
-      "Import verified shard milestone data before re-enabling upgrade-style planner behavior."
-    ],
-    notes: "Descriptive fallback mode avoids fake planner precision."
-  }, "shards"), ...loopWarnings]);
+  return sortRecommendationFeed([
+    toRecommendationAction(
+      {
+        id: "shard-module-grounding-warning",
+        module: "shards",
+        kind: "warning",
+        title: "Shard milestone planner pending verified data",
+        subtitle: "Descriptive mode",
+        score: 40,
+        confidence: 0.24,
+        benefit: [
+          "Keeps shard guidance visible without implying extracted milestone planner math."
+        ],
+        whyNow: [
+          "Shard Milestones are a real CIFI system, but this repo does not yet ship a verified milestone table.",
+          "The previous shard ranking path relied on unsourced milestone identities, cost curves, and value scoring."
+        ],
+        assumptions: [
+          "Current shards remain canonical shared player state.",
+          "Shard income stays available only as a labeled planner input."
+        ],
+        warnings: [
+          "No shard milestone recommendations are being ranked in this build.",
+          "Import verified shard milestone data before re-enabling upgrade-style planner behavior."
+        ],
+        notes: "Descriptive fallback mode avoids fake planner precision."
+      },
+      "shards"
+    ),
+    ...loopWarnings
+  ]);
 }
 
 function buildLoopGuardrailRecommendations() {
@@ -2798,39 +3100,44 @@ function buildLoopGuardrailRecommendations() {
   const shardSpend = getObservedBehaviorById("PPX_SHARDS_EARLY_DISTRIBUTION");
   const zeusWarning = getObservedBehaviorById("PPX_ZEUS_E1000_RESOURCE_PRIO_AND_LR_TARGETS");
   const antiBrickingSource = getSourceTitlesForIds(antiBricking?.sourceIds).join(" | ");
-  const runCadenceSource = Array.from(new Set([
-    ...getSourceTitlesForIds(earlyLoop?.sourceIds),
-    ...getSourceTitlesForIds(shortRuns?.sourceIds),
-    ...getSourceTitlesForIds(longRuns?.sourceIds)
-  ])).join(" | ");
+  const runCadenceSource = Array.from(
+    new Set([
+      ...getSourceTitlesForIds(earlyLoop?.sourceIds),
+      ...getSourceTitlesForIds(shortRuns?.sourceIds),
+      ...getSourceTitlesForIds(longRuns?.sourceIds)
+    ])
+  ).join(" | ");
   const shardSpendSource = getSourceTitlesForIds(shardSpend?.sourceIds).join(" | ");
 
   if (!loopReset) {
-    return [{
-      id: "loop-guardrail-input-warning",
-      module: "loop",
-      kind: "warning",
-      title: "Add current LR for loop guardrails",
-      subtitle: "Minimum loop-warning input missing",
-      score: 96,
-      confidence: 0.63,
-      benefit: [
-        "Unlocks the current loop-warning layer so the app can show grounded anti-bricking guidance."
-      ],
-      whyNow: [
-        "Current LR is the minimum grounded input needed for loop-reset guardrails in this build.",
-        antiBricking?.why || "Grounded loop guidance depends on pacing examples tied to specific LR transitions."
-      ],
-      assumptions: [
-        "This module is warning-oriented only and does not simulate best reset timing."
-      ],
-      warnings: [
-        "Without current LR, the app cannot show the anti-bricking pacing notes captured in the research bundle."
-      ],
-      notes: antiBrickingSource
-        ? `Loop guardrails remain descriptive and source-linked (${antiBrickingSource}).`
-        : "Loop guardrails remain descriptive and source-linked."
-    }];
+    return [
+      {
+        id: "loop-guardrail-input-warning",
+        module: "loop",
+        kind: "warning",
+        title: "Add current LR for loop guardrails",
+        subtitle: "Minimum loop-warning input missing",
+        score: 96,
+        confidence: 0.63,
+        benefit: [
+          "Unlocks the current loop-warning layer so the app can show grounded anti-bricking guidance."
+        ],
+        whyNow: [
+          "Current LR is the minimum grounded input needed for loop-reset guardrails in this build.",
+          antiBricking?.why ||
+            "Grounded loop guidance depends on pacing examples tied to specific LR transitions."
+        ],
+        assumptions: [
+          "This module is warning-oriented only and does not simulate best reset timing."
+        ],
+        warnings: [
+          "Without current LR, the app cannot show the anti-bricking pacing notes captured in the research bundle."
+        ],
+        notes: antiBrickingSource
+          ? `Loop guardrails remain descriptive and source-linked (${antiBrickingSource}).`
+          : "Loop guardrails remain descriptive and source-linked."
+      }
+    ];
   }
 
   const warnings = [];
@@ -2850,8 +3157,10 @@ function buildLoopGuardrailRecommendations() {
       earlyLoop?.playerState?.mod_points_gained_on_first_lr
         ? `One grounded early-loop example shows LR 1 earning ${formatShardNumber(earlyLoop.playerState.mod_points_gained_on_first_lr)} MP on the first reset.`
         : "Grounded guide notes show early loop pacing depends on deliberate run selection, not constant reset spam.",
-      shortRuns?.why || "Short MP runs are used to buy affordable loop mods and increase MP gains between resets.",
-      longRuns?.why || "Longer runs shift toward shards and cells instead of only pushing fast reset count."
+      shortRuns?.why ||
+        "Short MP runs are used to buy affordable loop mods and increase MP gains between resets.",
+      longRuns?.why ||
+        "Longer runs shift toward shards and cells instead of only pushing fast reset count."
     ],
     assumptions: [
       "This is a pacing reference only; the app does not estimate your best run duration.",
@@ -2863,8 +3172,10 @@ function buildLoopGuardrailRecommendations() {
         : "Long-run duration varies by account state."
     ],
     warnings: [
-      shortRuns?.priorities?.[2] || "Use short runs to build loop mod momentum before relying on longer shard-focused sessions.",
-      longRuns?.priorities?.[0] || "Long runs are a shard/cell pacing choice, not proof that immediate reset pushing is correct."
+      shortRuns?.priorities?.[2] ||
+        "Use short runs to build loop mod momentum before relying on longer shard-focused sessions.",
+      longRuns?.priorities?.[0] ||
+        "Long runs are a shard/cell pacing choice, not proof that immediate reset pushing is correct."
     ],
     notes: runCadenceSource
       ? `Run-cadence reference only (${runCadenceSource}).`
@@ -2873,7 +3184,11 @@ function buildLoopGuardrailRecommendations() {
 
   const operationTicks = mechanics?.operations?.ticks_per_operation;
   const resetTimer = mechanics?.shardMiningMenu?.unreducible_timer_between_operations?.value;
-  if (operationTicks?.initial_ticks_including_reset || operationTicks?.minimum_ticks_with_loop_mods || resetTimer) {
+  if (
+    operationTicks?.initial_ticks_including_reset ||
+    operationTicks?.minimum_ticks_with_loop_mods ||
+    resetTimer
+  ) {
     warnings.push({
       id: "loop-guardrail-operations-pacing-warning",
       module: "loop",
@@ -2896,14 +3211,13 @@ function buildLoopGuardrailRecommendations() {
           ? `${formatShardNumber(resetTimer)} reset ticks between operations are currently documented as unreducible.`
           : "A reset timer between operations is documented in the shard-mining notes."
       ],
-      assumptions: [
-        "This is a pacing boundary reminder, not a best-reset calculator."
-      ],
+      assumptions: ["This is a pacing boundary reminder, not a best-reset calculator."],
       warnings: [
         "Do not read fast reset pushing as proof that shard-side pacing constraints disappeared.",
         "Operation timing notes are grounded reference points only; they are not personalized run advice."
       ],
-      notes: "Grounded shard anchors can support loop warnings even while milestone rows remain descriptive-only."
+      notes:
+        "Grounded shard anchors can support loop warnings even while milestone rows remain descriptive-only."
     });
   }
 
@@ -2920,7 +3234,8 @@ function buildLoopGuardrailRecommendations() {
         "Flags when pushing LR higher is more likely to raise clear requirements than help progress."
       ],
       whyNow: [
-        antiBricking?.why || "Guide examples warn that pushing LR too quickly can raise loop requirements faster than the account can clear them.",
+        antiBricking?.why ||
+          "Guide examples warn that pushing LR too quickly can raise loop requirements faster than the account can clear them.",
         "Grounded examples show LR 5 -> 6 requiring 7 loops and LR 6 -> 7 requiring 8 loops."
       ],
       assumptions: [
@@ -2929,7 +3244,8 @@ function buildLoopGuardrailRecommendations() {
       ],
       warnings: [
         "Use buffer / instant loop checks before pushing LR higher.",
-        zeusWarning?.priorities?.[1] || "High LR progression can become 'playing with fire' in guide-side progression notes."
+        zeusWarning?.priorities?.[1] ||
+          "High LR progression can become 'playing with fire' in guide-side progression notes."
       ],
       notes: antiBrickingSource
         ? `Guardrail based on grounded guide examples from ${antiBrickingSource}, not simulated reset math.`
@@ -2946,12 +3262,11 @@ function buildLoopGuardrailRecommendations() {
       subtitle: `${formatShardNumber(currentShards)} shards currently tracked`,
       score: 92,
       confidence: 0.68,
-      benefit: [
-        "Protects currently tracked shard value from being wiped by the next reset."
-      ],
+      benefit: ["Protects currently tracked shard value from being wiped by the next reset."],
       whyNow: [
         "Shards reset to 0 on Loop Prestige in the grounded shard sources.",
-        shardSpend?.why || "Early shard guidance explicitly says to spend shards before loop resets."
+        shardSpend?.why ||
+          "Early shard guidance explicitly says to spend shards before loop resets."
       ],
       assumptions: [
         "This warning does not claim a best milestone target.",
@@ -3021,7 +3336,8 @@ function buildGroundedShardRecommendations() {
       ],
       warnings: [
         "No shard milestone ranking, ROI, ETA, or cost simulation is active in this workflow.",
-        conflictNote || "Shard milestone sources include unresolved discrepancies that keep this workflow descriptive.",
+        conflictNote ||
+          "Shard milestone sources include unresolved discrepancies that keep this workflow descriptive.",
         nextUnlock
           ? `${Math.max(getShardUnlockRequirement(nextUnlock) - totalLevels, 0)} additional total shard milestone levels are needed for this unlock.`
           : "Unlocked does not mean affordable; shard cost data is still unavailable."
@@ -3055,12 +3371,17 @@ function buildGroundedShardRecommendations() {
       ],
       assumptions: [
         focusMilestone?.summary || "Threshold watch uses imported unlock/bonus entries only.",
-        mechanics.effect_scaling?.description || "Incremental level increases milestone effects, but the app does not score them."
+        mechanics.effect_scaling?.description ||
+          "Incremental level increases milestone effects, but the app does not score them."
       ],
       warnings: [
-        focusMilestone?.uncertaintyNotes?.[0] || "Unknown/Unkown source values remain preserved where the source was incomplete.",
-        conflictNote || "Threshold wording stays descriptive because milestone sources conflict across accessible snapshots.",
-        nextThreshold ? `You need ${Math.max(nextThreshold - focusLevel, 0)} more levels on the observed milestone row to reach this threshold.` : "Threshold watch ends here unless you inspect another row."
+        focusMilestone?.uncertaintyNotes?.[0] ||
+          "Unknown/Unkown source values remain preserved where the source was incomplete.",
+        conflictNote ||
+          "Threshold wording stays descriptive because milestone sources conflict across accessible snapshots.",
+        nextThreshold
+          ? `You need ${Math.max(nextThreshold - focusLevel, 0)} more levels on the observed milestone row to reach this threshold.`
+          : "Threshold watch ends here unless you inspect another row."
       ],
       notes: sourceLabel
         ? `Threshold guidance is milestone-specific and descriptive only (${sourceLabel}).`
@@ -3078,19 +3399,24 @@ function buildGroundedShardRecommendations() {
         "Keeps known shard cost-bump zones visible without pretending the app knows affordability."
       ],
       whyNow: [
-        mechanics.cost_breakpoints_observed?.breakpoints_statement || "Cost bump notes are descriptive only.",
+        mechanics.cost_breakpoints_observed?.breakpoints_statement ||
+          "Cost bump notes are descriptive only.",
         nextCostBump
           ? `From tracked level ${formatShardNumber(focusLevel)}, the next noted cost bump is level ${nextCostBump.level} (${nextCostBump.severity}).`
           : "No cost bump watch could be derived from the current tracked row level."
       ],
       assumptions: [
         "The dataset provides breakpoint notes, not numeric shard costs.",
-        observation ? `${observation.title}: ${observation.why}` : "Observed examples are shown separately and do not become planner truth."
+        observation
+          ? `${observation.title}: ${observation.why}`
+          : "Observed examples are shown separately and do not become planner truth."
       ],
       warnings: [
         "Cost bumps are warning zones only; the app does not estimate shard affordability.",
-        conflictNote || "Cost wording stays generic until a single authoritative milestone list and cost table exist.",
-        focusMilestone?.costProgression?.notes || "No per-level shard costs were found in accessible sources."
+        conflictNote ||
+          "Cost wording stays generic until a single authoritative milestone list and cost table exist.",
+        focusMilestone?.costProgression?.notes ||
+          "No per-level shard costs were found in accessible sources."
       ],
       notes: sourceLabel
         ? `Use this to avoid false precision near known cost-bump levels (${sourceLabel}).`
@@ -3100,12 +3426,14 @@ function buildGroundedShardRecommendations() {
 }
 
 function saveShardPlannerInputs(nextMilestoneId = undefined, nextMilestoneLevel = undefined) {
-  const milestoneId = nextMilestoneId !== undefined
-    ? nextMilestoneId
-    : formControl("shardFocusMilestoneId")?.value || null;
-  const milestoneLevel = nextMilestoneLevel !== undefined
-    ? nextMilestoneLevel
-    : coerceInputValue(formControl("shardFocusMilestoneLevel")?.value ?? "");
+  const milestoneId =
+    nextMilestoneId !== undefined
+      ? nextMilestoneId
+      : formControl("shardFocusMilestoneId")?.value || null;
+  const milestoneLevel =
+    nextMilestoneLevel !== undefined
+      ? nextMilestoneLevel
+      : coerceInputValue(formControl("shardFocusMilestoneLevel")?.value ?? "");
   const observedLevelsByMilestone = {
     ...(state.playerProfile.planning.shards.observedLevelsByMilestone ?? {})
   };
@@ -3117,8 +3445,16 @@ function saveShardPlannerInputs(nextMilestoneId = undefined, nextMilestoneLevel 
     }
   }
   setProfileValue(["planning", "shards", "focusMilestoneId"], milestoneId, state.playerProfile);
-  setProfileValue(["planning", "shards", "focusMilestoneLevel"], milestoneLevel, state.playerProfile);
-  setProfileValue(["planning", "shards", "observedLevelsByMilestone"], observedLevelsByMilestone, state.playerProfile);
+  setProfileValue(
+    ["planning", "shards", "focusMilestoneLevel"],
+    milestoneLevel,
+    state.playerProfile
+  );
+  setProfileValue(
+    ["planning", "shards", "observedLevelsByMilestone"],
+    observedLevelsByMilestone,
+    state.playerProfile
+  );
   persistPlayerProfile();
   setStatus("shardPlannerStatus", "Shard row calibration saved.", "success");
   renderProgressionResults(runProgressionOptimization());
@@ -3133,9 +3469,13 @@ function renderShardPlannerControls() {
     return;
   }
   const selectedId = getSelectedShardMilestoneId();
-  select.innerHTML = milestones.map((milestone) => `
+  select.innerHTML = milestones
+    .map(
+      (milestone) => `
     <option value="${escapeHtml(String(milestone.id))}">${escapeHtml(`${milestone.name} (${formatShardRarity(milestone.rarity)})`)}</option>
-  `).join("");
+  `
+    )
+    .join("");
   select.value = selectedId;
   input.value = shardPlanner.focusMilestoneLevel ?? "";
 }
@@ -3180,13 +3520,25 @@ function renderShardGroundingBoundary() {
   const conflictCount = uncertaintyLog.filter((item) => item.status === "conflict_detected").length;
   const missingCount = uncertaintyLog.filter((item) => item.status !== "conflict_detected").length;
   const assetGrounding = state.shardGrounding?.assetGrounding;
-  const ownerBoundary = getShardOwnerFamilyBoundarySummary(state.shardGrounding?.ownerFamilyBoundary);
-  const costModelBoundary = getShardCostModelBoundarySummary(state.shardGrounding?.costModelBoundary);
-  const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(state.shardGrounding?.rowModelBoundary);
-  const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(state.shardGrounding?.titleEffectBoundary);
-  const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(state.shardGrounding?.effectTextHandlerBoundary);
+  const ownerBoundary = getShardOwnerFamilyBoundarySummary(
+    state.shardGrounding?.ownerFamilyBoundary
+  );
+  const costModelBoundary = getShardCostModelBoundarySummary(
+    state.shardGrounding?.costModelBoundary
+  );
+  const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
+    state.shardGrounding?.rowModelBoundary
+  );
+  const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
+    state.shardGrounding?.titleEffectBoundary
+  );
+  const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
+    state.shardGrounding?.effectTextHandlerBoundary
+  );
   const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
-  const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers) ? assetGrounding.groundedShellIdentifiers.slice(0, 5) : [];
+  const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers)
+    ? assetGrounding.groundedShellIdentifiers.slice(0, 5)
+    : [];
   const blockedUses = Array.isArray(assetGrounding?.blockedUses) ? assetGrounding.blockedUses : [];
   const descriptiveBundleStatus = getDatasetBadgeMeta("shards", "Integrated");
   const ownerBoundaryStatus = ownerBoundary.hasBoundary
@@ -3195,9 +3547,12 @@ function renderShardGroundingBoundary() {
   const costBoundaryStatus = costModelBoundary.hasSampledCostWindows
     ? getDatasetBadgeMeta("shard-cost-model-boundary", "Available")
     : getShardBadgeMetaFromLabel("Blocked");
-  const rowEvidenceStatus = rowModelBoundary.hasBoundary && titleEffectBoundary.hasBoundary && effectTextHandlerBoundary.hasBoundary
-    ? getShardBadgeMetaFromLabel("Integrated")
-    : getShardBadgeMetaFromLabel("Unmapped");
+  const rowEvidenceStatus =
+    rowModelBoundary.hasBoundary &&
+    titleEffectBoundary.hasBoundary &&
+    effectTextHandlerBoundary.hasBoundary
+      ? getShardBadgeMetaFromLabel("Integrated")
+      : getShardBadgeMetaFromLabel("Unmapped");
   const saveBoundaryStatus = saveBoundary.hasSeparationBoundary
     ? getShardBadgeMetaFromLabel("Blocked")
     : getShardBadgeMetaFromLabel("Unmapped");
@@ -3314,15 +3669,23 @@ function renderShardGroundingBoundary() {
 }
 
 function getVerifiedShardRowPackages() {
-  return (Array.isArray(state.shardGrounding?.verifiedRows) ? state.shardGrounding.verifiedRows : [])
-    .filter((entry) => entry?.verifiedRow?.rowKey && entry?.verifiedRow?.titleBinding?.playerFacingName)
-    .sort((left, right) => Number(left?.verifiedRow?.row ?? 0) - Number(right?.verifiedRow?.row ?? 0));
+  return (
+    Array.isArray(state.shardGrounding?.verifiedRows) ? state.shardGrounding.verifiedRows : []
+  )
+    .filter(
+      (entry) => entry?.verifiedRow?.rowKey && entry?.verifiedRow?.titleBinding?.playerFacingName
+    )
+    .sort(
+      (left, right) => Number(left?.verifiedRow?.row ?? 0) - Number(right?.verifiedRow?.row ?? 0)
+    );
 }
 
 function formatVerifiedShardBonusPackage(effectPackage) {
   return (Array.isArray(effectPackage?.bonuses) ? effectPackage.bonuses : [])
     .map((bonus) => {
-      const unlock = Number.isFinite(Number(bonus?.unlockLevel)) ? `Lv${Number(bonus.unlockLevel)}` : "Listed";
+      const unlock = Number.isFinite(Number(bonus?.unlockLevel))
+        ? `Lv${Number(bonus.unlockLevel)}`
+        : "Listed";
       return `${unlock} ${String(bonus?.effectLabel || "Unnamed bonus")}`;
     })
     .join(" | ");
@@ -3343,17 +3706,19 @@ function renderVerifiedShardRowsPreview() {
       <strong>Safely named shard rows the app can already show end-to-end</strong>
       <div class="meta-stack">
         <p class="meta">This preview is intentionally small and descriptive. It only shows rows whose shipped title, grounded three-bonus package, checked text slots, and checked cost shell all align in the current shard contract.</p>
-        ${verifiedRows.map((entry) => {
-          const verifiedRow = entry.verifiedRow;
-          const titleBinding = verifiedRow.titleBinding;
-          const effectPackage = verifiedRow.effectPackage;
-          const effectPresentation = verifiedRow.effectPresentationBinding;
-          const rowShell = verifiedRow.declaringRowModel?.rowShellFields;
-          const costShell = verifiedRow.costShell;
-          const renderCodeList = (items) => (Array.isArray(items) ? items : [])
-            .map((item) => `<code>${escapeHtml(String(item))}</code>`)
-            .join(", ");
-          return `
+        ${verifiedRows
+          .map((entry) => {
+            const verifiedRow = entry.verifiedRow;
+            const titleBinding = verifiedRow.titleBinding;
+            const effectPackage = verifiedRow.effectPackage;
+            const effectPresentation = verifiedRow.effectPresentationBinding;
+            const rowShell = verifiedRow.declaringRowModel?.rowShellFields;
+            const costShell = verifiedRow.costShell;
+            const renderCodeList = (items) =>
+              (Array.isArray(items) ? items : [])
+                .map((item) => `<code>${escapeHtml(String(item))}</code>`)
+                .join(", ");
+            return `
             <div class="shard-note-card">
               <strong>#${escapeHtml(String(verifiedRow.row))} ${escapeHtml(titleBinding.playerFacingName)}</strong>
               <p class="meta"><strong>Shipped title</strong> ${escapeHtml(titleBinding.title)} via <code>${escapeHtml(titleBinding.assetName)}</code></p>
@@ -3363,7 +3728,8 @@ function renderVerifiedShardRowsPreview() {
               <p class="meta"><strong>Checked effect accessors</strong> ${renderCodeList(effectPresentation.calcAccessors)}</p>
             </div>
           `;
-        }).join("")}
+          })
+          .join("")}
         <p class="meta">Rows outside SU1 and SU2 stay explicitly blocked until a matching row package clears end-to-end.</p>
         <p class="meta">No affordability math, ROI, ETA, ranking, best-upgrade logic, save import, or full shard-table claims are implied by this preview.</p>
       </div>
@@ -3385,12 +3751,15 @@ function renderShardWorkflowReference() {
         <div class="shard-threshold-grid">
           ${Object.entries(thresholds)
             .filter(([rarity]) => rarity !== "source_ids")
-            .map(([rarity, levels]) => `
+            .map(
+              ([rarity, levels]) => `
               <div class="shard-threshold-card">
                 <strong>${escapeHtml(rarity)}</strong>
                 <p class="meta">${escapeHtml(formatThresholdLevels(levels))}</p>
               </div>
-            `).join("")}
+            `
+            )
+            .join("")}
         </div>
         <p class="meta">${escapeHtml(mechanics.effect_scaling?.description || "Effect scaling note unavailable.")}</p>
       </article>
@@ -3424,13 +3793,17 @@ function renderObservedShardBehaviors() {
       <article class="snapshot-card">
         <span class="snapshot-title">Observed shard behavior notes</span>
         <div class="meta-stack">
-          ${observations.map((observation) => `
+          ${observations
+            .map(
+              (observation) => `
             <div class="shard-note-card">
               <strong>${escapeHtml(getObservationTitle(observation))}</strong>
               <p class="meta">${escapeHtml(observation.why || "No guide rationale captured.")}</p>
               <p class="meta">${escapeHtml((observation.priorities || []).join(" | "))}</p>
             </div>
-          `).join("")}
+          `
+            )
+            .join("")}
         </div>
       </article>
       <article class="snapshot-card">
@@ -3470,7 +3843,9 @@ function renderShardDocLink(href, label) {
 }
 
 function getBundledDatasetContractEntry(id) {
-  const datasets = Array.isArray(state.datasetContract?.datasets) ? state.datasetContract.datasets : [];
+  const datasets = Array.isArray(state.datasetContract?.datasets)
+    ? state.datasetContract.datasets
+    : [];
   return datasets.find((entry) => entry?.id === id) || null;
 }
 
@@ -3508,23 +3883,26 @@ function renderShardMilestoneDirectory() {
       <h3>Shard milestone rows</h3>
       <p class="meta">These rows live inside Shard Mining. Each card keeps its own observed level, stays in canonical order, and focuses on player-facing row tracking rather than in-page grounding detail.</p>
       <div class="preview-stack">
-${milestones.map((milestone) => {
-          const trackedLevel = getShardFocusLevelForMilestone(milestone);
-          const isCardOpen = isShardMilestoneOpen(milestone.id);
-          const panelTitle = getShardMilestonePanelTitle(milestone);
-          const displayMeta = getShardMilestoneDisplayMeta(milestone);
-          const headerMeta = `${formatShardRarity(milestone.rarity)} | Unlock ${describeUnlockCondition(milestone.unlockCondition)}`;
-          const thresholdSchedule = getThresholdScheduleForMilestone(milestone, mechanics);
-          const hasThresholdSchedule = Array.isArray(thresholdSchedule) && thresholdSchedule.length > 0;
-          const extractedBonusValues = (milestone.bonuses || [])
-            .map((bonus, index) => {
-              const extracted = getShardExtractedBonusPerLevel(milestone.milestoneNumber, index);
-              return Number.isFinite(extracted) ? `${bonus.effectLabel || `Bonus ${index + 1}`}: ${formatShardExtractedBonusPerLevel(extracted)}` : null;
-            })
-            .filter(Boolean);
-          const levelRailSummary = getShardMilestoneLevelRailSummary(milestone);
-          const formulaProfile = getShardFormulaApplicationProfile(milestone.milestoneNumber);
-          return `
+${milestones
+  .map((milestone) => {
+    const trackedLevel = getShardFocusLevelForMilestone(milestone);
+    const isCardOpen = isShardMilestoneOpen(milestone.id);
+    const panelTitle = getShardMilestonePanelTitle(milestone);
+    const displayMeta = getShardMilestoneDisplayMeta(milestone);
+    const headerMeta = `${formatShardRarity(milestone.rarity)} | Unlock ${describeUnlockCondition(milestone.unlockCondition)}`;
+    const thresholdSchedule = getThresholdScheduleForMilestone(milestone, mechanics);
+    const hasThresholdSchedule = Array.isArray(thresholdSchedule) && thresholdSchedule.length > 0;
+    const extractedBonusValues = (milestone.bonuses || [])
+      .map((bonus, index) => {
+        const extracted = getShardExtractedBonusPerLevel(milestone.milestoneNumber, index);
+        return Number.isFinite(extracted)
+          ? `${bonus.effectLabel || `Bonus ${index + 1}`}: ${formatShardExtractedBonusPerLevel(extracted)}`
+          : null;
+      })
+      .filter(Boolean);
+    const levelRailSummary = getShardMilestoneLevelRailSummary(milestone);
+    const formulaProfile = getShardFormulaApplicationProfile(milestone.milestoneNumber);
+    return `
           <details class="snapshot-card shard-milestone-card" data-shard-milestone-card="${escapeHtml(String(milestone.id))}" ${isCardOpen ? "open" : ""}>
             <summary class="shard-milestone-summary">
               <div class="shard-milestone-title-block">
@@ -3532,9 +3910,11 @@ ${milestones.map((milestone) => {
                 <div class="shard-milestone-heading-copy">
                   <strong>${escapeHtml(panelTitle)}</strong>
                   <p class="meta">${escapeHtml(headerMeta)}</p>
-                  ${displayMeta.startsWith("Community alias:")
-                    ? `<p class="meta shard-milestone-alias">${escapeHtml(displayMeta)}</p>`
-                    : ""}
+                  ${
+                    displayMeta.startsWith("Community alias:")
+                      ? `<p class="meta shard-milestone-alias">${escapeHtml(displayMeta)}</p>`
+                      : ""
+                  }
                 </div>
               </div>
               <div class="shard-milestone-summary-pills">
@@ -3553,10 +3933,18 @@ ${milestones.map((milestone) => {
             </div>
             <div class="shard-milestone-main-panel">
               <div class="shard-bonus-list">
-              ${(milestone.bonuses || []).map((bonus, index) => {
-                const computedBonus = getShardComputedBonusSummary(milestone, bonus, trackedLevel);
-                const extractedBonusPerLevel = getShardExtractedBonusPerLevel(milestone.milestoneNumber, index);
-                return `
+              ${(milestone.bonuses || [])
+                .map((bonus, index) => {
+                  const computedBonus = getShardComputedBonusSummary(
+                    milestone,
+                    bonus,
+                    trackedLevel
+                  );
+                  const extractedBonusPerLevel = getShardExtractedBonusPerLevel(
+                    milestone.milestoneNumber,
+                    index
+                  );
+                  return `
                 <article class="shard-bonus-card shard-panel-card">
                   <div class="shard-panel-card-header">
                     <strong>${escapeHtml(bonus.effectLabel || "Unnamed bonus")}</strong>
@@ -3570,7 +3958,8 @@ ${milestones.map((milestone) => {
                   <p class="meta"><strong>Next level</strong> ${escapeHtml(computedBonus.nextLabel)}</p>
                 </article>
               `;
-              }).join("")}
+                })
+                .join("")}
               </div>
               <aside class="shard-level-up-rail shard-panel-card">
                 <p class="snapshot-title">Level up</p>
@@ -3590,7 +3979,8 @@ ${milestones.map((milestone) => {
             </div>
           </details>
         `;
-        }).join("")}
+  })
+  .join("")}
       </div>
     </div>
   `;
@@ -3599,16 +3989,21 @@ ${milestones.map((milestone) => {
 function runGemOptimization() {
   const mode = $("#gemBudgetMode")?.value ?? "strict";
   const budget = getGemPlannerBudget();
-  return [...state.snapshot.gemNodes].map((node) => {
-    const affordability = node.cost <= budget ? 1 : mode === "stretch" ? 0.8 : 0.35;
-    return {
-      title: node.label,
-      subtitle: `${node.level}/${node.maxLevel}`,
-      score: (node.value / node.cost) * (1 + (node.maxLevel - node.level) / node.maxLevel) * affordability,
-      confidence: 0.7,
-      notes: node.tags.join(" | ")
-    };
-  }).sort((left, right) => right.score - left.score);
+  return [...state.snapshot.gemNodes]
+    .map((node) => {
+      const affordability = node.cost <= budget ? 1 : mode === "stretch" ? 0.8 : 0.35;
+      return {
+        title: node.label,
+        subtitle: `${node.level}/${node.maxLevel}`,
+        score:
+          (node.value / node.cost) *
+          (1 + (node.maxLevel - node.level) / node.maxLevel) *
+          affordability,
+        confidence: 0.7,
+        notes: node.tags.join(" | ")
+      };
+    })
+    .sort((left, right) => right.score - left.score);
 }
 
 function getGemPlannerBudget() {
@@ -3616,13 +4011,16 @@ function getGemPlannerBudget() {
 }
 
 function runValidationCases() {
-  const activeFeedContract = getRecommendationContractSummary(getActiveMvpRecommendationFeedPartition().all);
+  const activeFeedContract = getRecommendationContractSummary(
+    getActiveMvpRecommendationFeedPartition().all
+  );
   const current = {
     ship: runShipOptimization()[0]?.title ?? "None",
     progression: runProgressionOptimization()[0]?.title ?? "None",
-    recommendationFeed: activeFeedContract.invalidCount === 0
-      ? "All active feed items satisfy shared recommendation contract"
-      : "Contract gaps in active feed",
+    recommendationFeed:
+      activeFeedContract.invalidCount === 0
+        ? "All active feed items satisfy shared recommendation contract"
+        : "Contract gaps in active feed",
     gem: runGemOptimization()[0]?.title ?? "None"
   };
   const appCases = state.snapshot.validationCases.map((item) => ({
@@ -3639,7 +4037,8 @@ function runValidationCases() {
 function buildApkGroundingValidationCases() {
   const tokenShop = state.extractedMechanics?.tokenShop;
   const multiverseMarket = state.extractedMechanics?.multiverseMarket;
-  const multiverseMarketMetadataNeighborhood = state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
+  const multiverseMarketMetadataNeighborhood =
+    state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
   const tokeniumNamingClues = state.extractedMechanics?.tokeniumNamingClues;
   const tokenBankStateClues = state.extractedMechanics?.tokenBankStateClues;
   const dailyTokeniumLaneClues = state.extractedMechanics?.dailyTokeniumLaneClues;
@@ -3653,7 +4052,8 @@ function buildApkGroundingValidationCases() {
   const tokenShopOwnerShell = state.extractedMechanics?.tokenShopOwnerShell;
   const tokenShopSaveBoundary = state.extractedMechanics?.tokenShopSaveBoundary;
   const multiverseMarketSaveBoundary = state.extractedMechanics?.multiverseMarketSaveBoundary;
-  const multiverseMarketMarketMemberBoundary = state.extractedMechanics?.multiverseMarketMarketMemberBoundary;
+  const multiverseMarketMarketMemberBoundary =
+    state.extractedMechanics?.multiverseMarketMarketMemberBoundary;
   const tokenBankControllerShell = state.extractedMechanics?.tokenBankControllerShell;
   const shardMilestones = state.shardGrounding?.milestones;
   const shardAssetGrounding = state.shardGrounding?.assetGrounding;
@@ -3670,19 +4070,27 @@ function buildApkGroundingValidationCases() {
   const cases = [];
 
   if (shardAssetGrounding) {
-    const identifiers = Array.isArray(shardAssetGrounding.groundedShellIdentifiers) ? shardAssetGrounding.groundedShellIdentifiers : [];
-    const hasShellEvidence = identifiers.includes("LoopResetStage1") && identifiers.includes("MilestoneBonusesPerLevel");
+    const identifiers = Array.isArray(shardAssetGrounding.groundedShellIdentifiers)
+      ? shardAssetGrounding.groundedShellIdentifiers
+      : [];
+    const hasShellEvidence =
+      identifiers.includes("LoopResetStage1") && identifiers.includes("MilestoneBonusesPerLevel");
     cases.push({
       title: "Shard shell grounding payload",
       expected: "Grounded shard shell evidence available",
-      actual: hasShellEvidence ? "Grounded shard shell evidence available" : "Missing expected shard shell anchors",
+      actual: hasShellEvidence
+        ? "Grounded shard shell evidence available"
+        : "Missing expected shard shell anchors",
       pass: hasShellEvidence,
       scope: "APK"
     });
     cases.push({
       title: "Shard milestone mapping gate",
       expected: "Available but unmapped",
-      actual: shardAssetGrounding.integrationStatus === "available-but-unmapped" ? "Available but unmapped" : "Unexpected shard integration status",
+      actual:
+        shardAssetGrounding.integrationStatus === "available-but-unmapped"
+          ? "Available but unmapped"
+          : "Unexpected shard integration status",
       pass: shardAssetGrounding.integrationStatus === "available-but-unmapped",
       scope: "APK"
     });
@@ -3691,10 +4099,12 @@ function buildApkGroundingValidationCases() {
     const ownerBoundary = getShardOwnerFamilyBoundarySummary(shardOwnerFamilyBoundary);
     cases.push({
       title: "Shard owner-family boundary",
-      expected: "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded",
-      actual: ownerBoundary.hasBoundary && ownerBoundary.hasDowngradedGenericLead
-        ? "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded"
-        : "Shard owner-family boundary drifted",
+      expected:
+        "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded",
+      actual:
+        ownerBoundary.hasBoundary && ownerBoundary.hasDowngradedGenericLead
+          ? "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded"
+          : "Shard owner-family boundary drifted",
       pass: ownerBoundary.hasBoundary && ownerBoundary.hasDowngradedGenericLead,
       scope: "APK"
     });
@@ -3703,7 +4113,8 @@ function buildApkGroundingValidationCases() {
     const finalSuBoundary = getShardFinalSuBonusBoundarySummary(shardFinalSuBonusBoundary);
     cases.push({
       title: "Shard FinalSU bonus boundary",
-      expected: "ShardUpgradeInfo preserves SU final-unlock and FinalSU bonus-field families without row mapping claims",
+      expected:
+        "ShardUpgradeInfo preserves SU final-unlock and FinalSU bonus-field families without row mapping claims",
       actual: finalSuBoundary.hasBoundary
         ? `ShardUpgradeInfo preserves ${finalSuBoundary.unlockRangeLabel} plus ${finalSuBoundary.bonusFieldLabel}`
         : "Shard FinalSU bonus-field boundary drifted",
@@ -3715,11 +4126,21 @@ function buildApkGroundingValidationCases() {
     const payloadBoundary = getShardMilestonePayloadBoundarySummary(shardMilestonePayloadBoundary);
     cases.push({
       title: "Shard milestone payload boundary",
-      expected: "ShardUpgradeInfo preserves milestone-total, cost-list, progress-fill, and phase-tick hooks without claiming saved player rows",
-      actual: payloadBoundary.hasBoundary && payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields
-        ? `ShardUpgradeInfo preserves ${payloadBoundary.milestoneStateLabel} plus ${payloadBoundary.costAccessorLabel}`
-        : "Shard milestone payload-watch boundary drifted",
-      pass: payloadBoundary.hasBoundary && payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields && payloadBoundary.hasCostAccessorSamples,
+      expected:
+        "ShardUpgradeInfo preserves milestone-total, cost-list, progress-fill, and phase-tick hooks without claiming saved player rows",
+      actual:
+        payloadBoundary.hasBoundary &&
+        payloadBoundary.hasCostAndListHooks &&
+        payloadBoundary.hasProgressFillHooks &&
+        payloadBoundary.hasTickFields
+          ? `ShardUpgradeInfo preserves ${payloadBoundary.milestoneStateLabel} plus ${payloadBoundary.costAccessorLabel}`
+          : "Shard milestone payload-watch boundary drifted",
+      pass:
+        payloadBoundary.hasBoundary &&
+        payloadBoundary.hasCostAndListHooks &&
+        payloadBoundary.hasProgressFillHooks &&
+        payloadBoundary.hasTickFields &&
+        payloadBoundary.hasCostAccessorSamples,
       scope: "APK"
     });
   }
@@ -3727,78 +4148,137 @@ function buildApkGroundingValidationCases() {
     const costModelBoundary = getShardCostModelBoundarySummary(shardCostModelBoundary);
     cases.push({
       title: "Shard cost-model boundary",
-      expected: "ShardUpgradeInfo preserves sampled SU cost accessors plus a row-local SU0 cost parameter shell without formula claims",
-      actual: costModelBoundary.hasBoundary && costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell
-        ? `ShardUpgradeInfo preserves ${costModelBoundary.costWindowLabel} plus ${costModelBoundary.row0FieldLabel}`
-        : "Shard cost-model boundary drifted",
-      pass: costModelBoundary.hasBoundary && costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell,
+      expected:
+        "ShardUpgradeInfo preserves sampled SU cost accessors plus a row-local SU0 cost parameter shell without formula claims",
+      actual:
+        costModelBoundary.hasBoundary &&
+        costModelBoundary.hasSampledCostWindows &&
+        costModelBoundary.hasRow0FormulaShell
+          ? `ShardUpgradeInfo preserves ${costModelBoundary.costWindowLabel} plus ${costModelBoundary.row0FieldLabel}`
+          : "Shard cost-model boundary drifted",
+      pass:
+        costModelBoundary.hasBoundary &&
+        costModelBoundary.hasSampledCostWindows &&
+        costModelBoundary.hasRow0FormulaShell,
       scope: "APK"
     });
   }
   if (shardMilestoneRowModelBoundary) {
-    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(shardMilestoneRowModelBoundary);
+    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
+      shardMilestoneRowModelBoundary
+    );
     cases.push({
       title: "Shard milestone row model",
-      expected: "Shard-local text-checker and unlock rows now reach 0-29 while the numbered buy seam still crosses the generic family",
-      actual: rowModelBoundary.hasBoundary && rowModelBoundary.hasShardLocalBuySample && rowModelBoundary.hasGenericBuyFamily
-        ? `Text ${rowModelBoundary.textCheckerRangeLabel}, unlock ${rowModelBoundary.unlockRangeLabel}, buy seam ${rowModelBoundary.shardLocalBuyLabel} vs ${rowModelBoundary.genericBuyLabel}`
-        : "Shard row-model boundary drifted",
-      pass: rowModelBoundary.hasBoundary && rowModelBoundary.hasShardLocalBuySample && rowModelBoundary.hasGenericBuyFamily,
+      expected:
+        "Shard-local text-checker and unlock rows now reach 0-29 while the numbered buy seam still crosses the generic family",
+      actual:
+        rowModelBoundary.hasBoundary &&
+        rowModelBoundary.hasShardLocalBuySample &&
+        rowModelBoundary.hasGenericBuyFamily
+          ? `Text ${rowModelBoundary.textCheckerRangeLabel}, unlock ${rowModelBoundary.unlockRangeLabel}, buy seam ${rowModelBoundary.shardLocalBuyLabel} vs ${rowModelBoundary.genericBuyLabel}`
+          : "Shard row-model boundary drifted",
+      pass:
+        rowModelBoundary.hasBoundary &&
+        rowModelBoundary.hasShardLocalBuySample &&
+        rowModelBoundary.hasGenericBuyFamily,
       scope: "APK"
     });
   }
   if (shardMilestoneTitleEffectBoundary) {
-    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(shardMilestoneTitleEffectBoundary);
+    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
+      shardMilestoneTitleEffectBoundary
+    );
     cases.push({
       title: "Shard milestone titles and effect shell",
-      expected: "Shipped shard title assets and effect-family clues are preserved without claiming conflict-free row text",
-      actual: titleEffectBoundary.hasBoundary && titleEffectBoundary.hasEffectPresentationFamily && titleEffectBoundary.hasBonusCalcSamples
-        ? `Title rows ${titleEffectBoundary.titleRangeLabel} with effect shell ${titleEffectBoundary.effectSlotLabel}`
-        : "Shard title/effect boundary drifted",
-      pass: titleEffectBoundary.hasBoundary && titleEffectBoundary.hasEffectPresentationFamily && titleEffectBoundary.hasBonusCalcSamples,
+      expected:
+        "Shipped shard title assets and effect-family clues are preserved without claiming conflict-free row text",
+      actual:
+        titleEffectBoundary.hasBoundary &&
+        titleEffectBoundary.hasEffectPresentationFamily &&
+        titleEffectBoundary.hasBonusCalcSamples
+          ? `Title rows ${titleEffectBoundary.titleRangeLabel} with effect shell ${titleEffectBoundary.effectSlotLabel}`
+          : "Shard title/effect boundary drifted",
+      pass:
+        titleEffectBoundary.hasBoundary &&
+        titleEffectBoundary.hasEffectPresentationFamily &&
+        titleEffectBoundary.hasBonusCalcSamples,
       scope: "APK"
     });
   }
   if (shardEffectTextHandlerBoundary) {
-    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(shardEffectTextHandlerBoundary);
+    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
+      shardEffectTextHandlerBoundary
+    );
     cases.push({
       title: "Shard effect-text handler boundary",
-      expected: "A shard-specific bonus text handler leads over the generic milestone writer without claiming row-complete final text",
-      actual: effectTextHandlerBoundary.hasBoundary && effectTextHandlerBoundary.hasPresentationFamily && effectTextHandlerBoundary.hasBonusCalcSamples && effectTextHandlerBoundary.hasUiContextAnchors
-        ? `${effectTextHandlerBoundary.textHandlerLabel} aligned with ${effectTextHandlerBoundary.presentationFamilyLabel}`
-        : "Shard effect-text handler boundary drifted",
-      pass: effectTextHandlerBoundary.hasBoundary && effectTextHandlerBoundary.hasPresentationFamily && effectTextHandlerBoundary.hasBonusCalcSamples && effectTextHandlerBoundary.hasUiContextAnchors,
+      expected:
+        "A shard-specific bonus text handler leads over the generic milestone writer without claiming row-complete final text",
+      actual:
+        effectTextHandlerBoundary.hasBoundary &&
+        effectTextHandlerBoundary.hasPresentationFamily &&
+        effectTextHandlerBoundary.hasBonusCalcSamples &&
+        effectTextHandlerBoundary.hasUiContextAnchors
+          ? `${effectTextHandlerBoundary.textHandlerLabel} aligned with ${effectTextHandlerBoundary.presentationFamilyLabel}`
+          : "Shard effect-text handler boundary drifted",
+      pass:
+        effectTextHandlerBoundary.hasBoundary &&
+        effectTextHandlerBoundary.hasPresentationFamily &&
+        effectTextHandlerBoundary.hasBonusCalcSamples &&
+        effectTextHandlerBoundary.hasUiContextAnchors,
       scope: "APK"
     });
   }
   if (shardMilestoneRowShellBoundary) {
-    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(shardMilestoneRowShellBoundary);
+    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(
+      shardMilestoneRowShellBoundary
+    );
     cases.push({
       title: "Shard milestone row shell",
-      expected: "ShardMining preserves partial UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell without row-owner claims",
-      actual: rowShellBoundary.hasBoundary && rowShellBoundary.hasUnlockHookSamples && rowShellBoundary.hasBuyHookSamples && rowShellBoundary.hasTextCheckerSamples
-        ? `ShardMining preserves ${rowShellBoundary.unlockHookLabel} plus ${rowShellBoundary.buyHookLabel} and ${rowShellBoundary.textCheckerLabel}`
-        : "Shard milestone row-shell boundary drifted",
-      pass: rowShellBoundary.hasBoundary && rowShellBoundary.hasUnlockHookSamples && rowShellBoundary.hasBuyHookSamples && rowShellBoundary.hasTextCheckerSamples,
+      expected:
+        "ShardMining preserves partial UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell without row-owner claims",
+      actual:
+        rowShellBoundary.hasBoundary &&
+        rowShellBoundary.hasUnlockHookSamples &&
+        rowShellBoundary.hasBuyHookSamples &&
+        rowShellBoundary.hasTextCheckerSamples
+          ? `ShardMining preserves ${rowShellBoundary.unlockHookLabel} plus ${rowShellBoundary.buyHookLabel} and ${rowShellBoundary.textCheckerLabel}`
+          : "Shard milestone row-shell boundary drifted",
+      pass:
+        rowShellBoundary.hasBoundary &&
+        rowShellBoundary.hasUnlockHookSamples &&
+        rowShellBoundary.hasBuyHookSamples &&
+        rowShellBoundary.hasTextCheckerSamples,
       scope: "APK"
     });
   }
   if (shardMilestoneRowAlignmentBoundary) {
-    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(shardMilestoneRowAlignmentBoundary);
+    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(
+      shardMilestoneRowAlignmentBoundary
+    );
     cases.push({
       title: "Shard milestone row alignment",
-      expected: "Shard partial row shell keeps unlock, buy, and text-checker ranges separate until a declaring row model is recovered",
-      actual: rowAlignmentBoundary.hasBoundary && rowAlignmentBoundary.hasZeroUnlockTextOverlap && rowAlignmentBoundary.hasBuyTextOverlap
-        ? `Unlock ${rowAlignmentBoundary.unlockRangeLabel}, text ${rowAlignmentBoundary.textCheckerRangeLabel}, buy ${rowAlignmentBoundary.buyRangeLabel}`
-        : "Shard milestone row-alignment boundary drifted",
-      pass: rowAlignmentBoundary.hasBoundary && rowAlignmentBoundary.hasZeroUnlockTextOverlap && rowAlignmentBoundary.hasBuyTextOverlap,
+      expected:
+        "Shard partial row shell keeps unlock, buy, and text-checker ranges separate until a declaring row model is recovered",
+      actual:
+        rowAlignmentBoundary.hasBoundary &&
+        rowAlignmentBoundary.hasZeroUnlockTextOverlap &&
+        rowAlignmentBoundary.hasBuyTextOverlap
+          ? `Unlock ${rowAlignmentBoundary.unlockRangeLabel}, text ${rowAlignmentBoundary.textCheckerRangeLabel}, buy ${rowAlignmentBoundary.buyRangeLabel}`
+          : "Shard milestone row-alignment boundary drifted",
+      pass:
+        rowAlignmentBoundary.hasBoundary &&
+        rowAlignmentBoundary.hasZeroUnlockTextOverlap &&
+        rowAlignmentBoundary.hasBuyTextOverlap,
       scope: "APK"
     });
   }
   const verifiedShardRows = getVerifiedShardRowPackages();
   if (verifiedShardRows.length) {
-    const verifiedRowKeys = verifiedShardRows.map((entry) => entry?.verifiedRow?.rowKey).filter(Boolean);
-    const hasVerifiedPreviewSlice = verifiedRowKeys.includes("SU1") && verifiedRowKeys.includes("SU2");
+    const verifiedRowKeys = verifiedShardRows
+      .map((entry) => entry?.verifiedRow?.rowKey)
+      .filter(Boolean);
+    const hasVerifiedPreviewSlice =
+      verifiedRowKeys.includes("SU1") && verifiedRowKeys.includes("SU2");
     cases.push({
       title: "Verified shard rows preview",
       expected: "SU1 and SU2 verified rows available for descriptive preview",
@@ -3813,7 +4293,8 @@ function buildApkGroundingValidationCases() {
     const saveBoundary = getShardSaveBoundarySummary(shardSaveBoundary);
     cases.push({
       title: "Shard save-side separation",
-      expected: "Shard owner trail and PlayerProfileData save-family clues stay separate with zero overlap",
+      expected:
+        "Shard owner trail and PlayerProfileData save-family clues stay separate with zero overlap",
       actual: saveBoundary.hasSeparationBoundary
         ? "Shard owner trail and PlayerProfileData save-family clues stay separate with zero overlap"
         : "Shard save-boundary separation drifted",
@@ -3832,22 +4313,26 @@ function buildApkGroundingValidationCases() {
     cases.push({
       title: "TokenShop owner payload",
       expected: "Grounded TokenShop constants available",
-      actual: tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost
-        ? "Grounded TokenShop constants available"
-        : "Missing expected TokenShop constants",
-      pass: Boolean(tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost),
+      actual:
+        tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost
+          ? "Grounded TokenShop constants available"
+          : "Missing expected TokenShop constants",
+      pass: Boolean(
+        tokenShop.source?.level0 && numericTable.TokenBoost && numericTable.DiamondBoost
+      ),
       scope: "APK"
     });
     cases.push({
       title: "TokenShop extracted family coverage",
-      expected: "32 numeric groups with TokenBoost, DiamondBoost, and TokenDailiesT2 plus token-bank controller anchors",
+      expected:
+        "32 numeric groups with TokenBoost, DiamondBoost, and TokenDailiesT2 plus token-bank controller anchors",
       actual: tokenShopCoverage.hasCoverage
         ? `${tokenShopCoverage.numericGroupCount} numeric groups with ${tokenShopCoverage.namedLaneLabel}${tokenShopCoverage.hasControllerAnchors ? " plus token-bank controller anchors" : " but missing token-bank controller anchors"}`
         : "Missing TokenShop extracted family coverage",
       pass:
-        tokenShopCoverage.numericGroupCount === 32
-        && tokenShopCoverage.hasControllerAnchors
-        && tokenShopCoverage.hasNamedLanes,
+        tokenShopCoverage.numericGroupCount === 32 &&
+        tokenShopCoverage.hasControllerAnchors &&
+        tokenShopCoverage.hasNamedLanes,
       scope: "APK"
     });
     cases.push({
@@ -3879,13 +4364,19 @@ function buildApkGroundingValidationCases() {
 
   if (multiverseMarket) {
     const records = Array.isArray(multiverseMarket.records) ? multiverseMarket.records : [];
-    const validatedIds = Array.isArray(multiverseMarket.source?.validated_ids) ? multiverseMarket.source.validated_ids : [];
-    const hasAnchor = records.some((record) => Number(record.inscription_id) === 51 && Number(record.start_cost) === 2);
+    const validatedIds = Array.isArray(multiverseMarket.source?.validated_ids)
+      ? multiverseMarket.source.validated_ids
+      : [];
+    const hasAnchor = records.some(
+      (record) => Number(record.inscription_id) === 51 && Number(record.start_cost) === 2
+    );
     const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
     cases.push({
       title: "MultiverseMarket owner payload",
       expected: "Validated late-block constants available",
-      actual: hasAnchor ? "Validated late-block constants available" : "Missing validated late-block anchor",
+      actual: hasAnchor
+        ? "Validated late-block constants available"
+        : "Missing validated late-block anchor",
       pass: hasAnchor,
       scope: "APK"
     });
@@ -3908,7 +4399,8 @@ function buildApkGroundingValidationCases() {
   }
 
   if (multiverseMarketMetadataNeighborhood) {
-    const { hasCloudSavePathClues, hasSaveFamilyClues, hasProgressionFieldCluster } = getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood);
+    const { hasCloudSavePathClues, hasSaveFamilyClues, hasProgressionFieldCluster } =
+      getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood);
     cases.push({
       title: "MultiverseMarket save-family clues",
       expected: "PlayerProfileData persistence clues available",
@@ -3942,7 +4434,8 @@ function buildApkGroundingValidationCases() {
     const tokeniumNamingSummary = getTokeniumNamingSummary(tokeniumNamingClues);
     cases.push({
       title: "Spend tokenium naming clues",
-      expected: "Resource_Tokenium, Aca.Tokenium553, CostBox-Tokens, and CostBox-Tokenium available",
+      expected:
+        "Resource_Tokenium, Aca.Tokenium553, CostBox-Tokens, and CostBox-Tokenium available",
       actual: tokeniumNamingSummary.hasNamingClues
         ? `${tokeniumNamingSummary.resourceLabel}, ${tokeniumNamingSummary.academyLabel}, ${tokeniumNamingSummary.tokenShellLabel}, and ${tokeniumNamingSummary.tokeniumShellLabel} available`
         : "Missing token or tokenium naming clues",
@@ -3955,11 +4448,14 @@ function buildApkGroundingValidationCases() {
     const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShopCostLanes);
     cases.push({
       title: "TokenShop cost-lane split",
-      expected: "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox-Tokens, and CostBox-Tokenium available",
+      expected:
+        "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox-Tokens, and CostBox-Tokenium available",
       actual: tokenShopCostLaneSummary.hasLaneSplit
         ? `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.tokensShellLabel}, and ${tokenShopCostLaneSummary.tokeniumShellLabel} available`
         : "Missing TokenShop cost-lane split clues",
-      pass: tokenShopCostLaneSummary.hasLaneSplit && tokenShopCostLaneSummary.keepsDailyTokeniumSeparate,
+      pass:
+        tokenShopCostLaneSummary.hasLaneSplit &&
+        tokenShopCostLaneSummary.keepsDailyTokeniumSeparate,
       scope: "APK"
     });
   }
@@ -3968,11 +4464,14 @@ function buildApkGroundingValidationCases() {
     const spendActionLaneSummary = getSpendActionLaneSummary(spendActionLaneClues);
     cases.push({
       title: "Spend action-lane split",
-      expected: "BuyTokenBoost, BuyDiamondBoost, BuyLM244, BuyCollectorDevice, and zero BuyTokenDailies hooks preserved",
+      expected:
+        "BuyTokenBoost, BuyDiamondBoost, BuyLM244, BuyCollectorDevice, and zero BuyTokenDailies hooks preserved",
       actual: spendActionLaneSummary.hasActionSplit
         ? `${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, ${spendActionLaneSummary.premiumModifierHook}, and zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} hooks preserved`
         : "Missing spend action-lane clues",
-      pass: spendActionLaneSummary.hasActionSplit && spendActionLaneSummary.keepsDailyDirectHooksUnrecovered,
+      pass:
+        spendActionLaneSummary.hasActionSplit &&
+        spendActionLaneSummary.keepsDailyDirectHooksUnrecovered,
       scope: "APK"
     });
   }
@@ -3981,7 +4480,8 @@ function buildApkGroundingValidationCases() {
     const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShopOwnerShell);
     cases.push({
       title: "TokenShop owner shell",
-      expected: "TokenShop, ClaimBankedTokens, CheckTokenClaimNotification, and BuyAutoTokenClicker preserved as one local owner shell",
+      expected:
+        "TokenShop, ClaimBankedTokens, CheckTokenClaimNotification, and BuyAutoTokenClicker preserved as one local owner shell",
       actual: tokenShopOwnerShellSummary.hasOwnerShell
         ? `${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} preserved as one local owner shell`
         : "Missing TokenShop owner-shell clues",
@@ -3994,7 +4494,8 @@ function buildApkGroundingValidationCases() {
     const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShopSaveBoundary);
     cases.push({
       title: "TokenShop save boundary",
-      expected: "TokenShop owner shell and PlayerProfileData save-family clues stay separate with zero overlap",
+      expected:
+        "TokenShop owner shell and PlayerProfileData save-family clues stay separate with zero overlap",
       actual: tokenShopSaveBoundarySummary.hasSeparationBoundary
         ? `${tokenShopSaveBoundarySummary.ownerAnchor} and ${tokenShopSaveBoundarySummary.saveAnchor} stay separate with ${tokenShopSaveBoundarySummary.overlapLabel}`
         : "Missing TokenShop save-boundary clues",
@@ -4004,10 +4505,12 @@ function buildApkGroundingValidationCases() {
   }
 
   if (tokenBankControllerShell) {
-    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenBankControllerShell);
+    const tokenBankControllerShellSummary =
+      getTokenBankControllerShellSummary(tokenBankControllerShell);
     cases.push({
       title: "Token-bank controller shell",
-      expected: "ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and CheckTokenClaimNotification preserved",
+      expected:
+        "ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and CheckTokenClaimNotification preserved",
       actual: tokenBankControllerShellSummary.hasControllerShell
         ? `${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook} preserved`
         : "Missing token-bank controller-shell clues",
@@ -4020,7 +4523,8 @@ function buildApkGroundingValidationCases() {
     const tokenBankStateSummary = getTokenBankStateSummary(tokenBankStateClues);
     cases.push({
       title: "Token-bank controller split clues",
-      expected: "ClaimBankedTokens, get_TokenBankCap, BigStatisticPrefab.TokenBankCap, and SetLM244BonusText available",
+      expected:
+        "ClaimBankedTokens, get_TokenBankCap, BigStatisticPrefab.TokenBankCap, and SetLM244BonusText available",
       actual: tokenBankStateSummary.hasControllerSplit
         ? `${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook} available`
         : "Missing token-bank controller split clues",
@@ -4033,7 +4537,8 @@ function buildApkGroundingValidationCases() {
     const dailyTokeniumSummary = getDailyTokeniumLaneSummary(dailyTokeniumLaneClues);
     cases.push({
       title: "Daily Tokenium owner-family clues",
-      expected: "SpaceAcademy, FarmMissions, SetLM244BonusText, BuyLM244, and BuyCollectorDevice available",
+      expected:
+        "SpaceAcademy, FarmMissions, SetLM244BonusText, BuyLM244, and BuyCollectorDevice available",
       actual: dailyTokeniumSummary.hasOwnerFamilyClues
         ? `${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.purchaseOwner} available`
         : "Missing Daily Tokenium owner-family clues",
@@ -4046,20 +4551,26 @@ function buildApkGroundingValidationCases() {
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenBankFormulaBoundary);
     cases.push({
       title: "Token-bank derived output boundary",
-      expected: "FinalTokenBankCap and FinalTokenBankFillSpeed cluster without PlayerProfileData or CloudSavePlayerProfile joins",
+      expected:
+        "FinalTokenBankCap and FinalTokenBankFillSpeed cluster without PlayerProfileData or CloudSavePlayerProfile joins",
       actual: tokenBankFormulaSummary.hasDerivedOutputBoundary
         ? `${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} cluster${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? " without save-family joins" : " with save-family overlap"}.`
         : "Missing token-bank derived output boundary clues",
-      pass: tokenBankFormulaSummary.hasDerivedOutputBoundary && tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext,
+      pass:
+        tokenBankFormulaSummary.hasDerivedOutputBoundary &&
+        tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext,
       scope: "APK"
     });
   }
 
   if (multiverseMarketRangeBoundary) {
-    const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(multiverseMarketRangeBoundary);
+    const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
+      multiverseMarketRangeBoundary
+    );
     cases.push({
       title: "MultiverseMarket row-range boundary",
-      expected: "Validated rows 50-59 and 63-74 now share a first direct overlap with the recovered IS71-110 metadata run at rows 71-74",
+      expected:
+        "Validated rows 50-59 and 63-74 now share a first direct overlap with the recovered IS71-110 metadata run at rows 71-74",
       actual: multiverseMarketRangeSummary.hasOverlap
         ? `Validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} now share a first direct overlap with ${multiverseMarketRangeSummary.metadataRangeLabel} at rows ${multiverseMarketRangeSummary.overlapLabel}`
         : "Missing validated-row versus metadata-run boundary",
@@ -4069,23 +4580,31 @@ function buildApkGroundingValidationCases() {
   }
 
   if (multiverseMarketRowTextCoverage) {
-    const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(multiverseMarketRowTextCoverage);
+    const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
+      multiverseMarketRowTextCoverage
+    );
     cases.push({
       title: "MultiverseMarket validated row text coverage",
-      expected: "TextHandlerMarkets and SetAllChrystosEmporiumTexts cover SetIS50-59 and 63-74 cost texts",
+      expected:
+        "TextHandlerMarkets and SetAllChrystosEmporiumTexts cover SetIS50-59 and 63-74 cost texts",
       actual: multiverseMarketRowTextSummary.hasValidatedTextCoverage
         ? `${multiverseMarketRowTextSummary.textHandler} and ${multiverseMarketRowTextSummary.textBatcher} cover ${multiverseMarketRowTextSummary.coveredCount} SetIS*CostText hooks for ${multiverseMarketRowTextSummary.validatedRangeLabel}`
         : "Missing validated MultiverseMarket row text coverage",
-      pass: multiverseMarketRowTextSummary.hasValidatedTextCoverage && multiverseMarketRowTextSummary.hasBuyHookSamples,
+      pass:
+        multiverseMarketRowTextSummary.hasValidatedTextCoverage &&
+        multiverseMarketRowTextSummary.hasBuyHookSamples,
       scope: "APK"
     });
   }
 
   if (state.extractedMechanics?.multiverseMarketPrefabRemapBoundary) {
-    const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(state.extractedMechanics.multiverseMarketPrefabRemapBoundary);
+    const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(
+      state.extractedMechanics.multiverseMarketPrefabRemapBoundary
+    );
     cases.push({
       title: "MultiverseMarket prefab remap boundary",
-      expected: "Validated ids 69-74 still do not have direct ChrystosEmporiumUpgrade number matches",
+      expected:
+        "Validated ids 69-74 still do not have direct ChrystosEmporiumUpgrade number matches",
       actual: multiverseMarketPrefabRemapSummary.hasOverrideBoundary
         ? `${multiverseMarketPrefabRemapSummary.lastDirectPrefab} is the last direct band before ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}`
         : "Missing MultiverseMarket prefab-remap boundary",
@@ -4095,10 +4614,13 @@ function buildApkGroundingValidationCases() {
   }
 
   if (multiverseMarketActionShell) {
-    const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(multiverseMarketActionShell);
+    const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(
+      multiverseMarketActionShell
+    );
     cases.push({
       title: "MultiverseMarket action shell",
-      expected: "Context-derived BuyIS1-110 and SetIS1-110CostText shell preserved while only rows 50-59 and 63-74 stay validated",
+      expected:
+        "Context-derived BuyIS1-110 and SetIS1-110CostText shell preserved while only rows 50-59 and 63-74 stay validated",
       actual: multiverseMarketActionShellSummary.hasActionShell
         ? `${multiverseMarketActionShellSummary.buyRangeLabel} and ${multiverseMarketActionShellSummary.costTextRangeLabel} preserved while ${multiverseMarketActionShellSummary.validatedRangeLabel} stays validated`
         : "Missing MultiverseMarket action-shell boundary",
@@ -4108,23 +4630,31 @@ function buildApkGroundingValidationCases() {
   }
 
   if (multiverseMarketOwnerFamily) {
-    const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(multiverseMarketOwnerFamily);
+    const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
+      multiverseMarketOwnerFamily
+    );
     cases.push({
       title: "MultiverseMarket owner family",
-      expected: "MultiverseMarket, Inscryptions, and IS1-110 CurrencyBox shell preserved without implying saved-state ownership",
+      expected:
+        "MultiverseMarket, Inscryptions, and IS1-110 CurrencyBox shell preserved without implying saved-state ownership",
       actual: multiverseMarketOwnerFamilySummary.hasOwnerFamily
         ? `${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, and ${multiverseMarketOwnerFamilySummary.currencyRangeLabel} preserved with ${multiverseMarketOwnerFamilySummary.firstValidatedCurrencyBox} through ${multiverseMarketOwnerFamilySummary.lastValidatedCurrencyBox} samples`
         : "Missing MultiverseMarket owner-family shell",
-      pass: multiverseMarketOwnerFamilySummary.hasOwnerFamily && multiverseMarketOwnerFamilySummary.hasCurrencyShell,
+      pass:
+        multiverseMarketOwnerFamilySummary.hasOwnerFamily &&
+        multiverseMarketOwnerFamilySummary.hasCurrencyShell,
       scope: "APK"
     });
   }
 
   if (multiverseMarketSaveBoundary) {
-    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(multiverseMarketSaveBoundary);
+    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(
+      multiverseMarketSaveBoundary
+    );
     cases.push({
       title: "MultiverseMarket save boundary",
-      expected: "MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap",
+      expected:
+        "MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap",
       actual: multiverseMarketSaveBoundarySummary.hasSeparationBoundary
         ? `${multiverseMarketSaveBoundarySummary.actionAnchor} and ${multiverseMarketSaveBoundarySummary.saveAnchor} stay separate with ${multiverseMarketSaveBoundarySummary.overlapLabel}`
         : "Missing MultiverseMarket save-boundary clues",
@@ -4134,10 +4664,13 @@ function buildApkGroundingValidationCases() {
   }
 
   if (multiverseMarketMarketMemberBoundary) {
-    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(multiverseMarketMarketMemberBoundary);
+    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
+      multiverseMarketMarketMemberBoundary
+    );
     cases.push({
       title: "MultiverseMarket canonical host narrowing",
-      expected: "PlayerProfileHandler get_Market accessor bridge is checked while direct MultiverseMarket ownership of the broader progression run is ruled out",
+      expected:
+        "PlayerProfileHandler get_Market accessor bridge is checked while direct MultiverseMarket ownership of the broader progression run is ruled out",
       actual: marketMemberSummary.favorsDirectMemberBoundary
         ? `${marketMemberSummary.canonicalHostLabel} is checked, ${marketMemberSummary.negativeMultiverseFieldLabel}, and the broader declaring payload stays unresolved`
         : "Missing checked PlayerProfileHandler-to-MultiverseMarket accessor narrowing",
@@ -4163,13 +4696,19 @@ function getTokenShopCoverageSummary(tokenShop) {
   const numericTable = tokenShop?.numeric_table ?? {};
   const numericKeys = Object.keys(numericTable);
   const fields = Array.isArray(tokenShop?.fields) ? tokenShop.fields : [];
-  const controllerFieldNames = new Set(fields.filter((entry) => entry.group === "controller").map((entry) => entry.field));
-  const groups = [...new Set(
-    numericKeys
-      .map((key) => numericTable[key]?.group)
-      .filter((value) => typeof value === "string" && value.length)
-  )].sort();
-  const namedLanes = ["TokenBoost", "DiamondBoost", "TokenDailiesT2"].filter((key) => key in numericTable);
+  const controllerFieldNames = new Set(
+    fields.filter((entry) => entry.group === "controller").map((entry) => entry.field)
+  );
+  const groups = [
+    ...new Set(
+      numericKeys
+        .map((key) => numericTable[key]?.group)
+        .filter((value) => typeof value === "string" && value.length)
+    )
+  ].sort();
+  const namedLanes = ["TokenBoost", "DiamondBoost", "TokenDailiesT2"].filter(
+    (key) => key in numericTable
+  );
 
   return {
     hasCoverage: numericKeys.length > 0,
@@ -4178,48 +4717,94 @@ function getTokenShopCoverageSummary(tokenShop) {
     namedLaneLabel: namedLanes.join(", "),
     tierLabel: groups.join(", "),
     hasControllerAnchors:
-      controllerFieldNames.has("BankFill")
-      && controllerFieldNames.has("TokenBankDescriptionText")
+      controllerFieldNames.has("BankFill") && controllerFieldNames.has("TokenBankDescriptionText")
   };
 }
 
 function getShardOwnerFamilyBoundarySummary(boundary) {
-  const screenControllers = Array.isArray(boundary?.screenControllerFamilies) ? boundary.screenControllerFamilies : [];
-  const dataCarriers = Array.isArray(boundary?.dataCarrierCandidates) ? boundary.dataCarrierCandidates : [];
-  const fastBuyHooks = Array.isArray(boundary?.screenControlAnchors) ? boundary.screenControlAnchors : [];
+  const screenControllers = Array.isArray(boundary?.screenControllerFamilies)
+    ? boundary.screenControllerFamilies
+    : [];
+  const dataCarriers = Array.isArray(boundary?.dataCarrierCandidates)
+    ? boundary.dataCarrierCandidates
+    : [];
+  const fastBuyHooks = Array.isArray(boundary?.screenControlAnchors)
+    ? boundary.screenControlAnchors
+    : [];
   const bonusAnchors = Array.isArray(boundary?.bonusFieldAnchors) ? boundary.bonusFieldAnchors : [];
   const genericLead = boundary?.downgradedGenericLead ?? {};
   const genericLeadReasons = Array.isArray(genericLead.reasons) ? genericLead.reasons : [];
   return {
-    hasBoundary: screenControllers.includes("ShardMining, Assembly-CSharp") && dataCarriers.includes("ShardMining|ShardUpgradeInfo"),
-    hasFastBuyHooks: ["CheckFirstTimeShardMilestoneOpened", "AttachFastBuyButton", "FastBuyButtonMethodShards", "StartFastBuyButtonHold"]
-      .every((name) => fastBuyHooks.includes(name)),
-    hasBonusAnchors: ["TotalMilestoneLevels", "get_IsUnlocked", "FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"]
-      .every((name) => bonusAnchors.includes(name)),
-    hasDowngradedGenericLead: genericLead.family === "ConstructionMilestones, Assembly-CSharp" && genericLeadReasons.length > 0,
+    hasBoundary:
+      screenControllers.includes("ShardMining, Assembly-CSharp") &&
+      dataCarriers.includes("ShardMining|ShardUpgradeInfo"),
+    hasFastBuyHooks: [
+      "CheckFirstTimeShardMilestoneOpened",
+      "AttachFastBuyButton",
+      "FastBuyButtonMethodShards",
+      "StartFastBuyButtonHold"
+    ].every((name) => fastBuyHooks.includes(name)),
+    hasBonusAnchors: [
+      "TotalMilestoneLevels",
+      "get_IsUnlocked",
+      "FinalSU1Bonus1",
+      "FinalSU29Bonus2",
+      "FinalSU29Bonus3"
+    ].every((name) => bonusAnchors.includes(name)),
+    hasDowngradedGenericLead:
+      genericLead.family === "ConstructionMilestones, Assembly-CSharp" &&
+      genericLeadReasons.length > 0,
     screenController: screenControllers[0] || "ShardMining, Assembly-CSharp",
     dataCarrier: dataCarriers[0] || "ShardMining|ShardUpgradeInfo",
     fastBuyHooksLabel: fastBuyHooks.slice(0, 4).join(", "),
-    bonusAnchorLabel: bonusAnchors.filter((name) => ["TotalMilestoneLevels", "get_IsUnlocked", "FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].includes(name)).join(", "),
+    bonusAnchorLabel: bonusAnchors
+      .filter((name) =>
+        [
+          "TotalMilestoneLevels",
+          "get_IsUnlocked",
+          "FinalSU1Bonus1",
+          "FinalSU29Bonus2",
+          "FinalSU29Bonus3"
+        ].includes(name)
+      )
+      .join(", "),
     genericLead: genericLead.family || "ConstructionMilestones, Assembly-CSharp",
-    genericLeadReason: genericLeadReasons[0] || "its current evidence is still generic rather than shard-specific"
+    genericLeadReason:
+      genericLeadReasons[0] || "its current evidence is still generic rather than shard-specific"
   };
 }
 
 function getShardFinalSuBonusBoundarySummary(boundary) {
-  const unlockRequirementAccessors = Array.isArray(boundary?.unlockRequirementAccessors) ? boundary.unlockRequirementAccessors : [];
-  const bonusFieldSamples = Array.isArray(boundary?.bonusFieldSamples) ? boundary.bonusFieldSamples : [];
-  const bonusAccessorSamples = Array.isArray(boundary?.bonusAccessorSamples) ? boundary.bonusAccessorSamples : [];
+  const unlockRequirementAccessors = Array.isArray(boundary?.unlockRequirementAccessors)
+    ? boundary.unlockRequirementAccessors
+    : [];
+  const bonusFieldSamples = Array.isArray(boundary?.bonusFieldSamples)
+    ? boundary.bonusFieldSamples
+    : [];
+  const bonusAccessorSamples = Array.isArray(boundary?.bonusAccessorSamples)
+    ? boundary.bonusAccessorSamples
+    : [];
   const adjacentFields = Array.isArray(boundary?.adjacentFields) ? boundary.adjacentFields : [];
   return {
     hasBoundary:
-      boundary?.dataCarrier === "ShardUpgradeInfo"
-      && boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo"
-      && ["get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq"].every((name) => unlockRequirementAccessors.includes(name))
-      && ["FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].every((name) => bonusFieldSamples.includes(name))
-      && ["get_FinalSU1Bonus1", "get_FinalSU29Bonus2", "get_FinalSU29Bonus3"].every((name) => bonusAccessorSamples.includes(name)),
-    hasAdjacentFields: ["TotalMilestoneLevels", "get_IsUnlocked", "OverLevel100Exponent", "OverLevel400Exponent", "<FastBuyEnum>d__1429"]
-      .every((name) => adjacentFields.includes(name)),
+      boundary?.dataCarrier === "ShardUpgradeInfo" &&
+      boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
+      ["get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq"].every((name) =>
+        unlockRequirementAccessors.includes(name)
+      ) &&
+      ["FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].every((name) =>
+        bonusFieldSamples.includes(name)
+      ) &&
+      ["get_FinalSU1Bonus1", "get_FinalSU29Bonus2", "get_FinalSU29Bonus3"].every((name) =>
+        bonusAccessorSamples.includes(name)
+      ),
+    hasAdjacentFields: [
+      "TotalMilestoneLevels",
+      "get_IsUnlocked",
+      "OverLevel100Exponent",
+      "OverLevel400Exponent",
+      "<FastBuyEnum>d__1429"
+    ].every((name) => adjacentFields.includes(name)),
     dataCarrier: boundary?.dataCarrier || "ShardUpgradeInfo",
     unlockRangeLabel: unlockRequirementAccessors.join(", "),
     bonusFieldLabel: bonusFieldSamples.join(", "),
@@ -4229,23 +4814,48 @@ function getShardFinalSuBonusBoundarySummary(boundary) {
 }
 
 function getShardMilestonePayloadBoundarySummary(boundary) {
-  const milestoneStateFields = Array.isArray(boundary?.milestoneStateFields) ? boundary.milestoneStateFields : [];
-  const costAndListHooks = Array.isArray(boundary?.costAndListHooks) ? boundary.costAndListHooks : [];
-  const progressFillHooks = Array.isArray(boundary?.progressFillHooks) ? boundary.progressFillHooks : [];
+  const milestoneStateFields = Array.isArray(boundary?.milestoneStateFields)
+    ? boundary.milestoneStateFields
+    : [];
+  const costAndListHooks = Array.isArray(boundary?.costAndListHooks)
+    ? boundary.costAndListHooks
+    : [];
+  const progressFillHooks = Array.isArray(boundary?.progressFillHooks)
+    ? boundary.progressFillHooks
+    : [];
   const tickFields = Array.isArray(boundary?.tickFields) ? boundary.tickFields : [];
-  const sampleCostAccessors = Array.isArray(boundary?.sampleCostAccessors) ? boundary.sampleCostAccessors : [];
+  const sampleCostAccessors = Array.isArray(boundary?.sampleCostAccessors)
+    ? boundary.sampleCostAccessors
+    : [];
   return {
     hasBoundary:
-      boundary?.dataCarrier === "ShardUpgradeInfo"
-      && boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo"
-      && ["TotalMilestoneLevels", "get_IsUnlocked", "set_IsUnlocked", "<IsUnlocked>k__BackingField"]
-        .every((name) => milestoneStateFields.includes(name)),
-    hasCostAndListHooks: ["get_TotalMilestoneLevels", "UpdateShardCostList", "GetShardCostList", "CountAffordableShard", "InitializeShards"]
-      .every((name) => costAndListHooks.includes(name)),
-    hasProgressFillHooks: ["CheckAllMilestoneLevelFills", "CheckMilestone0ProgressFill", "CheckMilestone1ProgressFill", "CheckMilestone9ProgressFill"]
-      .every((name) => progressFillHooks.includes(name)),
-    hasTickFields: ["Phase1Tick", "Phase6Tick", "CooldownTick"].every((name) => tickFields.includes(name)),
-    hasCostAccessorSamples: ["get_SU23Cost", "get_SU29Cost"].every((name) => sampleCostAccessors.includes(name)),
+      boundary?.dataCarrier === "ShardUpgradeInfo" &&
+      boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
+      [
+        "TotalMilestoneLevels",
+        "get_IsUnlocked",
+        "set_IsUnlocked",
+        "<IsUnlocked>k__BackingField"
+      ].every((name) => milestoneStateFields.includes(name)),
+    hasCostAndListHooks: [
+      "get_TotalMilestoneLevels",
+      "UpdateShardCostList",
+      "GetShardCostList",
+      "CountAffordableShard",
+      "InitializeShards"
+    ].every((name) => costAndListHooks.includes(name)),
+    hasProgressFillHooks: [
+      "CheckAllMilestoneLevelFills",
+      "CheckMilestone0ProgressFill",
+      "CheckMilestone1ProgressFill",
+      "CheckMilestone9ProgressFill"
+    ].every((name) => progressFillHooks.includes(name)),
+    hasTickFields: ["Phase1Tick", "Phase6Tick", "CooldownTick"].every((name) =>
+      tickFields.includes(name)
+    ),
+    hasCostAccessorSamples: ["get_SU23Cost", "get_SU29Cost"].every((name) =>
+      sampleCostAccessors.includes(name)
+    ),
     dataCarrier: boundary?.dataCarrier || "ShardUpgradeInfo",
     milestoneStateLabel: milestoneStateFields.join(", "),
     costHookLabel: costAndListHooks.join(", "),
@@ -4256,36 +4866,55 @@ function getShardMilestonePayloadBoundarySummary(boundary) {
 }
 
 function getShardCostModelBoundarySummary(boundary) {
-  const sampleCostAccessorWindows = Array.isArray(boundary?.sampleCostAccessorWindows) ? boundary.sampleCostAccessorWindows : [];
+  const sampleCostAccessorWindows = Array.isArray(boundary?.sampleCostAccessorWindows)
+    ? boundary.sampleCostAccessorWindows
+    : [];
   const row0CostFields = Array.isArray(boundary?.row0CostFields) ? boundary.row0CostFields : [];
   const row0FillFields = Array.isArray(boundary?.row0FillFields) ? boundary.row0FillFields : [];
   const row0BonusFields = Array.isArray(boundary?.row0BonusFields) ? boundary.row0BonusFields : [];
-  const optimizerBoundary = typeof boundary?.optimizerBoundary === "object" && boundary.optimizerBoundary ? boundary.optimizerBoundary : {};
-  const supportedNow = Array.isArray(optimizerBoundary.supportedNow) ? optimizerBoundary.supportedNow : [];
-  const blockedNow = Array.isArray(optimizerBoundary.blockedNow) ? optimizerBoundary.blockedNow : [];
-  const earlyWindow = sampleCostAccessorWindows.find((window) => window?.label === "earlyWindow") || {};
-  const lateWindow = sampleCostAccessorWindows.find((window) => window?.label === "lateWindow") || {};
+  const optimizerBoundary =
+    typeof boundary?.optimizerBoundary === "object" && boundary.optimizerBoundary
+      ? boundary.optimizerBoundary
+      : {};
+  const supportedNow = Array.isArray(optimizerBoundary.supportedNow)
+    ? optimizerBoundary.supportedNow
+    : [];
+  const blockedNow = Array.isArray(optimizerBoundary.blockedNow)
+    ? optimizerBoundary.blockedNow
+    : [];
+  const earlyWindow =
+    sampleCostAccessorWindows.find((window) => window?.label === "earlyWindow") || {};
+  const lateWindow =
+    sampleCostAccessorWindows.find((window) => window?.label === "lateWindow") || {};
   const earlyAccessors = Array.isArray(earlyWindow.accessors) ? earlyWindow.accessors : [];
   const lateAccessors = Array.isArray(lateWindow.accessors) ? lateWindow.accessors : [];
   return {
     hasBoundary:
-      boundary?.dataCarrier === "ShardUpgradeInfo"
-      && boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo",
+      boundary?.dataCarrier === "ShardUpgradeInfo" &&
+      boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo",
     hasSampledCostWindows:
-      earlyWindow.start === 0
-      && earlyWindow.end === 9
-      && earlyWindow.count === 10
-      && ["get_SU0Cost", "get_SU9Cost"].every((name) => earlyAccessors.includes(name))
-      && lateWindow.start === 23
-      && lateWindow.end === 29
-      && lateWindow.count === 7
-      && ["get_SU23Cost", "get_SU29Cost"].every((name) => lateAccessors.includes(name)),
+      earlyWindow.start === 0 &&
+      earlyWindow.end === 9 &&
+      earlyWindow.count === 10 &&
+      ["get_SU0Cost", "get_SU9Cost"].every((name) => earlyAccessors.includes(name)) &&
+      lateWindow.start === 23 &&
+      lateWindow.end === 29 &&
+      lateWindow.count === 7 &&
+      ["get_SU23Cost", "get_SU29Cost"].every((name) => lateAccessors.includes(name)),
     hasRow0FormulaShell:
-      ["SU0StartCost", "SU0CostExponent", "SU0GrowthExponent", "SU0GrowthExponent2", "SU0GrowthExponent3"].every((name) => row0CostFields.includes(name))
-      && ["SU0Level1Fill", "SU0Level8Fill"].every((name) => row0FillFields.includes(name))
-      && ["SU0Bonus1", "SU0Bonus8"].every((name) => row0BonusFields.includes(name)),
+      [
+        "SU0StartCost",
+        "SU0CostExponent",
+        "SU0GrowthExponent",
+        "SU0GrowthExponent2",
+        "SU0GrowthExponent3"
+      ].every((name) => row0CostFields.includes(name)) &&
+      ["SU0Level1Fill", "SU0Level8Fill"].every((name) => row0FillFields.includes(name)) &&
+      ["SU0Bonus1", "SU0Bonus8"].every((name) => row0BonusFields.includes(name)),
     dataCarrier: boundary?.dataCarrier || "ShardUpgradeInfo",
-    costWindowLabel: [earlyAccessors.join(", "), lateAccessors.join(", ")].filter(Boolean).join(" | "),
+    costWindowLabel: [earlyAccessors.join(", "), lateAccessors.join(", ")]
+      .filter(Boolean)
+      .join(" | "),
     row0FieldLabel: row0CostFields.join(", "),
     row0FillLabel: row0FillFields.join(", "),
     row0BonusLabel: row0BonusFields.join(", "),
@@ -4295,26 +4924,41 @@ function getShardCostModelBoundarySummary(boundary) {
 }
 
 function getShardMilestoneRowModelBoundarySummary(boundary) {
-  const textCheckerRange = typeof boundary?.textCheckerRange === "object" && boundary.textCheckerRange ? boundary.textCheckerRange : {};
-  const unlockRequirementRange = typeof boundary?.unlockRequirementRange === "object" && boundary.unlockRequirementRange ? boundary.unlockRequirementRange : {};
-  const buyHookEvidence = typeof boundary?.buyHookEvidence === "object" && boundary.buyHookEvidence ? boundary.buyHookEvidence : {};
-  const shardLocalDirectHooks = Array.isArray(buyHookEvidence.shardLocalDirectHooks) ? buyHookEvidence.shardLocalDirectHooks : [];
-  const genericNumberedFamily = typeof buyHookEvidence.genericNumberedFamily === "object" && buyHookEvidence.genericNumberedFamily ? buyHookEvidence.genericNumberedFamily : {};
+  const textCheckerRange =
+    typeof boundary?.textCheckerRange === "object" && boundary.textCheckerRange
+      ? boundary.textCheckerRange
+      : {};
+  const unlockRequirementRange =
+    typeof boundary?.unlockRequirementRange === "object" && boundary.unlockRequirementRange
+      ? boundary.unlockRequirementRange
+      : {};
+  const buyHookEvidence =
+    typeof boundary?.buyHookEvidence === "object" && boundary.buyHookEvidence
+      ? boundary.buyHookEvidence
+      : {};
+  const shardLocalDirectHooks = Array.isArray(buyHookEvidence.shardLocalDirectHooks)
+    ? buyHookEvidence.shardLocalDirectHooks
+    : [];
+  const genericNumberedFamily =
+    typeof buyHookEvidence.genericNumberedFamily === "object" &&
+    buyHookEvidence.genericNumberedFamily
+      ? buyHookEvidence.genericNumberedFamily
+      : {};
   return {
     hasBoundary:
-      boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo"
-      && textCheckerRange.start === 0
-      && textCheckerRange.end === 29
-      && textCheckerRange.count === 30
-      && unlockRequirementRange.start === 0
-      && unlockRequirementRange.end === 29
-      && unlockRequirementRange.count === 30,
+      boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
+      textCheckerRange.start === 0 &&
+      textCheckerRange.end === 29 &&
+      textCheckerRange.count === 30 &&
+      unlockRequirementRange.start === 0 &&
+      unlockRequirementRange.end === 29 &&
+      unlockRequirementRange.count === 30,
     hasShardLocalBuySample: shardLocalDirectHooks.includes("BuyMilestone0"),
     hasGenericBuyFamily:
-      genericNumberedFamily.family === "ConstructionMilestones, Assembly-CSharp"
-      && genericNumberedFamily.start === 1
-      && genericNumberedFamily.end === 57
-      && genericNumberedFamily.count === 57,
+      genericNumberedFamily.family === "ConstructionMilestones, Assembly-CSharp" &&
+      genericNumberedFamily.start === 1 &&
+      genericNumberedFamily.end === 57 &&
+      genericNumberedFamily.count === 57,
     textCheckerRangeLabel: `${textCheckerRange.start ?? "?"}-${textCheckerRange.end ?? "?"}`,
     unlockRangeLabel: `${unlockRequirementRange.start ?? "?"}-${unlockRequirementRange.end ?? "?"}`,
     shardLocalBuyLabel: shardLocalDirectHooks.join(", "),
@@ -4323,16 +4967,34 @@ function getShardMilestoneRowModelBoundarySummary(boundary) {
 }
 
 function getShardMilestoneTitleEffectBoundarySummary(boundary) {
-  const titleAssetCandidates = Array.isArray(boundary?.titleAssetCandidates) ? boundary.titleAssetCandidates : [];
-  const effectPresentationSlots = Array.isArray(boundary?.effectPresentationSlots) ? boundary.effectPresentationSlots : [];
-  const sampleBonusCalcAccessors = Array.isArray(boundary?.sampleBonusCalcAccessors) ? boundary.sampleBonusCalcAccessors : [];
-  const uniqueRows = [...new Set(titleAssetCandidates.map((entry) => entry?.row).filter((value) => Number.isInteger(value)))].sort((a, b) => a - b);
-  const row28Candidates = titleAssetCandidates.filter((entry) => entry?.row === 28).map((entry) => entry.title);
+  const titleAssetCandidates = Array.isArray(boundary?.titleAssetCandidates)
+    ? boundary.titleAssetCandidates
+    : [];
+  const effectPresentationSlots = Array.isArray(boundary?.effectPresentationSlots)
+    ? boundary.effectPresentationSlots
+    : [];
+  const sampleBonusCalcAccessors = Array.isArray(boundary?.sampleBonusCalcAccessors)
+    ? boundary.sampleBonusCalcAccessors
+    : [];
+  const uniqueRows = [
+    ...new Set(
+      titleAssetCandidates.map((entry) => entry?.row).filter((value) => Number.isInteger(value))
+    )
+  ].sort((a, b) => a - b);
+  const row28Candidates = titleAssetCandidates
+    .filter((entry) => entry?.row === 28)
+    .map((entry) => entry.title);
   return {
     hasBoundary: uniqueRows.includes(0) && uniqueRows.includes(29) && uniqueRows.includes(30),
-    hasEffectPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) => effectPresentationSlots.includes(name)),
-    hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) => sampleBonusCalcAccessors.includes(name)),
-    titleRangeLabel: uniqueRows.length ? `${uniqueRows[0]}-${uniqueRows[uniqueRows.length - 1]}` : "unknown",
+    hasEffectPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) =>
+      effectPresentationSlots.includes(name)
+    ),
+    hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) =>
+      sampleBonusCalcAccessors.includes(name)
+    ),
+    titleRangeLabel: uniqueRows.length
+      ? `${uniqueRows[0]}-${uniqueRows[uniqueRows.length - 1]}`
+      : "unknown",
     effectSlotLabel: effectPresentationSlots.join(", "),
     bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
     row28ConflictLabel: row28Candidates.join(", ")
@@ -4340,20 +5002,35 @@ function getShardMilestoneTitleEffectBoundarySummary(boundary) {
 }
 
 function getShardEffectTextHandlerBoundarySummary(boundary) {
-  const presentationFamily = Array.isArray(boundary?.presentationFamily) ? boundary.presentationFamily : [];
-  const sampleBonusCalcAccessors = Array.isArray(boundary?.sampleBonusCalcAccessors) ? boundary.sampleBonusCalcAccessors : [];
-  const uiContextAnchors = Array.isArray(boundary?.uiContextAnchors) ? boundary.uiContextAnchors : [];
-  const rowModelCoverage = typeof boundary?.rowModelCoverage === "object" && boundary?.rowModelCoverage ? boundary.rowModelCoverage : {};
+  const presentationFamily = Array.isArray(boundary?.presentationFamily)
+    ? boundary.presentationFamily
+    : [];
+  const sampleBonusCalcAccessors = Array.isArray(boundary?.sampleBonusCalcAccessors)
+    ? boundary.sampleBonusCalcAccessors
+    : [];
+  const uiContextAnchors = Array.isArray(boundary?.uiContextAnchors)
+    ? boundary.uiContextAnchors
+    : [];
+  const rowModelCoverage =
+    typeof boundary?.rowModelCoverage === "object" && boundary?.rowModelCoverage
+      ? boundary.rowModelCoverage
+      : {};
   return {
     hasBoundary:
-      boundary?.probableTextHandler === "TextHandlerShardMilestoneBonusesPerLevel/N"
-      && boundary?.genericMilestoneWriter === "SetAllMilestoneTexts"
-      && rowModelCoverage.start === 0
-      && rowModelCoverage.end === 29
-      && rowModelCoverage.count === 30,
-    hasPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) => presentationFamily.includes(name)),
-    hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) => sampleBonusCalcAccessors.includes(name)),
-    hasUiContextAnchors: ["LevelText", "DescText", "ValueText", "DescriptionText"].every((name) => uiContextAnchors.includes(name)),
+      boundary?.probableTextHandler === "TextHandlerShardMilestoneBonusesPerLevel/N" &&
+      boundary?.genericMilestoneWriter === "SetAllMilestoneTexts" &&
+      rowModelCoverage.start === 0 &&
+      rowModelCoverage.end === 29 &&
+      rowModelCoverage.count === 30,
+    hasPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) =>
+      presentationFamily.includes(name)
+    ),
+    hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) =>
+      sampleBonusCalcAccessors.includes(name)
+    ),
+    hasUiContextAnchors: ["LevelText", "DescText", "ValueText", "DescriptionText"].every((name) =>
+      uiContextAnchors.includes(name)
+    ),
     textHandlerLabel: boundary?.probableTextHandler || "TextHandlerShardMilestoneBonusesPerLevel/N",
     genericWriterLabel: boundary?.genericMilestoneWriter || "SetAllMilestoneTexts",
     presentationFamilyLabel: presentationFamily.join(", "),
@@ -4364,18 +5041,32 @@ function getShardEffectTextHandlerBoundarySummary(boundary) {
 }
 
 function getShardMilestoneRowShellBoundarySummary(boundary) {
-  const controllerShellAnchors = Array.isArray(boundary?.controllerShellAnchors) ? boundary.controllerShellAnchors : [];
-  const unlockHookSamples = Array.isArray(boundary?.unlockHookSamples) ? boundary.unlockHookSamples : [];
+  const controllerShellAnchors = Array.isArray(boundary?.controllerShellAnchors)
+    ? boundary.controllerShellAnchors
+    : [];
+  const unlockHookSamples = Array.isArray(boundary?.unlockHookSamples)
+    ? boundary.unlockHookSamples
+    : [];
   const buyHookSamples = Array.isArray(boundary?.buyHookSamples) ? boundary.buyHookSamples : [];
-  const textCheckerSamples = Array.isArray(boundary?.textCheckerSamples) ? boundary.textCheckerSamples : [];
+  const textCheckerSamples = Array.isArray(boundary?.textCheckerSamples)
+    ? boundary.textCheckerSamples
+    : [];
   return {
     hasBoundary:
-      boundary?.screenControllerFamily === "ShardMining, Assembly-CSharp"
-      && boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo"
-      && ["AttachFastBuyButton", "StartFastBuyButtonHold", "FastBuyButtonMethodShards"].every((name) => controllerShellAnchors.includes(name)),
-    hasUnlockHookSamples: ["UnlockMilestone17", "UnlockMilestone29"].every((name) => unlockHookSamples.includes(name)),
+      boundary?.screenControllerFamily === "ShardMining, Assembly-CSharp" &&
+      boundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
+      ["AttachFastBuyButton", "StartFastBuyButtonHold", "FastBuyButtonMethodShards"].every((name) =>
+        controllerShellAnchors.includes(name)
+      ),
+    hasUnlockHookSamples: ["UnlockMilestone17", "UnlockMilestone29"].every((name) =>
+      unlockHookSamples.includes(name)
+    ),
     hasBuyHookSamples: buyHookSamples.includes("BuyMilestone0"),
-    hasTextCheckerSamples: ["Milestone0TextChecker", "Milestone9TextChecker", "Milestone12TextChecker"].every((name) => textCheckerSamples.includes(name)),
+    hasTextCheckerSamples: [
+      "Milestone0TextChecker",
+      "Milestone9TextChecker",
+      "Milestone12TextChecker"
+    ].every((name) => textCheckerSamples.includes(name)),
     screenController: boundary?.screenControllerFamily || "ShardMining, Assembly-CSharp",
     tieIn: boundary?.dataCarrierTieIn || "ShardMining|ShardUpgradeInfo",
     controllerHookLabel: controllerShellAnchors.join(", "),
@@ -4386,45 +5077,69 @@ function getShardMilestoneRowShellBoundarySummary(boundary) {
 }
 
 function getShardMilestoneRowAlignmentBoundarySummary(boundary) {
-  const unlockHookRange = typeof boundary?.unlockHookRange === "object" && boundary.unlockHookRange ? boundary.unlockHookRange : {};
-  const textCheckerRange = typeof boundary?.textCheckerRange === "object" && boundary.textCheckerRange ? boundary.textCheckerRange : {};
-  const buyHookRange = typeof boundary?.buyHookRange === "object" && boundary.buyHookRange ? boundary.buyHookRange : {};
-  const unlockTextCheckerOverlapIds = Array.isArray(boundary?.unlockTextCheckerOverlapIds) ? boundary.unlockTextCheckerOverlapIds : [];
-  const buyTextCheckerOverlapIds = Array.isArray(boundary?.buyTextCheckerOverlapIds) ? boundary.buyTextCheckerOverlapIds : [];
+  const unlockHookRange =
+    typeof boundary?.unlockHookRange === "object" && boundary.unlockHookRange
+      ? boundary.unlockHookRange
+      : {};
+  const textCheckerRange =
+    typeof boundary?.textCheckerRange === "object" && boundary.textCheckerRange
+      ? boundary.textCheckerRange
+      : {};
+  const buyHookRange =
+    typeof boundary?.buyHookRange === "object" && boundary.buyHookRange
+      ? boundary.buyHookRange
+      : {};
+  const unlockTextCheckerOverlapIds = Array.isArray(boundary?.unlockTextCheckerOverlapIds)
+    ? boundary.unlockTextCheckerOverlapIds
+    : [];
+  const buyTextCheckerOverlapIds = Array.isArray(boundary?.buyTextCheckerOverlapIds)
+    ? boundary.buyTextCheckerOverlapIds
+    : [];
   return {
     hasBoundary:
-      boundary?.screenControllerFamily === "ShardMining, Assembly-CSharp"
-      && unlockHookRange.start === 17
-      && unlockHookRange.end === 29
-      && unlockHookRange.count === 13
-      && textCheckerRange.start === 0
-      && textCheckerRange.end === 12
-      && textCheckerRange.count === 13
-      && buyHookRange.start === 0
-      && buyHookRange.end === 0
-      && buyHookRange.count === 1,
+      boundary?.screenControllerFamily === "ShardMining, Assembly-CSharp" &&
+      unlockHookRange.start === 17 &&
+      unlockHookRange.end === 29 &&
+      unlockHookRange.count === 13 &&
+      textCheckerRange.start === 0 &&
+      textCheckerRange.end === 12 &&
+      textCheckerRange.count === 13 &&
+      buyHookRange.start === 0 &&
+      buyHookRange.end === 0 &&
+      buyHookRange.count === 1,
     hasZeroUnlockTextOverlap: unlockTextCheckerOverlapIds.length === 0,
     hasBuyTextOverlap: buyTextCheckerOverlapIds.length === 1 && buyTextCheckerOverlapIds[0] === 0,
     unlockRangeLabel: `${unlockHookRange.start ?? "?"}-${unlockHookRange.end ?? "?"}`,
     textCheckerRangeLabel: `${textCheckerRange.start ?? "?"}-${textCheckerRange.end ?? "?"}`,
     buyRangeLabel: `${buyHookRange.start ?? "?"}-${buyHookRange.end ?? "?"}`,
-    unlockTextOverlapLabel: unlockTextCheckerOverlapIds.length ? unlockTextCheckerOverlapIds.join(", ") : "none",
-    buyTextOverlapLabel: buyTextCheckerOverlapIds.length ? buyTextCheckerOverlapIds.join(", ") : "none"
+    unlockTextOverlapLabel: unlockTextCheckerOverlapIds.length
+      ? unlockTextCheckerOverlapIds.join(", ")
+      : "none",
+    buyTextOverlapLabel: buyTextCheckerOverlapIds.length
+      ? buyTextCheckerOverlapIds.join(", ")
+      : "none"
   };
 }
 
 function getShardSaveBoundarySummary(boundary) {
-  const ownerShellTermsChecked = Array.isArray(boundary?.ownerShellTermsChecked) ? boundary.ownerShellTermsChecked : [];
-  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked) ? boundary.saveFamilyTermsChecked : [];
-  const probeResults = typeof boundary?.probeResults === "object" && boundary.probeResults ? boundary.probeResults : {};
+  const ownerShellTermsChecked = Array.isArray(boundary?.ownerShellTermsChecked)
+    ? boundary.ownerShellTermsChecked
+    : [];
+  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked)
+    ? boundary.saveFamilyTermsChecked
+    : [];
+  const probeResults =
+    typeof boundary?.probeResults === "object" && boundary.probeResults
+      ? boundary.probeResults
+      : {};
   return {
     hasSeparationBoundary:
-      probeResults.metadataNeighborhoodHasSaveTerms === false
-      && probeResults.level0HasSaveTerms === false
-      && probeResults.ownerShellWithSaveOverlapCount === 0
-      && probeResults.directShardPlayerProfileContext === false
-      && saveFamilyTermsChecked.includes("PlayerProfileData")
-      && saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
+      probeResults.metadataNeighborhoodHasSaveTerms === false &&
+      probeResults.level0HasSaveTerms === false &&
+      probeResults.ownerShellWithSaveOverlapCount === 0 &&
+      probeResults.directShardPlayerProfileContext === false &&
+      saveFamilyTermsChecked.includes("PlayerProfileData") &&
+      saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
     ownerAnchor: "ShardMining / ShardUpgradeInfo",
     saveAnchor: "PlayerProfileData",
     cloudSaveAnchor: "CloudSavePlayerProfile",
@@ -4434,40 +5149,48 @@ function getShardSaveBoundarySummary(boundary) {
 }
 
 function getTokeniumNamingSummary(clues) {
-  const resourceIcons = Array.isArray(clues?.assetNames?.resourceIcons) ? clues.assetNames.resourceIcons : [];
-  const academySprites = Array.isArray(clues?.assetNames?.academySprites) ? clues.assetNames.academySprites : [];
+  const resourceIcons = Array.isArray(clues?.assetNames?.resourceIcons)
+    ? clues.assetNames.resourceIcons
+    : [];
+  const academySprites = Array.isArray(clues?.assetNames?.academySprites)
+    ? clues.assetNames.academySprites
+    : [];
   const level0Shells = Array.isArray(clues?.level0Shells) ? clues.level0Shells : [];
 
   return {
     hasNamingClues:
-      resourceIcons.includes("Resource_Tokenium")
-      && academySprites.includes("Aca.Tokenium553")
-      && level0Shells.includes("CostBox-Tokens")
-      && level0Shells.includes("CostBox-Tokenium"),
-    resourceLabel: resourceIcons.find((value) => value === "Resource_Tokenium") || "Resource_Tokenium",
+      resourceIcons.includes("Resource_Tokenium") &&
+      academySprites.includes("Aca.Tokenium553") &&
+      level0Shells.includes("CostBox-Tokens") &&
+      level0Shells.includes("CostBox-Tokenium"),
+    resourceLabel:
+      resourceIcons.find((value) => value === "Resource_Tokenium") || "Resource_Tokenium",
     academyLabel: academySprites.find((value) => value === "Aca.Tokenium553") || "Aca.Tokenium553",
     tokenShellLabel: level0Shells.find((value) => value === "CostBox-Tokens") || "CostBox-Tokens",
-    tokeniumShellLabel: level0Shells.find((value) => value === "CostBox-Tokenium") || "CostBox-Tokenium"
+    tokeniumShellLabel:
+      level0Shells.find((value) => value === "CostBox-Tokenium") || "CostBox-Tokenium"
   };
 }
 
 function getTokenShopCostLaneSummary(clues) {
   const tokenSpendGroups = Array.isArray(clues?.tokenSpendGroups) ? clues.tokenSpendGroups : [];
-  const dailyTokeniumModifierGroups = Array.isArray(clues?.dailyTokeniumModifierGroups) ? clues.dailyTokeniumModifierGroups : [];
+  const dailyTokeniumModifierGroups = Array.isArray(clues?.dailyTokeniumModifierGroups)
+    ? clues.dailyTokeniumModifierGroups
+    : [];
   const diamondGroups = Array.isArray(clues?.diamondGroups) ? clues.diamondGroups : [];
   const playerFacingClues = Array.isArray(clues?.playerFacingClues) ? clues.playerFacingClues : [];
 
   return {
     hasLaneSplit:
-      tokenSpendGroups.includes("TokenBoost")
-      && diamondGroups.includes("DiamondBoost")
-      && dailyTokeniumModifierGroups.includes("TokenDailiesT2")
-      && playerFacingClues.includes("CostBox-Tokens")
-      && playerFacingClues.includes("CostBox-Tokenium"),
+      tokenSpendGroups.includes("TokenBoost") &&
+      diamondGroups.includes("DiamondBoost") &&
+      dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
+      playerFacingClues.includes("CostBox-Tokens") &&
+      playerFacingClues.includes("CostBox-Tokenium"),
     keepsDailyTokeniumSeparate:
-      dailyTokeniumModifierGroups.includes("TokenDailiesT2")
-      && dailyTokeniumModifierGroups.includes("TokenDailiesT3")
-      && playerFacingClues.includes("Mission Materials Booster"),
+      dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
+      dailyTokeniumModifierGroups.includes("TokenDailiesT3") &&
+      playerFacingClues.includes("Mission Materials Booster"),
     tokenLaneLabel: "TokenBoost",
     diamondLaneLabel: "DiamondBoost",
     dailyLaneLabel: "TokenDailiesT2",
@@ -4477,27 +5200,35 @@ function getTokenShopCostLaneSummary(clues) {
 }
 
 function getSpendActionLaneSummary(clues) {
-  const tokenDirectBuyHooks = Array.isArray(clues?.tokenDirectBuyHooks) ? clues.tokenDirectBuyHooks : [];
-  const diamondDirectBuyHooks = Array.isArray(clues?.diamondDirectBuyHooks) ? clues.diamondDirectBuyHooks : [];
-  const dailyTokeniumModifierHooks = Array.isArray(clues?.dailyTokeniumModifierHooks) ? clues.dailyTokeniumModifierHooks : [];
-  const searchMetadata = typeof clues?.searchResults?.metadata === "object" && clues.searchResults.metadata
-    ? clues.searchResults.metadata
-    : {};
-  const searchLevel0 = typeof clues?.searchResults?.level0 === "object" && clues.searchResults.level0
-    ? clues.searchResults.level0
-    : {};
+  const tokenDirectBuyHooks = Array.isArray(clues?.tokenDirectBuyHooks)
+    ? clues.tokenDirectBuyHooks
+    : [];
+  const diamondDirectBuyHooks = Array.isArray(clues?.diamondDirectBuyHooks)
+    ? clues.diamondDirectBuyHooks
+    : [];
+  const dailyTokeniumModifierHooks = Array.isArray(clues?.dailyTokeniumModifierHooks)
+    ? clues.dailyTokeniumModifierHooks
+    : [];
+  const searchMetadata =
+    typeof clues?.searchResults?.metadata === "object" && clues.searchResults.metadata
+      ? clues.searchResults.metadata
+      : {};
+  const searchLevel0 =
+    typeof clues?.searchResults?.level0 === "object" && clues.searchResults.level0
+      ? clues.searchResults.level0
+      : {};
 
   return {
     hasActionSplit:
-      tokenDirectBuyHooks.includes("BuyTokenBoost")
-      && diamondDirectBuyHooks.includes("BuyDiamondBoost")
-      && dailyTokeniumModifierHooks.includes("BuyLM244")
-      && dailyTokeniumModifierHooks.includes("BuyCollectorDevice"),
+      tokenDirectBuyHooks.includes("BuyTokenBoost") &&
+      diamondDirectBuyHooks.includes("BuyDiamondBoost") &&
+      dailyTokeniumModifierHooks.includes("BuyLM244") &&
+      dailyTokeniumModifierHooks.includes("BuyCollectorDevice"),
     keepsDailyDirectHooksUnrecovered:
-      searchMetadata.BuyTokenDailiesT2 === 0
-      && searchMetadata.BuyTokenDailiesT3 === 0
-      && searchLevel0.BuyTokenDailiesT2 === 0
-      && searchLevel0.BuyTokenDailiesT3 === 0,
+      searchMetadata.BuyTokenDailiesT2 === 0 &&
+      searchMetadata.BuyTokenDailiesT3 === 0 &&
+      searchLevel0.BuyTokenDailiesT2 === 0 &&
+      searchLevel0.BuyTokenDailiesT3 === 0,
     tokenHook: "BuyTokenBoost",
     diamondHook: "BuyDiamondBoost",
     loopModifierHook: "BuyLM244",
@@ -4509,26 +5240,34 @@ function getSpendActionLaneSummary(clues) {
 
 function getTokenBankStateSummary(clues) {
   const tokenShopMethods = Array.isArray(clues?.tokenShopMethods) ? clues.tokenShopMethods : [];
-  const displayOrHandlerClues = Array.isArray(clues?.displayOrHandlerClues) ? clues.displayOrHandlerClues : [];
-  const cloudSaveBoundary = typeof clues?.cloudSavePlayerProfileBoundary === "object" && clues.cloudSavePlayerProfileBoundary
-    ? clues.cloudSavePlayerProfileBoundary
-    : {};
-  const cloudSaveShellMethods = Array.isArray(cloudSaveBoundary.metadataShellMethods) ? cloudSaveBoundary.metadataShellMethods : [];
-  const cloudSaveStateMachines = Array.isArray(cloudSaveBoundary.metadataStateMachines) ? cloudSaveBoundary.metadataStateMachines : [];
+  const displayOrHandlerClues = Array.isArray(clues?.displayOrHandlerClues)
+    ? clues.displayOrHandlerClues
+    : [];
+  const cloudSaveBoundary =
+    typeof clues?.cloudSavePlayerProfileBoundary === "object" &&
+    clues.cloudSavePlayerProfileBoundary
+      ? clues.cloudSavePlayerProfileBoundary
+      : {};
+  const cloudSaveShellMethods = Array.isArray(cloudSaveBoundary.metadataShellMethods)
+    ? cloudSaveBoundary.metadataShellMethods
+    : [];
+  const cloudSaveStateMachines = Array.isArray(cloudSaveBoundary.metadataStateMachines)
+    ? cloudSaveBoundary.metadataStateMachines
+    : [];
 
   return {
     hasControllerSplit:
-      tokenShopMethods.includes("ClaimBankedTokens")
-      && tokenShopMethods.includes("get_TokenBankCap")
-      && displayOrHandlerClues.includes("BigStatisticPrefab.TokenBankCap")
-      && displayOrHandlerClues.includes("SetLM244BonusText"),
+      tokenShopMethods.includes("ClaimBankedTokens") &&
+      tokenShopMethods.includes("get_TokenBankCap") &&
+      displayOrHandlerClues.includes("BigStatisticPrefab.TokenBankCap") &&
+      displayOrHandlerClues.includes("SetLM244BonusText"),
     hasCloudSaveShellBoundary:
-      cloudSaveBoundary.scriptName === "CloudSavePlayerProfile"
-      && cloudSaveBoundary.typedTargetFound === false
-      && cloudSaveBoundary.metadataAnchorFound === true
-      && cloudSaveShellMethods.includes("GetCurrentSaveFileInfo")
-      && cloudSaveShellMethods.includes("GetPlayerProfileInfo")
-      && cloudSaveStateMachines.includes("<CloudSavePlayerProfile>d__24"),
+      cloudSaveBoundary.scriptName === "CloudSavePlayerProfile" &&
+      cloudSaveBoundary.typedTargetFound === false &&
+      cloudSaveBoundary.metadataAnchorFound === true &&
+      cloudSaveShellMethods.includes("GetCurrentSaveFileInfo") &&
+      cloudSaveShellMethods.includes("GetPlayerProfileInfo") &&
+      cloudSaveStateMachines.includes("<CloudSavePlayerProfile>d__24"),
     claimMethod: "ClaimBankedTokens",
     capMethod: "get_TokenBankCap",
     displayShell: "BigStatisticPrefab.TokenBankCap",
@@ -4544,26 +5283,34 @@ function getTokenBankStateSummary(clues) {
 function getDailyTokeniumLaneSummary(clues) {
   const ownerFamilyClues = Array.isArray(clues?.ownerFamilyClues) ? clues.ownerFamilyClues : [];
   const modifierClues = Array.isArray(clues?.modifierClues) ? clues.modifierClues : [];
-  const premiumModifierClues = Array.isArray(clues?.premiumModifierClues) ? clues.premiumModifierClues : [];
-  const playerFacingStrings = Array.isArray(clues?.playerFacingStrings) ? clues.playerFacingStrings : [];
+  const premiumModifierClues = Array.isArray(clues?.premiumModifierClues)
+    ? clues.premiumModifierClues
+    : [];
+  const playerFacingStrings = Array.isArray(clues?.playerFacingStrings)
+    ? clues.playerFacingStrings
+    : [];
 
   return {
     hasOwnerFamilyClues:
-      ownerFamilyClues.includes("SpaceAcademy")
-      && ownerFamilyClues.includes("SpaceAcademyMain")
-      && ownerFamilyClues.includes("TextHandlerSpaceAcademy")
-      && ownerFamilyClues.includes("FarmMissions"),
+      ownerFamilyClues.includes("SpaceAcademy") &&
+      ownerFamilyClues.includes("SpaceAcademyMain") &&
+      ownerFamilyClues.includes("TextHandlerSpaceAcademy") &&
+      ownerFamilyClues.includes("FarmMissions"),
     hasModifierBoundary:
-      modifierClues.includes("SetLM244BonusText")
-      && modifierClues.includes("BuyLM244")
-      && modifierClues.includes("FinalDailyTokenBonus")
-      && premiumModifierClues.includes("BuyCollectorDevice")
-      && premiumModifierClues.includes("CollectorCapBonus")
-      && premiumModifierClues.includes("CollectorMatsBonus"),
+      modifierClues.includes("SetLM244BonusText") &&
+      modifierClues.includes("BuyLM244") &&
+      modifierClues.includes("FinalDailyTokenBonus") &&
+      premiumModifierClues.includes("BuyCollectorDevice") &&
+      premiumModifierClues.includes("CollectorCapBonus") &&
+      premiumModifierClues.includes("CollectorMatsBonus"),
     hasPlayerFacingBoundary:
-      playerFacingStrings.includes("0 / 2000 Daily Tokenium (from blue farm missions)")
-      && playerFacingStrings.includes("This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)")
-      && playerFacingStrings.includes("The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"),
+      playerFacingStrings.includes("0 / 2000 Daily Tokenium (from blue farm missions)") &&
+      playerFacingStrings.includes(
+        "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
+      ) &&
+      playerFacingStrings.includes(
+        "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+      ),
     ownerFamilyLabel: "SpaceAcademy",
     missionFamilyLabel: "FarmMissions",
     academyController: "SpaceAcademyMain",
@@ -4576,17 +5323,19 @@ function getDailyTokeniumLaneSummary(clues) {
 }
 
 function getTokenBankFormulaBoundarySummary(clues) {
-  const derivedOutputCluster = Array.isArray(clues?.derivedOutputCluster) ? clues.derivedOutputCluster : [];
+  const derivedOutputCluster = Array.isArray(clues?.derivedOutputCluster)
+    ? clues.derivedOutputCluster
+    : [];
   const saveFamilyCluesInDerivedContext = Array.isArray(clues?.saveFamilyCluesInDerivedContext)
     ? clues.saveFamilyCluesInDerivedContext
     : [];
 
   return {
     hasDerivedOutputBoundary:
-      derivedOutputCluster.includes("get_FinalTokenBankCap")
-      && derivedOutputCluster.includes("get_FinalTokenBankFillSpeed")
-      && derivedOutputCluster.includes("<FinalTokenBankCap>k__BackingField")
-      && derivedOutputCluster.includes("<FinalTokenBankFillSpeed>k__BackingField"),
+      derivedOutputCluster.includes("get_FinalTokenBankCap") &&
+      derivedOutputCluster.includes("get_FinalTokenBankFillSpeed") &&
+      derivedOutputCluster.includes("<FinalTokenBankCap>k__BackingField") &&
+      derivedOutputCluster.includes("<FinalTokenBankFillSpeed>k__BackingField"),
     hasNoSaveJoinInDerivedContext: saveFamilyCluesInDerivedContext.length === 0,
     capAccessor: "get_FinalTokenBankCap",
     fillAccessor: "get_FinalTokenBankFillSpeed",
@@ -4596,15 +5345,19 @@ function getTokenBankFormulaBoundarySummary(clues) {
 }
 
 function getMultiverseMarketRangeBoundarySummary(boundary) {
-  const validatedRowRanges = Array.isArray(boundary?.validatedRowRanges) ? boundary.validatedRowRanges : [];
+  const validatedRowRanges = Array.isArray(boundary?.validatedRowRanges)
+    ? boundary.validatedRowRanges
+    : [];
   const overlapIds = Array.isArray(boundary?.overlapIds) ? boundary.overlapIds : [];
-  const metadataIsRangeLabel = typeof boundary?.metadataIsRangeLabel === "string" ? boundary.metadataIsRangeLabel : "";
+  const metadataIsRangeLabel =
+    typeof boundary?.metadataIsRangeLabel === "string" ? boundary.metadataIsRangeLabel : "";
 
   return {
     hasRangeBoundary: validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0,
     hasValidatedRows: validatedRowRanges.length > 0,
     hasOverlap: overlapIds.length > 0,
-    hasExplicitZeroOverlap: validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0 && overlapIds.length === 0,
+    hasExplicitZeroOverlap:
+      validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0 && overlapIds.length === 0,
     overlapLabel: formatNumericRanges(overlapIds),
     validatedRangeLabel: validatedRowRanges.join(" and "),
     metadataRangeLabel: metadataIsRangeLabel
@@ -4612,20 +5365,22 @@ function getMultiverseMarketRangeBoundarySummary(boundary) {
 }
 
 function getMultiverseMarketRowTextCoverageSummary(coverage) {
-  const textHandlerAnchors = Array.isArray(coverage?.textHandlerAnchors) ? coverage.textHandlerAnchors : [];
-  const validatedRowCostTexts = Array.isArray(coverage?.validatedRowCostTexts) ? coverage.validatedRowCostTexts : [];
+  const textHandlerAnchors = Array.isArray(coverage?.textHandlerAnchors)
+    ? coverage.textHandlerAnchors
+    : [];
+  const validatedRowCostTexts = Array.isArray(coverage?.validatedRowCostTexts)
+    ? coverage.validatedRowCostTexts
+    : [];
   const sampleBuyHooks = Array.isArray(coverage?.sampleBuyHooks) ? coverage.sampleBuyHooks : [];
 
   return {
     hasValidatedTextCoverage:
-      textHandlerAnchors.includes("TextHandlerMarkets")
-      && textHandlerAnchors.includes("SetAllChrystosEmporiumTexts")
-      && validatedRowCostTexts.length === 22
-      && validatedRowCostTexts.includes("SetIS50CostText")
-      && validatedRowCostTexts.includes("SetIS74CostText"),
-    hasBuyHookSamples:
-      sampleBuyHooks.includes("BuyIS50")
-      && sampleBuyHooks.includes("BuyIS74"),
+      textHandlerAnchors.includes("TextHandlerMarkets") &&
+      textHandlerAnchors.includes("SetAllChrystosEmporiumTexts") &&
+      validatedRowCostTexts.length === 22 &&
+      validatedRowCostTexts.includes("SetIS50CostText") &&
+      validatedRowCostTexts.includes("SetIS74CostText"),
+    hasBuyHookSamples: sampleBuyHooks.includes("BuyIS50") && sampleBuyHooks.includes("BuyIS74"),
     coveredCount: validatedRowCostTexts.length,
     validatedRangeLabel: "50-59 and 63-74",
     textHandler: "TextHandlerMarkets",
@@ -4636,26 +5391,32 @@ function getMultiverseMarketRowTextCoverageSummary(coverage) {
 }
 
 function getMultiverseMarketActionShellSummary(shell) {
-  const textHandlerAnchors = Array.isArray(shell?.textHandlerAnchors) ? shell.textHandlerAnchors : [];
-  const validatedBuyHookRanges = Array.isArray(shell?.validatedBuyHookRanges) ? shell.validatedBuyHookRanges : [];
+  const textHandlerAnchors = Array.isArray(shell?.textHandlerAnchors)
+    ? shell.textHandlerAnchors
+    : [];
+  const validatedBuyHookRanges = Array.isArray(shell?.validatedBuyHookRanges)
+    ? shell.validatedBuyHookRanges
+    : [];
   const validatedBuyHooks = Array.isArray(shell?.validatedBuyHooks) ? shell.validatedBuyHooks : [];
-  const validatedCostTexts = Array.isArray(shell?.validatedCostTexts) ? shell.validatedCostTexts : [];
+  const validatedCostTexts = Array.isArray(shell?.validatedCostTexts)
+    ? shell.validatedCostTexts
+    : [];
   const buyRange = shell?.contextDerivedBuyHookRange ?? {};
   const costTextRange = shell?.contextDerivedCostTextRange ?? {};
 
   return {
     hasActionShell:
-      textHandlerAnchors.includes("TextHandlerMarkets")
-      && textHandlerAnchors.includes("SetAllChrystosEmporiumTexts")
-      && buyRange.start === 1
-      && buyRange.end === 110
-      && buyRange.count === 110
-      && costTextRange.start === 1
-      && costTextRange.end === 110
-      && costTextRange.count === 110
-      && validatedBuyHookRanges.join(" and ") === "50-59 and 63-74"
-      && validatedBuyHooks.length === 22
-      && validatedCostTexts.length === 22,
+      textHandlerAnchors.includes("TextHandlerMarkets") &&
+      textHandlerAnchors.includes("SetAllChrystosEmporiumTexts") &&
+      buyRange.start === 1 &&
+      buyRange.end === 110 &&
+      buyRange.count === 110 &&
+      costTextRange.start === 1 &&
+      costTextRange.end === 110 &&
+      costTextRange.count === 110 &&
+      validatedBuyHookRanges.join(" and ") === "50-59 and 63-74" &&
+      validatedBuyHooks.length === 22 &&
+      validatedCostTexts.length === 22,
     buyRangeLabel: "BuyIS1-110",
     costTextRangeLabel: "SetIS1-110CostText",
     validatedRangeLabel: validatedBuyHookRanges.join(" and ") || "50-59 and 63-74"
@@ -4663,17 +5424,26 @@ function getMultiverseMarketActionShellSummary(shell) {
 }
 
 function getMultiverseMarketPrefabRemapBoundarySummary(boundary) {
-  const directPrefabNumberMatches = Array.isArray(boundary?.directPrefabNumberMatches) ? boundary.directPrefabNumberMatches : [];
-  const explicitPrefabIdOverrides = Array.isArray(boundary?.explicitPrefabIdOverrides) ? boundary.explicitPrefabIdOverrides : [];
-  const validatedIdsWithoutDirectPrefabName = Array.isArray(boundary?.validatedIdsWithoutDirectPrefabName) ? boundary.validatedIdsWithoutDirectPrefabName : [];
+  const directPrefabNumberMatches = Array.isArray(boundary?.directPrefabNumberMatches)
+    ? boundary.directPrefabNumberMatches
+    : [];
+  const explicitPrefabIdOverrides = Array.isArray(boundary?.explicitPrefabIdOverrides)
+    ? boundary.explicitPrefabIdOverrides
+    : [];
+  const validatedIdsWithoutDirectPrefabName = Array.isArray(
+    boundary?.validatedIdsWithoutDirectPrefabName
+  )
+    ? boundary.validatedIdsWithoutDirectPrefabName
+    : [];
 
   return {
     hasDirectMatchBand:
-      directPrefabNumberMatches.includes(50)
-      && directPrefabNumberMatches.includes(68),
+      directPrefabNumberMatches.includes(50) && directPrefabNumberMatches.includes(68),
     hasOverrideBoundary:
-      explicitPrefabIdOverrides.map((entry) => `${entry.prefabNumber}->${entry.serializedId}`).join(",") === "69->57,70->58,71->59,72->60,73->61,74->62"
-      && validatedIdsWithoutDirectPrefabName.join(",") === "69,70,71,72,73,74",
+      explicitPrefabIdOverrides
+        .map((entry) => `${entry.prefabNumber}->${entry.serializedId}`)
+        .join(",") === "69->57,70->58,71->59,72->60,73->61,74->62" &&
+      validatedIdsWithoutDirectPrefabName.join(",") === "69,70,71,72,73,74",
     lastDirectPrefab: "ChrystosEmporiumUpgrade68",
     firstOverride: "ChrystosEmporiumUpgrade69-ID57",
     lastOverride: "ChrystosEmporiumUpgrade74-ID62",
@@ -4684,28 +5454,33 @@ function getMultiverseMarketPrefabRemapBoundarySummary(boundary) {
 function getMultiverseMarketOwnerFamilySummary(family) {
   const ownerAnchors = Array.isArray(family?.ownerAnchors) ? family.ownerAnchors : [];
   const costLaneAnchors = Array.isArray(family?.costLaneAnchors) ? family.costLaneAnchors : [];
-  const validatedCurrencyBoxes = Array.isArray(family?.validatedCurrencyBoxes) ? family.validatedCurrencyBoxes : [];
+  const validatedCurrencyBoxes = Array.isArray(family?.validatedCurrencyBoxes)
+    ? family.validatedCurrencyBoxes
+    : [];
   const sampleBuyHooks = Array.isArray(family?.sampleBuyHooks) ? family.sampleBuyHooks : [];
-  const currencyBoxRange = typeof family?.currencyBoxRange === "object" && family.currencyBoxRange ? family.currencyBoxRange : {};
+  const currencyBoxRange =
+    typeof family?.currencyBoxRange === "object" && family.currencyBoxRange
+      ? family.currencyBoxRange
+      : {};
 
   return {
     hasOwnerFamily:
-      ownerAnchors.includes("MultiverseMarket, Assembly-CSharp")
-      && ownerAnchors.includes("TextHandlerMarkets")
-      && ownerAnchors.includes("SetAllChrystosEmporiumTexts")
-      && ownerAnchors.includes("SetInscryptionsDoneText")
-      && ownerAnchors.includes("Inscryptions")
-      && costLaneAnchors.includes("ResourceAmountText.InscryptionsDone")
-      && costLaneAnchors.includes("AchievementBar-Inscryptions")
-      && costLaneAnchors.includes("CostBox-InscryptionsDone")
-      && currencyBoxRange.start === 1
-      && currencyBoxRange.end === 110
-      && currencyBoxRange.count === 110
-      && sampleBuyHooks.includes("BuyIS64")
-      && sampleBuyHooks.includes("BuyIS105"),
+      ownerAnchors.includes("MultiverseMarket, Assembly-CSharp") &&
+      ownerAnchors.includes("TextHandlerMarkets") &&
+      ownerAnchors.includes("SetAllChrystosEmporiumTexts") &&
+      ownerAnchors.includes("SetInscryptionsDoneText") &&
+      ownerAnchors.includes("Inscryptions") &&
+      costLaneAnchors.includes("ResourceAmountText.InscryptionsDone") &&
+      costLaneAnchors.includes("AchievementBar-Inscryptions") &&
+      costLaneAnchors.includes("CostBox-InscryptionsDone") &&
+      currencyBoxRange.start === 1 &&
+      currencyBoxRange.end === 110 &&
+      currencyBoxRange.count === 110 &&
+      sampleBuyHooks.includes("BuyIS64") &&
+      sampleBuyHooks.includes("BuyIS105"),
     hasCurrencyShell:
-      validatedCurrencyBoxes.includes("IS50CurrencyBox")
-      && validatedCurrencyBoxes.includes("IS74CurrencyBox"),
+      validatedCurrencyBoxes.includes("IS50CurrencyBox") &&
+      validatedCurrencyBoxes.includes("IS74CurrencyBox"),
     ownerAnchor: "MultiverseMarket",
     inscryptionsLabel: "Inscryptions",
     textHandler: "TextHandlerMarkets",
@@ -4723,15 +5498,17 @@ function getTokenShopOwnerShellSummary(shell) {
   const ownerAnchors = Array.isArray(shell?.ownerAnchors) ? shell.ownerAnchors : [];
   const tokenBankMethods = Array.isArray(shell?.tokenBankMethods) ? shell.tokenBankMethods : [];
   const notificationHooks = Array.isArray(shell?.notificationHooks) ? shell.notificationHooks : [];
-  const adjacentDeviceHooks = Array.isArray(shell?.adjacentDeviceHooks) ? shell.adjacentDeviceHooks : [];
+  const adjacentDeviceHooks = Array.isArray(shell?.adjacentDeviceHooks)
+    ? shell.adjacentDeviceHooks
+    : [];
 
   return {
     hasOwnerShell:
-      ownerAnchors.includes("TokenShop")
-      && ownerAnchors.includes("InitializeTokenShop")
-      && tokenBankMethods.includes("ClaimBankedTokens")
-      && notificationHooks.includes("CheckTokenClaimNotification")
-      && adjacentDeviceHooks.includes("BuyAutoTokenClicker"),
+      ownerAnchors.includes("TokenShop") &&
+      ownerAnchors.includes("InitializeTokenShop") &&
+      tokenBankMethods.includes("ClaimBankedTokens") &&
+      notificationHooks.includes("CheckTokenClaimNotification") &&
+      adjacentDeviceHooks.includes("BuyAutoTokenClicker"),
     ownerAnchor: "TokenShop",
     bankMethod: "ClaimBankedTokens",
     notificationHook: "CheckTokenClaimNotification",
@@ -4740,18 +5517,25 @@ function getTokenShopOwnerShellSummary(shell) {
 }
 
 function getTokenShopSaveBoundarySummary(boundary) {
-  const ownerShellTermsChecked = Array.isArray(boundary?.ownerShellTermsChecked) ? boundary.ownerShellTermsChecked : [];
-  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked) ? boundary.saveFamilyTermsChecked : [];
-  const probeResults = typeof boundary?.probeResults === "object" && boundary.probeResults ? boundary.probeResults : {};
+  const ownerShellTermsChecked = Array.isArray(boundary?.ownerShellTermsChecked)
+    ? boundary.ownerShellTermsChecked
+    : [];
+  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked)
+    ? boundary.saveFamilyTermsChecked
+    : [];
+  const probeResults =
+    typeof boundary?.probeResults === "object" && boundary.probeResults
+      ? boundary.probeResults
+      : {};
 
   return {
     hasSeparationBoundary:
-      ownerShellTermsChecked.includes("TokenShop")
-      && saveFamilyTermsChecked.includes("PlayerProfileData")
-      && probeResults.metadataHasSaveTerms === true
-      && probeResults.level0HasSaveTerms === false
-      && probeResults.ownerShellWithSaveOverlapCount === 0
-      && probeResults.directTokenShopPlayerProfileContext === false,
+      ownerShellTermsChecked.includes("TokenShop") &&
+      saveFamilyTermsChecked.includes("PlayerProfileData") &&
+      probeResults.metadataHasSaveTerms === true &&
+      probeResults.level0HasSaveTerms === false &&
+      probeResults.ownerShellWithSaveOverlapCount === 0 &&
+      probeResults.directTokenShopPlayerProfileContext === false,
     ownerAnchor: "TokenShop",
     saveAnchor: "PlayerProfileData",
     overlapLabel: "zero overlap"
@@ -4760,7 +5544,8 @@ function getTokenShopSaveBoundarySummary(boundary) {
 
 function getTokenShopGroundedSubsetDefinitions(boundary) {
   const atu3EffectChain = boundary?.atu3CrossSystemEffectTrace?.recoveredActionEffectChain;
-  const atu3SupportingConsumerShell = boundary?.atu3ChestConsumerReadTrace?.recoveredInternalReadShell;
+  const atu3SupportingConsumerShell =
+    boundary?.atu3ChestConsumerReadTrace?.recoveredInternalReadShell;
   return [
     {
       field: "ATU1Level",
@@ -4770,12 +5555,11 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
         boundary?.adjacentFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
         boundary?.adjacentFollowUp?.recoveredAdditionalBridge?.prefabIdentity ||
         "NewTokenUPGPrefab.T1.TokensBoost",
-      identitySource:
-        boundary?.adjacentFollowUp?.verifiedNamedIdentityJoin?.namedIdentity
-          ? "Checked named identity"
-          : boundary?.adjacentFollowUp?.verifiedTitleTextChain?.titleProbeTitle
-            ? "Checked title-side text chain"
-            : "Checked prefab identity",
+      identitySource: boundary?.adjacentFollowUp?.verifiedNamedIdentityJoin?.namedIdentity
+        ? "Checked named identity"
+        : boundary?.adjacentFollowUp?.verifiedTitleTextChain?.titleProbeTitle
+          ? "Checked title-side text chain"
+          : "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
       startCostField: "TokenBoostStartCost",
@@ -4814,7 +5598,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "CellBoostMaxLevel",
       bonusStepLabel: "seconds timeskip to Cells Gained from Token & Diamond Chests",
       bonusStepMode: "additive",
-      effectText: atu3EffectChain?.sharedEffectText || "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.",
+      effectText:
+        atu3EffectChain?.sharedEffectText ||
+        '<b>+1</b> Seconds "timeskip" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.',
       note: "Checked shell-to-action-to-effect chain. This row stays effect-driven and is not promoted into a prefab or final-title remap.",
       supportingEvidenceNote: atu3SupportingConsumerShell
         ? "Supporting evidence only: the shared effect lane also reaches the AdManager chest consumer family, but the exact CellBoostBonus read-site handoff is still unresolved."
@@ -4823,7 +5609,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU4Level",
       slot: "ATU4",
-      identity: boundary?.traceFollowUp?.recoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.ModPointsBooster",
+      identity:
+        boundary?.traceFollowUp?.recoveredBridge?.prefabIdentity ||
+        "NewTokenUPGPrefab.T1.ModPointsBooster",
       identitySource: "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
@@ -4833,13 +5621,13 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "ModBoostMaxLevel",
       bonusStepLabel: "Mod Points Gained",
       bonusStepMode: "multiplier",
-      note:
-        "Checked shell-to-prefab bridge only. The remaining honest blocker is one exact shell-local join from the detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839."
+      note: "Checked shell-to-prefab bridge only. The remaining honest blocker is one exact shell-local join from the detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839."
     },
     {
       field: "ATU5Level",
       slot: "ATU5",
-      identity: boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
+      identity:
+        boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
       identitySource: "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
@@ -4854,8 +5642,13 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU6Level",
       slot: "ATU6",
-      identity: boundary?.verifiedTitleJoin?.titleProbeTitle || boundary?.boundedRecoveredBridgeFollowUp?.prefabIdentity || "Mk2 Generator Booster",
-      identitySource: boundary?.verifiedTitleJoin?.titleProbeTitle ? "Checked final title" : "Checked prefab identity",
+      identity:
+        boundary?.verifiedTitleJoin?.titleProbeTitle ||
+        boundary?.boundedRecoveredBridgeFollowUp?.prefabIdentity ||
+        "Mk2 Generator Booster",
+      identitySource: boundary?.verifiedTitleJoin?.titleProbeTitle
+        ? "Checked final title"
+        : "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
       startCostField: "MK2TokenBoostStartCost",
@@ -4869,8 +5662,13 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU7Level",
       slot: "ATU7",
-      identity: boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle || boundary?.atu7BridgeFollowUp?.recoveredBridge?.prefabIdentity || "Mk3 Generator Booster",
-      identitySource: boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ? "Checked title-side text chain" : "Checked prefab identity",
+      identity:
+        boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
+        boundary?.atu7BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
+        "Mk3 Generator Booster",
+      identitySource: boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle
+        ? "Checked title-side text chain"
+        : "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
       startCostField: "MK3TokenBoostStartCost",
@@ -4884,8 +5682,13 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU8Level",
       slot: "ATU8",
-      identity: boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle || boundary?.atu8BridgeFollowUp?.recoveredBridge?.prefabIdentity || "Mk4 Generator Booster",
-      identitySource: boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ? "Checked title-side text chain" : "Checked prefab identity",
+      identity:
+        boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
+        boundary?.atu8BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
+        "Mk4 Generator Booster",
+      identitySource: boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle
+        ? "Checked title-side text chain"
+        : "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
       startCostField: "MK4TokenBoostStartCost",
@@ -4906,7 +5709,8 @@ function getTokenShopNumericFieldValue(tokenShop, fieldName) {
 }
 
 function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
-  const resolvedTokenShopState = tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
+  const resolvedTokenShopState =
+    tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
   const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => ({
     label: `Compatibility-only subset level: ${row.identity} (${row.slot})`,
     value: resolvedTokenShopState[row.field],
@@ -4917,7 +5721,8 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
   return {
     rows,
     importedCount: rows.filter((row) => isBoundaryValuePresent(row.value)).length,
-    quarantineNote: "Only rows with checked remap-boundary joins are surfaced here. Remaining `ATU*Level` rows stay quarantined under `compatibility.unmappedSystemState.tokenShop` until more grounded row identities clear."
+    quarantineNote:
+      "Only rows with checked remap-boundary joins are surfaced here. Remaining `ATU*Level` rows stay quarantined under `compatibility.unmappedSystemState.tokenShop` until more grounded row identities clear."
   };
 }
 
@@ -4984,7 +5789,8 @@ function getTokenShopKnownMaxStatus(currentLevel, maxLevel) {
 
 function getTokenShopCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonusValue) {
   const bonusStep = formatTokenShopBonusStep(row, bonusValue);
-  const stepLabel = row?.rowType === "effect-driven" ? "checked effect step(s)" : "extracted bonus step(s)";
+  const stepLabel =
+    row?.rowType === "effect-driven" ? "checked effect step(s)" : "extracted bonus step(s)";
   if (typeof maxLevel === "number" && Number.isFinite(maxLevel) && currentLevel >= maxLevel) {
     return {
       currentLabel: `${formatBoundaryValue(currentLevel)} ${stepLabel} of ${bonusStep}`,
@@ -5002,16 +5808,26 @@ function getTokenShopCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonu
 }
 
 function sanitizeTokenShopRichText(value) {
-  return String(value || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return String(value || "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function getTokenShopRowDisplayTitle(row) {
-  if ((typeof row?.identitySource === "string" && /(final title|title-side text chain|named identity)/i.test(row.identitySource)) || row?.rowType === "effect-driven") {
+  if (
+    (typeof row?.identitySource === "string" &&
+      /(final title|title-side text chain|named identity)/i.test(row.identitySource)) ||
+    row?.rowType === "effect-driven"
+  ) {
     if (row?.identity) {
       return sanitizeTokenShopRichText(row.identity);
     }
   }
-  if ((row?.identitySource === "Checked final title" || row?.rowType === "effect-driven") && row?.identity) {
+  if (
+    (row?.identitySource === "Checked final title" || row?.rowType === "effect-driven") &&
+    row?.identity
+  ) {
     return sanitizeTokenShopRichText(row.identity);
   }
   const rawIdentity = sanitizeTokenShopRichText(row?.identity || "")
@@ -5033,7 +5849,10 @@ function getTokenShopRowGroundingSummary(row) {
   if (row?.rowType === "effect-driven") {
     return "Grounded as an effect-driven row from checked shell, action, and shared-effect evidence.";
   }
-  if (typeof row?.identitySource === "string" && /(final title|title-side text chain|named identity)/i.test(row.identitySource)) {
+  if (
+    typeof row?.identitySource === "string" &&
+    /(final title|title-side text chain|named identity)/i.test(row.identitySource)
+  ) {
     return "Grounded as a checked shell-to-prefab-to-player-facing-title row.";
   }
   return "Grounded as a checked shell-to-prefab row while the final title remains unresolved.";
@@ -5062,11 +5881,16 @@ function formatTokenShopBonusMagnitude(value, mode) {
 }
 
 function getTokenShopBonusStripEntries(row) {
-  const currentLevel = typeof row?.currentLevel === "number" && Number.isFinite(row.currentLevel) ? row.currentLevel : 0;
-  const bonusValue = typeof row?.bonusValue === "number" && Number.isFinite(row.bonusValue) ? row.bonusValue : 0;
-  const currentMagnitude = row?.bonusStepMode === "multiplier"
-    ? Math.pow(bonusValue || 1, currentLevel)
-    : bonusValue * currentLevel;
+  const currentLevel =
+    typeof row?.currentLevel === "number" && Number.isFinite(row.currentLevel)
+      ? row.currentLevel
+      : 0;
+  const bonusValue =
+    typeof row?.bonusValue === "number" && Number.isFinite(row.bonusValue) ? row.bonusValue : 0;
+  const currentMagnitude =
+    row?.bonusStepMode === "multiplier"
+      ? Math.pow(bonusValue || 1, currentLevel)
+      : bonusValue * currentLevel;
   const nextMagnitude = row?.isMaxed
     ? null
     : row?.bonusStepMode === "multiplier"
@@ -5077,7 +5901,10 @@ function getTokenShopBonusStripEntries(row) {
     {
       label: row?.bonusStepLabel || "Bonus",
       currentLabel: formatTokenShopBonusMagnitude(currentMagnitude, row?.bonusStepMode),
-      nextLabel: nextMagnitude === null ? "MAX" : formatTokenShopBonusMagnitude(nextMagnitude, row?.bonusStepMode)
+      nextLabel:
+        nextMagnitude === null
+          ? "MAX"
+          : formatTokenShopBonusMagnitude(nextMagnitude, row?.bonusStepMode)
     }
   ];
 }
@@ -5089,7 +5916,11 @@ function getTokenShopProgressionModel() {
   const tokenShop = state.extractedMechanics?.tokenShop;
   const currentTokens = state.playerProfile.player.resources.tokens;
   const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => {
-    const levelSource = resolveTokenShopProgressionLevelSource(row.field, progressionState, compatibilityLevels);
+    const levelSource = resolveTokenShopProgressionLevelSource(
+      row.field,
+      progressionState,
+      compatibilityLevels
+    );
     const currentLevel = levelSource.value;
     const startCost = getTokenShopNumericFieldValue(tokenShop, row.startCostField);
     const additiveCost = getTokenShopNumericFieldValue(tokenShop, row.additiveCostField);
@@ -5097,12 +5928,14 @@ function getTokenShopProgressionModel() {
     const maxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
     const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
     const isMaxed = hasLevel && typeof maxLevel === "number" && currentLevel >= maxLevel;
-    const nextKnownCost = hasLevel && !isMaxed && typeof startCost === "number" && typeof additiveCost === "number"
-      ? startCost + (additiveCost * currentLevel)
-      : null;
-    const isAffordable = typeof nextKnownCost === "number" && typeof currentTokens === "number"
-      ? currentTokens >= nextKnownCost
-      : null;
+    const nextKnownCost =
+      hasLevel && !isMaxed && typeof startCost === "number" && typeof additiveCost === "number"
+        ? startCost + additiveCost * currentLevel
+        : null;
+    const isAffordable =
+      typeof nextKnownCost === "number" && typeof currentTokens === "number"
+        ? currentTokens >= nextKnownCost
+        : null;
 
     return {
       ...row,
@@ -5117,17 +5950,27 @@ function getTokenShopProgressionModel() {
       isMaxed,
       maxLevel,
       maxStatus: getTokenShopKnownMaxStatus(currentLevel, maxLevel),
-      currentVsNextBonus: getTokenShopCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonusValue)
+      currentVsNextBonus: getTokenShopCurrentVsNextBonusSummary(
+        row,
+        currentLevel,
+        maxLevel,
+        bonusValue
+      )
     };
   });
 
   return {
     currentTokens,
-    displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8.",
+    displayRule:
+      "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8.",
     rows,
-    localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override").length,
-    playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state").length,
-    compatibilityCount: rows.filter((row) => row.currentLevelSourceLabel === "Compatibility fallback").length,
+    localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override")
+      .length,
+    playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state")
+      .length,
+    compatibilityCount: rows.filter(
+      (row) => row.currentLevelSourceLabel === "Compatibility fallback"
+    ).length,
     defaultCount: rows.filter((row) => row.currentLevelSourceLabel === "Default level 0").length,
     affordableCount: rows.filter((row) => row.isAffordable === true).length,
     knownCapCount: rows.filter((row) => row.maxStatus.label === "At or above known cap").length
@@ -5155,23 +5998,26 @@ function renderTokenShopOverviewAffordabilityModule() {
         <span class="pill">${escapeHtml(summary.displayRule)}</span>
       </div>
       <div class="preview-stack">
-        ${summary.rows.map((row) => {
-          const displayTitle = getTokenShopRowDisplayTitle(row);
-          const bonusStripEntries = getTokenShopBonusStripEntries(row);
-          const nextKnownCostLabel = row.isMaxed
-            ? "No next cost within known cap"
-            : typeof row.nextKnownCost === "number"
-              ? formatBoundaryValue(row.nextKnownCost)
-              : "No known next cost";
-          const affordabilityLine = row.isMaxed
-            ? "No next purchase within known cap."
-            : row.isAffordable === true
-              ? "Affordable from current Tokens."
-              : row.isAffordable === false && typeof row.nextKnownCost === "number" && typeof summary.currentTokens === "number"
-                ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
-                : "Affordability unavailable until Tokens are entered.";
+        ${summary.rows
+          .map((row) => {
+            const displayTitle = getTokenShopRowDisplayTitle(row);
+            const bonusStripEntries = getTokenShopBonusStripEntries(row);
+            const nextKnownCostLabel = row.isMaxed
+              ? "No next cost within known cap"
+              : typeof row.nextKnownCost === "number"
+                ? formatBoundaryValue(row.nextKnownCost)
+                : "No known next cost";
+            const affordabilityLine = row.isMaxed
+              ? "No next purchase within known cap."
+              : row.isAffordable === true
+                ? "Affordable from current Tokens."
+                : row.isAffordable === false &&
+                    typeof row.nextKnownCost === "number" &&
+                    typeof summary.currentTokens === "number"
+                  ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+                  : "Affordability unavailable until Tokens are entered.";
 
-          return `
+            return `
             <article class="preview-card token-shop-affordability-card">
               <div class="token-shop-game-row">
                 <div class="token-shop-level-ring">
@@ -5193,13 +6039,17 @@ function renderTokenShopOverviewAffordabilityModule() {
                     </div>
                   </div>
                   <div class="token-shop-stat-strip">
-                    ${bonusStripEntries.map((entry) => `
+                    ${bonusStripEntries
+                      .map(
+                        (entry) => `
                       <div class="validation-card warn token-shop-stat-card">
                         <span class="snapshot-title">Current vs next bonus • ${escapeHtml(entry.label)}</span>
                         <strong>${escapeHtml(entry.currentLabel)}</strong>
                         <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
                       </div>
-                    `).join("")}
+                    `
+                      )
+                      .join("")}
                   </div>
                   <div class="token-shop-editor-strip">
                     <div class="token-shop-editor-meta">
@@ -5218,7 +6068,8 @@ function renderTokenShopOverviewAffordabilityModule() {
               </div>
             </article>
           `;
-        }).join("")}
+          })
+          .join("")}
       </div>
       <p class="meta">Overview affordability only. No best-buy order, ROI, ranking, token-bank planner behavior, Daily Tokenium planner behavior, or canonical <code>state.playerProfile</code> promotion is added here.</p>
     </div>
@@ -5229,20 +6080,34 @@ function saveTokenShopProgressionLevel(fieldName, value) {
   if (!fieldName) {
     return;
   }
-  setProfileValue(["planning", "tokenShop", "checkedSubsetLevels", fieldName], value, state.playerProfile);
+  setProfileValue(
+    ["planning", "tokenShop", "checkedSubsetLevels", fieldName],
+    value,
+    state.playerProfile
+  );
   persistPlayerProfile();
-  setStatus("tokenShopProgressionStatus", `Saved ${fieldName} for the checked TokenShop subset editor.`, "success");
+  setStatus(
+    "tokenShopProgressionStatus",
+    `Saved ${fieldName} for the checked TokenShop subset editor.`,
+    "success"
+  );
   renderProgressionResults(runProgressionOptimization());
 }
 
 function prefillTokenShopProgressionEditorFromCompatibility() {
   const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
-  const subsetFields = getTokenShopGroundedSubsetDefinitions(state.extractedMechanics?.tokenShopRowRemapBoundary).map((row) => row.field);
+  const subsetFields = getTokenShopGroundedSubsetDefinitions(
+    state.extractedMechanics?.tokenShopRowRemapBoundary
+  ).map((row) => row.field);
   let importedCount = 0;
   subsetFields.forEach((fieldName) => {
     const importedValue = compatibilityLevels?.[fieldName];
     if (typeof importedValue === "number" && Number.isFinite(importedValue)) {
-      setProfileValue(["planning", "tokenShop", "checkedSubsetLevels", fieldName], importedValue, state.playerProfile);
+      setProfileValue(
+        ["planning", "tokenShop", "checkedSubsetLevels", fieldName],
+        importedValue,
+        state.playerProfile
+      );
       importedCount += 1;
     }
   });
@@ -5258,11 +6123,21 @@ function prefillTokenShopProgressionEditorFromCompatibility() {
 }
 
 function clearTokenShopProgressionEditorLevels() {
-  getTokenShopGroundedSubsetDefinitions(state.extractedMechanics?.tokenShopRowRemapBoundary).forEach((row) => {
-    setProfileValue(["planning", "tokenShop", "checkedSubsetLevels", row.field], null, state.playerProfile);
+  getTokenShopGroundedSubsetDefinitions(
+    state.extractedMechanics?.tokenShopRowRemapBoundary
+  ).forEach((row) => {
+    setProfileValue(
+      ["planning", "tokenShop", "checkedSubsetLevels", row.field],
+      null,
+      state.playerProfile
+    );
   });
   persistPlayerProfile();
-  setStatus("tokenShopProgressionStatus", "Cleared local TokenShop editor levels. Compatibility imports remain available as prefill only.", "success");
+  setStatus(
+    "tokenShopProgressionStatus",
+    "Cleared local TokenShop editor levels. Compatibility imports remain available as prefill only.",
+    "success"
+  );
   renderProgressionResults(runProgressionOptimization());
 }
 
@@ -5290,30 +6165,34 @@ function renderTokenShopProgressionEditor() {
         <span class="pill">No canonical ATU promotion</span>
       </div>
       <div class="preview-stack">
-        ${summary.rows.map((row) => {
-          const displayTitle = getTokenShopRowDisplayTitle(row);
-          const currentLevelLabel = formatBoundaryValue(row.currentLevel);
-          const effectLine = formatTokenShopSentence(formatTokenShopEffectLine(row));
-          const actionLabel = getTokenShopActionLabel(row);
-          const bonusStripEntries = getTokenShopBonusStripEntries(row);
-          const groundingSummary = getTokenShopRowGroundingSummary(row);
-          const nextKnownCostLabel = row.isMaxed
-            ? "No next cost within known cap"
-            : typeof row.nextKnownCost === "number"
-              ? formatBoundaryValue(row.nextKnownCost)
-              : "No known next cost";
-          const affordabilityLine = row.isMaxed
-            ? "No next purchase within known cap."
-            : row.isAffordable === true
-              ? "Affordable from current Tokens."
-              : row.isAffordable === false && typeof row.nextKnownCost === "number" && typeof summary.currentTokens === "number"
-                ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
-                : "Affordability unavailable until Tokens are entered.";
-          const costFormulaLine = typeof row.startCost === "number" && typeof row.additiveCost === "number"
-            ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
-            : "Known cost inputs are incomplete in this build.";
+        ${summary.rows
+          .map((row) => {
+            const displayTitle = getTokenShopRowDisplayTitle(row);
+            const currentLevelLabel = formatBoundaryValue(row.currentLevel);
+            const effectLine = formatTokenShopSentence(formatTokenShopEffectLine(row));
+            const actionLabel = getTokenShopActionLabel(row);
+            const bonusStripEntries = getTokenShopBonusStripEntries(row);
+            const groundingSummary = getTokenShopRowGroundingSummary(row);
+            const nextKnownCostLabel = row.isMaxed
+              ? "No next cost within known cap"
+              : typeof row.nextKnownCost === "number"
+                ? formatBoundaryValue(row.nextKnownCost)
+                : "No known next cost";
+            const affordabilityLine = row.isMaxed
+              ? "No next purchase within known cap."
+              : row.isAffordable === true
+                ? "Affordable from current Tokens."
+                : row.isAffordable === false &&
+                    typeof row.nextKnownCost === "number" &&
+                    typeof summary.currentTokens === "number"
+                  ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+                  : "Affordability unavailable until Tokens are entered.";
+            const costFormulaLine =
+              typeof row.startCost === "number" && typeof row.additiveCost === "number"
+                ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
+                : "Known cost inputs are incomplete in this build.";
 
-          return `
+            return `
             <article class="preview-card token-shop-affordability-card">
               <div class="token-shop-game-row">
                 <div class="token-shop-level-ring">
@@ -5335,13 +6214,17 @@ function renderTokenShopProgressionEditor() {
                     </div>
                   </div>
                   <div class="token-shop-stat-strip">
-                    ${bonusStripEntries.map((entry) => `
+                    ${bonusStripEntries
+                      .map(
+                        (entry) => `
                       <div class="validation-card warn token-shop-stat-card">
                         <span class="snapshot-title">Current vs next bonus • ${escapeHtml(entry.label)}</span>
                         <strong>${escapeHtml(entry.currentLabel)}</strong>
                         <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
                       </div>
-                    `).join("")}
+                    `
+                      )
+                      .join("")}
                   </div>
                   <div class="token-shop-editor-strip">
                     <div class="token-shop-editor-meta">
@@ -5383,7 +6266,8 @@ function renderTokenShopProgressionEditor() {
               </div>
             </article>
           `;
-        }).join("")}
+          })
+          .join("")}
       </div>
       <p class="meta">Non-canonical checked-row progression seam only. Broader TokenShop remap, token-bank, Daily Tokenium, Emporium, and ROI or ranking logic stay outside this surface.</p>
     </article>
@@ -5392,19 +6276,21 @@ function renderTokenShopProgressionEditor() {
 
 function getTokenBankControllerShellSummary(shell) {
   const controllerAnchors = Array.isArray(shell?.controllerAnchors) ? shell.controllerAnchors : [];
-  const adjacentControllerMethods = Array.isArray(shell?.adjacentControllerMethods) ? shell.adjacentControllerMethods : [];
+  const adjacentControllerMethods = Array.isArray(shell?.adjacentControllerMethods)
+    ? shell.adjacentControllerMethods
+    : [];
 
   return {
     hasControllerShell:
-      controllerAnchors.includes("ClaimBankedTokens")
-      && controllerAnchors.includes("SetBankFill")
-      && controllerAnchors.includes("BankFill")
-      && controllerAnchors.includes("TokenBankDescriptionText")
-      && controllerAnchors.includes("CheckTokenClaimNotification")
-      && controllerAnchors.includes("TokenShopButtonNotification")
-      && adjacentControllerMethods.includes("get_TokenBankCap")
-      && adjacentControllerMethods.includes("get_ClaimableBankTokens")
-      && adjacentControllerMethods.includes("IncreaseBankedTokens"),
+      controllerAnchors.includes("ClaimBankedTokens") &&
+      controllerAnchors.includes("SetBankFill") &&
+      controllerAnchors.includes("BankFill") &&
+      controllerAnchors.includes("TokenBankDescriptionText") &&
+      controllerAnchors.includes("CheckTokenClaimNotification") &&
+      controllerAnchors.includes("TokenShopButtonNotification") &&
+      adjacentControllerMethods.includes("get_TokenBankCap") &&
+      adjacentControllerMethods.includes("get_ClaimableBankTokens") &&
+      adjacentControllerMethods.includes("IncreaseBankedTokens"),
     claimMethod: "ClaimBankedTokens",
     fillMethod: "SetBankFill",
     fillField: "BankFill",
@@ -5414,19 +6300,26 @@ function getTokenBankControllerShellSummary(shell) {
 }
 
 function getMultiverseMarketSaveBoundarySummary(boundary) {
-  const actionShellTermsChecked = Array.isArray(boundary?.actionShellTermsChecked) ? boundary.actionShellTermsChecked : [];
-  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked) ? boundary.saveFamilyTermsChecked : [];
-  const probeResults = typeof boundary?.probeResults === "object" && boundary.probeResults ? boundary.probeResults : {};
+  const actionShellTermsChecked = Array.isArray(boundary?.actionShellTermsChecked)
+    ? boundary.actionShellTermsChecked
+    : [];
+  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked)
+    ? boundary.saveFamilyTermsChecked
+    : [];
+  const probeResults =
+    typeof boundary?.probeResults === "object" && boundary.probeResults
+      ? boundary.probeResults
+      : {};
 
   return {
     hasSeparationBoundary:
-      actionShellTermsChecked.includes("TextHandlerMarkets")
-      && saveFamilyTermsChecked.includes("PlayerProfileData")
-      && probeResults.actionShellWithSaveOverlapCount === 0
-      && probeResults.metadataNeighborhoodHasActionTerms === true
-      && probeResults.metadataNeighborhoodHasSaveTerms === true
-      && probeResults.metadataProbeHasSaveTerms === false
-      && probeResults.level0ProbeHasSaveTerms === false,
+      actionShellTermsChecked.includes("TextHandlerMarkets") &&
+      saveFamilyTermsChecked.includes("PlayerProfileData") &&
+      probeResults.actionShellWithSaveOverlapCount === 0 &&
+      probeResults.metadataNeighborhoodHasActionTerms === true &&
+      probeResults.metadataNeighborhoodHasSaveTerms === true &&
+      probeResults.metadataProbeHasSaveTerms === false &&
+      probeResults.level0ProbeHasSaveTerms === false,
     actionAnchor: "TextHandlerMarkets",
     saveAnchor: "PlayerProfileData",
     overlapLabel: "zero overlap"
@@ -5434,148 +6327,283 @@ function getMultiverseMarketSaveBoundarySummary(boundary) {
 }
 
 function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
-  const accessorClues = Array.isArray(boundary?.playerProfileAccessorClues) ? boundary.playerProfileAccessorClues : [];
-  const memberShellClues = Array.isArray(boundary?.playerProfileMemberShellClues) ? boundary.playerProfileMemberShellClues : [];
-  const handlerBridgeClues = Array.isArray(boundary?.playerProfileHandlerBridgeClues) ? boundary.playerProfileHandlerBridgeClues : [];
-  const directMemberHandoffClues = Array.isArray(boundary?.directMemberHandoffClues) ? boundary.directMemberHandoffClues : [];
-  const typedSiblingContrastClues = Array.isArray(boundary?.typedSiblingContrastClues) ? boundary.typedSiblingContrastClues : [];
-  const progressionPayloadFieldClues = Array.isArray(boundary?.progressionPayloadFieldClues) ? boundary.progressionPayloadFieldClues : [];
-  const cloudSaveBridgeClues = Array.isArray(boundary?.cloudSaveBridgeClues) ? boundary.cloudSaveBridgeClues : [];
-  const missingDirectTypeMapClues = Array.isArray(boundary?.missingDirectTypeMapClues) ? boundary.missingDirectTypeMapClues : [];
-  const typedPlayerProfileNestedTypeChecks = Array.isArray(boundary?.typedPlayerProfileNestedTypeChecks) ? boundary.typedPlayerProfileNestedTypeChecks : [];
-  const negativeTypedDirectPlayerProfileProgressionChecks = Array.isArray(boundary?.negativeTypedDirectPlayerProfileProgressionChecks) ? boundary.negativeTypedDirectPlayerProfileProgressionChecks : [];
-  const negativeTypedDirectMemberChecks = Array.isArray(boundary?.negativeTypedDirectMemberChecks) ? boundary.negativeTypedDirectMemberChecks : [];
-  const negativeTypedSaveDataMarketChecks = Array.isArray(boundary?.negativeTypedSaveDataMarketChecks) ? boundary.negativeTypedSaveDataMarketChecks : [];
-  const typedBridgeRecovery = typeof boundary?.typedBridgeRecovery === "object" && boundary.typedBridgeRecovery ? boundary.typedBridgeRecovery : {};
-  const typedHandlerFieldRecovery = typeof boundary?.typedHandlerFieldRecovery === "object" && boundary.typedHandlerFieldRecovery ? boundary.typedHandlerFieldRecovery : {};
-  const typedPlayerProfileFieldTableRecovery = typeof boundary?.typedPlayerProfileFieldTableRecovery === "object" && boundary?.typedPlayerProfileFieldTableRecovery ? boundary.typedPlayerProfileFieldTableRecovery : {};
-  const typedSaveDataFieldTableRecovery = typeof boundary?.typedSaveDataFieldTableRecovery === "object" && boundary?.typedSaveDataFieldTableRecovery ? boundary.typedSaveDataFieldTableRecovery : {};
-  const typedSaveDataProgressionOwnerSamples = Array.isArray(boundary?.typedSaveDataProgressionOwnerSamples) ? boundary.typedSaveDataProgressionOwnerSamples : [];
-  const siblingAccessorClues = ["get_Market", "get_BM", "get_ZN", "get_TU", "get_Relics", "get_CellData", "get_ModPointData", "get_ShardData", "get_ResearchPointData", "get_AcademyPointData"];
-  const siblingMemberShellClues = ["Market", "Relics", "CellData", "ModPointData", "ShardData", "ResearchPointData", "AcademyPointData"];
-  const handlerBridgeRequirement = ["PlayerProfileHandler", "playerData", "GetPlayerProfileData", "FillPlayerProfileData", "ConvertSaveDataToProfileData"];
-  const directMemberHandoffRequirement = ["get_Market", "Market", "GetPlayerProfileData", "FillPlayerProfileData", "<FillPlayerProfileData>d__45"];
-  const typedSiblingContrastRequirement = ["PlayerProfileData|GemData", "PlayerProfileData|GemNodeCombo"];
-  const payloadFieldRequirement = ["InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked"];
-  const negativeTypedMarketRequirement = ["PlayerProfileHandler.Market", "PlayerProfileData.Market", "PlayerProfileData.MultiverseMarket"];
-  const negativeTypedPlayerProfileProgressionRequirement = ["PlayerProfileData.IS71Level", "PlayerProfileData.IS110Level", "PlayerProfileData.EsotericR1Trades", "PlayerProfileData.NecrumR1Trades", "PlayerProfileData.Mech1Unlocked", "PlayerProfileData.Mech1MissionsCompleted"];
-  const negativeDirectMultiverseRequirement = ["MultiverseMarket.InscryptionsDone", "MultiverseMarket.IS71Level", "MultiverseMarket.IS110Level", "MultiverseMarket.EsotericR1Trades", "MultiverseMarket.NecrumR1Trades", "MultiverseMarket.Mech1Unlocked", "MultiverseMarket.Mech1MissionsCompleted"];
-  const preservedSiblingAccessorCount = siblingAccessorClues.filter((name) => accessorClues.includes(name)).length;
-  const preservedSiblingMemberCount = siblingMemberShellClues.filter((name) => memberShellClues.includes(name)).length;
+  const accessorClues = Array.isArray(boundary?.playerProfileAccessorClues)
+    ? boundary.playerProfileAccessorClues
+    : [];
+  const memberShellClues = Array.isArray(boundary?.playerProfileMemberShellClues)
+    ? boundary.playerProfileMemberShellClues
+    : [];
+  const handlerBridgeClues = Array.isArray(boundary?.playerProfileHandlerBridgeClues)
+    ? boundary.playerProfileHandlerBridgeClues
+    : [];
+  const directMemberHandoffClues = Array.isArray(boundary?.directMemberHandoffClues)
+    ? boundary.directMemberHandoffClues
+    : [];
+  const typedSiblingContrastClues = Array.isArray(boundary?.typedSiblingContrastClues)
+    ? boundary.typedSiblingContrastClues
+    : [];
+  const progressionPayloadFieldClues = Array.isArray(boundary?.progressionPayloadFieldClues)
+    ? boundary.progressionPayloadFieldClues
+    : [];
+  const cloudSaveBridgeClues = Array.isArray(boundary?.cloudSaveBridgeClues)
+    ? boundary.cloudSaveBridgeClues
+    : [];
+  const missingDirectTypeMapClues = Array.isArray(boundary?.missingDirectTypeMapClues)
+    ? boundary.missingDirectTypeMapClues
+    : [];
+  const typedPlayerProfileNestedTypeChecks = Array.isArray(
+    boundary?.typedPlayerProfileNestedTypeChecks
+  )
+    ? boundary.typedPlayerProfileNestedTypeChecks
+    : [];
+  const negativeTypedDirectPlayerProfileProgressionChecks = Array.isArray(
+    boundary?.negativeTypedDirectPlayerProfileProgressionChecks
+  )
+    ? boundary.negativeTypedDirectPlayerProfileProgressionChecks
+    : [];
+  const negativeTypedDirectMemberChecks = Array.isArray(boundary?.negativeTypedDirectMemberChecks)
+    ? boundary.negativeTypedDirectMemberChecks
+    : [];
+  const negativeTypedSaveDataMarketChecks = Array.isArray(
+    boundary?.negativeTypedSaveDataMarketChecks
+  )
+    ? boundary.negativeTypedSaveDataMarketChecks
+    : [];
+  const typedBridgeRecovery =
+    typeof boundary?.typedBridgeRecovery === "object" && boundary.typedBridgeRecovery
+      ? boundary.typedBridgeRecovery
+      : {};
+  const typedHandlerFieldRecovery =
+    typeof boundary?.typedHandlerFieldRecovery === "object" && boundary.typedHandlerFieldRecovery
+      ? boundary.typedHandlerFieldRecovery
+      : {};
+  const typedPlayerProfileFieldTableRecovery =
+    typeof boundary?.typedPlayerProfileFieldTableRecovery === "object" &&
+    boundary?.typedPlayerProfileFieldTableRecovery
+      ? boundary.typedPlayerProfileFieldTableRecovery
+      : {};
+  const typedSaveDataFieldTableRecovery =
+    typeof boundary?.typedSaveDataFieldTableRecovery === "object" &&
+    boundary?.typedSaveDataFieldTableRecovery
+      ? boundary.typedSaveDataFieldTableRecovery
+      : {};
+  const typedSaveDataProgressionOwnerSamples = Array.isArray(
+    boundary?.typedSaveDataProgressionOwnerSamples
+  )
+    ? boundary.typedSaveDataProgressionOwnerSamples
+    : [];
+  const siblingAccessorClues = [
+    "get_Market",
+    "get_BM",
+    "get_ZN",
+    "get_TU",
+    "get_Relics",
+    "get_CellData",
+    "get_ModPointData",
+    "get_ShardData",
+    "get_ResearchPointData",
+    "get_AcademyPointData"
+  ];
+  const siblingMemberShellClues = [
+    "Market",
+    "Relics",
+    "CellData",
+    "ModPointData",
+    "ShardData",
+    "ResearchPointData",
+    "AcademyPointData"
+  ];
+  const handlerBridgeRequirement = [
+    "PlayerProfileHandler",
+    "playerData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "ConvertSaveDataToProfileData"
+  ];
+  const directMemberHandoffRequirement = [
+    "get_Market",
+    "Market",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "<FillPlayerProfileData>d__45"
+  ];
+  const typedSiblingContrastRequirement = [
+    "PlayerProfileData|GemData",
+    "PlayerProfileData|GemNodeCombo"
+  ];
+  const payloadFieldRequirement = [
+    "InscryptionsDone",
+    "EsotericR1Trades",
+    "NecrumR1Trades",
+    "Mech1Unlocked"
+  ];
+  const negativeTypedMarketRequirement = [
+    "PlayerProfileHandler.Market",
+    "PlayerProfileData.Market",
+    "PlayerProfileData.MultiverseMarket"
+  ];
+  const negativeTypedPlayerProfileProgressionRequirement = [
+    "PlayerProfileData.IS71Level",
+    "PlayerProfileData.IS110Level",
+    "PlayerProfileData.EsotericR1Trades",
+    "PlayerProfileData.NecrumR1Trades",
+    "PlayerProfileData.Mech1Unlocked",
+    "PlayerProfileData.Mech1MissionsCompleted"
+  ];
+  const negativeDirectMultiverseRequirement = [
+    "MultiverseMarket.InscryptionsDone",
+    "MultiverseMarket.IS71Level",
+    "MultiverseMarket.IS110Level",
+    "MultiverseMarket.EsotericR1Trades",
+    "MultiverseMarket.NecrumR1Trades",
+    "MultiverseMarket.Mech1Unlocked",
+    "MultiverseMarket.Mech1MissionsCompleted"
+  ];
+  const preservedSiblingAccessorCount = siblingAccessorClues.filter((name) =>
+    accessorClues.includes(name)
+  ).length;
+  const preservedSiblingMemberCount = siblingMemberShellClues.filter((name) =>
+    memberShellClues.includes(name)
+  ).length;
 
   return {
     hasBoundary:
-      accessorClues.includes("get_Market")
-      && memberShellClues.includes("Market")
-      && memberShellClues.includes("ShardData")
-      && memberShellClues.includes("ResearchPointData"),
+      accessorClues.includes("get_Market") &&
+      memberShellClues.includes("Market") &&
+      memberShellClues.includes("ShardData") &&
+      memberShellClues.includes("ResearchPointData"),
     hasCloudBridge:
-      cloudSaveBridgeClues.includes("CloudSavePlayerProfile")
-      && cloudSaveBridgeClues.includes("GetPlayerProfileInfo")
-      && cloudSaveBridgeClues.includes("CloudLoad"),
-    hasHandlerBridge:
-      handlerBridgeRequirement.every((name) => handlerBridgeClues.includes(name)),
-    hasDirectMemberHandoff:
-      directMemberHandoffRequirement.every((name) => directMemberHandoffClues.includes(name)),
+      cloudSaveBridgeClues.includes("CloudSavePlayerProfile") &&
+      cloudSaveBridgeClues.includes("GetPlayerProfileInfo") &&
+      cloudSaveBridgeClues.includes("CloudLoad"),
+    hasHandlerBridge: handlerBridgeRequirement.every((name) => handlerBridgeClues.includes(name)),
+    hasDirectMemberHandoff: directMemberHandoffRequirement.every((name) =>
+      directMemberHandoffClues.includes(name)
+    ),
     hasTypedAccessorBridge:
-      typedBridgeRecovery.bridgeOwner === "PlayerProfileHandler"
-      && typedBridgeRecovery.bridgeAccessor === "get_Market"
-      && typedBridgeRecovery.bridgeReturnType === "MultiverseMarket",
+      typedBridgeRecovery.bridgeOwner === "PlayerProfileHandler" &&
+      typedBridgeRecovery.bridgeAccessor === "get_Market" &&
+      typedBridgeRecovery.bridgeReturnType === "MultiverseMarket",
     hasTypedSaveCacheField:
-      typedHandlerFieldRecovery.fieldOwner === "PlayerProfileHandler"
-      && typedHandlerFieldRecovery.fieldName === "saveInfoCache"
-      && typedHandlerFieldRecovery.fieldType === "PlayerProfileData",
+      typedHandlerFieldRecovery.fieldOwner === "PlayerProfileHandler" &&
+      typedHandlerFieldRecovery.fieldName === "saveInfoCache" &&
+      typedHandlerFieldRecovery.fieldType === "PlayerProfileData",
     hasTypedPlayerProfileFieldTable:
-      typedPlayerProfileFieldTableRecovery.fieldOwner === "PlayerProfileData"
-      && Number.isInteger(typedPlayerProfileFieldTableRecovery.fieldCount)
-      && Number.isInteger(typedPlayerProfileFieldTableRecovery.methodCount),
+      typedPlayerProfileFieldTableRecovery.fieldOwner === "PlayerProfileData" &&
+      Number.isInteger(typedPlayerProfileFieldTableRecovery.fieldCount) &&
+      Number.isInteger(typedPlayerProfileFieldTableRecovery.methodCount),
     hasTypedSaveDataFieldTable:
-      typedSaveDataFieldTableRecovery.fieldOwner === "SaveData"
-      && Number.isInteger(typedSaveDataFieldTableRecovery.fieldCount)
-      && Number.isInteger(typedSaveDataFieldTableRecovery.methodCount),
-    hasTypedSiblingContrast:
-      typedSiblingContrastRequirement.every((name) => typedSiblingContrastClues.includes(name)),
-    hasProgressionPayloadBoundary:
-      payloadFieldRequirement.every((name) => progressionPayloadFieldClues.includes(name)),
-    rulesOutTypedMarketField:
-      negativeTypedMarketRequirement.every((name) => negativeTypedDirectMemberChecks.includes(name)),
+      typedSaveDataFieldTableRecovery.fieldOwner === "SaveData" &&
+      Number.isInteger(typedSaveDataFieldTableRecovery.fieldCount) &&
+      Number.isInteger(typedSaveDataFieldTableRecovery.methodCount),
+    hasTypedSiblingContrast: typedSiblingContrastRequirement.every((name) =>
+      typedSiblingContrastClues.includes(name)
+    ),
+    hasProgressionPayloadBoundary: payloadFieldRequirement.every((name) =>
+      progressionPayloadFieldClues.includes(name)
+    ),
+    rulesOutTypedMarketField: negativeTypedMarketRequirement.every((name) =>
+      negativeTypedDirectMemberChecks.includes(name)
+    ),
     rulesOutDirectPlayerProfileProgressionOwner:
-      negativeTypedPlayerProfileProgressionRequirement.every((name) => negativeTypedDirectPlayerProfileProgressionChecks.includes(name)),
-    rulesOutDirectMultiverseFieldOwner:
-      negativeDirectMultiverseRequirement.every((name) => negativeTypedDirectMemberChecks.includes(name)),
-    rulesOutTypedSaveDataMarketField:
-      ["SaveData.Market", "SaveData.MultiverseMarket"].every((name) => negativeTypedSaveDataMarketChecks.includes(name)),
+      negativeTypedPlayerProfileProgressionRequirement.every((name) =>
+        negativeTypedDirectPlayerProfileProgressionChecks.includes(name)
+      ),
+    rulesOutDirectMultiverseFieldOwner: negativeDirectMultiverseRequirement.every((name) =>
+      negativeTypedDirectMemberChecks.includes(name)
+    ),
+    rulesOutTypedSaveDataMarketField: ["SaveData.Market", "SaveData.MultiverseMarket"].every(
+      (name) => negativeTypedSaveDataMarketChecks.includes(name)
+    ),
     hasExactSaveDataProgressionOwner:
-      typedSaveDataFieldTableRecovery.fieldOwner === "SaveData"
-      && typedSaveDataProgressionOwnerSamples.includes("IS71Level")
-      && typedSaveDataProgressionOwnerSamples.includes("IS110Level")
-      && typedSaveDataProgressionOwnerSamples.includes("InscryptionsDone")
-      && typedSaveDataProgressionOwnerSamples.includes("EsotericR1Trades")
-      && typedSaveDataProgressionOwnerSamples.includes("NecrumR1Trades")
-      && typedSaveDataProgressionOwnerSamples.includes("Mech1Unlocked")
-      && typedSaveDataProgressionOwnerSamples.includes("Mech1MissionsCompleted"),
+      typedSaveDataFieldTableRecovery.fieldOwner === "SaveData" &&
+      typedSaveDataProgressionOwnerSamples.includes("IS71Level") &&
+      typedSaveDataProgressionOwnerSamples.includes("IS110Level") &&
+      typedSaveDataProgressionOwnerSamples.includes("InscryptionsDone") &&
+      typedSaveDataProgressionOwnerSamples.includes("EsotericR1Trades") &&
+      typedSaveDataProgressionOwnerSamples.includes("NecrumR1Trades") &&
+      typedSaveDataProgressionOwnerSamples.includes("Mech1Unlocked") &&
+      typedSaveDataProgressionOwnerSamples.includes("Mech1MissionsCompleted"),
     hasMissingDirectTypeMap:
-      missingDirectTypeMapClues.includes("PlayerProfileData|Market")
-      && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption")
-      && missingDirectTypeMapClues.includes("PlayerProfileData|MultiverseMarket"),
+      missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
+      missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption") &&
+      missingDirectTypeMapClues.includes("PlayerProfileData|MultiverseMarket"),
     hasSiblingAccessorCluster:
-      siblingAccessorClues.every((name) => accessorClues.includes(name))
-      && siblingMemberShellClues.every((name) => memberShellClues.includes(name)),
+      siblingAccessorClues.every((name) => accessorClues.includes(name)) &&
+      siblingMemberShellClues.every((name) => memberShellClues.includes(name)),
     favorsPlayerProfileMemberHost:
-      accessorClues.includes("get_Market")
-      && memberShellClues.includes("Market")
-      && siblingAccessorClues.filter((name) => accessorClues.includes(name)).length >= 6
-      && siblingMemberShellClues.filter((name) => memberShellClues.includes(name)).length >= 6
-      && handlerBridgeRequirement.every((name) => handlerBridgeClues.includes(name))
-      && missingDirectTypeMapClues.includes("PlayerProfileData|Market")
-      && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption"),
+      accessorClues.includes("get_Market") &&
+      memberShellClues.includes("Market") &&
+      siblingAccessorClues.filter((name) => accessorClues.includes(name)).length >= 6 &&
+      siblingMemberShellClues.filter((name) => memberShellClues.includes(name)).length >= 6 &&
+      handlerBridgeRequirement.every((name) => handlerBridgeClues.includes(name)) &&
+      missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
+      missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption"),
     favorsIntermediateWrapper:
-      accessorClues.includes("get_Market")
-      && accessorClues.includes("get_BM")
-      && accessorClues.includes("get_ZN")
-      && accessorClues.includes("get_TU")
-      && memberShellClues.includes("Market")
-      && payloadFieldRequirement.every((name) => progressionPayloadFieldClues.includes(name))
-      && missingDirectTypeMapClues.includes("PlayerProfileData|Market")
-      && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption"),
+      accessorClues.includes("get_Market") &&
+      accessorClues.includes("get_BM") &&
+      accessorClues.includes("get_ZN") &&
+      accessorClues.includes("get_TU") &&
+      memberShellClues.includes("Market") &&
+      payloadFieldRequirement.every((name) => progressionPayloadFieldClues.includes(name)) &&
+      missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
+      missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption"),
     favorsDirectMemberBoundary:
-      typedBridgeRecovery.bridgeOwner === "PlayerProfileHandler"
-      && typedBridgeRecovery.bridgeAccessor === "get_Market"
-      && typedBridgeRecovery.bridgeReturnType === "MultiverseMarket"
-      && directMemberHandoffRequirement.every((name) => directMemberHandoffClues.includes(name))
-      && typedSiblingContrastRequirement.every((name) => typedSiblingContrastClues.includes(name))
-      && typedHandlerFieldRecovery.fieldOwner === "PlayerProfileHandler"
-      && typedHandlerFieldRecovery.fieldName === "saveInfoCache"
-      && typedHandlerFieldRecovery.fieldType === "PlayerProfileData"
-      && typedPlayerProfileFieldTableRecovery.fieldOwner === "PlayerProfileData"
-      && negativeTypedPlayerProfileProgressionRequirement.every((name) => negativeTypedDirectPlayerProfileProgressionChecks.includes(name))
-      && negativeTypedMarketRequirement.every((name) => negativeTypedDirectMemberChecks.includes(name))
-      && negativeDirectMultiverseRequirement.every((name) => negativeTypedDirectMemberChecks.includes(name))
-      && missingDirectTypeMapClues.includes("PlayerProfileData|Market")
-      && missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption"),
+      typedBridgeRecovery.bridgeOwner === "PlayerProfileHandler" &&
+      typedBridgeRecovery.bridgeAccessor === "get_Market" &&
+      typedBridgeRecovery.bridgeReturnType === "MultiverseMarket" &&
+      directMemberHandoffRequirement.every((name) => directMemberHandoffClues.includes(name)) &&
+      typedSiblingContrastRequirement.every((name) => typedSiblingContrastClues.includes(name)) &&
+      typedHandlerFieldRecovery.fieldOwner === "PlayerProfileHandler" &&
+      typedHandlerFieldRecovery.fieldName === "saveInfoCache" &&
+      typedHandlerFieldRecovery.fieldType === "PlayerProfileData" &&
+      typedPlayerProfileFieldTableRecovery.fieldOwner === "PlayerProfileData" &&
+      negativeTypedPlayerProfileProgressionRequirement.every((name) =>
+        negativeTypedDirectPlayerProfileProgressionChecks.includes(name)
+      ) &&
+      negativeTypedMarketRequirement.every((name) =>
+        negativeTypedDirectMemberChecks.includes(name)
+      ) &&
+      negativeDirectMultiverseRequirement.every((name) =>
+        negativeTypedDirectMemberChecks.includes(name)
+      ) &&
+      missingDirectTypeMapClues.includes("PlayerProfileData|Market") &&
+      missingDirectTypeMapClues.includes("PlayerProfileData|Inscryption"),
     preservedSiblingAccessorCount,
     preservedSiblingMemberCount,
     accessorLabel: "get_Market",
     memberLabel: "Market",
-    handlerBridgeLabel: "PlayerProfileHandler, playerData, GetPlayerProfileData, FillPlayerProfileData, and ConvertSaveDataToProfileData",
-    directMemberHandoffLabel: "get_Market, Market, GetPlayerProfileData, FillPlayerProfileData, and the FillPlayerProfileData coroutine shell",
+    handlerBridgeLabel:
+      "PlayerProfileHandler, playerData, GetPlayerProfileData, FillPlayerProfileData, and ConvertSaveDataToProfileData",
+    directMemberHandoffLabel:
+      "get_Market, Market, GetPlayerProfileData, FillPlayerProfileData, and the FillPlayerProfileData coroutine shell",
     memberShellLabel: "Relics, ShardData, ResearchPointData, and AcademyPointData",
-    siblingAccessorLabel: "get_BM, get_ZN, get_TU, get_Relics, get_CellData, get_ModPointData, get_ShardData, get_ResearchPointData, and get_AcademyPointData",
-    siblingMemberLabel: "Relics, CellData, ModPointData, ShardData, ResearchPointData, and AcademyPointData",
-    progressionPayloadLabel: "InscryptionsDone, EsotericR1Trades, NecrumR1Trades, and Mech1Unlocked",
+    siblingAccessorLabel:
+      "get_BM, get_ZN, get_TU, get_Relics, get_CellData, get_ModPointData, get_ShardData, get_ResearchPointData, and get_AcademyPointData",
+    siblingMemberLabel:
+      "Relics, CellData, ModPointData, ShardData, ResearchPointData, and AcademyPointData",
+    progressionPayloadLabel:
+      "InscryptionsDone, EsotericR1Trades, NecrumR1Trades, and Mech1Unlocked",
     typedSiblingContrastLabel: "PlayerProfileData|GemData and PlayerProfileData|GemNodeCombo",
     typedSaveCacheLabel: "PlayerProfileHandler.saveInfoCache: PlayerProfileData",
-    typedPlayerProfileFieldTableLabel: "PlayerProfileData field table: 89 direct fields and 1 method",
+    typedPlayerProfileFieldTableLabel:
+      "PlayerProfileData field table: 89 direct fields and 1 method",
     typedSaveDataFieldTableLabel: "SaveData field table: 4461 direct fields and 1 method",
-    typedSaveDataOwnerLabel: "SaveData directly declares IS71Level, IS110Level, InscryptionsDone, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, and Mech1MissionsCompleted",
+    typedSaveDataOwnerLabel:
+      "SaveData directly declares IS71Level, IS110Level, InscryptionsDone, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, and Mech1MissionsCompleted",
     typedPlayerProfileNestedTypeLabel: "PlayerProfileData+GemData",
-    negativeTypedMarketLabel: "no typed Market or MultiverseMarket field recovered on PlayerProfileHandler or PlayerProfileData",
-    negativeTypedSaveDataMarketLabel: "no typed Market or MultiverseMarket field recovered on SaveData",
-    negativeTypedPlayerProfileProgressionLabel: "PlayerProfileData does not directly declare IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted in the checked typed field table",
-    negativeMultiverseFieldLabel: "MultiverseMarket does not directly declare InscryptionsDone, IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted in the checked typed probe",
+    negativeTypedMarketLabel:
+      "no typed Market or MultiverseMarket field recovered on PlayerProfileHandler or PlayerProfileData",
+    negativeTypedSaveDataMarketLabel:
+      "no typed Market or MultiverseMarket field recovered on SaveData",
+    negativeTypedPlayerProfileProgressionLabel:
+      "PlayerProfileData does not directly declare IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted in the checked typed field table",
+    negativeMultiverseFieldLabel:
+      "MultiverseMarket does not directly declare InscryptionsDone, IS71Level, IS110Level, EsotericR1Trades, NecrumR1Trades, Mech1Unlocked, or Mech1MissionsCompleted in the checked typed probe",
     cloudSaveLabel: "CloudSavePlayerProfile",
     profileInfoLabel: "GetPlayerProfileInfo",
-    missingTypeMapLabel: "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket",
+    missingTypeMapLabel:
+      "PlayerProfileData|Market, PlayerProfileData|Inscryption, and PlayerProfileData|MultiverseMarket",
     canonicalHostLabel: "PlayerProfileHandler get_Market accessor bridge",
     exactSaveOwnerLabel: "SaveData"
   };
@@ -5584,31 +6612,36 @@ function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
 function getMultiverseMarketMetadataSummary(neighborhood) {
   const results = Array.isArray(neighborhood?.results) ? neighborhood.results : [];
   const findAnchor = (anchor) => results.find((entry) => entry.anchor === anchor);
-  const flattenStrings = (matches = []) => matches.flatMap((entry) => [
-    entry.match_value,
-    ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
-  ]);
+  const flattenStrings = (matches = []) =>
+    matches.flatMap((entry) => [
+      entry.match_value,
+      ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
+    ]);
   const cloudSaveStrings = flattenStrings(findAnchor("CloudSavePlayerProfile")?.matches ?? []);
   const playerProfileStrings = flattenStrings(findAnchor("PlayerProfileData")?.matches ?? []);
   const inscryptionsStrings = flattenStrings(findAnchor("InscryptionsDone")?.matches ?? []);
-  const recoveredIsLevels = [...new Set(
-    inscryptionsStrings
-      .flatMap((value) => Array.from(String(value).matchAll(/IS(\d+)Level/g), (match) => Number(match[1])))
-      .filter((value) => Number.isFinite(value))
-      .sort((left, right) => left - right)
-  )];
+  const recoveredIsLevels = [
+    ...new Set(
+      inscryptionsStrings
+        .flatMap((value) =>
+          Array.from(String(value).matchAll(/IS(\d+)Level/g), (match) => Number(match[1]))
+        )
+        .filter((value) => Number.isFinite(value))
+        .sort((left, right) => left - right)
+    )
+  ];
 
   return {
     hasCloudSavePathClues:
-      cloudSaveStrings.some((value) => String(value).includes("CloudSavePlayerProfile"))
-      && cloudSaveStrings.some((value) => String(value).includes("GetPlayerProfileInfo")),
+      cloudSaveStrings.some((value) => String(value).includes("CloudSavePlayerProfile")) &&
+      cloudSaveStrings.some((value) => String(value).includes("GetPlayerProfileInfo")),
     hasSaveFamilyClues:
-      playerProfileStrings.some((value) => String(value).includes("PlayerProfileData.cs"))
-      && playerProfileStrings.some((value) => String(value).includes("GetPlayerProfileData"))
-      && playerProfileStrings.some((value) => String(value).includes("FillPlayerProfileData")),
+      playerProfileStrings.some((value) => String(value).includes("PlayerProfileData.cs")) &&
+      playerProfileStrings.some((value) => String(value).includes("GetPlayerProfileData")) &&
+      playerProfileStrings.some((value) => String(value).includes("FillPlayerProfileData")),
     hasProgressionFieldCluster:
-      inscryptionsStrings.some((value) => String(value).includes("InscryptionsDone"))
-      && inscryptionsStrings.some((value) => String(value).includes("EsotericR1Trades")),
+      inscryptionsStrings.some((value) => String(value).includes("InscryptionsDone")) &&
+      inscryptionsStrings.some((value) => String(value).includes("EsotericR1Trades")),
     recoveredIsRangeLabel: recoveredIsLevels.length
       ? `IS${recoveredIsLevels[0]}Level through IS${recoveredIsLevels[recoveredIsLevels.length - 1]}Level`
       : ""
@@ -5617,7 +6650,14 @@ function getMultiverseMarketMetadataSummary(neighborhood) {
 
 function formatNumericRanges(values) {
   const normalizedValues = Array.isArray(values)
-    ? [...new Set(values.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
+    ? [
+        ...new Set(
+          values
+            .map((value) => Number(value))
+            .filter((value) => Number.isFinite(value))
+            .sort((left, right) => left - right)
+        )
+      ]
     : [];
   const ranges = [];
   let rangeStart = null;
@@ -5647,7 +6687,14 @@ function formatNumericRanges(values) {
 
 function getMultiverseMarketValidatedCoverage(multiverseMarket) {
   const validatedIds = Array.isArray(multiverseMarket?.source?.validated_ids)
-    ? [...new Set(multiverseMarket.source.validated_ids.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
+    ? [
+        ...new Set(
+          multiverseMarket.source.validated_ids
+            .map((value) => Number(value))
+            .filter((value) => Number.isFinite(value))
+            .sort((left, right) => left - right)
+        )
+      ]
     : [];
 
   return {
@@ -5657,11 +6704,23 @@ function getMultiverseMarketValidatedCoverage(multiverseMarket) {
   };
 }
 
-function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarket, multiverseMarketRangeBoundary) {
+function getImportedMultiverseMarketPreview(
+  importedMarketState,
+  multiverseMarket,
+  multiverseMarketRangeBoundary
+) {
   const overlapIds = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)
-    ? [...new Set(multiverseMarketRangeBoundary.overlapIds.map((value) => Number(value)).filter((value) => Number.isFinite(value)).sort((left, right) => left - right))]
+    ? [
+        ...new Set(
+          multiverseMarketRangeBoundary.overlapIds
+            .map((value) => Number(value))
+            .filter((value) => Number.isFinite(value))
+            .sort((left, right) => left - right)
+        )
+      ]
     : [];
-  const importedState = typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
+  const importedState =
+    typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
   const overlapIdSet = new Set(overlapIds);
   const importedSpanRows = Object.entries(importedState)
     .map(([key, value]) => {
@@ -5719,7 +6778,9 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     ...Array.from({ length: 9 }, (_, index) => `NecrumR${index + 1}Trades`)
   ];
   const importedTradeKeySet = new Set(importedTradeCounters.map((entry) => entry.key));
-  const missingTradeCounterKeys = expectedTradeCounterKeys.filter((key) => !importedTradeKeySet.has(key));
+  const missingTradeCounterKeys = expectedTradeCounterKeys.filter(
+    (key) => !importedTradeKeySet.has(key)
+  );
   const tradeCounterFamilies = {
     Esoteric: importedTradeCounters.filter((entry) => entry.family === "Esoteric"),
     Necrum: importedTradeCounters.filter((entry) => entry.family === "Necrum")
@@ -5748,7 +6809,9 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     })
     .filter(Boolean);
   const importedEarlyMechKeySet = new Set(importedEarlyMechFields.map((entry) => entry.key));
-  const missingEarlyMechFields = earlyMechWindowKeys.filter((key) => !importedEarlyMechKeySet.has(key));
+  const missingEarlyMechFields = earlyMechWindowKeys.filter(
+    (key) => !importedEarlyMechKeySet.has(key)
+  );
   const supportedTextModel = {
     effectLabelLane: "BonusDescriptionText",
     baseBonusLane: "PerLevelBonusText",
@@ -5798,22 +6861,33 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
   }));
 
   return {
-    hasImportedCompatibilityPreview: importedSpanRows.length > 0 || importedTradeCounters.length > 0 || importedEarlyMechFields.length > 0,
+    hasImportedCompatibilityPreview:
+      importedSpanRows.length > 0 ||
+      importedTradeCounters.length > 0 ||
+      importedEarlyMechFields.length > 0,
     hasImportedSpanPreview: importedSpanRows.length > 0,
     importTargetPath: "compatibility.unmappedSystemState.multiverseMarket",
     wrapperOnlyFieldLabel: "InscryptionsDone",
     typedSpanLabel: "IS1Level through IS110Level",
-    tradeCounterLabel: "EsotericR1Trades through EsotericR9Trades and NecrumR1Trades through NecrumR9Trades",
+    tradeCounterLabel:
+      "EsotericR1Trades through EsotericR9Trades and NecrumR1Trades through NecrumR9Trades",
     earlyMechWindowLabel: "Mech1Unlocked through Mech2Unlocked",
     importedSpanRowCount: importedSpanRows.length,
     totalSpanRowCount: 110,
-    importedRangeLabel: importedSpanRows.length ? formatNumericRanges(importedSpanRows.map((entry) => entry.rowId)) : "",
+    importedRangeLabel: importedSpanRows.length
+      ? formatNumericRanges(importedSpanRows.map((entry) => entry.rowId))
+      : "",
     firstImportedRowLabel: importedSpanRows.length ? `IS${importedSpanRows[0].rowId}Level` : "",
-    lastImportedRowLabel: importedSpanRows.length ? `IS${importedSpanRows[importedSpanRows.length - 1].rowId}Level` : "",
+    lastImportedRowLabel: importedSpanRows.length
+      ? `IS${importedSpanRows[importedSpanRows.length - 1].rowId}Level`
+      : "",
     missingSpanRows,
     missingSpanCount: missingSpanRows.length,
     missingSpanLabel: missingSpanRows.length
-      ? missingSpanRows.slice(0, 12).map((rowId) => `IS${rowId}Level`).join(", ")
+      ? missingSpanRows
+          .slice(0, 12)
+          .map((rowId) => `IS${rowId}Level`)
+          .join(", ")
       : "none",
     importedSpanRows,
     hasOverlapGroundedRows: overlapIds.length > 0,
@@ -5832,23 +6906,32 @@ function getImportedMultiverseMarketPreview(importedMarketState, multiverseMarke
     importedTradeCounterCount: importedTradeCounters.length,
     totalTradeCounterCount: expectedTradeCounterKeys.length,
     missingTradeCounterKeys,
-    missingTradeCounterLabel: missingTradeCounterKeys.length ? missingTradeCounterKeys.slice(0, 12).join(", ") : "none",
+    missingTradeCounterLabel: missingTradeCounterKeys.length
+      ? missingTradeCounterKeys.slice(0, 12).join(", ")
+      : "none",
     tradeCounterFamilies,
     tradeCounterSampleLine: importedTradeCounters.length
-      ? importedTradeCounters.slice(0, 6).map((entry) => `${entry.key} ${formatBoundaryValue(entry.value)}`).join(" | ")
+      ? importedTradeCounters
+          .slice(0, 6)
+          .map((entry) => `${entry.key} ${formatBoundaryValue(entry.value)}`)
+          .join(" | ")
       : "",
     hasEarlyMechPreview: importedEarlyMechFields.length > 0,
     importedEarlyMechFields,
     importedEarlyMechCount: importedEarlyMechFields.length,
     totalEarlyMechCount: earlyMechWindowKeys.length,
     missingEarlyMechFields,
-    missingEarlyMechLabel: missingEarlyMechFields.length ? missingEarlyMechFields.join(", ") : "none",
+    missingEarlyMechLabel: missingEarlyMechFields.length
+      ? missingEarlyMechFields.join(", ")
+      : "none",
     previewRows,
     trailingPreviewRows,
     supportedTextModel,
     rowSummaryShape,
     sampleLine: previewRows.length
-      ? previewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | ")
+      ? previewRows
+          .map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`)
+          .join(" | ")
       : ""
   };
 }
@@ -5884,7 +6967,11 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
         <p class="meta">${preview.missingEarlyMechFields.length ? `Missing early-mech quarantine fields: ${escapeHtml(preview.missingEarlyMechLabel)}.` : "All checked early-mech quarantine fields are present in this import."}</p>
         <p class="meta">${preview.hasOverlapGroundedRows ? `The checked ordered-overlap support rows ${escapeHtml(preview.overlapRangeLabel)} are tracked only as boundary evidence. Missing ordered-overlap imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "No ordered-overlap support rows are available in this build."}</p>
         <p class="meta">Planner use stays blocked. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence, not canonical player truth, not row-label claims, not complete live-text bindings, and not recommendation inputs.</p>
-        ${preview.hasOverlapLevelPreview ? `<div class="preview-stack">${preview.overlapRowSummaries.map((entry) => `
+        ${
+          preview.hasOverlapLevelPreview
+            ? `<div class="preview-stack">${preview.overlapRowSummaries
+                .map(
+                  (entry) => `
           <article class="preview-card">
             <strong>IS${escapeHtml(String(entry.rowId))}Level overlap support</strong>
             <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))} at <code>${escapeHtml(entry.fieldPath)}</code>.</p>
@@ -5895,30 +6982,55 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
               ${entry.quarantinedFields.map((field) => `<p class="meta"><code>${escapeHtml(field.key)}</code> -> <code>${escapeHtml(field.slotAlias)}</code> (${escapeHtml(field.status)}; ${escapeHtml(field.reason)})</p>`).join("")}
             </div>
           </article>
-        `).join("")}</div>` : ""}
-        <div class="preview-stack">${preview.previewRows.map((entry) => `
+        `
+                )
+                .join("")}</div>`
+            : ""
+        }
+        <div class="preview-stack">${preview.previewRows
+          .map(
+            (entry) => `
           <article class="preview-card">
             <strong>IS${escapeHtml(String(entry.rowId))}Level</strong>
             <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))}</p>
             <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
           </article>
-        `).join("")}</div>
+        `
+          )
+          .join("")}</div>
         ${preview.trailingPreviewRows.length && preview.importedSpanRowCount > preview.previewRows.length ? `<p class="meta">Trailing imported raw rows: ${escapeHtml(preview.trailingPreviewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | "))}</p>` : ""}
-        ${preview.hasTradeCounterPreview ? `<div class="preview-stack">${preview.importedTradeCounters.slice(0, 8).map((entry) => `
+        ${
+          preview.hasTradeCounterPreview
+            ? `<div class="preview-stack">${preview.importedTradeCounters
+                .slice(0, 8)
+                .map(
+                  (entry) => `
           <article class="preview-card">
             <strong>${escapeHtml(entry.key)}</strong>
             <p class="meta">Imported raw count ${escapeHtml(formatBoundaryValue(entry.value))}</p>
             <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
           </article>
-        `).join("")}</div>` : ""}
+        `
+                )
+                .join("")}</div>`
+            : ""
+        }
         ${preview.tradeCounterSampleLine ? `<p class="meta">Trade-counter sample: ${escapeHtml(preview.tradeCounterSampleLine)}${preview.importedTradeCounterCount > 6 ? "..." : ""}</p>` : ""}
-        ${preview.hasEarlyMechPreview ? `<div class="preview-stack">${preview.importedEarlyMechFields.map((entry) => `
+        ${
+          preview.hasEarlyMechPreview
+            ? `<div class="preview-stack">${preview.importedEarlyMechFields
+                .map(
+                  (entry) => `
           <article class="preview-card">
             <strong>${escapeHtml(entry.key)}</strong>
             <p class="meta">Imported raw value ${escapeHtml(formatBoundaryValue(entry.value))}</p>
             <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
           </article>
-        `).join("")}</div>` : ""}
+        `
+                )
+                .join("")}</div>`
+            : ""
+        }
       </div>
     </article>
   `;
@@ -5950,7 +7062,9 @@ function getActiveMvpRecommendationFeedSupport() {
 }
 
 function getProgressionRecommendationFeedPartition(items) {
-  const all = Array.isArray(items) ? items.filter((item) => item?.module === "shards" || item?.module === "loop") : [];
+  const all = Array.isArray(items)
+    ? items.filter((item) => item?.module === "shards" || item?.module === "loop")
+    : [];
   const valid = [];
   const invalid = [];
   all.forEach((item) => {
@@ -5982,12 +7096,16 @@ function getProgressionSubsystemPartition(items) {
   return {
     shards: shardItems,
     loop: loopItems,
-    tokenShop: getTokenShopGroundedSubsetDefinitions(state.extractedMechanics?.tokenShopRowRemapBoundary)
+    tokenShop: getTokenShopGroundedSubsetDefinitions(
+      state.extractedMechanics?.tokenShopRowRemapBoundary
+    )
   };
 }
 
 function getSelectedProgressionSubsystem() {
-  return ["shards", "loop", "tokenShop"].includes(state.progressionView) ? state.progressionView : "shards";
+  return ["shards", "loop", "tokenShop"].includes(state.progressionView)
+    ? state.progressionView
+    : "shards";
 }
 
 function renderProgressionSubsystemToggle(subsystemFeed) {
@@ -6001,15 +7119,21 @@ function renderProgressionSubsystemToggle(subsystemFeed) {
     { id: "shards", label: `Shard Mining (${counts.shards})` },
     { id: "loop", label: `Loop Prestige (${counts.loop})` },
     { id: "tokenShop", label: `TokenShop (${counts.tokenShop})` }
-  ].map((item) => `
+  ]
+    .map(
+      (item) => `
     <button class="button${selected === item.id ? " is-active" : ""}" type="button" data-progression-view="${escapeHtml(item.id)}" role="tab" aria-selected="${selected === item.id}">
       ${escapeHtml(item.label)}
     </button>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
 function renderProgressionSubsystemSection(title, eyebrow, description, items, tone) {
-  const cards = (Array.isArray(items) ? items : []).map((item) => makeRecommendationCard(item, tone)).join("");
+  const cards = (Array.isArray(items) ? items : [])
+    .map((item) => makeRecommendationCard(item, tone))
+    .join("");
   return `
     <section class="meta-stack">
       <div class="panel-header">
@@ -6057,22 +7181,34 @@ function renderRecommendationFeedSupportNotice(results, surface) {
     surface === "overview" ? "Quarantined feed items" : "Quarantined progression items",
     [
       `${results.length} recommendation item${results.length === 1 ? "" : "s"} failed the shared recommendation contract and were removed from the main feed.`,
-      titles.length ? `Quarantined titles: ${titles.join(", ")}.` : "Quarantined items are missing expected titles.",
+      titles.length
+        ? `Quarantined titles: ${titles.join(", ")}.`
+        : "Quarantined items are missing expected titles.",
       "Use the contract audit details to repair those cards before treating them as player-facing guidance."
     ]
   );
 }
 
 function getRecommendationExplainabilitySummary(results) {
-  const withWhyNow = results.filter((item) => Array.isArray(item.whyNow) && item.whyNow.length).length;
-  const withAssumptions = results.filter((item) => Array.isArray(item.assumptions) && item.assumptions.length).length;
-  const withWarnings = results.filter((item) => Array.isArray(item.warnings) && item.warnings.length).length;
+  const withWhyNow = results.filter(
+    (item) => Array.isArray(item.whyNow) && item.whyNow.length
+  ).length;
+  const withAssumptions = results.filter(
+    (item) => Array.isArray(item.assumptions) && item.assumptions.length
+  ).length;
+  const withWarnings = results.filter(
+    (item) => Array.isArray(item.warnings) && item.warnings.length
+  ).length;
   const withNotes = results.filter((item) => String(item.notes || "").trim()).length;
-  const withFullContext = results.filter((item) =>
-    Array.isArray(item.whyNow) && item.whyNow.length
-    && Array.isArray(item.assumptions) && item.assumptions.length
-    && Array.isArray(item.warnings) && item.warnings.length
-    && String(item.notes || "").trim()
+  const withFullContext = results.filter(
+    (item) =>
+      Array.isArray(item.whyNow) &&
+      item.whyNow.length &&
+      Array.isArray(item.assumptions) &&
+      item.assumptions.length &&
+      Array.isArray(item.warnings) &&
+      item.warnings.length &&
+      String(item.notes || "").trim()
   ).length;
   const averageConfidence = Math.round(
     (results.reduce((sum, item) => sum + Number(item.confidence || 0), 0) / results.length) * 100
@@ -6141,14 +7277,18 @@ function renderValidationSection(title, description, results) {
       </div>
       <p class="meta">${escapeHtml(description)}</p>
       <div class="validation-grid">
-        ${results.map((item) => `
+        ${results
+          .map(
+            (item) => `
           <article class="validation-card ${item.pass ? "pass" : "warn"}">
             <strong>${item.title}</strong>
             <p class="meta">${item.scope} ${item.scope === "Support" ? "| quarantined support surface" : item.scope === "APK" ? "| extracted grounding gate" : "| grounded MVP surface"}</p>
             <p class="validation-status">${item.pass ? "PASS" : "WARN"} | Expected: ${item.expected}</p>
             <p class="meta">${item.actual}</p>
           </article>
-        `).join("")}
+        `
+          )
+          .join("")}
       </div>
     </section>
   `;
@@ -6160,7 +7300,11 @@ function previewImport() {
   if (dataset === "shardMilestones") {
     state.importPreview = [];
     $("#importPreview").innerHTML = "";
-    setStatus("importStatus", "Shard milestone manual import stays disabled; this build only uses the bundled grounded descriptive dataset.", "warning");
+    setStatus(
+      "importStatus",
+      "Shard milestone manual import stays disabled; this build only uses the bundled grounded descriptive dataset.",
+      "warning"
+    );
     return [];
   }
   const raw = $("#importText").value.trim();
@@ -6173,18 +7317,28 @@ function previewImport() {
 
   const rows = format === "json" ? JSON.parse(raw) : parseCsv(raw);
   state.importPreview = rows.map((row, index) => normalizeImportRow(row, dataset, index));
-  $("#importPreview").innerHTML = state.importPreview.slice(0, 8).map((row) => `
+  $("#importPreview").innerHTML = state.importPreview
+    .slice(0, 8)
+    .map(
+      (row) => `
     <article class="preview-card">
       <strong>Row</strong>
       <pre>${escapeHtml(JSON.stringify(row, null, 2))}</pre>
     </article>
-  `).join("");
+  `
+    )
+    .join("");
   setStatus("importStatus", `Previewed ${state.importPreview.length} normalized rows.`, "success");
   return state.importPreview;
 }
 
 function normalizeImportRow(row, dataset, index = 0) {
-  const clean = Object.fromEntries(Object.entries(row).map(([key, value]) => [key.trim(), typeof value === "string" ? value.trim() : value]));
+  const clean = Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [
+      key.trim(),
+      typeof value === "string" ? value.trim() : value
+    ])
+  );
   if (dataset === "gemNodes") {
     return {
       id: clean.id || slugify(clean.label || `gem-node-${index + 1}`),
@@ -6239,7 +7393,11 @@ function applyImportPreview() {
   const dataset = $("#importDataset").value;
   if (dataset === "shardMilestones") {
     state.importPreview = [];
-    setStatus("importStatus", "Shard milestone manual import stays disabled; this build only uses the bundled grounded descriptive dataset.", "warning");
+    setStatus(
+      "importStatus",
+      "Shard milestone manual import stays disabled; this build only uses the bundled grounded descriptive dataset.",
+      "warning"
+    );
     return;
   }
   if (!state.importPreview.length) {
@@ -6257,7 +7415,11 @@ function applyImportPreview() {
     importedAt: new Date().toISOString()
   });
   saveStoredJson(STORAGE_KEYS.snapshot, state.snapshot);
-  setStatus("importStatus", `Imported ${state.importPreview.length} rows into ${dataset}.`, "success");
+  setStatus(
+    "importStatus",
+    `Imported ${state.importPreview.length} rows into ${dataset}.`,
+    "success"
+  );
   renderAll();
 }
 
@@ -6280,7 +7442,12 @@ function renderGeneratorOcrFileList() {
   }));
 
   $("#generatorOcrFileList").innerHTML = items.length
-    ? items.map((item) => `<article class="preview-card"><strong>${escapeHtml(item.name)}</strong><p class="meta">${Math.round(item.size / 1024)} KB | ${item.source}</p></article>`).join("")
+    ? items
+        .map(
+          (item) =>
+            `<article class="preview-card"><strong>${escapeHtml(item.name)}</strong><p class="meta">${Math.round(item.size / 1024)} KB | ${item.source}</p></article>`
+        )
+        .join("")
     : `<p class="meta">No screenshots selected yet.</p>`;
 
   renderGeneratorOcrPreview();
@@ -6293,7 +7460,11 @@ function renderGeneratorOcrFileList() {
 
   if (state.generatorOcrParsed) {
     const count = Object.keys(state.generatorOcrParsed.parsed ?? {}).length;
-    setStatus("generatorOcrStatus", `Experimental OCR parsed ${count} generator tiers. Review it carefully before applying.`, "success");
+    setStatus(
+      "generatorOcrStatus",
+      `Experimental OCR parsed ${count} generator tiers. Review it carefully before applying.`,
+      "success"
+    );
     return;
   }
 
@@ -6312,7 +7483,9 @@ function handleGeneratorOcrPaste(event) {
       if (!file) {
         return null;
       }
-      return new File([file], file.name || `clipboard-${Date.now()}-${index + 1}.png`, { type: file.type });
+      return new File([file], file.name || `clipboard-${Date.now()}-${index + 1}.png`, {
+        type: file.type
+      });
     })
     .filter(Boolean);
 
@@ -6335,7 +7508,8 @@ function getQueuedGeneratorOcrFiles() {
 function renderGeneratorOcrButtons() {
   const hasFiles = getQueuedGeneratorOcrFiles().length > 0;
   $("#parseGeneratorOcrBtn").disabled = !hasFiles || state.generatorOcrBusy;
-  $("#applyGeneratorOcrBtn").disabled = state.generatorOcrBusy || !$("#generatorOcrText").value.trim();
+  $("#applyGeneratorOcrBtn").disabled =
+    state.generatorOcrBusy || !$("#generatorOcrText").value.trim();
 }
 
 function renderGeneratorOcrPreview() {
@@ -6352,12 +7526,13 @@ function renderGeneratorOcrPreview() {
     return;
   }
 
-  preview.innerHTML = rows.map((row) => {
-    const tier = escapeHtml(String(row.tier ?? ""));
-    const manual = escapeHtml(String(row.manual ?? ""));
-    const titleRaw = escapeHtml(String(row.title_raw ?? ""));
-    const manualRaw = escapeHtml(String(row.manual_raw ?? ""));
-    return `
+  preview.innerHTML = rows
+    .map((row) => {
+      const tier = escapeHtml(String(row.tier ?? ""));
+      const manual = escapeHtml(String(row.manual ?? ""));
+      const titleRaw = escapeHtml(String(row.title_raw ?? ""));
+      const manualRaw = escapeHtml(String(row.manual_raw ?? ""));
+      return `
       <article class="preview-card">
         <strong>${tier.toUpperCase()}</strong>
         <p class="meta">Manual: ${manual}</p>
@@ -6365,7 +7540,8 @@ function renderGeneratorOcrPreview() {
         <p class="meta">Manual OCR: ${manualRaw || "-"}</p>
       </article>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 async function parseGeneratorOcrImages() {
@@ -6397,7 +7573,11 @@ async function parseGeneratorOcrImages() {
 
     state.generatorOcrParsed = payload;
     $("#generatorOcrText").value = JSON.stringify(payload.parsed ?? payload, null, 2);
-    setStatus("generatorOcrStatus", "Experimental OCR parsed successfully. Review the rows below before applying.", "success");
+    setStatus(
+      "generatorOcrStatus",
+      "Experimental OCR parsed successfully. Review the rows below before applying.",
+      "success"
+    );
   } catch (error) {
     state.generatorOcrParsed = null;
     setStatus("generatorOcrStatus", `Generator OCR failed: ${error.message}`, "warning");
@@ -6430,7 +7610,11 @@ function arrayBufferToBase64(buffer) {
 function applyGeneratorOcrPreview() {
   const raw = $("#generatorOcrText").value.trim();
   if (!raw) {
-    setStatus("generatorOcrStatus", "Parse screenshots first, or paste parsed generator OCR JSON.", "warning");
+    setStatus(
+      "generatorOcrStatus",
+      "Parse screenshots first, or paste parsed generator OCR JSON.",
+      "warning"
+    );
     return;
   }
 
@@ -6442,18 +7626,26 @@ function applyGeneratorOcrPreview() {
     return;
   }
 
-  const rows = Array.isArray(parsed) ? parsed : Object.entries(parsed).map(([tier, manual]) => ({ tier, manual }));
+  const rows = Array.isArray(parsed)
+    ? parsed
+    : Object.entries(parsed).map(([tier, manual]) => ({ tier, manual }));
   const normalized = rows.reduce((accumulator, row, index) => {
     const tierKey = normalizeGeneratorTierKey(row.tier ?? row.mk ?? row.id ?? `n${index + 1}`);
     if (!tierKey) {
       return accumulator;
     }
-    accumulator[tierKey] = normalizeCiNumberValue(row.manual ?? row.value ?? row.manualOwned ?? row.amount ?? "");
+    accumulator[tierKey] = normalizeCiNumberValue(
+      row.manual ?? row.value ?? row.manualOwned ?? row.amount ?? ""
+    );
     return accumulator;
   }, {});
 
   if (!Object.keys(normalized).length) {
-    setStatus("generatorOcrStatus", "No usable generator manual values were found in that JSON.", "warning");
+    setStatus(
+      "generatorOcrStatus",
+      "No usable generator manual values were found in that JSON.",
+      "warning"
+    );
     return;
   }
 
@@ -6465,7 +7657,11 @@ function applyGeneratorOcrPreview() {
   renderShipPlayerState();
   renderShipPanels();
   renderGeneratorOcrButtons();
-  setStatus("generatorOcrStatus", `Applied experimental OCR values for ${Object.keys(normalized).length} generator tiers.`, "success");
+  setStatus(
+    "generatorOcrStatus",
+    `Applied experimental OCR values for ${Object.keys(normalized).length} generator tiers.`,
+    "success"
+  );
 }
 
 function persistShipConfig(showStatus = false) {
@@ -6476,8 +7672,10 @@ function persistShipConfig(showStatus = false) {
 }
 
 function getImportedRecordCount() {
-  return ["shipLoadouts", "validationCases"]
-    .reduce((total, key) => total + (Array.isArray(state.snapshot[key]) ? state.snapshot[key].length : 0), 0);
+  return ["shipLoadouts", "validationCases"].reduce(
+    (total, key) => total + (Array.isArray(state.snapshot[key]) ? state.snapshot[key].length : 0),
+    0
+  );
 }
 
 function formatThresholdScheduleSummary(thresholds = {}) {
@@ -6496,9 +7694,11 @@ function getGroundedShardMechanics() {
 }
 
 function getSelectedShardMilestoneId() {
-  return getShardPlannerState().focusMilestoneId
-    || getDefaultShardFocusMilestoneId(getGroundedShardMilestones())
-    || "";
+  return (
+    getShardPlannerState().focusMilestoneId ||
+    getDefaultShardFocusMilestoneId(getGroundedShardMilestones()) ||
+    ""
+  );
 }
 
 function getDefaultShardFocusMilestoneId(milestones) {
@@ -6550,11 +7750,16 @@ function getShardFocusLevelForMilestone(milestone) {
 function getShardSceneMonoBehaviourProbeSummary(probe) {
   const monoBehaviours = Array.isArray(probe?.monoBehaviours) ? probe.monoBehaviours : [];
   const shardMining = monoBehaviours.find((entry) => entry?.scriptName === "ShardMining");
-  const textHandler = monoBehaviours.find((entry) => entry?.scriptName === "ShardPerLevelTextHandler");
-  const constructionMilestones = monoBehaviours.find((entry) => entry?.scriptName === "ConstructionMilestones");
-  const formatProbeLabel = (entry) => entry
-    ? `${entry.assetsFile} path ${entry.pathId} @ ${entry.byteStart} (${entry.byteSize} bytes)`
-    : "unavailable";
+  const textHandler = monoBehaviours.find(
+    (entry) => entry?.scriptName === "ShardPerLevelTextHandler"
+  );
+  const constructionMilestones = monoBehaviours.find(
+    (entry) => entry?.scriptName === "ConstructionMilestones"
+  );
+  const formatProbeLabel = (entry) =>
+    entry
+      ? `${entry.assetsFile} path ${entry.pathId} @ ${entry.byteStart} (${entry.byteSize} bytes)`
+      : "unavailable";
   return {
     hasBoundary: Boolean(shardMining),
     shardMiningLabel: formatProbeLabel(shardMining),
@@ -6564,32 +7769,48 @@ function getShardSceneMonoBehaviourProbeSummary(probe) {
 }
 
 function getShardCostParameterProbeSummary(probe) {
-    const metadataFamilies = probe?.metadataFamilies ?? {};
-    const candidateTuples = Array.isArray(probe?.shardMiningCandidateTuples) ? probe.shardMiningCandidateTuples : [];
-    const rowAlignedTuples = Array.isArray(probe?.rowAlignedTupleCandidates) ? probe.rowAlignedTupleCandidates : [];
-    const signatureGroups = Array.isArray(probe?.signatureGroups) ? probe.signatureGroups : [];
-    const startCostFields = Array.isArray(metadataFamilies.startCostFields) ? metadataFamilies.startCostFields : [];
-    const costExponentFields = Array.isArray(metadataFamilies.costExponentFields) ? metadataFamilies.costExponentFields : [];
-    const growthExponentFields = Array.isArray(metadataFamilies.growthExponentFields) ? metadataFamilies.growthExponentFields : [];
-    const sampleTuple = rowAlignedTuples[0] ?? candidateTuples[0] ?? null;
-    return {
-    hasFullMetadataFamilies: startCostFields.length === 30 && costExponentFields.length === 30 && growthExponentFields.length >= 30,
-    metadataLabel: startCostFields.length === 30 && costExponentFields.length === 30
-      ? "SU0-29 StartCost and CostExponent"
-      : "partial SU* cost fields",
-      hasCandidateTuples: candidateTuples.length > 0,
-      hasRowAlignedTuples: rowAlignedTuples.length > 0,
-      candidateTupleCount: candidateTuples.length,
-      rowAlignedTupleCount: rowAlignedTuples.length,
-      signatureGroupCount: signatureGroups.length,
-      sampleTupleLabel: sampleTuple
-        ? `${formatProbeNumber(sampleTuple.intValue)} | ${formatProbeNumber(sampleTuple.exponentA)} | ${formatProbeNumber(sampleTuple.exponentB)} | ${formatProbeNumber(sampleTuple.tailScalar)}`
-        : "unavailable"
-    };
-  }
+  const metadataFamilies = probe?.metadataFamilies ?? {};
+  const candidateTuples = Array.isArray(probe?.shardMiningCandidateTuples)
+    ? probe.shardMiningCandidateTuples
+    : [];
+  const rowAlignedTuples = Array.isArray(probe?.rowAlignedTupleCandidates)
+    ? probe.rowAlignedTupleCandidates
+    : [];
+  const signatureGroups = Array.isArray(probe?.signatureGroups) ? probe.signatureGroups : [];
+  const startCostFields = Array.isArray(metadataFamilies.startCostFields)
+    ? metadataFamilies.startCostFields
+    : [];
+  const costExponentFields = Array.isArray(metadataFamilies.costExponentFields)
+    ? metadataFamilies.costExponentFields
+    : [];
+  const growthExponentFields = Array.isArray(metadataFamilies.growthExponentFields)
+    ? metadataFamilies.growthExponentFields
+    : [];
+  const sampleTuple = rowAlignedTuples[0] ?? candidateTuples[0] ?? null;
+  return {
+    hasFullMetadataFamilies:
+      startCostFields.length === 30 &&
+      costExponentFields.length === 30 &&
+      growthExponentFields.length >= 30,
+    metadataLabel:
+      startCostFields.length === 30 && costExponentFields.length === 30
+        ? "SU0-29 StartCost and CostExponent"
+        : "partial SU* cost fields",
+    hasCandidateTuples: candidateTuples.length > 0,
+    hasRowAlignedTuples: rowAlignedTuples.length > 0,
+    candidateTupleCount: candidateTuples.length,
+    rowAlignedTupleCount: rowAlignedTuples.length,
+    signatureGroupCount: signatureGroups.length,
+    sampleTupleLabel: sampleTuple
+      ? `${formatProbeNumber(sampleTuple.intValue)} | ${formatProbeNumber(sampleTuple.exponentA)} | ${formatProbeNumber(sampleTuple.exponentB)} | ${formatProbeNumber(sampleTuple.tailScalar)}`
+      : "unavailable"
+  };
+}
 
 function getShardBonusSlotRowSummary(row) {
-  const rows = Array.isArray(state.shardGrounding?.bonusSlotProbe?.rows) ? state.shardGrounding.bonusSlotProbe.rows : [];
+  const rows = Array.isArray(state.shardGrounding?.bonusSlotProbe?.rows)
+    ? state.shardGrounding.bonusSlotProbe.rows
+    : [];
   return rows.find((entry) => Number(entry.row) === Number(row)) || null;
 }
 
@@ -6609,7 +7830,9 @@ function getShardRowDirectValues(row) {
 }
 
 function getShardExtractedUnlockRequirement(row) {
-  const values = Array.isArray(state.shardGrounding?.costParameterProbe?.unlockRequirementBlock?.values)
+  const values = Array.isArray(
+    state.shardGrounding?.costParameterProbe?.unlockRequirementBlock?.values
+  )
     ? state.shardGrounding.costParameterProbe.unlockRequirementBlock.values
     : [];
   const value = values[Number(row)];
@@ -6618,7 +7841,9 @@ function getShardExtractedUnlockRequirement(row) {
 
 function getShardExtractedBonusPerLevel(row, bonusIndex) {
   const directValues = getShardRowDirectValues(row);
-  const bonusValues = Array.isArray(directValues?.bonusPerLevelValues) ? directValues.bonusPerLevelValues : [];
+  const bonusValues = Array.isArray(directValues?.bonusPerLevelValues)
+    ? directValues.bonusPerLevelValues
+    : [];
   const value = bonusValues[bonusIndex];
   return Number.isFinite(Number(value)) ? Number(value) : null;
 }
@@ -6629,7 +7854,9 @@ function getShardExtractedCostFieldMapping(row) {
 }
 
 function getShardNativeCostRowSummary(row) {
-  const rows = Array.isArray(state.shardGrounding?.costNativeProbe?.rows) ? state.shardGrounding.costNativeProbe.rows : [];
+  const rows = Array.isArray(state.shardGrounding?.costNativeProbe?.rows)
+    ? state.shardGrounding.costNativeProbe.rows
+    : [];
   return rows.find((entry) => Number(entry.row) === Number(row)) || null;
 }
 
@@ -6656,8 +7883,11 @@ function getShardNativeCostStageSummary(row, level = 0) {
   const orderedStages = stages
     .filter((stage) => Number.isFinite(Number(stage?.minimumLevel)))
     .sort((left, right) => Number(left.minimumLevel) - Number(right.minimumLevel));
-  const stageLabel = orderedStages.map((stage) => formatShardNativeThresholdStage(stage)).join(" | ");
-  const nextStage = orderedStages.find((stage) => Number(stage.minimumLevel) > Number(level)) || null;
+  const stageLabel = orderedStages
+    .map((stage) => formatShardNativeThresholdStage(stage))
+    .join(" | ");
+  const nextStage =
+    orderedStages.find((stage) => Number(stage.minimumLevel) > Number(level)) || null;
   return {
     stageLabel,
     nextStageLabel: nextStage
@@ -6678,7 +7908,10 @@ function getShardFormulaApplicationProfile(row) {
     return profiles.rowZero || null;
   }
   const normalRows = Array.isArray(profiles.normalRows) ? profiles.normalRows : [];
-  return normalRows.find((entry) => Array.isArray(entry?.rows) && entry.rows.includes(Number(row))) || null;
+  return (
+    normalRows.find((entry) => Array.isArray(entry?.rows) && entry.rows.includes(Number(row))) ||
+    null
+  );
 }
 
 function formatShardFormulaClassLabel(formulaClass) {
@@ -6694,14 +7927,20 @@ function formatShardFormulaClassLabel(formulaClass) {
 }
 
 function formatShardExtractedBonusPerLevel(value) {
-  return Number.isFinite(Number(value)) ? `${Number(value).toFixed(3).replace(/\.?0+$/u, "")}x` : "Unknown";
+  return Number.isFinite(Number(value))
+    ? `${Number(value)
+        .toFixed(3)
+        .replace(/\.?0+$/u, "")}x`
+    : "Unknown";
 }
 
 function formatShardExtractedCostFieldMapping(mapping) {
   if (!mapping || typeof mapping !== "object" || !mapping.values) {
     return "Not recovered in direct row payload";
   }
-  const fieldNames = Array.isArray(mapping.fieldNames) ? mapping.fieldNames : Object.keys(mapping.values);
+  const fieldNames = Array.isArray(mapping.fieldNames)
+    ? mapping.fieldNames
+    : Object.keys(mapping.values);
   const parts = fieldNames
     .filter((fieldName) => Number.isFinite(Number(mapping.values?.[fieldName])))
     .map((fieldName) => `${fieldName} ${formatProbeNumber(mapping.values[fieldName])}`);
@@ -6717,47 +7956,73 @@ function formatShardExtractedCostFieldMapping(mapping) {
 
 function getShardMilestoneGroundedSummary(milestone) {
   const row = Number(milestone?.milestoneNumber);
-  const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(state.shardGrounding?.rowModelBoundary);
+  const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
+    state.shardGrounding?.rowModelBoundary
+  );
   const titleEffectBoundary = state.shardGrounding?.titleEffectBoundary;
   const titleEffectSummary = getShardMilestoneTitleEffectBoundarySummary(titleEffectBoundary);
-  const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(state.shardGrounding?.effectTextHandlerBoundary);
-  const costModelBoundary = getShardCostModelBoundarySummary(state.shardGrounding?.costModelBoundary);
-  const costParameterProbe = getShardCostParameterProbeSummary(state.shardGrounding?.costParameterProbe);
+  const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
+    state.shardGrounding?.effectTextHandlerBoundary
+  );
+  const costModelBoundary = getShardCostModelBoundarySummary(
+    state.shardGrounding?.costModelBoundary
+  );
+  const costParameterProbe = getShardCostParameterProbeSummary(
+    state.shardGrounding?.costParameterProbe
+  );
   const bonusSlotSummary = getShardBonusSlotRowSummary(row);
   const directRowValues = getShardRowDirectValues(row);
   const extractedUnlockRequirement = getShardExtractedUnlockRequirement(row);
-  const titleCandidates = (Array.isArray(titleEffectBoundary?.titleAssetCandidates) ? titleEffectBoundary.titleAssetCandidates : [])
+  const titleCandidates = (
+    Array.isArray(titleEffectBoundary?.titleAssetCandidates)
+      ? titleEffectBoundary.titleAssetCandidates
+      : []
+  )
     .filter((entry) => entry?.row === row)
     .map((entry) => entry.title);
   const uniqueTitles = [...new Set(titleCandidates)];
-  const bonusCalcAccessors = (Array.isArray(titleEffectBoundary?.sampleBonusCalcAccessors) ? titleEffectBoundary.sampleBonusCalcAccessors : [])
-    .filter((name) => name.startsWith(`get_SU${row}Bonus`));
-  const hasRowCostAccessor = rowModelBoundary.hasBoundary
-    && (((row >= 0 && row <= 9) || (row >= 23 && row <= 29)));
+  const bonusCalcAccessors = (
+    Array.isArray(titleEffectBoundary?.sampleBonusCalcAccessors)
+      ? titleEffectBoundary.sampleBonusCalcAccessors
+      : []
+  ).filter((name) => name.startsWith(`get_SU${row}Bonus`));
+  const hasRowCostAccessor =
+    rowModelBoundary.hasBoundary && ((row >= 0 && row <= 9) || (row >= 23 && row <= 29));
   const titleCoverageStatusLabel = uniqueTitles.length ? "Available" : "Unmapped";
   const rowShellStatusLabel = rowModelBoundary.hasBoundary ? "Unmapped" : "Blocked";
-  const effectStatusLabel = effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily ? "Available" : "Blocked";
+  const effectStatusLabel =
+    effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily
+      ? "Available"
+      : "Blocked";
   const costStatusLabel = directRowValues
     ? "Available"
-    : (row === 0 || hasRowCostAccessor || costParameterProbe.hasRowAlignedTuples || costParameterProbe.hasCandidateTuples || costModelBoundary.hasSampledCostWindows)
+    : row === 0 ||
+        hasRowCostAccessor ||
+        costParameterProbe.hasRowAlignedTuples ||
+        costParameterProbe.hasCandidateTuples ||
+        costModelBoundary.hasSampledCostWindows
       ? "Integrated"
       : "Blocked";
   return {
     titleCoverageTone: uniqueTitles.length ? "pass" : "warn",
     titleCoverageStatusLabel,
     titleCoverageStatusClass: `shard-status-pill-${titleCoverageStatusLabel.toLowerCase()}`,
-    titleCoverageLine: uniqueTitles.length > 1
-      ? `Row ${row} has multiple shipped title candidates, so the UI keeps the label descriptive: ${uniqueTitles.join(" | ")}.`
-      : uniqueTitles.length === 1
-        ? `Row ${row} has a shipped title candidate: ${uniqueTitles[0]}.`
-        : `Row ${row} does not yet have a preserved shipped title candidate in the checked bundle.`,
+    titleCoverageLine:
+      uniqueTitles.length > 1
+        ? `Row ${row} has multiple shipped title candidates, so the UI keeps the label descriptive: ${uniqueTitles.join(" | ")}.`
+        : uniqueTitles.length === 1
+          ? `Row ${row} has a shipped title candidate: ${uniqueTitles[0]}.`
+          : `Row ${row} does not yet have a preserved shipped title candidate in the checked bundle.`,
     rowShellTone: rowModelBoundary.hasBoundary ? "pass" : "warn",
     rowShellStatusLabel,
     rowShellStatusClass: `shard-status-pill-${rowShellStatusLabel.toLowerCase()}`,
     rowShellLine: rowModelBoundary.hasBoundary
       ? `Row ${row} sits on a recovered shard-local row shell, but its final player-owned owner mapping is still unresolved.`
       : `The checked row-model bundle is not strong enough to map row ${row} safely yet.`,
-    effectTone: effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily ? "pass" : "warn",
+    effectTone:
+      effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily
+        ? "pass"
+        : "warn",
     effectStatusLabel,
     effectStatusClass: `shard-status-pill-${effectStatusLabel.toLowerCase()}`,
     effectLine: bonusCalcAccessors.length
@@ -6768,23 +8033,25 @@ function getShardMilestoneGroundedSummary(milestone) {
     costTone: row === 0 || hasRowCostAccessor || directRowValues ? "pass" : "warn",
     costStatusLabel,
     costStatusClass: `shard-status-pill-${costStatusLabel.toLowerCase()}`,
-    costLine: row === 0 && costModelBoundary.hasRow0FormulaShell
-      ? `${costParameterProbe.hasFullMetadataFamilies ? "Recovered metadata preserves the full row-local shard-cost family." : "Recovered metadata preserves part of the row-local shard-cost family."} ${directRowValues ? "Row 0 also preserves direct serialized cost values." : costParameterProbe.hasRowAlignedTuples ? `Other rows already preserve ${costParameterProbe.rowAlignedTupleCount} direct row-aligned cost value groups.` : costParameterProbe.hasCandidateTuples ? "Additional numeric shard-cost evidence is present but not yet row-complete." : "Numeric row values are still blocked."} The app shows this as descriptive evidence only, not exact next-cost certainty.`
-      : hasRowCostAccessor && costModelBoundary.hasSampledCostWindows
-        ? `${directRowValues ? "This row preserves direct serialized shard-cost values and bonus-per-level evidence." : costParameterProbe.hasRowAlignedTuples ? "Nearby rows preserve row-aligned shard-cost value groups, which supports this row's cost lane." : "The row-specific cost lane is identified, but its direct numeric values are still blocked."} The app keeps this evidence descriptive until owner mapping and exact cost math are verified.`
-      : directRowValues
-          ? `This row preserves direct shard-cost values, which is enough for a descriptive evidence note but not enough for exact affordability or best-buy claims.`
-          : `${costParameterProbe.hasFullMetadataFamilies ? "Recovered shard-cost field families exist globally." : "Only a partial shard-cost shell is recovered so far."} ${costParameterProbe.hasRowAlignedTuples ? "Direct row-aligned cost evidence exists for other rows, but this row is not fully mapped yet." : costParameterProbe.hasCandidateTuples ? "Unmapped numeric shard-cost evidence exists, but it is not attached to this row yet." : "Only generic cost-bump notes remain available."}`
-    ,
+    costLine:
+      row === 0 && costModelBoundary.hasRow0FormulaShell
+        ? `${costParameterProbe.hasFullMetadataFamilies ? "Recovered metadata preserves the full row-local shard-cost family." : "Recovered metadata preserves part of the row-local shard-cost family."} ${directRowValues ? "Row 0 also preserves direct serialized cost values." : costParameterProbe.hasRowAlignedTuples ? `Other rows already preserve ${costParameterProbe.rowAlignedTupleCount} direct row-aligned cost value groups.` : costParameterProbe.hasCandidateTuples ? "Additional numeric shard-cost evidence is present but not yet row-complete." : "Numeric row values are still blocked."} The app shows this as descriptive evidence only, not exact next-cost certainty.`
+        : hasRowCostAccessor && costModelBoundary.hasSampledCostWindows
+          ? `${directRowValues ? "This row preserves direct serialized shard-cost values and bonus-per-level evidence." : costParameterProbe.hasRowAlignedTuples ? "Nearby rows preserve row-aligned shard-cost value groups, which supports this row's cost lane." : "The row-specific cost lane is identified, but its direct numeric values are still blocked."} The app keeps this evidence descriptive until owner mapping and exact cost math are verified.`
+          : directRowValues
+            ? `This row preserves direct shard-cost values, which is enough for a descriptive evidence note but not enough for exact affordability or best-buy claims.`
+            : `${costParameterProbe.hasFullMetadataFamilies ? "Recovered shard-cost field families exist globally." : "Only a partial shard-cost shell is recovered so far."} ${costParameterProbe.hasRowAlignedTuples ? "Direct row-aligned cost evidence exists for other rows, but this row is not fully mapped yet." : costParameterProbe.hasCandidateTuples ? "Unmapped numeric shard-cost evidence exists, but it is not attached to this row yet." : "Only generic cost-bump notes remain available."}`,
     extractedUnlockRequirement
   };
 }
 
 function getShardMilestoneDisplayName(milestone) {
   const row = Number(milestone?.milestoneNumber);
-  const titleCandidates = (Array.isArray(state.shardGrounding?.titleEffectBoundary?.titleAssetCandidates)
-    ? state.shardGrounding.titleEffectBoundary.titleAssetCandidates
-    : [])
+  const titleCandidates = (
+    Array.isArray(state.shardGrounding?.titleEffectBoundary?.titleAssetCandidates)
+      ? state.shardGrounding.titleEffectBoundary.titleAssetCandidates
+      : []
+  )
     .filter((entry) => entry?.row === row)
     .map((entry) => String(entry.title || "").trim())
     .filter(Boolean);
@@ -6796,21 +8063,24 @@ function getShardMilestoneDisplayName(milestone) {
 }
 
 function getShardMilestonePanelTitle(milestone) {
-    const row = Number(milestone?.milestoneNumber ?? 0);
-    const displayName = getShardMilestoneDisplayName(milestone);
-    const normalizedName = String(displayName || "")
-      .replace(/^The\s+/i, "")
-      .replace(/\([^)]*\)/g, "")
-      .replace(/\s+Milestone$/i, "")
-      .trim();
-    return `#${row} THE ${normalizedName.toUpperCase()} MILESTONE`;
-  }
+  const row = Number(milestone?.milestoneNumber ?? 0);
+  const displayName = getShardMilestoneDisplayName(milestone);
+  const normalizedName = String(displayName || "")
+    .replace(/^The\s+/i, "")
+    .replace(/\([^)]*\)/g, "")
+    .replace(/\s+Milestone$/i, "")
+    .trim();
+  return `#${row} THE ${normalizedName.toUpperCase()} MILESTONE`;
+}
 
 function getShardMilestoneLevelRailSummary(milestone) {
   const row = Number(milestone?.milestoneNumber ?? 0);
   const directValues = getShardRowDirectValues(row);
   const profile = getShardFormulaApplicationProfile(row);
-  const nativeSummary = getShardNativeCostStageSummary(row, getShardFocusLevelForMilestone(milestone));
+  const nativeSummary = getShardNativeCostStageSummary(
+    row,
+    getShardFocusLevelForMilestone(milestone)
+  );
   return {
     buttonLabel: "Level up",
     costLabel: directValues
@@ -6818,7 +8088,9 @@ function getShardMilestoneLevelRailSummary(milestone) {
       : "Current cost formula not yet verified.",
     formulaLabel: profile
       ? `${formatShardFormulaClassLabel(profile.formulaClass)}${profile.stageCoverage ? ` (${profile.stageCoverage})` : ""}`
-      : (row === 0 ? "Row 0 special case" : "Unresolved native class"),
+      : row === 0
+        ? "Row 0 special case"
+        : "Unresolved native class",
     stageLabel: nativeSummary.thresholdStageLabel || nativeSummary.stageLabel,
     nextStageLabel: nativeSummary.nextStageLabel
   };
@@ -6905,25 +8177,33 @@ function getShardComputedBonusSummary(milestone, bonus, observedLevelValue) {
       nextLabel: "Enter an observed level"
     };
   }
-  const unlockLevel = Number.isFinite(Number(bonus?.unlockLevel)) ? Number(bonus.unlockLevel) : null;
+  const unlockLevel = Number.isFinite(Number(bonus?.unlockLevel))
+    ? Number(bonus.unlockLevel)
+    : null;
   if (unlockLevel !== null && observedLevel < unlockLevel) {
     return {
       currentLabel: `Locked until level ${formatShardNumber(unlockLevel)}`,
       nextLabel: `Locked until level ${formatShardNumber(unlockLevel)}`
     };
   }
-  const activeLevels = unlockLevel === null ? observedLevel : Math.max(observedLevel - unlockLevel + 1, 0);
-  const nextActiveLevels = unlockLevel === null ? observedLevel + 1 : Math.max(observedLevel + 1 - unlockLevel + 1, 0);
+  const activeLevels =
+    unlockLevel === null ? observedLevel : Math.max(observedLevel - unlockLevel + 1, 0);
+  const nextActiveLevels =
+    unlockLevel === null ? observedLevel + 1 : Math.max(observedLevel + 1 - unlockLevel + 1, 0);
   const initialDescriptor = parseShardBonusDescriptor(bonus?.initialBonus);
   const bonusIndex = Array.isArray(milestone?.bonuses) ? milestone.bonuses.indexOf(bonus) : -1;
-  const extractedPerLevelValue = bonusIndex >= 0 ? getShardExtractedBonusPerLevel(milestone?.milestoneNumber, bonusIndex) : null;
+  const extractedPerLevelValue =
+    bonusIndex >= 0 ? getShardExtractedBonusPerLevel(milestone?.milestoneNumber, bonusIndex) : null;
   const perLevelDescriptor = Number.isFinite(extractedPerLevelValue)
     ? { kind: "multiplier", value: extractedPerLevelValue }
     : parseShardBonusDescriptor(bonus?.bonusPerLevel);
   if (perLevelDescriptor?.kind === "multiplier") {
     if (initialDescriptor?.kind === "multiplier") {
-      const current = initialDescriptor.value * Math.pow(perLevelDescriptor.value, Math.max(activeLevels - 1, 0));
-      const next = initialDescriptor.value * Math.pow(perLevelDescriptor.value, Math.max(nextActiveLevels - 1, 0));
+      const current =
+        initialDescriptor.value * Math.pow(perLevelDescriptor.value, Math.max(activeLevels - 1, 0));
+      const next =
+        initialDescriptor.value *
+        Math.pow(perLevelDescriptor.value, Math.max(nextActiveLevels - 1, 0));
       return {
         currentLabel: `${formatShardComputedMultiplier(current)} (descriptive model)`,
         nextLabel: `${formatShardComputedMultiplier(next)}`
@@ -6939,8 +8219,10 @@ function getShardComputedBonusSummary(milestone, bonus, observedLevelValue) {
     }
   }
   if (initialDescriptor?.kind === "seconds" && perLevelDescriptor?.kind === "seconds-per-level") {
-    const current = initialDescriptor.value + perLevelDescriptor.value * Math.max(activeLevels - 1, 0);
-    const next = initialDescriptor.value + perLevelDescriptor.value * Math.max(nextActiveLevels - 1, 0);
+    const current =
+      initialDescriptor.value + perLevelDescriptor.value * Math.max(activeLevels - 1, 0);
+    const next =
+      initialDescriptor.value + perLevelDescriptor.value * Math.max(nextActiveLevels - 1, 0);
     return {
       currentLabel: `${formatShardComputedSeconds(current)} (descriptive model)`,
       nextLabel: formatShardComputedSeconds(next)
@@ -6960,11 +8242,12 @@ function getShardUnlockRequirement(milestone) {
 }
 
 function getNextShardUnlockMilestone(totalLevels, milestones = getGroundedShardMilestones()) {
-  return milestones
-    .filter((milestone) => milestone.unlockCondition?.type === "total_milestone_levels_required")
-    .sort((left, right) => getShardUnlockRequirement(left) - getShardUnlockRequirement(right))
-    .find((milestone) => getShardUnlockRequirement(milestone) > totalLevels)
-    || null;
+  return (
+    milestones
+      .filter((milestone) => milestone.unlockCondition?.type === "total_milestone_levels_required")
+      .sort((left, right) => getShardUnlockRequirement(left) - getShardUnlockRequirement(right))
+      .find((milestone) => getShardUnlockRequirement(milestone) > totalLevels) || null
+  );
 }
 
 function getThresholdScheduleForMilestone(milestone, mechanics = getGroundedShardMechanics()) {
@@ -6972,13 +8255,19 @@ function getThresholdScheduleForMilestone(milestone, mechanics = getGroundedShar
     return milestone.fixedBreakpoints;
   }
   const rarity = normalizeShardRarityKey(milestone?.rarity);
-  return Object.entries(mechanics.rarity_bonus_thresholds ?? {})
-    .filter(([key]) => key !== "source_ids")
-    .find(([key]) => normalizeShardRarityKey(key) === rarity)?.[1] ?? [];
+  return (
+    Object.entries(mechanics.rarity_bonus_thresholds ?? {})
+      .filter(([key]) => key !== "source_ids")
+      .find(([key]) => normalizeShardRarityKey(key) === rarity)?.[1] ?? []
+  );
 }
 
 function getNextShardThreshold(milestone, currentLevel, mechanics = getGroundedShardMechanics()) {
-  return getThresholdScheduleForMilestone(milestone, mechanics).find((level) => Number(level) > Number(currentLevel || 0)) ?? null;
+  return (
+    getThresholdScheduleForMilestone(milestone, mechanics).find(
+      (level) => Number(level) > Number(currentLevel || 0)
+    ) ?? null
+  );
 }
 
 function getNextShardCostBump(currentLevel) {
@@ -6997,22 +8286,25 @@ function getNextShardCostBump(currentLevel) {
 }
 
 function getPrimaryShardObservation() {
-  return (state.shardGrounding?.observedBehaviors?.observations ?? [])
-    .map((observation) => ({
+  return (
+    (state.shardGrounding?.observedBehaviors?.observations ?? []).map((observation) => ({
       ...observation,
       title: getObservationTitle(observation)
-    }))[0] ?? null;
+    }))[0] ?? null
+  );
 }
 
 function getObservedBehaviorById(id) {
-  return (state.shardGrounding?.observedBehaviors?.observations ?? []).find((observation) => observation.id === id) || null;
+  return (
+    (state.shardGrounding?.observedBehaviors?.observations ?? []).find(
+      (observation) => observation.id === id
+    ) || null
+  );
 }
 
 function getSourceTitlesForIds(sourceIds = []) {
   const sourceMap = state.shardGrounding?.provenance?.sources ?? {};
-  return sourceIds
-    .map((sourceId) => sourceMap[sourceId]?.title)
-    .filter(Boolean);
+  return sourceIds.map((sourceId) => sourceMap[sourceId]?.title).filter(Boolean);
 }
 
 function getMilestoneSourceLabel(milestone) {
@@ -7021,15 +8313,21 @@ function getMilestoneSourceLabel(milestone) {
 }
 
 function getProvenanceConflictNote() {
-  return (state.shardGrounding?.provenance?.uncertaintyLog ?? []).find((entry) => entry.status === "conflict_detected")?.what_is_missing || "";
+  return (
+    (state.shardGrounding?.provenance?.uncertaintyLog ?? []).find(
+      (entry) => entry.status === "conflict_detected"
+    )?.what_is_missing || ""
+  );
 }
 
 function getObservationTitle(observation) {
   const playerState = observation?.playerState ?? {};
-  return playerState.run_type
-    || playerState.context
-    || playerState.lr_range
-    || observation.id.replaceAll("_", " ");
+  return (
+    playerState.run_type ||
+    playerState.context ||
+    playerState.lr_range ||
+    observation.id.replaceAll("_", " ")
+  );
 }
 
 function describeUnlockCondition(unlockCondition = {}) {
@@ -7043,7 +8341,9 @@ function describeUnlockCondition(unlockCondition = {}) {
 }
 
 function normalizeShardRarityKey(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function formatShardRarity(value) {
@@ -7052,7 +8352,9 @@ function formatShardRarity(value) {
 }
 
 function formatThresholdLevels(levels) {
-  return Array.isArray(levels) && levels.length ? levels.join(" / ") : "No explicit thresholds captured";
+  return Array.isArray(levels) && levels.length
+    ? levels.join(" / ")
+    : "No explicit thresholds captured";
 }
 
 function formatOptionalNumber(value) {
@@ -7102,8 +8404,9 @@ function formatBoundaryValue(value) {
 }
 
 function getProfileCompletion(profile) {
-  const filled = Object.values(ACTIVE_PROFILE_FORM_FIELD_PATHS)
-    .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
+  const filled = Object.values(ACTIVE_PROFILE_FORM_FIELD_PATHS).filter(
+    (path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== ""
+  ).length;
   const fields = Object.keys(ACTIVE_PROFILE_FORM_FIELD_PATHS);
   return Math.round((filled / fields.length) * 100);
 }
@@ -7117,11 +8420,10 @@ function sanitizeRecommendationLines(value) {
 }
 
 function getPlannerHelperCompletion(profile) {
-  const plannerPaths = [
-    ["planning", "shards", "totalMilestoneLevels"]
-  ];
-  const filled = plannerPaths
-    .filter((path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== "").length;
+  const plannerPaths = [["planning", "shards", "totalMilestoneLevels"]];
+  const filled = plannerPaths.filter(
+    (path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== ""
+  ).length;
   return Math.round((filled / plannerPaths.length) * 100);
 }
 
@@ -7137,19 +8439,25 @@ function makeRecommendationCard(item, module) {
   const detailLines = [
     item.cost ? `<span class="pill">cost ${escapeHtml(item.cost)}</span>` : "",
     item.eta ? `<span class="pill">eta ${escapeHtml(item.eta)}</span>` : ""
-  ].filter(Boolean).join("");
-  const whyNow = Array.isArray(item.whyNow) && item.whyNow.length
-    ? `<div class="meta-stack"><p class="snapshot-title">Why now</p>${item.whyNow.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
-    : "";
-  const benefit = Array.isArray(item.benefit) && item.benefit.length
-    ? `<div class="meta-stack"><p class="snapshot-title">Player value</p>${item.benefit.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
-    : "";
-  const assumptions = Array.isArray(item.assumptions) && item.assumptions.length
-    ? `<div class="meta-stack"><p class="snapshot-title">Assumptions</p>${item.assumptions.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
-    : "";
-  const warnings = Array.isArray(item.warnings) && item.warnings.length
-    ? `<div class="meta-stack"><p class="snapshot-title">Warnings</p>${item.warnings.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
-    : "";
+  ]
+    .filter(Boolean)
+    .join("");
+  const whyNow =
+    Array.isArray(item.whyNow) && item.whyNow.length
+      ? `<div class="meta-stack"><p class="snapshot-title">Why now</p>${item.whyNow.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
+      : "";
+  const benefit =
+    Array.isArray(item.benefit) && item.benefit.length
+      ? `<div class="meta-stack"><p class="snapshot-title">Player value</p>${item.benefit.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
+      : "";
+  const assumptions =
+    Array.isArray(item.assumptions) && item.assumptions.length
+      ? `<div class="meta-stack"><p class="snapshot-title">Assumptions</p>${item.assumptions.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
+      : "";
+  const warnings =
+    Array.isArray(item.warnings) && item.warnings.length
+      ? `<div class="meta-stack"><p class="snapshot-title">Warnings</p>${item.warnings.map((line) => `<p class="meta">${escapeHtml(line)}</p>`).join("")}</div>`
+      : "";
   const explainability = `
     <div class="meta-stack">
       <p class="snapshot-title">Explainability audit</p>
@@ -7201,16 +8509,19 @@ function makeRecommendationCard(item, module) {
 function makeCompactProgressionNoteCard(item, module) {
   const contractIssues = getNormalizedRecommendationContractIssues(item);
   const confidence = Math.round((item.confidence ?? 0.5) * 100);
-  const toneClass = module === "loop" || item.kind === "warning" ? "watch-note-warn" : "watch-note-pass";
+  const toneClass =
+    module === "loop" || item.kind === "warning" ? "watch-note-warn" : "watch-note-pass";
   const subtitle = item.subtitle ?? (module === "shards" ? "Shard Mining" : "Loop Prestige");
-  const primaryLine = getCompactProgressionNoteLine(item.warnings)
-    || getCompactProgressionNoteLine(item.whyNow)
-    || item.notes
-    || "";
-  const secondaryLine = getCompactProgressionNoteLine(item.whyNow, primaryLine)
-    || getCompactProgressionNoteLine(item.assumptions, primaryLine)
-    || getCompactProgressionNoteLine(item.benefit, primaryLine)
-    || "";
+  const primaryLine =
+    getCompactProgressionNoteLine(item.warnings) ||
+    getCompactProgressionNoteLine(item.whyNow) ||
+    item.notes ||
+    "";
+  const secondaryLine =
+    getCompactProgressionNoteLine(item.whyNow, primaryLine) ||
+    getCompactProgressionNoteLine(item.assumptions, primaryLine) ||
+    getCompactProgressionNoteLine(item.benefit, primaryLine) ||
+    "";
   const sourceLine = item.notes || getCompactProgressionNoteLine(item.assumptions) || "";
   const detailPills = [
     `<span class="pill">${escapeHtml(module === "shards" ? "shard watch" : "loop watch")}</span>`,
@@ -7218,7 +8529,9 @@ function makeCompactProgressionNoteCard(item, module) {
     item.cost ? `<span class="pill pill-neutral">cost ${escapeHtml(item.cost)}</span>` : "",
     item.eta ? `<span class="pill pill-neutral">eta ${escapeHtml(item.eta)}</span>` : "",
     contractIssues.length ? `<span class="pill watch-note-pill-warn">contract gap</span>` : ""
-  ].filter(Boolean).join("");
+  ]
+    .filter(Boolean)
+    .join("");
   return `
     <article class="recommendation-card watch-note-card ${toneClass}">
       <div class="recommendation-head watch-note-head">
@@ -7276,14 +8589,17 @@ function normalizeShardBreakpoints(value) {
       reason: item.reason || ""
     }));
   }
-  return String(value).split(/[|;]/).map((entry) => {
-    const [level, bonusValue, reason] = entry.split(":");
-    return {
-      level: Number(level || 0),
-      bonusValue: Number(bonusValue || 0),
-      reason: reason || ""
-    };
-  }).filter((item) => item.level > 0);
+  return String(value)
+    .split(/[|;]/)
+    .map((entry) => {
+      const [level, bonusValue, reason] = entry.split(":");
+      return {
+        level: Number(level || 0),
+        bonusValue: Number(bonusValue || 0),
+        reason: reason || ""
+      };
+    })
+    .filter((item) => item.level > 0);
 }
 
 function formatShardNumber(value) {
@@ -7325,14 +8641,22 @@ function scorePowerTerm(term, weights, meltdown) {
     return Math.max(Math.min(highest, Number(limit?.[1] || 8)) * meltdown, 1e-9);
   }
   if (term.includes("MaxGenHWunlocked+MaxGenSWunlocked")) {
-    const total = Number(getShipCommunityToolState().techLevels.MaxGenHWunlocked || 0) + Number(getShipCommunityToolState().techLevels.MaxGenSWunlocked || 0);
+    const total =
+      Number(getShipCommunityToolState().techLevels.MaxGenHWunlocked || 0) +
+      Number(getShipCommunityToolState().techLevels.MaxGenSWunlocked || 0);
     return Math.max(Math.min(total, 16) * meltdown, 1e-9);
   }
   if (term.includes("MaxGenHWunlocked")) {
-    return Math.max(Math.min(Number(getShipCommunityToolState().techLevels.MaxGenHWunlocked || 0), 8) * meltdown, 1e-9);
+    return Math.max(
+      Math.min(Number(getShipCommunityToolState().techLevels.MaxGenHWunlocked || 0), 8) * meltdown,
+      1e-9
+    );
   }
   if (term.includes("MaxGenSWunlocked")) {
-    return Math.max(Math.min(Number(getShipCommunityToolState().techLevels.MaxGenSWunlocked || 0), 8) * meltdown, 1e-9);
+    return Math.max(
+      Math.min(Number(getShipCommunityToolState().techLevels.MaxGenSWunlocked || 0), 8) * meltdown,
+      1e-9
+    );
   }
   if (term.includes("Meltdown")) {
     return Math.max(meltdown, 1e-9);
@@ -7340,74 +8664,79 @@ function scorePowerTerm(term, weights, meltdown) {
   return 1;
 }
 
-  function getEffectWeight(effectTypes, weights) {
-    const map = {
-      cells: Number(weights.CellsAndGens || 1),
-      gens: Number(weights.CellsAndGens || 1),
-      mp: Number(weights.Mods || 1),
-      shards: Number(weights.Shards || 1),
+function getEffectWeight(effectTypes, weights) {
+  const map = {
+    cells: Number(weights.CellsAndGens || 1),
+    gens: Number(weights.CellsAndGens || 1),
+    mp: Number(weights.Mods || 1),
+    shards: Number(weights.Shards || 1),
     rp: Number(weights.RP || 1),
     ap: Number(weights.AP || 1),
-      materials: Number(weights.Mats || 1),
-      other: Math.max(Number(weights.CellsAndGens || 1), Number(weights.Mats || 1))
-    };
-      const list = Array.isArray(effectTypes) ? effectTypes : [effectTypes];
-      return Math.max(...list.map((effectType) => Math.max(map[normalizeEffectType(effectType)] || 1, 1)));
-    }
+    materials: Number(weights.Mats || 1),
+    other: Math.max(Number(weights.CellsAndGens || 1), Number(weights.Mats || 1))
+  };
+  const list = Array.isArray(effectTypes) ? effectTypes : [effectTypes];
+  return Math.max(
+    ...list.map((effectType) => Math.max(map[normalizeEffectType(effectType)] || 1, 1))
+  );
+}
 
-  function getLanePriority(effectType, weights) {
-      const normalized = normalizeEffectType(effectType);
-      const enabled = getActiveLoadout().filters?.[normalized];
-      if (enabled !== false) {
-        return getEffectWeight(normalized, weights);
-      }
-      if (getShipCommunityToolState().innovation.softCap) {
-        return 0.01;
-      }
-      return 0;
+function getLanePriority(effectType, weights) {
+  const normalized = normalizeEffectType(effectType);
+  const enabled = getActiveLoadout().filters?.[normalized];
+  if (enabled !== false) {
+    return getEffectWeight(normalized, weights);
   }
-
-  function getInstallEffectTypes(shipKey, installIndex) {
-      const effectTypes = DESMOS_INSTALL_WEIGHT_MAPS[shipKey]?.[installIndex]
-        ?? state.shipTemplates[shipKey].installs[installIndex].effectTypes
-        ?? ["other"];
-      return (Array.isArray(effectTypes) ? effectTypes : [effectTypes]).map(normalizeEffectType);
-    }
-
-  function getInstallWeight(shipKey, installIndex, weights) {
-      const effectTypes = getInstallEffectTypes(shipKey, installIndex);
-      return Math.max(
-        ...effectTypes.map((effectType) => {
-          return getLanePriority(effectType, weights);
-        })
-      );
-    }
-
-  function getShipInstallLayout(shipKey) {
-    return SHIP_INSTALL_INDEX_LAYOUTS[shipKey] ?? SHIP_INSTALL_INDEX_LAYOUTS.default;
+  if (getShipCommunityToolState().innovation.softCap) {
+    return 0.01;
   }
+  return 0;
+}
 
-  function normalizeEffectType(effectType) {
-    if (effectType === "mods") {
-      return "mp";
-    }
-    if (effectType === "mats") {
-      return "materials";
-    }
-    return effectType;
-  }
+function getInstallEffectTypes(shipKey, installIndex) {
+  const effectTypes = DESMOS_INSTALL_WEIGHT_MAPS[shipKey]?.[installIndex] ??
+    state.shipTemplates[shipKey].installs[installIndex].effectTypes ?? ["other"];
+  return (Array.isArray(effectTypes) ? effectTypes : [effectTypes]).map(normalizeEffectType);
+}
 
-  function getDisplayEffectTypes(effectTypes) {
-    const list = Array.isArray(effectTypes) ? effectTypes : [effectTypes];
-    return [...new Set(list.map((effectType) => {
-      const normalized = normalizeEffectType(effectType);
-      return normalized === "gens" ? "cells" : normalized;
-    }))];
-  }
+function getInstallWeight(shipKey, installIndex, weights) {
+  const effectTypes = getInstallEffectTypes(shipKey, installIndex);
+  return Math.max(
+    ...effectTypes.map((effectType) => {
+      return getLanePriority(effectType, weights);
+    })
+  );
+}
 
-  function getPrimaryEffectClass(effectTypes) {
-    return getDisplayEffectTypes(effectTypes)[0];
+function getShipInstallLayout(shipKey) {
+  return SHIP_INSTALL_INDEX_LAYOUTS[shipKey] ?? SHIP_INSTALL_INDEX_LAYOUTS.default;
+}
+
+function normalizeEffectType(effectType) {
+  if (effectType === "mods") {
+    return "mp";
   }
+  if (effectType === "mats") {
+    return "materials";
+  }
+  return effectType;
+}
+
+function getDisplayEffectTypes(effectTypes) {
+  const list = Array.isArray(effectTypes) ? effectTypes : [effectTypes];
+  return [
+    ...new Set(
+      list.map((effectType) => {
+        const normalized = normalizeEffectType(effectType);
+        return normalized === "gens" ? "cells" : normalized;
+      })
+    )
+  ];
+}
+
+function getPrimaryEffectClass(effectTypes) {
+  return getDisplayEffectTypes(effectTypes)[0];
+}
 
 function formatPercentGain(value) {
   if (!Number.isFinite(value) || value <= 0) {
@@ -7447,8 +8776,12 @@ function getShipInnovationMultiplier(shipKey) {
   const innovation = getShipCommunityToolState().innovation;
   const dark = innovation.darkInno ? 3 : 1;
   const main = ["C", "A", "Zg", "H"].includes(shipKey)
-    ? (innovation.inno1 ? 7 : 1)
-    : (innovation.inno2 ? 222 : 1);
+    ? innovation.inno1
+      ? 7
+      : 1
+    : innovation.inno2
+      ? 222
+      : 1;
   return main * dark;
 }
 
@@ -7469,8 +8802,8 @@ function getInstallBaseMultiplier(shipKey, installIndex) {
   const missions = getMissionTotal();
   const totalGenerators = sum(Object.values(generators));
   const sTechs = Number(tech.S_techs || 0);
-  const sHw = Math.round(0.998 * sTechs / 2);
-  const sSw = Math.round(1.002 * sTechs / 2);
+  const sHw = Math.round((0.998 * sTechs) / 2);
+  const sSw = Math.round((1.002 * sTechs) / 2);
 
   const formulas = {
     C: [
@@ -7501,7 +8834,10 @@ function getInstallBaseMultiplier(shipKey, installIndex) {
     ],
     Zg: [
       0.005 * Number(zagreus.S_mod || 0) * Math.pow(1.02, Number(gears.G11 || 0)),
-      0.001 * Number(zagreus.S_loopFill || 0) * Math.pow(1.01, Number(gears.G10 || 0)) * Math.pow(1.01, Number(gears.G14 || 0)),
+      0.001 *
+        Number(zagreus.S_loopFill || 0) *
+        Math.pow(1.01, Number(gears.G10 || 0)) *
+        Math.pow(1.01, Number(gears.G14 || 0)),
       0.001 * Number(zagreus.S_loopReset || 0) * Math.pow(1.02, Number(gears.G8 || 0)),
       0.0005 * Number(zagreus.S_mod || 0) * Math.pow(1.02, Number(gears.G9 || 0)),
       0.0005 * Number(zagreus.S_mod || 0) * Math.pow(1.02, Number(gears.G10 || 0)),
@@ -7513,11 +8849,20 @@ function getInstallBaseMultiplier(shipKey, installIndex) {
       0.1 * Number(zagreus.S_loopFill || 0)
     ],
     H: [
-      0.04 * Number(hephaestus.S_automt || 0) * Math.pow(1.01, Number(gears.G8 || 0)) * Math.pow(1.02, Number(gears.G15 || 0)),
+      0.04 *
+        Number(hephaestus.S_automt || 0) *
+        Math.pow(1.01, Number(gears.G8 || 0)) *
+        Math.pow(1.02, Number(gears.G15 || 0)),
       0.000003 * ticksRun * Math.pow(1.02, Number(gears.G17 || 0)),
-      0.002 * Number(hephaestus.S_automt || 0) * Math.pow(1.01, Number(gears.G21 || 0)) * Math.pow(1.02, Number(gears.G2 || 0)),
+      0.002 *
+        Number(hephaestus.S_automt || 0) *
+        Math.pow(1.01, Number(gears.G21 || 0)) *
+        Math.pow(1.02, Number(gears.G2 || 0)),
       0.05 * Number(hephaestus.S_automt || 0) * Math.pow(1.01, Number(gears.G17 || 0)),
-      0.001 * totalGenerators * Math.pow(1.01, Number(gears.G20 || 0)) * Math.pow(1.02, Number(gears.G13 || 0)),
+      0.001 *
+        totalGenerators *
+        Math.pow(1.01, Number(gears.G20 || 0)) *
+        Math.pow(1.02, Number(gears.G13 || 0)),
       0.00001 * totalGenerators * Math.pow(1.02, Number(gears.G14 || 0)),
       0.02 * Number(hephaestus.S_automt || 0) * Math.pow(1.02, Number(gears.G16 || 0)),
       0.01,
@@ -7526,12 +8871,18 @@ function getInstallBaseMultiplier(shipKey, installIndex) {
       0.00001 * ticksRun
     ],
     D: [
-      Math.pow(10, 100) * Math.pow(1.01, Number(gears.G9 || 0)) * Math.pow(1.02, Number(gears.G19 || 0)),
+      Math.pow(10, 100) *
+        Math.pow(1.01, Number(gears.G9 || 0)) *
+        Math.pow(1.02, Number(gears.G19 || 0)),
       0.01 * Math.pow(1.01, Number(gears.G19 || 0)) * Math.pow(1.02, Number(gears.G1 || 0)),
       0.002 * ops * Math.pow(1.02, Number(gears.G18 || 0)),
       0.0002 * ops * Math.pow(1.02, Number(gears.G20 || 0)),
       0.0002 * ops * Math.pow(1.02, Number(gears.G22 || 0)),
-      0.00001 * ops * Math.pow(1.01, Number(gears.G12 || 0)) * Math.pow(1.01, Number(gears.G16 || 0)) * Math.pow(1.01, Number(gears.G22 || 0)),
+      0.00001 *
+        ops *
+        Math.pow(1.01, Number(gears.G12 || 0)) *
+        Math.pow(1.01, Number(gears.G16 || 0)) *
+        Math.pow(1.01, Number(gears.G22 || 0)),
       0.001 * ops * Math.pow(1.02, Number(gears.G21 || 0)),
       0.025,
       0.0004 * ops,
@@ -7543,7 +8894,10 @@ function getInstallBaseMultiplier(shipKey, installIndex) {
       0.00003 * studies * Math.pow(1.01, Number(gears.G7 || 0)),
       0.0025 * Number(koios.S_fullRes || 0) * Math.pow(1.01, Number(gears.G5 || 0)),
       0.005 * Number(koios.S_resLvl || 0) * Math.pow(1.01, Number(gears.G2 || 0)),
-      0.00001 * studies * Math.pow(1.01, Number(gears.G3 || 0)) * Math.pow(1.01, Number(gears.G15 || 0)),
+      0.00001 *
+        studies *
+        Math.pow(1.01, Number(gears.G3 || 0)) *
+        Math.pow(1.01, Number(gears.G15 || 0)),
       0.01 * Math.pow(1.01, Number(gears.G1 || 0)) * Math.pow(1.01, Number(gears.G6 || 0)),
       0.001 * studies * Math.pow(1.01, Number(gears.G4 || 0)),
       0.03,
@@ -7572,7 +8926,9 @@ function getInstallBaseMultiplier(shipKey, installIndex) {
 function getTicksRun() {
   const shipPlayerState = getShipCommunityToolState();
   const technical = shipPlayerState.technical;
-  const runHours = technical.LongRun ? Number(technical.LongRunLenDays || 0) * 24 : Number(technical.ShortRunLenMins || 0) / 60;
+  const runHours = technical.LongRun
+    ? Number(technical.LongRunLenDays || 0) * 24
+    : Number(technical.ShortRunLenMins || 0) / 60;
   const tickTimer = Number(shipPlayerState.hephaestus.tickTimer || 1);
   return Math.floor((runHours * 3600) / Math.max(tickTimer, 0.001));
 }
@@ -7580,21 +8936,35 @@ function getTicksRun() {
 function getOperationsTotal() {
   const demeter = getShipCommunityToolState().demeter;
   const efficiency = 1;
-  return Number(demeter.OpsFromAotC || 0) + (Math.floor(getTicksRun() / Math.max(Number(demeter.TicksPerOp || 1), 1)) * efficiency);
+  return (
+    Number(demeter.OpsFromAotC || 0) +
+    Math.floor(getTicksRun() / Math.max(Number(demeter.TicksPerOp || 1), 1)) * efficiency
+  );
 }
 
 function getStudiesTotal() {
   const koios = getShipCommunityToolState().koios;
   const efficiency = 1;
-  return Math.floor(getTicksRun() * Number(koios.StudiesPerResBar || 0) / Math.max(Number(koios.TicksPerResBar || 1), 1)) * efficiency;
+  return (
+    Math.floor(
+      (getTicksRun() * Number(koios.StudiesPerResBar || 0)) /
+        Math.max(Number(koios.TicksPerResBar || 1), 1)
+    ) * efficiency
+  );
 }
 
 function getMissionTotal() {
   const shipPlayerState = getShipCommunityToolState();
   const technical = shipPlayerState.technical;
   const zeus = shipPlayerState.zeus;
-  const runMinutes = technical.LongRun ? Number(technical.LongRunLenDays || 0) * 24 * 60 : Number(technical.ShortRunLenMins || 0);
-  return Math.floor(runMinutes * ((Number(zeus.CappedMissions || 0) / 2) + (1 / Math.max(Number(zeus.LowestUncappedMissionTimer || 1), 1))));
+  const runMinutes = technical.LongRun
+    ? Number(technical.LongRunLenDays || 0) * 24 * 60
+    : Number(technical.ShortRunLenMins || 0);
+  return Math.floor(
+    runMinutes *
+      (Number(zeus.CappedMissions || 0) / 2 +
+        1 / Math.max(Number(zeus.LowestUncappedMissionTimer || 1), 1))
+  );
 }
 
 function formControl(id) {
@@ -7628,7 +8998,7 @@ function splitCsvLine(line) {
   let quoted = false;
   for (let index = 0; index < line.length; index += 1) {
     const char = line[index];
-    if (char === "\"") {
+    if (char === '"') {
       quoted = !quoted;
     } else if (char === "," && !quoted) {
       values.push(current);
@@ -7655,11 +9025,17 @@ function splitList(value) {
   if (!value) {
     return [];
   }
-  return String(value).split(/[|,;]/).map((item) => item.trim()).filter(Boolean);
+  return String(value)
+    .split(/[|,;]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function slugify(value) {
-  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
 }
 
 function escapeHtml(value) {
@@ -7754,11 +9130,15 @@ function formatCiNormalizedNumber(mantissa, exponent) {
 }
 
 function trimTrailingZeros(value) {
-  return String(value).replace(/(\.\d*?[1-9])0+$/u, "$1").replace(/\.0+$/u, "");
+  return String(value)
+    .replace(/(\.\d*?[1-9])0+$/u, "$1")
+    .replace(/\.0+$/u, "");
 }
 
 function normalizeGeneratorTierKey(value) {
-  const text = String(value ?? "").trim().toLowerCase();
+  const text = String(value ?? "")
+    .trim()
+    .toLowerCase();
   if (!text) {
     return null;
   }

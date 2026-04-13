@@ -17,6 +17,7 @@ Evolve this repo toward a grounded MVP core that can expand into a unified repla
 ## MVP scope
 
 Prioritize:
+
 - `state.playerProfile`
 - guided/manual player import
 - grounded shard workflow
@@ -29,6 +30,7 @@ Do not assume all systems should converge into one surface. Converge surfaces on
 ## Lane contract
 
 Every future lane should declare:
+
 - the user-facing question it is trying to answer
 - the minimum required inputs for that answer
 - the explicit non-blockers that should not hold the slice open
@@ -40,10 +42,12 @@ If a neighboring lane is not a consumed input for the current slice, keep it lis
 ## Grounding rule
 
 Do not add a field, label, formula, or recommendation unless it is:
+
 1. a known in-game CIFI concept, or
 2. a clearly labeled external/community-derived input
 
 If uncertain:
+
 - preserve structure
 - document assumptions
 - avoid invented precision
@@ -52,6 +56,7 @@ If uncertain:
 ## Integration gate
 
 Before integrating a system into app behavior, verify:
+
 1. where it lives in-game
 2. its real owner
 3. its currencies or required player-owned inputs
@@ -60,6 +65,7 @@ Before integrating a system into app behavior, verify:
 6. which user painpoint or external-tool workflow the integration improves
 
 If these are not grounded enough:
+
 - do not wire the system into planner/recommendation logic
 - keep it in docs, extraction, mapping, validation, or descriptive-mode surfaces
 - record the unresolved gap
@@ -67,6 +73,7 @@ If these are not grounded enough:
 ## Non-goals
 
 Do not prioritize:
+
 - full save parsing
 - broad simulation architecture
 - late-game full optimization systems

@@ -33,7 +33,8 @@ export function sortRecommendationFeed(items) {
     if (scoreDiff !== 0) {
       return scoreDiff;
     }
-    const confidenceDiff = normalizeUnitInterval(right.confidence) - normalizeUnitInterval(left.confidence);
+    const confidenceDiff =
+      normalizeUnitInterval(right.confidence) - normalizeUnitInterval(left.confidence);
     if (confidenceDiff !== 0) {
       return confidenceDiff;
     }
@@ -61,11 +62,18 @@ export function getRecommendationContractIssues(item) {
   if (!Number.isFinite(Number(item.score))) {
     issues.push("Recommendation action score must be a finite number.");
   }
-  if (!Number.isFinite(Number(item.confidence)) || Number(item.confidence) < 0 || Number(item.confidence) > 1) {
+  if (
+    !Number.isFinite(Number(item.confidence)) ||
+    Number(item.confidence) < 0 ||
+    Number(item.confidence) > 1
+  ) {
     issues.push("Recommendation action confidence must be between 0 and 1.");
   }
   for (const key of ["benefit", "whyNow", "assumptions", "warnings"]) {
-    if (!Array.isArray(item[key]) || item[key].some((entry) => typeof entry !== "string" || !entry.trim())) {
+    if (
+      !Array.isArray(item[key]) ||
+      item[key].some((entry) => typeof entry !== "string" || !entry.trim())
+    ) {
       issues.push(`Recommendation action ${key} must be an array of non-empty strings.`);
     }
   }

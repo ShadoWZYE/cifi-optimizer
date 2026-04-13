@@ -19,7 +19,9 @@ const runtimeGetterRules = formulaModel.runtimeGetterRules || {};
 const getterFamily = runtimeGetterRules.getterFamily || {};
 const cacheLifecycle = runtimeGetterRules.cacheLifecycle || {};
 const sharedStageLogic = runtimeGetterRules.sharedStageLogic || {};
-const stableGetterCallOrder = Array.isArray(getterFamily.stableCallOrder) ? getterFamily.stableCallOrder : [];
+const stableGetterCallOrder = Array.isArray(getterFamily.stableCallOrder)
+  ? getterFamily.stableCallOrder
+  : [];
 const thresholdCoverageClasses = Array.isArray(sharedStageLogic.thresholdCoverageClasses)
   ? sharedStageLogic.thresholdCoverageClasses
   : [];
@@ -50,7 +52,8 @@ export function getShardCostRowClass(row) {
 
 export function getShardCostRuntimeRule(row) {
   assertRow(row);
-  const getterName = stableGetterCallOrder.find((name) => name === `get_SU${row}Cost`) || `get_SU${row}Cost`;
+  const getterName =
+    stableGetterCallOrder.find((name) => name === `get_SU${row}Cost`) || `get_SU${row}Cost`;
   const coverageClass = findThresholdCoverageClass(row);
   return {
     getterName,
@@ -65,7 +68,9 @@ export function getShardCostRuntimeRule(row) {
     affordabilityConsumerMethod: cacheLifecycle.affordabilityConsumerMethod || null,
     orderedGetterOutputsCached: cacheLifecycle.orderedGetterOutputsCached === true,
     alternateFormulaPathFound: cacheLifecycle.alternateFormulaPathFound === true,
-    windowOrder: Array.isArray(sharedStageLogic.windowOrder) ? [...sharedStageLogic.windowOrder] : [],
+    windowOrder: Array.isArray(sharedStageLogic.windowOrder)
+      ? [...sharedStageLogic.windowOrder]
+      : [],
     thresholdGetterNames: coverageClass?.getterNames ? [...coverageClass.getterNames] : [],
     overLevelBaseModels: findOverLevelBaseModelsForRow(coverageClass)
   };
@@ -73,9 +78,9 @@ export function getShardCostRuntimeRule(row) {
 
 export function isShardCostPlannerSafeFromCalibration(calibrationChecks) {
   return (
-    formulaModel.completionFlags.automatedCalibrationImplemented === true
-    && calibrationChecks?.allPassed === true
-    && formulaModel.completionFlags.plannerSafeCostOutputApproved === true
+    formulaModel.completionFlags.automatedCalibrationImplemented === true &&
+    calibrationChecks?.allPassed === true &&
+    formulaModel.completionFlags.plannerSafeCostOutputApproved === true
   );
 }
 
@@ -97,7 +102,10 @@ export function evaluateShardCost({ row, level }) {
   const adjustments = [];
 
   if (row === 0) {
-    cost = multiplyByPow10(cost, scalar(params.CostExponent) + modeledLevel * scalar(params.GrowthExponent));
+    cost = multiplyByPow10(
+      cost,
+      scalar(params.CostExponent) + modeledLevel * scalar(params.GrowthExponent)
+    );
     adjustments.push({
       kind: "base-pre-threshold",
       fieldNames: ["StartCost", "CostExponent", "GrowthExponent"]
@@ -123,7 +131,10 @@ export function evaluateShardCost({ row, level }) {
       });
     }
   } else {
-    cost = multiplyByPow10(cost, scalar(params.CostExponent) + modeledLevel * scalar(params.GrowthExponent));
+    cost = multiplyByPow10(
+      cost,
+      scalar(params.CostExponent) + modeledLevel * scalar(params.GrowthExponent)
+    );
     adjustments.push({
       kind: "base-pre-threshold",
       formula: formulaModel.stageRules.preThreshold.symbolicApproximation
@@ -135,7 +146,9 @@ export function evaluateShardCost({ row, level }) {
       const sampledFeeder = findSampledOffsetFeeder(row, family);
       const levelOffset = Number(sampledFeeder?.levelOffset ?? family?.levelOffset ?? 100);
       const remainder = Math.max(0, modeledLevel - levelOffset);
-      const coefficient = Number(sampledFeeder?.coefficient ?? (levelOffset > 0 ? 1 / levelOffset : 0));
+      const coefficient = Number(
+        sampledFeeder?.coefficient ?? (levelOffset > 0 ? 1 / levelOffset : 0)
+      );
       const stageScalar = 1 + Math.abs(coefficient) * remainder;
       cost = multiplyByScalar(cost, stageScalar);
       adjustments.push({
@@ -151,7 +164,9 @@ export function evaluateShardCost({ row, level }) {
     if (modeledLevel >= 200 && rowClass.stageCoverage.includes(200)) {
       activeStages.push(200);
       const seededFamily = findSeededFamily(twoHundredFamilies, row);
-      const stageScalar = seededFamily ? computeSeededStageScalar(seededFamily.integerSeeds, modeledLevel, 200) : 1;
+      const stageScalar = seededFamily
+        ? computeSeededStageScalar(seededFamily.integerSeeds, modeledLevel, 200)
+        : 1;
       cost = multiplyByScalar(cost, stageScalar);
       adjustments.push({
         kind: "two-hundred-plus-family",
@@ -163,7 +178,9 @@ export function evaluateShardCost({ row, level }) {
     if (modeledLevel >= 300 && rowClass.stageCoverage.includes(300)) {
       activeStages.push(300);
       const seededFamily = findSeededFamily(threeHundredFamilies, row);
-      const stageScalar = seededFamily ? computeSeededStageScalar(seededFamily.integerSeeds, modeledLevel, 300) : 1;
+      const stageScalar = seededFamily
+        ? computeSeededStageScalar(seededFamily.integerSeeds, modeledLevel, 300)
+        : 1;
       cost = multiplyByScalar(cost, stageScalar);
       adjustments.push({
         kind: "three-hundred-plus-family",
@@ -210,7 +227,10 @@ export function evaluateShardCost({ row, level }) {
 }
 
 function assertRow(row) {
-  assert.ok(Number.isInteger(row) && row >= 0 && row <= 29, "row must be an integer between 0 and 29");
+  assert.ok(
+    Number.isInteger(row) && row >= 0 && row <= 29,
+    "row must be an integer between 0 and 29"
+  );
 }
 
 function normalizeLevel(level) {
@@ -237,8 +257,10 @@ function readExactFields(entry, isRowZero) {
     StartCost: parseBigDoubleLabel(exact.StartCost?.label),
     CostExponent: parseBigDoubleLabel(exact.CostExponent?.label),
     GrowthExponent: parseBigDoubleLabel(exact.GrowthExponent?.label),
-    GrowthExponent2: isRowZero && exact.GrowthExponent2 ? parseBigDoubleLabel(exact.GrowthExponent2.label) : null,
-    GrowthExponent3: isRowZero && exact.GrowthExponent3 ? parseBigDoubleLabel(exact.GrowthExponent3.label) : null
+    GrowthExponent2:
+      isRowZero && exact.GrowthExponent2 ? parseBigDoubleLabel(exact.GrowthExponent2.label) : null,
+    GrowthExponent3:
+      isRowZero && exact.GrowthExponent3 ? parseBigDoubleLabel(exact.GrowthExponent3.label) : null
   };
 }
 
@@ -262,7 +284,11 @@ function findStageFamily(families, row) {
 }
 
 function findThresholdCoverageClass(row) {
-  return thresholdCoverageClasses.find((entry) => Array.isArray(entry.rows) && entry.rows.includes(row)) || null;
+  return (
+    thresholdCoverageClasses.find(
+      (entry) => Array.isArray(entry.rows) && entry.rows.includes(row)
+    ) || null
+  );
 }
 
 function findOverLevelBaseModelsForRow(coverageClass) {
@@ -288,15 +314,25 @@ function findSampledOffsetFeeder(row, family) {
   if (!family) {
     return null;
   }
-  return sampledOffsetFeeders.find(
-    (entry) => String(entry.model) === String(family.model) && Number(entry.levelOffset) === Number(family.levelOffset)
-  ) || null;
+  return (
+    sampledOffsetFeeders.find(
+      (entry) =>
+        String(entry.model) === String(family.model) &&
+        Number(entry.levelOffset) === Number(family.levelOffset)
+    ) || null
+  );
 }
 
 function findSeededFamily(families, row) {
-  return families.find(
-    (entry) => Array.isArray(entry.rows) && entry.rows.includes(row) && Array.isArray(entry.integerSeeds) && entry.integerSeeds.length > 0
-  ) || null;
+  return (
+    families.find(
+      (entry) =>
+        Array.isArray(entry.rows) &&
+        entry.rows.includes(row) &&
+        Array.isArray(entry.integerSeeds) &&
+        entry.integerSeeds.length > 0
+    ) || null
+  );
 }
 
 function computeSeededStageScalar(integerSeeds, level, threshold) {
@@ -356,5 +392,7 @@ function cloneBigDouble(value) {
 }
 
 function trimTrailingZeros(value) {
-  return String(value).replace(/(\.\d*?[1-9])0+$/u, "$1").replace(/\.0+$/u, "");
+  return String(value)
+    .replace(/(\.\d*?[1-9])0+$/u, "$1")
+    .replace(/\.0+$/u, "");
 }

@@ -7,8 +7,15 @@ const TOP_LEVEL_BUCKET_RULES = [
   { label: "top-level .deps/ bucket", test: (name) => name === ".deps" },
   { label: "top-level .vendor_*/ bucket", test: (name) => /^\.vendor_.+/.test(name) },
   { label: "top-level tmp*/ bucket", test: (name) => /^tmp/i.test(name) },
-  { label: "top-level cache bucket", test: (name) => [".appdata", ".cache", ".local", ".wheelhouse", "__pycache__", ".pytest_cache"].includes(name) },
-  { label: "top-level dependency cache bucket", test: (name) => [".dotnet", ".nuget"].includes(name) }
+  {
+    label: "top-level cache bucket",
+    test: (name) =>
+      [".appdata", ".cache", ".local", ".wheelhouse", "__pycache__", ".pytest_cache"].includes(name)
+  },
+  {
+    label: "top-level dependency cache bucket",
+    test: (name) => [".dotnet", ".nuget"].includes(name)
+  }
 ];
 
 const IGNORED_LOCAL_BUCKETS = new Set([
@@ -74,7 +81,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const result = await verifyVendoringLayout();
 
   if (result.regressions.length > 0) {
-    console.error("Vendoring layout verification failed. New scattered cache/vendor buckets found:");
+    console.error(
+      "Vendoring layout verification failed. New scattered cache/vendor buckets found:"
+    );
     for (const regression of result.regressions) {
       console.error(`- ${regression.path}: ${regression.rule}`);
     }

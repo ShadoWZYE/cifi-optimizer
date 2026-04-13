@@ -1,0 +1,48 @@
+# Git and local workspace state
+.git/
+_worktrees/
+.local/
+.tmp/
+
+# Dependency and vendored trees
+node_modules/
+.deps/
+.vendor_manual/
+.vendor_py/
+.wheelhouse/
+.appdata/
+.dotnet/
+.nuget/
+
+# Build, cache, and generated output
+bin/
+dist/
+build/
+coverage/
+.parcel-cache/
+.vite/
+__pycache__/
+obj/
+tools/**/bin/
+tools/**/obj/
+
+# Large extraction and machine-produced artifacts
+data/
+workbench/
+tmp*/
+tmp-*.json
+tmp-*.md
+*.assets
+*.apk
+*.exe
+*.so
+*.zip
+level0
+globalgamemanagers
+
+# Third-party and bulky tool payloads
+tools/unity/AssetRipper/
+tools/unity/UABEA/
+
+# Generated docs
+docs/contracts/dataset-index.generated.md

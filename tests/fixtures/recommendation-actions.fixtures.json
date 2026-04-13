@@ -144,9 +144,7 @@
       "assumptions": [
         "This remains descriptive until owner mapping and a single authoritative milestone list are grounded."
       ],
-      "warnings": [
-        "Do not treat this as spend order or ROI guidance."
-      ],
+      "warnings": ["Do not treat this as spend order or ROI guidance."],
       "notes": null
     }
   ]

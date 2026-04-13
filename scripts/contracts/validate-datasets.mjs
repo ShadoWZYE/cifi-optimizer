@@ -58,20 +58,37 @@ function validateSnapshot(snapshot) {
   expectNonEmptyString(snapshot.capturedAt, "capturedAt must be a non-empty string");
   expectRecord(snapshot.sourceStrategy, "sourceStrategy must be an object");
   expectArray(snapshot.shipLoadouts, "shipLoadouts must be an array");
-  assert.ok(snapshot.shipLoadouts.length >= 4, "shipLoadouts should include the shipped baseline set");
+  assert.ok(
+    snapshot.shipLoadouts.length >= 4,
+    "shipLoadouts should include the shipped baseline set"
+  );
   snapshot.shipLoadouts.forEach((loadout, index) => {
     expectNonEmptyString(loadout.id, `shipLoadouts[${index}].id must be a string`);
     expectNonEmptyString(loadout.name, `shipLoadouts[${index}].name must be a string`);
-    expectNonEmptyString(loadout.resourceBias, `shipLoadouts[${index}].resourceBias must be a string`);
+    expectNonEmptyString(
+      loadout.resourceBias,
+      `shipLoadouts[${index}].resourceBias must be a string`
+    );
     ["powerScale", "speedScale", "cargoScale"].forEach((field) => {
-      assert.equal(typeof loadout[field], "number", `shipLoadouts[${index}].${field} must be numeric`);
+      assert.equal(
+        typeof loadout[field],
+        "number",
+        `shipLoadouts[${index}].${field} must be numeric`
+      );
     });
   });
   expectArray(snapshot.shardMilestones, "snapshot.shardMilestones must be an array");
-  assert.equal(snapshot.shardMilestones.length, 0, "snapshot shardMilestones must remain quarantined");
+  assert.equal(
+    snapshot.shardMilestones.length,
+    0,
+    "snapshot shardMilestones must remain quarantined"
+  );
   expectArray(snapshot.validationCases, "validationCases must be an array");
   expectArray(snapshot.researchTracks, "researchTracks must be an array");
-  assert.ok(snapshot.researchTracks.some((track) => track.id === "data-contracts-and-apk-pipeline"), "researchTracks must include the dataset-contracts lane");
+  assert.ok(
+    snapshot.researchTracks.some((track) => track.id === "data-contracts-and-apk-pipeline"),
+    "researchTracks must include the dataset-contracts lane"
+  );
   return {
     id: "snapshot",
     label: "App snapshot",
@@ -90,7 +107,10 @@ function validateShardDatasets(milestones, observed, provenance) {
   expectNonEmptyString(milestones.sourceReport, "shard milestones sourceReport must be present");
   expectRecord(milestones.canonicalMechanics, "canonicalMechanics must be an object");
   expectArray(milestones.milestones, "shard milestones list must be an array");
-  assert.ok(milestones.milestones.length >= 20, "shard milestones list must keep the grounded baseline set");
+  assert.ok(
+    milestones.milestones.length >= 20,
+    "shard milestones list must keep the grounded baseline set"
+  );
 
   expectNonEmptyString(observed.dataset, "observed behavior dataset id must be present");
   expectNonEmptyString(observed.sourceReport, "observed behavior sourceReport must be present");
@@ -108,7 +128,10 @@ function validateShardDatasets(milestones, observed, provenance) {
     expectNonEmptyString(milestone.id, `milestones[${index}].id must be present`);
     expectNonEmptyString(milestone.name, `milestones[${index}].name must be present`);
     expectNonEmptyString(milestone.rarity, `milestones[${index}].rarity must be present`);
-    expectRecord(milestone.unlockCondition, `milestones[${index}].unlockCondition must be an object`);
+    expectRecord(
+      milestone.unlockCondition,
+      `milestones[${index}].unlockCondition must be an object`
+    );
     expectArray(milestone.bonuses, `milestones[${index}].bonuses must be an array`);
     expectSourceIds(milestone.sourceIds, knownSources, `milestones[${index}].sourceIds`);
   });
@@ -139,23 +162,54 @@ function validateShardDatasets(milestones, observed, provenance) {
 function validateShardAssetGrounding(grounding) {
   expectNonEmptyString(grounding.dataset, "shard asset grounding dataset id must be present");
   expectNonEmptyString(grounding.generatedAt, "shard asset grounding generatedAt must be present");
-  expectNonEmptyString(grounding.sourceReport, "shard asset grounding sourceReport must be present");
+  expectNonEmptyString(
+    grounding.sourceReport,
+    "shard asset grounding sourceReport must be present"
+  );
   expectArray(grounding.sourceArtifacts, "shard asset grounding sourceArtifacts must be an array");
-  expectNonEmptyString(grounding.classification, "shard asset grounding classification must be present");
+  expectNonEmptyString(
+    grounding.classification,
+    "shard asset grounding classification must be present"
+  );
   expectRecord(grounding.system, "shard asset grounding system must be an object");
   expectNonEmptyString(grounding.system.id, "shard asset grounding system.id must be present");
-  expectNonEmptyString(grounding.system.label, "shard asset grounding system.label must be present");
-  expectArray(grounding.groundedShellIdentifiers, "shard asset grounding groundedShellIdentifiers must be an array");
+  expectNonEmptyString(
+    grounding.system.label,
+    "shard asset grounding system.label must be present"
+  );
+  expectArray(
+    grounding.groundedShellIdentifiers,
+    "shard asset grounding groundedShellIdentifiers must be an array"
+  );
   expectArray(grounding.groundedFacts, "shard asset grounding groundedFacts must be an array");
   expectArray(grounding.appSafeUses, "shard asset grounding appSafeUses must be an array");
   expectArray(grounding.blockedUses, "shard asset grounding blockedUses must be an array");
   expectArray(grounding.unresolvedGaps, "shard asset grounding unresolvedGaps must be an array");
-  expectNonEmptyString(grounding.integrationStatus, "shard asset grounding integrationStatus must be present");
-  assert.ok(grounding.groundedShellIdentifiers.includes("LoopResetStage1"), "shard asset grounding must preserve LoopResetStage1");
-  assert.ok(grounding.groundedShellIdentifiers.includes("MilestoneBonusesPerLevel"), "shard asset grounding must preserve MilestoneBonusesPerLevel");
-  assert.ok(grounding.groundedFacts.some((fact) => String(fact).includes("ShardUpgradeInfo")), "shard asset grounding must mention ShardUpgradeInfo");
-  assert.ok(grounding.unresolvedGaps.includes("exact milestone data object or serialized row payload"), "shard asset grounding must preserve the unresolved milestone payload gap");
-  assert.equal(grounding.integrationStatus, "available-but-unmapped", "shard asset grounding must stay available-but-unmapped");
+  expectNonEmptyString(
+    grounding.integrationStatus,
+    "shard asset grounding integrationStatus must be present"
+  );
+  assert.ok(
+    grounding.groundedShellIdentifiers.includes("LoopResetStage1"),
+    "shard asset grounding must preserve LoopResetStage1"
+  );
+  assert.ok(
+    grounding.groundedShellIdentifiers.includes("MilestoneBonusesPerLevel"),
+    "shard asset grounding must preserve MilestoneBonusesPerLevel"
+  );
+  assert.ok(
+    grounding.groundedFacts.some((fact) => String(fact).includes("ShardUpgradeInfo")),
+    "shard asset grounding must mention ShardUpgradeInfo"
+  );
+  assert.ok(
+    grounding.unresolvedGaps.includes("exact milestone data object or serialized row payload"),
+    "shard asset grounding must preserve the unresolved milestone payload gap"
+  );
+  assert.equal(
+    grounding.integrationStatus,
+    "available-but-unmapped",
+    "shard asset grounding must stay available-but-unmapped"
+  );
 
   return {
     id: "shard-asset-grounding",
@@ -171,35 +225,122 @@ function validateShardAssetGrounding(grounding) {
 
 function validateShardOwnerFamilyBoundary(boundary) {
   expectNonEmptyString(boundary.dataset, "shard owner-family boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard owner-family boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard owner-family boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard owner-family boundary sources must be an object");
-  ["ownerProbe", "constructionComparisonProbe", "shardMiningMetadataNeighborhood", "shardUpgradeInfoMetadataNeighborhood", "level0", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard owner-family boundary sources.${field} must be present`);
+  [
+    "ownerProbe",
+    "constructionComparisonProbe",
+    "shardMiningMetadataNeighborhood",
+    "shardUpgradeInfoMetadataNeighborhood",
+    "level0",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard owner-family boundary sources.${field} must be present`
+    );
   });
-  expectArray(boundary.screenControllerFamilies, "shard owner-family boundary screenControllerFamilies must be an array");
-  expectArray(boundary.dataCarrierCandidates, "shard owner-family boundary dataCarrierCandidates must be an array");
-  expectArray(boundary.screenControlAnchors, "shard owner-family boundary screenControlAnchors must be an array");
-  expectArray(boundary.bonusFieldAnchors, "shard owner-family boundary bonusFieldAnchors must be an array");
-  expectRecord(boundary.downgradedGenericLead, "shard owner-family boundary downgradedGenericLead must be an object");
-  expectNonEmptyString(boundary.downgradedGenericLead.family, "shard owner-family boundary downgradedGenericLead.family must be present");
-  expectArray(boundary.downgradedGenericLead.anchors, "shard owner-family boundary downgradedGenericLead.anchors must be an array");
-  expectArray(boundary.downgradedGenericLead.reasons, "shard owner-family boundary downgradedGenericLead.reasons must be an array");
-  expectArray(boundary.currentBoundary, "shard owner-family boundary currentBoundary must be an array");
+  expectArray(
+    boundary.screenControllerFamilies,
+    "shard owner-family boundary screenControllerFamilies must be an array"
+  );
+  expectArray(
+    boundary.dataCarrierCandidates,
+    "shard owner-family boundary dataCarrierCandidates must be an array"
+  );
+  expectArray(
+    boundary.screenControlAnchors,
+    "shard owner-family boundary screenControlAnchors must be an array"
+  );
+  expectArray(
+    boundary.bonusFieldAnchors,
+    "shard owner-family boundary bonusFieldAnchors must be an array"
+  );
+  expectRecord(
+    boundary.downgradedGenericLead,
+    "shard owner-family boundary downgradedGenericLead must be an object"
+  );
+  expectNonEmptyString(
+    boundary.downgradedGenericLead.family,
+    "shard owner-family boundary downgradedGenericLead.family must be present"
+  );
+  expectArray(
+    boundary.downgradedGenericLead.anchors,
+    "shard owner-family boundary downgradedGenericLead.anchors must be an array"
+  );
+  expectArray(
+    boundary.downgradedGenericLead.reasons,
+    "shard owner-family boundary downgradedGenericLead.reasons must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard owner-family boundary currentBoundary must be an array"
+  );
 
-  assert.ok(boundary.screenControllerFamilies.includes("ShardMining, Assembly-CSharp"), "shard owner-family boundary must preserve ShardMining, Assembly-CSharp");
-  assert.ok(boundary.dataCarrierCandidates.includes("ShardMining|ShardUpgradeInfo"), "shard owner-family boundary must preserve ShardMining|ShardUpgradeInfo");
-  assert.ok(boundary.dataCarrierCandidates.includes("ShardUpgradeInfo"), "shard owner-family boundary must preserve ShardUpgradeInfo");
-  ["CheckFirstTimeShardMilestoneOpened", "AttachFastBuyButton", "FastBuyButtonMethodShards", "StartFastBuyButtonHold"].forEach((name) => {
-    assert.ok(boundary.screenControlAnchors.includes(name), `shard owner-family boundary missing ${name}`);
+  assert.ok(
+    boundary.screenControllerFamilies.includes("ShardMining, Assembly-CSharp"),
+    "shard owner-family boundary must preserve ShardMining, Assembly-CSharp"
+  );
+  assert.ok(
+    boundary.dataCarrierCandidates.includes("ShardMining|ShardUpgradeInfo"),
+    "shard owner-family boundary must preserve ShardMining|ShardUpgradeInfo"
+  );
+  assert.ok(
+    boundary.dataCarrierCandidates.includes("ShardUpgradeInfo"),
+    "shard owner-family boundary must preserve ShardUpgradeInfo"
+  );
+  [
+    "CheckFirstTimeShardMilestoneOpened",
+    "AttachFastBuyButton",
+    "FastBuyButtonMethodShards",
+    "StartFastBuyButtonHold"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.screenControlAnchors.includes(name),
+      `shard owner-family boundary missing ${name}`
+    );
   });
-  ["TotalMilestoneLevels", "get_IsUnlocked", "get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq", "FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3", "<FastBuyEnum>d__1429"].forEach((name) => {
-    assert.ok(boundary.bonusFieldAnchors.includes(name), `shard owner-family boundary missing ${name}`);
+  [
+    "TotalMilestoneLevels",
+    "get_IsUnlocked",
+    "get_SU1FinalUnlockReq",
+    "get_SU29FinalUnlockReq",
+    "FinalSU1Bonus1",
+    "FinalSU29Bonus2",
+    "FinalSU29Bonus3",
+    "<FastBuyEnum>d__1429"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.bonusFieldAnchors.includes(name),
+      `shard owner-family boundary missing ${name}`
+    );
   });
-  assert.equal(boundary.downgradedGenericLead.family, "ConstructionMilestones, Assembly-CSharp", "shard owner-family boundary generic lead drifted");
-  ["InitializeMilestones", "BuyMilestone1", "BuyMilestone57", "ClaimDiamondMilestone", "ConstructionMilestonesSum"].forEach((name) => {
-    assert.ok(boundary.downgradedGenericLead.anchors.includes(name), `shard owner-family boundary generic lead anchors missing ${name}`);
+  assert.equal(
+    boundary.downgradedGenericLead.family,
+    "ConstructionMilestones, Assembly-CSharp",
+    "shard owner-family boundary generic lead drifted"
+  );
+  [
+    "InitializeMilestones",
+    "BuyMilestone1",
+    "BuyMilestone57",
+    "ClaimDiamondMilestone",
+    "ConstructionMilestonesSum"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.downgradedGenericLead.anchors.includes(name),
+      `shard owner-family boundary generic lead anchors missing ${name}`
+    );
   });
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not promote player-facing milestone labels")), "shard owner-family boundary must preserve blocked-use framing");
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not promote player-facing milestone labels")
+    ),
+    "shard owner-family boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-owner-family-boundary",
@@ -215,34 +356,110 @@ function validateShardOwnerFamilyBoundary(boundary) {
 
 function validateShardFinalSuBonusBoundary(boundary) {
   expectNonEmptyString(boundary.dataset, "shard FinalSU bonus boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard FinalSU bonus boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard FinalSU bonus boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard FinalSU bonus boundary sources must be an object");
-  ["shardUpgradeInfoMetadataNeighborhood", "shardMiningMetadataNeighborhood", "ownerFamilyVerification", "systemVerification", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard FinalSU bonus boundary sources.${field} must be present`);
+  [
+    "shardUpgradeInfoMetadataNeighborhood",
+    "shardMiningMetadataNeighborhood",
+    "ownerFamilyVerification",
+    "systemVerification",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard FinalSU bonus boundary sources.${field} must be present`
+    );
   });
-  expectNonEmptyString(boundary.dataCarrier, "shard FinalSU bonus boundary dataCarrier must be present");
-  expectNonEmptyString(boundary.dataCarrierTieIn, "shard FinalSU bonus boundary dataCarrierTieIn must be present");
-  expectArray(boundary.unlockRequirementAccessors, "shard FinalSU bonus boundary unlockRequirementAccessors must be an array");
-  expectArray(boundary.bonusFieldSamples, "shard FinalSU bonus boundary bonusFieldSamples must be an array");
-  expectArray(boundary.bonusAccessorSamples, "shard FinalSU bonus boundary bonusAccessorSamples must be an array");
-  expectArray(boundary.adjacentFields, "shard FinalSU bonus boundary adjacentFields must be an array");
-  expectArray(boundary.currentBoundary, "shard FinalSU bonus boundary currentBoundary must be an array");
+  expectNonEmptyString(
+    boundary.dataCarrier,
+    "shard FinalSU bonus boundary dataCarrier must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataCarrierTieIn,
+    "shard FinalSU bonus boundary dataCarrierTieIn must be present"
+  );
+  expectArray(
+    boundary.unlockRequirementAccessors,
+    "shard FinalSU bonus boundary unlockRequirementAccessors must be an array"
+  );
+  expectArray(
+    boundary.bonusFieldSamples,
+    "shard FinalSU bonus boundary bonusFieldSamples must be an array"
+  );
+  expectArray(
+    boundary.bonusAccessorSamples,
+    "shard FinalSU bonus boundary bonusAccessorSamples must be an array"
+  );
+  expectArray(
+    boundary.adjacentFields,
+    "shard FinalSU bonus boundary adjacentFields must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard FinalSU bonus boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataCarrier, "ShardUpgradeInfo", "shard FinalSU bonus boundary dataCarrier drifted");
-  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard FinalSU bonus boundary dataCarrierTieIn drifted");
+  assert.equal(
+    boundary.dataCarrier,
+    "ShardUpgradeInfo",
+    "shard FinalSU bonus boundary dataCarrier drifted"
+  );
+  assert.equal(
+    boundary.dataCarrierTieIn,
+    "ShardMining|ShardUpgradeInfo",
+    "shard FinalSU bonus boundary dataCarrierTieIn drifted"
+  );
   ["get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq"].forEach((name) => {
-    assert.ok(boundary.unlockRequirementAccessors.includes(name), `shard FinalSU bonus boundary missing ${name}`);
+    assert.ok(
+      boundary.unlockRequirementAccessors.includes(name),
+      `shard FinalSU bonus boundary missing ${name}`
+    );
   });
-  ["FinalSU1Bonus1", "FinalSU1Bonus2", "FinalSU2Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].forEach((name) => {
-    assert.ok(boundary.bonusFieldSamples.includes(name), `shard FinalSU bonus boundary missing ${name}`);
+  [
+    "FinalSU1Bonus1",
+    "FinalSU1Bonus2",
+    "FinalSU2Bonus1",
+    "FinalSU29Bonus2",
+    "FinalSU29Bonus3"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.bonusFieldSamples.includes(name),
+      `shard FinalSU bonus boundary missing ${name}`
+    );
   });
-  ["get_FinalSU1Bonus1", "get_FinalSU1Bonus2", "get_FinalSU2Bonus1", "get_FinalSU29Bonus2", "get_FinalSU29Bonus3"].forEach((name) => {
-    assert.ok(boundary.bonusAccessorSamples.includes(name), `shard FinalSU bonus boundary missing ${name}`);
+  [
+    "get_FinalSU1Bonus1",
+    "get_FinalSU1Bonus2",
+    "get_FinalSU2Bonus1",
+    "get_FinalSU29Bonus2",
+    "get_FinalSU29Bonus3"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.bonusAccessorSamples.includes(name),
+      `shard FinalSU bonus boundary missing ${name}`
+    );
   });
-  ["TotalMilestoneLevels", "get_IsUnlocked", "OverLevel100Exponent", "OverLevel400Exponent", "<FastBuyEnum>d__1429"].forEach((name) => {
-    assert.ok(boundary.adjacentFields.includes(name), `shard FinalSU bonus boundary missing ${name}`);
+  [
+    "TotalMilestoneLevels",
+    "get_IsUnlocked",
+    "OverLevel100Exponent",
+    "OverLevel400Exponent",
+    "<FastBuyEnum>d__1429"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.adjacentFields.includes(name),
+      `shard FinalSU bonus boundary missing ${name}`
+    );
   });
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not map FinalSU fields directly")), "shard FinalSU bonus boundary must preserve blocked-use framing");
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not map FinalSU fields directly")
+    ),
+    "shard FinalSU bonus boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-finalsu-bonus-boundary",
@@ -257,39 +474,141 @@ function validateShardFinalSuBonusBoundary(boundary) {
 }
 
 function validateShardMilestonePayloadBoundary(boundary) {
-  expectNonEmptyString(boundary.dataset, "shard milestone payload boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard milestone payload boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard milestone payload boundary dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard milestone payload boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard milestone payload boundary sources must be an object");
-  ["shardMiningMetadataNeighborhood", "shardUpgradeInfoMetadataNeighborhood", "ownerFamilyBoundary", "finalSuBonusBoundary", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard milestone payload boundary sources.${field} must be present`);
+  [
+    "shardMiningMetadataNeighborhood",
+    "shardUpgradeInfoMetadataNeighborhood",
+    "ownerFamilyBoundary",
+    "finalSuBonusBoundary",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard milestone payload boundary sources.${field} must be present`
+    );
   });
-  expectNonEmptyString(boundary.dataCarrier, "shard milestone payload boundary dataCarrier must be present");
-  expectNonEmptyString(boundary.dataCarrierTieIn, "shard milestone payload boundary dataCarrierTieIn must be present");
-  expectArray(boundary.milestoneStateFields, "shard milestone payload boundary milestoneStateFields must be an array");
-  expectArray(boundary.costAndListHooks, "shard milestone payload boundary costAndListHooks must be an array");
-  expectArray(boundary.progressFillHooks, "shard milestone payload boundary progressFillHooks must be an array");
+  expectNonEmptyString(
+    boundary.dataCarrier,
+    "shard milestone payload boundary dataCarrier must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataCarrierTieIn,
+    "shard milestone payload boundary dataCarrierTieIn must be present"
+  );
+  expectArray(
+    boundary.milestoneStateFields,
+    "shard milestone payload boundary milestoneStateFields must be an array"
+  );
+  expectArray(
+    boundary.costAndListHooks,
+    "shard milestone payload boundary costAndListHooks must be an array"
+  );
+  expectArray(
+    boundary.progressFillHooks,
+    "shard milestone payload boundary progressFillHooks must be an array"
+  );
   expectArray(boundary.tickFields, "shard milestone payload boundary tickFields must be an array");
-  expectArray(boundary.sampleCostAccessors, "shard milestone payload boundary sampleCostAccessors must be an array");
-  expectArray(boundary.currentBoundary, "shard milestone payload boundary currentBoundary must be an array");
+  expectArray(
+    boundary.sampleCostAccessors,
+    "shard milestone payload boundary sampleCostAccessors must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard milestone payload boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataCarrier, "ShardUpgradeInfo", "shard milestone payload boundary dataCarrier drifted");
-  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard milestone payload boundary dataCarrierTieIn drifted");
-  ["TotalMilestoneLevels", "get_IsUnlocked", "set_IsUnlocked", "<IsUnlocked>k__BackingField"].forEach((name) => {
-    assert.ok(boundary.milestoneStateFields.includes(name), `shard milestone payload boundary missing ${name}`);
+  assert.equal(
+    boundary.dataCarrier,
+    "ShardUpgradeInfo",
+    "shard milestone payload boundary dataCarrier drifted"
+  );
+  assert.equal(
+    boundary.dataCarrierTieIn,
+    "ShardMining|ShardUpgradeInfo",
+    "shard milestone payload boundary dataCarrierTieIn drifted"
+  );
+  [
+    "TotalMilestoneLevels",
+    "get_IsUnlocked",
+    "set_IsUnlocked",
+    "<IsUnlocked>k__BackingField"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.milestoneStateFields.includes(name),
+      `shard milestone payload boundary missing ${name}`
+    );
   });
-  ["get_TotalMilestoneLevels", "InitializeMaxLevelBools", "UpdateMaxedMilestonesList", "UpdateUnlockedMilestonesList", "SortCostAndBools", "CountAffordableShard", "UpdateShardCostList", "GetShardCostList", "InitializeShards"].forEach((name) => {
-    assert.ok(boundary.costAndListHooks.includes(name), `shard milestone payload boundary missing ${name}`);
+  [
+    "get_TotalMilestoneLevels",
+    "InitializeMaxLevelBools",
+    "UpdateMaxedMilestonesList",
+    "UpdateUnlockedMilestonesList",
+    "SortCostAndBools",
+    "CountAffordableShard",
+    "UpdateShardCostList",
+    "GetShardCostList",
+    "InitializeShards"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.costAndListHooks.includes(name),
+      `shard milestone payload boundary missing ${name}`
+    );
   });
-  ["CheckAllMilestoneLevelFills", "CheckMilestone0ProgressFill", "CheckMilestone1ProgressFill", "CheckMilestone9ProgressFill"].forEach((name) => {
-    assert.ok(boundary.progressFillHooks.includes(name), `shard milestone payload boundary missing ${name}`);
+  [
+    "CheckAllMilestoneLevelFills",
+    "CheckMilestone0ProgressFill",
+    "CheckMilestone1ProgressFill",
+    "CheckMilestone9ProgressFill"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.progressFillHooks.includes(name),
+      `shard milestone payload boundary missing ${name}`
+    );
   });
-  ["Phase1Tick", "Phase2Tick", "Phase3Tick", "Phase4Tick", "Phase5Tick", "Phase6Tick", "CooldownTick"].forEach((name) => {
-    assert.ok(boundary.tickFields.includes(name), `shard milestone payload boundary missing ${name}`);
+  [
+    "Phase1Tick",
+    "Phase2Tick",
+    "Phase3Tick",
+    "Phase4Tick",
+    "Phase5Tick",
+    "Phase6Tick",
+    "CooldownTick"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.tickFields.includes(name),
+      `shard milestone payload boundary missing ${name}`
+    );
   });
-  ["get_SU23Cost", "get_SU24Cost", "get_SU25Cost", "get_SU26Cost", "get_SU27Cost", "get_SU28Cost", "get_SU29Cost"].forEach((name) => {
-    assert.ok(boundary.sampleCostAccessors.includes(name), `shard milestone payload boundary missing ${name}`);
+  [
+    "get_SU23Cost",
+    "get_SU24Cost",
+    "get_SU25Cost",
+    "get_SU26Cost",
+    "get_SU27Cost",
+    "get_SU28Cost",
+    "get_SU29Cost"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.sampleCostAccessors.includes(name),
+      `shard milestone payload boundary missing ${name}`
+    );
   });
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat these hooks as recovered serialized player-owned milestone rows")), "shard milestone payload boundary must preserve blocked-use framing");
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes(
+        "Do not treat these hooks as recovered serialized player-owned milestone rows"
+      )
+    ),
+    "shard milestone payload boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-milestone-payload-boundary",
@@ -305,25 +624,72 @@ function validateShardMilestonePayloadBoundary(boundary) {
 
 function validateShardCostModelBoundary(boundary) {
   expectNonEmptyString(boundary.dataset, "shard cost-model boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard cost-model boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard cost-model boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard cost-model boundary sources must be an object");
-  ["shardUpgradeInfoMetadataNeighborhood", "ownerFamilyProbe", "milestonePayloadBoundary", "finalSuBonusBoundary", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard cost-model boundary sources.${field} must be present`);
+  [
+    "shardUpgradeInfoMetadataNeighborhood",
+    "ownerFamilyProbe",
+    "milestonePayloadBoundary",
+    "finalSuBonusBoundary",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard cost-model boundary sources.${field} must be present`
+    );
   });
-  expectNonEmptyString(boundary.dataCarrier, "shard cost-model boundary dataCarrier must be present");
-  expectNonEmptyString(boundary.dataCarrierTieIn, "shard cost-model boundary dataCarrierTieIn must be present");
-  expectArray(boundary.sampleCostAccessorWindows, "shard cost-model boundary sampleCostAccessorWindows must be an array");
+  expectNonEmptyString(
+    boundary.dataCarrier,
+    "shard cost-model boundary dataCarrier must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataCarrierTieIn,
+    "shard cost-model boundary dataCarrierTieIn must be present"
+  );
+  expectArray(
+    boundary.sampleCostAccessorWindows,
+    "shard cost-model boundary sampleCostAccessorWindows must be an array"
+  );
   expectArray(boundary.row0CostFields, "shard cost-model boundary row0CostFields must be an array");
   expectArray(boundary.row0FillFields, "shard cost-model boundary row0FillFields must be an array");
-  expectArray(boundary.row0BonusFields, "shard cost-model boundary row0BonusFields must be an array");
-  expectArray(boundary.costModelFindings, "shard cost-model boundary costModelFindings must be an array");
-  expectRecord(boundary.optimizerBoundary, "shard cost-model boundary optimizerBoundary must be an object");
-  expectArray(boundary.optimizerBoundary.supportedNow, "shard cost-model boundary optimizerBoundary.supportedNow must be an array");
-  expectArray(boundary.optimizerBoundary.blockedNow, "shard cost-model boundary optimizerBoundary.blockedNow must be an array");
-  expectArray(boundary.currentBoundary, "shard cost-model boundary currentBoundary must be an array");
+  expectArray(
+    boundary.row0BonusFields,
+    "shard cost-model boundary row0BonusFields must be an array"
+  );
+  expectArray(
+    boundary.costModelFindings,
+    "shard cost-model boundary costModelFindings must be an array"
+  );
+  expectRecord(
+    boundary.optimizerBoundary,
+    "shard cost-model boundary optimizerBoundary must be an object"
+  );
+  expectArray(
+    boundary.optimizerBoundary.supportedNow,
+    "shard cost-model boundary optimizerBoundary.supportedNow must be an array"
+  );
+  expectArray(
+    boundary.optimizerBoundary.blockedNow,
+    "shard cost-model boundary optimizerBoundary.blockedNow must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard cost-model boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataCarrier, "ShardUpgradeInfo", "shard cost-model boundary dataCarrier drifted");
-  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard cost-model boundary dataCarrierTieIn drifted");
+  assert.equal(
+    boundary.dataCarrier,
+    "ShardUpgradeInfo",
+    "shard cost-model boundary dataCarrier drifted"
+  );
+  assert.equal(
+    boundary.dataCarrierTieIn,
+    "ShardMining|ShardUpgradeInfo",
+    "shard cost-model boundary dataCarrierTieIn drifted"
+  );
   assert.deepEqual(
     boundary.sampleCostAccessorWindows,
     [
@@ -332,19 +698,44 @@ function validateShardCostModelBoundary(boundary) {
         start: 0,
         end: 9,
         count: 10,
-        accessors: ["get_SU0Cost", "get_SU1Cost", "get_SU2Cost", "get_SU3Cost", "get_SU4Cost", "get_SU5Cost", "get_SU6Cost", "get_SU7Cost", "get_SU8Cost", "get_SU9Cost"]
+        accessors: [
+          "get_SU0Cost",
+          "get_SU1Cost",
+          "get_SU2Cost",
+          "get_SU3Cost",
+          "get_SU4Cost",
+          "get_SU5Cost",
+          "get_SU6Cost",
+          "get_SU7Cost",
+          "get_SU8Cost",
+          "get_SU9Cost"
+        ]
       },
       {
         label: "lateWindow",
         start: 23,
         end: 29,
         count: 7,
-        accessors: ["get_SU23Cost", "get_SU24Cost", "get_SU25Cost", "get_SU26Cost", "get_SU27Cost", "get_SU28Cost", "get_SU29Cost"]
+        accessors: [
+          "get_SU23Cost",
+          "get_SU24Cost",
+          "get_SU25Cost",
+          "get_SU26Cost",
+          "get_SU27Cost",
+          "get_SU28Cost",
+          "get_SU29Cost"
+        ]
       }
     ],
     "shard cost-model boundary accessor windows drifted"
   );
-  ["SU0StartCost", "SU0CostExponent", "SU0GrowthExponent", "SU0GrowthExponent2", "SU0GrowthExponent3"].forEach((name) => {
+  [
+    "SU0StartCost",
+    "SU0CostExponent",
+    "SU0GrowthExponent",
+    "SU0GrowthExponent2",
+    "SU0GrowthExponent3"
+  ].forEach((name) => {
     assert.ok(boundary.row0CostFields.includes(name), `shard cost-model boundary missing ${name}`);
   });
   ["SU0Level1Fill", "SU0Level8Fill"].forEach((name) => {
@@ -353,9 +744,22 @@ function validateShardCostModelBoundary(boundary) {
   ["SU0Bonus1", "SU0Bonus8"].forEach((name) => {
     assert.ok(boundary.row0BonusFields.includes(name), `shard cost-model boundary missing ${name}`);
   });
-  assert.ok(boundary.optimizerBoundary.supportedNow.includes("row-local shard cost-parameter extraction and consistency checks against get_SU*Cost accessors"), "shard cost-model boundary must preserve supported extraction wording");
-  assert.ok(boundary.optimizerBoundary.blockedNow.includes("exact per-level shard costs"), "shard cost-model boundary must preserve exact-cost blocking");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not derive exact shard cost formulas")), "shard cost-model boundary must preserve blocked-use framing");
+  assert.ok(
+    boundary.optimizerBoundary.supportedNow.includes(
+      "row-local shard cost-parameter extraction and consistency checks against get_SU*Cost accessors"
+    ),
+    "shard cost-model boundary must preserve supported extraction wording"
+  );
+  assert.ok(
+    boundary.optimizerBoundary.blockedNow.includes("exact per-level shard costs"),
+    "shard cost-model boundary must preserve exact-cost blocking"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not derive exact shard cost formulas")
+    ),
+    "shard cost-model boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-cost-model-boundary",
@@ -370,31 +774,91 @@ function validateShardCostModelBoundary(boundary) {
 }
 
 function validateShardMilestoneRowModelBoundary(boundary) {
-  expectNonEmptyString(boundary.dataset, "shard milestone row-model boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard milestone row-model boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard milestone row-model boundary dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard milestone row-model boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard milestone row-model boundary sources must be an object");
-  ["ownerFamilyProbe", "rowShellBoundary", "rowAlignmentBoundary", "costModelBoundary", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard milestone row-model boundary sources.${field} must be present`);
+  [
+    "ownerFamilyProbe",
+    "rowShellBoundary",
+    "rowAlignmentBoundary",
+    "costModelBoundary",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard milestone row-model boundary sources.${field} must be present`
+    );
   });
-  expectNonEmptyString(boundary.dataCarrierTieIn, "shard milestone row-model boundary dataCarrierTieIn must be present");
-  expectRecord(boundary.textCheckerRange, "shard milestone row-model boundary textCheckerRange must be an object");
-  expectRecord(boundary.unlockRequirementRange, "shard milestone row-model boundary unlockRequirementRange must be an object");
-  expectRecord(boundary.buyHookEvidence, "shard milestone row-model boundary buyHookEvidence must be an object");
-  expectArray(boundary.buyHookEvidence.shardLocalDirectHooks, "shard milestone row-model boundary shardLocalDirectHooks must be an array");
-  expectRecord(boundary.buyHookEvidence.genericNumberedFamily, "shard milestone row-model boundary genericNumberedFamily must be an object");
-  expectArray(boundary.rowModelFindings, "shard milestone row-model boundary rowModelFindings must be an array");
-  expectArray(boundary.currentBoundary, "shard milestone row-model boundary currentBoundary must be an array");
+  expectNonEmptyString(
+    boundary.dataCarrierTieIn,
+    "shard milestone row-model boundary dataCarrierTieIn must be present"
+  );
+  expectRecord(
+    boundary.textCheckerRange,
+    "shard milestone row-model boundary textCheckerRange must be an object"
+  );
+  expectRecord(
+    boundary.unlockRequirementRange,
+    "shard milestone row-model boundary unlockRequirementRange must be an object"
+  );
+  expectRecord(
+    boundary.buyHookEvidence,
+    "shard milestone row-model boundary buyHookEvidence must be an object"
+  );
+  expectArray(
+    boundary.buyHookEvidence.shardLocalDirectHooks,
+    "shard milestone row-model boundary shardLocalDirectHooks must be an array"
+  );
+  expectRecord(
+    boundary.buyHookEvidence.genericNumberedFamily,
+    "shard milestone row-model boundary genericNumberedFamily must be an object"
+  );
+  expectArray(
+    boundary.rowModelFindings,
+    "shard milestone row-model boundary rowModelFindings must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard milestone row-model boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard milestone row-model boundary dataCarrierTieIn drifted");
-  assert.deepEqual(boundary.textCheckerRange, { start: 0, end: 29, count: 30 }, "shard milestone row-model boundary textCheckerRange drifted");
-  assert.deepEqual(boundary.unlockRequirementRange, { start: 0, end: 29, count: 30 }, "shard milestone row-model boundary unlockRequirementRange drifted");
-  assert.deepEqual(boundary.buyHookEvidence.shardLocalDirectHooks, ["BuyMilestone0"], "shard milestone row-model boundary shardLocalDirectHooks drifted");
+  assert.equal(
+    boundary.dataCarrierTieIn,
+    "ShardMining|ShardUpgradeInfo",
+    "shard milestone row-model boundary dataCarrierTieIn drifted"
+  );
+  assert.deepEqual(
+    boundary.textCheckerRange,
+    { start: 0, end: 29, count: 30 },
+    "shard milestone row-model boundary textCheckerRange drifted"
+  );
+  assert.deepEqual(
+    boundary.unlockRequirementRange,
+    { start: 0, end: 29, count: 30 },
+    "shard milestone row-model boundary unlockRequirementRange drifted"
+  );
+  assert.deepEqual(
+    boundary.buyHookEvidence.shardLocalDirectHooks,
+    ["BuyMilestone0"],
+    "shard milestone row-model boundary shardLocalDirectHooks drifted"
+  );
   assert.deepEqual(
     boundary.buyHookEvidence.genericNumberedFamily,
     { family: "ConstructionMilestones, Assembly-CSharp", start: 1, end: 57, count: 57 },
     "shard milestone row-model boundary genericNumberedFamily drifted"
   );
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not infer that rows 0-29 are already mapped")), "shard milestone row-model boundary must preserve blocked-use framing");
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not infer that rows 0-29 are already mapped")
+    ),
+    "shard milestone row-model boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-milestone-row-model-boundary",
@@ -409,30 +873,92 @@ function validateShardMilestoneRowModelBoundary(boundary) {
 }
 
 function validateShardMilestoneTitleEffectBoundary(boundary) {
-  expectNonEmptyString(boundary.dataset, "shard milestone title/effect boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard milestone title/effect boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard milestone title/effect boundary dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard milestone title/effect boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard milestone title/effect boundary sources must be an object");
-  ["unityProbeReport", "ownerFamilyProbe", "shardUpgradeInfoMetadataNeighborhood", "rowModelBoundary", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard milestone title/effect boundary sources.${field} must be present`);
+  [
+    "unityProbeReport",
+    "ownerFamilyProbe",
+    "shardUpgradeInfoMetadataNeighborhood",
+    "rowModelBoundary",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard milestone title/effect boundary sources.${field} must be present`
+    );
   });
-  expectArray(boundary.titleAssetCandidates, "shard milestone title/effect boundary titleAssetCandidates must be an array");
-  expectArray(boundary.effectPresentationSlots, "shard milestone title/effect boundary effectPresentationSlots must be an array");
-  expectArray(boundary.sampleBonusCalcAccessors, "shard milestone title/effect boundary sampleBonusCalcAccessors must be an array");
+  expectArray(
+    boundary.titleAssetCandidates,
+    "shard milestone title/effect boundary titleAssetCandidates must be an array"
+  );
+  expectArray(
+    boundary.effectPresentationSlots,
+    "shard milestone title/effect boundary effectPresentationSlots must be an array"
+  );
+  expectArray(
+    boundary.sampleBonusCalcAccessors,
+    "shard milestone title/effect boundary sampleBonusCalcAccessors must be an array"
+  );
   expectArray(boundary.findings, "shard milestone title/effect boundary findings must be an array");
-  expectArray(boundary.currentBoundary, "shard milestone title/effect boundary currentBoundary must be an array");
+  expectArray(
+    boundary.currentBoundary,
+    "shard milestone title/effect boundary currentBoundary must be an array"
+  );
 
-  assert.ok(boundary.titleAssetCandidates.some((entry) => entry.row === 0 && entry.assetName === "SMilestone-0-Eternal(OURO)"), "shard milestone title/effect boundary missing row 0 title asset");
-  assert.ok(boundary.titleAssetCandidates.some((entry) => entry.row === 29 && entry.assetName === "SMilestone-29-Earthly"), "shard milestone title/effect boundary missing row 29 title asset");
-  assert.ok(boundary.titleAssetCandidates.some((entry) => entry.row === 30 && entry.assetName === "SMilestone-30-Illuminating"), "shard milestone title/effect boundary missing row 30 title asset");
-  assert.equal(boundary.titleAssetCandidates.filter((entry) => entry.row === 28).length, 2, "shard milestone title/effect boundary should preserve both row 28 title candidates");
+  assert.ok(
+    boundary.titleAssetCandidates.some(
+      (entry) => entry.row === 0 && entry.assetName === "SMilestone-0-Eternal(OURO)"
+    ),
+    "shard milestone title/effect boundary missing row 0 title asset"
+  );
+  assert.ok(
+    boundary.titleAssetCandidates.some(
+      (entry) => entry.row === 29 && entry.assetName === "SMilestone-29-Earthly"
+    ),
+    "shard milestone title/effect boundary missing row 29 title asset"
+  );
+  assert.ok(
+    boundary.titleAssetCandidates.some(
+      (entry) => entry.row === 30 && entry.assetName === "SMilestone-30-Illuminating"
+    ),
+    "shard milestone title/effect boundary missing row 30 title asset"
+  );
+  assert.equal(
+    boundary.titleAssetCandidates.filter((entry) => entry.row === 28).length,
+    2,
+    "shard milestone title/effect boundary should preserve both row 28 title candidates"
+  );
   ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].forEach((name) => {
-    assert.ok(boundary.effectPresentationSlots.includes(name), `shard milestone title/effect boundary missing ${name}`);
+    assert.ok(
+      boundary.effectPresentationSlots.includes(name),
+      `shard milestone title/effect boundary missing ${name}`
+    );
   });
   ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].forEach((name) => {
-    assert.ok(boundary.sampleBonusCalcAccessors.includes(name), `shard milestone title/effect boundary missing ${name}`);
+    assert.ok(
+      boundary.sampleBonusCalcAccessors.includes(name),
+      `shard milestone title/effect boundary missing ${name}`
+    );
   });
-  assert.ok(boundary.findings.some((line) => /row 28 currently has conflicting shipped asset title candidates/i.test(String(line))), "shard milestone title/effect boundary must preserve the row 28 conflict");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat the title list as fully conflict-free")), "shard milestone title/effect boundary must preserve blocked-use framing");
+  assert.ok(
+    boundary.findings.some((line) =>
+      /row 28 currently has conflicting shipped asset title candidates/i.test(String(line))
+    ),
+    "shard milestone title/effect boundary must preserve the row 28 conflict"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not treat the title list as fully conflict-free")
+    ),
+    "shard milestone title/effect boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-milestone-title-effect-boundary",
@@ -447,33 +973,97 @@ function validateShardMilestoneTitleEffectBoundary(boundary) {
 }
 
 function validateShardEffectTextHandlerBoundary(boundary) {
-  expectNonEmptyString(boundary.dataset, "shard effect-text handler boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard effect-text handler boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard effect-text handler boundary dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard effect-text handler boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard effect-text handler boundary sources must be an object");
-  ["unityProbeReport", "targetedStringProbe", "ownerComparisonProbe", "titleEffectBoundary", "rowModelBoundary"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard effect-text handler boundary sources.${field} must be present`);
+  [
+    "unityProbeReport",
+    "targetedStringProbe",
+    "ownerComparisonProbe",
+    "titleEffectBoundary",
+    "rowModelBoundary"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard effect-text handler boundary sources.${field} must be present`
+    );
   });
-  expectNonEmptyString(boundary.probableTextHandler, "shard effect-text handler boundary probableTextHandler must be present");
-  expectArray(boundary.presentationFamily, "shard effect-text handler boundary presentationFamily must be an array");
-  expectArray(boundary.sampleBonusCalcAccessors, "shard effect-text handler boundary sampleBonusCalcAccessors must be an array");
-  expectArray(boundary.uiContextAnchors, "shard effect-text handler boundary uiContextAnchors must be an array");
-  expectNonEmptyString(boundary.genericMilestoneWriter, "shard effect-text handler boundary genericMilestoneWriter must be present");
-  expectRecord(boundary.rowModelCoverage, "shard effect-text handler boundary rowModelCoverage must be an object");
-  expectArray(boundary.currentBoundary, "shard effect-text handler boundary currentBoundary must be an array");
+  expectNonEmptyString(
+    boundary.probableTextHandler,
+    "shard effect-text handler boundary probableTextHandler must be present"
+  );
+  expectArray(
+    boundary.presentationFamily,
+    "shard effect-text handler boundary presentationFamily must be an array"
+  );
+  expectArray(
+    boundary.sampleBonusCalcAccessors,
+    "shard effect-text handler boundary sampleBonusCalcAccessors must be an array"
+  );
+  expectArray(
+    boundary.uiContextAnchors,
+    "shard effect-text handler boundary uiContextAnchors must be an array"
+  );
+  expectNonEmptyString(
+    boundary.genericMilestoneWriter,
+    "shard effect-text handler boundary genericMilestoneWriter must be present"
+  );
+  expectRecord(
+    boundary.rowModelCoverage,
+    "shard effect-text handler boundary rowModelCoverage must be an object"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard effect-text handler boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N", "shard effect-text handler boundary probableTextHandler drifted");
+  assert.equal(
+    boundary.probableTextHandler,
+    "TextHandlerShardMilestoneBonusesPerLevel/N",
+    "shard effect-text handler boundary probableTextHandler drifted"
+  );
   ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].forEach((name) => {
-    assert.ok(boundary.presentationFamily.includes(name), `shard effect-text handler boundary missing ${name}`);
+    assert.ok(
+      boundary.presentationFamily.includes(name),
+      `shard effect-text handler boundary missing ${name}`
+    );
   });
   ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].forEach((name) => {
-    assert.ok(boundary.sampleBonusCalcAccessors.includes(name), `shard effect-text handler boundary missing ${name}`);
+    assert.ok(
+      boundary.sampleBonusCalcAccessors.includes(name),
+      `shard effect-text handler boundary missing ${name}`
+    );
   });
   ["LevelText", "DescText", "ValueText", "DescriptionText"].forEach((name) => {
-    assert.ok(boundary.uiContextAnchors.includes(name), `shard effect-text handler boundary missing ${name}`);
+    assert.ok(
+      boundary.uiContextAnchors.includes(name),
+      `shard effect-text handler boundary missing ${name}`
+    );
   });
-  assert.equal(boundary.genericMilestoneWriter, "SetAllMilestoneTexts", "shard effect-text handler boundary genericMilestoneWriter drifted");
-  assert.deepEqual(boundary.rowModelCoverage, { start: 0, end: 29, count: 30 }, "shard effect-text handler boundary rowModelCoverage drifted");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat this boundary as a recovered row-complete effect-text table")), "shard effect-text handler boundary must preserve blocked-use framing");
+  assert.equal(
+    boundary.genericMilestoneWriter,
+    "SetAllMilestoneTexts",
+    "shard effect-text handler boundary genericMilestoneWriter drifted"
+  );
+  assert.deepEqual(
+    boundary.rowModelCoverage,
+    { start: 0, end: 29, count: 30 },
+    "shard effect-text handler boundary rowModelCoverage drifted"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes(
+        "Do not treat this boundary as a recovered row-complete effect-text table"
+      )
+    ),
+    "shard effect-text handler boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-effect-text-handler-boundary",
@@ -488,33 +1078,93 @@ function validateShardEffectTextHandlerBoundary(boundary) {
 }
 
 function validateShardMilestoneRowShellBoundary(boundary) {
-  expectNonEmptyString(boundary.dataset, "shard milestone row-shell boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard milestone row-shell boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard milestone row-shell boundary dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard milestone row-shell boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard milestone row-shell boundary sources must be an object");
-  ["shardMiningMetadataNeighborhood", "ownerFamilyBoundary", "payloadBoundary", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard milestone row-shell boundary sources.${field} must be present`);
+  [
+    "shardMiningMetadataNeighborhood",
+    "ownerFamilyBoundary",
+    "payloadBoundary",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard milestone row-shell boundary sources.${field} must be present`
+    );
   });
-  expectNonEmptyString(boundary.screenControllerFamily, "shard milestone row-shell boundary screenControllerFamily must be present");
-  expectNonEmptyString(boundary.dataCarrierTieIn, "shard milestone row-shell boundary dataCarrierTieIn must be present");
-  expectArray(boundary.controllerShellAnchors, "shard milestone row-shell boundary controllerShellAnchors must be an array");
-  expectArray(boundary.unlockHookSamples, "shard milestone row-shell boundary unlockHookSamples must be an array");
-  expectArray(boundary.buyHookSamples, "shard milestone row-shell boundary buyHookSamples must be an array");
-  expectArray(boundary.textCheckerSamples, "shard milestone row-shell boundary textCheckerSamples must be an array");
-  expectArray(boundary.currentBoundary, "shard milestone row-shell boundary currentBoundary must be an array");
+  expectNonEmptyString(
+    boundary.screenControllerFamily,
+    "shard milestone row-shell boundary screenControllerFamily must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataCarrierTieIn,
+    "shard milestone row-shell boundary dataCarrierTieIn must be present"
+  );
+  expectArray(
+    boundary.controllerShellAnchors,
+    "shard milestone row-shell boundary controllerShellAnchors must be an array"
+  );
+  expectArray(
+    boundary.unlockHookSamples,
+    "shard milestone row-shell boundary unlockHookSamples must be an array"
+  );
+  expectArray(
+    boundary.buyHookSamples,
+    "shard milestone row-shell boundary buyHookSamples must be an array"
+  );
+  expectArray(
+    boundary.textCheckerSamples,
+    "shard milestone row-shell boundary textCheckerSamples must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard milestone row-shell boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.screenControllerFamily, "ShardMining, Assembly-CSharp", "shard milestone row-shell boundary screenControllerFamily drifted");
-  assert.equal(boundary.dataCarrierTieIn, "ShardMining|ShardUpgradeInfo", "shard milestone row-shell boundary dataCarrierTieIn drifted");
+  assert.equal(
+    boundary.screenControllerFamily,
+    "ShardMining, Assembly-CSharp",
+    "shard milestone row-shell boundary screenControllerFamily drifted"
+  );
+  assert.equal(
+    boundary.dataCarrierTieIn,
+    "ShardMining|ShardUpgradeInfo",
+    "shard milestone row-shell boundary dataCarrierTieIn drifted"
+  );
   ["AttachFastBuyButton", "StartFastBuyButtonHold", "FastBuyButtonMethodShards"].forEach((name) => {
-    assert.ok(boundary.controllerShellAnchors.includes(name), `shard milestone row-shell boundary missing ${name}`);
+    assert.ok(
+      boundary.controllerShellAnchors.includes(name),
+      `shard milestone row-shell boundary missing ${name}`
+    );
   });
   ["UnlockMilestone17", "UnlockMilestone29"].forEach((name) => {
-    assert.ok(boundary.unlockHookSamples.includes(name), `shard milestone row-shell boundary missing ${name}`);
+    assert.ok(
+      boundary.unlockHookSamples.includes(name),
+      `shard milestone row-shell boundary missing ${name}`
+    );
   });
-  assert.ok(boundary.buyHookSamples.includes("BuyMilestone0"), "shard milestone row-shell boundary missing BuyMilestone0");
+  assert.ok(
+    boundary.buyHookSamples.includes("BuyMilestone0"),
+    "shard milestone row-shell boundary missing BuyMilestone0"
+  );
   ["Milestone0TextChecker", "Milestone9TextChecker", "Milestone12TextChecker"].forEach((name) => {
-    assert.ok(boundary.textCheckerSamples.includes(name), `shard milestone row-shell boundary missing ${name}`);
+    assert.ok(
+      boundary.textCheckerSamples.includes(name),
+      `shard milestone row-shell boundary missing ${name}`
+    );
   });
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat this partial row shell")), "shard milestone row-shell boundary must preserve blocked-use framing");
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not treat this partial row shell")
+    ),
+    "shard milestone row-shell boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-milestone-row-shell-boundary",
@@ -529,27 +1179,94 @@ function validateShardMilestoneRowShellBoundary(boundary) {
 }
 
 function validateShardMilestoneRowAlignmentBoundary(boundary) {
-  expectNonEmptyString(boundary.dataset, "shard milestone row-alignment boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard milestone row-alignment boundary generatedAt must be present");
-  expectRecord(boundary.sources, "shard milestone row-alignment boundary sources must be an object");
-  ["shardMiningMetadataNeighborhood", "rowShellBoundary", "ownerFamilyBoundary", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard milestone row-alignment boundary sources.${field} must be present`);
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard milestone row-alignment boundary dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard milestone row-alignment boundary generatedAt must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "shard milestone row-alignment boundary sources must be an object"
+  );
+  [
+    "shardMiningMetadataNeighborhood",
+    "rowShellBoundary",
+    "ownerFamilyBoundary",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard milestone row-alignment boundary sources.${field} must be present`
+    );
   });
-  expectNonEmptyString(boundary.screenControllerFamily, "shard milestone row-alignment boundary screenControllerFamily must be present");
-  expectRecord(boundary.unlockHookRange, "shard milestone row-alignment boundary unlockHookRange must be an object");
-  expectRecord(boundary.textCheckerRange, "shard milestone row-alignment boundary textCheckerRange must be an object");
-  expectRecord(boundary.buyHookRange, "shard milestone row-alignment boundary buyHookRange must be an object");
-  expectArray(boundary.unlockTextCheckerOverlapIds, "shard milestone row-alignment boundary unlockTextCheckerOverlapIds must be an array");
-  expectArray(boundary.buyTextCheckerOverlapIds, "shard milestone row-alignment boundary buyTextCheckerOverlapIds must be an array");
-  expectArray(boundary.currentBoundary, "shard milestone row-alignment boundary currentBoundary must be an array");
+  expectNonEmptyString(
+    boundary.screenControllerFamily,
+    "shard milestone row-alignment boundary screenControllerFamily must be present"
+  );
+  expectRecord(
+    boundary.unlockHookRange,
+    "shard milestone row-alignment boundary unlockHookRange must be an object"
+  );
+  expectRecord(
+    boundary.textCheckerRange,
+    "shard milestone row-alignment boundary textCheckerRange must be an object"
+  );
+  expectRecord(
+    boundary.buyHookRange,
+    "shard milestone row-alignment boundary buyHookRange must be an object"
+  );
+  expectArray(
+    boundary.unlockTextCheckerOverlapIds,
+    "shard milestone row-alignment boundary unlockTextCheckerOverlapIds must be an array"
+  );
+  expectArray(
+    boundary.buyTextCheckerOverlapIds,
+    "shard milestone row-alignment boundary buyTextCheckerOverlapIds must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard milestone row-alignment boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.screenControllerFamily, "ShardMining, Assembly-CSharp", "shard milestone row-alignment boundary screenControllerFamily drifted");
-  assert.deepEqual(boundary.unlockHookRange, { start: 17, end: 29, count: 13 }, "shard milestone row-alignment boundary unlockHookRange drifted");
-  assert.deepEqual(boundary.textCheckerRange, { start: 0, end: 12, count: 13 }, "shard milestone row-alignment boundary textCheckerRange drifted");
-  assert.deepEqual(boundary.buyHookRange, { start: 0, end: 0, count: 1 }, "shard milestone row-alignment boundary buyHookRange drifted");
-  assert.deepEqual(boundary.unlockTextCheckerOverlapIds, [], "shard milestone row-alignment boundary unlockTextCheckerOverlapIds drifted");
-  assert.deepEqual(boundary.buyTextCheckerOverlapIds, [0], "shard milestone row-alignment boundary buyTextCheckerOverlapIds drifted");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not infer that UnlockMilestone17 already maps")), "shard milestone row-alignment boundary must preserve blocked-use framing");
+  assert.equal(
+    boundary.screenControllerFamily,
+    "ShardMining, Assembly-CSharp",
+    "shard milestone row-alignment boundary screenControllerFamily drifted"
+  );
+  assert.deepEqual(
+    boundary.unlockHookRange,
+    { start: 17, end: 29, count: 13 },
+    "shard milestone row-alignment boundary unlockHookRange drifted"
+  );
+  assert.deepEqual(
+    boundary.textCheckerRange,
+    { start: 0, end: 12, count: 13 },
+    "shard milestone row-alignment boundary textCheckerRange drifted"
+  );
+  assert.deepEqual(
+    boundary.buyHookRange,
+    { start: 0, end: 0, count: 1 },
+    "shard milestone row-alignment boundary buyHookRange drifted"
+  );
+  assert.deepEqual(
+    boundary.unlockTextCheckerOverlapIds,
+    [],
+    "shard milestone row-alignment boundary unlockTextCheckerOverlapIds drifted"
+  );
+  assert.deepEqual(
+    boundary.buyTextCheckerOverlapIds,
+    [0],
+    "shard milestone row-alignment boundary buyTextCheckerOverlapIds drifted"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not infer that UnlockMilestone17 already maps")
+    ),
+    "shard milestone row-alignment boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-milestone-row-alignment-boundary",
@@ -567,41 +1284,138 @@ function validateShardSaveBoundary(boundary) {
   expectNonEmptyString(boundary.dataset, "shard save boundary dataset id must be present");
   expectNonEmptyString(boundary.generatedAt, "shard save boundary generatedAt must be present");
   expectRecord(boundary.sources, "shard save boundary sources must be an object");
-  ["shardMiningMetadataNeighborhood", "shardUpgradeInfoMetadataNeighborhood", "shardMetadataNeighborhood", "ownerFamilyBoundary", "payloadBoundary", "handoffBoundary", "typeMetadataProbe", "globalMetadata", "level0"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard save boundary sources.${field} must be present`);
+  [
+    "shardMiningMetadataNeighborhood",
+    "shardUpgradeInfoMetadataNeighborhood",
+    "shardMetadataNeighborhood",
+    "ownerFamilyBoundary",
+    "payloadBoundary",
+    "handoffBoundary",
+    "typeMetadataProbe",
+    "globalMetadata",
+    "level0"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard save boundary sources.${field} must be present`
+    );
   });
-  expectArray(boundary.ownerShellTermsChecked, "shard save boundary ownerShellTermsChecked must be an array");
-  expectArray(boundary.saveFamilyTermsChecked, "shard save boundary saveFamilyTermsChecked must be an array");
+  expectArray(
+    boundary.ownerShellTermsChecked,
+    "shard save boundary ownerShellTermsChecked must be an array"
+  );
+  expectArray(
+    boundary.saveFamilyTermsChecked,
+    "shard save boundary saveFamilyTermsChecked must be an array"
+  );
   expectRecord(boundary.probeResults, "shard save boundary probeResults must be an object");
-  expectRecord(boundary.recoveredDeclaringRowModel, "shard save boundary recoveredDeclaringRowModel must be an object");
-  expectRecord(boundary.recoveredDeclaringRowModel.declaringField, "shard save boundary recoveredDeclaringRowModel.declaringField must be an object");
-  expectRecord(boundary.recoveredDeclaringRowModel.rowModelType, "shard save boundary recoveredDeclaringRowModel.rowModelType must be an object");
-  expectArray(boundary.recoveredDeclaringRowModel.rowStateFields, "shard save boundary recoveredDeclaringRowModel.rowStateFields must be an array");
+  expectRecord(
+    boundary.recoveredDeclaringRowModel,
+    "shard save boundary recoveredDeclaringRowModel must be an object"
+  );
+  expectRecord(
+    boundary.recoveredDeclaringRowModel.declaringField,
+    "shard save boundary recoveredDeclaringRowModel.declaringField must be an object"
+  );
+  expectRecord(
+    boundary.recoveredDeclaringRowModel.rowModelType,
+    "shard save boundary recoveredDeclaringRowModel.rowModelType must be an object"
+  );
+  expectArray(
+    boundary.recoveredDeclaringRowModel.rowStateFields,
+    "shard save boundary recoveredDeclaringRowModel.rowStateFields must be an array"
+  );
   expectArray(boundary.currentBoundary, "shard save boundary currentBoundary must be an array");
 
-  ["ShardMining", "ShardUpgradeInfo", "TotalMilestoneLevels", "UpdateShardCostList", "GetShardCostList", "CheckAllMilestoneLevelFills", "get_SU1FinalUnlockReq", "FinalSU29Bonus2"].forEach((name) => {
-    assert.ok(boundary.ownerShellTermsChecked.includes(name), `shard save boundary missing ${name}`);
+  [
+    "ShardMining",
+    "ShardUpgradeInfo",
+    "TotalMilestoneLevels",
+    "UpdateShardCostList",
+    "GetShardCostList",
+    "CheckAllMilestoneLevelFills",
+    "get_SU1FinalUnlockReq",
+    "FinalSU29Bonus2"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.ownerShellTermsChecked.includes(name),
+      `shard save boundary missing ${name}`
+    );
   });
-  ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"].forEach((name) => {
-    assert.ok(boundary.saveFamilyTermsChecked.includes(name), `shard save boundary missing ${name}`);
+  [
+    "PlayerProfileData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "CloudSavePlayerProfile"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.saveFamilyTermsChecked.includes(name),
+      `shard save boundary missing ${name}`
+    );
   });
-  assert.equal(boundary.probeResults.metadataNeighborhoodHasSaveTerms, false, "shard save boundary metadataNeighborhoodHasSaveTerms drifted");
-  assert.equal(boundary.probeResults.level0HasSaveTerms, false, "shard save boundary level0HasSaveTerms drifted");
-  assert.equal(boundary.probeResults.ownerShellWithSaveOverlapCount, 0, "shard save boundary ownerShellWithSaveOverlapCount drifted");
-  assert.equal(boundary.probeResults.directShardPlayerProfileContext, false, "shard save boundary directShardPlayerProfileContext drifted");
-  assert.equal(boundary.probeResults.declaringRowModelRecovered, true, "shard save boundary declaringRowModelRecovered drifted");
-  assert.equal(boundary.probeResults.saveSideOwnerRecovered, false, "shard save boundary saveSideOwnerRecovered drifted");
-  assert.equal(boundary.recoveredDeclaringRowModel.ownerType, "ShardMining", "shard save boundary recoveredDeclaringRowModel.ownerType drifted");
-  assert.equal(boundary.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList", "shard save boundary recoveredDeclaringRowModel.declaringField.name drifted");
-  assert.equal(boundary.recoveredDeclaringRowModel.declaringField.type, "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>", "shard save boundary recoveredDeclaringRowModel.declaringField.type drifted");
-  assert.equal(boundary.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo", "shard save boundary recoveredDeclaringRowModel.rowModelType.fullName drifted");
+  assert.equal(
+    boundary.probeResults.metadataNeighborhoodHasSaveTerms,
+    false,
+    "shard save boundary metadataNeighborhoodHasSaveTerms drifted"
+  );
+  assert.equal(
+    boundary.probeResults.level0HasSaveTerms,
+    false,
+    "shard save boundary level0HasSaveTerms drifted"
+  );
+  assert.equal(
+    boundary.probeResults.ownerShellWithSaveOverlapCount,
+    0,
+    "shard save boundary ownerShellWithSaveOverlapCount drifted"
+  );
+  assert.equal(
+    boundary.probeResults.directShardPlayerProfileContext,
+    false,
+    "shard save boundary directShardPlayerProfileContext drifted"
+  );
+  assert.equal(
+    boundary.probeResults.declaringRowModelRecovered,
+    true,
+    "shard save boundary declaringRowModelRecovered drifted"
+  );
+  assert.equal(
+    boundary.probeResults.saveSideOwnerRecovered,
+    false,
+    "shard save boundary saveSideOwnerRecovered drifted"
+  );
+  assert.equal(
+    boundary.recoveredDeclaringRowModel.ownerType,
+    "ShardMining",
+    "shard save boundary recoveredDeclaringRowModel.ownerType drifted"
+  );
+  assert.equal(
+    boundary.recoveredDeclaringRowModel.declaringField.name,
+    "upgradeInfoList",
+    "shard save boundary recoveredDeclaringRowModel.declaringField.name drifted"
+  );
+  assert.equal(
+    boundary.recoveredDeclaringRowModel.declaringField.type,
+    "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>",
+    "shard save boundary recoveredDeclaringRowModel.declaringField.type drifted"
+  );
+  assert.equal(
+    boundary.recoveredDeclaringRowModel.rowModelType.fullName,
+    "ShardMining+ShardUpgradeInfo",
+    "shard save boundary recoveredDeclaringRowModel.rowModelType.fullName drifted"
+  );
   assert.deepEqual(
     boundary.recoveredDeclaringRowModel.rowStateFields.map((field) => field.name),
     ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"],
     "shard save boundary recoveredDeclaringRowModel.rowStateFields drifted"
   );
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("zero checked overlap")), "shard save boundary must preserve zero-overlap framing");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("upgradeInfoList")), "shard save boundary must preserve row-model seam framing");
+  assert.ok(
+    boundary.currentBoundary.some((line) => String(line).includes("zero checked overlap")),
+    "shard save boundary must preserve zero-overlap framing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) => String(line).includes("upgradeInfoList")),
+    "shard save boundary must preserve row-model seam framing"
+  );
 
   return {
     id: "shard-save-boundary",
@@ -616,50 +1430,170 @@ function validateShardSaveBoundary(boundary) {
 }
 
 function validateShardMilestoneSaveOwnerCandidates(candidates) {
-  expectNonEmptyString(candidates.dataset, "shard milestone save-owner candidates dataset id must be present");
-  expectNonEmptyString(candidates.generatedAt, "shard milestone save-owner candidates generatedAt must be present");
-  expectRecord(candidates.sources, "shard milestone save-owner candidates sources must be an object");
-  ["shardSaveBoundary", "handoffBoundary", "ownerFamilyBoundary", "payloadBoundary", "typeMetadataProbe", "extractionCandidateFamilies", "globalMetadata", "level0"].forEach((field) => {
-    expectNonEmptyString(candidates.sources[field], `shard milestone save-owner candidates sources.${field} must be present`);
+  expectNonEmptyString(
+    candidates.dataset,
+    "shard milestone save-owner candidates dataset id must be present"
+  );
+  expectNonEmptyString(
+    candidates.generatedAt,
+    "shard milestone save-owner candidates generatedAt must be present"
+  );
+  expectRecord(
+    candidates.sources,
+    "shard milestone save-owner candidates sources must be an object"
+  );
+  [
+    "shardSaveBoundary",
+    "handoffBoundary",
+    "ownerFamilyBoundary",
+    "payloadBoundary",
+    "typeMetadataProbe",
+    "extractionCandidateFamilies",
+    "globalMetadata",
+    "level0"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      candidates.sources[field],
+      `shard milestone save-owner candidates sources.${field} must be present`
+    );
   });
-  expectRecord(candidates.recoveredDeclaringRowModel, "shard milestone save-owner candidates recoveredDeclaringRowModel must be an object");
-  expectRecord(candidates.recoveredDeclaringRowModel.declaringField, "shard milestone save-owner candidates recoveredDeclaringRowModel.declaringField must be an object");
-  expectRecord(candidates.recoveredDeclaringRowModel.rowModelType, "shard milestone save-owner candidates recoveredDeclaringRowModel.rowModelType must be an object");
-  expectArray(candidates.recoveredDeclaringRowModel.rowStateFields, "shard milestone save-owner candidates recoveredDeclaringRowModel.rowStateFields must be an array");
-  expectArray(candidates.recoveredDeclaringRowModel.why, "shard milestone save-owner candidates recoveredDeclaringRowModel.why must be an array");
-  expectArray(candidates.remainingSaveOwnerCandidates, "shard milestone save-owner candidates remainingSaveOwnerCandidates must be an array");
-  assert.ok(candidates.remainingSaveOwnerCandidates.length >= 1, "shard milestone save-owner candidates must preserve at least one remaining candidate");
+  expectRecord(
+    candidates.recoveredDeclaringRowModel,
+    "shard milestone save-owner candidates recoveredDeclaringRowModel must be an object"
+  );
+  expectRecord(
+    candidates.recoveredDeclaringRowModel.declaringField,
+    "shard milestone save-owner candidates recoveredDeclaringRowModel.declaringField must be an object"
+  );
+  expectRecord(
+    candidates.recoveredDeclaringRowModel.rowModelType,
+    "shard milestone save-owner candidates recoveredDeclaringRowModel.rowModelType must be an object"
+  );
+  expectArray(
+    candidates.recoveredDeclaringRowModel.rowStateFields,
+    "shard milestone save-owner candidates recoveredDeclaringRowModel.rowStateFields must be an array"
+  );
+  expectArray(
+    candidates.recoveredDeclaringRowModel.why,
+    "shard milestone save-owner candidates recoveredDeclaringRowModel.why must be an array"
+  );
+  expectArray(
+    candidates.remainingSaveOwnerCandidates,
+    "shard milestone save-owner candidates remainingSaveOwnerCandidates must be an array"
+  );
+  assert.ok(
+    candidates.remainingSaveOwnerCandidates.length >= 1,
+    "shard milestone save-owner candidates must preserve at least one remaining candidate"
+  );
   candidates.remainingSaveOwnerCandidates.forEach((entry, index) => {
-    expectNonEmptyString(entry.id, `shard milestone save-owner candidates[${index}].id must be present`);
-    expectNonEmptyString(entry.label, `shard milestone save-owner candidates[${index}].label must be present`);
-    expectNonEmptyString(entry.kind, `shard milestone save-owner candidates[${index}].kind must be present`);
-    expectNonEmptyString(entry.confidence, `shard milestone save-owner candidates[${index}].confidence must be present`);
+    expectNonEmptyString(
+      entry.id,
+      `shard milestone save-owner candidates[${index}].id must be present`
+    );
+    expectNonEmptyString(
+      entry.label,
+      `shard milestone save-owner candidates[${index}].label must be present`
+    );
+    expectNonEmptyString(
+      entry.kind,
+      `shard milestone save-owner candidates[${index}].kind must be present`
+    );
+    expectNonEmptyString(
+      entry.confidence,
+      `shard milestone save-owner candidates[${index}].confidence must be present`
+    );
     expectArray(entry.why, `shard milestone save-owner candidates[${index}].why must be an array`);
-    expectArray(entry.candidateFieldClusters, `shard milestone save-owner candidates[${index}].candidateFieldClusters must be an array`);
-    expectRecord(entry.checkedOverlapStats, `shard milestone save-owner candidates[${index}].checkedOverlapStats must be an object`);
+    expectArray(
+      entry.candidateFieldClusters,
+      `shard milestone save-owner candidates[${index}].candidateFieldClusters must be an array`
+    );
+    expectRecord(
+      entry.checkedOverlapStats,
+      `shard milestone save-owner candidates[${index}].checkedOverlapStats must be an object`
+    );
   });
-  expectArray(candidates.confidenceNotes, "shard milestone save-owner candidates confidenceNotes must be an array");
-  expectRecord(candidates.checkedOverlapStatistics, "shard milestone save-owner candidates checkedOverlapStatistics must be an object");
-  expectArray(candidates.warnings, "shard milestone save-owner candidates warnings must be an array");
-  expectArray(candidates.currentBoundary, "shard milestone save-owner candidates currentBoundary must be an array");
+  expectArray(
+    candidates.confidenceNotes,
+    "shard milestone save-owner candidates confidenceNotes must be an array"
+  );
+  expectRecord(
+    candidates.checkedOverlapStatistics,
+    "shard milestone save-owner candidates checkedOverlapStatistics must be an object"
+  );
+  expectArray(
+    candidates.warnings,
+    "shard milestone save-owner candidates warnings must be an array"
+  );
+  expectArray(
+    candidates.currentBoundary,
+    "shard milestone save-owner candidates currentBoundary must be an array"
+  );
 
-  assert.equal(candidates.recoveredDeclaringRowModel.id, "shardmining-upgradeinfolist-row-model", "shard milestone save-owner candidates recoveredDeclaringRowModel.id drifted");
-  assert.equal(candidates.recoveredDeclaringRowModel.ownerType, "ShardMining", "shard milestone save-owner candidates recoveredDeclaringRowModel.ownerType drifted");
-  assert.equal(candidates.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList", "shard milestone save-owner candidates recoveredDeclaringRowModel.declaringField.name drifted");
-  assert.equal(candidates.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo", "shard milestone save-owner candidates recoveredDeclaringRowModel.rowModelType.fullName drifted");
+  assert.equal(
+    candidates.recoveredDeclaringRowModel.id,
+    "shardmining-upgradeinfolist-row-model",
+    "shard milestone save-owner candidates recoveredDeclaringRowModel.id drifted"
+  );
+  assert.equal(
+    candidates.recoveredDeclaringRowModel.ownerType,
+    "ShardMining",
+    "shard milestone save-owner candidates recoveredDeclaringRowModel.ownerType drifted"
+  );
+  assert.equal(
+    candidates.recoveredDeclaringRowModel.declaringField.name,
+    "upgradeInfoList",
+    "shard milestone save-owner candidates recoveredDeclaringRowModel.declaringField.name drifted"
+  );
+  assert.equal(
+    candidates.recoveredDeclaringRowModel.rowModelType.fullName,
+    "ShardMining+ShardUpgradeInfo",
+    "shard milestone save-owner candidates recoveredDeclaringRowModel.rowModelType.fullName drifted"
+  );
   assert.deepEqual(
     candidates.recoveredDeclaringRowModel.rowStateFields.map((field) => field.name),
     ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"],
     "shard milestone save-owner candidates recoveredDeclaringRowModel.rowStateFields drifted"
   );
-  assert.ok(candidates.remainingSaveOwnerCandidates.some((entry) => entry.id === "player-profile-side-shard-member-shell"), "shard milestone save-owner candidates must preserve the PlayerProfile-side candidate");
-  assert.equal(candidates.checkedOverlapStatistics.ownerShellWithSaveOverlapCount, 0, "shard milestone save-owner candidates overlap count drifted");
-  assert.equal(candidates.checkedOverlapStatistics.directShardPlayerProfileContext, false, "shard milestone save-owner candidates direct save context drifted");
-  assert.equal(candidates.checkedOverlapStatistics.declaringRowModelRecovered, true, "shard milestone save-owner candidates declaringRowModelRecovered drifted");
-  assert.equal(candidates.checkedOverlapStatistics.remainingSaveOwnerCandidateCount, 1, "shard milestone save-owner candidates remainingSaveOwnerCandidateCount drifted");
-  assert.ok(candidates.warnings.some((line) => String(line).includes("not recovered a save-side owner")), "shard milestone save-owner candidates must preserve warning framing");
-  assert.ok(candidates.currentBoundary.some((line) => String(line).includes("recovered shard-local row-model result")), "shard milestone save-owner candidates must preserve row-model framing");
-  assert.ok(candidates.currentBoundary.some((line) => String(line).includes("save-owner gap")), "shard milestone save-owner candidates must preserve save-owner-gap framing");
+  assert.ok(
+    candidates.remainingSaveOwnerCandidates.some(
+      (entry) => entry.id === "player-profile-side-shard-member-shell"
+    ),
+    "shard milestone save-owner candidates must preserve the PlayerProfile-side candidate"
+  );
+  assert.equal(
+    candidates.checkedOverlapStatistics.ownerShellWithSaveOverlapCount,
+    0,
+    "shard milestone save-owner candidates overlap count drifted"
+  );
+  assert.equal(
+    candidates.checkedOverlapStatistics.directShardPlayerProfileContext,
+    false,
+    "shard milestone save-owner candidates direct save context drifted"
+  );
+  assert.equal(
+    candidates.checkedOverlapStatistics.declaringRowModelRecovered,
+    true,
+    "shard milestone save-owner candidates declaringRowModelRecovered drifted"
+  );
+  assert.equal(
+    candidates.checkedOverlapStatistics.remainingSaveOwnerCandidateCount,
+    1,
+    "shard milestone save-owner candidates remainingSaveOwnerCandidateCount drifted"
+  );
+  assert.ok(
+    candidates.warnings.some((line) => String(line).includes("not recovered a save-side owner")),
+    "shard milestone save-owner candidates must preserve warning framing"
+  );
+  assert.ok(
+    candidates.currentBoundary.some((line) =>
+      String(line).includes("recovered shard-local row-model result")
+    ),
+    "shard milestone save-owner candidates must preserve row-model framing"
+  );
+  assert.ok(
+    candidates.currentBoundary.some((line) => String(line).includes("save-owner gap")),
+    "shard milestone save-owner candidates must preserve save-owner-gap framing"
+  );
 
   return {
     id: "shard-milestone-save-owner-candidates",
@@ -675,20 +1609,56 @@ function validateShardMilestoneSaveOwnerCandidates(candidates) {
 
 function validateShardSceneMonoBehaviourProbe(probe) {
   expectNonEmptyString(probe.dataset, "shard scene MonoBehaviour probe dataset id must be present");
-  expectNonEmptyString(probe.generatedAt, "shard scene MonoBehaviour probe generatedAt must be present");
+  expectNonEmptyString(
+    probe.generatedAt,
+    "shard scene MonoBehaviour probe generatedAt must be present"
+  );
   expectRecord(probe.source, "shard scene MonoBehaviour probe source must be an object");
   ["unityJoinedDir", "probeMethod"].forEach((field) => {
-    expectNonEmptyString(probe.source[field], `shard scene MonoBehaviour probe source.${field} must be present`);
+    expectNonEmptyString(
+      probe.source[field],
+      `shard scene MonoBehaviour probe source.${field} must be present`
+    );
   });
-  expectArray(probe.monoBehaviours, "shard scene MonoBehaviour probe monoBehaviours must be an array");
+  expectArray(
+    probe.monoBehaviours,
+    "shard scene MonoBehaviour probe monoBehaviours must be an array"
+  );
   expectArray(probe.findings, "shard scene MonoBehaviour probe findings must be an array");
-  expectArray(probe.currentBoundary, "shard scene MonoBehaviour probe currentBoundary must be an array");
+  expectArray(
+    probe.currentBoundary,
+    "shard scene MonoBehaviour probe currentBoundary must be an array"
+  );
 
-  assert.equal(probe.dataset, "shard-scene-monobehaviour-probe.v1", "shard scene MonoBehaviour probe dataset drifted");
-  assert.ok(probe.monoBehaviours.some((entry) => entry.scriptName === "ShardMining" && entry.assetsFile === "level0"), "shard scene MonoBehaviour probe must preserve ShardMining level0 target");
-  assert.ok(probe.monoBehaviours.some((entry) => entry.scriptName === "ShardPerLevelTextHandler" && entry.assetsFile === "level0"), "shard scene MonoBehaviour probe must preserve shard text handler target");
-  assert.ok(probe.monoBehaviours.some((entry) => entry.scriptName === "ConstructionMilestones" && entry.assetsFile === "level0"), "shard scene MonoBehaviour probe must preserve ConstructionMilestones level0 target");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("Do not claim recovered shard numeric fields")), "shard scene MonoBehaviour probe must preserve blocked-use framing");
+  assert.equal(
+    probe.dataset,
+    "shard-scene-monobehaviour-probe.v1",
+    "shard scene MonoBehaviour probe dataset drifted"
+  );
+  assert.ok(
+    probe.monoBehaviours.some(
+      (entry) => entry.scriptName === "ShardMining" && entry.assetsFile === "level0"
+    ),
+    "shard scene MonoBehaviour probe must preserve ShardMining level0 target"
+  );
+  assert.ok(
+    probe.monoBehaviours.some(
+      (entry) => entry.scriptName === "ShardPerLevelTextHandler" && entry.assetsFile === "level0"
+    ),
+    "shard scene MonoBehaviour probe must preserve shard text handler target"
+  );
+  assert.ok(
+    probe.monoBehaviours.some(
+      (entry) => entry.scriptName === "ConstructionMilestones" && entry.assetsFile === "level0"
+    ),
+    "shard scene MonoBehaviour probe must preserve ConstructionMilestones level0 target"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("Do not claim recovered shard numeric fields")
+    ),
+    "shard scene MonoBehaviour probe must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-scene-monobehaviour-probe",
@@ -707,82 +1677,292 @@ function validateShardCostParameterProbe(probe) {
   expectNonEmptyString(probe.generatedAt, "shard cost parameter probe generatedAt must be present");
   expectRecord(probe.source, "shard cost parameter probe source must be an object");
   ["metadata", "level0"].forEach((field) => {
-    expectNonEmptyString(probe.source[field], `shard cost parameter probe source.${field} must be present`);
+    expectNonEmptyString(
+      probe.source[field],
+      `shard cost parameter probe source.${field} must be present`
+    );
   });
-  expectRecord(probe.metadataFamilies, "shard cost parameter probe metadataFamilies must be an object");
-  ["startCostFields", "costExponentFields", "growthExponentFields", "costAccessors"].forEach((field) => {
-    expectArray(probe.metadataFamilies[field], `shard cost parameter probe metadataFamilies.${field} must be an array`);
-  });
+  expectRecord(
+    probe.metadataFamilies,
+    "shard cost parameter probe metadataFamilies must be an object"
+  );
+  ["startCostFields", "costExponentFields", "growthExponentFields", "costAccessors"].forEach(
+    (field) => {
+      expectArray(
+        probe.metadataFamilies[field],
+        `shard cost parameter probe metadataFamilies.${field} must be an array`
+      );
+    }
+  );
   ["overLevelExponentFields", "overLevelExponentAccessors"].forEach((field) => {
-    expectArray(probe.metadataFamilies[field], `shard cost parameter probe metadataFamilies.${field} must be an array`);
+    expectArray(
+      probe.metadataFamilies[field],
+      `shard cost parameter probe metadataFamilies.${field} must be an array`
+    );
   });
-  expectArray(probe.shardMiningCandidateTuples, "shard cost parameter probe shardMiningCandidateTuples must be an array");
-  expectArray(probe.rowAlignedTupleCandidates, "shard cost parameter probe rowAlignedTupleCandidates must be an array");
+  expectArray(
+    probe.shardMiningCandidateTuples,
+    "shard cost parameter probe shardMiningCandidateTuples must be an array"
+  );
+  expectArray(
+    probe.rowAlignedTupleCandidates,
+    "shard cost parameter probe rowAlignedTupleCandidates must be an array"
+  );
   expectArray(probe.signatureGroups, "shard cost parameter probe signatureGroups must be an array");
   expectArray(probe.findings, "shard cost parameter probe findings must be an array");
   expectArray(probe.currentBoundary, "shard cost parameter probe currentBoundary must be an array");
 
-  assert.equal(probe.dataset, "shard-cost-parameter-probe.v1", "shard cost parameter probe dataset drifted");
-  assert.equal(probe.metadataFamilies.startCostFields.length, 30, "shard cost parameter probe startCostFields drifted");
-  assert.equal(probe.metadataFamilies.costExponentFields.length, 30, "shard cost parameter probe costExponentFields drifted");
-  assert.ok(probe.metadataFamilies.growthExponentFields.length >= 30, "shard cost parameter probe growthExponentFields regressed");
-  assert.equal(probe.metadataFamilies.costAccessors.length, 30, "shard cost parameter probe costAccessors drifted");
-  assert.deepEqual(probe.metadataFamilies.overLevelExponentFields, ["OverLevel100Exponent", "OverLevel200Exponent", "OverLevel300Exponent", "OverLevel400Exponent"], "shard cost parameter probe overLevelExponentFields drifted");
-  assert.deepEqual(probe.metadataFamilies.overLevelExponentAccessors, ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], "shard cost parameter probe overLevelExponentAccessors drifted");
-  assert.equal(probe.unlockRequirementBlock?.offset, 1456, "shard cost parameter probe unlockRequirementBlock offset drifted");
-  assert.deepEqual(probe.unlockRequirementBlock?.values?.slice(0, 8), [0, 0, 5, 10, 20, 30, 40, 50], "shard cost parameter probe early unlock requirements drifted");
-  assert.deepEqual(probe.unlockRequirementBlock?.values?.slice(-3), [8000, 8050, 8100], "shard cost parameter probe late unlock requirements drifted");
-  assert.ok(probe.shardMiningCandidateTuples.length >= 7, "shard cost parameter probe candidate tuples regressed");
-  assert.equal(probe.rowAlignedTupleCandidates.length, 30, "shard cost parameter probe rowAlignedTupleCandidates drifted");
-  assert.equal(probe.row0AlignedTupleCandidate?.row, 0, "shard cost parameter probe row0AlignedTupleCandidate row drifted");
-  assert.equal(probe.row0AlignedTupleCandidate?.pointerRefCount, 19, "shard cost parameter probe row0AlignedTupleCandidate pointerRefCount drifted");
-  assert.equal(probe.row0AlignedTupleCandidate?.unlockRequirementValue, 0, "shard cost parameter probe row0AlignedTupleCandidate unlockRequirementValue drifted");
-  assert.equal(probe.row0AlignedTupleCandidate?.bonusCount, 3, "shard cost parameter probe row0AlignedTupleCandidate bonusCount drifted");
-  assert.equal(probe.row0AlignedTupleCandidate?.numericBlockByteCount, 92, "shard cost parameter probe row0AlignedTupleCandidate numericBlockByteCount drifted");
-  assert.equal(probe.row0AlignedTupleCandidate?.trailingSlackByteCount, 20, "shard cost parameter probe row0AlignedTupleCandidate trailingSlackByteCount drifted");
-  assert.equal(Number(probe.row0AlignedTupleCandidate?.leadingValue), 5, "shard cost parameter probe row0AlignedTupleCandidate leadingValue drifted");
-  assert.equal(Number(probe.row0AlignedTupleCandidate?.exponentA), 1.3, "shard cost parameter probe row0AlignedTupleCandidate exponentA drifted");
-  assert.equal(Number(probe.row0AlignedTupleCandidate?.exponentB), 1.5, "shard cost parameter probe row0AlignedTupleCandidate exponentB drifted");
-  assert.equal(Number(probe.row0AlignedTupleCandidate?.tailScalar), 1.1, "shard cost parameter probe row0AlignedTupleCandidate tailScalar drifted");
-  assert.deepEqual(probe.row0AlignedTupleCandidate?.strongestFieldOrderMapping?.values, {
-    StartCost: 5,
-    CostExponent: 1.3,
-    GrowthExponent: 1.5,
-    GrowthExponent2: 1.1,
-    GrowthExponent3: 2
-  }, "shard cost parameter probe row0AlignedTupleCandidate strongestFieldOrderMapping drifted");
-  assert.equal(probe.row0AlignedTupleCandidate?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label, "5.0e0", "shard cost parameter probe row0 StartCost BigDouble label drifted");
-  assert.deepEqual(probe.row0AlignedTupleCandidate?.bonusPerLevelValues?.map((value) => Number(value.toFixed(3))), [1.1, 1.02, 1.3], "shard cost parameter probe row0 bonusPerLevelValues drifted");
-  assert.ok(probe.signatureGroups.length >= 5, "shard cost parameter probe signatureGroups regressed");
-  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 19 && entry?.unlockRequirementValue === 1400 && entry?.intValue === 70 && Number(entry?.exponentA) === 2.5 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 19 tuple drifted");
-  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27 && entry?.unlockRequirementValue === 8000 && entry?.intValue === 975 && Number(entry?.exponentA) === 2.25 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 27 tuple drifted");
-  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 29 && entry?.intValue === 988 && Number(entry?.exponentA) === 2.3 && Number(entry?.exponentB) === 4), "shard cost parameter probe row 29 tuple drifted");
-  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 19
-    && Number(entry?.strongestFieldOrderMapping?.values?.StartCost) === 1
-    && Number(entry?.strongestFieldOrderMapping?.values?.CostExponent) === 2.5
-    && Number(entry?.strongestFieldOrderMapping?.values?.GrowthExponent) === 4
-    && Number(entry?.strongestFieldOrderMapping?.auxiliaryIntCandidate) === 70), "shard cost parameter probe row 19 strongestFieldOrderMapping drifted");
-  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 19
-    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "1.0e70"
-    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.5e0"
-    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"), "shard cost parameter probe row 19 exact BigDouble mapping drifted");
-  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27
-    && Number(entry?.strongestFieldOrderMapping?.values?.StartCost) === 2
-    && Number(entry?.strongestFieldOrderMapping?.values?.CostExponent) === 2.25
-    && Number(entry?.strongestFieldOrderMapping?.values?.GrowthExponent) === 4
-    && Number(entry?.strongestFieldOrderMapping?.auxiliaryIntCandidate) === 975), "shard cost parameter probe row 27 strongestFieldOrderMapping drifted");
-  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 27
-    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "2.0e975"
-    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.25e0"
-    && entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"), "shard cost parameter probe row 27 exact BigDouble mapping drifted");
-  assert.ok(probe.rowAlignedTupleCandidates.some((entry) => entry?.row === 29
-    && entry?.numericBlockByteCount === 60
-    && entry?.trailingSlackByteCount === 48
-    && JSON.stringify(entry?.bonusPerLevelValues?.map((value) => Number(value.toFixed(3)))) === JSON.stringify([1.16, 1.018, 1.028])), "shard cost parameter probe row 29 bounded block drifted");
-  assert.deepEqual(probe.repeatedCommonRowGroup?.rows, [19, 20, 21], "shard cost parameter probe repeatedCommonRowGroup rows drifted");
-  assert.equal(probe.repeatedCommonRowGroup?.tuples?.length, 3, "shard cost parameter probe repeatedCommonRowGroup tuple count drifted");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("exact serialized ShardMining row fields")), "shard cost parameter probe must preserve serialized-field framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("not as a verified get_SU*Cost formula")), "shard cost parameter probe must preserve formula-block framing");
+  assert.equal(
+    probe.dataset,
+    "shard-cost-parameter-probe.v1",
+    "shard cost parameter probe dataset drifted"
+  );
+  assert.equal(
+    probe.metadataFamilies.startCostFields.length,
+    30,
+    "shard cost parameter probe startCostFields drifted"
+  );
+  assert.equal(
+    probe.metadataFamilies.costExponentFields.length,
+    30,
+    "shard cost parameter probe costExponentFields drifted"
+  );
+  assert.ok(
+    probe.metadataFamilies.growthExponentFields.length >= 30,
+    "shard cost parameter probe growthExponentFields regressed"
+  );
+  assert.equal(
+    probe.metadataFamilies.costAccessors.length,
+    30,
+    "shard cost parameter probe costAccessors drifted"
+  );
+  assert.deepEqual(
+    probe.metadataFamilies.overLevelExponentFields,
+    [
+      "OverLevel100Exponent",
+      "OverLevel200Exponent",
+      "OverLevel300Exponent",
+      "OverLevel400Exponent"
+    ],
+    "shard cost parameter probe overLevelExponentFields drifted"
+  );
+  assert.deepEqual(
+    probe.metadataFamilies.overLevelExponentAccessors,
+    [
+      "get_OverLevel100Exponent",
+      "get_OverLevel200Exponent",
+      "get_OverLevel300Exponent",
+      "get_OverLevel400Exponent"
+    ],
+    "shard cost parameter probe overLevelExponentAccessors drifted"
+  );
+  assert.equal(
+    probe.unlockRequirementBlock?.offset,
+    1456,
+    "shard cost parameter probe unlockRequirementBlock offset drifted"
+  );
+  assert.deepEqual(
+    probe.unlockRequirementBlock?.values?.slice(0, 8),
+    [0, 0, 5, 10, 20, 30, 40, 50],
+    "shard cost parameter probe early unlock requirements drifted"
+  );
+  assert.deepEqual(
+    probe.unlockRequirementBlock?.values?.slice(-3),
+    [8000, 8050, 8100],
+    "shard cost parameter probe late unlock requirements drifted"
+  );
+  assert.ok(
+    probe.shardMiningCandidateTuples.length >= 7,
+    "shard cost parameter probe candidate tuples regressed"
+  );
+  assert.equal(
+    probe.rowAlignedTupleCandidates.length,
+    30,
+    "shard cost parameter probe rowAlignedTupleCandidates drifted"
+  );
+  assert.equal(
+    probe.row0AlignedTupleCandidate?.row,
+    0,
+    "shard cost parameter probe row0AlignedTupleCandidate row drifted"
+  );
+  assert.equal(
+    probe.row0AlignedTupleCandidate?.pointerRefCount,
+    19,
+    "shard cost parameter probe row0AlignedTupleCandidate pointerRefCount drifted"
+  );
+  assert.equal(
+    probe.row0AlignedTupleCandidate?.unlockRequirementValue,
+    0,
+    "shard cost parameter probe row0AlignedTupleCandidate unlockRequirementValue drifted"
+  );
+  assert.equal(
+    probe.row0AlignedTupleCandidate?.bonusCount,
+    3,
+    "shard cost parameter probe row0AlignedTupleCandidate bonusCount drifted"
+  );
+  assert.equal(
+    probe.row0AlignedTupleCandidate?.numericBlockByteCount,
+    92,
+    "shard cost parameter probe row0AlignedTupleCandidate numericBlockByteCount drifted"
+  );
+  assert.equal(
+    probe.row0AlignedTupleCandidate?.trailingSlackByteCount,
+    20,
+    "shard cost parameter probe row0AlignedTupleCandidate trailingSlackByteCount drifted"
+  );
+  assert.equal(
+    Number(probe.row0AlignedTupleCandidate?.leadingValue),
+    5,
+    "shard cost parameter probe row0AlignedTupleCandidate leadingValue drifted"
+  );
+  assert.equal(
+    Number(probe.row0AlignedTupleCandidate?.exponentA),
+    1.3,
+    "shard cost parameter probe row0AlignedTupleCandidate exponentA drifted"
+  );
+  assert.equal(
+    Number(probe.row0AlignedTupleCandidate?.exponentB),
+    1.5,
+    "shard cost parameter probe row0AlignedTupleCandidate exponentB drifted"
+  );
+  assert.equal(
+    Number(probe.row0AlignedTupleCandidate?.tailScalar),
+    1.1,
+    "shard cost parameter probe row0AlignedTupleCandidate tailScalar drifted"
+  );
+  assert.deepEqual(
+    probe.row0AlignedTupleCandidate?.strongestFieldOrderMapping?.values,
+    {
+      StartCost: 5,
+      CostExponent: 1.3,
+      GrowthExponent: 1.5,
+      GrowthExponent2: 1.1,
+      GrowthExponent3: 2
+    },
+    "shard cost parameter probe row0AlignedTupleCandidate strongestFieldOrderMapping drifted"
+  );
+  assert.equal(
+    probe.row0AlignedTupleCandidate?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost
+      ?.label,
+    "5.0e0",
+    "shard cost parameter probe row0 StartCost BigDouble label drifted"
+  );
+  assert.deepEqual(
+    probe.row0AlignedTupleCandidate?.bonusPerLevelValues?.map((value) => Number(value.toFixed(3))),
+    [1.1, 1.02, 1.3],
+    "shard cost parameter probe row0 bonusPerLevelValues drifted"
+  );
+  assert.ok(
+    probe.signatureGroups.length >= 5,
+    "shard cost parameter probe signatureGroups regressed"
+  );
+  assert.ok(
+    probe.rowAlignedTupleCandidates.some(
+      (entry) =>
+        entry?.row === 19 &&
+        entry?.unlockRequirementValue === 1400 &&
+        entry?.intValue === 70 &&
+        Number(entry?.exponentA) === 2.5 &&
+        Number(entry?.exponentB) === 4
+    ),
+    "shard cost parameter probe row 19 tuple drifted"
+  );
+  assert.ok(
+    probe.rowAlignedTupleCandidates.some(
+      (entry) =>
+        entry?.row === 27 &&
+        entry?.unlockRequirementValue === 8000 &&
+        entry?.intValue === 975 &&
+        Number(entry?.exponentA) === 2.25 &&
+        Number(entry?.exponentB) === 4
+    ),
+    "shard cost parameter probe row 27 tuple drifted"
+  );
+  assert.ok(
+    probe.rowAlignedTupleCandidates.some(
+      (entry) =>
+        entry?.row === 29 &&
+        entry?.intValue === 988 &&
+        Number(entry?.exponentA) === 2.3 &&
+        Number(entry?.exponentB) === 4
+    ),
+    "shard cost parameter probe row 29 tuple drifted"
+  );
+  assert.ok(
+    probe.rowAlignedTupleCandidates.some(
+      (entry) =>
+        entry?.row === 19 &&
+        Number(entry?.strongestFieldOrderMapping?.values?.StartCost) === 1 &&
+        Number(entry?.strongestFieldOrderMapping?.values?.CostExponent) === 2.5 &&
+        Number(entry?.strongestFieldOrderMapping?.values?.GrowthExponent) === 4 &&
+        Number(entry?.strongestFieldOrderMapping?.auxiliaryIntCandidate) === 70
+    ),
+    "shard cost parameter probe row 19 strongestFieldOrderMapping drifted"
+  );
+  assert.ok(
+    probe.rowAlignedTupleCandidates.some(
+      (entry) =>
+        entry?.row === 19 &&
+        entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "1.0e70" &&
+        entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.5e0" &&
+        entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"
+    ),
+    "shard cost parameter probe row 19 exact BigDouble mapping drifted"
+  );
+  assert.ok(
+    probe.rowAlignedTupleCandidates.some(
+      (entry) =>
+        entry?.row === 27 &&
+        Number(entry?.strongestFieldOrderMapping?.values?.StartCost) === 2 &&
+        Number(entry?.strongestFieldOrderMapping?.values?.CostExponent) === 2.25 &&
+        Number(entry?.strongestFieldOrderMapping?.values?.GrowthExponent) === 4 &&
+        Number(entry?.strongestFieldOrderMapping?.auxiliaryIntCandidate) === 975
+    ),
+    "shard cost parameter probe row 27 strongestFieldOrderMapping drifted"
+  );
+  assert.ok(
+    probe.rowAlignedTupleCandidates.some(
+      (entry) =>
+        entry?.row === 27 &&
+        entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.StartCost?.label === "2.0e975" &&
+        entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.CostExponent?.label === "2.25e0" &&
+        entry?.strongestFieldOrderMapping?.exactBigDoubleValues?.GrowthExponent?.label === "4.0e-1"
+    ),
+    "shard cost parameter probe row 27 exact BigDouble mapping drifted"
+  );
+  assert.ok(
+    probe.rowAlignedTupleCandidates.some(
+      (entry) =>
+        entry?.row === 29 &&
+        entry?.numericBlockByteCount === 60 &&
+        entry?.trailingSlackByteCount === 48 &&
+        JSON.stringify(entry?.bonusPerLevelValues?.map((value) => Number(value.toFixed(3)))) ===
+          JSON.stringify([1.16, 1.018, 1.028])
+    ),
+    "shard cost parameter probe row 29 bounded block drifted"
+  );
+  assert.deepEqual(
+    probe.repeatedCommonRowGroup?.rows,
+    [19, 20, 21],
+    "shard cost parameter probe repeatedCommonRowGroup rows drifted"
+  );
+  assert.equal(
+    probe.repeatedCommonRowGroup?.tuples?.length,
+    3,
+    "shard cost parameter probe repeatedCommonRowGroup tuple count drifted"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("exact serialized ShardMining row fields")
+    ),
+    "shard cost parameter probe must preserve serialized-field framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("not as a verified get_SU*Cost formula")
+    ),
+    "shard cost parameter probe must preserve formula-block framing"
+  );
 
   return {
     id: "shard-cost-parameter-probe",
@@ -802,31 +1982,117 @@ function validateShardCostMethodProbe(probe) {
   expectNonEmptyString(probe.generatedAt, "shard cost method probe generatedAt must be present");
   expectRecord(probe.source, "shard cost method probe source must be an object");
   ["uabeaProbeReport", "libIl2cpp"].forEach((field) => {
-    expectNonEmptyString(probe.source[field], `shard cost method probe source.${field} must be present`);
+    expectNonEmptyString(
+      probe.source[field],
+      `shard cost method probe source.${field} must be present`
+    );
   });
-  expectRecord(probe.costGetterFamily, "shard cost method probe costGetterFamily must be an object");
-  expectArray(probe.costGetterFamily.rows, "shard cost method probe costGetterFamily.rows must be an array");
+  expectRecord(
+    probe.costGetterFamily,
+    "shard cost method probe costGetterFamily must be an object"
+  );
+  expectArray(
+    probe.costGetterFamily.rows,
+    "shard cost method probe costGetterFamily.rows must be an array"
+  );
   expectArray(probe.helperMethods, "shard cost method probe helperMethods must be an array");
-  expectArray(probe.estimatedTrackedBodySizeClusters, "shard cost method probe estimatedTrackedBodySizeClusters must be an array");
+  expectArray(
+    probe.estimatedTrackedBodySizeClusters,
+    "shard cost method probe estimatedTrackedBodySizeClusters must be an array"
+  );
   expectArray(probe.findings, "shard cost method probe findings must be an array");
   expectArray(probe.currentBoundary, "shard cost method probe currentBoundary must be an array");
 
-  assert.equal(probe.dataset, "shard-cost-method-probe.v1", "shard cost method probe dataset drifted");
+  assert.equal(
+    probe.dataset,
+    "shard-cost-method-probe.v1",
+    "shard cost method probe dataset drifted"
+  );
   assert.equal(probe.costGetterFamily.count, 30, "shard cost method probe getter count drifted");
-  assert.equal(probe.costGetterFamily.returnType, "BreakInfinity.BigDouble", "shard cost method probe return type drifted");
+  assert.equal(
+    probe.costGetterFamily.returnType,
+    "BreakInfinity.BigDouble",
+    "shard cost method probe return type drifted"
+  );
   assert.equal(probe.costGetterFamily.rows.length, 30, "shard cost method probe row count drifted");
-  assert.ok(probe.costGetterFamily.rows.some((entry) => entry?.row === 0 && entry?.name === "get_SU0Cost" && entry?.rva === 38240178), "shard cost method probe row 0 drifted");
-  assert.ok(probe.costGetterFamily.rows.some((entry) => entry?.row === 19 && entry?.name === "get_SU19Cost" && entry?.estimatedTrackedBodySize === 3258), "shard cost method probe row 19 drifted");
-  assert.ok(probe.costGetterFamily.rows.some((entry) => entry?.row === 27 && entry?.name === "get_SU27Cost" && entry?.estimatedTrackedBodySize === 2693), "shard cost method probe row 27 drifted");
-  assert.ok(probe.helperMethods.some((entry) => entry?.name === "UpdateShardCostList" && entry?.rva === 38238055), "shard cost method probe missing UpdateShardCostList");
-  assert.ok(probe.helperMethods.some((entry) => entry?.name === "GetShardCostList" && entry?.rva === 38349168), "shard cost method probe missing GetShardCostList");
-  assert.ok(probe.helperMethods.some((entry) => entry?.name === "SortCostAndBools" && entry?.rva === 38348434), "shard cost method probe missing SortCostAndBools");
-  assert.ok(probe.helperMethods.some((entry) => entry?.name === "CountAffordableShard" && entry?.rva === 38351862), "shard cost method probe missing CountAffordableShard");
-  assert.ok(probe.helperMethods.some((entry) => entry?.name === "get_OverLevel100Exponent" && entry?.rva === 38239421), "shard cost method probe missing get_OverLevel100Exponent");
-  assert.ok(probe.estimatedTrackedBodySizeClusters.some((entry) => entry?.estimatedTrackedBodySize === 3258 && JSON.stringify(entry?.rows) === JSON.stringify([19, 20, 21])), "shard cost method probe 19-21 cluster drifted");
-  assert.ok(probe.estimatedTrackedBodySizeClusters.some((entry) => entry?.estimatedTrackedBodySize === 2693 && JSON.stringify(entry?.rows) === JSON.stringify([27, 28])), "shard cost method probe 27-28 cluster drifted");
-  assert.ok(probe.findings.some((line) => String(line).includes("real get_SU0-29Cost runtime family")), "shard cost method probe must preserve the getter-family finding");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("verified runtime getter family")), "shard cost method probe must preserve runtime boundary framing");
+  assert.ok(
+    probe.costGetterFamily.rows.some(
+      (entry) => entry?.row === 0 && entry?.name === "get_SU0Cost" && entry?.rva === 38240178
+    ),
+    "shard cost method probe row 0 drifted"
+  );
+  assert.ok(
+    probe.costGetterFamily.rows.some(
+      (entry) =>
+        entry?.row === 19 &&
+        entry?.name === "get_SU19Cost" &&
+        entry?.estimatedTrackedBodySize === 3258
+    ),
+    "shard cost method probe row 19 drifted"
+  );
+  assert.ok(
+    probe.costGetterFamily.rows.some(
+      (entry) =>
+        entry?.row === 27 &&
+        entry?.name === "get_SU27Cost" &&
+        entry?.estimatedTrackedBodySize === 2693
+    ),
+    "shard cost method probe row 27 drifted"
+  );
+  assert.ok(
+    probe.helperMethods.some(
+      (entry) => entry?.name === "UpdateShardCostList" && entry?.rva === 38238055
+    ),
+    "shard cost method probe missing UpdateShardCostList"
+  );
+  assert.ok(
+    probe.helperMethods.some(
+      (entry) => entry?.name === "GetShardCostList" && entry?.rva === 38349168
+    ),
+    "shard cost method probe missing GetShardCostList"
+  );
+  assert.ok(
+    probe.helperMethods.some(
+      (entry) => entry?.name === "SortCostAndBools" && entry?.rva === 38348434
+    ),
+    "shard cost method probe missing SortCostAndBools"
+  );
+  assert.ok(
+    probe.helperMethods.some(
+      (entry) => entry?.name === "CountAffordableShard" && entry?.rva === 38351862
+    ),
+    "shard cost method probe missing CountAffordableShard"
+  );
+  assert.ok(
+    probe.helperMethods.some(
+      (entry) => entry?.name === "get_OverLevel100Exponent" && entry?.rva === 38239421
+    ),
+    "shard cost method probe missing get_OverLevel100Exponent"
+  );
+  assert.ok(
+    probe.estimatedTrackedBodySizeClusters.some(
+      (entry) =>
+        entry?.estimatedTrackedBodySize === 3258 &&
+        JSON.stringify(entry?.rows) === JSON.stringify([19, 20, 21])
+    ),
+    "shard cost method probe 19-21 cluster drifted"
+  );
+  assert.ok(
+    probe.estimatedTrackedBodySizeClusters.some(
+      (entry) =>
+        entry?.estimatedTrackedBodySize === 2693 &&
+        JSON.stringify(entry?.rows) === JSON.stringify([27, 28])
+    ),
+    "shard cost method probe 27-28 cluster drifted"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("real get_SU0-29Cost runtime family")),
+    "shard cost method probe must preserve the getter-family finding"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("verified runtime getter family")),
+    "shard cost method probe must preserve runtime boundary framing"
+  );
 
   return {
     id: "shard-cost-method-probe",
@@ -845,321 +2111,1729 @@ function validateShardCostNativeProbe(probe) {
   expectNonEmptyString(probe.generatedAt, "shard cost native probe generatedAt must be present");
   expectRecord(probe.source, "shard cost native probe source must be an object");
   ["methodProbe", "uabeaProbeReport", "libIl2cpp", "vendorManual"].forEach((field) => {
-    expectNonEmptyString(probe.source[field], `shard cost native probe source.${field} must be present`);
+    expectNonEmptyString(
+      probe.source[field],
+      `shard cost native probe source.${field} must be present`
+    );
   });
   expectArray(probe.rows, "shard cost native probe rows must be an array");
-  expectArray(probe.earlyCallClusters, "shard cost native probe earlyCallClusters must be an array");
-  expectArray(probe.helperTargetSummaries, "shard cost native probe helperTargetSummaries must be an array");
-  expectRecord(probe.powerHelperFamily, "shard cost native probe powerHelperFamily must be an object");
-  expectArray(probe.overLevelGetterProfiles, "shard cost native probe overLevelGetterProfiles must be an array");
+  expectArray(
+    probe.earlyCallClusters,
+    "shard cost native probe earlyCallClusters must be an array"
+  );
+  expectArray(
+    probe.helperTargetSummaries,
+    "shard cost native probe helperTargetSummaries must be an array"
+  );
+  expectRecord(
+    probe.powerHelperFamily,
+    "shard cost native probe powerHelperFamily must be an object"
+  );
+  expectArray(
+    probe.overLevelGetterProfiles,
+    "shard cost native probe overLevelGetterProfiles must be an array"
+  );
   expectArray(probe.findings, "shard cost native probe findings must be an array");
   expectArray(probe.currentBoundary, "shard cost native probe currentBoundary must be an array");
   expectRecord(probe.spotChecks, "shard cost native probe spotChecks must be an object");
 
-  assert.equal(probe.dataset, "shard-cost-native-probe.v1", "shard cost native probe dataset drifted");
+  assert.equal(
+    probe.dataset,
+    "shard-cost-native-probe.v1",
+    "shard cost native probe dataset drifted"
+  );
   assert.equal(probe.rows.length, 30, "shard cost native probe row count drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 0 && JSON.stringify(entry?.earlyFieldReads?.slice(3, 8).map((item) => item.offsetHex)) === JSON.stringify(["0x340", "0x348", "0x350", "0x358", "0x360"])), "shard cost native probe row 0 field shell drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0x3e8", "0x3f0", "0x3f8", "0x400"])), "shard cost native probe row 1 operand bridge drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.operandFieldNames) === JSON.stringify(["SU1StartCost", "SU1CostExponent"])), "shard cost native probe row 1 operand fields drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.costFieldUsage) === JSON.stringify(["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"])), "shard cost native probe row 1 cost field usage drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])), "shard cost native probe row 1 level gates drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 1 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true), "shard cost native probe row 1 hundred-stage divide-by-100 drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 1 && entry?.hundredStageStructure?.remainderLane?.powerHelperTarget === "0x24e20d9"), "shard cost native probe row 1 hundred-stage power helper drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU1CostExponent", "SU1GrowthExponent"])), "shard cost native probe row 1 three-hundred-stage lane drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0xd58", "0xd60", "0xd68", "0xd70"])), "shard cost native probe row 19 operand bridge drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.operandFieldNames) === JSON.stringify(["SU19StartCost", "SU19CostExponent"])), "shard cost native probe row 19 operand fields drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.costFieldUsage) === JSON.stringify(["SU19StartCost", "SU19CostExponent", "SU19GrowthExponent"])), "shard cost native probe row 19 cost field usage drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])), "shard cost native probe row 19 level gates drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 19 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true), "shard cost native probe row 19 hundred-stage divide-by-100 drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 19 && JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU19CostExponent", "SU19GrowthExponent"])), "shard cost native probe row 19 three-hundred-stage lane drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) === JSON.stringify(["0x1188", "0x1190", "0x1198", "0x11a0"])), "shard cost native probe row 27 operand bridge drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.operandFieldNames) === JSON.stringify(["SU27StartCost", "SU27CostExponent"])), "shard cost native probe row 27 operand fields drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.costFieldUsage) === JSON.stringify(["SU27StartCost", "SU27CostExponent", "SU27GrowthExponent"])), "shard cost native probe row 27 cost field usage drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])), "shard cost native probe row 27 level gates drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 27 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true), "shard cost native probe row 27 hundred-stage divide-by-100 drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 27 && JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) === JSON.stringify(["SU27CostExponent", "SU27GrowthExponent"])), "shard cost native probe row 27 three-hundred-stage lane drifted");
-  assert.ok(probe.earlyCallClusters.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])), "shard cost native probe early cluster for rows 1-12 drifted");
-  assert.ok(probe.earlyCallClusters.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([17])), "shard cost native probe row 17 outlier drifted");
-  assert.ok(probe.helperTargetSummaries.some((entry) => entry?.target === "0x24e1a07" && String(entry?.summary).includes("double literal")), "shard cost native probe literal helper summary drifted");
-  assert.ok(probe.helperTargetSummaries.some((entry) => entry?.target === "0x24e1d36" && String(entry?.summary).includes("integer input")), "shard cost native probe int helper summary drifted");
-  assert.equal(probe.powerHelperFamily?.shardPathEntryTarget, "0x24e20d9", "shard cost native probe power-helper shard path entry drifted");
-  assert.deepEqual(probe.powerHelperFamily?.shardPathChain, ["0x24e20d9", "0x24e1a2b", "0x24e1452", "0x24e0faa", "0x24e1ab0"], "shard cost native probe shard-path helper chain drifted");
-  assert.deepEqual(probe.powerHelperFamily?.nearbySiblingChain, ["0x24e21dc", "0x24e1bba", "0x24e1c3f", "0x24e1cb3"], "shard cost native probe sibling helper chain drifted");
-  assert.equal(probe.genericBigDoubleHelpers?.storedCostFieldsUseBigDoubleSlots, true, "shard cost native probe must preserve BigDouble cost-slot interpretation");
-  assert.equal(probe.genericBigDoubleHelpers?.rowCostFieldSlotSizeBytes, 16, "shard cost native probe BigDouble slot size drifted");
-  assert.equal(probe.genericBigDoubleHelpers?.multiplyHelperTarget, "0x24e1b33", "shard cost native probe multiply helper drifted");
-  assert.equal(probe.genericBigDoubleHelpers?.addHelperTarget, "0x24e176a", "shard cost native probe add helper drifted");
-  assert.equal(probe.genericBigDoubleHelpers?.toDoubleTarget, "0x24e0cda", "shard cost native probe to-double helper drifted");
-  assert.equal(probe.scalarRemainderSubfamily?.entryTarget, "0x24e3620", "shard cost native probe scalar remainder entry drifted");
-  assert.equal(probe.scalarRemainderSubfamily?.integralPartHelperTarget, "0x393469a", "shard cost native probe scalar integral-part helper drifted");
-  assert.equal(probe.scalarRemainderSubfamily?.scalarToBigDoubleTarget, "0x24e349c", "shard cost native probe scalar-to-BigDouble helper drifted");
-  assert.equal(probe.scalarRemainderSubfamily?.scaledPowerBuilderTarget, "0x24e38f9", "shard cost native probe scalar power-builder helper drifted");
-  assert.equal(probe.scalarRemainderSubfamily?.unresolvedTransformTarget, "0x393474a", "shard cost native probe unresolved scalar transform drifted");
-  assert.equal(probe.scalarRemainderSubfamily?.resolvedTransformKind, "powWrapper", "shard cost native probe resolved transform kind drifted");
-  assert.equal(probe.decimalPowerBridge?.bigDoubleLog10Target, "0x24e30e4", "shard cost native probe BigDouble-to-log10 bridge drifted");
-  assert.equal(probe.decimalPowerBridge?.scaledPowerBuilderTarget, "0x24e38f9", "shard cost native probe decimal power-builder drifted");
-  assert.equal(probe.decimalPowerBridge?.powWrapperTarget, "0x393474a", "shard cost native probe pow-wrapper target drifted");
-  assert.equal(probe.decimalPowerBridge?.mathImports?.modfImportName, "modf", "shard cost native probe modf import drifted");
-  assert.equal(probe.decimalPowerBridge?.mathImports?.fmodImportName, "fmod", "shard cost native probe fmod import drifted");
-  assert.equal(probe.decimalPowerBridge?.mathImports?.log10ImportName, "log10", "shard cost native probe log10 import drifted");
-  assert.equal(probe.decimalPowerBridge?.mathImports?.powImportName, "pow", "shard cost native probe pow import drifted");
-  assert.equal(probe.stageAssemblyBoundary?.stageDispatcherEntryTarget, "0x24e3620", "shard cost native probe stage dispatcher entry drifted");
-  assert.equal(probe.stageAssemblyBoundary?.stageDispatcherBodyTarget, "0x24e368d", "shard cost native probe stage dispatcher body drifted");
-  assert.equal(probe.stageAssemblyBoundary?.scalarCompareTarget, "0x24e2d86", "shard cost native probe scalar compare helper drifted");
-  assert.equal(probe.stageAssemblyBoundary?.specialCaseGateTarget, "0x24e387a", "shard cost native probe special-case gate drifted");
-  assert.equal(probe.stageAssemblyBoundary?.scalarToBigDoubleTarget, "0x24e349c", "shard cost native probe stage scalar-to-BigDouble lane drifted");
-  assert.equal(probe.stageAssemblyBoundary?.decimalPowerBuilderTarget, "0x24e38f9", "shard cost native probe stage decimal power-builder drifted");
-  assert.equal(probe.sampledOffsetFeeders?.length, 3, "shard cost native probe sampled offset feeder count drifted");
-  assert.ok(probe.sampledOffsetFeeders?.some((entry) => entry?.row === 1 && entry?.thresholdWindow === "100-plus-window" && entry?.levelOffset === 70 && Math.abs(Number(entry?.coefficient) - 9.765628774403013e-05) < 1e-16 && entry?.model === "literalTimesBigDoubleOffsetThenAdd"), "shard cost native probe row 1 sampled offset feeder drifted");
-  assert.ok(probe.sampledOffsetFeeders?.some((entry) => entry?.row === 19 && entry?.thresholdWindow === "100-plus-window" && entry?.levelOffset === 70 && Math.abs(Number(entry?.coefficient) - (-0.00011718430323526263)) < 1e-16 && entry?.model === "scalarOffsetTimesCoefficientThenAdd"), "shard cost native probe row 19 sampled offset feeder drifted");
-  assert.ok(probe.sampledOffsetFeeders?.some((entry) => entry?.row === 27 && entry?.thresholdWindow === "100-plus-window" && entry?.levelOffset === 82 && Math.abs(Number(entry?.coefficient) - 8192.001984596252) < 1e-9 && entry?.model === "literalTimesBigDoubleOffsetThenAdd"), "shard cost native probe row 27 sampled offset feeder drifted");
-  assert.deepEqual(probe.windowOffsetFamilies?.hundredWindowFamilies, [
-    { thresholdWindow: "100-plus-window", model: "literalTimesBigDoubleOffsetThenAdd", levelOffset: 70, usesLiteralBuilder: false, usesPreMergeMultiply: true, rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] },
-    { thresholdWindow: "100-plus-window", model: "scalarOffsetTimesCoefficientThenAdd", levelOffset: 70, usesLiteralBuilder: true, usesPreMergeMultiply: false, rows: [19, 20, 21, 22, 23] },
-    { thresholdWindow: "100-plus-window", model: "scalarOffsetTimesCoefficientThenAdd", levelOffset: 67, usesLiteralBuilder: true, usesPreMergeMultiply: false, rows: [24, 25, 26] },
-    { thresholdWindow: "100-plus-window", model: "literalTimesBigDoubleOffsetThenAdd", levelOffset: 82, usesLiteralBuilder: false, usesPreMergeMultiply: true, rows: [27, 28, 29] },
-  ], "shard cost native probe hundred-window family clusters drifted");
-  assert.deepEqual(probe.windowOffsetFamilies?.twoHundredWindowFamilies, [
-    { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 27, 28, 29] },
-    { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [180], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 26, 27, 28, 29] },
-  ], "shard cost native probe two-hundred-window family clusters drifted");
-  assert.deepEqual(probe.windowOffsetFamilies?.threeHundredWindowFamilies, [
-    { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29] },
-    { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [49], rows: [24] },
-    { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesCurrentLevelBigDouble: true, usesLiteralBuilder: false, integerSeeds: [19], rows: [25] },
-  ], "shard cost native probe three-hundred-window family clusters drifted");
-  assert.deepEqual(probe.stageWindowProfiles, [
-    {
-      rows: [0],
-      familySignature: [
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [] },
-      ],
-    },
-    {
-      rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29],
-      familySignature: [
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
-        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-      ],
-    },
-    {
-      rows: [18],
-      familySignature: [
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
-        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [99] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-      ],
-    },
-    {
-      rows: [19, 20, 21, 22, 23],
-      familySignature: [
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
-        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
-        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-      ],
-    },
-    {
-      rows: [24],
-      familySignature: [
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
-        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [49] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
-        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: true, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
-      ],
-    },
-    {
-      rows: [25],
-      familySignature: [
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
-        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [19] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
-      ],
-    },
-    {
-      rows: [26],
-      familySignature: [
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [100] },
-        { thresholdWindow: "300-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: false, integerSeeds: [] },
-        { thresholdWindow: "200-plus-window", usesUnaryThresholdTransform: true, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: false, integerSeeds: [180] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: true, usesLiteralBuilder: true, integerSeeds: [] },
-        { thresholdWindow: "100-plus-window", usesUnaryThresholdTransform: false, usesPreMergeMultiply: false, usesPreMergeAdd: false, usesLiteralBuilder: true, integerSeeds: [] },
-      ],
-    },
-  ], "shard cost native probe stage-window profile map drifted");
-  assert.deepEqual(probe.stageProfileCorrelations, [
-    { rows: [0], unlockRequirementRange: [0, 0], distinctRarities: ["Unique"], distinctStartCosts: [5], distinctCostExponents: [1.3], distinctGrowthExponents: [1.5] },
-    { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29], unlockRequirementRange: [0, 8100], distinctRarities: ["Epic", "Rare", "common"], distinctStartCosts: [1.4, 2, 2.4, 3.1, 3.6, 4, 5.6, 6, 8, 9, 9.99], distinctCostExponents: [1.15, 1.22, 1.24, 1.26, 1.4, 1.48, 1.5, 1.6, 1.78, 2, 2.25, 2.29, 2.3, 3, 4], distinctGrowthExponents: [1.2, 1.3, 1.6, 1.8, 2, 2.2, 2.5, 2.6, 2.8, 3.2, 3.4, 3.8, 4, 5, 8] },
-    { rows: [18], unlockRequirementRange: [1100, 1100], distinctRarities: ["Legendary"], distinctStartCosts: [1.5], distinctCostExponents: [1], distinctGrowthExponents: [5] },
-    { rows: [19, 20, 21, 22, 23], unlockRequirementRange: [1400, 1800], distinctRarities: ["Epic", "Rare", "common"], distinctStartCosts: [1], distinctCostExponents: [1, 2.5, 5], distinctGrowthExponents: [1, 3, 4] },
-    { rows: [24], unlockRequirementRange: [3300, 3300], distinctRarities: ["Rare"], distinctStartCosts: [4], distinctCostExponents: [5], distinctGrowthExponents: [5] },
-    { rows: [25], unlockRequirementRange: [3600, 3600], distinctRarities: ["Low Pristine"], distinctStartCosts: [3], distinctCostExponents: [2], distinctGrowthExponents: [2] },
-    { rows: [26], unlockRequirementRange: [3900, 3900], distinctRarities: ["Mid Pristine"], distinctStartCosts: [5], distinctCostExponents: [2], distinctGrowthExponents: [6] },
-  ], "shard cost native probe stage-profile correlation map drifted");
-  assert.deepEqual(probe.transitionRowAnalysis?.transitionRows?.map((entry) => ({ row: entry?.row, betweenRows: entry?.betweenRows })), [
-    { row: 18, betweenRows: [17, 19] },
-    { row: 24, betweenRows: [23, 27] },
-    { row: 25, betweenRows: [24, 26] },
-    { row: 26, betweenRows: [25, 27] },
-  ], "shard cost native probe transition-row anchors drifted");
-  assert.ok(probe.transitionRowAnalysis?.transitionRows?.some((entry) => entry?.row === 18 && entry?.neighborContrast?.some((line) => String(line).includes("second 100-plus unary feeder"))), "shard cost native probe row 18 transition contrast drifted");
-  assert.ok(probe.transitionRowAnalysis?.transitionRows?.some((entry) => entry?.row === 24 && entry?.neighborContrast?.some((line) => String(line).includes("300-plus unary feeder with integer seed 49"))), "shard cost native probe row 24 transition contrast drifted");
-  assert.ok(probe.transitionRowAnalysis?.transitionRows?.some((entry) => entry?.row === 25 && entry?.neighborContrast?.some((line) => String(line).includes("seed 19"))), "shard cost native probe row 25 transition contrast drifted");
-  assert.ok(probe.transitionRowAnalysis?.transitionRows?.some((entry) => entry?.row === 26 && entry?.neighborContrast?.some((line) => String(line).includes("seed 180"))), "shard cost native probe row 26 transition contrast drifted");
-  assert.deepEqual(probe.transitionRowAnalysis?.row0SpecialCase?.costFieldUsage, ["SU0StartCost", "SU0CostExponent", "SU0GrowthExponent", "SU0GrowthExponent2", "SU0GrowthExponent3"], "shard cost native probe row 0 cost-field shell drifted");
-  assert.deepEqual(probe.transitionRowAnalysis?.row0SpecialCase?.levelGateChecks, [100], "shard cost native probe row 0 level-gate shell drifted");
-  assert.equal(probe.transitionRowAnalysis?.row0SpecialCase?.thresholdStages?.length, 0, "shard cost native probe row 0 threshold-stage shell drifted");
-  assert.ok(probe.transitionRowAnalysis?.row0SpecialCase?.facts?.some((line) => String(line).includes("five serialized cost fields")), "shard cost native probe row 0 special-case fact drifted");
-  assert.deepEqual(probe.thresholdStageClasses, [
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21] },
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23] },
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29] },
-    { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26] },
-  ], "shard cost native probe threshold-stage classes drifted");
-  assert.deepEqual(probe.representativeClassAnalysis?.map((entry) => ({
-    getterNames: entry?.getterNames,
-    rows: entry?.rows,
-    representativeRows: entry?.representatives?.map((rep) => rep?.row),
-  })), [
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21], representativeRows: [1, 21] },
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23], representativeRows: [17, 23] },
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29], representativeRows: [18, 29] },
-    { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26], representativeRows: [25, 26] },
-  ], "shard cost native probe representative class analysis drifted");
-  assert.ok(probe.representativeClassAnalysis?.some((entry) => JSON.stringify(entry?.getterNames) === JSON.stringify(["get_OverLevel100Exponent", "get_OverLevel200Exponent"]) && entry?.representatives?.some((rep) => rep?.row === 29 && rep?.hundredStageStructure?.divideBy100CompilerPattern === true)), "shard cost native probe representative hundred-stage structure drifted");
-  assert.deepEqual(probe.normalRowStageRecipe?.classRecipes?.map((entry) => ({ getterNames: entry?.getterNames, rows: entry?.rows })), [
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21] },
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"], rows: [17, 22, 23] },
-    { getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"], rows: [18, 24, 27, 28, 29] },
-    { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26] },
-  ], "shard cost native probe normal-row stage recipe drifted");
-  assert.ok(probe.normalRowStageRecipe?.sharedScaffolding?.facts?.some((line) => String(line).includes("same hundred-stage structure")), "shard cost native probe shared stage scaffolding drifted");
-  assert.deepEqual(probe.canonicalSymbolicAssembler?.canonicalClass?.getterNames, ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], "shard cost native probe canonical symbolic assembler getter coverage drifted");
-  assert.deepEqual(probe.canonicalSymbolicAssembler?.canonicalClass?.rows, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21], "shard cost native probe canonical symbolic assembler rows drifted");
-  assert.deepEqual(probe.canonicalSymbolicAssembler?.canonicalClass?.symbolicStages?.map((entry) => entry?.name), ["base-row-fields", "hundred-stage", "two-hundred-stage", "three-hundred-stage", "four-hundred-stage"], "shard cost native probe canonical symbolic assembler stages drifted");
-  assert.deepEqual(probe.canonicalSymbolicAssembler?.canonicalClass?.subprofiles?.map((entry) => entry?.rows), [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], [19, 20, 21]], "shard cost native probe canonical symbolic assembler subprofiles drifted");
-  assert.ok(probe.canonicalSymbolicAssembler?.classDeltas?.some((entry) => JSON.stringify(entry?.getterNames) === JSON.stringify(["get_OverLevel100Exponent"]) && entry?.delta?.some((line) => String(line).includes("0x24e1ab0"))), "shard cost native probe canonical symbolic assembler short-class delta drifted");
-  assert.deepEqual(probe.canonicalMergeConstraints?.secondaryHundredPlusSplit?.map((entry) => ({ rows: entry?.rows, path: entry?.path })), [
-    { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], path: "additivePremerge" },
-    { rows: [19, 20, 21], path: "literalBuilderAdditive" },
-  ], "shard cost native probe canonical merge constraints drifted");
-  assert.ok(probe.canonicalMergeConstraints?.sharedConstraints?.some((line) => String(line).includes("first 200-plus feeder is stable")), "shard cost native probe canonical merge shared constraint drifted");
-  assert.equal(probe.formulaApplicationProfiles?.rowZero?.formulaClass, "row0-special-case", "shard cost native probe row-zero formula profile drifted");
-  assert.deepEqual(probe.formulaApplicationProfiles?.normalRows?.map((entry) => ({ rows: entry?.rows, formulaClass: entry?.formulaClass })), [
-    { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], formulaClass: "canonical-additive-premerge" },
-    { rows: [19, 20, 21], formulaClass: "canonical-literal-builder" },
-    { rows: [17, 22, 23], formulaClass: "drop-400-stage" },
-    { rows: [18, 24, 27, 28, 29], formulaClass: "two-stage-transition-band" },
-    { rows: [25, 26], formulaClass: "hundred-stage-short-class" },
-  ], "shard cost native probe formula application profiles drifted");
-  assert.deepEqual(probe.preThresholdMergeModels?.normalProfile?.rows, [9, 25], "shard cost native probe pre-threshold sample rows drifted");
-  assert.ok(String(probe.preThresholdMergeModels?.normalProfile?.symbolicApproximation).includes("multiply(StartCost, dispatch(currentLevel, add(CostExponent, multiply(currentLevelBigDouble, GrowthExponent))))"), "shard cost native probe pre-threshold symbolic approximation drifted");
-  assert.ok(probe.preThresholdMergeModels?.sharedNormalPath?.some((line) => String(line).includes("owner-flag-zero pre-threshold structure")), "shard cost native probe pre-threshold shared-path framing drifted");
-  assert.ok(probe.preThresholdMergeModels?.alternateFlaggedBranchSamples?.some((entry) => entry?.row === 25 && String(entry?.seedBuilder).includes("integer seed 4")), "shard cost native probe pre-threshold alternate branch drifted");
-  assert.equal(probe.dispatcherCompareModel?.compareTarget, "0x24e2d86", "shard cost native probe dispatcher compare target drifted");
-  assert.ok(probe.dispatcherCompareModel?.facts?.some((line) => String(line).includes("converted BigDouble lane is greater than the original scalar lane")), "shard cost native probe dispatcher compare semantics drifted");
-  assert.equal(probe.dispatcherAlignmentModel?.alignmentCheckTarget, "0x24e3597", "shard cost native probe dispatcher alignment target drifted");
-  assert.equal(Number(probe.dispatcherAlignmentModel?.toleranceLiteral), 5.238690707360522e-11, "shard cost native probe dispatcher alignment tolerance drifted");
-  assert.ok(probe.dispatcherAlignmentModel?.currentInference?.some((line) => String(line).includes("tiny fmod-style alignment gate")), "shard cost native probe dispatcher alignment inference drifted");
-  assert.ok(probe.dispatcherSelectionModel?.facts?.some((line) => String(line).includes("selector register equals 1")), "shard cost native probe dispatcher selection gate drifted");
-  assert.ok(probe.dispatcherSelectionModel?.sampledNormalRows?.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([1, 9, 27, 29]) && JSON.stringify(entry?.sampledSelectorValues) === JSON.stringify([0])), "shard cost native probe dispatcher sampled zero-selector rows drifted");
-  assert.ok(probe.dispatcherSelectionModel?.sampledNormalRows?.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([25]) && JSON.stringify(entry?.sampledSelectorValues) === JSON.stringify([4])), "shard cost native probe dispatcher sampled short-class selector drifted");
-  assert.ok(probe.findings?.some((line) => String(line).includes("exact serialized OverLevel*Base payload values remain unresolved")), "shard cost native probe over-level base unresolved finding drifted");
-  assert.ok(probe.currentBoundary?.some((line) => String(line).includes("OverLevel100/200/300/400Base metadata names as unresolved typed field clues")), "shard cost native probe over-level base boundary drifted");
-  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel100Exponent" && entry?.baseSeed === 2), "shard cost native probe over-level 100 seed drifted");
-  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel200Exponent" && Number(entry?.baseSeed) === 0), "shard cost native probe over-level 200 seed drifted");
-  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel300Exponent" && Number(entry?.baseSeed) === 0), "shard cost native probe over-level 300 seed drifted");
-  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel100Exponent" && Number(entry?.optionalMmoMergeFloatValue) === 1.264570970563716e-39), "shard cost native probe over-level 100 merge float drifted");
-  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel200Exponent" && Number(entry?.optionalMmoMergeFloatValue) === 6.345649113524877e-36), "shard cost native probe over-level 200 merge float drifted");
-  assert.ok(probe.overLevelSeedModels?.sampledGetters?.some((entry) => entry?.getterName === "get_OverLevel400Exponent" && Number(entry?.baseSeed) === 0.007812501846152979), "shard cost native probe over-level 400 seed drifted");
-  assert.ok(probe.overLevelSeedModels?.currentInference?.some((line) => String(line).includes("100 starts from integer seed 2")), "shard cost native probe over-level seed inference drifted");
-  assert.deepEqual(probe.secondaryHundredPlusMergeModels?.profiles?.map((entry) => ({ rows: entry?.rows, profile: entry?.profile })), [
-    { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 27, 28, 29], profile: "additive-premerge" },
-    { rows: [19, 20, 21], profile: "literal-builder-additive" },
-  ], "shard cost native probe secondary hundred-plus merge models drifted");
-  assert.ok(probe.secondaryHundredPlusMergeModels?.sharedFrame?.some((line) => String(line).includes("post-200, pre-300 branch")), "shard cost native probe secondary hundred-plus branch framing drifted");
-  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "additive-premerge" && String(entry?.symbolicApproximation).includes("multiply(levelOffsetBigDouble, preservedScalarLane)")), "shard cost native probe additive-premerge symbolic approximation drifted");
-  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "additive-premerge" && String(entry?.laneSources?.baseLane).includes("OverLevel200Base")), "shard cost native probe additive-premerge base-lane source drifted");
-  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "additive-premerge" && String(entry?.laneSources?.stageLane).includes("get_OverLevel200Exponent")), "shard cost native probe additive-premerge stage-lane helper drifted");
-  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "literal-builder-additive" && entry?.preDispatchAssembly?.some((line) => String(line).includes("0x24e1a07"))), "shard cost native probe literal-builder merge model drifted");
-  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "literal-builder-additive" && String(entry?.symbolicApproximation).includes("literalBigDouble((level - offset) * coefficient)")), "shard cost native probe literal-builder symbolic approximation drifted");
-  assert.ok(probe.secondaryHundredPlusMergeModels?.profiles?.some((entry) => entry?.profile === "literal-builder-additive" && String(entry?.laneSources?.stageLane).includes("get_OverLevel200Exponent")), "shard cost native probe literal-builder stage-lane source drifted");
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 0 &&
+        JSON.stringify(entry?.earlyFieldReads?.slice(3, 8).map((item) => item.offsetHex)) ===
+          JSON.stringify(["0x340", "0x348", "0x350", "0x358", "0x360"])
+    ),
+    "shard cost native probe row 0 field shell drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 1 &&
+        JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) ===
+          JSON.stringify(["0x3e8", "0x3f0", "0x3f8", "0x400"])
+    ),
+    "shard cost native probe row 1 operand bridge drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 1 &&
+        JSON.stringify(entry?.operandFieldNames) ===
+          JSON.stringify(["SU1StartCost", "SU1CostExponent"])
+    ),
+    "shard cost native probe row 1 operand fields drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 1 &&
+        JSON.stringify(entry?.costFieldUsage) ===
+          JSON.stringify(["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"])
+    ),
+    "shard cost native probe row 1 cost field usage drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 1 &&
+        JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])
+    ),
+    "shard cost native probe row 1 level gates drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 1 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true
+    ),
+    "shard cost native probe row 1 hundred-stage divide-by-100 drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 1 &&
+        entry?.hundredStageStructure?.remainderLane?.powerHelperTarget === "0x24e20d9"
+    ),
+    "shard cost native probe row 1 hundred-stage power helper drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 1 &&
+        JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) ===
+          JSON.stringify(["SU1CostExponent", "SU1GrowthExponent"])
+    ),
+    "shard cost native probe row 1 three-hundred-stage lane drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 19 &&
+        JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) ===
+          JSON.stringify(["0xd58", "0xd60", "0xd68", "0xd70"])
+    ),
+    "shard cost native probe row 19 operand bridge drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 19 &&
+        JSON.stringify(entry?.operandFieldNames) ===
+          JSON.stringify(["SU19StartCost", "SU19CostExponent"])
+    ),
+    "shard cost native probe row 19 operand fields drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 19 &&
+        JSON.stringify(entry?.costFieldUsage) ===
+          JSON.stringify(["SU19StartCost", "SU19CostExponent", "SU19GrowthExponent"])
+    ),
+    "shard cost native probe row 19 cost field usage drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 19 &&
+        JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])
+    ),
+    "shard cost native probe row 19 level gates drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 19 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true
+    ),
+    "shard cost native probe row 19 hundred-stage divide-by-100 drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 19 &&
+        JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) ===
+          JSON.stringify(["SU19CostExponent", "SU19GrowthExponent"])
+    ),
+    "shard cost native probe row 19 three-hundred-stage lane drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 27 &&
+        JSON.stringify(entry?.earlyFieldReads?.slice(1, 5).map((item) => item.offsetHex)) ===
+          JSON.stringify(["0x1188", "0x1190", "0x1198", "0x11a0"])
+    ),
+    "shard cost native probe row 27 operand bridge drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 27 &&
+        JSON.stringify(entry?.operandFieldNames) ===
+          JSON.stringify(["SU27StartCost", "SU27CostExponent"])
+    ),
+    "shard cost native probe row 27 operand fields drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 27 &&
+        JSON.stringify(entry?.costFieldUsage) ===
+          JSON.stringify(["SU27StartCost", "SU27CostExponent", "SU27GrowthExponent"])
+    ),
+    "shard cost native probe row 27 cost field usage drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 27 &&
+        JSON.stringify(entry?.levelGateChecks) === JSON.stringify([200, 100, 300])
+    ),
+    "shard cost native probe row 27 level gates drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 27 && entry?.hundredStageStructure?.divideBy100CompilerPattern === true
+    ),
+    "shard cost native probe row 27 hundred-stage divide-by-100 drifted"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 27 &&
+        JSON.stringify(entry?.threeHundredStageCostLane?.stageFieldUsage) ===
+          JSON.stringify(["SU27CostExponent", "SU27GrowthExponent"])
+    ),
+    "shard cost native probe row 27 three-hundred-stage lane drifted"
+  );
+  assert.ok(
+    probe.earlyCallClusters.some(
+      (entry) =>
+        JSON.stringify(entry?.rows) === JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    ),
+    "shard cost native probe early cluster for rows 1-12 drifted"
+  );
+  assert.ok(
+    probe.earlyCallClusters.some((entry) => JSON.stringify(entry?.rows) === JSON.stringify([17])),
+    "shard cost native probe row 17 outlier drifted"
+  );
+  assert.ok(
+    probe.helperTargetSummaries.some(
+      (entry) => entry?.target === "0x24e1a07" && String(entry?.summary).includes("double literal")
+    ),
+    "shard cost native probe literal helper summary drifted"
+  );
+  assert.ok(
+    probe.helperTargetSummaries.some(
+      (entry) => entry?.target === "0x24e1d36" && String(entry?.summary).includes("integer input")
+    ),
+    "shard cost native probe int helper summary drifted"
+  );
+  assert.equal(
+    probe.powerHelperFamily?.shardPathEntryTarget,
+    "0x24e20d9",
+    "shard cost native probe power-helper shard path entry drifted"
+  );
+  assert.deepEqual(
+    probe.powerHelperFamily?.shardPathChain,
+    ["0x24e20d9", "0x24e1a2b", "0x24e1452", "0x24e0faa", "0x24e1ab0"],
+    "shard cost native probe shard-path helper chain drifted"
+  );
+  assert.deepEqual(
+    probe.powerHelperFamily?.nearbySiblingChain,
+    ["0x24e21dc", "0x24e1bba", "0x24e1c3f", "0x24e1cb3"],
+    "shard cost native probe sibling helper chain drifted"
+  );
+  assert.equal(
+    probe.genericBigDoubleHelpers?.storedCostFieldsUseBigDoubleSlots,
+    true,
+    "shard cost native probe must preserve BigDouble cost-slot interpretation"
+  );
+  assert.equal(
+    probe.genericBigDoubleHelpers?.rowCostFieldSlotSizeBytes,
+    16,
+    "shard cost native probe BigDouble slot size drifted"
+  );
+  assert.equal(
+    probe.genericBigDoubleHelpers?.multiplyHelperTarget,
+    "0x24e1b33",
+    "shard cost native probe multiply helper drifted"
+  );
+  assert.equal(
+    probe.genericBigDoubleHelpers?.addHelperTarget,
+    "0x24e176a",
+    "shard cost native probe add helper drifted"
+  );
+  assert.equal(
+    probe.genericBigDoubleHelpers?.toDoubleTarget,
+    "0x24e0cda",
+    "shard cost native probe to-double helper drifted"
+  );
+  assert.equal(
+    probe.scalarRemainderSubfamily?.entryTarget,
+    "0x24e3620",
+    "shard cost native probe scalar remainder entry drifted"
+  );
+  assert.equal(
+    probe.scalarRemainderSubfamily?.integralPartHelperTarget,
+    "0x393469a",
+    "shard cost native probe scalar integral-part helper drifted"
+  );
+  assert.equal(
+    probe.scalarRemainderSubfamily?.scalarToBigDoubleTarget,
+    "0x24e349c",
+    "shard cost native probe scalar-to-BigDouble helper drifted"
+  );
+  assert.equal(
+    probe.scalarRemainderSubfamily?.scaledPowerBuilderTarget,
+    "0x24e38f9",
+    "shard cost native probe scalar power-builder helper drifted"
+  );
+  assert.equal(
+    probe.scalarRemainderSubfamily?.unresolvedTransformTarget,
+    "0x393474a",
+    "shard cost native probe unresolved scalar transform drifted"
+  );
+  assert.equal(
+    probe.scalarRemainderSubfamily?.resolvedTransformKind,
+    "powWrapper",
+    "shard cost native probe resolved transform kind drifted"
+  );
+  assert.equal(
+    probe.decimalPowerBridge?.bigDoubleLog10Target,
+    "0x24e30e4",
+    "shard cost native probe BigDouble-to-log10 bridge drifted"
+  );
+  assert.equal(
+    probe.decimalPowerBridge?.scaledPowerBuilderTarget,
+    "0x24e38f9",
+    "shard cost native probe decimal power-builder drifted"
+  );
+  assert.equal(
+    probe.decimalPowerBridge?.powWrapperTarget,
+    "0x393474a",
+    "shard cost native probe pow-wrapper target drifted"
+  );
+  assert.equal(
+    probe.decimalPowerBridge?.mathImports?.modfImportName,
+    "modf",
+    "shard cost native probe modf import drifted"
+  );
+  assert.equal(
+    probe.decimalPowerBridge?.mathImports?.fmodImportName,
+    "fmod",
+    "shard cost native probe fmod import drifted"
+  );
+  assert.equal(
+    probe.decimalPowerBridge?.mathImports?.log10ImportName,
+    "log10",
+    "shard cost native probe log10 import drifted"
+  );
+  assert.equal(
+    probe.decimalPowerBridge?.mathImports?.powImportName,
+    "pow",
+    "shard cost native probe pow import drifted"
+  );
+  assert.equal(
+    probe.stageAssemblyBoundary?.stageDispatcherEntryTarget,
+    "0x24e3620",
+    "shard cost native probe stage dispatcher entry drifted"
+  );
+  assert.equal(
+    probe.stageAssemblyBoundary?.stageDispatcherBodyTarget,
+    "0x24e368d",
+    "shard cost native probe stage dispatcher body drifted"
+  );
+  assert.equal(
+    probe.stageAssemblyBoundary?.scalarCompareTarget,
+    "0x24e2d86",
+    "shard cost native probe scalar compare helper drifted"
+  );
+  assert.equal(
+    probe.stageAssemblyBoundary?.specialCaseGateTarget,
+    "0x24e387a",
+    "shard cost native probe special-case gate drifted"
+  );
+  assert.equal(
+    probe.stageAssemblyBoundary?.scalarToBigDoubleTarget,
+    "0x24e349c",
+    "shard cost native probe stage scalar-to-BigDouble lane drifted"
+  );
+  assert.equal(
+    probe.stageAssemblyBoundary?.decimalPowerBuilderTarget,
+    "0x24e38f9",
+    "shard cost native probe stage decimal power-builder drifted"
+  );
+  assert.equal(
+    probe.sampledOffsetFeeders?.length,
+    3,
+    "shard cost native probe sampled offset feeder count drifted"
+  );
+  assert.ok(
+    probe.sampledOffsetFeeders?.some(
+      (entry) =>
+        entry?.row === 1 &&
+        entry?.thresholdWindow === "100-plus-window" &&
+        entry?.levelOffset === 70 &&
+        Math.abs(Number(entry?.coefficient) - 9.765628774403013e-5) < 1e-16 &&
+        entry?.model === "literalTimesBigDoubleOffsetThenAdd"
+    ),
+    "shard cost native probe row 1 sampled offset feeder drifted"
+  );
+  assert.ok(
+    probe.sampledOffsetFeeders?.some(
+      (entry) =>
+        entry?.row === 19 &&
+        entry?.thresholdWindow === "100-plus-window" &&
+        entry?.levelOffset === 70 &&
+        Math.abs(Number(entry?.coefficient) - -0.00011718430323526263) < 1e-16 &&
+        entry?.model === "scalarOffsetTimesCoefficientThenAdd"
+    ),
+    "shard cost native probe row 19 sampled offset feeder drifted"
+  );
+  assert.ok(
+    probe.sampledOffsetFeeders?.some(
+      (entry) =>
+        entry?.row === 27 &&
+        entry?.thresholdWindow === "100-plus-window" &&
+        entry?.levelOffset === 82 &&
+        Math.abs(Number(entry?.coefficient) - 8192.001984596252) < 1e-9 &&
+        entry?.model === "literalTimesBigDoubleOffsetThenAdd"
+    ),
+    "shard cost native probe row 27 sampled offset feeder drifted"
+  );
+  assert.deepEqual(
+    probe.windowOffsetFamilies?.hundredWindowFamilies,
+    [
+      {
+        thresholdWindow: "100-plus-window",
+        model: "literalTimesBigDoubleOffsetThenAdd",
+        levelOffset: 70,
+        usesLiteralBuilder: false,
+        usesPreMergeMultiply: true,
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+      },
+      {
+        thresholdWindow: "100-plus-window",
+        model: "scalarOffsetTimesCoefficientThenAdd",
+        levelOffset: 70,
+        usesLiteralBuilder: true,
+        usesPreMergeMultiply: false,
+        rows: [19, 20, 21, 22, 23]
+      },
+      {
+        thresholdWindow: "100-plus-window",
+        model: "scalarOffsetTimesCoefficientThenAdd",
+        levelOffset: 67,
+        usesLiteralBuilder: true,
+        usesPreMergeMultiply: false,
+        rows: [24, 25, 26]
+      },
+      {
+        thresholdWindow: "100-plus-window",
+        model: "literalTimesBigDoubleOffsetThenAdd",
+        levelOffset: 82,
+        usesLiteralBuilder: false,
+        usesPreMergeMultiply: true,
+        rows: [27, 28, 29]
+      }
+    ],
+    "shard cost native probe hundred-window family clusters drifted"
+  );
+  assert.deepEqual(
+    probe.windowOffsetFamilies?.twoHundredWindowFamilies,
+    [
+      {
+        thresholdWindow: "200-plus-window",
+        usesUnaryThresholdTransform: false,
+        usesPreMergeMultiply: true,
+        usesPreMergeAdd: true,
+        usesCurrentLevelBigDouble: true,
+        usesLiteralBuilder: false,
+        integerSeeds: [],
+        rows: [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 27,
+          28, 29
+        ]
+      },
+      {
+        thresholdWindow: "200-plus-window",
+        usesUnaryThresholdTransform: true,
+        usesPreMergeMultiply: false,
+        usesPreMergeAdd: false,
+        usesCurrentLevelBigDouble: true,
+        usesLiteralBuilder: false,
+        integerSeeds: [180],
+        rows: [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 26, 27, 28,
+          29
+        ]
+      }
+    ],
+    "shard cost native probe two-hundred-window family clusters drifted"
+  );
+  assert.deepEqual(
+    probe.windowOffsetFamilies?.threeHundredWindowFamilies,
+    [
+      {
+        thresholdWindow: "300-plus-window",
+        usesUnaryThresholdTransform: false,
+        usesPreMergeMultiply: false,
+        usesPreMergeAdd: true,
+        usesCurrentLevelBigDouble: true,
+        usesLiteralBuilder: false,
+        integerSeeds: [],
+        rows: [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+          26, 27, 28, 29
+        ]
+      },
+      {
+        thresholdWindow: "300-plus-window",
+        usesUnaryThresholdTransform: true,
+        usesPreMergeMultiply: false,
+        usesPreMergeAdd: false,
+        usesCurrentLevelBigDouble: true,
+        usesLiteralBuilder: false,
+        integerSeeds: [49],
+        rows: [24]
+      },
+      {
+        thresholdWindow: "300-plus-window",
+        usesUnaryThresholdTransform: true,
+        usesPreMergeMultiply: false,
+        usesPreMergeAdd: false,
+        usesCurrentLevelBigDouble: true,
+        usesLiteralBuilder: false,
+        integerSeeds: [19],
+        rows: [25]
+      }
+    ],
+    "shard cost native probe three-hundred-window family clusters drifted"
+  );
+  assert.deepEqual(
+    probe.stageWindowProfiles,
+    [
+      {
+        rows: [0],
+        familySignature: [
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: true,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          }
+        ]
+      },
+      {
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29],
+        familySignature: [
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [100]
+          },
+          {
+            thresholdWindow: "300-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "200-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [180]
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: true,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "200-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: true,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          }
+        ]
+      },
+      {
+        rows: [18],
+        familySignature: [
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [100]
+          },
+          {
+            thresholdWindow: "300-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [99]
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: true,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "200-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: true,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          }
+        ]
+      },
+      {
+        rows: [19, 20, 21, 22, 23],
+        familySignature: [
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [100]
+          },
+          {
+            thresholdWindow: "300-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "200-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [180]
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: true,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "200-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: true,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          }
+        ]
+      },
+      {
+        rows: [24],
+        familySignature: [
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [100]
+          },
+          {
+            thresholdWindow: "300-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "300-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [49]
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: true,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "200-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: true,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: true,
+            integerSeeds: []
+          }
+        ]
+      },
+      {
+        rows: [25],
+        familySignature: [
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [100]
+          },
+          {
+            thresholdWindow: "300-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "300-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [19]
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: true,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: true,
+            integerSeeds: []
+          }
+        ]
+      },
+      {
+        rows: [26],
+        familySignature: [
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [100]
+          },
+          {
+            thresholdWindow: "300-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: false,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "200-plus-window",
+            usesUnaryThresholdTransform: true,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: false,
+            integerSeeds: [180]
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: true,
+            usesLiteralBuilder: true,
+            integerSeeds: []
+          },
+          {
+            thresholdWindow: "100-plus-window",
+            usesUnaryThresholdTransform: false,
+            usesPreMergeMultiply: false,
+            usesPreMergeAdd: false,
+            usesLiteralBuilder: true,
+            integerSeeds: []
+          }
+        ]
+      }
+    ],
+    "shard cost native probe stage-window profile map drifted"
+  );
+  assert.deepEqual(
+    probe.stageProfileCorrelations,
+    [
+      {
+        rows: [0],
+        unlockRequirementRange: [0, 0],
+        distinctRarities: ["Unique"],
+        distinctStartCosts: [5],
+        distinctCostExponents: [1.3],
+        distinctGrowthExponents: [1.5]
+      },
+      {
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29],
+        unlockRequirementRange: [0, 8100],
+        distinctRarities: ["Epic", "Rare", "common"],
+        distinctStartCosts: [1.4, 2, 2.4, 3.1, 3.6, 4, 5.6, 6, 8, 9, 9.99],
+        distinctCostExponents: [
+          1.15, 1.22, 1.24, 1.26, 1.4, 1.48, 1.5, 1.6, 1.78, 2, 2.25, 2.29, 2.3, 3, 4
+        ],
+        distinctGrowthExponents: [1.2, 1.3, 1.6, 1.8, 2, 2.2, 2.5, 2.6, 2.8, 3.2, 3.4, 3.8, 4, 5, 8]
+      },
+      {
+        rows: [18],
+        unlockRequirementRange: [1100, 1100],
+        distinctRarities: ["Legendary"],
+        distinctStartCosts: [1.5],
+        distinctCostExponents: [1],
+        distinctGrowthExponents: [5]
+      },
+      {
+        rows: [19, 20, 21, 22, 23],
+        unlockRequirementRange: [1400, 1800],
+        distinctRarities: ["Epic", "Rare", "common"],
+        distinctStartCosts: [1],
+        distinctCostExponents: [1, 2.5, 5],
+        distinctGrowthExponents: [1, 3, 4]
+      },
+      {
+        rows: [24],
+        unlockRequirementRange: [3300, 3300],
+        distinctRarities: ["Rare"],
+        distinctStartCosts: [4],
+        distinctCostExponents: [5],
+        distinctGrowthExponents: [5]
+      },
+      {
+        rows: [25],
+        unlockRequirementRange: [3600, 3600],
+        distinctRarities: ["Low Pristine"],
+        distinctStartCosts: [3],
+        distinctCostExponents: [2],
+        distinctGrowthExponents: [2]
+      },
+      {
+        rows: [26],
+        unlockRequirementRange: [3900, 3900],
+        distinctRarities: ["Mid Pristine"],
+        distinctStartCosts: [5],
+        distinctCostExponents: [2],
+        distinctGrowthExponents: [6]
+      }
+    ],
+    "shard cost native probe stage-profile correlation map drifted"
+  );
+  assert.deepEqual(
+    probe.transitionRowAnalysis?.transitionRows?.map((entry) => ({
+      row: entry?.row,
+      betweenRows: entry?.betweenRows
+    })),
+    [
+      { row: 18, betweenRows: [17, 19] },
+      { row: 24, betweenRows: [23, 27] },
+      { row: 25, betweenRows: [24, 26] },
+      { row: 26, betweenRows: [25, 27] }
+    ],
+    "shard cost native probe transition-row anchors drifted"
+  );
+  assert.ok(
+    probe.transitionRowAnalysis?.transitionRows?.some(
+      (entry) =>
+        entry?.row === 18 &&
+        entry?.neighborContrast?.some((line) =>
+          String(line).includes("second 100-plus unary feeder")
+        )
+    ),
+    "shard cost native probe row 18 transition contrast drifted"
+  );
+  assert.ok(
+    probe.transitionRowAnalysis?.transitionRows?.some(
+      (entry) =>
+        entry?.row === 24 &&
+        entry?.neighborContrast?.some((line) =>
+          String(line).includes("300-plus unary feeder with integer seed 49")
+        )
+    ),
+    "shard cost native probe row 24 transition contrast drifted"
+  );
+  assert.ok(
+    probe.transitionRowAnalysis?.transitionRows?.some(
+      (entry) =>
+        entry?.row === 25 &&
+        entry?.neighborContrast?.some((line) => String(line).includes("seed 19"))
+    ),
+    "shard cost native probe row 25 transition contrast drifted"
+  );
+  assert.ok(
+    probe.transitionRowAnalysis?.transitionRows?.some(
+      (entry) =>
+        entry?.row === 26 &&
+        entry?.neighborContrast?.some((line) => String(line).includes("seed 180"))
+    ),
+    "shard cost native probe row 26 transition contrast drifted"
+  );
+  assert.deepEqual(
+    probe.transitionRowAnalysis?.row0SpecialCase?.costFieldUsage,
+    [
+      "SU0StartCost",
+      "SU0CostExponent",
+      "SU0GrowthExponent",
+      "SU0GrowthExponent2",
+      "SU0GrowthExponent3"
+    ],
+    "shard cost native probe row 0 cost-field shell drifted"
+  );
+  assert.deepEqual(
+    probe.transitionRowAnalysis?.row0SpecialCase?.levelGateChecks,
+    [100],
+    "shard cost native probe row 0 level-gate shell drifted"
+  );
+  assert.equal(
+    probe.transitionRowAnalysis?.row0SpecialCase?.thresholdStages?.length,
+    0,
+    "shard cost native probe row 0 threshold-stage shell drifted"
+  );
+  assert.ok(
+    probe.transitionRowAnalysis?.row0SpecialCase?.facts?.some((line) =>
+      String(line).includes("five serialized cost fields")
+    ),
+    "shard cost native probe row 0 special-case fact drifted"
+  );
+  assert.deepEqual(
+    probe.thresholdStageClasses,
+    [
+      {
+        getterNames: [
+          "get_OverLevel100Exponent",
+          "get_OverLevel200Exponent",
+          "get_OverLevel300Exponent",
+          "get_OverLevel400Exponent"
+        ],
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21]
+      },
+      {
+        getterNames: [
+          "get_OverLevel100Exponent",
+          "get_OverLevel200Exponent",
+          "get_OverLevel300Exponent"
+        ],
+        rows: [17, 22, 23]
+      },
+      {
+        getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"],
+        rows: [18, 24, 27, 28, 29]
+      },
+      { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26] }
+    ],
+    "shard cost native probe threshold-stage classes drifted"
+  );
+  assert.deepEqual(
+    probe.representativeClassAnalysis?.map((entry) => ({
+      getterNames: entry?.getterNames,
+      rows: entry?.rows,
+      representativeRows: entry?.representatives?.map((rep) => rep?.row)
+    })),
+    [
+      {
+        getterNames: [
+          "get_OverLevel100Exponent",
+          "get_OverLevel200Exponent",
+          "get_OverLevel300Exponent",
+          "get_OverLevel400Exponent"
+        ],
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21],
+        representativeRows: [1, 21]
+      },
+      {
+        getterNames: [
+          "get_OverLevel100Exponent",
+          "get_OverLevel200Exponent",
+          "get_OverLevel300Exponent"
+        ],
+        rows: [17, 22, 23],
+        representativeRows: [17, 23]
+      },
+      {
+        getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"],
+        rows: [18, 24, 27, 28, 29],
+        representativeRows: [18, 29]
+      },
+      { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26], representativeRows: [25, 26] }
+    ],
+    "shard cost native probe representative class analysis drifted"
+  );
+  assert.ok(
+    probe.representativeClassAnalysis?.some(
+      (entry) =>
+        JSON.stringify(entry?.getterNames) ===
+          JSON.stringify(["get_OverLevel100Exponent", "get_OverLevel200Exponent"]) &&
+        entry?.representatives?.some(
+          (rep) =>
+            rep?.row === 29 && rep?.hundredStageStructure?.divideBy100CompilerPattern === true
+        )
+    ),
+    "shard cost native probe representative hundred-stage structure drifted"
+  );
+  assert.deepEqual(
+    probe.normalRowStageRecipe?.classRecipes?.map((entry) => ({
+      getterNames: entry?.getterNames,
+      rows: entry?.rows
+    })),
+    [
+      {
+        getterNames: [
+          "get_OverLevel100Exponent",
+          "get_OverLevel200Exponent",
+          "get_OverLevel300Exponent",
+          "get_OverLevel400Exponent"
+        ],
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21]
+      },
+      {
+        getterNames: [
+          "get_OverLevel100Exponent",
+          "get_OverLevel200Exponent",
+          "get_OverLevel300Exponent"
+        ],
+        rows: [17, 22, 23]
+      },
+      {
+        getterNames: ["get_OverLevel100Exponent", "get_OverLevel200Exponent"],
+        rows: [18, 24, 27, 28, 29]
+      },
+      { getterNames: ["get_OverLevel100Exponent"], rows: [25, 26] }
+    ],
+    "shard cost native probe normal-row stage recipe drifted"
+  );
+  assert.ok(
+    probe.normalRowStageRecipe?.sharedScaffolding?.facts?.some((line) =>
+      String(line).includes("same hundred-stage structure")
+    ),
+    "shard cost native probe shared stage scaffolding drifted"
+  );
+  assert.deepEqual(
+    probe.canonicalSymbolicAssembler?.canonicalClass?.getterNames,
+    [
+      "get_OverLevel100Exponent",
+      "get_OverLevel200Exponent",
+      "get_OverLevel300Exponent",
+      "get_OverLevel400Exponent"
+    ],
+    "shard cost native probe canonical symbolic assembler getter coverage drifted"
+  );
+  assert.deepEqual(
+    probe.canonicalSymbolicAssembler?.canonicalClass?.rows,
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21],
+    "shard cost native probe canonical symbolic assembler rows drifted"
+  );
+  assert.deepEqual(
+    probe.canonicalSymbolicAssembler?.canonicalClass?.symbolicStages?.map((entry) => entry?.name),
+    [
+      "base-row-fields",
+      "hundred-stage",
+      "two-hundred-stage",
+      "three-hundred-stage",
+      "four-hundred-stage"
+    ],
+    "shard cost native probe canonical symbolic assembler stages drifted"
+  );
+  assert.deepEqual(
+    probe.canonicalSymbolicAssembler?.canonicalClass?.subprofiles?.map((entry) => entry?.rows),
+    [
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+      [19, 20, 21]
+    ],
+    "shard cost native probe canonical symbolic assembler subprofiles drifted"
+  );
+  assert.ok(
+    probe.canonicalSymbolicAssembler?.classDeltas?.some(
+      (entry) =>
+        JSON.stringify(entry?.getterNames) === JSON.stringify(["get_OverLevel100Exponent"]) &&
+        entry?.delta?.some((line) => String(line).includes("0x24e1ab0"))
+    ),
+    "shard cost native probe canonical symbolic assembler short-class delta drifted"
+  );
+  assert.deepEqual(
+    probe.canonicalMergeConstraints?.secondaryHundredPlusSplit?.map((entry) => ({
+      rows: entry?.rows,
+      path: entry?.path
+    })),
+    [
+      { rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], path: "additivePremerge" },
+      { rows: [19, 20, 21], path: "literalBuilderAdditive" }
+    ],
+    "shard cost native probe canonical merge constraints drifted"
+  );
+  assert.ok(
+    probe.canonicalMergeConstraints?.sharedConstraints?.some((line) =>
+      String(line).includes("first 200-plus feeder is stable")
+    ),
+    "shard cost native probe canonical merge shared constraint drifted"
+  );
+  assert.equal(
+    probe.formulaApplicationProfiles?.rowZero?.formulaClass,
+    "row0-special-case",
+    "shard cost native probe row-zero formula profile drifted"
+  );
+  assert.deepEqual(
+    probe.formulaApplicationProfiles?.normalRows?.map((entry) => ({
+      rows: entry?.rows,
+      formulaClass: entry?.formulaClass
+    })),
+    [
+      {
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        formulaClass: "canonical-additive-premerge"
+      },
+      { rows: [19, 20, 21], formulaClass: "canonical-literal-builder" },
+      { rows: [17, 22, 23], formulaClass: "drop-400-stage" },
+      { rows: [18, 24, 27, 28, 29], formulaClass: "two-stage-transition-band" },
+      { rows: [25, 26], formulaClass: "hundred-stage-short-class" }
+    ],
+    "shard cost native probe formula application profiles drifted"
+  );
+  assert.deepEqual(
+    probe.preThresholdMergeModels?.normalProfile?.rows,
+    [9, 25],
+    "shard cost native probe pre-threshold sample rows drifted"
+  );
+  assert.ok(
+    String(probe.preThresholdMergeModels?.normalProfile?.symbolicApproximation).includes(
+      "multiply(StartCost, dispatch(currentLevel, add(CostExponent, multiply(currentLevelBigDouble, GrowthExponent))))"
+    ),
+    "shard cost native probe pre-threshold symbolic approximation drifted"
+  );
+  assert.ok(
+    probe.preThresholdMergeModels?.sharedNormalPath?.some((line) =>
+      String(line).includes("owner-flag-zero pre-threshold structure")
+    ),
+    "shard cost native probe pre-threshold shared-path framing drifted"
+  );
+  assert.ok(
+    probe.preThresholdMergeModels?.alternateFlaggedBranchSamples?.some(
+      (entry) => entry?.row === 25 && String(entry?.seedBuilder).includes("integer seed 4")
+    ),
+    "shard cost native probe pre-threshold alternate branch drifted"
+  );
+  assert.equal(
+    probe.dispatcherCompareModel?.compareTarget,
+    "0x24e2d86",
+    "shard cost native probe dispatcher compare target drifted"
+  );
+  assert.ok(
+    probe.dispatcherCompareModel?.facts?.some((line) =>
+      String(line).includes("converted BigDouble lane is greater than the original scalar lane")
+    ),
+    "shard cost native probe dispatcher compare semantics drifted"
+  );
+  assert.equal(
+    probe.dispatcherAlignmentModel?.alignmentCheckTarget,
+    "0x24e3597",
+    "shard cost native probe dispatcher alignment target drifted"
+  );
+  assert.equal(
+    Number(probe.dispatcherAlignmentModel?.toleranceLiteral),
+    5.238690707360522e-11,
+    "shard cost native probe dispatcher alignment tolerance drifted"
+  );
+  assert.ok(
+    probe.dispatcherAlignmentModel?.currentInference?.some((line) =>
+      String(line).includes("tiny fmod-style alignment gate")
+    ),
+    "shard cost native probe dispatcher alignment inference drifted"
+  );
+  assert.ok(
+    probe.dispatcherSelectionModel?.facts?.some((line) =>
+      String(line).includes("selector register equals 1")
+    ),
+    "shard cost native probe dispatcher selection gate drifted"
+  );
+  assert.ok(
+    probe.dispatcherSelectionModel?.sampledNormalRows?.some(
+      (entry) =>
+        JSON.stringify(entry?.rows) === JSON.stringify([1, 9, 27, 29]) &&
+        JSON.stringify(entry?.sampledSelectorValues) === JSON.stringify([0])
+    ),
+    "shard cost native probe dispatcher sampled zero-selector rows drifted"
+  );
+  assert.ok(
+    probe.dispatcherSelectionModel?.sampledNormalRows?.some(
+      (entry) =>
+        JSON.stringify(entry?.rows) === JSON.stringify([25]) &&
+        JSON.stringify(entry?.sampledSelectorValues) === JSON.stringify([4])
+    ),
+    "shard cost native probe dispatcher sampled short-class selector drifted"
+  );
+  assert.ok(
+    probe.findings?.some((line) =>
+      String(line).includes("exact serialized OverLevel*Base payload values remain unresolved")
+    ),
+    "shard cost native probe over-level base unresolved finding drifted"
+  );
+  assert.ok(
+    probe.currentBoundary?.some((line) =>
+      String(line).includes(
+        "OverLevel100/200/300/400Base metadata names as unresolved typed field clues"
+      )
+    ),
+    "shard cost native probe over-level base boundary drifted"
+  );
+  assert.ok(
+    probe.overLevelSeedModels?.sampledGetters?.some(
+      (entry) => entry?.getterName === "get_OverLevel100Exponent" && entry?.baseSeed === 2
+    ),
+    "shard cost native probe over-level 100 seed drifted"
+  );
+  assert.ok(
+    probe.overLevelSeedModels?.sampledGetters?.some(
+      (entry) => entry?.getterName === "get_OverLevel200Exponent" && Number(entry?.baseSeed) === 0
+    ),
+    "shard cost native probe over-level 200 seed drifted"
+  );
+  assert.ok(
+    probe.overLevelSeedModels?.sampledGetters?.some(
+      (entry) => entry?.getterName === "get_OverLevel300Exponent" && Number(entry?.baseSeed) === 0
+    ),
+    "shard cost native probe over-level 300 seed drifted"
+  );
+  assert.ok(
+    probe.overLevelSeedModels?.sampledGetters?.some(
+      (entry) =>
+        entry?.getterName === "get_OverLevel100Exponent" &&
+        Number(entry?.optionalMmoMergeFloatValue) === 1.264570970563716e-39
+    ),
+    "shard cost native probe over-level 100 merge float drifted"
+  );
+  assert.ok(
+    probe.overLevelSeedModels?.sampledGetters?.some(
+      (entry) =>
+        entry?.getterName === "get_OverLevel200Exponent" &&
+        Number(entry?.optionalMmoMergeFloatValue) === 6.345649113524877e-36
+    ),
+    "shard cost native probe over-level 200 merge float drifted"
+  );
+  assert.ok(
+    probe.overLevelSeedModels?.sampledGetters?.some(
+      (entry) =>
+        entry?.getterName === "get_OverLevel400Exponent" &&
+        Number(entry?.baseSeed) === 0.007812501846152979
+    ),
+    "shard cost native probe over-level 400 seed drifted"
+  );
+  assert.ok(
+    probe.overLevelSeedModels?.currentInference?.some((line) =>
+      String(line).includes("100 starts from integer seed 2")
+    ),
+    "shard cost native probe over-level seed inference drifted"
+  );
+  assert.deepEqual(
+    probe.secondaryHundredPlusMergeModels?.profiles?.map((entry) => ({
+      rows: entry?.rows,
+      profile: entry?.profile
+    })),
+    [
+      {
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 27, 28, 29],
+        profile: "additive-premerge"
+      },
+      { rows: [19, 20, 21], profile: "literal-builder-additive" }
+    ],
+    "shard cost native probe secondary hundred-plus merge models drifted"
+  );
+  assert.ok(
+    probe.secondaryHundredPlusMergeModels?.sharedFrame?.some((line) =>
+      String(line).includes("post-200, pre-300 branch")
+    ),
+    "shard cost native probe secondary hundred-plus branch framing drifted"
+  );
+  assert.ok(
+    probe.secondaryHundredPlusMergeModels?.profiles?.some(
+      (entry) =>
+        entry?.profile === "additive-premerge" &&
+        String(entry?.symbolicApproximation).includes(
+          "multiply(levelOffsetBigDouble, preservedScalarLane)"
+        )
+    ),
+    "shard cost native probe additive-premerge symbolic approximation drifted"
+  );
+  assert.ok(
+    probe.secondaryHundredPlusMergeModels?.profiles?.some(
+      (entry) =>
+        entry?.profile === "additive-premerge" &&
+        String(entry?.laneSources?.baseLane).includes("OverLevel200Base")
+    ),
+    "shard cost native probe additive-premerge base-lane source drifted"
+  );
+  assert.ok(
+    probe.secondaryHundredPlusMergeModels?.profiles?.some(
+      (entry) =>
+        entry?.profile === "additive-premerge" &&
+        String(entry?.laneSources?.stageLane).includes("get_OverLevel200Exponent")
+    ),
+    "shard cost native probe additive-premerge stage-lane helper drifted"
+  );
+  assert.ok(
+    probe.secondaryHundredPlusMergeModels?.profiles?.some(
+      (entry) =>
+        entry?.profile === "literal-builder-additive" &&
+        entry?.preDispatchAssembly?.some((line) => String(line).includes("0x24e1a07"))
+    ),
+    "shard cost native probe literal-builder merge model drifted"
+  );
+  assert.ok(
+    probe.secondaryHundredPlusMergeModels?.profiles?.some(
+      (entry) =>
+        entry?.profile === "literal-builder-additive" &&
+        String(entry?.symbolicApproximation).includes(
+          "literalBigDouble((level - offset) * coefficient)"
+        )
+    ),
+    "shard cost native probe literal-builder symbolic approximation drifted"
+  );
+  assert.ok(
+    probe.secondaryHundredPlusMergeModels?.profiles?.some(
+      (entry) =>
+        entry?.profile === "literal-builder-additive" &&
+        String(entry?.laneSources?.stageLane).includes("get_OverLevel200Exponent")
+    ),
+    "shard cost native probe literal-builder stage-lane source drifted"
+  );
   const row1 = probe.rows?.find((entry) => entry?.row === 1);
   const row19 = probe.rows?.find((entry) => entry?.row === 19);
   const row27 = probe.rows?.find((entry) => entry?.row === 27);
-  assert.ok(row1?.stageDispatchCallFamilies?.some((family) => family?.usesPreMergeAdd === true && family?.usesCurrentLevelBigDouble === true && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 1 must preserve opening additive dispatcher feeder");
-  assert.ok(row1?.stageDispatchCallFamilies?.some((family) => family?.usesUnaryThresholdTransform === true && JSON.stringify(family?.integerSeeds) === JSON.stringify([100]) && family?.thresholdWindow === "100-plus-window" && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 1 must preserve 100-seed dispatcher feeder");
-  assert.ok(row1?.stageDispatchCallFamilies?.some((family) => family?.usesUnaryThresholdTransform === true && JSON.stringify(family?.integerSeeds) === JSON.stringify([180]) && family?.thresholdWindow === "200-plus-window" && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 1 must preserve 180-seed dispatcher feeder");
-  assert.ok(row1?.stageDispatchCallFamilies?.some((family) => family?.thresholdWindow === "300-plus-window" && family?.usesPreMergeAdd === true && family?.usesUnaryThresholdTransform === false), "shard cost native probe row 1 must preserve plain 300-plus dispatcher feeder");
-  assert.ok(row19?.stageDispatchCallFamilies?.some((family) => family?.usesLiteralBuilder === true && family?.usesPreMergeAdd === true && family?.thresholdWindow === "100-plus-window" && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 19 must preserve literal-seeded dispatcher feeder");
-  assert.ok(row27?.stageDispatchCallFamilies?.some((family) => family?.usesPreMergeMultiply === true && family?.usesPreMergeAdd === true && family?.thresholdWindow === "100-plus-window" && family?.postDispatchMergeTarget === "0x24e1cb3"), "shard cost native probe row 27 must preserve stacked additive-premerge feeder");
-  assert.ok(probe.overLevelGetterProfiles.some((entry) => entry?.getterName === "get_OverLevel100Exponent" && entry?.initialBuilderTarget === "0x24e1d36" && entry?.initialIntegerSeed === 2), "shard cost native probe OverLevel100 getter profile drifted");
-  assert.ok(probe.overLevelGetterProfiles.some((entry) => entry?.getterName === "get_OverLevel400Exponent" && entry?.fallsIntoExtendedShardLane === true), "shard cost native probe OverLevel400 getter profile drifted");
-  assert.ok(probe.findings.some((line) => String(line).includes("row-local ShardMining cost operands")), "shard cost native probe must preserve operand finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("stored as checked 16-byte BreakInfinity.BigDouble slots")), "shard cost native probe must preserve BigDouble slot finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("named ShardMining cost fields")), "shard cost native probe must preserve named field finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("touch GrowthExponent later")), "shard cost native probe must preserve growth exponent finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("compare gates inside get_SU*Cost")), "shard cost native probe must preserve compare-gate finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("divide-by-100 integer lane")), "shard cost native probe must preserve hundred-stage divide finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("CostExponent and GrowthExponent neighborhood")), "shard cost native probe must preserve three-hundred-stage lane finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("checked unary helper chain")), "shard cost native probe must preserve unary helper-chain finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("nearby sibling helper lane")), "shard cost native probe must preserve sibling helper-lane finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("0x24e3620 converts a BigDouble pair into a double before dispatching into the remaining scalar remainder subfamily")), "shard cost native probe must preserve scalar remainder finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("0x393469a now resolves to a modf wrapper")), "shard cost native probe must preserve modf-wrapper finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("0x24e38f9 now preserves a checked decimal power-builder")), "shard cost native probe must preserve decimal power-builder finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("0x24e349c now preserves a checked scalar-to-BigDouble fallback")), "shard cost native probe must preserve scalar-to-BigDouble fallback finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("0x393474a is no longer just a pow-like candidate")), "shard cost native probe must preserve pow-wrapper finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("checked BigDouble-to-log10 bridge")), "shard cost native probe must preserve BigDouble log10 bridge finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("checked stage dispatcher")), "shard cost native probe must preserve stage-dispatcher finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("first 100-plus unary threshold feeder")), "shard cost native probe must preserve 100-plus dispatcher finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("later 200-plus unary threshold feeder")), "shard cost native probe must preserve 200-plus dispatcher finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("300-plus window also preserves a plain additive dispatcher feeder")), "shard cost native probe must preserve 300-plus dispatcher finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("literal-seeded dispatcher feeder inside a 100-plus window")), "shard cost native probe must preserve row-19 dispatcher outlier finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("Sampled late-window feeder parameters are now preserved directly from the binary")), "shard cost native probe must preserve sampled feeder-parameter finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("clusters sampled rows into reusable late-window families")), "shard cost native probe must preserve hundred-window family finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("later stage windows now also preserve reusable row-family maps")), "shard cost native probe must preserve later-window family finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("cross-window profile map")), "shard cost native probe must preserve cross-window profile finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("do not collapse cleanly onto one rarity band")), "shard cost native probe must preserve stage-profile correlation finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("transition rows now preserve concrete neighbor contrasts")), "shard cost native probe must preserve transition-row finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("Row 0 is no longer just a weaker version")), "shard cost native probe must preserve row-0 special-case finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("split cleanly by preserved over-level getter coverage")), "shard cost native probe must preserve threshold-stage class finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("Representative rows from each normal-row coverage class")), "shard cost native probe must preserve representative-class finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("shared stage scaffold with class-specific stage coverage")), "shard cost native probe must preserve normal-row recipe finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("canonical symbolic stage assembler")), "shard cost native probe must preserve symbolic-assembler finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("secondary 100-plus feeder")), "shard cost native probe must preserve canonical subprofile finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("narrowest remaining merge breakpoint")), "shard cost native probe must preserve canonical merge finding");
-  assert.ok(probe.rows.some((entry) => entry?.row === 1 && JSON.stringify(entry?.thresholdStages?.map((stage) => stage.getterName)) === JSON.stringify(["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"])), "shard cost native probe row 1 threshold stages drifted");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("row-local ShardMining operands")), "shard cost native probe must preserve current boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("serialized BreakInfinity.BigDouble pairs")), "shard cost native probe must preserve BigDouble-pair boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("level 100, 200, and 300 compare gates")), "shard cost native probe must preserve compare-gate boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("divide-by-100 loop")), "shard cost native probe must preserve staged-structure boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("shard-path unary transform entry")), "shard cost native probe must preserve helper-family boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("0x24e30e4 as the checked BigDouble-to-log10 bridge")), "shard cost native probe must preserve BigDouble log10 boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("0x24e3620 and 0x24e368d as the checked stage dispatcher")), "shard cost native probe must preserve stage-dispatcher boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("pre-threshold, 100-plus, 200-plus, and 300-plus windows")), "shard cost native probe must preserve stage-window boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("sampled `(level - offset)` feeder parameters")), "shard cost native probe must preserve sampled feeder boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("100-plus feeder row clusters")), "shard cost native probe must preserve hundred-window family boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("new 200-plus and 300-plus family maps")), "shard cost native probe must preserve later-window family boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("new cross-window stage profiles")), "shard cost native probe must preserve cross-window profile boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("row-family switch inside get_SU*Cost")), "shard cost native probe must preserve stage-profile correlation boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("Treat row 0 as a separate shard cost lane")), "shard cost native probe must preserve row-0 special-case boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("preserved over-level getter coverage classes")), "shard cost native probe must preserve threshold-stage class boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("one representative row per coverage class")), "shard cost native probe must preserve representative-class boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("class recipe boundary")), "shard cost native probe must preserve normal-row recipe boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("canonical symbolic assembler")), "shard cost native probe must preserve symbolic-assembler boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("secondary 100-plus feeder split inside the canonical class")), "shard cost native probe must preserve canonical subprofile boundary framing");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("sampled 300-plus feeder and both sampled 200-plus feeders as shared canonical-class structure")), "shard cost native probe must preserve canonical merge boundary framing");
+  assert.ok(
+    row1?.stageDispatchCallFamilies?.some(
+      (family) =>
+        family?.usesPreMergeAdd === true &&
+        family?.usesCurrentLevelBigDouble === true &&
+        family?.postDispatchMergeTarget === "0x24e1cb3"
+    ),
+    "shard cost native probe row 1 must preserve opening additive dispatcher feeder"
+  );
+  assert.ok(
+    row1?.stageDispatchCallFamilies?.some(
+      (family) =>
+        family?.usesUnaryThresholdTransform === true &&
+        JSON.stringify(family?.integerSeeds) === JSON.stringify([100]) &&
+        family?.thresholdWindow === "100-plus-window" &&
+        family?.postDispatchMergeTarget === "0x24e1cb3"
+    ),
+    "shard cost native probe row 1 must preserve 100-seed dispatcher feeder"
+  );
+  assert.ok(
+    row1?.stageDispatchCallFamilies?.some(
+      (family) =>
+        family?.usesUnaryThresholdTransform === true &&
+        JSON.stringify(family?.integerSeeds) === JSON.stringify([180]) &&
+        family?.thresholdWindow === "200-plus-window" &&
+        family?.postDispatchMergeTarget === "0x24e1cb3"
+    ),
+    "shard cost native probe row 1 must preserve 180-seed dispatcher feeder"
+  );
+  assert.ok(
+    row1?.stageDispatchCallFamilies?.some(
+      (family) =>
+        family?.thresholdWindow === "300-plus-window" &&
+        family?.usesPreMergeAdd === true &&
+        family?.usesUnaryThresholdTransform === false
+    ),
+    "shard cost native probe row 1 must preserve plain 300-plus dispatcher feeder"
+  );
+  assert.ok(
+    row19?.stageDispatchCallFamilies?.some(
+      (family) =>
+        family?.usesLiteralBuilder === true &&
+        family?.usesPreMergeAdd === true &&
+        family?.thresholdWindow === "100-plus-window" &&
+        family?.postDispatchMergeTarget === "0x24e1cb3"
+    ),
+    "shard cost native probe row 19 must preserve literal-seeded dispatcher feeder"
+  );
+  assert.ok(
+    row27?.stageDispatchCallFamilies?.some(
+      (family) =>
+        family?.usesPreMergeMultiply === true &&
+        family?.usesPreMergeAdd === true &&
+        family?.thresholdWindow === "100-plus-window" &&
+        family?.postDispatchMergeTarget === "0x24e1cb3"
+    ),
+    "shard cost native probe row 27 must preserve stacked additive-premerge feeder"
+  );
+  assert.ok(
+    probe.overLevelGetterProfiles.some(
+      (entry) =>
+        entry?.getterName === "get_OverLevel100Exponent" &&
+        entry?.initialBuilderTarget === "0x24e1d36" &&
+        entry?.initialIntegerSeed === 2
+    ),
+    "shard cost native probe OverLevel100 getter profile drifted"
+  );
+  assert.ok(
+    probe.overLevelGetterProfiles.some(
+      (entry) =>
+        entry?.getterName === "get_OverLevel400Exponent" &&
+        entry?.fallsIntoExtendedShardLane === true
+    ),
+    "shard cost native probe OverLevel400 getter profile drifted"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("row-local ShardMining cost operands")),
+    "shard cost native probe must preserve operand finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("stored as checked 16-byte BreakInfinity.BigDouble slots")
+    ),
+    "shard cost native probe must preserve BigDouble slot finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("named ShardMining cost fields")),
+    "shard cost native probe must preserve named field finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("touch GrowthExponent later")),
+    "shard cost native probe must preserve growth exponent finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("compare gates inside get_SU*Cost")),
+    "shard cost native probe must preserve compare-gate finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("divide-by-100 integer lane")),
+    "shard cost native probe must preserve hundred-stage divide finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("CostExponent and GrowthExponent neighborhood")
+    ),
+    "shard cost native probe must preserve three-hundred-stage lane finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("checked unary helper chain")),
+    "shard cost native probe must preserve unary helper-chain finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("nearby sibling helper lane")),
+    "shard cost native probe must preserve sibling helper-lane finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes(
+        "0x24e3620 converts a BigDouble pair into a double before dispatching into the remaining scalar remainder subfamily"
+      )
+    ),
+    "shard cost native probe must preserve scalar remainder finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("0x393469a now resolves to a modf wrapper")
+    ),
+    "shard cost native probe must preserve modf-wrapper finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("0x24e38f9 now preserves a checked decimal power-builder")
+    ),
+    "shard cost native probe must preserve decimal power-builder finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("0x24e349c now preserves a checked scalar-to-BigDouble fallback")
+    ),
+    "shard cost native probe must preserve scalar-to-BigDouble fallback finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("0x393474a is no longer just a pow-like candidate")
+    ),
+    "shard cost native probe must preserve pow-wrapper finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("checked BigDouble-to-log10 bridge")),
+    "shard cost native probe must preserve BigDouble log10 bridge finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("checked stage dispatcher")),
+    "shard cost native probe must preserve stage-dispatcher finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("first 100-plus unary threshold feeder")),
+    "shard cost native probe must preserve 100-plus dispatcher finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("later 200-plus unary threshold feeder")),
+    "shard cost native probe must preserve 200-plus dispatcher finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("300-plus window also preserves a plain additive dispatcher feeder")
+    ),
+    "shard cost native probe must preserve 300-plus dispatcher finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("literal-seeded dispatcher feeder inside a 100-plus window")
+    ),
+    "shard cost native probe must preserve row-19 dispatcher outlier finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes(
+        "Sampled late-window feeder parameters are now preserved directly from the binary"
+      )
+    ),
+    "shard cost native probe must preserve sampled feeder-parameter finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("clusters sampled rows into reusable late-window families")
+    ),
+    "shard cost native probe must preserve hundred-window family finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("later stage windows now also preserve reusable row-family maps")
+    ),
+    "shard cost native probe must preserve later-window family finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("cross-window profile map")),
+    "shard cost native probe must preserve cross-window profile finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("do not collapse cleanly onto one rarity band")
+    ),
+    "shard cost native probe must preserve stage-profile correlation finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("transition rows now preserve concrete neighbor contrasts")
+    ),
+    "shard cost native probe must preserve transition-row finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("Row 0 is no longer just a weaker version")
+    ),
+    "shard cost native probe must preserve row-0 special-case finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("split cleanly by preserved over-level getter coverage")
+    ),
+    "shard cost native probe must preserve threshold-stage class finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("Representative rows from each normal-row coverage class")
+    ),
+    "shard cost native probe must preserve representative-class finding"
+  );
+  assert.ok(
+    probe.findings.some((line) =>
+      String(line).includes("shared stage scaffold with class-specific stage coverage")
+    ),
+    "shard cost native probe must preserve normal-row recipe finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("canonical symbolic stage assembler")),
+    "shard cost native probe must preserve symbolic-assembler finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("secondary 100-plus feeder")),
+    "shard cost native probe must preserve canonical subprofile finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("narrowest remaining merge breakpoint")),
+    "shard cost native probe must preserve canonical merge finding"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 1 &&
+        JSON.stringify(entry?.thresholdStages?.map((stage) => stage.getterName)) ===
+          JSON.stringify([
+            "get_OverLevel100Exponent",
+            "get_OverLevel200Exponent",
+            "get_OverLevel300Exponent",
+            "get_OverLevel400Exponent"
+          ])
+    ),
+    "shard cost native probe row 1 threshold stages drifted"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("row-local ShardMining operands")),
+    "shard cost native probe must preserve current boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("serialized BreakInfinity.BigDouble pairs")
+    ),
+    "shard cost native probe must preserve BigDouble-pair boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("level 100, 200, and 300 compare gates")
+    ),
+    "shard cost native probe must preserve compare-gate boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("divide-by-100 loop")),
+    "shard cost native probe must preserve staged-structure boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("shard-path unary transform entry")),
+    "shard cost native probe must preserve helper-family boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("0x24e30e4 as the checked BigDouble-to-log10 bridge")
+    ),
+    "shard cost native probe must preserve BigDouble log10 boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("0x24e3620 and 0x24e368d as the checked stage dispatcher")
+    ),
+    "shard cost native probe must preserve stage-dispatcher boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("pre-threshold, 100-plus, 200-plus, and 300-plus windows")
+    ),
+    "shard cost native probe must preserve stage-window boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("sampled `(level - offset)` feeder parameters")
+    ),
+    "shard cost native probe must preserve sampled feeder boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("100-plus feeder row clusters")),
+    "shard cost native probe must preserve hundred-window family boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("new 200-plus and 300-plus family maps")
+    ),
+    "shard cost native probe must preserve later-window family boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("new cross-window stage profiles")),
+    "shard cost native probe must preserve cross-window profile boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("row-family switch inside get_SU*Cost")
+    ),
+    "shard cost native probe must preserve stage-profile correlation boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("Treat row 0 as a separate shard cost lane")
+    ),
+    "shard cost native probe must preserve row-0 special-case boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("preserved over-level getter coverage classes")
+    ),
+    "shard cost native probe must preserve threshold-stage class boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("one representative row per coverage class")
+    ),
+    "shard cost native probe must preserve representative-class boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("class recipe boundary")),
+    "shard cost native probe must preserve normal-row recipe boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("canonical symbolic assembler")),
+    "shard cost native probe must preserve symbolic-assembler boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("secondary 100-plus feeder split inside the canonical class")
+    ),
+    "shard cost native probe must preserve canonical subprofile boundary framing"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes(
+        "sampled 300-plus feeder and both sampled 200-plus feeders as shared canonical-class structure"
+      )
+    ),
+    "shard cost native probe must preserve canonical merge boundary framing"
+  );
 
   return {
     id: "shard-cost-native-probe",
@@ -1174,19 +3848,54 @@ function validateShardCostNativeProbe(probe) {
 }
 
 function validateShardCostScreenshotCalibration(probe) {
-  expectNonEmptyString(probe.dataset, "shard cost screenshot calibration dataset id must be present");
-  expectNonEmptyString(probe.generatedAt, "shard cost screenshot calibration generatedAt must be present");
+  expectNonEmptyString(
+    probe.dataset,
+    "shard cost screenshot calibration dataset id must be present"
+  );
+  expectNonEmptyString(
+    probe.generatedAt,
+    "shard cost screenshot calibration generatedAt must be present"
+  );
   expectRecord(probe.source, "shard cost screenshot calibration source must be an object");
   expectArray(probe.entries, "shard cost screenshot calibration entries must be an array");
   expectArray(probe.findings, "shard cost screenshot calibration findings must be an array");
-  expectArray(probe.currentBoundary, "shard cost screenshot calibration currentBoundary must be an array");
+  expectArray(
+    probe.currentBoundary,
+    "shard cost screenshot calibration currentBoundary must be an array"
+  );
 
-  assert.equal(probe.dataset, "shard-cost-screenshot-calibration.v1", "shard cost screenshot calibration dataset drifted");
+  assert.equal(
+    probe.dataset,
+    "shard-cost-screenshot-calibration.v1",
+    "shard cost screenshot calibration dataset drifted"
+  );
   assert.equal(probe.entries.length, 5, "shard cost screenshot calibration row count drifted");
-  assert.ok(probe.entries.some((entry) => Number(entry.row) === 1 && Number(entry.observedLevel) === 283 && String(entry.observedCostLabel) === "1.89e565"), "shard cost screenshot calibration row 1 checkpoint drifted");
-  assert.ok(probe.entries.some((entry) => Number(entry.row) === 21 && Number(entry.observedLevel) === 126 && String(entry.observedCostLabel) === "1.20e565"), "shard cost screenshot calibration row 21 checkpoint drifted");
-  assert.ok(probe.findings.some((line) => String(line).includes("e563-e565")), "shard cost screenshot calibration must preserve magnitude finding");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("player")), "shard cost screenshot calibration must preserve screenshot-source framing");
+  assert.ok(
+    probe.entries.some(
+      (entry) =>
+        Number(entry.row) === 1 &&
+        Number(entry.observedLevel) === 283 &&
+        String(entry.observedCostLabel) === "1.89e565"
+    ),
+    "shard cost screenshot calibration row 1 checkpoint drifted"
+  );
+  assert.ok(
+    probe.entries.some(
+      (entry) =>
+        Number(entry.row) === 21 &&
+        Number(entry.observedLevel) === 126 &&
+        String(entry.observedCostLabel) === "1.20e565"
+    ),
+    "shard cost screenshot calibration row 21 checkpoint drifted"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("e563-e565")),
+    "shard cost screenshot calibration must preserve magnitude finding"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("player")),
+    "shard cost screenshot calibration must preserve screenshot-source framing"
+  );
 
   return {
     id: "shard-cost-screenshot-calibration",
@@ -1205,22 +3914,58 @@ function validateShardCostListPathProbe(probe) {
   expectNonEmptyString(probe.generatedAt, "shard cost list-path probe generatedAt must be present");
   expectRecord(probe.source, "shard cost list-path probe source must be an object");
   ["methodProbe", "uabeaProbeReport", "libIl2cpp"].forEach((field) => {
-    expectNonEmptyString(probe.source[field], `shard cost list-path probe source.${field} must be present`);
+    expectNonEmptyString(
+      probe.source[field],
+      `shard cost list-path probe source.${field} must be present`
+    );
   });
   expectRecord(probe.ownerFields, "shard cost list-path probe ownerFields must be an object");
   expectArray(probe.findings, "shard cost list-path probe findings must be an array");
   expectArray(probe.callOrder, "shard cost list-path probe callOrder must be an array");
   expectArray(probe.currentBoundary, "shard cost list-path probe currentBoundary must be an array");
 
-  assert.equal(probe.dataset, "shard-cost-list-path-probe.v1", "shard cost list-path probe dataset drifted");
-  assert.equal(probe.ownerFields.milestoneCostListField?.name, "MilestoneCostList", "shard cost list-path probe MilestoneCostList field drifted");
-  assert.equal(Number(probe.ownerFields.milestoneCostListField?.fieldOffset), 5160, "shard cost list-path probe MilestoneCostList offset drifted");
-  assert.equal(probe.callOrder[0], "GetShardCostList", "shard cost list-path probe call order must start at GetShardCostList");
-  assert.equal(probe.callOrder[1], "get_SU0Cost", "shard cost list-path probe must preserve get_SU0Cost as first appended getter");
-  assert.equal(probe.callOrder.at(-1), "get_SU29Cost", "shard cost list-path probe must preserve get_SU29Cost as final appended getter");
-  assert.ok(probe.findings.some((line) => String(line).includes("same getter outputs")), "shard cost list-path probe must preserve cache-builder finding");
-  assert.ok(probe.findings.some((line) => String(line).includes("affordability")), "shard cost list-path probe must preserve affordability finding");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("cache builder")), "shard cost list-path probe must preserve blocked-use framing");
+  assert.equal(
+    probe.dataset,
+    "shard-cost-list-path-probe.v1",
+    "shard cost list-path probe dataset drifted"
+  );
+  assert.equal(
+    probe.ownerFields.milestoneCostListField?.name,
+    "MilestoneCostList",
+    "shard cost list-path probe MilestoneCostList field drifted"
+  );
+  assert.equal(
+    Number(probe.ownerFields.milestoneCostListField?.fieldOffset),
+    5160,
+    "shard cost list-path probe MilestoneCostList offset drifted"
+  );
+  assert.equal(
+    probe.callOrder[0],
+    "GetShardCostList",
+    "shard cost list-path probe call order must start at GetShardCostList"
+  );
+  assert.equal(
+    probe.callOrder[1],
+    "get_SU0Cost",
+    "shard cost list-path probe must preserve get_SU0Cost as first appended getter"
+  );
+  assert.equal(
+    probe.callOrder.at(-1),
+    "get_SU29Cost",
+    "shard cost list-path probe must preserve get_SU29Cost as final appended getter"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("same getter outputs")),
+    "shard cost list-path probe must preserve cache-builder finding"
+  );
+  assert.ok(
+    probe.findings.some((line) => String(line).includes("affordability")),
+    "shard cost list-path probe must preserve affordability finding"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("cache builder")),
+    "shard cost list-path probe must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-cost-list-path-probe",
@@ -1238,69 +3983,245 @@ function validateShardCostFormulaModel(model) {
   expectNonEmptyString(model.dataset, "shard cost formula model dataset id must be present");
   expectNonEmptyString(model.generatedAt, "shard cost formula model generatedAt must be present");
   expectRecord(model.sources, "shard cost formula model sources must be an object");
-  ["costModelBoundary", "parameterProbe", "methodProbe", "nativeProbe", "screenshotCalibration", "listPathProbe"].forEach((field) => {
-    expectNonEmptyString(model.sources[field], `shard cost formula model sources.${field} must be present`);
+  [
+    "costModelBoundary",
+    "parameterProbe",
+    "methodProbe",
+    "nativeProbe",
+    "screenshotCalibration",
+    "listPathProbe"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      model.sources[field],
+      `shard cost formula model sources.${field} must be present`
+    );
   });
   expectNonEmptyString(model.modelIntent, "shard cost formula model modelIntent must be present");
   expectRecord(model.completionFlags, "shard cost formula model completionFlags must be an object");
   expectRecord(model.implementation, "shard cost formula model implementation must be an object");
-  expectRecord(model.calibrationCheckConfig, "shard cost formula model calibrationCheckConfig must be an object");
-  expectRecord(model.runtimeGetterRules, "shard cost formula model runtimeGetterRules must be an object");
+  expectRecord(
+    model.calibrationCheckConfig,
+    "shard cost formula model calibrationCheckConfig must be an object"
+  );
+  expectRecord(
+    model.runtimeGetterRules,
+    "shard cost formula model runtimeGetterRules must be an object"
+  );
   expectArray(model.rowClasses, "shard cost formula model rowClasses must be an array");
   expectRecord(model.stageRules, "shard cost formula model stageRules must be an object");
-  expectRecord(model.verifiedParameters, "shard cost formula model verifiedParameters must be an object");
-  expectRecord(model.derivedParameters, "shard cost formula model derivedParameters must be an object");
-  expectArray(model.calibrationAnchors, "shard cost formula model calibrationAnchors must be an array");
+  expectRecord(
+    model.verifiedParameters,
+    "shard cost formula model verifiedParameters must be an object"
+  );
+  expectRecord(
+    model.derivedParameters,
+    "shard cost formula model derivedParameters must be an object"
+  );
+  expectArray(
+    model.calibrationAnchors,
+    "shard cost formula model calibrationAnchors must be an array"
+  );
   expectArray(model.provenanceNotes, "shard cost formula model provenanceNotes must be an array");
-  expectRecord(model.boundedUncertaintyFlags, "shard cost formula model boundedUncertaintyFlags must be an object");
+  expectRecord(
+    model.boundedUncertaintyFlags,
+    "shard cost formula model boundedUncertaintyFlags must be an object"
+  );
   expectArray(model.blockedUses, "shard cost formula model blockedUses must be an array");
   expectArray(model.currentBoundary, "shard cost formula model currentBoundary must be an array");
 
-  assert.equal(model.dataset, "shard-cost-formula-model.v1", "shard cost formula model dataset drifted");
-  assert.equal(model.completionFlags.canonicalDatasetShipped, true, "shard cost formula model must stay shipped");
-  assert.equal(model.completionFlags.deterministicEvaluatorImplemented, true, "shard cost formula model must preserve the deterministic evaluator flag");
-  assert.equal(model.completionFlags.automatedCalibrationImplemented, false, "shard cost formula model must not claim automated calibration");
-  assert.equal(model.completionFlags.plannerSafeCostOutputApproved, false, "shard cost formula model must keep planner-safe cost output blocked");
-  assert.equal(model.implementation.module, "scripts/shards/cost-evaluator.mjs", "shard cost formula model implementation module drifted");
-  assert.equal(model.implementation.outputKind, "normalized-bigdouble-like", "shard cost formula model implementation outputKind drifted");
-  assert.equal(model.implementation.deterministic, true, "shard cost formula model implementation must stay deterministic");
-  assert.equal(model.calibrationCheckConfig.scientificLabelMantissaDecimals, 2, "shard cost formula model calibration mantissa decimals drifted");
-  assert.equal(model.calibrationCheckConfig.requiredExponentDelta, 0, "shard cost formula model calibration requiredExponentDelta drifted");
-  assert.equal(model.calibrationCheckConfig.mantissaAbsoluteTolerance, 0.005, "shard cost formula model calibration mantissaAbsoluteTolerance drifted");
-  assert.equal(model.calibrationCheckConfig.mantissaRelativeTolerance, 0.005, "shard cost formula model calibration mantissaRelativeTolerance drifted");
-  assert.equal(model.runtimeGetterRules.getterFamily.ownerType, "ShardMining", "shard cost formula model getter ownerType drifted");
-  assert.equal(model.runtimeGetterRules.getterFamily.returnType, "BreakInfinity.BigDouble", "shard cost formula model getter returnType drifted");
-  assert.equal(model.runtimeGetterRules.getterFamily.getterNamePattern, "get_SU{row}Cost", "shard cost formula model getterNamePattern drifted");
-  assert.deepEqual(model.runtimeGetterRules.getterFamily.rows, Array.from({ length: 30 }, (_, index) => index), "shard cost formula model getter-family rows drifted");
-  assert.equal(model.runtimeGetterRules.getterFamily.stableCallOrder[0], "GetShardCostList", "shard cost formula model stableCallOrder start drifted");
-  assert.equal(model.runtimeGetterRules.getterFamily.stableCallOrder[1], "get_SU0Cost", "shard cost formula model stableCallOrder getter start drifted");
-  assert.equal(model.runtimeGetterRules.getterFamily.stableCallOrder.at(-1), "get_SU29Cost", "shard cost formula model stableCallOrder end drifted");
-  assert.ok(model.runtimeGetterRules.getterFamily.bodySizeClusterRules.some((entry) => entry.estimatedTrackedBodySize === 3258 && JSON.stringify(entry.rows) === JSON.stringify([19, 20, 21])), "shard cost formula model getter body-size cluster drifted");
-  assert.equal(model.runtimeGetterRules.cacheLifecycle.refreshMethod, "UpdateShardCostList", "shard cost formula model cache refreshMethod drifted");
-  assert.equal(model.runtimeGetterRules.cacheLifecycle.listBuilderMethod, "GetShardCostList", "shard cost formula model cache listBuilderMethod drifted");
-  assert.equal(model.runtimeGetterRules.cacheLifecycle.cacheField, "MilestoneCostList", "shard cost formula model cacheField drifted");
-  assert.equal(model.runtimeGetterRules.cacheLifecycle.cacheFieldOffset, 5160, "shard cost formula model cacheFieldOffset drifted");
-  assert.equal(model.runtimeGetterRules.cacheLifecycle.sortedConsumerMethod, "SortCostAndBools", "shard cost formula model sortedConsumerMethod drifted");
-  assert.equal(model.runtimeGetterRules.cacheLifecycle.affordabilityConsumerMethod, "CountAffordableShard", "shard cost formula model affordabilityConsumerMethod drifted");
-  assert.equal(model.runtimeGetterRules.cacheLifecycle.orderedGetterOutputsCached, true, "shard cost formula model orderedGetterOutputsCached drifted");
-  assert.equal(model.runtimeGetterRules.cacheLifecycle.alternateFormulaPathFound, false, "shard cost formula model alternateFormulaPathFound drifted");
-  assert.deepEqual(model.runtimeGetterRules.sharedStageLogic.windowOrder, ["pre-threshold", "100-plus-window", "200-plus-window", "300-plus-window", "400-plus-window"], "shard cost formula model windowOrder drifted");
-  assert.equal(model.runtimeGetterRules.sharedStageLogic.dispatcherTargets.stageDispatcherEntryTarget, "0x24e3620", "shard cost formula model stageDispatcherEntryTarget drifted");
-  assert.equal(model.runtimeGetterRules.sharedStageLogic.dispatcherTargets.decimalPowerBuilderTarget, "0x24e38f9", "shard cost formula model decimalPowerBuilderTarget drifted");
-  assert.deepEqual(model.runtimeGetterRules.sharedStageLogic.thresholdCoverageClasses.map((entry) => entry.getterNames), [
-    ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"],
-    ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"],
-    ["get_OverLevel100Exponent", "get_OverLevel200Exponent"],
-    ["get_OverLevel100Exponent"]
-  ], "shard cost formula model thresholdCoverageClasses drifted");
-  assert.deepEqual(model.runtimeGetterRules.sharedStageLogic.formulaApplicationProfiles.map((entry) => ({ formulaClass: entry.formulaClass, rows: entry.rows })), [
-    { formulaClass: "row0-special-case", rows: [0] },
-    { formulaClass: "canonical-additive-premerge", rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
-    { formulaClass: "canonical-literal-builder", rows: [19, 20, 21] },
-    { formulaClass: "drop-400-stage", rows: [17, 22, 23] },
-    { formulaClass: "two-stage-transition-band", rows: [18, 24, 27, 28, 29] },
-    { formulaClass: "hundred-stage-short-class", rows: [25, 26] }
-  ], "shard cost formula model formulaApplicationProfiles drifted");
+  assert.equal(
+    model.dataset,
+    "shard-cost-formula-model.v1",
+    "shard cost formula model dataset drifted"
+  );
+  assert.equal(
+    model.completionFlags.canonicalDatasetShipped,
+    true,
+    "shard cost formula model must stay shipped"
+  );
+  assert.equal(
+    model.completionFlags.deterministicEvaluatorImplemented,
+    true,
+    "shard cost formula model must preserve the deterministic evaluator flag"
+  );
+  assert.equal(
+    model.completionFlags.automatedCalibrationImplemented,
+    false,
+    "shard cost formula model must not claim automated calibration"
+  );
+  assert.equal(
+    model.completionFlags.plannerSafeCostOutputApproved,
+    false,
+    "shard cost formula model must keep planner-safe cost output blocked"
+  );
+  assert.equal(
+    model.implementation.module,
+    "scripts/shards/cost-evaluator.mjs",
+    "shard cost formula model implementation module drifted"
+  );
+  assert.equal(
+    model.implementation.outputKind,
+    "normalized-bigdouble-like",
+    "shard cost formula model implementation outputKind drifted"
+  );
+  assert.equal(
+    model.implementation.deterministic,
+    true,
+    "shard cost formula model implementation must stay deterministic"
+  );
+  assert.equal(
+    model.calibrationCheckConfig.scientificLabelMantissaDecimals,
+    2,
+    "shard cost formula model calibration mantissa decimals drifted"
+  );
+  assert.equal(
+    model.calibrationCheckConfig.requiredExponentDelta,
+    0,
+    "shard cost formula model calibration requiredExponentDelta drifted"
+  );
+  assert.equal(
+    model.calibrationCheckConfig.mantissaAbsoluteTolerance,
+    0.005,
+    "shard cost formula model calibration mantissaAbsoluteTolerance drifted"
+  );
+  assert.equal(
+    model.calibrationCheckConfig.mantissaRelativeTolerance,
+    0.005,
+    "shard cost formula model calibration mantissaRelativeTolerance drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.getterFamily.ownerType,
+    "ShardMining",
+    "shard cost formula model getter ownerType drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.getterFamily.returnType,
+    "BreakInfinity.BigDouble",
+    "shard cost formula model getter returnType drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.getterFamily.getterNamePattern,
+    "get_SU{row}Cost",
+    "shard cost formula model getterNamePattern drifted"
+  );
+  assert.deepEqual(
+    model.runtimeGetterRules.getterFamily.rows,
+    Array.from({ length: 30 }, (_, index) => index),
+    "shard cost formula model getter-family rows drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.getterFamily.stableCallOrder[0],
+    "GetShardCostList",
+    "shard cost formula model stableCallOrder start drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.getterFamily.stableCallOrder[1],
+    "get_SU0Cost",
+    "shard cost formula model stableCallOrder getter start drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.getterFamily.stableCallOrder.at(-1),
+    "get_SU29Cost",
+    "shard cost formula model stableCallOrder end drifted"
+  );
+  assert.ok(
+    model.runtimeGetterRules.getterFamily.bodySizeClusterRules.some(
+      (entry) =>
+        entry.estimatedTrackedBodySize === 3258 &&
+        JSON.stringify(entry.rows) === JSON.stringify([19, 20, 21])
+    ),
+    "shard cost formula model getter body-size cluster drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.cacheLifecycle.refreshMethod,
+    "UpdateShardCostList",
+    "shard cost formula model cache refreshMethod drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.cacheLifecycle.listBuilderMethod,
+    "GetShardCostList",
+    "shard cost formula model cache listBuilderMethod drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.cacheLifecycle.cacheField,
+    "MilestoneCostList",
+    "shard cost formula model cacheField drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.cacheLifecycle.cacheFieldOffset,
+    5160,
+    "shard cost formula model cacheFieldOffset drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.cacheLifecycle.sortedConsumerMethod,
+    "SortCostAndBools",
+    "shard cost formula model sortedConsumerMethod drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.cacheLifecycle.affordabilityConsumerMethod,
+    "CountAffordableShard",
+    "shard cost formula model affordabilityConsumerMethod drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.cacheLifecycle.orderedGetterOutputsCached,
+    true,
+    "shard cost formula model orderedGetterOutputsCached drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.cacheLifecycle.alternateFormulaPathFound,
+    false,
+    "shard cost formula model alternateFormulaPathFound drifted"
+  );
+  assert.deepEqual(
+    model.runtimeGetterRules.sharedStageLogic.windowOrder,
+    ["pre-threshold", "100-plus-window", "200-plus-window", "300-plus-window", "400-plus-window"],
+    "shard cost formula model windowOrder drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.sharedStageLogic.dispatcherTargets.stageDispatcherEntryTarget,
+    "0x24e3620",
+    "shard cost formula model stageDispatcherEntryTarget drifted"
+  );
+  assert.equal(
+    model.runtimeGetterRules.sharedStageLogic.dispatcherTargets.decimalPowerBuilderTarget,
+    "0x24e38f9",
+    "shard cost formula model decimalPowerBuilderTarget drifted"
+  );
+  assert.deepEqual(
+    model.runtimeGetterRules.sharedStageLogic.thresholdCoverageClasses.map(
+      (entry) => entry.getterNames
+    ),
+    [
+      [
+        "get_OverLevel100Exponent",
+        "get_OverLevel200Exponent",
+        "get_OverLevel300Exponent",
+        "get_OverLevel400Exponent"
+      ],
+      ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent"],
+      ["get_OverLevel100Exponent", "get_OverLevel200Exponent"],
+      ["get_OverLevel100Exponent"]
+    ],
+    "shard cost formula model thresholdCoverageClasses drifted"
+  );
+  assert.deepEqual(
+    model.runtimeGetterRules.sharedStageLogic.formulaApplicationProfiles.map((entry) => ({
+      formulaClass: entry.formulaClass,
+      rows: entry.rows
+    })),
+    [
+      { formulaClass: "row0-special-case", rows: [0] },
+      {
+        formulaClass: "canonical-additive-premerge",
+        rows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+      },
+      { formulaClass: "canonical-literal-builder", rows: [19, 20, 21] },
+      { formulaClass: "drop-400-stage", rows: [17, 22, 23] },
+      { formulaClass: "two-stage-transition-band", rows: [18, 24, 27, 28, 29] },
+      { formulaClass: "hundred-stage-short-class", rows: [25, 26] }
+    ],
+    "shard cost formula model formulaApplicationProfiles drifted"
+  );
 
   assert.deepEqual(
     model.rowClasses.map((entry) => entry.id),
@@ -1315,70 +4236,315 @@ function validateShardCostFormulaModel(model) {
     "shard cost formula model row-class ids drifted"
   );
   assert.deepEqual(model.rowClasses[0].rows, [0], "shard cost formula model row0 class drifted");
-  assert.deepEqual(model.rowClasses[1].stageCoverage, [100, 200, 300, 400], "shard cost formula model canonical-additive-premerge stage coverage drifted");
-  assert.deepEqual(model.rowClasses[2].rows, [19, 20, 21], "shard cost formula model canonical-literal-builder rows drifted");
-  assert.deepEqual(model.rowClasses[3].rows, [17, 22, 23], "shard cost formula model drop-400-stage rows drifted");
-  assert.deepEqual(model.rowClasses[4].rows, [18, 24, 27, 28, 29], "shard cost formula model two-stage-transition-band rows drifted");
-  assert.deepEqual(model.rowClasses[5].rows, [25, 26], "shard cost formula model hundred-stage-short-class rows drifted");
+  assert.deepEqual(
+    model.rowClasses[1].stageCoverage,
+    [100, 200, 300, 400],
+    "shard cost formula model canonical-additive-premerge stage coverage drifted"
+  );
+  assert.deepEqual(
+    model.rowClasses[2].rows,
+    [19, 20, 21],
+    "shard cost formula model canonical-literal-builder rows drifted"
+  );
+  assert.deepEqual(
+    model.rowClasses[3].rows,
+    [17, 22, 23],
+    "shard cost formula model drop-400-stage rows drifted"
+  );
+  assert.deepEqual(
+    model.rowClasses[4].rows,
+    [18, 24, 27, 28, 29],
+    "shard cost formula model two-stage-transition-band rows drifted"
+  );
+  assert.deepEqual(
+    model.rowClasses[5].rows,
+    [25, 26],
+    "shard cost formula model hundred-stage-short-class rows drifted"
+  );
 
   assert.equal(
     model.stageRules.preThreshold.symbolicApproximation,
     "multiply(StartCost, dispatch(currentLevel, add(CostExponent, multiply(currentLevelBigDouble, GrowthExponent))))",
     "shard cost formula model pre-threshold symbolic approximation drifted"
   );
-  assert.deepEqual(model.stageRules.preThreshold.sampledRows, [9, 25], "shard cost formula model pre-threshold sampled rows drifted");
-  assert.equal(model.stageRules.hundredPlus.sampledOffsetFeeders.length, 3, "shard cost formula model sampled offset feeder count drifted");
-  assert.ok(model.stageRules.hundredPlus.sampledOffsetFeeders.some((entry) => entry.row === 1 && entry.levelOffset === 70 && Math.abs(Number(entry.coefficient) - 9.765628774403013e-05) < 1e-16), "shard cost formula model row 1 feeder drifted");
-  assert.ok(model.stageRules.hundredPlus.sampledOffsetFeeders.some((entry) => entry.row === 19 && entry.levelOffset === 70 && Math.abs(Number(entry.coefficient) - (-0.00011718430323526263)) < 1e-16), "shard cost formula model row 19 feeder drifted");
-  assert.ok(model.stageRules.hundredPlus.sampledOffsetFeeders.some((entry) => entry.row === 27 && entry.levelOffset === 82 && Math.abs(Number(entry.coefficient) - 8192.001984596252) < 1e-9), "shard cost formula model row 27 feeder drifted");
-  assert.deepEqual(model.stageRules.twoHundredPlus.sharedFamilies[1].integerSeeds, [180], "shard cost formula model 200-plus unary seed drifted");
-  assert.deepEqual(model.stageRules.threeHundredPlus.sharedFamilies[1].integerSeeds, [49], "shard cost formula model 300-plus row 24 seed drifted");
-  assert.deepEqual(model.stageRules.threeHundredPlus.sharedFamilies[2].integerSeeds, [19], "shard cost formula model 300-plus row 25 seed drifted");
+  assert.deepEqual(
+    model.stageRules.preThreshold.sampledRows,
+    [9, 25],
+    "shard cost formula model pre-threshold sampled rows drifted"
+  );
+  assert.equal(
+    model.stageRules.hundredPlus.sampledOffsetFeeders.length,
+    3,
+    "shard cost formula model sampled offset feeder count drifted"
+  );
+  assert.ok(
+    model.stageRules.hundredPlus.sampledOffsetFeeders.some(
+      (entry) =>
+        entry.row === 1 &&
+        entry.levelOffset === 70 &&
+        Math.abs(Number(entry.coefficient) - 9.765628774403013e-5) < 1e-16
+    ),
+    "shard cost formula model row 1 feeder drifted"
+  );
+  assert.ok(
+    model.stageRules.hundredPlus.sampledOffsetFeeders.some(
+      (entry) =>
+        entry.row === 19 &&
+        entry.levelOffset === 70 &&
+        Math.abs(Number(entry.coefficient) - -0.00011718430323526263) < 1e-16
+    ),
+    "shard cost formula model row 19 feeder drifted"
+  );
+  assert.ok(
+    model.stageRules.hundredPlus.sampledOffsetFeeders.some(
+      (entry) =>
+        entry.row === 27 &&
+        entry.levelOffset === 82 &&
+        Math.abs(Number(entry.coefficient) - 8192.001984596252) < 1e-9
+    ),
+    "shard cost formula model row 27 feeder drifted"
+  );
+  assert.deepEqual(
+    model.stageRules.twoHundredPlus.sharedFamilies[1].integerSeeds,
+    [180],
+    "shard cost formula model 200-plus unary seed drifted"
+  );
+  assert.deepEqual(
+    model.stageRules.threeHundredPlus.sharedFamilies[1].integerSeeds,
+    [49],
+    "shard cost formula model 300-plus row 24 seed drifted"
+  );
+  assert.deepEqual(
+    model.stageRules.threeHundredPlus.sharedFamilies[2].integerSeeds,
+    [19],
+    "shard cost formula model 300-plus row 25 seed drifted"
+  );
 
-  assert.equal(model.verifiedParameters.unlockRequirementBlock.offset, 1456, "shard cost formula model unlock requirement offset drifted");
-  assert.deepEqual(model.verifiedParameters.unlockRequirementBlock.firstEightValues, [0, 0, 5, 10, 20, 30, 40, 50], "shard cost formula model unlock requirement prefix drifted");
-  assert.deepEqual(model.verifiedParameters.unlockRequirementBlock.lastThreeValues, [8000, 8050, 8100], "shard cost formula model unlock requirement suffix drifted");
-  assert.equal(model.verifiedParameters.row0FieldShell.exactBigDoubleValues.StartCost, "5.0e0", "shard cost formula model row0 StartCost drifted");
-  assert.ok(model.verifiedParameters.representativeNormalRows.some((entry) => entry.row === 19 && entry.exactBigDoubleValues.StartCost === "1.0e70"), "shard cost formula model row 19 exact StartCost drifted");
-  assert.ok(model.verifiedParameters.representativeNormalRows.some((entry) => entry.row === 27 && entry.exactBigDoubleValues.StartCost === "2.0e975"), "shard cost formula model row 27 exact StartCost drifted");
-  assert.ok(model.verifiedParameters.representativeNormalRows.some((entry) => entry.row === 29 && entry.exactBigDoubleValues.StartCost === "6.0e988"), "shard cost formula model row 29 exact StartCost drifted");
-  assert.deepEqual(model.verifiedParameters.overLevelExponentAccessors, ["get_OverLevel100Exponent", "get_OverLevel200Exponent", "get_OverLevel300Exponent", "get_OverLevel400Exponent"], "shard cost formula model over-level accessors drifted");
-  assert.deepEqual(model.verifiedParameters.overLevelBaseFieldShells.map((entry) => entry.fieldName), ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"], "shard cost formula model over-level base field shells drifted");
-  assert.deepEqual(model.verifiedParameters.overLevelBaseFieldShells.map((entry) => entry.fieldOffset), [5080, 5096, 5112, 5128], "shard cost formula model over-level base field offsets drifted");
-  assert.equal(model.verifiedParameters.listPathTieIn.milestoneCostListField, "MilestoneCostList", "shard cost formula model MilestoneCostList field drifted");
-  assert.equal(model.verifiedParameters.listPathTieIn.milestoneCostListFieldOffset, 5160, "shard cost formula model MilestoneCostList offset drifted");
-  assert.equal(model.verifiedParameters.listPathTieIn.callOrderStart, "GetShardCostList", "shard cost formula model callOrderStart drifted");
-  assert.equal(model.verifiedParameters.listPathTieIn.callOrderEnd, "get_SU29Cost", "shard cost formula model callOrderEnd drifted");
+  assert.equal(
+    model.verifiedParameters.unlockRequirementBlock.offset,
+    1456,
+    "shard cost formula model unlock requirement offset drifted"
+  );
+  assert.deepEqual(
+    model.verifiedParameters.unlockRequirementBlock.firstEightValues,
+    [0, 0, 5, 10, 20, 30, 40, 50],
+    "shard cost formula model unlock requirement prefix drifted"
+  );
+  assert.deepEqual(
+    model.verifiedParameters.unlockRequirementBlock.lastThreeValues,
+    [8000, 8050, 8100],
+    "shard cost formula model unlock requirement suffix drifted"
+  );
+  assert.equal(
+    model.verifiedParameters.row0FieldShell.exactBigDoubleValues.StartCost,
+    "5.0e0",
+    "shard cost formula model row0 StartCost drifted"
+  );
+  assert.ok(
+    model.verifiedParameters.representativeNormalRows.some(
+      (entry) => entry.row === 19 && entry.exactBigDoubleValues.StartCost === "1.0e70"
+    ),
+    "shard cost formula model row 19 exact StartCost drifted"
+  );
+  assert.ok(
+    model.verifiedParameters.representativeNormalRows.some(
+      (entry) => entry.row === 27 && entry.exactBigDoubleValues.StartCost === "2.0e975"
+    ),
+    "shard cost formula model row 27 exact StartCost drifted"
+  );
+  assert.ok(
+    model.verifiedParameters.representativeNormalRows.some(
+      (entry) => entry.row === 29 && entry.exactBigDoubleValues.StartCost === "6.0e988"
+    ),
+    "shard cost formula model row 29 exact StartCost drifted"
+  );
+  assert.deepEqual(
+    model.verifiedParameters.overLevelExponentAccessors,
+    [
+      "get_OverLevel100Exponent",
+      "get_OverLevel200Exponent",
+      "get_OverLevel300Exponent",
+      "get_OverLevel400Exponent"
+    ],
+    "shard cost formula model over-level accessors drifted"
+  );
+  assert.deepEqual(
+    model.verifiedParameters.overLevelBaseFieldShells.map((entry) => entry.fieldName),
+    ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"],
+    "shard cost formula model over-level base field shells drifted"
+  );
+  assert.deepEqual(
+    model.verifiedParameters.overLevelBaseFieldShells.map((entry) => entry.fieldOffset),
+    [5080, 5096, 5112, 5128],
+    "shard cost formula model over-level base field offsets drifted"
+  );
+  assert.equal(
+    model.verifiedParameters.listPathTieIn.milestoneCostListField,
+    "MilestoneCostList",
+    "shard cost formula model MilestoneCostList field drifted"
+  );
+  assert.equal(
+    model.verifiedParameters.listPathTieIn.milestoneCostListFieldOffset,
+    5160,
+    "shard cost formula model MilestoneCostList offset drifted"
+  );
+  assert.equal(
+    model.verifiedParameters.listPathTieIn.callOrderStart,
+    "GetShardCostList",
+    "shard cost formula model callOrderStart drifted"
+  );
+  assert.equal(
+    model.verifiedParameters.listPathTieIn.callOrderEnd,
+    "get_SU29Cost",
+    "shard cost formula model callOrderEnd drifted"
+  );
 
-  assert.deepEqual(model.derivedParameters.repeatedCommonRowGroup.rows, [19, 20, 21], "shard cost formula model repeated common-row group drifted");
-  assert.equal(model.derivedParameters.dispatcherSelectionBoundary.decimalPowerBuilderTarget, "0x24e38f9", "shard cost formula model decimalPowerBuilderTarget drifted");
-  assert.equal(model.derivedParameters.dispatcherSelectionBoundary.bigDoubleLog10BridgeTarget, "0x24e30e4", "shard cost formula model bigDoubleLog10BridgeTarget drifted");
-  assert.ok(model.derivedParameters.overLevelSeedModels.some((entry) => entry.getterName === "get_OverLevel100Exponent" && entry.baseSeed === 2), "shard cost formula model 100 seed drifted");
-  assert.ok(model.derivedParameters.overLevelSeedModels.some((entry) => entry.getterName === "get_OverLevel200Exponent" && Number(entry.baseSeed) === 0), "shard cost formula model 200 seed drifted");
-  assert.ok(model.derivedParameters.overLevelSeedModels.some((entry) => entry.getterName === "get_OverLevel400Exponent" && Math.abs(Number(entry.baseSeed) - 0.007812501846152979) < 1e-18), "shard cost formula model 400 seed drifted");
-  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.status, "deterministic-native-seed-derivation", "shard cost formula model over-level base recovery status drifted");
-  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.exactSerializedValuesRecovered, false, "shard cost formula model must not claim exact over-level base extraction");
-  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt.uabeaDefaultValuesPresent, false, "shard cost formula model over-level asset default-value status drifted");
-  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt.directMonoBehaviourFieldHitsCount, 0, "shard cost formula model over-level directMonoBehaviourFieldHitsCount drifted");
-  assert.equal(model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt.shardTargetMonoBehavioursCount, 0, "shard cost formula model over-level shardTargetMonoBehavioursCount drifted");
-  assert.deepEqual(model.derivedParameters.overLevelBaseRecoveryPath.derivedRuntimeSeedModels.map((entry) => entry.fieldName), ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"], "shard cost formula model over-level derivedRuntimeSeedModels drifted");
-  assert.ok(model.derivedParameters.overLevelBaseRecoveryPath.currentBoundary.some((line) => String(line).includes("not recovered serialized owner-field payload values")), "shard cost formula model over-level recovery boundary drifted");
+  assert.deepEqual(
+    model.derivedParameters.repeatedCommonRowGroup.rows,
+    [19, 20, 21],
+    "shard cost formula model repeated common-row group drifted"
+  );
+  assert.equal(
+    model.derivedParameters.dispatcherSelectionBoundary.decimalPowerBuilderTarget,
+    "0x24e38f9",
+    "shard cost formula model decimalPowerBuilderTarget drifted"
+  );
+  assert.equal(
+    model.derivedParameters.dispatcherSelectionBoundary.bigDoubleLog10BridgeTarget,
+    "0x24e30e4",
+    "shard cost formula model bigDoubleLog10BridgeTarget drifted"
+  );
+  assert.ok(
+    model.derivedParameters.overLevelSeedModels.some(
+      (entry) => entry.getterName === "get_OverLevel100Exponent" && entry.baseSeed === 2
+    ),
+    "shard cost formula model 100 seed drifted"
+  );
+  assert.ok(
+    model.derivedParameters.overLevelSeedModels.some(
+      (entry) => entry.getterName === "get_OverLevel200Exponent" && Number(entry.baseSeed) === 0
+    ),
+    "shard cost formula model 200 seed drifted"
+  );
+  assert.ok(
+    model.derivedParameters.overLevelSeedModels.some(
+      (entry) =>
+        entry.getterName === "get_OverLevel400Exponent" &&
+        Math.abs(Number(entry.baseSeed) - 0.007812501846152979) < 1e-18
+    ),
+    "shard cost formula model 400 seed drifted"
+  );
+  assert.equal(
+    model.derivedParameters.overLevelBaseRecoveryPath.status,
+    "deterministic-native-seed-derivation",
+    "shard cost formula model over-level base recovery status drifted"
+  );
+  assert.equal(
+    model.derivedParameters.overLevelBaseRecoveryPath.exactSerializedValuesRecovered,
+    false,
+    "shard cost formula model must not claim exact over-level base extraction"
+  );
+  assert.equal(
+    model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt
+      .uabeaDefaultValuesPresent,
+    false,
+    "shard cost formula model over-level asset default-value status drifted"
+  );
+  assert.equal(
+    model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt
+      .directMonoBehaviourFieldHitsCount,
+    0,
+    "shard cost formula model over-level directMonoBehaviourFieldHitsCount drifted"
+  );
+  assert.equal(
+    model.derivedParameters.overLevelBaseRecoveryPath.assetExtractionAttempt
+      .shardTargetMonoBehavioursCount,
+    0,
+    "shard cost formula model over-level shardTargetMonoBehavioursCount drifted"
+  );
+  assert.deepEqual(
+    model.derivedParameters.overLevelBaseRecoveryPath.derivedRuntimeSeedModels.map(
+      (entry) => entry.fieldName
+    ),
+    ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"],
+    "shard cost formula model over-level derivedRuntimeSeedModels drifted"
+  );
+  assert.ok(
+    model.derivedParameters.overLevelBaseRecoveryPath.currentBoundary.some((line) =>
+      String(line).includes("not recovered serialized owner-field payload values")
+    ),
+    "shard cost formula model over-level recovery boundary drifted"
+  );
 
-  assert.equal(model.calibrationAnchors.length, 5, "shard cost formula model calibration anchor count drifted");
-  assert.ok(model.calibrationAnchors.some((entry) => entry.row === 1 && entry.level === 283 && entry.observedCostLabel === "1.89e565"), "shard cost formula model calibration row 1 drifted");
-  assert.ok(model.calibrationAnchors.some((entry) => entry.row === 21 && entry.level === 126 && entry.observedCostLabel === "1.20e565"), "shard cost formula model calibration row 21 drifted");
+  assert.equal(
+    model.calibrationAnchors.length,
+    5,
+    "shard cost formula model calibration anchor count drifted"
+  );
+  assert.ok(
+    model.calibrationAnchors.some(
+      (entry) => entry.row === 1 && entry.level === 283 && entry.observedCostLabel === "1.89e565"
+    ),
+    "shard cost formula model calibration row 1 drifted"
+  );
+  assert.ok(
+    model.calibrationAnchors.some(
+      (entry) => entry.row === 21 && entry.level === 126 && entry.observedCostLabel === "1.20e565"
+    ),
+    "shard cost formula model calibration row 21 drifted"
+  );
 
-  assert.equal(model.boundedUncertaintyFlags.row0ExactClosedFormUnresolved, true, "shard cost formula model must keep row0 uncertainty explicit");
-  assert.equal(model.boundedUncertaintyFlags.normalRowNumericMergeRuleUnresolved, true, "shard cost formula model must keep normal-row uncertainty explicit");
-  assert.equal(model.boundedUncertaintyFlags.secondaryHundredPlusScalarLaneMeaningUnresolved, true, "shard cost formula model must keep secondary hundred-plus uncertainty explicit");
-  assert.equal(model.boundedUncertaintyFlags.overLevelBasePayloadValuesUnresolved, true, "shard cost formula model must keep over-level base uncertainty explicit");
-  assert.equal(model.boundedUncertaintyFlags.dispatcherLaneSelectionFullyProven, false, "shard cost formula model must not claim full dispatcher proof");
-  assert.equal(model.boundedUncertaintyFlags.screenshotAnchorsMatchedByAcceptedEvaluator, false, "shard cost formula model must not claim screenshot-matched evaluator");
+  assert.equal(
+    model.boundedUncertaintyFlags.row0ExactClosedFormUnresolved,
+    true,
+    "shard cost formula model must keep row0 uncertainty explicit"
+  );
+  assert.equal(
+    model.boundedUncertaintyFlags.normalRowNumericMergeRuleUnresolved,
+    true,
+    "shard cost formula model must keep normal-row uncertainty explicit"
+  );
+  assert.equal(
+    model.boundedUncertaintyFlags.secondaryHundredPlusScalarLaneMeaningUnresolved,
+    true,
+    "shard cost formula model must keep secondary hundred-plus uncertainty explicit"
+  );
+  assert.equal(
+    model.boundedUncertaintyFlags.overLevelBasePayloadValuesUnresolved,
+    true,
+    "shard cost formula model must keep over-level base uncertainty explicit"
+  );
+  assert.equal(
+    model.boundedUncertaintyFlags.dispatcherLaneSelectionFullyProven,
+    false,
+    "shard cost formula model must not claim full dispatcher proof"
+  );
+  assert.equal(
+    model.boundedUncertaintyFlags.screenshotAnchorsMatchedByAcceptedEvaluator,
+    false,
+    "shard cost formula model must not claim screenshot-matched evaluator"
+  );
 
-  assert.ok(model.blockedUses.includes("exact next-level shard costs"), "shard cost formula model must block exact next-level shard costs");
-  assert.ok(model.blockedUses.includes("planner-safe affordability outputs"), "shard cost formula model must block affordability outputs");
-  assert.ok(model.currentBoundary.some((line) => String(line).includes("single canonical shard-cost evaluator structure model")), "shard cost formula model must preserve canonical-dataset framing");
-  assert.ok(model.currentBoundary.some((line) => String(line).includes("Do not expose exact next-level shard costs")), "shard cost formula model must preserve blocked-use framing");
+  assert.ok(
+    model.blockedUses.includes("exact next-level shard costs"),
+    "shard cost formula model must block exact next-level shard costs"
+  );
+  assert.ok(
+    model.blockedUses.includes("planner-safe affordability outputs"),
+    "shard cost formula model must block affordability outputs"
+  );
+  assert.ok(
+    model.currentBoundary.some((line) =>
+      String(line).includes("single canonical shard-cost evaluator structure model")
+    ),
+    "shard cost formula model must preserve canonical-dataset framing"
+  );
+  assert.ok(
+    model.currentBoundary.some((line) =>
+      String(line).includes("Do not expose exact next-level shard costs")
+    ),
+    "shard cost formula model must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-cost-formula-model",
@@ -1397,18 +4563,52 @@ function validateShardBonusSlotProbe(probe) {
   expectNonEmptyString(probe.generatedAt, "shard bonus slot probe generatedAt must be present");
   expectRecord(probe.source, "shard bonus slot probe source must be an object");
   ["metadata", "groundedMilestones"].forEach((field) => {
-    expectNonEmptyString(probe.source[field], `shard bonus slot probe source.${field} must be present`);
+    expectNonEmptyString(
+      probe.source[field],
+      `shard bonus slot probe source.${field} must be present`
+    );
   });
   expectArray(probe.rows, "shard bonus slot probe rows must be an array");
   expectArray(probe.findings, "shard bonus slot probe findings must be an array");
   expectArray(probe.currentBoundary, "shard bonus slot probe currentBoundary must be an array");
 
-  assert.equal(probe.dataset, "shard-bonus-slot-probe.v1", "shard bonus slot probe dataset drifted");
+  assert.equal(
+    probe.dataset,
+    "shard-bonus-slot-probe.v1",
+    "shard bonus slot probe dataset drifted"
+  );
   assert.equal(probe.rows.length, 30, "shard bonus slot probe row count drifted");
-  assert.ok(probe.rows.some((entry) => Number(entry.row) === 0 && Number(entry.bonusFieldCount) === 8 && Number(entry.groundedBonusCount) === 3), "shard bonus slot probe must preserve the Eternal row mismatch");
-  assert.ok(probe.rows.some((entry) => Number(entry.row) === 18 && Number(entry.bonusFieldCount) === 6 && Number(entry.calcAccessorCount) === 6), "shard bonus slot probe must preserve row 18 bonus-slot coverage");
-  assert.ok(probe.rows.some((entry) => Number(entry.row) === 27 && Number(entry.bonusFieldCount) === 3 && Number(entry.calcAccessorCount) === 3), "shard bonus slot probe must preserve late common row slot coverage");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("slot counts alone")), "shard bonus slot probe must preserve blocked-use framing");
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        Number(entry.row) === 0 &&
+        Number(entry.bonusFieldCount) === 8 &&
+        Number(entry.groundedBonusCount) === 3
+    ),
+    "shard bonus slot probe must preserve the Eternal row mismatch"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        Number(entry.row) === 18 &&
+        Number(entry.bonusFieldCount) === 6 &&
+        Number(entry.calcAccessorCount) === 6
+    ),
+    "shard bonus slot probe must preserve row 18 bonus-slot coverage"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        Number(entry.row) === 27 &&
+        Number(entry.bonusFieldCount) === 3 &&
+        Number(entry.calcAccessorCount) === 3
+    ),
+    "shard bonus slot probe must preserve late common row slot coverage"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) => String(line).includes("slot counts alone")),
+    "shard bonus slot probe must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-bonus-slot-probe",
@@ -1426,38 +4626,151 @@ function validateShardTypeMetadataProbe(probe) {
   expectNonEmptyString(probe.dataset, "shard type metadata probe dataset id must be present");
   expectNonEmptyString(probe.generatedAt, "shard type metadata probe generatedAt must be present");
   expectRecord(probe.source, "shard type metadata probe source must be an object");
-  expectNonEmptyString(probe.source.uabeaProbeReport, "shard type metadata probe source.uabeaProbeReport must be present");
-  expectNonEmptyString(probe.source.probeMethod, "shard type metadata probe source.probeMethod must be present");
+  expectNonEmptyString(
+    probe.source.uabeaProbeReport,
+    "shard type metadata probe source.uabeaProbeReport must be present"
+  );
+  expectNonEmptyString(
+    probe.source.probeMethod,
+    "shard type metadata probe source.probeMethod must be present"
+  );
   expectRecord(probe.targets, "shard type metadata probe targets must be an object");
-  expectRecord(probe.targets.shardMining, "shard type metadata probe shardMining target must be an object");
-  expectRecord(probe.targets.shardUpgradeInfo, "shard type metadata probe shardUpgradeInfo target must be an object");
-  expectRecord(probe.targets.shardPerLevelTextHandler, "shard type metadata probe shardPerLevelTextHandler target must be an object");
-  expectArray(probe.targets.shardMining.ownerListFields, "shard type metadata probe shardMining.ownerListFields must be an array");
-  expectArray(probe.targets.shardUpgradeInfo.fields, "shard type metadata probe shardUpgradeInfo.fields must be an array");
+  expectRecord(
+    probe.targets.shardMining,
+    "shard type metadata probe shardMining target must be an object"
+  );
+  expectRecord(
+    probe.targets.shardUpgradeInfo,
+    "shard type metadata probe shardUpgradeInfo target must be an object"
+  );
+  expectRecord(
+    probe.targets.shardPerLevelTextHandler,
+    "shard type metadata probe shardPerLevelTextHandler target must be an object"
+  );
+  expectArray(
+    probe.targets.shardMining.ownerListFields,
+    "shard type metadata probe shardMining.ownerListFields must be an array"
+  );
+  expectArray(
+    probe.targets.shardUpgradeInfo.fields,
+    "shard type metadata probe shardUpgradeInfo.fields must be an array"
+  );
   expectArray(probe.rows, "shard type metadata probe rows must be an array");
   expectArray(probe.findings, "shard type metadata probe findings must be an array");
   expectArray(probe.currentBoundary, "shard type metadata probe currentBoundary must be an array");
 
-  assert.equal(probe.dataset, "shard-type-metadata-probe.v1", "shard type metadata probe dataset drifted");
-  assert.equal(probe.targets.shardMining.fullName, "ShardMining", "shard type metadata probe ShardMining fullName drifted");
-  assert.equal(probe.targets.shardMining.baseType, "UnityEngine.MonoBehaviour", "shard type metadata probe ShardMining baseType drifted");
-  assert.equal(probe.targets.shardPerLevelTextHandler.fullName, "ShardPerLevelTextHandler", "shard type metadata probe text handler fullName drifted");
-  assert.equal(probe.targets.shardUpgradeInfo.fullName, "ShardMining+ShardUpgradeInfo", "shard type metadata probe ShardUpgradeInfo fullName drifted");
-  assert.ok(probe.targets.shardMining.ownerListFields.some((entry) => entry?.name === "MilestoneCostList" && entry?.type === "System.Collections.Generic.List`1<BreakInfinity.BigDouble>"), "shard type metadata probe must preserve MilestoneCostList");
-  assert.ok(probe.targets.shardMining.ownerListFields.some((entry) => entry?.name === "upgradeInfoList" && entry?.type === "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>"), "shard type metadata probe must preserve upgradeInfoList");
-  assert.deepEqual(probe.targets.shardMining.overLevelBaseFields.map((entry) => entry?.name), ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"], "shard type metadata probe over-level base fields drifted");
-  assert.deepEqual(probe.targets.shardMining.overLevelBaseFields.map((entry) => entry?.fieldOffset), [5080, 5096, 5112, 5128], "shard type metadata probe over-level base field offsets drifted");
-  assert.deepEqual(probe.targets.shardUpgradeInfo.fields.map((entry) => entry?.name), ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"], "shard type metadata probe ShardUpgradeInfo field list drifted");
+  assert.equal(
+    probe.dataset,
+    "shard-type-metadata-probe.v1",
+    "shard type metadata probe dataset drifted"
+  );
+  assert.equal(
+    probe.targets.shardMining.fullName,
+    "ShardMining",
+    "shard type metadata probe ShardMining fullName drifted"
+  );
+  assert.equal(
+    probe.targets.shardMining.baseType,
+    "UnityEngine.MonoBehaviour",
+    "shard type metadata probe ShardMining baseType drifted"
+  );
+  assert.equal(
+    probe.targets.shardPerLevelTextHandler.fullName,
+    "ShardPerLevelTextHandler",
+    "shard type metadata probe text handler fullName drifted"
+  );
+  assert.equal(
+    probe.targets.shardUpgradeInfo.fullName,
+    "ShardMining+ShardUpgradeInfo",
+    "shard type metadata probe ShardUpgradeInfo fullName drifted"
+  );
+  assert.ok(
+    probe.targets.shardMining.ownerListFields.some(
+      (entry) =>
+        entry?.name === "MilestoneCostList" &&
+        entry?.type === "System.Collections.Generic.List`1<BreakInfinity.BigDouble>"
+    ),
+    "shard type metadata probe must preserve MilestoneCostList"
+  );
+  assert.ok(
+    probe.targets.shardMining.ownerListFields.some(
+      (entry) =>
+        entry?.name === "upgradeInfoList" &&
+        entry?.type === "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>"
+    ),
+    "shard type metadata probe must preserve upgradeInfoList"
+  );
+  assert.deepEqual(
+    probe.targets.shardMining.overLevelBaseFields.map((entry) => entry?.name),
+    ["OverLevel100Base", "OverLevel200Base", "OverLevel300Base", "OverLevel400Base"],
+    "shard type metadata probe over-level base fields drifted"
+  );
+  assert.deepEqual(
+    probe.targets.shardMining.overLevelBaseFields.map((entry) => entry?.fieldOffset),
+    [5080, 5096, 5112, 5128],
+    "shard type metadata probe over-level base field offsets drifted"
+  );
+  assert.deepEqual(
+    probe.targets.shardUpgradeInfo.fields.map((entry) => entry?.name),
+    ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"],
+    "shard type metadata probe ShardUpgradeInfo field list drifted"
+  );
   assert.equal(probe.rows.length, 30, "shard type metadata probe row count drifted");
-  assert.ok(probe.rows.some((entry) => entry?.row === 0 && entry?.costFieldCount === 5 && entry?.bonusFieldCount === 8), "shard type metadata probe must preserve row 0 schema");
-  assert.ok(probe.rows.some((entry) => entry?.row === 18 && entry?.bonusFieldCount === 6 && entry?.bonusTextFieldCount === 6), "shard type metadata probe must preserve row 18 bonus/text schema");
-  assert.ok(probe.rows.some((entry) => entry?.row === 27 && entry?.costFieldCount === 3 && entry?.bonusFieldCount === 3 && entry?.bonusTextFieldCount === 3), "shard type metadata probe must preserve row 27 schema");
-  assert.equal(probe.overLevelBaseValueRecovery.uabeaDefaultValuesPresent, false, "shard type metadata probe over-level default values status drifted");
-  assert.equal(probe.overLevelBaseValueRecovery.directMonoBehaviourFieldHitsCount, 0, "shard type metadata probe over-level directMonoBehaviourFieldHitsCount drifted");
-  assert.equal(probe.overLevelBaseValueRecovery.shardTargetMonoBehavioursCount, 0, "shard type metadata probe over-level shardTargetMonoBehavioursCount drifted");
-  assert.equal(probe.overLevelBaseValueRecovery.exactSerializedValuesRecovered, false, "shard type metadata probe must not claim exact over-level values");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("OverLevel*Base as typed owner-field shells only")), "shard type metadata probe over-level boundary drifted");
-  assert.ok(probe.currentBoundary.some((line) => String(line).includes("not as final serialized row values")), "shard type metadata probe must preserve blocked-use framing");
+  assert.ok(
+    probe.rows.some(
+      (entry) => entry?.row === 0 && entry?.costFieldCount === 5 && entry?.bonusFieldCount === 8
+    ),
+    "shard type metadata probe must preserve row 0 schema"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 18 && entry?.bonusFieldCount === 6 && entry?.bonusTextFieldCount === 6
+    ),
+    "shard type metadata probe must preserve row 18 bonus/text schema"
+  );
+  assert.ok(
+    probe.rows.some(
+      (entry) =>
+        entry?.row === 27 &&
+        entry?.costFieldCount === 3 &&
+        entry?.bonusFieldCount === 3 &&
+        entry?.bonusTextFieldCount === 3
+    ),
+    "shard type metadata probe must preserve row 27 schema"
+  );
+  assert.equal(
+    probe.overLevelBaseValueRecovery.uabeaDefaultValuesPresent,
+    false,
+    "shard type metadata probe over-level default values status drifted"
+  );
+  assert.equal(
+    probe.overLevelBaseValueRecovery.directMonoBehaviourFieldHitsCount,
+    0,
+    "shard type metadata probe over-level directMonoBehaviourFieldHitsCount drifted"
+  );
+  assert.equal(
+    probe.overLevelBaseValueRecovery.shardTargetMonoBehavioursCount,
+    0,
+    "shard type metadata probe over-level shardTargetMonoBehavioursCount drifted"
+  );
+  assert.equal(
+    probe.overLevelBaseValueRecovery.exactSerializedValuesRecovered,
+    false,
+    "shard type metadata probe must not claim exact over-level values"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("OverLevel*Base as typed owner-field shells only")
+    ),
+    "shard type metadata probe over-level boundary drifted"
+  );
+  assert.ok(
+    probe.currentBoundary.some((line) =>
+      String(line).includes("not as final serialized row values")
+    ),
+    "shard type metadata probe must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-type-metadata-probe",
@@ -1472,51 +4785,180 @@ function validateShardTypeMetadataProbe(probe) {
 }
 
 function validateShardMilestoneHandoffBoundary(boundary) {
-  expectNonEmptyString(boundary.dataset, "shard milestone handoff boundary dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard milestone handoff boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard milestone handoff boundary dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard milestone handoff boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard milestone handoff boundary sources must be an object");
-  ["shardMiningMetadataNeighborhood", "shardMetadataNeighborhood", "ownerFamilyBoundary", "rowShellBoundary", "rowAlignmentBoundary", "typeMetadataProbe", "sceneMonoBehaviourProbe", "globalMetadata"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard milestone handoff boundary sources.${field} must be present`);
+  [
+    "shardMiningMetadataNeighborhood",
+    "shardMetadataNeighborhood",
+    "ownerFamilyBoundary",
+    "rowShellBoundary",
+    "rowAlignmentBoundary",
+    "typeMetadataProbe",
+    "sceneMonoBehaviourProbe",
+    "globalMetadata"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard milestone handoff boundary sources.${field} must be present`
+    );
   });
-  expectNonEmptyString(boundary.shardControllerFamily, "shard milestone handoff boundary shardControllerFamily must be present");
-  expectRecord(boundary.shardControllerRowShell, "shard milestone handoff boundary shardControllerRowShell must be an object");
-  expectRecord(boundary.shardControllerRowShell.unlockHookRange, "shard milestone handoff boundary unlockHookRange must be an object");
-  expectRecord(boundary.shardControllerRowShell.buyHookRange, "shard milestone handoff boundary buyHookRange must be an object");
-  expectRecord(boundary.shardControllerRowShell.textCheckerRange, "shard milestone handoff boundary textCheckerRange must be an object");
-  expectRecord(boundary.genericMilestoneLead, "shard milestone handoff boundary genericMilestoneLead must be an object");
-  expectNonEmptyString(boundary.genericMilestoneLead.family, "shard milestone handoff boundary genericMilestoneLead.family must be present");
-  expectNonEmptyString(boundary.genericMilestoneLead.metadataPath, "shard milestone handoff boundary genericMilestoneLead.metadataPath must be present");
-  expectRecord(boundary.genericMilestoneLead.buyHookRange, "shard milestone handoff boundary genericMilestoneLead.buyHookRange must be an object");
-  expectArray(boundary.genericMilestoneLead.textAndValueAnchors, "shard milestone handoff boundary genericMilestoneLead.textAndValueAnchors must be an array");
-  expectRecord(boundary.recoveredDeclaringRowModel, "shard milestone handoff boundary recoveredDeclaringRowModel must be an object");
-  expectRecord(boundary.recoveredDeclaringRowModel.declaringField, "shard milestone handoff boundary recoveredDeclaringRowModel.declaringField must be an object");
-  expectRecord(boundary.recoveredDeclaringRowModel.rowModelType, "shard milestone handoff boundary recoveredDeclaringRowModel.rowModelType must be an object");
-  expectArray(boundary.recoveredDeclaringRowModel.rowStateFields, "shard milestone handoff boundary recoveredDeclaringRowModel.rowStateFields must be an array");
-  expectArray(boundary.handoffFindings, "shard milestone handoff boundary handoffFindings must be an array");
-  expectArray(boundary.currentBoundary, "shard milestone handoff boundary currentBoundary must be an array");
+  expectNonEmptyString(
+    boundary.shardControllerFamily,
+    "shard milestone handoff boundary shardControllerFamily must be present"
+  );
+  expectRecord(
+    boundary.shardControllerRowShell,
+    "shard milestone handoff boundary shardControllerRowShell must be an object"
+  );
+  expectRecord(
+    boundary.shardControllerRowShell.unlockHookRange,
+    "shard milestone handoff boundary unlockHookRange must be an object"
+  );
+  expectRecord(
+    boundary.shardControllerRowShell.buyHookRange,
+    "shard milestone handoff boundary buyHookRange must be an object"
+  );
+  expectRecord(
+    boundary.shardControllerRowShell.textCheckerRange,
+    "shard milestone handoff boundary textCheckerRange must be an object"
+  );
+  expectRecord(
+    boundary.genericMilestoneLead,
+    "shard milestone handoff boundary genericMilestoneLead must be an object"
+  );
+  expectNonEmptyString(
+    boundary.genericMilestoneLead.family,
+    "shard milestone handoff boundary genericMilestoneLead.family must be present"
+  );
+  expectNonEmptyString(
+    boundary.genericMilestoneLead.metadataPath,
+    "shard milestone handoff boundary genericMilestoneLead.metadataPath must be present"
+  );
+  expectRecord(
+    boundary.genericMilestoneLead.buyHookRange,
+    "shard milestone handoff boundary genericMilestoneLead.buyHookRange must be an object"
+  );
+  expectArray(
+    boundary.genericMilestoneLead.textAndValueAnchors,
+    "shard milestone handoff boundary genericMilestoneLead.textAndValueAnchors must be an array"
+  );
+  expectRecord(
+    boundary.recoveredDeclaringRowModel,
+    "shard milestone handoff boundary recoveredDeclaringRowModel must be an object"
+  );
+  expectRecord(
+    boundary.recoveredDeclaringRowModel.declaringField,
+    "shard milestone handoff boundary recoveredDeclaringRowModel.declaringField must be an object"
+  );
+  expectRecord(
+    boundary.recoveredDeclaringRowModel.rowModelType,
+    "shard milestone handoff boundary recoveredDeclaringRowModel.rowModelType must be an object"
+  );
+  expectArray(
+    boundary.recoveredDeclaringRowModel.rowStateFields,
+    "shard milestone handoff boundary recoveredDeclaringRowModel.rowStateFields must be an array"
+  );
+  expectArray(
+    boundary.handoffFindings,
+    "shard milestone handoff boundary handoffFindings must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "shard milestone handoff boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.shardControllerFamily, "ShardMining, Assembly-CSharp", "shard milestone handoff boundary shardControllerFamily drifted");
-  assert.deepEqual(boundary.shardControllerRowShell.unlockHookRange, { start: 17, end: 29, count: 13 }, "shard milestone handoff boundary unlockHookRange drifted");
-  assert.deepEqual(boundary.shardControllerRowShell.buyHookRange, { start: 0, end: 0, count: 1 }, "shard milestone handoff boundary buyHookRange drifted");
-  assert.deepEqual(boundary.shardControllerRowShell.textCheckerRange, { start: 0, end: 12, count: 13 }, "shard milestone handoff boundary textCheckerRange drifted");
-  assert.equal(boundary.genericMilestoneLead.family, "ConstructionMilestones, Assembly-CSharp", "shard milestone handoff boundary genericMilestoneLead.family drifted");
-  assert.equal(boundary.genericMilestoneLead.metadataPath, "Assets\\Scripts\\Upgrades\\AcademyData\\ConstructionMilestones.cs", "shard milestone handoff boundary genericMilestoneLead.metadataPath drifted");
-  assert.deepEqual(boundary.genericMilestoneLead.buyHookRange, { start: 1, end: 57, count: 57 }, "shard milestone handoff boundary genericMilestoneLead.buyHookRange drifted");
-  ["InitializeMilestones", "SetAllMilestoneTexts", "GetMilestoneDiamondValue", "GetMilestoneTokenValue", "GetClaimedMilestonesAmount"].forEach((name) => {
-    assert.ok(boundary.genericMilestoneLead.textAndValueAnchors.includes(name), `shard milestone handoff boundary missing ${name}`);
+  assert.equal(
+    boundary.shardControllerFamily,
+    "ShardMining, Assembly-CSharp",
+    "shard milestone handoff boundary shardControllerFamily drifted"
+  );
+  assert.deepEqual(
+    boundary.shardControllerRowShell.unlockHookRange,
+    { start: 17, end: 29, count: 13 },
+    "shard milestone handoff boundary unlockHookRange drifted"
+  );
+  assert.deepEqual(
+    boundary.shardControllerRowShell.buyHookRange,
+    { start: 0, end: 0, count: 1 },
+    "shard milestone handoff boundary buyHookRange drifted"
+  );
+  assert.deepEqual(
+    boundary.shardControllerRowShell.textCheckerRange,
+    { start: 0, end: 12, count: 13 },
+    "shard milestone handoff boundary textCheckerRange drifted"
+  );
+  assert.equal(
+    boundary.genericMilestoneLead.family,
+    "ConstructionMilestones, Assembly-CSharp",
+    "shard milestone handoff boundary genericMilestoneLead.family drifted"
+  );
+  assert.equal(
+    boundary.genericMilestoneLead.metadataPath,
+    "Assets\\Scripts\\Upgrades\\AcademyData\\ConstructionMilestones.cs",
+    "shard milestone handoff boundary genericMilestoneLead.metadataPath drifted"
+  );
+  assert.deepEqual(
+    boundary.genericMilestoneLead.buyHookRange,
+    { start: 1, end: 57, count: 57 },
+    "shard milestone handoff boundary genericMilestoneLead.buyHookRange drifted"
+  );
+  [
+    "InitializeMilestones",
+    "SetAllMilestoneTexts",
+    "GetMilestoneDiamondValue",
+    "GetMilestoneTokenValue",
+    "GetClaimedMilestonesAmount"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.genericMilestoneLead.textAndValueAnchors.includes(name),
+      `shard milestone handoff boundary missing ${name}`
+    );
   });
-  assert.equal(boundary.recoveredDeclaringRowModel.ownerType, "ShardMining", "shard milestone handoff boundary recoveredDeclaringRowModel.ownerType drifted");
-  assert.equal(boundary.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList", "shard milestone handoff boundary recoveredDeclaringRowModel.declaringField.name drifted");
-  assert.equal(boundary.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo", "shard milestone handoff boundary recoveredDeclaringRowModel.rowModelType.fullName drifted");
+  assert.equal(
+    boundary.recoveredDeclaringRowModel.ownerType,
+    "ShardMining",
+    "shard milestone handoff boundary recoveredDeclaringRowModel.ownerType drifted"
+  );
+  assert.equal(
+    boundary.recoveredDeclaringRowModel.declaringField.name,
+    "upgradeInfoList",
+    "shard milestone handoff boundary recoveredDeclaringRowModel.declaringField.name drifted"
+  );
+  assert.equal(
+    boundary.recoveredDeclaringRowModel.rowModelType.fullName,
+    "ShardMining+ShardUpgradeInfo",
+    "shard milestone handoff boundary recoveredDeclaringRowModel.rowModelType.fullName drifted"
+  );
   assert.deepEqual(
     boundary.recoveredDeclaringRowModel.rowStateFields.map((field) => field.name),
     ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"],
     "shard milestone handoff boundary recoveredDeclaringRowModel.rowStateFields drifted"
   );
-  assert.ok(boundary.handoffFindings.some((line) => String(line).includes("BuyMilestone1-57")), "shard milestone handoff boundary must preserve generic buy-family narrowing");
-  assert.ok(boundary.handoffFindings.some((line) => String(line).includes("upgradeInfoList")), "shard milestone handoff boundary must preserve recovered row-model narrowing");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("declaring row-model result")), "shard milestone handoff boundary must preserve declaring-row-model framing");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("not recovered player-owned shard milestone state")), "shard milestone handoff boundary must preserve blocked-use framing");
+  assert.ok(
+    boundary.handoffFindings.some((line) => String(line).includes("BuyMilestone1-57")),
+    "shard milestone handoff boundary must preserve generic buy-family narrowing"
+  );
+  assert.ok(
+    boundary.handoffFindings.some((line) => String(line).includes("upgradeInfoList")),
+    "shard milestone handoff boundary must preserve recovered row-model narrowing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) => String(line).includes("declaring row-model result")),
+    "shard milestone handoff boundary must preserve declaring-row-model framing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("not recovered player-owned shard milestone state")
+    ),
+    "shard milestone handoff boundary must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-milestone-handoff-boundary",
@@ -1532,61 +4974,241 @@ function validateShardMilestoneHandoffBoundary(boundary) {
 
 function validateShardRowVerificationSu1(boundary) {
   expectNonEmptyString(boundary.dataset, "shard row verification SU1 dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard row verification SU1 generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard row verification SU1 generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard row verification SU1 sources must be an object");
-  ["rowModelBoundary", "titleEffectBoundary", "effectTextHandlerBoundary", "bonusSlotProbe", "costModelBoundary", "costNativeProbe", "typeMetadataProbe", "handoffBoundary", "groundedMilestones"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard row verification SU1 sources.${field} must be present`);
+  [
+    "rowModelBoundary",
+    "titleEffectBoundary",
+    "effectTextHandlerBoundary",
+    "bonusSlotProbe",
+    "costModelBoundary",
+    "costNativeProbe",
+    "typeMetadataProbe",
+    "handoffBoundary",
+    "groundedMilestones"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard row verification SU1 sources.${field} must be present`
+    );
   });
   expectRecord(boundary.verifiedRow, "shard row verification SU1 verifiedRow must be an object");
-  expectRecord(boundary.verifiedRow.titleBinding, "shard row verification SU1 titleBinding must be an object");
-  expectRecord(boundary.verifiedRow.declaringRowModel, "shard row verification SU1 declaringRowModel must be an object");
-  expectRecord(boundary.verifiedRow.declaringRowModel.declaringField, "shard row verification SU1 declaringRowModel.declaringField must be an object");
-  expectRecord(boundary.verifiedRow.declaringRowModel.rowModelType, "shard row verification SU1 declaringRowModel.rowModelType must be an object");
-  expectArray(boundary.verifiedRow.declaringRowModel.runtimeStateFields, "shard row verification SU1 declaringRowModel.runtimeStateFields must be an array");
-  expectRecord(boundary.verifiedRow.declaringRowModel.rowShellFields, "shard row verification SU1 declaringRowModel.rowShellFields must be an object");
-  expectRecord(boundary.verifiedRow.effectPackage, "shard row verification SU1 effectPackage must be an object");
-  expectArray(boundary.verifiedRow.effectPackage.fixedBreakpoints, "shard row verification SU1 effectPackage.fixedBreakpoints must be an array");
-  expectArray(boundary.verifiedRow.effectPackage.bonuses, "shard row verification SU1 effectPackage.bonuses must be an array");
-  expectRecord(boundary.verifiedRow.effectPresentationBinding, "shard row verification SU1 effectPresentationBinding must be an object");
-  expectArray(boundary.verifiedRow.effectPresentationBinding.presentationSlots, "shard row verification SU1 effectPresentationBinding.presentationSlots must be an array");
-  expectArray(boundary.verifiedRow.effectPresentationBinding.calcAccessors, "shard row verification SU1 effectPresentationBinding.calcAccessors must be an array");
-  expectArray(boundary.verifiedRow.effectPresentationBinding.uiTextAnchors, "shard row verification SU1 effectPresentationBinding.uiTextAnchors must be an array");
-  expectRecord(boundary.verifiedRow.costShell, "shard row verification SU1 costShell must be an object");
-  expectArray(boundary.verifiedRow.costShell.serializedCostFields, "shard row verification SU1 costShell.serializedCostFields must be an array");
-  expectArray(boundary.verifiedRow.costShell.nativeOperandFieldNames, "shard row verification SU1 costShell.nativeOperandFieldNames must be an array");
-  expectArray(boundary.verifiedRow.costShell.thresholdStages, "shard row verification SU1 costShell.thresholdStages must be an array");
-  expectArray(boundary.verifiedRow.costShell.stageFieldUsage, "shard row verification SU1 costShell.stageFieldUsage must be an array");
+  expectRecord(
+    boundary.verifiedRow.titleBinding,
+    "shard row verification SU1 titleBinding must be an object"
+  );
+  expectRecord(
+    boundary.verifiedRow.declaringRowModel,
+    "shard row verification SU1 declaringRowModel must be an object"
+  );
+  expectRecord(
+    boundary.verifiedRow.declaringRowModel.declaringField,
+    "shard row verification SU1 declaringRowModel.declaringField must be an object"
+  );
+  expectRecord(
+    boundary.verifiedRow.declaringRowModel.rowModelType,
+    "shard row verification SU1 declaringRowModel.rowModelType must be an object"
+  );
+  expectArray(
+    boundary.verifiedRow.declaringRowModel.runtimeStateFields,
+    "shard row verification SU1 declaringRowModel.runtimeStateFields must be an array"
+  );
+  expectRecord(
+    boundary.verifiedRow.declaringRowModel.rowShellFields,
+    "shard row verification SU1 declaringRowModel.rowShellFields must be an object"
+  );
+  expectRecord(
+    boundary.verifiedRow.effectPackage,
+    "shard row verification SU1 effectPackage must be an object"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPackage.fixedBreakpoints,
+    "shard row verification SU1 effectPackage.fixedBreakpoints must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPackage.bonuses,
+    "shard row verification SU1 effectPackage.bonuses must be an array"
+  );
+  expectRecord(
+    boundary.verifiedRow.effectPresentationBinding,
+    "shard row verification SU1 effectPresentationBinding must be an object"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPresentationBinding.presentationSlots,
+    "shard row verification SU1 effectPresentationBinding.presentationSlots must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPresentationBinding.calcAccessors,
+    "shard row verification SU1 effectPresentationBinding.calcAccessors must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPresentationBinding.uiTextAnchors,
+    "shard row verification SU1 effectPresentationBinding.uiTextAnchors must be an array"
+  );
+  expectRecord(
+    boundary.verifiedRow.costShell,
+    "shard row verification SU1 costShell must be an object"
+  );
+  expectArray(
+    boundary.verifiedRow.costShell.serializedCostFields,
+    "shard row verification SU1 costShell.serializedCostFields must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.costShell.nativeOperandFieldNames,
+    "shard row verification SU1 costShell.nativeOperandFieldNames must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.costShell.thresholdStages,
+    "shard row verification SU1 costShell.thresholdStages must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.costShell.stageFieldUsage,
+    "shard row verification SU1 costShell.stageFieldUsage must be an array"
+  );
   expectArray(boundary.findings, "shard row verification SU1 findings must be an array");
-  expectArray(boundary.currentBoundary, "shard row verification SU1 currentBoundary must be an array");
+  expectArray(
+    boundary.currentBoundary,
+    "shard row verification SU1 currentBoundary must be an array"
+  );
 
   assert.equal(boundary.verifiedRow.row, 1, "shard row verification SU1 row drifted");
   assert.equal(boundary.verifiedRow.rowKey, "SU1", "shard row verification SU1 rowKey drifted");
-  assert.equal(boundary.verifiedRow.titleBinding.assetName, "SMilestone-1-Alpha", "shard row verification SU1 assetName drifted");
-  assert.equal(boundary.verifiedRow.titleBinding.playerFacingName, "Alpha Milestone", "shard row verification SU1 playerFacingName drifted");
-  assert.equal(boundary.verifiedRow.titleBinding.assetTitleMatchesGroundedPackage, true, "shard row verification SU1 title/package alignment drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.ownerType, "ShardMining", "shard row verification SU1 ownerType drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.declaringField.name, "upgradeInfoList", "shard row verification SU1 declaring field drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo", "shard row verification SU1 row model type drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.rowShellFields.textCheckerField, "Milestone1TextChecker", "shard row verification SU1 textCheckerField drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.rowShellFields.unlockRequirementField, "SU1UnlockReq", "shard row verification SU1 unlockRequirementField drifted");
-  assert.deepEqual(boundary.verifiedRow.declaringRowModel.rowShellFields.bonusTextFields, ["SM1B1Text", "SM1B2Text", "SM1B3Text"], "shard row verification SU1 bonusTextFields drifted");
-  assert.deepEqual(boundary.verifiedRow.effectPackage.fixedBreakpoints, [1, 25, 50], "shard row verification SU1 fixedBreakpoints drifted");
-  assert.equal(boundary.verifiedRow.effectPackage.provenance, "community-grounded descriptive package", "shard row verification SU1 effectPackage.provenance drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N", "shard row verification SU1 probableTextHandler drifted");
-  assert.deepEqual(boundary.verifiedRow.effectPresentationBinding.calcAccessors, ["get_SU1Bonus1Calc", "get_SU1Bonus2Calc", "get_SU1Bonus3Calc"], "shard row verification SU1 calcAccessors drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.bonusSlotCount, 3, "shard row verification SU1 bonusSlotCount drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.calcAccessorCount, 3, "shard row verification SU1 calcAccessorCount drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.groundedBonusCount, 3, "shard row verification SU1 groundedBonusCount drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.groundedCountMatches, true, "shard row verification SU1 groundedCountMatches drifted");
-  assert.equal(boundary.verifiedRow.costShell.getterName, "get_SU1Cost", "shard row verification SU1 getterName drifted");
-  assert.equal(boundary.verifiedRow.costShell.getterRva, 38254156, "shard row verification SU1 getterRva drifted");
-  assert.deepEqual(boundary.verifiedRow.costShell.serializedCostFields, ["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"], "shard row verification SU1 serializedCostFields drifted");
-  assert.deepEqual(boundary.verifiedRow.costShell.nativeOperandFieldNames, ["SU1StartCost", "SU1CostExponent"], "shard row verification SU1 nativeOperandFieldNames drifted");
-  assert.deepEqual(boundary.verifiedRow.costShell.stageFieldUsage, ["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"], "shard row verification SU1 stageFieldUsage drifted");
-  assert.equal(boundary.verifiedRow.costShell.thresholdStages.length, 4, "shard row verification SU1 thresholdStages drifted");
-  assert.ok(boundary.findings.some((line) => String(line).includes("SU1 is the cleanest first verified shard row")), "shard row verification SU1 must preserve single-row verification framing");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("SU1 now binds to Alpha title identity")), "shard row verification SU1 must preserve verified-row framing");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat this single-row verification")), "shard row verification SU1 must preserve blocked-use framing");
+  assert.equal(
+    boundary.verifiedRow.titleBinding.assetName,
+    "SMilestone-1-Alpha",
+    "shard row verification SU1 assetName drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.titleBinding.playerFacingName,
+    "Alpha Milestone",
+    "shard row verification SU1 playerFacingName drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.titleBinding.assetTitleMatchesGroundedPackage,
+    true,
+    "shard row verification SU1 title/package alignment drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.ownerType,
+    "ShardMining",
+    "shard row verification SU1 ownerType drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.declaringField.name,
+    "upgradeInfoList",
+    "shard row verification SU1 declaring field drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.rowModelType.fullName,
+    "ShardMining+ShardUpgradeInfo",
+    "shard row verification SU1 row model type drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.rowShellFields.textCheckerField,
+    "Milestone1TextChecker",
+    "shard row verification SU1 textCheckerField drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.rowShellFields.unlockRequirementField,
+    "SU1UnlockReq",
+    "shard row verification SU1 unlockRequirementField drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.declaringRowModel.rowShellFields.bonusTextFields,
+    ["SM1B1Text", "SM1B2Text", "SM1B3Text"],
+    "shard row verification SU1 bonusTextFields drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.effectPackage.fixedBreakpoints,
+    [1, 25, 50],
+    "shard row verification SU1 fixedBreakpoints drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPackage.provenance,
+    "community-grounded descriptive package",
+    "shard row verification SU1 effectPackage.provenance drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.probableTextHandler,
+    "TextHandlerShardMilestoneBonusesPerLevel/N",
+    "shard row verification SU1 probableTextHandler drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.effectPresentationBinding.calcAccessors,
+    ["get_SU1Bonus1Calc", "get_SU1Bonus2Calc", "get_SU1Bonus3Calc"],
+    "shard row verification SU1 calcAccessors drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.bonusSlotCount,
+    3,
+    "shard row verification SU1 bonusSlotCount drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.calcAccessorCount,
+    3,
+    "shard row verification SU1 calcAccessorCount drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.groundedBonusCount,
+    3,
+    "shard row verification SU1 groundedBonusCount drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.groundedCountMatches,
+    true,
+    "shard row verification SU1 groundedCountMatches drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.costShell.getterName,
+    "get_SU1Cost",
+    "shard row verification SU1 getterName drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.costShell.getterRva,
+    38254156,
+    "shard row verification SU1 getterRva drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.costShell.serializedCostFields,
+    ["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"],
+    "shard row verification SU1 serializedCostFields drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.costShell.nativeOperandFieldNames,
+    ["SU1StartCost", "SU1CostExponent"],
+    "shard row verification SU1 nativeOperandFieldNames drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.costShell.stageFieldUsage,
+    ["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"],
+    "shard row verification SU1 stageFieldUsage drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.costShell.thresholdStages.length,
+    4,
+    "shard row verification SU1 thresholdStages drifted"
+  );
+  assert.ok(
+    boundary.findings.some((line) =>
+      String(line).includes("SU1 is the cleanest first verified shard row")
+    ),
+    "shard row verification SU1 must preserve single-row verification framing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("SU1 now binds to Alpha title identity")
+    ),
+    "shard row verification SU1 must preserve verified-row framing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not treat this single-row verification")
+    ),
+    "shard row verification SU1 must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-row-verification-su1",
@@ -1602,61 +5224,241 @@ function validateShardRowVerificationSu1(boundary) {
 
 function validateShardRowVerificationSu2(boundary) {
   expectNonEmptyString(boundary.dataset, "shard row verification SU2 dataset id must be present");
-  expectNonEmptyString(boundary.generatedAt, "shard row verification SU2 generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard row verification SU2 generatedAt must be present"
+  );
   expectRecord(boundary.sources, "shard row verification SU2 sources must be an object");
-  ["rowModelBoundary", "titleEffectBoundary", "effectTextHandlerBoundary", "bonusSlotProbe", "costModelBoundary", "costNativeProbe", "typeMetadataProbe", "handoffBoundary", "groundedMilestones"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `shard row verification SU2 sources.${field} must be present`);
+  [
+    "rowModelBoundary",
+    "titleEffectBoundary",
+    "effectTextHandlerBoundary",
+    "bonusSlotProbe",
+    "costModelBoundary",
+    "costNativeProbe",
+    "typeMetadataProbe",
+    "handoffBoundary",
+    "groundedMilestones"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard row verification SU2 sources.${field} must be present`
+    );
   });
   expectRecord(boundary.verifiedRow, "shard row verification SU2 verifiedRow must be an object");
-  expectRecord(boundary.verifiedRow.titleBinding, "shard row verification SU2 titleBinding must be an object");
-  expectRecord(boundary.verifiedRow.declaringRowModel, "shard row verification SU2 declaringRowModel must be an object");
-  expectRecord(boundary.verifiedRow.declaringRowModel.declaringField, "shard row verification SU2 declaringRowModel.declaringField must be an object");
-  expectRecord(boundary.verifiedRow.declaringRowModel.rowModelType, "shard row verification SU2 declaringRowModel.rowModelType must be an object");
-  expectArray(boundary.verifiedRow.declaringRowModel.runtimeStateFields, "shard row verification SU2 declaringRowModel.runtimeStateFields must be an array");
-  expectRecord(boundary.verifiedRow.declaringRowModel.rowShellFields, "shard row verification SU2 declaringRowModel.rowShellFields must be an object");
-  expectRecord(boundary.verifiedRow.effectPackage, "shard row verification SU2 effectPackage must be an object");
-  expectArray(boundary.verifiedRow.effectPackage.fixedBreakpoints, "shard row verification SU2 effectPackage.fixedBreakpoints must be an array");
-  expectArray(boundary.verifiedRow.effectPackage.bonuses, "shard row verification SU2 effectPackage.bonuses must be an array");
-  expectRecord(boundary.verifiedRow.effectPresentationBinding, "shard row verification SU2 effectPresentationBinding must be an object");
-  expectArray(boundary.verifiedRow.effectPresentationBinding.presentationSlots, "shard row verification SU2 effectPresentationBinding.presentationSlots must be an array");
-  expectArray(boundary.verifiedRow.effectPresentationBinding.calcAccessors, "shard row verification SU2 effectPresentationBinding.calcAccessors must be an array");
-  expectArray(boundary.verifiedRow.effectPresentationBinding.uiTextAnchors, "shard row verification SU2 effectPresentationBinding.uiTextAnchors must be an array");
-  expectRecord(boundary.verifiedRow.costShell, "shard row verification SU2 costShell must be an object");
-  expectArray(boundary.verifiedRow.costShell.serializedCostFields, "shard row verification SU2 costShell.serializedCostFields must be an array");
-  expectArray(boundary.verifiedRow.costShell.nativeOperandFieldNames, "shard row verification SU2 costShell.nativeOperandFieldNames must be an array");
-  expectArray(boundary.verifiedRow.costShell.thresholdStages, "shard row verification SU2 costShell.thresholdStages must be an array");
-  expectArray(boundary.verifiedRow.costShell.stageFieldUsage, "shard row verification SU2 costShell.stageFieldUsage must be an array");
+  expectRecord(
+    boundary.verifiedRow.titleBinding,
+    "shard row verification SU2 titleBinding must be an object"
+  );
+  expectRecord(
+    boundary.verifiedRow.declaringRowModel,
+    "shard row verification SU2 declaringRowModel must be an object"
+  );
+  expectRecord(
+    boundary.verifiedRow.declaringRowModel.declaringField,
+    "shard row verification SU2 declaringRowModel.declaringField must be an object"
+  );
+  expectRecord(
+    boundary.verifiedRow.declaringRowModel.rowModelType,
+    "shard row verification SU2 declaringRowModel.rowModelType must be an object"
+  );
+  expectArray(
+    boundary.verifiedRow.declaringRowModel.runtimeStateFields,
+    "shard row verification SU2 declaringRowModel.runtimeStateFields must be an array"
+  );
+  expectRecord(
+    boundary.verifiedRow.declaringRowModel.rowShellFields,
+    "shard row verification SU2 declaringRowModel.rowShellFields must be an object"
+  );
+  expectRecord(
+    boundary.verifiedRow.effectPackage,
+    "shard row verification SU2 effectPackage must be an object"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPackage.fixedBreakpoints,
+    "shard row verification SU2 effectPackage.fixedBreakpoints must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPackage.bonuses,
+    "shard row verification SU2 effectPackage.bonuses must be an array"
+  );
+  expectRecord(
+    boundary.verifiedRow.effectPresentationBinding,
+    "shard row verification SU2 effectPresentationBinding must be an object"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPresentationBinding.presentationSlots,
+    "shard row verification SU2 effectPresentationBinding.presentationSlots must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPresentationBinding.calcAccessors,
+    "shard row verification SU2 effectPresentationBinding.calcAccessors must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.effectPresentationBinding.uiTextAnchors,
+    "shard row verification SU2 effectPresentationBinding.uiTextAnchors must be an array"
+  );
+  expectRecord(
+    boundary.verifiedRow.costShell,
+    "shard row verification SU2 costShell must be an object"
+  );
+  expectArray(
+    boundary.verifiedRow.costShell.serializedCostFields,
+    "shard row verification SU2 costShell.serializedCostFields must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.costShell.nativeOperandFieldNames,
+    "shard row verification SU2 costShell.nativeOperandFieldNames must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.costShell.thresholdStages,
+    "shard row verification SU2 costShell.thresholdStages must be an array"
+  );
+  expectArray(
+    boundary.verifiedRow.costShell.stageFieldUsage,
+    "shard row verification SU2 costShell.stageFieldUsage must be an array"
+  );
   expectArray(boundary.findings, "shard row verification SU2 findings must be an array");
-  expectArray(boundary.currentBoundary, "shard row verification SU2 currentBoundary must be an array");
+  expectArray(
+    boundary.currentBoundary,
+    "shard row verification SU2 currentBoundary must be an array"
+  );
 
   assert.equal(boundary.verifiedRow.row, 2, "shard row verification SU2 row drifted");
   assert.equal(boundary.verifiedRow.rowKey, "SU2", "shard row verification SU2 rowKey drifted");
-  assert.equal(boundary.verifiedRow.titleBinding.assetName, "SMilestone-2-Aquarius", "shard row verification SU2 assetName drifted");
-  assert.equal(boundary.verifiedRow.titleBinding.playerFacingName, "Aquarius Milestone", "shard row verification SU2 playerFacingName drifted");
-  assert.equal(boundary.verifiedRow.titleBinding.assetTitleMatchesGroundedPackage, true, "shard row verification SU2 title/package alignment drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.ownerType, "ShardMining", "shard row verification SU2 ownerType drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.declaringField.name, "upgradeInfoList", "shard row verification SU2 declaring field drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo", "shard row verification SU2 row model type drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.rowShellFields.textCheckerField, "Milestone2TextChecker", "shard row verification SU2 textCheckerField drifted");
-  assert.equal(boundary.verifiedRow.declaringRowModel.rowShellFields.unlockRequirementField, "SU2UnlockReq", "shard row verification SU2 unlockRequirementField drifted");
-  assert.deepEqual(boundary.verifiedRow.declaringRowModel.rowShellFields.bonusTextFields, ["SM2B1Text", "SM2B2Text", "SM2B3Text"], "shard row verification SU2 bonusTextFields drifted");
-  assert.deepEqual(boundary.verifiedRow.effectPackage.fixedBreakpoints, [1, 25, 50], "shard row verification SU2 fixedBreakpoints drifted");
-  assert.equal(boundary.verifiedRow.effectPackage.provenance, "community-grounded descriptive package", "shard row verification SU2 effectPackage.provenance drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N", "shard row verification SU2 probableTextHandler drifted");
-  assert.deepEqual(boundary.verifiedRow.effectPresentationBinding.calcAccessors, ["get_SU2Bonus1Calc", "get_SU2Bonus2Calc", "get_SU2Bonus3Calc"], "shard row verification SU2 calcAccessors drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.bonusSlotCount, 3, "shard row verification SU2 bonusSlotCount drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.calcAccessorCount, 3, "shard row verification SU2 calcAccessorCount drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.groundedBonusCount, 3, "shard row verification SU2 groundedBonusCount drifted");
-  assert.equal(boundary.verifiedRow.effectPresentationBinding.groundedCountMatches, true, "shard row verification SU2 groundedCountMatches drifted");
-  assert.equal(boundary.verifiedRow.costShell.getterName, "get_SU2Cost", "shard row verification SU2 getterName drifted");
-  assert.equal(boundary.verifiedRow.costShell.getterRva, 38257438, "shard row verification SU2 getterRva drifted");
-  assert.deepEqual(boundary.verifiedRow.costShell.serializedCostFields, ["SU2StartCost", "SU2CostExponent", "SU2GrowthExponent"], "shard row verification SU2 serializedCostFields drifted");
-  assert.deepEqual(boundary.verifiedRow.costShell.nativeOperandFieldNames, ["SU2StartCost", "SU2CostExponent"], "shard row verification SU2 nativeOperandFieldNames drifted");
-  assert.deepEqual(boundary.verifiedRow.costShell.stageFieldUsage, ["SU2StartCost", "SU2CostExponent", "SU2GrowthExponent"], "shard row verification SU2 stageFieldUsage drifted");
-  assert.equal(boundary.verifiedRow.costShell.thresholdStages.length, 4, "shard row verification SU2 thresholdStages drifted");
-  assert.ok(boundary.findings.some((line) => String(line).includes("SU2 is the next clean verified shard row")), "shard row verification SU2 must preserve single-row verification framing");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("SU2 now binds to Aquarius title identity")), "shard row verification SU2 must preserve verified-row framing");
-  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat this single-row verification")), "shard row verification SU2 must preserve blocked-use framing");
+  assert.equal(
+    boundary.verifiedRow.titleBinding.assetName,
+    "SMilestone-2-Aquarius",
+    "shard row verification SU2 assetName drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.titleBinding.playerFacingName,
+    "Aquarius Milestone",
+    "shard row verification SU2 playerFacingName drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.titleBinding.assetTitleMatchesGroundedPackage,
+    true,
+    "shard row verification SU2 title/package alignment drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.ownerType,
+    "ShardMining",
+    "shard row verification SU2 ownerType drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.declaringField.name,
+    "upgradeInfoList",
+    "shard row verification SU2 declaring field drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.rowModelType.fullName,
+    "ShardMining+ShardUpgradeInfo",
+    "shard row verification SU2 row model type drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.rowShellFields.textCheckerField,
+    "Milestone2TextChecker",
+    "shard row verification SU2 textCheckerField drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.declaringRowModel.rowShellFields.unlockRequirementField,
+    "SU2UnlockReq",
+    "shard row verification SU2 unlockRequirementField drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.declaringRowModel.rowShellFields.bonusTextFields,
+    ["SM2B1Text", "SM2B2Text", "SM2B3Text"],
+    "shard row verification SU2 bonusTextFields drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.effectPackage.fixedBreakpoints,
+    [1, 25, 50],
+    "shard row verification SU2 fixedBreakpoints drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPackage.provenance,
+    "community-grounded descriptive package",
+    "shard row verification SU2 effectPackage.provenance drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.probableTextHandler,
+    "TextHandlerShardMilestoneBonusesPerLevel/N",
+    "shard row verification SU2 probableTextHandler drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.effectPresentationBinding.calcAccessors,
+    ["get_SU2Bonus1Calc", "get_SU2Bonus2Calc", "get_SU2Bonus3Calc"],
+    "shard row verification SU2 calcAccessors drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.bonusSlotCount,
+    3,
+    "shard row verification SU2 bonusSlotCount drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.calcAccessorCount,
+    3,
+    "shard row verification SU2 calcAccessorCount drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.groundedBonusCount,
+    3,
+    "shard row verification SU2 groundedBonusCount drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.effectPresentationBinding.groundedCountMatches,
+    true,
+    "shard row verification SU2 groundedCountMatches drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.costShell.getterName,
+    "get_SU2Cost",
+    "shard row verification SU2 getterName drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.costShell.getterRva,
+    38257438,
+    "shard row verification SU2 getterRva drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.costShell.serializedCostFields,
+    ["SU2StartCost", "SU2CostExponent", "SU2GrowthExponent"],
+    "shard row verification SU2 serializedCostFields drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.costShell.nativeOperandFieldNames,
+    ["SU2StartCost", "SU2CostExponent"],
+    "shard row verification SU2 nativeOperandFieldNames drifted"
+  );
+  assert.deepEqual(
+    boundary.verifiedRow.costShell.stageFieldUsage,
+    ["SU2StartCost", "SU2CostExponent", "SU2GrowthExponent"],
+    "shard row verification SU2 stageFieldUsage drifted"
+  );
+  assert.equal(
+    boundary.verifiedRow.costShell.thresholdStages.length,
+    4,
+    "shard row verification SU2 thresholdStages drifted"
+  );
+  assert.ok(
+    boundary.findings.some((line) =>
+      String(line).includes("SU2 is the next clean verified shard row")
+    ),
+    "shard row verification SU2 must preserve single-row verification framing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("SU2 now binds to Aquarius title identity")
+    ),
+    "shard row verification SU2 must preserve verified-row framing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("Do not treat this single-row verification")
+    ),
+    "shard row verification SU2 must preserve blocked-use framing"
+  );
 
   return {
     id: "shard-row-verification-su2",
@@ -1671,24 +5473,54 @@ function validateShardRowVerificationSu2(boundary) {
 }
 
 function validateExtractionCandidateFamilies(families) {
-  expectNonEmptyString(families.dataset, "extraction candidate families dataset id must be present");
-  expectNonEmptyString(families.generatedAt, "extraction candidate families generatedAt must be present");
+  expectNonEmptyString(
+    families.dataset,
+    "extraction candidate families dataset id must be present"
+  );
+  expectNonEmptyString(
+    families.generatedAt,
+    "extraction candidate families generatedAt must be present"
+  );
   expectArray(families.binaryFiles, "extraction candidate families binaryFiles must be an array");
   expectArray(families.textFiles, "extraction candidate families textFiles must be an array");
-  expectArray(families.globalContextTerms, "extraction candidate families globalContextTerms must be an array");
-  expectArray(families.unresolvedMarkers, "extraction candidate families unresolvedMarkers must be an array");
+  expectArray(
+    families.globalContextTerms,
+    "extraction candidate families globalContextTerms must be an array"
+  );
+  expectArray(
+    families.unresolvedMarkers,
+    "extraction candidate families unresolvedMarkers must be an array"
+  );
   expectArray(families.families, "extraction candidate families families must be an array");
-  assert.ok(families.families.length >= 7, "extraction candidate families must preserve the seeded family set");
+  assert.ok(
+    families.families.length >= 7,
+    "extraction candidate families must preserve the seeded family set"
+  );
   families.families.forEach((entry, index) => {
     expectNonEmptyString(entry.id, `extraction candidate families[${index}].id must be present`);
-    expectNonEmptyString(entry.label, `extraction candidate families[${index}].label must be present`);
-    expectNonEmptyString(entry.track, `extraction candidate families[${index}].track must be present`);
+    expectNonEmptyString(
+      entry.label,
+      `extraction candidate families[${index}].label must be present`
+    );
+    expectNonEmptyString(
+      entry.track,
+      `extraction candidate families[${index}].track must be present`
+    );
     expectArray(entry.terms, `extraction candidate families[${index}].terms must be an array`);
     expectArray(entry.anchors, `extraction candidate families[${index}].anchors must be an array`);
   });
-  assert.ok(families.families.some((entry) => entry.id === "shards.milestone-owner-family"), "extraction candidate families must preserve the shard milestone owner family");
-  assert.ok(families.families.some((entry) => entry.id === "spend.multiverse-market-save-model"), "extraction candidate families must preserve the MultiverseMarket save-model family");
-  assert.ok(!families.families.some((entry) => entry.id === "spend.multiverse-market-owner-family"), "extraction candidate families should not keep the resolved MultiverseMarket owner-family candidate active");
+  assert.ok(
+    families.families.some((entry) => entry.id === "shards.milestone-owner-family"),
+    "extraction candidate families must preserve the shard milestone owner family"
+  );
+  assert.ok(
+    families.families.some((entry) => entry.id === "spend.multiverse-market-save-model"),
+    "extraction candidate families must preserve the MultiverseMarket save-model family"
+  );
+  assert.ok(
+    !families.families.some((entry) => entry.id === "spend.multiverse-market-owner-family"),
+    "extraction candidate families should not keep the resolved MultiverseMarket owner-family candidate active"
+  );
 
   return {
     id: "extraction-candidate-families",
@@ -1704,26 +5536,71 @@ function validateExtractionCandidateFamilies(families) {
 
 function validateExtractionCandidateRanking(ranking) {
   expectNonEmptyString(ranking.dataset, "extraction candidate ranking dataset id must be present");
-  expectNonEmptyString(ranking.generatedAt, "extraction candidate ranking generatedAt must be present");
-  expectNonEmptyString(ranking.sourceConfig, "extraction candidate ranking sourceConfig must be present");
-  expectPositiveInteger(ranking.byteRadius, "extraction candidate ranking byteRadius must be positive");
-  expectArray(ranking.globalContextTerms, "extraction candidate ranking globalContextTerms must be an array");
-  expectArray(ranking.unresolvedMarkers, "extraction candidate ranking unresolvedMarkers must be an array");
+  expectNonEmptyString(
+    ranking.generatedAt,
+    "extraction candidate ranking generatedAt must be present"
+  );
+  expectNonEmptyString(
+    ranking.sourceConfig,
+    "extraction candidate ranking sourceConfig must be present"
+  );
+  expectPositiveInteger(
+    ranking.byteRadius,
+    "extraction candidate ranking byteRadius must be positive"
+  );
+  expectArray(
+    ranking.globalContextTerms,
+    "extraction candidate ranking globalContextTerms must be an array"
+  );
+  expectArray(
+    ranking.unresolvedMarkers,
+    "extraction candidate ranking unresolvedMarkers must be an array"
+  );
   expectArray(ranking.binaryFiles, "extraction candidate ranking binaryFiles must be an array");
   expectArray(ranking.textFiles, "extraction candidate ranking textFiles must be an array");
   expectArray(ranking.familyFilter, "extraction candidate ranking familyFilter must be an array");
   expectRecord(ranking.topCandidate, "extraction candidate ranking topCandidate must be an object");
   expectArray(ranking.candidates, "extraction candidate ranking candidates must be an array");
-  assert.ok(ranking.candidates.length >= 7, "extraction candidate ranking must preserve the scored candidate set");
-  expectNonEmptyString(ranking.topCandidate.id, "extraction candidate ranking topCandidate.id must be present");
-  expectNonEmptyString(ranking.topCandidate.track, "extraction candidate ranking topCandidate.track must be present");
-  assert.equal(typeof ranking.topCandidate.heuristicScore, "number", "extraction candidate ranking topCandidate.heuristicScore must be numeric");
-  assert.equal(ranking.topCandidate.id, "shards.milestone-owner-family", "extraction candidate ranking topCandidate.id drifted");
-  assert.equal(ranking.topCandidate.track, "shard-milestone-payload-recovery", "extraction candidate ranking topCandidate.track drifted");
-  const shardCandidate = ranking.candidates.find((entry) => entry.track === "shard-milestone-payload-recovery");
+  assert.ok(
+    ranking.candidates.length >= 7,
+    "extraction candidate ranking must preserve the scored candidate set"
+  );
+  expectNonEmptyString(
+    ranking.topCandidate.id,
+    "extraction candidate ranking topCandidate.id must be present"
+  );
+  expectNonEmptyString(
+    ranking.topCandidate.track,
+    "extraction candidate ranking topCandidate.track must be present"
+  );
+  assert.equal(
+    typeof ranking.topCandidate.heuristicScore,
+    "number",
+    "extraction candidate ranking topCandidate.heuristicScore must be numeric"
+  );
+  assert.equal(
+    ranking.topCandidate.id,
+    "shards.milestone-owner-family",
+    "extraction candidate ranking topCandidate.id drifted"
+  );
+  assert.equal(
+    ranking.topCandidate.track,
+    "shard-milestone-payload-recovery",
+    "extraction candidate ranking topCandidate.track drifted"
+  );
+  const shardCandidate = ranking.candidates.find(
+    (entry) => entry.track === "shard-milestone-payload-recovery"
+  );
   assert.ok(shardCandidate, "extraction candidate ranking must preserve a shard-local candidate");
-  assert.equal(shardCandidate.id, "shards.milestone-owner-family", "extraction candidate ranking top shard candidate drifted");
-  assert.ok(shardCandidate.heuristicScore >= 500, "extraction candidate ranking top shard candidate heuristicScore regressed");
+  assert.equal(
+    shardCandidate.id,
+    "shards.milestone-owner-family",
+    "extraction candidate ranking top shard candidate drifted"
+  );
+  assert.ok(
+    shardCandidate.heuristicScore >= 500,
+    "extraction candidate ranking top shard candidate heuristicScore regressed"
+  );
 
   return {
     id: "extraction-candidate-ranking",
@@ -1744,12 +5621,18 @@ function validateTokenShop(tokenShop) {
   expectArray(tokenShop.fields, "token shop fields must be an array");
   expectRecord(tokenShop.numeric_table, "token shop numeric_table must be an object");
   expectArray(tokenShop.resource_icons, "token shop resource_icons must be an array");
-  assert.ok(tokenShop.fields.length >= 50, "token shop fields should include the extracted payload");
+  assert.ok(
+    tokenShop.fields.length >= 50,
+    "token shop fields should include the extracted payload"
+  );
   ["TokenBoost", "DiamondBoost", "TokenBoostT2", "ATU25"].forEach((key) => {
     expectRecord(tokenShop.numeric_table[key], `token shop numeric_table.${key} must be present`);
   });
   ["resourceicons/resource_tokenium", "resourceicons/resource_tokenium_cap"].forEach((icon) => {
-    assert.ok(tokenShop.resource_icons.includes(icon), `token shop resource_icons must include ${icon}`);
+    assert.ok(
+      tokenShop.resource_icons.includes(icon),
+      `token shop resource_icons must include ${icon}`
+    );
   });
   return {
     id: "token-shop",
@@ -1767,17 +5650,32 @@ function validateMultiverseMarket(multiverseMarket) {
   expectRecord(multiverseMarket.source, "multiverse market source must be an object");
   expectArray(multiverseMarket.source.validated_ids, "validated_ids must be an array");
   expectArray(multiverseMarket.records, "multiverse market records must be an array");
-  assert.ok(multiverseMarket.records.length >= 20, "multiverse market records should include the validated late block");
+  assert.ok(
+    multiverseMarket.records.length >= 20,
+    "multiverse market records should include the validated late block"
+  );
   assert.equal(
     multiverseMarket.source.validated_ids.length,
     multiverseMarket.records.length,
     "validated_ids length must match record count"
   );
   multiverseMarket.records.forEach((record, index) => {
-    assert.equal(typeof record.inscription_id, "number", `records[${index}].inscription_id must be numeric`);
+    assert.equal(
+      typeof record.inscription_id,
+      "number",
+      `records[${index}].inscription_id must be numeric`
+    );
     assert.equal(typeof record.max_level, "number", `records[${index}].max_level must be numeric`);
-    assert.equal(typeof record.start_cost, "number", `records[${index}].start_cost must be numeric`);
-    assert.equal(typeof record.cost_exponent, "number", `records[${index}].cost_exponent must be numeric`);
+    assert.equal(
+      typeof record.start_cost,
+      "number",
+      `records[${index}].start_cost must be numeric`
+    );
+    assert.equal(
+      typeof record.cost_exponent,
+      "number",
+      `records[${index}].cost_exponent must be numeric`
+    );
   });
   return {
     id: "multiverse-market",
@@ -1791,18 +5689,45 @@ function validateMultiverseMarket(multiverseMarket) {
 }
 
 function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
-  expectNonEmptyString(neighborhood.metadata, "multiverse metadata neighborhood path must be present");
-  expectPositiveInteger(neighborhood.anchor_count, "multiverse metadata neighborhood anchor_count must be positive");
-  expectPositiveInteger(neighborhood.context, "multiverse metadata neighborhood context must be positive");
+  expectNonEmptyString(
+    neighborhood.metadata,
+    "multiverse metadata neighborhood path must be present"
+  );
+  expectPositiveInteger(
+    neighborhood.anchor_count,
+    "multiverse metadata neighborhood anchor_count must be positive"
+  );
+  expectPositiveInteger(
+    neighborhood.context,
+    "multiverse metadata neighborhood context must be positive"
+  );
   expectArray(neighborhood.results, "multiverse metadata neighborhood results must be an array");
-  assert.ok(neighborhood.results.length >= 10, "multiverse metadata neighborhood should preserve the narrowed anchor set");
+  assert.ok(
+    neighborhood.results.length >= 10,
+    "multiverse metadata neighborhood should preserve the narrowed anchor set"
+  );
 
   const anchors = neighborhood.results.map((entry) => entry.anchor);
-  ["CloudSavePlayerProfile", "PlayerProfileData", "FillPlayerProfileData", "GetPlayerProfileData", "InscryptionsDone", "SetAllChrystosEmporiumTexts", "Mech1Unlocked", "Market", "GemData", "ShardData"].forEach((anchor) => {
-    assert.ok(anchors.includes(anchor), `multiverse metadata neighborhood missing ${anchor} anchor`);
+  [
+    "CloudSavePlayerProfile",
+    "PlayerProfileData",
+    "FillPlayerProfileData",
+    "GetPlayerProfileData",
+    "InscryptionsDone",
+    "SetAllChrystosEmporiumTexts",
+    "Mech1Unlocked",
+    "Market",
+    "GemData",
+    "ShardData"
+  ].forEach((anchor) => {
+    assert.ok(
+      anchors.includes(anchor),
+      `multiverse metadata neighborhood missing ${anchor} anchor`
+    );
   });
 
-  const cloudSaveMatches = neighborhood.results.find((entry) => entry.anchor === "CloudSavePlayerProfile")?.matches ?? [];
+  const cloudSaveMatches =
+    neighborhood.results.find((entry) => entry.anchor === "CloudSavePlayerProfile")?.matches ?? [];
   const cloudSaveStrings = cloudSaveMatches.flatMap((entry) => [
     entry.match_value,
     ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
@@ -1816,7 +5741,8 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
     "multiverse metadata neighborhood must preserve GetPlayerProfileInfo clues"
   );
 
-  const playerProfileMatches = neighborhood.results.find((entry) => entry.anchor === "PlayerProfileData")?.matches ?? [];
+  const playerProfileMatches =
+    neighborhood.results.find((entry) => entry.anchor === "PlayerProfileData")?.matches ?? [];
   const playerProfileStrings = playerProfileMatches.flatMap((entry) => [
     entry.match_value,
     ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
@@ -1842,7 +5768,8 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
     "multiverse metadata neighborhood should not yet claim a direct PlayerProfileData|Market type-map clue"
   );
 
-  const inscryptionsMatches = neighborhood.results.find((entry) => entry.anchor === "InscryptionsDone")?.matches ?? [];
+  const inscryptionsMatches =
+    neighborhood.results.find((entry) => entry.anchor === "InscryptionsDone")?.matches ?? [];
   const inscryptionsStrings = inscryptionsMatches.flatMap((entry) => [
     entry.match_value,
     ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
@@ -1860,7 +5787,8 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
     "multiverse metadata neighborhood must preserve SetAllChrystosEmporiumTexts clues"
   );
 
-  const mechMatches = neighborhood.results.find((entry) => entry.anchor === "Mech1Unlocked")?.matches ?? [];
+  const mechMatches =
+    neighborhood.results.find((entry) => entry.anchor === "Mech1Unlocked")?.matches ?? [];
   const mechStrings = mechMatches.flatMap((entry) => [
     entry.match_value,
     ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
@@ -1870,7 +5798,8 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
     "multiverse metadata neighborhood must preserve Mech1Unlocked clues"
   );
 
-  const marketMatches = neighborhood.results.find((entry) => entry.anchor === "Market")?.matches ?? [];
+  const marketMatches =
+    neighborhood.results.find((entry) => entry.anchor === "Market")?.matches ?? [];
   const marketStrings = marketMatches.flatMap((entry) => [
     entry.match_value,
     ...(Array.isArray(entry.context) ? entry.context.map((item) => item.value) : [])
@@ -1903,24 +5832,46 @@ function validateMultiverseMarketMetadataNeighborhood(neighborhood) {
 function validateTokeniumNamingClues(clues) {
   expectNonEmptyString(clues.generatedAt, "tokenium naming clues generatedAt must be present");
   expectRecord(clues.sources, "tokenium naming clues sources must be an object");
-  expectNonEmptyString(clues.sources.metadata, "tokenium naming clues metadata path must be present");
+  expectNonEmptyString(
+    clues.sources.metadata,
+    "tokenium naming clues metadata path must be present"
+  );
   expectNonEmptyString(clues.sources.level0, "tokenium naming clues level0 path must be present");
-  expectArray(clues.sources.assetNames, "tokenium naming clues sources.assetNames must be an array");
+  expectArray(
+    clues.sources.assetNames,
+    "tokenium naming clues sources.assetNames must be an array"
+  );
   expectRecord(clues.assetNames, "tokenium naming clues assetNames must be an object");
-  expectArray(clues.assetNames.resourceIcons, "tokenium naming clues resourceIcons must be an array");
-  expectArray(clues.assetNames.academySprites, "tokenium naming clues academySprites must be an array");
+  expectArray(
+    clues.assetNames.resourceIcons,
+    "tokenium naming clues resourceIcons must be an array"
+  );
+  expectArray(
+    clues.assetNames.academySprites,
+    "tokenium naming clues academySprites must be an array"
+  );
   expectArray(clues.level0Shells, "tokenium naming clues level0Shells must be an array");
   expectArray(clues.metadataStrings, "tokenium naming clues metadataStrings must be an array");
   expectArray(clues.currentBoundary, "tokenium naming clues currentBoundary must be an array");
 
   ["Resource_Tokenium", "Resource_Tokenium_Cap_0"].forEach((name) => {
-    assert.ok(clues.assetNames.resourceIcons.includes(name), `tokenium naming clues missing ${name}`);
+    assert.ok(
+      clues.assetNames.resourceIcons.includes(name),
+      `tokenium naming clues missing ${name}`
+    );
   });
-  assert.ok(clues.assetNames.academySprites.includes("Aca.Tokenium553"), "tokenium naming clues missing Aca.Tokenium553");
+  assert.ok(
+    clues.assetNames.academySprites.includes("Aca.Tokenium553"),
+    "tokenium naming clues missing Aca.Tokenium553"
+  );
   ["AvailableTokensBar", "CostBox-Tokens", "CostBox-Tokenium"].forEach((name) => {
     assert.ok(clues.level0Shells.includes(name), `tokenium naming clues missing ${name}`);
   });
-  ["Daily Tokenium (from blue farm missions)", "Mission Materials", "INCREASE TOKENS PER TOKENIUM-553"].forEach((value) => {
+  [
+    "Daily Tokenium (from blue farm missions)",
+    "Mission Materials",
+    "INCREASE TOKENS PER TOKENIUM-553"
+  ].forEach((value) => {
     assert.ok(clues.metadataStrings.includes(value), `tokenium naming clues missing ${value}`);
   });
 
@@ -1939,57 +5890,183 @@ function validateTokeniumNamingClues(clues) {
 function validateTokenBankStateClues(clues) {
   expectNonEmptyString(clues.generatedAt, "token-bank state clues generatedAt must be present");
   expectRecord(clues.sources, "token-bank state clues sources must be an object");
-  expectNonEmptyString(clues.sources.metadata, "token-bank state clues metadata path must be present");
+  expectNonEmptyString(
+    clues.sources.metadata,
+    "token-bank state clues metadata path must be present"
+  );
   expectNonEmptyString(clues.sources.level0, "token-bank state clues level0 path must be present");
   expectNonEmptyString(clues.sources.probe, "token-bank state clues probe path must be present");
-  expectNonEmptyString(clues.sources.uabeaProbe, "token-bank state clues uabeaProbe path must be present");
+  expectNonEmptyString(
+    clues.sources.uabeaProbe,
+    "token-bank state clues uabeaProbe path must be present"
+  );
   expectArray(clues.tokenShopMethods, "token-bank state clues tokenShopMethods must be an array");
-  expectArray(clues.tokenShopControllerRefs, "token-bank state clues tokenShopControllerRefs must be an array");
-  expectArray(clues.displayOrHandlerClues, "token-bank state clues displayOrHandlerClues must be an array");
+  expectArray(
+    clues.tokenShopControllerRefs,
+    "token-bank state clues tokenShopControllerRefs must be an array"
+  );
+  expectArray(
+    clues.displayOrHandlerClues,
+    "token-bank state clues displayOrHandlerClues must be an array"
+  );
   expectArray(clues.derivedOutputs, "token-bank state clues derivedOutputs must be an array");
-  expectRecord(clues.exactSaveOwnerRecovery, "token-bank state clues exactSaveOwnerRecovery must be an object");
-  expectRecord(clues.playerProfilePersistenceBoundary, "token-bank state clues playerProfilePersistenceBoundary must be an object");
-  expectRecord(clues.genericTokeniumClaimableBoundary, "token-bank state clues genericTokeniumClaimableBoundary must be an object");
-  expectRecord(clues.cloudSavePlayerProfileBoundary, "token-bank state clues cloudSavePlayerProfileBoundary must be an object");
-  expectArray(clues.negativeTypedOwnerChecks, "token-bank state clues negativeTypedOwnerChecks must be an array");
+  expectRecord(
+    clues.exactSaveOwnerRecovery,
+    "token-bank state clues exactSaveOwnerRecovery must be an object"
+  );
+  expectRecord(
+    clues.playerProfilePersistenceBoundary,
+    "token-bank state clues playerProfilePersistenceBoundary must be an object"
+  );
+  expectRecord(
+    clues.genericTokeniumClaimableBoundary,
+    "token-bank state clues genericTokeniumClaimableBoundary must be an object"
+  );
+  expectRecord(
+    clues.cloudSavePlayerProfileBoundary,
+    "token-bank state clues cloudSavePlayerProfileBoundary must be an object"
+  );
+  expectArray(
+    clues.negativeTypedOwnerChecks,
+    "token-bank state clues negativeTypedOwnerChecks must be an array"
+  );
   expectArray(clues.currentBoundary, "token-bank state clues currentBoundary must be an array");
 
-  ["get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "SetBankFill"].forEach((name) => {
+  [
+    "get_TokenBankCap",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens",
+    "ClaimBankedTokens",
+    "SetBankFill"
+  ].forEach((name) => {
     assert.ok(clues.tokenShopMethods.includes(name), `token-bank state clues missing ${name}`);
   });
   ["BankFill", "TokenBankDescriptionText"].forEach((name) => {
-    assert.ok(clues.tokenShopControllerRefs.includes(name), `token-bank state clues missing ${name}`);
+    assert.ok(
+      clues.tokenShopControllerRefs.includes(name),
+      `token-bank state clues missing ${name}`
+    );
   });
-  ["BigStatisticPrefab.TokenBankCap", "TextHandlerLoopMods", "SetLM244BonusText"].forEach((name) => {
-    assert.ok(clues.displayOrHandlerClues.includes(name), `token-bank state clues missing ${name}`);
-  });
+  ["BigStatisticPrefab.TokenBankCap", "TextHandlerLoopMods", "SetLM244BonusText"].forEach(
+    (name) => {
+      assert.ok(
+        clues.displayOrHandlerClues.includes(name),
+        `token-bank state clues missing ${name}`
+      );
+    }
+  );
   ["FinalTokenBankFillSpeed", "<FinalTokenBankFillSpeed>k__BackingField"].forEach((name) => {
     assert.ok(clues.derivedOutputs.includes(name), `token-bank state clues missing ${name}`);
   });
-  assert.equal(clues.exactSaveOwnerRecovery.declaringType, "SaveData", "token-bank state clues declaringType drifted");
-  assert.equal(clues.exactSaveOwnerRecovery.storedAmountField, "BankedTokens", "token-bank state clues storedAmountField drifted");
-  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldType, "System.Single", "token-bank state clues storedAmountFieldType drifted");
-  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldIndex, 214, "token-bank state clues storedAmountFieldIndex drifted");
-  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldOffset, 1800, "token-bank state clues storedAmountFieldOffset drifted");
-  assert.equal(clues.playerProfilePersistenceBoundary.bridgeOwner, "PlayerProfileHandler", "token-bank state clues bridgeOwner drifted");
-  assert.equal(clues.playerProfilePersistenceBoundary.bridgeMethod, "ConvertSaveDataToProfileData", "token-bank state clues bridgeMethod drifted");
-  assert.equal(clues.playerProfilePersistenceBoundary.bridgeReturnType, "PlayerProfileData", "token-bank state clues bridgeReturnType drifted");
-  assert.equal(clues.playerProfilePersistenceBoundary.handlerField, "saveInfoCache", "token-bank state clues handlerField drifted");
-  assert.equal(clues.playerProfilePersistenceBoundary.handlerFieldType, "PlayerProfileData", "token-bank state clues handlerFieldType drifted");
-  assert.equal(clues.genericTokeniumClaimableBoundary.declaringType, "SaveData", "token-bank state clues generic claimable declaringType drifted");
-  assert.equal(clues.genericTokeniumClaimableBoundary.field, "ClaimableTokenium", "token-bank state clues generic claimable field drifted");
-  assert.equal(clues.genericTokeniumClaimableBoundary.fieldType, "System.Double", "token-bank state clues generic claimable fieldType drifted");
-  assert.equal(clues.cloudSavePlayerProfileBoundary.scriptName, "CloudSavePlayerProfile", "token-bank state clues cloud save scriptName drifted");
-  assert.equal(clues.cloudSavePlayerProfileBoundary.typedTargetFound, false, "token-bank state clues cloud save typedTargetFound drifted");
-  assert.equal(clues.cloudSavePlayerProfileBoundary.metadataAnchorFound, true, "token-bank state clues cloud save metadataAnchorFound drifted");
-  ["OnCloudSaveClick", "GetCurrentSaveFileInfo", "CloudLoad", "GetPlayerProfileInfo", "IsCloudSaved"].forEach((name) => {
-    assert.ok(clues.cloudSavePlayerProfileBoundary.metadataShellMethods.includes(name), `token-bank state clues missing cloud save shell method ${name}`);
+  assert.equal(
+    clues.exactSaveOwnerRecovery.declaringType,
+    "SaveData",
+    "token-bank state clues declaringType drifted"
+  );
+  assert.equal(
+    clues.exactSaveOwnerRecovery.storedAmountField,
+    "BankedTokens",
+    "token-bank state clues storedAmountField drifted"
+  );
+  assert.equal(
+    clues.exactSaveOwnerRecovery.storedAmountFieldType,
+    "System.Single",
+    "token-bank state clues storedAmountFieldType drifted"
+  );
+  assert.equal(
+    clues.exactSaveOwnerRecovery.storedAmountFieldIndex,
+    214,
+    "token-bank state clues storedAmountFieldIndex drifted"
+  );
+  assert.equal(
+    clues.exactSaveOwnerRecovery.storedAmountFieldOffset,
+    1800,
+    "token-bank state clues storedAmountFieldOffset drifted"
+  );
+  assert.equal(
+    clues.playerProfilePersistenceBoundary.bridgeOwner,
+    "PlayerProfileHandler",
+    "token-bank state clues bridgeOwner drifted"
+  );
+  assert.equal(
+    clues.playerProfilePersistenceBoundary.bridgeMethod,
+    "ConvertSaveDataToProfileData",
+    "token-bank state clues bridgeMethod drifted"
+  );
+  assert.equal(
+    clues.playerProfilePersistenceBoundary.bridgeReturnType,
+    "PlayerProfileData",
+    "token-bank state clues bridgeReturnType drifted"
+  );
+  assert.equal(
+    clues.playerProfilePersistenceBoundary.handlerField,
+    "saveInfoCache",
+    "token-bank state clues handlerField drifted"
+  );
+  assert.equal(
+    clues.playerProfilePersistenceBoundary.handlerFieldType,
+    "PlayerProfileData",
+    "token-bank state clues handlerFieldType drifted"
+  );
+  assert.equal(
+    clues.genericTokeniumClaimableBoundary.declaringType,
+    "SaveData",
+    "token-bank state clues generic claimable declaringType drifted"
+  );
+  assert.equal(
+    clues.genericTokeniumClaimableBoundary.field,
+    "ClaimableTokenium",
+    "token-bank state clues generic claimable field drifted"
+  );
+  assert.equal(
+    clues.genericTokeniumClaimableBoundary.fieldType,
+    "System.Double",
+    "token-bank state clues generic claimable fieldType drifted"
+  );
+  assert.equal(
+    clues.cloudSavePlayerProfileBoundary.scriptName,
+    "CloudSavePlayerProfile",
+    "token-bank state clues cloud save scriptName drifted"
+  );
+  assert.equal(
+    clues.cloudSavePlayerProfileBoundary.typedTargetFound,
+    false,
+    "token-bank state clues cloud save typedTargetFound drifted"
+  );
+  assert.equal(
+    clues.cloudSavePlayerProfileBoundary.metadataAnchorFound,
+    true,
+    "token-bank state clues cloud save metadataAnchorFound drifted"
+  );
+  [
+    "OnCloudSaveClick",
+    "GetCurrentSaveFileInfo",
+    "CloudLoad",
+    "GetPlayerProfileInfo",
+    "IsCloudSaved"
+  ].forEach((name) => {
+    assert.ok(
+      clues.cloudSavePlayerProfileBoundary.metadataShellMethods.includes(name),
+      `token-bank state clues missing cloud save shell method ${name}`
+    );
   });
-  ["<CloudSave>d__23", "<CloudSavePlayerProfile>d__24", "<GetCurrentSaveFileInfo>d__25", "<CloudLoad>d__28", "<GetPlayerProfileInfo>d__29"].forEach((name) => {
-    assert.ok(clues.cloudSavePlayerProfileBoundary.metadataStateMachines.includes(name), `token-bank state clues missing cloud save state machine ${name}`);
+  [
+    "<CloudSave>d__23",
+    "<CloudSavePlayerProfile>d__24",
+    "<GetCurrentSaveFileInfo>d__25",
+    "<CloudLoad>d__28",
+    "<GetPlayerProfileInfo>d__29"
+  ].forEach((name) => {
+    assert.ok(
+      clues.cloudSavePlayerProfileBoundary.metadataStateMachines.includes(name),
+      `token-bank state clues missing cloud save state machine ${name}`
+    );
   });
   ["<saveData>5__2", "<lastCloudSave>5__3"].forEach((name) => {
-    assert.ok(clues.cloudSavePlayerProfileBoundary.metadataTransientLocals.includes(name), `token-bank state clues missing cloud save transient local ${name}`);
+    assert.ok(
+      clues.cloudSavePlayerProfileBoundary.metadataTransientLocals.includes(name),
+      `token-bank state clues missing cloud save transient local ${name}`
+    );
   });
   [
     "SaveData.ClaimableBankTokens",
@@ -1998,7 +6075,10 @@ function validateTokenBankStateClues(clues) {
     "PlayerProfileData.ClaimableBankTokens",
     "PlayerProfileData.TokenBankCap"
   ].forEach((name) => {
-    assert.ok(clues.negativeTypedOwnerChecks.includes(name), `token-bank state clues missing ${name}`);
+    assert.ok(
+      clues.negativeTypedOwnerChecks.includes(name),
+      `token-bank state clues missing ${name}`
+    );
   });
 
   return {
@@ -2017,49 +6097,131 @@ function validateDailyTokeniumLaneClues(clues) {
   expectNonEmptyString(clues.generatedAt, "daily tokenium lane clues generatedAt must be present");
   expectRecord(clues.sources, "daily tokenium lane clues sources must be an object");
   ["metadata", "level0", "iapCatalog", "probe", "academySprite", "uabeaProbe"].forEach((field) => {
-    expectNonEmptyString(clues.sources[field], `daily tokenium lane clues sources.${field} must be present`);
+    expectNonEmptyString(
+      clues.sources[field],
+      `daily tokenium lane clues sources.${field} must be present`
+    );
   });
-  expectArray(clues.ownerFamilyClues, "daily tokenium lane clues ownerFamilyClues must be an array");
+  expectArray(
+    clues.ownerFamilyClues,
+    "daily tokenium lane clues ownerFamilyClues must be an array"
+  );
   expectArray(clues.modifierClues, "daily tokenium lane clues modifierClues must be an array");
-  expectArray(clues.premiumModifierClues, "daily tokenium lane clues premiumModifierClues must be an array");
-  expectArray(clues.playerFacingStrings, "daily tokenium lane clues playerFacingStrings must be an array");
-  expectRecord(clues.exactSaveOwnerRecovery, "daily tokenium lane clues exactSaveOwnerRecovery must be an object");
-  expectRecord(clues.genericTokeniumClaimableBoundary, "daily tokenium lane clues genericTokeniumClaimableBoundary must be an object");
-  expectArray(clues.negativeTypedOwnerChecks, "daily tokenium lane clues negativeTypedOwnerChecks must be an array");
+  expectArray(
+    clues.premiumModifierClues,
+    "daily tokenium lane clues premiumModifierClues must be an array"
+  );
+  expectArray(
+    clues.playerFacingStrings,
+    "daily tokenium lane clues playerFacingStrings must be an array"
+  );
+  expectRecord(
+    clues.exactSaveOwnerRecovery,
+    "daily tokenium lane clues exactSaveOwnerRecovery must be an object"
+  );
+  expectRecord(
+    clues.genericTokeniumClaimableBoundary,
+    "daily tokenium lane clues genericTokeniumClaimableBoundary must be an object"
+  );
+  expectArray(
+    clues.negativeTypedOwnerChecks,
+    "daily tokenium lane clues negativeTypedOwnerChecks must be an array"
+  );
   expectArray(clues.currentBoundary, "daily tokenium lane clues currentBoundary must be an array");
 
-  ["SpaceAcademy", "SpaceAcademyMain", "TextHandlerSpaceAcademy", "FarmMissions"].forEach((name) => {
-    assert.ok(clues.ownerFamilyClues.includes(name), `daily tokenium lane clues missing ${name}`);
-  });
-  ["SetLM244BonusText", "BuyLM244", "FinalDailyTokenBonus", "FinalFragmentsGainedFromFarmMissions"].forEach((name) => {
+  ["SpaceAcademy", "SpaceAcademyMain", "TextHandlerSpaceAcademy", "FarmMissions"].forEach(
+    (name) => {
+      assert.ok(clues.ownerFamilyClues.includes(name), `daily tokenium lane clues missing ${name}`);
+    }
+  );
+  [
+    "SetLM244BonusText",
+    "BuyLM244",
+    "FinalDailyTokenBonus",
+    "FinalFragmentsGainedFromFarmMissions"
+  ].forEach((name) => {
     assert.ok(clues.modifierClues.includes(name), `daily tokenium lane clues missing ${name}`);
   });
-  ["BuyCollectorDevice", "CollectorCapBonus", "CollectorMatsBonus", "SetCollectorDeviceTexts"].forEach((name) => {
-    assert.ok(clues.premiumModifierClues.includes(name), `daily tokenium lane clues missing ${name}`);
+  [
+    "BuyCollectorDevice",
+    "CollectorCapBonus",
+    "CollectorMatsBonus",
+    "SetCollectorDeviceTexts"
+  ].forEach((name) => {
+    assert.ok(
+      clues.premiumModifierClues.includes(name),
+      `daily tokenium lane clues missing ${name}`
+    );
   });
   [
     "0 / 2000 Daily Tokenium (from blue farm missions)",
     "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
     "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
   ].forEach((value) => {
-    assert.ok(clues.playerFacingStrings.includes(value), `daily tokenium lane clues missing ${value}`);
+    assert.ok(
+      clues.playerFacingStrings.includes(value),
+      `daily tokenium lane clues missing ${value}`
+    );
   });
-  assert.equal(clues.exactSaveOwnerRecovery.declaringType, "SaveData", "daily tokenium lane clues declaringType drifted");
-  assert.equal(clues.exactSaveOwnerRecovery.storedAmountField, "DailyTokenium", "daily tokenium lane clues storedAmountField drifted");
-  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldType, "System.Double", "daily tokenium lane clues storedAmountFieldType drifted");
-  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldIndex, 2361, "daily tokenium lane clues storedAmountFieldIndex drifted");
-  assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldOffset, 13032, "daily tokenium lane clues storedAmountFieldOffset drifted");
-  assert.equal(clues.genericTokeniumClaimableBoundary.declaringType, "SaveData", "daily tokenium lane clues claimable declaringType drifted");
-  assert.equal(clues.genericTokeniumClaimableBoundary.field, "ClaimableTokenium", "daily tokenium lane clues claimable field drifted");
-  assert.equal(clues.genericTokeniumClaimableBoundary.fieldType, "System.Double", "daily tokenium lane clues claimable fieldType drifted");
-  assert.equal(clues.genericTokeniumClaimableBoundary.fieldIndex, 2022, "daily tokenium lane clues claimable fieldIndex drifted");
-  assert.equal(clues.genericTokeniumClaimableBoundary.fieldOffset, 12064, "daily tokenium lane clues claimable fieldOffset drifted");
+  assert.equal(
+    clues.exactSaveOwnerRecovery.declaringType,
+    "SaveData",
+    "daily tokenium lane clues declaringType drifted"
+  );
+  assert.equal(
+    clues.exactSaveOwnerRecovery.storedAmountField,
+    "DailyTokenium",
+    "daily tokenium lane clues storedAmountField drifted"
+  );
+  assert.equal(
+    clues.exactSaveOwnerRecovery.storedAmountFieldType,
+    "System.Double",
+    "daily tokenium lane clues storedAmountFieldType drifted"
+  );
+  assert.equal(
+    clues.exactSaveOwnerRecovery.storedAmountFieldIndex,
+    2361,
+    "daily tokenium lane clues storedAmountFieldIndex drifted"
+  );
+  assert.equal(
+    clues.exactSaveOwnerRecovery.storedAmountFieldOffset,
+    13032,
+    "daily tokenium lane clues storedAmountFieldOffset drifted"
+  );
+  assert.equal(
+    clues.genericTokeniumClaimableBoundary.declaringType,
+    "SaveData",
+    "daily tokenium lane clues claimable declaringType drifted"
+  );
+  assert.equal(
+    clues.genericTokeniumClaimableBoundary.field,
+    "ClaimableTokenium",
+    "daily tokenium lane clues claimable field drifted"
+  );
+  assert.equal(
+    clues.genericTokeniumClaimableBoundary.fieldType,
+    "System.Double",
+    "daily tokenium lane clues claimable fieldType drifted"
+  );
+  assert.equal(
+    clues.genericTokeniumClaimableBoundary.fieldIndex,
+    2022,
+    "daily tokenium lane clues claimable fieldIndex drifted"
+  );
+  assert.equal(
+    clues.genericTokeniumClaimableBoundary.fieldOffset,
+    12064,
+    "daily tokenium lane clues claimable fieldOffset drifted"
+  );
   [
     "SaveData.DailyTokeniumCap",
     "PlayerProfileData.DailyTokenium",
     "PlayerProfileData.DailyTokeniumCap"
   ].forEach((name) => {
-    assert.ok(clues.negativeTypedOwnerChecks.includes(name), `daily tokenium lane clues missing ${name}`);
+    assert.ok(
+      clues.negativeTypedOwnerChecks.includes(name),
+      `daily tokenium lane clues missing ${name}`
+    );
   });
 
   return {
@@ -2075,16 +6237,37 @@ function validateDailyTokeniumLaneClues(clues) {
 }
 
 function validateTokenBankFormulaBoundary(clues) {
-  expectNonEmptyString(clues.generatedAt, "token-bank formula boundary generatedAt must be present");
+  expectNonEmptyString(
+    clues.generatedAt,
+    "token-bank formula boundary generatedAt must be present"
+  );
   expectRecord(clues.sources, "token-bank formula boundary sources must be an object");
   ["metadata", "level0", "probe"].forEach((field) => {
-    expectNonEmptyString(clues.sources[field], `token-bank formula boundary sources.${field} must be present`);
+    expectNonEmptyString(
+      clues.sources[field],
+      `token-bank formula boundary sources.${field} must be present`
+    );
   });
-  expectArray(clues.derivedOutputCluster, "token-bank formula boundary derivedOutputCluster must be an array");
-  expectArray(clues.controllerSideAnchors, "token-bank formula boundary controllerSideAnchors must be an array");
-  expectArray(clues.saveFamilyCluesChecked, "token-bank formula boundary saveFamilyCluesChecked must be an array");
-  expectArray(clues.saveFamilyCluesInDerivedContext, "token-bank formula boundary saveFamilyCluesInDerivedContext must be an array");
-  expectArray(clues.currentBoundary, "token-bank formula boundary currentBoundary must be an array");
+  expectArray(
+    clues.derivedOutputCluster,
+    "token-bank formula boundary derivedOutputCluster must be an array"
+  );
+  expectArray(
+    clues.controllerSideAnchors,
+    "token-bank formula boundary controllerSideAnchors must be an array"
+  );
+  expectArray(
+    clues.saveFamilyCluesChecked,
+    "token-bank formula boundary saveFamilyCluesChecked must be an array"
+  );
+  expectArray(
+    clues.saveFamilyCluesInDerivedContext,
+    "token-bank formula boundary saveFamilyCluesInDerivedContext must be an array"
+  );
+  expectArray(
+    clues.currentBoundary,
+    "token-bank formula boundary currentBoundary must be an array"
+  );
 
   [
     "get_FinalTokenBankCap",
@@ -2096,13 +6279,33 @@ function validateTokenBankFormulaBoundary(clues) {
     "FinalTokenBankCap",
     "FinalTokenBankFillSpeed"
   ].forEach((name) => {
-    assert.ok(clues.derivedOutputCluster.includes(name), `token-bank formula boundary missing ${name}`);
+    assert.ok(
+      clues.derivedOutputCluster.includes(name),
+      `token-bank formula boundary missing ${name}`
+    );
   });
-  ["TokenShop", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "SetBankFill"].forEach((name) => {
-    assert.ok(clues.controllerSideAnchors.includes(name), `token-bank formula boundary missing ${name}`);
+  [
+    "TokenShop",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens",
+    "ClaimBankedTokens",
+    "SetBankFill"
+  ].forEach((name) => {
+    assert.ok(
+      clues.controllerSideAnchors.includes(name),
+      `token-bank formula boundary missing ${name}`
+    );
   });
-  ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"].forEach((name) => {
-    assert.ok(clues.saveFamilyCluesChecked.includes(name), `token-bank formula boundary missing ${name}`);
+  [
+    "PlayerProfileData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "CloudSavePlayerProfile"
+  ].forEach((name) => {
+    assert.ok(
+      clues.saveFamilyCluesChecked.includes(name),
+      `token-bank formula boundary missing ${name}`
+    );
   });
   assert.equal(
     clues.saveFamilyCluesInDerivedContext.length,
@@ -2123,21 +6326,64 @@ function validateTokenBankFormulaBoundary(clues) {
 }
 
 function validateMultiverseMarketRangeBoundary(boundary) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market range boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market range boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "multiverse market range boundary sources must be an object");
-  expectNonEmptyString(boundary.sources.validatedRows, "multiverse market range boundary validatedRows source must be present");
-  expectNonEmptyString(boundary.sources.metadataNeighborhood, "multiverse market range boundary metadataNeighborhood source must be present");
-  expectArray(boundary.validatedRowIds, "multiverse market range boundary validatedRowIds must be an array");
-  expectArray(boundary.validatedRowRanges, "multiverse market range boundary validatedRowRanges must be an array");
-  expectArray(boundary.metadataIsLevels, "multiverse market range boundary metadataIsLevels must be an array");
-  expectNonEmptyString(boundary.metadataIsRangeLabel, "multiverse market range boundary metadataIsRangeLabel must be present");
+  expectNonEmptyString(
+    boundary.sources.validatedRows,
+    "multiverse market range boundary validatedRows source must be present"
+  );
+  expectNonEmptyString(
+    boundary.sources.metadataNeighborhood,
+    "multiverse market range boundary metadataNeighborhood source must be present"
+  );
+  expectArray(
+    boundary.validatedRowIds,
+    "multiverse market range boundary validatedRowIds must be an array"
+  );
+  expectArray(
+    boundary.validatedRowRanges,
+    "multiverse market range boundary validatedRowRanges must be an array"
+  );
+  expectArray(
+    boundary.metadataIsLevels,
+    "multiverse market range boundary metadataIsLevels must be an array"
+  );
+  expectNonEmptyString(
+    boundary.metadataIsRangeLabel,
+    "multiverse market range boundary metadataIsRangeLabel must be present"
+  );
   expectArray(boundary.overlapIds, "multiverse market range boundary overlapIds must be an array");
-  expectArray(boundary.currentBoundary, "multiverse market range boundary currentBoundary must be an array");
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market range boundary currentBoundary must be an array"
+  );
 
-  assert.deepEqual(boundary.validatedRowRanges, ["50-59", "63-74"], "multiverse market range boundary validatedRowRanges drifted");
-  assert.deepEqual(boundary.metadataIsLevels, [71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110], "multiverse market range boundary metadataIsLevels drifted");
-  assert.equal(boundary.metadataIsRangeLabel, "IS71Level through IS110Level", "multiverse market range boundary metadataIsRangeLabel drifted");
-  assert.deepEqual(boundary.overlapIds, [71, 72, 73, 74], "multiverse market range boundary overlapIds drifted");
+  assert.deepEqual(
+    boundary.validatedRowRanges,
+    ["50-59", "63-74"],
+    "multiverse market range boundary validatedRowRanges drifted"
+  );
+  assert.deepEqual(
+    boundary.metadataIsLevels,
+    [
+      71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93,
+      94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110
+    ],
+    "multiverse market range boundary metadataIsLevels drifted"
+  );
+  assert.equal(
+    boundary.metadataIsRangeLabel,
+    "IS71Level through IS110Level",
+    "multiverse market range boundary metadataIsRangeLabel drifted"
+  );
+  assert.deepEqual(
+    boundary.overlapIds,
+    [71, 72, 73, 74],
+    "multiverse market range boundary overlapIds drifted"
+  );
 
   return {
     id: "multiverse-market-range-boundary",
@@ -2152,25 +6398,56 @@ function validateMultiverseMarketRangeBoundary(boundary) {
 }
 
 function validateMultiverseMarketRowTextCoverage(coverage) {
-  expectNonEmptyString(coverage.generatedAt, "multiverse market row text coverage generatedAt must be present");
+  expectNonEmptyString(
+    coverage.generatedAt,
+    "multiverse market row text coverage generatedAt must be present"
+  );
   expectRecord(coverage.sources, "multiverse market row text coverage sources must be an object");
   ["metadata", "level0", "probe", "validatedRows"].forEach((field) => {
-    expectNonEmptyString(coverage.sources[field], `multiverse market row text coverage sources.${field} must be present`);
+    expectNonEmptyString(
+      coverage.sources[field],
+      `multiverse market row text coverage sources.${field} must be present`
+    );
   });
-  expectArray(coverage.textHandlerAnchors, "multiverse market row text coverage textHandlerAnchors must be an array");
-  expectArray(coverage.validatedRowCostTexts, "multiverse market row text coverage validatedRowCostTexts must be an array");
-  expectArray(coverage.sampleBuyHooks, "multiverse market row text coverage sampleBuyHooks must be an array");
-  expectArray(coverage.currentBoundary, "multiverse market row text coverage currentBoundary must be an array");
+  expectArray(
+    coverage.textHandlerAnchors,
+    "multiverse market row text coverage textHandlerAnchors must be an array"
+  );
+  expectArray(
+    coverage.validatedRowCostTexts,
+    "multiverse market row text coverage validatedRowCostTexts must be an array"
+  );
+  expectArray(
+    coverage.sampleBuyHooks,
+    "multiverse market row text coverage sampleBuyHooks must be an array"
+  );
+  expectArray(
+    coverage.currentBoundary,
+    "multiverse market row text coverage currentBoundary must be an array"
+  );
 
   ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts"].forEach((name) => {
-    assert.ok(coverage.textHandlerAnchors.includes(name), `multiverse market row text coverage missing ${name}`);
+    assert.ok(
+      coverage.textHandlerAnchors.includes(name),
+      `multiverse market row text coverage missing ${name}`
+    );
   });
   ["SetIS50CostText", "SetIS59CostText", "SetIS63CostText", "SetIS74CostText"].forEach((name) => {
-    assert.ok(coverage.validatedRowCostTexts.includes(name), `multiverse market row text coverage missing ${name}`);
+    assert.ok(
+      coverage.validatedRowCostTexts.includes(name),
+      `multiverse market row text coverage missing ${name}`
+    );
   });
-  assert.equal(coverage.validatedRowCostTexts.length, 22, "multiverse market row text coverage should preserve 22 validated row cost texts");
+  assert.equal(
+    coverage.validatedRowCostTexts.length,
+    22,
+    "multiverse market row text coverage should preserve 22 validated row cost texts"
+  );
   ["BuyIS50", "BuyIS74"].forEach((name) => {
-    assert.ok(coverage.sampleBuyHooks.includes(name), `multiverse market row text coverage missing ${name}`);
+    assert.ok(
+      coverage.sampleBuyHooks.includes(name),
+      `multiverse market row text coverage missing ${name}`
+    );
   });
 
   return {
@@ -2189,22 +6466,48 @@ function validateTokenShopCostLanes(lanes) {
   expectNonEmptyString(lanes.generatedAt, "token shop cost lanes generatedAt must be present");
   expectRecord(lanes.sources, "token shop cost lanes sources must be an object");
   ["tokenShopExtract", "level0", "probe"].forEach((field) => {
-    expectNonEmptyString(lanes.sources[field], `token shop cost lanes sources.${field} must be present`);
+    expectNonEmptyString(
+      lanes.sources[field],
+      `token shop cost lanes sources.${field} must be present`
+    );
   });
   expectArray(lanes.tokenSpendGroups, "token shop cost lanes tokenSpendGroups must be an array");
-  expectArray(lanes.dailyTokeniumModifierGroups, "token shop cost lanes dailyTokeniumModifierGroups must be an array");
+  expectArray(
+    lanes.dailyTokeniumModifierGroups,
+    "token shop cost lanes dailyTokeniumModifierGroups must be an array"
+  );
   expectArray(lanes.diamondGroups, "token shop cost lanes diamondGroups must be an array");
   expectArray(lanes.playerFacingClues, "token shop cost lanes playerFacingClues must be an array");
   expectArray(lanes.currentBoundary, "token shop cost lanes currentBoundary must be an array");
 
-  ["TokenBoost", "TokenBoostT2", "TokenBoostT3", "Tier2Token", "Tier5Token", "MK8TokenBoost"].forEach((name) => {
+  [
+    "TokenBoost",
+    "TokenBoostT2",
+    "TokenBoostT3",
+    "Tier2Token",
+    "Tier5Token",
+    "MK8TokenBoost"
+  ].forEach((name) => {
     assert.ok(lanes.tokenSpendGroups.includes(name), `token shop cost lanes missing ${name}`);
   });
   ["TokenDailiesT2", "TokenDailiesT3"].forEach((name) => {
-    assert.ok(lanes.dailyTokeniumModifierGroups.includes(name), `token shop cost lanes missing ${name}`);
+    assert.ok(
+      lanes.dailyTokeniumModifierGroups.includes(name),
+      `token shop cost lanes missing ${name}`
+    );
   });
-  assert.deepEqual(lanes.diamondGroups, ["DiamondBoost"], "token shop cost lanes diamondGroups drifted");
-  ["CostBox-Tokens", "CostBox-Tokenium", "Tokens Booster T1", "Tokens Booster T2", "Mission Materials Booster"].forEach((name) => {
+  assert.deepEqual(
+    lanes.diamondGroups,
+    ["DiamondBoost"],
+    "token shop cost lanes diamondGroups drifted"
+  );
+  [
+    "CostBox-Tokens",
+    "CostBox-Tokenium",
+    "Tokens Booster T1",
+    "Tokens Booster T2",
+    "Mission Materials Booster"
+  ].forEach((name) => {
     assert.ok(lanes.playerFacingClues.includes(name), `token shop cost lanes missing ${name}`);
   });
 
@@ -2224,18 +6527,42 @@ function validateSpendActionLaneClues(clues) {
   expectNonEmptyString(clues.generatedAt, "spend action lane clues generatedAt must be present");
   expectRecord(clues.sources, "spend action lane clues sources must be an object");
   ["probe", "metadata", "level0", "tokenShopExtract", "iapCatalog"].forEach((field) => {
-    expectNonEmptyString(clues.sources[field], `spend action lane clues sources.${field} must be present`);
+    expectNonEmptyString(
+      clues.sources[field],
+      `spend action lane clues sources.${field} must be present`
+    );
   });
-  expectArray(clues.tokenDirectBuyHooks, "spend action lane clues tokenDirectBuyHooks must be an array");
+  expectArray(
+    clues.tokenDirectBuyHooks,
+    "spend action lane clues tokenDirectBuyHooks must be an array"
+  );
   expectArray(clues.tokenHoldHooks, "spend action lane clues tokenHoldHooks must be an array");
-  expectArray(clues.diamondDirectBuyHooks, "spend action lane clues diamondDirectBuyHooks must be an array");
+  expectArray(
+    clues.diamondDirectBuyHooks,
+    "spend action lane clues diamondDirectBuyHooks must be an array"
+  );
   expectArray(clues.diamondHoldHooks, "spend action lane clues diamondHoldHooks must be an array");
-  expectArray(clues.dailyTokeniumModifierHooks, "spend action lane clues dailyTokeniumModifierHooks must be an array");
-  expectArray(clues.tokenSupportingShells, "spend action lane clues tokenSupportingShells must be an array");
-  expectArray(clues.dailyTokeniumSupportingShells, "spend action lane clues dailyTokeniumSupportingShells must be an array");
+  expectArray(
+    clues.dailyTokeniumModifierHooks,
+    "spend action lane clues dailyTokeniumModifierHooks must be an array"
+  );
+  expectArray(
+    clues.tokenSupportingShells,
+    "spend action lane clues tokenSupportingShells must be an array"
+  );
+  expectArray(
+    clues.dailyTokeniumSupportingShells,
+    "spend action lane clues dailyTokeniumSupportingShells must be an array"
+  );
   expectRecord(clues.searchResults, "spend action lane clues searchResults must be an object");
-  expectRecord(clues.searchResults.metadata, "spend action lane clues searchResults.metadata must be an object");
-  expectRecord(clues.searchResults.level0, "spend action lane clues searchResults.level0 must be an object");
+  expectRecord(
+    clues.searchResults.metadata,
+    "spend action lane clues searchResults.metadata must be an object"
+  );
+  expectRecord(
+    clues.searchResults.level0,
+    "spend action lane clues searchResults.level0 must be an object"
+  );
   expectArray(clues.currentBoundary, "spend action lane clues currentBoundary must be an array");
 
   ["BuyTokenBoost", "BuyMK1TokenBoost", "BuyMK8TokenBoost"].forEach((name) => {
@@ -2244,32 +6571,94 @@ function validateSpendActionLaneClues(clues) {
   ["StartTokenBoostHold", "StopTokenBoostHold"].forEach((name) => {
     assert.ok(clues.tokenHoldHooks.includes(name), `spend action lane clues missing ${name}`);
   });
-  assert.deepEqual(clues.diamondDirectBuyHooks, ["BuyDiamondBoost"], "spend action lane clues diamondDirectBuyHooks drifted");
+  assert.deepEqual(
+    clues.diamondDirectBuyHooks,
+    ["BuyDiamondBoost"],
+    "spend action lane clues diamondDirectBuyHooks drifted"
+  );
   ["StartDiamondBoostHold", "StopDiamondBoostHold"].forEach((name) => {
     assert.ok(clues.diamondHoldHooks.includes(name), `spend action lane clues missing ${name}`);
   });
   ["BuyLM244", "BuyCollectorDevice"].forEach((name) => {
-    assert.ok(clues.dailyTokeniumModifierHooks.includes(name), `spend action lane clues missing ${name}`);
+    assert.ok(
+      clues.dailyTokeniumModifierHooks.includes(name),
+      `spend action lane clues missing ${name}`
+    );
   });
-  assert.ok(clues.tokenSupportingShells.includes("CostBox-Tokens"), "spend action lane clues missing CostBox-Tokens");
+  assert.ok(
+    clues.tokenSupportingShells.includes("CostBox-Tokens"),
+    "spend action lane clues missing CostBox-Tokens"
+  );
   ["CostBox-Tokenium", "Mission Materials Booster", "COLLECTERS PACK"].forEach((name) => {
-    assert.ok(clues.dailyTokeniumSupportingShells.includes(name), `spend action lane clues missing ${name}`);
+    assert.ok(
+      clues.dailyTokeniumSupportingShells.includes(name),
+      `spend action lane clues missing ${name}`
+    );
   });
-  assert.ok(clues.searchResults.metadata.BuyTokenBoost > 0, "spend action lane clues must preserve metadata BuyTokenBoost matches");
-  assert.ok(clues.searchResults.metadata.BuyDiamondBoost > 0, "spend action lane clues must preserve metadata BuyDiamondBoost matches");
-  assert.ok(clues.searchResults.metadata.BuyLM244 > 0, "spend action lane clues must preserve metadata BuyLM244 matches");
-  assert.ok(clues.searchResults.metadata.BuyCollectorDevice > 0, "spend action lane clues must preserve metadata BuyCollectorDevice matches");
-  assert.equal(clues.searchResults.metadata.BuyTokenDailiesT2, 0, "spend action lane clues metadata BuyTokenDailiesT2 should stay unresolved");
-  assert.equal(clues.searchResults.metadata.BuyTokenDailiesT3, 0, "spend action lane clues metadata BuyTokenDailiesT3 should stay unresolved");
-  assert.ok(clues.searchResults.level0.BuyTokenBoost > 0, "spend action lane clues must preserve level0 BuyTokenBoost matches");
-  assert.ok(clues.searchResults.level0.BuyDiamondBoost > 0, "spend action lane clues must preserve level0 BuyDiamondBoost matches");
-  assert.ok(clues.searchResults.level0.BuyLM244 > 0, "spend action lane clues must preserve level0 BuyLM244 matches");
-  assert.ok(clues.searchResults.level0.BuyCollectorDevice > 0, "spend action lane clues must preserve level0 BuyCollectorDevice matches");
-  assert.equal(clues.searchResults.level0.BuyTokenDailiesT2, 0, "spend action lane clues level0 BuyTokenDailiesT2 should stay unresolved");
-  assert.equal(clues.searchResults.level0.BuyTokenDailiesT3, 0, "spend action lane clues level0 BuyTokenDailiesT3 should stay unresolved");
-  assert.ok(clues.searchResults.level0["CostBox-Tokens"] > 0, "spend action lane clues must preserve CostBox-Tokens shells");
-  assert.ok(clues.searchResults.level0["CostBox-Tokenium"] > 0, "spend action lane clues must preserve CostBox-Tokenium shells");
-  assert.ok(clues.searchResults.level0["Mission Materials Booster"] > 0, "spend action lane clues must preserve Mission Materials Booster shells");
+  assert.ok(
+    clues.searchResults.metadata.BuyTokenBoost > 0,
+    "spend action lane clues must preserve metadata BuyTokenBoost matches"
+  );
+  assert.ok(
+    clues.searchResults.metadata.BuyDiamondBoost > 0,
+    "spend action lane clues must preserve metadata BuyDiamondBoost matches"
+  );
+  assert.ok(
+    clues.searchResults.metadata.BuyLM244 > 0,
+    "spend action lane clues must preserve metadata BuyLM244 matches"
+  );
+  assert.ok(
+    clues.searchResults.metadata.BuyCollectorDevice > 0,
+    "spend action lane clues must preserve metadata BuyCollectorDevice matches"
+  );
+  assert.equal(
+    clues.searchResults.metadata.BuyTokenDailiesT2,
+    0,
+    "spend action lane clues metadata BuyTokenDailiesT2 should stay unresolved"
+  );
+  assert.equal(
+    clues.searchResults.metadata.BuyTokenDailiesT3,
+    0,
+    "spend action lane clues metadata BuyTokenDailiesT3 should stay unresolved"
+  );
+  assert.ok(
+    clues.searchResults.level0.BuyTokenBoost > 0,
+    "spend action lane clues must preserve level0 BuyTokenBoost matches"
+  );
+  assert.ok(
+    clues.searchResults.level0.BuyDiamondBoost > 0,
+    "spend action lane clues must preserve level0 BuyDiamondBoost matches"
+  );
+  assert.ok(
+    clues.searchResults.level0.BuyLM244 > 0,
+    "spend action lane clues must preserve level0 BuyLM244 matches"
+  );
+  assert.ok(
+    clues.searchResults.level0.BuyCollectorDevice > 0,
+    "spend action lane clues must preserve level0 BuyCollectorDevice matches"
+  );
+  assert.equal(
+    clues.searchResults.level0.BuyTokenDailiesT2,
+    0,
+    "spend action lane clues level0 BuyTokenDailiesT2 should stay unresolved"
+  );
+  assert.equal(
+    clues.searchResults.level0.BuyTokenDailiesT3,
+    0,
+    "spend action lane clues level0 BuyTokenDailiesT3 should stay unresolved"
+  );
+  assert.ok(
+    clues.searchResults.level0["CostBox-Tokens"] > 0,
+    "spend action lane clues must preserve CostBox-Tokens shells"
+  );
+  assert.ok(
+    clues.searchResults.level0["CostBox-Tokenium"] > 0,
+    "spend action lane clues must preserve CostBox-Tokenium shells"
+  );
+  assert.ok(
+    clues.searchResults.level0["Mission Materials Booster"] > 0,
+    "spend action lane clues must preserve Mission Materials Booster shells"
+  );
 
   return {
     id: "spend-action-lane-clues",
@@ -2284,37 +6673,109 @@ function validateSpendActionLaneClues(clues) {
 }
 
 function validateMultiverseMarketActionShell(shell) {
-  expectNonEmptyString(shell.generatedAt, "multiverse market action shell generatedAt must be present");
+  expectNonEmptyString(
+    shell.generatedAt,
+    "multiverse market action shell generatedAt must be present"
+  );
   expectRecord(shell.sources, "multiverse market action shell sources must be an object");
   ["probe", "metadata", "validatedRows"].forEach((field) => {
-    expectNonEmptyString(shell.sources[field], `multiverse market action shell sources.${field} must be present`);
+    expectNonEmptyString(
+      shell.sources[field],
+      `multiverse market action shell sources.${field} must be present`
+    );
   });
-  expectArray(shell.textHandlerAnchors, "multiverse market action shell textHandlerAnchors must be an array");
-  expectRecord(shell.contextDerivedBuyHookRange, "multiverse market action shell contextDerivedBuyHookRange must be an object");
-  expectRecord(shell.contextDerivedCostTextRange, "multiverse market action shell contextDerivedCostTextRange must be an object");
-  expectArray(shell.validatedBuyHookRanges, "multiverse market action shell validatedBuyHookRanges must be an array");
-  expectArray(shell.validatedBuyHooks, "multiverse market action shell validatedBuyHooks must be an array");
-  expectArray(shell.validatedCostTexts, "multiverse market action shell validatedCostTexts must be an array");
-  expectArray(shell.currentBoundary, "multiverse market action shell currentBoundary must be an array");
+  expectArray(
+    shell.textHandlerAnchors,
+    "multiverse market action shell textHandlerAnchors must be an array"
+  );
+  expectRecord(
+    shell.contextDerivedBuyHookRange,
+    "multiverse market action shell contextDerivedBuyHookRange must be an object"
+  );
+  expectRecord(
+    shell.contextDerivedCostTextRange,
+    "multiverse market action shell contextDerivedCostTextRange must be an object"
+  );
+  expectArray(
+    shell.validatedBuyHookRanges,
+    "multiverse market action shell validatedBuyHookRanges must be an array"
+  );
+  expectArray(
+    shell.validatedBuyHooks,
+    "multiverse market action shell validatedBuyHooks must be an array"
+  );
+  expectArray(
+    shell.validatedCostTexts,
+    "multiverse market action shell validatedCostTexts must be an array"
+  );
+  expectArray(
+    shell.currentBoundary,
+    "multiverse market action shell currentBoundary must be an array"
+  );
 
   ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts"].forEach((name) => {
-    assert.ok(shell.textHandlerAnchors.includes(name), `multiverse market action shell missing ${name}`);
+    assert.ok(
+      shell.textHandlerAnchors.includes(name),
+      `multiverse market action shell missing ${name}`
+    );
   });
-  assert.equal(shell.contextDerivedBuyHookRange.start, 1, "multiverse market action shell buy range start drifted");
-  assert.equal(shell.contextDerivedBuyHookRange.end, 110, "multiverse market action shell buy range end drifted");
-  assert.equal(shell.contextDerivedBuyHookRange.count, 110, "multiverse market action shell buy range count drifted");
-  assert.equal(shell.contextDerivedCostTextRange.start, 1, "multiverse market action shell cost-text range start drifted");
-  assert.equal(shell.contextDerivedCostTextRange.end, 110, "multiverse market action shell cost-text range end drifted");
-  assert.equal(shell.contextDerivedCostTextRange.count, 110, "multiverse market action shell cost-text range count drifted");
-  assert.deepEqual(shell.validatedBuyHookRanges, ["50-59", "63-74"], "multiverse market action shell validatedBuyHookRanges drifted");
+  assert.equal(
+    shell.contextDerivedBuyHookRange.start,
+    1,
+    "multiverse market action shell buy range start drifted"
+  );
+  assert.equal(
+    shell.contextDerivedBuyHookRange.end,
+    110,
+    "multiverse market action shell buy range end drifted"
+  );
+  assert.equal(
+    shell.contextDerivedBuyHookRange.count,
+    110,
+    "multiverse market action shell buy range count drifted"
+  );
+  assert.equal(
+    shell.contextDerivedCostTextRange.start,
+    1,
+    "multiverse market action shell cost-text range start drifted"
+  );
+  assert.equal(
+    shell.contextDerivedCostTextRange.end,
+    110,
+    "multiverse market action shell cost-text range end drifted"
+  );
+  assert.equal(
+    shell.contextDerivedCostTextRange.count,
+    110,
+    "multiverse market action shell cost-text range count drifted"
+  );
+  assert.deepEqual(
+    shell.validatedBuyHookRanges,
+    ["50-59", "63-74"],
+    "multiverse market action shell validatedBuyHookRanges drifted"
+  );
   ["BuyIS50", "BuyIS59", "BuyIS63", "BuyIS74"].forEach((name) => {
-    assert.ok(shell.validatedBuyHooks.includes(name), `multiverse market action shell missing ${name}`);
+    assert.ok(
+      shell.validatedBuyHooks.includes(name),
+      `multiverse market action shell missing ${name}`
+    );
   });
   ["SetIS50CostText", "SetIS59CostText", "SetIS63CostText", "SetIS74CostText"].forEach((name) => {
-    assert.ok(shell.validatedCostTexts.includes(name), `multiverse market action shell missing ${name}`);
+    assert.ok(
+      shell.validatedCostTexts.includes(name),
+      `multiverse market action shell missing ${name}`
+    );
   });
-  assert.equal(shell.validatedBuyHooks.length, 22, "multiverse market action shell should preserve 22 validated buy hooks");
-  assert.equal(shell.validatedCostTexts.length, 22, "multiverse market action shell should preserve 22 validated cost texts");
+  assert.equal(
+    shell.validatedBuyHooks.length,
+    22,
+    "multiverse market action shell should preserve 22 validated buy hooks"
+  );
+  assert.equal(
+    shell.validatedCostTexts.length,
+    22,
+    "multiverse market action shell should preserve 22 validated cost texts"
+  );
 
   return {
     id: "multiverse-market-action-shell",
@@ -2329,16 +6790,46 @@ function validateMultiverseMarketActionShell(shell) {
 }
 
 function validateMultiverseMarketPrefabRemapBoundary(boundary) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market prefab remap boundary generatedAt must be present");
-  expectRecord(boundary.sources, "multiverse market prefab remap boundary sources must be an object");
-  expectNonEmptyString(boundary.sources.level0, "multiverse market prefab remap boundary sources.level0 must be present");
-  expectNonEmptyString(boundary.sources.validatedRows, "multiverse market prefab remap boundary sources.validatedRows must be present");
-  expectArray(boundary.validatedSerializedIds, "multiverse market prefab remap boundary validatedSerializedIds must be an array");
-  expectArray(boundary.directPrefabNumberMatches, "multiverse market prefab remap boundary directPrefabNumberMatches must be an array");
-  expectArray(boundary.explicitPrefabIdOverrides, "multiverse market prefab remap boundary explicitPrefabIdOverrides must be an array");
-  expectArray(boundary.validatedIdsWithoutDirectPrefabName, "multiverse market prefab remap boundary validatedIdsWithoutDirectPrefabName must be an array");
-  expectArray(boundary.overrideSerializedIdsOutsideValidatedBlock, "multiverse market prefab remap boundary overrideSerializedIdsOutsideValidatedBlock must be an array");
-  expectArray(boundary.currentBoundary, "multiverse market prefab remap boundary currentBoundary must be an array");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market prefab remap boundary generatedAt must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market prefab remap boundary sources must be an object"
+  );
+  expectNonEmptyString(
+    boundary.sources.level0,
+    "multiverse market prefab remap boundary sources.level0 must be present"
+  );
+  expectNonEmptyString(
+    boundary.sources.validatedRows,
+    "multiverse market prefab remap boundary sources.validatedRows must be present"
+  );
+  expectArray(
+    boundary.validatedSerializedIds,
+    "multiverse market prefab remap boundary validatedSerializedIds must be an array"
+  );
+  expectArray(
+    boundary.directPrefabNumberMatches,
+    "multiverse market prefab remap boundary directPrefabNumberMatches must be an array"
+  );
+  expectArray(
+    boundary.explicitPrefabIdOverrides,
+    "multiverse market prefab remap boundary explicitPrefabIdOverrides must be an array"
+  );
+  expectArray(
+    boundary.validatedIdsWithoutDirectPrefabName,
+    "multiverse market prefab remap boundary validatedIdsWithoutDirectPrefabName must be an array"
+  );
+  expectArray(
+    boundary.overrideSerializedIdsOutsideValidatedBlock,
+    "multiverse market prefab remap boundary overrideSerializedIdsOutsideValidatedBlock must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market prefab remap boundary currentBoundary must be an array"
+  );
 
   assert.deepEqual(
     boundary.validatedIdsWithoutDirectPrefabName,
@@ -2357,7 +6848,9 @@ function validateMultiverseMarketPrefabRemapBoundary(boundary) {
     );
   });
   assert.deepEqual(
-    boundary.explicitPrefabIdOverrides.map((entry) => `${entry.prefabNumber}->${entry.serializedId}`),
+    boundary.explicitPrefabIdOverrides.map(
+      (entry) => `${entry.prefabNumber}->${entry.serializedId}`
+    ),
     ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"],
     "multiverse market prefab remap boundary explicitPrefabIdOverrides drifted"
   );
@@ -2375,32 +6868,84 @@ function validateMultiverseMarketPrefabRemapBoundary(boundary) {
 }
 
 function validateMultiverseMarketOwnerFamily(family) {
-  expectNonEmptyString(family.generatedAt, "multiverse market owner family generatedAt must be present");
+  expectNonEmptyString(
+    family.generatedAt,
+    "multiverse market owner family generatedAt must be present"
+  );
   expectRecord(family.sources, "multiverse market owner family sources must be an object");
   ["probe", "metadata", "level0", "validatedRows"].forEach((field) => {
-    expectNonEmptyString(family.sources[field], `multiverse market owner family sources.${field} must be present`);
+    expectNonEmptyString(
+      family.sources[field],
+      `multiverse market owner family sources.${field} must be present`
+    );
   });
   expectArray(family.ownerAnchors, "multiverse market owner family ownerAnchors must be an array");
-  expectArray(family.costLaneAnchors, "multiverse market owner family costLaneAnchors must be an array");
-  expectRecord(family.currencyBoxRange, "multiverse market owner family currencyBoxRange must be an object");
-  expectArray(family.validatedCurrencyBoxes, "multiverse market owner family validatedCurrencyBoxes must be an array");
-  expectArray(family.sampleBuyHooks, "multiverse market owner family sampleBuyHooks must be an array");
-  expectArray(family.currentBoundary, "multiverse market owner family currentBoundary must be an array");
+  expectArray(
+    family.costLaneAnchors,
+    "multiverse market owner family costLaneAnchors must be an array"
+  );
+  expectRecord(
+    family.currencyBoxRange,
+    "multiverse market owner family currencyBoxRange must be an object"
+  );
+  expectArray(
+    family.validatedCurrencyBoxes,
+    "multiverse market owner family validatedCurrencyBoxes must be an array"
+  );
+  expectArray(
+    family.sampleBuyHooks,
+    "multiverse market owner family sampleBuyHooks must be an array"
+  );
+  expectArray(
+    family.currentBoundary,
+    "multiverse market owner family currentBoundary must be an array"
+  );
 
-  ["MultiverseMarket, Assembly-CSharp", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts", "SetInscryptionsDoneText", "Inscryptions"].forEach((name) => {
+  [
+    "MultiverseMarket, Assembly-CSharp",
+    "TextHandlerMarkets",
+    "SetAllChrystosEmporiumTexts",
+    "SetInscryptionsDoneText",
+    "Inscryptions"
+  ].forEach((name) => {
     assert.ok(family.ownerAnchors.includes(name), `multiverse market owner family missing ${name}`);
   });
-  ["ResourceAmountText.InscryptionsDone", "AchievementBar-Inscryptions", "CostBox-InscryptionsDone"].forEach((name) => {
-    assert.ok(family.costLaneAnchors.includes(name), `multiverse market owner family missing ${name}`);
+  [
+    "ResourceAmountText.InscryptionsDone",
+    "AchievementBar-Inscryptions",
+    "CostBox-InscryptionsDone"
+  ].forEach((name) => {
+    assert.ok(
+      family.costLaneAnchors.includes(name),
+      `multiverse market owner family missing ${name}`
+    );
   });
-  assert.equal(family.currencyBoxRange.start, 1, "multiverse market owner family currencyBoxRange.start drifted");
-  assert.equal(family.currencyBoxRange.end, 110, "multiverse market owner family currencyBoxRange.end drifted");
-  assert.equal(family.currencyBoxRange.count, 110, "multiverse market owner family currencyBoxRange.count drifted");
+  assert.equal(
+    family.currencyBoxRange.start,
+    1,
+    "multiverse market owner family currencyBoxRange.start drifted"
+  );
+  assert.equal(
+    family.currencyBoxRange.end,
+    110,
+    "multiverse market owner family currencyBoxRange.end drifted"
+  );
+  assert.equal(
+    family.currencyBoxRange.count,
+    110,
+    "multiverse market owner family currencyBoxRange.count drifted"
+  );
   ["IS50CurrencyBox", "IS59CurrencyBox", "IS63CurrencyBox", "IS74CurrencyBox"].forEach((name) => {
-    assert.ok(family.validatedCurrencyBoxes.includes(name), `multiverse market owner family missing ${name}`);
+    assert.ok(
+      family.validatedCurrencyBoxes.includes(name),
+      `multiverse market owner family missing ${name}`
+    );
   });
   ["BuyIS47", "BuyIS64", "BuyIS73", "BuyIS105"].forEach((name) => {
-    assert.ok(family.sampleBuyHooks.includes(name), `multiverse market owner family missing ${name}`);
+    assert.ok(
+      family.sampleBuyHooks.includes(name),
+      `multiverse market owner family missing ${name}`
+    );
   });
 
   return {
@@ -2419,38 +6964,93 @@ function validateTokenShopOwnerShell(shell) {
   expectNonEmptyString(shell.generatedAt, "token shop owner shell generatedAt must be present");
   expectRecord(shell.sources, "token shop owner shell sources must be an object");
   ["probe", "metadata", "level0"].forEach((field) => {
-    expectNonEmptyString(shell.sources[field], `token shop owner shell sources.${field} must be present`);
+    expectNonEmptyString(
+      shell.sources[field],
+      `token shop owner shell sources.${field} must be present`
+    );
   });
   expectArray(shell.ownerAnchors, "token shop owner shell ownerAnchors must be an array");
   expectArray(shell.tokenBankMethods, "token shop owner shell tokenBankMethods must be an array");
   expectArray(shell.notificationHooks, "token shop owner shell notificationHooks must be an array");
-  expectArray(shell.adjacentDeviceHooks, "token shop owner shell adjacentDeviceHooks must be an array");
+  expectArray(
+    shell.adjacentDeviceHooks,
+    "token shop owner shell adjacentDeviceHooks must be an array"
+  );
   expectArray(shell.uiShells, "token shop owner shell uiShells must be an array");
   expectRecord(shell.sourcePresence, "token shop owner shell sourcePresence must be an object");
-  expectRecord(shell.sourcePresence.metadata, "token shop owner shell sourcePresence.metadata must be an object");
-  expectRecord(shell.sourcePresence.level0, "token shop owner shell sourcePresence.level0 must be an object");
+  expectRecord(
+    shell.sourcePresence.metadata,
+    "token shop owner shell sourcePresence.metadata must be an object"
+  );
+  expectRecord(
+    shell.sourcePresence.level0,
+    "token shop owner shell sourcePresence.level0 must be an object"
+  );
   expectArray(shell.currentBoundary, "token shop owner shell currentBoundary must be an array");
 
   ["TokenShop", "InitializeTokenShop", "SetAllTokenShopTexts"].forEach((name) => {
     assert.ok(shell.ownerAnchors.includes(name), `token shop owner shell missing ${name}`);
   });
-  ["get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "SetBankFill"].forEach((name) => {
+  [
+    "get_TokenBankCap",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens",
+    "ClaimBankedTokens",
+    "SetBankFill"
+  ].forEach((name) => {
     assert.ok(shell.tokenBankMethods.includes(name), `token shop owner shell missing ${name}`);
   });
-  ["CheckTokenClaimNotification", "TokenShopButtonNotification", "BankedDescriptionTextIncrease"].forEach((name) => {
+  [
+    "CheckTokenClaimNotification",
+    "TokenShopButtonNotification",
+    "BankedDescriptionTextIncrease"
+  ].forEach((name) => {
     assert.ok(shell.notificationHooks.includes(name), `token shop owner shell missing ${name}`);
   });
   ["BuyAutoTokenClicker", "BuyAutoDiamondClicker", "BuyChestSpeedster"].forEach((name) => {
     assert.ok(shell.adjacentDeviceHooks.includes(name), `token shop owner shell missing ${name}`);
   });
-  ["TokenBankDescriptionText", "TokenShopCanvas", "TokenShopMenu", "TokenShopOverlay", "TokenShopRecoloring"].forEach((name) => {
+  [
+    "TokenBankDescriptionText",
+    "TokenShopCanvas",
+    "TokenShopMenu",
+    "TokenShopOverlay",
+    "TokenShopRecoloring"
+  ].forEach((name) => {
     assert.ok(shell.uiShells.includes(name), `token shop owner shell missing ${name}`);
   });
-  ["TokenShop", "get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens", "ClaimBankedTokens", "CheckTokenClaimNotification", "TokenShopButtonNotification", "BankedDescriptionTextIncrease", "BuyAutoTokenClicker", "BuyAutoDiamondClicker", "BuyChestSpeedster"].forEach((name) => {
-    assert.equal(shell.sourcePresence.metadata[name], 1, `token shop owner shell metadata presence drifted for ${name}`);
+  [
+    "TokenShop",
+    "get_TokenBankCap",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens",
+    "ClaimBankedTokens",
+    "CheckTokenClaimNotification",
+    "TokenShopButtonNotification",
+    "BankedDescriptionTextIncrease",
+    "BuyAutoTokenClicker",
+    "BuyAutoDiamondClicker",
+    "BuyChestSpeedster"
+  ].forEach((name) => {
+    assert.equal(
+      shell.sourcePresence.metadata[name],
+      1,
+      `token shop owner shell metadata presence drifted for ${name}`
+    );
   });
-  ["TokenShop", "ClaimBankedTokens", "BankedDescriptionTextIncrease", "BuyAutoTokenClicker", "BuyAutoDiamondClicker", "BuyChestSpeedster"].forEach((name) => {
-    assert.equal(shell.sourcePresence.level0[name], 1, `token shop owner shell level0 presence drifted for ${name}`);
+  [
+    "TokenShop",
+    "ClaimBankedTokens",
+    "BankedDescriptionTextIncrease",
+    "BuyAutoTokenClicker",
+    "BuyAutoDiamondClicker",
+    "BuyChestSpeedster"
+  ].forEach((name) => {
+    assert.equal(
+      shell.sourcePresence.level0[name],
+      1,
+      `token shop owner shell level0 presence drifted for ${name}`
+    );
   });
 
   return {
@@ -2466,26 +7066,70 @@ function validateTokenShopOwnerShell(shell) {
 }
 
 function validateTokenShopSaveBoundary(boundary) {
-  expectNonEmptyString(boundary.generatedAt, "token shop save boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "token shop save boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "token shop save boundary sources must be an object");
   ["probe", "metadata", "level0"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `token shop save boundary sources.${field} must be present`);
+    expectNonEmptyString(
+      boundary.sources[field],
+      `token shop save boundary sources.${field} must be present`
+    );
   });
-  expectArray(boundary.ownerShellTermsChecked, "token shop save boundary ownerShellTermsChecked must be an array");
-  expectArray(boundary.saveFamilyTermsChecked, "token shop save boundary saveFamilyTermsChecked must be an array");
+  expectArray(
+    boundary.ownerShellTermsChecked,
+    "token shop save boundary ownerShellTermsChecked must be an array"
+  );
+  expectArray(
+    boundary.saveFamilyTermsChecked,
+    "token shop save boundary saveFamilyTermsChecked must be an array"
+  );
   expectRecord(boundary.probeResults, "token shop save boundary probeResults must be an object");
-  expectArray(boundary.currentBoundary, "token shop save boundary currentBoundary must be an array");
+  expectArray(
+    boundary.currentBoundary,
+    "token shop save boundary currentBoundary must be an array"
+  );
 
-  ["TokenShop", "InitializeTokenShop", "ClaimBankedTokens", "BuyAutoTokenClicker"].forEach((name) => {
-    assert.ok(boundary.ownerShellTermsChecked.includes(name), `token shop save boundary missing ${name}`);
+  ["TokenShop", "InitializeTokenShop", "ClaimBankedTokens", "BuyAutoTokenClicker"].forEach(
+    (name) => {
+      assert.ok(
+        boundary.ownerShellTermsChecked.includes(name),
+        `token shop save boundary missing ${name}`
+      );
+    }
+  );
+  [
+    "PlayerProfileData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "CloudSavePlayerProfile"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.saveFamilyTermsChecked.includes(name),
+      `token shop save boundary missing ${name}`
+    );
   });
-  ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"].forEach((name) => {
-    assert.ok(boundary.saveFamilyTermsChecked.includes(name), `token shop save boundary missing ${name}`);
-  });
-  assert.equal(boundary.probeResults.metadataHasSaveTerms, true, "token shop save boundary metadataHasSaveTerms drifted");
-  assert.equal(boundary.probeResults.level0HasSaveTerms, false, "token shop save boundary level0HasSaveTerms drifted");
-  assert.equal(boundary.probeResults.ownerShellWithSaveOverlapCount, 0, "token shop save boundary overlap count drifted");
-  assert.equal(boundary.probeResults.directTokenShopPlayerProfileContext, false, "token shop save boundary directTokenShopPlayerProfileContext drifted");
+  assert.equal(
+    boundary.probeResults.metadataHasSaveTerms,
+    true,
+    "token shop save boundary metadataHasSaveTerms drifted"
+  );
+  assert.equal(
+    boundary.probeResults.level0HasSaveTerms,
+    false,
+    "token shop save boundary level0HasSaveTerms drifted"
+  );
+  assert.equal(
+    boundary.probeResults.ownerShellWithSaveOverlapCount,
+    0,
+    "token shop save boundary overlap count drifted"
+  );
+  assert.equal(
+    boundary.probeResults.directTokenShopPlayerProfileContext,
+    false,
+    "token shop save boundary directTokenShopPlayerProfileContext drifted"
+  );
 
   return {
     id: "token-shop-save-boundary",
@@ -2500,45 +7144,150 @@ function validateTokenShopSaveBoundary(boundary) {
 }
 
 function validateTokenShopRowLevelOwner(boundary) {
-  expectNonEmptyString(boundary.generatedAt, "token shop row-level owner generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "token shop row-level owner generatedAt must be present"
+  );
   expectNonEmptyString(boundary.dataset, "token shop row-level owner dataset must be present");
   expectRecord(boundary.sources, "token shop row-level owner sources must be an object");
   ["uabeaProbe", "tokenShopExtract", "metadata", "level0"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `token shop row-level owner sources.${field} must be present`);
+    expectNonEmptyString(
+      boundary.sources[field],
+      `token shop row-level owner sources.${field} must be present`
+    );
   });
-  expectRecord(boundary.typedSaveDataFieldTableRecovery, "token shop row-level owner typedSaveDataFieldTableRecovery must be an object");
-  expectRecord(boundary.tokenShopRowLevelFamily, "token shop row-level owner tokenShopRowLevelFamily must be an object");
-  expectRecord(boundary.compatibilityImportBoundary, "token shop row-level owner compatibilityImportBoundary must be an object");
-  expectArray(boundary.tokenShopRowLevelFamily.saveFieldSamples, "token shop row-level owner saveFieldSamples must be an array");
-  expectArray(boundary.tokenShopRowLevelFamily.adjacentSaveFields, "token shop row-level owner adjacentSaveFields must be an array");
-  expectArray(boundary.tokenShopRowLevelFamily.groundedTokenShopNumericSamples, "token shop row-level owner groundedTokenShopNumericSamples must be an array");
-  expectArray(boundary.compatibilityImportBoundary.safeImportSubset, "token shop row-level owner safeImportSubset must be an array");
-  expectArray(boundary.compatibilityImportBoundary.blockedCanonicalPromotionBy, "token shop row-level owner blockedCanonicalPromotionBy must be an array");
-  expectArray(boundary.currentBoundary, "token shop row-level owner currentBoundary must be an array");
+  expectRecord(
+    boundary.typedSaveDataFieldTableRecovery,
+    "token shop row-level owner typedSaveDataFieldTableRecovery must be an object"
+  );
+  expectRecord(
+    boundary.tokenShopRowLevelFamily,
+    "token shop row-level owner tokenShopRowLevelFamily must be an object"
+  );
+  expectRecord(
+    boundary.compatibilityImportBoundary,
+    "token shop row-level owner compatibilityImportBoundary must be an object"
+  );
+  expectArray(
+    boundary.tokenShopRowLevelFamily.saveFieldSamples,
+    "token shop row-level owner saveFieldSamples must be an array"
+  );
+  expectArray(
+    boundary.tokenShopRowLevelFamily.adjacentSaveFields,
+    "token shop row-level owner adjacentSaveFields must be an array"
+  );
+  expectArray(
+    boundary.tokenShopRowLevelFamily.groundedTokenShopNumericSamples,
+    "token shop row-level owner groundedTokenShopNumericSamples must be an array"
+  );
+  expectArray(
+    boundary.compatibilityImportBoundary.safeImportSubset,
+    "token shop row-level owner safeImportSubset must be an array"
+  );
+  expectArray(
+    boundary.compatibilityImportBoundary.blockedCanonicalPromotionBy,
+    "token shop row-level owner blockedCanonicalPromotionBy must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "token shop row-level owner currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "token-shop-row-level-owner", "token shop row-level owner dataset id drifted");
-  assert.equal(boundary.typedSaveDataFieldTableRecovery.fieldOwner, "SaveData", "token shop row-level owner typed field owner drifted");
-  assert.equal(boundary.typedSaveDataFieldTableRecovery.fieldCount, 4461, "token shop row-level owner SaveData field count drifted");
-  assert.equal(boundary.typedSaveDataFieldTableRecovery.methodCount, 1, "token shop row-level owner SaveData method count drifted");
-  assert.equal(boundary.tokenShopRowLevelFamily.saveFieldRange, "ATU1Level through ATU28Level", "token shop row-level owner save field range drifted");
+  assert.equal(
+    boundary.dataset,
+    "token-shop-row-level-owner",
+    "token shop row-level owner dataset id drifted"
+  );
+  assert.equal(
+    boundary.typedSaveDataFieldTableRecovery.fieldOwner,
+    "SaveData",
+    "token shop row-level owner typed field owner drifted"
+  );
+  assert.equal(
+    boundary.typedSaveDataFieldTableRecovery.fieldCount,
+    4461,
+    "token shop row-level owner SaveData field count drifted"
+  );
+  assert.equal(
+    boundary.typedSaveDataFieldTableRecovery.methodCount,
+    1,
+    "token shop row-level owner SaveData method count drifted"
+  );
+  assert.equal(
+    boundary.tokenShopRowLevelFamily.saveFieldRange,
+    "ATU1Level through ATU28Level",
+    "token shop row-level owner save field range drifted"
+  );
   ["ATU1Level", "ATU14Level", "ATU24Level", "ATU28Level"].forEach((name) => {
-    assert.ok(boundary.tokenShopRowLevelFamily.saveFieldSamples.includes(name), `token shop row-level owner missing save field sample ${name}`);
+    assert.ok(
+      boundary.tokenShopRowLevelFamily.saveFieldSamples.includes(name),
+      `token shop row-level owner missing save field sample ${name}`
+    );
   });
-  ["BankedTokens", "Tier2TokensUnlocked", "Tier3TokensUnlocked", "Tier4TokensUnlocked", "Tier5TokensUnlocked"].forEach((name) => {
-    assert.ok(boundary.tokenShopRowLevelFamily.adjacentSaveFields.includes(name), `token shop row-level owner missing adjacent save field ${name}`);
+  [
+    "BankedTokens",
+    "Tier2TokensUnlocked",
+    "Tier3TokensUnlocked",
+    "Tier4TokensUnlocked",
+    "Tier5TokensUnlocked"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.tokenShopRowLevelFamily.adjacentSaveFields.includes(name),
+      `token shop row-level owner missing adjacent save field ${name}`
+    );
   });
-  assert.equal(boundary.tokenShopRowLevelFamily.groundedTokenShopFieldRange, "ATU1Button through ATU28MaxOverlay", "token shop row-level owner grounded field range drifted");
+  assert.equal(
+    boundary.tokenShopRowLevelFamily.groundedTokenShopFieldRange,
+    "ATU1Button through ATU28MaxOverlay",
+    "token shop row-level owner grounded field range drifted"
+  );
   ["ATU24StartCost", "ATU25MaxLevel", "ATU26Fill", "ATU28Bonus"].forEach((name) => {
-    assert.ok(boundary.tokenShopRowLevelFamily.groundedTokenShopNumericSamples.includes(name), `token shop row-level owner missing grounded numeric sample ${name}`);
+    assert.ok(
+      boundary.tokenShopRowLevelFamily.groundedTokenShopNumericSamples.includes(name),
+      `token shop row-level owner missing grounded numeric sample ${name}`
+    );
   });
-  assert.equal(boundary.compatibilityImportBoundary.targetPath, "compatibility.unmappedSystemState.tokenShop", "token shop row-level owner target path drifted");
-  ["ATU1Level through ATU28Level", "Tier2TokensUnlocked", "Tier3TokensUnlocked", "Tier4TokensUnlocked", "Tier5TokensUnlocked"].forEach((name) => {
-    assert.ok(boundary.compatibilityImportBoundary.safeImportSubset.includes(name), `token shop row-level owner missing safe import subset ${name}`);
+  assert.equal(
+    boundary.compatibilityImportBoundary.targetPath,
+    "compatibility.unmappedSystemState.tokenShop",
+    "token shop row-level owner target path drifted"
+  );
+  [
+    "ATU1Level through ATU28Level",
+    "Tier2TokensUnlocked",
+    "Tier3TokensUnlocked",
+    "Tier4TokensUnlocked",
+    "Tier5TokensUnlocked"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.compatibilityImportBoundary.safeImportSubset.includes(name),
+      `token shop row-level owner missing safe import subset ${name}`
+    );
   });
-  assert.ok(boundary.compatibilityImportBoundary.blockedCanonicalPromotionBy.some((line) => /row-by-row remap/i.test(line)), "token shop row-level owner must preserve remap blocker");
-  assert.ok(boundary.currentBoundary.some((line) => /SaveData directly declares BankedTokens plus ATU1Level through ATU28Level/i.test(line)), "token shop row-level owner must preserve SaveData declaring-owner conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /same ATU numbering family/i.test(line)), "token shop row-level owner must preserve shared ATU numbering-family conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /not yet enough to promote those raw ATU fields into canonical playerProfile state/i.test(line)), "token shop row-level owner must preserve canonical-blocked conclusion");
+  assert.ok(
+    boundary.compatibilityImportBoundary.blockedCanonicalPromotionBy.some((line) =>
+      /row-by-row remap/i.test(line)
+    ),
+    "token shop row-level owner must preserve remap blocker"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /SaveData directly declares BankedTokens plus ATU1Level through ATU28Level/i.test(line)
+    ),
+    "token shop row-level owner must preserve SaveData declaring-owner conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) => /same ATU numbering family/i.test(line)),
+    "token shop row-level owner must preserve shared ATU numbering-family conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /not yet enough to promote those raw ATU fields into canonical playerProfile state/i.test(
+        line
+      )
+    ),
+    "token shop row-level owner must preserve canonical-blocked conclusion"
+  );
 
   return {
     id: "token-shop-row-level-owner",
@@ -2553,31 +7302,97 @@ function validateTokenShopRowLevelOwner(boundary) {
 }
 
 function validateTokenShopRowRemapBoundary(boundary) {
-  expectNonEmptyString(boundary.generatedAt, "token shop row remap boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "token shop row remap boundary generatedAt must be present"
+  );
   expectNonEmptyString(boundary.dataset, "token shop row remap boundary dataset must be present");
   expectRecord(boundary.sources, "token shop row remap boundary sources must be an object");
   ["tokenShopExtract", "uabeaProbe", "unityProbe", "dailyTokeniumLaneProbe"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `token shop row remap boundary sources.${field} must be present`);
+    expectNonEmptyString(
+      boundary.sources[field],
+      `token shop row remap boundary sources.${field} must be present`
+    );
   });
-  expectRecord(boundary.rawSaveFamily, "token shop row remap boundary rawSaveFamily must be an object");
-  expectRecord(boundary.groundedNonLabelClues, "token shop row remap boundary groundedNonLabelClues must be an object");
-  expectRecord(boundary.recoveredBridge, "token shop row remap boundary recoveredBridge must be an object");
-  expectRecord(boundary.adjacentFollowUp, "token shop row remap boundary adjacentFollowUp must be an object");
-  expectRecord(boundary.blockedIdentityJoin, "token shop row remap boundary blockedIdentityJoin must be an object");
-  expectArray(boundary.groundedNonLabelClues.effectHookSamples, "token shop row remap boundary effectHookSamples must be an array");
-  expectArray(boundary.groundedNonLabelClues.prefabRosterSamples, "token shop row remap boundary prefabRosterSamples must be an array");
-  expectArray(boundary.groundedNonLabelClues.playerFacingStringSamples, "token shop row remap boundary playerFacingStringSamples must be an array");
-  expectArray(boundary.groundedNonLabelClues.directBuyHookSamples, "token shop row remap boundary directBuyHookSamples must be an array");
-  expectArray(boundary.blockedIdentityJoin.missingLinks, "token shop row remap boundary missingLinks must be an array");
-  expectArray(boundary.blockedIdentityJoin.unsafeInferenceSources, "token shop row remap boundary unsafeInferenceSources must be an array");
-  expectArray(boundary.currentBoundary, "token shop row remap boundary currentBoundary must be an array");
+  expectRecord(
+    boundary.rawSaveFamily,
+    "token shop row remap boundary rawSaveFamily must be an object"
+  );
+  expectRecord(
+    boundary.groundedNonLabelClues,
+    "token shop row remap boundary groundedNonLabelClues must be an object"
+  );
+  expectRecord(
+    boundary.recoveredBridge,
+    "token shop row remap boundary recoveredBridge must be an object"
+  );
+  expectRecord(
+    boundary.adjacentFollowUp,
+    "token shop row remap boundary adjacentFollowUp must be an object"
+  );
+  expectRecord(
+    boundary.blockedIdentityJoin,
+    "token shop row remap boundary blockedIdentityJoin must be an object"
+  );
+  expectArray(
+    boundary.groundedNonLabelClues.effectHookSamples,
+    "token shop row remap boundary effectHookSamples must be an array"
+  );
+  expectArray(
+    boundary.groundedNonLabelClues.prefabRosterSamples,
+    "token shop row remap boundary prefabRosterSamples must be an array"
+  );
+  expectArray(
+    boundary.groundedNonLabelClues.playerFacingStringSamples,
+    "token shop row remap boundary playerFacingStringSamples must be an array"
+  );
+  expectArray(
+    boundary.groundedNonLabelClues.directBuyHookSamples,
+    "token shop row remap boundary directBuyHookSamples must be an array"
+  );
+  expectArray(
+    boundary.blockedIdentityJoin.missingLinks,
+    "token shop row remap boundary missingLinks must be an array"
+  );
+  expectArray(
+    boundary.blockedIdentityJoin.unsafeInferenceSources,
+    "token shop row remap boundary unsafeInferenceSources must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "token shop row remap boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "token-shop-row-remap-boundary", "token shop row remap boundary dataset id drifted");
-  assert.equal(boundary.rawSaveFamily.fieldRange, "ATU1Level through ATU28Level", "token shop row remap boundary field range drifted");
-  assert.equal(boundary.rawSaveFamily.owner, "SaveData", "token shop row remap boundary owner drifted");
-  assert.equal(boundary.rawSaveFamily.groundedOwnerPayloadRange, "ATU1Button through ATU28MaxOverlay", "token shop row remap boundary grounded owner payload range drifted");
-  assert.equal(boundary.recoveredBridge.shellField, "ATU2Button", "token shop row remap boundary recovered bridge shell drifted");
-  assert.equal(boundary.recoveredBridge.shellPathId, 15804, "token shop row remap boundary recovered bridge shell path drifted");
+  assert.equal(
+    boundary.dataset,
+    "token-shop-row-remap-boundary",
+    "token shop row remap boundary dataset id drifted"
+  );
+  assert.equal(
+    boundary.rawSaveFamily.fieldRange,
+    "ATU1Level through ATU28Level",
+    "token shop row remap boundary field range drifted"
+  );
+  assert.equal(
+    boundary.rawSaveFamily.owner,
+    "SaveData",
+    "token shop row remap boundary owner drifted"
+  );
+  assert.equal(
+    boundary.rawSaveFamily.groundedOwnerPayloadRange,
+    "ATU1Button through ATU28MaxOverlay",
+    "token shop row remap boundary grounded owner payload range drifted"
+  );
+  assert.equal(
+    boundary.recoveredBridge.shellField,
+    "ATU2Button",
+    "token shop row remap boundary recovered bridge shell drifted"
+  );
+  assert.equal(
+    boundary.recoveredBridge.shellPathId,
+    15804,
+    "token shop row remap boundary recovered bridge shell path drifted"
+  );
   assert.deepEqual(
     boundary.recoveredBridge.ownerFieldBlock,
     [
@@ -2589,44 +7404,174 @@ function validateTokenShopRowRemapBoundary(boundary) {
     ],
     "token shop row remap boundary recovered bridge owner field block drifted"
   );
-  assert.equal(boundary.recoveredBridge.supportingEffectHook, "ATU2DiamondsBonus", "token shop row remap boundary recovered bridge effect hook drifted");
-  assert.equal(boundary.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.DiamondBoost", "token shop row remap boundary recovered bridge prefab drifted");
-  assert.match(boundary.recoveredBridge.groundedConclusion, /ATU2Button now has one checked bridge to NewTokenUPGPrefab\.T1\.DiamondBoost/i, "token shop row remap boundary recovered bridge conclusion drifted");
-  assert.deepEqual(boundary.adjacentFollowUp.testedNeighbors, ["ATU1Button", "ATU3Button"], "token shop row remap boundary tested neighbor set drifted");
-  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.shellField, "ATU1Button", "token shop row remap boundary adjacent recovered bridge shell drifted");
-  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.shellPathId, 15839, "token shop row remap boundary adjacent recovered bridge shell path drifted");
-  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingEffectHook, "ATU1TokenBonus", "token shop row remap boundary adjacent recovered bridge effect hook drifted");
-  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook, "BuyTokenBoost", "token shop row remap boundary adjacent recovered bridge action hook drifted");
-  assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity, "NewTokenUPGPrefab.T1.TokensBoost", "token shop row remap boundary adjacent recovered bridge prefab drifted");
-  expectRecord(boundary.adjacentFollowUp.blockedTitleJoin, "token shop row remap boundary adjacent blocked title join must be an object");
-  expectArray(boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces, "token shop row remap boundary adjacent blocked title tested surfaces must be an array");
-  assert.equal(boundary.adjacentFollowUp.blockedTitleJoin.titleCandidate, "Tokens Booster T1", "token shop row remap boundary adjacent blocked title candidate drifted");
-  assert.equal(boundary.adjacentFollowUp.blockedTitleJoin.alternateTitleCandidate, "Tokens Booster", "token shop row remap boundary adjacent alternate title candidate drifted");
-  assert.equal(boundary.adjacentFollowUp.blockedTitleJoin.diamondTitleCandidate, ">Diamond Upgrade 9 - TokensBoost", "token shop row remap boundary adjacent diamond title candidate drifted");
-  assert.ok(boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"), "token shop row remap boundary adjacent text-hook surface drifted");
-  assert.ok(boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "token-side tokens title candidates"), "token shop row remap boundary adjacent token title surface drifted");
-  assert.ok(boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "diamond-side tokens title candidate"), "token shop row remap boundary adjacent diamond title surface drifted");
-  assert.match(boundary.adjacentFollowUp.blockedTitleJoin.missingJoin, /Tokens Booster, Tokens Booster T1, and >Diamond Upgrade 9 - TokensBoost title-side clues/i, "token shop row remap boundary adjacent blocked title note drifted");
-  assert.match(boundary.adjacentFollowUp.blockedTitleJoin.lastBlocker, /last honest blocker.*Tokens Booster.*Tokens Booster T1.*>Diamond Upgrade 9 - TokensBoost.*ATU1Button path id 15839/i, "token shop row remap boundary adjacent last-blocker note drifted");
-  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.shellField, "ATU3Button", "token shop row remap boundary blocked adjacent shell drifted");
-  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.shellPathId, 15810, "token shop row remap boundary blocked adjacent shell path drifted");
-  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook, "BuyCellBoost", "token shop row remap boundary blocked adjacent named action drifted");
-  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.diamondSpecialPrefab, "NewDiamondUPGPrefab.Specials.CellsBoost", "token shop row remap boundary blocked adjacent diamond special prefab drifted");
-  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.diamondSpecialTitle, ">Diamond Upgrade 10 - CellsBoost", "token shop row remap boundary blocked adjacent diamond special title drifted");
+  assert.equal(
+    boundary.recoveredBridge.supportingEffectHook,
+    "ATU2DiamondsBonus",
+    "token shop row remap boundary recovered bridge effect hook drifted"
+  );
+  assert.equal(
+    boundary.recoveredBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.DiamondBoost",
+    "token shop row remap boundary recovered bridge prefab drifted"
+  );
+  assert.match(
+    boundary.recoveredBridge.groundedConclusion,
+    /ATU2Button now has one checked bridge to NewTokenUPGPrefab\.T1\.DiamondBoost/i,
+    "token shop row remap boundary recovered bridge conclusion drifted"
+  );
+  assert.deepEqual(
+    boundary.adjacentFollowUp.testedNeighbors,
+    ["ATU1Button", "ATU3Button"],
+    "token shop row remap boundary tested neighbor set drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.recoveredAdditionalBridge.shellField,
+    "ATU1Button",
+    "token shop row remap boundary adjacent recovered bridge shell drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.recoveredAdditionalBridge.shellPathId,
+    15839,
+    "token shop row remap boundary adjacent recovered bridge shell path drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingEffectHook,
+    "ATU1TokenBonus",
+    "token shop row remap boundary adjacent recovered bridge effect hook drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook,
+    "BuyTokenBoost",
+    "token shop row remap boundary adjacent recovered bridge action hook drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.TokensBoost",
+    "token shop row remap boundary adjacent recovered bridge prefab drifted"
+  );
+  expectRecord(
+    boundary.adjacentFollowUp.blockedTitleJoin,
+    "token shop row remap boundary adjacent blocked title join must be an object"
+  );
+  expectArray(
+    boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces,
+    "token shop row remap boundary adjacent blocked title tested surfaces must be an array"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.blockedTitleJoin.titleCandidate,
+    "Tokens Booster T1",
+    "token shop row remap boundary adjacent blocked title candidate drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.blockedTitleJoin.alternateTitleCandidate,
+    "Tokens Booster",
+    "token shop row remap boundary adjacent alternate title candidate drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.blockedTitleJoin.diamondTitleCandidate,
+    ">Diamond Upgrade 9 - TokensBoost",
+    "token shop row remap boundary adjacent diamond title candidate drifted"
+  );
+  assert.ok(
+    boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "generic TokenShop text hooks"
+    ),
+    "token shop row remap boundary adjacent text-hook surface drifted"
+  );
+  assert.ok(
+    boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "token-side tokens title candidates"
+    ),
+    "token shop row remap boundary adjacent token title surface drifted"
+  );
+  assert.ok(
+    boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "diamond-side tokens title candidate"
+    ),
+    "token shop row remap boundary adjacent diamond title surface drifted"
+  );
+  assert.match(
+    boundary.adjacentFollowUp.blockedTitleJoin.missingJoin,
+    /Tokens Booster, Tokens Booster T1, and >Diamond Upgrade 9 - TokensBoost title-side clues/i,
+    "token shop row remap boundary adjacent blocked title note drifted"
+  );
+  assert.match(
+    boundary.adjacentFollowUp.blockedTitleJoin.lastBlocker,
+    /last honest blocker.*Tokens Booster.*Tokens Booster T1.*>Diamond Upgrade 9 - TokensBoost.*ATU1Button path id 15839/i,
+    "token shop row remap boundary adjacent last-blocker note drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.blockedAdjacentShell.shellField,
+    "ATU3Button",
+    "token shop row remap boundary blocked adjacent shell drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.blockedAdjacentShell.shellPathId,
+    15810,
+    "token shop row remap boundary blocked adjacent shell path drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook,
+    "BuyCellBoost",
+    "token shop row remap boundary blocked adjacent named action drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.diamondSpecialPrefab,
+    "NewDiamondUPGPrefab.Specials.CellsBoost",
+    "token shop row remap boundary blocked adjacent diamond special prefab drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.diamondSpecialTitle,
+    ">Diamond Upgrade 10 - CellsBoost",
+    "token shop row remap boundary blocked adjacent diamond special title drifted"
+  );
   assert.deepEqual(
     boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenPrefabCandidates,
     ["NewTokenUPGPrefab.T1.CellsPerChestBooster", "NewTokenUPGPrefab.T5.UltimaCells"],
     "token shop row remap boundary blocked adjacent token prefab candidates drifted"
   );
-  assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenTitleCandidate, "Token Ultima: Cells", "token shop row remap boundary blocked adjacent token title candidate drifted");
-  assert.match(boundary.adjacentFollowUp.blockedAdjacentShell.groundedConclusion, /ATU3Button does not yet clear/i, "token shop row remap boundary blocked adjacent conclusion drifted");
-  assert.equal(boundary.adjacentFollowUp.result, "one more grounded bridge recovered but no concrete title join cleared", "token shop row remap boundary adjacent follow-up result drifted");
-  expectRecord(boundary.traceFollowUp, "token shop row remap boundary trace follow-up must be an object");
-  expectRecord(boundary.traceFollowUp.recoveredBridge, "token shop row remap boundary trace recovered bridge must be an object");
-  expectRecord(boundary.traceFollowUp.blockedTitleJoin, "token shop row remap boundary trace blocked title join must be an object");
-  assert.equal(boundary.traceFollowUp.targetId, "token-shop-atu4-mod", "token shop row remap boundary trace target drifted");
-  assert.equal(boundary.traceFollowUp.recoveredBridge.shellField, "ATU4Button", "token shop row remap boundary trace bridge shell drifted");
-  assert.equal(boundary.traceFollowUp.recoveredBridge.shellPathId, 15796, "token shop row remap boundary trace bridge shell path drifted");
+  assert.equal(
+    boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenTitleCandidate,
+    "Token Ultima: Cells",
+    "token shop row remap boundary blocked adjacent token title candidate drifted"
+  );
+  assert.match(
+    boundary.adjacentFollowUp.blockedAdjacentShell.groundedConclusion,
+    /ATU3Button does not yet clear/i,
+    "token shop row remap boundary blocked adjacent conclusion drifted"
+  );
+  assert.equal(
+    boundary.adjacentFollowUp.result,
+    "one more grounded bridge recovered but no concrete title join cleared",
+    "token shop row remap boundary adjacent follow-up result drifted"
+  );
+  expectRecord(
+    boundary.traceFollowUp,
+    "token shop row remap boundary trace follow-up must be an object"
+  );
+  expectRecord(
+    boundary.traceFollowUp.recoveredBridge,
+    "token shop row remap boundary trace recovered bridge must be an object"
+  );
+  expectRecord(
+    boundary.traceFollowUp.blockedTitleJoin,
+    "token shop row remap boundary trace blocked title join must be an object"
+  );
+  assert.equal(
+    boundary.traceFollowUp.targetId,
+    "token-shop-atu4-mod",
+    "token shop row remap boundary trace target drifted"
+  );
+  assert.equal(
+    boundary.traceFollowUp.recoveredBridge.shellField,
+    "ATU4Button",
+    "token shop row remap boundary trace bridge shell drifted"
+  );
+  assert.equal(
+    boundary.traceFollowUp.recoveredBridge.shellPathId,
+    15796,
+    "token shop row remap boundary trace bridge shell path drifted"
+  );
   assert.deepEqual(
     boundary.traceFollowUp.recoveredBridge.ownerFieldBlock,
     [
@@ -2638,30 +7583,123 @@ function validateTokenShopRowRemapBoundary(boundary) {
     ],
     "token shop row remap boundary trace bridge owner field block drifted"
   );
-  assert.equal(boundary.traceFollowUp.recoveredBridge.supportingActionHook, "BuyModBoost", "token shop row remap boundary trace bridge action hook drifted");
-  assert.equal(boundary.traceFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.ModPointsBooster", "token shop row remap boundary trace bridge prefab drifted");
-  expectArray(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces, "token shop row remap boundary trace blocked title tested surfaces must be an array");
-  assert.equal(boundary.traceFollowUp.blockedTitleJoin.titleCandidate, "Token Ultima: MP", "token shop row remap boundary trace blocked title candidate drifted");
-  assert.equal(boundary.traceFollowUp.blockedTitleJoin.alternateTitleCandidate, ":Diamond Upgrade 11 - ModBoost", "token shop row remap boundary trace alternate title candidate drifted");
-  assert.ok(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"), "token shop row remap boundary trace text-hook surface drifted");
-  assert.ok(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "token-side mod title candidate"), "token shop row remap boundary trace token title surface drifted");
-  assert.ok(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "diamond-side mod title candidate"), "token shop row remap boundary trace diamond title surface drifted");
-  assert.match(boundary.traceFollowUp.blockedTitleJoin.missingJoin, /generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues/i, "token shop row remap boundary trace blocked title note drifted");
-  assert.match(boundary.traceFollowUp.blockedTitleJoin.lastBlocker, /last honest blocker.*Token Ultima: MP.*:Diamond Upgrade 11 - ModBoost.*ATU4Button path id 15796/i, "token shop row remap boundary trace last-blocker note drifted");
-  assert.equal(boundary.traceFollowUp.result, "checked object bridge recovered but no concrete title join cleared", "token shop row remap boundary trace follow-up result drifted");
-  expectRecord(boundary.atu5TitleFollowUp, "token shop row remap boundary ATU5 title follow-up must be an object");
-  expectRecord(boundary.atu5TitleFollowUp.recoveredBridge, "token shop row remap boundary ATU5 recovered bridge must be an object");
-  expectRecord(boundary.atu5TitleFollowUp.recoveredTitleTextChain, "token shop row remap boundary ATU5 recovered title text chain must be an object");
-  expectRecord(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin, "token shop row remap boundary ATU5 named identity join must be an object");
-  expectRecord(boundary.atu5TitleFollowUp.blockedTitleJoin, "token shop row remap boundary ATU5 blocked title join must be an object");
-  assert.equal(boundary.atu5TitleFollowUp.targetId, "token-shop-atu5-mk1-title", "token shop row remap boundary ATU5 trace target drifted");
-  assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.shellField, "ATU5Button", "token shop row remap boundary ATU5 trace bridge shell drifted");
-  assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.shellPathId, 15831, "token shop row remap boundary ATU5 trace bridge shell path drifted");
-  assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.supportingActionHook, "BuyMK1TokenBoost", "token shop row remap boundary ATU5 trace bridge action hook drifted");
-  assert.equal(boundary.atu5TitleFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster", "token shop row remap boundary ATU5 trace bridge prefab drifted");
-  assert.equal(boundary.atu5TitleFollowUp.recoveredTitleTextChain.shellField, "ATU5Button", "token shop row remap boundary ATU5 title text shell drifted");
-  assert.equal(boundary.atu5TitleFollowUp.recoveredTitleTextChain.shellPathId, 15831, "token shop row remap boundary ATU5 title text shell path drifted");
-  assert.equal(boundary.atu5TitleFollowUp.recoveredTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster", "token shop row remap boundary ATU5 title text prefab drifted");
+  assert.equal(
+    boundary.traceFollowUp.recoveredBridge.supportingActionHook,
+    "BuyModBoost",
+    "token shop row remap boundary trace bridge action hook drifted"
+  );
+  assert.equal(
+    boundary.traceFollowUp.recoveredBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.ModPointsBooster",
+    "token shop row remap boundary trace bridge prefab drifted"
+  );
+  expectArray(
+    boundary.traceFollowUp.blockedTitleJoin.testedSurfaces,
+    "token shop row remap boundary trace blocked title tested surfaces must be an array"
+  );
+  assert.equal(
+    boundary.traceFollowUp.blockedTitleJoin.titleCandidate,
+    "Token Ultima: MP",
+    "token shop row remap boundary trace blocked title candidate drifted"
+  );
+  assert.equal(
+    boundary.traceFollowUp.blockedTitleJoin.alternateTitleCandidate,
+    ":Diamond Upgrade 11 - ModBoost",
+    "token shop row remap boundary trace alternate title candidate drifted"
+  );
+  assert.ok(
+    boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "generic TokenShop text hooks"
+    ),
+    "token shop row remap boundary trace text-hook surface drifted"
+  );
+  assert.ok(
+    boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "token-side mod title candidate"
+    ),
+    "token shop row remap boundary trace token title surface drifted"
+  );
+  assert.ok(
+    boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "diamond-side mod title candidate"
+    ),
+    "token shop row remap boundary trace diamond title surface drifted"
+  );
+  assert.match(
+    boundary.traceFollowUp.blockedTitleJoin.missingJoin,
+    /generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues/i,
+    "token shop row remap boundary trace blocked title note drifted"
+  );
+  assert.match(
+    boundary.traceFollowUp.blockedTitleJoin.lastBlocker,
+    /last honest blocker.*Token Ultima: MP.*:Diamond Upgrade 11 - ModBoost.*ATU4Button path id 15796/i,
+    "token shop row remap boundary trace last-blocker note drifted"
+  );
+  assert.equal(
+    boundary.traceFollowUp.result,
+    "checked object bridge recovered but no concrete title join cleared",
+    "token shop row remap boundary trace follow-up result drifted"
+  );
+  expectRecord(
+    boundary.atu5TitleFollowUp,
+    "token shop row remap boundary ATU5 title follow-up must be an object"
+  );
+  expectRecord(
+    boundary.atu5TitleFollowUp.recoveredBridge,
+    "token shop row remap boundary ATU5 recovered bridge must be an object"
+  );
+  expectRecord(
+    boundary.atu5TitleFollowUp.recoveredTitleTextChain,
+    "token shop row remap boundary ATU5 recovered title text chain must be an object"
+  );
+  expectRecord(
+    boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin,
+    "token shop row remap boundary ATU5 named identity join must be an object"
+  );
+  expectRecord(
+    boundary.atu5TitleFollowUp.blockedTitleJoin,
+    "token shop row remap boundary ATU5 blocked title join must be an object"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.targetId,
+    "token-shop-atu5-mk1-title",
+    "token shop row remap boundary ATU5 trace target drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.recoveredBridge.shellField,
+    "ATU5Button",
+    "token shop row remap boundary ATU5 trace bridge shell drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.recoveredBridge.shellPathId,
+    15831,
+    "token shop row remap boundary ATU5 trace bridge shell path drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.recoveredBridge.supportingActionHook,
+    "BuyMK1TokenBoost",
+    "token shop row remap boundary ATU5 trace bridge action hook drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.recoveredBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK1Booster",
+    "token shop row remap boundary ATU5 trace bridge prefab drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.recoveredTitleTextChain.shellField,
+    "ATU5Button",
+    "token shop row remap boundary ATU5 title text shell drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.recoveredTitleTextChain.shellPathId,
+    15831,
+    "token shop row remap boundary ATU5 title text shell path drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.recoveredTitleTextChain.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK1Booster",
+    "token shop row remap boundary ATU5 title text prefab drifted"
+  );
   assert.deepEqual(
     boundary.atu5TitleFollowUp.recoveredTitleTextChain.titleSideTextSurface,
     [
@@ -2671,11 +7709,31 @@ function validateTokenShopRowRemapBoundary(boundary) {
     ],
     "token shop row remap boundary ATU5 title text surface drifted"
   );
-  assert.match(boundary.atu5TitleFollowUp.recoveredTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU5 title text conclusion drifted");
-  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellField, "ATU5Button", "token shop row remap boundary ATU5 named identity shell drifted");
-  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellPathId, 15831, "token shop row remap boundary ATU5 named identity shell path drifted");
-  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.prefabIdentity, "NewTokenUPGPrefab.T1.MK1Booster", "token shop row remap boundary ATU5 named identity prefab drifted");
-  assert.equal(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.namedIdentity, "1. MK1 Generator Output,", "token shop row remap boundary ATU5 named identity drifted");
+  assert.match(
+    boundary.atu5TitleFollowUp.recoveredTitleTextChain.groundedConclusion,
+    /shell-to-prefab-to-title-side-text chain/i,
+    "token shop row remap boundary ATU5 title text conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellField,
+    "ATU5Button",
+    "token shop row remap boundary ATU5 named identity shell drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellPathId,
+    15831,
+    "token shop row remap boundary ATU5 named identity shell path drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK1Booster",
+    "token shop row remap boundary ATU5 named identity prefab drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.namedIdentity,
+    "1. MK1 Generator Output,",
+    "token shop row remap boundary ATU5 named identity drifted"
+  );
   assert.deepEqual(
     boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.supportingTitleTextSurface,
     [
@@ -2684,20 +7742,76 @@ function validateTokenShopRowRemapBoundary(boundary) {
     ],
     "token shop row remap boundary ATU5 named identity support text drifted"
   );
-  assert.match(boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.groundedConclusion, /player-facing-named-identity join/i, "token shop row remap boundary ATU5 named identity conclusion drifted");
-  expectArray(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces, "token shop row remap boundary ATU5 blocked title tested surfaces must be an array");
-  assert.equal(boundary.atu5TitleFollowUp.blockedTitleJoin.supportTextCandidate, "1. MK1 Generator Output,", "token shop row remap boundary ATU5 support candidate drifted");
-  assert.equal(boundary.atu5TitleFollowUp.blockedTitleJoin.alternateSupportTextCandidate, "This upgrade divides the cost of MK1 Generators by 1500.", "token shop row remap boundary ATU5 alternate support candidate drifted");
-  assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"), "token shop row remap boundary ATU5 text-hook surface drifted");
-  assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "MK1 generator support-text cluster"), "token shop row remap boundary ATU5 support-text surface drifted");
-  assert.ok(boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "neighboring generator title roster gap"), "token shop row remap boundary ATU5 title-roster surface drifted");
-  assert.match(boundary.atu5TitleFollowUp.blockedTitleJoin.missingJoin, /generic text hooks and neighboring generator title roster still stay detached.*named MK1 Generator Output identity join/i, "token shop row remap boundary ATU5 blocked title note drifted");
-  assert.equal(boundary.atu5TitleFollowUp.result, "checked object bridge plus named identity and title-side text chain recovered but no final title join cleared", "token shop row remap boundary ATU5 title follow-up result drifted");
-  expectRecord(boundary.atu7BridgeFollowUp, "token shop row remap boundary ATU7 bridge follow-up must be an object");
-  expectRecord(boundary.atu7BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU7 recovered bridge must be an object");
-  assert.equal(boundary.atu7BridgeFollowUp.targetId, "token-shop-atu7-mk3-bridge", "token shop row remap boundary ATU7 trace target drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.shellField, "ATU7Button", "token shop row remap boundary ATU7 trace bridge shell drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.shellPathId, 15792, "token shop row remap boundary ATU7 trace bridge shell path drifted");
+  assert.match(
+    boundary.atu5TitleFollowUp.verifiedNamedIdentityJoin.groundedConclusion,
+    /player-facing-named-identity join/i,
+    "token shop row remap boundary ATU5 named identity conclusion drifted"
+  );
+  expectArray(
+    boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces,
+    "token shop row remap boundary ATU5 blocked title tested surfaces must be an array"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.blockedTitleJoin.supportTextCandidate,
+    "1. MK1 Generator Output,",
+    "token shop row remap boundary ATU5 support candidate drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.blockedTitleJoin.alternateSupportTextCandidate,
+    "This upgrade divides the cost of MK1 Generators by 1500.",
+    "token shop row remap boundary ATU5 alternate support candidate drifted"
+  );
+  assert.ok(
+    boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "generic TokenShop text hooks"
+    ),
+    "token shop row remap boundary ATU5 text-hook surface drifted"
+  );
+  assert.ok(
+    boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "MK1 generator support-text cluster"
+    ),
+    "token shop row remap boundary ATU5 support-text surface drifted"
+  );
+  assert.ok(
+    boundary.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces.some(
+      (surface) => surface.surface === "neighboring generator title roster gap"
+    ),
+    "token shop row remap boundary ATU5 title-roster surface drifted"
+  );
+  assert.match(
+    boundary.atu5TitleFollowUp.blockedTitleJoin.missingJoin,
+    /generic text hooks and neighboring generator title roster still stay detached.*named MK1 Generator Output identity join/i,
+    "token shop row remap boundary ATU5 blocked title note drifted"
+  );
+  assert.equal(
+    boundary.atu5TitleFollowUp.result,
+    "checked object bridge plus named identity and title-side text chain recovered but no final title join cleared",
+    "token shop row remap boundary ATU5 title follow-up result drifted"
+  );
+  expectRecord(
+    boundary.atu7BridgeFollowUp,
+    "token shop row remap boundary ATU7 bridge follow-up must be an object"
+  );
+  expectRecord(
+    boundary.atu7BridgeFollowUp.recoveredBridge,
+    "token shop row remap boundary ATU7 recovered bridge must be an object"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.targetId,
+    "token-shop-atu7-mk3-bridge",
+    "token shop row remap boundary ATU7 trace target drifted"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.recoveredBridge.shellField,
+    "ATU7Button",
+    "token shop row remap boundary ATU7 trace bridge shell drifted"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.recoveredBridge.shellPathId,
+    15792,
+    "token shop row remap boundary ATU7 trace bridge shell path drifted"
+  );
   assert.deepEqual(
     boundary.atu7BridgeFollowUp.recoveredBridge.ownerFieldBlock,
     [
@@ -2709,14 +7823,45 @@ function validateTokenShopRowRemapBoundary(boundary) {
     ],
     "token shop row remap boundary ATU7 trace bridge owner field block drifted"
   );
-  assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK3TokenBoost", "token shop row remap boundary ATU7 trace bridge action hook drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster", "token shop row remap boundary ATU7 trace bridge prefab drifted");
-  assert.match(boundary.atu7BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU7Button now has one checked trace-backed bridge/i, "token shop row remap boundary ATU7 conclusion drifted");
-  expectRecord(boundary.atu7BridgeFollowUp.verifiedTitleTextChain, "token shop row remap boundary ATU7 title text chain must be an object");
-  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.shellField, "ATU7Button", "token shop row remap boundary ATU7 title text shell drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.shellPathId, 15792, "token shop row remap boundary ATU7 title text shell path drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster", "token shop row remap boundary ATU7 title text prefab drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle, "Mk3 Generator Booster", "token shop row remap boundary ATU7 title text title drifted");
+  assert.equal(
+    boundary.atu7BridgeFollowUp.recoveredBridge.supportingActionHook,
+    "BuyMK3TokenBoost",
+    "token shop row remap boundary ATU7 trace bridge action hook drifted"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.recoveredBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK3Booster",
+    "token shop row remap boundary ATU7 trace bridge prefab drifted"
+  );
+  assert.match(
+    boundary.atu7BridgeFollowUp.recoveredBridge.groundedConclusion,
+    /ATU7Button now has one checked trace-backed bridge/i,
+    "token shop row remap boundary ATU7 conclusion drifted"
+  );
+  expectRecord(
+    boundary.atu7BridgeFollowUp.verifiedTitleTextChain,
+    "token shop row remap boundary ATU7 title text chain must be an object"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.verifiedTitleTextChain.shellField,
+    "ATU7Button",
+    "token shop row remap boundary ATU7 title text shell drifted"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.verifiedTitleTextChain.shellPathId,
+    15792,
+    "token shop row remap boundary ATU7 title text shell path drifted"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.verifiedTitleTextChain.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK3Booster",
+    "token shop row remap boundary ATU7 title text prefab drifted"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
+    "Mk3 Generator Booster",
+    "token shop row remap boundary ATU7 title text title drifted"
+  );
   assert.deepEqual(
     boundary.atu7BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
     [
@@ -2725,14 +7870,43 @@ function validateTokenShopRowRemapBoundary(boundary) {
     ],
     "token shop row remap boundary ATU7 title text support drifted"
   );
-  assert.match(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU7 title text conclusion drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.result, "checked object bridge plus title-side text chain recovered", "token shop row remap boundary ATU7 trace result drifted");
-  expectRecord(boundary.atu8BridgeFollowUp, "token shop row remap boundary ATU8 bridge follow-up must be an object");
-  expectRecord(boundary.atu8BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU8 recovered bridge must be an object");
-  expectRecord(boundary.atu8BridgeFollowUp.verifiedTitleTextChain, "token shop row remap boundary ATU8 title text chain must be an object");
-  assert.equal(boundary.atu8BridgeFollowUp.targetId, "token-shop-atu8-mk4-bridge", "token shop row remap boundary ATU8 trace target drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.shellField, "ATU8Button", "token shop row remap boundary ATU8 trace bridge shell drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.shellPathId, 15795, "token shop row remap boundary ATU8 trace bridge shell path drifted");
+  assert.match(
+    boundary.atu7BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
+    /shell-to-prefab-to-title-side-text chain/i,
+    "token shop row remap boundary ATU7 title text conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu7BridgeFollowUp.result,
+    "checked object bridge plus title-side text chain recovered",
+    "token shop row remap boundary ATU7 trace result drifted"
+  );
+  expectRecord(
+    boundary.atu8BridgeFollowUp,
+    "token shop row remap boundary ATU8 bridge follow-up must be an object"
+  );
+  expectRecord(
+    boundary.atu8BridgeFollowUp.recoveredBridge,
+    "token shop row remap boundary ATU8 recovered bridge must be an object"
+  );
+  expectRecord(
+    boundary.atu8BridgeFollowUp.verifiedTitleTextChain,
+    "token shop row remap boundary ATU8 title text chain must be an object"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.targetId,
+    "token-shop-atu8-mk4-bridge",
+    "token shop row remap boundary ATU8 trace target drifted"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.recoveredBridge.shellField,
+    "ATU8Button",
+    "token shop row remap boundary ATU8 trace bridge shell drifted"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.recoveredBridge.shellPathId,
+    15795,
+    "token shop row remap boundary ATU8 trace bridge shell path drifted"
+  );
   assert.deepEqual(
     boundary.atu8BridgeFollowUp.recoveredBridge.ownerFieldBlock,
     [
@@ -2744,13 +7918,41 @@ function validateTokenShopRowRemapBoundary(boundary) {
     ],
     "token shop row remap boundary ATU8 trace bridge owner field block drifted"
   );
-  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK4TokenBoost", "token shop row remap boundary ATU8 trace bridge action hook drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster", "token shop row remap boundary ATU8 trace bridge prefab drifted");
-  assert.match(boundary.atu8BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU8Button now has one checked bridge/i, "token shop row remap boundary ATU8 conclusion drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.shellField, "ATU8Button", "token shop row remap boundary ATU8 title text shell drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.shellPathId, 15795, "token shop row remap boundary ATU8 title text shell path drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK4Booster", "token shop row remap boundary ATU8 title text prefab drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle, "Mk4 Generator Booster", "token shop row remap boundary ATU8 title text title drifted");
+  assert.equal(
+    boundary.atu8BridgeFollowUp.recoveredBridge.supportingActionHook,
+    "BuyMK4TokenBoost",
+    "token shop row remap boundary ATU8 trace bridge action hook drifted"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.recoveredBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK4Booster",
+    "token shop row remap boundary ATU8 trace bridge prefab drifted"
+  );
+  assert.match(
+    boundary.atu8BridgeFollowUp.recoveredBridge.groundedConclusion,
+    /ATU8Button now has one checked bridge/i,
+    "token shop row remap boundary ATU8 conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.verifiedTitleTextChain.shellField,
+    "ATU8Button",
+    "token shop row remap boundary ATU8 title text shell drifted"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.verifiedTitleTextChain.shellPathId,
+    15795,
+    "token shop row remap boundary ATU8 title text shell path drifted"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.verifiedTitleTextChain.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK4Booster",
+    "token shop row remap boundary ATU8 title text prefab drifted"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
+    "Mk4 Generator Booster",
+    "token shop row remap boundary ATU8 title text title drifted"
+  );
   assert.deepEqual(
     boundary.atu8BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
     [
@@ -2759,102 +7961,435 @@ function validateTokenShopRowRemapBoundary(boundary) {
     ],
     "token shop row remap boundary ATU8 title text support drifted"
   );
-  assert.match(boundary.atu8BridgeFollowUp.verifiedTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU8 title text conclusion drifted");
-  assert.equal(boundary.atu8BridgeFollowUp.result, "checked object bridge plus title-side text chain recovered", "token shop row remap boundary ATU8 trace result drifted");
-  expectRecord(boundary.atu3CrossSystemEffectTrace, "token shop row remap boundary ATU3 cross-system effect trace must be an object");
-  expectRecord(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain, "token shop row remap boundary ATU3 recovered action-effect chain must be an object");
-  expectRecord(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface, "token shop row remap boundary ATU3 parameter surface must be an object");
-  expectRecord(boundary.atu3CrossSystemEffectTrace.detachedIdentitySurfaces, "token shop row remap boundary ATU3 detached identity surfaces must be an object");
-  expectRecord(boundary.atu3CrossSystemEffectTrace.missingTypedEffectOwner, "token shop row remap boundary ATU3 missing typed effect owner must be an object");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.targetId, "token-shop-atu3-cells-effect", "token shop row remap boundary ATU3 effect target drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellField, "ATU3Button", "token shop row remap boundary ATU3 effect shell drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellPathId, 15810, "token shop row remap boundary ATU3 effect shell path drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook, "BuyCellBoost", "token shop row remap boundary ATU3 effect action hook drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "token shop row remap boundary ATU3 shared effect title drifted");
-  assert.match(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectText, /\+1.*Cells Gained.*Token & Diamond Chests/i, "token shop row remap boundary ATU3 shared effect text drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.field, "CellBoostBonus", "token shop row remap boundary ATU3 parameter field drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.value, 1, "token shop row remap boundary ATU3 parameter value drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.supportingField, "CellBoostMaxLevel", "token shop row remap boundary ATU3 parameter supporting field drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.supportingValue, 60, "token shop row remap boundary ATU3 parameter supporting value drifted");
-  assert.ok(boundary.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.diamondSide.includes("NewDiamondUPGPrefab.Specials.CellsBoost"), "token shop row remap boundary ATU3 detached diamond surface drifted");
-  assert.ok(boundary.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.tokenSide.includes("NewTokenUPGPrefab.T1.CellsPerChestBooster"), "token shop row remap boundary ATU3 detached token surface drifted");
-  assert.match(boundary.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin, /typed gameplay owner|chest-reward applier/i, "token shop row remap boundary ATU3 typed owner gap drifted");
-  assert.equal(boundary.atu3CrossSystemEffectTrace.result, "checked action-to-shared-effect chain recovered but typed gameplay owner remains unresolved", "token shop row remap boundary ATU3 effect result drifted");
-  expectRecord(boundary.atu3ChestConsumerTrace, "token shop row remap boundary ATU3 chest consumer trace must be an object");
-  expectRecord(boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff, "token shop row remap boundary ATU3 recovered consumer handoff must be an object");
-  expectRecord(boundary.atu3ChestConsumerTrace.missingParameterConsumerSeam, "token shop row remap boundary ATU3 missing parameter consumer seam must be an object");
-  assert.equal(boundary.atu3ChestConsumerTrace.targetId, "token-shop-atu3-chest-consumer", "token shop row remap boundary ATU3 chest consumer target drifted");
-  assert.equal(boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellField, "ATU3Button", "token shop row remap boundary ATU3 chest consumer shell drifted");
-  assert.equal(boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellPathId, 15810, "token shop row remap boundary ATU3 chest consumer shell path drifted");
-  assert.equal(boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerSystem, "AdManager, Assembly-CSharp", "token shop row remap boundary ATU3 chest consumer system drifted");
-  ["StartTokenRoutine", "<TokenChestRoutine>d__149", "GoToClosedTokenChest", "StartDiamondRoutine", "<DiamondChestRoutine>d__155", "GoToClosedDiamondChest"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerMethodFamily.includes(name), `token shop row remap boundary ATU3 chest consumer method drifted for ${name}`);
+  assert.match(
+    boundary.atu8BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
+    /shell-to-prefab-to-title-side-text chain/i,
+    "token shop row remap boundary ATU8 title text conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu8BridgeFollowUp.result,
+    "checked object bridge plus title-side text chain recovered",
+    "token shop row remap boundary ATU8 trace result drifted"
+  );
+  expectRecord(
+    boundary.atu3CrossSystemEffectTrace,
+    "token shop row remap boundary ATU3 cross-system effect trace must be an object"
+  );
+  expectRecord(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain,
+    "token shop row remap boundary ATU3 recovered action-effect chain must be an object"
+  );
+  expectRecord(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface,
+    "token shop row remap boundary ATU3 parameter surface must be an object"
+  );
+  expectRecord(
+    boundary.atu3CrossSystemEffectTrace.detachedIdentitySurfaces,
+    "token shop row remap boundary ATU3 detached identity surfaces must be an object"
+  );
+  expectRecord(
+    boundary.atu3CrossSystemEffectTrace.missingTypedEffectOwner,
+    "token shop row remap boundary ATU3 missing typed effect owner must be an object"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.targetId,
+    "token-shop-atu3-cells-effect",
+    "token shop row remap boundary ATU3 effect target drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellField,
+    "ATU3Button",
+    "token shop row remap boundary ATU3 effect shell drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellPathId,
+    15810,
+    "token shop row remap boundary ATU3 effect shell path drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook,
+    "BuyCellBoost",
+    "token shop row remap boundary ATU3 effect action hook drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle,
+    'Cells Booster <size="22"><i><color=#B5B5B5>(Chests)</i></color></size>',
+    "token shop row remap boundary ATU3 shared effect title drifted"
+  );
+  assert.match(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectText,
+    /\+1.*Cells Gained.*Token & Diamond Chests/i,
+    "token shop row remap boundary ATU3 shared effect text drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.field,
+    "CellBoostBonus",
+    "token shop row remap boundary ATU3 parameter field drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.value,
+    1,
+    "token shop row remap boundary ATU3 parameter value drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.supportingField,
+    "CellBoostMaxLevel",
+    "token shop row remap boundary ATU3 parameter supporting field drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.supportingValue,
+    60,
+    "token shop row remap boundary ATU3 parameter supporting value drifted"
+  );
+  assert.ok(
+    boundary.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.diamondSide.includes(
+      "NewDiamondUPGPrefab.Specials.CellsBoost"
+    ),
+    "token shop row remap boundary ATU3 detached diamond surface drifted"
+  );
+  assert.ok(
+    boundary.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.tokenSide.includes(
+      "NewTokenUPGPrefab.T1.CellsPerChestBooster"
+    ),
+    "token shop row remap boundary ATU3 detached token surface drifted"
+  );
+  assert.match(
+    boundary.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin,
+    /typed gameplay owner|chest-reward applier/i,
+    "token shop row remap boundary ATU3 typed owner gap drifted"
+  );
+  assert.equal(
+    boundary.atu3CrossSystemEffectTrace.result,
+    "checked action-to-shared-effect chain recovered but typed gameplay owner remains unresolved",
+    "token shop row remap boundary ATU3 effect result drifted"
+  );
+  expectRecord(
+    boundary.atu3ChestConsumerTrace,
+    "token shop row remap boundary ATU3 chest consumer trace must be an object"
+  );
+  expectRecord(
+    boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff,
+    "token shop row remap boundary ATU3 recovered consumer handoff must be an object"
+  );
+  expectRecord(
+    boundary.atu3ChestConsumerTrace.missingParameterConsumerSeam,
+    "token shop row remap boundary ATU3 missing parameter consumer seam must be an object"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerTrace.targetId,
+    "token-shop-atu3-chest-consumer",
+    "token shop row remap boundary ATU3 chest consumer target drifted"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellField,
+    "ATU3Button",
+    "token shop row remap boundary ATU3 chest consumer shell drifted"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellPathId,
+    15810,
+    "token shop row remap boundary ATU3 chest consumer shell path drifted"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerSystem,
+    "AdManager, Assembly-CSharp",
+    "token shop row remap boundary ATU3 chest consumer system drifted"
+  );
+  [
+    "StartTokenRoutine",
+    "<TokenChestRoutine>d__149",
+    "GoToClosedTokenChest",
+    "StartDiamondRoutine",
+    "<DiamondChestRoutine>d__155",
+    "GoToClosedDiamondChest"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerMethodFamily.includes(name),
+      `token shop row remap boundary ATU3 chest consumer method drifted for ${name}`
+    );
   });
-  ["get_SmallAdCellGains", "get_BigAdCellGains", "<FinalAdTokenChestBonus>k__BackingField", "<FinalDiamondChestBonus>k__BackingField"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerBonusShell.includes(name), `token shop row remap boundary ATU3 chest consumer bonus shell drifted for ${name}`);
+  [
+    "get_SmallAdCellGains",
+    "get_BigAdCellGains",
+    "<FinalAdTokenChestBonus>k__BackingField",
+    "<FinalDiamondChestBonus>k__BackingField"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerBonusShell.includes(name),
+      `token shop row remap boundary ATU3 chest consumer bonus shell drifted for ${name}`
+    );
   });
   ["TokenChest", "DiamondChest"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.supportingChestObjects.includes(name), `token shop row remap boundary ATU3 chest object drifted for ${name}`);
+    assert.ok(
+      boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.supportingChestObjects.includes(
+        name
+      ),
+      `token shop row remap boundary ATU3 chest object drifted for ${name}`
+    );
   });
-  ["SetAdChestTexts", "TextHandler, Assembly-CSharp", "OfflineManager, Assembly-CSharp", "DailyAndAdCounterChecker"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.adjacentSupportSystems.includes(name), `token shop row remap boundary ATU3 chest support system drifted for ${name}`);
+  [
+    "SetAdChestTexts",
+    "TextHandler, Assembly-CSharp",
+    "OfflineManager, Assembly-CSharp",
+    "DailyAndAdCounterChecker"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.atu3ChestConsumerTrace.recoveredConsumerHandoff.adjacentSupportSystems.includes(
+        name
+      ),
+      `token shop row remap boundary ATU3 chest support system drifted for ${name}`
+    );
   });
-  assert.match(boundary.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin, /CellBoostBonus.*AdManager chest routine family/i, "token shop row remap boundary ATU3 consumer seam gap drifted");
-  assert.equal(boundary.atu3ChestConsumerTrace.result, "checked shared-effect-to-consumer-family handoff recovered but exact CellBoostBonus consumer method remains unresolved", "token shop row remap boundary ATU3 chest consumer result drifted");
-  expectRecord(boundary.atu3ChestConsumerReadTrace, "token shop row remap boundary ATU3 chest consumer read trace must be an object");
-  expectRecord(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell, "token shop row remap boundary ATU3 recovered internal read shell must be an object");
-  expectRecord(boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp, "token shop row remap boundary ATU3 explicit CellBoostBonus anchor follow-up must be an object");
-  expectRecord(boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam, "token shop row remap boundary ATU3 missing exact read site seam must be an object");
-  assert.equal(boundary.atu3ChestConsumerReadTrace.targetId, "token-shop-atu3-chest-consumer-read", "token shop row remap boundary ATU3 chest consumer read target drifted");
-  assert.equal(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.shellField, "ATU3Button", "token shop row remap boundary ATU3 chest consumer read shell drifted");
-  assert.equal(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.shellPathId, 15810, "token shop row remap boundary ATU3 chest consumer read shell path drifted");
-  assert.equal(boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.targetedAnchor, "CellBoostBonus", "token shop row remap boundary ATU3 explicit CellBoostBonus anchor drifted");
-  ["CellBoostStartCost", "CellBoostAdditiveCost", "CellBoostBonus", "CellBoostMaxLevel", "CellBoostFill", "ATU3Button"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.ownerSideMetadataNeighborhood.includes(name), `token shop row remap boundary ATU3 explicit owner-side CellBoost neighborhood drifted for ${name}`);
+  assert.match(
+    boundary.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin,
+    /CellBoostBonus.*AdManager chest routine family/i,
+    "token shop row remap boundary ATU3 consumer seam gap drifted"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerTrace.result,
+    "checked shared-effect-to-consumer-family handoff recovered but exact CellBoostBonus consumer method remains unresolved",
+    "token shop row remap boundary ATU3 chest consumer result drifted"
+  );
+  expectRecord(
+    boundary.atu3ChestConsumerReadTrace,
+    "token shop row remap boundary ATU3 chest consumer read trace must be an object"
+  );
+  expectRecord(
+    boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell,
+    "token shop row remap boundary ATU3 recovered internal read shell must be an object"
+  );
+  expectRecord(
+    boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp,
+    "token shop row remap boundary ATU3 explicit CellBoostBonus anchor follow-up must be an object"
+  );
+  expectRecord(
+    boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam,
+    "token shop row remap boundary ATU3 missing exact read site seam must be an object"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerReadTrace.targetId,
+    "token-shop-atu3-chest-consumer-read",
+    "token shop row remap boundary ATU3 chest consumer read target drifted"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.shellField,
+    "ATU3Button",
+    "token shop row remap boundary ATU3 chest consumer read shell drifted"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.shellPathId,
+    15810,
+    "token shop row remap boundary ATU3 chest consumer read shell path drifted"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.targetedAnchor,
+    "CellBoostBonus",
+    "token shop row remap boundary ATU3 explicit CellBoostBonus anchor drifted"
+  );
+  [
+    "CellBoostStartCost",
+    "CellBoostAdditiveCost",
+    "CellBoostBonus",
+    "CellBoostMaxLevel",
+    "CellBoostFill",
+    "ATU3Button"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.ownerSideMetadataNeighborhood.includes(
+        name
+      ),
+      `token shop row remap boundary ATU3 explicit owner-side CellBoost neighborhood drifted for ${name}`
+    );
   });
-  ["get_SmallAdCellGains", "get_BigAdCellGains", "SetBoosterAdBonus", "get_FinalBoosterAdBonus", "SmallAdCellGains", "BigAdCellGains", "FinalBoosterAdBonus", "<BoosterAdRoutine>d__158"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.consumerSideMetadataNeighborhood.includes(name), `token shop row remap boundary ATU3 explicit consumer-side CellBoost neighborhood drifted for ${name}`);
+  [
+    "get_SmallAdCellGains",
+    "get_BigAdCellGains",
+    "SetBoosterAdBonus",
+    "get_FinalBoosterAdBonus",
+    "SmallAdCellGains",
+    "BigAdCellGains",
+    "FinalBoosterAdBonus",
+    "<BoosterAdRoutine>d__158"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.consumerSideMetadataNeighborhood.includes(
+        name
+      ),
+      `token shop row remap boundary ATU3 explicit consumer-side CellBoost neighborhood drifted for ${name}`
+    );
   });
   ["get_SmallAdCellGains", "get_BigAdCellGains"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.cellGainGetterFamily.includes(name), `token shop row remap boundary ATU3 cell gain getter drifted for ${name}`);
+    assert.ok(
+      boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.cellGainGetterFamily.includes(
+        name
+      ),
+      `token shop row remap boundary ATU3 cell gain getter drifted for ${name}`
+    );
   });
-  ["SetBoosterAdBonus", "get_FinalBoosterAdBonus", "SmallAdCellGains", "BigAdCellGains", "FinalBoosterAdBonus", "<BoosterAdRoutine>d__158"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.boosterAdBonusShell.includes(name), `token shop row remap boundary ATU3 booster bonus shell drifted for ${name}`);
+  [
+    "SetBoosterAdBonus",
+    "get_FinalBoosterAdBonus",
+    "SmallAdCellGains",
+    "BigAdCellGains",
+    "FinalBoosterAdBonus",
+    "<BoosterAdRoutine>d__158"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.boosterAdBonusShell.includes(
+        name
+      ),
+      `token shop row remap boundary ATU3 booster bonus shell drifted for ${name}`
+    );
   });
-  ["<FinalAdTokenChestBonus>k__BackingField", "<FinalDiamondChestBonus>k__BackingField"].forEach((name) => {
-    assert.ok(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.finalChestBonusShell.includes(name), `token shop row remap boundary ATU3 final chest bonus shell drifted for ${name}`);
+  ["<FinalAdTokenChestBonus>k__BackingField", "<FinalDiamondChestBonus>k__BackingField"].forEach(
+    (name) => {
+      assert.ok(
+        boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.finalChestBonusShell.includes(
+          name
+        ),
+        `token shop row remap boundary ATU3 final chest bonus shell drifted for ${name}`
+      );
+    }
+  );
+  assert.match(
+    boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin,
+    /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i,
+    "token shop row remap boundary ATU3 internal read seam gap drifted"
+  );
+  assert.equal(
+    boundary.atu3ChestConsumerReadTrace.result,
+    "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site",
+    "token shop row remap boundary ATU3 chest consumer read result drifted"
+  );
+  ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach(
+    (name) => {
+      assert.ok(
+        boundary.groundedNonLabelClues.effectHookSamples.includes(name),
+        `token shop row remap boundary missing effect hook sample ${name}`
+      );
+    }
+  );
+  [
+    "NewTokenUPGPrefab.T1.TokensBoost",
+    "NewTokenUPGPrefab.T4.Ultima",
+    "NewTokenUPGPrefab.T5.CampaignFragments"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.groundedNonLabelClues.prefabRosterSamples.includes(name),
+      `token shop row remap boundary missing prefab roster sample ${name}`
+    );
   });
-  assert.match(boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin, /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i, "token shop row remap boundary ATU3 internal read seam gap drifted");
-  assert.equal(boundary.atu3ChestConsumerReadTrace.result, "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site", "token shop row remap boundary ATU3 chest consumer read result drifted");
-  ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
-    assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);
-  });
-  ["NewTokenUPGPrefab.T1.TokensBoost", "NewTokenUPGPrefab.T4.Ultima", "NewTokenUPGPrefab.T5.CampaignFragments"].forEach((name) => {
-    assert.ok(boundary.groundedNonLabelClues.prefabRosterSamples.includes(name), `token shop row remap boundary missing prefab roster sample ${name}`);
-  });
-  ["Tokens Booster T2", "Duo Booster Four", "Trinity Booster One", "Tokens Booster T3"].forEach((name) => {
-    assert.ok(boundary.groundedNonLabelClues.playerFacingStringSamples.includes(name), `token shop row remap boundary missing player-facing string sample ${name}`);
-  });
+  ["Tokens Booster T2", "Duo Booster Four", "Trinity Booster One", "Tokens Booster T3"].forEach(
+    (name) => {
+      assert.ok(
+        boundary.groundedNonLabelClues.playerFacingStringSamples.includes(name),
+        `token shop row remap boundary missing player-facing string sample ${name}`
+      );
+    }
+  );
   ["BuyATU24", "BuyATU25", "BuyATU26", "BuyATU27", "BuyATU28"].forEach((name) => {
-    assert.ok(boundary.groundedNonLabelClues.directBuyHookSamples.includes(name), `token shop row remap boundary missing direct buy hook sample ${name}`);
+    assert.ok(
+      boundary.groundedNonLabelClues.directBuyHookSamples.includes(name),
+      `token shop row remap boundary missing direct buy hook sample ${name}`
+    );
   });
-  assert.ok(boundary.blockedIdentityJoin.missingLinks.some((line) => /remaining ATU\*Button or ATU\*Content/i.test(line)), "token shop row remap boundary must preserve narrowed remaining ATU button join blocker");
-  assert.ok(boundary.blockedIdentityJoin.missingLinks.some((line) => /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam blocker");
-  ["row-order similarity alone", "OR_* labels", "community naming", "prefab-only naming without a checked object join"].forEach((name) => {
-    assert.ok(boundary.blockedIdentityJoin.unsafeInferenceSources.includes(name), `token shop row remap boundary missing unsafe inference source ${name}`);
+  assert.ok(
+    boundary.blockedIdentityJoin.missingLinks.some((line) =>
+      /remaining ATU\*Button or ATU\*Content/i.test(line)
+    ),
+    "token shop row remap boundary must preserve narrowed remaining ATU button join blocker"
+  );
+  assert.ok(
+    boundary.blockedIdentityJoin.missingLinks.some((line) =>
+      /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i.test(
+        line
+      )
+    ),
+    "token shop row remap boundary must preserve ATU3 consumer-seam blocker"
+  );
+  [
+    "row-order similarity alone",
+    "OR_* labels",
+    "community naming",
+    "prefab-only naming without a checked object join"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.blockedIdentityJoin.unsafeInferenceSources.includes(name),
+      `token shop row remap boundary missing unsafe inference source ${name}`
+    );
   });
-  assert.ok(boundary.currentBoundary.some((line) => /seven checked TokenShop row bridges/i.test(line)), "token shop row remap boundary must preserve recovered bridge count");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU2Button aligns directly with the DiamondBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU2 bridge conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU4 bridge conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU7Button aligns directly with the MK3TokenBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU7 bridge conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU8Button aligns directly with the MK4TokenBoost owner-field block/i.test(line)), "token shop row remap boundary must preserve recovered ATU8 bridge conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button/i.test(line)), "token shop row remap boundary must preserve ATU3 effect-chain conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-internal read conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU1 title-side pass also stays negative.*Tokens Booster.*ATU1Button path id 15839/i.test(line)), "token shop row remap boundary must preserve bounded ATU1 title-side negative");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU4 title-side pass also stays negative.*last honest blocker/i.test(line)), "token shop row remap boundary must preserve bounded ATU4 title-side negative");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU5 last-title-blocker pass now narrows cleanly/i.test(line)), "token shop row remap boundary must preserve narrowed ATU5 last-title blocker");
-  assert.ok(boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion for remaining rows");
+  assert.ok(
+    boundary.currentBoundary.some((line) => /seven checked TokenShop row bridges/i.test(line)),
+    "token shop row remap boundary must preserve recovered bridge count"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU2Button aligns directly with the DiamondBoost owner-field block/i.test(line)
+    ),
+    "token shop row remap boundary must preserve recovered ATU2 bridge conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU4Button aligns directly with the ModBoost owner-field block/i.test(line)
+    ),
+    "token shop row remap boundary must preserve recovered ATU4 bridge conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU7Button aligns directly with the MK3TokenBoost owner-field block/i.test(line)
+    ),
+    "token shop row remap boundary must preserve recovered ATU7 bridge conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU8Button aligns directly with the MK4TokenBoost owner-field block/i.test(line)
+    ),
+    "token shop row remap boundary must preserve recovered ATU8 bridge conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button/i.test(
+        line
+      )
+    ),
+    "token shop row remap boundary must preserve ATU3 effect-chain conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)
+    ),
+    "token shop row remap boundary must preserve ATU3 consumer-seam conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)
+    ),
+    "token shop row remap boundary must preserve ATU3 consumer-internal read conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU1 title-side pass also stays negative.*Tokens Booster.*ATU1Button path id 15839/i.test(
+        line
+      )
+    ),
+    "token shop row remap boundary must preserve bounded ATU1 title-side negative"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU4 title-side pass also stays negative.*last honest blocker/i.test(line)
+    ),
+    "token shop row remap boundary must preserve bounded ATU4 title-side negative"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU5 last-title-blocker pass now narrows cleanly/i.test(line)
+    ),
+    "token shop row remap boundary must preserve narrowed ATU5 last-title blocker"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)),
+    "token shop row remap boundary must preserve blocked identity conclusion for remaining rows"
+  );
 
   return {
     id: "token-shop-row-remap-boundary",
@@ -2869,32 +8404,107 @@ function validateTokenShopRowRemapBoundary(boundary) {
 }
 
 function validateTokenShopLateAtuBoundary(boundary) {
-  expectNonEmptyString(boundary.generatedAt, "token shop late ATU boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "token shop late ATU boundary generatedAt must be present"
+  );
   expectNonEmptyString(boundary.dataset, "token shop late ATU boundary dataset must be present");
   expectRecord(boundary.sources, "token shop late ATU boundary sources must be an object");
-  ["tokenShopExtract", "tokenShopRowRemapBoundary", "uabeaProbe", "unityProbe", "dailyTokeniumLaneProbe", "dailyTokeniumOwnerProbe", "lm244TargetedProbe", "metadata", "level0"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `token shop late ATU boundary sources.${field} must be present`);
+  [
+    "tokenShopExtract",
+    "tokenShopRowRemapBoundary",
+    "uabeaProbe",
+    "unityProbe",
+    "dailyTokeniumLaneProbe",
+    "dailyTokeniumOwnerProbe",
+    "lm244TargetedProbe",
+    "metadata",
+    "level0"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `token shop late ATU boundary sources.${field} must be present`
+    );
   });
-  expectRecord(boundary.targetNeighborhood, "token shop late ATU boundary targetNeighborhood must be an object");
+  expectRecord(
+    boundary.targetNeighborhood,
+    "token shop late ATU boundary targetNeighborhood must be an object"
+  );
   expectArray(boundary.lateRows, "token shop late ATU boundary lateRows must be an array");
-  expectRecord(boundary.actionNeighborhood, "token shop late ATU boundary actionNeighborhood must be an object");
-  expectRecord(boundary.titleRosterBoundary, "token shop late ATU boundary titleRosterBoundary must be an object");
-  expectRecord(boundary.prefabRosterBoundary, "token shop late ATU boundary prefabRosterBoundary must be an object");
-  expectRecord(boundary.effectSideBoundary, "token shop late ATU boundary effectSideBoundary must be an object");
-  expectRecord(boundary.rowOrderTrap, "token shop late ATU boundary rowOrderTrap must be an object");
-  expectArray(boundary.actionNeighborhood.preservedLateHooks, "token shop late ATU boundary preservedLateHooks must be an array");
-  expectArray(boundary.actionNeighborhood.adjacentNamedTierHooks, "token shop late ATU boundary adjacentNamedTierHooks must be an array");
-  expectArray(boundary.titleRosterBoundary.localTitleCluster, "token shop late ATU boundary localTitleCluster must be an array");
-  expectArray(boundary.prefabRosterBoundary.localPrefabCluster, "token shop late ATU boundary localPrefabCluster must be an array");
-  expectArray(boundary.effectSideBoundary.preservedEffectClues, "token shop late ATU boundary preservedEffectClues must be an array");
-  expectArray(boundary.rowOrderTrap.unsafeInferenceSources, "token shop late ATU boundary unsafeInferenceSources must be an array");
-  expectArray(boundary.currentBoundary, "token shop late ATU boundary currentBoundary must be an array");
+  expectRecord(
+    boundary.actionNeighborhood,
+    "token shop late ATU boundary actionNeighborhood must be an object"
+  );
+  expectRecord(
+    boundary.titleRosterBoundary,
+    "token shop late ATU boundary titleRosterBoundary must be an object"
+  );
+  expectRecord(
+    boundary.prefabRosterBoundary,
+    "token shop late ATU boundary prefabRosterBoundary must be an object"
+  );
+  expectRecord(
+    boundary.effectSideBoundary,
+    "token shop late ATU boundary effectSideBoundary must be an object"
+  );
+  expectRecord(
+    boundary.rowOrderTrap,
+    "token shop late ATU boundary rowOrderTrap must be an object"
+  );
+  expectArray(
+    boundary.actionNeighborhood.preservedLateHooks,
+    "token shop late ATU boundary preservedLateHooks must be an array"
+  );
+  expectArray(
+    boundary.actionNeighborhood.adjacentNamedTierHooks,
+    "token shop late ATU boundary adjacentNamedTierHooks must be an array"
+  );
+  expectArray(
+    boundary.titleRosterBoundary.localTitleCluster,
+    "token shop late ATU boundary localTitleCluster must be an array"
+  );
+  expectArray(
+    boundary.prefabRosterBoundary.localPrefabCluster,
+    "token shop late ATU boundary localPrefabCluster must be an array"
+  );
+  expectArray(
+    boundary.effectSideBoundary.preservedEffectClues,
+    "token shop late ATU boundary preservedEffectClues must be an array"
+  );
+  expectArray(
+    boundary.rowOrderTrap.unsafeInferenceSources,
+    "token shop late ATU boundary unsafeInferenceSources must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "token shop late ATU boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "token-shop-late-atu-boundary", "token shop late ATU boundary dataset id drifted");
-  assert.equal(boundary.targetNeighborhood.saveFieldRange, "ATU24Level through ATU28Level", "token shop late ATU boundary save field range drifted");
-  assert.equal(boundary.targetNeighborhood.shellFieldRange, "ATU24Button through ATU28Button", "token shop late ATU boundary shell field range drifted");
-  assert.equal(boundary.targetNeighborhood.numericFieldRange, "ATU24StartCost through ATU28Fill", "token shop late ATU boundary numeric field range drifted");
-  assert.equal(boundary.targetNeighborhood.group, "tier4plus", "token shop late ATU boundary group drifted");
+  assert.equal(
+    boundary.dataset,
+    "token-shop-late-atu-boundary",
+    "token shop late ATU boundary dataset id drifted"
+  );
+  assert.equal(
+    boundary.targetNeighborhood.saveFieldRange,
+    "ATU24Level through ATU28Level",
+    "token shop late ATU boundary save field range drifted"
+  );
+  assert.equal(
+    boundary.targetNeighborhood.shellFieldRange,
+    "ATU24Button through ATU28Button",
+    "token shop late ATU boundary shell field range drifted"
+  );
+  assert.equal(
+    boundary.targetNeighborhood.numericFieldRange,
+    "ATU24StartCost through ATU28Fill",
+    "token shop late ATU boundary numeric field range drifted"
+  );
+  assert.equal(
+    boundary.targetNeighborhood.group,
+    "tier4plus",
+    "token shop late ATU boundary group drifted"
+  );
   assert.deepEqual(
     boundary.lateRows.map((row) => row.shellField),
     ["ATU24Button", "ATU25Button", "ATU26Button", "ATU27Button", "ATU28Button"],
@@ -2911,10 +8521,23 @@ function validateTokenShopLateAtuBoundary(boundary) {
     "token shop late ATU boundary preserved late hooks drifted"
   );
   ["BuyTokenT3", "BuyTokenDailyT3", "BuyTrio1Boost", "BuyTrio2Boost"].forEach((name) => {
-    assert.ok(boundary.actionNeighborhood.adjacentNamedTierHooks.includes(name), `token shop late ATU boundary missing adjacent named tier hook ${name}`);
+    assert.ok(
+      boundary.actionNeighborhood.adjacentNamedTierHooks.includes(name),
+      `token shop late ATU boundary missing adjacent named tier hook ${name}`
+    );
   });
-  ["Duo Booster Four", "Trinity Booster One", "Academy Booster", "Trinity Oom Booster", "Tokens Booster T3", "Tier 3 Max Level Increaser"].forEach((name) => {
-    assert.ok(boundary.titleRosterBoundary.localTitleCluster.some((entry) => entry.title === name), `token shop late ATU boundary missing title cluster entry ${name}`);
+  [
+    "Duo Booster Four",
+    "Trinity Booster One",
+    "Academy Booster",
+    "Trinity Oom Booster",
+    "Tokens Booster T3",
+    "Tier 3 Max Level Increaser"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.titleRosterBoundary.localTitleCluster.some((entry) => entry.title === name),
+      `token shop late ATU boundary missing title cluster entry ${name}`
+    );
   });
   [
     "NewTokenUPGPrefab.T3.TokensBoost",
@@ -2923,17 +8546,50 @@ function validateTokenShopLateAtuBoundary(boundary) {
     "NewTokenUPGPrefab.T5.TrinityOomBooster",
     "NewTokenUPGPrefab.T2.DuoBoosterFour"
   ].forEach((name) => {
-    assert.ok(boundary.prefabRosterBoundary.localPrefabCluster.some((entry) => entry.identity === name), `token shop late ATU boundary missing local prefab cluster entry ${name}`);
+    assert.ok(
+      boundary.prefabRosterBoundary.localPrefabCluster.some((entry) => entry.identity === name),
+      `token shop late ATU boundary missing local prefab cluster entry ${name}`
+    );
   });
-  assert.equal(boundary.prefabRosterBoundary.separateEffectSidePrefab.identity, "NewTokenUPGPrefab.T5.CampaignFragments", "token shop late ATU boundary effect-side prefab drifted");
-  ["ATU24Bonus3Shards", "LV. 1 - x1.1 Campaign Fragments", "LV. 3 - Academy Points x3"].forEach((name) => {
-    assert.ok(boundary.effectSideBoundary.preservedEffectClues.includes(name), `token shop late ATU boundary missing effect-side clue ${name}`);
-  });
-  assert.equal(boundary.result, "no concrete late-row object-or-title join cleared", "token shop late ATU boundary result drifted");
-  assert.match(boundary.groundedConclusion, /ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result/i, "token shop late ATU boundary grounded conclusion drifted");
-  assert.ok(boundary.rowOrderTrap.unsafeInferenceSources.includes("row-order similarity inside the late title roster"), "token shop late ATU boundary must preserve row-order title trap");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU24Level through ATU28Level/i.test(line)), "token shop late ATU boundary must preserve late save field range conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /do not infer ATU24 through ATU28 row identity/i.test(line)), "token shop late ATU boundary must preserve anti-inference conclusion");
+  assert.equal(
+    boundary.prefabRosterBoundary.separateEffectSidePrefab.identity,
+    "NewTokenUPGPrefab.T5.CampaignFragments",
+    "token shop late ATU boundary effect-side prefab drifted"
+  );
+  ["ATU24Bonus3Shards", "LV. 1 - x1.1 Campaign Fragments", "LV. 3 - Academy Points x3"].forEach(
+    (name) => {
+      assert.ok(
+        boundary.effectSideBoundary.preservedEffectClues.includes(name),
+        `token shop late ATU boundary missing effect-side clue ${name}`
+      );
+    }
+  );
+  assert.equal(
+    boundary.result,
+    "no concrete late-row object-or-title join cleared",
+    "token shop late ATU boundary result drifted"
+  );
+  assert.match(
+    boundary.groundedConclusion,
+    /ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result/i,
+    "token shop late ATU boundary grounded conclusion drifted"
+  );
+  assert.ok(
+    boundary.rowOrderTrap.unsafeInferenceSources.includes(
+      "row-order similarity inside the late title roster"
+    ),
+    "token shop late ATU boundary must preserve row-order title trap"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) => /ATU24Level through ATU28Level/i.test(line)),
+    "token shop late ATU boundary must preserve late save field range conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /do not infer ATU24 through ATU28 row identity/i.test(line)
+    ),
+    "token shop late ATU boundary must preserve anti-inference conclusion"
+  );
 
   return {
     id: "token-shop-late-atu-boundary",
@@ -2962,30 +8618,111 @@ function validateUnityTraceBundle(bundle) {
   expectRecord(bundle.traceGraph, "unity trace bundle traceGraph must be an object");
   expectRecord(bundle.decisionSummary, "unity trace bundle decisionSummary must be an object");
   expectRecord(bundle.bridgeCheck, "unity trace bundle bridgeCheck must be an object");
-  expectRecord(bundle.solvedVsBlockedDiff, "unity trace bundle solvedVsBlockedDiff must be an object");
+  expectRecord(
+    bundle.solvedVsBlockedDiff,
+    "unity trace bundle solvedVsBlockedDiff must be an object"
+  );
   expectArray(bundle.lostStructure, "unity trace bundle lostStructure must be an array");
   expectArray(bundle.currentBoundary, "unity trace bundle currentBoundary must be an array");
-  ["metadata", "tokenShopExtract", "tokenShopRowRemapBoundary", "tokenShopLateAtuBoundary", "dailyTokeniumLaneProbe", "dailyTokeniumOwnerProbe", "uabeaProbe", "unityProbe", "lm244TargetedProbe"].forEach((field) => {
-    expectNonEmptyString(bundle.sources[field], `unity trace bundle sources.${field} must be present`);
+  [
+    "metadata",
+    "tokenShopExtract",
+    "tokenShopRowRemapBoundary",
+    "tokenShopLateAtuBoundary",
+    "dailyTokeniumLaneProbe",
+    "dailyTokeniumOwnerProbe",
+    "uabeaProbe",
+    "unityProbe",
+    "lm244TargetedProbe"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      bundle.sources[field],
+      `unity trace bundle sources.${field} must be present`
+    );
   });
 
   assert.equal(bundle.dataset, "unity-trace-bundle", "unity trace bundle dataset id drifted");
-  assert.equal(bundle.traceWorkflow.command, "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]", "unity trace bundle command drifted");
-  assert.equal(bundle.traceWorkflow.plannerExample, "node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>", "unity trace bundle planner example drifted");
-  assert.equal(bundle.plannerResolution.selectionMode, "explicit-target", "unity trace bundle planner selection mode drifted");
-  assert.equal(bundle.plannerResolution.matchedFamilyId, "token-shop", "unity trace bundle planner family drifted");
-  assert.equal(bundle.plannerResolution.runMode, "trace", "unity trace bundle planner run mode drifted");
-  assert.equal(bundle.plannerResolution.comparePresetId, null, "unity trace bundle planner compare preset drifted");
-  assert.ok(bundle.plannerResolution.expandedAnchors.includes("ATU3Button"), "unity trace bundle planner anchors must preserve ATU3 shell anchor");
-  assert.ok(bundle.plannerResolution.expandedAnchorSpecs.some((anchor) => anchor.value === "15810" && anchor.kind === "path id"), "unity trace bundle planner anchor typing drifted");
-  assert.match(bundle.plannerResolution.decisionNote, /TokenShop/i, "unity trace bundle planner decision note must preserve chosen family");
-  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"), "unity trace bundle execution shell anchor drifted");
-  assert.ok(bundle.executionAnchors.some((anchor) => anchor.value === "get_SmallAdCellGains" && anchor.kind === "method"), "unity trace bundle execution method anchor drifted");
-  assert.equal(bundle.traceRegistry.path, "data/unity-trace-target-registry.json", "unity trace bundle registry path drifted");
-  assert.equal(bundle.traceRegistry.selectedFamilyId, "token-shop", "unity trace bundle selected family drifted");
-  assert.equal(bundle.target.id, "token-shop-atu3-chest-consumer-read", "unity trace bundle target id drifted");
-  assert.ok(bundle.target.anchors.includes("ATU3Button"), "unity trace bundle target anchors must preserve solved shell field");
-  assert.equal(bundle.shellWindow.shellField, "ATU3Button", "unity trace bundle shell field drifted");
+  assert.equal(
+    bundle.traceWorkflow.command,
+    "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]",
+    "unity trace bundle command drifted"
+  );
+  assert.equal(
+    bundle.traceWorkflow.plannerExample,
+    "node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>",
+    "unity trace bundle planner example drifted"
+  );
+  assert.equal(
+    bundle.plannerResolution.selectionMode,
+    "explicit-target",
+    "unity trace bundle planner selection mode drifted"
+  );
+  assert.equal(
+    bundle.plannerResolution.matchedFamilyId,
+    "token-shop",
+    "unity trace bundle planner family drifted"
+  );
+  assert.equal(
+    bundle.plannerResolution.runMode,
+    "trace",
+    "unity trace bundle planner run mode drifted"
+  );
+  assert.equal(
+    bundle.plannerResolution.comparePresetId,
+    null,
+    "unity trace bundle planner compare preset drifted"
+  );
+  assert.ok(
+    bundle.plannerResolution.expandedAnchors.includes("ATU3Button"),
+    "unity trace bundle planner anchors must preserve ATU3 shell anchor"
+  );
+  assert.ok(
+    bundle.plannerResolution.expandedAnchorSpecs.some(
+      (anchor) => anchor.value === "15810" && anchor.kind === "path id"
+    ),
+    "unity trace bundle planner anchor typing drifted"
+  );
+  assert.match(
+    bundle.plannerResolution.decisionNote,
+    /TokenShop/i,
+    "unity trace bundle planner decision note must preserve chosen family"
+  );
+  assert.ok(
+    bundle.executionAnchors.some(
+      (anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"
+    ),
+    "unity trace bundle execution shell anchor drifted"
+  );
+  assert.ok(
+    bundle.executionAnchors.some(
+      (anchor) => anchor.value === "get_SmallAdCellGains" && anchor.kind === "method"
+    ),
+    "unity trace bundle execution method anchor drifted"
+  );
+  assert.equal(
+    bundle.traceRegistry.path,
+    "data/unity-trace-target-registry.json",
+    "unity trace bundle registry path drifted"
+  );
+  assert.equal(
+    bundle.traceRegistry.selectedFamilyId,
+    "token-shop",
+    "unity trace bundle selected family drifted"
+  );
+  assert.equal(
+    bundle.target.id,
+    "token-shop-atu3-chest-consumer-read",
+    "unity trace bundle target id drifted"
+  );
+  assert.ok(
+    bundle.target.anchors.includes("ATU3Button"),
+    "unity trace bundle target anchors must preserve solved shell field"
+  );
+  assert.equal(
+    bundle.shellWindow.shellField,
+    "ATU3Button",
+    "unity trace bundle shell field drifted"
+  );
   assert.equal(bundle.shellWindow.shellPathId, 15810, "unity trace bundle shell path id drifted");
   assert.deepEqual(
     bundle.shellWindow.ownerFieldBlock,
@@ -2998,45 +8735,193 @@ function validateUnityTraceBundle(bundle) {
     ],
     "unity trace bundle owner field block drifted"
   );
-  assert.equal(bundle.bridgeCheck.bridgeCleared, true, "unity trace bundle must preserve the ATU3 effect-chain result");
-  assert.equal(bundle.bridgeCheck.result, "checked consumer-internal bonus shell recovered", "unity trace bundle result drifted");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "metadata-neighborhood"), "unity trace bundle missing metadata surface");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "consumer-family"), "unity trace bundle missing consumer-family surface");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "consumer-routines"), "unity trace bundle missing consumer-routines surface");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "cell-gain-getters"), "unity trace bundle missing cell-gain-getters surface");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "booster-bonus-shell"), "unity trace bundle missing booster-bonus-shell surface");
-  assert.ok(bundle.surfaces.some((surface) => surface.id === "final-chest-bonus-shell"), "unity trace bundle missing final-chest-bonus-shell surface");
+  assert.equal(
+    bundle.bridgeCheck.bridgeCleared,
+    true,
+    "unity trace bundle must preserve the ATU3 effect-chain result"
+  );
+  assert.equal(
+    bundle.bridgeCheck.result,
+    "checked consumer-internal bonus shell recovered",
+    "unity trace bundle result drifted"
+  );
+  assert.ok(
+    bundle.surfaces.some((surface) => surface.id === "metadata-neighborhood"),
+    "unity trace bundle missing metadata surface"
+  );
+  assert.ok(
+    bundle.surfaces.some((surface) => surface.id === "consumer-family"),
+    "unity trace bundle missing consumer-family surface"
+  );
+  assert.ok(
+    bundle.surfaces.some((surface) => surface.id === "consumer-routines"),
+    "unity trace bundle missing consumer-routines surface"
+  );
+  assert.ok(
+    bundle.surfaces.some((surface) => surface.id === "cell-gain-getters"),
+    "unity trace bundle missing cell-gain-getters surface"
+  );
+  assert.ok(
+    bundle.surfaces.some((surface) => surface.id === "booster-bonus-shell"),
+    "unity trace bundle missing booster-bonus-shell surface"
+  );
+  assert.ok(
+    bundle.surfaces.some((surface) => surface.id === "final-chest-bonus-shell"),
+    "unity trace bundle missing final-chest-bonus-shell surface"
+  );
   const metadataSurface = bundle.surfaces.find((surface) => surface.id === "metadata-neighborhood");
-  assert.ok(metadataSurface.anchorSpecs.some((anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"), "unity trace bundle metadata surface must preserve ATU3 anchor");
+  assert.ok(
+    metadataSurface.anchorSpecs.some(
+      (anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"
+    ),
+    "unity trace bundle metadata surface must preserve ATU3 anchor"
+  );
   const metadataSource = metadataSurface.sources.find((source) => source.sourceId === "metadata");
-  assert.deepEqual(metadataSource.searchModes, ["exact-string", "bounded-containment"], "unity trace bundle metadata search modes drifted");
-  assert.equal(metadataSource.highSignalHitCount, 0, "unity trace bundle metadata high-signal count drifted");
-  assert.ok(metadataSource.supportingHitCount >= 3, "unity trace bundle metadata supporting count drifted");
-  assert.ok(metadataSource.incidentalHitCount >= 1, "unity trace bundle metadata incidental count drifted");
-  assert.ok(metadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)), "unity trace bundle metadata hits should suppress public-key noise");
-  assert.ok(metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")), "unity trace bundle metadata hits should not treat path ids as free-text anchors");
+  assert.deepEqual(
+    metadataSource.searchModes,
+    ["exact-string", "bounded-containment"],
+    "unity trace bundle metadata search modes drifted"
+  );
+  assert.equal(
+    metadataSource.highSignalHitCount,
+    0,
+    "unity trace bundle metadata high-signal count drifted"
+  );
+  assert.ok(
+    metadataSource.supportingHitCount >= 3,
+    "unity trace bundle metadata supporting count drifted"
+  );
+  assert.ok(
+    metadataSource.incidentalHitCount >= 1,
+    "unity trace bundle metadata incidental count drifted"
+  );
+  assert.ok(
+    metadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)),
+    "unity trace bundle metadata hits should suppress public-key noise"
+  );
+  assert.ok(
+    metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")),
+    "unity trace bundle metadata hits should not treat path ids as free-text anchors"
+  );
   assert.equal(bundle.traceGraph.edges.length, 6, "unity trace bundle proved edge count drifted");
-  assert.equal(bundle.traceGraph.negativeEdges.length, 1, "unity trace bundle negative edge count drifted");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"), "unity trace bundle missing serialized adjacency edge");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "shared-effect-to-consumer-family"), "unity trace bundle missing consumer-family handoff edge");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-chest-routines"), "unity trace bundle missing chest-routine edge");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-cell-gain-getters"), "unity trace bundle missing cell-gain getter edge");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "cell-gain-getters-to-booster-bonus-shell"), "unity trace bundle missing booster aggregation edge");
-  assert.ok(bundle.traceGraph.edges.some((edge) => edge.type === "booster-bonus-shell-to-final-chest-bonus-shell"), "unity trace bundle missing final chest bonus shell edge");
-  assert.ok(bundle.traceGraph.negativeEdges.some((edge) => edge.type === "exact-cellboost-to-booster-bonus-handoff"), "unity trace bundle missing exact CellBoost consumer negative edge");
-  assert.ok(bundle.traceGraph.claimLedger.some((claim) => claim.id === "claim-atu3-consumer-internal-shell" && claim.status === "proved"), "unity trace bundle missing ATU3 consumer-internal claim");
-  assert.equal(bundle.decisionSummary.verdict, "quarantine", "unity trace bundle decision verdict drifted");
-  assert.deepEqual(bundle.decisionSummary.baselineGap, ["exact-cellboost-to-booster-bonus-handoff"], "unity trace bundle decision baseline gap drifted");
-  assert.equal(bundle.solvedVsBlockedDiff.baseline.shellField, "ATU3Button", "unity trace bundle baseline shell drifted");
-  assert.equal(bundle.solvedVsBlockedDiff.baseline.shellPathId, 15810, "unity trace bundle baseline shell path drifted");
-  assert.equal(bundle.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button", "unity trace bundle blocked shell drifted");
-  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, ["serialized-adjacency", "shared-effect-to-consumer-family", "consumer-family-to-chest-routines"], "unity trace bundle shared edge diff drifted");
-  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes, ["consumer-family-to-cell-gain-getters", "cell-gain-getters-to-booster-bonus-shell", "booster-bonus-shell-to-final-chest-bonus-shell"], "unity trace bundle baseline-only diff drifted");
-  assert.deepEqual(bundle.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, ["exact-cellboost-to-booster-bonus-handoff"], "unity trace bundle blocked missing diff drifted");
-  assert.ok(bundle.lostStructure.some((line) => /checked ATU3 chain now reaches the concrete AdManager consumer family/i.test(line)), "unity trace bundle must preserve ATU3 shell-loss explanation");
-  assert.ok(bundle.lostStructure.some((line) => /exact CellBoostBonus read-site or typed-field handoff/i.test(line)), "unity trace bundle must preserve exact consumer-seam gap framing");
-  assert.match(bundle.groundedConclusion, /ATU3 consumer-internal read trace now preserves/i, "unity trace bundle grounded conclusion drifted");
-  assert.ok(bundle.currentBoundary.some((line) => /Keep the ATU3 result quarantined to effect-chain completion evidence/i.test(line)), "unity trace bundle must preserve ATU3 quarantine framing");
+  assert.equal(
+    bundle.traceGraph.negativeEdges.length,
+    1,
+    "unity trace bundle negative edge count drifted"
+  );
+  assert.ok(
+    bundle.traceGraph.edges.some(
+      (edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"
+    ),
+    "unity trace bundle missing serialized adjacency edge"
+  );
+  assert.ok(
+    bundle.traceGraph.edges.some((edge) => edge.type === "shared-effect-to-consumer-family"),
+    "unity trace bundle missing consumer-family handoff edge"
+  );
+  assert.ok(
+    bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-chest-routines"),
+    "unity trace bundle missing chest-routine edge"
+  );
+  assert.ok(
+    bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-cell-gain-getters"),
+    "unity trace bundle missing cell-gain getter edge"
+  );
+  assert.ok(
+    bundle.traceGraph.edges.some(
+      (edge) => edge.type === "cell-gain-getters-to-booster-bonus-shell"
+    ),
+    "unity trace bundle missing booster aggregation edge"
+  );
+  assert.ok(
+    bundle.traceGraph.edges.some(
+      (edge) => edge.type === "booster-bonus-shell-to-final-chest-bonus-shell"
+    ),
+    "unity trace bundle missing final chest bonus shell edge"
+  );
+  assert.ok(
+    bundle.traceGraph.negativeEdges.some(
+      (edge) => edge.type === "exact-cellboost-to-booster-bonus-handoff"
+    ),
+    "unity trace bundle missing exact CellBoost consumer negative edge"
+  );
+  assert.ok(
+    bundle.traceGraph.claimLedger.some(
+      (claim) => claim.id === "claim-atu3-consumer-internal-shell" && claim.status === "proved"
+    ),
+    "unity trace bundle missing ATU3 consumer-internal claim"
+  );
+  assert.equal(
+    bundle.decisionSummary.verdict,
+    "quarantine",
+    "unity trace bundle decision verdict drifted"
+  );
+  assert.deepEqual(
+    bundle.decisionSummary.baselineGap,
+    ["exact-cellboost-to-booster-bonus-handoff"],
+    "unity trace bundle decision baseline gap drifted"
+  );
+  assert.equal(
+    bundle.solvedVsBlockedDiff.baseline.shellField,
+    "ATU3Button",
+    "unity trace bundle baseline shell drifted"
+  );
+  assert.equal(
+    bundle.solvedVsBlockedDiff.baseline.shellPathId,
+    15810,
+    "unity trace bundle baseline shell path drifted"
+  );
+  assert.equal(
+    bundle.solvedVsBlockedDiff.blockedTarget.shellField,
+    "ATU3Button",
+    "unity trace bundle blocked shell drifted"
+  );
+  assert.deepEqual(
+    bundle.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes,
+    [
+      "serialized-adjacency",
+      "shared-effect-to-consumer-family",
+      "consumer-family-to-chest-routines"
+    ],
+    "unity trace bundle shared edge diff drifted"
+  );
+  assert.deepEqual(
+    bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes,
+    [
+      "consumer-family-to-cell-gain-getters",
+      "cell-gain-getters-to-booster-bonus-shell",
+      "booster-bonus-shell-to-final-chest-bonus-shell"
+    ],
+    "unity trace bundle baseline-only diff drifted"
+  );
+  assert.deepEqual(
+    bundle.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes,
+    ["exact-cellboost-to-booster-bonus-handoff"],
+    "unity trace bundle blocked missing diff drifted"
+  );
+  assert.ok(
+    bundle.lostStructure.some((line) =>
+      /checked ATU3 chain now reaches the concrete AdManager consumer family/i.test(line)
+    ),
+    "unity trace bundle must preserve ATU3 shell-loss explanation"
+  );
+  assert.ok(
+    bundle.lostStructure.some((line) =>
+      /exact CellBoostBonus read-site or typed-field handoff/i.test(line)
+    ),
+    "unity trace bundle must preserve exact consumer-seam gap framing"
+  );
+  assert.match(
+    bundle.groundedConclusion,
+    /ATU3 consumer-internal read trace now preserves/i,
+    "unity trace bundle grounded conclusion drifted"
+  );
+  assert.ok(
+    bundle.currentBoundary.some((line) =>
+      /Keep the ATU3 result quarantined to effect-chain completion evidence/i.test(line)
+    ),
+    "unity trace bundle must preserve ATU3 quarantine framing"
+  );
 
   return {
     id: "unity-trace-bundle",
@@ -3052,32 +8937,114 @@ function validateUnityTraceBundle(bundle) {
 
 function validateUnityTraceTargetRegistry(registry) {
   expectNonEmptyString(registry.dataset, "unity trace target registry dataset must be present");
-  expectRecord(registry.sourceFamilies, "unity trace target registry sourceFamilies must be an object");
+  expectRecord(
+    registry.sourceFamilies,
+    "unity trace target registry sourceFamilies must be an object"
+  );
   expectRecord(registry.planner, "unity trace target registry planner must be an object");
-  expectRecord(registry.planner.families, "unity trace target registry planner.families must be an object");
-  expectRecord(registry.comparisonPresets, "unity trace target registry comparisonPresets must be an object");
+  expectRecord(
+    registry.planner.families,
+    "unity trace target registry planner.families must be an object"
+  );
+  expectRecord(
+    registry.comparisonPresets,
+    "unity trace target registry comparisonPresets must be an object"
+  );
   expectRecord(registry.targets, "unity trace target registry targets must be an object");
-  assert.equal(registry.dataset, "unity-trace-target-registry", "unity trace target registry dataset id drifted");
+  assert.equal(
+    registry.dataset,
+    "unity-trace-target-registry",
+    "unity trace target registry dataset id drifted"
+  );
   ["token-shop", "shard-cost", "multiverse-market-save-owner"].forEach((familyId) => {
-    assert.ok(registry.sourceFamilies[familyId], `unity trace target registry missing family ${familyId}`);
-    assert.ok(registry.planner.families[familyId], `unity trace target registry planner missing family ${familyId}`);
+    assert.ok(
+      registry.sourceFamilies[familyId],
+      `unity trace target registry missing family ${familyId}`
+    );
+    assert.ok(
+      registry.planner.families[familyId],
+      `unity trace target registry planner missing family ${familyId}`
+    );
   });
-  ["token-shop-atu3-cells", "token-shop-atu3-cells-effect", "token-shop-atu3-chest-consumer", "token-shop-atu3-chest-consumer-read", "token-shop-atu4-mod", "token-shop-atu5-mk1-title", "token-shop-atu7-mk3-bridge", "token-shop-family-structure", "shard-cost-su0-structure", "multiverse-market-save-owner-boundary"].forEach((targetId) => {
+  [
+    "token-shop-atu3-cells",
+    "token-shop-atu3-cells-effect",
+    "token-shop-atu3-chest-consumer",
+    "token-shop-atu3-chest-consumer-read",
+    "token-shop-atu4-mod",
+    "token-shop-atu5-mk1-title",
+    "token-shop-atu7-mk3-bridge",
+    "token-shop-family-structure",
+    "shard-cost-su0-structure",
+    "multiverse-market-save-owner-boundary"
+  ].forEach((targetId) => {
     assert.ok(registry.targets[targetId], `unity trace target registry missing target ${targetId}`);
   });
-  assert.equal(registry.planner.families["token-shop"].defaultTargetId, "token-shop-atu3-cells", "unity trace target registry token-shop planner target drifted");
-  assert.equal(registry.planner.families["shard-cost"].defaultRunMode, "trace", "unity trace target registry shard planner mode drifted");
-  assert.equal(registry.planner.families["multiverse-market-save-owner"].defaultRunMode, "compare", "unity trace target registry market planner mode drifted");
-  assert.equal(registry.targets["token-shop-atu3-cells"].comparisonPresetId, "token-shop-atu3-vs-atu1", "unity trace target registry token-shop comparison preset drifted");
-  assert.equal(registry.targets["token-shop-atu4-mod"].comparisonPresetId, "token-shop-atu4-vs-atu3", "unity trace target registry ATU4 comparison preset drifted");
-  assert.equal(registry.targets["token-shop-atu5-mk1-title"].comparisonPresetId, "token-shop-atu5-vs-atu3", "unity trace target registry ATU5 comparison preset drifted");
-  assert.equal(registry.targets["token-shop-atu7-mk3-bridge"].comparisonPresetId, "token-shop-atu7-vs-atu3", "unity trace target registry ATU7 comparison preset drifted");
-  assert.equal(registry.targets["token-shop-atu3-cells-effect"].comparisonPresetId, "token-shop-atu3-effect-vs-split", "unity trace target registry ATU3 effect comparison preset drifted");
-  assert.equal(registry.targets["token-shop-atu3-chest-consumer"].comparisonPresetId, "token-shop-atu3-consumer-vs-effect", "unity trace target registry ATU3 consumer comparison preset drifted");
-  assert.equal(registry.targets["token-shop-atu3-chest-consumer-read"].comparisonPresetId, "token-shop-atu3-consumer-read-vs-consumer", "unity trace target registry ATU3 consumer read comparison preset drifted");
-  assert.equal(registry.targets["token-shop-family-structure"].comparisonPresetId, "token-shop-family-structure-vs-unresolved", "unity trace target registry family-structure comparison preset drifted");
-  assert.equal(registry.targets["shard-cost-su0-structure"].comparisonPresetId, "shard-cost-structure-vs-planner", "unity trace target registry shard comparison preset drifted");
-  assert.equal(registry.targets["multiverse-market-save-owner-boundary"].comparisonPresetId, "multiverse-market-save-owner-vs-canonical-import", "unity trace target registry market comparison preset drifted");
+  assert.equal(
+    registry.planner.families["token-shop"].defaultTargetId,
+    "token-shop-atu3-cells",
+    "unity trace target registry token-shop planner target drifted"
+  );
+  assert.equal(
+    registry.planner.families["shard-cost"].defaultRunMode,
+    "trace",
+    "unity trace target registry shard planner mode drifted"
+  );
+  assert.equal(
+    registry.planner.families["multiverse-market-save-owner"].defaultRunMode,
+    "compare",
+    "unity trace target registry market planner mode drifted"
+  );
+  assert.equal(
+    registry.targets["token-shop-atu3-cells"].comparisonPresetId,
+    "token-shop-atu3-vs-atu1",
+    "unity trace target registry token-shop comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["token-shop-atu4-mod"].comparisonPresetId,
+    "token-shop-atu4-vs-atu3",
+    "unity trace target registry ATU4 comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["token-shop-atu5-mk1-title"].comparisonPresetId,
+    "token-shop-atu5-vs-atu3",
+    "unity trace target registry ATU5 comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["token-shop-atu7-mk3-bridge"].comparisonPresetId,
+    "token-shop-atu7-vs-atu3",
+    "unity trace target registry ATU7 comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["token-shop-atu3-cells-effect"].comparisonPresetId,
+    "token-shop-atu3-effect-vs-split",
+    "unity trace target registry ATU3 effect comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["token-shop-atu3-chest-consumer"].comparisonPresetId,
+    "token-shop-atu3-consumer-vs-effect",
+    "unity trace target registry ATU3 consumer comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["token-shop-atu3-chest-consumer-read"].comparisonPresetId,
+    "token-shop-atu3-consumer-read-vs-consumer",
+    "unity trace target registry ATU3 consumer read comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["token-shop-family-structure"].comparisonPresetId,
+    "token-shop-family-structure-vs-unresolved",
+    "unity trace target registry family-structure comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["shard-cost-su0-structure"].comparisonPresetId,
+    "shard-cost-structure-vs-planner",
+    "unity trace target registry shard comparison preset drifted"
+  );
+  assert.equal(
+    registry.targets["multiverse-market-save-owner-boundary"].comparisonPresetId,
+    "multiverse-market-save-owner-vs-canonical-import",
+    "unity trace target registry market comparison preset drifted"
+  );
   return {
     id: "unity-trace-target-registry",
     label: "Unity trace target registry",
@@ -3091,36 +9058,122 @@ function validateUnityTraceTargetRegistry(registry) {
 }
 
 function validateMultiverseMarketSaveBoundary(boundary) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market save boundary generatedAt must be present");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market save boundary generatedAt must be present"
+  );
   expectRecord(boundary.sources, "multiverse market save boundary sources must be an object");
   ["actionShellProbe", "metadataNeighborhood", "metadata", "level0"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market save boundary sources.${field} must be present`);
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market save boundary sources.${field} must be present`
+    );
   });
-  expectArray(boundary.actionShellTermsChecked, "multiverse market save boundary actionShellTermsChecked must be an array");
-  expectArray(boundary.saveFamilyTermsChecked, "multiverse market save boundary saveFamilyTermsChecked must be an array");
-  expectRecord(boundary.probeResults, "multiverse market save boundary probeResults must be an object");
-  expectArray(boundary.currentBoundary, "multiverse market save boundary currentBoundary must be an array");
+  expectArray(
+    boundary.actionShellTermsChecked,
+    "multiverse market save boundary actionShellTermsChecked must be an array"
+  );
+  expectArray(
+    boundary.saveFamilyTermsChecked,
+    "multiverse market save boundary saveFamilyTermsChecked must be an array"
+  );
+  expectRecord(
+    boundary.probeResults,
+    "multiverse market save boundary probeResults must be an object"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market save boundary currentBoundary must be an array"
+  );
 
-  ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts", "SetInscryptionsDoneText"].forEach((name) => {
-    assert.ok(boundary.actionShellTermsChecked.includes(name), `multiverse market save boundary missing ${name}`);
+  ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts", "SetInscryptionsDoneText"].forEach(
+    (name) => {
+      assert.ok(
+        boundary.actionShellTermsChecked.includes(name),
+        `multiverse market save boundary missing ${name}`
+      );
+    }
+  );
+  [
+    "PlayerProfileData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "CloudSavePlayerProfile"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.saveFamilyTermsChecked.includes(name),
+      `multiverse market save boundary missing ${name}`
+    );
   });
-  ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"].forEach((name) => {
-    assert.ok(boundary.saveFamilyTermsChecked.includes(name), `multiverse market save boundary missing ${name}`);
-  });
-  assert.equal(boundary.probeResults.actionShellWithSaveOverlapCount, 0, "multiverse market save boundary overlap count drifted");
-  assert.equal(boundary.probeResults.metadataNeighborhoodHasActionTerms, true, "multiverse market save boundary metadataNeighborhoodHasActionTerms drifted");
-  assert.equal(boundary.probeResults.metadataNeighborhoodHasSaveTerms, true, "multiverse market save boundary metadataNeighborhoodHasSaveTerms drifted");
-  assert.equal(boundary.probeResults.metadataProbeHasSaveTerms, false, "multiverse market save boundary metadataProbeHasSaveTerms drifted");
-  assert.equal(boundary.probeResults.level0ProbeHasSaveTerms, false, "multiverse market save boundary level0ProbeHasSaveTerms drifted");
-  expectRecord(boundary.crossBoundaryTypedOwnerStatus, "multiverse market save boundary crossBoundaryTypedOwnerStatus must be an object");
-  assert.equal(boundary.crossBoundaryTypedOwnerStatus.status, "declaring-owner-closed-market-wrapper-still-unresolved", "multiverse market save boundary cross-boundary typed owner status drifted");
-  assert.equal(boundary.crossBoundaryTypedOwnerStatus.exactDeclaringOwner, "SaveData", "multiverse market save boundary exact declaring owner drifted");
-  assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /InscryptionsDone/i, "multiverse market save boundary typed owner scope must preserve InscryptionsDone");
-  assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /IS\*Level/, "multiverse market save boundary typed owner scope must preserve the IS*Level cluster");
-  assert.match(boundary.crossBoundaryTypedOwnerStatus.scope, /typed Market-wrapper recovery only/i, "multiverse market save boundary typed owner scope must preserve the narrowed remaining seam");
-  assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /does not recover a typed Market field/i, "multiverse market save boundary typed owner note must preserve the typed Market-field blocker");
-  assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /PlayerProfileData\.InscryptionsDone:System\.String/i, "multiverse market save boundary typed owner note must preserve the PlayerProfileData InscryptionsDone type");
-  assert.match(boundary.crossBoundaryTypedOwnerStatus.note, /SaveData\.InscryptionsDone:System\.Int32/i, "multiverse market save boundary typed owner note must preserve the SaveData InscryptionsDone type");
+  assert.equal(
+    boundary.probeResults.actionShellWithSaveOverlapCount,
+    0,
+    "multiverse market save boundary overlap count drifted"
+  );
+  assert.equal(
+    boundary.probeResults.metadataNeighborhoodHasActionTerms,
+    true,
+    "multiverse market save boundary metadataNeighborhoodHasActionTerms drifted"
+  );
+  assert.equal(
+    boundary.probeResults.metadataNeighborhoodHasSaveTerms,
+    true,
+    "multiverse market save boundary metadataNeighborhoodHasSaveTerms drifted"
+  );
+  assert.equal(
+    boundary.probeResults.metadataProbeHasSaveTerms,
+    false,
+    "multiverse market save boundary metadataProbeHasSaveTerms drifted"
+  );
+  assert.equal(
+    boundary.probeResults.level0ProbeHasSaveTerms,
+    false,
+    "multiverse market save boundary level0ProbeHasSaveTerms drifted"
+  );
+  expectRecord(
+    boundary.crossBoundaryTypedOwnerStatus,
+    "multiverse market save boundary crossBoundaryTypedOwnerStatus must be an object"
+  );
+  assert.equal(
+    boundary.crossBoundaryTypedOwnerStatus.status,
+    "declaring-owner-closed-market-wrapper-still-unresolved",
+    "multiverse market save boundary cross-boundary typed owner status drifted"
+  );
+  assert.equal(
+    boundary.crossBoundaryTypedOwnerStatus.exactDeclaringOwner,
+    "SaveData",
+    "multiverse market save boundary exact declaring owner drifted"
+  );
+  assert.match(
+    boundary.crossBoundaryTypedOwnerStatus.scope,
+    /InscryptionsDone/i,
+    "multiverse market save boundary typed owner scope must preserve InscryptionsDone"
+  );
+  assert.match(
+    boundary.crossBoundaryTypedOwnerStatus.scope,
+    /IS\*Level/,
+    "multiverse market save boundary typed owner scope must preserve the IS*Level cluster"
+  );
+  assert.match(
+    boundary.crossBoundaryTypedOwnerStatus.scope,
+    /typed Market-wrapper recovery only/i,
+    "multiverse market save boundary typed owner scope must preserve the narrowed remaining seam"
+  );
+  assert.match(
+    boundary.crossBoundaryTypedOwnerStatus.note,
+    /does not recover a typed Market field/i,
+    "multiverse market save boundary typed owner note must preserve the typed Market-field blocker"
+  );
+  assert.match(
+    boundary.crossBoundaryTypedOwnerStatus.note,
+    /PlayerProfileData\.InscryptionsDone:System\.String/i,
+    "multiverse market save boundary typed owner note must preserve the PlayerProfileData InscryptionsDone type"
+  );
+  assert.match(
+    boundary.crossBoundaryTypedOwnerStatus.note,
+    /SaveData\.InscryptionsDone:System\.Int32/i,
+    "multiverse market save boundary typed owner note must preserve the SaveData InscryptionsDone type"
+  );
 
   return {
     id: "multiverse-market-save-boundary",
@@ -3135,82 +9188,316 @@ function validateMultiverseMarketSaveBoundary(boundary) {
 }
 
 function validateMultiverseMarketMarketMemberBoundary(boundary) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market market-member boundary generatedAt must be present");
-  expectRecord(boundary.sources, "multiverse market market-member boundary sources must be an object");
-  ["probeScript", "metadataNeighborhood", "typedProbeReport", "metadata", "nativeBinary"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market market-member boundary sources.${field} must be present`);
-  });
-  expectArray(boundary.playerProfileAccessorClues, "multiverse market market-member boundary playerProfileAccessorClues must be an array");
-  expectArray(boundary.playerProfileMemberShellClues, "multiverse market market-member boundary playerProfileMemberShellClues must be an array");
-  expectArray(boundary.playerProfileHandlerBridgeClues, "multiverse market market-member boundary playerProfileHandlerBridgeClues must be an array");
-  expectArray(boundary.directMemberHandoffClues, "multiverse market market-member boundary directMemberHandoffClues must be an array");
-  expectArray(boundary.typedSiblingContrastClues, "multiverse market market-member boundary typedSiblingContrastClues must be an array");
-  expectArray(boundary.cloudSaveBridgeClues, "multiverse market market-member boundary cloudSaveBridgeClues must be an array");
-  expectArray(boundary.missingDirectTypeMapClues, "multiverse market market-member boundary missingDirectTypeMapClues must be an array");
-  expectArray(boundary.marketWrapperTypeClues, "multiverse market market-member boundary marketWrapperTypeClues must be an array");
-  expectRecord(boundary.typedBridgeRecovery, "multiverse market market-member boundary typedBridgeRecovery must be an object");
-  expectRecord(boundary.typedHandlerFieldRecovery, "multiverse market market-member boundary typedHandlerFieldRecovery must be an object");
-  expectRecord(boundary.typedProfileConversionRecovery, "multiverse market market-member boundary typed profile conversion recovery must be an object");
-  expectRecord(boundary.typedPlayerProfileFieldTableRecovery, "multiverse market market-member boundary typedPlayerProfileFieldTableRecovery must be an object");
-  expectRecord(boundary.typedSaveDataFieldTableRecovery, "multiverse market market-member boundary typedSaveDataFieldTableRecovery must be an object");
-  expectArray(boundary.directPlayerProfileFieldSamples, "multiverse market market-member boundary directPlayerProfileFieldSamples must be an array");
-  expectRecord(boundary.typedInscryptionsDoneDualDeclaration, "multiverse market market-member boundary typedInscryptionsDoneDualDeclaration must be an object");
-  expectArray(boundary.typedSaveDataProgressionOwnerSamples, "multiverse market market-member boundary typedSaveDataProgressionOwnerSamples must be an array");
-  expectArray(boundary.typedPlayerProfileNestedTypeChecks, "multiverse market market-member boundary typedPlayerProfileNestedTypeChecks must be an array");
-  expectArray(boundary.firstNestedMarketTypeChecks, "multiverse market market-member boundary firstNestedMarketTypeChecks must be an array");
-  expectArray(boundary.firstNestedMarketFieldSamples, "multiverse market market-member boundary firstNestedMarketFieldSamples must be an array");
-  expectArray(boundary.negativeProgressionOwnerChecks, "multiverse market market-member boundary negativeProgressionOwnerChecks must be an array");
-  expectArray(boundary.negativeTypedDirectPlayerProfileProgressionChecks, "multiverse market market-member boundary negativeTypedDirectPlayerProfileProgressionChecks must be an array");
-  expectArray(boundary.negativeTypedDirectMemberChecks, "multiverse market market-member boundary negativeTypedDirectMemberChecks must be an array");
-  expectArray(boundary.negativeTypedSaveDataMarketChecks, "multiverse market market-member boundary negativeTypedSaveDataMarketChecks must be an array");
-  expectRecord(boundary.typedMarketFieldBoundary, "multiverse market market-member boundary typedMarketFieldBoundary must be an object");
-  expectRecord(boundary.deeperMarketOwnerStatus, "multiverse market market-member boundary deeperMarketOwnerStatus must be an object");
-  expectArray(boundary.progressionPayloadFieldClues, "multiverse market market-member boundary progressionPayloadFieldClues must be an array");
-  expectArray(boundary.currentBoundary, "multiverse market market-member boundary currentBoundary must be an array");
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market market-member boundary generatedAt must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market market-member boundary sources must be an object"
+  );
+  ["probeScript", "metadataNeighborhood", "typedProbeReport", "metadata", "nativeBinary"].forEach(
+    (field) => {
+      expectNonEmptyString(
+        boundary.sources[field],
+        `multiverse market market-member boundary sources.${field} must be present`
+      );
+    }
+  );
+  expectArray(
+    boundary.playerProfileAccessorClues,
+    "multiverse market market-member boundary playerProfileAccessorClues must be an array"
+  );
+  expectArray(
+    boundary.playerProfileMemberShellClues,
+    "multiverse market market-member boundary playerProfileMemberShellClues must be an array"
+  );
+  expectArray(
+    boundary.playerProfileHandlerBridgeClues,
+    "multiverse market market-member boundary playerProfileHandlerBridgeClues must be an array"
+  );
+  expectArray(
+    boundary.directMemberHandoffClues,
+    "multiverse market market-member boundary directMemberHandoffClues must be an array"
+  );
+  expectArray(
+    boundary.typedSiblingContrastClues,
+    "multiverse market market-member boundary typedSiblingContrastClues must be an array"
+  );
+  expectArray(
+    boundary.cloudSaveBridgeClues,
+    "multiverse market market-member boundary cloudSaveBridgeClues must be an array"
+  );
+  expectArray(
+    boundary.missingDirectTypeMapClues,
+    "multiverse market market-member boundary missingDirectTypeMapClues must be an array"
+  );
+  expectArray(
+    boundary.marketWrapperTypeClues,
+    "multiverse market market-member boundary marketWrapperTypeClues must be an array"
+  );
+  expectRecord(
+    boundary.typedBridgeRecovery,
+    "multiverse market market-member boundary typedBridgeRecovery must be an object"
+  );
+  expectRecord(
+    boundary.typedHandlerFieldRecovery,
+    "multiverse market market-member boundary typedHandlerFieldRecovery must be an object"
+  );
+  expectRecord(
+    boundary.typedProfileConversionRecovery,
+    "multiverse market market-member boundary typed profile conversion recovery must be an object"
+  );
+  expectRecord(
+    boundary.typedPlayerProfileFieldTableRecovery,
+    "multiverse market market-member boundary typedPlayerProfileFieldTableRecovery must be an object"
+  );
+  expectRecord(
+    boundary.typedSaveDataFieldTableRecovery,
+    "multiverse market market-member boundary typedSaveDataFieldTableRecovery must be an object"
+  );
+  expectArray(
+    boundary.directPlayerProfileFieldSamples,
+    "multiverse market market-member boundary directPlayerProfileFieldSamples must be an array"
+  );
+  expectRecord(
+    boundary.typedInscryptionsDoneDualDeclaration,
+    "multiverse market market-member boundary typedInscryptionsDoneDualDeclaration must be an object"
+  );
+  expectArray(
+    boundary.typedSaveDataProgressionOwnerSamples,
+    "multiverse market market-member boundary typedSaveDataProgressionOwnerSamples must be an array"
+  );
+  expectArray(
+    boundary.typedPlayerProfileNestedTypeChecks,
+    "multiverse market market-member boundary typedPlayerProfileNestedTypeChecks must be an array"
+  );
+  expectArray(
+    boundary.firstNestedMarketTypeChecks,
+    "multiverse market market-member boundary firstNestedMarketTypeChecks must be an array"
+  );
+  expectArray(
+    boundary.firstNestedMarketFieldSamples,
+    "multiverse market market-member boundary firstNestedMarketFieldSamples must be an array"
+  );
+  expectArray(
+    boundary.negativeProgressionOwnerChecks,
+    "multiverse market market-member boundary negativeProgressionOwnerChecks must be an array"
+  );
+  expectArray(
+    boundary.negativeTypedDirectPlayerProfileProgressionChecks,
+    "multiverse market market-member boundary negativeTypedDirectPlayerProfileProgressionChecks must be an array"
+  );
+  expectArray(
+    boundary.negativeTypedDirectMemberChecks,
+    "multiverse market market-member boundary negativeTypedDirectMemberChecks must be an array"
+  );
+  expectArray(
+    boundary.negativeTypedSaveDataMarketChecks,
+    "multiverse market market-member boundary negativeTypedSaveDataMarketChecks must be an array"
+  );
+  expectRecord(
+    boundary.typedMarketFieldBoundary,
+    "multiverse market market-member boundary typedMarketFieldBoundary must be an object"
+  );
+  expectRecord(
+    boundary.deeperMarketOwnerStatus,
+    "multiverse market market-member boundary deeperMarketOwnerStatus must be an object"
+  );
+  expectArray(
+    boundary.progressionPayloadFieldClues,
+    "multiverse market market-member boundary progressionPayloadFieldClues must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market market-member boundary currentBoundary must be an array"
+  );
 
-  ["get_Market", "get_BM", "get_ZN", "get_TU", "get_ShardData", "get_ResearchPointData", "get_AcademyPointData"].forEach((name) => {
-    assert.ok(boundary.playerProfileAccessorClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  [
+    "get_Market",
+    "get_BM",
+    "get_ZN",
+    "get_TU",
+    "get_ShardData",
+    "get_ResearchPointData",
+    "get_AcademyPointData"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.playerProfileAccessorClues.includes(name),
+      `multiverse market market-member boundary missing ${name}`
+    );
   });
-  ["Market", "Relics", "CellData", "ModPointData", "ShardData", "ResearchPointData", "AcademyPointData", "BlueprintsThisTR"].forEach((name) => {
-    assert.ok(boundary.playerProfileMemberShellClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  [
+    "Market",
+    "Relics",
+    "CellData",
+    "ModPointData",
+    "ShardData",
+    "ResearchPointData",
+    "AcademyPointData",
+    "BlueprintsThisTR"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.playerProfileMemberShellClues.includes(name),
+      `multiverse market market-member boundary missing ${name}`
+    );
   });
-  ["PlayerProfileHandler", "playerData", "GetPlayerProfileData", "FillPlayerProfileData", "ConvertSaveDataToProfileData"].forEach((name) => {
-    assert.ok(boundary.playerProfileHandlerBridgeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  [
+    "PlayerProfileHandler",
+    "playerData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "ConvertSaveDataToProfileData"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.playerProfileHandlerBridgeClues.includes(name),
+      `multiverse market market-member boundary missing ${name}`
+    );
   });
-  ["get_Market", "Market", "GetPlayerProfileData", "FillPlayerProfileData", "<FillPlayerProfileData>d__45"].forEach((name) => {
-    assert.ok(boundary.directMemberHandoffClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  [
+    "get_Market",
+    "Market",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "<FillPlayerProfileData>d__45"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.directMemberHandoffClues.includes(name),
+      `multiverse market market-member boundary missing ${name}`
+    );
   });
   ["PlayerProfileData|GemData", "PlayerProfileData|GemNodeCombo"].forEach((name) => {
-    assert.ok(boundary.typedSiblingContrastClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+    assert.ok(
+      boundary.typedSiblingContrastClues.includes(name),
+      `multiverse market market-member boundary missing ${name}`
+    );
   });
-  ["CloudSavePlayerProfile", "GetCurrentSaveFileInfo", "GetPlayerProfileInfo", "CloudLoad"].forEach((name) => {
-    assert.ok(boundary.cloudSaveBridgeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  ["CloudSavePlayerProfile", "GetCurrentSaveFileInfo", "GetPlayerProfileInfo", "CloudLoad"].forEach(
+    (name) => {
+      assert.ok(
+        boundary.cloudSaveBridgeClues.includes(name),
+        `multiverse market market-member boundary missing ${name}`
+      );
+    }
+  );
+  [
+    "PlayerProfileData|Market",
+    "PlayerProfileData|Inscryption",
+    "PlayerProfileData|MultiverseMarket"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.missingDirectTypeMapClues.includes(name),
+      `multiverse market market-member boundary missing ${name}`
+    );
   });
-  ["PlayerProfileData|Market", "PlayerProfileData|Inscryption", "PlayerProfileData|MultiverseMarket"].forEach((name) => {
-    assert.ok(boundary.missingDirectTypeMapClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  [
+    "MultiverseMarket",
+    "MultiverseMarket|InscryptionTupleObject",
+    "MultiverseMarket|Inscryption",
+    "NecrumExchange",
+    "OuroborosResetter",
+    "TraitSpheres",
+    "ZeimarrNautallium",
+    "ResearchLaboratory",
+    "ResearchUltimas",
+    "RewardLanes",
+    "ShardMining"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.marketWrapperTypeClues.includes(name),
+      `multiverse market market-member boundary missing ${name}`
+    );
   });
-  ["MultiverseMarket", "MultiverseMarket|InscryptionTupleObject", "MultiverseMarket|Inscryption", "NecrumExchange", "OuroborosResetter", "TraitSpheres", "ZeimarrNautallium", "ResearchLaboratory", "ResearchUltimas", "RewardLanes", "ShardMining"].forEach((name) => {
-    assert.ok(boundary.marketWrapperTypeClues.includes(name), `multiverse market market-member boundary missing ${name}`);
-  });
-  assert.equal(boundary.typedBridgeRecovery.bridgeOwner, "PlayerProfileHandler", "multiverse market market-member boundary typed bridge owner drifted");
-  assert.equal(boundary.typedBridgeRecovery.bridgeAccessor, "get_Market", "multiverse market market-member boundary typed bridge accessor drifted");
-  assert.equal(boundary.typedBridgeRecovery.bridgeReturnType, "MultiverseMarket", "multiverse market market-member boundary typed bridge return type drifted");
-  assert.equal(boundary.typedHandlerFieldRecovery.fieldOwner, "PlayerProfileHandler", "multiverse market market-member boundary typed handler field owner drifted");
-  assert.equal(boundary.typedHandlerFieldRecovery.fieldName, "saveInfoCache", "multiverse market market-member boundary typed handler field name drifted");
-  assert.equal(boundary.typedHandlerFieldRecovery.fieldType, "PlayerProfileData", "multiverse market market-member boundary typed handler field type drifted");
-  assert.equal(boundary.typedProfileConversionRecovery.bridgeOwner, "PlayerProfileHandler", "multiverse market market-member boundary typed profile conversion owner drifted");
-  assert.equal(boundary.typedProfileConversionRecovery.bridgeMethod, "ConvertSaveDataToProfileData", "multiverse market market-member boundary typed profile conversion method drifted");
-  assert.equal(boundary.typedProfileConversionRecovery.sourceType, "SaveData", "multiverse market market-member boundary typed profile conversion source type drifted");
-  assert.equal(boundary.typedProfileConversionRecovery.returnType, "PlayerProfileData", "multiverse market market-member boundary typed profile conversion return type drifted");
-  assert.equal(boundary.typedProfileConversionRecovery.extraParameterType, "System.DateTime", "multiverse market market-member boundary typed profile conversion extra parameter type drifted");
-  assert.equal(boundary.typedPlayerProfileFieldTableRecovery.fieldOwner, "PlayerProfileData", "multiverse market market-member boundary typed PlayerProfile field-table owner drifted");
-  assert.equal(boundary.typedPlayerProfileFieldTableRecovery.fieldCount, 89, "multiverse market market-member boundary typed PlayerProfile field-count drifted");
-  assert.equal(boundary.typedPlayerProfileFieldTableRecovery.methodCount, 1, "multiverse market market-member boundary typed PlayerProfile method-count drifted");
-  assert.equal(boundary.typedSaveDataFieldTableRecovery.fieldOwner, "SaveData", "multiverse market market-member boundary typed SaveData field-table owner drifted");
-  assert.equal(boundary.typedSaveDataFieldTableRecovery.fieldCount, 4461, "multiverse market market-member boundary typed SaveData field-count drifted");
-  assert.equal(boundary.typedSaveDataFieldTableRecovery.methodCount, 1, "multiverse market market-member boundary typed SaveData method-count drifted");
+  assert.equal(
+    boundary.typedBridgeRecovery.bridgeOwner,
+    "PlayerProfileHandler",
+    "multiverse market market-member boundary typed bridge owner drifted"
+  );
+  assert.equal(
+    boundary.typedBridgeRecovery.bridgeAccessor,
+    "get_Market",
+    "multiverse market market-member boundary typed bridge accessor drifted"
+  );
+  assert.equal(
+    boundary.typedBridgeRecovery.bridgeReturnType,
+    "MultiverseMarket",
+    "multiverse market market-member boundary typed bridge return type drifted"
+  );
+  assert.equal(
+    boundary.typedHandlerFieldRecovery.fieldOwner,
+    "PlayerProfileHandler",
+    "multiverse market market-member boundary typed handler field owner drifted"
+  );
+  assert.equal(
+    boundary.typedHandlerFieldRecovery.fieldName,
+    "saveInfoCache",
+    "multiverse market market-member boundary typed handler field name drifted"
+  );
+  assert.equal(
+    boundary.typedHandlerFieldRecovery.fieldType,
+    "PlayerProfileData",
+    "multiverse market market-member boundary typed handler field type drifted"
+  );
+  assert.equal(
+    boundary.typedProfileConversionRecovery.bridgeOwner,
+    "PlayerProfileHandler",
+    "multiverse market market-member boundary typed profile conversion owner drifted"
+  );
+  assert.equal(
+    boundary.typedProfileConversionRecovery.bridgeMethod,
+    "ConvertSaveDataToProfileData",
+    "multiverse market market-member boundary typed profile conversion method drifted"
+  );
+  assert.equal(
+    boundary.typedProfileConversionRecovery.sourceType,
+    "SaveData",
+    "multiverse market market-member boundary typed profile conversion source type drifted"
+  );
+  assert.equal(
+    boundary.typedProfileConversionRecovery.returnType,
+    "PlayerProfileData",
+    "multiverse market market-member boundary typed profile conversion return type drifted"
+  );
+  assert.equal(
+    boundary.typedProfileConversionRecovery.extraParameterType,
+    "System.DateTime",
+    "multiverse market market-member boundary typed profile conversion extra parameter type drifted"
+  );
+  assert.equal(
+    boundary.typedPlayerProfileFieldTableRecovery.fieldOwner,
+    "PlayerProfileData",
+    "multiverse market market-member boundary typed PlayerProfile field-table owner drifted"
+  );
+  assert.equal(
+    boundary.typedPlayerProfileFieldTableRecovery.fieldCount,
+    89,
+    "multiverse market market-member boundary typed PlayerProfile field-count drifted"
+  );
+  assert.equal(
+    boundary.typedPlayerProfileFieldTableRecovery.methodCount,
+    1,
+    "multiverse market market-member boundary typed PlayerProfile method-count drifted"
+  );
+  assert.equal(
+    boundary.typedSaveDataFieldTableRecovery.fieldOwner,
+    "SaveData",
+    "multiverse market market-member boundary typed SaveData field-table owner drifted"
+  );
+  assert.equal(
+    boundary.typedSaveDataFieldTableRecovery.fieldCount,
+    4461,
+    "multiverse market market-member boundary typed SaveData field-count drifted"
+  );
+  assert.equal(
+    boundary.typedSaveDataFieldTableRecovery.methodCount,
+    1,
+    "multiverse market market-member boundary typed SaveData method-count drifted"
+  );
   ["InscryptionsDone", "MechsOwned", "GadgetLevels"].forEach((name) => {
-    assert.ok(boundary.directPlayerProfileFieldSamples.includes(name), `multiverse market market-member boundary missing direct PlayerProfileData field sample ${name}`);
+    assert.ok(
+      boundary.directPlayerProfileFieldSamples.includes(name),
+      `multiverse market market-member boundary missing direct PlayerProfileData field sample ${name}`
+    );
   });
   assert.deepEqual(
     boundary.typedInscryptionsDoneDualDeclaration,
@@ -3230,40 +9517,162 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
     },
     "multiverse market market-member boundary typed InscryptionsDone dual declaration drifted"
   );
-  ["IS71Level", "IS110Level", "InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
-    assert.ok(boundary.typedSaveDataProgressionOwnerSamples.includes(name), `multiverse market market-member boundary missing typed SaveData progression-owner sample ${name}`);
+  [
+    "IS71Level",
+    "IS110Level",
+    "InscryptionsDone",
+    "EsotericR1Trades",
+    "NecrumR1Trades",
+    "Mech1Unlocked",
+    "Mech1MissionsCompleted"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.typedSaveDataProgressionOwnerSamples.includes(name),
+      `multiverse market market-member boundary missing typed SaveData progression-owner sample ${name}`
+    );
   });
-  assert.deepEqual(boundary.typedPlayerProfileNestedTypeChecks, ["PlayerProfileData+GemData"], "multiverse market market-member boundary typed PlayerProfile nested-type checks drifted");
+  assert.deepEqual(
+    boundary.typedPlayerProfileNestedTypeChecks,
+    ["PlayerProfileData+GemData"],
+    "multiverse market market-member boundary typed PlayerProfile nested-type checks drifted"
+  );
   ["MultiverseMarket|Inscryption", "MultiverseMarket|InscryptionTupleObject"].forEach((name) => {
-    assert.ok(boundary.firstNestedMarketTypeChecks.includes(name), `multiverse market market-member boundary missing first nested market type check ${name}`);
+    assert.ok(
+      boundary.firstNestedMarketTypeChecks.includes(name),
+      `multiverse market market-member boundary missing first nested market type check ${name}`
+    );
   });
-  ["<ID>k__BackingField", "<Cost>k__BackingField", "<Level>k__BackingField", "<MaxLevel>k__BackingField", "<ISObject>k__BackingField", "transform"].forEach((name) => {
-    assert.ok(boundary.firstNestedMarketFieldSamples.includes(name), `multiverse market market-member boundary missing first nested market field sample ${name}`);
+  [
+    "<ID>k__BackingField",
+    "<Cost>k__BackingField",
+    "<Level>k__BackingField",
+    "<MaxLevel>k__BackingField",
+    "<ISObject>k__BackingField",
+    "transform"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.firstNestedMarketFieldSamples.includes(name),
+      `multiverse market market-member boundary missing first nested market field sample ${name}`
+    );
   });
-  ["IS71Level", "IS110Level", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
-    assert.ok(boundary.negativeProgressionOwnerChecks.includes(name), `multiverse market market-member boundary missing negative owner check ${name}`);
+  [
+    "IS71Level",
+    "IS110Level",
+    "EsotericR1Trades",
+    "NecrumR1Trades",
+    "Mech1Unlocked",
+    "Mech1MissionsCompleted"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.negativeProgressionOwnerChecks.includes(name),
+      `multiverse market market-member boundary missing negative owner check ${name}`
+    );
   });
-  ["PlayerProfileData.IS71Level", "PlayerProfileData.IS110Level", "PlayerProfileData.EsotericR1Trades", "PlayerProfileData.NecrumR1Trades", "PlayerProfileData.Mech1Unlocked", "PlayerProfileData.Mech1MissionsCompleted"].forEach((name) => {
-    assert.ok(boundary.negativeTypedDirectPlayerProfileProgressionChecks.includes(name), `multiverse market market-member boundary missing negative typed PlayerProfile progression check ${name}`);
+  [
+    "PlayerProfileData.IS71Level",
+    "PlayerProfileData.IS110Level",
+    "PlayerProfileData.EsotericR1Trades",
+    "PlayerProfileData.NecrumR1Trades",
+    "PlayerProfileData.Mech1Unlocked",
+    "PlayerProfileData.Mech1MissionsCompleted"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.negativeTypedDirectPlayerProfileProgressionChecks.includes(name),
+      `multiverse market market-member boundary missing negative typed PlayerProfile progression check ${name}`
+    );
   });
-  ["PlayerProfileHandler.Market", "PlayerProfileData.Market", "PlayerProfileData.MultiverseMarket", "MultiverseMarket.InscryptionsDone", "MultiverseMarket.IS71Level", "MultiverseMarket.IS110Level", "MultiverseMarket.EsotericR1Trades", "MultiverseMarket.NecrumR1Trades", "MultiverseMarket.Mech1Unlocked", "MultiverseMarket.Mech1MissionsCompleted"].forEach((name) => {
-    assert.ok(boundary.negativeTypedDirectMemberChecks.includes(name), `multiverse market market-member boundary missing negative typed direct-member check ${name}`);
+  [
+    "PlayerProfileHandler.Market",
+    "PlayerProfileData.Market",
+    "PlayerProfileData.MultiverseMarket",
+    "MultiverseMarket.InscryptionsDone",
+    "MultiverseMarket.IS71Level",
+    "MultiverseMarket.IS110Level",
+    "MultiverseMarket.EsotericR1Trades",
+    "MultiverseMarket.NecrumR1Trades",
+    "MultiverseMarket.Mech1Unlocked",
+    "MultiverseMarket.Mech1MissionsCompleted"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.negativeTypedDirectMemberChecks.includes(name),
+      `multiverse market market-member boundary missing negative typed direct-member check ${name}`
+    );
   });
   ["SaveData.Market", "SaveData.MultiverseMarket"].forEach((name) => {
-    assert.ok(boundary.negativeTypedSaveDataMarketChecks.includes(name), `multiverse market market-member boundary missing negative typed SaveData market check ${name}`);
+    assert.ok(
+      boundary.negativeTypedSaveDataMarketChecks.includes(name),
+      `multiverse market market-member boundary missing negative typed SaveData market check ${name}`
+    );
   });
-  assert.equal(boundary.typedMarketFieldBoundary.checkedAccessorBridge, "PlayerProfileHandler.get_Market -> MultiverseMarket", "multiverse market market-member boundary checked accessor bridge drifted");
-  assert.equal(boundary.typedMarketFieldBoundary.metadataMemberShell, "Market", "multiverse market market-member boundary metadata member shell drifted");
-  assert.deepEqual(boundary.typedMarketFieldBoundary.checkedTypedFieldOwners, ["PlayerProfileHandler", "PlayerProfileData", "SaveData"], "multiverse market market-member boundary checked typed field owners drifted");
-  assert.deepEqual(boundary.typedMarketFieldBoundary.checkedNegativeTypedFieldRecoveries, ["PlayerProfileHandler.Market", "PlayerProfileData.Market", "PlayerProfileData.MultiverseMarket", "SaveData.Market", "SaveData.MultiverseMarket"], "multiverse market market-member boundary checked negative typed field recoveries drifted");
-  assert.equal(boundary.typedMarketFieldBoundary.conclusion, "negative-typed-market-field-in-checked-boundary", "multiverse market market-member boundary typed Market field conclusion drifted");
-  assert.equal(boundary.typedMarketFieldBoundary.currentUse, "accessor-member-shell-naming-only", "multiverse market market-member boundary typed Market field current-use drifted");
-  assert.equal(boundary.deeperMarketOwnerStatus.status, "declaring-owner-closed-market-wrapper-still-unresolved", "multiverse market market-member boundary deeper market owner status drifted");
-  assert.equal(boundary.deeperMarketOwnerStatus.scope, "typed Market-named wrapper recovery beyond the checked accessor bridge, not the declaring owner for the checked InscryptionsDone / IS*Level cluster", "multiverse market market-member boundary deeper market owner scope drifted");
-  assert.match(boundary.deeperMarketOwnerStatus.note, /SaveData/i, "multiverse market market-member boundary deeper market owner note must mention SaveData");
-  assert.match(boundary.deeperMarketOwnerStatus.note, /does not recover a typed Market field/i, "multiverse market market-member boundary deeper market owner note must preserve the negative typed Market result");
-  ["IS71Level", "IS110Level", "InscryptionsDone", "EsotericR1Trades", "NecrumR1Trades", "Mech1Unlocked", "Mech1MissionsCompleted"].forEach((name) => {
-    assert.ok(boundary.progressionPayloadFieldClues.includes(name), `multiverse market market-member boundary missing ${name}`);
+  assert.equal(
+    boundary.typedMarketFieldBoundary.checkedAccessorBridge,
+    "PlayerProfileHandler.get_Market -> MultiverseMarket",
+    "multiverse market market-member boundary checked accessor bridge drifted"
+  );
+  assert.equal(
+    boundary.typedMarketFieldBoundary.metadataMemberShell,
+    "Market",
+    "multiverse market market-member boundary metadata member shell drifted"
+  );
+  assert.deepEqual(
+    boundary.typedMarketFieldBoundary.checkedTypedFieldOwners,
+    ["PlayerProfileHandler", "PlayerProfileData", "SaveData"],
+    "multiverse market market-member boundary checked typed field owners drifted"
+  );
+  assert.deepEqual(
+    boundary.typedMarketFieldBoundary.checkedNegativeTypedFieldRecoveries,
+    [
+      "PlayerProfileHandler.Market",
+      "PlayerProfileData.Market",
+      "PlayerProfileData.MultiverseMarket",
+      "SaveData.Market",
+      "SaveData.MultiverseMarket"
+    ],
+    "multiverse market market-member boundary checked negative typed field recoveries drifted"
+  );
+  assert.equal(
+    boundary.typedMarketFieldBoundary.conclusion,
+    "negative-typed-market-field-in-checked-boundary",
+    "multiverse market market-member boundary typed Market field conclusion drifted"
+  );
+  assert.equal(
+    boundary.typedMarketFieldBoundary.currentUse,
+    "accessor-member-shell-naming-only",
+    "multiverse market market-member boundary typed Market field current-use drifted"
+  );
+  assert.equal(
+    boundary.deeperMarketOwnerStatus.status,
+    "declaring-owner-closed-market-wrapper-still-unresolved",
+    "multiverse market market-member boundary deeper market owner status drifted"
+  );
+  assert.equal(
+    boundary.deeperMarketOwnerStatus.scope,
+    "typed Market-named wrapper recovery beyond the checked accessor bridge, not the declaring owner for the checked InscryptionsDone / IS*Level cluster",
+    "multiverse market market-member boundary deeper market owner scope drifted"
+  );
+  assert.match(
+    boundary.deeperMarketOwnerStatus.note,
+    /SaveData/i,
+    "multiverse market market-member boundary deeper market owner note must mention SaveData"
+  );
+  assert.match(
+    boundary.deeperMarketOwnerStatus.note,
+    /does not recover a typed Market field/i,
+    "multiverse market market-member boundary deeper market owner note must preserve the negative typed Market result"
+  );
+  [
+    "IS71Level",
+    "IS110Level",
+    "InscryptionsDone",
+    "EsotericR1Trades",
+    "NecrumR1Trades",
+    "Mech1Unlocked",
+    "Mech1MissionsCompleted"
+  ].forEach((name) => {
+    assert.ok(
+      boundary.progressionPayloadFieldClues.includes(name),
+      `multiverse market market-member boundary missing ${name}`
+    );
   });
 
   return {
@@ -3292,83 +9701,301 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
 
 function validateMultiverseMarketMarketShellDocs(boundaryDoc, stateDoc, activeBoundariesDoc) {
   const combinedDocs = [boundaryDoc, stateDoc, activeBoundariesDoc].join("\n");
-  assert.match(boundaryDoc, /checked accessor bridge:/, "multiverse market market-member boundary doc must split the checked accessor bridge");
-  assert.match(boundaryDoc, /metadata\/member-shell clue:/, "multiverse market market-member boundary doc must split the metadata member shell clue");
-  assert.match(boundaryDoc, /checked typed-`Market` field result:/, "multiverse market market-member boundary doc must split the checked typed Market field result");
-  assert.match(boundaryDoc, /deeper typed `Market`-named owner status:/, "multiverse market market-member boundary doc must preserve deeper Market owner status");
-  assert.match(combinedDocs, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/, "multiverse market docs must preserve the checked accessor bridge");
-  assert.match(combinedDocs, /metadata-only `Market` shell/, "multiverse market docs must preserve the metadata-only Market shell phrasing");
-  assert.match(combinedDocs, /(does not recover a typed `Market` field|no typed `Market`(?:-named)?(?: or `MultiverseMarket`)? field is recovered) on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/, "multiverse market docs must preserve the negative typed Market recovery");
-  assert.match(combinedDocs, /`PlayerProfileData\.InscryptionsDone`(?: is|:)? (?:recovered as )?`?System\.String`?[\s\S]*`SaveData\.InscryptionsDone`(?: is|:)? (?:recovered as )?`?System\.Int32`?/i, "multiverse market docs must preserve the exact InscryptionsDone type split");
-  assert.match(combinedDocs, /(remaining unresolved seam is only .*typed `Market`(?:-wrapper|` wrapper)|only a typed `Market`-wrapper recovery beyond the checked accessor bridge remains unresolved)/i, "multiverse market docs must preserve the narrowed remaining seam");
-  assert.match(combinedDocs, /accessor\/member-shell naming only/, "multiverse market docs must preserve accessor/member-shell-only use");
-  assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `PlayerProfileHandler`/i, "multiverse market docs must not claim typed Market recovery on PlayerProfileHandler");
-  assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `PlayerProfileData`/i, "multiverse market docs must not claim typed Market recovery on PlayerProfileData");
-  assert.doesNotMatch(combinedDocs, /typed `Market` field recovered on `SaveData`/i, "multiverse market docs must not claim typed Market recovery on SaveData");
+  assert.match(
+    boundaryDoc,
+    /checked accessor bridge:/,
+    "multiverse market market-member boundary doc must split the checked accessor bridge"
+  );
+  assert.match(
+    boundaryDoc,
+    /metadata\/member-shell clue:/,
+    "multiverse market market-member boundary doc must split the metadata member shell clue"
+  );
+  assert.match(
+    boundaryDoc,
+    /checked typed-`Market` field result:/,
+    "multiverse market market-member boundary doc must split the checked typed Market field result"
+  );
+  assert.match(
+    boundaryDoc,
+    /deeper typed `Market`-named owner status:/,
+    "multiverse market market-member boundary doc must preserve deeper Market owner status"
+  );
+  assert.match(
+    combinedDocs,
+    /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/,
+    "multiverse market docs must preserve the checked accessor bridge"
+  );
+  assert.match(
+    combinedDocs,
+    /metadata-only `Market` shell/,
+    "multiverse market docs must preserve the metadata-only Market shell phrasing"
+  );
+  assert.match(
+    combinedDocs,
+    /(does not recover a typed `Market` field|no typed `Market`(?:-named)?(?: or `MultiverseMarket`)? field is recovered) on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/,
+    "multiverse market docs must preserve the negative typed Market recovery"
+  );
+  assert.match(
+    combinedDocs,
+    /`PlayerProfileData\.InscryptionsDone`(?: is|:)? (?:recovered as )?`?System\.String`?[\s\S]*`SaveData\.InscryptionsDone`(?: is|:)? (?:recovered as )?`?System\.Int32`?/i,
+    "multiverse market docs must preserve the exact InscryptionsDone type split"
+  );
+  assert.match(
+    combinedDocs,
+    /(remaining unresolved seam is only .*typed `Market`(?:-wrapper|` wrapper)|only a typed `Market`-wrapper recovery beyond the checked accessor bridge remains unresolved)/i,
+    "multiverse market docs must preserve the narrowed remaining seam"
+  );
+  assert.match(
+    combinedDocs,
+    /accessor\/member-shell naming only/,
+    "multiverse market docs must preserve accessor/member-shell-only use"
+  );
+  assert.doesNotMatch(
+    combinedDocs,
+    /typed `Market` field recovered on `PlayerProfileHandler`/i,
+    "multiverse market docs must not claim typed Market recovery on PlayerProfileHandler"
+  );
+  assert.doesNotMatch(
+    combinedDocs,
+    /typed `Market` field recovered on `PlayerProfileData`/i,
+    "multiverse market docs must not claim typed Market recovery on PlayerProfileData"
+  );
+  assert.doesNotMatch(
+    combinedDocs,
+    /typed `Market` field recovered on `SaveData`/i,
+    "multiverse market docs must not claim typed Market recovery on SaveData"
+  );
 }
 
 function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market SaveData import boundary generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market SaveData import boundary dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market SaveData import boundary sources must be an object");
-  ["marketMemberBoundary", "rangeBoundary", "rowTextCoverage", "actionShell", "metadataNeighborhood", "validatedRows", "typedProbeReport", "stateVerificationDoc"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market SaveData import boundary sources.${field} must be present`);
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market SaveData import boundary generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market SaveData import boundary dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market SaveData import boundary sources must be an object"
+  );
+  [
+    "marketMemberBoundary",
+    "rangeBoundary",
+    "rowTextCoverage",
+    "actionShell",
+    "metadataNeighborhood",
+    "validatedRows",
+    "typedProbeReport",
+    "stateVerificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market SaveData import boundary sources.${field} must be present`
+    );
   });
-  expectRecord(boundary.canonicalSplit, "multiverse market SaveData import boundary canonicalSplit must be an object");
-  expectRecord(boundary.checkedIsToRowOrderBoundary, "multiverse market SaveData import boundary checkedIsToRowOrderBoundary must be an object");
-  expectRecord(boundary.boundedImportConclusion, "multiverse market SaveData import boundary boundedImportConclusion must be an object");
-  expectRecord(boundary.classifications, "multiverse market SaveData import boundary classifications must be an object");
-  expectRecord(boundary.checkedIsToRowOrderBoundary.widerOrderedSet, "multiverse market SaveData import boundary widerOrderedSet must be an object");
-  expectArray(boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings, "multiverse market SaveData import boundary checkedOrderedMappings must be an array");
-  expectArray(boundary.checkedIsToRowOrderBoundary.blockedWiderMapping, "multiverse market SaveData import boundary blockedWiderMapping must be an array");
-  expectArray(boundary.boundedImportConclusion.importSafeSubset, "multiverse market SaveData import boundary importSafeSubset must be an array");
-  expectNonEmptyString(boundary.boundedImportConclusion.exactImportSafeSubsetLabel, "multiverse market SaveData import boundary exactImportSafeSubsetLabel must be present");
-  expectNonEmptyString(boundary.boundedImportConclusion.importTargetPath, "multiverse market SaveData import boundary importTargetPath must be present");
-  expectArray(boundary.boundedImportConclusion.canonicalImportSafeSubset, "multiverse market SaveData import boundary canonicalImportSafeSubset must be an array");
-  expectNonEmptyString(boundary.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel, "multiverse market SaveData import boundary exactCanonicalImportSafeSubsetLabel must be present");
-  expectNonEmptyString(boundary.boundedImportConclusion.currentBoundary, "multiverse market SaveData import boundary currentBoundary must be present");
-  expectArray(boundary.boundedImportConclusion.blockedBy, "multiverse market SaveData import boundary blockedBy must be an array");
-  expectArray(boundary.classifications.safe_import_candidate, "multiverse market SaveData import boundary safe_import_candidate must be an array");
-  expectArray(boundary.classifications.wrapper_or_export_only, "multiverse market SaveData import boundary wrapper_or_export_only must be an array");
-  expectArray(boundary.classifications.verified_but_blocked, "multiverse market SaveData import boundary verified_but_blocked must be an array");
-  expectArray(boundary.classifications.unresolved, "multiverse market SaveData import boundary unresolved must be an array");
+  expectRecord(
+    boundary.canonicalSplit,
+    "multiverse market SaveData import boundary canonicalSplit must be an object"
+  );
+  expectRecord(
+    boundary.checkedIsToRowOrderBoundary,
+    "multiverse market SaveData import boundary checkedIsToRowOrderBoundary must be an object"
+  );
+  expectRecord(
+    boundary.boundedImportConclusion,
+    "multiverse market SaveData import boundary boundedImportConclusion must be an object"
+  );
+  expectRecord(
+    boundary.classifications,
+    "multiverse market SaveData import boundary classifications must be an object"
+  );
+  expectRecord(
+    boundary.checkedIsToRowOrderBoundary.widerOrderedSet,
+    "multiverse market SaveData import boundary widerOrderedSet must be an object"
+  );
+  expectArray(
+    boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings,
+    "multiverse market SaveData import boundary checkedOrderedMappings must be an array"
+  );
+  expectArray(
+    boundary.checkedIsToRowOrderBoundary.blockedWiderMapping,
+    "multiverse market SaveData import boundary blockedWiderMapping must be an array"
+  );
+  expectArray(
+    boundary.boundedImportConclusion.importSafeSubset,
+    "multiverse market SaveData import boundary importSafeSubset must be an array"
+  );
+  expectNonEmptyString(
+    boundary.boundedImportConclusion.exactImportSafeSubsetLabel,
+    "multiverse market SaveData import boundary exactImportSafeSubsetLabel must be present"
+  );
+  expectNonEmptyString(
+    boundary.boundedImportConclusion.importTargetPath,
+    "multiverse market SaveData import boundary importTargetPath must be present"
+  );
+  expectArray(
+    boundary.boundedImportConclusion.canonicalImportSafeSubset,
+    "multiverse market SaveData import boundary canonicalImportSafeSubset must be an array"
+  );
+  expectNonEmptyString(
+    boundary.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel,
+    "multiverse market SaveData import boundary exactCanonicalImportSafeSubsetLabel must be present"
+  );
+  expectNonEmptyString(
+    boundary.boundedImportConclusion.currentBoundary,
+    "multiverse market SaveData import boundary currentBoundary must be present"
+  );
+  expectArray(
+    boundary.boundedImportConclusion.blockedBy,
+    "multiverse market SaveData import boundary blockedBy must be an array"
+  );
+  expectArray(
+    boundary.classifications.safe_import_candidate,
+    "multiverse market SaveData import boundary safe_import_candidate must be an array"
+  );
+  expectArray(
+    boundary.classifications.wrapper_or_export_only,
+    "multiverse market SaveData import boundary wrapper_or_export_only must be an array"
+  );
+  expectArray(
+    boundary.classifications.verified_but_blocked,
+    "multiverse market SaveData import boundary verified_but_blocked must be an array"
+  );
+  expectArray(
+    boundary.classifications.unresolved,
+    "multiverse market SaveData import boundary unresolved must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-savedata-import-boundary", "multiverse market SaveData import boundary dataset id drifted");
-  assert.equal(boundary.canonicalSplit.accessorBridge, "PlayerProfileHandler.get_Market -> MultiverseMarket", "multiverse market SaveData import boundary accessor bridge drifted");
-  assert.equal(boundary.canonicalSplit.metadataMemberShell, "Market", "multiverse market SaveData import boundary metadata member shell drifted");
-  assert.equal(boundary.canonicalSplit.widerSaveOwner, "SaveData", "multiverse market SaveData import boundary wider save owner drifted");
-  assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellBuyHookRange, "BuyIS1 through BuyIS110", "multiverse market SaveData import boundary actionShellBuyHookRange drifted");
-  assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellCostTextRange, "SetIS1CostText through SetIS110CostText", "multiverse market SaveData import boundary actionShellCostTextRange drifted");
-  assert.deepEqual(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.validatedRowRanges, ["50-59", "63-74"], "multiverse market SaveData import boundary validatedRowRanges drifted");
-  assert.equal(boundary.checkedIsToRowOrderBoundary.widerOrderedSet.saveDataFieldRange, "IS1Level through IS110Level", "multiverse market SaveData import boundary saveDataFieldRange drifted");
-  expectRecord(boundary.typedSpanBoundary, "multiverse market SaveData import boundary typedSpanBoundary must be an object");
-  expectNonEmptyString(boundary.typedSpanBoundary.declaringOwner, "multiverse market SaveData import boundary typedSpanBoundary.declaringOwner must be present");
-  expectNonEmptyString(boundary.typedSpanBoundary.contiguousLevelSpan, "multiverse market SaveData import boundary typedSpanBoundary.contiguousLevelSpan must be present");
-  expectRecord(boundary.typedSpanBoundary.lowerBoundary, "multiverse market SaveData import boundary typedSpanBoundary.lowerBoundary must be an object");
-  expectRecord(boundary.typedSpanBoundary.upperBoundary, "multiverse market SaveData import boundary typedSpanBoundary.upperBoundary must be an object");
-  expectArray(boundary.typedSpanBoundary.evidence, "multiverse market SaveData import boundary typedSpanBoundary.evidence must be an array");
-  assert.equal(boundary.typedSpanBoundary.declaringOwner, "SaveData", "multiverse market SaveData import boundary typed span declaringOwner drifted");
-  assert.equal(boundary.typedSpanBoundary.contiguousLevelSpan, "IS1Level through IS110Level", "multiverse market SaveData import boundary typed contiguous span drifted");
-  assert.equal(boundary.typedSpanBoundary.lowerBoundary.includedField, "IS1Level", "multiverse market SaveData import boundary typed lower included field drifted");
-  assert.equal(boundary.typedSpanBoundary.lowerBoundary.excludedNeighbor, "IS0Level", "multiverse market SaveData import boundary typed lower excluded neighbor drifted");
-  assert.equal(boundary.typedSpanBoundary.upperBoundary.includedField, "IS110Level", "multiverse market SaveData import boundary typed upper included field drifted");
-  assert.equal(boundary.typedSpanBoundary.upperBoundary.excludedNeighbor, "IS111Level", "multiverse market SaveData import boundary typed upper excluded neighbor drifted");
-  assert.equal(boundary.typedSpanBoundary.upperBoundary.nextTypedNeighbor, "InscryptionsDone", "multiverse market SaveData import boundary typed upper next neighbor drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-savedata-import-boundary",
+    "multiverse market SaveData import boundary dataset id drifted"
+  );
+  assert.equal(
+    boundary.canonicalSplit.accessorBridge,
+    "PlayerProfileHandler.get_Market -> MultiverseMarket",
+    "multiverse market SaveData import boundary accessor bridge drifted"
+  );
+  assert.equal(
+    boundary.canonicalSplit.metadataMemberShell,
+    "Market",
+    "multiverse market SaveData import boundary metadata member shell drifted"
+  );
+  assert.equal(
+    boundary.canonicalSplit.widerSaveOwner,
+    "SaveData",
+    "multiverse market SaveData import boundary wider save owner drifted"
+  );
+  assert.equal(
+    boundary.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellBuyHookRange,
+    "BuyIS1 through BuyIS110",
+    "multiverse market SaveData import boundary actionShellBuyHookRange drifted"
+  );
+  assert.equal(
+    boundary.checkedIsToRowOrderBoundary.widerOrderedSet.actionShellCostTextRange,
+    "SetIS1CostText through SetIS110CostText",
+    "multiverse market SaveData import boundary actionShellCostTextRange drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedIsToRowOrderBoundary.widerOrderedSet.validatedRowRanges,
+    ["50-59", "63-74"],
+    "multiverse market SaveData import boundary validatedRowRanges drifted"
+  );
+  assert.equal(
+    boundary.checkedIsToRowOrderBoundary.widerOrderedSet.saveDataFieldRange,
+    "IS1Level through IS110Level",
+    "multiverse market SaveData import boundary saveDataFieldRange drifted"
+  );
+  expectRecord(
+    boundary.typedSpanBoundary,
+    "multiverse market SaveData import boundary typedSpanBoundary must be an object"
+  );
+  expectNonEmptyString(
+    boundary.typedSpanBoundary.declaringOwner,
+    "multiverse market SaveData import boundary typedSpanBoundary.declaringOwner must be present"
+  );
+  expectNonEmptyString(
+    boundary.typedSpanBoundary.contiguousLevelSpan,
+    "multiverse market SaveData import boundary typedSpanBoundary.contiguousLevelSpan must be present"
+  );
+  expectRecord(
+    boundary.typedSpanBoundary.lowerBoundary,
+    "multiverse market SaveData import boundary typedSpanBoundary.lowerBoundary must be an object"
+  );
+  expectRecord(
+    boundary.typedSpanBoundary.upperBoundary,
+    "multiverse market SaveData import boundary typedSpanBoundary.upperBoundary must be an object"
+  );
+  expectArray(
+    boundary.typedSpanBoundary.evidence,
+    "multiverse market SaveData import boundary typedSpanBoundary.evidence must be an array"
+  );
+  assert.equal(
+    boundary.typedSpanBoundary.declaringOwner,
+    "SaveData",
+    "multiverse market SaveData import boundary typed span declaringOwner drifted"
+  );
+  assert.equal(
+    boundary.typedSpanBoundary.contiguousLevelSpan,
+    "IS1Level through IS110Level",
+    "multiverse market SaveData import boundary typed contiguous span drifted"
+  );
+  assert.equal(
+    boundary.typedSpanBoundary.lowerBoundary.includedField,
+    "IS1Level",
+    "multiverse market SaveData import boundary typed lower included field drifted"
+  );
+  assert.equal(
+    boundary.typedSpanBoundary.lowerBoundary.excludedNeighbor,
+    "IS0Level",
+    "multiverse market SaveData import boundary typed lower excluded neighbor drifted"
+  );
+  assert.equal(
+    boundary.typedSpanBoundary.upperBoundary.includedField,
+    "IS110Level",
+    "multiverse market SaveData import boundary typed upper included field drifted"
+  );
+  assert.equal(
+    boundary.typedSpanBoundary.upperBoundary.excludedNeighbor,
+    "IS111Level",
+    "multiverse market SaveData import boundary typed upper excluded neighbor drifted"
+  );
+  assert.equal(
+    boundary.typedSpanBoundary.upperBoundary.nextTypedNeighbor,
+    "InscryptionsDone",
+    "multiverse market SaveData import boundary typed upper next neighbor drifted"
+  );
   assert.deepEqual(
     boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.map((entry) => entry.saveField),
     ["IS71Level", "IS72Level", "IS73Level", "IS74Level"],
     "multiverse market SaveData import boundary checkedOrderedMappings saveField order drifted"
   );
   assert.deepEqual(
-    boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.map((entry) => entry.orderedInscriptionRow),
+    boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.map(
+      (entry) => entry.orderedInscriptionRow
+    ),
     [71, 72, 73, 74],
     "multiverse market SaveData import boundary checkedOrderedMappings row ids drifted"
   );
   boundary.checkedIsToRowOrderBoundary.checkedOrderedMappings.forEach((entry, index) => {
-    expectArray(entry.evidence, `multiverse market SaveData import boundary checkedOrderedMappings[${index}].evidence must be an array`);
-    assert.equal(entry.evidence.length, 4, `multiverse market SaveData import boundary checkedOrderedMappings[${index}] should preserve four evidence links`);
+    expectArray(
+      entry.evidence,
+      `multiverse market SaveData import boundary checkedOrderedMappings[${index}].evidence must be an array`
+    );
+    assert.equal(
+      entry.evidence.length,
+      4,
+      `multiverse market SaveData import boundary checkedOrderedMappings[${index}] should preserve four evidence links`
+    );
   });
-  assert.equal(boundary.checkedIsToRowOrderBoundary.blockedWiderMapping.length, 2, "multiverse market SaveData import boundary blockedWiderMapping count drifted");
+  assert.equal(
+    boundary.checkedIsToRowOrderBoundary.blockedWiderMapping.length,
+    2,
+    "multiverse market SaveData import boundary blockedWiderMapping count drifted"
+  );
   assert.deepEqual(
     boundary.boundedImportConclusion.importSafeSubset,
     [
@@ -3384,33 +10011,111 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
     "IS1Level through IS110Level plus separate bounded trade-counter and early-mech quarantine ranges after the dual-declared InscryptionsDone boundary",
     "multiverse market SaveData import boundary exactImportSafeSubsetLabel drifted"
   );
-  assert.equal(boundary.boundedImportConclusion.importTargetPath, "compatibility.unmappedSystemState.multiverseMarket", "multiverse market SaveData import boundary importTargetPath drifted");
-  assert.deepEqual(boundary.boundedImportConclusion.canonicalImportSafeSubset, [], "multiverse market SaveData import boundary canonicalImportSafeSubset must remain empty in this slice");
-  assert.equal(boundary.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel, "none", "multiverse market SaveData import boundary exactCanonicalImportSafeSubsetLabel drifted");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /IS1Level through IS110Level/i, "multiverse market SaveData import boundary currentBoundary must preserve the exact import-safe span");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /IS1Level rather than IS0Level/i, "multiverse market SaveData import boundary currentBoundary must preserve the typed lower boundary");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /IS110Level before the dual-declared InscryptionsDone boundary/i, "multiverse market SaveData import boundary currentBoundary must preserve the typed upper boundary");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /EsotericR1Trades through EsotericR9Trades/i, "multiverse market SaveData import boundary currentBoundary must preserve the bounded trade-counter range");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /NecrumR1Trades through NecrumR9Trades/i, "multiverse market SaveData import boundary currentBoundary must preserve the bounded trade-counter range");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /Mech1Unlocked through Mech2Unlocked/i, "multiverse market SaveData import boundary currentBoundary must preserve the bounded early-mech window");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /compatibility-only/i, "multiverse market SaveData import boundary currentBoundary must preserve the compatibility-only conclusion");
-  assert.match(boundary.boundedImportConclusion.currentBoundary, /no recovered SaveData field is currently safe to promote into canonical PlayerProfile import/i, "multiverse market SaveData import boundary currentBoundary must preserve the canonical block");
-  ["do not reopen the metadata-only Market typed-field question without new direct evidence", "do not treat the compatibility-safe IS1Level through IS110Level import span or the ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery", "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap", "do not do planner integration from the recovered SaveData block in this slice"].forEach((line) => {
-    assert.ok(boundary.boundedImportConclusion.blockedBy.includes(line), `multiverse market SaveData import boundary missing blockedBy line ${line}`);
+  assert.equal(
+    boundary.boundedImportConclusion.importTargetPath,
+    "compatibility.unmappedSystemState.multiverseMarket",
+    "multiverse market SaveData import boundary importTargetPath drifted"
+  );
+  assert.deepEqual(
+    boundary.boundedImportConclusion.canonicalImportSafeSubset,
+    [],
+    "multiverse market SaveData import boundary canonicalImportSafeSubset must remain empty in this slice"
+  );
+  assert.equal(
+    boundary.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel,
+    "none",
+    "multiverse market SaveData import boundary exactCanonicalImportSafeSubsetLabel drifted"
+  );
+  assert.match(
+    boundary.boundedImportConclusion.currentBoundary,
+    /IS1Level through IS110Level/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the exact import-safe span"
+  );
+  assert.match(
+    boundary.boundedImportConclusion.currentBoundary,
+    /IS1Level rather than IS0Level/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the typed lower boundary"
+  );
+  assert.match(
+    boundary.boundedImportConclusion.currentBoundary,
+    /IS110Level before the dual-declared InscryptionsDone boundary/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the typed upper boundary"
+  );
+  assert.match(
+    boundary.boundedImportConclusion.currentBoundary,
+    /EsotericR1Trades through EsotericR9Trades/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the bounded trade-counter range"
+  );
+  assert.match(
+    boundary.boundedImportConclusion.currentBoundary,
+    /NecrumR1Trades through NecrumR9Trades/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the bounded trade-counter range"
+  );
+  assert.match(
+    boundary.boundedImportConclusion.currentBoundary,
+    /Mech1Unlocked through Mech2Unlocked/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the bounded early-mech window"
+  );
+  assert.match(
+    boundary.boundedImportConclusion.currentBoundary,
+    /compatibility-only/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the compatibility-only conclusion"
+  );
+  assert.match(
+    boundary.boundedImportConclusion.currentBoundary,
+    /no recovered SaveData field is currently safe to promote into canonical PlayerProfile import/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the canonical block"
+  );
+  [
+    "do not reopen the metadata-only Market typed-field question without new direct evidence",
+    "do not treat the compatibility-safe IS1Level through IS110Level import span or the ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery",
+    "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap",
+    "do not do planner integration from the recovered SaveData block in this slice"
+  ].forEach((line) => {
+    assert.ok(
+      boundary.boundedImportConclusion.blockedBy.includes(line),
+      `multiverse market SaveData import boundary missing blockedBy line ${line}`
+    );
   });
 
-  assert.equal(boundary.classifications.safe_import_candidate.length, 3, "multiverse market SaveData import boundary safe_import_candidate count drifted");
-  assert.equal(boundary.classifications.wrapper_or_export_only.length, 1, "multiverse market SaveData import boundary wrapper_or_export_only count drifted");
-  assert.equal(boundary.classifications.verified_but_blocked.length, 1, "multiverse market SaveData import boundary verified_but_blocked count drifted");
-  assert.equal(boundary.classifications.unresolved.length, 0, "multiverse market SaveData import boundary unresolved count drifted");
+  assert.equal(
+    boundary.classifications.safe_import_candidate.length,
+    3,
+    "multiverse market SaveData import boundary safe_import_candidate count drifted"
+  );
+  assert.equal(
+    boundary.classifications.wrapper_or_export_only.length,
+    1,
+    "multiverse market SaveData import boundary wrapper_or_export_only count drifted"
+  );
+  assert.equal(
+    boundary.classifications.verified_but_blocked.length,
+    1,
+    "multiverse market SaveData import boundary verified_but_blocked count drifted"
+  );
+  assert.equal(
+    boundary.classifications.unresolved.length,
+    0,
+    "multiverse market SaveData import boundary unresolved count drifted"
+  );
 
-  const safeById = new Map(boundary.classifications.safe_import_candidate.map((entry) => [entry.entryId, entry]));
+  const safeById = new Map(
+    boundary.classifications.safe_import_candidate.map((entry) => [entry.entryId, entry])
+  );
   assert.deepEqual(
     [...safeById.keys()],
-    ["savedata-owned-is1-110", "savedata-owned-trade-counters", "savedata-owned-adjacent-mech-window"],
+    [
+      "savedata-owned-is1-110",
+      "savedata-owned-trade-counters",
+      "savedata-owned-adjacent-mech-window"
+    ],
     "multiverse market SaveData import boundary safe_import_candidate entry ids drifted"
   );
-  assert.deepEqual(safeById.get("savedata-owned-is1-110")?.fieldNames, ["IS1Level through IS110Level"], "multiverse market SaveData import boundary IS span fieldNames drifted");
+  assert.deepEqual(
+    safeById.get("savedata-owned-is1-110")?.fieldNames,
+    ["IS1Level through IS110Level"],
+    "multiverse market SaveData import boundary IS span fieldNames drifted"
+  );
   assert.deepEqual(
     safeById.get("savedata-owned-trade-counters")?.fieldNames,
     ["EsotericR1Trades through EsotericR9Trades", "NecrumR1Trades through NecrumR9Trades"],
@@ -3422,39 +10127,125 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
     "multiverse market SaveData import boundary early-mech safe fieldNames drifted"
   );
   [...safeById.values()].forEach((entry) => {
-    assert.equal(entry.targetPath, "compatibility.unmappedSystemState.multiverseMarket", "multiverse market SaveData import boundary safe targetPath drifted");
+    assert.equal(
+      entry.targetPath,
+      "compatibility.unmappedSystemState.multiverseMarket",
+      "multiverse market SaveData import boundary safe targetPath drifted"
+    );
   });
-  assert.match(safeById.get("savedata-owned-is1-110")?.why || "", /compatibility-only raw Emporium import truth/i, "multiverse market SaveData import boundary IS span safe rationale drifted");
-  assert.match(safeById.get("savedata-owned-trade-counters")?.why || "", /separate bounded quarantine ranges/i, "multiverse market SaveData import boundary trade safe rationale drifted");
-  assert.match(safeById.get("savedata-owned-adjacent-mech-window")?.why || "", /broader Mech2\* continuation/i, "multiverse market SaveData import boundary mech safe rationale drifted");
+  assert.match(
+    safeById.get("savedata-owned-is1-110")?.why || "",
+    /compatibility-only raw Emporium import truth/i,
+    "multiverse market SaveData import boundary IS span safe rationale drifted"
+  );
+  assert.match(
+    safeById.get("savedata-owned-trade-counters")?.why || "",
+    /separate bounded quarantine ranges/i,
+    "multiverse market SaveData import boundary trade safe rationale drifted"
+  );
+  assert.match(
+    safeById.get("savedata-owned-adjacent-mech-window")?.why || "",
+    /broader Mech2\* continuation/i,
+    "multiverse market SaveData import boundary mech safe rationale drifted"
+  );
 
   const wrapperEntry = boundary.classifications.wrapper_or_export_only[0];
-  assert.equal(wrapperEntry.entryId, "inscryptionsdone-wrapper", "multiverse market SaveData import boundary wrapper entry id drifted");
-  assert.deepEqual(wrapperEntry.fieldNames, ["InscryptionsDone"], "multiverse market SaveData import boundary wrapper fieldNames drifted");
-  assert.match(wrapperEntry.why, /PlayerProfileData already exposes InscryptionsDone/i, "multiverse market SaveData import boundary wrapper rationale drifted");
+  assert.equal(
+    wrapperEntry.entryId,
+    "inscryptionsdone-wrapper",
+    "multiverse market SaveData import boundary wrapper entry id drifted"
+  );
+  assert.deepEqual(
+    wrapperEntry.fieldNames,
+    ["InscryptionsDone"],
+    "multiverse market SaveData import boundary wrapper fieldNames drifted"
+  );
+  assert.match(
+    wrapperEntry.why,
+    /PlayerProfileData already exposes InscryptionsDone/i,
+    "multiverse market SaveData import boundary wrapper rationale drifted"
+  );
 
-  const blockedById = new Map(boundary.classifications.verified_but_blocked.map((entry) => [entry.entryId, entry]));
+  const blockedById = new Map(
+    boundary.classifications.verified_but_blocked.map((entry) => [entry.entryId, entry])
+  );
   assert.deepEqual(
     [...blockedById.keys()],
     ["checked-row-order-is71-74"],
     "multiverse market SaveData import boundary verified_but_blocked entry ids drifted"
   );
-  assert.deepEqual(blockedById.get("checked-row-order-is71-74")?.fieldNames, ["IS71Level", "IS72Level", "IS73Level", "IS74Level"], "multiverse market SaveData import boundary checked row-order fieldNames drifted");
-  assert.match(blockedById.get("checked-row-order-is71-74")?.why || "", /ordered row-position mapping/i, "multiverse market SaveData import boundary checked row-order rationale must mention ordered row-position mapping");
+  assert.deepEqual(
+    blockedById.get("checked-row-order-is71-74")?.fieldNames,
+    ["IS71Level", "IS72Level", "IS73Level", "IS74Level"],
+    "multiverse market SaveData import boundary checked row-order fieldNames drifted"
+  );
+  assert.match(
+    blockedById.get("checked-row-order-is71-74")?.why || "",
+    /ordered row-position mapping/i,
+    "multiverse market SaveData import boundary checked row-order rationale must mention ordered row-position mapping"
+  );
 
   const combinedDoc = stateDoc;
-  assert.match(combinedDoc, /## Checked `IS\*Level` to inscription-row boundary/, "multiverse market state verification doc must expose the checked IS-to-row boundary section");
-  assert.match(combinedDoc, /`IS71Level` -> ordered row `71`/, "multiverse market state verification doc must preserve the checked IS71 ordered row mapping");
-  assert.match(combinedDoc, /`IS74Level` -> ordered row `74`/, "multiverse market state verification doc must preserve the checked IS74 ordered row mapping");
-  assert.match(combinedDoc, /## Bounded SaveData import classification/, "multiverse market state verification doc must expose the bounded SaveData import classification");
-  assert.match(combinedDoc, /`safe_import_candidate`[\s\S]*`IS1Level` through `IS110Level`/, "multiverse market state verification doc must preserve the exact compatibility-safe IS span");
-  assert.match(combinedDoc, /`safe_import_candidate`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/, "multiverse market state verification doc must preserve the compatibility-safe trade counter entries");
-  assert.match(combinedDoc, /`safe_import_candidate`[\s\S]*`Mech1Unlocked` through `Mech2Unlocked`/, "multiverse market state verification doc must preserve the compatibility-safe early-mech window");
-  assert.match(combinedDoc, /`wrapper_or_export_only`[\s\S]*`InscryptionsDone`/, "multiverse market state verification doc must preserve the wrapper/export-only InscryptionsDone entry");
-  assert.match(combinedDoc, /`verified_but_blocked`[\s\S]*`IS71Level` through `IS74Level`/, "multiverse market state verification doc must preserve the blocked overlap IS71-74 entry");
-  assert.match(combinedDoc, /split into separate exact typed quarantine ranges/i, "multiverse market state verification doc must preserve the split-envelope conclusion");
-  assert.match(combinedDoc, /`unresolved`[\s\S]*none/, "multiverse market state verification doc must preserve an empty unresolved subset");
-  assert.match(combinedDoc, /no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import/i, "multiverse market state verification doc must preserve the no-safe-import conclusion");
+  assert.match(
+    combinedDoc,
+    /## Checked `IS\*Level` to inscription-row boundary/,
+    "multiverse market state verification doc must expose the checked IS-to-row boundary section"
+  );
+  assert.match(
+    combinedDoc,
+    /`IS71Level` -> ordered row `71`/,
+    "multiverse market state verification doc must preserve the checked IS71 ordered row mapping"
+  );
+  assert.match(
+    combinedDoc,
+    /`IS74Level` -> ordered row `74`/,
+    "multiverse market state verification doc must preserve the checked IS74 ordered row mapping"
+  );
+  assert.match(
+    combinedDoc,
+    /## Bounded SaveData import classification/,
+    "multiverse market state verification doc must expose the bounded SaveData import classification"
+  );
+  assert.match(
+    combinedDoc,
+    /`safe_import_candidate`[\s\S]*`IS1Level` through `IS110Level`/,
+    "multiverse market state verification doc must preserve the exact compatibility-safe IS span"
+  );
+  assert.match(
+    combinedDoc,
+    /`safe_import_candidate`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/,
+    "multiverse market state verification doc must preserve the compatibility-safe trade counter entries"
+  );
+  assert.match(
+    combinedDoc,
+    /`safe_import_candidate`[\s\S]*`Mech1Unlocked` through `Mech2Unlocked`/,
+    "multiverse market state verification doc must preserve the compatibility-safe early-mech window"
+  );
+  assert.match(
+    combinedDoc,
+    /`wrapper_or_export_only`[\s\S]*`InscryptionsDone`/,
+    "multiverse market state verification doc must preserve the wrapper/export-only InscryptionsDone entry"
+  );
+  assert.match(
+    combinedDoc,
+    /`verified_but_blocked`[\s\S]*`IS71Level` through `IS74Level`/,
+    "multiverse market state verification doc must preserve the blocked overlap IS71-74 entry"
+  );
+  assert.match(
+    combinedDoc,
+    /split into separate exact typed quarantine ranges/i,
+    "multiverse market state verification doc must preserve the split-envelope conclusion"
+  );
+  assert.match(
+    combinedDoc,
+    /`unresolved`[\s\S]*none/,
+    "multiverse market state verification doc must preserve an empty unresolved subset"
+  );
+  assert.match(
+    combinedDoc,
+    /no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import/i,
+    "multiverse market state verification doc must preserve the no-safe-import conclusion"
+  );
 
   return {
     id: "multiverse-market-savedata-import-boundary",
@@ -3470,57 +10261,207 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   };
 }
 
-function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDoc, verificationDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market row 69-74 identity-source boundary generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market row 69-74 identity-source boundary dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market row 69-74 identity-source boundary sources must be an object");
-  ["inscriptionNumberingStabilityBoundary", "prefabRemapBoundary", "rowTextCoverage", "actionShell", "metadataNeighborhood", "unityProbeReport", "uabeaProbeReport", "liveUiScreenshotEvidence", "verificationDoc"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market row 69-74 identity-source boundary sources.${field} must be present`);
+function validateMultiverseMarketRow6974IdentitySourceBoundary(
+  boundary,
+  stateDoc,
+  verificationDoc
+) {
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market row 69-74 identity-source boundary generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market row 69-74 identity-source boundary dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market row 69-74 identity-source boundary sources must be an object"
+  );
+  [
+    "inscriptionNumberingStabilityBoundary",
+    "prefabRemapBoundary",
+    "rowTextCoverage",
+    "actionShell",
+    "metadataNeighborhood",
+    "unityProbeReport",
+    "uabeaProbeReport",
+    "liveUiScreenshotEvidence",
+    "verificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market row 69-74 identity-source boundary sources.${field} must be present`
+    );
   });
-  expectArray(boundary.settledBrokenPrefabBand, "multiverse market row 69-74 identity-source boundary settledBrokenPrefabBand must be an array");
-  expectRecord(boundary.checkedNonPrefabIdentitySources, "multiverse market row 69-74 identity-source boundary checkedNonPrefabIdentitySources must be an object");
-  expectRecord(boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch, "multiverse market row 69-74 identity-source boundary directPlayerFacingStringSearch must be an object");
-  expectArray(boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.searchedLabels, "multiverse market row 69-74 identity-source boundary searchedLabels must be an array");
-  expectArray(boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.matches, "multiverse market row 69-74 identity-source boundary direct string matches must be an array");
-  expectRecord(boundary.checkedNonPrefabIdentitySources.textHandlerCoverage, "multiverse market row 69-74 identity-source boundary textHandlerCoverage must be an object");
-  expectArray(boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.costTextHooks, "multiverse market row 69-74 identity-source boundary costTextHooks must be an array");
-  expectRecord(boundary.checkedNonPrefabIdentitySources.actionShellCoverage, "multiverse market row 69-74 identity-source boundary actionShellCoverage must be an object");
-  expectArray(boundary.checkedNonPrefabIdentitySources.actionShellCoverage.buyHooks, "multiverse market row 69-74 identity-source boundary buyHooks must be an array");
-  expectRecord(boundary.checkedNonPrefabIdentitySources.metadataJoinCandidates, "multiverse market row 69-74 identity-source boundary metadataJoinCandidates must be an object");
-  expectRecord(boundary.checkedNonPrefabIdentitySources.liveUiScreenshotEvidence, "multiverse market row 69-74 identity-source boundary liveUiScreenshotEvidence must be an object");
-  expectArray(boundary.checkedNonPrefabIdentitySources.nearbyPositiveBindingAnchors, "multiverse market row 69-74 identity-source boundary nearbyPositiveBindingAnchors must be an array");
-  expectRecord(boundary.playerFacingIdentitySourceBoundary, "multiverse market row 69-74 identity-source boundary playerFacingIdentitySourceBoundary must be an object");
-  expectArray(boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered, "multiverse market row 69-74 identity-source boundary identitySourceRecovered must be an array");
-  expectArray(boundary.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, "multiverse market row 69-74 identity-source boundary canonicalImportSafeSubset must be an array");
-  expectArray(boundary.playerFacingIdentitySourceBoundary.identityStillBlocked, "multiverse market row 69-74 identity-source boundary identityStillBlocked must be an array");
-  expectArray(boundary.playerFacingIdentitySourceBoundary.currentBoundary, "multiverse market row 69-74 identity-source boundary currentBoundary must be an array");
+  expectArray(
+    boundary.settledBrokenPrefabBand,
+    "multiverse market row 69-74 identity-source boundary settledBrokenPrefabBand must be an array"
+  );
+  expectRecord(
+    boundary.checkedNonPrefabIdentitySources,
+    "multiverse market row 69-74 identity-source boundary checkedNonPrefabIdentitySources must be an object"
+  );
+  expectRecord(
+    boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch,
+    "multiverse market row 69-74 identity-source boundary directPlayerFacingStringSearch must be an object"
+  );
+  expectArray(
+    boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.searchedLabels,
+    "multiverse market row 69-74 identity-source boundary searchedLabels must be an array"
+  );
+  expectArray(
+    boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.matches,
+    "multiverse market row 69-74 identity-source boundary direct string matches must be an array"
+  );
+  expectRecord(
+    boundary.checkedNonPrefabIdentitySources.textHandlerCoverage,
+    "multiverse market row 69-74 identity-source boundary textHandlerCoverage must be an object"
+  );
+  expectArray(
+    boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.costTextHooks,
+    "multiverse market row 69-74 identity-source boundary costTextHooks must be an array"
+  );
+  expectRecord(
+    boundary.checkedNonPrefabIdentitySources.actionShellCoverage,
+    "multiverse market row 69-74 identity-source boundary actionShellCoverage must be an object"
+  );
+  expectArray(
+    boundary.checkedNonPrefabIdentitySources.actionShellCoverage.buyHooks,
+    "multiverse market row 69-74 identity-source boundary buyHooks must be an array"
+  );
+  expectRecord(
+    boundary.checkedNonPrefabIdentitySources.metadataJoinCandidates,
+    "multiverse market row 69-74 identity-source boundary metadataJoinCandidates must be an object"
+  );
+  expectRecord(
+    boundary.checkedNonPrefabIdentitySources.liveUiScreenshotEvidence,
+    "multiverse market row 69-74 identity-source boundary liveUiScreenshotEvidence must be an object"
+  );
+  expectArray(
+    boundary.checkedNonPrefabIdentitySources.nearbyPositiveBindingAnchors,
+    "multiverse market row 69-74 identity-source boundary nearbyPositiveBindingAnchors must be an array"
+  );
+  expectRecord(
+    boundary.playerFacingIdentitySourceBoundary,
+    "multiverse market row 69-74 identity-source boundary playerFacingIdentitySourceBoundary must be an object"
+  );
+  expectArray(
+    boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered,
+    "multiverse market row 69-74 identity-source boundary identitySourceRecovered must be an array"
+  );
+  expectArray(
+    boundary.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset,
+    "multiverse market row 69-74 identity-source boundary canonicalImportSafeSubset must be an array"
+  );
+  expectArray(
+    boundary.playerFacingIdentitySourceBoundary.identityStillBlocked,
+    "multiverse market row 69-74 identity-source boundary identityStillBlocked must be an array"
+  );
+  expectArray(
+    boundary.playerFacingIdentitySourceBoundary.currentBoundary,
+    "multiverse market row 69-74 identity-source boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-row69-74-identity-source-boundary", "multiverse market row 69-74 identity-source boundary dataset id drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-row69-74-identity-source-boundary",
+    "multiverse market row 69-74 identity-source boundary dataset id drifted"
+  );
   assert.deepEqual(
-    boundary.settledBrokenPrefabBand.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.costTextHook, entry.prefabName, entry.remappedSerializedId]),
+    boundary.settledBrokenPrefabBand.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.saveField,
+      entry.serializedIdField,
+      entry.buyHook,
+      entry.costTextHook,
+      entry.prefabName,
+      entry.remappedSerializedId
+    ]),
     [
-      [69, "IS69Level", "IS69ID", "BuyIS69", "SetIS69CostText", "ChrystosEmporiumUpgrade69-ID57", 57],
-      [70, "IS70Level", "IS70ID", "BuyIS70", "SetIS70CostText", "ChrystosEmporiumUpgrade70-ID58", 58],
-      [71, "IS71Level", "IS71ID", "BuyIS71", "SetIS71CostText", "ChrystosEmporiumUpgrade71-ID59", 59],
-      [72, "IS72Level", "IS72ID", "BuyIS72", "SetIS72CostText", "ChrystosEmporiumUpgrade72-ID60", 60],
-      [73, "IS73Level", "IS73ID", "BuyIS73", "SetIS73CostText", "ChrystosEmporiumUpgrade73-ID61", 61],
-      [74, "IS74Level", "IS74ID", "BuyIS74", "SetIS74CostText", "ChrystosEmporiumUpgrade74-ID62", 62]
+      [
+        69,
+        "IS69Level",
+        "IS69ID",
+        "BuyIS69",
+        "SetIS69CostText",
+        "ChrystosEmporiumUpgrade69-ID57",
+        57
+      ],
+      [
+        70,
+        "IS70Level",
+        "IS70ID",
+        "BuyIS70",
+        "SetIS70CostText",
+        "ChrystosEmporiumUpgrade70-ID58",
+        58
+      ],
+      [
+        71,
+        "IS71Level",
+        "IS71ID",
+        "BuyIS71",
+        "SetIS71CostText",
+        "ChrystosEmporiumUpgrade71-ID59",
+        59
+      ],
+      [
+        72,
+        "IS72Level",
+        "IS72ID",
+        "BuyIS72",
+        "SetIS72CostText",
+        "ChrystosEmporiumUpgrade72-ID60",
+        60
+      ],
+      [
+        73,
+        "IS73Level",
+        "IS73ID",
+        "BuyIS73",
+        "SetIS73CostText",
+        "ChrystosEmporiumUpgrade73-ID61",
+        61
+      ],
+      [
+        74,
+        "IS74Level",
+        "IS74ID",
+        "BuyIS74",
+        "SetIS74CostText",
+        "ChrystosEmporiumUpgrade74-ID62",
+        62
+      ]
     ],
     "multiverse market row 69-74 identity-source boundary settledBrokenPrefabBand drifted"
   );
   assert.deepEqual(
     boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.searchedLabels,
-    ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"],
+    [
+      "Inscryption 69",
+      "Inscryption 70",
+      "Inscryption 71",
+      "Inscryption 72",
+      "Inscryption 73",
+      "Inscryption 74"
+    ],
     "multiverse market row 69-74 identity-source boundary searchedLabels drifted"
   );
-  assert.deepEqual(boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.matches, [], "multiverse market row 69-74 identity-source boundary direct string matches must remain empty");
   assert.deepEqual(
-    boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.remappedSerializedIds,
+    boundary.checkedNonPrefabIdentitySources.directPlayerFacingStringSearch.matches,
+    [],
+    "multiverse market row 69-74 identity-source boundary direct string matches must remain empty"
+  );
+  assert.deepEqual(
+    boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary
+      .remappedSerializedIds,
     [57, 58, 59, 60, 61, 62],
     "multiverse market row 69-74 identity-source boundary remappedSerializedIds drifted"
   );
   assert.deepEqual(
-    boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.earlierDirectPrefabShells,
+    boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary
+      .earlierDirectPrefabShells,
     [
       "ChrystosEmporiumUpgrade57",
       "ChrystosEmporiumUpgrade58",
@@ -3533,7 +10474,14 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
   );
   assert.deepEqual(
     boundary.checkedNonPrefabIdentitySources.remappedSerializedIdLabelBoundary.searchedLabels,
-    ["Inscryption 57", "Inscryption 58", "Inscryption 59", "Inscryption 60", "Inscryption 61", "Inscryption 62"],
+    [
+      "Inscryption 57",
+      "Inscryption 58",
+      "Inscryption 59",
+      "Inscryption 60",
+      "Inscryption 61",
+      "Inscryption 62"
+    ],
     "multiverse market row 69-74 identity-source boundary remapped serialized searchedLabels drifted"
   );
   assert.deepEqual(
@@ -3541,11 +10489,26 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
     [],
     "multiverse market row 69-74 identity-source boundary remapped serialized string matches must remain empty"
   );
-  assert.equal(boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.textHandlerOwner, "TextHandlerMarkets", "multiverse market row 69-74 identity-source boundary textHandlerOwner drifted");
-  assert.equal(boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.textHandlerScriptPath, "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs", "multiverse market row 69-74 identity-source boundary textHandlerScriptPath drifted");
+  assert.equal(
+    boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.textHandlerOwner,
+    "TextHandlerMarkets",
+    "multiverse market row 69-74 identity-source boundary textHandlerOwner drifted"
+  );
+  assert.equal(
+    boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.textHandlerScriptPath,
+    "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
+    "multiverse market row 69-74 identity-source boundary textHandlerScriptPath drifted"
+  );
   assert.deepEqual(
     boundary.checkedNonPrefabIdentitySources.textHandlerCoverage.costTextHooks,
-    ["SetIS69CostText", "SetIS70CostText", "SetIS71CostText", "SetIS72CostText", "SetIS73CostText", "SetIS74CostText"],
+    [
+      "SetIS69CostText",
+      "SetIS70CostText",
+      "SetIS71CostText",
+      "SetIS72CostText",
+      "SetIS73CostText",
+      "SetIS74CostText"
+    ],
     "multiverse market row 69-74 identity-source boundary costTextHooks drifted"
   );
   assert.deepEqual(
@@ -3560,7 +10523,12 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
       boundary.checkedNonPrefabIdentitySources.metadataJoinCandidates.listField,
       boundary.checkedNonPrefabIdentitySources.metadataJoinCandidates.listType
     ],
-    ["THMarkets", "TextHandlerMarkets", "InscryptionsList", "System.Collections.Generic.List`1<UnityEngine.GameObject>"],
+    [
+      "THMarkets",
+      "TextHandlerMarkets",
+      "InscryptionsList",
+      "System.Collections.Generic.List`1<UnityEngine.GameObject>"
+    ],
     "multiverse market row 69-74 identity-source boundary metadataJoinCandidates drifted"
   );
   assert.equal(
@@ -3575,16 +10543,34 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
   );
   assert.deepEqual(
     boundary.checkedNonPrefabIdentitySources.tmpProbeNegativeBoundary.checkedAnchors,
-    ["SetIS69BaseBonusText", "ClearISObjects", "ClearISMaxLevelObjects", "SetISMaxLevelObjects", "THMarkets", "InscryptionsList"],
+    [
+      "SetIS69BaseBonusText",
+      "ClearISObjects",
+      "ClearISMaxLevelObjects",
+      "SetISMaxLevelObjects",
+      "THMarkets",
+      "InscryptionsList"
+    ],
     "multiverse market row 69-74 identity-source boundary tmp probe anchors drifted"
   );
   assert.deepEqual(
-    boundary.checkedNonPrefabIdentitySources.nearbyPositiveBindingAnchors.map((entry) => [entry.orderedInscriptionRow, entry.prefabName, entry.playerFacingLabel]),
-    [[78, "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs"], [83, "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"]],
+    boundary.checkedNonPrefabIdentitySources.nearbyPositiveBindingAnchors.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.prefabName,
+      entry.playerFacingLabel
+    ]),
+    [
+      [78, "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs"],
+      [83, "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"]
+    ],
     "multiverse market row 69-74 identity-source boundary nearbyPositiveBindingAnchors drifted"
   );
   assert.deepEqual(
-    boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.playerFacingLabel]),
+    boundary.playerFacingIdentitySourceBoundary.identitySourceRecovered.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.saveField,
+      entry.playerFacingLabel
+    ]),
     [
       [69, "IS69Level", "INSCRYPTION #69"],
       [70, "IS70Level", "INSCRYPTION #70"],
@@ -3595,21 +10581,77 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
     ],
     "multiverse market row 69-74 identity-source boundary recovered identities drifted"
   );
-  assert.deepEqual(boundary.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset, [], "multiverse market row 69-74 identity-source boundary canonicalImportSafeSubset must remain empty");
-  assert.equal(boundary.playerFacingIdentitySourceBoundary.helpsRows6974, true, "multiverse market row 69-74 identity-source boundary helpsRows6974 drifted");
-  assert.deepEqual(boundary.playerFacingIdentitySourceBoundary.identityStillBlocked, [], "multiverse market row 69-74 identity-source boundary blocked rows must now be empty");
+  assert.deepEqual(
+    boundary.playerFacingIdentitySourceBoundary.canonicalImportSafeSubset,
+    [],
+    "multiverse market row 69-74 identity-source boundary canonicalImportSafeSubset must remain empty"
+  );
+  assert.equal(
+    boundary.playerFacingIdentitySourceBoundary.helpsRows6974,
+    true,
+    "multiverse market row 69-74 identity-source boundary helpsRows6974 drifted"
+  );
+  assert.deepEqual(
+    boundary.playerFacingIdentitySourceBoundary.identityStillBlocked,
+    [],
+    "multiverse market row 69-74 identity-source boundary blocked rows must now be empty"
+  );
 
-  assert.match(stateDoc, /## Checked row `69-74` player-facing text-provenance boundary/, "multiverse market state verification doc must expose the row 69-74 text-provenance boundary section");
-  assert.match(stateDoc, /row identity for rows `69-74` is already carried by the same-number chain/i, "multiverse market state verification doc must preserve the structural row identity conclusion");
-  assert.match(stateDoc, /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market state verification doc must preserve the remapped serialized-id blocker");
-  assert.match(stateDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i, "multiverse market state verification doc must preserve the tmp probe negative boundary");
-  assert.match(verificationDoc, /## Narrow row 69-74 text-provenance boundary/, "multiverse market verification doc must expose the narrow row 69-74 text-provenance boundary section");
-  assert.match(verificationDoc, /THMarkets: TextHandlerMarkets/, "multiverse market verification doc must preserve the THMarkets metadata join clue");
-  assert.match(verificationDoc, /InscryptionsList: List<GameObject>/, "multiverse market verification doc must preserve the InscryptionsList metadata join clue");
-  assert.match(verificationDoc, /the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`/i, "multiverse market verification doc must preserve the direct string negative boundary");
-  assert.match(verificationDoc, /the remaining unresolved lane is the actual game-side player-facing effect or label text source/i, "multiverse market verification doc must preserve the text-provenance blocker");
-  assert.match(verificationDoc, /direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i, "multiverse market verification doc must preserve the remapped serialized-id negative boundary");
-  assert.match(verificationDoc, /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i, "multiverse market verification doc must preserve the tmp probe negative boundary");
+  assert.match(
+    stateDoc,
+    /## Checked row `69-74` player-facing text-provenance boundary/,
+    "multiverse market state verification doc must expose the row 69-74 text-provenance boundary section"
+  );
+  assert.match(
+    stateDoc,
+    /row identity for rows `69-74` is already carried by the same-number chain/i,
+    "multiverse market state verification doc must preserve the structural row identity conclusion"
+  );
+  assert.match(
+    stateDoc,
+    /serialized ids `57-62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i,
+    "multiverse market state verification doc must preserve the remapped serialized-id blocker"
+  );
+  assert.match(
+    stateDoc,
+    /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i,
+    "multiverse market state verification doc must preserve the tmp probe negative boundary"
+  );
+  assert.match(
+    verificationDoc,
+    /## Narrow row 69-74 text-provenance boundary/,
+    "multiverse market verification doc must expose the narrow row 69-74 text-provenance boundary section"
+  );
+  assert.match(
+    verificationDoc,
+    /THMarkets: TextHandlerMarkets/,
+    "multiverse market verification doc must preserve the THMarkets metadata join clue"
+  );
+  assert.match(
+    verificationDoc,
+    /InscryptionsList: List<GameObject>/,
+    "multiverse market verification doc must preserve the InscryptionsList metadata join clue"
+  );
+  assert.match(
+    verificationDoc,
+    /the checked repo-local probe artifacts do not recover direct player-facing strings `Inscryption 69` through `Inscryption 74`/i,
+    "multiverse market verification doc must preserve the direct string negative boundary"
+  );
+  assert.match(
+    verificationDoc,
+    /the remaining unresolved lane is the actual game-side player-facing effect or label text source/i,
+    "multiverse market verification doc must preserve the text-provenance blocker"
+  );
+  assert.match(
+    verificationDoc,
+    /direct shells `ChrystosEmporiumUpgrade57` through `ChrystosEmporiumUpgrade62`[\s\S]*do not recover direct player-facing strings `Inscryption 57` through `Inscryption 62`/i,
+    "multiverse market verification doc must preserve the remapped serialized-id negative boundary"
+  );
+  assert.match(
+    verificationDoc,
+    /tmp-multiverse-row-text-probe\.json[\s\S]*SetIS69BaseBonusText[\s\S]*ClearISObjects[\s\S]*ClearISMaxLevelObjects[\s\S]*SetISMaxLevelObjects/i,
+    "multiverse market verification doc must preserve the tmp probe negative boundary"
+  );
 
   return {
     id: "multiverse-market-row69-74-identity-source-boundary",
@@ -3624,50 +10666,170 @@ function validateMultiverseMarketRow6974IdentitySourceBoundary(boundary, stateDo
   };
 }
 
-function validateMultiverseMarketSerializedLabelSourceBoundary(boundary, stateDoc, verificationDoc, boundaryDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market serialized label-source boundary generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market serialized label-source boundary dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market serialized label-source boundary sources must be an object");
-  ["row6974IdentitySourceBoundary", "marketMemberBoundary", "uabeaProbeReport", "stateVerificationDoc", "verificationDoc"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market serialized label-source boundary sources.${field} must be present`);
+function validateMultiverseMarketSerializedLabelSourceBoundary(
+  boundary,
+  stateDoc,
+  verificationDoc,
+  boundaryDoc
+) {
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market serialized label-source boundary generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market serialized label-source boundary dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market serialized label-source boundary sources must be an object"
+  );
+  [
+    "row6974IdentitySourceBoundary",
+    "marketMemberBoundary",
+    "uabeaProbeReport",
+    "stateVerificationDoc",
+    "verificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market serialized label-source boundary sources.${field} must be present`
+    );
   });
-  expectRecord(boundary.checkedSerializedExportEvidence, "multiverse market serialized label-source boundary checkedSerializedExportEvidence must be an object");
-  expectArray(boundary.checkedSerializedExportEvidence.multiverseMarketContainerFields, "multiverse market serialized label-source boundary multiverseMarketContainerFields must be an array");
-  expectArray(boundary.checkedSerializedExportEvidence.rowPayloadTypes, "multiverse market serialized label-source boundary rowPayloadTypes must be an array");
-  expectRecord(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks, "multiverse market serialized label-source boundary labelBearingFieldChecks must be an object");
-  expectArray(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.checkedAbsentFieldNames, "multiverse market serialized label-source boundary checkedAbsentFieldNames must be an array");
-  expectArray(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, "multiverse market serialized label-source boundary recoveredStringOrLabelFields must be an array");
-  expectRecord(boundary.checkedSerializedExportEvidence.indirectJoinSearch, "multiverse market serialized label-source boundary indirectJoinSearch must be an object");
-  expectArray(boundary.checkedSerializedExportEvidence.indirectJoinSearch.candidateCatalogOrRelationFields, "multiverse market serialized label-source boundary candidateCatalogOrRelationFields must be an array");
-  expectArray(boundary.checkedSerializedExportEvidence.indirectJoinSearch.separateUiShellClues, "multiverse market serialized label-source boundary separateUiShellClues must be an array");
-  expectArray(boundary.checkedSerializedExportEvidence.indirectJoinSearch.repoLocalConsumerSearchSourcesWithoutCandidateHits, "multiverse market serialized label-source boundary repoLocalConsumerSearchSourcesWithoutCandidateHits must be an array");
-  expectArray(boundary.checkedSerializedExportEvidence.indirectJoinSearch.adjacentConsumerOrViewSymbolsRecovered, "multiverse market serialized label-source boundary adjacentConsumerOrViewSymbolsRecovered must be an array");
-  expectRecord(boundary.joinBackAssessment, "multiverse market serialized label-source boundary joinBackAssessment must be an object");
-  expectArray(boundary.joinBackAssessment.distinctFromSettledCheckedPath, "multiverse market serialized label-source boundary distinctFromSettledCheckedPath must be an array");
-  expectArray(boundary.joinBackAssessment.structuralCarryover, "multiverse market serialized label-source boundary structuralCarryover must be an array");
-  expectArray(boundary.joinBackAssessment.playerFacingIdentitySourceRecovered, "multiverse market serialized label-source boundary playerFacingIdentitySourceRecovered must be an array");
-  expectArray(boundary.joinBackAssessment.canonicalImportSafeSubset, "multiverse market serialized label-source boundary canonicalImportSafeSubset must be an array");
-  expectArray(boundary.joinBackAssessment.smallestRecoveredPattern, "multiverse market serialized label-source boundary smallestRecoveredPattern must be an array");
-  expectArray(boundary.joinBackAssessment.blockedBy, "multiverse market serialized label-source boundary blockedBy must be an array");
-  expectArray(boundary.joinBackAssessment.currentBoundary, "multiverse market serialized label-source boundary currentBoundary must be an array");
+  expectRecord(
+    boundary.checkedSerializedExportEvidence,
+    "multiverse market serialized label-source boundary checkedSerializedExportEvidence must be an object"
+  );
+  expectArray(
+    boundary.checkedSerializedExportEvidence.multiverseMarketContainerFields,
+    "multiverse market serialized label-source boundary multiverseMarketContainerFields must be an array"
+  );
+  expectArray(
+    boundary.checkedSerializedExportEvidence.rowPayloadTypes,
+    "multiverse market serialized label-source boundary rowPayloadTypes must be an array"
+  );
+  expectRecord(
+    boundary.checkedSerializedExportEvidence.labelBearingFieldChecks,
+    "multiverse market serialized label-source boundary labelBearingFieldChecks must be an object"
+  );
+  expectArray(
+    boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.checkedAbsentFieldNames,
+    "multiverse market serialized label-source boundary checkedAbsentFieldNames must be an array"
+  );
+  expectArray(
+    boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields,
+    "multiverse market serialized label-source boundary recoveredStringOrLabelFields must be an array"
+  );
+  expectRecord(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch,
+    "multiverse market serialized label-source boundary indirectJoinSearch must be an object"
+  );
+  expectArray(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch.candidateCatalogOrRelationFields,
+    "multiverse market serialized label-source boundary candidateCatalogOrRelationFields must be an array"
+  );
+  expectArray(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch.separateUiShellClues,
+    "multiverse market serialized label-source boundary separateUiShellClues must be an array"
+  );
+  expectArray(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch
+      .repoLocalConsumerSearchSourcesWithoutCandidateHits,
+    "multiverse market serialized label-source boundary repoLocalConsumerSearchSourcesWithoutCandidateHits must be an array"
+  );
+  expectArray(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch
+      .adjacentConsumerOrViewSymbolsRecovered,
+    "multiverse market serialized label-source boundary adjacentConsumerOrViewSymbolsRecovered must be an array"
+  );
+  expectRecord(
+    boundary.joinBackAssessment,
+    "multiverse market serialized label-source boundary joinBackAssessment must be an object"
+  );
+  expectArray(
+    boundary.joinBackAssessment.distinctFromSettledCheckedPath,
+    "multiverse market serialized label-source boundary distinctFromSettledCheckedPath must be an array"
+  );
+  expectArray(
+    boundary.joinBackAssessment.structuralCarryover,
+    "multiverse market serialized label-source boundary structuralCarryover must be an array"
+  );
+  expectArray(
+    boundary.joinBackAssessment.playerFacingIdentitySourceRecovered,
+    "multiverse market serialized label-source boundary playerFacingIdentitySourceRecovered must be an array"
+  );
+  expectArray(
+    boundary.joinBackAssessment.canonicalImportSafeSubset,
+    "multiverse market serialized label-source boundary canonicalImportSafeSubset must be an array"
+  );
+  expectArray(
+    boundary.joinBackAssessment.smallestRecoveredPattern,
+    "multiverse market serialized label-source boundary smallestRecoveredPattern must be an array"
+  );
+  expectArray(
+    boundary.joinBackAssessment.blockedBy,
+    "multiverse market serialized label-source boundary blockedBy must be an array"
+  );
+  expectArray(
+    boundary.joinBackAssessment.currentBoundary,
+    "multiverse market serialized label-source boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-serialized-label-source-boundary", "multiverse market serialized label-source boundary dataset id drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-serialized-label-source-boundary",
+    "multiverse market serialized label-source boundary dataset id drifted"
+  );
   assert.deepEqual(
-    boundary.checkedSerializedExportEvidence.multiverseMarketContainerFields.map((entry) => [entry.name, entry.type, entry.fieldOffset]),
+    boundary.checkedSerializedExportEvidence.multiverseMarketContainerFields.map((entry) => [
+      entry.name,
+      entry.type,
+      entry.fieldOffset
+    ]),
     [
       ["InscryptionCostList", "System.Collections.Generic.List`1<BreakInfinity.BigDouble>", 10656],
-      ["InscryptionAndCostRelations", "System.Collections.Generic.Dictionary`2<System.Int32, BreakInfinity.BigDouble>", 10672],
+      [
+        "InscryptionAndCostRelations",
+        "System.Collections.Generic.Dictionary`2<System.Int32, BreakInfinity.BigDouble>",
+        10672
+      ],
       ["IDChecks", "System.Collections.Generic.List`1<System.Int32>", 10688],
       ["inscryptions", "System.Collections.Generic.List`1<MultiverseMarket+Inscryption>", 10696],
-      ["InscryptionTupleList", "System.Collections.Generic.List`1<MultiverseMarket+InscryptionTupleObject>", 10704]
+      [
+        "InscryptionTupleList",
+        "System.Collections.Generic.List`1<MultiverseMarket+InscryptionTupleObject>",
+        10704
+      ]
     ],
     "multiverse market serialized label-source boundary container fields drifted"
   );
   assert.deepEqual(
-    boundary.checkedSerializedExportEvidence.rowPayloadTypes.map((entry) => [entry.typeName, entry.fields]),
+    boundary.checkedSerializedExportEvidence.rowPayloadTypes.map((entry) => [
+      entry.typeName,
+      entry.fields
+    ]),
     [
-      ["MultiverseMarket|Inscryption", ["<ID>k__BackingField", "<Cost>k__BackingField", "<Level>k__BackingField", "<MaxLevel>k__BackingField", "<ISObject>k__BackingField", "transform"]],
-      ["MultiverseMarket|InscryptionTupleObject", ["<ID>k__BackingField", "<Cost>k__BackingField", "<Level>k__BackingField", "<MaxLevel>k__BackingField", "<ISObject>k__BackingField"]]
+      [
+        "MultiverseMarket|Inscryption",
+        [
+          "<ID>k__BackingField",
+          "<Cost>k__BackingField",
+          "<Level>k__BackingField",
+          "<MaxLevel>k__BackingField",
+          "<ISObject>k__BackingField",
+          "transform"
+        ]
+      ],
+      [
+        "MultiverseMarket|InscryptionTupleObject",
+        [
+          "<ID>k__BackingField",
+          "<Cost>k__BackingField",
+          "<Level>k__BackingField",
+          "<MaxLevel>k__BackingField",
+          "<ISObject>k__BackingField"
+        ]
+      ]
     ],
     "multiverse market serialized label-source boundary row payload types drifted"
   );
@@ -3676,11 +10838,25 @@ function validateMultiverseMarketSerializedLabelSourceBoundary(boundary, stateDo
     ["Name", "Label", "Title", "Description", "Text", "LocalizationKey", "StringId"],
     "multiverse market serialized label-source boundary checkedAbsentFieldNames drifted"
   );
-  assert.deepEqual(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields, [], "multiverse market serialized label-source boundary recoveredStringOrLabelFields must remain empty");
-  assert.match(boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.conclusion, /structural row containers and GameObject carriers only/i, "multiverse market serialized label-source boundary conclusion drifted");
+  assert.deepEqual(
+    boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.recoveredStringOrLabelFields,
+    [],
+    "multiverse market serialized label-source boundary recoveredStringOrLabelFields must remain empty"
+  );
+  assert.match(
+    boundary.checkedSerializedExportEvidence.labelBearingFieldChecks.conclusion,
+    /structural row containers and GameObject carriers only/i,
+    "multiverse market serialized label-source boundary conclusion drifted"
+  );
   assert.deepEqual(
     boundary.checkedSerializedExportEvidence.indirectJoinSearch.candidateCatalogOrRelationFields,
-    ["InscryptionCostList", "InscryptionAndCostRelations", "IDChecks", "inscryptions", "InscryptionTupleList"],
+    [
+      "InscryptionCostList",
+      "InscryptionAndCostRelations",
+      "IDChecks",
+      "inscryptions",
+      "InscryptionTupleList"
+    ],
     "multiverse market serialized label-source boundary candidateCatalogOrRelationFields drifted"
   );
   assert.deepEqual(
@@ -3689,32 +10865,106 @@ function validateMultiverseMarketSerializedLabelSourceBoundary(boundary, stateDo
     "multiverse market serialized label-source boundary separateUiShellClues drifted"
   );
   assert.deepEqual(
-    boundary.checkedSerializedExportEvidence.indirectJoinSearch.repoLocalConsumerSearchSourcesWithoutCandidateHits,
-    ["data/unity-probe-report.json", "data/lm244-targeted-probe.json", "data/multiverse-market-metadata-neighborhood.json"],
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch
+      .repoLocalConsumerSearchSourcesWithoutCandidateHits,
+    [
+      "data/unity-probe-report.json",
+      "data/lm244-targeted-probe.json",
+      "data/multiverse-market-metadata-neighborhood.json"
+    ],
     "multiverse market serialized label-source boundary repoLocalConsumerSearchSourcesWithoutCandidateHits drifted"
   );
-  assert.deepEqual(boundary.checkedSerializedExportEvidence.indirectJoinSearch.adjacentConsumerOrViewSymbolsRecovered, [], "multiverse market serialized label-source boundary adjacentConsumerOrViewSymbolsRecovered must remain empty");
-  assert.match(boundary.checkedSerializedExportEvidence.indirectJoinSearch.conclusion, /does not recover a consumer path that reads those carriers back into player-facing inscription labels/i, "multiverse market serialized label-source boundary indirectJoinSearch conclusion drifted");
-  assert.deepEqual(boundary.joinBackAssessment.playerFacingIdentitySourceRecovered, [], "multiverse market serialized label-source boundary playerFacingIdentitySourceRecovered must remain empty");
-  assert.deepEqual(boundary.joinBackAssessment.canonicalImportSafeSubset, [], "multiverse market serialized label-source boundary canonicalImportSafeSubset must remain empty");
-  assert.equal(boundary.joinBackAssessment.helpsRows6974, false, "multiverse market serialized label-source boundary helpsRows6974 must remain false");
-  assert.deepEqual(boundary.joinBackAssessment.smallestRecoveredPattern, [], "multiverse market serialized label-source boundary smallestRecoveredPattern must remain empty");
+  assert.deepEqual(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch
+      .adjacentConsumerOrViewSymbolsRecovered,
+    [],
+    "multiverse market serialized label-source boundary adjacentConsumerOrViewSymbolsRecovered must remain empty"
+  );
+  assert.match(
+    boundary.checkedSerializedExportEvidence.indirectJoinSearch.conclusion,
+    /does not recover a consumer path that reads those carriers back into player-facing inscription labels/i,
+    "multiverse market serialized label-source boundary indirectJoinSearch conclusion drifted"
+  );
+  assert.deepEqual(
+    boundary.joinBackAssessment.playerFacingIdentitySourceRecovered,
+    [],
+    "multiverse market serialized label-source boundary playerFacingIdentitySourceRecovered must remain empty"
+  );
+  assert.deepEqual(
+    boundary.joinBackAssessment.canonicalImportSafeSubset,
+    [],
+    "multiverse market serialized label-source boundary canonicalImportSafeSubset must remain empty"
+  );
+  assert.equal(
+    boundary.joinBackAssessment.helpsRows6974,
+    false,
+    "multiverse market serialized label-source boundary helpsRows6974 must remain false"
+  );
+  assert.deepEqual(
+    boundary.joinBackAssessment.smallestRecoveredPattern,
+    [],
+    "multiverse market serialized label-source boundary smallestRecoveredPattern must remain empty"
+  );
   assert.deepEqual(
     boundary.joinBackAssessment.structuralCarryover,
-    ["InscryptionCostList", "InscryptionAndCostRelations", "IDChecks", "inscryptions", "InscryptionTupleList", "<ID>k__BackingField", "<ISObject>k__BackingField"],
+    [
+      "InscryptionCostList",
+      "InscryptionAndCostRelations",
+      "IDChecks",
+      "inscryptions",
+      "InscryptionTupleList",
+      "<ID>k__BackingField",
+      "<ISObject>k__BackingField"
+    ],
     "multiverse market serialized label-source boundary structuralCarryover drifted"
   );
 
   const combinedDocs = [stateDoc, verificationDoc, boundaryDoc].join("\n");
-  assert.match(boundaryDoc, /checked UABEA field-table export/i, "serialized label-source boundary doc must mention the checked UABEA field-table export");
-  assert.match(boundaryDoc, /no indirect row-to-label join pattern is currently recoverable/i, "serialized label-source boundary doc must preserve the indirect-join negative boundary");
-  assert.match(verificationDoc, /## Alternate serialized-export indirect-join boundary/, "multiverse market verification doc must expose the alternate serialized-export indirect-join boundary section");
-  assert.match(verificationDoc, /InscryptionCostList/, "multiverse market verification doc must preserve the InscryptionCostList evidence");
-  assert.match(verificationDoc, /no indirect catalog\/relation join is recoverable repo-locally/i, "multiverse market verification doc must preserve the indirect join negative boundary");
-  assert.match(stateDoc, /## Alternate serialized-export indirect-join boundary/, "multiverse market state verification doc must expose the alternate serialized-export indirect-join boundary section");
-  assert.match(stateDoc, /InscryptionTupleList/, "multiverse market state verification doc must preserve the InscryptionTupleList evidence");
-  assert.match(stateDoc, /no indirect catalog\/relation join is recoverable repo-locally/i, "multiverse market state verification doc must preserve the indirect join negative boundary");
-  assert.match(combinedDocs, /the canonical import-safe subset stays empty/i, "serialized label-source boundary docs must preserve the empty canonical subset conclusion");
+  assert.match(
+    boundaryDoc,
+    /checked UABEA field-table export/i,
+    "serialized label-source boundary doc must mention the checked UABEA field-table export"
+  );
+  assert.match(
+    boundaryDoc,
+    /no indirect row-to-label join pattern is currently recoverable/i,
+    "serialized label-source boundary doc must preserve the indirect-join negative boundary"
+  );
+  assert.match(
+    verificationDoc,
+    /## Alternate serialized-export indirect-join boundary/,
+    "multiverse market verification doc must expose the alternate serialized-export indirect-join boundary section"
+  );
+  assert.match(
+    verificationDoc,
+    /InscryptionCostList/,
+    "multiverse market verification doc must preserve the InscryptionCostList evidence"
+  );
+  assert.match(
+    verificationDoc,
+    /no indirect catalog\/relation join is recoverable repo-locally/i,
+    "multiverse market verification doc must preserve the indirect join negative boundary"
+  );
+  assert.match(
+    stateDoc,
+    /## Alternate serialized-export indirect-join boundary/,
+    "multiverse market state verification doc must expose the alternate serialized-export indirect-join boundary section"
+  );
+  assert.match(
+    stateDoc,
+    /InscryptionTupleList/,
+    "multiverse market state verification doc must preserve the InscryptionTupleList evidence"
+  );
+  assert.match(
+    stateDoc,
+    /no indirect catalog\/relation join is recoverable repo-locally/i,
+    "multiverse market state verification doc must preserve the indirect join negative boundary"
+  );
+  assert.match(
+    combinedDocs,
+    /the canonical import-safe subset stays empty/i,
+    "serialized label-source boundary docs must preserve the empty canonical subset conclusion"
+  );
 
   return {
     id: "multiverse-market-serialized-label-source-boundary",
@@ -3730,29 +10980,89 @@ function validateMultiverseMarketSerializedLabelSourceBoundary(boundary, stateDo
 }
 
 function validateMultiverseMarketRow7174IdentityBoundary(boundary, stateDoc, verificationDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market row 71-74 identity boundary generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market row 71-74 identity boundary dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market row 71-74 identity boundary sources must be an object");
-  ["saveDataImportBoundary", "validatedRows", "rowTextCoverage", "actionShell", "prefabRemapBoundary", "unityProbeReport", "uabeaProbeReport", "liveUiScreenshotEvidence", "verificationDoc"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market row 71-74 identity boundary sources.${field} must be present`);
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market row 71-74 identity boundary generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market row 71-74 identity boundary dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market row 71-74 identity boundary sources must be an object"
+  );
+  [
+    "saveDataImportBoundary",
+    "validatedRows",
+    "rowTextCoverage",
+    "actionShell",
+    "prefabRemapBoundary",
+    "unityProbeReport",
+    "uabeaProbeReport",
+    "liveUiScreenshotEvidence",
+    "verificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market row 71-74 identity boundary sources.${field} must be present`
+    );
   });
-  expectArray(boundary.settledOrderedMapping, "multiverse market row 71-74 identity boundary settledOrderedMapping must be an array");
-  expectRecord(boundary.playerFacingIdentityBoundary, "multiverse market row 71-74 identity boundary playerFacingIdentityBoundary must be an object");
-  expectArray(boundary.playerFacingIdentityBoundary.canonicalImportSafeSubset, "multiverse market row 71-74 identity boundary canonicalImportSafeSubset must be an array");
-  expectArray(boundary.playerFacingIdentityBoundary.identityRecovered, "multiverse market row 71-74 identity boundary identityRecovered must be an array");
-  expectArray(boundary.playerFacingIdentityBoundary.identityStillBlocked, "multiverse market row 71-74 identity boundary identityStillBlocked must be an array");
-  expectArray(boundary.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors, "multiverse market row 71-74 identity boundary adjacentKnownPlayerFacingAnchors must be an array");
-  expectArray(boundary.playerFacingIdentityBoundary.currentBoundary, "multiverse market row 71-74 identity boundary currentBoundary must be an array");
+  expectArray(
+    boundary.settledOrderedMapping,
+    "multiverse market row 71-74 identity boundary settledOrderedMapping must be an array"
+  );
+  expectRecord(
+    boundary.playerFacingIdentityBoundary,
+    "multiverse market row 71-74 identity boundary playerFacingIdentityBoundary must be an object"
+  );
+  expectArray(
+    boundary.playerFacingIdentityBoundary.canonicalImportSafeSubset,
+    "multiverse market row 71-74 identity boundary canonicalImportSafeSubset must be an array"
+  );
+  expectArray(
+    boundary.playerFacingIdentityBoundary.identityRecovered,
+    "multiverse market row 71-74 identity boundary identityRecovered must be an array"
+  );
+  expectArray(
+    boundary.playerFacingIdentityBoundary.identityStillBlocked,
+    "multiverse market row 71-74 identity boundary identityStillBlocked must be an array"
+  );
+  expectArray(
+    boundary.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors,
+    "multiverse market row 71-74 identity boundary adjacentKnownPlayerFacingAnchors must be an array"
+  );
+  expectArray(
+    boundary.playerFacingIdentityBoundary.currentBoundary,
+    "multiverse market row 71-74 identity boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-row71-74-identity-boundary", "multiverse market row 71-74 identity boundary dataset id drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-row71-74-identity-boundary",
+    "multiverse market row 71-74 identity boundary dataset id drifted"
+  );
   assert.deepEqual(
     boundary.settledOrderedMapping.map((entry) => [entry.saveField, entry.orderedInscriptionRow]),
-    [["IS71Level", 71], ["IS72Level", 72], ["IS73Level", 73], ["IS74Level", 74]],
+    [
+      ["IS71Level", 71],
+      ["IS72Level", 72],
+      ["IS73Level", 73],
+      ["IS74Level", 74]
+    ],
     "multiverse market row 71-74 identity boundary settledOrderedMapping drifted"
   );
-  assert.deepEqual(boundary.playerFacingIdentityBoundary.canonicalImportSafeSubset, [], "multiverse market row 71-74 identity boundary canonicalImportSafeSubset must remain empty");
   assert.deepEqual(
-    boundary.playerFacingIdentityBoundary.identityRecovered.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.playerFacingLabel]),
+    boundary.playerFacingIdentityBoundary.canonicalImportSafeSubset,
+    [],
+    "multiverse market row 71-74 identity boundary canonicalImportSafeSubset must remain empty"
+  );
+  assert.deepEqual(
+    boundary.playerFacingIdentityBoundary.identityRecovered.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.saveField,
+      entry.playerFacingLabel
+    ]),
     [
       [71, "IS71Level", "INSCRYPTION #71"],
       [72, "IS72Level", "INSCRYPTION #72"],
@@ -3761,18 +11071,44 @@ function validateMultiverseMarketRow7174IdentityBoundary(boundary, stateDoc, ver
     ],
     "multiverse market row 71-74 identity boundary identityRecovered drifted"
   );
-  assert.deepEqual(boundary.playerFacingIdentityBoundary.identityStillBlocked, [], "multiverse market row 71-74 identity boundary blocked rows must now be empty");
   assert.deepEqual(
-    boundary.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors.map((entry) => [entry.orderedInscriptionRow, entry.label]),
-    [[68, "INSCRYPTION #68"], [75, "INSCRYPTION #75"]],
+    boundary.playerFacingIdentityBoundary.identityStillBlocked,
+    [],
+    "multiverse market row 71-74 identity boundary blocked rows must now be empty"
+  );
+  assert.deepEqual(
+    boundary.playerFacingIdentityBoundary.adjacentKnownPlayerFacingAnchors.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.label
+    ]),
+    [
+      [68, "INSCRYPTION #68"],
+      [75, "INSCRYPTION #75"]
+    ],
     "multiverse market row 71-74 identity boundary adjacent anchors drifted"
   );
 
   const combinedStateDoc = stateDoc;
-  assert.match(combinedStateDoc, /ChrystosEmporiumUpgrade71-ID59/, "multiverse market state verification doc must preserve the row 71 prefab override evidence");
-  assert.match(verificationDoc, /ChrystosEmporiumUpgrade71-ID59/, "multiverse market verification doc must preserve the row 71 prefab override evidence");
-  assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the adjacent row 78 anchor");
-  assert.match(verificationDoc, /the canonical import-safe subset stays empty/i, "multiverse market verification doc must preserve the empty canonical subset conclusion");
+  assert.match(
+    combinedStateDoc,
+    /ChrystosEmporiumUpgrade71-ID59/,
+    "multiverse market state verification doc must preserve the row 71 prefab override evidence"
+  );
+  assert.match(
+    verificationDoc,
+    /ChrystosEmporiumUpgrade71-ID59/,
+    "multiverse market verification doc must preserve the row 71 prefab override evidence"
+  );
+  assert.match(
+    verificationDoc,
+    /Inscryption 78: Ouroboros Orbs/,
+    "multiverse market verification doc must preserve the adjacent row 78 anchor"
+  );
+  assert.match(
+    verificationDoc,
+    /the canonical import-safe subset stays empty/i,
+    "multiverse market verification doc must preserve the empty canonical subset conclusion"
+  );
 
   return {
     id: "multiverse-market-row71-74-identity-boundary",
@@ -3788,21 +11124,68 @@ function validateMultiverseMarketRow7174IdentityBoundary(boundary, stateDoc, ver
 }
 
 function validateMultiverseMarketRow7174RemapBand(boundary, stateDoc, verificationDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market row 71-74 remap band generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market row 71-74 remap band dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market row 71-74 remap band sources must be an object");
-  ["row7174IdentityBoundary", "prefabRemapBoundary", "metadataNeighborhood", "rowTextCoverage", "actionShell", "uabeaProbeReport", "unityProbeReport", "liveUiScreenshotEvidence", "verificationDoc"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market row 71-74 remap band sources.${field} must be present`);
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market row 71-74 remap band generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market row 71-74 remap band dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market row 71-74 remap band sources must be an object"
+  );
+  [
+    "row7174IdentityBoundary",
+    "prefabRemapBoundary",
+    "metadataNeighborhood",
+    "rowTextCoverage",
+    "actionShell",
+    "uabeaProbeReport",
+    "unityProbeReport",
+    "liveUiScreenshotEvidence",
+    "verificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market row 71-74 remap band sources.${field} must be present`
+    );
   });
-  expectArray(boundary.remapBandRows, "multiverse market row 71-74 remap band remapBandRows must be an array");
-  expectArray(boundary.earlierPrefabShellEvidence, "multiverse market row 71-74 remap band earlierPrefabShellEvidence must be an array");
-  expectRecord(boundary.nearbyUiBindingEvidence, "multiverse market row 71-74 remap band nearbyUiBindingEvidence must be an object");
-  expectRecord(boundary.liveUiComparison, "multiverse market row 71-74 remap band liveUiComparison must be an object");
-  expectRecord(boundary.recoveredRelationship, "multiverse market row 71-74 remap band recoveredRelationship must be an object");
-  expectArray(boundary.canonicalImportSafeSubset, "multiverse market row 71-74 remap band canonicalImportSafeSubset must be an array");
-  expectArray(boundary.currentBoundary, "multiverse market row 71-74 remap band currentBoundary must be an array");
+  expectArray(
+    boundary.remapBandRows,
+    "multiverse market row 71-74 remap band remapBandRows must be an array"
+  );
+  expectArray(
+    boundary.earlierPrefabShellEvidence,
+    "multiverse market row 71-74 remap band earlierPrefabShellEvidence must be an array"
+  );
+  expectRecord(
+    boundary.nearbyUiBindingEvidence,
+    "multiverse market row 71-74 remap band nearbyUiBindingEvidence must be an object"
+  );
+  expectRecord(
+    boundary.liveUiComparison,
+    "multiverse market row 71-74 remap band liveUiComparison must be an object"
+  );
+  expectRecord(
+    boundary.recoveredRelationship,
+    "multiverse market row 71-74 remap band recoveredRelationship must be an object"
+  );
+  expectArray(
+    boundary.canonicalImportSafeSubset,
+    "multiverse market row 71-74 remap band canonicalImportSafeSubset must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market row 71-74 remap band currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-row71-74-remap-band", "multiverse market row 71-74 remap band dataset id drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-row71-74-remap-band",
+    "multiverse market row 71-74 remap band dataset id drifted"
+  );
   assert.deepEqual(
     boundary.remapBandRows.map((entry) => [
       entry.orderedInscriptionRow,
@@ -3815,34 +11198,123 @@ function validateMultiverseMarketRow7174RemapBand(boundary, stateDoc, verificati
       entry.remappedSerializedId
     ]),
     [
-      [71, "IS71Level", "IS71ID", "BuyIS71", "SetIS71CostText", 71, "ChrystosEmporiumUpgrade71-ID59", 59],
-      [72, "IS72Level", "IS72ID", "BuyIS72", "SetIS72CostText", 72, "ChrystosEmporiumUpgrade72-ID60", 60],
-      [73, "IS73Level", "IS73ID", "BuyIS73", "SetIS73CostText", 73, "ChrystosEmporiumUpgrade73-ID61", 61],
-      [74, "IS74Level", "IS74ID", "BuyIS74", "SetIS74CostText", 74, "ChrystosEmporiumUpgrade74-ID62", 62]
+      [
+        71,
+        "IS71Level",
+        "IS71ID",
+        "BuyIS71",
+        "SetIS71CostText",
+        71,
+        "ChrystosEmporiumUpgrade71-ID59",
+        59
+      ],
+      [
+        72,
+        "IS72Level",
+        "IS72ID",
+        "BuyIS72",
+        "SetIS72CostText",
+        72,
+        "ChrystosEmporiumUpgrade72-ID60",
+        60
+      ],
+      [
+        73,
+        "IS73Level",
+        "IS73ID",
+        "BuyIS73",
+        "SetIS73CostText",
+        73,
+        "ChrystosEmporiumUpgrade73-ID61",
+        61
+      ],
+      [
+        74,
+        "IS74Level",
+        "IS74ID",
+        "BuyIS74",
+        "SetIS74CostText",
+        74,
+        "ChrystosEmporiumUpgrade74-ID62",
+        62
+      ]
     ],
     "multiverse market row 71-74 remap band row mapping drifted"
   );
   assert.deepEqual(
     boundary.earlierPrefabShellEvidence.map((entry) => [entry.serializedId, entry.prefabName]),
-    [[59, "ChrystosEmporiumUpgrade59"], [60, "ChrystosEmporiumUpgrade60"], [61, "ChrystosEmporiumUpgrade61"], [62, "ChrystosEmporiumUpgrade62"]],
+    [
+      [59, "ChrystosEmporiumUpgrade59"],
+      [60, "ChrystosEmporiumUpgrade60"],
+      [61, "ChrystosEmporiumUpgrade61"],
+      [62, "ChrystosEmporiumUpgrade62"]
+    ],
     "multiverse market row 71-74 remap band earlier prefab shell evidence drifted"
   );
-  assert.equal(boundary.nearbyUiBindingEvidence.textHandlerOwner, "TextHandlerMarkets", "multiverse market row 71-74 remap band textHandlerOwner drifted");
-  assert.equal(boundary.nearbyUiBindingEvidence.textHandlerScriptPath, "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs", "multiverse market row 71-74 remap band textHandlerScriptPath drifted");
-  assert.deepEqual(boundary.nearbyUiBindingEvidence.nearestPositiveSameNumberRows, [78, 83], "multiverse market row 71-74 remap band nearestPositiveSameNumberRows drifted");
-  assert.deepEqual(boundary.nearbyUiBindingEvidence.nearestPositiveSameNumberLabels, ["Inscryption 78: Ouroboros Orbs", "Inscryption 83: Fast-Loop ML"], "multiverse market row 71-74 remap band nearestPositiveSameNumberLabels drifted");
+  assert.equal(
+    boundary.nearbyUiBindingEvidence.textHandlerOwner,
+    "TextHandlerMarkets",
+    "multiverse market row 71-74 remap band textHandlerOwner drifted"
+  );
+  assert.equal(
+    boundary.nearbyUiBindingEvidence.textHandlerScriptPath,
+    "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
+    "multiverse market row 71-74 remap band textHandlerScriptPath drifted"
+  );
   assert.deepEqual(
-    boundary.liveUiComparison.testedRows.map((entry) => [entry.orderedInscriptionRow, entry.playerFacingLabel]),
-    [[71, "INSCRYPTION #71"], [72, "INSCRYPTION #72"], [73, "INSCRYPTION #73"], [74, "INSCRYPTION #74"]],
+    boundary.nearbyUiBindingEvidence.nearestPositiveSameNumberRows,
+    [78, 83],
+    "multiverse market row 71-74 remap band nearestPositiveSameNumberRows drifted"
+  );
+  assert.deepEqual(
+    boundary.nearbyUiBindingEvidence.nearestPositiveSameNumberLabels,
+    ["Inscryption 78: Ouroboros Orbs", "Inscryption 83: Fast-Loop ML"],
+    "multiverse market row 71-74 remap band nearestPositiveSameNumberLabels drifted"
+  );
+  assert.deepEqual(
+    boundary.liveUiComparison.testedRows.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.playerFacingLabel
+    ]),
+    [
+      [71, "INSCRYPTION #71"],
+      [72, "INSCRYPTION #72"],
+      [73, "INSCRYPTION #73"],
+      [74, "INSCRYPTION #74"]
+    ],
     "multiverse market row 71-74 remap band live UI comparison drifted"
   );
-  assert.deepEqual(boundary.canonicalImportSafeSubset, [], "multiverse market row 71-74 remap band canonicalImportSafeSubset must remain empty");
+  assert.deepEqual(
+    boundary.canonicalImportSafeSubset,
+    [],
+    "multiverse market row 71-74 remap band canonicalImportSafeSubset must remain empty"
+  );
 
-  assert.match(stateDoc, /## Checked row `71-74` remap-band boundary/, "multiverse market state verification doc must expose the row 71-74 remap-band boundary section");
-  assert.match(stateDoc, /prefab numbers `71-74` are reused as shells for serialized ids `59-62`/i, "multiverse market state verification doc must preserve the remap-band relationship");
-  assert.match(verificationDoc, /## Narrow row 71-74 remap-band boundary/, "multiverse market verification doc must expose the row 71-74 remap-band boundary section");
-  assert.match(verificationDoc, /ChrystosEmporiumUpgrade59/, "multiverse market verification doc must preserve the earlier shell evidence for id 59");
-  assert.match(verificationDoc, /rows `71-74` stay player-facing rows `71-74` in live UI/i, "multiverse market verification doc must preserve the live UI row identity conclusion");
+  assert.match(
+    stateDoc,
+    /## Checked row `71-74` remap-band boundary/,
+    "multiverse market state verification doc must expose the row 71-74 remap-band boundary section"
+  );
+  assert.match(
+    stateDoc,
+    /prefab numbers `71-74` are reused as shells for serialized ids `59-62`/i,
+    "multiverse market state verification doc must preserve the remap-band relationship"
+  );
+  assert.match(
+    verificationDoc,
+    /## Narrow row 71-74 remap-band boundary/,
+    "multiverse market verification doc must expose the row 71-74 remap-band boundary section"
+  );
+  assert.match(
+    verificationDoc,
+    /ChrystosEmporiumUpgrade59/,
+    "multiverse market verification doc must preserve the earlier shell evidence for id 59"
+  );
+  assert.match(
+    verificationDoc,
+    /rows `71-74` stay player-facing rows `71-74` in live UI/i,
+    "multiverse market verification doc must preserve the live UI row identity conclusion"
+  );
 
   return {
     id: "multiverse-market-row71-74-remap-band",
@@ -3857,52 +11329,194 @@ function validateMultiverseMarketRow7174RemapBand(boundary, stateDoc, verificati
 }
 
 function validateMultiverseMarketNearbyIdentityBindingPattern(pattern, stateDoc, verificationDoc) {
-  expectNonEmptyString(pattern.generatedAt, "multiverse market nearby identity-binding pattern generatedAt must be present");
-  expectNonEmptyString(pattern.dataset, "multiverse market nearby identity-binding pattern dataset id must be present");
-  expectRecord(pattern.sources, "multiverse market nearby identity-binding pattern sources must be an object");
-  ["row6974IdentitySourceBoundary", "metadataNeighborhood", "uabeaProbeReport", "unityProbeReport", "verificationDoc"].forEach((field) => {
-    expectNonEmptyString(pattern.sources[field], `multiverse market nearby identity-binding pattern sources.${field} must be present`);
+  expectNonEmptyString(
+    pattern.generatedAt,
+    "multiverse market nearby identity-binding pattern generatedAt must be present"
+  );
+  expectNonEmptyString(
+    pattern.dataset,
+    "multiverse market nearby identity-binding pattern dataset id must be present"
+  );
+  expectRecord(
+    pattern.sources,
+    "multiverse market nearby identity-binding pattern sources must be an object"
+  );
+  [
+    "row6974IdentitySourceBoundary",
+    "metadataNeighborhood",
+    "uabeaProbeReport",
+    "unityProbeReport",
+    "verificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      pattern.sources[field],
+      `multiverse market nearby identity-binding pattern sources.${field} must be present`
+    );
   });
-  expectArray(pattern.checkedPositiveBindings, "multiverse market nearby identity-binding pattern checkedPositiveBindings must be an array");
-  expectRecord(pattern.recoveredPattern, "multiverse market nearby identity-binding pattern recoveredPattern must be an object");
-  expectArray(pattern.recoveredPattern.playerFacingIdentityBindingRule, "multiverse market nearby identity-binding pattern playerFacingIdentityBindingRule must be an array");
-  expectArray(pattern.recoveredPattern.checkedPositiveRows, "multiverse market nearby identity-binding pattern checkedPositiveRows must be an array");
-  expectArray(pattern.recoveredPattern.checkedNegativeCarryoverRows, "multiverse market nearby identity-binding pattern checkedNegativeCarryoverRows must be an array");
-  expectArray(pattern.recoveredPattern.whyNotRows6974, "multiverse market nearby identity-binding pattern whyNotRows6974 must be an array");
-  expectArray(pattern.recoveredPattern.canonicalImportSafeSubset, "multiverse market nearby identity-binding pattern canonicalImportSafeSubset must be an array");
-  expectArray(pattern.currentBoundary, "multiverse market nearby identity-binding pattern currentBoundary must be an array");
+  expectArray(
+    pattern.checkedPositiveBindings,
+    "multiverse market nearby identity-binding pattern checkedPositiveBindings must be an array"
+  );
+  expectRecord(
+    pattern.recoveredPattern,
+    "multiverse market nearby identity-binding pattern recoveredPattern must be an object"
+  );
+  expectArray(
+    pattern.recoveredPattern.playerFacingIdentityBindingRule,
+    "multiverse market nearby identity-binding pattern playerFacingIdentityBindingRule must be an array"
+  );
+  expectArray(
+    pattern.recoveredPattern.checkedPositiveRows,
+    "multiverse market nearby identity-binding pattern checkedPositiveRows must be an array"
+  );
+  expectArray(
+    pattern.recoveredPattern.checkedNegativeCarryoverRows,
+    "multiverse market nearby identity-binding pattern checkedNegativeCarryoverRows must be an array"
+  );
+  expectArray(
+    pattern.recoveredPattern.whyNotRows6974,
+    "multiverse market nearby identity-binding pattern whyNotRows6974 must be an array"
+  );
+  expectArray(
+    pattern.recoveredPattern.canonicalImportSafeSubset,
+    "multiverse market nearby identity-binding pattern canonicalImportSafeSubset must be an array"
+  );
+  expectArray(
+    pattern.currentBoundary,
+    "multiverse market nearby identity-binding pattern currentBoundary must be an array"
+  );
 
-  assert.equal(pattern.dataset, "multiverse-market-nearby-identity-binding-pattern", "multiverse market nearby identity-binding pattern dataset id drifted");
+  assert.equal(
+    pattern.dataset,
+    "multiverse-market-nearby-identity-binding-pattern",
+    "multiverse market nearby identity-binding pattern dataset id drifted"
+  );
   assert.deepEqual(
-    pattern.checkedPositiveBindings.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.prefabName, entry.playerFacingLabel]),
+    pattern.checkedPositiveBindings.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.saveField,
+      entry.serializedIdField,
+      entry.buyHook,
+      entry.prefabName,
+      entry.playerFacingLabel
+    ]),
     [
-      [78, "IS78Level", "IS78ID", "BuyIS78", "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs"],
-      [83, "IS83Level", "IS83ID", "BuyIS83", "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML"]
+      [
+        78,
+        "IS78Level",
+        "IS78ID",
+        "BuyIS78",
+        "ChrystosEmporiumUpgrade78-ID78",
+        "Inscryption 78: Ouroboros Orbs"
+      ],
+      [
+        83,
+        "IS83Level",
+        "IS83ID",
+        "BuyIS83",
+        "ChrystosEmporiumUpgrade83-ID83",
+        "Inscryption 83: Fast-Loop ML"
+      ]
     ],
     "multiverse market nearby identity-binding pattern checkedPositiveBindings drifted"
   );
   pattern.checkedPositiveBindings.forEach((entry, index) => {
-    assert.equal(entry.textHandlerOwner, "TextHandlerMarkets", `multiverse market nearby identity-binding pattern entry ${index} textHandlerOwner drifted`);
-    assert.equal(entry.textHandlerScriptPath, "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs", `multiverse market nearby identity-binding pattern entry ${index} textHandlerScriptPath drifted`);
-    assert.equal(entry.controlStatus, "partial-text-adjacent-control", `multiverse market nearby identity-binding pattern entry ${index} controlStatus drifted`);
-    expectArray(entry.evidence, `multiverse market nearby identity-binding pattern entry ${index} evidence must be an array`);
+    assert.equal(
+      entry.textHandlerOwner,
+      "TextHandlerMarkets",
+      `multiverse market nearby identity-binding pattern entry ${index} textHandlerOwner drifted`
+    );
+    assert.equal(
+      entry.textHandlerScriptPath,
+      "9\\Assets\\Scripts\\Text\\Text Ouroboros\\TextHandlerMarkets.cs",
+      `multiverse market nearby identity-binding pattern entry ${index} textHandlerScriptPath drifted`
+    );
+    assert.equal(
+      entry.controlStatus,
+      "partial-text-adjacent-control",
+      `multiverse market nearby identity-binding pattern entry ${index} controlStatus drifted`
+    );
+    expectArray(
+      entry.evidence,
+      `multiverse market nearby identity-binding pattern entry ${index} evidence must be an array`
+    );
   });
-  assert.equal(pattern.recoveredPattern.patternName, "same-number nearby text-adjacent control", "multiverse market nearby identity-binding pattern patternName drifted");
-  assert.equal(pattern.recoveredPattern.orderedRowMappingStatus, "separate-input", "multiverse market nearby identity-binding pattern orderedRowMappingStatus drifted");
-  assert.deepEqual(pattern.recoveredPattern.checkedPositiveRows, [78, 83], "multiverse market nearby identity-binding pattern checkedPositiveRows drifted");
-  assert.deepEqual(pattern.recoveredPattern.checkedNegativeCarryoverRows, [69, 70, 71, 72, 73, 74], "multiverse market nearby identity-binding pattern checkedNegativeCarryoverRows drifted");
-  assert.equal(pattern.recoveredPattern.helpsRows6974, false, "multiverse market nearby identity-binding pattern helpsRows6974 must remain false");
-  assert.deepEqual(pattern.recoveredPattern.canonicalImportSafeSubset, [], "multiverse market nearby identity-binding pattern canonicalImportSafeSubset must remain empty");
+  assert.equal(
+    pattern.recoveredPattern.patternName,
+    "same-number nearby text-adjacent control",
+    "multiverse market nearby identity-binding pattern patternName drifted"
+  );
+  assert.equal(
+    pattern.recoveredPattern.orderedRowMappingStatus,
+    "separate-input",
+    "multiverse market nearby identity-binding pattern orderedRowMappingStatus drifted"
+  );
+  assert.deepEqual(
+    pattern.recoveredPattern.checkedPositiveRows,
+    [78, 83],
+    "multiverse market nearby identity-binding pattern checkedPositiveRows drifted"
+  );
+  assert.deepEqual(
+    pattern.recoveredPattern.checkedNegativeCarryoverRows,
+    [69, 70, 71, 72, 73, 74],
+    "multiverse market nearby identity-binding pattern checkedNegativeCarryoverRows drifted"
+  );
+  assert.equal(
+    pattern.recoveredPattern.helpsRows6974,
+    false,
+    "multiverse market nearby identity-binding pattern helpsRows6974 must remain false"
+  );
+  assert.deepEqual(
+    pattern.recoveredPattern.canonicalImportSafeSubset,
+    [],
+    "multiverse market nearby identity-binding pattern canonicalImportSafeSubset must remain empty"
+  );
 
-  assert.match(stateDoc, /## Nearby checked inscription text-adjacent controls/, "multiverse market state verification doc must expose the nearby inscription text-adjacent controls section");
-  assert.match(stateDoc, /ChrystosEmporiumUpgrade78-ID78/, "multiverse market state verification doc must preserve the row 78 direct prefab binding");
-  assert.match(stateDoc, /ChrystosEmporiumUpgrade83-ID83/, "multiverse market state verification doc must preserve the row 83 direct prefab binding");
-  assert.match(stateDoc, /the canonical import-safe subset stays empty/i, "multiverse market state verification doc must preserve the empty canonical subset conclusion for the nearby binding pattern");
-  assert.match(verificationDoc, /## Nearby checked text-adjacent controls/, "multiverse market verification doc must expose the nearby text-adjacent controls section");
-  assert.match(verificationDoc, /sparse anchor: `Inscryption 78: Ouroboros Orbs`[\s\S]*live screenshot text: `OUROBOROS POINTS GAINED`/i, "multiverse market verification doc must preserve the row 78 screenshot mismatch");
-  assert.match(verificationDoc, /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, sparse anchor `Inscryption 83: Fast-Loop ML`/, "multiverse market verification doc must preserve the row 83 partial control chain");
-  assert.match(verificationDoc, /does not recover the missing player-facing text provenance for rows `69-74`/i, "multiverse market verification doc must preserve the negative carryover for rows 69-74");
-  assert.match(verificationDoc, /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i, "multiverse market verification doc must preserve the recovered remap-band explanation");
+  assert.match(
+    stateDoc,
+    /## Nearby checked inscription text-adjacent controls/,
+    "multiverse market state verification doc must expose the nearby inscription text-adjacent controls section"
+  );
+  assert.match(
+    stateDoc,
+    /ChrystosEmporiumUpgrade78-ID78/,
+    "multiverse market state verification doc must preserve the row 78 direct prefab binding"
+  );
+  assert.match(
+    stateDoc,
+    /ChrystosEmporiumUpgrade83-ID83/,
+    "multiverse market state verification doc must preserve the row 83 direct prefab binding"
+  );
+  assert.match(
+    stateDoc,
+    /the canonical import-safe subset stays empty/i,
+    "multiverse market state verification doc must preserve the empty canonical subset conclusion for the nearby binding pattern"
+  );
+  assert.match(
+    verificationDoc,
+    /## Nearby checked text-adjacent controls/,
+    "multiverse market verification doc must expose the nearby text-adjacent controls section"
+  );
+  assert.match(
+    verificationDoc,
+    /sparse anchor: `Inscryption 78: Ouroboros Orbs`[\s\S]*live screenshot text: `OUROBOROS POINTS GAINED`/i,
+    "multiverse market verification doc must preserve the row 78 screenshot mismatch"
+  );
+  assert.match(
+    verificationDoc,
+    /IS83Level`, `IS83ID`, `BuyIS83`, `ChrystosEmporiumUpgrade83-ID83`, sparse anchor `Inscryption 83: Fast-Loop ML`/,
+    "multiverse market verification doc must preserve the row 83 partial control chain"
+  );
+  assert.match(
+    verificationDoc,
+    /does not recover the missing player-facing text provenance for rows `69-74`/i,
+    "multiverse market verification doc must preserve the negative carryover for rows 69-74"
+  );
+  assert.match(
+    verificationDoc,
+    /ChrystosEmporiumUpgrade69-ID57[\s\S]*ChrystosEmporiumUpgrade74-ID62/i,
+    "multiverse market verification doc must preserve the recovered remap-band explanation"
+  );
 
   return {
     id: "multiverse-market-nearby-identity-binding-pattern",
@@ -3916,31 +11530,108 @@ function validateMultiverseMarketNearbyIdentityBindingPattern(pattern, stateDoc,
   };
 }
 
-function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary, stateDoc, verificationDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market inscription numbering-stability boundary generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market inscription numbering-stability boundary dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market inscription numbering-stability boundary sources must be an object");
-  ["prefabRemapBoundary", "row7174RemapBand", "metadataNeighborhood", "uabeaProbeReport", "unityProbeReport", "nearbyIdentityBindingPattern", "verificationDoc"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market inscription numbering-stability boundary sources.${field} must be present`);
+function validateMultiverseMarketInscriptionNumberingStabilityBoundary(
+  boundary,
+  stateDoc,
+  verificationDoc
+) {
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market inscription numbering-stability boundary generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market inscription numbering-stability boundary dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market inscription numbering-stability boundary sources must be an object"
+  );
+  [
+    "prefabRemapBoundary",
+    "row7174RemapBand",
+    "metadataNeighborhood",
+    "uabeaProbeReport",
+    "unityProbeReport",
+    "nearbyIdentityBindingPattern",
+    "verificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market inscription numbering-stability boundary sources.${field} must be present`
+    );
   });
-  expectRecord(boundary.checkedFieldStability, "multiverse market inscription numbering-stability boundary checkedFieldStability must be an object");
-  expectRecord(boundary.checkedFieldStability.orderedSaveFieldRun, "multiverse market inscription numbering-stability boundary orderedSaveFieldRun must be an object");
-  expectRecord(boundary.checkedFieldStability.serializedIdFieldRun, "multiverse market inscription numbering-stability boundary serializedIdFieldRun must be an object");
-  expectRecord(boundary.checkedFieldStability.buyHookRun, "multiverse market inscription numbering-stability boundary buyHookRun must be an object");
-  expectRecord(boundary.checkedFieldStability.prefabNumbering, "multiverse market inscription numbering-stability boundary prefabNumbering must be an object");
-  expectRecord(boundary.checkedFieldStability.playerFacingStringAnchors, "multiverse market inscription numbering-stability boundary playerFacingStringAnchors must be an object");
-  expectArray(boundary.checkedFieldStability.playerFacingStringAnchors.checkedAnchorRows, "multiverse market inscription numbering-stability boundary checkedAnchorRows must be an array");
-  expectArray(boundary.checkedFieldStability.playerFacingStringAnchors.sameNumberPositiveRowsInsideStableResume, "multiverse market inscription numbering-stability boundary sameNumberPositiveRowsInsideStableResume must be an array");
-  expectArray(boundary.brokenPrefabBand, "multiverse market inscription numbering-stability boundary brokenPrefabBand must be an array");
-  expectArray(boundary.stableResumeEvidence, "multiverse market inscription numbering-stability boundary stableResumeEvidence must be an array");
-  expectRecord(boundary.identityBindingBoundary, "multiverse market inscription numbering-stability boundary identityBindingBoundary must be an object");
-  expectArray(boundary.identityBindingBoundary.brokenSameNumberPrefabBand, "multiverse market inscription numbering-stability boundary brokenSameNumberPrefabBand must be an array");
-  expectArray(boundary.identityBindingBoundary.playerFacingIdentityRecoveredRows, "multiverse market inscription numbering-stability boundary playerFacingIdentityRecoveredRows must be an array");
-  expectArray(boundary.identityBindingBoundary.playerFacingIdentityStillUnresolvedRows, "multiverse market inscription numbering-stability boundary playerFacingIdentityStillUnresolvedRows must be an array");
-  expectArray(boundary.identityBindingBoundary.canonicalImportSafeSubset, "multiverse market inscription numbering-stability boundary canonicalImportSafeSubset must be an array");
-  expectArray(boundary.currentBoundary, "multiverse market inscription numbering-stability boundary currentBoundary must be an array");
+  expectRecord(
+    boundary.checkedFieldStability,
+    "multiverse market inscription numbering-stability boundary checkedFieldStability must be an object"
+  );
+  expectRecord(
+    boundary.checkedFieldStability.orderedSaveFieldRun,
+    "multiverse market inscription numbering-stability boundary orderedSaveFieldRun must be an object"
+  );
+  expectRecord(
+    boundary.checkedFieldStability.serializedIdFieldRun,
+    "multiverse market inscription numbering-stability boundary serializedIdFieldRun must be an object"
+  );
+  expectRecord(
+    boundary.checkedFieldStability.buyHookRun,
+    "multiverse market inscription numbering-stability boundary buyHookRun must be an object"
+  );
+  expectRecord(
+    boundary.checkedFieldStability.prefabNumbering,
+    "multiverse market inscription numbering-stability boundary prefabNumbering must be an object"
+  );
+  expectRecord(
+    boundary.checkedFieldStability.playerFacingStringAnchors,
+    "multiverse market inscription numbering-stability boundary playerFacingStringAnchors must be an object"
+  );
+  expectArray(
+    boundary.checkedFieldStability.playerFacingStringAnchors.checkedAnchorRows,
+    "multiverse market inscription numbering-stability boundary checkedAnchorRows must be an array"
+  );
+  expectArray(
+    boundary.checkedFieldStability.playerFacingStringAnchors
+      .sameNumberPositiveRowsInsideStableResume,
+    "multiverse market inscription numbering-stability boundary sameNumberPositiveRowsInsideStableResume must be an array"
+  );
+  expectArray(
+    boundary.brokenPrefabBand,
+    "multiverse market inscription numbering-stability boundary brokenPrefabBand must be an array"
+  );
+  expectArray(
+    boundary.stableResumeEvidence,
+    "multiverse market inscription numbering-stability boundary stableResumeEvidence must be an array"
+  );
+  expectRecord(
+    boundary.identityBindingBoundary,
+    "multiverse market inscription numbering-stability boundary identityBindingBoundary must be an object"
+  );
+  expectArray(
+    boundary.identityBindingBoundary.brokenSameNumberPrefabBand,
+    "multiverse market inscription numbering-stability boundary brokenSameNumberPrefabBand must be an array"
+  );
+  expectArray(
+    boundary.identityBindingBoundary.playerFacingIdentityRecoveredRows,
+    "multiverse market inscription numbering-stability boundary playerFacingIdentityRecoveredRows must be an array"
+  );
+  expectArray(
+    boundary.identityBindingBoundary.playerFacingIdentityStillUnresolvedRows,
+    "multiverse market inscription numbering-stability boundary playerFacingIdentityStillUnresolvedRows must be an array"
+  );
+  expectArray(
+    boundary.identityBindingBoundary.canonicalImportSafeSubset,
+    "multiverse market inscription numbering-stability boundary canonicalImportSafeSubset must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market inscription numbering-stability boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-inscription-numbering-stability-boundary", "multiverse market inscription numbering-stability boundary dataset id drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-inscription-numbering-stability-boundary",
+    "multiverse market inscription numbering-stability boundary dataset id drifted"
+  );
   assert.deepEqual(
     [
       boundary.checkedFieldStability.orderedSaveFieldRun.fieldPattern,
@@ -3982,11 +11673,31 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
     [68, 69, 74, 75, 110],
     "multiverse market inscription numbering-stability boundary prefabNumbering drifted"
   );
-  assert.deepEqual(boundary.checkedFieldStability.playerFacingStringAnchors.checkedAnchorRows, [25, 46, 78, 83], "multiverse market inscription numbering-stability boundary checkedAnchorRows drifted");
-  assert.deepEqual(boundary.checkedFieldStability.playerFacingStringAnchors.sameNumberPositiveRowsInsideStableResume, [78, 83], "multiverse market inscription numbering-stability boundary sameNumberPositiveRowsInsideStableResume drifted");
-  assert.equal(boundary.checkedFieldStability.playerFacingStringAnchors.status, "sparse-direct-anchors-only", "multiverse market inscription numbering-stability boundary playerFacingStringAnchors status drifted");
   assert.deepEqual(
-    boundary.brokenPrefabBand.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.prefabName, entry.remappedSerializedId]),
+    boundary.checkedFieldStability.playerFacingStringAnchors.checkedAnchorRows,
+    [25, 46, 78, 83],
+    "multiverse market inscription numbering-stability boundary checkedAnchorRows drifted"
+  );
+  assert.deepEqual(
+    boundary.checkedFieldStability.playerFacingStringAnchors
+      .sameNumberPositiveRowsInsideStableResume,
+    [78, 83],
+    "multiverse market inscription numbering-stability boundary sameNumberPositiveRowsInsideStableResume drifted"
+  );
+  assert.equal(
+    boundary.checkedFieldStability.playerFacingStringAnchors.status,
+    "sparse-direct-anchors-only",
+    "multiverse market inscription numbering-stability boundary playerFacingStringAnchors status drifted"
+  );
+  assert.deepEqual(
+    boundary.brokenPrefabBand.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.saveField,
+      entry.serializedIdField,
+      entry.buyHook,
+      entry.prefabName,
+      entry.remappedSerializedId
+    ]),
     [
       [69, "IS69Level", "IS69ID", "BuyIS69", "ChrystosEmporiumUpgrade69-ID57", 57],
       [70, "IS70Level", "IS70ID", "BuyIS70", "ChrystosEmporiumUpgrade70-ID58", 58],
@@ -3998,32 +11709,120 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
     "multiverse market inscription numbering-stability boundary brokenPrefabBand drifted"
   );
   assert.deepEqual(
-    boundary.stableResumeEvidence.map((entry) => [entry.orderedInscriptionRow, entry.saveField, entry.serializedIdField, entry.buyHook, entry.prefabName, entry.playerFacingLabel ?? null, entry.controlStatus ?? null]),
+    boundary.stableResumeEvidence.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.saveField,
+      entry.serializedIdField,
+      entry.buyHook,
+      entry.prefabName,
+      entry.playerFacingLabel ?? null,
+      entry.controlStatus ?? null
+    ]),
     [
       [75, "IS75Level", "IS75ID", "BuyIS75", "ChrystosEmporiumUpgrade75-ID75", null, null],
-      [78, "IS78Level", "IS78ID", "BuyIS78", "ChrystosEmporiumUpgrade78-ID78", "Inscryption 78: Ouroboros Orbs", "partial-text-adjacent-control"],
-      [83, "IS83Level", "IS83ID", "BuyIS83", "ChrystosEmporiumUpgrade83-ID83", "Inscryption 83: Fast-Loop ML", "partial-text-adjacent-control"],
+      [
+        78,
+        "IS78Level",
+        "IS78ID",
+        "BuyIS78",
+        "ChrystosEmporiumUpgrade78-ID78",
+        "Inscryption 78: Ouroboros Orbs",
+        "partial-text-adjacent-control"
+      ],
+      [
+        83,
+        "IS83Level",
+        "IS83ID",
+        "BuyIS83",
+        "ChrystosEmporiumUpgrade83-ID83",
+        "Inscryption 83: Fast-Loop ML",
+        "partial-text-adjacent-control"
+      ],
       [110, "IS110Level", "IS110ID", "BuyIS110", "ChrystosEmporiumUpgrade110-ID110", null, null]
     ],
     "multiverse market inscription numbering-stability boundary stableResumeEvidence drifted"
   );
-  assert.equal(boundary.identityBindingBoundary.earliestBrokenSameNumberPrefabRow, 69, "multiverse market inscription numbering-stability boundary earliestBrokenSameNumberPrefabRow drifted");
-  assert.deepEqual(boundary.identityBindingBoundary.brokenSameNumberPrefabBand, [69, 74], "multiverse market inscription numbering-stability boundary brokenSameNumberPrefabBand drifted");
-  assert.equal(boundary.identityBindingBoundary.sameNumberPrefabResumesAtRow, 75, "multiverse market inscription numbering-stability boundary sameNumberPrefabResumesAtRow drifted");
-  assert.equal(boundary.identityBindingBoundary.sameNumberPrefabStableThroughRow, 110, "multiverse market inscription numbering-stability boundary sameNumberPrefabStableThroughRow drifted");
-  assert.deepEqual(boundary.identityBindingBoundary.playerFacingIdentityRecoveredRows, [], "multiverse market inscription numbering-stability boundary playerFacingIdentityRecoveredRows drifted");
-  assert.deepEqual(boundary.identityBindingBoundary.partialTextAdjacentControlRows, [78, 83], "multiverse market inscription numbering-stability boundary partialTextAdjacentControlRows drifted");
-  assert.equal(boundary.identityBindingBoundary.helpsUnresolvedRows7174, false, "multiverse market inscription numbering-stability boundary helpsUnresolvedRows7174 must remain false");
-  assert.deepEqual(boundary.identityBindingBoundary.canonicalImportSafeSubset, [], "multiverse market inscription numbering-stability boundary canonicalImportSafeSubset must remain empty");
+  assert.equal(
+    boundary.identityBindingBoundary.earliestBrokenSameNumberPrefabRow,
+    69,
+    "multiverse market inscription numbering-stability boundary earliestBrokenSameNumberPrefabRow drifted"
+  );
+  assert.deepEqual(
+    boundary.identityBindingBoundary.brokenSameNumberPrefabBand,
+    [69, 74],
+    "multiverse market inscription numbering-stability boundary brokenSameNumberPrefabBand drifted"
+  );
+  assert.equal(
+    boundary.identityBindingBoundary.sameNumberPrefabResumesAtRow,
+    75,
+    "multiverse market inscription numbering-stability boundary sameNumberPrefabResumesAtRow drifted"
+  );
+  assert.equal(
+    boundary.identityBindingBoundary.sameNumberPrefabStableThroughRow,
+    110,
+    "multiverse market inscription numbering-stability boundary sameNumberPrefabStableThroughRow drifted"
+  );
+  assert.deepEqual(
+    boundary.identityBindingBoundary.playerFacingIdentityRecoveredRows,
+    [],
+    "multiverse market inscription numbering-stability boundary playerFacingIdentityRecoveredRows drifted"
+  );
+  assert.deepEqual(
+    boundary.identityBindingBoundary.partialTextAdjacentControlRows,
+    [78, 83],
+    "multiverse market inscription numbering-stability boundary partialTextAdjacentControlRows drifted"
+  );
+  assert.equal(
+    boundary.identityBindingBoundary.helpsUnresolvedRows7174,
+    false,
+    "multiverse market inscription numbering-stability boundary helpsUnresolvedRows7174 must remain false"
+  );
+  assert.deepEqual(
+    boundary.identityBindingBoundary.canonicalImportSafeSubset,
+    [],
+    "multiverse market inscription numbering-stability boundary canonicalImportSafeSubset must remain empty"
+  );
 
-  assert.match(stateDoc, /## Checked wider inscription numbering-stability boundary/, "multiverse market state verification doc must expose the wider numbering-stability boundary section");
-  assert.match(stateDoc, /same-number prefab numbering is stable through row `68`/i, "multiverse market state verification doc must preserve the stable-through-68 conclusion");
-  assert.match(stateDoc, /same-number prefab numbering is broken from rows `69-74`/i, "multiverse market state verification doc must preserve the broken 69-74 conclusion");
-  assert.match(stateDoc, /same-number prefab numbering resumes at row `75` and stays direct through row `110`/i, "multiverse market state verification doc must preserve the resumed 75-110 conclusion");
-  assert.match(verificationDoc, /## Wider checked inscription numbering-stability boundary/, "multiverse market verification doc must expose the wider numbering-stability boundary section");
-  assert.match(verificationDoc, /ChrystosEmporiumUpgrade69-ID57/, "multiverse market verification doc must preserve the earliest broken prefab row");
-  assert.match(verificationDoc, /ChrystosEmporiumUpgrade110-ID110/, "multiverse market verification doc must preserve the far-end stable resume evidence");
-  assert.match(verificationDoc, /this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally/i, "multiverse market verification doc must preserve the widened numbering boundary conclusion");
+  assert.match(
+    stateDoc,
+    /## Checked wider inscription numbering-stability boundary/,
+    "multiverse market state verification doc must expose the wider numbering-stability boundary section"
+  );
+  assert.match(
+    stateDoc,
+    /same-number prefab numbering is stable through row `68`/i,
+    "multiverse market state verification doc must preserve the stable-through-68 conclusion"
+  );
+  assert.match(
+    stateDoc,
+    /same-number prefab numbering is broken from rows `69-74`/i,
+    "multiverse market state verification doc must preserve the broken 69-74 conclusion"
+  );
+  assert.match(
+    stateDoc,
+    /same-number prefab numbering resumes at row `75` and stays direct through row `110`/i,
+    "multiverse market state verification doc must preserve the resumed 75-110 conclusion"
+  );
+  assert.match(
+    verificationDoc,
+    /## Wider checked inscription numbering-stability boundary/,
+    "multiverse market verification doc must expose the wider numbering-stability boundary section"
+  );
+  assert.match(
+    verificationDoc,
+    /ChrystosEmporiumUpgrade69-ID57/,
+    "multiverse market verification doc must preserve the earliest broken prefab row"
+  );
+  assert.match(
+    verificationDoc,
+    /ChrystosEmporiumUpgrade110-ID110/,
+    "multiverse market verification doc must preserve the far-end stable resume evidence"
+  );
+  assert.match(
+    verificationDoc,
+    /this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally/i,
+    "multiverse market verification doc must preserve the widened numbering boundary conclusion"
+  );
 
   return {
     id: "multiverse-market-inscription-numbering-stability-boundary",
@@ -4037,10 +11836,24 @@ function validateMultiverseMarketInscriptionNumberingStabilityBoundary(boundary,
   };
 }
 
-function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verificationDoc, provenanceDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market 69-74 anomaly provenance generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market 69-74 anomaly provenance dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market 69-74 anomaly provenance sources must be an object");
+function validateMultiverseMarket6974AnomalyProvenance(
+  boundary,
+  stateDoc,
+  verificationDoc,
+  provenanceDoc
+) {
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market 69-74 anomaly provenance generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market 69-74 anomaly provenance dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market 69-74 anomaly provenance sources must be an object"
+  );
   [
     "rawAppSideAsset",
     "rawUnityProbeReport",
@@ -4053,29 +11866,79 @@ function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verif
     "liveUiScreenshotEvidence",
     "stateVerificationDoc"
   ].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market 69-74 anomaly provenance sources.${field} must be present`);
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market 69-74 anomaly provenance sources.${field} must be present`
+    );
   });
-  expectRecord(boundary.settledAnomaly, "multiverse market 69-74 anomaly provenance settledAnomaly must be an object");
-  expectArray(boundary.settledAnomaly.sameNumberAlignmentLayers, "multiverse market 69-74 anomaly provenance sameNumberAlignmentLayers must be an array");
-  expectArray(boundary.settledAnomaly.brokenPrefabBandRows, "multiverse market 69-74 anomaly provenance brokenPrefabBandRows must be an array");
-  expectArray(boundary.settledAnomaly.prefabRemapPairs, "multiverse market 69-74 anomaly provenance prefabRemapPairs must be an array");
-  expectArray(boundary.settledAnomaly.playerFacingIdentityRecoveredRowsInBand, "multiverse market 69-74 anomaly provenance playerFacingIdentityRecoveredRowsInBand must be an array");
-  expectArray(boundary.pipelineStages, "multiverse market 69-74 anomaly provenance pipelineStages must be an array");
-  expectRecord(boundary.provenanceConclusion, "multiverse market 69-74 anomaly provenance provenanceConclusion must be an object");
-  expectRecord(boundary.standardizationDecision, "multiverse market 69-74 anomaly provenance standardizationDecision must be an object");
-  expectArray(boundary.currentBoundary, "multiverse market 69-74 anomaly provenance currentBoundary must be an array");
+  expectRecord(
+    boundary.settledAnomaly,
+    "multiverse market 69-74 anomaly provenance settledAnomaly must be an object"
+  );
+  expectArray(
+    boundary.settledAnomaly.sameNumberAlignmentLayers,
+    "multiverse market 69-74 anomaly provenance sameNumberAlignmentLayers must be an array"
+  );
+  expectArray(
+    boundary.settledAnomaly.brokenPrefabBandRows,
+    "multiverse market 69-74 anomaly provenance brokenPrefabBandRows must be an array"
+  );
+  expectArray(
+    boundary.settledAnomaly.prefabRemapPairs,
+    "multiverse market 69-74 anomaly provenance prefabRemapPairs must be an array"
+  );
+  expectArray(
+    boundary.settledAnomaly.playerFacingIdentityRecoveredRowsInBand,
+    "multiverse market 69-74 anomaly provenance playerFacingIdentityRecoveredRowsInBand must be an array"
+  );
+  expectArray(
+    boundary.pipelineStages,
+    "multiverse market 69-74 anomaly provenance pipelineStages must be an array"
+  );
+  expectRecord(
+    boundary.provenanceConclusion,
+    "multiverse market 69-74 anomaly provenance provenanceConclusion must be an object"
+  );
+  expectRecord(
+    boundary.standardizationDecision,
+    "multiverse market 69-74 anomaly provenance standardizationDecision must be an object"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market 69-74 anomaly provenance currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-69-74-anomaly-provenance", "multiverse market 69-74 anomaly provenance dataset id drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-69-74-anomaly-provenance",
+    "multiverse market 69-74 anomaly provenance dataset id drifted"
+  );
   assert.deepEqual(
     boundary.settledAnomaly.sameNumberAlignmentLayers,
     ["IS69Level through IS74Level", "IS69ID through IS74ID", "BuyIS69 through BuyIS74"],
     "multiverse market 69-74 anomaly provenance sameNumberAlignmentLayers drifted"
   );
-  assert.deepEqual(boundary.settledAnomaly.brokenPrefabBandRows, [69, 70, 71, 72, 73, 74], "multiverse market 69-74 anomaly provenance brokenPrefabBandRows drifted");
-  assert.deepEqual(boundary.settledAnomaly.prefabRemapPairs, ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"], "multiverse market 69-74 anomaly provenance prefabRemapPairs drifted");
-  assert.deepEqual(boundary.settledAnomaly.playerFacingIdentityRecoveredRowsInBand, [69, 70, 71, 72, 73, 74], "multiverse market 69-74 anomaly provenance playerFacingIdentityRecoveredRowsInBand drifted");
   assert.deepEqual(
-    boundary.pipelineStages.map((stage) => [stage.stageId, stage.classification, stage.anomalyPresent]),
+    boundary.settledAnomaly.brokenPrefabBandRows,
+    [69, 70, 71, 72, 73, 74],
+    "multiverse market 69-74 anomaly provenance brokenPrefabBandRows drifted"
+  );
+  assert.deepEqual(
+    boundary.settledAnomaly.prefabRemapPairs,
+    ["69->57", "70->58", "71->59", "72->60", "73->61", "74->62"],
+    "multiverse market 69-74 anomaly provenance prefabRemapPairs drifted"
+  );
+  assert.deepEqual(
+    boundary.settledAnomaly.playerFacingIdentityRecoveredRowsInBand,
+    [69, 70, 71, 72, 73, 74],
+    "multiverse market 69-74 anomaly provenance playerFacingIdentityRecoveredRowsInBand drifted"
+  );
+  assert.deepEqual(
+    boundary.pipelineStages.map((stage) => [
+      stage.stageId,
+      stage.classification,
+      stage.anomalyPresent
+    ]),
     [
       ["raw-app-side-asset", "raw-app-side", true],
       ["raw-app-side-probe-reports", "raw-app-side", true],
@@ -4083,23 +11946,87 @@ function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verif
     ],
     "multiverse market 69-74 anomaly provenance pipelineStages drifted"
   );
-  assert.equal(boundary.provenanceConclusion.earliestCheckedAppearanceStage, "raw-app-side-asset", "multiverse market 69-74 anomaly provenance earliestCheckedAppearanceStage drifted");
-  assert.equal(boundary.provenanceConclusion.anomalyOwner, "app-side-inherited", "multiverse market 69-74 anomaly provenance anomalyOwner drifted");
-  assert.equal(boundary.provenanceConclusion.repoLocalIntroductionDetected, false, "multiverse market 69-74 anomaly provenance repoLocalIntroductionDetected must remain false");
-  assert.equal(boundary.provenanceConclusion.firstRepoLocalTransformationThatIntroducesAnomaly, null, "multiverse market 69-74 anomaly provenance firstRepoLocalTransformationThatIntroducesAnomaly must remain null");
-  assert.equal(boundary.standardizationDecision.standardizationAllowed, false, "multiverse market 69-74 anomaly provenance standardizationAllowed must remain false");
-  assert.equal(boundary.standardizationDecision.standardizationApplied, false, "multiverse market 69-74 anomaly provenance standardizationApplied must remain false");
-  assert.match(boundary.standardizationDecision.boundary, /Preserve the anomaly/i, "multiverse market 69-74 anomaly provenance boundary text drifted");
-  assert.match(boundary.standardizationDecision.reason, /already present in preserved app-side asset and probe evidence/i, "multiverse market 69-74 anomaly provenance reason drifted");
+  assert.equal(
+    boundary.provenanceConclusion.earliestCheckedAppearanceStage,
+    "raw-app-side-asset",
+    "multiverse market 69-74 anomaly provenance earliestCheckedAppearanceStage drifted"
+  );
+  assert.equal(
+    boundary.provenanceConclusion.anomalyOwner,
+    "app-side-inherited",
+    "multiverse market 69-74 anomaly provenance anomalyOwner drifted"
+  );
+  assert.equal(
+    boundary.provenanceConclusion.repoLocalIntroductionDetected,
+    false,
+    "multiverse market 69-74 anomaly provenance repoLocalIntroductionDetected must remain false"
+  );
+  assert.equal(
+    boundary.provenanceConclusion.firstRepoLocalTransformationThatIntroducesAnomaly,
+    null,
+    "multiverse market 69-74 anomaly provenance firstRepoLocalTransformationThatIntroducesAnomaly must remain null"
+  );
+  assert.equal(
+    boundary.standardizationDecision.standardizationAllowed,
+    false,
+    "multiverse market 69-74 anomaly provenance standardizationAllowed must remain false"
+  );
+  assert.equal(
+    boundary.standardizationDecision.standardizationApplied,
+    false,
+    "multiverse market 69-74 anomaly provenance standardizationApplied must remain false"
+  );
+  assert.match(
+    boundary.standardizationDecision.boundary,
+    /Preserve the anomaly/i,
+    "multiverse market 69-74 anomaly provenance boundary text drifted"
+  );
+  assert.match(
+    boundary.standardizationDecision.reason,
+    /already present in preserved app-side asset and probe evidence/i,
+    "multiverse market 69-74 anomaly provenance reason drifted"
+  );
 
-  assert.match(stateDoc, /## Checked `69-74` anomaly provenance boundary/, "multiverse market state verification doc must expose the anomaly provenance section");
-  assert.match(stateDoc, /app-side inherited rather than repo-local/i, "multiverse market state verification doc must preserve the app-side inherited conclusion");
-  assert.match(stateDoc, /live UI evidence now grounds rows `69-74` as player-facing rows `69-74`/i, "multiverse market state verification doc must preserve the separate live UI identity conclusion");
-  assert.match(verificationDoc, /## Checked 69-74 anomaly provenance boundary/, "multiverse market verification doc must expose the anomaly provenance section");
-  assert.match(verificationDoc, /earliest checked appearance of the `69-74` anomaly is raw app-side evidence/i, "multiverse market verification doc must preserve the raw-source earliest appearance conclusion");
-  assert.match(verificationDoc, /live UI evidence now grounds player-facing rows `69-74` directly/i, "multiverse market verification doc must preserve the live UI identity conclusion");
-  assert.match(provenanceDoc, /earliest checked appearance is raw app-side evidence/i, "multiverse market anomaly provenance doc must preserve the earliest checked appearance conclusion");
-  assert.match(provenanceDoc, /No dataset standardization is applied in this lane\./, "multiverse market anomaly provenance doc must preserve the no-standardization conclusion");
+  assert.match(
+    stateDoc,
+    /## Checked `69-74` anomaly provenance boundary/,
+    "multiverse market state verification doc must expose the anomaly provenance section"
+  );
+  assert.match(
+    stateDoc,
+    /app-side inherited rather than repo-local/i,
+    "multiverse market state verification doc must preserve the app-side inherited conclusion"
+  );
+  assert.match(
+    stateDoc,
+    /live UI evidence now grounds rows `69-74` as player-facing rows `69-74`/i,
+    "multiverse market state verification doc must preserve the separate live UI identity conclusion"
+  );
+  assert.match(
+    verificationDoc,
+    /## Checked 69-74 anomaly provenance boundary/,
+    "multiverse market verification doc must expose the anomaly provenance section"
+  );
+  assert.match(
+    verificationDoc,
+    /earliest checked appearance of the `69-74` anomaly is raw app-side evidence/i,
+    "multiverse market verification doc must preserve the raw-source earliest appearance conclusion"
+  );
+  assert.match(
+    verificationDoc,
+    /live UI evidence now grounds player-facing rows `69-74` directly/i,
+    "multiverse market verification doc must preserve the live UI identity conclusion"
+  );
+  assert.match(
+    provenanceDoc,
+    /earliest checked appearance is raw app-side evidence/i,
+    "multiverse market anomaly provenance doc must preserve the earliest checked appearance conclusion"
+  );
+  assert.match(
+    provenanceDoc,
+    /No dataset standardization is applied in this lane\./,
+    "multiverse market anomaly provenance doc must preserve the no-standardization conclusion"
+  );
 
   return {
     id: "multiverse-market-69-74-anomaly-provenance",
@@ -4113,10 +12040,24 @@ function validateMultiverseMarket6974AnomalyProvenance(boundary, stateDoc, verif
   };
 }
 
-function validateMultiverseMarketShellRowPredictionBoundary(boundary, stateDoc, verificationDoc, boundaryDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market shell-row prediction boundary generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market shell-row prediction boundary dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market shell-row prediction boundary sources must be an object");
+function validateMultiverseMarketShellRowPredictionBoundary(
+  boundary,
+  stateDoc,
+  verificationDoc,
+  boundaryDoc
+) {
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market shell-row prediction boundary generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market shell-row prediction boundary dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market shell-row prediction boundary sources must be an object"
+  );
   [
     "marketMemberBoundary",
     "saveDataImportBoundary",
@@ -4130,16 +12071,40 @@ function validateMultiverseMarketShellRowPredictionBoundary(boundary, stateDoc, 
     "liveUiScreenshotEvidence",
     "verificationDoc"
   ].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market shell-row prediction boundary sources.${field} must be present`);
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market shell-row prediction boundary sources.${field} must be present`
+    );
   });
-  expectArray(boundary.testedRows, "multiverse market shell-row prediction boundary testedRows must be an array");
-  expectRecord(boundary.layerPredictionAssessment, "multiverse market shell-row prediction boundary layerPredictionAssessment must be an object");
-  expectRecord(boundary.actualStructureConclusion, "multiverse market shell-row prediction boundary actualStructureConclusion must be an object");
-  expectArray(boundary.currentBoundary, "multiverse market shell-row prediction boundary currentBoundary must be an array");
+  expectArray(
+    boundary.testedRows,
+    "multiverse market shell-row prediction boundary testedRows must be an array"
+  );
+  expectRecord(
+    boundary.layerPredictionAssessment,
+    "multiverse market shell-row prediction boundary layerPredictionAssessment must be an object"
+  );
+  expectRecord(
+    boundary.actualStructureConclusion,
+    "multiverse market shell-row prediction boundary actualStructureConclusion must be an object"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market shell-row prediction boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-shell-row-prediction-boundary", "multiverse market shell-row prediction boundary dataset id drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-shell-row-prediction-boundary",
+    "multiverse market shell-row prediction boundary dataset id drifted"
+  );
   assert.deepEqual(
-    boundary.testedRows.map((entry) => [entry.orderedInscriptionRow, entry.saveDataOwnerChain.saveField, entry.saveDataOwnerChain.serializedIdField, entry.saveDataOwnerChain.buyHook]),
+    boundary.testedRows.map((entry) => [
+      entry.orderedInscriptionRow,
+      entry.saveDataOwnerChain.saveField,
+      entry.saveDataOwnerChain.serializedIdField,
+      entry.saveDataOwnerChain.buyHook
+    ]),
     [
       [69, "IS69Level", "IS69ID", "BuyIS69"],
       [70, "IS70Level", "IS70ID", "BuyIS70"],
@@ -4152,7 +12117,13 @@ function validateMultiverseMarketShellRowPredictionBoundary(boundary, stateDoc, 
     "multiverse market shell-row prediction boundary tested row carrier chain drifted"
   );
   assert.deepEqual(
-    boundary.testedRows.slice(0, 6).map((entry) => [entry.orderedInscriptionRow, entry.rowPayloadChain.recordInscriptionId, entry.rowPayloadChain.bonusValue]),
+    boundary.testedRows
+      .slice(0, 6)
+      .map((entry) => [
+        entry.orderedInscriptionRow,
+        entry.rowPayloadChain.recordInscriptionId,
+        entry.rowPayloadChain.bonusValue
+      ]),
     [
       [69, 69, 5000000136282112.0],
       [70, 70, 10000000000.0],
@@ -4163,17 +12134,53 @@ function validateMultiverseMarketShellRowPredictionBoundary(boundary, stateDoc, 
     ],
     "multiverse market shell-row prediction boundary row payload values drifted"
   );
-  assert.equal(boundary.testedRows[6].shellMetadata.prefabName, "ChrystosEmporiumUpgrade78-ID78", "multiverse market shell-row prediction boundary control row prefab drifted");
-  assert.match(boundary.layerPredictionAssessment.prefabShellLayer.predictsDisplayedRowNumber[0].why, /remapped ids 57-62/i, "multiverse market shell-row prediction boundary prefab divergence reasoning drifted");
-  assert.match(boundary.layerPredictionAssessment.rowPayloadLayer.predictsBonusMagnitude[0].why, /5qa[\s\S]*10b[\s\S]*0\.02[\s\S]*0\.06[\s\S]*10[\s\S]*40/i, "multiverse market shell-row prediction boundary row payload magnitude reasoning drifted");
-  assert.deepEqual(boundary.actualStructureConclusion.canonicalImportSafeSubset, [], "multiverse market shell-row prediction boundary canonicalImportSafeSubset must remain empty");
-  assert.equal(boundary.actualStructureConclusion.compatibilityOnlyImportPath, "compatibility.unmappedSystemState.multiverseMarket", "multiverse market shell-row prediction boundary compatibility path drifted");
+  assert.equal(
+    boundary.testedRows[6].shellMetadata.prefabName,
+    "ChrystosEmporiumUpgrade78-ID78",
+    "multiverse market shell-row prediction boundary control row prefab drifted"
+  );
+  assert.match(
+    boundary.layerPredictionAssessment.prefabShellLayer.predictsDisplayedRowNumber[0].why,
+    /remapped ids 57-62/i,
+    "multiverse market shell-row prediction boundary prefab divergence reasoning drifted"
+  );
+  assert.match(
+    boundary.layerPredictionAssessment.rowPayloadLayer.predictsBonusMagnitude[0].why,
+    /5qa[\s\S]*10b[\s\S]*0\.02[\s\S]*0\.06[\s\S]*10[\s\S]*40/i,
+    "multiverse market shell-row prediction boundary row payload magnitude reasoning drifted"
+  );
+  assert.deepEqual(
+    boundary.actualStructureConclusion.canonicalImportSafeSubset,
+    [],
+    "multiverse market shell-row prediction boundary canonicalImportSafeSubset must remain empty"
+  );
+  assert.equal(
+    boundary.actualStructureConclusion.compatibilityOnlyImportPath,
+    "compatibility.unmappedSystemState.multiverseMarket",
+    "multiverse market shell-row prediction boundary compatibility path drifted"
+  );
 
   const combinedDocs = [stateDoc, verificationDoc, boundaryDoc].join("\n");
-  assert.match(stateDoc, /## Checked shell-to-SaveData row-prediction boundary/, "multiverse market state verification doc must expose the shell-to-SaveData boundary section");
-  assert.match(verificationDoc, /## Shell-to-SaveData row-prediction boundary/, "multiverse market verification doc must expose the shell-to-SaveData boundary section");
-  assert.match(boundaryDoc, /displayed row number follows the ordered same-number `SaveData` and row-carrier chain, not the prefab shell suffix/i, "multiverse market shell-row prediction boundary doc must preserve the ordered chain conclusion");
-  assert.match(combinedDocs, /the `57-62` relation is (only )?shell-local anomaly metadata/i, "multiverse market shell-row prediction boundary docs must preserve the shell-local metadata conclusion");
+  assert.match(
+    stateDoc,
+    /## Checked shell-to-SaveData row-prediction boundary/,
+    "multiverse market state verification doc must expose the shell-to-SaveData boundary section"
+  );
+  assert.match(
+    verificationDoc,
+    /## Shell-to-SaveData row-prediction boundary/,
+    "multiverse market verification doc must expose the shell-to-SaveData boundary section"
+  );
+  assert.match(
+    boundaryDoc,
+    /displayed row number follows the ordered same-number `SaveData` and row-carrier chain, not the prefab shell suffix/i,
+    "multiverse market shell-row prediction boundary doc must preserve the ordered chain conclusion"
+  );
+  assert.match(
+    combinedDocs,
+    /the `57-62` relation is (only )?shell-local anomaly metadata/i,
+    "multiverse market shell-row prediction boundary docs must preserve the shell-local metadata conclusion"
+  );
 
   return {
     id: "multiverse-market-shell-row-prediction-boundary",
@@ -4187,29 +12194,105 @@ function validateMultiverseMarketShellRowPredictionBoundary(boundary, stateDoc, 
   };
 }
 
-function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, verificationDoc, boundaryDoc) {
-  expectNonEmptyString(boundary.generatedAt, "multiverse market text-provenance path boundary generatedAt must be present");
-  expectNonEmptyString(boundary.dataset, "multiverse market text-provenance path boundary dataset id must be present");
-  expectRecord(boundary.sources, "multiverse market text-provenance path boundary sources must be an object");
-  ["shellRowPredictionBoundary", "nearbyIdentityBindingPattern", "rowTextCoverage", "metadataNeighborhood", "uabeaProbeReport", "unityProbeReport", "assignmentSiteProbe", "runtimeSurfaceProbe", "runtimeCodeProbe", "tmpRowTextProbe", "stateVerificationDoc", "verificationDoc"].forEach((field) => {
-    expectNonEmptyString(boundary.sources[field], `multiverse market text-provenance path boundary sources.${field} must be present`);
+function validateMultiverseMarketTextProvenancePathBoundary(
+  boundary,
+  stateDoc,
+  verificationDoc,
+  boundaryDoc
+) {
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "multiverse market text-provenance path boundary generatedAt must be present"
+  );
+  expectNonEmptyString(
+    boundary.dataset,
+    "multiverse market text-provenance path boundary dataset id must be present"
+  );
+  expectRecord(
+    boundary.sources,
+    "multiverse market text-provenance path boundary sources must be an object"
+  );
+  [
+    "shellRowPredictionBoundary",
+    "nearbyIdentityBindingPattern",
+    "rowTextCoverage",
+    "metadataNeighborhood",
+    "uabeaProbeReport",
+    "unityProbeReport",
+    "assignmentSiteProbe",
+    "runtimeSurfaceProbe",
+    "runtimeCodeProbe",
+    "tmpRowTextProbe",
+    "stateVerificationDoc",
+    "verificationDoc"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market text-provenance path boundary sources.${field} must be present`
+    );
   });
-  expectRecord(boundary.controlRowTextPath, "multiverse market text-provenance path boundary controlRowTextPath must be an object");
-  expectRecord(boundary.controlRowTextPath.saveDataOwnerChain, "multiverse market text-provenance path boundary controlRowTextPath.saveDataOwnerChain must be an object");
-  expectRecord(boundary.controlRowTextPath.textHandlerShell, "multiverse market text-provenance path boundary controlRowTextPath.textHandlerShell must be an object");
-  expectRecord(boundary.controlRowTextPath.textBearingSource, "multiverse market text-provenance path boundary controlRowTextPath.textBearingSource must be an object");
-  expectArray(boundary.controlRowTextPath.evidence, "multiverse market text-provenance path boundary controlRowTextPath.evidence must be an array");
-  expectRecord(boundary.scalingCheck, "multiverse market text-provenance path boundary scalingCheck must be an object");
-  expectArray(boundary.scalingCheck.broadHandlerFamilyRecovered, "multiverse market text-provenance path boundary scalingCheck.broadHandlerFamilyRecovered must be an array");
-  expectArray(boundary.scalingCheck.playerFacingStringAnchorsRecovered, "multiverse market text-provenance path boundary scalingCheck.playerFacingStringAnchorsRecovered must be an array");
-  expectArray(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, "multiverse market text-provenance path boundary scalingCheck.missingInsideTheCheckedEmporiumBand must be an array");
-  expectArray(boundary.scalingCheck.whyNot, "multiverse market text-provenance path boundary scalingCheck.whyNot must be an array");
-  expectRecord(boundary.lastMissingBindingLayer, "multiverse market text-provenance path boundary lastMissingBindingLayer must be an object");
-  expectArray(boundary.lastMissingBindingLayer.currentlyRecoveredInputs, "multiverse market text-provenance path boundary lastMissingBindingLayer.currentlyRecoveredInputs must be an array");
-  expectArray(boundary.lastMissingBindingLayer.notYetRecovered, "multiverse market text-provenance path boundary lastMissingBindingLayer.notYetRecovered must be an array");
-  expectArray(boundary.currentBoundary, "multiverse market text-provenance path boundary currentBoundary must be an array");
+  expectRecord(
+    boundary.controlRowTextPath,
+    "multiverse market text-provenance path boundary controlRowTextPath must be an object"
+  );
+  expectRecord(
+    boundary.controlRowTextPath.saveDataOwnerChain,
+    "multiverse market text-provenance path boundary controlRowTextPath.saveDataOwnerChain must be an object"
+  );
+  expectRecord(
+    boundary.controlRowTextPath.textHandlerShell,
+    "multiverse market text-provenance path boundary controlRowTextPath.textHandlerShell must be an object"
+  );
+  expectRecord(
+    boundary.controlRowTextPath.textBearingSource,
+    "multiverse market text-provenance path boundary controlRowTextPath.textBearingSource must be an object"
+  );
+  expectArray(
+    boundary.controlRowTextPath.evidence,
+    "multiverse market text-provenance path boundary controlRowTextPath.evidence must be an array"
+  );
+  expectRecord(
+    boundary.scalingCheck,
+    "multiverse market text-provenance path boundary scalingCheck must be an object"
+  );
+  expectArray(
+    boundary.scalingCheck.broadHandlerFamilyRecovered,
+    "multiverse market text-provenance path boundary scalingCheck.broadHandlerFamilyRecovered must be an array"
+  );
+  expectArray(
+    boundary.scalingCheck.playerFacingStringAnchorsRecovered,
+    "multiverse market text-provenance path boundary scalingCheck.playerFacingStringAnchorsRecovered must be an array"
+  );
+  expectArray(
+    boundary.scalingCheck.missingInsideTheCheckedEmporiumBand,
+    "multiverse market text-provenance path boundary scalingCheck.missingInsideTheCheckedEmporiumBand must be an array"
+  );
+  expectArray(
+    boundary.scalingCheck.whyNot,
+    "multiverse market text-provenance path boundary scalingCheck.whyNot must be an array"
+  );
+  expectRecord(
+    boundary.lastMissingBindingLayer,
+    "multiverse market text-provenance path boundary lastMissingBindingLayer must be an object"
+  );
+  expectArray(
+    boundary.lastMissingBindingLayer.currentlyRecoveredInputs,
+    "multiverse market text-provenance path boundary lastMissingBindingLayer.currentlyRecoveredInputs must be an array"
+  );
+  expectArray(
+    boundary.lastMissingBindingLayer.notYetRecovered,
+    "multiverse market text-provenance path boundary lastMissingBindingLayer.notYetRecovered must be an array"
+  );
+  expectArray(
+    boundary.currentBoundary,
+    "multiverse market text-provenance path boundary currentBoundary must be an array"
+  );
 
-  assert.equal(boundary.dataset, "multiverse-market-text-provenance-path-boundary", "multiverse market text-provenance path boundary dataset id drifted");
+  assert.equal(
+    boundary.dataset,
+    "multiverse-market-text-provenance-path-boundary",
+    "multiverse market text-provenance path boundary dataset id drifted"
+  );
   assert.deepEqual(
     [
       boundary.controlRowTextPath.orderedInscriptionRow,
@@ -4230,34 +12313,97 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
     ["THMarkets", "TextHandlerMarkets", "SetAllChrystosEmporiumTexts"],
     "multiverse market text-provenance path boundary text handler shell drifted"
   );
-  assert.equal(boundary.controlRowTextPath.textBearingSource.playerFacingLabel, "Inscryption 78: Ouroboros Orbs", "multiverse market text-provenance path boundary control row label drifted");
-  assert.equal(boundary.controlRowTextPath.textBearingSource.status, "not-a-completed-live-effect-text-binding", "multiverse market text-provenance path boundary control row status drifted");
+  assert.equal(
+    boundary.controlRowTextPath.textBearingSource.playerFacingLabel,
+    "Inscryption 78: Ouroboros Orbs",
+    "multiverse market text-provenance path boundary control row label drifted"
+  );
+  assert.equal(
+    boundary.controlRowTextPath.textBearingSource.status,
+    "not-a-completed-live-effect-text-binding",
+    "multiverse market text-provenance path boundary control row status drifted"
+  );
   assert.deepEqual(
     boundary.controlRowTextPath.rowLocalAssetBinding.row78SlotObjects,
-    ["CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox"],
+    [
+      "CurrentBonusText",
+      "BonusDescriptionText",
+      "PerLevelBonusText",
+      "DescriptionText",
+      "IDText",
+      "IconBox"
+    ],
     "multiverse market text-provenance path boundary row78SlotObjects drifted"
   );
   assert.deepEqual(
     boundary.controlRowTextPath.rowLocalAssetBinding.recoveredComponentTypes,
-    ["UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow"],
+    [
+      "UnityEngine.UI.Text",
+      "UnityEngine.UI.Image",
+      "UnityEngine.UI.Outline",
+      "UnityEngine.UI.Shadow"
+    ],
     "multiverse market text-provenance path boundary recoveredComponentTypes drifted"
   );
-  assert.equal(boundary.controlRowTextPath.assignmentSiteRecovery.candidateProducerSerializedHits, 0, "multiverse market text-provenance path boundary candidateProducerSerializedHits must stay zero");
-  assert.equal(boundary.controlRowTextPath.assignmentSiteRecovery.externalSerializedProducerHits, 0, "multiverse market text-provenance path boundary externalSerializedProducerHits must stay zero");
-  assert.equal(boundary.controlRowTextPath.assignmentSiteRecovery.runtimeOnlyInference, true, "multiverse market text-provenance path boundary runtimeOnlyInference must stay true");
-  assert.equal(boundary.controlRowTextPath.liveOutputCheck.displayedEffectText, "OUROBOROS POINTS GAINED", "multiverse market text-provenance path boundary row 78 liveOutputCheck drifted");
+  assert.equal(
+    boundary.controlRowTextPath.assignmentSiteRecovery.candidateProducerSerializedHits,
+    0,
+    "multiverse market text-provenance path boundary candidateProducerSerializedHits must stay zero"
+  );
+  assert.equal(
+    boundary.controlRowTextPath.assignmentSiteRecovery.externalSerializedProducerHits,
+    0,
+    "multiverse market text-provenance path boundary externalSerializedProducerHits must stay zero"
+  );
+  assert.equal(
+    boundary.controlRowTextPath.assignmentSiteRecovery.runtimeOnlyInference,
+    true,
+    "multiverse market text-provenance path boundary runtimeOnlyInference must stay true"
+  );
+  assert.equal(
+    boundary.controlRowTextPath.liveOutputCheck.displayedEffectText,
+    "OUROBOROS POINTS GAINED",
+    "multiverse market text-provenance path boundary row 78 liveOutputCheck drifted"
+  );
   assert.deepEqual(
     boundary.scalingCheck.broadHandlerFamilyRecovered,
-    ["SetAllBaseBonusTexts", "SetIS1BaseBonusText", "SetIS25BaseBonusText", "SetIS50BaseBonusText", "SetIS68BaseBonusText", "SetIS69BaseBonusText"],
+    [
+      "SetAllBaseBonusTexts",
+      "SetIS1BaseBonusText",
+      "SetIS25BaseBonusText",
+      "SetIS50BaseBonusText",
+      "SetIS68BaseBonusText",
+      "SetIS69BaseBonusText"
+    ],
     "multiverse market text-provenance path boundary broad handler family drifted"
   );
   assert.deepEqual(
     boundary.scalingCheck.playerFacingStringAnchorsRecovered,
-    ["Inscryption 25: Idle Ship Speed", "Inscryption 46: Increase Basic Power", "Inscryption 78: Ouroboros Orbs", "Inscryption 83: Fast-Loop ML"],
+    [
+      "Inscryption 25: Idle Ship Speed",
+      "Inscryption 46: Increase Basic Power",
+      "Inscryption 78: Ouroboros Orbs",
+      "Inscryption 83: Fast-Loop ML"
+    ],
     "multiverse market text-provenance path boundary string anchors drifted"
   );
-  assert.deepEqual(boundary.scalingCheck.missingInsideTheCheckedEmporiumBand, ["Inscryption 69", "Inscryption 70", "Inscryption 71", "Inscryption 72", "Inscryption 73", "Inscryption 74"], "multiverse market text-provenance path boundary missing checked-band strings drifted");
-  assert.equal(boundary.scalingCheck.scalesToWholeTable, false, "multiverse market text-provenance path boundary scalesToWholeTable must remain false");
+  assert.deepEqual(
+    boundary.scalingCheck.missingInsideTheCheckedEmporiumBand,
+    [
+      "Inscryption 69",
+      "Inscryption 70",
+      "Inscryption 71",
+      "Inscryption 72",
+      "Inscryption 73",
+      "Inscryption 74"
+    ],
+    "multiverse market text-provenance path boundary missing checked-band strings drifted"
+  );
+  assert.equal(
+    boundary.scalingCheck.scalesToWholeTable,
+    false,
+    "multiverse market text-provenance path boundary scalesToWholeTable must remain false"
+  );
   assert.deepEqual(
     boundary.supportedRowLocalTextModel,
     {
@@ -4268,7 +12414,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
       },
       baseBonusLane: {
         slotAlias: "PerLevelBonusText",
-        runtimeWriterFamily: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText",
+        runtimeWriterFamily:
+          "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText",
         status: "grounded-runtime-lane"
       },
       idLane: {
@@ -4279,7 +12426,8 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
       currentValueLane: {
         slotAlias: "CurrentBonusText",
         status: "quarantined-unrecovered-runtime-only-display-lane",
-        reason: "No typed CurrentBonusText field, SetCurrentBonusText writer family, or recovered row-local producer is present in the checked runtime surface."
+        reason:
+          "No typed CurrentBonusText field, SetCurrentBonusText writer family, or recovered row-local producer is present in the checked runtime surface."
       }
     },
     "multiverse market text-provenance path boundary supportedRowLocalTextModel drifted"
@@ -4315,104 +12463,506 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
     },
     "multiverse market text-provenance path boundary appSideRowSummaryShape drifted"
   );
-  assert.equal(boundary.lastMissingBindingLayer.layerName, "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted", "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted");
+  assert.equal(
+    boundary.lastMissingBindingLayer.layerName,
+    "separate dedicated CurrentBonusText runtime writer lane after the last plausible row-local update surfaces are exhausted",
+    "multiverse market text-provenance path boundary lastMissingBindingLayer.layerName drifted"
+  );
   assert.deepEqual(
     boundary.lastMissingBindingLayer.currentlyRecoveredInputs,
-    ["TextHandlerMarkets", "THMarkets", "MultiverseMarket", "SetAllChrystosEmporiumTexts", "SetAllBonusTexts", "SetAllBaseBonusTexts", "SetIS78BaseBonusText", "SetIS83BaseBonusText", "SetIS78BonusText", "SetIS83BonusText", "get_FinalIS78Bonus", "get_FinalIS83Bonus", "SetISNCostText", "SetISNBaseBonusText", "SetISNBonusText", "InscryptionsList", "CurrentBonusText", "BonusDescriptionText", "PerLevelBonusText", "DescriptionText", "IDText", "IconBox", "GeneralFunctionsManager.BigDoubleToText", "System.Int32.ToString", "runtime metadata init helper", "null-reference throw helper", "UnityEngine.UI.Text", "UnityEngine.UI.Image", "UnityEngine.UI.Outline", "UnityEngine.UI.Shadow", "RectTransform", "CanvasRenderer", "System.String.Concat"],
+    [
+      "TextHandlerMarkets",
+      "THMarkets",
+      "MultiverseMarket",
+      "SetAllChrystosEmporiumTexts",
+      "SetAllBonusTexts",
+      "SetAllBaseBonusTexts",
+      "SetIS78BaseBonusText",
+      "SetIS83BaseBonusText",
+      "SetIS78BonusText",
+      "SetIS83BonusText",
+      "get_FinalIS78Bonus",
+      "get_FinalIS83Bonus",
+      "SetISNCostText",
+      "SetISNBaseBonusText",
+      "SetISNBonusText",
+      "InscryptionsList",
+      "CurrentBonusText",
+      "BonusDescriptionText",
+      "PerLevelBonusText",
+      "DescriptionText",
+      "IDText",
+      "IconBox",
+      "GeneralFunctionsManager.BigDoubleToText",
+      "System.Int32.ToString",
+      "runtime metadata init helper",
+      "null-reference throw helper",
+      "UnityEngine.UI.Text",
+      "UnityEngine.UI.Image",
+      "UnityEngine.UI.Outline",
+      "UnityEngine.UI.Shadow",
+      "RectTransform",
+      "CanvasRenderer",
+      "System.String.Concat"
+    ],
     "multiverse market text-provenance path boundary currentlyRecoveredInputs drifted"
   );
-  assert.match(boundary.lastMissingBindingLayer.smallestDefensibleConclusion, /ISNBonusText effect-label write lane/i, "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted");
+  assert.match(
+    boundary.lastMissingBindingLayer.smallestDefensibleConclusion,
+    /ISNBonusText effect-label write lane/i,
+    "multiverse market text-provenance path boundary smallestDefensibleConclusion drifted"
+  );
 
-  assert.match(boundaryDoc, /sparse Unity string anchor/i, "multiverse market text-provenance path boundary doc must preserve the sparse Unity string anchor conclusion");
-  assert.match(boundaryDoc, /OUROBOROS POINTS GAINED/i, "multiverse market text-provenance path boundary doc must preserve the row 78 screenshot mismatch");
-  assert.match(boundaryDoc, /CurrentBonusText/, "multiverse market text-provenance path boundary doc must preserve the recovered row-local slot clue");
-  assert.match(boundaryDoc, /UnityEngine\.UI\.Text/, "multiverse market text-provenance path boundary doc must preserve the recovered text-component clue");
-  assert.match(boundaryDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i, "multiverse market text-provenance path boundary doc must preserve the zero serialized producer-link result");
-  assert.match(boundaryDoc, /SetAllChrystosEmporiumTexts/i, "multiverse market text-provenance path boundary doc must preserve the runtime producer clue");
-  assert.match(boundaryDoc, /virtual-dispatch write pattern/i, "multiverse market text-provenance path boundary doc must preserve the runtime write-pattern result");
-  assert.match(boundaryDoc, /BonusDescriptionText/, "multiverse market text-provenance path boundary doc must preserve the closed effect-label slot alias");
-  assert.match(boundaryDoc, /PerLevelBonusText/, "multiverse market text-provenance path boundary doc must preserve the grounded base-bonus lane");
-  assert.match(boundaryDoc, /IDText/, "multiverse market text-provenance path boundary doc must preserve the grounded id lane");
-  assert.match(boundaryDoc, /`effectLabel`/, "multiverse market text-provenance path boundary doc must preserve the app-side effectLabel key");
-  assert.match(boundaryDoc, /`baseBonus`/, "multiverse market text-provenance path boundary doc must preserve the app-side baseBonus key");
-  assert.match(boundaryDoc, /`rowIdLabel`/, "multiverse market text-provenance path boundary doc must preserve the app-side rowIdLabel key");
-  assert.match(boundaryDoc, /`currentValueDisplay`/, "multiverse market text-provenance path boundary doc must preserve the quarantined app-side currentValueDisplay key");
-  assert.match(boundaryDoc, /separate dedicated `CurrentBonusText` runtime writer lane/i, "multiverse market text-provenance path boundary doc must preserve the final missing binding layer");
-  assert.match(boundaryDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market text-provenance path boundary doc must preserve the narrowed control payload source");
-  assert.match(boundaryDoc, /SetAllBonusTexts/, "multiverse market text-provenance path boundary doc must preserve the recovered effect-label batch method");
-  assert.match(boundaryDoc, /GeneralFunctionsManager\.BigDoubleToText/, "multiverse market text-provenance path boundary doc must preserve the narrowed row 78 helper name");
-  assert.match(boundaryDoc, /System\.Int32\.ToString|Int32\.ToString/, "multiverse market text-provenance path boundary doc must preserve the narrowed row 83 helper name");
-  assert.match(boundaryDoc, /runtime metadata-init helper|runtime metadata init helper/i, "multiverse market text-provenance path boundary doc must preserve the resolved metadata helper role");
-  assert.match(boundaryDoc, /null-reference throw helper/i, "multiverse market text-provenance path boundary doc must preserve the resolved null helper role");
-  assert.match(boundaryDoc, /NavigationManager\.UpdateInscryptionUI/, "multiverse market text-provenance path boundary doc must preserve the checked negative update surface");
-  assert.match(boundaryDoc, /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/, "multiverse market text-provenance path boundary doc must preserve the checked negative update coroutine");
-  assert.match(boundaryDoc, /NavigationManager\+<InscEnum>d__186\.MoveNext/, "multiverse market text-provenance path boundary doc must preserve the checked negative row-enum coroutine");
-  assert.match(boundaryDoc, /NavigationManager\.DisableInscryptionObjects/, "multiverse market text-provenance path boundary doc must preserve the checked negative row-hide surface");
-  assert.match(boundaryDoc, /NavigationManager\.OnAvailbleInscryptionsClick/, "multiverse market text-provenance path boundary doc must preserve the checked negative available-click surface");
-  assert.match(boundaryDoc, /NavigationManager\.OnFinishedInscryptionsClick/, "multiverse market text-provenance path boundary doc must preserve the checked negative finished-click surface");
-  assert.match(boundaryDoc, /TextHandlerShopNPCs\.OpeningChrystosEmporium/, "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue-open surface");
-  assert.match(boundaryDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/, "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue-default surface");
-  assert.match(boundaryDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/, "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue coroutine");
-  assert.match(stateDoc, /## Checked control-row text-provenance path boundary/, "multiverse market state verification doc must expose the control-row text-provenance path boundary section");
-  assert.match(stateDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market state verification doc must preserve the control row string anchor");
-  assert.match(stateDoc, /OUROBOROS POINTS GAINED/i, "multiverse market state verification doc must preserve the row 78 live-text mismatch");
-  assert.match(stateDoc, /SetAllChrystosEmporiumTexts/, "multiverse market state verification doc must preserve the root runtime producer clue");
-  assert.match(stateDoc, /SetIS78BaseBonusText/, "multiverse market state verification doc must preserve the row 78 runtime control clue");
-  assert.match(stateDoc, /SetIS78BonusText/, "multiverse market state verification doc must preserve the row 78 runtime effect-label clue");
-  assert.match(stateDoc, /CurrentBonusText/, "multiverse market state verification doc must preserve the recovered row-local slot clue");
-  assert.match(stateDoc, /UnityEngine\.UI\.Text/, "multiverse market state verification doc must preserve the recovered text-component clue");
-  assert.match(stateDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i, "multiverse market state verification doc must preserve the zero serialized producer-link result");
-  assert.match(stateDoc, /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i, "multiverse market state verification doc must preserve the CurrentBonusText negative result");
-  assert.match(stateDoc, /SetIS1IDText/, "multiverse market state verification doc must preserve the dedicated IDText family clue");
-  assert.match(stateDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i, "multiverse market state verification doc must preserve the closed slot alias");
-  assert.match(stateDoc, /`PerLevelBonusText` is now the grounded base-bonus lane/i, "multiverse market state verification doc must preserve the grounded base-bonus wording");
-  assert.match(stateDoc, /`IDText` is now the grounded id lane/i, "multiverse market state verification doc must preserve the grounded id wording");
-  assert.match(stateDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market state verification doc must preserve the narrowed control payload source");
-  assert.match(stateDoc, /SetAllBonusTexts/, "multiverse market state verification doc must preserve the recovered effect-label batch method");
-  assert.match(stateDoc, /GeneralFunctionsManager\.BigDoubleToText/, "multiverse market state verification doc must preserve the narrowed row 78 helper name");
-  assert.match(stateDoc, /System\.Int32\.ToString|Int32\.ToString/, "multiverse market state verification doc must preserve the narrowed row 83 helper name");
-  assert.match(stateDoc, /runtime metadata-init helper|runtime metadata init helper/i, "multiverse market state verification doc must preserve the resolved metadata helper role");
-  assert.match(stateDoc, /null-reference throw helper/i, "multiverse market state verification doc must preserve the resolved null helper role");
-  assert.match(stateDoc, /separate `CurrentBonusText` writer lane/i, "multiverse market state verification doc must preserve the exact remaining blocker");
-  assert.match(stateDoc, /NavigationManager\.UpdateInscryptionUI/, "multiverse market state verification doc must preserve the checked negative update surface");
-  assert.match(stateDoc, /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/, "multiverse market state verification doc must preserve the checked negative update coroutine");
-  assert.match(stateDoc, /NavigationManager\+<InscEnum>d__186\.MoveNext/, "multiverse market state verification doc must preserve the checked negative row-enum coroutine");
-  assert.match(stateDoc, /NavigationManager\.DisableInscryptionObjects/, "multiverse market state verification doc must preserve the checked negative row-hide surface");
-  assert.match(stateDoc, /NavigationManager\.OnAvailbleInscryptionsClick/, "multiverse market state verification doc must preserve the checked negative available-click surface");
-  assert.match(stateDoc, /NavigationManager\.OnFinishedInscryptionsClick/, "multiverse market state verification doc must preserve the checked negative finished-click surface");
-  assert.match(stateDoc, /TextHandlerShopNPCs\.OpeningChrystosEmporium/, "multiverse market state verification doc must preserve the checked negative dialogue-open surface");
-  assert.match(stateDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/, "multiverse market state verification doc must preserve the checked negative dialogue-default surface");
-  assert.match(stateDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/, "multiverse market state verification doc must preserve the checked negative dialogue coroutine");
-  assert.match(verificationDoc, /## Checked control-row text-provenance path boundary/, "multiverse market verification doc must expose the control-row text-provenance path boundary section");
-  assert.match(verificationDoc, /Inscryption 78: Ouroboros Orbs/, "multiverse market verification doc must preserve the control row string anchor");
-  assert.match(verificationDoc, /OUROBOROS POINTS GAINED/i, "multiverse market verification doc must preserve the row 78 live-text mismatch");
-  assert.match(verificationDoc, /SetIS69BaseBonusText/, "multiverse market verification doc must preserve the checked handler-side scaling clue");
-  assert.match(verificationDoc, /SetIS78BaseBonusText/, "multiverse market verification doc must preserve the row 78 runtime control clue");
-  assert.match(verificationDoc, /SetIS78BonusText/, "multiverse market verification doc must preserve the row 78 runtime effect-label clue");
-  assert.match(verificationDoc, /CurrentBonusText/, "multiverse market verification doc must preserve the recovered row-local slot clue");
-  assert.match(verificationDoc, /UnityEngine\.UI\.Text/, "multiverse market verification doc must preserve the recovered text-component clue");
-  assert.match(verificationDoc, /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i, "multiverse market verification doc must preserve the zero serialized producer-link result");
-  assert.match(verificationDoc, /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i, "multiverse market verification doc must preserve the CurrentBonusText negative result");
-  assert.match(verificationDoc, /SetIS1IDText/, "multiverse market verification doc must preserve the dedicated IDText family clue");
-  assert.match(verificationDoc, /row-local effect-label slot alias to `BonusDescriptionText`/i, "multiverse market verification doc must preserve the closed slot alias");
-  assert.match(verificationDoc, /`PerLevelBonusText` is now the grounded base-bonus lane/i, "multiverse market verification doc must preserve the grounded base-bonus wording");
-  assert.match(verificationDoc, /`IDText` is now the grounded id lane/i, "multiverse market verification doc must preserve the grounded id wording");
-  assert.match(verificationDoc, /get_FinalIS78Bonus|get_FinalIS83Bonus/i, "multiverse market verification doc must preserve the narrowed control payload source");
-  assert.match(verificationDoc, /SetAllBonusTexts/, "multiverse market verification doc must preserve the recovered effect-label batch method");
-  assert.match(verificationDoc, /GeneralFunctionsManager\.BigDoubleToText/, "multiverse market verification doc must preserve the narrowed row 78 helper name");
-  assert.match(verificationDoc, /System\.Int32\.ToString|Int32\.ToString/, "multiverse market verification doc must preserve the narrowed row 83 helper name");
-  assert.match(verificationDoc, /runtime metadata-init helper|runtime metadata init helper/i, "multiverse market verification doc must preserve the resolved metadata helper role");
-  assert.match(verificationDoc, /null-reference throw helper/i, "multiverse market verification doc must preserve the resolved null helper role");
-  assert.match(verificationDoc, /separate `CurrentBonusText` writer lane/i, "multiverse market verification doc must preserve the narrowed text-slot blocker");
-  assert.match(verificationDoc, /NavigationManager\.UpdateInscryptionUI/, "multiverse market verification doc must preserve the checked negative update surface");
-  assert.match(verificationDoc, /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/, "multiverse market verification doc must preserve the checked negative update coroutine");
-  assert.match(verificationDoc, /NavigationManager\+<InscEnum>d__186\.MoveNext/, "multiverse market verification doc must preserve the checked negative row-enum coroutine");
-  assert.match(verificationDoc, /NavigationManager\.DisableInscryptionObjects/, "multiverse market verification doc must preserve the checked negative row-hide surface");
-  assert.match(verificationDoc, /NavigationManager\.OnAvailbleInscryptionsClick/, "multiverse market verification doc must preserve the checked negative available-click surface");
-  assert.match(verificationDoc, /NavigationManager\.OnFinishedInscryptionsClick/, "multiverse market verification doc must preserve the checked negative finished-click surface");
-  assert.match(verificationDoc, /TextHandlerShopNPCs\.OpeningChrystosEmporium/, "multiverse market verification doc must preserve the checked negative dialogue-open surface");
-  assert.match(verificationDoc, /TextHandlerShopNPCs\.EmporiumDefaultText/, "multiverse market verification doc must preserve the checked negative dialogue-default surface");
-  assert.match(verificationDoc, /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/, "multiverse market verification doc must preserve the checked negative dialogue coroutine");
+  assert.match(
+    boundaryDoc,
+    /sparse Unity string anchor/i,
+    "multiverse market text-provenance path boundary doc must preserve the sparse Unity string anchor conclusion"
+  );
+  assert.match(
+    boundaryDoc,
+    /OUROBOROS POINTS GAINED/i,
+    "multiverse market text-provenance path boundary doc must preserve the row 78 screenshot mismatch"
+  );
+  assert.match(
+    boundaryDoc,
+    /CurrentBonusText/,
+    "multiverse market text-provenance path boundary doc must preserve the recovered row-local slot clue"
+  );
+  assert.match(
+    boundaryDoc,
+    /UnityEngine\.UI\.Text/,
+    "multiverse market text-provenance path boundary doc must preserve the recovered text-component clue"
+  );
+  assert.match(
+    boundaryDoc,
+    /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i,
+    "multiverse market text-provenance path boundary doc must preserve the zero serialized producer-link result"
+  );
+  assert.match(
+    boundaryDoc,
+    /SetAllChrystosEmporiumTexts/i,
+    "multiverse market text-provenance path boundary doc must preserve the runtime producer clue"
+  );
+  assert.match(
+    boundaryDoc,
+    /virtual-dispatch write pattern/i,
+    "multiverse market text-provenance path boundary doc must preserve the runtime write-pattern result"
+  );
+  assert.match(
+    boundaryDoc,
+    /BonusDescriptionText/,
+    "multiverse market text-provenance path boundary doc must preserve the closed effect-label slot alias"
+  );
+  assert.match(
+    boundaryDoc,
+    /PerLevelBonusText/,
+    "multiverse market text-provenance path boundary doc must preserve the grounded base-bonus lane"
+  );
+  assert.match(
+    boundaryDoc,
+    /IDText/,
+    "multiverse market text-provenance path boundary doc must preserve the grounded id lane"
+  );
+  assert.match(
+    boundaryDoc,
+    /`effectLabel`/,
+    "multiverse market text-provenance path boundary doc must preserve the app-side effectLabel key"
+  );
+  assert.match(
+    boundaryDoc,
+    /`baseBonus`/,
+    "multiverse market text-provenance path boundary doc must preserve the app-side baseBonus key"
+  );
+  assert.match(
+    boundaryDoc,
+    /`rowIdLabel`/,
+    "multiverse market text-provenance path boundary doc must preserve the app-side rowIdLabel key"
+  );
+  assert.match(
+    boundaryDoc,
+    /`currentValueDisplay`/,
+    "multiverse market text-provenance path boundary doc must preserve the quarantined app-side currentValueDisplay key"
+  );
+  assert.match(
+    boundaryDoc,
+    /separate dedicated `CurrentBonusText` runtime writer lane/i,
+    "multiverse market text-provenance path boundary doc must preserve the final missing binding layer"
+  );
+  assert.match(
+    boundaryDoc,
+    /get_FinalIS78Bonus|get_FinalIS83Bonus/i,
+    "multiverse market text-provenance path boundary doc must preserve the narrowed control payload source"
+  );
+  assert.match(
+    boundaryDoc,
+    /SetAllBonusTexts/,
+    "multiverse market text-provenance path boundary doc must preserve the recovered effect-label batch method"
+  );
+  assert.match(
+    boundaryDoc,
+    /GeneralFunctionsManager\.BigDoubleToText/,
+    "multiverse market text-provenance path boundary doc must preserve the narrowed row 78 helper name"
+  );
+  assert.match(
+    boundaryDoc,
+    /System\.Int32\.ToString|Int32\.ToString/,
+    "multiverse market text-provenance path boundary doc must preserve the narrowed row 83 helper name"
+  );
+  assert.match(
+    boundaryDoc,
+    /runtime metadata-init helper|runtime metadata init helper/i,
+    "multiverse market text-provenance path boundary doc must preserve the resolved metadata helper role"
+  );
+  assert.match(
+    boundaryDoc,
+    /null-reference throw helper/i,
+    "multiverse market text-provenance path boundary doc must preserve the resolved null helper role"
+  );
+  assert.match(
+    boundaryDoc,
+    /NavigationManager\.UpdateInscryptionUI/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative update surface"
+  );
+  assert.match(
+    boundaryDoc,
+    /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative update coroutine"
+  );
+  assert.match(
+    boundaryDoc,
+    /NavigationManager\+<InscEnum>d__186\.MoveNext/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative row-enum coroutine"
+  );
+  assert.match(
+    boundaryDoc,
+    /NavigationManager\.DisableInscryptionObjects/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative row-hide surface"
+  );
+  assert.match(
+    boundaryDoc,
+    /NavigationManager\.OnAvailbleInscryptionsClick/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative available-click surface"
+  );
+  assert.match(
+    boundaryDoc,
+    /NavigationManager\.OnFinishedInscryptionsClick/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative finished-click surface"
+  );
+  assert.match(
+    boundaryDoc,
+    /TextHandlerShopNPCs\.OpeningChrystosEmporium/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue-open surface"
+  );
+  assert.match(
+    boundaryDoc,
+    /TextHandlerShopNPCs\.EmporiumDefaultText/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue-default surface"
+  );
+  assert.match(
+    boundaryDoc,
+    /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/,
+    "multiverse market text-provenance path boundary doc must preserve the checked negative dialogue coroutine"
+  );
+  assert.match(
+    stateDoc,
+    /## Checked control-row text-provenance path boundary/,
+    "multiverse market state verification doc must expose the control-row text-provenance path boundary section"
+  );
+  assert.match(
+    stateDoc,
+    /Inscryption 78: Ouroboros Orbs/,
+    "multiverse market state verification doc must preserve the control row string anchor"
+  );
+  assert.match(
+    stateDoc,
+    /OUROBOROS POINTS GAINED/i,
+    "multiverse market state verification doc must preserve the row 78 live-text mismatch"
+  );
+  assert.match(
+    stateDoc,
+    /SetAllChrystosEmporiumTexts/,
+    "multiverse market state verification doc must preserve the root runtime producer clue"
+  );
+  assert.match(
+    stateDoc,
+    /SetIS78BaseBonusText/,
+    "multiverse market state verification doc must preserve the row 78 runtime control clue"
+  );
+  assert.match(
+    stateDoc,
+    /SetIS78BonusText/,
+    "multiverse market state verification doc must preserve the row 78 runtime effect-label clue"
+  );
+  assert.match(
+    stateDoc,
+    /CurrentBonusText/,
+    "multiverse market state verification doc must preserve the recovered row-local slot clue"
+  );
+  assert.match(
+    stateDoc,
+    /UnityEngine\.UI\.Text/,
+    "multiverse market state verification doc must preserve the recovered text-component clue"
+  );
+  assert.match(
+    stateDoc,
+    /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i,
+    "multiverse market state verification doc must preserve the zero serialized producer-link result"
+  );
+  assert.match(
+    stateDoc,
+    /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i,
+    "multiverse market state verification doc must preserve the CurrentBonusText negative result"
+  );
+  assert.match(
+    stateDoc,
+    /SetIS1IDText/,
+    "multiverse market state verification doc must preserve the dedicated IDText family clue"
+  );
+  assert.match(
+    stateDoc,
+    /row-local effect-label slot alias to `BonusDescriptionText`/i,
+    "multiverse market state verification doc must preserve the closed slot alias"
+  );
+  assert.match(
+    stateDoc,
+    /`PerLevelBonusText` is now the grounded base-bonus lane/i,
+    "multiverse market state verification doc must preserve the grounded base-bonus wording"
+  );
+  assert.match(
+    stateDoc,
+    /`IDText` is now the grounded id lane/i,
+    "multiverse market state verification doc must preserve the grounded id wording"
+  );
+  assert.match(
+    stateDoc,
+    /get_FinalIS78Bonus|get_FinalIS83Bonus/i,
+    "multiverse market state verification doc must preserve the narrowed control payload source"
+  );
+  assert.match(
+    stateDoc,
+    /SetAllBonusTexts/,
+    "multiverse market state verification doc must preserve the recovered effect-label batch method"
+  );
+  assert.match(
+    stateDoc,
+    /GeneralFunctionsManager\.BigDoubleToText/,
+    "multiverse market state verification doc must preserve the narrowed row 78 helper name"
+  );
+  assert.match(
+    stateDoc,
+    /System\.Int32\.ToString|Int32\.ToString/,
+    "multiverse market state verification doc must preserve the narrowed row 83 helper name"
+  );
+  assert.match(
+    stateDoc,
+    /runtime metadata-init helper|runtime metadata init helper/i,
+    "multiverse market state verification doc must preserve the resolved metadata helper role"
+  );
+  assert.match(
+    stateDoc,
+    /null-reference throw helper/i,
+    "multiverse market state verification doc must preserve the resolved null helper role"
+  );
+  assert.match(
+    stateDoc,
+    /separate `CurrentBonusText` writer lane/i,
+    "multiverse market state verification doc must preserve the exact remaining blocker"
+  );
+  assert.match(
+    stateDoc,
+    /NavigationManager\.UpdateInscryptionUI/,
+    "multiverse market state verification doc must preserve the checked negative update surface"
+  );
+  assert.match(
+    stateDoc,
+    /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/,
+    "multiverse market state verification doc must preserve the checked negative update coroutine"
+  );
+  assert.match(
+    stateDoc,
+    /NavigationManager\+<InscEnum>d__186\.MoveNext/,
+    "multiverse market state verification doc must preserve the checked negative row-enum coroutine"
+  );
+  assert.match(
+    stateDoc,
+    /NavigationManager\.DisableInscryptionObjects/,
+    "multiverse market state verification doc must preserve the checked negative row-hide surface"
+  );
+  assert.match(
+    stateDoc,
+    /NavigationManager\.OnAvailbleInscryptionsClick/,
+    "multiverse market state verification doc must preserve the checked negative available-click surface"
+  );
+  assert.match(
+    stateDoc,
+    /NavigationManager\.OnFinishedInscryptionsClick/,
+    "multiverse market state verification doc must preserve the checked negative finished-click surface"
+  );
+  assert.match(
+    stateDoc,
+    /TextHandlerShopNPCs\.OpeningChrystosEmporium/,
+    "multiverse market state verification doc must preserve the checked negative dialogue-open surface"
+  );
+  assert.match(
+    stateDoc,
+    /TextHandlerShopNPCs\.EmporiumDefaultText/,
+    "multiverse market state verification doc must preserve the checked negative dialogue-default surface"
+  );
+  assert.match(
+    stateDoc,
+    /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/,
+    "multiverse market state verification doc must preserve the checked negative dialogue coroutine"
+  );
+  assert.match(
+    verificationDoc,
+    /## Checked control-row text-provenance path boundary/,
+    "multiverse market verification doc must expose the control-row text-provenance path boundary section"
+  );
+  assert.match(
+    verificationDoc,
+    /Inscryption 78: Ouroboros Orbs/,
+    "multiverse market verification doc must preserve the control row string anchor"
+  );
+  assert.match(
+    verificationDoc,
+    /OUROBOROS POINTS GAINED/i,
+    "multiverse market verification doc must preserve the row 78 live-text mismatch"
+  );
+  assert.match(
+    verificationDoc,
+    /SetIS69BaseBonusText/,
+    "multiverse market verification doc must preserve the checked handler-side scaling clue"
+  );
+  assert.match(
+    verificationDoc,
+    /SetIS78BaseBonusText/,
+    "multiverse market verification doc must preserve the row 78 runtime control clue"
+  );
+  assert.match(
+    verificationDoc,
+    /SetIS78BonusText/,
+    "multiverse market verification doc must preserve the row 78 runtime effect-label clue"
+  );
+  assert.match(
+    verificationDoc,
+    /CurrentBonusText/,
+    "multiverse market verification doc must preserve the recovered row-local slot clue"
+  );
+  assert.match(
+    verificationDoc,
+    /UnityEngine\.UI\.Text/,
+    "multiverse market verification doc must preserve the recovered text-component clue"
+  );
+  assert.match(
+    verificationDoc,
+    /zero serialized `TextHandlerMarkets` or `MultiverseMarket` producer links/i,
+    "multiverse market verification doc must preserve the zero serialized producer-link result"
+  );
+  assert.match(
+    verificationDoc,
+    /no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family/i,
+    "multiverse market verification doc must preserve the CurrentBonusText negative result"
+  );
+  assert.match(
+    verificationDoc,
+    /SetIS1IDText/,
+    "multiverse market verification doc must preserve the dedicated IDText family clue"
+  );
+  assert.match(
+    verificationDoc,
+    /row-local effect-label slot alias to `BonusDescriptionText`/i,
+    "multiverse market verification doc must preserve the closed slot alias"
+  );
+  assert.match(
+    verificationDoc,
+    /`PerLevelBonusText` is now the grounded base-bonus lane/i,
+    "multiverse market verification doc must preserve the grounded base-bonus wording"
+  );
+  assert.match(
+    verificationDoc,
+    /`IDText` is now the grounded id lane/i,
+    "multiverse market verification doc must preserve the grounded id wording"
+  );
+  assert.match(
+    verificationDoc,
+    /get_FinalIS78Bonus|get_FinalIS83Bonus/i,
+    "multiverse market verification doc must preserve the narrowed control payload source"
+  );
+  assert.match(
+    verificationDoc,
+    /SetAllBonusTexts/,
+    "multiverse market verification doc must preserve the recovered effect-label batch method"
+  );
+  assert.match(
+    verificationDoc,
+    /GeneralFunctionsManager\.BigDoubleToText/,
+    "multiverse market verification doc must preserve the narrowed row 78 helper name"
+  );
+  assert.match(
+    verificationDoc,
+    /System\.Int32\.ToString|Int32\.ToString/,
+    "multiverse market verification doc must preserve the narrowed row 83 helper name"
+  );
+  assert.match(
+    verificationDoc,
+    /runtime metadata-init helper|runtime metadata init helper/i,
+    "multiverse market verification doc must preserve the resolved metadata helper role"
+  );
+  assert.match(
+    verificationDoc,
+    /null-reference throw helper/i,
+    "multiverse market verification doc must preserve the resolved null helper role"
+  );
+  assert.match(
+    verificationDoc,
+    /separate `CurrentBonusText` writer lane/i,
+    "multiverse market verification doc must preserve the narrowed text-slot blocker"
+  );
+  assert.match(
+    verificationDoc,
+    /NavigationManager\.UpdateInscryptionUI/,
+    "multiverse market verification doc must preserve the checked negative update surface"
+  );
+  assert.match(
+    verificationDoc,
+    /NavigationManager\+<UpdateInscryptionUI>d__185\.MoveNext/,
+    "multiverse market verification doc must preserve the checked negative update coroutine"
+  );
+  assert.match(
+    verificationDoc,
+    /NavigationManager\+<InscEnum>d__186\.MoveNext/,
+    "multiverse market verification doc must preserve the checked negative row-enum coroutine"
+  );
+  assert.match(
+    verificationDoc,
+    /NavigationManager\.DisableInscryptionObjects/,
+    "multiverse market verification doc must preserve the checked negative row-hide surface"
+  );
+  assert.match(
+    verificationDoc,
+    /NavigationManager\.OnAvailbleInscryptionsClick/,
+    "multiverse market verification doc must preserve the checked negative available-click surface"
+  );
+  assert.match(
+    verificationDoc,
+    /NavigationManager\.OnFinishedInscryptionsClick/,
+    "multiverse market verification doc must preserve the checked negative finished-click surface"
+  );
+  assert.match(
+    verificationDoc,
+    /TextHandlerShopNPCs\.OpeningChrystosEmporium/,
+    "multiverse market verification doc must preserve the checked negative dialogue-open surface"
+  );
+  assert.match(
+    verificationDoc,
+    /TextHandlerShopNPCs\.EmporiumDefaultText/,
+    "multiverse market verification doc must preserve the checked negative dialogue-default surface"
+  );
+  assert.match(
+    verificationDoc,
+    /TextHandlerShopNPCs\+<DisplayTextEmporium>d__22\.MoveNext/,
+    "multiverse market verification doc must preserve the checked negative dialogue coroutine"
+  );
 
   return {
     id: "multiverse-market-text-provenance-path-boundary",
@@ -4428,29 +12978,90 @@ function validateMultiverseMarketTextProvenancePathBoundary(boundary, stateDoc, 
 }
 
 function validateTokenBankControllerShell(shell) {
-  expectNonEmptyString(shell.generatedAt, "token-bank controller shell generatedAt must be present");
+  expectNonEmptyString(
+    shell.generatedAt,
+    "token-bank controller shell generatedAt must be present"
+  );
   expectRecord(shell.sources, "token-bank controller shell sources must be an object");
   ["probe", "metadata", "level0"].forEach((field) => {
-    expectNonEmptyString(shell.sources[field], `token-bank controller shell sources.${field} must be present`);
+    expectNonEmptyString(
+      shell.sources[field],
+      `token-bank controller shell sources.${field} must be present`
+    );
   });
-  expectArray(shell.controllerAnchors, "token-bank controller shell controllerAnchors must be an array");
-  expectArray(shell.adjacentControllerMethods, "token-bank controller shell adjacentControllerMethods must be an array");
-  expectRecord(shell.sourcePresence, "token-bank controller shell sourcePresence must be an object");
-  expectRecord(shell.sourcePresence.metadata, "token-bank controller shell sourcePresence.metadata must be an object");
-  expectRecord(shell.sourcePresence.level0, "token-bank controller shell sourcePresence.level0 must be an object");
-  expectArray(shell.currentBoundary, "token-bank controller shell currentBoundary must be an array");
+  expectArray(
+    shell.controllerAnchors,
+    "token-bank controller shell controllerAnchors must be an array"
+  );
+  expectArray(
+    shell.adjacentControllerMethods,
+    "token-bank controller shell adjacentControllerMethods must be an array"
+  );
+  expectRecord(
+    shell.sourcePresence,
+    "token-bank controller shell sourcePresence must be an object"
+  );
+  expectRecord(
+    shell.sourcePresence.metadata,
+    "token-bank controller shell sourcePresence.metadata must be an object"
+  );
+  expectRecord(
+    shell.sourcePresence.level0,
+    "token-bank controller shell sourcePresence.level0 must be an object"
+  );
+  expectArray(
+    shell.currentBoundary,
+    "token-bank controller shell currentBoundary must be an array"
+  );
 
-  ["TokenShop", "ClaimBankedTokens", "SetBankFill", "BankFill", "TokenBankDescriptionText", "CheckTokenClaimNotification", "TokenShopButtonNotification"].forEach((name) => {
-    assert.ok(shell.controllerAnchors.includes(name), `token-bank controller shell missing ${name}`);
+  [
+    "TokenShop",
+    "ClaimBankedTokens",
+    "SetBankFill",
+    "BankFill",
+    "TokenBankDescriptionText",
+    "CheckTokenClaimNotification",
+    "TokenShopButtonNotification"
+  ].forEach((name) => {
+    assert.ok(
+      shell.controllerAnchors.includes(name),
+      `token-bank controller shell missing ${name}`
+    );
   });
   ["get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens"].forEach((name) => {
-    assert.ok(shell.adjacentControllerMethods.includes(name), `token-bank controller shell missing ${name}`);
+    assert.ok(
+      shell.adjacentControllerMethods.includes(name),
+      `token-bank controller shell missing ${name}`
+    );
   });
-  ["TokenShop", "ClaimBankedTokens", "SetBankFill", "BankFill", "TokenBankDescriptionText", "CheckTokenClaimNotification", "TokenShopButtonNotification", "get_TokenBankCap", "get_ClaimableBankTokens", "IncreaseBankedTokens"].forEach((name) => {
-    assert.equal(shell.sourcePresence.metadata[name], 1, `token-bank controller shell metadata presence drifted for ${name}`);
+  [
+    "TokenShop",
+    "ClaimBankedTokens",
+    "SetBankFill",
+    "BankFill",
+    "TokenBankDescriptionText",
+    "CheckTokenClaimNotification",
+    "TokenShopButtonNotification",
+    "get_TokenBankCap",
+    "get_ClaimableBankTokens",
+    "IncreaseBankedTokens"
+  ].forEach((name) => {
+    assert.equal(
+      shell.sourcePresence.metadata[name],
+      1,
+      `token-bank controller shell metadata presence drifted for ${name}`
+    );
   });
-  assert.equal(shell.sourcePresence.level0.ClaimBankedTokens, 1, "token-bank controller shell level0 ClaimBankedTokens drifted");
-  assert.equal(shell.sourcePresence.level0.BankedDescriptionTextIncrease, 1, "token-bank controller shell level0 BankedDescriptionTextIncrease drifted");
+  assert.equal(
+    shell.sourcePresence.level0.ClaimBankedTokens,
+    1,
+    "token-bank controller shell level0 ClaimBankedTokens drifted"
+  );
+  assert.equal(
+    shell.sourcePresence.level0.BankedDescriptionTextIncrease,
+    1,
+    "token-bank controller shell level0 BankedDescriptionTextIncrease drifted"
+  );
 
   return {
     id: "token-bank-controller-shell",
@@ -4465,9 +13076,15 @@ function validateTokenBankControllerShell(shell) {
 }
 
 async function validateBundledDatasetContract(contract) {
-  expectNonEmptyString(contract.contractVersion, "bundled dataset contract version must be present");
+  expectNonEmptyString(
+    contract.contractVersion,
+    "bundled dataset contract version must be present"
+  );
   expectNonEmptyString(contract.updatedAt, "bundled dataset contract updatedAt must be present");
-  expectNonEmptyString(contract.validationCommand, "bundled dataset contract validationCommand must be present");
+  expectNonEmptyString(
+    contract.validationCommand,
+    "bundled dataset contract validationCommand must be present"
+  );
   assert.equal(
     contract.validationCommand,
     "npm run verify:data",
@@ -4475,13 +13092,21 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.sourcePriority, "bundled dataset contract sourcePriority must be an array");
-  assert.equal(contract.sourcePriority.length, 3, "bundled dataset contract must define the three source-priority tiers");
+  assert.equal(
+    contract.sourcePriority.length,
+    3,
+    "bundled dataset contract must define the three source-priority tiers"
+  );
   contract.sourcePriority.forEach((entry, index) => {
     expectPositiveInteger(entry.rank, `sourcePriority[${index}].rank must be a positive integer`);
     expectNonEmptyString(entry.id, `sourcePriority[${index}].id must be present`);
     expectNonEmptyString(entry.label, `sourcePriority[${index}].label must be present`);
     expectNonEmptyString(entry.description, `sourcePriority[${index}].description must be present`);
-    assert.equal(entry.rank, index + 1, `sourcePriority[${index}].rank must stay in source-priority order`);
+    assert.equal(
+      entry.rank,
+      index + 1,
+      `sourcePriority[${index}].rank must stay in source-priority order`
+    );
   });
   assert.deepEqual(
     contract.sourcePriority.map((entry) => entry.id),
@@ -4490,12 +13115,19 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 62, "bundled dataset contract must track the sixty-two shipped dataset groups");
+  assert.equal(
+    contract.datasets.length,
+    62,
+    "bundled dataset contract must track the sixty-two shipped dataset groups"
+  );
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
     expectNonEmptyString(dataset.label, `datasets[${index}].label must be present`);
-    expectNonEmptyString(dataset.classification, `datasets[${index}].classification must be present`);
+    expectNonEmptyString(
+      dataset.classification,
+      `datasets[${index}].classification must be present`
+    );
     expectArray(dataset.files, `datasets[${index}].files must be an array`);
     assert.ok(dataset.files.length >= 1, `datasets[${index}].files must not be empty`);
     for (const [fileIndex, relativePath] of dataset.files.entries()) {
@@ -4556,44 +13188,82 @@ export async function validateBundledDatasets() {
   const shardProvenance = await readJson("../../data/shard-milestones-provenance.grounded.v1.json");
   const shardAssetGrounding = await readJson("../../data/shard-asset-grounding.v1.json");
   const shardOwnerFamilyBoundary = await readJson("../../data/shard-owner-family-boundary.v1.json");
-  const shardFinalSuBonusBoundary = await readJson("../../data/shard-finalsu-bonus-boundary.v1.json");
-  const shardMilestonePayloadBoundary = await readJson("../../data/shard-milestone-payload-boundary.v1.json");
+  const shardFinalSuBonusBoundary = await readJson(
+    "../../data/shard-finalsu-bonus-boundary.v1.json"
+  );
+  const shardMilestonePayloadBoundary = await readJson(
+    "../../data/shard-milestone-payload-boundary.v1.json"
+  );
   const shardCostModelBoundary = await readJson("../../data/shard-cost-model-boundary.v1.json");
-  const shardMilestoneRowModelBoundary = await readJson("../../data/shard-milestone-row-model-boundary.v1.json");
-  const shardMilestoneTitleEffectBoundary = await readJson("../../data/shard-milestone-title-effect-boundary.v1.json");
-  const shardEffectTextHandlerBoundary = await readJson("../../data/shard-effect-text-handler-boundary.v1.json");
-  const shardMilestoneRowShellBoundary = await readJson("../../data/shard-milestone-row-shell-boundary.v1.json");
-  const shardMilestoneRowAlignmentBoundary = await readJson("../../data/shard-milestone-row-alignment-boundary.v1.json");
-  const shardMilestoneHandoffBoundary = await readJson("../../data/shard-milestone-handoff-boundary.v1.json");
+  const shardMilestoneRowModelBoundary = await readJson(
+    "../../data/shard-milestone-row-model-boundary.v1.json"
+  );
+  const shardMilestoneTitleEffectBoundary = await readJson(
+    "../../data/shard-milestone-title-effect-boundary.v1.json"
+  );
+  const shardEffectTextHandlerBoundary = await readJson(
+    "../../data/shard-effect-text-handler-boundary.v1.json"
+  );
+  const shardMilestoneRowShellBoundary = await readJson(
+    "../../data/shard-milestone-row-shell-boundary.v1.json"
+  );
+  const shardMilestoneRowAlignmentBoundary = await readJson(
+    "../../data/shard-milestone-row-alignment-boundary.v1.json"
+  );
+  const shardMilestoneHandoffBoundary = await readJson(
+    "../../data/shard-milestone-handoff-boundary.v1.json"
+  );
   const shardSaveBoundary = await readJson("../../data/shard-save-boundary.v1.json");
-  const shardMilestoneSaveOwnerCandidates = await readJson("../../data/shard-milestone-save-owner-candidates.v1.json");
-  const shardSceneMonoBehaviourProbe = await readJson("../../data/shard-scene-monobehaviour-probe.v1.json");
+  const shardMilestoneSaveOwnerCandidates = await readJson(
+    "../../data/shard-milestone-save-owner-candidates.v1.json"
+  );
+  const shardSceneMonoBehaviourProbe = await readJson(
+    "../../data/shard-scene-monobehaviour-probe.v1.json"
+  );
   const shardCostParameterProbe = await readJson("../../data/shard-cost-parameter-probe.v1.json");
   const shardCostMethodProbe = await readJson("../../data/shard-cost-method-probe.v1.json");
   const shardCostNativeProbe = await readJson("../../data/shard-cost-native-probe.v1.json");
-  const shardCostScreenshotCalibration = await readJson("../../data/shard-cost-screenshot-calibration.v1.json");
+  const shardCostScreenshotCalibration = await readJson(
+    "../../data/shard-cost-screenshot-calibration.v1.json"
+  );
   const shardCostListPathProbe = await readJson("../../data/shard-cost-list-path-probe.v1.json");
   const shardCostFormulaModel = await readJson("../../data/shard-cost-formula-model.v1.json");
   const shardBonusSlotProbe = await readJson("../../data/shard-bonus-slot-probe.v1.json");
   const shardRowVerificationSu1 = await readJson("../../data/shard-row-verification-su1.v1.json");
   const shardRowVerificationSu2 = await readJson("../../data/shard-row-verification-su2.v1.json");
   const shardTypeMetadataProbe = await readJson("../../data/shard-type-metadata-probe.v1.json");
-  const extractionCandidateFamilies = await readJson("../../data/extraction-candidate-families.v1.json");
-  const extractionCandidateRanking = await readJson("../../data/extraction-candidate-ranking.v1.json");
+  const extractionCandidateFamilies = await readJson(
+    "../../data/extraction-candidate-families.v1.json"
+  );
+  const extractionCandidateRanking = await readJson(
+    "../../data/extraction-candidate-ranking.v1.json"
+  );
   const tokenShop = await readJson("../../data/token-shop-values.json");
   const multiverseMarket = await readJson("../../data/multiverse-market-values.json");
-  const multiverseMarketMetadataNeighborhood = await readJson("../../data/multiverse-market-metadata-neighborhood.json");
+  const multiverseMarketMetadataNeighborhood = await readJson(
+    "../../data/multiverse-market-metadata-neighborhood.json"
+  );
   const tokeniumNamingClues = await readJson("../../data/tokenium-naming-clues.json");
   const tokenBankStateClues = await readJson("../../data/token-bank-state-clues.json");
   const dailyTokeniumLaneClues = await readJson("../../data/daily-tokenium-lane-clues.json");
   const tokenBankFormulaBoundary = await readJson("../../data/token-bank-formula-boundary.json");
-  const multiverseMarketRangeBoundary = await readJson("../../data/multiverse-market-range-boundary.json");
-  const multiverseMarketRowTextCoverage = await readJson("../../data/multiverse-market-row-text-coverage.json");
-  const multiverseMarketPrefabRemapBoundary = await readJson("../../data/multiverse-market-prefab-remap-boundary.json");
+  const multiverseMarketRangeBoundary = await readJson(
+    "../../data/multiverse-market-range-boundary.json"
+  );
+  const multiverseMarketRowTextCoverage = await readJson(
+    "../../data/multiverse-market-row-text-coverage.json"
+  );
+  const multiverseMarketPrefabRemapBoundary = await readJson(
+    "../../data/multiverse-market-prefab-remap-boundary.json"
+  );
   const tokenShopCostLanes = await readJson("../../data/token-shop-cost-lanes.json");
   const spendActionLaneClues = await readJson("../../data/spend-action-lane-clues.json");
-  const multiverseMarketActionShell = await readJson("../../data/multiverse-market-action-shell.json");
-  const multiverseMarketOwnerFamily = await readJson("../../data/multiverse-market-owner-family.json");
+  const multiverseMarketActionShell = await readJson(
+    "../../data/multiverse-market-action-shell.json"
+  );
+  const multiverseMarketOwnerFamily = await readJson(
+    "../../data/multiverse-market-owner-family.json"
+  );
   const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
   const tokenShopRowLevelOwner = await readJson("../../data/token-shop-row-level-owner.json");
@@ -4601,27 +13271,67 @@ export async function validateBundledDatasets() {
   const tokenShopLateAtuBoundary = await readJson("../../data/token-shop-late-atu-boundary.json");
   const unityTraceTargetRegistry = await readJson("../../data/unity-trace-target-registry.json");
   const unityTraceBundle = await readJson("../../data/unity-trace-bundle.json");
-  const multiverseMarketSaveBoundary = await readJson("../../data/multiverse-market-save-boundary.json");
-  const multiverseMarketMarketMemberBoundary = await readJson("../../data/multiverse-market-market-member-boundary.json");
-  const multiverseMarketSaveDataImportBoundary = await readJson("../../data/multiverse-market-savedata-import-boundary.json");
-  const multiverseMarketRow6974IdentitySourceBoundary = await readJson("../../data/multiverse-market-row69-74-identity-source-boundary.json");
-  const multiverseMarketSerializedLabelSourceBoundary = await readJson("../../data/multiverse-market-serialized-label-source-boundary.json");
-  const multiverseMarketRow7174IdentityBoundary = await readJson("../../data/multiverse-market-row71-74-identity-boundary.json");
-  const multiverseMarketRow7174RemapBand = await readJson("../../data/multiverse-market-row71-74-remap-band.json");
-  const multiverseMarketNearbyIdentityBindingPattern = await readJson("../../data/multiverse-market-nearby-identity-binding-pattern.json");
-  const multiverseMarketInscriptionNumberingStabilityBoundary = await readJson("../../data/multiverse-market-inscription-numbering-stability-boundary.json");
-  const multiverseMarket6974AnomalyProvenance = await readJson("../../data/multiverse-market-69-74-anomaly-provenance.json");
-  const multiverseMarketShellRowPredictionBoundary = await readJson("../../data/multiverse-market-shell-row-prediction-boundary.json");
-  const multiverseMarketTextProvenancePathBoundary = await readJson("../../data/multiverse-market-text-provenance-path-boundary.json");
+  const multiverseMarketSaveBoundary = await readJson(
+    "../../data/multiverse-market-save-boundary.json"
+  );
+  const multiverseMarketMarketMemberBoundary = await readJson(
+    "../../data/multiverse-market-market-member-boundary.json"
+  );
+  const multiverseMarketSaveDataImportBoundary = await readJson(
+    "../../data/multiverse-market-savedata-import-boundary.json"
+  );
+  const multiverseMarketRow6974IdentitySourceBoundary = await readJson(
+    "../../data/multiverse-market-row69-74-identity-source-boundary.json"
+  );
+  const multiverseMarketSerializedLabelSourceBoundary = await readJson(
+    "../../data/multiverse-market-serialized-label-source-boundary.json"
+  );
+  const multiverseMarketRow7174IdentityBoundary = await readJson(
+    "../../data/multiverse-market-row71-74-identity-boundary.json"
+  );
+  const multiverseMarketRow7174RemapBand = await readJson(
+    "../../data/multiverse-market-row71-74-remap-band.json"
+  );
+  const multiverseMarketNearbyIdentityBindingPattern = await readJson(
+    "../../data/multiverse-market-nearby-identity-binding-pattern.json"
+  );
+  const multiverseMarketInscriptionNumberingStabilityBoundary = await readJson(
+    "../../data/multiverse-market-inscription-numbering-stability-boundary.json"
+  );
+  const multiverseMarket6974AnomalyProvenance = await readJson(
+    "../../data/multiverse-market-69-74-anomaly-provenance.json"
+  );
+  const multiverseMarketShellRowPredictionBoundary = await readJson(
+    "../../data/multiverse-market-shell-row-prediction-boundary.json"
+  );
+  const multiverseMarketTextProvenancePathBoundary = await readJson(
+    "../../data/multiverse-market-text-provenance-path-boundary.json"
+  );
   const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
-  const multiverseMarketMarketMemberBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-market-member-boundary.md");
-  const multiverseMarketStateVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-state-verification.md");
-  const multiverseMarketVerificationDoc = await readText("../../docs/systems/spend/multiverse-market-verification.md");
-  const multiverseMarketSerializedLabelSourceBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-serialized-label-source-boundary.md");
-  const multiverseMarket6974AnomalyProvenanceDoc = await readText("../../docs/systems/spend/multiverse-market-69-74-anomaly-provenance.md");
-  const multiverseMarketShellRowPredictionBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md");
-  const multiverseMarketTextProvenancePathBoundaryDoc = await readText("../../docs/systems/spend/multiverse-market-text-provenance-path-boundary.md");
-  const activeGroundingBoundariesDoc = await readText("../../docs/roadmap/active-grounding-boundaries.md");
+  const multiverseMarketMarketMemberBoundaryDoc = await readText(
+    "../../docs/systems/spend/multiverse-market-market-member-boundary.md"
+  );
+  const multiverseMarketStateVerificationDoc = await readText(
+    "../../docs/systems/spend/multiverse-market-state-verification.md"
+  );
+  const multiverseMarketVerificationDoc = await readText(
+    "../../docs/systems/spend/multiverse-market-verification.md"
+  );
+  const multiverseMarketSerializedLabelSourceBoundaryDoc = await readText(
+    "../../docs/systems/spend/multiverse-market-serialized-label-source-boundary.md"
+  );
+  const multiverseMarket6974AnomalyProvenanceDoc = await readText(
+    "../../docs/systems/spend/multiverse-market-69-74-anomaly-provenance.md"
+  );
+  const multiverseMarketShellRowPredictionBoundaryDoc = await readText(
+    "../../docs/systems/spend/multiverse-market-shell-row-prediction-boundary.md"
+  );
+  const multiverseMarketTextProvenancePathBoundaryDoc = await readText(
+    "../../docs/systems/spend/multiverse-market-text-provenance-path-boundary.md"
+  );
+  const activeGroundingBoundariesDoc = await readText(
+    "../../docs/roadmap/active-grounding-boundaries.md"
+  );
 
   const summaries = [
     validateSnapshot(snapshot),
@@ -4675,16 +13385,59 @@ export async function validateBundledDatasets() {
     validateUnityTraceBundle(unityTraceBundle),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
-    validateMultiverseMarketSaveDataImportBoundary(multiverseMarketSaveDataImportBoundary, multiverseMarketStateVerificationDoc),
-    validateMultiverseMarketRow6974IdentitySourceBoundary(multiverseMarketRow6974IdentitySourceBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
-    validateMultiverseMarketSerializedLabelSourceBoundary(multiverseMarketSerializedLabelSourceBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarketSerializedLabelSourceBoundaryDoc),
-    validateMultiverseMarketRow7174IdentityBoundary(multiverseMarketRow7174IdentityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
-    validateMultiverseMarketRow7174RemapBand(multiverseMarketRow7174RemapBand, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
-    validateMultiverseMarketNearbyIdentityBindingPattern(multiverseMarketNearbyIdentityBindingPattern, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
-    validateMultiverseMarketInscriptionNumberingStabilityBoundary(multiverseMarketInscriptionNumberingStabilityBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc),
-    validateMultiverseMarket6974AnomalyProvenance(multiverseMarket6974AnomalyProvenance, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarket6974AnomalyProvenanceDoc),
-    validateMultiverseMarketShellRowPredictionBoundary(multiverseMarketShellRowPredictionBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarketShellRowPredictionBoundaryDoc),
-    validateMultiverseMarketTextProvenancePathBoundary(multiverseMarketTextProvenancePathBoundary, multiverseMarketStateVerificationDoc, multiverseMarketVerificationDoc, multiverseMarketTextProvenancePathBoundaryDoc),
+    validateMultiverseMarketSaveDataImportBoundary(
+      multiverseMarketSaveDataImportBoundary,
+      multiverseMarketStateVerificationDoc
+    ),
+    validateMultiverseMarketRow6974IdentitySourceBoundary(
+      multiverseMarketRow6974IdentitySourceBoundary,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc
+    ),
+    validateMultiverseMarketSerializedLabelSourceBoundary(
+      multiverseMarketSerializedLabelSourceBoundary,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc,
+      multiverseMarketSerializedLabelSourceBoundaryDoc
+    ),
+    validateMultiverseMarketRow7174IdentityBoundary(
+      multiverseMarketRow7174IdentityBoundary,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc
+    ),
+    validateMultiverseMarketRow7174RemapBand(
+      multiverseMarketRow7174RemapBand,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc
+    ),
+    validateMultiverseMarketNearbyIdentityBindingPattern(
+      multiverseMarketNearbyIdentityBindingPattern,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc
+    ),
+    validateMultiverseMarketInscriptionNumberingStabilityBoundary(
+      multiverseMarketInscriptionNumberingStabilityBoundary,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc
+    ),
+    validateMultiverseMarket6974AnomalyProvenance(
+      multiverseMarket6974AnomalyProvenance,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc,
+      multiverseMarket6974AnomalyProvenanceDoc
+    ),
+    validateMultiverseMarketShellRowPredictionBoundary(
+      multiverseMarketShellRowPredictionBoundary,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc,
+      multiverseMarketShellRowPredictionBoundaryDoc
+    ),
+    validateMultiverseMarketTextProvenancePathBoundary(
+      multiverseMarketTextProvenancePathBoundary,
+      multiverseMarketStateVerificationDoc,
+      multiverseMarketVerificationDoc,
+      multiverseMarketTextProvenancePathBoundaryDoc
+    ),
     validateTokenBankControllerShell(tokenBankControllerShell)
   ];
 
@@ -4701,7 +13454,9 @@ export async function validateBundledDatasets() {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const bundledDatasetContract = await readJson("../../data/bundled-dataset-contract.v1.json");
   const summaries = await validateBundledDatasets();
-  console.log(`Bundled dataset contracts validated against ${bundledDatasetContract.contractVersion}:`);
+  console.log(
+    `Bundled dataset contracts validated against ${bundledDatasetContract.contractVersion}:`
+  );
   console.log(`- Validation command: ${bundledDatasetContract.validationCommand}`);
   console.log(
     `- Source priority: ${bundledDatasetContract.sourcePriority

@@ -12,7 +12,8 @@ import {
 
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
-const launcherMode = process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
+const launcherMode =
+  process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
 const clientLeaseTtlMs = 60000;
 const launcherIdleCheckMs = 2000;
 const clientSessions = new Map();
@@ -36,7 +37,10 @@ const serverCapabilitiesScript = `<script>window.__CIFI_SERVER_CAPABILITIES__ = 
 })};</script>`;
 
 const server = createServer(async (request, response) => {
-  const requestUrl = new URL(request.url || "/", `http://${request.headers.host || `localhost:${port}`}`);
+  const requestUrl = new URL(
+    request.url || "/",
+    `http://${request.headers.host || `localhost:${port}`}`
+  );
 
   if (request.method === "GET" && requestUrl.pathname === "/api/healthz") {
     writeJson(response, 200, {
@@ -121,7 +125,10 @@ async function handleGeneratorOcr(request, response) {
       for (const [index, image] of images.entries()) {
         const extension = getImageExtension(image.type, image.name, index);
         const filename = sanitizeFileName(image.name || `generator-${index + 1}${extension}`);
-        const filePath = join(tempDir, filename.endsWith(extension) ? filename : `${filename}${extension}`);
+        const filePath = join(
+          tempDir,
+          filename.endsWith(extension) ? filename : `${filename}${extension}`
+        );
         const base64 = String(image.data || "").replace(/^data:[^;]+;base64,/, "");
         await writeFile(filePath, Buffer.from(base64, "base64"));
         imagePaths.push(filePath);
@@ -148,7 +155,9 @@ async function handleGeneratorOcr(request, response) {
           response,
           500,
           createGeneratorOcrStageError(
-            detectOcrFailureStage(`${error?.message || ""}\n${error?.stderr || ""}\n${error?.stdout || ""}`),
+            detectOcrFailureStage(
+              `${error?.message || ""}\n${error?.stderr || ""}\n${error?.stdout || ""}`
+            ),
             error,
             error
           )
@@ -160,7 +169,11 @@ async function handleGeneratorOcr(request, response) {
         writeJson(
           response,
           500,
-          createGeneratorOcrStageError(detectOcrFailureStage(result.stderr), new Error("OCR tooling failed before JSON output."), result)
+          createGeneratorOcrStageError(
+            detectOcrFailureStage(result.stderr),
+            new Error("OCR tooling failed before JSON output."),
+            result
+          )
         );
         return;
       }
@@ -169,7 +182,15 @@ async function handleGeneratorOcr(request, response) {
       try {
         parsed = JSON.parse(result.stdout || "{}");
       } catch {
-        writeJson(response, 500, createGeneratorOcrStageError("powershell", new Error("OCR script returned invalid JSON."), result));
+        writeJson(
+          response,
+          500,
+          createGeneratorOcrStageError(
+            "powershell",
+            new Error("OCR script returned invalid JSON."),
+            result
+          )
+        );
         return;
       }
 
@@ -177,7 +198,11 @@ async function handleGeneratorOcr(request, response) {
         writeJson(
           response,
           500,
-          createGeneratorOcrStageError(detectOcrFailureStage(`${parsed.error}\n${result.stderr}\n${result.stdout}`), new Error(String(parsed.error)), result)
+          createGeneratorOcrStageError(
+            detectOcrFailureStage(`${parsed.error}\n${result.stderr}\n${result.stdout}`),
+            new Error(String(parsed.error)),
+            result
+          )
         );
         return;
       }
@@ -279,7 +304,9 @@ function handleClientEvents(request, response, requestUrl) {
     "Cache-Control": "no-cache, no-transform",
     Connection: "keep-alive"
   });
-  response.write(`event: ready\ndata: ${JSON.stringify({ launchSignalSequence: launcherSignalSequence })}\n\n`);
+  response.write(
+    `event: ready\ndata: ${JSON.stringify({ launchSignalSequence: launcherSignalSequence })}\n\n`
+  );
 
   const existingSession = clientSessions.get(clientId) || {};
   clientSessions.set(clientId, {
@@ -369,7 +396,8 @@ function getActiveClientCount() {
   const cutoff = Date.now() - clientLeaseTtlMs;
   let count = 0;
   for (const session of clientSessions.values()) {
-    const hasLiveStream = session?.stream && !session.stream.destroyed && !session.stream.writableEnded;
+    const hasLiveStream =
+      session?.stream && !session.stream.destroyed && !session.stream.writableEnded;
     const hasRecentHeartbeat = Number(session?.lastSeenAt || 0) >= cutoff;
     if (hasLiveStream || hasRecentHeartbeat) {
       count += 1;

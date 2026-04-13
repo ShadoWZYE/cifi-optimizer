@@ -41,7 +41,7 @@ async function collectMarkdownFiles(directory) {
     const entryPath = path.join(directory, entry.name);
 
     if (entry.isDirectory()) {
-      files.push(...await collectMarkdownFiles(entryPath));
+      files.push(...(await collectMarkdownFiles(entryPath)));
       continue;
     }
 

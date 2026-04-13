@@ -142,7 +142,10 @@ body {
   border-radius: 18px;
   padding: 11px 14px;
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
 }
 
 .nav-link:hover,
@@ -256,7 +259,10 @@ textarea {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.82);
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
 }
 
 .research-view-toggle {
@@ -904,7 +910,12 @@ textarea {
   inset: 0 auto auto 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, rgba(110, 205, 255, 0.85), rgba(138, 107, 255, 0.3), transparent 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(110, 205, 255, 0.85),
+    rgba(138, 107, 255, 0.3),
+    transparent 75%
+  );
   opacity: 0.7;
 }
 
@@ -1131,7 +1142,10 @@ textarea {
   color: var(--accent-strong);
   text-decoration: none;
   font-size: 0.9rem;
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
 }
 
 .shard-doc-link:hover {
@@ -1275,7 +1289,9 @@ textarea {
   background: linear-gradient(180deg, rgba(223, 230, 239, 0.98) 0%, rgba(203, 212, 224, 0.98) 100%);
   position: relative;
   cursor: pointer;
-  transition: background 140ms ease, border-color 140ms ease;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease;
 }
 
 .mini-field-toggle input[type="checkbox"]::after {
@@ -1322,7 +1338,9 @@ textarea {
 .install-card.is-active {
   border-color: rgba(110, 201, 132, 0.56);
   background: linear-gradient(180deg, rgba(240, 255, 244, 0.99) 0%, rgba(222, 245, 228, 0.99) 100%);
-  box-shadow: inset 0 0 0 1px rgba(110, 201, 132, 0.24), 0 0 0 1px rgba(110, 201, 132, 0.18);
+  box-shadow:
+    inset 0 0 0 1px rgba(110, 201, 132, 0.24),
+    0 0 0 1px rgba(110, 201, 132, 0.18);
 }
 
 .install-card {
@@ -1355,7 +1373,11 @@ textarea {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.95rem;
   color: inherit;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.92), rgba(199, 219, 240, 0.25));
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.92),
+    rgba(199, 219, 240, 0.25)
+  );
 }
 
 .install-card .snapshot-title {
@@ -1377,21 +1399,47 @@ textarea {
   justify-items: center;
 }
 
-.effect-cells { color: #1c8f49; }
-.effect-mp { color: #c74343; }
-.effect-shards { color: #2d6fe3; }
-.effect-rp { color: #d46c17; }
-.effect-ap { color: #6d46c7; }
+.effect-cells {
+  color: #1c8f49;
+}
+.effect-mp {
+  color: #c74343;
+}
+.effect-shards {
+  color: #2d6fe3;
+}
+.effect-rp {
+  color: #d46c17;
+}
+.effect-ap {
+  color: #6d46c7;
+}
 .effect-materials,
-.effect-other { color: #1f1c1a; }
+.effect-other {
+  color: #1f1c1a;
+}
 
-.ship-theme-C { color: #4d657f; }
-.ship-theme-A { color: #c96e13; }
-.ship-theme-Zg { color: #c94c63; }
-.ship-theme-H { color: #7f9222; }
-.ship-theme-D { color: #2f8cb2; }
-.ship-theme-K { color: #9b871b; }
-.ship-theme-Ze { color: #9f7e16; }
+.ship-theme-C {
+  color: #4d657f;
+}
+.ship-theme-A {
+  color: #c96e13;
+}
+.ship-theme-Zg {
+  color: #c94c63;
+}
+.ship-theme-H {
+  color: #7f9222;
+}
+.ship-theme-D {
+  color: #2f8cb2;
+}
+.ship-theme-K {
+  color: #9b871b;
+}
+.ship-theme-Ze {
+  color: #9f7e16;
+}
 
 .action-button.action-danger {
   border-color: rgba(255, 125, 125, 0.3);
@@ -1536,7 +1584,9 @@ textarea {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-10px);
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .launch-notice.is-visible {

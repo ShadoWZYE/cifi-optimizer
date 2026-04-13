@@ -17,7 +17,7 @@ const probeSourceInputs = [
   path.join(probeSourceDir, "NuGet.Config"),
   ...readdirSync(probeSourceDir)
     .filter((entry) => entry.toLowerCase().endsWith(".cs"))
-    .map((entry) => path.join(probeSourceDir, entry)),
+    .map((entry) => path.join(probeSourceDir, entry))
 ];
 
 const sharedEnv = {
@@ -26,40 +26,36 @@ const sharedEnv = {
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1",
   DOTNET_CLI_TELEMETRY_OPTOUT: "1",
   APPDATA: path.join(root, ".appdata"),
-  NUGET_PACKAGES: path.join(root, ".nuget", "packages"),
+  NUGET_PACKAGES: path.join(root, ".nuget", "packages")
 };
 
 const commandSets = {
-  "build": [
-    ["uabea-rebuild", []],
-  ],
-  "uabea": [
+  build: [["uabea-rebuild", []]],
+  uabea: [
     ["uabea-build", []],
-    ["dotnet", [probeDll]],
+    ["dotnet", [probeDll]]
   ],
   "shards:parameters": [
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]],
+    ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]]
   ],
   "shards:type-metadata": [
     ["uabea-build", []],
     ["dotnet", [probeDll]],
-    ["python", [path.join(root, "scripts", "unity", "shard_type_metadata_probe.py")]],
+    ["python", [path.join(root, "scripts", "unity", "shard_type_metadata_probe.py")]]
   ],
   "shards:method": [
     ["uabea-build", []],
     ["dotnet", [probeDll]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_method_probe.py")]],
+    ["python", [path.join(root, "scripts", "unity", "shard_cost_method_probe.py")]]
   ],
   "shards:cost-native": [
     ["uabea-build", []],
     ["dotnet", [probeDll]],
     ["python", [path.join(root, "scripts", "unity", "shard_cost_method_probe.py")]],
     ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_native_probe.py")]],
+    ["python", [path.join(root, "scripts", "unity", "shard_cost_native_probe.py")]]
   ],
-  "trace": [
-    ["python", [path.join(root, "scripts", "unity", "unity_trace_bundle.py")]],
-  ],
+  trace: [["python", [path.join(root, "scripts", "unity", "unity_trace_bundle.py")]]]
 };
 
 function formatRepoPath(targetPath) {
@@ -67,18 +63,22 @@ function formatRepoPath(targetPath) {
 }
 
 function getNewestPath(paths) {
-  return [...paths]
-    .filter((targetPath) => existsSync(targetPath))
-    .map((targetPath) => ({ path: targetPath, mtimeMs: statSync(targetPath).mtimeMs }))
-    .sort((left, right) => right.mtimeMs - left.mtimeMs)[0] ?? null;
+  return (
+    [...paths]
+      .filter((targetPath) => existsSync(targetPath))
+      .map((targetPath) => ({ path: targetPath, mtimeMs: statSync(targetPath).mtimeMs }))
+      .sort((left, right) => right.mtimeMs - left.mtimeMs)[0] ?? null
+  );
 }
 
 function getProbeFreshness() {
-  const missingOutputs = [probeDll, probeRuntimeConfig].filter((targetPath) => !existsSync(targetPath));
+  const missingOutputs = [probeDll, probeRuntimeConfig].filter(
+    (targetPath) => !existsSync(targetPath)
+  );
   if (missingOutputs.length > 0) {
     return {
       status: "missing",
-      missingOutputs,
+      missingOutputs
     };
   }
 
@@ -88,7 +88,7 @@ function getProbeFreshness() {
     return {
       status: "stale",
       newestSource: newestSource.path,
-      builtDll: builtDll.path,
+      builtDll: builtDll.path
     };
   }
 
@@ -96,22 +96,31 @@ function getProbeFreshness() {
 }
 
 function resolvePythonCommand() {
-  const candidates = process.platform === "win32"
-    ? [["python", []], ["py", ["-3"]]]
-    : [["python3", []], ["python", []]];
+  const candidates =
+    process.platform === "win32"
+      ? [
+          ["python", []],
+          ["py", ["-3"]]
+        ]
+      : [
+          ["python3", []],
+          ["python", []]
+        ];
 
   for (const [command, prefixArgs] of candidates) {
     const probe = spawnSync(command, [...prefixArgs, "--version"], {
       cwd: root,
       env: sharedEnv,
-      stdio: "ignore",
+      stdio: "ignore"
     });
     if (probe.status === 0) {
       return { command, prefixArgs };
     }
   }
 
-  throw new Error("Python 3 was not found on PATH. Install Python 3.11+ or expose `py -3`/`python` on PATH.");
+  throw new Error(
+    "Python 3 was not found on PATH. Install Python 3.11+ or expose `py -3`/`python` on PATH."
+  );
 }
 
 function runCommand(command, args) {
@@ -125,28 +134,37 @@ function runCommand(command, args) {
       return;
     }
     throw new Error(
-      `Probe artifact is stale: ${formatRepoPath(freshness.newestSource)} is newer than ${formatRepoPath(freshness.builtDll)}. `
-      + "Rebuild with `npm run probe:build` before running probe commands."
+      `Probe artifact is stale: ${formatRepoPath(freshness.newestSource)} is newer than ${formatRepoPath(freshness.builtDll)}. ` +
+        "Rebuild with `npm run probe:build` before running probe commands."
     );
   }
 
   if (command === "uabea-rebuild") {
     runCommand("dotnet", ["restore", probeProject]);
-    runCommand("dotnet", ["build", probeProject, "-c", "Release", "--no-restore", "-o", probeOutputDir]);
+    runCommand("dotnet", [
+      "build",
+      probeProject,
+      "-c",
+      "Release",
+      "--no-restore",
+      "-o",
+      probeOutputDir
+    ]);
     return;
   }
 
-  const [resolvedCommand, resolvedArgs] = command === "python"
-    ? (() => {
-        const python = resolvePythonCommand();
-        return [python.command, [...python.prefixArgs, ...args]];
-      })()
-    : [command, args];
+  const [resolvedCommand, resolvedArgs] =
+    command === "python"
+      ? (() => {
+          const python = resolvePythonCommand();
+          return [python.command, [...python.prefixArgs, ...args]];
+        })()
+      : [command, args];
 
   const result = spawnSync(resolvedCommand, resolvedArgs, {
     cwd: root,
     env: sharedEnv,
-    stdio: "inherit",
+    stdio: "inherit"
   });
 
   if (result.error) {
