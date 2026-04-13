@@ -31,15 +31,18 @@ When restarting or handing off a lane, do not let adjacent unresolved systems be
   - the repo has checked shard payload-watch, row-shell, row-alignment, handoff, save-boundary, cost-parameter, cost-method, cost-native, type-metadata, and bonus-slot artifacts
   - the checked `ShardMining` to `ConstructionMilestones` handoff plus typed field table now recover one shard-local declaring row model: `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo`
   - the recovered shard-local row shell currently exposes `Cost`, `MaxLevel`, and `IsUnlocked`
+  - one concrete row now clears as a bounded verification pass: `SU1` binds to the shipped `Alpha` title asset, one three-slot effect package, and one checked `get_SU1Cost` cost shell
 - Still blocked:
+  - only one shard row is currently verified end-to-end; the repo still does not have a full verified row table
   - the exact serialized `upgradeInfoList` payload or save-side owner is not yet recovered
   - exact player-owned shard row state is not yet import-ready
   - exact planner-safe shard cost math and effect-text mapping are not yet recovered
 - Smallest next slice:
-  - recover the exact serialized `upgradeInfoList` payload or save-side owner beyond the recovered shard-local row-model shell, or tighten that seam further without claiming solved player-owned rows
+  - verify one more concrete shard row from an adjacent slot-count or cost-shell class without claiming a full row table, or tighten the next single-row blocker if that row does not clear
 - Start here:
   - `docs/systems/shards/shard-system-verification.md`
   - `docs/systems/shards/shard-owner-family-verification.md`
+  - `data/shard-row-verification-su1.v1.json`
   - `data/shard-milestone-handoff-boundary.v1.json`
   - `data/shard-save-boundary.v1.json`
   - `data/shard-milestone-save-owner-candidates.v1.json`

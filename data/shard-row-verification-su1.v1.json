@@ -1,0 +1,172 @@
+{
+  "dataset": "shard-row-verification-su1.v1",
+  "generatedAt": "2026-04-13",
+  "sources": {
+    "rowModelBoundary": "data/shard-milestone-row-model-boundary.v1.json",
+    "titleEffectBoundary": "data/shard-milestone-title-effect-boundary.v1.json",
+    "effectTextHandlerBoundary": "data/shard-effect-text-handler-boundary.v1.json",
+    "bonusSlotProbe": "data/shard-bonus-slot-probe.v1.json",
+    "costModelBoundary": "data/shard-cost-model-boundary.v1.json",
+    "costNativeProbe": "data/shard-cost-native-probe.v1.json",
+    "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json",
+    "handoffBoundary": "data/shard-milestone-handoff-boundary.v1.json",
+    "groundedMilestones": "data/shard-milestones.grounded.v1.json"
+  },
+  "verifiedRow": {
+    "row": 1,
+    "rowKey": "SU1",
+    "titleBinding": {
+      "assetName": "SMilestone-1-Alpha",
+      "title": "Alpha",
+      "playerFacingName": "Alpha Milestone",
+      "assetTitleMatchesGroundedPackage": true
+    },
+    "declaringRowModel": {
+      "ownerType": "ShardMining",
+      "declaringField": {
+        "name": "upgradeInfoList",
+        "type": "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>",
+        "fieldOffset": 5216
+      },
+      "rowModelType": {
+        "fullName": "ShardMining+ShardUpgradeInfo",
+        "baseType": "System.Object"
+      },
+      "runtimeStateFields": [
+        {
+          "name": "<Cost>k__BackingField",
+          "type": "BreakInfinity.BigDouble",
+          "fieldOffset": 16
+        },
+        {
+          "name": "<MaxLevel>k__BackingField",
+          "type": "System.Boolean",
+          "fieldOffset": 32
+        },
+        {
+          "name": "<IsUnlocked>k__BackingField",
+          "type": "System.Boolean",
+          "fieldOffset": 33
+        }
+      ],
+      "rowShellFields": {
+        "textCheckerField": "Milestone1TextChecker",
+        "unlockRequirementField": "SU1UnlockReq",
+        "bonusTextFields": [
+          "SM1B1Text",
+          "SM1B2Text",
+          "SM1B3Text"
+        ]
+      }
+    },
+    "effectPackage": {
+      "provenance": "community-grounded descriptive package",
+      "milestoneId": "shard-milestone-1",
+      "rarity": "common",
+      "summary": "Boosts Cells gained, MK5 output, and Shards gained at milestone level thresholds.",
+      "unlockCondition": {
+        "type": "total_milestone_levels_required",
+        "value": 0
+      },
+      "fixedBreakpoints": [
+        1,
+        25,
+        50
+      ],
+      "bonuses": [
+        {
+          "unlockLevel": 1,
+          "effectLabel": "Cells Gained",
+          "initialBonus": "1.06x",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 25,
+          "effectLabel": "MK5 Output",
+          "initialBonus": "1.34x",
+          "bonusPerLevel": "1.06x"
+        },
+        {
+          "unlockLevel": 50,
+          "effectLabel": "Shards Gained",
+          "initialBonus": "Unknown",
+          "bonusPerLevel": "1.06x"
+        }
+      ]
+    },
+    "effectPresentationBinding": {
+      "probableTextHandler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+      "presentationSlots": [
+        "ShardMilestoneBonus1",
+        "ShardMilestoneBonus2",
+        "ShardMilestoneBonus3"
+      ],
+      "calcAccessors": [
+        "get_SU1Bonus1Calc",
+        "get_SU1Bonus2Calc",
+        "get_SU1Bonus3Calc"
+      ],
+      "uiTextAnchors": [
+        "LevelText",
+        "DescText",
+        "ValueText",
+        "DescriptionText"
+      ],
+      "bonusSlotCount": 3,
+      "calcAccessorCount": 3,
+      "groundedBonusCount": 3,
+      "groundedCountMatches": true
+    },
+    "costShell": {
+      "getterName": "get_SU1Cost",
+      "getterRva": 38254156,
+      "serializedCostFields": [
+        "SU1StartCost",
+        "SU1CostExponent",
+        "SU1GrowthExponent"
+      ],
+      "nativeOperandFieldNames": [
+        "SU1StartCost",
+        "SU1CostExponent"
+      ],
+      "thresholdStages": [
+        {
+          "minimumLevel": 100,
+          "getterName": "get_OverLevel100Exponent",
+          "baseFieldName": "OverLevel100Base"
+        },
+        {
+          "minimumLevel": 200,
+          "getterName": "get_OverLevel200Exponent",
+          "baseFieldName": "OverLevel200Base"
+        },
+        {
+          "minimumLevel": 300,
+          "getterName": "get_OverLevel300Exponent",
+          "baseFieldName": "OverLevel300Base"
+        },
+        {
+          "minimumLevel": 400,
+          "getterName": "get_OverLevel400Exponent",
+          "baseFieldName": "OverLevel400Base"
+        }
+      ],
+      "stageFieldUsage": [
+        "SU1StartCost",
+        "SU1CostExponent",
+        "SU1GrowthExponent"
+      ]
+    }
+  },
+  "findings": [
+    "SU1 is the cleanest first verified shard row because the shipped title asset, grounded descriptive package, bonus-slot count, sampled calc accessors, and native cost shell all align without the row-0 mismatch or row-28 title conflict.",
+    "The recovered declaring row model ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo is now enough to bind SU1 to one row-local runtime shell with Milestone1TextChecker, SU1UnlockReq, and three SM1B*Text bonus text slots.",
+    "The player-facing Alpha package remains partly community-grounded for effect labels and threshold copy, while the title asset, row shell, calc accessors, and cost shell are checked shard-local game evidence.",
+    "This verifies one concrete shard row package end-to-end at the artifact level without claiming a full shard row table, exact effect-string table, planner-safe costs, or save-import readiness."
+  ],
+  "currentBoundary": [
+    "Treat this artifact as one verified shard-first row package only: SU1 now binds to Alpha title identity, one three-bonus effect package, and one checked cost shell.",
+    "Use it to fork future shard work into bounded row verification instead of reopening broad owner hunting now that the declaring row-model foothold is recovered.",
+    "Do not treat this single-row verification as a full shard row table, exact player-facing effect-string table, planner-safe affordability model, or save-import boundary."
+  ]
+}
