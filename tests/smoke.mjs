@@ -1974,7 +1974,7 @@ assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.recoveredConsu
 });
 assert.match(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin, /CellBoostBonus.*AdManager chest routine family/i);
 assert.match(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin, /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i);
-assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.result, "checked consumer-internal bonus shell recovered but exact CellBoostBonus read site remains unresolved");
+assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.result, "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site");
 assert.equal(tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.result, "checked shared-effect-to-consumer-family handoff recovered but exact CellBoostBonus consumer method remains unresolved");
 assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /remaining ATU\*Button or ATU\*Content path_id family/i.test(line)));
 assert.ok(tokenShopRowRemapBoundaryData.blockedIdentityJoin.missingLinks.some((line) => /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i.test(line)));

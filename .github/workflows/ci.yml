@@ -30,10 +30,16 @@ jobs:
 
           if [[ -n "$BASE_REF" ]]; then
             git fetch --no-tags origin "$BASE_REF"
-            diff_from="$(git merge-base "origin/$BASE_REF" HEAD)"
+            diff_from="$(git merge-base "origin/$BASE_REF" HEAD || true)"
+            if [[ -z "$diff_from" ]] && git rev-parse "HEAD^1" >/dev/null 2>&1; then
+              diff_from="$(git rev-parse "HEAD^1")"
+            fi
           elif [[ -n "$DEFAULT_BRANCH" ]]; then
             git fetch --no-tags origin "$DEFAULT_BRANCH"
-            diff_from="$(git merge-base "origin/$DEFAULT_BRANCH" HEAD)"
+            diff_from="$(git merge-base "origin/$DEFAULT_BRANCH" HEAD || true)"
+            if [[ -z "$diff_from" ]] && git rev-parse "HEAD^1" >/dev/null 2>&1; then
+              diff_from="$(git rev-parse "HEAD^1")"
+            fi
           elif [[ "$BEFORE_SHA" != "$EMPTY_SHA" ]] && git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
             diff_from="$BEFORE_SHA"
             diff_to="$HEAD_SHA"
