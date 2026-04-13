@@ -306,6 +306,14 @@ const tokenBankControllerShellData = JSON.parse(
 );
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const tokenShopProgressionModel = await readFile(
+  new URL("../token-shop-progression-model.js", import.meta.url),
+  "utf8"
+);
+const tokenShopUiSupport = await readFile(
+  new URL("../token-shop-ui-support.js", import.meta.url),
+  "utf8"
+);
 const styles = await readFile(new URL("../styles.css", import.meta.url), "utf8");
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 const recommendationContractModule = await readFile(
@@ -737,12 +745,12 @@ assert.match(
 );
 assert.match(appJs, /function renderTokenShopProgressionEditor/);
 assert.match(appJs, /function getTokenShopProgressionModel/);
-assert.match(appJs, /function formatTokenShopBonusStep/);
+assert.match(tokenShopUiSupport, /function formatTokenShopBonusStep/);
 assert.match(appJs, /Grounded TokenShop checked-row editor/);
-assert.match(appJs, /Default level 0/);
+assert.match(tokenShopProgressionModel, /Default level 0/);
 assert.match(appJs, /Prefill local rows from compatibility import/);
 assert.ok(
-  appJs.includes(
+  tokenShopProgressionModel.includes(
     "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8."
   )
 );
@@ -756,7 +764,7 @@ assert.match(
   appJs,
   /detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839/
 );
-assert.match(appJs, /function sanitizeTokenShopRichText/);
+assert.match(tokenShopUiSupport, /function sanitizeTokenShopRichText/);
 assert.match(appJs, /<details class="token-shop-evidence-note">/);
 assert.match(appJs, /boundary\?\.atu3CrossSystemEffectTrace\?\.recoveredActionEffectChain/);
 assert.match(appJs, /This module is explicitly non-optimizer/);
@@ -766,7 +774,7 @@ assert.match(
   /Known cost inputs: start \$\{formatBoundaryValue\(row\.startCost\)\} \+ additive \$\{formatBoundaryValue\(row\.additiveCost\)\} x current level\./
 );
 assert.match(appJs, /Current vs next bonus/);
-assert.match(appJs, /"checked effect step" : "extracted bonus step"/);
+assert.match(tokenShopUiSupport, /"checked effect step\(s\)" : "extracted bonus step\(s\)"/);
 assert.match(html, /id="tokenShopProgressionStatus"/);
 assert.match(
   appJs,
@@ -812,7 +820,10 @@ assert.match(
   /Checked player-facing names are preferred where they exist, grounded prefab identity is used where they do not/
 );
 assert.match(appJs, /Overview TokenShop affordability[\s\S]*Current vs next bonus •/);
-assert.match(appJs, /Grounded as a checked shell-to-prefab-to-player-facing-title row\./);
+assert.match(
+  tokenShopUiSupport,
+  /Grounded as a checked shell-to-prefab-to-player-facing-title row\./
+);
 assert.match(appJs, /function getRecommendationExplainabilitySummary/);
 assert.match(appJs, /function getRecommendationContractSummary/);
 assert.match(appJs, /function getRecommendationExplainabilityAudit/);
