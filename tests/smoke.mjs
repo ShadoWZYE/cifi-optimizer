@@ -890,10 +890,7 @@ assert.match(
   playerProfileBoundarySupportModule,
   /export function buildPlayerProfileBoundaryGroups/
 );
-assert.match(
-  playerProfileBoundarySupportModule,
-  /export function getPlayerProfileBoundaryAudit/
-);
+assert.match(playerProfileBoundarySupportModule, /export function getPlayerProfileBoundaryAudit/);
 assert.match(playerProfileBoundarySupportModule, /export function getProfileCompletion/);
 assert.match(
   playerProfileBoundarySupportModule,
@@ -7985,17 +7982,17 @@ assert.doesNotMatch(appJs, /function getResearchTrackProgressLabel/);
 assert.match(researchValidationSupportModule, /export function getResearchTrackOrder/);
 assert.match(researchValidationSupportModule, /export function getResearchTrackLane/);
 assert.match(researchValidationSupportModule, /export function getResearchTrackStatus/);
-assert.match(
-  normalizedResearchValidationSupportModule,
-  /return "Foundation archive";/
-);
+assert.match(normalizedResearchValidationSupportModule, /return "Foundation archive";/);
 assert.match(appJs, /Archived foundation cards may still appear here as historical context/);
 assert.match(researchValidationSupportModule, /export function getResearchTrackProgressLabel/);
 assert.match(researchValidationSupportModule, /export function buildSnapshotValidationCases/);
 assert.match(researchValidationSupportModule, /export function getValidationScopeMeta/);
 assert.match(researchValidationSupportModule, /export function getDatasetBadgeMetaFromEntry/);
 assert.match(appJs, /from "\.\/recommendation-contract\.js"/);
-assert.match(researchValidationSupportModule, /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/);
+assert.match(
+  researchValidationSupportModule,
+  /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/
+);
 assert.match(
   researchValidationSupportModule,
   /"spend-multiverse-savedata-import-surface": "PR 4 successor"/

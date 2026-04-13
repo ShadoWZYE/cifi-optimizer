@@ -226,7 +226,8 @@ export function getImportedMultiverseMarketPreviewCardModel(preview, formatShard
       fieldPath: entry.fieldPath
     })),
     trailingPreviewLine:
-      preview.trailingPreviewRows.length && preview.importedSpanRowCount > preview.previewRows.length
+      preview.trailingPreviewRows.length &&
+      preview.importedSpanRowCount > preview.previewRows.length
         ? `Trailing imported raw rows: ${preview.trailingPreviewRows
             .map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`)
             .join(" | ")}`

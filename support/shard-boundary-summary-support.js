@@ -308,8 +308,7 @@ export function getShardEffectTextHandlerBoundarySummary(boundary) {
     hasUiContextAnchors: ["LevelText", "DescText", "ValueText", "DescriptionText"].every((name) =>
       uiContextAnchors.includes(name)
     ),
-    textHandlerLabel:
-      boundary?.probableTextHandler || "TextHandlerShardMilestoneBonusesPerLevel/N",
+    textHandlerLabel: boundary?.probableTextHandler || "TextHandlerShardMilestoneBonusesPerLevel/N",
     genericWriterLabel: boundary?.genericMilestoneWriter || "SetAllMilestoneTexts",
     presentationFamilyLabel: presentationFamily.join(", "),
     bonusCalcLabel: sampleBonusCalcAccessors.join(", "),

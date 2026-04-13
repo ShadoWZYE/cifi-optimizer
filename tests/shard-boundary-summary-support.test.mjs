@@ -60,8 +60,20 @@ test("shard cost-model summary preserves sampled window and row-shell labels", (
     dataCarrier: "ShardUpgradeInfo",
     dataCarrierTieIn: "ShardMining|ShardUpgradeInfo",
     sampleCostAccessorWindows: [
-      { label: "earlyWindow", start: 0, end: 9, count: 10, accessors: ["get_SU0Cost", "get_SU9Cost"] },
-      { label: "lateWindow", start: 23, end: 29, count: 7, accessors: ["get_SU23Cost", "get_SU29Cost"] }
+      {
+        label: "earlyWindow",
+        start: 0,
+        end: 9,
+        count: 10,
+        accessors: ["get_SU0Cost", "get_SU9Cost"]
+      },
+      {
+        label: "lateWindow",
+        start: 23,
+        end: 29,
+        count: 7,
+        accessors: ["get_SU23Cost", "get_SU29Cost"]
+      }
     ],
     row0CostFields: [
       "SU0StartCost",

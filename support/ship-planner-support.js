@@ -43,10 +43,8 @@ export function createShipPlannerSupport({
   }
 
   function getInstallEffectTypes(shipKey, installIndex) {
-    const effectTypes =
-      desmosInstallWeightMaps[shipKey]?.[installIndex] ??
-      getShipTemplate(shipKey).installs[installIndex].effectTypes ??
-      ["other"];
+    const effectTypes = desmosInstallWeightMaps[shipKey]?.[installIndex] ??
+      getShipTemplate(shipKey).installs[installIndex].effectTypes ?? ["other"];
     return (Array.isArray(effectTypes) ? effectTypes : [effectTypes]).map(normalizeEffectType);
   }
 
@@ -367,7 +365,12 @@ export function createShipPlannerSupport({
         }
         const gain = getInstallGain(shipKey, index);
         const delta = getTapDelta(shipKey, index);
-        return { index, score: gain.weightedGain * Math.max(delta, 1), rawGain: gain.rawGain, delta };
+        return {
+          index,
+          score: gain.weightedGain * Math.max(delta, 1),
+          rawGain: gain.rawGain,
+          delta
+        };
       })
       .filter(Boolean);
 

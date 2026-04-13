@@ -4,62 +4,60 @@ import assert from "node:assert/strict";
 import { createShipPlannerSupport } from "../support/ship-planner-support.js";
 
 function createSupport(overrides = {}) {
-  const activeLoadout =
-    overrides.activeLoadout ??
-    {
-      ships: { C: [0, 0, 0], Ze: Array(11).fill(0) },
-      filters: { cells: true, gens: true, mp: true, shards: true, rp: true, ap: true, materials: true }
-    };
-  const shipConfig =
-    overrides.shipConfig ??
-    {
-      weights: {
-        CellsAndGens: 1,
-        Mods: 3,
-        Shards: 2,
-        RP: 1,
-        AP: 1,
-        Mats: 1
-      }
-    };
-  const shipTemplates =
-    overrides.shipTemplates ??
-    {
-      C: {
-        installs: [
-          { effectTypes: ["mods"] },
-          { effectTypes: ["cells"] },
-          { effectTypes: ["cells"] }
-        ],
-        powerTerms: [null, null, null],
-        caps: [10, 10, 10],
-        reserveThresholds: [0, 0, 0]
-      },
-      Ze: {
-        installs: Array.from({ length: 11 }, () => ({ effectTypes: ["ap"] })),
-        powerTerms: Array(11).fill(null),
-        caps: Array(11).fill(10),
-        reserveThresholds: Array(11).fill(0)
-      }
-    };
-  const communityToolState =
-    overrides.communityToolState ??
-    {
-      academyGears: {},
-      innovation: { inno1: true, inno2: false, darkInno: false, softCap: false },
-      generators: {},
-      techLevels: { MaxGenHWunlocked: 4, MaxGenSWunlocked: 6, S_techs: 0 },
-      zagreus: {},
-      hephaestus: { tickTimer: 60 },
-      demeter: { OpsFromAotC: 2, TicksPerOp: 30 },
-      koios: { StudiesPerResBar: 3, TicksPerResBar: 20 },
-      zeus: { CappedMissions: 4, LowestUncappedMissionTimer: 10 },
-      crew: { Crew: 10, ZeusCrew: 7 },
-      technical: { Meltdown: 2, LongRun: false, ShortRunLenMins: 120 }
-    };
+  const activeLoadout = overrides.activeLoadout ?? {
+    ships: { C: [0, 0, 0], Ze: Array(11).fill(0) },
+    filters: {
+      cells: true,
+      gens: true,
+      mp: true,
+      shards: true,
+      rp: true,
+      ap: true,
+      materials: true
+    }
+  };
+  const shipConfig = overrides.shipConfig ?? {
+    weights: {
+      CellsAndGens: 1,
+      Mods: 3,
+      Shards: 2,
+      RP: 1,
+      AP: 1,
+      Mats: 1
+    }
+  };
+  const shipTemplates = overrides.shipTemplates ?? {
+    C: {
+      installs: [{ effectTypes: ["mods"] }, { effectTypes: ["cells"] }, { effectTypes: ["cells"] }],
+      powerTerms: [null, null, null],
+      caps: [10, 10, 10],
+      reserveThresholds: [0, 0, 0]
+    },
+    Ze: {
+      installs: Array.from({ length: 11 }, () => ({ effectTypes: ["ap"] })),
+      powerTerms: Array(11).fill(null),
+      caps: Array(11).fill(10),
+      reserveThresholds: Array(11).fill(0)
+    }
+  };
+  const communityToolState = overrides.communityToolState ?? {
+    academyGears: {},
+    innovation: { inno1: true, inno2: false, darkInno: false, softCap: false },
+    generators: {},
+    techLevels: { MaxGenHWunlocked: 4, MaxGenSWunlocked: 6, S_techs: 0 },
+    zagreus: {},
+    hephaestus: { tickTimer: 60 },
+    demeter: { OpsFromAotC: 2, TicksPerOp: 30 },
+    koios: { StudiesPerResBar: 3, TicksPerResBar: 20 },
+    zeus: { CappedMissions: 4, LowestUncappedMissionTimer: 10 },
+    crew: { Crew: 10, ZeusCrew: 7 },
+    technical: { Meltdown: 2, LongRun: false, ShortRunLenMins: 120 }
+  };
 
   return createShipPlannerSupport({
-    desmosInstallWeightMaps: overrides.desmosInstallWeightMaps ?? { C: [["mods"], ["cells"], ["cells"]] },
+    desmosInstallWeightMaps: overrides.desmosInstallWeightMaps ?? {
+      C: [["mods"], ["cells"], ["cells"]]
+    },
     getActiveLoadout() {
       return activeLoadout;
     },
@@ -100,7 +98,15 @@ test("install weighting normalizes effect lanes and honors the soft-cap fallback
   const support = createSupport({
     activeLoadout: {
       ships: { C: [0, 0, 0], Ze: Array(11).fill(0) },
-      filters: { cells: false, gens: true, mp: true, shards: true, rp: true, ap: true, materials: false }
+      filters: {
+        cells: false,
+        gens: true,
+        mp: true,
+        shards: true,
+        rp: true,
+        ap: true,
+        materials: false
+      }
     },
     communityToolState: {
       academyGears: {},
@@ -150,7 +156,15 @@ test("install gain and next-best evaluation preserve weighted scoring and tie in
   const tieSupport = createSupport({
     activeLoadout: {
       ships: { C: [1, 0, 0], Ze: Array(11).fill(0) },
-      filters: { cells: true, gens: true, mp: true, shards: true, rp: true, ap: true, materials: true }
+      filters: {
+        cells: true,
+        gens: true,
+        mp: true,
+        shards: true,
+        rp: true,
+        ap: true,
+        materials: true
+      }
     },
     shipTemplates: {
       C: {

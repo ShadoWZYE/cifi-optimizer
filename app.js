@@ -1427,11 +1427,15 @@ function renderQuickPanels() {
 }
 
 function renderOverview() {
-  $("#profileCompletionValue").textContent = `${getProfileCompletion(state.playerProfile, ACTIVE_PROFILE_FORM_FIELD_PATHS)}%`;
+  $("#profileCompletionValue").textContent =
+    `${getProfileCompletion(state.playerProfile, ACTIVE_PROFILE_FORM_FIELD_PATHS)}%`;
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
   const validation = runValidationCases();
-  const { mvp: mvpValidation, apk: apkValidation, support: supportValidation } =
-    partitionValidationResults(validation);
+  const {
+    mvp: mvpValidation,
+    apk: apkValidation,
+    support: supportValidation
+  } = partitionValidationResults(validation);
   const recommendationFeed = getActiveMvpRecommendationFeed();
   const recommendationFeedSupport = getActiveMvpRecommendationFeedSupport();
   $("#validationStatusValue").textContent =

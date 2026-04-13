@@ -91,10 +91,7 @@ test("boundary audit and completion helpers keep labeled import summaries", () =
     }
   );
 
-  assert.deepEqual(audit.counts, [
-    "Canonical shared truth: 2/2",
-    "Compatibility leftovers: 1/2"
-  ]);
+  assert.deepEqual(audit.counts, ["Canonical shared truth: 2/2", "Compatibility leftovers: 1/2"]);
   assert.match(audit.notes[0], /multiverseMarket/);
   assert.match(audit.notes[1], /external-model implementation state/);
   assert.match(audit.notes[2], /gemDust/);
