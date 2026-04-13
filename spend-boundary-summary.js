@@ -792,3 +792,294 @@ export function getMultiverseMarketValidatedCoverage(multiverseMarket) {
     rangeLabel: formatNumericRanges(validatedIds)
   };
 }
+
+export function getTokeniumNamingSummary(clues) {
+  const resourceIcons = Array.isArray(clues?.assetNames?.resourceIcons)
+    ? clues.assetNames.resourceIcons
+    : [];
+  const academySprites = Array.isArray(clues?.assetNames?.academySprites)
+    ? clues.assetNames.academySprites
+    : [];
+  const level0Shells = Array.isArray(clues?.level0Shells) ? clues.level0Shells : [];
+
+  return {
+    hasNamingClues:
+      resourceIcons.includes("Resource_Tokenium") &&
+      academySprites.includes("Aca.Tokenium553") &&
+      level0Shells.includes("CostBox-Tokens") &&
+      level0Shells.includes("CostBox-Tokenium"),
+    resourceLabel:
+      resourceIcons.find((value) => value === "Resource_Tokenium") || "Resource_Tokenium",
+    academyLabel: academySprites.find((value) => value === "Aca.Tokenium553") || "Aca.Tokenium553",
+    tokenShellLabel: level0Shells.find((value) => value === "CostBox-Tokens") || "CostBox-Tokens",
+    tokeniumShellLabel:
+      level0Shells.find((value) => value === "CostBox-Tokenium") || "CostBox-Tokenium"
+  };
+}
+
+export function getTokenShopCoverageSummary(tokenShop) {
+  const numericTable = tokenShop?.numeric_table ?? {};
+  const numericKeys = Object.keys(numericTable);
+  const fields = Array.isArray(tokenShop?.fields) ? tokenShop.fields : [];
+  const controllerFieldNames = new Set(
+    fields.filter((entry) => entry.group === "controller").map((entry) => entry.field)
+  );
+  const groups = [
+    ...new Set(
+      numericKeys
+        .map((key) => numericTable[key]?.group)
+        .filter((value) => typeof value === "string" && value.length)
+    )
+  ].sort();
+  const namedLanes = ["TokenBoost", "DiamondBoost", "TokenDailiesT2"].filter(
+    (key) => key in numericTable
+  );
+
+  return {
+    hasCoverage: numericKeys.length > 0,
+    numericGroupCount: numericKeys.length,
+    hasNamedLanes: namedLanes.length === 3,
+    namedLaneLabel: namedLanes.join(", "),
+    tierLabel: groups.join(", "),
+    hasControllerAnchors:
+      controllerFieldNames.has("BankFill") && controllerFieldNames.has("TokenBankDescriptionText")
+  };
+}
+
+export function getImportedMultiverseMarketPreview(
+  importedMarketState,
+  multiverseMarket,
+  multiverseMarketRangeBoundary,
+  {
+    formatBoundaryValue,
+    formatShardNumber,
+    isBoundaryValuePresent
+  }
+) {
+  void multiverseMarket;
+  const overlapIds = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)
+    ? [
+        ...new Set(
+          multiverseMarketRangeBoundary.overlapIds
+            .map((value) => Number(value))
+            .filter((value) => Number.isFinite(value))
+            .sort((left, right) => left - right)
+        )
+      ]
+    : [];
+  const importedState =
+    typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
+  const overlapIdSet = new Set(overlapIds);
+  const importedSpanRows = Object.entries(importedState)
+    .map(([key, value]) => {
+      const match = /^IS(\d+)Level$/u.exec(String(key));
+      if (!match) {
+        return null;
+      }
+      const rowId = Number(match[1]);
+      const level = Number(value);
+      if (!Number.isFinite(rowId) || rowId < 1 || rowId > 110 || !Number.isFinite(level)) {
+        return null;
+      }
+      return {
+        rowId,
+        level,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.IS${rowId}Level`
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.rowId - right.rowId);
+  const importedSpanIds = new Set(importedSpanRows.map((entry) => entry.rowId));
+  const importedOverlapRows = importedSpanRows.filter((entry) => overlapIdSet.has(entry.rowId));
+  const missingOverlapRows = overlapIds.filter((rowId) => !importedSpanIds.has(rowId));
+  const missingSpanRows = [];
+  for (let rowId = 1; rowId <= 110; rowId += 1) {
+    if (!importedSpanIds.has(rowId)) {
+      missingSpanRows.push(rowId);
+    }
+  }
+  const previewRows = importedSpanRows.slice(0, 12);
+  const trailingPreviewRows = importedSpanRows.slice(-4);
+  const importedTradeCounters = Object.entries(importedState)
+    .map(([key, value]) => {
+      const match = /^(Esoteric|Necrum)R([1-9])Trades$/u.exec(String(key));
+      if (!match) {
+        return null;
+      }
+      return {
+        family: match[1],
+        rank: Number(match[2]),
+        key,
+        value,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.${key}`
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => {
+      if (left.family !== right.family) {
+        return left.family.localeCompare(right.family);
+      }
+      return left.rank - right.rank;
+    });
+  const expectedTradeCounterKeys = [
+    ...Array.from({ length: 9 }, (_, index) => `EsotericR${index + 1}Trades`),
+    ...Array.from({ length: 9 }, (_, index) => `NecrumR${index + 1}Trades`)
+  ];
+  const importedTradeKeySet = new Set(importedTradeCounters.map((entry) => entry.key));
+  const missingTradeCounterKeys = expectedTradeCounterKeys.filter(
+    (key) => !importedTradeKeySet.has(key)
+  );
+  const tradeCounterFamilies = {
+    Esoteric: importedTradeCounters.filter((entry) => entry.family === "Esoteric"),
+    Necrum: importedTradeCounters.filter((entry) => entry.family === "Necrum")
+  };
+  const earlyMechWindowKeys = [
+    "Mech1Unlocked",
+    "Mech1Units",
+    "Mech1Upg1Level",
+    "Mech1Upg2Level",
+    "Mech1MissionsProgress",
+    "FinalMech1MainBonus",
+    "Mech1MissionsCompleted",
+    "Mech2Unlocked"
+  ];
+  const importedEarlyMechFields = earlyMechWindowKeys
+    .map((key) => {
+      const value = importedState[key];
+      if (!isBoundaryValuePresent(value)) {
+        return null;
+      }
+      return {
+        key,
+        value,
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.${key}`
+      };
+    })
+    .filter(Boolean);
+  const importedEarlyMechKeySet = new Set(importedEarlyMechFields.map((entry) => entry.key));
+  const missingEarlyMechFields = earlyMechWindowKeys.filter(
+    (key) => !importedEarlyMechKeySet.has(key)
+  );
+  const supportedTextModel = {
+    effectLabelLane: "BonusDescriptionText",
+    baseBonusLane: "PerLevelBonusText",
+    idLane: "IDText",
+    quarantinedCurrentValueLane: "CurrentBonusText"
+  };
+  const rowSummaryShape = {
+    shapeId: "multiverse-market-row-local-text-summary",
+    groundedFields: [
+      {
+        key: "effectLabel",
+        slotAlias: supportedTextModel.effectLabelLane,
+        sourceLane: "SetAllBonusTexts -> SetISNBonusText"
+      },
+      {
+        key: "baseBonus",
+        slotAlias: supportedTextModel.baseBonusLane,
+        sourceLane: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText"
+      },
+      {
+        key: "rowIdLabel",
+        slotAlias: supportedTextModel.idLane,
+        sourceLane: "SetIS1IDText through SetIS110IDText"
+      }
+    ],
+    quarantinedFields: [
+      {
+        key: "currentValueDisplay",
+        slotAlias: supportedTextModel.quarantinedCurrentValueLane,
+        status: "quarantined-unrecovered-runtime-only-display-lane"
+      }
+    ]
+  };
+  const overlapRowSummaries = importedOverlapRows.map((entry) => ({
+    rowId: entry.rowId,
+    level: entry.level,
+    fieldPath: entry.fieldPath,
+    shapeId: rowSummaryShape.shapeId,
+    groundedFields: rowSummaryShape.groundedFields.map((field) => ({
+      ...field,
+      status: "grounded-compatibility-evidence"
+    })),
+    quarantinedFields: rowSummaryShape.quarantinedFields.map((field) => ({
+      ...field,
+      reason: "Distinct unrecovered runtime-only display lane"
+    }))
+  }));
+
+  return {
+    hasImportedCompatibilityPreview:
+      importedSpanRows.length > 0 ||
+      importedTradeCounters.length > 0 ||
+      importedEarlyMechFields.length > 0,
+    hasImportedSpanPreview: importedSpanRows.length > 0,
+    importTargetPath: "compatibility.unmappedSystemState.multiverseMarket",
+    wrapperOnlyFieldLabel: "InscryptionsDone",
+    typedSpanLabel: "IS1Level through IS110Level",
+    tradeCounterLabel:
+      "EsotericR1Trades through EsotericR9Trades and NecrumR1Trades through NecrumR9Trades",
+    earlyMechWindowLabel: "Mech1Unlocked through Mech2Unlocked",
+    importedSpanRowCount: importedSpanRows.length,
+    totalSpanRowCount: 110,
+    importedRangeLabel: importedSpanRows.length
+      ? formatNumericRanges(importedSpanRows.map((entry) => entry.rowId))
+      : "",
+    firstImportedRowLabel: importedSpanRows.length ? `IS${importedSpanRows[0].rowId}Level` : "",
+    lastImportedRowLabel: importedSpanRows.length
+      ? `IS${importedSpanRows[importedSpanRows.length - 1].rowId}Level`
+      : "",
+    missingSpanRows,
+    missingSpanCount: missingSpanRows.length,
+    missingSpanLabel: missingSpanRows.length
+      ? missingSpanRows
+          .slice(0, 12)
+          .map((rowId) => `IS${rowId}Level`)
+          .join(", ")
+      : "none",
+    importedSpanRows,
+    hasOverlapGroundedRows: overlapIds.length > 0,
+    overlapRangeLabel: formatNumericRanges(overlapIds),
+    overlapRowCount: overlapIds.length,
+    hasOverlapLevelPreview: importedOverlapRows.length > 0,
+    importedOverlapRowCount: importedOverlapRows.length,
+    overlapPreviewRows: importedOverlapRows.slice(0, 4),
+    overlapRowSummaries: overlapRowSummaries.slice(0, 4),
+    missingOverlapRows,
+    missingOverlapLabel: missingOverlapRows.length
+      ? missingOverlapRows.map((rowId) => `IS${rowId}Level`).join(", ")
+      : "none",
+    hasTradeCounterPreview: importedTradeCounters.length > 0,
+    importedTradeCounters,
+    importedTradeCounterCount: importedTradeCounters.length,
+    totalTradeCounterCount: expectedTradeCounterKeys.length,
+    missingTradeCounterKeys,
+    missingTradeCounterLabel: missingTradeCounterKeys.length
+      ? missingTradeCounterKeys.slice(0, 12).join(", ")
+      : "none",
+    tradeCounterFamilies,
+    tradeCounterSampleLine: importedTradeCounters.length
+      ? importedTradeCounters
+          .slice(0, 6)
+          .map((entry) => `${entry.key} ${formatBoundaryValue(entry.value)}`)
+          .join(" | ")
+      : "",
+    hasEarlyMechPreview: importedEarlyMechFields.length > 0,
+    importedEarlyMechFields,
+    importedEarlyMechCount: importedEarlyMechFields.length,
+    totalEarlyMechCount: earlyMechWindowKeys.length,
+    missingEarlyMechFields,
+    missingEarlyMechLabel: missingEarlyMechFields.length
+      ? missingEarlyMechFields.join(", ")
+      : "none",
+    previewRows,
+    trailingPreviewRows,
+    supportedTextModel,
+    rowSummaryShape,
+    sampleLine: previewRows.length
+      ? previewRows
+          .map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`)
+          .join(" | ")
+      : ""
+  };
+}

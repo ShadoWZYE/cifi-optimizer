@@ -3,8 +3,11 @@ import assert from "node:assert/strict";
 
 import {
   formatNumericRanges,
+  getImportedMultiverseMarketPreview,
   getMultiverseMarketMarketMemberBoundarySummary,
+  getTokeniumNamingSummary,
   getTokenBankStateSummary,
+  getTokenShopCoverageSummary,
   getTokenShopCostLaneSummary
 } from "../spend-boundary-summary.js";
 
@@ -59,6 +62,78 @@ test("getTokenBankStateSummary keeps the cloud-save boundary separate from contr
       cloudSaveStateMachine: "<CloudSavePlayerProfile>d__24"
     }
   );
+});
+
+test("token spend naming and coverage summaries preserve the checked lane anchors", () => {
+  assert.deepEqual(
+    getTokeniumNamingSummary({
+      assetNames: {
+        resourceIcons: ["Resource_Tokenium"],
+        academySprites: ["Aca.Tokenium553"]
+      },
+      level0Shells: ["CostBox-Tokens", "CostBox-Tokenium"]
+    }),
+    {
+      hasNamingClues: true,
+      resourceLabel: "Resource_Tokenium",
+      academyLabel: "Aca.Tokenium553",
+      tokenShellLabel: "CostBox-Tokens",
+      tokeniumShellLabel: "CostBox-Tokenium"
+    }
+  );
+
+  assert.deepEqual(
+    getTokenShopCoverageSummary({
+      numeric_table: {
+        TokenBoost: { group: "T1" },
+        DiamondBoost: { group: "T1" },
+        TokenDailiesT2: { group: "T2" }
+      },
+      fields: [
+        { group: "controller", field: "BankFill" },
+        { group: "controller", field: "TokenBankDescriptionText" }
+      ]
+    }),
+    {
+      hasCoverage: true,
+      numericGroupCount: 3,
+      hasNamedLanes: true,
+      namedLaneLabel: "TokenBoost, DiamondBoost, TokenDailiesT2",
+      tierLabel: "T1, T2",
+      hasControllerAnchors: true
+    }
+  );
+});
+
+test("imported multiverse market preview keeps the compatibility-only summary shape", () => {
+  const preview = getImportedMultiverseMarketPreview(
+    {
+      IS71Level: 3,
+      IS72Level: 4,
+      EsotericR1Trades: 9,
+      Mech1Unlocked: true
+    },
+    {},
+    { overlapIds: [71, 72] },
+    {
+      formatBoundaryValue(value) {
+        return String(value);
+      },
+      formatShardNumber(value) {
+        return String(value);
+      },
+      isBoundaryValuePresent(value) {
+        return value !== null && value !== undefined && value !== "";
+      }
+    }
+  );
+
+  assert.equal(preview.hasImportedCompatibilityPreview, true);
+  assert.equal(preview.importedRangeLabel, "71-72");
+  assert.equal(preview.overlapRangeLabel, "71-72");
+  assert.equal(preview.tradeCounterSampleLine, "EsotericR1Trades 9");
+  assert.equal(preview.missingOverlapLabel, "none");
+  assert.equal(preview.rowSummaryShape.shapeId, "multiverse-market-row-local-text-summary");
 });
 
 test("getMultiverseMarketMarketMemberBoundarySummary keeps the PlayerProfile host narrowing", () => {

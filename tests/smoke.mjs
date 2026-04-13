@@ -8104,7 +8104,7 @@ assert.match(appJs, /Grounding checks stay separate from MVP behavior/);
 assert.match(appJs, /function renderSpendPlannerBoundary/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /compatibility\.unmappedSystemState/);
-assert.match(appJs, /function getTokeniumNamingSummary/);
+assert.match(spendBoundarySummaryJs, /function getTokeniumNamingSummary/);
 assert.match(appJs, /from "\.\/spend-boundary-summary\.js"/);
 assert.match(spendBoundarySummaryJs, /function getTokenBankStateSummary/);
 assert.match(spendBoundarySummaryJs, /function getDailyTokeniumLaneSummary/);
@@ -8118,8 +8118,8 @@ assert.match(
   /export function getMultiverseMarketMarketMemberBoundarySummary\(boundary\)/
 );
 assert.match(
-  normalizedAppJs,
-  /function getImportedMultiverseMarketPreview\( importedMarketState, multiverseMarket, multiverseMarketRangeBoundary \)/
+  normalizedSpendBoundarySummaryJs,
+  /export function getImportedMultiverseMarketPreview\( importedMarketState, multiverseMarket, multiverseMarketRangeBoundary, \{ formatBoundaryValue, formatShardNumber, isBoundaryValuePresent \} \)/
 );
 assert.match(spendBoundarySummaryJs, /function getMultiverseMarketSaveBoundarySummary/);
 assert.match(
@@ -8147,25 +8147,25 @@ assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
 assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Emporium compatibility preview/);
 assert.match(appJs, /grounded Emporium text model is split/i);
-assert.match(appJs, /BonusDescriptionText/);
-assert.match(appJs, /PerLevelBonusText/);
-assert.match(appJs, /IDText/);
-assert.match(appJs, /CurrentBonusText/);
+assert.match(spendBoundarySummaryJs, /BonusDescriptionText/);
+assert.match(spendBoundarySummaryJs, /PerLevelBonusText/);
+assert.match(spendBoundarySummaryJs, /IDText/);
+assert.match(spendBoundarySummaryJs, /CurrentBonusText/);
 assert.match(appJs, /distinct unrecovered runtime-only display lane/i);
-assert.match(appJs, /multiverse-market-row-local-text-summary/);
+assert.match(spendBoundarySummaryJs, /multiverse-market-row-local-text-summary/);
 assert.match(appJs, /effectLabel/);
 assert.match(appJs, /baseBonus/);
-assert.match(appJs, /rowIdLabel/);
-assert.match(appJs, /currentValueDisplay/);
+assert.match(spendBoundarySummaryJs, /rowIdLabel/);
+assert.match(spendBoundarySummaryJs, /currentValueDisplay/);
 assert.match(appJs, /App-side Emporium row summaries now normalize only the grounded lanes/i);
-assert.match(appJs, /const overlapRowSummaries = importedOverlapRows\.map/);
+assert.match(spendBoundarySummaryJs, /const overlapRowSummaries = importedOverlapRows\.map/);
 assert.match(
   appJs,
   /Structured compatibility evidence from <code>\$\{escapeHtml\(entry\.shapeId\)\}<\/code>:/
 );
-assert.match(appJs, /grounded-compatibility-evidence/);
-assert.match(appJs, /quarantined-unrecovered-runtime-only-display-lane/);
-assert.match(appJs, /Distinct unrecovered runtime-only display lane/);
+assert.match(spendBoundarySummaryJs, /grounded-compatibility-evidence/);
+assert.match(spendBoundarySummaryJs, /quarantined-unrecovered-runtime-only-display-lane/);
+assert.match(spendBoundarySummaryJs, /Distinct unrecovered runtime-only display lane/);
 assert.match(
   appJs,
   /compatibility-only Emporium import state under <code>\$\{escapeHtml\(preview\.importTargetPath\)\}<\/code>\. It preserves the checked raw <code>\$\{escapeHtml\(preview\.typedSpanLabel\)\}<\/code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only\./i
@@ -8308,11 +8308,11 @@ assert.match(
   appJs,
   /metadata-only \$\{marketMemberSummary\.memberLabel\} shell stays unresolved as an exact typed field/
 );
-assert.match(appJs, /"TokenBoost"/);
-assert.match(appJs, /"DiamondBoost"/);
-assert.match(appJs, /"TokenDailiesT2"/);
-assert.match(appJs, /"CostBox-Tokens"/);
-assert.match(appJs, /"CostBox-Tokenium"/);
+assert.match(spendBoundarySummaryJs, /"TokenBoost"/);
+assert.match(spendBoundarySummaryJs, /"DiamondBoost"/);
+assert.match(spendBoundarySummaryJs, /"TokenDailiesT2"/);
+assert.match(spendBoundarySummaryJs, /"CostBox-Tokens"/);
+assert.match(spendBoundarySummaryJs, /"CostBox-Tokenium"/);
 assert.match(
   appJs,
   /These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels/
