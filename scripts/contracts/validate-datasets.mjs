@@ -8154,6 +8154,98 @@ function validateTokenShopRowRemapBoundary(boundary) {
     "token shop row remap boundary ATU10 trace result drifted"
   );
   expectRecord(
+    boundary.atu11BridgeFollowUp,
+    "token shop row remap boundary ATU11 bridge follow-up must be an object"
+  );
+  expectRecord(
+    boundary.atu11BridgeFollowUp.recoveredBridge,
+    "token shop row remap boundary ATU11 recovered bridge must be an object"
+  );
+  expectRecord(
+    boundary.atu11BridgeFollowUp.boundedTitleSideNegative,
+    "token shop row remap boundary ATU11 bounded title-side negative must be an object"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.targetId,
+    "token-shop-atu11-mk7-bridge",
+    "token shop row remap boundary ATU11 trace target drifted"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.recoveredBridge.shellField,
+    "ATU11Button",
+    "token shop row remap boundary ATU11 trace bridge shell drifted"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.recoveredBridge.shellPathId,
+    15793,
+    "token shop row remap boundary ATU11 trace bridge shell path drifted"
+  );
+  assert.deepEqual(
+    boundary.atu11BridgeFollowUp.recoveredBridge.ownerFieldBlock,
+    [
+      "MK7TokenBoostStartCost",
+      "MK7TokenBoostAdditiveCost",
+      "MK7TokenBoostBonus",
+      "MK7TokenBoostFillMaxLevel",
+      "MK7TokenBoostFill"
+    ],
+    "token shop row remap boundary ATU11 trace bridge owner field block drifted"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.recoveredBridge.supportingActionHook,
+    "BuyMK7TokenBoost",
+    "token shop row remap boundary ATU11 trace bridge action hook drifted"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.recoveredBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK7Booster",
+    "token shop row remap boundary ATU11 trace bridge prefab drifted"
+  );
+  assert.match(
+    boundary.atu11BridgeFollowUp.recoveredBridge.groundedConclusion,
+    /ATU11Button now has one checked bridge/i,
+    "token shop row remap boundary ATU11 conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.boundedTitleSideNegative.shellField,
+    "ATU11Button",
+    "token shop row remap boundary ATU11 title-side negative shell drifted"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.boundedTitleSideNegative.shellPathId,
+    15793,
+    "token shop row remap boundary ATU11 title-side negative shell path drifted"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.boundedTitleSideNegative.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK7Booster",
+    "token shop row remap boundary ATU11 title-side negative prefab drifted"
+  );
+  assert.deepEqual(
+    boundary.atu11BridgeFollowUp.boundedTitleSideNegative.detachedTitleSurface,
+    [
+      "MK7 GEN ENHANCEMENT",
+      "This upgrade divides the cost of MK7 Generators by 70Qu.",
+      "This upgrade provides a 30% increase to the output of MK7 Generators."
+    ],
+    "token shop row remap boundary ATU11 title-side negative detached surface drifted"
+  );
+  assert.match(
+    boundary.atu11BridgeFollowUp.boundedTitleSideNegative.missingJoin,
+    /Mk7 Generator Booster title/i,
+    "token shop row remap boundary ATU11 title-side negative missing join drifted"
+  );
+  assert.match(
+    boundary.atu11BridgeFollowUp.boundedTitleSideNegative.groundedConclusion,
+    /row-specific negative on the title side/i,
+    "token shop row remap boundary ATU11 title-side negative conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu11BridgeFollowUp.result,
+    "checked object bridge recovered but final title-side join remains unresolved",
+    "token shop row remap boundary ATU11 trace result drifted"
+  );
+  expectRecord(
     boundary.atu3CrossSystemEffectTrace,
     "token shop row remap boundary ATU3 cross-system effect trace must be an object"
   );
@@ -8535,7 +8627,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     );
   });
   assert.ok(
-    boundary.currentBoundary.some((line) => /nine checked TokenShop row bridges/i.test(line)),
+    boundary.currentBoundary.some((line) => /ten checked TokenShop row bridges/i.test(line)),
     "token shop row remap boundary must preserve recovered bridge count"
   );
   assert.ok(
