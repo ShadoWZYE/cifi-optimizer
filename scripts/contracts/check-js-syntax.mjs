@@ -21,7 +21,7 @@ const ignoredDirectories = new Set([
   "workbench"
 ]);
 const includedRootFiles = new Set(["app.js", "player-profile.js", "recommendation-contract.js"]);
-const includedRootDirectories = new Set(["scripts", "tests"]);
+const includedRootDirectories = new Set(["scripts", "support", "tests"]);
 const syntaxLinter = new Linter();
 
 const files = await collectFirstPartyJsFiles(root);
@@ -118,5 +118,9 @@ function isIncludedFile(relativePath) {
     return includedRootFiles.has(relativePath);
   }
 
-  return relativePath.startsWith("scripts/") || relativePath.startsWith("tests/");
+  return (
+    relativePath.startsWith("scripts/") ||
+    relativePath.startsWith("support/") ||
+    relativePath.startsWith("tests/")
+  );
 }

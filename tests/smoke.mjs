@@ -306,6 +306,38 @@ const tokenBankControllerShellData = JSON.parse(
 );
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const importNormalizationSupportModule = await readFile(
+  new URL("../support/import-normalization-support.js", import.meta.url),
+  "utf8"
+);
+const researchValidationSupportModule = await readFile(
+  new URL("../support/research-validation-support.js", import.meta.url),
+  "utf8"
+);
+const shardBoundarySummarySupportModule = await readFile(
+  new URL("../support/shard-boundary-summary-support.js", import.meta.url),
+  "utf8"
+);
+const playerProfileBoundarySupportModule = await readFile(
+  new URL("../support/player-profile-boundary-support.js", import.meta.url),
+  "utf8"
+);
+const recommendationFeedSupportModule = await readFile(
+  new URL("../support/recommendation-feed-support.js", import.meta.url),
+  "utf8"
+);
+const shardEvidenceSupportModule = await readFile(
+  new URL("../support/shard-evidence-support.js", import.meta.url),
+  "utf8"
+);
+const shipPlannerSupportModule = await readFile(
+  new URL("../support/ship-planner-support.js", import.meta.url),
+  "utf8"
+);
+const spendBoundarySummaryJs = await readFile(
+  new URL("../support/spend-boundary-summary.js", import.meta.url),
+  "utf8"
+);
 const tokenShopProgressionModel = await readFile(
   new URL("../token-shop-progression-model.js", import.meta.url),
   "utf8"
@@ -500,6 +532,24 @@ await runNodeSyntaxCheck(fileURLToPath(new URL("../app.js", import.meta.url)));
 const datasetValidation = await validateBundledDatasets();
 const normalizedHtml = collapseWhitespace(html);
 const normalizedAppJs = collapseWhitespace(appJs);
+const normalizedImportNormalizationSupportModule = collapseWhitespace(
+  importNormalizationSupportModule
+);
+const normalizedResearchValidationSupportModule = collapseWhitespace(
+  researchValidationSupportModule
+);
+const normalizedShardBoundarySummarySupportModule = collapseWhitespace(
+  shardBoundarySummarySupportModule
+);
+const normalizedPlayerProfileBoundarySupportModule = collapseWhitespace(
+  playerProfileBoundarySupportModule
+);
+const normalizedRecommendationFeedSupportModule = collapseWhitespace(
+  recommendationFeedSupportModule
+);
+const normalizedShardEvidenceSupportModule = collapseWhitespace(shardEvidenceSupportModule);
+const normalizedShipPlannerSupportModule = collapseWhitespace(shipPlannerSupportModule);
+const normalizedSpendBoundarySummaryJs = collapseWhitespace(spendBoundarySummaryJs);
 const normalizedProbeRunner = collapseWhitespace(probeRunner);
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
 const hardAssert = {
@@ -628,15 +678,15 @@ assert.match(appJs, /data-research-view="archived"/);
 assert.match(appJs, /function bindResearchViewSelector\(\)/);
 assert.match(appJs, /track\.status === "archived" : track\.status !== "archived"/);
 assert.match(styles, /\.research-view-toggle/);
-assert.match(appJs, /Active roadmap slice/);
-assert.match(appJs, /Queued behind mapping gate/);
-assert.match(appJs, /Queued after gate/);
-assert.match(appJs, /Sequence 1\/5/);
-assert.match(appJs, /Sequence 4\/5/);
-assert.match(appJs, /PR 3 then PR 5 hardening/);
+assert.match(researchValidationSupportModule, /Active roadmap slice/);
+assert.match(researchValidationSupportModule, /Queued behind mapping gate/);
+assert.match(researchValidationSupportModule, /Queued after gate/);
+assert.match(researchValidationSupportModule, /Sequence 1\/5/);
+assert.match(researchValidationSupportModule, /Sequence 4\/5/);
+assert.match(researchValidationSupportModule, /PR 3 then PR 5 hardening/);
 assert.match(appJs, /APK\/Unity first/);
-assert.match(appJs, /Integration contract/);
-assert.match(appJs, /In research/);
+assert.match(researchValidationSupportModule, /Integration contract/);
+assert.match(researchValidationSupportModule, /In research/);
 assert.match(appJs, /checked APK or Unity evidence/);
 assert.match(appJs, /Confidence, uncertainty, and classification are explicit/);
 assert.match(appJs, /Sources/);
@@ -644,11 +694,11 @@ assert.match(appJs, /Repo artifacts/);
 assert.match(appJs, /Verified now/);
 assert.match(appJs, /Still uncertain/);
 assert.match(appJs, /Smallest shippable slice/);
-assert.match(appJs, /Research intake only/);
-assert.match(appJs, /"hunter-related-planning"/);
-assert.match(appJs, /"mech-related-planning"/);
-assert.match(appJs, /"input-automation-intake"/);
-assert.match(appJs, /"external-model-integration-intake"/);
+assert.match(researchValidationSupportModule, /Research intake only/);
+assert.match(researchValidationSupportModule, /"hunter-related-planning"/);
+assert.match(researchValidationSupportModule, /"mech-related-planning"/);
+assert.match(researchValidationSupportModule, /"input-automation-intake"/);
+assert.match(researchValidationSupportModule, /"external-model-integration-intake"/);
 assert.match(appJs, /function renderResearchGuidance/);
 assert.match(appJs, /Tracks stay in intake until they are mature enough for roadmap work/);
 assert.match(appJs, /Not a product commitment/);
@@ -663,8 +713,14 @@ assert.match(appJs, /Mech planning stays in research/);
 assert.match(appJs, /Input automation stays in research/);
 assert.match(appJs, /External-model integration stays in research/);
 assert.match(appJs, /function renderShardGroundingBoundary/);
-assert.match(appJs, /function getShardOwnerFamilyBoundarySummary/);
-assert.match(appJs, /function getShardFinalSuBonusBoundarySummary/);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardOwnerFamilyBoundarySummary/
+);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardFinalSuBonusBoundarySummary/
+);
 assert.match(appJs, /Grounded shard evidence/);
 assert.match(appJs, /Ownership mapping/);
 assert.match(appJs, /Shard-specific ownership evidence is narrowed, not resolved/);
@@ -824,9 +880,34 @@ assert.match(
   tokenShopUiSupport,
   /Grounded as a checked shell-to-prefab-to-player-facing-title row\./
 );
-assert.match(appJs, /function getRecommendationExplainabilitySummary/);
-assert.match(appJs, /function getRecommendationContractSummary/);
-assert.match(appJs, /function getRecommendationExplainabilityAudit/);
+assert.match(appJs, /from "\.\/support\/recommendation-feed-support\.js"/);
+assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilitySummary/);
+assert.match(recommendationFeedSupportModule, /function getRecommendationContractSummary/);
+assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilityAudit/);
+assert.match(appJs, /from "\.\/support\/ship-planner-support\.js"/);
+assert.match(appJs, /from "\.\/support\/player-profile-boundary-support\.js"/);
+assert.match(
+  playerProfileBoundarySupportModule,
+  /export function buildPlayerProfileBoundaryGroups/
+);
+assert.match(playerProfileBoundarySupportModule, /export function getPlayerProfileBoundaryAudit/);
+assert.match(playerProfileBoundarySupportModule, /export function getProfileCompletion/);
+assert.match(
+  playerProfileBoundarySupportModule,
+  /export function getImportedMultiverseMarketPreviewCardModel/
+);
+assert.match(
+  normalizedPlayerProfileBoundarySupportModule,
+  /buildPlayerProfileBoundaryGroups\(\{ canonical, shardPlanner, shipPlanner, experimental, compatibility \}\)/
+);
+assert.match(shipPlannerSupportModule, /export function createShipPlannerSupport/);
+assert.match(shipPlannerSupportModule, /export function getDisplayEffectTypes/);
+assert.match(shipPlannerSupportModule, /export function getPrimaryEffectClass/);
+assert.match(shipPlannerSupportModule, /export function normalizeEffectType/);
+assert.match(
+  normalizedShipPlannerSupportModule,
+  /createShipPlannerSupport\(\{ desmosInstallWeightMaps, getActiveLoadout, getEffectiveCap, getShipCommunityToolState, getShipConfig, getShipInstallTotal, getShipTemplate, shipInstallIndexLayouts, sum \}\)/
+);
 assert.match(devServer, /launchSignalSequence:\s*launcherSignalSequence/);
 assert.match(
   devServer,
@@ -839,11 +920,11 @@ assert.match(
 assert.match(appJs, /function getActiveMvpRecommendationFeedPartition\(\)/);
 assert.match(appJs, /function renderRecommendationFeedSupportNotice\(results, surface\)/);
 assert.match(
-  appJs,
+  recommendationFeedSupportModule,
   /failed the shared recommendation contract and were removed from the main feed/
 );
 assert.match(
-  appJs,
+  recommendationFeedSupportModule,
   /Use the contract audit details to repair those cards before treating them as player-facing guidance/
 );
 assert.match(appJs, /All visible cards currently satisfy the shared recommendation contract\./);
@@ -855,17 +936,18 @@ assert.match(appJs, /Spend-planner recommendations remain blocked by system-mapp
 assert.match(appJs, /Explainability audit/);
 assert.match(appJs, /Status: \$\{escapeHtml\(explainabilityAudit\.status\)\}\./);
 assert.match(appJs, /Source note: \$\{escapeHtml\(explainabilityAudit\.sourceNoteStatus\)\}\./);
-assert.match(appJs, /Missing: none\./);
-assert.match(appJs, /Partial context/);
-assert.match(appJs, /Complete context/);
-assert.match(appJs, /function getPlayerProfileBoundaryAudit/);
+assert.match(recommendationFeedSupportModule, /Missing: none\./);
+assert.match(recommendationFeedSupportModule, /Partial context/);
+assert.match(recommendationFeedSupportModule, /Complete context/);
+assert.doesNotMatch(appJs, /function getPlayerProfileBoundaryAudit/);
+assert.match(playerProfileBoundarySupportModule, /function getPlayerProfileBoundaryAudit/);
 assert.match(appJs, /Import boundary audit/);
 assert.match(
   appJs,
   /Normalization keeps imported values in labeled namespaces instead of flattening them into raw game truth/
 );
-assert.match(appJs, /Quarantined unmapped system blobs preserved:/);
-assert.match(appJs, /Compatibility-only leftovers preserved:/);
+assert.match(playerProfileBoundarySupportModule, /Quarantined unmapped system blobs preserved:/);
+assert.match(playerProfileBoundarySupportModule, /Compatibility-only leftovers preserved:/);
 assert.match(appJs, /Review the boundary audit before using recommendations/);
 const normalizedFeedAction = toRecommendationAction(
   {
@@ -7821,6 +7903,20 @@ assert.match(
 );
 assert.match(html, /Community-tool Calibration/);
 assert.match(html, /External model inputs preserved with the ship planner/);
+assert.doesNotMatch(appJs, /function getInstallGain\(/);
+assert.doesNotMatch(appJs, /function getBestNextInstall\(/);
+assert.doesNotMatch(appJs, /function getInstallWeight\(/);
+assert.doesNotMatch(appJs, /function getShipCrew\(/);
+assert.doesNotMatch(appJs, /function getShipInnovationMultiplier\(/);
+assert.doesNotMatch(appJs, /function getInstallBaseMultiplier\(/);
+assert.doesNotMatch(appJs, /function getTicksRun\(/);
+assert.match(shipPlannerSupportModule, /function getInstallGain\(/);
+assert.match(shipPlannerSupportModule, /function getBestNextInstall\(/);
+assert.match(shipPlannerSupportModule, /function getInstallWeight\(/);
+assert.match(shipPlannerSupportModule, /function getShipCrew\(/);
+assert.match(shipPlannerSupportModule, /function getShipInnovationMultiplier\(/);
+assert.match(shipPlannerSupportModule, /function getInstallBaseMultiplier\(/);
+assert.match(shipPlannerSupportModule, /function getTicksRun\(/);
 assert.match(html, /Diamonds/);
 assert.match(html, /Planner-only helper inputs are optional/);
 assert.match(
@@ -7878,15 +7974,29 @@ assert.match(appJs, /function renderShardMilestoneDirectory/);
 assert.match(appJs, /function renderShardWorkflowReference/);
 assert.match(appJs, /function renderResearchTrackSupport/);
 assert.match(appJs, /function renderResearchTrackProgress/);
-assert.match(appJs, /function getResearchTrackOrder/);
-assert.match(appJs, /function getResearchTrackLane/);
-assert.match(appJs, /if \(track\.status === "archived"\) \{\s*return "Foundation archive";\s*\}/);
+assert.match(appJs, /from "\.\/support\/research-validation-support\.js"/);
+assert.doesNotMatch(appJs, /function getResearchTrackOrder/);
+assert.doesNotMatch(appJs, /function getResearchTrackLane/);
+assert.doesNotMatch(appJs, /function getResearchTrackStatus/);
+assert.doesNotMatch(appJs, /function getResearchTrackProgressLabel/);
+assert.match(researchValidationSupportModule, /export function getResearchTrackOrder/);
+assert.match(researchValidationSupportModule, /export function getResearchTrackLane/);
+assert.match(researchValidationSupportModule, /export function getResearchTrackStatus/);
+assert.match(normalizedResearchValidationSupportModule, /return "Foundation archive";/);
 assert.match(appJs, /Archived foundation cards may still appear here as historical context/);
-assert.match(appJs, /function getResearchTrackStatus/);
-assert.match(appJs, /function getResearchTrackProgressLabel/);
+assert.match(researchValidationSupportModule, /export function getResearchTrackProgressLabel/);
+assert.match(researchValidationSupportModule, /export function buildSnapshotValidationCases/);
+assert.match(researchValidationSupportModule, /export function getValidationScopeMeta/);
+assert.match(researchValidationSupportModule, /export function getDatasetBadgeMetaFromEntry/);
 assert.match(appJs, /from "\.\/recommendation-contract\.js"/);
-assert.match(appJs, /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/);
-assert.match(appJs, /"spend-multiverse-savedata-import-surface": "PR 4 successor"/);
+assert.match(
+  researchValidationSupportModule,
+  /"unified-feed-and-hardening": "PR 3 then PR 5 hardening"/
+);
+assert.match(
+  researchValidationSupportModule,
+  /"spend-multiverse-savedata-import-surface": "PR 4 successor"/
+);
 assert.match(appJs, /function importPlayerProfileJson/);
 assert.match(appJs, /function exportPlayerProfileJson/);
 assert.match(appJs, /function renderPlayerProfileBoundarySummary/);
@@ -7901,7 +8011,10 @@ assert.match(appJs, /function initServerSession/);
 assert.match(appJs, /function closeServerSession/);
 assert.match(appJs, /function parseServerEvent/);
 assert.match(appJs, /function getGemPlannerBudget/);
-assert.match(appJs, /function getPlannerHelperCompletion/);
+assert.doesNotMatch(appJs, /function getPlannerHelperCompletion/);
+assert.doesNotMatch(appJs, /function getProfileCompletion/);
+assert.match(playerProfileBoundarySupportModule, /function getPlannerHelperCompletion/);
+assert.match(playerProfileBoundarySupportModule, /function getProfileCompletion/);
 assert.match(appJs, /SUPPORT_SURFACE_VALIDATION_MODULES/);
 assert.match(appJs, /function buildApkGroundingValidationCases/);
 assert.match(appJs, /function renderOverviewSupportSummary/);
@@ -7912,27 +8025,64 @@ assert.match(appJs, /function renderSupportSurfaceNotice/);
 assert.match(appJs, /function renderValidationSection/);
 assert.match(appJs, /function toRecommendationAction/);
 assert.match(appJs, /function sanitizeRecommendationLines/);
-assert.match(appJs, /function getShardMilestonePayloadBoundarySummary/);
-assert.match(appJs, /function getShardCostModelBoundarySummary/);
-assert.match(appJs, /function getShardMilestoneRowModelBoundarySummary/);
-assert.match(appJs, /function getShardMilestoneTitleEffectBoundarySummary/);
-assert.match(appJs, /function getShardMilestoneRowShellBoundarySummary/);
-assert.match(appJs, /function getShardMilestoneRowAlignmentBoundarySummary/);
-assert.match(appJs, /function getShardSaveBoundarySummary/);
+assert.match(appJs, /from "\.\/support\/shard-boundary-summary-support\.js"/);
+assert.doesNotMatch(appJs, /function getShardMilestonePayloadBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardCostModelBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardMilestoneRowModelBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardMilestoneTitleEffectBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardMilestoneRowShellBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardMilestoneRowAlignmentBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardSaveBoundarySummary/);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestonePayloadBoundarySummary/
+);
+assert.match(shardBoundarySummarySupportModule, /export function getShardCostModelBoundarySummary/);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestoneRowModelBoundarySummary/
+);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestoneTitleEffectBoundarySummary/
+);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestoneRowShellBoundarySummary/
+);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestoneRowAlignmentBoundarySummary/
+);
+assert.match(shardBoundarySummarySupportModule, /export function getShardSaveBoundarySummary/);
+assert.match(
+  normalizedShardBoundarySummarySupportModule,
+  /export function getShardOwnerFamilyBoundarySummary\(boundary\)/
+);
 assert.match(recommendationContractModule, /export function toRecommendationAction/);
 assert.match(recommendationContractModule, /export function sortRecommendationFeed/);
 assert.match(recommendationContractModule, /export function getRecommendationContractIssues/);
-assert.match(appJs, /function getSourceTitlesForIds/);
-assert.match(appJs, /function getMilestoneSourceLabel/);
-assert.match(appJs, /function getProvenanceConflictNote/);
+assert.match(appJs, /from "\.\/support\/shard-evidence-support\.js"/);
+assert.match(shardEvidenceSupportModule, /getSourceTitlesForIds/);
+assert.match(shardEvidenceSupportModule, /getMilestoneSourceLabel/);
+assert.match(shardEvidenceSupportModule, /getProvenanceConflictNote/);
 assert.match(appJs, /function buildLoopGuardrailRecommendations/);
 assert.match(appJs, /function getObservedBehaviorById/);
 assert.match(appJs, /function saveShardPlannerInputs/);
 assert.match(appJs, /function getShardFocusLevelForMilestone/);
-assert.match(appJs, /function getShardMilestoneGroundedSummary/);
+assert.match(shardEvidenceSupportModule, /getShardMilestoneGroundedSummary/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
-assert.match(appJs, /function normalizeImportRow/);
+assert.match(appJs, /from "\.\/support\/import-normalization-support\.js"/);
+assert.doesNotMatch(appJs, /function normalizeImportRow/);
+assert.match(importNormalizationSupportModule, /export function parseCsv/);
+assert.match(importNormalizationSupportModule, /export function normalizeImportRow/);
+assert.match(importNormalizationSupportModule, /export function coerceInputValue/);
+assert.match(importNormalizationSupportModule, /export function normalizeGeneratorTierKey/);
+assert.match(
+  normalizedImportNormalizationSupportModule,
+  /export function normalizeCiNumberValue\(value\)/
+);
 assert.match(appJs, /from "\.\/player-profile\.js"/);
 assert.match(appJs, /PLAYER_PROFILE_SCHEMA_VERSION/);
 assert.match(appJs, /playerProfile:/);
@@ -7948,7 +8098,10 @@ assert.match(appJs, /Shard cost bump watch/);
 assert.match(appJs, /Add current LR for loop guardrails/);
 assert.match(appJs, /Use intentional short vs long runs/);
 assert.match(appJs, /The current feed ranks trust-oriented warning urgency/);
-assert.match(appJs, /function getProgressionRecommendationFeedPartition\(/);
+assert.match(
+  normalizedRecommendationFeedSupportModule,
+  /export function getProgressionRecommendationFeedPartition\(items\)/
+);
 assert.match(appJs, /function getProgressionSubsystemPartition\(/);
 assert.match(appJs, /function getSelectedProgressionSubsystem\(/);
 assert.match(appJs, /function renderProgressionSubsystemToggle\(/);
@@ -7964,11 +8117,14 @@ assert.match(appJs, /Observed level/);
 assert.doesNotMatch(appJs, /Tracked row/);
 assert.match(appJs, /stays in canonical order/);
 assert.match(appJs, /Community alias:/);
-assert.match(appJs, /function getShardMilestonePanelTitle/);
-assert.match(appJs, /THE \${normalizedName\.toUpperCase\(\)} MILESTONE/);
+assert.match(shardEvidenceSupportModule, /getShardMilestonePanelTitle/);
+assert.match(
+  normalizedShardEvidenceSupportModule,
+  /THE \$\{normalizedName\.toUpperCase\(\)\} MILESTONE/
+);
 assert.match(appJs, /shard-threshold-pill/);
 assert.match(
-  appJs,
+  shardEvidenceSupportModule,
   /Direct row-aligned cost evidence exists for other rows, but this row is not fully mapped yet/
 );
 assert.match(appJs, /Extracted bonus per level/);
@@ -7978,11 +8134,14 @@ assert.doesNotMatch(appJs, /Extracted row state/);
 assert.doesNotMatch(appJs, /Formula profile/);
 assert.doesNotMatch(appJs, /Grounding detail/);
 assert.doesNotMatch(appJs, /Grounded data/);
-assert.match(appJs, /Verified row inputs recovered; exact cost formula still unresolved\./);
-assert.match(appJs, /Native cost stages not yet recovered for this row\./);
+assert.match(
+  shardEvidenceSupportModule,
+  /Verified row inputs recovered; exact cost formula still unresolved\./
+);
+assert.match(shardEvidenceSupportModule, /Native cost stages not yet recovered for this row\./);
 assert.match(appJs, /Observed value/);
-assert.match(appJs, /per-level multiplicative model/);
-assert.match(appJs, /Current value unresolved from checked inputs/);
+assert.match(shardEvidenceSupportModule, /per-level multiplicative model/);
+assert.match(shardEvidenceSupportModule, /Current value unresolved from checked inputs/);
 assert.doesNotMatch(appJs, /Title source/);
 assert.doesNotMatch(appJs, /Row shell/);
 assert.doesNotMatch(appJs, /Effect path/);
@@ -8045,7 +8204,7 @@ assert.doesNotMatch(appJs, /Effect-text handler boundary/);
 assert.match(appJs, /Shard effect-text handler boundary/);
 assert.match(appJs, /Shard milestone row model/);
 assert.match(appJs, /Shard milestone titles and effect shell/);
-assert.match(appJs, /TextHandlerShardMilestoneBonusesPerLevel\/N/);
+assert.match(shardBoundarySummarySupportModule, /TextHandlerShardMilestoneBonusesPerLevel\/N/);
 assert.match(appJs, /Shard milestone row shell/);
 assert.match(appJs, /Shard milestone row alignment/);
 assert.match(appJs, /UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell/);
@@ -8063,14 +8222,14 @@ assert.match(appJs, /\.\/data\/extraction-candidate-ranking\.v1\.json/);
 assert.match(appJs, /npm run verify:data/);
 assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(appJs, /PlayerProfile JSON imported through the grounded normalizer/);
-assert.match(appJs, /Canonical shared truth/);
-assert.match(appJs, /Planner-only helpers/);
-assert.match(appJs, /External-model implementation state/);
-assert.match(appJs, /Experimental support-surface helpers/);
-assert.match(appJs, /Compatibility leftovers/);
-assert.match(appJs, /Unmapped shard milestone state/);
-assert.match(appJs, /Unmapped TokenShop state/);
-assert.match(appJs, /Unmapped MultiverseMarket state/);
+assert.match(playerProfileBoundarySupportModule, /Canonical shared truth/);
+assert.match(playerProfileBoundarySupportModule, /Planner-only helpers/);
+assert.match(playerProfileBoundarySupportModule, /External-model implementation state/);
+assert.match(playerProfileBoundarySupportModule, /Experimental support-surface helpers/);
+assert.match(playerProfileBoundarySupportModule, /Compatibility leftovers/);
+assert.match(playerProfileBoundarySupportModule, /Unmapped shard milestone state/);
+assert.match(playerProfileBoundarySupportModule, /Unmapped TokenShop state/);
+assert.match(playerProfileBoundarySupportModule, /Unmapped MultiverseMarket state/);
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
@@ -8079,21 +8238,26 @@ assert.match(appJs, /Grounding checks stay separate from MVP behavior/);
 assert.match(appJs, /function renderSpendPlannerBoundary/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /compatibility\.unmappedSystemState/);
-assert.match(appJs, /function getTokeniumNamingSummary/);
-assert.match(appJs, /function getTokenBankStateSummary/);
-assert.match(appJs, /function getDailyTokeniumLaneSummary/);
-assert.match(appJs, /function getTokenBankFormulaBoundarySummary/);
-assert.match(appJs, /function formatNumericRanges/);
-assert.match(appJs, /function getMultiverseMarketRangeBoundarySummary/);
-assert.match(appJs, /function getMultiverseMarketRowTextCoverageSummary/);
-assert.match(appJs, /function getMultiverseMarketPrefabRemapBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function getTokeniumNamingSummary/);
+assert.match(appJs, /from "\.\/support\/spend-boundary-summary\.js"/);
+assert.match(spendBoundarySummaryJs, /function getTokenBankStateSummary/);
+assert.match(spendBoundarySummaryJs, /function getDailyTokeniumLaneSummary/);
+assert.match(spendBoundarySummaryJs, /function getTokenBankFormulaBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function formatNumericRanges/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketRangeBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketRowTextCoverageSummary/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketPrefabRemapBoundarySummary/);
 assert.match(
-  normalizedAppJs,
-  /function getImportedMultiverseMarketPreview\( importedMarketState, multiverseMarket, multiverseMarketRangeBoundary \)/
+  normalizedSpendBoundarySummaryJs,
+  /export function getMultiverseMarketMarketMemberBoundarySummary\(boundary\)/
 );
-assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
 assert.match(
-  appJs,
+  normalizedSpendBoundarySummaryJs,
+  /export function getImportedMultiverseMarketPreview\( importedMarketState, multiverseMarket, multiverseMarketRangeBoundary, \{ formatBoundaryValue, formatShardNumber, isBoundaryValuePresent \} \)/
+);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketSaveBoundarySummary/);
+assert.match(
+  spendBoundarySummaryJs,
   /PlayerProfileHandler, playerData, GetPlayerProfileData, FillPlayerProfileData, and ConvertSaveDataToProfileData/
 );
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
@@ -8116,48 +8280,51 @@ assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
 assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Emporium compatibility preview/);
-assert.match(appJs, /grounded Emporium text model is split/i);
-assert.match(appJs, /BonusDescriptionText/);
-assert.match(appJs, /PerLevelBonusText/);
-assert.match(appJs, /IDText/);
-assert.match(appJs, /CurrentBonusText/);
-assert.match(appJs, /distinct unrecovered runtime-only display lane/i);
-assert.match(appJs, /multiverse-market-row-local-text-summary/);
+assert.match(playerProfileBoundarySupportModule, /grounded Emporium text model is split/i);
+assert.match(spendBoundarySummaryJs, /BonusDescriptionText/);
+assert.match(spendBoundarySummaryJs, /PerLevelBonusText/);
+assert.match(spendBoundarySummaryJs, /IDText/);
+assert.match(spendBoundarySummaryJs, /CurrentBonusText/);
+assert.match(playerProfileBoundarySupportModule, /distinct unrecovered runtime-only display lane/i);
+assert.match(spendBoundarySummaryJs, /multiverse-market-row-local-text-summary/);
 assert.match(appJs, /effectLabel/);
-assert.match(appJs, /baseBonus/);
-assert.match(appJs, /rowIdLabel/);
-assert.match(appJs, /currentValueDisplay/);
-assert.match(appJs, /App-side Emporium row summaries now normalize only the grounded lanes/i);
-assert.match(appJs, /const overlapRowSummaries = importedOverlapRows\.map/);
+assert.match(playerProfileBoundarySupportModule, /baseBonus/);
+assert.match(spendBoundarySummaryJs, /rowIdLabel/);
+assert.match(spendBoundarySummaryJs, /currentValueDisplay/);
+assert.match(
+  playerProfileBoundarySupportModule,
+  /App-side Emporium row summaries now normalize only the grounded lanes/i
+);
+assert.match(spendBoundarySummaryJs, /const overlapRowSummaries = importedOverlapRows\.map/);
 assert.match(
   appJs,
   /Structured compatibility evidence from <code>\$\{escapeHtml\(entry\.shapeId\)\}<\/code>:/
 );
-assert.match(appJs, /grounded-compatibility-evidence/);
-assert.match(appJs, /quarantined-unrecovered-runtime-only-display-lane/);
-assert.match(appJs, /Distinct unrecovered runtime-only display lane/);
+assert.match(spendBoundarySummaryJs, /grounded-compatibility-evidence/);
+assert.match(spendBoundarySummaryJs, /quarantined-unrecovered-runtime-only-display-lane/);
+assert.match(spendBoundarySummaryJs, /Distinct unrecovered runtime-only display lane/);
 assert.match(
   appJs,
   /compatibility-only Emporium import state under <code>\$\{escapeHtml\(preview\.importTargetPath\)\}<\/code>\. It preserves the checked raw <code>\$\{escapeHtml\(preview\.typedSpanLabel\)\}<\/code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only\./i
 );
 assert.match(
-  appJs,
-  /wrapperOnlyFieldLabel\)\}<\/code> stays wrapper-only and is intentionally excluded from this preview/
+  playerProfileBoundarySupportModule,
+  /stays wrapper-only and is intentionally excluded from this preview even when it exists in the imported compatibility blob/
 );
 assert.match(
-  appJs,
-  /Imported trade-counter quarantine currently covers \${escapeHtml\(preview\.tradeCounterLabel\)\} with \${preview\.importedTradeCounterCount} recovered fields\./
+  playerProfileBoundarySupportModule,
+  /Imported trade-counter quarantine currently covers \$\{preview\.tradeCounterLabel\} with \$\{preview\.importedTradeCounterCount\} recovered fields\./
 );
 assert.match(
-  appJs,
-  /Imported early-mech quarantine currently covers \${escapeHtml\(preview\.earlyMechWindowLabel\)\} with \${preview\.importedEarlyMechCount} recovered fields\./
+  playerProfileBoundarySupportModule,
+  /Imported early-mech quarantine currently covers \$\{preview\.earlyMechWindowLabel\} with \$\{preview\.importedEarlyMechCount\} recovered fields\./
 );
 assert.match(
-  appJs,
+  playerProfileBoundarySupportModule,
   /Planner use stays blocked\. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence/
 );
 assert.match(
-  appJs,
+  spendBoundarySummaryJs,
   /get_Market, Market, GetPlayerProfileData, FillPlayerProfileData, and the FillPlayerProfileData coroutine shell/
 );
 assert.match(appJs, /Shard milestone mapping gate/);
@@ -8180,7 +8347,7 @@ assert.match(
 assert.match(appJs, /\.\/data\/token-shop-cost-lanes\.json/);
 assert.match(appJs, /\.\/data\/spend-action-lane-clues\.json/);
 assert.match(appJs, /\.\/data\/token-shop-owner-shell\.json/);
-assert.match(appJs, /function getTokenShopCostLaneSummary/);
+assert.match(spendBoundarySummaryJs, /function getTokenShopCostLaneSummary/);
 assert.match(appJs, /TokenShop cost-lane split/);
 assert.match(
   appJs,
@@ -8194,7 +8361,7 @@ assert.match(
   appJs,
   /This keeps TokenDailies on the Daily Tokenium modifier lane instead of mixing it into generic token spend rows/
 );
-assert.match(appJs, /function getSpendActionLaneSummary/);
+assert.match(spendBoundarySummaryJs, /function getSpendActionLaneSummary/);
 assert.match(appJs, /Spend action-lane split/);
 assert.match(
   appJs,
@@ -8208,13 +8375,13 @@ assert.match(
   appJs,
   /The checked APK and Unity probe still returns zero \${spendActionLaneSummary\.dailyHookT2} or \${spendActionLaneSummary\.dailyHookT3} matches/
 );
-assert.match(appJs, /"BuyTokenBoost"/);
-assert.match(appJs, /"BuyDiamondBoost"/);
-assert.match(appJs, /"BuyLM244"/);
-assert.match(appJs, /"BuyCollectorDevice"/);
-assert.match(appJs, /"BuyTokenDailiesT2"/);
-assert.match(appJs, /"BuyTokenDailiesT3"/);
-assert.match(appJs, /function getTokenShopOwnerShellSummary/);
+assert.match(spendBoundarySummaryJs, /"BuyTokenBoost"/);
+assert.match(spendBoundarySummaryJs, /"BuyDiamondBoost"/);
+assert.match(spendBoundarySummaryJs, /"BuyLM244"/);
+assert.match(spendBoundarySummaryJs, /"BuyCollectorDevice"/);
+assert.match(spendBoundarySummaryJs, /"BuyTokenDailiesT2"/);
+assert.match(spendBoundarySummaryJs, /"BuyTokenDailiesT3"/);
+assert.match(spendBoundarySummaryJs, /function getTokenShopOwnerShellSummary/);
 assert.match(appJs, /TokenShop owner shell/);
 assert.match(
   appJs,
@@ -8228,7 +8395,7 @@ assert.match(
   appJs,
   /That local TokenShop shell is enough to keep bank controls and adjacent device hooks grouped together, but not enough to promote player-owned bank values into planner state/
 );
-assert.match(appJs, /function getTokenShopSaveBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function getTokenShopSaveBoundarySummary/);
 assert.match(appJs, /TokenShop save boundary/);
 assert.match(
   appJs,
@@ -8242,7 +8409,7 @@ assert.match(
   appJs,
   /That means TokenShop ownership and PlayerProfile save recovery remain separate tasks, so the app should not infer saved bank values from owner-shell clues yet/
 );
-assert.match(appJs, /function getTokenBankControllerShellSummary/);
+assert.match(spendBoundarySummaryJs, /function getTokenBankControllerShellSummary/);
 assert.match(appJs, /Token-bank controller shell/);
 assert.match(
   appJs,
@@ -8264,7 +8431,7 @@ assert.match(
   appJs,
   /This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state/
 );
-assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketSaveBoundarySummary/);
 assert.match(appJs, /MultiverseMarket save boundary/);
 assert.match(
   appJs,
@@ -8272,17 +8439,17 @@ assert.match(
 );
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
 assert.match(appJs, /PlayerProfileHandler get_Market accessor bridge/);
-assert.match(appJs, /get_BM, get_ZN, get_TU/);
+assert.match(spendBoundarySummaryJs, /get_BM, get_ZN, get_TU/);
 assert.match(appJs, /broader progression-payload field cluster/);
 assert.match(
   appJs,
   /metadata-only \$\{marketMemberSummary\.memberLabel\} shell stays unresolved as an exact typed field/
 );
-assert.match(appJs, /"TokenBoost"/);
-assert.match(appJs, /"DiamondBoost"/);
-assert.match(appJs, /"TokenDailiesT2"/);
-assert.match(appJs, /"CostBox-Tokens"/);
-assert.match(appJs, /"CostBox-Tokenium"/);
+assert.match(spendBoundarySummaryJs, /"TokenBoost"/);
+assert.match(spendBoundarySummaryJs, /"DiamondBoost"/);
+assert.match(spendBoundarySummaryJs, /"TokenDailiesT2"/);
+assert.match(spendBoundarySummaryJs, /"CostBox-Tokens"/);
+assert.match(spendBoundarySummaryJs, /"CostBox-Tokenium"/);
 assert.match(
   appJs,
   /These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels/
