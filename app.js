@@ -1941,7 +1941,7 @@ function renderSpendPlannerBoundary() {
   const blockedInputs = [
     {
       label: "TokenShop recommendations beyond the checked editor subset",
-      reason: "The checked ATU1, ATU2, ATU5, and ATU6 remap subset now lives on the Progression page as a non-canonical local editor, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
+      reason: "The checked ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, and ATU8 remap subset can now appear on shipped Overview and Progression surfaces, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
     },
     {
       label: "Token-bank cap and claimable tokens",
@@ -1973,9 +1973,10 @@ function renderSpendPlannerBoundary() {
     </div>
     <div class="meta-stack">
       <p class="snapshot-title">TokenShop progression handoff</p>
-      <p class="meta">The checked TokenShop subset editor now lives on the Progression page instead of inside this Overview-bound spend boundary panel.</p>
-      <p class="meta">Its local row levels stay non-canonical under <code>planning.tokenShop.checkedSubsetLevels.*</code>, compatibility imports remain prefill only, and the rest of the raw <code>ATU*Level</code> family stays quarantined under <code>compatibility.unmappedSystemState.tokenShop</code>.</p>
+      <p class="meta">The checked TokenShop subset now ships in two bounded user-facing surfaces: this Overview affordability module and the separate Progression-side checked-row editor.</p>
+      <p class="meta">Overview reads the shared checked subset for current affordability only, while Progression keeps local row edits non-canonical under <code>planning.tokenShop.checkedSubsetLevels.*</code>. Compatibility imports remain prefill or fallback only, and the rest of the raw <code>ATU*Level</code> family stays quarantined under <code>compatibility.unmappedSystemState.tokenShop</code>.</p>
     </div>
+    ${renderTokenShopOverviewAffordabilityModule()}
     <div class="meta-stack">
         <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
         <ul class="research-step-list">${blockedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${escapeHtml(input.reason)}</li>`).join("")}</ul>
@@ -2011,8 +2012,8 @@ function renderSpendPlannerResearchForkNote() {
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Forked user-surface slice</p>
-      <p class="meta">The Overview page now keeps the descriptive spend boundary only, while the first real TokenShop-facing checked-row editor slice now lives on the Progression page.</p>
-      <p class="meta">The TokenShop module answers one real player question for the checked subset only: what do the grounded upgrades I can already inspect actually do at my current level and on the next level?</p>
+      <p class="meta">The Overview page keeps the descriptive spend boundary and the checked-subset TokenShop affordability module, while the Progression page keeps the separate checked-row editor slice.</p>
+      <p class="meta">Those two shipped TokenShop surfaces answer two real player questions for the same checked subset only: what can I afford right now, and what do the grounded upgrades I can already inspect do at my current level and on the next level?</p>
       <p class="meta">Anything beyond that consumed-input contract should fork into a new slice rather than reopening the shipped surfaces with optimizer behavior.</p>
     </div>
   `;
@@ -4671,8 +4672,17 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU1Level",
       slot: "ATU1",
-      identity: boundary?.adjacentFollowUp?.recoveredAdditionalBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.TokensBoost",
-      identitySource: "Checked prefab identity",
+      identity:
+        boundary?.adjacentFollowUp?.verifiedNamedIdentityJoin?.namedIdentity ||
+        boundary?.adjacentFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
+        boundary?.adjacentFollowUp?.recoveredAdditionalBridge?.prefabIdentity ||
+        "NewTokenUPGPrefab.T1.TokensBoost",
+      identitySource:
+        boundary?.adjacentFollowUp?.verifiedNamedIdentityJoin?.namedIdentity
+          ? "Checked named identity"
+          : boundary?.adjacentFollowUp?.verifiedTitleTextChain?.titleProbeTitle
+            ? "Checked title-side text chain"
+            : "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
       startCostField: "TokenBoostStartCost",
@@ -4718,6 +4728,22 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
         : "Supporting evidence only: the shared effect lane stops at the checked action-to-effect chain and does not claim a typed gameplay-owner handoff."
     },
     {
+      field: "ATU4Level",
+      slot: "ATU4",
+      identity: boundary?.traceFollowUp?.recoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.ModPointsBooster",
+      identitySource: "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "ModBoostStartCost",
+      additiveCostField: "ModBoostAdditiveCost",
+      bonusField: "ModBoostBonus",
+      maxLevelField: "ModBoostMaxLevel",
+      bonusStepLabel: "Mod Points Gained",
+      bonusStepMode: "multiplier",
+      note:
+        "Checked shell-to-prefab bridge only. The remaining honest blocker is one exact shell-local join from the detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839."
+    },
+    {
       field: "ATU5Level",
       slot: "ATU5",
       identity: boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
@@ -4746,6 +4772,36 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       bonusStepLabel: "Mk2 Output",
       bonusStepMode: "multiplier",
       note: "Checked shell-to-prefab-to-title chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
+    },
+    {
+      field: "ATU7Level",
+      slot: "ATU7",
+      identity: boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle || boundary?.atu7BridgeFollowUp?.recoveredBridge?.prefabIdentity || "Mk3 Generator Booster",
+      identitySource: boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ? "Checked title-side text chain" : "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "MK3TokenBoostStartCost",
+      additiveCostField: "MK3TokenBoostAdditiveCost",
+      bonusField: "MK3TokenBoostBonus",
+      maxLevelField: "MK3TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk3 Output",
+      bonusStepMode: "multiplier",
+      note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
+    },
+    {
+      field: "ATU8Level",
+      slot: "ATU8",
+      identity: boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle || boundary?.atu8BridgeFollowUp?.recoveredBridge?.prefabIdentity || "Mk4 Generator Booster",
+      identitySource: boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ? "Checked title-side text chain" : "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "MK4TokenBoostStartCost",
+      additiveCostField: "MK4TokenBoostAdditiveCost",
+      bonusField: "MK4TokenBoostBonus",
+      maxLevelField: "MK4TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk4 Output",
+      bonusStepMode: "multiplier",
+      note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     }
   ];
 }
@@ -4857,6 +4913,11 @@ function sanitizeTokenShopRichText(value) {
 }
 
 function getTokenShopRowDisplayTitle(row) {
+  if ((typeof row?.identitySource === "string" && /(final title|title-side text chain|named identity)/i.test(row.identitySource)) || row?.rowType === "effect-driven") {
+    if (row?.identity) {
+      return sanitizeTokenShopRichText(row.identity);
+    }
+  }
   if ((row?.identitySource === "Checked final title" || row?.rowType === "effect-driven") && row?.identity) {
     return sanitizeTokenShopRichText(row.identity);
   }
@@ -4879,8 +4940,8 @@ function getTokenShopRowGroundingSummary(row) {
   if (row?.rowType === "effect-driven") {
     return "Grounded as an effect-driven row from checked shell, action, and shared-effect evidence.";
   }
-  if (row?.identitySource === "Checked final title") {
-    return "Grounded as a checked shell-to-prefab-to-title row.";
+  if (typeof row?.identitySource === "string" && /(final title|title-side text chain|named identity)/i.test(row.identitySource)) {
+    return "Grounded as a checked shell-to-prefab-to-player-facing-title row.";
   }
   return "Grounded as a checked shell-to-prefab row while the final title remains unresolved.";
 }
@@ -4969,7 +5030,7 @@ function getTokenShopProgressionModel() {
 
   return {
     currentTokens,
-    displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU5, ATU6.",
+    displayRule: "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8.",
     rows,
     localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override").length,
     playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state").length,
@@ -4978,6 +5039,97 @@ function getTokenShopProgressionModel() {
     affordableCount: rows.filter((row) => row.isAffordable === true).length,
     knownCapCount: rows.filter((row) => row.maxStatus.label === "At or above known cap").length
   };
+}
+
+function renderTokenShopOverviewAffordabilityModule() {
+  const summary = getTokenShopProgressionModel();
+  const sourceLine = summary.playerStateCount
+    ? `${summary.playerStateCount}/${summary.rows.length} checked player-state row${summary.playerStateCount === 1 ? "" : "s"} active before compatibility fallback.`
+    : "No checked player-state rows are active yet; compatibility import and default level 0 stay available.";
+
+  return `
+    <div class="meta-stack">
+      <p class="snapshot-title">Overview TokenShop affordability</p>
+      <p class="meta">This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, and <code>ATU8Level</code>.</p>
+      <p class="meta">Checked player-facing names are preferred where they exist, grounded prefab identity is used where they do not, and the rest of the unresolved <code>ATU*Level</code> family stays quarantined outside this module.</p>
+      <p class="meta">${escapeHtml(sourceLine)}</p>
+      <div class="pill-row">
+        <span class="pill">${typeof summary.currentTokens === "number" ? `${summary.affordableCount}/${summary.rows.length} affordable from ${formatBoundaryValue(summary.currentTokens)} Tokens` : "Affordability gated by missing Tokens"}</span>
+        <span class="pill">${summary.playerStateCount}/${summary.rows.length} checked player-state rows active</span>
+        <span class="pill">${summary.compatibilityCount}/${summary.rows.length} compatibility fallback rows active</span>
+        <span class="pill">${summary.defaultCount}/${summary.rows.length} defaulted to level 0</span>
+        <span class="pill">${summary.knownCapCount} at or above known cap</span>
+        <span class="pill">${escapeHtml(summary.displayRule)}</span>
+      </div>
+      <div class="preview-stack">
+        ${summary.rows.map((row) => {
+          const displayTitle = getTokenShopRowDisplayTitle(row);
+          const bonusStripEntries = getTokenShopBonusStripEntries(row);
+          const nextKnownCostLabel = row.isMaxed
+            ? "No next cost within known cap"
+            : typeof row.nextKnownCost === "number"
+              ? formatBoundaryValue(row.nextKnownCost)
+              : "No known next cost";
+          const affordabilityLine = row.isMaxed
+            ? "No next purchase within known cap."
+            : row.isAffordable === true
+              ? "Affordable from current Tokens."
+              : row.isAffordable === false && typeof row.nextKnownCost === "number" && typeof summary.currentTokens === "number"
+                ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+                : "Affordability unavailable until Tokens are entered.";
+
+          return `
+            <article class="preview-card token-shop-affordability-card">
+              <div class="token-shop-game-row">
+                <div class="token-shop-level-ring">
+                  <span class="token-shop-level-value">${escapeHtml(formatBoundaryValue(row.currentLevel))}</span>
+                  <span class="token-shop-level-divider">/</span>
+                  <span class="token-shop-level-cap">${typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel) ? escapeHtml(formatBoundaryValue(row.maxLevel)) : "?"}</span>
+                </div>
+                <div class="token-shop-main-lane">
+                  <div class="token-shop-top-band">
+                    <div class="token-shop-affordability-head">
+                      <div class="meta-stack">
+                        <strong>${escapeHtml(displayTitle)}</strong>
+                        <div class="token-shop-row-tags">
+                          <span class="token-shop-row-tag">${escapeHtml(row.rowTypeLabel || "Checked row")}</span>
+                          ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
+                        </div>
+                        <p class="meta token-shop-effect-line">${escapeHtml(formatTokenShopSentence(formatTokenShopEffectLine(row)))}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="token-shop-stat-strip">
+                    ${bonusStripEntries.map((entry) => `
+                      <div class="validation-card warn token-shop-stat-card">
+                        <span class="snapshot-title">Current vs next bonus • ${escapeHtml(entry.label)}</span>
+                        <strong>${escapeHtml(entry.currentLabel)}</strong>
+                        <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
+                      </div>
+                    `).join("")}
+                  </div>
+                  <div class="token-shop-editor-strip">
+                    <div class="token-shop-editor-meta">
+                      <p class="meta">Level ${escapeHtml(formatBoundaryValue(row.currentLevel))} • ${escapeHtml(row.currentLevelSourceLabel)}</p>
+                      <p class="meta">${escapeHtml(getTokenShopRowGroundingSummary(row))}</p>
+                      <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
+                      <p class="meta">${escapeHtml(row.currentVsNextBonus.detail)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="token-shop-buy-panel">
+                  <span class="token-shop-buy-label">${escapeHtml(getTokenShopActionLabel(row))}</span>
+                  <strong>${escapeHtml(nextKnownCostLabel)}</strong>
+                  <p class="meta">${escapeHtml(affordabilityLine)}</p>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+      <p class="meta">Overview affordability only. No best-buy order, ROI, ranking, token-bank planner behavior, Daily Tokenium planner behavior, or canonical <code>state.playerProfile</code> promotion is added here.</p>
+    </div>
+  `;
 }
 
 function saveTokenShopProgressionLevel(fieldName, value) {
@@ -5028,8 +5180,8 @@ function renderTokenShopProgressionEditor() {
     <article class="validation-card warn">
       <strong>Grounded TokenShop checked-row editor</strong>
       <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
-      <p class="meta">This module is explicitly non-optimizer and stays fixed to the shipped <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU5Level</code>, and <code>ATU6Level</code> subset.</p>
-      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown separately inside the same bounded subset. ATU3 remains effect-driven and is not promoted into a prefab or final-title remap.</p>
+      <p class="meta">This module is explicitly non-optimizer and stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, and <code>ATU8Level</code>.</p>
+      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown separately inside the same bounded subset. ATU3 remains effect-driven and is not promoted into a prefab or final-title remap. The rest of the unresolved ATU family stays quarantined outside this editor.</p>
       <div class="profile-actions">
         <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
         <button class="button button-ghost" type="button" data-token-shop-clear-local>Clear local row levels</button>

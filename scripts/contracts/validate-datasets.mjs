@@ -2390,6 +2390,16 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingEffectHook, "ATU1TokenBonus", "token shop row remap boundary adjacent recovered bridge effect hook drifted");
   assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook, "BuyTokenBoost", "token shop row remap boundary adjacent recovered bridge action hook drifted");
   assert.equal(boundary.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity, "NewTokenUPGPrefab.T1.TokensBoost", "token shop row remap boundary adjacent recovered bridge prefab drifted");
+  expectRecord(boundary.adjacentFollowUp.blockedTitleJoin, "token shop row remap boundary adjacent blocked title join must be an object");
+  expectArray(boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces, "token shop row remap boundary adjacent blocked title tested surfaces must be an array");
+  assert.equal(boundary.adjacentFollowUp.blockedTitleJoin.titleCandidate, "Tokens Booster T1", "token shop row remap boundary adjacent blocked title candidate drifted");
+  assert.equal(boundary.adjacentFollowUp.blockedTitleJoin.alternateTitleCandidate, "Tokens Booster", "token shop row remap boundary adjacent alternate title candidate drifted");
+  assert.equal(boundary.adjacentFollowUp.blockedTitleJoin.diamondTitleCandidate, ">Diamond Upgrade 9 - TokensBoost", "token shop row remap boundary adjacent diamond title candidate drifted");
+  assert.ok(boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "generic TokenShop text hooks"), "token shop row remap boundary adjacent text-hook surface drifted");
+  assert.ok(boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "token-side tokens title candidates"), "token shop row remap boundary adjacent token title surface drifted");
+  assert.ok(boundary.adjacentFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "diamond-side tokens title candidate"), "token shop row remap boundary adjacent diamond title surface drifted");
+  assert.match(boundary.adjacentFollowUp.blockedTitleJoin.missingJoin, /Tokens Booster, Tokens Booster T1, and >Diamond Upgrade 9 - TokensBoost title-side clues/i, "token shop row remap boundary adjacent blocked title note drifted");
+  assert.match(boundary.adjacentFollowUp.blockedTitleJoin.lastBlocker, /last honest blocker.*Tokens Booster.*Tokens Booster T1.*>Diamond Upgrade 9 - TokensBoost.*ATU1Button path id 15839/i, "token shop row remap boundary adjacent last-blocker note drifted");
   assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.shellField, "ATU3Button", "token shop row remap boundary blocked adjacent shell drifted");
   assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.shellPathId, 15810, "token shop row remap boundary blocked adjacent shell path drifted");
   assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook, "BuyCellBoost", "token shop row remap boundary blocked adjacent named action drifted");
@@ -2402,7 +2412,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   );
   assert.equal(boundary.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenTitleCandidate, "Token Ultima: Cells", "token shop row remap boundary blocked adjacent token title candidate drifted");
   assert.match(boundary.adjacentFollowUp.blockedAdjacentShell.groundedConclusion, /ATU3Button does not yet clear/i, "token shop row remap boundary blocked adjacent conclusion drifted");
-  assert.equal(boundary.adjacentFollowUp.result, "one more grounded bridge recovered", "token shop row remap boundary adjacent follow-up result drifted");
+  assert.equal(boundary.adjacentFollowUp.result, "one more grounded bridge recovered but no concrete title join cleared", "token shop row remap boundary adjacent follow-up result drifted");
   expectRecord(boundary.traceFollowUp, "token shop row remap boundary trace follow-up must be an object");
   expectRecord(boundary.traceFollowUp.recoveredBridge, "token shop row remap boundary trace recovered bridge must be an object");
   expectRecord(boundary.traceFollowUp.blockedTitleJoin, "token shop row remap boundary trace blocked title join must be an object");
@@ -2429,6 +2439,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.ok(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "token-side mod title candidate"), "token shop row remap boundary trace token title surface drifted");
   assert.ok(boundary.traceFollowUp.blockedTitleJoin.testedSurfaces.some((surface) => surface.surface === "diamond-side mod title candidate"), "token shop row remap boundary trace diamond title surface drifted");
   assert.match(boundary.traceFollowUp.blockedTitleJoin.missingJoin, /generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues/i, "token shop row remap boundary trace blocked title note drifted");
+  assert.match(boundary.traceFollowUp.blockedTitleJoin.lastBlocker, /last honest blocker.*Token Ultima: MP.*:Diamond Upgrade 11 - ModBoost.*ATU4Button path id 15796/i, "token shop row remap boundary trace last-blocker note drifted");
   assert.equal(boundary.traceFollowUp.result, "checked object bridge recovered but no concrete title join cleared", "token shop row remap boundary trace follow-up result drifted");
   expectRecord(boundary.atu5TitleFollowUp, "token shop row remap boundary ATU5 title follow-up must be an object");
   expectRecord(boundary.atu5TitleFollowUp.recoveredBridge, "token shop row remap boundary ATU5 recovered bridge must be an object");
@@ -2493,7 +2504,21 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.supportingActionHook, "BuyMK3TokenBoost", "token shop row remap boundary ATU7 trace bridge action hook drifted");
   assert.equal(boundary.atu7BridgeFollowUp.recoveredBridge.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster", "token shop row remap boundary ATU7 trace bridge prefab drifted");
   assert.match(boundary.atu7BridgeFollowUp.recoveredBridge.groundedConclusion, /ATU7Button now has one checked trace-backed bridge/i, "token shop row remap boundary ATU7 conclusion drifted");
-  assert.equal(boundary.atu7BridgeFollowUp.result, "checked object bridge recovered", "token shop row remap boundary ATU7 trace result drifted");
+  expectRecord(boundary.atu7BridgeFollowUp.verifiedTitleTextChain, "token shop row remap boundary ATU7 title text chain must be an object");
+  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.shellField, "ATU7Button", "token shop row remap boundary ATU7 title text shell drifted");
+  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.shellPathId, 15792, "token shop row remap boundary ATU7 title text shell path drifted");
+  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.prefabIdentity, "NewTokenUPGPrefab.T1.MK3Booster", "token shop row remap boundary ATU7 title text prefab drifted");
+  assert.equal(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle, "Mk3 Generator Booster", "token shop row remap boundary ATU7 title text title drifted");
+  assert.deepEqual(
+    boundary.atu7BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+    [
+      "This upgrade divides the cost of MK3 Generators by 3m",
+      "This upgrade provides a 30% increase to the output of MK3 Generators."
+    ],
+    "token shop row remap boundary ATU7 title text support drifted"
+  );
+  assert.match(boundary.atu7BridgeFollowUp.verifiedTitleTextChain.groundedConclusion, /shell-to-prefab-to-title-side-text chain/i, "token shop row remap boundary ATU7 title text conclusion drifted");
+  assert.equal(boundary.atu7BridgeFollowUp.result, "checked object bridge plus title-side text chain recovered", "token shop row remap boundary ATU7 trace result drifted");
   expectRecord(boundary.atu8BridgeFollowUp, "token shop row remap boundary ATU8 bridge follow-up must be an object");
   expectRecord(boundary.atu8BridgeFollowUp.recoveredBridge, "token shop row remap boundary ATU8 recovered bridge must be an object");
   expectRecord(boundary.atu8BridgeFollowUp.verifiedTitleTextChain, "token shop row remap boundary ATU8 title text chain must be an object");
@@ -2610,7 +2635,8 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.ok(boundary.currentBoundary.some((line) => /new effect-driven trace does recover one shell-to-action-hook-to-shared-effect chain for ATU3Button/i.test(line)), "token shop row remap boundary must preserve ATU3 effect-chain conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-seam pass now also recovers one checked handoff/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-seam conclusion");
   assert.ok(boundary.currentBoundary.some((line) => /ATU3 consumer-internal read pass now tightens that seam one step further/i.test(line)), "token shop row remap boundary must preserve ATU3 consumer-internal read conclusion");
-  assert.ok(boundary.currentBoundary.some((line) => /ATU4 title-side pass also stays negative/i.test(line)), "token shop row remap boundary must preserve bounded ATU4 title-side negative");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU1 title-side pass also stays negative.*Tokens Booster.*ATU1Button path id 15839/i.test(line)), "token shop row remap boundary must preserve bounded ATU1 title-side negative");
+  assert.ok(boundary.currentBoundary.some((line) => /ATU4 title-side pass also stays negative.*last honest blocker/i.test(line)), "token shop row remap boundary must preserve bounded ATU4 title-side negative");
   assert.ok(boundary.currentBoundary.some((line) => /ATU5 last-title-blocker pass now narrows cleanly/i.test(line)), "token shop row remap boundary must preserve narrowed ATU5 last-title blocker");
   assert.ok(boundary.currentBoundary.some((line) => /remaining ATU number/i.test(line)), "token shop row remap boundary must preserve blocked identity conclusion for remaining rows");
 
