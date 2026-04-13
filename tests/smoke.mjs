@@ -751,6 +751,14 @@ assert.deepEqual(shardMilestoneHandoffBoundary.genericMilestoneLead.buyHookRange
 assert.ok(shardMilestoneHandoffBoundary.genericMilestoneLead.textAndValueAnchors.includes("InitializeMilestones"));
 assert.ok(shardMilestoneHandoffBoundary.genericMilestoneLead.textAndValueAnchors.includes("SetAllMilestoneTexts"));
 assert.ok(shardMilestoneHandoffBoundary.handoffFindings.some((line) => /BuyMilestone1-57/.test(line)));
+assert.equal(shardMilestoneHandoffBoundary.recoveredDeclaringRowModel.ownerType, "ShardMining");
+assert.equal(shardMilestoneHandoffBoundary.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardMilestoneHandoffBoundary.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.deepEqual(
+  shardMilestoneHandoffBoundary.recoveredDeclaringRowModel.rowStateFields.map((field) => field.name),
+  ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]
+);
+assert.ok(shardMilestoneHandoffBoundary.currentBoundary.some((line) => /declaring row-model result/.test(line)));
 assert.ok(shardMilestoneHandoffBoundary.currentBoundary.some((line) => /not recovered player-owned shard milestone state/.test(line)));
 assert.equal(shardSaveBoundary.dataset, "shard-save-boundary.v1");
 assert.ok(shardSaveBoundary.ownerShellTermsChecked.includes("ShardMining"));
@@ -761,16 +769,30 @@ assert.equal(shardSaveBoundary.probeResults.metadataNeighborhoodHasSaveTerms, fa
 assert.equal(shardSaveBoundary.probeResults.level0HasSaveTerms, false);
 assert.equal(shardSaveBoundary.probeResults.ownerShellWithSaveOverlapCount, 0);
 assert.equal(shardSaveBoundary.probeResults.directShardPlayerProfileContext, false);
+assert.equal(shardSaveBoundary.probeResults.declaringRowModelRecovered, true);
+assert.equal(shardSaveBoundary.probeResults.saveSideOwnerRecovered, false);
+assert.equal(shardSaveBoundary.recoveredDeclaringRowModel.ownerType, "ShardMining");
+assert.equal(shardSaveBoundary.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardSaveBoundary.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.deepEqual(
+  shardSaveBoundary.recoveredDeclaringRowModel.rowStateFields.map((field) => field.name),
+  ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]
+);
 assert.ok(shardSaveBoundary.currentBoundary.some((line) => /zero checked overlap/.test(line)));
+assert.ok(shardSaveBoundary.currentBoundary.some((line) => /upgradeInfoList/.test(line)));
 assert.equal(shardMilestoneSaveOwnerCandidates.dataset, "shard-milestone-save-owner-candidates.v1");
-assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.length >= 1);
-assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.some((entry) => entry.id === "player-profile-side-shard-member-shell"));
-assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.some((entry) => entry.id === "shard-mining-wrapper-or-handoff-shell"));
+assert.equal(shardMilestoneSaveOwnerCandidates.recoveredDeclaringRowModel.id, "shardmining-upgradeinfolist-row-model");
+assert.equal(shardMilestoneSaveOwnerCandidates.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardMilestoneSaveOwnerCandidates.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.equal(shardMilestoneSaveOwnerCandidates.remainingSaveOwnerCandidates.length, 1);
+assert.ok(shardMilestoneSaveOwnerCandidates.remainingSaveOwnerCandidates.some((entry) => entry.id === "player-profile-side-shard-member-shell"));
 assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.ownerShellWithSaveOverlapCount, 0);
 assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.directShardPlayerProfileContext, false);
-assert.ok(shardMilestoneSaveOwnerCandidates.warnings.some((line) => /not recovered player-owned shard milestone state/i.test(line)));
-assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /candidate-narrowing artifact only/i.test(line)));
-assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /not as recovered player-owned shard milestone state/i.test(line)));
+assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.declaringRowModelRecovered, true);
+assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.remainingSaveOwnerCandidateCount, 1);
+assert.ok(shardMilestoneSaveOwnerCandidates.warnings.some((line) => /not recovered a save-side owner/i.test(line)));
+assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /recovered shard-local row-model result/i.test(line)));
+assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /save-owner gap/i.test(line)));
 assert.equal(shardSceneMonoBehaviourProbe.dataset, "shard-scene-monobehaviour-probe.v1");
 assert.ok(shardSceneMonoBehaviourProbe.monoBehaviours.some((entry) => entry.scriptName === "ShardMining" && entry.pathId === 290724));
 assert.ok(shardSceneMonoBehaviourProbe.monoBehaviours.some((entry) => entry.scriptName === "ShardPerLevelTextHandler" && entry.byteSize === 1328));
@@ -2102,12 +2124,12 @@ const shardTrack = snapshot.researchTracks.find((track) => track.id === "shard-m
 withRequiredValue(shardTrack, "expected shard milestone payload recovery track", (track) => {
   assert.equal(track.status, "active");
   assert.match(track.goal, /Recover the exact shard-side serialized row payload or declaring save-side owner/);
-  assert.match(track.currentSlice, /Extend the narrowed ShardMining \/ ShardUpgradeInfo trail/);
-  assert.match(track.currentSlice, /checked cost-model, row-model, title\/effect, and effect-text-handler boundaries/);
-  assert.match(track.currentSlice, /title\/effect/);
+  assert.match(track.currentSlice, /ShardMining to ConstructionMilestones handoff/);
+  assert.match(track.currentSlice, /ShardMining\.upgradeInfoList -> ShardMining\+ShardUpgradeInfo/);
+  assert.match(track.currentSlice, /without widening into row verification, cost-formula completion, effect-text remap, or planner behavior/);
   assert.match(track.exitCondition, /exact serialized shard milestone row payload or declaring save-side owner/);
-  assert.match(track.blockedBy, /still do not expose the declaring saved row model itself/);
-  assert.match(track.smallestShippableSlice, /checked shard row-owner or save-owner boundary/);
+  assert.match(track.blockedBy, /recovers the shard-local declaring row model as ShardMining\.upgradeInfoList -> ShardMining\+ShardUpgradeInfo/);
+  assert.match(track.smallestShippableSlice, /leaves save-side ownership blocked/);
   assert.deepEqual(track.sources, [
     "docs/systems/shards/shard-system-verification.md",
     "docs/systems/shards/shard-owner-family-verification.md",
@@ -2186,10 +2208,13 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
     "expected shard successor track to record the row-alignment mismatch in verified facts"
   );
   assert.ok(
-    track.verified.some((line) => /ShardMining keeps the shard-local row shell while ConstructionMilestones keeps the dense BuyMilestone1-57 family/.test(line)),
-    "expected shard successor track to record the narrowed handoff seam in verified facts"
+    track.verified.some((line) => /ShardMining\.upgradeInfoList -> ShardMining\+ShardUpgradeInfo/.test(line)),
+    "expected shard successor track to record the recovered shard-local row model in verified facts"
   );
-  assert.ok(track.nextSteps.length <= 5, "expected narrowed shard successor next-step count");
+  assert.ok(track.nextSteps.some((step) => /exact serialized list payload or save-family bridge/.test(step)));
+  assert.ok(track.nextSteps.some((step) => /If the save\/row owner is recovered, fork row-verification follow-up work/.test(step)));
+  assert.equal(track.nextSteps.length, 2);
+  assert.ok(track.uncertain.some((line) => /Which save-side owner or exact serialized list host actually persists player-owned shard milestone rows/.test(line)));
 });
 const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
 withRequiredValue(spendTrack, "expected archived spend parent track", (track) => {

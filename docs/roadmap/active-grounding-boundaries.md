@@ -21,29 +21,6 @@ When restarting or handing off a lane, do not let adjacent unresolved systems be
 
 ## Active lanes
 
-### `spend-planner-first-ui-slice`
-
-- Status: `active`
-- User-facing question: what TokenShop rows can the player safely inspect from current repo-backed data right now, and what still stays blocked
-- Minimum required inputs:
-  - the checked TokenShop row-remap subset
-  - imported current levels for that same checked subset
-  - explicit blocked-state labeling for unresolved rows or inputs
-- Explicit non-blockers:
-  - token-bank cap or claimable-state recovery
-  - Daily Tokenium cap or ready-state recovery
-  - Emporium owned-state recovery
-  - unresolved TokenShop rows outside the checked subset
-  - recommendation math or new gameplay logic
-- Current true blocker:
-  - keeping the first slice subset-bound and player-facing instead of widening it into a full spend-planner dependency bundle
-- Smallest shippable tool slice:
-  - ship a normal app surface that shows the checked TokenShop row subset, current imported levels for that subset, and explicit blocked-input notes for everything still unresolved, with no recommendation math
-- Start here:
-  - `docs/systems/spend/spend-system-verification.md`
-  - `docs/systems/spend/token-shop-row-remap-verification.md`
-  - `docs/roadmap/research-tracks.md`
-
 ### `shard-milestone-payload-recovery`
 
 - Status: `active`
@@ -52,18 +29,20 @@ When restarting or handing off a lane, do not let adjacent unresolved systems be
   - `ShardMining` is the strongest current shard screen-controller family
   - `ShardUpgradeInfo` is the strongest current shard-specific data carrier candidate
   - the repo has checked shard payload-watch, row-shell, row-alignment, handoff, save-boundary, cost-parameter, cost-method, cost-native, type-metadata, and bonus-slot artifacts
-  - the current shard row-owner seam is narrowed to the `ShardMining` to `ConstructionMilestones` handoff, not a fully open shard-owner search
+  - the checked `ShardMining` to `ConstructionMilestones` handoff plus typed field table now recover one shard-local declaring row model: `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo`
+  - the recovered shard-local row shell currently exposes `Cost`, `MaxLevel`, and `IsUnlocked`
 - Still blocked:
-  - the declaring serialized row model or save-side owner is not yet recovered
+  - the exact serialized `upgradeInfoList` payload or save-side owner is not yet recovered
   - exact player-owned shard row state is not yet import-ready
   - exact planner-safe shard cost math and effect-text mapping are not yet recovered
 - Smallest next slice:
-  - recover the declaring row or save owner at the narrowed handoff seam, or tighten that seam further without claiming solved player-owned rows
+  - recover the exact serialized `upgradeInfoList` payload or save-side owner beyond the recovered shard-local row-model shell, or tighten that seam further without claiming solved player-owned rows
 - Start here:
   - `docs/systems/shards/shard-system-verification.md`
   - `docs/systems/shards/shard-owner-family-verification.md`
   - `data/shard-milestone-handoff-boundary.v1.json`
   - `data/shard-save-boundary.v1.json`
+  - `data/shard-milestone-save-owner-candidates.v1.json`
 
 ### `spend-multiverse-savedata-import-surface`
 

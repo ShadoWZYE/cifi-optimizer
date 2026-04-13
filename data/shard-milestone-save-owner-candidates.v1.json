@@ -1,8 +1,9 @@
 {
   "dataset": "shard-milestone-save-owner-candidates.v1",
-  "generatedAt": "2026-04-06",
+  "generatedAt": "2026-04-13",
   "sources": {
     "shardSaveBoundary": "data/shard-save-boundary.v1.json",
+    "handoffBoundary": "data/shard-milestone-handoff-boundary.v1.json",
     "ownerFamilyBoundary": "data/shard-owner-family-boundary.v1.json",
     "payloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
     "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json",
@@ -10,7 +11,45 @@
     "globalMetadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0"
   },
-  "candidateTypes": [
+  "recoveredDeclaringRowModel": {
+    "id": "shardmining-upgradeinfolist-row-model",
+    "label": "ShardMining upgradeInfoList row model",
+    "kind": "declaring-row-model",
+    "confidence": "medium",
+    "ownerType": "ShardMining",
+    "declaringField": {
+      "name": "upgradeInfoList",
+      "type": "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>",
+      "fieldOffset": 5216
+    },
+    "rowModelType": {
+      "fullName": "ShardMining+ShardUpgradeInfo",
+      "baseType": "System.Object"
+    },
+    "rowStateFields": [
+      {
+        "name": "<Cost>k__BackingField",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 16
+      },
+      {
+        "name": "<MaxLevel>k__BackingField",
+        "type": "System.Boolean",
+        "fieldOffset": 32
+      },
+      {
+        "name": "<IsUnlocked>k__BackingField",
+        "type": "System.Boolean",
+        "fieldOffset": 33
+      }
+    ],
+    "why": [
+      "Checked type reflection now directly exposes ShardMining.upgradeInfoList as List<ShardMining+ShardUpgradeInfo> instead of leaving the shard-local row shell unnamed.",
+      "The nested ShardMining+ShardUpgradeInfo row shell already preserves Cost, MaxLevel, and IsUnlocked fields, which closes one declaring shard-local row-model step without claiming saved ownership.",
+      "The checked handoff boundary now keeps ConstructionMilestones as a nearby generic family while the remaining unresolved seam moves to exact serialized payload recovery or save-side ownership."
+    ]
+  },
+  "remainingSaveOwnerCandidates": [
     {
       "id": "player-profile-side-shard-member-shell",
       "label": "PlayerProfile-side shard member shell",
@@ -18,7 +57,7 @@
       "confidence": "low",
       "why": [
         "Shard save-boundary checks still show zero direct overlap between the narrowed shard-local owner trail and PlayerProfileData save-family anchors.",
-        "A PlayerProfile-side shard member shell remains a viable unresolved class of owner because shard state still has to land somewhere save-side even though no direct declaring type is recovered yet."
+        "A PlayerProfile-side shard member shell remains the current unresolved save-owner class because player-owned shard state still has to land somewhere save-side even though the shard-local declaring row model is now recovered."
       ],
       "candidateFieldClusters": [
         "PlayerProfileData",
@@ -32,49 +71,28 @@
         "level0HasSaveTerms": false,
         "directShardPlayerProfileContext": false
       }
-    },
-    {
-      "id": "shard-mining-wrapper-or-handoff-shell",
-      "label": "ShardMining wrapper or handoff shell",
-      "kind": "owner-handoff-shell",
-      "confidence": "medium-low",
-      "why": [
-        "ShardMining and ShardUpgradeInfo still preserve the strongest shard-local runtime and row-payload clues.",
-        "The unresolved seam may be a wrapper, handoff object, or adjacent shell that bridges runtime shard rows to any saved player-owned milestone state without reusing the visible shard-local owner names directly."
-      ],
-      "candidateFieldClusters": [
-        "ShardMining",
-        "ShardUpgradeInfo",
-        "upgradeInfoList",
-        "TotalMilestoneLevels",
-        "MilestoneCostList"
-      ],
-      "checkedOverlapStats": {
-        "shardOwnerFamiliesChecked": 2,
-        "typedOwnerListHooksRecovered": 2,
-        "typedShardUpgradeInfoFieldsRecovered": 3,
-        "recoveredDirectSaveDeclaringType": false
-      }
     }
   ],
   "confidenceNotes": [
-    "This artifact only narrows likely save-owner classes; it does not recover a concrete declaring save type for player-owned shard milestone state.",
-    "The current evidence still separates shard-local runtime owners from save-family anchors, so confidence remains intentionally bounded."
+    "This artifact now preserves one recovered shard-local declaring row model, but it still does not recover a concrete declaring save type for player-owned shard milestone state.",
+    "The current evidence still separates the recovered shard-local row shell from save-family anchors, so confidence remains intentionally bounded."
   ],
   "checkedOverlapStatistics": {
     "saveFamilyTermsChecked": 4,
     "shardOwnerShellTermsChecked": 12,
     "ownerShellWithSaveOverlapCount": 0,
     "directShardPlayerProfileContext": false,
-    "candidateTypeCount": 2
+    "declaringRowModelRecovered": true,
+    "remainingSaveOwnerCandidateCount": 1
   },
   "warnings": [
-    "Candidate narrowing is not recovered player-owned shard milestone state.",
+    "The recovered shard-local row model is not recovered player-owned shard milestone state.",
+    "The repo still has not recovered a save-side owner for player-owned shard milestone rows.",
     "Do not wire planner logic, affordability logic, or import logic to these candidates."
   ],
   "currentBoundary": [
-    "Treat this dataset as a candidate-narrowing artifact only, not as recovered player-owned shard milestone state or a verified save owner.",
+    "Treat this dataset as one recovered shard-local row-model result plus a remaining save-owner gap, not as recovered player-owned shard milestone state or a verified save owner.",
     "The current repo evidence still preserves zero checked overlap between narrowed shard-local owner clues and PlayerProfileData save-family anchors.",
-    "Use these candidates to focus future extraction work, not to enable planner-safe shard state, recommendation logic, or import mapping."
+    "Use this recovered shard-local row-model result and the remaining save-owner candidate to focus future extraction work, not to enable planner-safe shard state, recommendation logic, or import mapping."
   ]
 }
