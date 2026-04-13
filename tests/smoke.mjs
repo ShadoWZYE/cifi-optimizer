@@ -306,6 +306,10 @@ const tokenBankControllerShellData = JSON.parse(
 );
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const playerProfileBoundarySupportModule = await readFile(
+  new URL("../player-profile-boundary-support.js", import.meta.url),
+  "utf8"
+);
 const recommendationFeedSupportModule = await readFile(
   new URL("../recommendation-feed-support.js", import.meta.url),
   "utf8"
@@ -516,6 +520,9 @@ await runNodeSyntaxCheck(fileURLToPath(new URL("../app.js", import.meta.url)));
 const datasetValidation = await validateBundledDatasets();
 const normalizedHtml = collapseWhitespace(html);
 const normalizedAppJs = collapseWhitespace(appJs);
+const normalizedPlayerProfileBoundarySupportModule = collapseWhitespace(
+  playerProfileBoundarySupportModule
+);
 const normalizedRecommendationFeedSupportModule = collapseWhitespace(
   recommendationFeedSupportModule
 );
@@ -851,6 +858,24 @@ assert.match(recommendationFeedSupportModule, /function getRecommendationExplain
 assert.match(recommendationFeedSupportModule, /function getRecommendationContractSummary/);
 assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilityAudit/);
 assert.match(appJs, /from "\.\/ship-planner-support\.js"/);
+assert.match(appJs, /from "\.\/player-profile-boundary-support\.js"/);
+assert.match(
+  playerProfileBoundarySupportModule,
+  /export function buildPlayerProfileBoundaryGroups/
+);
+assert.match(
+  playerProfileBoundarySupportModule,
+  /export function getPlayerProfileBoundaryAudit/
+);
+assert.match(playerProfileBoundarySupportModule, /export function getProfileCompletion/);
+assert.match(
+  playerProfileBoundarySupportModule,
+  /export function getImportedMultiverseMarketPreviewCardModel/
+);
+assert.match(
+  normalizedPlayerProfileBoundarySupportModule,
+  /buildPlayerProfileBoundaryGroups\(\{ canonical, shardPlanner, shipPlanner, experimental, compatibility \}\)/
+);
 assert.match(shipPlannerSupportModule, /export function createShipPlannerSupport/);
 assert.match(shipPlannerSupportModule, /export function getDisplayEffectTypes/);
 assert.match(shipPlannerSupportModule, /export function getPrimaryEffectClass/);
@@ -890,14 +915,15 @@ assert.match(appJs, /Source note: \$\{escapeHtml\(explainabilityAudit\.sourceNot
 assert.match(recommendationFeedSupportModule, /Missing: none\./);
 assert.match(recommendationFeedSupportModule, /Partial context/);
 assert.match(recommendationFeedSupportModule, /Complete context/);
-assert.match(appJs, /function getPlayerProfileBoundaryAudit/);
+assert.doesNotMatch(appJs, /function getPlayerProfileBoundaryAudit/);
+assert.match(playerProfileBoundarySupportModule, /function getPlayerProfileBoundaryAudit/);
 assert.match(appJs, /Import boundary audit/);
 assert.match(
   appJs,
   /Normalization keeps imported values in labeled namespaces instead of flattening them into raw game truth/
 );
-assert.match(appJs, /Quarantined unmapped system blobs preserved:/);
-assert.match(appJs, /Compatibility-only leftovers preserved:/);
+assert.match(playerProfileBoundarySupportModule, /Quarantined unmapped system blobs preserved:/);
+assert.match(playerProfileBoundarySupportModule, /Compatibility-only leftovers preserved:/);
 assert.match(appJs, /Review the boundary audit before using recommendations/);
 const normalizedFeedAction = toRecommendationAction(
   {
@@ -7947,7 +7973,10 @@ assert.match(appJs, /function initServerSession/);
 assert.match(appJs, /function closeServerSession/);
 assert.match(appJs, /function parseServerEvent/);
 assert.match(appJs, /function getGemPlannerBudget/);
-assert.match(appJs, /function getPlannerHelperCompletion/);
+assert.doesNotMatch(appJs, /function getPlannerHelperCompletion/);
+assert.doesNotMatch(appJs, /function getProfileCompletion/);
+assert.match(playerProfileBoundarySupportModule, /function getPlannerHelperCompletion/);
+assert.match(playerProfileBoundarySupportModule, /function getProfileCompletion/);
 assert.match(appJs, /SUPPORT_SURFACE_VALIDATION_MODULES/);
 assert.match(appJs, /function buildApkGroundingValidationCases/);
 assert.match(appJs, /function renderOverviewSupportSummary/);
@@ -8119,14 +8148,14 @@ assert.match(appJs, /\.\/data\/extraction-candidate-ranking\.v1\.json/);
 assert.match(appJs, /npm run verify:data/);
 assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(appJs, /PlayerProfile JSON imported through the grounded normalizer/);
-assert.match(appJs, /Canonical shared truth/);
-assert.match(appJs, /Planner-only helpers/);
-assert.match(appJs, /External-model implementation state/);
-assert.match(appJs, /Experimental support-surface helpers/);
-assert.match(appJs, /Compatibility leftovers/);
-assert.match(appJs, /Unmapped shard milestone state/);
-assert.match(appJs, /Unmapped TokenShop state/);
-assert.match(appJs, /Unmapped MultiverseMarket state/);
+assert.match(playerProfileBoundarySupportModule, /Canonical shared truth/);
+assert.match(playerProfileBoundarySupportModule, /Planner-only helpers/);
+assert.match(playerProfileBoundarySupportModule, /External-model implementation state/);
+assert.match(playerProfileBoundarySupportModule, /Experimental support-surface helpers/);
+assert.match(playerProfileBoundarySupportModule, /Compatibility leftovers/);
+assert.match(playerProfileBoundarySupportModule, /Unmapped shard milestone state/);
+assert.match(playerProfileBoundarySupportModule, /Unmapped TokenShop state/);
+assert.match(playerProfileBoundarySupportModule, /Unmapped MultiverseMarket state/);
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
@@ -8177,18 +8206,21 @@ assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
 assert.match(appJs, /Blocked inputs and unavailable planner actions/);
 assert.match(appJs, /Emporium compatibility preview/);
-assert.match(appJs, /grounded Emporium text model is split/i);
+assert.match(playerProfileBoundarySupportModule, /grounded Emporium text model is split/i);
 assert.match(spendBoundarySummaryJs, /BonusDescriptionText/);
 assert.match(spendBoundarySummaryJs, /PerLevelBonusText/);
 assert.match(spendBoundarySummaryJs, /IDText/);
 assert.match(spendBoundarySummaryJs, /CurrentBonusText/);
-assert.match(appJs, /distinct unrecovered runtime-only display lane/i);
+assert.match(playerProfileBoundarySupportModule, /distinct unrecovered runtime-only display lane/i);
 assert.match(spendBoundarySummaryJs, /multiverse-market-row-local-text-summary/);
 assert.match(appJs, /effectLabel/);
-assert.match(appJs, /baseBonus/);
+assert.match(playerProfileBoundarySupportModule, /baseBonus/);
 assert.match(spendBoundarySummaryJs, /rowIdLabel/);
 assert.match(spendBoundarySummaryJs, /currentValueDisplay/);
-assert.match(appJs, /App-side Emporium row summaries now normalize only the grounded lanes/i);
+assert.match(
+  playerProfileBoundarySupportModule,
+  /App-side Emporium row summaries now normalize only the grounded lanes/i
+);
 assert.match(spendBoundarySummaryJs, /const overlapRowSummaries = importedOverlapRows\.map/);
 assert.match(
   appJs,
@@ -8202,19 +8234,19 @@ assert.match(
   /compatibility-only Emporium import state under <code>\$\{escapeHtml\(preview\.importTargetPath\)\}<\/code>\. It preserves the checked raw <code>\$\{escapeHtml\(preview\.typedSpanLabel\)\}<\/code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only\./i
 );
 assert.match(
-  appJs,
-  /wrapperOnlyFieldLabel\)\}<\/code> stays wrapper-only and is intentionally excluded from this preview/
+  playerProfileBoundarySupportModule,
+  /stays wrapper-only and is intentionally excluded from this preview even when it exists in the imported compatibility blob/
 );
 assert.match(
-  appJs,
-  /Imported trade-counter quarantine currently covers \${escapeHtml\(preview\.tradeCounterLabel\)\} with \${preview\.importedTradeCounterCount} recovered fields\./
+  playerProfileBoundarySupportModule,
+  /Imported trade-counter quarantine currently covers \$\{preview\.tradeCounterLabel\} with \$\{preview\.importedTradeCounterCount\} recovered fields\./
 );
 assert.match(
-  appJs,
-  /Imported early-mech quarantine currently covers \${escapeHtml\(preview\.earlyMechWindowLabel\)\} with \${preview\.importedEarlyMechCount} recovered fields\./
+  playerProfileBoundarySupportModule,
+  /Imported early-mech quarantine currently covers \$\{preview\.earlyMechWindowLabel\} with \$\{preview\.importedEarlyMechCount\} recovered fields\./
 );
 assert.match(
-  appJs,
+  playerProfileBoundarySupportModule,
   /Planner use stays blocked\. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence/
 );
 assert.match(

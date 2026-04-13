@@ -4,6 +4,13 @@ import {
   normalizePlayerProfile
 } from "./player-profile.js";
 import {
+  buildPlayerProfileBoundaryGroups,
+  getImportedMultiverseMarketPreviewCardModel,
+  getPlannerHelperCompletion,
+  getPlayerProfileBoundaryAudit,
+  getProfileCompletion
+} from "./player-profile-boundary-support.js";
+import {
   getRecommendationContractIssues as getNormalizedRecommendationContractIssues,
   sanitizeRecommendationLines as sanitizeNormalizedRecommendationLines,
   sortRecommendationFeed as sortNormalizedRecommendationFeed,
@@ -1383,7 +1390,7 @@ function renderNavigation() {
 
 function renderQuickPanels() {
   const snapshots = loadStoredJson(STORAGE_KEYS.snapshots, []);
-  const completion = getProfileCompletion(state.playerProfile);
+  const completion = getProfileCompletion(state.playerProfile, ACTIVE_PROFILE_FORM_FIELD_PATHS);
   const helperCompletion = getPlannerHelperCompletion(state.playerProfile);
   $("#snapshotSummary").innerHTML = `
     <span class="snapshot-title">Active snapshot</span>
@@ -1399,7 +1406,7 @@ function renderQuickPanels() {
 }
 
 function renderOverview() {
-  $("#profileCompletionValue").textContent = `${getProfileCompletion(state.playerProfile)}%`;
+  $("#profileCompletionValue").textContent = `${getProfileCompletion(state.playerProfile, ACTIVE_PROFILE_FORM_FIELD_PATHS)}%`;
   $("#importedRecordsValue").textContent = String(getImportedRecordCount());
   const validation = runValidationCases();
   const mvpValidation = validation.filter((item) => item.scope === "MVP");
@@ -2812,74 +2819,21 @@ function renderPlayerProfileBoundarySummary() {
   const shipPlanner = getShipPlannerState();
   const experimental = getExperimentalProfileState();
   const compatibility = getCompatibilityProfileState();
-  const groups = [
-    {
-      title: "Canonical shared truth",
-      note: "Grounded account state and metadata that the shared MVP profile can treat as first-class truth.",
-      items: [
-        ["Profile name", canonical.profileName],
-        ["Data confidence", canonical.dataConfidence],
-        ["Current LR", canonical.loopReset],
-        ["Diamonds", canonical.diamonds],
-        ["Tokens", canonical.tokens],
-        ["Current shards", canonical.shards],
-        ["Profile notes", canonical.notes]
-      ]
-    },
-    {
-      title: "Import-only or aggregated profile fields",
-      note: "Real profile values that are not currently direct active-form inputs because they are aggregated, derived, or not quickly readable in-game.",
-      items: [["Academy relics", canonical.academyRelics]]
-    },
-    {
-      title: "Planner-only helpers",
-      note: "Manual helper inputs used by descriptive planners, not canonical account truth. Derived values that are not directly visible in game stay out of the active form.",
-      items: [
-        ["Total shard milestone levels", shardPlanner.totalMilestoneLevels],
-        ["Threshold watch row", shardPlanner.focusMilestoneId],
-        ["Threshold watch row level", shardPlanner.focusMilestoneLevel],
-        ["Observed shard rows", Object.keys(shardPlanner.observedLevelsByMilestone ?? {}).length]
-      ]
-    },
-    {
-      title: "External-model implementation state",
-      note: "Current implementation data for canonical systems that stays isolated from shared profile truth. Imports must use explicit systems.ship or externalModels.shipPlanner paths.",
-      items: [
-        ["Ship planner power", shipPlanner.summary.power],
-        ["Ship planner speed", shipPlanner.summary.speed],
-        ["Ship planner cargo", shipPlanner.summary.cargo],
-        ["Ship calibration groups", Object.keys(shipPlanner.calibration || {}).length]
-      ]
-    },
-    {
-      title: "Experimental support-surface helpers",
-      note: "Non-MVP experimental or prototype helpers that stay outside canonical shared truth and outside canonical-system implementation state. Loose planning and flat helper aliases are retired.",
-      items: [
-        ["Gem-node budget", experimental.gemNodeBudget],
-        ["Primary farming focus", experimental.primaryFarmingFocus],
-        ["Research hours", experimental.researchHours]
-      ]
-    },
-    {
-      title: "Compatibility leftovers",
-      note: "Preserved migration values and quarantined unmapped system blobs that are not treated as active shared truth. Loose top-level compatibility aliases are retired in favor of explicit compatibility or namespaced legacy paths.",
-      items: [
-        ["Legacy highest ship unlocked", compatibility.legacyStage.highestShipUnlocked],
-        ["Legacy manual phase", compatibility.legacyStage.manualPhase],
-        ["Legacy gemDust", compatibility.unresolved.gemDust],
-        ["Legacy hunter level", compatibility.unresolved.hunterLevel],
-        ["Legacy trait sphere count", compatibility.unresolved.traitSphereCount],
-        ["Legacy mech parts", compatibility.unresolved.mechParts],
-        ["Unmapped shard milestone state", compatibility.unmappedSystems.shardMilestones],
-        ["Unmapped TokenShop state", compatibility.unmappedSystems.tokenShop],
-        ["Unmapped MultiverseMarket state", compatibility.unmappedSystems.multiverseMarket]
-      ]
-    }
-  ];
-  const audit = getPlayerProfileBoundaryAudit(groups, {
+  const groups = buildPlayerProfileBoundaryGroups({
+    canonical,
+    shardPlanner,
     shipPlanner,
+    experimental,
     compatibility
   });
+  const audit = getPlayerProfileBoundaryAudit(
+    groups,
+    {
+      shipPlanner,
+      compatibility
+    },
+    isBoundaryValuePresent
+  );
   const importedMultiverseMarketPreview = getImportedMultiverseMarketPreview(
     compatibility.unmappedSystems?.multiverseMarket,
     state.extractedMechanics?.multiverseMarket,
@@ -2919,46 +2873,6 @@ function renderPlayerProfileBoundarySummary() {
     ${renderImportedMultiverseMarketPreviewCard(importedMultiverseMarketPreview)}
     ${$("#playerProfileImportSummary").innerHTML}
   `;
-}
-
-function getPlayerProfileBoundaryAudit(groups, context) {
-  const counts = groups.map((group) => {
-    const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value)).length;
-    return `${group.title}: ${populated}/${group.items.length}`;
-  });
-  const unmappedSystemEntries = Object.entries(context.compatibility.unmappedSystems || {})
-    .filter(([, value]) => isBoundaryValuePresent(value))
-    .map(([key]) => key);
-  const unresolvedEntries = Object.entries(context.compatibility.unresolved || {})
-    .filter(([, value]) => isBoundaryValuePresent(value))
-    .map(([key]) => key);
-  const notes = [];
-
-  if (unmappedSystemEntries.length) {
-    notes.push(
-      `Quarantined unmapped system blobs preserved: ${unmappedSystemEntries.join(", ")}. Keep these descriptive until owner mapping and player-owned inputs are grounded.`
-    );
-  } else {
-    notes.push("No quarantined unmapped system blobs are present in this import.");
-  }
-
-  if (
-    Object.values(context.shipPlanner.summary || {}).some((value) => isBoundaryValuePresent(value))
-  ) {
-    notes.push(
-      "Ship planner values are preserved as external-model implementation state, not as canonical shared profile truth."
-    );
-  }
-
-  if (unresolvedEntries.length) {
-    notes.push(
-      `Compatibility-only leftovers preserved: ${unresolvedEntries.join(", ")}. These remain migration sinks, not active recommendation inputs.`
-    );
-  } else {
-    notes.push("No compatibility-only leftover fields were populated by this import.");
-  }
-
-  return { counts, notes };
 }
 
 function applyInstallTap(installIndex, direction = 1) {
@@ -5644,7 +5558,8 @@ function renderTokenShopProgressionEditor() {
 }
 
 function renderImportedMultiverseMarketPreviewCard(preview) {
-  if (!preview.hasImportedCompatibilityPreview) {
+  const model = getImportedMultiverseMarketPreviewCardModel(preview, formatShardNumber);
+  if (!model.hasPreview) {
     return "";
   }
 
@@ -5653,35 +5568,33 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
       <strong>Emporium compatibility preview</strong>
       <p class="meta">This is a descriptive preview of compatibility-only Emporium import state under <code>${escapeHtml(preview.importTargetPath)}</code>. It preserves the checked raw <code>${escapeHtml(preview.typedSpanLabel)}</code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only.</p>
       <div class="pill-row">
-        <span class="pill">${preview.importedSpanRowCount}/${preview.totalSpanRowCount} raw IS rows imported</span>
-        <span class="pill">${preview.importedTradeCounterCount}/${preview.totalTradeCounterCount} trade counters imported</span>
-        <span class="pill">${preview.importedEarlyMechCount}/${preview.totalEarlyMechCount} early-mech fields imported</span>
-        ${preview.hasOverlapGroundedRows ? `<span class="pill">${preview.importedOverlapRowCount}/${preview.overlapRowCount} ordered-overlap rows imported</span>` : ""}
-        <span class="pill">Compatibility only</span>
-        <span class="pill">Planner blocked</span>
+        ${model.pillLabels.map((label) => `<span class="pill">${escapeHtml(label)}</span>`).join("")}
       </div>
       <div class="meta-stack">
-        <p class="meta">Only compatibility-only evidence from the checked SaveData quarantine is shown here. This card does not reopen row-label recovery, row remap, planner logic, or canonical PlayerProfile promotion.</p>
-        <p class="meta"><code>${escapeHtml(preview.wrapperOnlyFieldLabel)}</code> stays wrapper-only and is intentionally excluded from this preview even when it exists in the imported compatibility blob.</p>
-        <p class="meta">The grounded Emporium text model is split: <code>${escapeHtml(preview.supportedTextModel.effectLabelLane)}</code> is the recovered effect-label lane, <code>${escapeHtml(preview.supportedTextModel.baseBonusLane)}</code> is the recovered base-bonus lane, and <code>${escapeHtml(preview.supportedTextModel.idLane)}</code> is the recovered id lane.</p>
-        <p class="meta"><code>${escapeHtml(preview.supportedTextModel.quarantinedCurrentValueLane)}</code> remains a distinct unrecovered runtime-only display lane. It is explicitly quarantined from the preview and is not treated as grounded Emporium truth, planner input, or canonical player state.</p>
-        <p class="meta">App-side Emporium row summaries now normalize only the grounded lanes into <code>${escapeHtml(preview.rowSummaryShape.shapeId)}</code>: ${preview.rowSummaryShape.groundedFields.map((field) => `<code>${escapeHtml(field.key)}</code> from <code>${escapeHtml(field.slotAlias)}</code>`).join(", ")}. ${preview.rowSummaryShape.quarantinedFields.map((field) => `<code>${escapeHtml(field.key)}</code> stays quarantined as <code>${escapeHtml(field.slotAlias)}</code>`).join(", ")}.</p>
-        <p class="meta">${preview.importedRangeLabel ? `Imported raw Emporium levels currently cover ${escapeHtml(preview.firstImportedRowLabel)} through ${escapeHtml(preview.lastImportedRowLabel)} across rows ${escapeHtml(preview.importedRangeLabel)}.` : "No raw Emporium level fields are currently imported from the checked compatibility span."}</p>
-        <p class="meta">${preview.missingSpanCount ? `Missing raw span fields still absent from this import: ${escapeHtml(preview.missingSpanLabel)}${preview.missingSpanCount > 12 ? "..." : ""}.` : "All raw fields in the checked IS1Level through IS110Level compatibility span are present in this import."}</p>
-        <p class="meta">${preview.hasTradeCounterPreview ? `Imported trade-counter quarantine currently covers ${escapeHtml(preview.tradeCounterLabel)} with ${preview.importedTradeCounterCount} recovered fields.` : "No adjacent trade-counter quarantine fields are currently imported from the checked compatibility envelope."}</p>
-        <p class="meta">${preview.missingTradeCounterKeys.length ? `Missing trade-counter quarantine fields: ${escapeHtml(preview.missingTradeCounterLabel)}${preview.missingTradeCounterKeys.length > 12 ? "..." : ""}.` : "All checked Esoteric and Necrum trade-counter quarantine fields are present in this import."}</p>
-        <p class="meta">${preview.hasEarlyMechPreview ? `Imported early-mech quarantine currently covers ${escapeHtml(preview.earlyMechWindowLabel)} with ${preview.importedEarlyMechCount} recovered fields.` : "No early-mech quarantine fields are currently imported from the checked compatibility envelope."}</p>
-        <p class="meta">${preview.missingEarlyMechFields.length ? `Missing early-mech quarantine fields: ${escapeHtml(preview.missingEarlyMechLabel)}.` : "All checked early-mech quarantine fields are present in this import."}</p>
-        <p class="meta">${preview.hasOverlapGroundedRows ? `The checked ordered-overlap support rows ${escapeHtml(preview.overlapRangeLabel)} are tracked only as boundary evidence. Missing ordered-overlap imports: ${escapeHtml(preview.missingOverlapLabel)}.` : "No ordered-overlap support rows are available in this build."}</p>
-        <p class="meta">Planner use stays blocked. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence, not canonical player truth, not row-label claims, not complete live-text bindings, and not recommendation inputs.</p>
+        ${model.metaLines
+          .map((line) => {
+            if (typeof line === "string") {
+              return `<p class="meta">${escapeHtml(line)}</p>`;
+            }
+            if (Array.isArray(line.codePairs)) {
+              return `<p class="meta">${escapeHtml(line.text)}${line.codePairs
+                .map(
+                  ([code, suffix], index) =>
+                    `${index ? ", " : ""}<code>${escapeHtml(code)}</code>${escapeHtml(suffix)}`
+                )
+                .join("")}.</p>`;
+            }
+            return `<p class="meta">${line.text ? escapeHtml(line.text) : ""}<code>${escapeHtml(line.code)}</code>${escapeHtml(line.suffix)}</p>`;
+          })
+          .join("")}
         ${
-          preview.hasOverlapLevelPreview
-            ? `<div class="preview-stack">${preview.overlapRowSummaries
+          model.overlapCards.length
+            ? `<div class="preview-stack">${model.overlapCards
                 .map(
                   (entry) => `
           <article class="preview-card">
-            <strong>IS${escapeHtml(String(entry.rowId))}Level overlap support</strong>
-            <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))} at <code>${escapeHtml(entry.fieldPath)}</code>.</p>
+            <strong>${escapeHtml(entry.title)}</strong>
+            <p class="meta">Imported raw level ${escapeHtml(entry.level)} at <code>${escapeHtml(entry.fieldPath)}</code>.</p>
             <p class="meta">This row sits inside the checked ordered-overlap support band only. It is still not a recovered player-facing row label or canonical Emporium identity.</p>
             <p class="meta">Structured compatibility evidence from <code>${escapeHtml(entry.shapeId)}</code>:</p>
             <div class="meta-stack">
@@ -5694,22 +5607,21 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
                 .join("")}</div>`
             : ""
         }
-        <div class="preview-stack">${preview.previewRows
+        <div class="preview-stack">${model.previewRows
           .map(
             (entry) => `
           <article class="preview-card">
             <strong>IS${escapeHtml(String(entry.rowId))}Level</strong>
-            <p class="meta">Imported raw level ${escapeHtml(formatShardNumber(entry.level))}</p>
+            <p class="meta">Imported raw level ${escapeHtml(entry.level)}</p>
             <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
           </article>
         `
           )
           .join("")}</div>
-        ${preview.trailingPreviewRows.length && preview.importedSpanRowCount > preview.previewRows.length ? `<p class="meta">Trailing imported raw rows: ${escapeHtml(preview.trailingPreviewRows.map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`).join(" | "))}</p>` : ""}
+        ${model.trailingPreviewLine ? `<p class="meta">${escapeHtml(model.trailingPreviewLine)}</p>` : ""}
         ${
           preview.hasTradeCounterPreview
-            ? `<div class="preview-stack">${preview.importedTradeCounters
-                .slice(0, 8)
+            ? `<div class="preview-stack">${model.importedTradeCounters
                 .map(
                   (entry) => `
           <article class="preview-card">
@@ -5725,7 +5637,7 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
         ${preview.tradeCounterSampleLine ? `<p class="meta">Trade-counter sample: ${escapeHtml(preview.tradeCounterSampleLine)}${preview.importedTradeCounterCount > 6 ? "..." : ""}</p>` : ""}
         ${
           preview.hasEarlyMechPreview
-            ? `<div class="preview-stack">${preview.importedEarlyMechFields
+            ? `<div class="preview-stack">${model.importedEarlyMechFields
                 .map(
                   (entry) => `
           <article class="preview-card">
@@ -6463,28 +6375,12 @@ function formatBoundaryValue(value) {
   return String(value);
 }
 
-function getProfileCompletion(profile) {
-  const filled = Object.values(ACTIVE_PROFILE_FORM_FIELD_PATHS).filter(
-    (path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== ""
-  ).length;
-  const fields = Object.keys(ACTIVE_PROFILE_FORM_FIELD_PATHS);
-  return Math.round((filled / fields.length) * 100);
-}
-
 function toRecommendationAction(item, fallbackModule) {
   return normalizeRecommendationAction(item, fallbackModule);
 }
 
 function sanitizeRecommendationLines(value) {
   return sanitizeNormalizedRecommendationLines(value);
-}
-
-function getPlannerHelperCompletion(profile) {
-  const plannerPaths = [["planning", "shards", "totalMilestoneLevels"]];
-  const filled = plannerPaths.filter(
-    (path) => String(path.reduce((current, key) => current?.[key], profile) ?? "").trim() !== ""
-  ).length;
-  return Math.round((filled / plannerPaths.length) * 100);
 }
 
 function makeRecommendationCard(item, module) {
