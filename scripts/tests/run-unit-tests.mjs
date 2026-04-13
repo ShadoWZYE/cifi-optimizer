@@ -1,4 +1,5 @@
 import "../../tests/generator-ocr-support.test.mjs";
+import "../../tests/import-normalization-support.test.mjs";
 import "../../tests/player-profile.test.mjs";
 import "../../tests/player-profile-boundary-support.test.mjs";
 import "../../tests/recommendation-feed-support.test.mjs";

@@ -306,6 +306,10 @@ const tokenBankControllerShellData = JSON.parse(
 );
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const importNormalizationSupportModule = await readFile(
+  new URL("../import-normalization-support.js", import.meta.url),
+  "utf8"
+);
 const playerProfileBoundarySupportModule = await readFile(
   new URL("../player-profile-boundary-support.js", import.meta.url),
   "utf8"
@@ -520,6 +524,9 @@ await runNodeSyntaxCheck(fileURLToPath(new URL("../app.js", import.meta.url)));
 const datasetValidation = await validateBundledDatasets();
 const normalizedHtml = collapseWhitespace(html);
 const normalizedAppJs = collapseWhitespace(appJs);
+const normalizedImportNormalizationSupportModule = collapseWhitespace(
+  importNormalizationSupportModule
+);
 const normalizedPlayerProfileBoundarySupportModule = collapseWhitespace(
   playerProfileBoundarySupportModule
 );
@@ -8008,7 +8015,16 @@ assert.match(appJs, /function getShardFocusLevelForMilestone/);
 assert.match(shardEvidenceSupportModule, /getShardMilestoneGroundedSummary/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
-assert.match(appJs, /function normalizeImportRow/);
+assert.match(appJs, /from "\.\/import-normalization-support\.js"/);
+assert.doesNotMatch(appJs, /function normalizeImportRow/);
+assert.match(importNormalizationSupportModule, /export function parseCsv/);
+assert.match(importNormalizationSupportModule, /export function normalizeImportRow/);
+assert.match(importNormalizationSupportModule, /export function coerceInputValue/);
+assert.match(importNormalizationSupportModule, /export function normalizeGeneratorTierKey/);
+assert.match(
+  normalizedImportNormalizationSupportModule,
+  /export function normalizeCiNumberValue\(value\)/
+);
 assert.match(appJs, /from "\.\/player-profile\.js"/);
 assert.match(appJs, /PLAYER_PROFILE_SCHEMA_VERSION/);
 assert.match(appJs, /playerProfile:/);

@@ -22,6 +22,7 @@ const ignoredDirectories = new Set([
 ]);
 const includedRootFiles = new Set([
   "app.js",
+  "import-normalization-support.js",
   "player-profile-boundary-support.js",
   "player-profile.js",
   "recommendation-contract.js",
