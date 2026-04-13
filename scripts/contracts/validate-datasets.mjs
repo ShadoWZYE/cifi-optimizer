@@ -8246,6 +8246,97 @@ function validateTokenShopRowRemapBoundary(boundary) {
     "token shop row remap boundary ATU11 trace result drifted"
   );
   expectRecord(
+    boundary.atu12BridgeFollowUp,
+    "token shop row remap boundary ATU12 bridge follow-up must be an object"
+  );
+  expectRecord(
+    boundary.atu12BridgeFollowUp.recoveredBridge,
+    "token shop row remap boundary ATU12 recovered bridge must be an object"
+  );
+  expectRecord(
+    boundary.atu12BridgeFollowUp.verifiedTitleTextChain,
+    "token shop row remap boundary ATU12 title text chain must be an object"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.targetId,
+    "token-shop-atu12-mk8-bridge",
+    "token shop row remap boundary ATU12 trace target drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.recoveredBridge.shellField,
+    "ATU12Button",
+    "token shop row remap boundary ATU12 trace bridge shell drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.recoveredBridge.shellPathId,
+    15830,
+    "token shop row remap boundary ATU12 trace bridge shell path drifted"
+  );
+  assert.deepEqual(
+    boundary.atu12BridgeFollowUp.recoveredBridge.ownerFieldBlock,
+    [
+      "MK8TokenBoostStartCost",
+      "MK8TokenBoostAdditiveCost",
+      "MK8TokenBoostBonus",
+      "MK8TokenBoostFillMaxLevel",
+      "MK8TokenBoostFill"
+    ],
+    "token shop row remap boundary ATU12 trace bridge owner field block drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.recoveredBridge.supportingActionHook,
+    "BuyMK8TokenBoost",
+    "token shop row remap boundary ATU12 trace bridge action hook drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.recoveredBridge.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK8Booster",
+    "token shop row remap boundary ATU12 trace bridge prefab drifted"
+  );
+  assert.match(
+    boundary.atu12BridgeFollowUp.recoveredBridge.groundedConclusion,
+    /ATU12Button now has one checked bridge/i,
+    "token shop row remap boundary ATU12 conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.verifiedTitleTextChain.shellField,
+    "ATU12Button",
+    "token shop row remap boundary ATU12 title text shell drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.verifiedTitleTextChain.shellPathId,
+    15830,
+    "token shop row remap boundary ATU12 title text shell path drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.verifiedTitleTextChain.prefabIdentity,
+    "NewTokenUPGPrefab.T1.MK8Booster",
+    "token shop row remap boundary ATU12 title text prefab drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
+    "Mk8 Generator Booster",
+    "token shop row remap boundary ATU12 title text title drifted"
+  );
+  assert.deepEqual(
+    boundary.atu12BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+    [
+      "This upgrade divides the cost of MK8 Generators by 8e100.",
+      "This upgrade provides a 30% increase to the output of MK8 Generators."
+    ],
+    "token shop row remap boundary ATU12 title text support drifted"
+  );
+  assert.match(
+    boundary.atu12BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
+    /shell-to-prefab-to-title-side-text chain/i,
+    "token shop row remap boundary ATU12 title text conclusion drifted"
+  );
+  assert.equal(
+    boundary.atu12BridgeFollowUp.result,
+    "checked object bridge plus title-side text chain recovered",
+    "token shop row remap boundary ATU12 trace result drifted"
+  );
+  expectRecord(
     boundary.atu3CrossSystemEffectTrace,
     "token shop row remap boundary ATU3 cross-system effect trace must be an object"
   );
@@ -8627,7 +8718,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     );
   });
   assert.ok(
-    boundary.currentBoundary.some((line) => /ten checked TokenShop row bridges/i.test(line)),
+    boundary.currentBoundary.some((line) => /eleven checked TokenShop row bridges/i.test(line)),
     "token shop row remap boundary must preserve recovered bridge count"
   );
   assert.ok(
