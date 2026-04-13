@@ -25,6 +25,7 @@ const includedRootFiles = new Set([
   "player-profile.js",
   "recommendation-contract.js",
   "recommendation-feed-support.js",
+  "shard-evidence-support.js",
   "spend-boundary-summary.js"
 ]);
 const includedRootDirectories = new Set(["scripts", "tests"]);

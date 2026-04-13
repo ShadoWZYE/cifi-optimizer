@@ -310,6 +310,10 @@ const recommendationFeedSupportModule = await readFile(
   new URL("../recommendation-feed-support.js", import.meta.url),
   "utf8"
 );
+const shardEvidenceSupportModule = await readFile(
+  new URL("../shard-evidence-support.js", import.meta.url),
+  "utf8"
+);
 const spendBoundarySummaryJs = await readFile(
   new URL("../spend-boundary-summary.js", import.meta.url),
   "utf8"
@@ -511,6 +515,7 @@ const normalizedAppJs = collapseWhitespace(appJs);
 const normalizedRecommendationFeedSupportModule = collapseWhitespace(
   recommendationFeedSupportModule
 );
+const normalizedShardEvidenceSupportModule = collapseWhitespace(shardEvidenceSupportModule);
 const normalizedSpendBoundarySummaryJs = collapseWhitespace(spendBoundarySummaryJs);
 const normalizedProbeRunner = collapseWhitespace(probeRunner);
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
@@ -7935,14 +7940,15 @@ assert.match(appJs, /function getShardSaveBoundarySummary/);
 assert.match(recommendationContractModule, /export function toRecommendationAction/);
 assert.match(recommendationContractModule, /export function sortRecommendationFeed/);
 assert.match(recommendationContractModule, /export function getRecommendationContractIssues/);
-assert.match(appJs, /function getSourceTitlesForIds/);
-assert.match(appJs, /function getMilestoneSourceLabel/);
-assert.match(appJs, /function getProvenanceConflictNote/);
+assert.match(appJs, /from "\.\/shard-evidence-support\.js"/);
+assert.match(shardEvidenceSupportModule, /getSourceTitlesForIds/);
+assert.match(shardEvidenceSupportModule, /getMilestoneSourceLabel/);
+assert.match(shardEvidenceSupportModule, /getProvenanceConflictNote/);
 assert.match(appJs, /function buildLoopGuardrailRecommendations/);
 assert.match(appJs, /function getObservedBehaviorById/);
 assert.match(appJs, /function saveShardPlannerInputs/);
 assert.match(appJs, /function getShardFocusLevelForMilestone/);
-assert.match(appJs, /function getShardMilestoneGroundedSummary/);
+assert.match(shardEvidenceSupportModule, /getShardMilestoneGroundedSummary/);
 assert.match(appJs, /function runGemOptimization/);
 assert.match(appJs, /function previewImport/);
 assert.match(appJs, /function normalizeImportRow/);
@@ -7980,11 +7986,14 @@ assert.match(appJs, /Observed level/);
 assert.doesNotMatch(appJs, /Tracked row/);
 assert.match(appJs, /stays in canonical order/);
 assert.match(appJs, /Community alias:/);
-assert.match(appJs, /function getShardMilestonePanelTitle/);
-assert.match(appJs, /THE \${normalizedName\.toUpperCase\(\)} MILESTONE/);
+assert.match(shardEvidenceSupportModule, /getShardMilestonePanelTitle/);
+assert.match(
+  normalizedShardEvidenceSupportModule,
+  /THE \$\{normalizedName\.toUpperCase\(\)\} MILESTONE/
+);
 assert.match(appJs, /shard-threshold-pill/);
 assert.match(
-  appJs,
+  shardEvidenceSupportModule,
   /Direct row-aligned cost evidence exists for other rows, but this row is not fully mapped yet/
 );
 assert.match(appJs, /Extracted bonus per level/);
@@ -7994,11 +8003,11 @@ assert.doesNotMatch(appJs, /Extracted row state/);
 assert.doesNotMatch(appJs, /Formula profile/);
 assert.doesNotMatch(appJs, /Grounding detail/);
 assert.doesNotMatch(appJs, /Grounded data/);
-assert.match(appJs, /Verified row inputs recovered; exact cost formula still unresolved\./);
-assert.match(appJs, /Native cost stages not yet recovered for this row\./);
+assert.match(shardEvidenceSupportModule, /Verified row inputs recovered; exact cost formula still unresolved\./);
+assert.match(shardEvidenceSupportModule, /Native cost stages not yet recovered for this row\./);
 assert.match(appJs, /Observed value/);
-assert.match(appJs, /per-level multiplicative model/);
-assert.match(appJs, /Current value unresolved from checked inputs/);
+assert.match(shardEvidenceSupportModule, /per-level multiplicative model/);
+assert.match(shardEvidenceSupportModule, /Current value unresolved from checked inputs/);
 assert.doesNotMatch(appJs, /Title source/);
 assert.doesNotMatch(appJs, /Row shell/);
 assert.doesNotMatch(appJs, /Effect path/);
