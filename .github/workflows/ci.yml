@@ -3,6 +3,8 @@ name: CI
 on:
   pull_request:
   push:
+    branches:
+      - main
 
 jobs:
   artifact-guard:
@@ -94,6 +96,9 @@ jobs:
       - name: Validate datasets
         run: npm run verify:data
 
+      - name: Verify vendoring layout
+        run: npm run verify:vendoring
+
       - name: Run tests
         run: npm test
 
@@ -102,3 +107,6 @@ jobs:
 
       - name: Syntax check first-party JS
         run: npm run check:syntax
+
+      - name: Lint docs portability
+        run: npm run lint:docs
