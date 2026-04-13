@@ -122,5 +122,9 @@ function isIncludedFile(relativePath) {
     return includedRootFiles.has(relativePath);
   }
 
-  return relativePath.startsWith("scripts/") || relativePath.startsWith("tests/");
+  return (
+    relativePath.startsWith("scripts/") ||
+    relativePath.startsWith("support/") ||
+    relativePath.startsWith("tests/")
+  );
 }
