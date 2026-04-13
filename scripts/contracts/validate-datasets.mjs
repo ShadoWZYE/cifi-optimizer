@@ -1600,6 +1600,76 @@ function validateShardRowVerificationSu1(boundary) {
   };
 }
 
+function validateShardRowVerificationSu2(boundary) {
+  expectNonEmptyString(boundary.dataset, "shard row verification SU2 dataset id must be present");
+  expectNonEmptyString(boundary.generatedAt, "shard row verification SU2 generatedAt must be present");
+  expectRecord(boundary.sources, "shard row verification SU2 sources must be an object");
+  ["rowModelBoundary", "titleEffectBoundary", "effectTextHandlerBoundary", "bonusSlotProbe", "costModelBoundary", "costNativeProbe", "typeMetadataProbe", "handoffBoundary", "groundedMilestones"].forEach((field) => {
+    expectNonEmptyString(boundary.sources[field], `shard row verification SU2 sources.${field} must be present`);
+  });
+  expectRecord(boundary.verifiedRow, "shard row verification SU2 verifiedRow must be an object");
+  expectRecord(boundary.verifiedRow.titleBinding, "shard row verification SU2 titleBinding must be an object");
+  expectRecord(boundary.verifiedRow.declaringRowModel, "shard row verification SU2 declaringRowModel must be an object");
+  expectRecord(boundary.verifiedRow.declaringRowModel.declaringField, "shard row verification SU2 declaringRowModel.declaringField must be an object");
+  expectRecord(boundary.verifiedRow.declaringRowModel.rowModelType, "shard row verification SU2 declaringRowModel.rowModelType must be an object");
+  expectArray(boundary.verifiedRow.declaringRowModel.runtimeStateFields, "shard row verification SU2 declaringRowModel.runtimeStateFields must be an array");
+  expectRecord(boundary.verifiedRow.declaringRowModel.rowShellFields, "shard row verification SU2 declaringRowModel.rowShellFields must be an object");
+  expectRecord(boundary.verifiedRow.effectPackage, "shard row verification SU2 effectPackage must be an object");
+  expectArray(boundary.verifiedRow.effectPackage.fixedBreakpoints, "shard row verification SU2 effectPackage.fixedBreakpoints must be an array");
+  expectArray(boundary.verifiedRow.effectPackage.bonuses, "shard row verification SU2 effectPackage.bonuses must be an array");
+  expectRecord(boundary.verifiedRow.effectPresentationBinding, "shard row verification SU2 effectPresentationBinding must be an object");
+  expectArray(boundary.verifiedRow.effectPresentationBinding.presentationSlots, "shard row verification SU2 effectPresentationBinding.presentationSlots must be an array");
+  expectArray(boundary.verifiedRow.effectPresentationBinding.calcAccessors, "shard row verification SU2 effectPresentationBinding.calcAccessors must be an array");
+  expectArray(boundary.verifiedRow.effectPresentationBinding.uiTextAnchors, "shard row verification SU2 effectPresentationBinding.uiTextAnchors must be an array");
+  expectRecord(boundary.verifiedRow.costShell, "shard row verification SU2 costShell must be an object");
+  expectArray(boundary.verifiedRow.costShell.serializedCostFields, "shard row verification SU2 costShell.serializedCostFields must be an array");
+  expectArray(boundary.verifiedRow.costShell.nativeOperandFieldNames, "shard row verification SU2 costShell.nativeOperandFieldNames must be an array");
+  expectArray(boundary.verifiedRow.costShell.thresholdStages, "shard row verification SU2 costShell.thresholdStages must be an array");
+  expectArray(boundary.verifiedRow.costShell.stageFieldUsage, "shard row verification SU2 costShell.stageFieldUsage must be an array");
+  expectArray(boundary.findings, "shard row verification SU2 findings must be an array");
+  expectArray(boundary.currentBoundary, "shard row verification SU2 currentBoundary must be an array");
+
+  assert.equal(boundary.verifiedRow.row, 2, "shard row verification SU2 row drifted");
+  assert.equal(boundary.verifiedRow.rowKey, "SU2", "shard row verification SU2 rowKey drifted");
+  assert.equal(boundary.verifiedRow.titleBinding.assetName, "SMilestone-2-Aquarius", "shard row verification SU2 assetName drifted");
+  assert.equal(boundary.verifiedRow.titleBinding.playerFacingName, "Aquarius Milestone", "shard row verification SU2 playerFacingName drifted");
+  assert.equal(boundary.verifiedRow.titleBinding.assetTitleMatchesGroundedPackage, true, "shard row verification SU2 title/package alignment drifted");
+  assert.equal(boundary.verifiedRow.declaringRowModel.ownerType, "ShardMining", "shard row verification SU2 ownerType drifted");
+  assert.equal(boundary.verifiedRow.declaringRowModel.declaringField.name, "upgradeInfoList", "shard row verification SU2 declaring field drifted");
+  assert.equal(boundary.verifiedRow.declaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo", "shard row verification SU2 row model type drifted");
+  assert.equal(boundary.verifiedRow.declaringRowModel.rowShellFields.textCheckerField, "Milestone2TextChecker", "shard row verification SU2 textCheckerField drifted");
+  assert.equal(boundary.verifiedRow.declaringRowModel.rowShellFields.unlockRequirementField, "SU2UnlockReq", "shard row verification SU2 unlockRequirementField drifted");
+  assert.deepEqual(boundary.verifiedRow.declaringRowModel.rowShellFields.bonusTextFields, ["SM2B1Text", "SM2B2Text", "SM2B3Text"], "shard row verification SU2 bonusTextFields drifted");
+  assert.deepEqual(boundary.verifiedRow.effectPackage.fixedBreakpoints, [1, 25, 50], "shard row verification SU2 fixedBreakpoints drifted");
+  assert.equal(boundary.verifiedRow.effectPackage.provenance, "community-grounded descriptive package", "shard row verification SU2 effectPackage.provenance drifted");
+  assert.equal(boundary.verifiedRow.effectPresentationBinding.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N", "shard row verification SU2 probableTextHandler drifted");
+  assert.deepEqual(boundary.verifiedRow.effectPresentationBinding.calcAccessors, ["get_SU2Bonus1Calc", "get_SU2Bonus2Calc", "get_SU2Bonus3Calc"], "shard row verification SU2 calcAccessors drifted");
+  assert.equal(boundary.verifiedRow.effectPresentationBinding.bonusSlotCount, 3, "shard row verification SU2 bonusSlotCount drifted");
+  assert.equal(boundary.verifiedRow.effectPresentationBinding.calcAccessorCount, 3, "shard row verification SU2 calcAccessorCount drifted");
+  assert.equal(boundary.verifiedRow.effectPresentationBinding.groundedBonusCount, 3, "shard row verification SU2 groundedBonusCount drifted");
+  assert.equal(boundary.verifiedRow.effectPresentationBinding.groundedCountMatches, true, "shard row verification SU2 groundedCountMatches drifted");
+  assert.equal(boundary.verifiedRow.costShell.getterName, "get_SU2Cost", "shard row verification SU2 getterName drifted");
+  assert.equal(boundary.verifiedRow.costShell.getterRva, 38257438, "shard row verification SU2 getterRva drifted");
+  assert.deepEqual(boundary.verifiedRow.costShell.serializedCostFields, ["SU2StartCost", "SU2CostExponent", "SU2GrowthExponent"], "shard row verification SU2 serializedCostFields drifted");
+  assert.deepEqual(boundary.verifiedRow.costShell.nativeOperandFieldNames, ["SU2StartCost", "SU2CostExponent"], "shard row verification SU2 nativeOperandFieldNames drifted");
+  assert.deepEqual(boundary.verifiedRow.costShell.stageFieldUsage, ["SU2StartCost", "SU2CostExponent", "SU2GrowthExponent"], "shard row verification SU2 stageFieldUsage drifted");
+  assert.equal(boundary.verifiedRow.costShell.thresholdStages.length, 4, "shard row verification SU2 thresholdStages drifted");
+  assert.ok(boundary.findings.some((line) => String(line).includes("SU2 is the next clean verified shard row")), "shard row verification SU2 must preserve single-row verification framing");
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("SU2 now binds to Aquarius title identity")), "shard row verification SU2 must preserve verified-row framing");
+  assert.ok(boundary.currentBoundary.some((line) => String(line).includes("Do not treat this single-row verification")), "shard row verification SU2 must preserve blocked-use framing");
+
+  return {
+    id: "shard-row-verification-su2",
+    label: "Shard row verification SU2",
+    classification: "extracted-mechanics",
+    stats: [
+      boundary.verifiedRow.rowKey,
+      `${boundary.verifiedRow.effectPresentationBinding.bonusSlotCount} verified bonus slots`,
+      "One more shard row now binds title, effect package, and cost shell without claiming a full row table"
+    ]
+  };
+}
+
 function validateExtractionCandidateFamilies(families) {
   expectNonEmptyString(families.dataset, "extraction candidate families dataset id must be present");
   expectNonEmptyString(families.generatedAt, "extraction candidate families generatedAt must be present");
@@ -4389,7 +4459,7 @@ async function validateBundledDatasetContract(contract) {
   );
 
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
-  assert.equal(contract.datasets.length, 61, "bundled dataset contract must track the sixty-one shipped dataset groups");
+  assert.equal(contract.datasets.length, 62, "bundled dataset contract must track the sixty-two shipped dataset groups");
 
   for (const [index, dataset] of contract.datasets.entries()) {
     expectNonEmptyString(dataset.id, `datasets[${index}].id must be present`);
@@ -4475,6 +4545,7 @@ export async function validateBundledDatasets() {
   const shardCostFormulaModel = await readJson("../../data/shard-cost-formula-model.v1.json");
   const shardBonusSlotProbe = await readJson("../../data/shard-bonus-slot-probe.v1.json");
   const shardRowVerificationSu1 = await readJson("../../data/shard-row-verification-su1.v1.json");
+  const shardRowVerificationSu2 = await readJson("../../data/shard-row-verification-su2.v1.json");
   const shardTypeMetadataProbe = await readJson("../../data/shard-type-metadata-probe.v1.json");
   const extractionCandidateFamilies = await readJson("../../data/extraction-candidate-families.v1.json");
   const extractionCandidateRanking = await readJson("../../data/extraction-candidate-ranking.v1.json");
@@ -4546,6 +4617,7 @@ export async function validateBundledDatasets() {
     validateShardCostFormulaModel(shardCostFormulaModel),
     validateShardBonusSlotProbe(shardBonusSlotProbe),
     validateShardRowVerificationSu1(shardRowVerificationSu1),
+    validateShardRowVerificationSu2(shardRowVerificationSu2),
     validateShardTypeMetadataProbe(shardTypeMetadataProbe),
     validateExtractionCandidateFamilies(extractionCandidateFamilies),
     validateExtractionCandidateRanking(extractionCandidateRanking),

@@ -60,6 +60,7 @@ const shardCostListPathProbe = JSON.parse(await readFile(new URL("../data/shard-
 const shardCostFormulaModel = JSON.parse(await readFile(new URL("../data/shard-cost-formula-model.v1.json", import.meta.url), "utf8"));
 const shardBonusSlotProbe = JSON.parse(await readFile(new URL("../data/shard-bonus-slot-probe.v1.json", import.meta.url), "utf8"));
 const shardRowVerificationSu1 = JSON.parse(await readFile(new URL("../data/shard-row-verification-su1.v1.json", import.meta.url), "utf8"));
+const shardRowVerificationSu2 = JSON.parse(await readFile(new URL("../data/shard-row-verification-su2.v1.json", import.meta.url), "utf8"));
 const shardTypeMetadataProbe = JSON.parse(await readFile(new URL("../data/shard-type-metadata-probe.v1.json", import.meta.url), "utf8"));
 const extractionCandidateFamilies = JSON.parse(await readFile(new URL("../data/extraction-candidate-families.v1.json", import.meta.url), "utf8"));
 const extractionCandidateRanking = JSON.parse(await readFile(new URL("../data/extraction-candidate-ranking.v1.json", import.meta.url), "utf8"));
@@ -484,6 +485,7 @@ const expectedBundledDatasetIds = [
   "shard-cost-formula-model",
   "shard-bonus-slot-probe",
   "shard-row-verification-su1",
+  "shard-row-verification-su2",
   "shard-type-metadata-probe",
   "extraction-candidate-families",
   "extraction-candidate-ranking",
@@ -1532,6 +1534,25 @@ assert.equal(shardRowVerificationSu1.verifiedRow.costShell.getterRva, 38254156);
 assert.deepEqual(shardRowVerificationSu1.verifiedRow.costShell.serializedCostFields, ["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"]);
 assert.ok(shardRowVerificationSu1.currentBoundary.some((line) => /SU1 now binds to Alpha title identity/.test(line)));
 assert.ok(shardRowVerificationSu1.currentBoundary.some((line) => /Do not treat this single-row verification/.test(line)));
+assert.equal(shardRowVerificationSu2.dataset, "shard-row-verification-su2.v1");
+assert.equal(shardRowVerificationSu2.verifiedRow.row, 2);
+assert.equal(shardRowVerificationSu2.verifiedRow.rowKey, "SU2");
+assert.equal(shardRowVerificationSu2.verifiedRow.titleBinding.assetName, "SMilestone-2-Aquarius");
+assert.equal(shardRowVerificationSu2.verifiedRow.titleBinding.playerFacingName, "Aquarius Milestone");
+assert.equal(shardRowVerificationSu2.verifiedRow.declaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardRowVerificationSu2.verifiedRow.declaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.equal(shardRowVerificationSu2.verifiedRow.declaringRowModel.rowShellFields.textCheckerField, "Milestone2TextChecker");
+assert.equal(shardRowVerificationSu2.verifiedRow.declaringRowModel.rowShellFields.unlockRequirementField, "SU2UnlockReq");
+assert.deepEqual(shardRowVerificationSu2.verifiedRow.declaringRowModel.rowShellFields.bonusTextFields, ["SM2B1Text", "SM2B2Text", "SM2B3Text"]);
+assert.deepEqual(shardRowVerificationSu2.verifiedRow.effectPackage.fixedBreakpoints, [1, 25, 50]);
+assert.equal(shardRowVerificationSu2.verifiedRow.effectPresentationBinding.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N");
+assert.deepEqual(shardRowVerificationSu2.verifiedRow.effectPresentationBinding.calcAccessors, ["get_SU2Bonus1Calc", "get_SU2Bonus2Calc", "get_SU2Bonus3Calc"]);
+assert.equal(shardRowVerificationSu2.verifiedRow.effectPresentationBinding.groundedCountMatches, true);
+assert.equal(shardRowVerificationSu2.verifiedRow.costShell.getterName, "get_SU2Cost");
+assert.equal(shardRowVerificationSu2.verifiedRow.costShell.getterRva, 38257438);
+assert.deepEqual(shardRowVerificationSu2.verifiedRow.costShell.serializedCostFields, ["SU2StartCost", "SU2CostExponent", "SU2GrowthExponent"]);
+assert.ok(shardRowVerificationSu2.currentBoundary.some((line) => /SU2 now binds to Aquarius title identity/.test(line)));
+assert.ok(shardRowVerificationSu2.currentBoundary.some((line) => /Do not treat this single-row verification/.test(line)));
 assert.equal(shardTypeMetadataProbe.dataset, "shard-type-metadata-probe.v1");
 assert.equal(shardTypeMetadataProbe.targets.shardMining.fullName, "ShardMining");
 assert.ok(shardTypeMetadataProbe.targets.shardMining.ownerListFields.some((entry) => entry.name === "MilestoneCostList"));
@@ -2149,7 +2170,7 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
   assert.match(track.currentSlice, /ShardMining\.upgradeInfoList -> ShardMining\+ShardUpgradeInfo/);
   assert.match(track.currentSlice, /without widening into planner behavior, affordability math, or a full row table/);
   assert.match(track.exitCondition, /exact serialized shard milestone row payload or declaring save-side owner/);
-  assert.match(track.blockedBy, /one verified SU1 row package/);
+  assert.match(track.blockedBy, /verified SU1 and SU2 row packages/);
   assert.match(track.smallestShippableSlice, /single-row shard-verification artifact/);
   assert.deepEqual(track.sources, [
     "docs/systems/shards/shard-system-verification.md",
@@ -2170,6 +2191,7 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
     "data/shard-milestone-handoff-boundary.v1.json",
     "data/shard-save-boundary.v1.json",
     "data/shard-row-verification-su1.v1.json",
+    "data/shard-row-verification-su2.v1.json",
     "data/shard-scene-monobehaviour-probe.v1.json",
     "data/shard-cost-parameter-probe.v1.json",
     "data/shard-cost-method-probe.v1.json",
@@ -2237,8 +2259,10 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
   assert.ok(track.nextSteps.some((step) => /record the exact single-row blocker/.test(step)));
   assert.equal(track.nextSteps.length, 2);
   assert.ok(track.completedSteps.some((step) => /Promote one bounded shard row-verification artifact so SU1 now binds/.test(step)));
+  assert.ok(track.completedSteps.some((step) => /Promote one bounded shard row-verification artifact so SU2 now binds/.test(step)));
   assert.ok(track.uncertain.some((line) => /Which save-side owner or exact serialized list host actually persists player-owned shard milestone rows/.test(line)));
   assert.ok(track.uncertain.some((line) => /How far the same row-verification method generalizes beyond SU1/.test(line)));
+  assert.ok(track.verified.some((line) => /SU2 now clears as one bounded verified row/.test(line)));
 });
 const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
 withRequiredValue(spendTrack, "expected archived spend parent track", (track) => {
