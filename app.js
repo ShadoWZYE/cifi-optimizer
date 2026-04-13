@@ -9,6 +9,7 @@ import {
   sortRecommendationFeed as sortNormalizedRecommendationFeed,
   toRecommendationAction as normalizeRecommendationAction
 } from "./recommendation-contract.js";
+import { buildTokenShopProgressionModel } from "./token-shop-progression-model.js";
 import { createTokenShopUiSupport } from "./token-shop-ui-support.js";
 
 const STORAGE_KEYS = {
@@ -5706,12 +5707,6 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
   ];
 }
 
-function getTokenShopNumericFieldValue(tokenShop, fieldName) {
-  const fields = Array.isArray(tokenShop?.fields) ? tokenShop.fields : [];
-  const entry = fields.find((field) => field?.field === fieldName && field?.kind === "number");
-  return typeof entry?.value === "number" ? entry.value : null;
-}
-
 function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
   const resolvedTokenShopState =
     tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
@@ -5730,104 +5725,17 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
   };
 }
 
-function resolveTokenShopProgressionLevelSource(fieldName, progressionState, compatibilityLevels) {
-  const localOverrideValue = progressionState?.checkedSubsetLevels?.[fieldName];
-  if (typeof localOverrideValue === "number" && Number.isFinite(localOverrideValue)) {
-    return {
-      value: localOverrideValue,
-      sourceLabel: "Local progression override",
-      path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
-    };
-  }
-  const playerStateValue = progressionState?.checkedSubsetPlayerState?.[fieldName];
-  if (typeof playerStateValue === "number" && Number.isFinite(playerStateValue)) {
-    return {
-      value: playerStateValue,
-      sourceLabel: "Checked player state",
-      path: `planning.tokenShop.checkedSubsetPlayerState.${fieldName}`
-    };
-  }
-  const compatibilityValue = compatibilityLevels?.[fieldName];
-  if (typeof compatibilityValue === "number" && Number.isFinite(compatibilityValue)) {
-    return {
-      value: compatibilityValue,
-      sourceLabel: "Compatibility fallback",
-      path: `compatibility.unmappedSystemState.tokenShop.${fieldName}`
-    };
-  }
-  return {
-    value: 0,
-    sourceLabel: "Default level 0",
-    path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
-  };
-}
-
 function getTokenShopProgressionModel() {
-  const progressionState = getTokenShopProgressionProfileState();
-  const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
-  const boundary = state.extractedMechanics?.tokenShopRowRemapBoundary;
-  const tokenShop = state.extractedMechanics?.tokenShop;
-  const currentTokens = state.playerProfile.player.resources.tokens;
-  const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => {
-    const levelSource = resolveTokenShopProgressionLevelSource(
-      row.field,
-      progressionState,
-      compatibilityLevels
-    );
-    const currentLevel = levelSource.value;
-    const startCost = getTokenShopNumericFieldValue(tokenShop, row.startCostField);
-    const additiveCost = getTokenShopNumericFieldValue(tokenShop, row.additiveCostField);
-    const bonusValue = getTokenShopNumericFieldValue(tokenShop, row.bonusField);
-    const maxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
-    const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
-    const isMaxed = hasLevel && typeof maxLevel === "number" && currentLevel >= maxLevel;
-    const nextKnownCost =
-      hasLevel && !isMaxed && typeof startCost === "number" && typeof additiveCost === "number"
-        ? startCost + additiveCost * currentLevel
-        : null;
-    const isAffordable =
-      typeof nextKnownCost === "number" && typeof currentTokens === "number"
-        ? currentTokens >= nextKnownCost
-        : null;
-
-    return {
-      ...row,
-      currentLevel,
-      currentLevelPath: levelSource.path,
-      currentLevelSourceLabel: levelSource.sourceLabel,
-      startCost,
-      additiveCost,
-      bonusValue,
-      nextKnownCost,
-      isAffordable,
-      isMaxed,
-      maxLevel,
-      maxStatus: tokenShopUi.getTokenShopKnownMaxStatus(currentLevel, maxLevel),
-      currentVsNextBonus: tokenShopUi.getTokenShopCurrentVsNextBonusSummary(
-        row,
-        currentLevel,
-        maxLevel,
-        bonusValue
-      )
-    };
+  return buildTokenShopProgressionModel({
+    progressionState: getTokenShopProgressionProfileState(),
+    compatibilityLevels: getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {},
+    boundary: state.extractedMechanics?.tokenShopRowRemapBoundary,
+    tokenShop: state.extractedMechanics?.tokenShop,
+    currentTokens: state.playerProfile.player.resources.tokens,
+    getGroundedSubsetDefinitions: getTokenShopGroundedSubsetDefinitions,
+    getKnownMaxStatus: tokenShopUi.getTokenShopKnownMaxStatus,
+    getCurrentVsNextBonusSummary: tokenShopUi.getTokenShopCurrentVsNextBonusSummary
   });
-
-  return {
-    currentTokens,
-    displayRule:
-      "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8.",
-    rows,
-    localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override")
-      .length,
-    playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state")
-      .length,
-    compatibilityCount: rows.filter(
-      (row) => row.currentLevelSourceLabel === "Compatibility fallback"
-    ).length,
-    defaultCount: rows.filter((row) => row.currentLevelSourceLabel === "Default level 0").length,
-    affordableCount: rows.filter((row) => row.isAffordable === true).length,
-    knownCapCount: rows.filter((row) => row.maxStatus.label === "At or above known cap").length
-  };
 }
 
 function renderTokenShopOverviewAffordabilityModule() {

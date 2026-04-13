@@ -306,6 +306,10 @@ const tokenBankControllerShellData = JSON.parse(
 );
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const tokenShopProgressionModel = await readFile(
+  new URL("../token-shop-progression-model.js", import.meta.url),
+  "utf8"
+);
 const tokenShopUiSupport = await readFile(
   new URL("../token-shop-ui-support.js", import.meta.url),
   "utf8"
@@ -743,10 +747,10 @@ assert.match(appJs, /function renderTokenShopProgressionEditor/);
 assert.match(appJs, /function getTokenShopProgressionModel/);
 assert.match(tokenShopUiSupport, /function formatTokenShopBonusStep/);
 assert.match(appJs, /Grounded TokenShop checked-row editor/);
-assert.match(appJs, /Default level 0/);
+assert.match(tokenShopProgressionModel, /Default level 0/);
 assert.match(appJs, /Prefill local rows from compatibility import/);
 assert.ok(
-  appJs.includes(
+  tokenShopProgressionModel.includes(
     "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8."
   )
 );
