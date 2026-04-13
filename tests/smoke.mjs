@@ -385,7 +385,10 @@ assert.match(appJs, /Compatibility-only preview labeled/);
 assert.match(appJs, /Uncertainty visible/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /function renderSpendPlannerResearchForkNote/);
-assert.match(appJs, /The Overview page now keeps the descriptive spend boundary only, while the first real TokenShop-facing checked-row editor slice now lives on the Progression page/);
+assert.match(appJs, /The Overview page keeps the descriptive spend boundary and the checked-subset TokenShop affordability module, while the Progression page keeps the separate checked-row editor slice/);
+assert.match(appJs, /Overview TokenShop affordability/);
+assert.match(appJs, /This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level<\/code>, <code>ATU2Level<\/code>, <code>ATU3Level<\/code>, <code>ATU4Level<\/code>, <code>ATU5Level<\/code>, <code>ATU6Level<\/code>, <code>ATU7Level<\/code>, and <code>ATU8Level<\/code>/);
+assert.match(appJs, /Checked player-facing names are preferred where they exist, grounded prefab identity is used where they do not/);
 assert.match(appJs, /function getRecommendationExplainabilitySummary/);
 assert.match(appJs, /function getRecommendationContractSummary/);
 assert.match(appJs, /function getRecommendationExplainabilityAudit/);
@@ -2324,10 +2327,14 @@ withRequiredValue(spendFirstUiSliceTrack, "expected spend planner first UI slice
     track.verified.some((line) => /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level`/.test(line)),
     "expected spend first UI slice track to record grounded TokenShop row subset"
   );
-  assert.ok(
-    track.verified.some((line) => /separate TokenShop subset affordability module can ship on a normal app surface without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs/.test(line)),
-    "expected spend first UI slice track to keep unresolved owners and wrapper-only Emporium fields out of canonical inputs"
-  );
+assert.ok(
+  track.verified.some((line) => /separate TokenShop subset affordability module can ship on a normal app surface without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs/.test(line)),
+  "expected spend first UI slice track to keep unresolved owners and wrapper-only Emporium fields out of canonical inputs"
+);
+assert.ok(
+  track.verified.some((line) => /shipped Overview affordability surface can now consume the full currently grounded product-facing subset: `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level`/i.test(line)),
+  "expected spend first UI slice track to record the full Overview affordability subset"
+);
   assert.ok(track.nextSteps.length <= 3, "expected spend first UI slice next-step count");
 });
 const tokenShopRowDetailSliceTrack = snapshot.researchTracks.find((track) => track.id === "spend-token-shop-row-detail-slice");

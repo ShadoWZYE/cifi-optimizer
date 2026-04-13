@@ -1941,7 +1941,7 @@ function renderSpendPlannerBoundary() {
   const blockedInputs = [
     {
       label: "TokenShop recommendations beyond the checked editor subset",
-      reason: "The checked ATU1, ATU2, ATU5, and ATU6 remap subset now lives on the Progression page as a non-canonical local editor, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
+      reason: "The checked ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, and ATU8 remap subset can now appear on shipped Overview and Progression surfaces, but recommendation logic and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
     },
     {
       label: "Token-bank cap and claimable tokens",
@@ -1973,9 +1973,10 @@ function renderSpendPlannerBoundary() {
     </div>
     <div class="meta-stack">
       <p class="snapshot-title">TokenShop progression handoff</p>
-      <p class="meta">The checked TokenShop subset editor now lives on the Progression page instead of inside this Overview-bound spend boundary panel.</p>
-      <p class="meta">Its local row levels stay non-canonical under <code>planning.tokenShop.checkedSubsetLevels.*</code>, compatibility imports remain prefill only, and the rest of the raw <code>ATU*Level</code> family stays quarantined under <code>compatibility.unmappedSystemState.tokenShop</code>.</p>
+      <p class="meta">The checked TokenShop subset now ships in two bounded user-facing surfaces: this Overview affordability module and the separate Progression-side checked-row editor.</p>
+      <p class="meta">Overview reads the shared checked subset for current affordability only, while Progression keeps local row edits non-canonical under <code>planning.tokenShop.checkedSubsetLevels.*</code>. Compatibility imports remain prefill or fallback only, and the rest of the raw <code>ATU*Level</code> family stays quarantined under <code>compatibility.unmappedSystemState.tokenShop</code>.</p>
     </div>
+    ${renderTokenShopOverviewAffordabilityModule()}
     <div class="meta-stack">
         <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
         <ul class="research-step-list">${blockedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${escapeHtml(input.reason)}</li>`).join("")}</ul>
@@ -2011,8 +2012,8 @@ function renderSpendPlannerResearchForkNote() {
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Forked user-surface slice</p>
-      <p class="meta">The Overview page now keeps the descriptive spend boundary only, while the first real TokenShop-facing checked-row editor slice now lives on the Progression page.</p>
-      <p class="meta">The TokenShop module answers one real player question for the checked subset only: what do the grounded upgrades I can already inspect actually do at my current level and on the next level?</p>
+      <p class="meta">The Overview page keeps the descriptive spend boundary and the checked-subset TokenShop affordability module, while the Progression page keeps the separate checked-row editor slice.</p>
+      <p class="meta">Those two shipped TokenShop surfaces answer two real player questions for the same checked subset only: what can I afford right now, and what do the grounded upgrades I can already inspect do at my current level and on the next level?</p>
       <p class="meta">Anything beyond that consumed-input contract should fork into a new slice rather than reopening the shipped surfaces with optimizer behavior.</p>
     </div>
   `;
@@ -5038,6 +5039,86 @@ function getTokenShopProgressionModel() {
     affordableCount: rows.filter((row) => row.isAffordable === true).length,
     knownCapCount: rows.filter((row) => row.maxStatus.label === "At or above known cap").length
   };
+}
+
+function renderTokenShopOverviewAffordabilityModule() {
+  const summary = getTokenShopProgressionModel();
+  const sourceLine = summary.playerStateCount
+    ? `${summary.playerStateCount}/${summary.rows.length} checked player-state row${summary.playerStateCount === 1 ? "" : "s"} active before compatibility fallback.`
+    : "No checked player-state rows are active yet; compatibility import and default level 0 stay available.";
+
+  return `
+    <div class="meta-stack">
+      <p class="snapshot-title">Overview TokenShop affordability</p>
+      <p class="meta">This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, and <code>ATU8Level</code>.</p>
+      <p class="meta">Checked player-facing names are preferred where they exist, grounded prefab identity is used where they do not, and the rest of the unresolved <code>ATU*Level</code> family stays quarantined outside this module.</p>
+      <p class="meta">${escapeHtml(sourceLine)}</p>
+      <div class="pill-row">
+        <span class="pill">${typeof summary.currentTokens === "number" ? `${summary.affordableCount}/${summary.rows.length} affordable from ${formatBoundaryValue(summary.currentTokens)} Tokens` : "Affordability gated by missing Tokens"}</span>
+        <span class="pill">${summary.playerStateCount}/${summary.rows.length} checked player-state rows active</span>
+        <span class="pill">${summary.compatibilityCount}/${summary.rows.length} compatibility fallback rows active</span>
+        <span class="pill">${summary.defaultCount}/${summary.rows.length} defaulted to level 0</span>
+        <span class="pill">${summary.knownCapCount} at or above known cap</span>
+        <span class="pill">${escapeHtml(summary.displayRule)}</span>
+      </div>
+      <div class="preview-stack">
+        ${summary.rows.map((row) => {
+          const displayTitle = getTokenShopRowDisplayTitle(row);
+          const nextKnownCostLabel = row.isMaxed
+            ? "No next cost within known cap"
+            : typeof row.nextKnownCost === "number"
+              ? formatBoundaryValue(row.nextKnownCost)
+              : "No known next cost";
+          const affordabilityLine = row.isMaxed
+            ? "No next purchase within known cap."
+            : row.isAffordable === true
+              ? "Affordable from current Tokens."
+              : row.isAffordable === false && typeof row.nextKnownCost === "number" && typeof summary.currentTokens === "number"
+                ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+                : "Affordability unavailable until Tokens are entered.";
+
+          return `
+            <article class="preview-card token-shop-affordability-card">
+              <div class="token-shop-game-row">
+                <div class="token-shop-level-ring">
+                  <span class="token-shop-level-value">${escapeHtml(formatBoundaryValue(row.currentLevel))}</span>
+                  <span class="token-shop-level-divider">/</span>
+                  <span class="token-shop-level-cap">${typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel) ? escapeHtml(formatBoundaryValue(row.maxLevel)) : "?"}</span>
+                </div>
+                <div class="token-shop-main-lane">
+                  <div class="token-shop-top-band">
+                    <div class="token-shop-affordability-head">
+                      <div class="meta-stack">
+                        <strong>${escapeHtml(displayTitle)}</strong>
+                        <div class="token-shop-row-tags">
+                          <span class="token-shop-row-tag">${escapeHtml(row.rowTypeLabel || "Checked row")}</span>
+                          ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
+                        </div>
+                        <p class="meta token-shop-effect-line">${escapeHtml(formatTokenShopSentence(formatTokenShopEffectLine(row)))}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="token-shop-editor-strip">
+                    <div class="token-shop-editor-meta">
+                      <p class="meta">Level ${escapeHtml(formatBoundaryValue(row.currentLevel))} • ${escapeHtml(row.currentLevelSourceLabel)}</p>
+                      <p class="meta">${escapeHtml(getTokenShopRowGroundingSummary(row))}</p>
+                      <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="token-shop-buy-panel">
+                  <span class="token-shop-buy-label">${escapeHtml(getTokenShopActionLabel(row))}</span>
+                  <strong>${escapeHtml(nextKnownCostLabel)}</strong>
+                  <p class="meta">${escapeHtml(affordabilityLine)}</p>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+      <p class="meta">Overview affordability only. No best-buy order, ROI, ranking, token-bank planner behavior, Daily Tokenium planner behavior, or canonical <code>state.playerProfile</code> promotion is added here.</p>
+    </div>
+  `;
 }
 
 function saveTokenShopProgressionLevel(fieldName, value) {

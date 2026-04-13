@@ -68,7 +68,7 @@ Import-only or retired active helpers:
 Planner rule:
 
 - checked TokenShop editor levels stay under `planning.tokenShop.checkedSubsetLevels.*` and remain non-canonical until broader row remap and planner gates clear
-- checked TokenShop player-state-backed subset levels stay under `planning.tokenShop.checkedSubsetPlayerState.*` for the already cleared four-row seam only and do not promote the wider raw `ATU*Level` family into canonical state
+- checked TokenShop player-state-backed subset levels stay under `planning.tokenShop.checkedSubsetPlayerState.*` for the already cleared grounded product-facing subset only and do not promote the wider raw `ATU*Level` family into canonical state
 
 ## External-model implementation state
 

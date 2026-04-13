@@ -412,7 +412,8 @@
         "The checked TokenShop row-remap boundary now clears a small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level`, so those rows can appear in a separate affordability module while the rest of the `ATU*Level` family stays quarantined.",
         "The grounded TokenShop extract already preserves the checked cost inputs needed by this slice, so next known cost for that subset can stay on the exact `StartCost + AdditiveCost * currentLevel` contract without claiming broader planner logic.",
         "Current spend owner-recovery blockers still live on separate TokenShop row-level, token-bank cap or claimable state-owner, Daily Tokenium cap or ready-state, and Emporium save-model tracks.",
-        "A separate TokenShop subset affordability module can ship on a normal app surface without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs."
+        "A separate TokenShop subset affordability module can ship on a normal app surface without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs.",
+        "The shipped Overview affordability surface can now consume the full currently grounded product-facing subset: `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level`, while preferring checked player-facing names where they exist and falling back to grounded prefab identity where they do not."
       ],
       "uncertain": [
         "Which blocked spend lane will recover the next planner-safe player-owned input first.",
