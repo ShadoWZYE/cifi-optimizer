@@ -306,6 +306,10 @@ const tokenBankControllerShellData = JSON.parse(
 );
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const recommendationFeedSupportModule = await readFile(
+  new URL("../recommendation-feed-support.js", import.meta.url),
+  "utf8"
+);
 const spendBoundarySummaryJs = await readFile(
   new URL("../spend-boundary-summary.js", import.meta.url),
   "utf8"
@@ -504,6 +508,9 @@ await runNodeSyntaxCheck(fileURLToPath(new URL("../app.js", import.meta.url)));
 const datasetValidation = await validateBundledDatasets();
 const normalizedHtml = collapseWhitespace(html);
 const normalizedAppJs = collapseWhitespace(appJs);
+const normalizedRecommendationFeedSupportModule = collapseWhitespace(
+  recommendationFeedSupportModule
+);
 const normalizedSpendBoundarySummaryJs = collapseWhitespace(spendBoundarySummaryJs);
 const normalizedProbeRunner = collapseWhitespace(probeRunner);
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
@@ -829,9 +836,10 @@ assert.match(
   tokenShopUiSupport,
   /Grounded as a checked shell-to-prefab-to-player-facing-title row\./
 );
-assert.match(appJs, /function getRecommendationExplainabilitySummary/);
-assert.match(appJs, /function getRecommendationContractSummary/);
-assert.match(appJs, /function getRecommendationExplainabilityAudit/);
+assert.match(appJs, /from "\.\/recommendation-feed-support\.js"/);
+assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilitySummary/);
+assert.match(recommendationFeedSupportModule, /function getRecommendationContractSummary/);
+assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilityAudit/);
 assert.match(devServer, /launchSignalSequence:\s*launcherSignalSequence/);
 assert.match(
   devServer,
@@ -844,11 +852,11 @@ assert.match(
 assert.match(appJs, /function getActiveMvpRecommendationFeedPartition\(\)/);
 assert.match(appJs, /function renderRecommendationFeedSupportNotice\(results, surface\)/);
 assert.match(
-  appJs,
+  recommendationFeedSupportModule,
   /failed the shared recommendation contract and were removed from the main feed/
 );
 assert.match(
-  appJs,
+  recommendationFeedSupportModule,
   /Use the contract audit details to repair those cards before treating them as player-facing guidance/
 );
 assert.match(appJs, /All visible cards currently satisfy the shared recommendation contract\./);
@@ -860,9 +868,9 @@ assert.match(appJs, /Spend-planner recommendations remain blocked by system-mapp
 assert.match(appJs, /Explainability audit/);
 assert.match(appJs, /Status: \$\{escapeHtml\(explainabilityAudit\.status\)\}\./);
 assert.match(appJs, /Source note: \$\{escapeHtml\(explainabilityAudit\.sourceNoteStatus\)\}\./);
-assert.match(appJs, /Missing: none\./);
-assert.match(appJs, /Partial context/);
-assert.match(appJs, /Complete context/);
+assert.match(recommendationFeedSupportModule, /Missing: none\./);
+assert.match(recommendationFeedSupportModule, /Partial context/);
+assert.match(recommendationFeedSupportModule, /Complete context/);
 assert.match(appJs, /function getPlayerProfileBoundaryAudit/);
 assert.match(appJs, /Import boundary audit/);
 assert.match(
@@ -7953,7 +7961,10 @@ assert.match(appJs, /Shard cost bump watch/);
 assert.match(appJs, /Add current LR for loop guardrails/);
 assert.match(appJs, /Use intentional short vs long runs/);
 assert.match(appJs, /The current feed ranks trust-oriented warning urgency/);
-assert.match(appJs, /function getProgressionRecommendationFeedPartition\(/);
+assert.match(
+  normalizedRecommendationFeedSupportModule,
+  /export function getProgressionRecommendationFeedPartition\(items\)/
+);
 assert.match(appJs, /function getProgressionSubsystemPartition\(/);
 assert.match(appJs, /function getSelectedProgressionSubsystem\(/);
 assert.match(appJs, /function renderProgressionSubsystemToggle\(/);
