@@ -807,14 +807,14 @@ assert.match(tokenShopProgressionModel, /Default level 0/);
 assert.match(appJs, /Prefill local rows from compatibility import/);
 assert.ok(
   tokenShopProgressionModel.includes(
-    "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9."
+    "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, ATU12."
   )
 );
 assert.match(appJs, /Effect-driven checked row/);
 assert.match(appJs, /Prefab-driven checked row/);
 assert.match(
   appJs,
-  /ATU3 remains effect-driven and is not promoted into a prefab or final-title remap\./
+  /ATU3 remains effect-driven, ATU10 and ATU12 are newly grounded title-side rows, ATU11 stays quarantined because it still lacks a final title join/
 );
 assert.match(
   appJs,
@@ -869,7 +869,7 @@ assert.match(
 assert.match(appJs, /Overview TokenShop affordability/);
 assert.match(
   appJs,
-  /This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level<\/code>, <code>ATU2Level<\/code>, <code>ATU3Level<\/code>, <code>ATU4Level<\/code>, <code>ATU5Level<\/code>, <code>ATU6Level<\/code>, <code>ATU7Level<\/code>, <code>ATU8Level<\/code>, and <code>ATU9Level<\/code>/
+  /This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level<\/code>, <code>ATU2Level<\/code>, <code>ATU3Level<\/code>, <code>ATU4Level<\/code>, <code>ATU5Level<\/code>, <code>ATU6Level<\/code>, <code>ATU7Level<\/code>, <code>ATU8Level<\/code>, <code>ATU9Level<\/code>, <code>ATU10Level<\/code>, and <code>ATU12Level<\/code>/
 );
 assert.match(
   appJs,
@@ -5853,7 +5853,7 @@ withRequiredValue(
     assert.match(track.currentSlice, /canonical `state\.playerProfile\.player\.resources\.tokens`/);
     assert.match(
       track.currentSlice,
-      /`ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level` subset/
+      /`ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` subset/
     );
     assert.match(
       track.currentSlice,
@@ -5904,7 +5904,7 @@ withRequiredValue(
     );
     assert.ok(
       track.completedSteps.some((step) =>
-        /checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(
+        /checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(
           step
         )
       ),
@@ -5950,7 +5950,7 @@ withRequiredValue(
     );
     assert.ok(
       track.verified.some((line) =>
-        /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level`/.test(
+        /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`/.test(
           line
         )
       ),
@@ -5966,7 +5966,7 @@ withRequiredValue(
     );
     assert.ok(
       track.verified.some((line) =>
-        /shipped Overview affordability surface can now consume the full currently grounded product-facing subset: `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level`/i.test(
+        /shipped Overview affordability surface can now consume the full currently grounded product-facing subset: `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`/i.test(
           line
         )
       ),
@@ -8078,7 +8078,7 @@ assert.match(
 assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to affect/);
 assert.match(
   spendSystemVerificationDoc,
-  /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level` remap subset/
+  /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` remap subset/
 );
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);

@@ -92,7 +92,7 @@ export function buildTokenShopProgressionModel({
   return {
     currentTokens,
     displayRule:
-      "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9.",
+      "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, ATU12.",
     rows,
     localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override")
       .length,
