@@ -31,7 +31,9 @@ export function createShardEvidenceSupport({
   }
 
   function getVerifiedShardRowPackages() {
-    return (Array.isArray(getShardGrounding()?.verifiedRows) ? getShardGrounding().verifiedRows : [])
+    return (
+      Array.isArray(getShardGrounding()?.verifiedRows) ? getShardGrounding().verifiedRows : []
+    )
       .filter(
         (entry) => entry?.verifiedRow?.rowKey && entry?.verifiedRow?.titleBinding?.playerFacingName
       )
@@ -74,7 +76,9 @@ export function createShardEvidenceSupport({
   }
 
   function getShardExtractedUnlockRequirement(row) {
-    const values = Array.isArray(getShardGrounding()?.costParameterProbe?.unlockRequirementBlock?.values)
+    const values = Array.isArray(
+      getShardGrounding()?.costParameterProbe?.unlockRequirementBlock?.values
+    )
       ? getShardGrounding().costParameterProbe.unlockRequirementBlock.values
       : [];
     const value = values[Number(row)];
@@ -259,8 +263,12 @@ export function createShardEvidenceSupport({
     const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
       getShardGrounding()?.effectTextHandlerBoundary
     );
-    const costModelBoundary = getShardCostModelBoundarySummary(getShardGrounding()?.costModelBoundary);
-    const costParameterProbe = getShardCostParameterProbeSummary(getShardGrounding()?.costParameterProbe);
+    const costModelBoundary = getShardCostModelBoundarySummary(
+      getShardGrounding()?.costModelBoundary
+    );
+    const costParameterProbe = getShardCostParameterProbeSummary(
+      getShardGrounding()?.costParameterProbe
+    );
     const bonusSlotSummary = getShardBonusSlotRowSummary(row);
     const directRowValues = getShardRowDirectValues(row);
     const extractedUnlockRequirement = getShardExtractedUnlockRequirement(row);
@@ -475,7 +483,9 @@ export function createShardEvidenceSupport({
     const initialDescriptor = parseShardBonusDescriptor(bonus?.initialBonus);
     const bonusIndex = Array.isArray(milestone?.bonuses) ? milestone.bonuses.indexOf(bonus) : -1;
     const extractedPerLevelValue =
-      bonusIndex >= 0 ? getShardExtractedBonusPerLevel(milestone?.milestoneNumber, bonusIndex) : null;
+      bonusIndex >= 0
+        ? getShardExtractedBonusPerLevel(milestone?.milestoneNumber, bonusIndex)
+        : null;
     const perLevelDescriptor = Number.isFinite(extractedPerLevelValue)
       ? { kind: "multiplier", value: extractedPerLevelValue }
       : parseShardBonusDescriptor(bonus?.bonusPerLevel);
@@ -527,7 +537,9 @@ export function createShardEvidenceSupport({
   function getNextShardUnlockMilestone(totalLevels, milestones = getGroundedShardMilestones()) {
     return (
       milestones
-        .filter((milestone) => milestone.unlockCondition?.type === "total_milestone_levels_required")
+        .filter(
+          (milestone) => milestone.unlockCondition?.type === "total_milestone_levels_required"
+        )
         .sort((left, right) => getShardUnlockRequirement(left) - getShardUnlockRequirement(right))
         .find((milestone) => getShardUnlockRequirement(milestone) > totalLevels) || null
     );

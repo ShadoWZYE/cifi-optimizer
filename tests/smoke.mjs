@@ -8003,7 +8003,10 @@ assert.doesNotMatch(appJs, /Extracted row state/);
 assert.doesNotMatch(appJs, /Formula profile/);
 assert.doesNotMatch(appJs, /Grounding detail/);
 assert.doesNotMatch(appJs, /Grounded data/);
-assert.match(shardEvidenceSupportModule, /Verified row inputs recovered; exact cost formula still unresolved\./);
+assert.match(
+  shardEvidenceSupportModule,
+  /Verified row inputs recovered; exact cost formula still unresolved\./
+);
 assert.match(shardEvidenceSupportModule, /Native cost stages not yet recovered for this row\./);
 assert.match(appJs, /Observed value/);
 assert.match(shardEvidenceSupportModule, /per-level multiplicative model/);

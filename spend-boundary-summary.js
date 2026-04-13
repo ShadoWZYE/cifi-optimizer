@@ -850,11 +850,7 @@ export function getImportedMultiverseMarketPreview(
   importedMarketState,
   multiverseMarket,
   multiverseMarketRangeBoundary,
-  {
-    formatBoundaryValue,
-    formatShardNumber,
-    isBoundaryValuePresent
-  }
+  { formatBoundaryValue, formatShardNumber, isBoundaryValuePresent }
 ) {
   void multiverseMarket;
   const overlapIds = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)

@@ -122,9 +122,7 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
           report_a: { title: "Report A" },
           report_b: { title: "Report B" }
         },
-        uncertaintyLog: [
-          { status: "conflict_detected", what_is_missing: "Row owner unresolved." }
-        ]
+        uncertaintyLog: [{ status: "conflict_detected", what_is_missing: "Row owner unresolved." }]
       },
       rowModelBoundary: { hasBoundary: true },
       titleEffectBoundary: {
