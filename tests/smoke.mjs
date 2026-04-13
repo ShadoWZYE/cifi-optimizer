@@ -1691,6 +1691,19 @@ assert.equal(tokenBankStateCluesData.genericTokeniumClaimableBoundary.fieldIndex
 assert.equal(tokenBankStateCluesData.genericTokeniumClaimableBoundary.fieldOffset, 12064);
 assert.equal(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.scriptName, "CloudSavePlayerProfile");
 assert.equal(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.typedTargetFound, false);
+assert.equal(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataAnchorFound, true);
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataShellMethods.includes("OnCloudSaveClick"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataShellMethods.includes("GetCurrentSaveFileInfo"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataShellMethods.includes("CloudLoad"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataShellMethods.includes("GetPlayerProfileInfo"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataShellMethods.includes("IsCloudSaved"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataStateMachines.includes("<CloudSave>d__23"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataStateMachines.includes("<CloudSavePlayerProfile>d__24"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataStateMachines.includes("<GetCurrentSaveFileInfo>d__25"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataStateMachines.includes("<CloudLoad>d__28"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataStateMachines.includes("<GetPlayerProfileInfo>d__29"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataTransientLocals.includes("<saveData>5__2"));
+assert.ok(tokenBankStateCluesData.cloudSavePlayerProfileBoundary.metadataTransientLocals.includes("<lastCloudSave>5__3"));
 assert.match(
   tokenBankStateCluesData.playerProfilePersistenceBoundary.blockedReason,
   /only expose generic export strings, not token-bank-specific cap or claimable-bank fields/i
@@ -2497,7 +2510,7 @@ withRequiredValue(tokenBankOwnerTrack, "expected token-bank state-owner track", 
     "expected token-bank state-owner track to record the checked PlayerProfile bridge"
   );
   assert.ok(
-    track.verified.some((line) => /remaining grounded save-side search therefore stays on the broader PlayerProfile persistence-family boundary/.test(line)),
+    track.verified.some((line) => /remaining grounded save-side search therefore stays past both the generic `PlayerProfileData` export bridge and the metadata-only `CloudSavePlayerProfile` shell/.test(line)),
     "expected token-bank state-owner track to record the narrowed broader save-family search path"
   );
   assert.ok(
@@ -3232,7 +3245,7 @@ assert.match(multiverseMarketStateVerificationDoc, /(does not recover a typed `M
 assert.match(multiverseMarketStateVerificationDoc, /`SaveData` remains the exact declaring owner for the checked `IS\*Level` \/ trade-counter \/ mech run/);
 assert.match(activeGroundingBoundariesDoc, /the bare `Market` symbol is still only a metadata\/member-shell clue/);
 assert.match(activeGroundingBoundariesDoc, /does not recover a typed `Market` or `MultiverseMarket` field on `PlayerProfileHandler`, `PlayerProfileData`, or `SaveData`/);
-assert.match(activeGroundingBoundariesDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings/i);
+assert.match(activeGroundingBoundariesDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge still only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings, and the remaining `CloudSavePlayerProfile` evidence now narrows only to a metadata-only cloud save\/load shell/i);
 assert.match(spendSystemVerificationDoc, /saveInfoCache` plus `ConvertSaveDataToProfileData\(\.\.\.\) -> PlayerProfileData` bridge still only exposes generic `PlayerProfileData\.Tokens` and `PlayerProfileData\.Tokenium` wrapper strings/i);
 assert.match(spendSystemVerificationDoc, /SaveData\.ClaimableTokenium/);
 assert.match(spendSystemVerificationDoc, /CloudSavePlayerProfile/);
@@ -3806,7 +3819,7 @@ assert.match(appJs, /Token-bank controller shell/);
 assert.match(appJs, /ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and CheckTokenClaimNotification preserved/);
 assert.match(appJs, /Token-bank controller shell now preserves \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}/);
 assert.match(appJs, /That keeps the narrow bank controller cluster together without promoting it into saved-state ownership or formula truth/);
-assert.match(appJs, /The remaining grounded save-side search therefore stays on the broader PlayerProfileData and CloudSavePlayerProfile persistence-family boundary, not on TokenShop methods, BigStatisticPrefab\.TokenBankCap, or FinalTokenBank outputs/);
+assert.match(appJs, /The remaining grounded save-side search therefore stays past the checked PlayerProfileData export bridge and the metadata-only CloudSavePlayerProfile shell, not on TokenShop methods, BigStatisticPrefab\.TokenBankCap, or FinalTokenBank outputs/);
 assert.match(appJs, /This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state/);
 assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
 assert.match(appJs, /MultiverseMarket save boundary/);

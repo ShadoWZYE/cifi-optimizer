@@ -237,7 +237,7 @@ Current active or queued tracks:
   - goal: remap recovered raw `ATU*Level` TokenShop row fields onto grounded row identities without promoting speculative player-facing labels; the current blocker is now narrowed to joining one `ATU` row shell or generic TokenShop text hook to one concrete prefab or final title
 - `spend-token-bank-state-owner`
   - status: `active`
-  - goal: recover the saved-state owner behind token-bank cap, fill, and claimable state without guessing from derived `OR_*` labels
+  - goal: recover the saved-state owner behind token-bank cap, fill, and claimable state without guessing from derived `OR_*` labels or the metadata-only `CloudSavePlayerProfile` shell
 - `spend-daily-tokenium-save-owner`
   - status: `queued`
   - goal: recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane

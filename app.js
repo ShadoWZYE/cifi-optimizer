@@ -2308,7 +2308,8 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${tokenBankStateSummary.hasControllerSplit ? `Separate display and presentation clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} are still preserved beside controller methods like ${tokenBankStateSummary.capMethod}.` : "Token-bank controller or display split clues are not available in this build."}</p>
         <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? `The derived-output cluster still preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}.` : "Token-bank derived-output clues are not available in this build."}</p>
         <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "That output-side cluster still has no checked PlayerProfileData or CloudSavePlayerProfile join, so FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields." : "The checked derived-output cluster now overlaps the broader save-family search and needs review."}</p>
-        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary && tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "The remaining grounded save-side search therefore stays on the broader PlayerProfileData and CloudSavePlayerProfile persistence-family boundary, not on TokenShop methods, BigStatisticPrefab.TokenBankCap, or FinalTokenBank outputs." : "The current build does not yet preserve a grounded negative owner narrowing for the token-bank save-state lane."}</p>
+        <p class="meta">${tokenBankStateSummary.hasCloudSaveShellBoundary ? `The remaining CloudSavePlayerProfile evidence now only preserves a metadata-side shell through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}, not a narrower typed wrapper.` : "The current build does not yet preserve the narrowed CloudSavePlayerProfile shell boundary for this lane."}</p>
+        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary && tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext && tokenBankStateSummary.hasCloudSaveShellBoundary ? "The remaining grounded save-side search therefore stays past the checked PlayerProfileData export bridge and the metadata-only CloudSavePlayerProfile shell, not on TokenShop methods, BigStatisticPrefab.TokenBankCap, or FinalTokenBank outputs." : "The current build does not yet preserve a grounded negative owner narrowing for the token-bank save-state lane."}</p>
         <p class="meta">This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state.</p>
       </div>
     `;
@@ -4509,6 +4510,11 @@ function getSpendActionLaneSummary(clues) {
 function getTokenBankStateSummary(clues) {
   const tokenShopMethods = Array.isArray(clues?.tokenShopMethods) ? clues.tokenShopMethods : [];
   const displayOrHandlerClues = Array.isArray(clues?.displayOrHandlerClues) ? clues.displayOrHandlerClues : [];
+  const cloudSaveBoundary = typeof clues?.cloudSavePlayerProfileBoundary === "object" && clues.cloudSavePlayerProfileBoundary
+    ? clues.cloudSavePlayerProfileBoundary
+    : {};
+  const cloudSaveShellMethods = Array.isArray(cloudSaveBoundary.metadataShellMethods) ? cloudSaveBoundary.metadataShellMethods : [];
+  const cloudSaveStateMachines = Array.isArray(cloudSaveBoundary.metadataStateMachines) ? cloudSaveBoundary.metadataStateMachines : [];
 
   return {
     hasControllerSplit:
@@ -4516,11 +4522,22 @@ function getTokenBankStateSummary(clues) {
       && tokenShopMethods.includes("get_TokenBankCap")
       && displayOrHandlerClues.includes("BigStatisticPrefab.TokenBankCap")
       && displayOrHandlerClues.includes("SetLM244BonusText"),
+    hasCloudSaveShellBoundary:
+      cloudSaveBoundary.scriptName === "CloudSavePlayerProfile"
+      && cloudSaveBoundary.typedTargetFound === false
+      && cloudSaveBoundary.metadataAnchorFound === true
+      && cloudSaveShellMethods.includes("GetCurrentSaveFileInfo")
+      && cloudSaveShellMethods.includes("GetPlayerProfileInfo")
+      && cloudSaveStateMachines.includes("<CloudSavePlayerProfile>d__24"),
     claimMethod: "ClaimBankedTokens",
     capMethod: "get_TokenBankCap",
     displayShell: "BigStatisticPrefab.TokenBankCap",
     loopHandler: "TextHandlerLoopMods",
-    loopHook: "SetLM244BonusText"
+    loopHook: "SetLM244BonusText",
+    cloudSaveShell: "CloudSavePlayerProfile",
+    cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
+    cloudSaveProfileRoutine: "GetPlayerProfileInfo",
+    cloudSaveStateMachine: "<CloudSavePlayerProfile>d__24"
   };
 }
 

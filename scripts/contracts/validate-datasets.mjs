@@ -1948,6 +1948,9 @@ function validateTokenBankStateClues(clues) {
   expectArray(clues.displayOrHandlerClues, "token-bank state clues displayOrHandlerClues must be an array");
   expectArray(clues.derivedOutputs, "token-bank state clues derivedOutputs must be an array");
   expectRecord(clues.exactSaveOwnerRecovery, "token-bank state clues exactSaveOwnerRecovery must be an object");
+  expectRecord(clues.playerProfilePersistenceBoundary, "token-bank state clues playerProfilePersistenceBoundary must be an object");
+  expectRecord(clues.genericTokeniumClaimableBoundary, "token-bank state clues genericTokeniumClaimableBoundary must be an object");
+  expectRecord(clues.cloudSavePlayerProfileBoundary, "token-bank state clues cloudSavePlayerProfileBoundary must be an object");
   expectArray(clues.negativeTypedOwnerChecks, "token-bank state clues negativeTypedOwnerChecks must be an array");
   expectArray(clues.currentBoundary, "token-bank state clues currentBoundary must be an array");
 
@@ -1968,6 +1971,26 @@ function validateTokenBankStateClues(clues) {
   assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldType, "System.Single", "token-bank state clues storedAmountFieldType drifted");
   assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldIndex, 214, "token-bank state clues storedAmountFieldIndex drifted");
   assert.equal(clues.exactSaveOwnerRecovery.storedAmountFieldOffset, 1800, "token-bank state clues storedAmountFieldOffset drifted");
+  assert.equal(clues.playerProfilePersistenceBoundary.bridgeOwner, "PlayerProfileHandler", "token-bank state clues bridgeOwner drifted");
+  assert.equal(clues.playerProfilePersistenceBoundary.bridgeMethod, "ConvertSaveDataToProfileData", "token-bank state clues bridgeMethod drifted");
+  assert.equal(clues.playerProfilePersistenceBoundary.bridgeReturnType, "PlayerProfileData", "token-bank state clues bridgeReturnType drifted");
+  assert.equal(clues.playerProfilePersistenceBoundary.handlerField, "saveInfoCache", "token-bank state clues handlerField drifted");
+  assert.equal(clues.playerProfilePersistenceBoundary.handlerFieldType, "PlayerProfileData", "token-bank state clues handlerFieldType drifted");
+  assert.equal(clues.genericTokeniumClaimableBoundary.declaringType, "SaveData", "token-bank state clues generic claimable declaringType drifted");
+  assert.equal(clues.genericTokeniumClaimableBoundary.field, "ClaimableTokenium", "token-bank state clues generic claimable field drifted");
+  assert.equal(clues.genericTokeniumClaimableBoundary.fieldType, "System.Double", "token-bank state clues generic claimable fieldType drifted");
+  assert.equal(clues.cloudSavePlayerProfileBoundary.scriptName, "CloudSavePlayerProfile", "token-bank state clues cloud save scriptName drifted");
+  assert.equal(clues.cloudSavePlayerProfileBoundary.typedTargetFound, false, "token-bank state clues cloud save typedTargetFound drifted");
+  assert.equal(clues.cloudSavePlayerProfileBoundary.metadataAnchorFound, true, "token-bank state clues cloud save metadataAnchorFound drifted");
+  ["OnCloudSaveClick", "GetCurrentSaveFileInfo", "CloudLoad", "GetPlayerProfileInfo", "IsCloudSaved"].forEach((name) => {
+    assert.ok(clues.cloudSavePlayerProfileBoundary.metadataShellMethods.includes(name), `token-bank state clues missing cloud save shell method ${name}`);
+  });
+  ["<CloudSave>d__23", "<CloudSavePlayerProfile>d__24", "<GetCurrentSaveFileInfo>d__25", "<CloudLoad>d__28", "<GetPlayerProfileInfo>d__29"].forEach((name) => {
+    assert.ok(clues.cloudSavePlayerProfileBoundary.metadataStateMachines.includes(name), `token-bank state clues missing cloud save state machine ${name}`);
+  });
+  ["<saveData>5__2", "<lastCloudSave>5__3"].forEach((name) => {
+    assert.ok(clues.cloudSavePlayerProfileBoundary.metadataTransientLocals.includes(name), `token-bank state clues missing cloud save transient local ${name}`);
+  });
   [
     "SaveData.ClaimableBankTokens",
     "SaveData.TokenBankCap",
@@ -1985,7 +2008,7 @@ function validateTokenBankStateClues(clues) {
     stats: [
       `${clues.tokenShopMethods.length} token-bank controller methods`,
       `${clues.displayOrHandlerClues.length} display or handler clues`,
-      "Exact SaveData.BankedTokens owner plus blocked cap or claimable typed checks"
+      "Exact SaveData.BankedTokens owner plus blocked cap or claimable typed checks and a metadata-only CloudSavePlayerProfile shell"
     ]
   };
 }
