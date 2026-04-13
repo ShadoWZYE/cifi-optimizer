@@ -1,12 +1,14 @@
 {
   "dataset": "shard-save-boundary.v1",
-  "generatedAt": "2026-04-03",
+  "generatedAt": "2026-04-13",
   "sources": {
     "shardMiningMetadataNeighborhood": "data/shardmining-metadata-neighborhood.v1.json",
     "shardUpgradeInfoMetadataNeighborhood": "data/shardupgradeinfo-metadata-neighborhood.v1.json",
     "shardMetadataNeighborhood": "data/shard-metadata-neighborhood.v1.json",
     "ownerFamilyBoundary": "data/shard-owner-family-boundary.v1.json",
     "payloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
+    "handoffBoundary": "data/shard-milestone-handoff-boundary.v1.json",
+    "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json",
     "globalMetadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0"
   },
@@ -34,11 +36,42 @@
     "metadataNeighborhoodHasSaveTerms": false,
     "level0HasSaveTerms": false,
     "ownerShellWithSaveOverlapCount": 0,
-    "directShardPlayerProfileContext": false
+    "directShardPlayerProfileContext": false,
+    "declaringRowModelRecovered": true,
+    "saveSideOwnerRecovered": false
+  },
+  "recoveredDeclaringRowModel": {
+    "ownerType": "ShardMining",
+    "declaringField": {
+      "name": "upgradeInfoList",
+      "type": "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>",
+      "fieldOffset": 5216
+    },
+    "rowModelType": {
+      "fullName": "ShardMining+ShardUpgradeInfo",
+      "baseType": "System.Object"
+    },
+    "rowStateFields": [
+      {
+        "name": "<Cost>k__BackingField",
+        "type": "BreakInfinity.BigDouble",
+        "fieldOffset": 16
+      },
+      {
+        "name": "<MaxLevel>k__BackingField",
+        "type": "System.Boolean",
+        "fieldOffset": 32
+      },
+      {
+        "name": "<IsUnlocked>k__BackingField",
+        "type": "System.Boolean",
+        "fieldOffset": 33
+      }
+    ]
   },
   "currentBoundary": [
-    "The checked shard-specific owner trail now preserves ShardMining, ShardUpgradeInfo, TotalMilestoneLevels, shard cost-list hooks, progress-fill hooks, and FinalSU anchors while separately confirming no PlayerProfileData or CloudSavePlayerProfile save-family clues in the narrowed shard-local contexts.",
+    "The checked shard-specific owner trail now preserves ShardMining, ShardUpgradeInfo, TotalMilestoneLevels, shard cost-list hooks, progress-fill hooks, FinalSU anchors, and the shard-local declaring row model ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo while separately confirming no PlayerProfileData or CloudSavePlayerProfile save-family clues in the narrowed shard-local contexts.",
     "The same shard-local metadata neighborhoods and level0 contexts currently preserve zero checked overlap cases where the narrowed shard owner trail shares context with PlayerProfileData, GetPlayerProfileData, FillPlayerProfileData, or CloudSavePlayerProfile.",
-    "This is enough to keep shard owner-family narrowing and save-side recovery separated in repo-local grounding, but not enough to recover the actual saved shard milestone fields or declaring save model."
+    "This is enough to keep recovered shard row-model structure separate from unresolved save-side ownership in repo-local grounding, but not enough to recover the actual serialized upgradeInfoList payload, saved shard milestone fields, or declaring save model."
   ]
 }

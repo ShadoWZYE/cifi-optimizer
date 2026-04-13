@@ -59,6 +59,8 @@ const shardCostScreenshotCalibration = JSON.parse(await readFile(new URL("../dat
 const shardCostListPathProbe = JSON.parse(await readFile(new URL("../data/shard-cost-list-path-probe.v1.json", import.meta.url), "utf8"));
 const shardCostFormulaModel = JSON.parse(await readFile(new URL("../data/shard-cost-formula-model.v1.json", import.meta.url), "utf8"));
 const shardBonusSlotProbe = JSON.parse(await readFile(new URL("../data/shard-bonus-slot-probe.v1.json", import.meta.url), "utf8"));
+const shardRowVerificationSu1 = JSON.parse(await readFile(new URL("../data/shard-row-verification-su1.v1.json", import.meta.url), "utf8"));
+const shardRowVerificationSu2 = JSON.parse(await readFile(new URL("../data/shard-row-verification-su2.v1.json", import.meta.url), "utf8"));
 const shardTypeMetadataProbe = JSON.parse(await readFile(new URL("../data/shard-type-metadata-probe.v1.json", import.meta.url), "utf8"));
 const extractionCandidateFamilies = JSON.parse(await readFile(new URL("../data/extraction-candidate-families.v1.json", import.meta.url), "utf8"));
 const extractionCandidateRanking = JSON.parse(await readFile(new URL("../data/extraction-candidate-ranking.v1.json", import.meta.url), "utf8"));
@@ -181,11 +183,13 @@ assert.deepEqual(
     "shardMilestoneRowShellBoundary",
     "shardMilestoneRowAlignmentBoundary",
       "shardSaveBoundary",
-      "shardSceneMonoBehaviourProbe",
-      "shardCostParameterProbe",
-      "shardCostNativeProbe",
-      "shardBonusSlotProbe",
-      "extractionCandidateRanking",
+    "shardSceneMonoBehaviourProbe",
+    "shardCostParameterProbe",
+    "shardCostNativeProbe",
+    "shardBonusSlotProbe",
+    "shardRowVerificationSu1",
+    "shardRowVerificationSu2",
+    "extractionCandidateRanking",
     "tokenShopValues",
     "multiverseMarketValues",
     "multiverseMarketMetadataNeighborhood",
@@ -233,7 +237,9 @@ assert.deepEqual(
     "./data/shard-cost-parameter-probe.v1.json",
     "./data/shard-cost-native-probe.v1.json",
     "./data/shard-bonus-slot-probe.v1.json",
-      "./data/extraction-candidate-ranking.v1.json",
+    "./data/shard-row-verification-su1.v1.json",
+    "./data/shard-row-verification-su2.v1.json",
+    "./data/extraction-candidate-ranking.v1.json",
     "./data/token-shop-values.json",
     "./data/multiverse-market-values.json",
     "./data/multiverse-market-metadata-neighborhood.json",
@@ -482,6 +488,8 @@ const expectedBundledDatasetIds = [
   "shard-cost-list-path-probe",
   "shard-cost-formula-model",
   "shard-bonus-slot-probe",
+  "shard-row-verification-su1",
+  "shard-row-verification-su2",
   "shard-type-metadata-probe",
   "extraction-candidate-families",
   "extraction-candidate-ranking",
@@ -751,6 +759,14 @@ assert.deepEqual(shardMilestoneHandoffBoundary.genericMilestoneLead.buyHookRange
 assert.ok(shardMilestoneHandoffBoundary.genericMilestoneLead.textAndValueAnchors.includes("InitializeMilestones"));
 assert.ok(shardMilestoneHandoffBoundary.genericMilestoneLead.textAndValueAnchors.includes("SetAllMilestoneTexts"));
 assert.ok(shardMilestoneHandoffBoundary.handoffFindings.some((line) => /BuyMilestone1-57/.test(line)));
+assert.equal(shardMilestoneHandoffBoundary.recoveredDeclaringRowModel.ownerType, "ShardMining");
+assert.equal(shardMilestoneHandoffBoundary.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardMilestoneHandoffBoundary.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.deepEqual(
+  shardMilestoneHandoffBoundary.recoveredDeclaringRowModel.rowStateFields.map((field) => field.name),
+  ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]
+);
+assert.ok(shardMilestoneHandoffBoundary.currentBoundary.some((line) => /declaring row-model result/.test(line)));
 assert.ok(shardMilestoneHandoffBoundary.currentBoundary.some((line) => /not recovered player-owned shard milestone state/.test(line)));
 assert.equal(shardSaveBoundary.dataset, "shard-save-boundary.v1");
 assert.ok(shardSaveBoundary.ownerShellTermsChecked.includes("ShardMining"));
@@ -761,16 +777,30 @@ assert.equal(shardSaveBoundary.probeResults.metadataNeighborhoodHasSaveTerms, fa
 assert.equal(shardSaveBoundary.probeResults.level0HasSaveTerms, false);
 assert.equal(shardSaveBoundary.probeResults.ownerShellWithSaveOverlapCount, 0);
 assert.equal(shardSaveBoundary.probeResults.directShardPlayerProfileContext, false);
+assert.equal(shardSaveBoundary.probeResults.declaringRowModelRecovered, true);
+assert.equal(shardSaveBoundary.probeResults.saveSideOwnerRecovered, false);
+assert.equal(shardSaveBoundary.recoveredDeclaringRowModel.ownerType, "ShardMining");
+assert.equal(shardSaveBoundary.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardSaveBoundary.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.deepEqual(
+  shardSaveBoundary.recoveredDeclaringRowModel.rowStateFields.map((field) => field.name),
+  ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]
+);
 assert.ok(shardSaveBoundary.currentBoundary.some((line) => /zero checked overlap/.test(line)));
+assert.ok(shardSaveBoundary.currentBoundary.some((line) => /upgradeInfoList/.test(line)));
 assert.equal(shardMilestoneSaveOwnerCandidates.dataset, "shard-milestone-save-owner-candidates.v1");
-assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.length >= 1);
-assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.some((entry) => entry.id === "player-profile-side-shard-member-shell"));
-assert.ok(shardMilestoneSaveOwnerCandidates.candidateTypes.some((entry) => entry.id === "shard-mining-wrapper-or-handoff-shell"));
+assert.equal(shardMilestoneSaveOwnerCandidates.recoveredDeclaringRowModel.id, "shardmining-upgradeinfolist-row-model");
+assert.equal(shardMilestoneSaveOwnerCandidates.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardMilestoneSaveOwnerCandidates.recoveredDeclaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.equal(shardMilestoneSaveOwnerCandidates.remainingSaveOwnerCandidates.length, 1);
+assert.ok(shardMilestoneSaveOwnerCandidates.remainingSaveOwnerCandidates.some((entry) => entry.id === "player-profile-side-shard-member-shell"));
 assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.ownerShellWithSaveOverlapCount, 0);
 assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.directShardPlayerProfileContext, false);
-assert.ok(shardMilestoneSaveOwnerCandidates.warnings.some((line) => /not recovered player-owned shard milestone state/i.test(line)));
-assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /candidate-narrowing artifact only/i.test(line)));
-assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /not as recovered player-owned shard milestone state/i.test(line)));
+assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.declaringRowModelRecovered, true);
+assert.equal(shardMilestoneSaveOwnerCandidates.checkedOverlapStatistics.remainingSaveOwnerCandidateCount, 1);
+assert.ok(shardMilestoneSaveOwnerCandidates.warnings.some((line) => /not recovered a save-side owner/i.test(line)));
+assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /recovered shard-local row-model result/i.test(line)));
+assert.ok(shardMilestoneSaveOwnerCandidates.currentBoundary.some((line) => /save-owner gap/i.test(line)));
 assert.equal(shardSceneMonoBehaviourProbe.dataset, "shard-scene-monobehaviour-probe.v1");
 assert.ok(shardSceneMonoBehaviourProbe.monoBehaviours.some((entry) => entry.scriptName === "ShardMining" && entry.pathId === 290724));
 assert.ok(shardSceneMonoBehaviourProbe.monoBehaviours.some((entry) => entry.scriptName === "ShardPerLevelTextHandler" && entry.byteSize === 1328));
@@ -1489,6 +1519,44 @@ assert.ok(shardBonusSlotProbe.rows.some((entry) => entry.row === 0 && entry.bonu
 assert.ok(shardBonusSlotProbe.rows.some((entry) => entry.row === 18 && entry.bonusFieldCount === 6 && entry.calcAccessorCount === 6));
 assert.ok(shardBonusSlotProbe.rows.some((entry) => entry.row === 27 && entry.bonusFieldCount === 3 && entry.calcAccessorCount === 3));
 assert.ok(shardBonusSlotProbe.currentBoundary.some((line) => /slot counts alone/.test(line)));
+assert.equal(shardRowVerificationSu1.dataset, "shard-row-verification-su1.v1");
+assert.equal(shardRowVerificationSu1.verifiedRow.row, 1);
+assert.equal(shardRowVerificationSu1.verifiedRow.rowKey, "SU1");
+assert.equal(shardRowVerificationSu1.verifiedRow.titleBinding.assetName, "SMilestone-1-Alpha");
+assert.equal(shardRowVerificationSu1.verifiedRow.titleBinding.playerFacingName, "Alpha Milestone");
+assert.equal(shardRowVerificationSu1.verifiedRow.declaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardRowVerificationSu1.verifiedRow.declaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.equal(shardRowVerificationSu1.verifiedRow.declaringRowModel.rowShellFields.textCheckerField, "Milestone1TextChecker");
+assert.equal(shardRowVerificationSu1.verifiedRow.declaringRowModel.rowShellFields.unlockRequirementField, "SU1UnlockReq");
+assert.deepEqual(shardRowVerificationSu1.verifiedRow.declaringRowModel.rowShellFields.bonusTextFields, ["SM1B1Text", "SM1B2Text", "SM1B3Text"]);
+assert.deepEqual(shardRowVerificationSu1.verifiedRow.effectPackage.fixedBreakpoints, [1, 25, 50]);
+assert.equal(shardRowVerificationSu1.verifiedRow.effectPresentationBinding.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N");
+assert.deepEqual(shardRowVerificationSu1.verifiedRow.effectPresentationBinding.calcAccessors, ["get_SU1Bonus1Calc", "get_SU1Bonus2Calc", "get_SU1Bonus3Calc"]);
+assert.equal(shardRowVerificationSu1.verifiedRow.effectPresentationBinding.groundedCountMatches, true);
+assert.equal(shardRowVerificationSu1.verifiedRow.costShell.getterName, "get_SU1Cost");
+assert.equal(shardRowVerificationSu1.verifiedRow.costShell.getterRva, 38254156);
+assert.deepEqual(shardRowVerificationSu1.verifiedRow.costShell.serializedCostFields, ["SU1StartCost", "SU1CostExponent", "SU1GrowthExponent"]);
+assert.ok(shardRowVerificationSu1.currentBoundary.some((line) => /SU1 now binds to Alpha title identity/.test(line)));
+assert.ok(shardRowVerificationSu1.currentBoundary.some((line) => /Do not treat this single-row verification/.test(line)));
+assert.equal(shardRowVerificationSu2.dataset, "shard-row-verification-su2.v1");
+assert.equal(shardRowVerificationSu2.verifiedRow.row, 2);
+assert.equal(shardRowVerificationSu2.verifiedRow.rowKey, "SU2");
+assert.equal(shardRowVerificationSu2.verifiedRow.titleBinding.assetName, "SMilestone-2-Aquarius");
+assert.equal(shardRowVerificationSu2.verifiedRow.titleBinding.playerFacingName, "Aquarius Milestone");
+assert.equal(shardRowVerificationSu2.verifiedRow.declaringRowModel.declaringField.name, "upgradeInfoList");
+assert.equal(shardRowVerificationSu2.verifiedRow.declaringRowModel.rowModelType.fullName, "ShardMining+ShardUpgradeInfo");
+assert.equal(shardRowVerificationSu2.verifiedRow.declaringRowModel.rowShellFields.textCheckerField, "Milestone2TextChecker");
+assert.equal(shardRowVerificationSu2.verifiedRow.declaringRowModel.rowShellFields.unlockRequirementField, "SU2UnlockReq");
+assert.deepEqual(shardRowVerificationSu2.verifiedRow.declaringRowModel.rowShellFields.bonusTextFields, ["SM2B1Text", "SM2B2Text", "SM2B3Text"]);
+assert.deepEqual(shardRowVerificationSu2.verifiedRow.effectPackage.fixedBreakpoints, [1, 25, 50]);
+assert.equal(shardRowVerificationSu2.verifiedRow.effectPresentationBinding.probableTextHandler, "TextHandlerShardMilestoneBonusesPerLevel/N");
+assert.deepEqual(shardRowVerificationSu2.verifiedRow.effectPresentationBinding.calcAccessors, ["get_SU2Bonus1Calc", "get_SU2Bonus2Calc", "get_SU2Bonus3Calc"]);
+assert.equal(shardRowVerificationSu2.verifiedRow.effectPresentationBinding.groundedCountMatches, true);
+assert.equal(shardRowVerificationSu2.verifiedRow.costShell.getterName, "get_SU2Cost");
+assert.equal(shardRowVerificationSu2.verifiedRow.costShell.getterRva, 38257438);
+assert.deepEqual(shardRowVerificationSu2.verifiedRow.costShell.serializedCostFields, ["SU2StartCost", "SU2CostExponent", "SU2GrowthExponent"]);
+assert.ok(shardRowVerificationSu2.currentBoundary.some((line) => /SU2 now binds to Aquarius title identity/.test(line)));
+assert.ok(shardRowVerificationSu2.currentBoundary.some((line) => /Do not treat this single-row verification/.test(line)));
 assert.equal(shardTypeMetadataProbe.dataset, "shard-type-metadata-probe.v1");
 assert.equal(shardTypeMetadataProbe.targets.shardMining.fullName, "ShardMining");
 assert.ok(shardTypeMetadataProbe.targets.shardMining.ownerListFields.some((entry) => entry.name === "MilestoneCostList"));
@@ -2102,12 +2170,12 @@ const shardTrack = snapshot.researchTracks.find((track) => track.id === "shard-m
 withRequiredValue(shardTrack, "expected shard milestone payload recovery track", (track) => {
   assert.equal(track.status, "active");
   assert.match(track.goal, /Recover the exact shard-side serialized row payload or declaring save-side owner/);
-  assert.match(track.currentSlice, /Extend the narrowed ShardMining \/ ShardUpgradeInfo trail/);
-  assert.match(track.currentSlice, /checked cost-model, row-model, title\/effect, and effect-text-handler boundaries/);
-  assert.match(track.currentSlice, /title\/effect/);
+  assert.match(track.currentSlice, /Ship one bounded player-facing verified shard rows preview/);
+  assert.match(track.currentSlice, /ShardMining\.upgradeInfoList -> ShardMining\+ShardUpgradeInfo/);
+  assert.match(track.currentSlice, /explicit blocked notes for every row that is not yet verified/);
   assert.match(track.exitCondition, /exact serialized shard milestone row payload or declaring save-side owner/);
-  assert.match(track.blockedBy, /still do not expose the declaring saved row model itself/);
-  assert.match(track.smallestShippableSlice, /checked shard row-owner or save-owner boundary/);
+  assert.match(track.blockedBy, /verified SU1 and SU2 row packages/);
+  assert.match(track.smallestShippableSlice, /small descriptive verified shard rows preview/);
   assert.deepEqual(track.sources, [
     "docs/systems/shards/shard-system-verification.md",
     "docs/systems/shards/shard-owner-family-verification.md",
@@ -2126,6 +2194,8 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
     "data/shard-milestone-row-alignment-boundary.v1.json",
     "data/shard-milestone-handoff-boundary.v1.json",
     "data/shard-save-boundary.v1.json",
+    "data/shard-row-verification-su1.v1.json",
+    "data/shard-row-verification-su2.v1.json",
     "data/shard-scene-monobehaviour-probe.v1.json",
     "data/shard-cost-parameter-probe.v1.json",
     "data/shard-cost-method-probe.v1.json",
@@ -2186,10 +2256,19 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
     "expected shard successor track to record the row-alignment mismatch in verified facts"
   );
   assert.ok(
-    track.verified.some((line) => /ShardMining keeps the shard-local row shell while ConstructionMilestones keeps the dense BuyMilestone1-57 family/.test(line)),
-    "expected shard successor track to record the narrowed handoff seam in verified facts"
+    track.verified.some((line) => /SU1 now clears as one bounded verified row/.test(line)),
+    "expected shard successor track to record the first verified row in verified facts"
   );
-  assert.ok(track.nextSteps.length <= 5, "expected narrowed shard successor next-step count");
+  assert.ok(track.nextSteps.some((step) => /Keep the player-facing preview limited to verified rows only/.test(step)));
+  assert.ok(track.nextSteps.some((step) => /verify one additional row package/.test(step)));
+  assert.equal(track.nextSteps.length, 2);
+  assert.ok(track.completedSteps.some((step) => /Promote one bounded shard row-verification artifact so SU1 now binds/.test(step)));
+  assert.ok(track.completedSteps.some((step) => /Promote one bounded shard row-verification artifact so SU2 now binds/.test(step)));
+  assert.ok(track.completedSteps.some((step) => /Ship a first player-facing verified shard rows preview/.test(step)));
+  assert.ok(track.uncertain.some((line) => /Which save-side owner or exact serialized list host actually persists player-owned shard milestone rows/.test(line)));
+  assert.ok(track.uncertain.some((line) => /How far the same row-verification method generalizes beyond SU1/.test(line)));
+  assert.ok(track.verified.some((line) => /SU2 now clears as one bounded verified row/.test(line)));
+  assert.ok(track.verified.some((line) => /small verified shard rows preview that renders only SU1 and SU2/.test(line)));
 });
 const spendTrack = snapshot.researchTracks.find((track) => track.id === "spend-planner-from-extracted-data");
 withRequiredValue(spendTrack, "expected archived spend parent track", (track) => {
@@ -3582,6 +3661,8 @@ assert.match(appJs, /\.\/data\/shard-effect-text-handler-boundary\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestone-row-shell-boundary\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-milestone-row-alignment-boundary\.v1\.json/);
 assert.match(appJs, /\.\/data\/shard-save-boundary\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-row-verification-su1\.v1\.json/);
+assert.match(appJs, /\.\/data\/shard-row-verification-su2\.v1\.json/);
 assert.doesNotMatch(appJs, /Row-shell boundary/);
 assert.doesNotMatch(appJs, /Row-alignment boundary/);
 assert.doesNotMatch(appJs, /Cost-model boundary/);
@@ -3600,6 +3681,12 @@ assert.match(appJs, /Shard milestone row shell/);
 assert.match(appJs, /Shard milestone row alignment/);
 assert.match(appJs, /UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell/);
 assert.match(appJs, /with partial row hooks such as/);
+assert.match(appJs, /Verified shard rows preview/);
+assert.match(appJs, /Checked text slots/);
+assert.match(appJs, /Checked cost shell/);
+assert.match(appJs, /Rows outside SU1 and SU2 stay explicitly blocked/);
+assert.match(appJs, /No affordability math, ROI, ETA, ranking, best-upgrade logic, save import, or full shard-table claims are implied by this preview/);
+assert.match(appJs, /SU1 and SU2 verified rows available for descriptive preview/);
 assert.match(appJs, /\.\/data\/extraction-candidate-ranking\.v1\.json/);
 assert.match(appJs, /npm run verify:data/);
 assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
@@ -3856,6 +3943,8 @@ assert.match(datasetContractsDoc, /data\/shard-cost-screenshot-calibration\.v1\.
 assert.match(datasetContractsDoc, /data\/shard-cost-list-path-probe\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-cost-formula-model\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-bonus-slot-probe\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-row-verification-su1\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-row-verification-su2\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-type-metadata-probe\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/extraction-candidate-families\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/extraction-candidate-ranking\.v1\.json/);

@@ -180,6 +180,20 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/shard-bonus-slot-probe.v1.json`
 
+### `shard-row-verification-su1`
+
+- Label: Shard row verification SU1
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/shard-row-verification-su1.v1.json`
+
+### `shard-row-verification-su2`
+
+- Label: Shard row verification SU2
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/shard-row-verification-su2.v1.json`
+
 ### `shard-type-metadata-probe`
 
 - Label: Shard type metadata probe
