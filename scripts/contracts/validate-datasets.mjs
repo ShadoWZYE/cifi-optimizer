@@ -2803,10 +2803,18 @@ function validateTokenShopRowRemapBoundary(boundary) {
   assert.equal(boundary.atu3ChestConsumerTrace.result, "checked shared-effect-to-consumer-family handoff recovered but exact CellBoostBonus consumer method remains unresolved", "token shop row remap boundary ATU3 chest consumer result drifted");
   expectRecord(boundary.atu3ChestConsumerReadTrace, "token shop row remap boundary ATU3 chest consumer read trace must be an object");
   expectRecord(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell, "token shop row remap boundary ATU3 recovered internal read shell must be an object");
+  expectRecord(boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp, "token shop row remap boundary ATU3 explicit CellBoostBonus anchor follow-up must be an object");
   expectRecord(boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam, "token shop row remap boundary ATU3 missing exact read site seam must be an object");
   assert.equal(boundary.atu3ChestConsumerReadTrace.targetId, "token-shop-atu3-chest-consumer-read", "token shop row remap boundary ATU3 chest consumer read target drifted");
   assert.equal(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.shellField, "ATU3Button", "token shop row remap boundary ATU3 chest consumer read shell drifted");
   assert.equal(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.shellPathId, 15810, "token shop row remap boundary ATU3 chest consumer read shell path drifted");
+  assert.equal(boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.targetedAnchor, "CellBoostBonus", "token shop row remap boundary ATU3 explicit CellBoostBonus anchor drifted");
+  ["CellBoostStartCost", "CellBoostAdditiveCost", "CellBoostBonus", "CellBoostMaxLevel", "CellBoostFill", "ATU3Button"].forEach((name) => {
+    assert.ok(boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.ownerSideMetadataNeighborhood.includes(name), `token shop row remap boundary ATU3 explicit owner-side CellBoost neighborhood drifted for ${name}`);
+  });
+  ["get_SmallAdCellGains", "get_BigAdCellGains", "SetBoosterAdBonus", "get_FinalBoosterAdBonus", "SmallAdCellGains", "BigAdCellGains", "FinalBoosterAdBonus", "<BoosterAdRoutine>d__158"].forEach((name) => {
+    assert.ok(boundary.atu3ChestConsumerReadTrace.explicitCellBoostBonusAnchorFollowUp.consumerSideMetadataNeighborhood.includes(name), `token shop row remap boundary ATU3 explicit consumer-side CellBoost neighborhood drifted for ${name}`);
+  });
   ["get_SmallAdCellGains", "get_BigAdCellGains"].forEach((name) => {
     assert.ok(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.cellGainGetterFamily.includes(name), `token shop row remap boundary ATU3 cell gain getter drifted for ${name}`);
   });
@@ -2817,7 +2825,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     assert.ok(boundary.atu3ChestConsumerReadTrace.recoveredInternalReadShell.finalChestBonusShell.includes(name), `token shop row remap boundary ATU3 final chest bonus shell drifted for ${name}`);
   });
   assert.match(boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin, /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i, "token shop row remap boundary ATU3 internal read seam gap drifted");
-  assert.equal(boundary.atu3ChestConsumerReadTrace.result, "checked consumer-internal bonus shell recovered but exact CellBoostBonus read site remains unresolved", "token shop row remap boundary ATU3 chest consumer read result drifted");
+  assert.equal(boundary.atu3ChestConsumerReadTrace.result, "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site", "token shop row remap boundary ATU3 chest consumer read result drifted");
   ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach((name) => {
     assert.ok(boundary.groundedNonLabelClues.effectHookSamples.includes(name), `token shop row remap boundary missing effect hook sample ${name}`);
   });
