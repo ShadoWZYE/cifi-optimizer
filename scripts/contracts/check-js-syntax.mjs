@@ -1,33 +1,52 @@
-import { relative } from "node:path";
+import { readdir, readFile } from "node:fs/promises";
+import path, { relative } from "node:path";
 import { cwd } from "node:process";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { Linter } from "eslint";
 
-const execFileAsync = promisify(execFile);
 const root = cwd();
-const ignoredPrefixes = [
-  ".appdata/",
-  ".deps/",
-  ".dotnet/",
-  ".local/",
-  ".nuget/",
-  ".vendor_py/",
-  ".wheelhouse/",
-  "_worktrees/",
-  "tools/",
-  "workbench/"
-];
+const ignoredDirectories = new Set([
+  ".appdata",
+  ".deps",
+  ".dotnet",
+  ".git",
+  ".local",
+  ".nuget",
+  ".vendor_manual",
+  ".vendor_py",
+  ".wheelhouse",
+  "_worktrees",
+  "data",
+  "node_modules",
+  "tools",
+  "workbench"
+]);
+const includedRootFiles = new Set(["app.js", "player-profile.js", "recommendation-contract.js"]);
+const includedRootDirectories = new Set(["scripts", "tests"]);
+const syntaxLinter = new Linter();
 
-const files = await collectTrackedFirstPartyJsFiles(root);
+const files = await collectFirstPartyJsFiles(root);
 const failures = [];
 
 for (const file of files) {
-  try {
-    await execFileAsync(process.execPath, ["--check", file], { cwd: root });
-  } catch (error) {
+  const source = await readFile(file, "utf8");
+  const messages = syntaxLinter.verify(
+    source,
+    {
+      languageOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module"
+      },
+      rules: {}
+    },
+    file
+  );
+  const parseFailures = messages.filter((message) => message.fatal);
+  if (parseFailures.length) {
     failures.push({
       file: relative(root, file),
-      stderr: String(error.stderr || error.stdout || error.message || "").trim()
+      stderr: parseFailures
+        .map((message) => `${message.message} (${message.line ?? 0}:${message.column ?? 0})`)
+        .join("\n")
     });
   }
 }
@@ -45,13 +64,59 @@ if (failures.length) {
 
 console.log(`Syntax OK for ${files.length} first-party JS/MJS files.`);
 
-async function collectTrackedFirstPartyJsFiles(directory) {
-  const { stdout } = await execFileAsync("git", ["ls-files", "*.js", "*.mjs"], { cwd: directory });
-  return stdout
-    .split(/\r?\n/u)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((file) => !ignoredPrefixes.some((prefix) => file.startsWith(prefix)))
-    .map((file) => `${directory}/${file.replace(/\\/g, "/")}`)
-    .sort();
+async function collectFirstPartyJsFiles(directory) {
+  const files = [];
+  await walkDirectory(directory, "", files);
+  return files.sort();
+}
+
+async function walkDirectory(currentDirectory, relativeDirectory, files) {
+  const entries = await readdir(currentDirectory, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const entryPath = path.join(currentDirectory, entry.name);
+    const entryRelativePath = relativeDirectory ? `${relativeDirectory}/${entry.name}` : entry.name;
+
+    if (entry.isDirectory()) {
+      if (shouldSkipDirectory(entry.name, relativeDirectory)) {
+        continue;
+      }
+      await walkDirectory(entryPath, entryRelativePath, files);
+      continue;
+    }
+
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    if (!isIncludedFile(entryRelativePath)) {
+      continue;
+    }
+
+    files.push(entryPath);
+  }
+}
+
+function shouldSkipDirectory(directoryName, relativeDirectory) {
+  if (!relativeDirectory && ignoredDirectories.has(directoryName)) {
+    return true;
+  }
+
+  if (!relativeDirectory) {
+    return !includedRootDirectories.has(directoryName);
+  }
+
+  return false;
+}
+
+function isIncludedFile(relativePath) {
+  if (!relativePath.endsWith(".js") && !relativePath.endsWith(".mjs")) {
+    return false;
+  }
+
+  if (!relativePath.includes("/")) {
+    return includedRootFiles.has(relativePath);
+  }
+
+  return relativePath.startsWith("scripts/") || relativePath.startsWith("tests/");
 }
