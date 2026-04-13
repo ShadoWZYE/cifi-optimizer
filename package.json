@@ -9,6 +9,7 @@
     "dev": "node ./scripts/dev-server.mjs",
     "format": "prettier --write \"package*.json\" \".prettierrc.json\" \".github/**/*.{md,yml,yaml}\" \"AGENTS.md\" \"CODEX_BRIEF.md\" \"README.md\" \"THIRD_PARTY_NOTICES.md\" \"app.js\" \"player-profile.js\" \"recommendation-contract.js\" \"index.html\" \"styles.css\" \"scripts/**/*.mjs\" \"tests/**/*.{json,mjs}\"",
     "format:check": "prettier --check \"package*.json\" \".prettierrc.json\" \".github/**/*.{md,yml,yaml}\" \"AGENTS.md\" \"CODEX_BRIEF.md\" \"README.md\" \"THIRD_PARTY_NOTICES.md\" \"app.js\" \"player-profile.js\" \"recommendation-contract.js\" \"index.html\" \"styles.css\" \"scripts/**/*.mjs\" \"tests/**/*.{json,mjs}\"",
+    "lint": "eslint --max-warnings=0 \"app.js\" \"player-profile.js\" \"recommendation-contract.js\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\"",
     "lint:docs": "node ./scripts/contracts/lint-doc-portability.mjs",
     "probe:build": "node ./scripts/unity/run_probe.mjs build",
     "probe:uabea": "node ./scripts/unity/run_probe.mjs uabea",
@@ -24,6 +25,7 @@
     "test:unit": "node ./scripts/tests/run-unit-tests.mjs"
   },
   "devDependencies": {
+    "eslint": "^10.2.0",
     "prettier": "^3.8.2"
   }
 }
