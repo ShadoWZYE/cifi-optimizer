@@ -32,13 +32,14 @@ When restarting or handing off a lane, do not let adjacent unresolved systems be
   - the checked `ShardMining` to `ConstructionMilestones` handoff plus typed field table now recover one shard-local declaring row model: `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo`
   - the recovered shard-local row shell currently exposes `Cost`, `MaxLevel`, and `IsUnlocked`
   - two concrete rows now clear as bounded verification passes: `SU1` binds to the shipped `Alpha` title asset and `SU2` binds to the shipped `Aquarius` title asset, each with one three-slot effect package and one checked `get_SU*Cost` cost shell
+  - the app can now safely show a small `verified shard rows` preview for `SU1` and `SU2` with explicit blocked notes for everything else
 - Still blocked:
   - only two shard rows are currently verified end-to-end; the repo still does not have a full verified row table
   - the exact serialized `upgradeInfoList` payload or save-side owner is not yet recovered
   - exact player-owned shard row state is not yet import-ready
   - exact planner-safe shard cost math and effect-text mapping are not yet recovered
 - Smallest next slice:
-  - verify one more concrete shard row from an adjacent slot-count or cost-shell class without claiming a full row table, or tighten the next single-row blocker if that row does not clear
+  - keep the player-facing preview limited to verified rows only, and verify one more concrete row only when the app needs to expand that preview
 - Start here:
   - `docs/systems/shards/shard-system-verification.md`
   - `docs/systems/shards/shard-owner-family-verification.md`

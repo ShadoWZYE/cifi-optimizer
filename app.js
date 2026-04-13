@@ -395,7 +395,7 @@ async function bootstrap() {
     return;
   }
 
-  const [snapshot, datasetContract, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardCostModelBoundary, shardMilestoneRowModelBoundary, shardMilestoneTitleEffectBoundary, shardEffectTextHandlerBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, shardSceneMonoBehaviourProbe, shardCostParameterProbe, shardCostNativeProbe, shardBonusSlotProbe, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell, tokenShopRowRemapBoundary] = await Promise.all([
+  const [snapshot, datasetContract, shipBaseline, groundedShardMilestones, groundedShardObservedBehaviors, groundedShardProvenance, shardAssetGrounding, shardOwnerFamilyBoundary, shardFinalSuBonusBoundary, shardMilestonePayloadBoundary, shardCostModelBoundary, shardMilestoneRowModelBoundary, shardMilestoneTitleEffectBoundary, shardEffectTextHandlerBoundary, shardMilestoneRowShellBoundary, shardMilestoneRowAlignmentBoundary, shardSaveBoundary, shardSceneMonoBehaviourProbe, shardCostParameterProbe, shardCostNativeProbe, shardBonusSlotProbe, shardRowVerificationSu1, shardRowVerificationSu2, extractionCandidateRanking, tokenShopValues, multiverseMarketValues, multiverseMarketMetadataNeighborhood, tokeniumNamingClues, tokenBankStateClues, dailyTokeniumLaneClues, tokenBankFormulaBoundary, multiverseMarketRangeBoundary, multiverseMarketRowTextCoverage, multiverseMarketPrefabRemapBoundary, tokenShopCostLanes, spendActionLaneClues, multiverseMarketActionShell, multiverseMarketOwnerFamily, tokenShopOwnerShell, tokenShopSaveBoundary, multiverseMarketSaveBoundary, multiverseMarketMarketMemberBoundary, tokenBankControllerShell, tokenShopRowRemapBoundary] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/bundled-dataset-contract.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
@@ -417,6 +417,8 @@ async function bootstrap() {
     fetchJson("./data/shard-cost-parameter-probe.v1.json"),
     fetchJson("./data/shard-cost-native-probe.v1.json"),
     fetchJson("./data/shard-bonus-slot-probe.v1.json"),
+    fetchJson("./data/shard-row-verification-su1.v1.json"),
+    fetchJson("./data/shard-row-verification-su2.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
     fetchJson("./data/token-shop-values.json"),
     fetchJson("./data/multiverse-market-values.json"),
@@ -467,7 +469,8 @@ async function bootstrap() {
     sceneMonoBehaviourProbe: shardSceneMonoBehaviourProbe,
     costParameterProbe: shardCostParameterProbe,
     costNativeProbe: shardCostNativeProbe,
-    bonusSlotProbe: shardBonusSlotProbe
+    bonusSlotProbe: shardBonusSlotProbe,
+    verifiedRows: [shardRowVerificationSu1, shardRowVerificationSu2]
   };
   state.extractionCandidateRanking = extractionCandidateRanking;
   state.extractedMechanics = {
@@ -1586,6 +1589,7 @@ function renderShardSubsystemSection(items) {
       </div>
       <p class="meta">Shard Mining is the player-facing shard surface. It keeps milestone guidance and row tracking together, while grounding details and recovery evidence stay in docs.</p>
       ${cards ? `<div class="recommendation-list">${cards}</div>` : `<article class="validation-card warn"><strong>Shard Mining unavailable</strong><p class="meta">No player-facing shard cards currently passed the shared recommendation contract.</p></article>`}
+      ${renderVerifiedShardRowsPreview()}
       ${renderShardMilestoneDirectory()}
       ${renderShardDocsNotice()}
     </section>
@@ -3308,6 +3312,64 @@ function renderShardGroundingBoundary() {
   `;
 }
 
+function getVerifiedShardRowPackages() {
+  return (Array.isArray(state.shardGrounding?.verifiedRows) ? state.shardGrounding.verifiedRows : [])
+    .filter((entry) => entry?.verifiedRow?.rowKey && entry?.verifiedRow?.titleBinding?.playerFacingName)
+    .sort((left, right) => Number(left?.verifiedRow?.row ?? 0) - Number(right?.verifiedRow?.row ?? 0));
+}
+
+function formatVerifiedShardBonusPackage(effectPackage) {
+  return (Array.isArray(effectPackage?.bonuses) ? effectPackage.bonuses : [])
+    .map((bonus) => {
+      const unlock = Number.isFinite(Number(bonus?.unlockLevel)) ? `Lv${Number(bonus.unlockLevel)}` : "Listed";
+      return `${unlock} ${String(bonus?.effectLabel || "Unnamed bonus")}`;
+    })
+    .join(" | ");
+}
+
+function renderVerifiedShardRowsPreview() {
+  const verifiedRows = getVerifiedShardRowPackages();
+  if (!verifiedRows.length) {
+    return "";
+  }
+  const previewStatus = getShardBadgeMetaFromLabel("Integrated");
+  return `
+    <article class="snapshot-card shard-status-card ${previewStatus.cardClass}">
+      <div class="shard-status-heading">
+        <span class="snapshot-title">Verified shard rows preview</span>
+        <span class="shard-status-pill ${previewStatus.pillClass}">${escapeHtml(previewStatus.label)}</span>
+      </div>
+      <strong>Safely named shard rows the app can already show end-to-end</strong>
+      <div class="meta-stack">
+        <p class="meta">This preview is intentionally small and descriptive. It only shows rows whose shipped title, grounded three-bonus package, checked text slots, and checked cost shell all align in the current shard contract.</p>
+        ${verifiedRows.map((entry) => {
+          const verifiedRow = entry.verifiedRow;
+          const titleBinding = verifiedRow.titleBinding;
+          const effectPackage = verifiedRow.effectPackage;
+          const effectPresentation = verifiedRow.effectPresentationBinding;
+          const rowShell = verifiedRow.declaringRowModel?.rowShellFields;
+          const costShell = verifiedRow.costShell;
+          const renderCodeList = (items) => (Array.isArray(items) ? items : [])
+            .map((item) => `<code>${escapeHtml(String(item))}</code>`)
+            .join(", ");
+          return `
+            <div class="shard-note-card">
+              <strong>#${escapeHtml(String(verifiedRow.row))} ${escapeHtml(titleBinding.playerFacingName)}</strong>
+              <p class="meta"><strong>Shipped title</strong> ${escapeHtml(titleBinding.title)} via <code>${escapeHtml(titleBinding.assetName)}</code></p>
+              <p class="meta"><strong>Grounded three-bonus package</strong> ${escapeHtml(formatVerifiedShardBonusPackage(effectPackage))}</p>
+              <p class="meta"><strong>Checked text slots</strong> ${renderCodeList(rowShell?.bonusTextFields)}</p>
+              <p class="meta"><strong>Checked cost shell</strong> <code>${escapeHtml(costShell.getterName)}</code> -> ${renderCodeList(costShell.serializedCostFields)}</p>
+              <p class="meta"><strong>Checked effect accessors</strong> ${renderCodeList(effectPresentation.calcAccessors)}</p>
+            </div>
+          `;
+        }).join("")}
+        <p class="meta">Rows outside SU1 and SU2 stay explicitly blocked until a matching row package clears end-to-end.</p>
+        <p class="meta">No affordability math, ROI, ETA, ranking, best-upgrade logic, save import, or full shard-table claims are implied by this preview.</p>
+      </div>
+    </article>
+  `;
+}
+
 function renderShardWorkflowReference() {
   const mechanics = getGroundedShardMechanics();
   const provenance = state.shardGrounding?.provenance;
@@ -3729,6 +3791,20 @@ function buildApkGroundingValidationCases() {
         ? `Unlock ${rowAlignmentBoundary.unlockRangeLabel}, text ${rowAlignmentBoundary.textCheckerRangeLabel}, buy ${rowAlignmentBoundary.buyRangeLabel}`
         : "Shard milestone row-alignment boundary drifted",
       pass: rowAlignmentBoundary.hasBoundary && rowAlignmentBoundary.hasZeroUnlockTextOverlap && rowAlignmentBoundary.hasBuyTextOverlap,
+      scope: "APK"
+    });
+  }
+  const verifiedShardRows = getVerifiedShardRowPackages();
+  if (verifiedShardRows.length) {
+    const verifiedRowKeys = verifiedShardRows.map((entry) => entry?.verifiedRow?.rowKey).filter(Boolean);
+    const hasVerifiedPreviewSlice = verifiedRowKeys.includes("SU1") && verifiedRowKeys.includes("SU2");
+    cases.push({
+      title: "Verified shard rows preview",
+      expected: "SU1 and SU2 verified rows available for descriptive preview",
+      actual: hasVerifiedPreviewSlice
+        ? "SU1 and SU2 verified rows available for descriptive preview"
+        : "Verified shard rows preview drifted",
+      pass: hasVerifiedPreviewSlice,
       scope: "APK"
     });
   }

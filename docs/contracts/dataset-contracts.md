@@ -189,6 +189,20 @@ Prevent:
 - must contain exact `SU0-29` `Bonus*` slot-count coverage plus row-0 mismatch framing where grounded descriptive bonuses still undershoot metadata
 - useful for nailing row-local bonus arity without pretending the player-facing effect text or formulas are fully recovered
 
+### Shard row verification SU1
+
+- file: `data/shard-row-verification-su1.v1.json`
+- classification: `extracted-mechanics`
+- must contain one end-to-end verified shard row package for `SU1`, including the shipped title binding, grounded three-bonus package, checked `SM1B*Text` slots, sampled `get_SU1Bonus*Calc` accessors, and checked `get_SU1Cost` shell
+- useful for the bounded verified shard rows preview slice, not itself a full shard row table, affordability model, or save import surface
+
+### Shard row verification SU2
+
+- file: `data/shard-row-verification-su2.v1.json`
+- classification: `extracted-mechanics`
+- must contain one end-to-end verified shard row package for `SU2`, including the shipped title binding, grounded three-bonus package, checked `SM2B*Text` slots, sampled `get_SU2Bonus*Calc` accessors, and checked `get_SU2Cost` shell
+- useful for the bounded verified shard rows preview slice, not itself a full shard row table, affordability model, or save import surface
+
 ### Shard type metadata probe
 
 - file: `data/shard-type-metadata-probe.v1.json`
