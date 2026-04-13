@@ -20,7 +20,12 @@ const ignoredDirectories = new Set([
   "tools",
   "workbench"
 ]);
-const includedRootFiles = new Set(["app.js", "player-profile.js", "recommendation-contract.js"]);
+const includedRootFiles = new Set([
+  "app.js",
+  "player-profile.js",
+  "recommendation-contract.js",
+  "spend-boundary-summary.js"
+]);
 const includedRootDirectories = new Set(["scripts", "tests"]);
 const syntaxLinter = new Linter();
 

@@ -306,6 +306,10 @@ const tokenBankControllerShellData = JSON.parse(
 );
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const spendBoundarySummaryJs = await readFile(
+  new URL("../spend-boundary-summary.js", import.meta.url),
+  "utf8"
+);
 const tokenShopProgressionModel = await readFile(
   new URL("../token-shop-progression-model.js", import.meta.url),
   "utf8"
@@ -500,6 +504,7 @@ await runNodeSyntaxCheck(fileURLToPath(new URL("../app.js", import.meta.url)));
 const datasetValidation = await validateBundledDatasets();
 const normalizedHtml = collapseWhitespace(html);
 const normalizedAppJs = collapseWhitespace(appJs);
+const normalizedSpendBoundarySummaryJs = collapseWhitespace(spendBoundarySummaryJs);
 const normalizedProbeRunner = collapseWhitespace(probeRunner);
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
 const hardAssert = {
@@ -8080,20 +8085,25 @@ assert.match(appJs, /function renderSpendPlannerBoundary/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /compatibility\.unmappedSystemState/);
 assert.match(appJs, /function getTokeniumNamingSummary/);
-assert.match(appJs, /function getTokenBankStateSummary/);
-assert.match(appJs, /function getDailyTokeniumLaneSummary/);
-assert.match(appJs, /function getTokenBankFormulaBoundarySummary/);
-assert.match(appJs, /function formatNumericRanges/);
-assert.match(appJs, /function getMultiverseMarketRangeBoundarySummary/);
-assert.match(appJs, /function getMultiverseMarketRowTextCoverageSummary/);
-assert.match(appJs, /function getMultiverseMarketPrefabRemapBoundarySummary/);
+assert.match(appJs, /from "\.\/spend-boundary-summary\.js"/);
+assert.match(spendBoundarySummaryJs, /function getTokenBankStateSummary/);
+assert.match(spendBoundarySummaryJs, /function getDailyTokeniumLaneSummary/);
+assert.match(spendBoundarySummaryJs, /function getTokenBankFormulaBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function formatNumericRanges/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketRangeBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketRowTextCoverageSummary/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketPrefabRemapBoundarySummary/);
+assert.match(
+  normalizedSpendBoundarySummaryJs,
+  /export function getMultiverseMarketMarketMemberBoundarySummary\(boundary\)/
+);
 assert.match(
   normalizedAppJs,
   /function getImportedMultiverseMarketPreview\( importedMarketState, multiverseMarket, multiverseMarketRangeBoundary \)/
 );
-assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketSaveBoundarySummary/);
 assert.match(
-  appJs,
+  spendBoundarySummaryJs,
   /PlayerProfileHandler, playerData, GetPlayerProfileData, FillPlayerProfileData, and ConvertSaveDataToProfileData/
 );
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
@@ -8157,7 +8167,7 @@ assert.match(
   /Planner use stays blocked\. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence/
 );
 assert.match(
-  appJs,
+  spendBoundarySummaryJs,
   /get_Market, Market, GetPlayerProfileData, FillPlayerProfileData, and the FillPlayerProfileData coroutine shell/
 );
 assert.match(appJs, /Shard milestone mapping gate/);
@@ -8180,7 +8190,7 @@ assert.match(
 assert.match(appJs, /\.\/data\/token-shop-cost-lanes\.json/);
 assert.match(appJs, /\.\/data\/spend-action-lane-clues\.json/);
 assert.match(appJs, /\.\/data\/token-shop-owner-shell\.json/);
-assert.match(appJs, /function getTokenShopCostLaneSummary/);
+assert.match(spendBoundarySummaryJs, /function getTokenShopCostLaneSummary/);
 assert.match(appJs, /TokenShop cost-lane split/);
 assert.match(
   appJs,
@@ -8194,7 +8204,7 @@ assert.match(
   appJs,
   /This keeps TokenDailies on the Daily Tokenium modifier lane instead of mixing it into generic token spend rows/
 );
-assert.match(appJs, /function getSpendActionLaneSummary/);
+assert.match(spendBoundarySummaryJs, /function getSpendActionLaneSummary/);
 assert.match(appJs, /Spend action-lane split/);
 assert.match(
   appJs,
@@ -8208,13 +8218,13 @@ assert.match(
   appJs,
   /The checked APK and Unity probe still returns zero \${spendActionLaneSummary\.dailyHookT2} or \${spendActionLaneSummary\.dailyHookT3} matches/
 );
-assert.match(appJs, /"BuyTokenBoost"/);
-assert.match(appJs, /"BuyDiamondBoost"/);
-assert.match(appJs, /"BuyLM244"/);
-assert.match(appJs, /"BuyCollectorDevice"/);
-assert.match(appJs, /"BuyTokenDailiesT2"/);
-assert.match(appJs, /"BuyTokenDailiesT3"/);
-assert.match(appJs, /function getTokenShopOwnerShellSummary/);
+assert.match(spendBoundarySummaryJs, /"BuyTokenBoost"/);
+assert.match(spendBoundarySummaryJs, /"BuyDiamondBoost"/);
+assert.match(spendBoundarySummaryJs, /"BuyLM244"/);
+assert.match(spendBoundarySummaryJs, /"BuyCollectorDevice"/);
+assert.match(spendBoundarySummaryJs, /"BuyTokenDailiesT2"/);
+assert.match(spendBoundarySummaryJs, /"BuyTokenDailiesT3"/);
+assert.match(spendBoundarySummaryJs, /function getTokenShopOwnerShellSummary/);
 assert.match(appJs, /TokenShop owner shell/);
 assert.match(
   appJs,
@@ -8228,7 +8238,7 @@ assert.match(
   appJs,
   /That local TokenShop shell is enough to keep bank controls and adjacent device hooks grouped together, but not enough to promote player-owned bank values into planner state/
 );
-assert.match(appJs, /function getTokenShopSaveBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function getTokenShopSaveBoundarySummary/);
 assert.match(appJs, /TokenShop save boundary/);
 assert.match(
   appJs,
@@ -8242,7 +8252,7 @@ assert.match(
   appJs,
   /That means TokenShop ownership and PlayerProfile save recovery remain separate tasks, so the app should not infer saved bank values from owner-shell clues yet/
 );
-assert.match(appJs, /function getTokenBankControllerShellSummary/);
+assert.match(spendBoundarySummaryJs, /function getTokenBankControllerShellSummary/);
 assert.match(appJs, /Token-bank controller shell/);
 assert.match(
   appJs,
@@ -8264,7 +8274,7 @@ assert.match(
   appJs,
   /This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state/
 );
-assert.match(appJs, /function getMultiverseMarketSaveBoundarySummary/);
+assert.match(spendBoundarySummaryJs, /function getMultiverseMarketSaveBoundarySummary/);
 assert.match(appJs, /MultiverseMarket save boundary/);
 assert.match(
   appJs,
@@ -8272,7 +8282,7 @@ assert.match(
 );
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
 assert.match(appJs, /PlayerProfileHandler get_Market accessor bridge/);
-assert.match(appJs, /get_BM, get_ZN, get_TU/);
+assert.match(spendBoundarySummaryJs, /get_BM, get_ZN, get_TU/);
 assert.match(appJs, /broader progression-payload field cluster/);
 assert.match(
   appJs,
