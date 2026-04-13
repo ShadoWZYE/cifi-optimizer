@@ -5,6 +5,7 @@ import "../../tests/player-profile-boundary-support.test.mjs";
 import "../../tests/recommendation-feed-support.test.mjs";
 import "../../tests/recommendation-contract.test.mjs";
 import "../../tests/research-validation-support.test.mjs";
+import "../../tests/shard-boundary-summary-support.test.mjs";
 import "../../tests/shard-evidence-support.test.mjs";
 import "../../tests/ship-planner-support.test.mjs";
 import "../../tests/spend-boundary-summary.test.mjs";

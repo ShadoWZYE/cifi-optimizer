@@ -314,6 +314,10 @@ const researchValidationSupportModule = await readFile(
   new URL("../research-validation-support.js", import.meta.url),
   "utf8"
 );
+const shardBoundarySummarySupportModule = await readFile(
+  new URL("../shard-boundary-summary-support.js", import.meta.url),
+  "utf8"
+);
 const playerProfileBoundarySupportModule = await readFile(
   new URL("../player-profile-boundary-support.js", import.meta.url),
   "utf8"
@@ -534,6 +538,9 @@ const normalizedImportNormalizationSupportModule = collapseWhitespace(
 const normalizedResearchValidationSupportModule = collapseWhitespace(
   researchValidationSupportModule
 );
+const normalizedShardBoundarySummarySupportModule = collapseWhitespace(
+  shardBoundarySummarySupportModule
+);
 const normalizedPlayerProfileBoundarySupportModule = collapseWhitespace(
   playerProfileBoundarySupportModule
 );
@@ -706,8 +713,14 @@ assert.match(appJs, /Mech planning stays in research/);
 assert.match(appJs, /Input automation stays in research/);
 assert.match(appJs, /External-model integration stays in research/);
 assert.match(appJs, /function renderShardGroundingBoundary/);
-assert.match(appJs, /function getShardOwnerFamilyBoundarySummary/);
-assert.match(appJs, /function getShardFinalSuBonusBoundarySummary/);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardOwnerFamilyBoundarySummary/
+);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardFinalSuBonusBoundarySummary/
+);
 assert.match(appJs, /Grounded shard evidence/);
 assert.match(appJs, /Ownership mapping/);
 assert.match(appJs, /Shard-specific ownership evidence is narrowed, not resolved/);
@@ -8015,13 +8028,40 @@ assert.match(appJs, /function renderSupportSurfaceNotice/);
 assert.match(appJs, /function renderValidationSection/);
 assert.match(appJs, /function toRecommendationAction/);
 assert.match(appJs, /function sanitizeRecommendationLines/);
-assert.match(appJs, /function getShardMilestonePayloadBoundarySummary/);
-assert.match(appJs, /function getShardCostModelBoundarySummary/);
-assert.match(appJs, /function getShardMilestoneRowModelBoundarySummary/);
-assert.match(appJs, /function getShardMilestoneTitleEffectBoundarySummary/);
-assert.match(appJs, /function getShardMilestoneRowShellBoundarySummary/);
-assert.match(appJs, /function getShardMilestoneRowAlignmentBoundarySummary/);
-assert.match(appJs, /function getShardSaveBoundarySummary/);
+assert.match(appJs, /from "\.\/shard-boundary-summary-support\.js"/);
+assert.doesNotMatch(appJs, /function getShardMilestonePayloadBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardCostModelBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardMilestoneRowModelBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardMilestoneTitleEffectBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardMilestoneRowShellBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardMilestoneRowAlignmentBoundarySummary/);
+assert.doesNotMatch(appJs, /function getShardSaveBoundarySummary/);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestonePayloadBoundarySummary/
+);
+assert.match(shardBoundarySummarySupportModule, /export function getShardCostModelBoundarySummary/);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestoneRowModelBoundarySummary/
+);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestoneTitleEffectBoundarySummary/
+);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestoneRowShellBoundarySummary/
+);
+assert.match(
+  shardBoundarySummarySupportModule,
+  /export function getShardMilestoneRowAlignmentBoundarySummary/
+);
+assert.match(shardBoundarySummarySupportModule, /export function getShardSaveBoundarySummary/);
+assert.match(
+  normalizedShardBoundarySummarySupportModule,
+  /export function getShardOwnerFamilyBoundarySummary\(boundary\)/
+);
 assert.match(recommendationContractModule, /export function toRecommendationAction/);
 assert.match(recommendationContractModule, /export function sortRecommendationFeed/);
 assert.match(recommendationContractModule, /export function getRecommendationContractIssues/);
@@ -8167,7 +8207,7 @@ assert.doesNotMatch(appJs, /Effect-text handler boundary/);
 assert.match(appJs, /Shard effect-text handler boundary/);
 assert.match(appJs, /Shard milestone row model/);
 assert.match(appJs, /Shard milestone titles and effect shell/);
-assert.match(appJs, /TextHandlerShardMilestoneBonusesPerLevel\/N/);
+assert.match(shardBoundarySummarySupportModule, /TextHandlerShardMilestoneBonusesPerLevel\/N/);
 assert.match(appJs, /Shard milestone row shell/);
 assert.match(appJs, /Shard milestone row alignment/);
 assert.match(appJs, /UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell/);
