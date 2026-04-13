@@ -103,8 +103,8 @@ Use these when the active lanes above close or split.
 ### `spend-token-bank-state-owner`
 
 - Goal: recover the saved-state owner behind token-bank cap, fill, and claimable-bank state
-- Current blocker: exact `SaveData.BankedTokens` recovery closes current stored amount and the broader checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge only exposes generic `PlayerProfileData.Tokens` and `PlayerProfileData.Tokenium` wrapper strings, so bank-cap and claimable-bank ownership are still unresolved
-- Smallest next slice: checked bank-state owner boundary that either recovers a deeper declaring save model or proves a narrower non-`PlayerProfileData` wrapper than the current export bridge
+- Current blocker: exact `SaveData.BankedTokens` recovery closes current stored amount, the checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge still only exposes generic `PlayerProfileData.Tokens` and `PlayerProfileData.Tokenium` wrapper strings, and the remaining `CloudSavePlayerProfile` evidence now narrows only to a metadata-only cloud save/load shell instead of a deeper typed wrapper, so bank-cap and claimable-bank ownership are still unresolved
+- Smallest next slice: checked bank-state owner boundary that either recovers a deeper declaring save model or proves a narrower non-`PlayerProfileData` wrapper than the current export bridge while keeping the metadata-only `CloudSavePlayerProfile` shell closed as a non-owner surface
 
 ### `spend-daily-tokenium-save-owner`
 

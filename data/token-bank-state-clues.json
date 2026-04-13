@@ -72,7 +72,28 @@
   "cloudSavePlayerProfileBoundary": {
     "scriptName": "CloudSavePlayerProfile",
     "typedTargetFound": false,
-    "blockedReason": "The checked direct target-type recovery does not surface CloudSavePlayerProfile as a found typed target, so this pass does not clear a narrower cloud-save wrapper for token-bank cap, claimable-bank, or ready-state ownership."
+    "metadataAnchorFound": true,
+    "metadataShellMethods": [
+      "OnCloudSaveClick",
+      "GetCurrentSaveFileInfo",
+      "OnCloudLoadClick",
+      "OnCloudLoadExtraBackupClick",
+      "CloudLoad",
+      "GetPlayerProfileInfo",
+      "IsCloudSaved"
+    ],
+    "metadataStateMachines": [
+      "<CloudSave>d__23",
+      "<CloudSavePlayerProfile>d__24",
+      "<GetCurrentSaveFileInfo>d__25",
+      "<CloudLoad>d__28",
+      "<GetPlayerProfileInfo>d__29"
+    ],
+    "metadataTransientLocals": [
+      "<saveData>5__2",
+      "<lastCloudSave>5__3"
+    ],
+    "blockedReason": "The checked direct target-type recovery still does not surface CloudSavePlayerProfile as a found typed target, and the surviving metadata context only narrows it to a cloud-save orchestration shell around save/load routines plus transient SaveData handling rather than a narrower token-bank cap, claimable-bank, or ready-state wrapper."
   },
   "negativeTypedOwnerChecks": [
     "SaveData.ClaimableBankTokens",
@@ -86,8 +107,8 @@
     "The same checked typed save tables do not currently expose ClaimableBankTokens or TokenBankCap on SaveData or PlayerProfileData.",
     "The broader PlayerProfile persistence neighborhood is now checked more tightly: PlayerProfileHandler.saveInfoCache is typed as PlayerProfileData and ConvertSaveDataToProfileData(SaveData, System.DateTime) returns PlayerProfileData, but the direct PlayerProfileData wrapper only exposes generic Tokens and Tokenium strings in this lane.",
     "Exact typed recovery also clears SaveData.ClaimableTokenium as a broader generic Tokenium-cluster claimable field, which is useful for boundary narrowing but still does not prove a token-bank-specific claimable or ready-state owner.",
-    "The checked direct target-type recovery still does not surface CloudSavePlayerProfile as a found typed target, so no narrower cloud-save wrapper clears beyond the broader PlayerProfile persistence-family boundary.",
-    "That broader PlayerProfile bridge therefore still does not recover one exact token-bank cap or claimable-bank input beyond SaveData.BankedTokens.",
+    "The checked direct target-type recovery still does not surface CloudSavePlayerProfile as a found typed target, and the surviving metadata-only CloudSavePlayerProfile shell stays limited to cloud save/load orchestration plus transient SaveData locals instead of a narrower declaring wrapper.",
+    "That means neither the checked PlayerProfileData export bridge nor the metadata-only CloudSavePlayerProfile shell recovers one exact token-bank cap or claimable-bank input beyond SaveData.BankedTokens.",
     "TokenShop remains the strongest controller-side owner for token-bank cap, claimable, fill, and claim behavior, but not the recovered save-state owner.",
     "BigStatisticPrefab.TokenBankCap is a separate statistic-display shell for bank-cap presentation.",
     "TextHandlerLoopMods and SetLM244BonusText are still presentation-side daily-tokenium hooks, not recovered gameplay owners.",
