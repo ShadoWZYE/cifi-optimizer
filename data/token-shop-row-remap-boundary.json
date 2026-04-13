@@ -83,6 +83,49 @@
       "prefabIdentity": "NewTokenUPGPrefab.T1.TokensBoost",
       "groundedConclusion": "ATU1Button now has one additional checked bridge to the TokenShop TokenBoost or NewTokenUPGPrefab.T1.TokensBoost row family because the exact TokenShop owner payload places ATU1Button directly after the TokenBoost field family, broader probes preserve ATU1TokenBonus, checked action-lane clues preserve BuyTokenBoost, and the checked level0 prefab roster preserves the exact T1 TokensBoost prefab identity."
     },
+    "blockedTitleJoin": {
+      "testedSurfaces": [
+        {
+          "surface": "generic TokenShop text hooks",
+          "checkedArtifacts": [
+            "data/unity-probe-report.json",
+            "data/daily-tokenium-lane-probe.json",
+            "data/lm244-targeted-probe.json"
+          ],
+          "preservedNeighbors": [
+            "SetAllTokenShopTexts",
+            "SetTokenTexts"
+          ],
+          "missingJoin": "The generic TokenShop text-hook surface still preserves SetAllTokenShopTexts and SetTokenTexts as a separate text-handler cluster, but it does not preserve any ATU1 shell, path id 15839, or exact row-local title join."
+        },
+        {
+          "surface": "token-side tokens title candidates",
+          "checkedArtifacts": [
+            "data/unity-probe-report.json"
+          ],
+          "preservedNeighbors": [
+            "Tokens Booster",
+            "Tokens Booster T1"
+          ],
+          "missingJoin": "The surviving Tokens Booster and Tokens Booster T1 strings remain detached token-side title clues and do not preserve any direct ATU1 shell join."
+        },
+        {
+          "surface": "diamond-side tokens title candidate",
+          "checkedArtifacts": [
+            "data/unity-probe-report.json"
+          ],
+          "preservedNeighbors": [
+            ">Diamond Upgrade 9 - TokensBoost"
+          ],
+          "missingJoin": "The surviving >Diamond Upgrade 9 - TokensBoost clue remains a separate diamond-side title surface and does not preserve any direct ATU1 shell join."
+        }
+      ],
+      "titleCandidate": "Tokens Booster T1",
+      "alternateTitleCandidate": "Tokens Booster",
+      "diamondTitleCandidate": ">Diamond Upgrade 9 - TokensBoost",
+      "missingJoin": "No committed source currently ties ATU1Button directly to one final player-facing TokenShop row title or named identity; the surviving generic text hooks plus the detached Tokens Booster, Tokens Booster T1, and >Diamond Upgrade 9 - TokensBoost title-side clues still do not cross back to the grounded ATU1 shell neighborhood.",
+      "lastBlocker": "The last honest blocker for ATU1 is still one exact shell-local join from the already detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839."
+    },
     "blockedAdjacentShell": {
       "shellField": "ATU3Button",
       "shellPathId": 15810,
@@ -110,7 +153,7 @@
       ],
       "groundedConclusion": "ATU3Button does not yet clear. The blocker is now narrower than simple CellBoost adjacency: committed repo evidence splits the surviving cells-domain clues across the CellBoost owner block, the generic BuyCellBoost action hook, the separate diamond-special CellsBoost prefab and title, and separate token-prefab and Token Ultima: Cells title clusters, but still does not provide a checked object or text join to path_id 15810."
     },
-    "result": "one more grounded bridge recovered"
+    "result": "one more grounded bridge recovered but no concrete title join cleared"
   },
   "boundedRecoveredBridge": {
     "shellField": "ATU5Button",
@@ -579,6 +622,7 @@
     "The neighboring grounded shell-side rows still remain more limited: ATU5Button now preserves one bounded player-facing named identity join through 1. MK1 Generator Output plus the matching detached MK1 generator support text, but it still lacks one checked exact final player-facing row-title string; ATU7Button now also preserves one bounded title-side chain through Mk3 Generator Booster with matching MK3 support text; ATU8Button now also preserves one bounded title-side chain through Mk4 Generator Booster with matching MK4 support text; and the neighboring MK5-MK8 token rows remain unresolved even though the same owner payload preserves their numbered shells and the broader action lane preserves BuyMK5TokenBoost through BuyMK8TokenBoost.",
     "Grounded metadata neighborhoods now tighten the late-row shell further: BuyATU24 through BuyATU28 sit beside named tier-buy hooks like BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, while getter neighborhoods preserve ATU1TokenBonus, ATU2DiamondsBonus, ATU14TokenDailiesBonus, and ATU24Bonus3Shards through ATU24Bonus5AP in one ATU-numbered family.",
     "Grounded level0 neighborhoods now tighten the text-hook blocker further: SetAllTokenShopTexts and SetTokenTexts sit in a token-menu or token-bank text-handler cluster with CheckFirstTokenMenuTime, ClaimTokenium, token-bank formula strings, TokenClaimRecolor, and TokenShopRecoloring, while most NewTokenUPGPrefab.* names remain one separate prefab roster cluster and player-facing titles such as Trinity Booster One, Academy Booster, Tokens Booster T3, and Campaign Fragments remain a separate title cluster.",
+    "The bounded ATU1 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface remains a separate text-handler cluster, while Tokens Booster, Tokens Booster T1, and >Diamond Upgrade 9 - TokensBoost remain detached title candidates instead of one exact shell-local final title or named-identity join. The last honest blocker is still one exact join from one of those detached tokens-domain title clues back to ATU1Button path id 15839.",
     "The bounded ATU4 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface remains a separate text-handler cluster, while Token Ultima: MP and :Diamond Upgrade 11 - ModBoost remain detached title candidates instead of one exact shell-local final title join. The last honest blocker is still one exact join from one of those detached mod-domain title clues back to ATU4Button path id 15796.",
     "The bounded ATU5 last-title-blocker pass now narrows cleanly: the detached MK1 generator support-text cluster already clears one checked ATU5Button -> NewTokenUPGPrefab.T1.MK1Booster -> 1. MK1 Generator Output named-identity and support-text chain, while the remaining honest blocker is only the absent exact final player-facing row-title string such as one exact Mk1 Generator Booster join.",
     "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU1, ATU2, ATU4, ATU5, ATU6, ATU7, and ATU8 bridges plus the one checked ATU6 shell-to-prefab-to-title chain, and the unrecovered ATU family should stay compatibility-only instead of entering planner logic or canonical state.playerProfile.",

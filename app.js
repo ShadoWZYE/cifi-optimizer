@@ -4671,8 +4671,17 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU1Level",
       slot: "ATU1",
-      identity: boundary?.adjacentFollowUp?.recoveredAdditionalBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.TokensBoost",
-      identitySource: "Checked prefab identity",
+      identity:
+        boundary?.adjacentFollowUp?.verifiedNamedIdentityJoin?.namedIdentity ||
+        boundary?.adjacentFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
+        boundary?.adjacentFollowUp?.recoveredAdditionalBridge?.prefabIdentity ||
+        "NewTokenUPGPrefab.T1.TokensBoost",
+      identitySource:
+        boundary?.adjacentFollowUp?.verifiedNamedIdentityJoin?.namedIdentity
+          ? "Checked named identity"
+          : boundary?.adjacentFollowUp?.verifiedTitleTextChain?.titleProbeTitle
+            ? "Checked title-side text chain"
+            : "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
       startCostField: "TokenBoostStartCost",
@@ -4730,7 +4739,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "ModBoostMaxLevel",
       bonusStepLabel: "Mod Points Gained",
       bonusStepMode: "multiplier",
-      note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
+      note:
+        "Checked shell-to-prefab bridge only. The remaining honest blocker is one exact shell-local join from the detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839."
     },
     {
       field: "ATU5Level",
