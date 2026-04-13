@@ -314,6 +314,10 @@ const shardEvidenceSupportModule = await readFile(
   new URL("../shard-evidence-support.js", import.meta.url),
   "utf8"
 );
+const shipPlannerSupportModule = await readFile(
+  new URL("../ship-planner-support.js", import.meta.url),
+  "utf8"
+);
 const spendBoundarySummaryJs = await readFile(
   new URL("../spend-boundary-summary.js", import.meta.url),
   "utf8"
@@ -516,6 +520,7 @@ const normalizedRecommendationFeedSupportModule = collapseWhitespace(
   recommendationFeedSupportModule
 );
 const normalizedShardEvidenceSupportModule = collapseWhitespace(shardEvidenceSupportModule);
+const normalizedShipPlannerSupportModule = collapseWhitespace(shipPlannerSupportModule);
 const normalizedSpendBoundarySummaryJs = collapseWhitespace(spendBoundarySummaryJs);
 const normalizedProbeRunner = collapseWhitespace(probeRunner);
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
@@ -845,6 +850,15 @@ assert.match(appJs, /from "\.\/recommendation-feed-support\.js"/);
 assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilitySummary/);
 assert.match(recommendationFeedSupportModule, /function getRecommendationContractSummary/);
 assert.match(recommendationFeedSupportModule, /function getRecommendationExplainabilityAudit/);
+assert.match(appJs, /from "\.\/ship-planner-support\.js"/);
+assert.match(shipPlannerSupportModule, /export function createShipPlannerSupport/);
+assert.match(shipPlannerSupportModule, /export function getDisplayEffectTypes/);
+assert.match(shipPlannerSupportModule, /export function getPrimaryEffectClass/);
+assert.match(shipPlannerSupportModule, /export function normalizeEffectType/);
+assert.match(
+  normalizedShipPlannerSupportModule,
+  /createShipPlannerSupport\(\{ desmosInstallWeightMaps, getActiveLoadout, getEffectiveCap, getShipCommunityToolState, getShipConfig, getShipInstallTotal, getShipTemplate, shipInstallIndexLayouts, sum \}\)/
+);
 assert.match(devServer, /launchSignalSequence:\s*launcherSignalSequence/);
 assert.match(
   devServer,
@@ -7839,6 +7853,20 @@ assert.match(
 );
 assert.match(html, /Community-tool Calibration/);
 assert.match(html, /External model inputs preserved with the ship planner/);
+assert.doesNotMatch(appJs, /function getInstallGain\(/);
+assert.doesNotMatch(appJs, /function getBestNextInstall\(/);
+assert.doesNotMatch(appJs, /function getInstallWeight\(/);
+assert.doesNotMatch(appJs, /function getShipCrew\(/);
+assert.doesNotMatch(appJs, /function getShipInnovationMultiplier\(/);
+assert.doesNotMatch(appJs, /function getInstallBaseMultiplier\(/);
+assert.doesNotMatch(appJs, /function getTicksRun\(/);
+assert.match(shipPlannerSupportModule, /function getInstallGain\(/);
+assert.match(shipPlannerSupportModule, /function getBestNextInstall\(/);
+assert.match(shipPlannerSupportModule, /function getInstallWeight\(/);
+assert.match(shipPlannerSupportModule, /function getShipCrew\(/);
+assert.match(shipPlannerSupportModule, /function getShipInnovationMultiplier\(/);
+assert.match(shipPlannerSupportModule, /function getInstallBaseMultiplier\(/);
+assert.match(shipPlannerSupportModule, /function getTicksRun\(/);
 assert.match(html, /Diamonds/);
 assert.match(html, /Planner-only helper inputs are optional/);
 assert.match(

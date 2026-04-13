@@ -3,6 +3,7 @@ import "../../tests/player-profile.test.mjs";
 import "../../tests/recommendation-feed-support.test.mjs";
 import "../../tests/recommendation-contract.test.mjs";
 import "../../tests/shard-evidence-support.test.mjs";
+import "../../tests/ship-planner-support.test.mjs";
 import "../../tests/spend-boundary-summary.test.mjs";
 import "../../tests/token-shop-progression-model.test.mjs";
 import "../../tests/token-shop-ui-support.test.mjs";
