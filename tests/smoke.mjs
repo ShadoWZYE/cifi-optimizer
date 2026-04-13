@@ -4962,26 +4962,24 @@ assert.match(
   "get_SmallAdCellGains",
   "get_BigAdCellGains",
   "SetBoosterAdBonus",
-  "get_FinalBoosterAdBonus"
+  "get_FinalBoosterAdBonus",
+  "set_FinalBoosterAdBonus",
+  "FinalBoosterAdBonus",
+  "<FinalBoosterAdBonus>k__BackingField"
 ].forEach((name) => {
   assert.ok(
-    tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.remainingExactReadTargets.includes(
+    tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.ruledOutRemainingBonusAggregationTargets.includes(
       name
     )
   );
 });
-["set_FinalBoosterAdBonus", "FinalBoosterAdBonus", "<FinalBoosterAdBonus>k__BackingField"].forEach(
-  (name) => {
-    assert.ok(
-      tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.remainingTypedFieldTargets.includes(
-        name
-      )
-    );
-  }
+assert.match(
+  tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.negativeConclusion,
+  /stop searching that cluster for an exact handoff unless a new committed artifact lands/i
 );
 assert.equal(
   tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.result,
-  "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site"
+  "checked consumer-internal bonus shell recovered and remaining internal AdManager bonus-aggregation family stays ruled out as an exact CellBoostBonus handoff"
 );
 assert.equal(
   tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.result,
@@ -7582,11 +7580,11 @@ assert.match(
 );
 assert.match(
   activeGroundingBoundariesDoc,
-  /exact `CellBoostBonus` read-site seam inside that remaining getter-or-booster aggregation shell or the `FinalBoosterAdBonus` setter-or-backing-field surfaces/i
+  /ATU3 no longer has a live search blocker inside that cluster/i
 );
 assert.match(
   activeGroundingBoundariesDoc,
-  /rules out the outer chest routines plus the final token-or-diamond chest bonus backing fields as the direct handoff point/i
+  /closes the full internal AdManager bonus-aggregation family as a bounded negative result/i
 );
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
@@ -7612,7 +7610,7 @@ assert.match(
 );
 assert.match(
   tokenShopRowRemapTrack?.blockedBy ?? "",
-  /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain, one tighter shared-effect-to-consumer-family handoff, and one checked internal bonus-aggregation shell while still failing exact prefab-or-title localization.*rules out the outer chest routines plus the final token-or-diamond chest bonus backing fields as the direct handoff point.*late ATU24-ATU28 shell neighborhood now stays negative/
+  /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain, one tighter shared-effect-to-consumer-family handoff, and one checked internal bonus-aggregation shell while still failing exact prefab-or-title localization.*closes the outer chest routines, the final token-or-diamond chest bonus backing fields, and the remaining internal getter-or-booster aggregation family.*late ATU24-ATU28 shell neighborhood now stays negative/
 );
 assert.ok(
   tokenShopRowRemapTrack?.verified?.some((line) =>

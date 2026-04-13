@@ -8364,28 +8364,26 @@ function validateTokenShopRowRemapBoundary(boundary) {
     "get_SmallAdCellGains",
     "get_BigAdCellGains",
     "SetBoosterAdBonus",
-    "get_FinalBoosterAdBonus"
+    "get_FinalBoosterAdBonus",
+    "set_FinalBoosterAdBonus",
+    "FinalBoosterAdBonus",
+    "<FinalBoosterAdBonus>k__BackingField"
   ].forEach((name) => {
     assert.ok(
-      boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.remainingExactReadTargets.includes(
+      boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.ruledOutRemainingBonusAggregationTargets.includes(
         name
       ),
-      `token shop row remap boundary ATU3 remaining exact read target drifted for ${name}`
+      `token shop row remap boundary ATU3 ruled-out remaining bonus aggregation target drifted for ${name}`
     );
   });
-  ["set_FinalBoosterAdBonus", "FinalBoosterAdBonus", "<FinalBoosterAdBonus>k__BackingField"].forEach(
-    (name) => {
-      assert.ok(
-        boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.remainingTypedFieldTargets.includes(
-          name
-        ),
-        `token shop row remap boundary ATU3 remaining typed field target drifted for ${name}`
-      );
-    }
+  assert.match(
+    boundary.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.negativeConclusion,
+    /stop searching that cluster for an exact handoff unless a new committed artifact lands/i,
+    "token shop row remap boundary ATU3 closed-cluster negative conclusion drifted"
   );
   assert.equal(
     boundary.atu3ChestConsumerReadTrace.result,
-    "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site",
+    "checked consumer-internal bonus shell recovered and remaining internal AdManager bonus-aggregation family stays ruled out as an exact CellBoostBonus handoff",
     "token shop row remap boundary ATU3 chest consumer read result drifted"
   );
   ["ATU1TokenBonus", "ATU2DiamondsBonus", "ATU14TokenDailiesBonus", "ATU24Bonus3Shards"].forEach(

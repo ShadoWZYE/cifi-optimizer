@@ -2968,7 +2968,7 @@ def build_atu3_chest_consumer_read_trace_graph(
             {
                 "id": "claim-missing-exact-cellboost-read-site",
                 "status": "missing",
-                "statement": "The exact CellBoostBonus read site or typed field handoff into the internal bonus shell still is not recovered.",
+                "statement": "The exact CellBoostBonus read site or typed field handoff anywhere inside the checked internal bonus-aggregation family still is not recovered.",
                 "edgeIds": [edge["id"] for edge in negative_edges],
                 "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
             },
@@ -3952,8 +3952,8 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
             "This is a target-driven cross-system trace workflow, not a standard prefab-or-title TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU3 consumer-internal bonus shell inside the AdManager chest consumer family, rules out the outer chest routines plus final token-or-diamond chest bonus backing fields as the direct handoff point, and keeps the exact CellBoostBonus runtime read explicit only inside the remaining getter-or-booster aggregation shell or the FinalBoosterAdBonus setter-or-backing-field surfaces.",
-            "Keep the ATU3 result quarantined to effect-chain completion evidence until one committed source recovers the exact CellBoostBonus read site or typed field handoff inside that remaining internal shell.",
+            "It now preserves one exact ATU3 consumer-internal bonus shell inside the AdManager chest consumer family while also closing the checked outer chest routines, final token-or-diamond chest bonus backing fields, remaining getter-or-booster aggregation family, and FinalBoosterAdBonus setter-or-backing-field surfaces as a bounded negative result for one exact CellBoostBonus handoff.",
+            "Keep the ATU3 result quarantined to effect-chain completion evidence and do not reopen this closed AdManager bonus-aggregation cluster unless a new committed artifact lands.",
         ],
     }
 
