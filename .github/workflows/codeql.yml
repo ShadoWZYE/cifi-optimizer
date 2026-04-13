@@ -31,7 +31,7 @@ jobs:
 
       - name: Check out repository
         if: ${{ !github.event.repository.private }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Initialize CodeQL
         if: ${{ !github.event.repository.private }}
