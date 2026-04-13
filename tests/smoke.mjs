@@ -389,6 +389,8 @@ assert.match(appJs, /The Overview page keeps the descriptive spend boundary and 
 assert.match(appJs, /Overview TokenShop affordability/);
 assert.match(appJs, /This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level<\/code>, <code>ATU2Level<\/code>, <code>ATU3Level<\/code>, <code>ATU4Level<\/code>, <code>ATU5Level<\/code>, <code>ATU6Level<\/code>, <code>ATU7Level<\/code>, and <code>ATU8Level<\/code>/);
 assert.match(appJs, /Checked player-facing names are preferred where they exist, grounded prefab identity is used where they do not/);
+assert.match(appJs, /Overview TokenShop affordability[\s\S]*Current vs next bonus •/);
+assert.match(appJs, /Grounded as a checked shell-to-prefab-to-player-facing-title row\./);
 assert.match(appJs, /function getRecommendationExplainabilitySummary/);
 assert.match(appJs, /function getRecommendationContractSummary/);
 assert.match(appJs, /function getRecommendationExplainabilityAudit/);
@@ -2371,6 +2373,8 @@ withRequiredValue(tokenShopProgressionEditorTrack, "expected Progression TokenSh
   assert.match(track.currentSlice, /compatibility\.unmappedSystemState\.tokenShop\.\*` as prefill only/);
   assert.match(track.exitCondition, /first real TokenShop-facing editor slice lives under Progression/i);
   assert.match(track.smallestShippableSlice, /persists local checked-row levels under a non-canonical planning path/);
+  assert.match(track.smallestShippableSlice, /`ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`/);
+  assert.match(track.smallestShippableSlice, /current-vs-next extracted(?: or checked-effect)? bonus-step change|current-vs-next extracted or checked-effect step change/);
   assert.ok(
     track.completedSteps.some((step) => /Move the checked TokenShop subset UI out of the Overview-bound spend boundary panel/.test(step)),
     "expected Progression TokenShop editor slice track to record the surface move"

@@ -4940,8 +4940,8 @@ function getTokenShopRowGroundingSummary(row) {
   if (row?.rowType === "effect-driven") {
     return "Grounded as an effect-driven row from checked shell, action, and shared-effect evidence.";
   }
-  if (row?.identitySource === "Checked final title") {
-    return "Grounded as a checked shell-to-prefab-to-title row.";
+  if (typeof row?.identitySource === "string" && /(final title|title-side text chain|named identity)/i.test(row.identitySource)) {
+    return "Grounded as a checked shell-to-prefab-to-player-facing-title row.";
   }
   return "Grounded as a checked shell-to-prefab row while the final title remains unresolved.";
 }
@@ -5064,6 +5064,7 @@ function renderTokenShopOverviewAffordabilityModule() {
       <div class="preview-stack">
         ${summary.rows.map((row) => {
           const displayTitle = getTokenShopRowDisplayTitle(row);
+          const bonusStripEntries = getTokenShopBonusStripEntries(row);
           const nextKnownCostLabel = row.isMaxed
             ? "No next cost within known cap"
             : typeof row.nextKnownCost === "number"
@@ -5098,11 +5099,21 @@ function renderTokenShopOverviewAffordabilityModule() {
                       </div>
                     </div>
                   </div>
+                  <div class="token-shop-stat-strip">
+                    ${bonusStripEntries.map((entry) => `
+                      <div class="validation-card warn token-shop-stat-card">
+                        <span class="snapshot-title">Current vs next bonus • ${escapeHtml(entry.label)}</span>
+                        <strong>${escapeHtml(entry.currentLabel)}</strong>
+                        <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
+                      </div>
+                    `).join("")}
+                  </div>
                   <div class="token-shop-editor-strip">
                     <div class="token-shop-editor-meta">
                       <p class="meta">Level ${escapeHtml(formatBoundaryValue(row.currentLevel))} • ${escapeHtml(row.currentLevelSourceLabel)}</p>
                       <p class="meta">${escapeHtml(getTokenShopRowGroundingSummary(row))}</p>
                       <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
+                      <p class="meta">${escapeHtml(row.currentVsNextBonus.detail)}</p>
                     </div>
                   </div>
                 </div>
