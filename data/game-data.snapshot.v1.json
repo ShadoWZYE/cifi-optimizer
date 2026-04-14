@@ -505,7 +505,7 @@
         "tests/smoke.mjs"
       ],
       "verified": [
-        "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level`.",
+        "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`.",
         "The first real TokenShop-facing checked-row editor slice can live under Progression without promoting unresolved row levels into canonical player state.",
         "Local checked-row levels under `planning.tokenShop.checkedSubsetLevels.*` stay non-canonical while compatibility TokenShop import remains available as prefill only.",
         "The shipped TokenShop values data already preserves the checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields needed by this slice for the same subset rows.",

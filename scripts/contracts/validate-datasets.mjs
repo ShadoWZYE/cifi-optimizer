@@ -8803,7 +8803,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     stats: [
       boundary.rawSaveFamily.fieldRange,
       `${boundary.groundedNonLabelClues.effectHookSamples.length} grounded non-label effect clues`,
-      "Seven ATU bridges are recovered and ATU3 preserves one effect-driven trace; broader remap still does not generalize"
+      "Eleven ATU bridges are recovered, ATU3 preserves one effect-driven trace, and ATU11 stays quarantined while broader remap still does not generalize"
     ]
   };
 }

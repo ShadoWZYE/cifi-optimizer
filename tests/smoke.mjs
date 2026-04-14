@@ -1099,7 +1099,9 @@ assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetLevels, {
   ATU6Level: null,
   ATU7Level: null,
   ATU8Level: null,
-  ATU9Level: null
+  ATU9Level: null,
+  ATU10Level: null,
+  ATU12Level: null
 });
 assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU1Level: null,
@@ -1110,7 +1112,9 @@ assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU6Level: null,
   ATU7Level: null,
   ATU8Level: null,
-  ATU9Level: null
+  ATU9Level: null,
+  ATU10Level: null,
+  ATU12Level: null
 });
 assert.deepEqual(defaultProfile.externalModels.communityTools.shipOptimizer, {});
 assert.deepEqual(defaultProfile.externalModels.communityTools.shardOptimizer, {});
@@ -9350,6 +9354,8 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
   ATU7Level: "8",
   ATU8Level: "9",
   ATU9Level: "10",
+  ATU10Level: "11",
+  ATU12Level: "12",
   ATU28Level: 1,
   Tier2TokensUnlocked: true,
   Tier4TokensUnlocked: false,
@@ -9380,7 +9386,9 @@ assert.deepEqual(migratedFlatSpendStateProfile.planning.tokenShop.checkedSubsetP
   ATU6Level: 7,
   ATU7Level: 8,
   ATU8Level: 9,
-  ATU9Level: 10
+  ATU9Level: 10,
+  ATU10Level: 11,
+  ATU12Level: 12
 });
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
   ATU1Level: 3,
@@ -9392,6 +9400,8 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
   ATU7Level: 8,
   ATU8Level: 9,
   ATU9Level: 10,
+  ATU10Level: 11,
+  ATU12Level: 12,
   ATU28Level: 1,
   Tier2TokensUnlocked: true,
   Tier4TokensUnlocked: false,
