@@ -51,7 +51,7 @@ test("player profile boundary groups preserve canonical, planner, and compatibil
   assert.equal(groups[0].title, "Canonical shared truth");
   assert.deepEqual(groups[2].items[0], ["Total shard milestone levels", 21]);
   assert.deepEqual(groups[3].items[3], ["Ship calibration groups", 2]);
-  assert.deepEqual(groups[5].items.at(-1), ["Unmapped MultiverseMarket state", { IS71Level: 3 }]);
+  assert.deepEqual(groups[5].items.at(-1), ["Raw/unmapped MultiverseMarket state", { IS71Level: 3 }]);
 });
 
 test("boundary audit and completion helpers keep labeled import summaries", () => {
@@ -164,7 +164,7 @@ test("Emporium import preview card model preserves compatibility-only summary li
         {
           rowId: 71,
           level: 3,
-          fieldPath: "compatibility.unmappedSystemState.multiverseMarket.IS71Level",
+          fieldPath: "compatibility.unmappedSystemState.multiverseMarket.importedState.IS71Level",
           shapeId: "grounded-compatibility-evidence",
           groundedFields: [
             {

@@ -65,7 +65,7 @@ export function buildPlayerProfileBoundaryGroups({
         ["Legacy mech parts", compatibility.unresolved.mechParts],
         ["Unmapped shard milestone state", compatibility.unmappedSystems.shardMilestones],
         ["Unmapped TokenShop state", compatibility.unmappedSystems.tokenShop],
-        ["Unmapped MultiverseMarket state", compatibility.unmappedSystems.multiverseMarket]
+        ["Raw/unmapped MultiverseMarket state", compatibility.unmappedSystems.multiverseMarket]
       ]
     }
   ];

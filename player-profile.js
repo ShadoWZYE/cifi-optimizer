@@ -1,4 +1,4 @@
-export const PLAYER_PROFILE_SCHEMA_VERSION = 2;
+export const PLAYER_PROFILE_SCHEMA_VERSION = 3;
 export const PLAYER_PROFILE_IMPORT_ALIASES = {
   meta: {
     profileName: [["meta", "profileName"], ["profileName"]],
@@ -439,6 +439,35 @@ function coerceQuarantinedShardMilestoneState(value) {
   };
 }
 
+function coerceQuarantinedMultiverseMarketState(value) {
+  const importedState = isRecord(value?.importedState)
+    ? cloneValue(value.importedState)
+    : isRecord(value)
+      ? cloneValue(value)
+      : null;
+  if (!importedState) {
+    return null;
+  }
+
+  return {
+    status: "quarantined-raw-unmapped",
+    importedState,
+    mappingGate: {
+      plannerUseAllowed: false,
+      canonicalPromotionBlocked: true,
+      requiredBeforeCanonicalPromotion: [
+        "Recover a direct typed Market wrapper seam beyond the current metadata-only Market member clue.",
+        "Recover grounded Emporium row labels before promoting any IS*Level field beyond raw compatibility storage.",
+        "Approve planner-safe recommendation use only after canonical Emporium player-state inputs are grounded."
+      ]
+    },
+    currentBoundary: [
+      "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
+      "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
+    ]
+  };
+}
+
 function coerceCompatibilityValue(value) {
   if (value === undefined) {
     return undefined;
@@ -732,18 +761,21 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
     source,
     MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS
   );
-  normalized.compatibility.unmappedSystemState.multiverseMarket = mergeCompatibilityRecord(
-    importedMultiverseMarketRecord,
-    mergeCompatibilityRecord(
-      importedMultiverseMarketStateClues,
+  normalized.compatibility.unmappedSystemState.multiverseMarket =
+    coerceQuarantinedMultiverseMarketState(
       mergeCompatibilityRecord(
-        importedMultiverseMarketLevels,
+        importedMultiverseMarketRecord,
         mergeCompatibilityRecord(
-          importedMultiverseMarketTradeCounters,
-          importedMultiverseMarketAdjacentMechWindow
+          importedMultiverseMarketStateClues,
+          mergeCompatibilityRecord(
+            importedMultiverseMarketLevels,
+            mergeCompatibilityRecord(
+              importedMultiverseMarketTradeCounters,
+              importedMultiverseMarketAdjacentMechWindow
+            )
+          )
         )
       )
-    )
   );
 
   const mergedShipToolState = mergeDeep(

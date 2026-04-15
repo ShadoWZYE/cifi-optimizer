@@ -59,27 +59,76 @@ test("normalizePlayerProfile keeps only the exact typed bounded multiverse marke
   });
 
   assert.equal(profile.meta.schemaVersion, PLAYER_PROFILE_SCHEMA_VERSION);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS0Level, undefined);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS1Level, 4);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS24Level, 4);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS71Level, 4);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS72Level, 5);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.EsotericR1Trades, 6);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.NecrumR9Trades, 7);
   assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.EsotericR10Trades,
+    profile.compatibility.unmappedSystemState.multiverseMarket.status,
+    "quarantined-raw-unmapped"
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.mappingGate.plannerUseAllowed,
+    false
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.mappingGate
+      .canonicalPromotionBlocked,
+    true
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS0Level,
     undefined
   );
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech1Unlocked, true);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech1Units, 9);
+  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS1Level, 4);
   assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.FinalMech1MainBonus,
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS24Level,
+    4
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS71Level,
+    4
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS72Level,
+    5
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.EsotericR1Trades,
+    6
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.NecrumR9Trades,
+    7
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.EsotericR10Trades,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech1Unlocked,
+    true
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech1Units,
+    9
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.FinalMech1MainBonus,
     125000
   );
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech2Unlocked, false);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.Mech2Units, undefined);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.IS111Level, undefined);
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.ExistingRow, 8);
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech2Unlocked,
+    false
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech2Units,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS111Level,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.ExistingRow,
+    8
+  );
   assert.equal(profile.player.resources.tokens, null);
   assert.equal(profile.player.resources.diamonds, null);
   assert.equal(profile.player.IS71Level, undefined);

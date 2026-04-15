@@ -8500,7 +8500,7 @@ assert.match(playerProfileBoundarySupportModule, /Experimental support-surface h
 assert.match(playerProfileBoundarySupportModule, /Compatibility leftovers/);
 assert.match(playerProfileBoundarySupportModule, /Unmapped shard milestone state/);
 assert.match(playerProfileBoundarySupportModule, /Unmapped TokenShop state/);
-assert.match(playerProfileBoundarySupportModule, /Unmapped MultiverseMarket state/);
+assert.match(playerProfileBoundarySupportModule, /Raw\/unmapped MultiverseMarket state/);
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
@@ -9313,7 +9313,23 @@ assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemStat
 assert.deepEqual(
   migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.multiverseMarket,
   {
-    inscription51Level: 2
+    status: "quarantined-raw-unmapped",
+    importedState: {
+      inscription51Level: 2
+    },
+    mappingGate: {
+      plannerUseAllowed: false,
+      canonicalPromotionBlocked: true,
+      requiredBeforeCanonicalPromotion: [
+        "Recover a direct typed Market wrapper seam beyond the current metadata-only Market member clue.",
+        "Recover grounded Emporium row labels before promoting any IS*Level field beyond raw compatibility storage.",
+        "Approve planner-safe recommendation use only after canonical Emporium player-state inputs are grounded."
+      ]
+    },
+    currentBoundary: [
+      "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
+      "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
+    ]
   }
 );
 assert.equal(migratedUnmappedSystemsProfile.player.resources.tokens, null);
@@ -9422,17 +9438,34 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
   DailyTokeniumCap: 2000
 });
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket, {
-  InscryptionsDone: 98,
-  IS1Level: 2,
-  IS73Level: 4,
-  EsotericR1Trades: 5,
-  NecrumR9Trades: 6,
-  Mech1Unlocked: true,
-  FinalMech1MainBonus: 2500,
-  Mech2Unlocked: false
+  status: "quarantined-raw-unmapped",
+  importedState: {
+    InscryptionsDone: 98,
+    IS1Level: 2,
+    IS73Level: 4,
+    EsotericR1Trades: 5,
+    NecrumR9Trades: 6,
+    Mech1Unlocked: true,
+    FinalMech1MainBonus: 2500,
+    Mech2Unlocked: false
+  },
+  mappingGate: {
+    plannerUseAllowed: false,
+    canonicalPromotionBlocked: true,
+    requiredBeforeCanonicalPromotion: [
+      "Recover a direct typed Market wrapper seam beyond the current metadata-only Market member clue.",
+      "Recover grounded Emporium row labels before promoting any IS*Level field beyond raw compatibility storage.",
+      "Approve planner-safe recommendation use only after canonical Emporium player-state inputs are grounded."
+    ]
+  },
+  currentBoundary: [
+    "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
+    "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
+  ]
 });
 assert.equal(
-  migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.Mech2Units,
+  migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.importedState
+    .Mech2Units,
   undefined
 );
 assert.equal(migratedFlatSpendStateProfile.player.resources.tokens, null);
