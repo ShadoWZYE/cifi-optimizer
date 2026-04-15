@@ -8910,7 +8910,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     );
   });
   assert.ok(
-    boundary.currentBoundary.some((line) => /eleven checked TokenShop row bridges/i.test(line)),
+    boundary.currentBoundary.some((line) => /thirteen checked TokenShop row bridges/i.test(line)),
     "token shop row remap boundary must preserve recovered bridge count"
   );
   assert.ok(
@@ -8942,6 +8942,18 @@ function validateTokenShopRowRemapBoundary(boundary) {
       /ATU9Button aligns directly with the MK5TokenBoost owner-field block/i.test(line)
     ),
     "token shop row remap boundary must preserve recovered ATU9 bridge conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU13Button aligns directly with the TokenBoostT2 owner-field block/i.test(line)
+    ),
+    "token shop row remap boundary must preserve recovered ATU13 bridge conclusion"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      /ATU20Button aligns directly with the TokenBoostT3 owner-field block/i.test(line)
+    ),
+    "token shop row remap boundary must preserve recovered ATU20 bridge conclusion"
   );
   assert.ok(
     boundary.currentBoundary.some((line) =>
@@ -8995,7 +9007,7 @@ function validateTokenShopRowRemapBoundary(boundary) {
     stats: [
       boundary.rawSaveFamily.fieldRange,
       `${boundary.groundedNonLabelClues.effectHookSamples.length} grounded non-label effect clues`,
-      "Eleven ATU bridges are recovered, ATU3 preserves one effect-driven trace, and ATU11 stays quarantined while broader remap still does not generalize"
+      "Thirteen ATU bridges are recovered, ATU3 preserves one effect-driven trace, and ATU11 stays quarantined while broader remap still does not generalize"
     ]
   };
 }

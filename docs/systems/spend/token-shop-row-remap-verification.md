@@ -106,7 +106,7 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
 ## Grounded conclusion
 
 - The repo can now say more than “ATU is unnamed.”
-- Eleven exact shell-side bridges are now recovered:
+- Thirteen exact shell-side bridges are now recovered:
   - `ATU1Button` -> TokenShop `TokenBoost` / `NewTokenUPGPrefab.T1.TokensBoost`
   - `ATU2Button` -> `NewTokenUPGPrefab.T1.DiamondBoost`
   - `ATU4Button` -> `NewTokenUPGPrefab.T1.ModPointsBooster`
@@ -118,6 +118,8 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
   - `ATU10Button` -> `NewTokenUPGPrefab.T1.MK6Booster`
   - `ATU11Button` -> `NewTokenUPGPrefab.T1.MK7Booster`
   - `ATU12Button` -> `NewTokenUPGPrefab.T1.MK8Booster`
+  - `ATU13Button` -> `NewTokenUPGPrefab.T2.TokensBoost`
+  - `ATU20Button` -> `NewTokenUPGPrefab.T3.TokensBoost`
 - One exact shell-to-prefab-to-final-title chain is now recovered:
   - `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` -> `Mk2 Generator Booster`
 - Some `ATU` rows demonstrably touch token, diamond, daily-token, or shard effect domains.
@@ -137,7 +139,7 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
     - the diamond-special `CellsBoost` prefab and `>Diamond Upgrade 10 - CellsBoost` title remain a separate diamond lane
     - the token-side `NewTokenUPGPrefab.T1.CellsPerChestBooster`, `NewTokenUPGPrefab.T5.UltimaCells`, and `Token Ultima: Cells` clues remain a separate token lane
     - none of those checked surfaces crosses back to `ATU3Button` path id `15810`
-  - `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU11`, and `ATU12` clearing do not change that rule for the rest of the lane:
+  - `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU11`, `ATU12`, `ATU13`, and `ATU20` clearing do not change that rule for the rest of the lane:
     - they clear because one exact owner-field block, one exact buy hook, and one exact token prefab converge on the same `ModBoost`, `MK1`, `MK2`, or `MK3` family
     - `ATU4Button` now clears the same shell-to-prefab bar through `BuyModBoost` and `NewTokenUPGPrefab.T1.ModPointsBooster`, but still does not have a checked final player-facing row title
     - the repo now has one checked final title join for `ATU6Button`, while `ATU5Button` now also has one checked named identity and support-text chain but still does not have one exact final player-facing row-title string
@@ -147,11 +149,13 @@ This note records the current grounded state of the TokenShop `ATU*Level` row-re
     - `ATU10Button` now also clears the same shell-to-prefab bar through `BuyMK6TokenBoost` and `NewTokenUPGPrefab.T1.MK6Booster`, and now also has one bounded `Mk6 Generator Booster` title-side text chain, but this pass does not promote broader row-pattern claims or another shell
     - `ATU11Button` now also clears the same shell-to-prefab bar through `BuyMK7TokenBoost` and `NewTokenUPGPrefab.T1.MK7Booster`, but the row-specific title-side follow-up still preserves only detached `MK7 GEN ENHANCEMENT` text with matching MK7 support text rather than one exact final player-facing row title
     - `ATU12Button` now also clears the same shell-to-prefab bar through `BuyMK8TokenBoost` and `NewTokenUPGPrefab.T1.MK8Booster`, and now also has one bounded `Mk8 Generator Booster` title-side text chain, but this pass does not promote broader row-pattern claims or another shell
+    - `ATU13Button` now also clears the same shell-to-prefab bar through `BuyTokenT2` and `NewTokenUPGPrefab.T2.TokensBoost`, but the detached `Tokens Booster T2` title clue still does not preserve one exact final player-facing row title join
+    - `ATU20Button` now also clears the same shell-to-prefab bar through `BuyTokenT3` and `NewTokenUPGPrefab.T3.TokensBoost`, but the detached `Tokens Booster T3` title clue still does not preserve one exact final player-facing row title join
 
 The remaining missing pieces are still checked joins:
 
 - no checked repo artifact currently ties `ATU1Button` or `ATU2Button` directly to a final player-facing TokenShop row title string
-- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU7Button`, `ATU8Button`, `ATU9Button`, `ATU10Button`, `ATU11Button`, or `ATU12Button` directly to a final player-facing TokenShop row title string
+- no checked repo artifact currently ties `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU7Button`, `ATU8Button`, `ATU9Button`, `ATU10Button`, `ATU11Button`, `ATU12Button`, `ATU13Button`, or `ATU20Button` directly to a final player-facing TokenShop row title string
 - no checked repo artifact currently joins the remaining `ATU*Button` or `ATU*Content` path ids directly to specific `NewTokenUPGPrefab.*` object identities
 - no checked repo artifact currently ties the remaining concrete `ATU` numbers directly to final player-facing TokenShop row titles
 - no checked repo artifact currently bridges the generic `SetAllTokenShopTexts` or `SetTokenTexts` token-menu or token-bank neighborhood to a specific `ATU` row number
