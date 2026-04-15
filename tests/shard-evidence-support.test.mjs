@@ -35,23 +35,41 @@ function createTestSupport(overrides = {}) {
   });
 }
 
-test("verified shard rows and milestone naming prefer the single player-facing title binding", () => {
+test("shared shard family evidence drives verified rows and milestone naming", () => {
   const support = createTestSupport({
     grounding: {
-      verifiedRows: [
-        { verifiedRow: { row: 3, rowKey: "SU3", titleBinding: { playerFacingName: "Gamma" } } },
-        { verifiedRow: { row: 1, rowKey: "SU1", titleBinding: { playerFacingName: "Alpha" } } },
-        { verifiedRow: { row: 2, rowKey: "", titleBinding: { playerFacingName: "Broken" } } }
-      ],
-      titleEffectBoundary: {
-        titleAssetCandidates: [{ row: 1, title: "The Alpha Milestone" }]
+      milestoneFamilyEvidence: {
+        rows: [
+          {
+            row: 3,
+            rowKey: "SU3",
+            status: "partial",
+            titleBinding: { titleCandidates: ["Gamma"], playerFacingName: "Gamma" }
+          },
+          {
+            row: 1,
+            rowKey: "SU1",
+            status: "verified",
+            titleBinding: {
+              titleCandidates: ["The Alpha Milestone"],
+              playerFacingName: "Alpha"
+            },
+            verifiedPackage: { fixedBreakpoints: [1, 25, 50] }
+          },
+          {
+            row: 2,
+            rowKey: "",
+            status: "verified",
+            titleBinding: { titleCandidates: ["Broken"], playerFacingName: "Broken" }
+          }
+        ]
       }
     }
   });
 
   assert.deepEqual(
     support.getVerifiedShardRowPackages().map((entry) => entry.verifiedRow.row),
-    [1, 3]
+    [1]
   );
   assert.equal(
     support.getShardMilestoneDisplayName({ milestoneNumber: 1, name: "Fallback One" }),
@@ -67,8 +85,13 @@ test("verified shard rows and milestone naming prefer the single player-facing t
       name: "Fallback One",
       unlockCondition: { type: "total_milestone_levels_required", value: 10 }
     }),
-    "Community alias: Fallback One"
+    "Evidence status: Verified"
   );
+  assert.deepEqual(support.getShardMilestoneEvidenceCounts(), {
+    verified: 2,
+    partial: 1,
+    blocked: 0
+  });
 });
 
 test("threshold, unlock, and computed bonus helpers preserve descriptive shard evidence behavior", () => {
@@ -117,6 +140,22 @@ test("threshold, unlock, and computed bonus helpers preserve descriptive shard e
 test("grounded summary and provenance helpers keep descriptive evidence labels", () => {
   const support = createTestSupport({
     grounding: {
+      milestoneFamilyEvidence: {
+        rows: [
+          {
+            row: 4,
+            rowKey: "SU4",
+            status: "partial",
+            statusReason: "Row 4 stays descriptive.",
+            titleBinding: { titleCandidates: ["Delta"], playerFacingName: "Delta Milestone" },
+            effectBinding: {
+              bonusFieldCount: 3,
+              handler: "TextHandlerShardMilestoneBonusesPerLevel/N"
+            },
+            costShell: { getterName: "get_SU4Cost" }
+          }
+        ]
+      },
       provenance: {
         sources: {
           report_a: { title: "Report A" },
@@ -124,26 +163,22 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
         },
         uncertaintyLog: [{ status: "conflict_detected", what_is_missing: "Row owner unresolved." }]
       },
-      rowModelBoundary: { hasBoundary: true },
-      titleEffectBoundary: {
-        hasEffectPresentationFamily: true,
-        titleAssetCandidates: [{ row: 4, title: "Delta" }],
-        sampleBonusCalcAccessors: ["get_SU4BonusA"]
-      },
-      effectTextHandlerBoundary: { hasBoundary: true },
-      costModelBoundary: { hasSampledCostWindows: true, hasRow0FormulaShell: false },
-      costParameterProbe: {
-        metadataFamilies: {
-          startCostFields: Array.from({ length: 30 }, () => "x"),
-          costExponentFields: Array.from({ length: 30 }, () => "y"),
-          growthExponentFields: Array.from({ length: 30 }, () => "z")
+      saveBoundary: {
+        probeResults: {
+          saveSideOwnerRecovered: false,
+          traceOwnedStateOutcomeKind: "non-local-injection-seam"
         },
-        rowAlignedTupleCandidates: [{ row: 4 }],
-        signatureGroups: [1]
+        recoveredDeclaringRowModel: {
+          ownerType: "ShardMining",
+          rowModelType: {
+            fullName: "ShardMining+ShardUpgradeInfo"
+          }
+        }
       },
-      bonusSlotProbe: {
-        rows: [{ row: 4, bonusFieldCount: 3, matchesGroundedCount: true }]
-      }
+      saveOwnerCandidates: {
+        remainingSaveOwnerCandidates: [{ label: "PlayerProfile-side shard member shell" }]
+      },
+      rowModelBoundary: { hasBoundary: true }
     }
   });
 
@@ -152,8 +187,19 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
     sourceIds: ["report_a", "report_b"]
   });
 
-  assert.equal(summary.titleCoverageStatusLabel, "Available");
-  assert.match(summary.effectLine, /row-local bonus slots/);
+  assert.equal(summary.titleCoverageStatusLabel, "Partial");
+  assert.match(summary.effectLine, /bonus slots/);
+  const definitionSummary = support.getShardDefinitionEvidenceSummary({
+    milestoneNumber: 4,
+    unlockCondition: { type: "total_milestone_levels_required", value: 40 }
+  });
+  assert.match(definitionSummary.unlockLine, /Unlock requirement: 40 total milestone levels/);
+  assert.match(definitionSummary.bonusShapeLine, /Recovered bonus package shape/);
+  const ownedStateBlocker = support.getShardOwnedStateBlockerSummary();
+  assert.match(ownedStateBlocker.ownerLine, /No checked save-side owner is recovered/);
+  assert.match(ownedStateBlocker.traceLine, /non-local injection seam/);
+  assert.match(ownedStateBlocker.importLine, /No grounded import path is available/);
+  assert.match(ownedStateBlocker.candidateLine, /PlayerProfile-side shard member shell/);
   assert.equal(
     support.getMilestoneSourceLabel({ sourceIds: ["report_a", "report_b"] }),
     "Report A | Report B"

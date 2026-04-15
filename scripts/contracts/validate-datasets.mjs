@@ -1292,6 +1292,10 @@ function validateShardSaveBoundary(boundary) {
     "payloadBoundary",
     "handoffBoundary",
     "typeMetadataProbe",
+    "costParameterProbe",
+    "sceneMonoBehaviourProbe",
+    "unityTraceTargetRegistry",
+    "unityTraceBundle",
     "globalMetadata",
     "level0"
   ].forEach((field) => {
@@ -1379,6 +1383,36 @@ function validateShardSaveBoundary(boundary) {
     "shard save boundary declaringRowModelRecovered drifted"
   );
   assert.equal(
+    boundary.probeResults.directSerializedRowDefinitionRecovered,
+    true,
+    "shard save boundary directSerializedRowDefinitionRecovered drifted"
+  );
+  assert.equal(
+    boundary.probeResults.runtimeOwnedStateShellRecovered,
+    true,
+    "shard save boundary runtimeOwnedStateShellRecovered drifted"
+  );
+  assert.equal(
+    boundary.probeResults.traceRegistryHasOwnedStateTarget,
+    true,
+    "shard save boundary traceRegistryHasOwnedStateTarget drifted"
+  );
+  assert.equal(
+    boundary.probeResults.traceWorkflowHasOwnedStatePopulationBridge,
+    false,
+    "shard save boundary traceWorkflowHasOwnedStatePopulationBridge drifted"
+  );
+  assert.equal(
+    boundary.probeResults.traceOwnedStateOutcomeKind,
+    "non-local-injection-seam",
+    "shard save boundary traceOwnedStateOutcomeKind drifted"
+  );
+  assert.equal(
+    boundary.probeResults.runtimePopulationLocalProducerRecovered,
+    false,
+    "shard save boundary runtimePopulationLocalProducerRecovered drifted"
+  );
+  assert.equal(
     boundary.probeResults.saveSideOwnerRecovered,
     false,
     "shard save boundary saveSideOwnerRecovered drifted"
@@ -1415,6 +1449,10 @@ function validateShardSaveBoundary(boundary) {
   assert.ok(
     boundary.currentBoundary.some((line) => String(line).includes("upgradeInfoList")),
     "shard save boundary must preserve row-model seam framing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) => String(line).includes("non-local injection seam")),
+    "shard save boundary must preserve non-local seam framing"
   );
 
   return {
@@ -1576,6 +1614,16 @@ function validateShardMilestoneSaveOwnerCandidates(candidates) {
     "shard milestone save-owner candidates declaringRowModelRecovered drifted"
   );
   assert.equal(
+    candidates.checkedOverlapStatistics.directSerializedRowDefinitionRecovered,
+    true,
+    "shard milestone save-owner candidates directSerializedRowDefinitionRecovered drifted"
+  );
+  assert.equal(
+    candidates.checkedOverlapStatistics.traceWorkflowHasOwnedStatePopulationBridge,
+    false,
+    "shard milestone save-owner candidates traceWorkflowHasOwnedStatePopulationBridge drifted"
+  );
+  assert.equal(
     candidates.checkedOverlapStatistics.remainingSaveOwnerCandidateCount,
     1,
     "shard milestone save-owner candidates remainingSaveOwnerCandidateCount drifted"
@@ -1586,7 +1634,7 @@ function validateShardMilestoneSaveOwnerCandidates(candidates) {
   );
   assert.ok(
     candidates.currentBoundary.some((line) =>
-      String(line).includes("recovered shard-local row-model result")
+      String(line).includes("recovered shard-local runtime row shell")
     ),
     "shard milestone save-owner candidates must preserve row-model framing"
   );
@@ -4950,8 +4998,19 @@ function validateShardMilestoneHandoffBoundary(boundary) {
     "shard milestone handoff boundary must preserve recovered row-model narrowing"
   );
   assert.ok(
-    boundary.currentBoundary.some((line) => String(line).includes("declaring row-model result")),
-    "shard milestone handoff boundary must preserve declaring-row-model framing"
+    boundary.currentBoundary.some((line) => String(line).includes("runtime row shell recovered")) &&
+      boundary.currentBoundary.some((line) =>
+        String(line).includes("row-definition family already recovered")
+      ),
+    "shard milestone handoff boundary must preserve split row-definition and runtime-shell framing"
+  );
+  assert.ok(
+    boundary.handoffFindings.some(
+      (line) =>
+        String(line).includes("rules out a local producer") ||
+        String(line).includes("does not recover any local producer")
+    ),
+    "shard milestone handoff boundary must preserve missing local-producer framing"
   );
   assert.ok(
     boundary.currentBoundary.some((line) =>
@@ -5468,6 +5527,139 @@ function validateShardRowVerificationSu2(boundary) {
       boundary.verifiedRow.rowKey,
       `${boundary.verifiedRow.effectPresentationBinding.bonusSlotCount} verified bonus slots`,
       "One more shard row now binds title, effect package, and cost shell without claiming a full row table"
+    ]
+  };
+}
+
+function validateShardMilestoneFamilyEvidence(boundary) {
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard milestone family evidence dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard milestone family evidence generatedAt must be present"
+  );
+  expectRecord(boundary.sources, "shard milestone family evidence sources must be an object");
+  [
+    "groundedMilestones",
+    "rowModelBoundary",
+    "rowShellBoundary",
+    "titleEffectBoundary",
+    "effectTextHandlerBoundary",
+    "payloadBoundary",
+    "saveBoundary",
+    "bonusSlotProbe",
+    "costMethodProbe",
+    "costNativeProbe",
+    "handoffBoundary",
+    "typeMetadataProbe"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard milestone family evidence sources.${field} must be present`
+    );
+  });
+  expectRecord(
+    boundary.reachableFamily,
+    "shard milestone family evidence reachableFamily must be an object"
+  );
+  expectRecord(
+    boundary.reachableFamily.declaringField,
+    "shard milestone family evidence declaringField must be an object"
+  );
+  expectRecord(
+    boundary.reachableFamily.reachableRows,
+    "shard milestone family evidence reachableRows must be an object"
+  );
+  expectRecord(
+    boundary.reachableFamily.statusMeanings,
+    "shard milestone family evidence statusMeanings must be an object"
+  );
+  expectRecord(
+    boundary.sharedEvidence,
+    "shard milestone family evidence sharedEvidence must be an object"
+  );
+  expectArray(
+    boundary.familyFindings,
+    "shard milestone family evidence familyFindings must be an array"
+  );
+  expectArray(boundary.rows, "shard milestone family evidence rows must be an array");
+  expectArray(
+    boundary.currentBoundary,
+    "shard milestone family evidence currentBoundary must be an array"
+  );
+
+  assert.equal(
+    boundary.reachableFamily.screenController,
+    "ShardMining, Assembly-CSharp",
+    "shard milestone family evidence screenController drifted"
+  );
+  assert.equal(
+    boundary.reachableFamily.declaringField.name,
+    "upgradeInfoList",
+    "shard milestone family evidence declaringField.name drifted"
+  );
+  assert.equal(
+    boundary.reachableFamily.reachableRows.start,
+    0,
+    "shard milestone family evidence reachableRows.start drifted"
+  );
+  assert.equal(
+    boundary.reachableFamily.reachableRows.end,
+    29,
+    "shard milestone family evidence reachableRows.end drifted"
+  );
+  assert.equal(
+    boundary.reachableFamily.reachableRows.count,
+    30,
+    "shard milestone family evidence reachableRows.count drifted"
+  );
+
+  const verifiedRows = boundary.rows.filter((entry) => entry?.status === "verified");
+  const partialRows = boundary.rows.filter((entry) => entry?.status === "partial");
+  const blockedRows = boundary.rows.filter((entry) => entry?.status === "blocked");
+  assert.equal(boundary.rows.length, 30, "shard milestone family evidence must keep 30 rows");
+  assert.deepEqual(
+    verifiedRows.map((entry) => entry.rowKey),
+    ["SU1", "SU2"],
+    "shard milestone family evidence verified rows drifted"
+  );
+  assert.ok(
+    blockedRows.some((entry) => entry.rowKey === "SU0"),
+    "shard milestone family evidence must keep SU0 blocked"
+  );
+  assert.ok(
+    blockedRows.some((entry) => entry.rowKey === "SU7"),
+    "shard milestone family evidence must keep SU7 blocked"
+  );
+  assert.ok(
+    blockedRows.some((entry) => entry.rowKey === "SU28"),
+    "shard milestone family evidence must keep SU28 blocked"
+  );
+  assert.ok(
+    partialRows.length >= 20,
+    "shard milestone family evidence should preserve the descriptive partial family"
+  );
+  assert.ok(
+    verifiedRows.every((entry) => entry?.verifiedPackage?.rowShellFields?.unlockRequirementField),
+    "shard milestone family evidence verified rows must preserve rowShellFields"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("shared shard milestone evidence table")
+    ),
+    "shard milestone family evidence must preserve shared-table boundary framing"
+  );
+
+  return {
+    id: "shard-milestone-family-evidence",
+    label: "Shard milestone family evidence",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.rows.length} reachable shard rows`,
+      `${verifiedRows.length} verified | ${partialRows.length} partial | ${blockedRows.length} blocked`,
+      "Shared shard-family evidence stays descriptive-only and save-side blocked"
     ]
   };
 }
@@ -9029,22 +9221,6 @@ function validateUnityTraceBundle(bundle) {
   );
   expectArray(bundle.lostStructure, "unity trace bundle lostStructure must be an array");
   expectArray(bundle.currentBoundary, "unity trace bundle currentBoundary must be an array");
-  [
-    "metadata",
-    "tokenShopExtract",
-    "tokenShopRowRemapBoundary",
-    "tokenShopLateAtuBoundary",
-    "dailyTokeniumLaneProbe",
-    "dailyTokeniumOwnerProbe",
-    "uabeaProbe",
-    "unityProbe",
-    "lm244TargetedProbe"
-  ].forEach((field) => {
-    expectNonEmptyString(
-      bundle.sources[field],
-      `unity trace bundle sources.${field} must be present`
-    );
-  });
 
   assert.equal(bundle.dataset, "unity-trace-bundle", "unity trace bundle dataset id drifted");
   assert.equal(
@@ -9063,11 +9239,6 @@ function validateUnityTraceBundle(bundle) {
     "unity trace bundle planner selection mode drifted"
   );
   assert.equal(
-    bundle.plannerResolution.matchedFamilyId,
-    "token-shop",
-    "unity trace bundle planner family drifted"
-  );
-  assert.equal(
     bundle.plannerResolution.runMode,
     "trace",
     "unity trace bundle planner run mode drifted"
@@ -9077,256 +9248,146 @@ function validateUnityTraceBundle(bundle) {
     null,
     "unity trace bundle planner compare preset drifted"
   );
-  assert.ok(
-    bundle.plannerResolution.expandedAnchors.includes("ATU3Button"),
-    "unity trace bundle planner anchors must preserve ATU3 shell anchor"
-  );
-  assert.ok(
-    bundle.plannerResolution.expandedAnchorSpecs.some(
-      (anchor) => anchor.value === "15810" && anchor.kind === "path id"
-    ),
-    "unity trace bundle planner anchor typing drifted"
-  );
-  assert.match(
-    bundle.plannerResolution.decisionNote,
-    /TokenShop/i,
-    "unity trace bundle planner decision note must preserve chosen family"
-  );
-  assert.ok(
-    bundle.executionAnchors.some(
-      (anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"
-    ),
-    "unity trace bundle execution shell anchor drifted"
-  );
-  assert.ok(
-    bundle.executionAnchors.some(
-      (anchor) => anchor.value === "get_SmallAdCellGains" && anchor.kind === "method"
-    ),
-    "unity trace bundle execution method anchor drifted"
-  );
   assert.equal(
     bundle.traceRegistry.path,
     "data/unity-trace-target-registry.json",
     "unity trace bundle registry path drifted"
   );
-  assert.equal(
-    bundle.traceRegistry.selectedFamilyId,
-    "token-shop",
-    "unity trace bundle selected family drifted"
-  );
-  assert.equal(
-    bundle.target.id,
-    "token-shop-atu3-chest-consumer-read",
-    "unity trace bundle target id drifted"
-  );
-  assert.ok(
-    bundle.target.anchors.includes("ATU3Button"),
-    "unity trace bundle target anchors must preserve solved shell field"
-  );
-  assert.equal(
-    bundle.shellWindow.shellField,
-    "ATU3Button",
-    "unity trace bundle shell field drifted"
-  );
-  assert.equal(bundle.shellWindow.shellPathId, 15810, "unity trace bundle shell path id drifted");
-  assert.deepEqual(
-    bundle.shellWindow.ownerFieldBlock,
+  if (bundle.target.id === "shard-owned-state-upgradeinfolist-population") {
+    expectRecord(bundle.outcome, "unity trace bundle shard outcome must be present");
     [
-      "CellBoostStartCost",
-      "CellBoostAdditiveCost",
-      "CellBoostBonus",
-      "CellBoostMaxLevel",
-      "CellBoostFill"
-    ],
-    "unity trace bundle owner field block drifted"
-  );
-  assert.equal(
-    bundle.bridgeCheck.bridgeCleared,
-    true,
-    "unity trace bundle must preserve the ATU3 effect-chain result"
-  );
-  assert.equal(
-    bundle.bridgeCheck.result,
-    "checked consumer-internal bonus shell recovered",
-    "unity trace bundle result drifted"
-  );
-  assert.ok(
-    bundle.surfaces.some((surface) => surface.id === "metadata-neighborhood"),
-    "unity trace bundle missing metadata surface"
-  );
-  assert.ok(
-    bundle.surfaces.some((surface) => surface.id === "consumer-family"),
-    "unity trace bundle missing consumer-family surface"
-  );
-  assert.ok(
-    bundle.surfaces.some((surface) => surface.id === "consumer-routines"),
-    "unity trace bundle missing consumer-routines surface"
-  );
-  assert.ok(
-    bundle.surfaces.some((surface) => surface.id === "cell-gain-getters"),
-    "unity trace bundle missing cell-gain-getters surface"
-  );
-  assert.ok(
-    bundle.surfaces.some((surface) => surface.id === "booster-bonus-shell"),
-    "unity trace bundle missing booster-bonus-shell surface"
-  );
-  assert.ok(
-    bundle.surfaces.some((surface) => surface.id === "final-chest-bonus-shell"),
-    "unity trace bundle missing final-chest-bonus-shell surface"
-  );
-  const metadataSurface = bundle.surfaces.find((surface) => surface.id === "metadata-neighborhood");
-  assert.ok(
-    metadataSurface.anchorSpecs.some(
-      (anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"
-    ),
-    "unity trace bundle metadata surface must preserve ATU3 anchor"
-  );
-  const metadataSource = metadataSurface.sources.find((source) => source.sourceId === "metadata");
-  assert.deepEqual(
-    metadataSource.searchModes,
-    ["exact-string", "bounded-containment"],
-    "unity trace bundle metadata search modes drifted"
-  );
-  assert.equal(
-    metadataSource.highSignalHitCount,
-    0,
-    "unity trace bundle metadata high-signal count drifted"
-  );
-  assert.ok(
-    metadataSource.supportingHitCount >= 3,
-    "unity trace bundle metadata supporting count drifted"
-  );
-  assert.ok(
-    metadataSource.incidentalHitCount >= 1,
-    "unity trace bundle metadata incidental count drifted"
-  );
-  assert.ok(
-    metadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)),
-    "unity trace bundle metadata hits should suppress public-key noise"
-  );
-  assert.ok(
-    metadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")),
-    "unity trace bundle metadata hits should not treat path ids as free-text anchors"
-  );
-  assert.equal(bundle.traceGraph.edges.length, 6, "unity trace bundle proved edge count drifted");
-  assert.equal(
-    bundle.traceGraph.negativeEdges.length,
-    1,
-    "unity trace bundle negative edge count drifted"
-  );
-  assert.ok(
-    bundle.traceGraph.edges.some(
-      (edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"
-    ),
-    "unity trace bundle missing serialized adjacency edge"
-  );
-  assert.ok(
-    bundle.traceGraph.edges.some((edge) => edge.type === "shared-effect-to-consumer-family"),
-    "unity trace bundle missing consumer-family handoff edge"
-  );
-  assert.ok(
-    bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-chest-routines"),
-    "unity trace bundle missing chest-routine edge"
-  );
-  assert.ok(
-    bundle.traceGraph.edges.some((edge) => edge.type === "consumer-family-to-cell-gain-getters"),
-    "unity trace bundle missing cell-gain getter edge"
-  );
-  assert.ok(
-    bundle.traceGraph.edges.some(
-      (edge) => edge.type === "cell-gain-getters-to-booster-bonus-shell"
-    ),
-    "unity trace bundle missing booster aggregation edge"
-  );
-  assert.ok(
-    bundle.traceGraph.edges.some(
-      (edge) => edge.type === "booster-bonus-shell-to-final-chest-bonus-shell"
-    ),
-    "unity trace bundle missing final chest bonus shell edge"
-  );
-  assert.ok(
-    bundle.traceGraph.negativeEdges.some(
-      (edge) => edge.type === "exact-cellboost-to-booster-bonus-handoff"
-    ),
-    "unity trace bundle missing exact CellBoost consumer negative edge"
-  );
-  assert.ok(
-    bundle.traceGraph.claimLedger.some(
-      (claim) => claim.id === "claim-atu3-consumer-internal-shell" && claim.status === "proved"
-    ),
-    "unity trace bundle missing ATU3 consumer-internal claim"
-  );
-  assert.equal(
-    bundle.decisionSummary.verdict,
-    "quarantine",
-    "unity trace bundle decision verdict drifted"
-  );
-  assert.deepEqual(
-    bundle.decisionSummary.baselineGap,
-    ["exact-cellboost-to-booster-bonus-handoff"],
-    "unity trace bundle decision baseline gap drifted"
-  );
-  assert.equal(
-    bundle.solvedVsBlockedDiff.baseline.shellField,
-    "ATU3Button",
-    "unity trace bundle baseline shell drifted"
-  );
-  assert.equal(
-    bundle.solvedVsBlockedDiff.baseline.shellPathId,
-    15810,
-    "unity trace bundle baseline shell path drifted"
-  );
-  assert.equal(
-    bundle.solvedVsBlockedDiff.blockedTarget.shellField,
-    "ATU3Button",
-    "unity trace bundle blocked shell drifted"
-  );
-  assert.deepEqual(
-    bundle.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes,
+      "shardSaveBoundary",
+      "shardMilestonePayloadBoundary",
+      "shardMilestoneHandoffBoundary",
+      "shardTypeMetadataProbe",
+      "shardSceneMonoBehaviourProbe",
+      "shardMilestoneSaveOwnerCandidates"
+    ].forEach((field) => {
+      expectNonEmptyString(
+        bundle.sources[field],
+        `unity trace bundle sources.${field} must be present`
+      );
+    });
+    assert.equal(
+      bundle.plannerResolution.matchedFamilyId,
+      "shard-owned-state",
+      "unity trace bundle planner family drifted"
+    );
+    assert.ok(
+      bundle.plannerResolution.expandedAnchors.includes("upgradeInfoList"),
+      "unity trace bundle planner anchors must preserve upgradeInfoList"
+    );
+    assert.ok(
+      bundle.executionAnchors.some(
+        (anchor) => anchor.value === "upgradeInfoList" && anchor.kind === "string"
+      ),
+      "unity trace bundle execution shell anchor drifted"
+    );
+    assert.equal(
+      bundle.traceRegistry.selectedFamilyId,
+      "shard-owned-state",
+      "unity trace bundle selected family drifted"
+    );
+    assert.equal(
+      bundle.shellWindow.shellField,
+      "upgradeInfoList",
+      "unity trace bundle shell field drifted"
+    );
+    assert.equal(bundle.shellWindow.shellPathId, 5216, "unity trace bundle shell path id drifted");
+    assert.deepEqual(
+      bundle.shellWindow.ownerFieldBlock,
+      ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"],
+      "unity trace bundle owner field block drifted"
+    );
+    assert.equal(
+      bundle.bridgeCheck.bridgeCleared,
+      true,
+      "unity trace bundle bridge verdict drifted"
+    );
+    assert.equal(
+      bundle.bridgeCheck.result,
+      "checked non-local injection seam preserved",
+      "unity trace bundle result drifted"
+    );
+    assert.equal(
+      bundle.outcome.kind,
+      "non-local-injection-seam",
+      "unity trace bundle outcome drifted"
+    );
+    assert.ok(
+      bundle.surfaces.some((surface) => surface.id === "runtime-shell"),
+      "unity trace bundle missing runtime-shell surface"
+    );
+    assert.ok(
+      bundle.surfaces.some((surface) => surface.id === "owner-list-watchers"),
+      "unity trace bundle missing owner-list-watchers surface"
+    );
+    assert.ok(
+      bundle.surfaces.some((surface) => surface.id === "save-gap"),
+      "unity trace bundle missing save-gap surface"
+    );
+    assert.equal(bundle.traceGraph.edges.length, 5, "unity trace bundle proved edge count drifted");
+    assert.equal(
+      bundle.traceGraph.negativeEdges.length,
+      2,
+      "unity trace bundle negative edge count drifted"
+    );
     [
-      "serialized-adjacency",
-      "shared-effect-to-consumer-family",
-      "consumer-family-to-chest-routines"
-    ],
-    "unity trace bundle shared edge diff drifted"
-  );
-  assert.deepEqual(
-    bundle.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes,
-    [
-      "consumer-family-to-cell-gain-getters",
-      "cell-gain-getters-to-booster-bonus-shell",
-      "booster-bonus-shell-to-final-chest-bonus-shell"
-    ],
-    "unity trace bundle baseline-only diff drifted"
-  );
-  assert.deepEqual(
-    bundle.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes,
-    ["exact-cellboost-to-booster-bonus-handoff"],
-    "unity trace bundle blocked missing diff drifted"
-  );
-  assert.ok(
-    bundle.lostStructure.some((line) =>
-      /checked ATU3 chain now reaches the concrete AdManager consumer family/i.test(line)
-    ),
-    "unity trace bundle must preserve ATU3 shell-loss explanation"
-  );
-  assert.ok(
-    bundle.lostStructure.some((line) =>
-      /exact CellBoostBonus read-site or typed-field handoff/i.test(line)
-    ),
-    "unity trace bundle must preserve exact consumer-seam gap framing"
-  );
-  assert.match(
-    bundle.groundedConclusion,
-    /ATU3 consumer-internal read trace now preserves/i,
-    "unity trace bundle grounded conclusion drifted"
-  );
-  assert.ok(
-    bundle.currentBoundary.some((line) =>
-      /Keep the ATU3 result quarantined to effect-chain completion evidence/i.test(line)
-    ),
-    "unity trace bundle must preserve ATU3 quarantine framing"
-  );
+      "direct-scene-definition-payload",
+      "definition-to-runtime-shell",
+      "runtime-shell-to-owner-lists",
+      "runtime-shell-to-local-hooks",
+      "non-local-injection-seam"
+    ].forEach((edgeType) => {
+      assert.ok(
+        bundle.traceGraph.edges.some((edge) => edge.type === edgeType),
+        `unity trace bundle missing ${edgeType} edge`
+      );
+    });
+    ["local-runtime-population-bridge", "deeper-wrapper-handoff-recovery"].forEach((edgeType) => {
+      assert.ok(
+        bundle.traceGraph.negativeEdges.some((edge) => edge.type === edgeType),
+        `unity trace bundle missing ${edgeType} negative edge`
+      );
+    });
+    assert.equal(
+      bundle.decisionSummary.verdict,
+      "quarantine",
+      "unity trace bundle decision verdict drifted"
+    );
+    assert.deepEqual(
+      bundle.decisionSummary.baselineGap,
+      ["local-runtime-population-bridge", "deeper-wrapper-handoff-recovery"],
+      "unity trace bundle decision baseline gap drifted"
+    );
+    assert.equal(
+      bundle.solvedVsBlockedDiff.baseline.shellField,
+      "upgradeInfoList",
+      "unity trace bundle baseline shell drifted"
+    );
+    assert.equal(
+      bundle.solvedVsBlockedDiff.baseline.shellPathId,
+      5216,
+      "unity trace bundle baseline shell path drifted"
+    );
+    assert.ok(
+      bundle.lostStructure.some((line) =>
+        /without one committed write path into IsUnlocked/i.test(line)
+      ),
+      "unity trace bundle must preserve shard write-path blocker framing"
+    );
+    assert.match(
+      bundle.groundedConclusion,
+      /non-local injection seam/i,
+      "unity trace bundle grounded conclusion drifted"
+    );
+    assert.ok(
+      bundle.currentBoundary.some((line) => /owned-state population boundary/i.test(line)),
+      "unity trace bundle must preserve shard boundary framing"
+    );
+  } else {
+    throw new Error(`Unsupported committed unity trace bundle target: ${bundle.target.id}`);
+  }
 
   return {
     id: "unity-trace-bundle",
@@ -9335,7 +9396,9 @@ function validateUnityTraceBundle(bundle) {
     stats: [
       `${bundle.target.anchors.length} target anchors`,
       `${bundle.surfaces.length} cross-surface trace lanes`,
-      "ATU3 trace preserves one bounded consumer-internal bonus shell"
+      bundle.target.id === "shard-owned-state-upgradeinfolist-population"
+        ? "Shard trace preserves one bounded owned-state injection seam"
+        : "Committed trace verdict preserved"
     ]
   };
 }
@@ -9361,16 +9424,18 @@ function validateUnityTraceTargetRegistry(registry) {
     "unity-trace-target-registry",
     "unity trace target registry dataset id drifted"
   );
-  ["token-shop", "shard-cost", "multiverse-market-save-owner"].forEach((familyId) => {
-    assert.ok(
-      registry.sourceFamilies[familyId],
-      `unity trace target registry missing family ${familyId}`
-    );
-    assert.ok(
-      registry.planner.families[familyId],
-      `unity trace target registry planner missing family ${familyId}`
-    );
-  });
+  ["token-shop", "shard-cost", "shard-owned-state", "multiverse-market-save-owner"].forEach(
+    (familyId) => {
+      assert.ok(
+        registry.sourceFamilies[familyId],
+        `unity trace target registry missing family ${familyId}`
+      );
+      assert.ok(
+        registry.planner.families[familyId],
+        `unity trace target registry planner missing family ${familyId}`
+      );
+    }
+  );
   [
     "token-shop-atu3-cells",
     "token-shop-atu3-cells-effect",
@@ -9381,6 +9446,7 @@ function validateUnityTraceTargetRegistry(registry) {
     "token-shop-atu7-mk3-bridge",
     "token-shop-family-structure",
     "shard-cost-su0-structure",
+    "shard-owned-state-upgradeinfolist-population",
     "multiverse-market-save-owner-boundary"
   ].forEach((targetId) => {
     assert.ok(registry.targets[targetId], `unity trace target registry missing target ${targetId}`);
@@ -9394,6 +9460,11 @@ function validateUnityTraceTargetRegistry(registry) {
     registry.planner.families["shard-cost"].defaultRunMode,
     "trace",
     "unity trace target registry shard planner mode drifted"
+  );
+  assert.equal(
+    registry.planner.families["shard-owned-state"].defaultTargetId,
+    "shard-owned-state-upgradeinfolist-population",
+    "unity trace target registry shard-owned-state planner target drifted"
   );
   assert.equal(
     registry.planner.families["multiverse-market-save-owner"].defaultRunMode,
@@ -9446,6 +9517,11 @@ function validateUnityTraceTargetRegistry(registry) {
     "unity trace target registry shard comparison preset drifted"
   );
   assert.equal(
+    registry.targets["shard-owned-state-upgradeinfolist-population"].comparisonPresetId,
+    "shard-owned-state-seam-vs-local-bridge",
+    "unity trace target registry shard owned-state comparison preset drifted"
+  );
+  assert.equal(
     registry.targets["multiverse-market-save-owner-boundary"].comparisonPresetId,
     "multiverse-market-save-owner-vs-canonical-import",
     "unity trace target registry market comparison preset drifted"
@@ -9457,7 +9533,7 @@ function validateUnityTraceTargetRegistry(registry) {
     stats: [
       `${Object.keys(registry.sourceFamilies).length} trace source families`,
       `${Object.keys(registry.targets).length} trace targets`,
-      "TokenShop, shard-cost, and multiverse-market/save-owner families are registry-seeded"
+      "TokenShop, shard-cost, shard-owned-state, and multiverse-market/save-owner families are registry-seeded"
     ]
   };
 }
@@ -13522,8 +13598,8 @@ async function validateBundledDatasetContract(contract) {
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
   assert.equal(
     contract.datasets.length,
-    62,
-    "bundled dataset contract must track the sixty-two shipped dataset groups"
+    61,
+    "bundled dataset contract must track the sixty-one shipped dataset groups"
   );
 
   for (const [index, dataset] of contract.datasets.entries()) {
@@ -13634,8 +13710,9 @@ export async function validateBundledDatasets() {
   const shardCostListPathProbe = await readJson("../../data/shard-cost-list-path-probe.v1.json");
   const shardCostFormulaModel = await readJson("../../data/shard-cost-formula-model.v1.json");
   const shardBonusSlotProbe = await readJson("../../data/shard-bonus-slot-probe.v1.json");
-  const shardRowVerificationSu1 = await readJson("../../data/shard-row-verification-su1.v1.json");
-  const shardRowVerificationSu2 = await readJson("../../data/shard-row-verification-su2.v1.json");
+  const shardMilestoneFamilyEvidence = await readJson(
+    "../../data/shard-milestone-family-evidence.v1.json"
+  );
   const shardTypeMetadataProbe = await readJson("../../data/shard-type-metadata-probe.v1.json");
   const extractionCandidateFamilies = await readJson(
     "../../data/extraction-candidate-families.v1.json"
@@ -13762,8 +13839,7 @@ export async function validateBundledDatasets() {
     validateShardCostListPathProbe(shardCostListPathProbe),
     validateShardCostFormulaModel(shardCostFormulaModel),
     validateShardBonusSlotProbe(shardBonusSlotProbe),
-    validateShardRowVerificationSu1(shardRowVerificationSu1),
-    validateShardRowVerificationSu2(shardRowVerificationSu2),
+    validateShardMilestoneFamilyEvidence(shardMilestoneFamilyEvidence),
     validateShardTypeMetadataProbe(shardTypeMetadataProbe),
     validateExtractionCandidateFamilies(extractionCandidateFamilies),
     validateExtractionCandidateRanking(extractionCandidateRanking),

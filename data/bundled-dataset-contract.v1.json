@@ -210,19 +210,11 @@
       ]
     },
     {
-      "id": "shard-row-verification-su1",
-      "label": "Shard row verification SU1",
+      "id": "shard-milestone-family-evidence",
+      "label": "Shard milestone family evidence",
       "classification": "extracted-mechanics",
       "files": [
-        "data/shard-row-verification-su1.v1.json"
-      ]
-    },
-    {
-      "id": "shard-row-verification-su2",
-      "label": "Shard row verification SU2",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-row-verification-su2.v1.json"
+        "data/shard-milestone-family-evidence.v1.json"
       ]
     },
     {

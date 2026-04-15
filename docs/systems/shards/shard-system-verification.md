@@ -82,7 +82,8 @@ Repo-local owner-family evidence now narrows the milestone shell further:
 - `ShardPerLevelTextHandler` now preserves row-local typed `SM*B*Text` slot fields, which is a stronger shard bonus-text anchor than a pure string-shell clue
 - the narrowed `ShardMining` controller shell also preserves a checked partial row shell around `UnlockMilestone17` through `UnlockMilestone29`, `BuyMilestone0`, and `Milestone0TextChecker` through `Milestone12TextChecker`
 - the checked row-alignment boundary now makes the current mismatch explicit: unlock hooks sit at `17-29`, text-checker hooks sit at `0-12`, and buy hooks currently only reach `0`
-- the checked handoff boundary now narrows the remaining seam further: `ShardMining` keeps the shard-local row shell while `ConstructionMilestones` keeps the dense `BuyMilestone1-57` generic buy family, but the direct declaring-model handoff between them is still unresolved
+- the checked handoff boundary now narrows the remaining seam further: `ShardMining` already preserves the direct row-definition family while `ConstructionMilestones` remains only a nearby generic `BuyMilestone1-57` buy family, so the unresolved handoff is no longer row-definition ownership
+- the checked shard-owned-state trace now preserves one direct scene-owner to runtime-shell boundary and narrows the blocker further: no local `upgradeInfoList` owned-state population bridge is recovered, no deeper wrapper handoff is recovered, and the current owned-state result stays at a non-local injection seam
 - the current narrowed shard-local contexts still preserve zero checked overlap with `PlayerProfileData`, `GetPlayerProfileData`, `FillPlayerProfileData`, or `CloudSavePlayerProfile`
 - `level0` now also preserves a direct `ShardMining` MonoBehaviour parser target at path `290724` and byte start `34088352`, plus a separate `ShardPerLevelTextHandler` target at path `286629`
 - `ConstructionMilestones` still exists as a parallel generic milestone family, but it is no longer the preferred shard-owner interpretation because its metadata path is academy-side
@@ -111,12 +112,12 @@ That makes it suitable for:
 
 ## Not yet verified enough for stronger app behavior
 
-- exact serialized shard milestone row owner or payload
+- exact serialized or rebuilt player-owned shard milestone owner path behind the recovered runtime shell
 - asset-grounded shard milestone labels and bonus tables
 - exact row-complete text-handler mapping from recovered row ids to final player-facing bonus text lines
 - asset-grounded milestone row order and milestone-number mapping
 - recovered declaring owner behind the partial `UnlockMilestone*` / `BuyMilestone*` / `Milestone*TextChecker` row shell
-- recovered declaring owner behind the newly narrowed `ShardMining` to `ConstructionMilestones` handoff seam
+- recovered save-side owner behind the `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo` runtime shell
 - a clean one-to-one shard row-number family inside the current controller shell
 - asset-grounded milestone unlock list
 - exact mapping between recovered `FinalSU*Bonus*` fields and player-facing shard milestone rows
@@ -136,9 +137,8 @@ That makes it suitable for:
 
 Before expanding shard planner behavior, the repo should:
 
-1. recover the exact serialized shard milestone row payload or save-side owner from the narrowed `ShardMining` / `ShardUpgradeInfo` trail
+1. determine whether player-owned shard milestone rows are serialized directly, rebuilt from a deeper save model, or stop at a runtime-only shell behind the narrowed `ShardMining` / `ShardUpgradeInfo` trail
 2. verify whether milestone names, unlocks, and bonus labels can be extracted directly
 3. recover numeric shard cost parameter values across enough rows to verify the real cost curve
 4. compare extracted results against the current community-grounded dataset
 5. then decide which future shard planner claims can be promoted beyond descriptive mode
-

@@ -409,6 +409,15 @@ export function getShardSaveBoundarySummary(boundary) {
     typeof boundary?.probeResults === "object" && boundary.probeResults
       ? boundary.probeResults
       : {};
+  const recoveredDirectRowDefinitionPayload =
+    typeof boundary?.recoveredDirectRowDefinitionPayload === "object" &&
+    boundary.recoveredDirectRowDefinitionPayload
+      ? boundary.recoveredDirectRowDefinitionPayload
+      : {};
+  const recoveredDeclaringRowModel =
+    typeof boundary?.recoveredDeclaringRowModel === "object" && boundary.recoveredDeclaringRowModel
+      ? boundary.recoveredDeclaringRowModel
+      : {};
   return {
     hasSeparationBoundary:
       probeResults.metadataNeighborhoodHasSaveTerms === false &&
@@ -417,9 +426,26 @@ export function getShardSaveBoundarySummary(boundary) {
       probeResults.directShardPlayerProfileContext === false &&
       saveFamilyTermsChecked.includes("PlayerProfileData") &&
       saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
+    hasDirectRowDefinitionPayload: probeResults.directSerializedRowDefinitionRecovered === true,
+    hasRuntimeOwnedStateShell: probeResults.runtimeOwnedStateShellRecovered === true,
+    hasTraceOwnedStateTarget: probeResults.traceRegistryHasOwnedStateTarget === true,
+    hasTraceOwnedStatePopulationBridge:
+      probeResults.traceWorkflowHasOwnedStatePopulationBridge === true,
+    traceOwnedStateOutcomeKind:
+      probeResults.traceOwnedStateOutcomeKind || "non-local-injection-seam",
     ownerAnchor: "ShardMining / ShardUpgradeInfo",
     saveAnchor: "PlayerProfileData",
     cloudSaveAnchor: "CloudSavePlayerProfile",
+    directPayloadAnchor: recoveredDirectRowDefinitionPayload.ownerType || "ShardMining",
+    runtimeShellAnchor: recoveredDeclaringRowModel.ownerType
+      ? `${recoveredDeclaringRowModel.ownerType}.upgradeInfoList`
+      : "ShardMining.upgradeInfoList",
+    traceOwnedStateLabel:
+      probeResults.traceWorkflowHasOwnedStatePopulationBridge === true
+        ? "Trace-owned-state population bridge recovered"
+        : probeResults.traceOwnedStateOutcomeKind === "deeper-wrapper-handoff"
+          ? "Trace does not recover a local bridge, but it does preserve a deeper wrapper handoff for owned state"
+          : "Trace rules out a local upgradeInfoList bridge and still cannot name a deeper wrapper handoff; owned state stays at a non-local injection seam",
     overlapLabel: "zero direct overlap",
     ownerTermCount: ownerShellTermsChecked.length
   };

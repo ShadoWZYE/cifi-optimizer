@@ -27,6 +27,17 @@
         "shardMilestoneSaveOwnerCandidates"
       ]
     },
+    "shard-owned-state": {
+      "label": "Shard owned state",
+      "sourceIds": [
+        "shardSaveBoundary",
+        "shardMilestonePayloadBoundary",
+        "shardMilestoneHandoffBoundary",
+        "shardTypeMetadataProbe",
+        "shardSceneMonoBehaviourProbe",
+        "shardMilestoneSaveOwnerCandidates"
+      ]
+    },
     "multiverse-market-save-owner": {
       "label": "Multiverse market/save-owner",
       "sourceIds": [
@@ -53,6 +64,7 @@
     "familyOrder": [
       "token-shop",
       "shard-cost",
+      "shard-owned-state",
       "multiverse-market-save-owner"
     ],
     "families": {
@@ -159,6 +171,61 @@
             "planner safe",
             "planner output",
             "cost output"
+          ]
+        }
+      },
+      "shard-owned-state": {
+        "label": "Shard owned state",
+        "defaultTargetId": "shard-owned-state-upgradeinfolist-population",
+        "defaultRunMode": "trace",
+        "queryTerms": [
+          "Shard owned state",
+          "upgradeInfoList",
+          "ShardUpgradeInfo",
+          "IsUnlocked",
+          "MaxLevel",
+          "milestone progress"
+        ],
+        "anchorExpansionTerms": [
+          "upgradeInfoList",
+          "ShardMining+ShardUpgradeInfo",
+          "IsUnlocked",
+          "MaxLevel",
+          "InitializeShards",
+          "UpdateUnlockedMilestonesList",
+          "UpdateMaxedMilestonesList"
+        ],
+        "directTraceTerms": [
+          "upgradeInfoList",
+          "ShardMining+ShardUpgradeInfo",
+          "IsUnlocked",
+          "MaxLevel"
+        ],
+        "compareTerms": [
+          "Shard owned state",
+          "save owner",
+          "player-owned shard",
+          "milestone progress"
+        ],
+        "synonymSets": {
+          "runtime-shell": [
+            "upgradeInfoList",
+            "ShardMining+ShardUpgradeInfo",
+            "IsUnlocked",
+            "MaxLevel"
+          ],
+          "local-watchers": [
+            "InitializeShards",
+            "InitializeMaxLevelBools",
+            "UpdateUnlockedMilestonesList",
+            "UpdateMaxedMilestonesList",
+            "CheckAllMilestoneLevelFills"
+          ],
+          "owned-state-gap": [
+            "save owner",
+            "PlayerProfileData",
+            "CloudSavePlayerProfile",
+            "player-owned shard"
           ]
         }
       },
@@ -301,6 +368,16 @@
         "getter-to-parameter-shell structure",
         "deterministic evaluator support",
         "planner-safe output approval"
+      ]
+    },
+    "shard-owned-state-seam-vs-local-bridge": {
+      "label": "Shard owned-state boundary vs local population bridge",
+      "solvedBaselineTargetId": "shard-owned-state-upgradeinfolist-population",
+      "blockedTargetId": "shard-owned-state-local-bridge",
+      "summaryFocus": [
+        "direct definition payload and runtime shell",
+        "local watcher cluster",
+        "owned-state outcome kind"
       ]
     },
     "multiverse-market-save-owner-vs-canonical-import": {
@@ -1345,6 +1422,54 @@
           "SU0GrowthExponent2",
           "SU0GrowthExponent3"
         ]
+      }
+    },
+    "shard-owned-state-upgradeinfolist-population": {
+      "label": "Shard owned-state population boundary",
+      "familyId": "shard-owned-state",
+      "strategy": "shard-owned-state-upgradeinfolist-population",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "field",
+        "dataset"
+      ],
+      "defaultAnchors": [
+        "upgradeInfoList",
+        "ShardMining+ShardUpgradeInfo",
+        "IsUnlocked",
+        "MaxLevel"
+      ],
+      "joinGoal": "Trace the owned-state population path behind ShardMining.upgradeInfoList end to end and distinguish whether reachable shard row state is filled by a local runtime bridge, a deeper wrapper handoff, or a still-negative non-local injection seam.",
+      "requiredSourceFamilies": [
+        "shard-owned-state"
+      ],
+      "solvedBaselineTargetId": "shard-owned-state-upgradeinfolist-population",
+      "blockedTargetId": "shard-owned-state-local-bridge",
+      "comparisonPresetId": "shard-owned-state-seam-vs-local-bridge",
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 6,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "local-runtime-population-bridge",
+            "deeper-wrapper-handoff-recovery"
+          ]
+        },
+        "messages": {
+          "wire": "The shard owned-state path is recovered cleanly enough to wire player-owned shard import behavior.",
+          "quarantine": "The shard owned-state trace is grounded enough to preserve one exact boundary verdict, but the result must stay quarantined to blocker evidence until a local bridge or deeper wrapper handoff is recovered.",
+          "research": "The shard owned-state trace still lacks enough checked structure to preserve one bounded population verdict."
+        }
+      },
+      "strategyConfig": {
+        "sceneOwner": "ShardMining",
+        "runtimeShell": "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo",
+        "genericLead": "ConstructionMilestones, Assembly-CSharp",
+        "saveCandidate": "PlayerProfile-side shard member shell"
       }
     },
     "multiverse-market-save-owner-boundary": {

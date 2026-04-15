@@ -1,0 +1,1019 @@
+{
+  "dataset": "shard-milestone-family-evidence.v1",
+  "generatedAt": "2026-04-15",
+  "sources": {
+    "groundedMilestones": "data/shard-milestones.grounded.v1.json",
+    "rowModelBoundary": "data/shard-milestone-row-model-boundary.v1.json",
+    "rowShellBoundary": "data/shard-milestone-row-shell-boundary.v1.json",
+    "titleEffectBoundary": "data/shard-milestone-title-effect-boundary.v1.json",
+    "effectTextHandlerBoundary": "data/shard-effect-text-handler-boundary.v1.json",
+    "payloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
+    "saveBoundary": "data/shard-save-boundary.v1.json",
+    "bonusSlotProbe": "data/shard-bonus-slot-probe.v1.json",
+    "costMethodProbe": "data/shard-cost-method-probe.v1.json",
+    "costNativeProbe": "data/shard-cost-native-probe.v1.json",
+    "handoffBoundary": "data/shard-milestone-handoff-boundary.v1.json",
+    "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json"
+  },
+  "reachableFamily": {
+    "screenController": "ShardMining, Assembly-CSharp",
+    "declaringField": {
+      "ownerType": "ShardMining",
+      "name": "upgradeInfoList",
+      "type": "System.Collections.Generic.List`1<ShardMining+ShardUpgradeInfo>",
+      "fieldOffset": 5216
+    },
+    "rowModelType": {
+      "fullName": "ShardMining+ShardUpgradeInfo",
+      "baseType": "System.Object"
+    },
+    "reachableRows": {
+      "start": 0,
+      "end": 29,
+      "count": 30
+    },
+    "statusMeanings": {
+      "verified": "The row has one checked shipped title binding plus aligned row-shell, effect package, bonus-slot, and cost-shell evidence.",
+      "partial": "The row stays inside the recovered shard family and can be shown descriptively, but at least one player-facing identity, text binding, or verified row package seam remains unresolved.",
+      "blocked": "A stronger row claim would overreach because the current title-side or bonus-package evidence still conflicts, undershoots the recovered row shell, or remains explicitly unresolved."
+    }
+  },
+  "sharedEvidence": {
+    "rowModel": {
+      "status": "recovered",
+      "summary": "The shard-local declaring row model is recovered as ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo, with contiguous SU0-29 unlock requirements and Milestone0-29 text-checker families."
+    },
+    "rowShell": {
+      "status": "partial",
+      "summary": "The checked shard-local controller shell still only directly exposes UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker, so the family is real but not row-complete at the controller-hook level."
+    },
+    "payloadWatch": {
+      "status": "recovered",
+      "summary": "ShardUpgradeInfo still carries the checked milestone-total, cost-list, progress-fill, and phase-tick hooks for the whole family."
+    },
+    "saveBoundary": {
+      "status": "blocked",
+      "summary": "The reachable row-definition family is direct-serialized on ShardMining, and the shard-owned-state trace now narrows player-owned row values to a non-local injection seam: no checked PlayerProfileData or CloudSavePlayerProfile overlap, no local upgradeInfoList population bridge, and no recovered deeper wrapper handoff."
+    }
+  },
+  "familyFindings": [
+    "The reachable shard family is rows 0-29 inside ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo.",
+    "This table keeps one shared family-level evidence pass instead of reopening a separate artifact for each row.",
+    "Rows 1 and 2 currently clear as verified end-to-end row packages; rows 0, 7, and 28 remain blocked by explicit title-side or bonus-package conflicts; the remaining reachable rows are descriptive partials inside the recovered shard family.",
+    "The table is canonical-as-evidence only. It is not planner math, affordability proof, ROI, ETA, or permission to promote unresolved shard milestone state into canonical playerProfile inputs."
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "rowKey": "SU0",
+      "milestoneId": "shard-milestone-0",
+      "status": "blocked",
+      "statusReason": "The Eternal row still undershoots the recovered shard-local shell: metadata preserves eight bonus slots while the descriptive package currently carries only three surfaced bonuses and no sampled calc accessors.",
+      "titleBinding": {
+        "status": "blocked",
+        "assetNames": [
+          "SMilestone-0-Eternal(OURO)"
+        ],
+        "titleCandidates": [
+          "Eternal(OURO)"
+        ],
+        "playerFacingName": "Eternal Milestone"
+      },
+      "effectBinding": {
+        "status": "blocked",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 8,
+        "calcAccessorCount": 0,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU0Cost",
+        "note": "Row 0 stays inside the recovered shard cost family as the special-case opener, but its typed evaluator and full effect package remain unresolved."
+      }
+    },
+    {
+      "row": 1,
+      "rowKey": "SU1",
+      "milestoneId": "shard-milestone-1",
+      "status": "verified",
+      "statusReason": "The shipped Alpha title asset, the grounded three-bonus package, the recovered row shell, three calc accessors, and the checked get_SU1Cost shell align on the same shard-local row.",
+      "titleBinding": {
+        "status": "verified",
+        "assetNames": [
+          "SMilestone-1-Alpha"
+        ],
+        "titleCandidates": [
+          "Alpha"
+        ],
+        "playerFacingName": "Alpha Milestone"
+      },
+      "effectBinding": {
+        "status": "verified",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "verified",
+        "getterName": "get_SU1Cost",
+        "note": "The checked SU1 cost shell preserves row-local serialized operands plus the shared 100/200/300/400 over-level stage family."
+      },
+      "verifiedPackage": {
+        "summary": "Boosts Cells gained, MK5 output, and Shards gained at milestone level thresholds.",
+        "unlockCondition": {
+          "type": "total_milestone_levels_required",
+          "value": 0
+        },
+        "fixedBreakpoints": [
+          1,
+          25,
+          50
+        ],
+        "rowShellFields": {
+          "textCheckerField": "Milestone1TextChecker",
+          "unlockRequirementField": "SU1UnlockReq",
+          "bonusTextFields": [
+            "SM1B1Text",
+            "SM1B2Text",
+            "SM1B3Text"
+          ]
+        },
+        "calcAccessors": [
+          "get_SU1Bonus1Calc",
+          "get_SU1Bonus2Calc",
+          "get_SU1Bonus3Calc"
+        ],
+        "serializedCostFields": [
+          "SU1StartCost",
+          "SU1CostExponent",
+          "SU1GrowthExponent"
+        ],
+        "bonuses": [
+          {
+            "unlockLevel": 1,
+            "effectLabel": "Cells Gained",
+            "initialBonus": "1.06x",
+            "bonusPerLevel": "1.06x"
+          },
+          {
+            "unlockLevel": 25,
+            "effectLabel": "MK5 Output",
+            "initialBonus": "1.34x",
+            "bonusPerLevel": "1.06x"
+          },
+          {
+            "unlockLevel": 50,
+            "effectLabel": "Shards Gained",
+            "initialBonus": "Unknown",
+            "bonusPerLevel": "1.06x"
+          }
+        ]
+      }
+    },
+    {
+      "row": 2,
+      "rowKey": "SU2",
+      "milestoneId": "shard-milestone-2",
+      "status": "verified",
+      "statusReason": "The shipped Aquarius title asset, the grounded three-bonus package, the recovered row shell, three calc accessors, and the checked get_SU2Cost shell align on the same shard-local row.",
+      "titleBinding": {
+        "status": "verified",
+        "assetNames": [
+          "SMilestone-2-Aquarius"
+        ],
+        "titleCandidates": [
+          "Aquarius"
+        ],
+        "playerFacingName": "Aquarius Milestone"
+      },
+      "effectBinding": {
+        "status": "verified",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "verified",
+        "getterName": "get_SU2Cost",
+        "note": "The checked SU2 cost shell preserves row-local serialized operands plus the shared 100/200/300/400 over-level stage family."
+      },
+      "verifiedPackage": {
+        "summary": "Boosts Mod Points gained, MK4 output, and Cells gained at milestone level thresholds.",
+        "unlockCondition": {
+          "type": "total_milestone_levels_required",
+          "value": 5
+        },
+        "fixedBreakpoints": [
+          1,
+          25,
+          50
+        ],
+        "rowShellFields": {
+          "textCheckerField": "Milestone2TextChecker",
+          "unlockRequirementField": "SU2UnlockReq",
+          "bonusTextFields": [
+            "SM2B1Text",
+            "SM2B2Text",
+            "SM2B3Text"
+          ]
+        },
+        "calcAccessors": [
+          "get_SU2Bonus1Calc",
+          "get_SU2Bonus2Calc",
+          "get_SU2Bonus3Calc"
+        ],
+        "serializedCostFields": [
+          "SU2StartCost",
+          "SU2CostExponent",
+          "SU2GrowthExponent"
+        ],
+        "bonuses": [
+          {
+            "unlockLevel": 1,
+            "effectLabel": "Mod Points Gained",
+            "initialBonus": "1.06x",
+            "bonusPerLevel": "1.06x"
+          },
+          {
+            "unlockLevel": 25,
+            "effectLabel": "MK4 Output",
+            "initialBonus": "Unknown",
+            "bonusPerLevel": "1.06x"
+          },
+          {
+            "unlockLevel": 50,
+            "effectLabel": "Cells Gained",
+            "initialBonus": "Unknown",
+            "bonusPerLevel": "1.06x"
+          }
+        ]
+      }
+    },
+    {
+      "row": 3,
+      "rowKey": "SU3",
+      "milestoneId": "shard-milestone-3",
+      "status": "partial",
+      "statusReason": "Row 3 stays inside the recovered shard family with one shipped Libra title candidate, matched 3-slot bonus arity and a get_SU3Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-3-Libra"
+        ],
+        "titleCandidates": [
+          "Libra"
+        ],
+        "playerFacingName": "Libra Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU3Cost"
+      }
+    },
+    {
+      "row": 4,
+      "rowKey": "SU4",
+      "milestoneId": "shard-milestone-4",
+      "status": "partial",
+      "statusReason": "Row 4 stays inside the recovered shard family with one shipped Modifying title candidate, matched 4-slot bonus arity and a get_SU4Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-4-Modifying"
+        ],
+        "titleCandidates": [
+          "Modifying"
+        ],
+        "playerFacingName": "Modifying Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 4,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 4
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU4Cost"
+      }
+    },
+    {
+      "row": 5,
+      "rowKey": "SU5",
+      "milestoneId": "shard-milestone-5",
+      "status": "partial",
+      "statusReason": "Row 5 stays inside the recovered shard family with one shipped Flowering title candidate, matched 3-slot bonus arity and a get_SU5Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-5-Flowering"
+        ],
+        "titleCandidates": [
+          "Flowering"
+        ],
+        "playerFacingName": "Flowering Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU5Cost"
+      }
+    },
+    {
+      "row": 6,
+      "rowKey": "SU6",
+      "milestoneId": "shard-milestone-6",
+      "status": "partial",
+      "statusReason": "Row 6 stays inside the recovered shard family with one shipped Connecting title candidate, matched 3-slot bonus arity and a get_SU6Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-6-Connecting"
+        ],
+        "titleCandidates": [
+          "Connecting"
+        ],
+        "playerFacingName": "Connecting Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU6Cost"
+      }
+    },
+    {
+      "row": 7,
+      "rowKey": "SU7",
+      "milestoneId": "shard-milestone-7",
+      "status": "blocked",
+      "statusReason": "The title-side evidence conflicts on row 7: the shipped asset says Generating while the current descriptive package says Duality, so the row stays blocked from stronger player-facing identity claims.",
+      "titleBinding": {
+        "status": "blocked",
+        "assetNames": [
+          "SMilestone-7-Generating"
+        ],
+        "titleCandidates": [
+          "Generating"
+        ],
+        "playerFacingName": "Duality Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 4,
+        "calcAccessorCount": 4,
+        "groundedBonusCount": 4
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU7Cost"
+      }
+    },
+    {
+      "row": 8,
+      "rowKey": "SU8",
+      "milestoneId": "shard-milestone-8",
+      "status": "partial",
+      "statusReason": "Row 8 stays inside the recovered shard family with one shipped Morphing title candidate, matched 5-slot bonus arity and a get_SU8Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-8-Morphing"
+        ],
+        "titleCandidates": [
+          "Morphing"
+        ],
+        "playerFacingName": "Morphing Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 5,
+        "calcAccessorCount": 5,
+        "groundedBonusCount": 5
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU8Cost"
+      }
+    },
+    {
+      "row": 9,
+      "rowKey": "SU9",
+      "milestoneId": "shard-milestone-9",
+      "status": "partial",
+      "statusReason": "Row 9 stays inside the recovered shard family with one shipped Producing title candidate, matched 3-slot bonus arity and a get_SU9Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-9-Producing"
+        ],
+        "titleCandidates": [
+          "Producing"
+        ],
+        "playerFacingName": "Producing Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU9Cost"
+      }
+    },
+    {
+      "row": 10,
+      "rowKey": "SU10",
+      "milestoneId": "shard-milestone-10",
+      "status": "partial",
+      "statusReason": "Row 10 stays inside the recovered shard family with one shipped Expanding title candidate, matched 3-slot bonus arity and a get_SU10Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-10-Expanding"
+        ],
+        "titleCandidates": [
+          "Expanding"
+        ],
+        "playerFacingName": "Expanding Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU10Cost"
+      }
+    },
+    {
+      "row": 11,
+      "rowKey": "SU11",
+      "milestoneId": "shard-milestone-11",
+      "status": "partial",
+      "statusReason": "Row 11 stays inside the recovered shard family with one shipped Triangular title candidate, matched 4-slot bonus arity and a get_SU11Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-11-Triangular"
+        ],
+        "titleCandidates": [
+          "Triangular"
+        ],
+        "playerFacingName": "Triangular Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 4,
+        "calcAccessorCount": 4,
+        "groundedBonusCount": 4
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU11Cost"
+      }
+    },
+    {
+      "row": 12,
+      "rowKey": "SU12",
+      "milestoneId": "shard-milestone-12",
+      "status": "partial",
+      "statusReason": "Row 12 stays inside the recovered shard family with one shipped Extracting title candidate, matched 5-slot bonus arity and a get_SU12Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-12-Extracting"
+        ],
+        "titleCandidates": [
+          "Extracting"
+        ],
+        "playerFacingName": "Extracting Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 5,
+        "calcAccessorCount": 5,
+        "groundedBonusCount": 5
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU12Cost"
+      }
+    },
+    {
+      "row": 13,
+      "rowKey": "SU13",
+      "milestoneId": "shard-milestone-13",
+      "status": "partial",
+      "statusReason": "Row 13 stays inside the recovered shard family with one shipped Seeding title candidate, matched 3-slot bonus arity and a get_SU13Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-13-Seeding"
+        ],
+        "titleCandidates": [
+          "Seeding"
+        ],
+        "playerFacingName": "Seeding Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU13Cost"
+      }
+    },
+    {
+      "row": 14,
+      "rowKey": "SU14",
+      "milestoneId": "shard-milestone-14",
+      "status": "partial",
+      "statusReason": "Row 14 stays inside the recovered shard family with one shipped Pathing title candidate, matched 4-slot bonus arity and a get_SU14Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-14-Pathing"
+        ],
+        "titleCandidates": [
+          "Pathing"
+        ],
+        "playerFacingName": "Pathing Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 4,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 4
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU14Cost"
+      }
+    },
+    {
+      "row": 15,
+      "rowKey": "SU15",
+      "milestoneId": "shard-milestone-15",
+      "status": "partial",
+      "statusReason": "Row 15 stays inside the recovered shard family with one shipped Ritualistic title candidate, matched 3-slot bonus arity and a get_SU15Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-15-Ritualistic"
+        ],
+        "titleCandidates": [
+          "Ritualistic"
+        ],
+        "playerFacingName": "Ritualistic Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU15Cost"
+      }
+    },
+    {
+      "row": 16,
+      "rowKey": "SU16",
+      "milestoneId": "shard-milestone-16",
+      "status": "partial",
+      "statusReason": "Row 16 stays inside the recovered shard family with one shipped Modulistic title candidate, matched 4-slot bonus arity and a get_SU16Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-16-Modulistic"
+        ],
+        "titleCandidates": [
+          "Modulistic"
+        ],
+        "playerFacingName": "Modulistic Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 4,
+        "calcAccessorCount": 4,
+        "groundedBonusCount": 4
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU16Cost"
+      }
+    },
+    {
+      "row": 17,
+      "rowKey": "SU17",
+      "milestoneId": "shard-milestone-17",
+      "status": "partial",
+      "statusReason": "Row 17 stays inside the recovered shard family with one shipped Machining title candidate, matched 5-slot bonus arity and a get_SU17Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-17-Machining"
+        ],
+        "titleCandidates": [
+          "Machining"
+        ],
+        "playerFacingName": "Machining Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 5,
+        "calcAccessorCount": 5,
+        "groundedBonusCount": 5
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU17Cost"
+      }
+    },
+    {
+      "row": 18,
+      "rowKey": "SU18",
+      "milestoneId": "shard-milestone-18",
+      "status": "partial",
+      "statusReason": "Row 18 stays inside the recovered shard family with one shipped Studying title candidate, matched 6-slot bonus arity and a get_SU18Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-18-Studying"
+        ],
+        "titleCandidates": [
+          "Studying"
+        ],
+        "playerFacingName": "Studying Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 6,
+        "calcAccessorCount": 6,
+        "groundedBonusCount": 6
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU18Cost"
+      }
+    },
+    {
+      "row": 19,
+      "rowKey": "SU19",
+      "milestoneId": "shard-milestone-19",
+      "status": "partial",
+      "statusReason": "Row 19 stays inside the recovered shard family with one shipped Lucky title candidate, matched 3-slot bonus arity and a get_SU19Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-19-Lucky"
+        ],
+        "titleCandidates": [
+          "Lucky"
+        ],
+        "playerFacingName": "Lucky Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU19Cost"
+      }
+    },
+    {
+      "row": 20,
+      "rowKey": "SU20",
+      "milestoneId": "shard-milestone-20",
+      "status": "partial",
+      "statusReason": "Row 20 stays inside the recovered shard family with one shipped Duplicating title candidate, matched 3-slot bonus arity and a get_SU20Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-20-Duplicating"
+        ],
+        "titleCandidates": [
+          "Duplicating"
+        ],
+        "playerFacingName": "Duplicating Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU20Cost"
+      }
+    },
+    {
+      "row": 21,
+      "rowKey": "SU21",
+      "milestoneId": "shard-milestone-21",
+      "status": "partial",
+      "statusReason": "Row 21 stays inside the recovered shard family with one shipped Targeting title candidate, matched 3-slot bonus arity and a get_SU21Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-21-Targeting"
+        ],
+        "titleCandidates": [
+          "Targeting"
+        ],
+        "playerFacingName": "Targeting Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU21Cost"
+      }
+    },
+    {
+      "row": 22,
+      "rowKey": "SU22",
+      "milestoneId": "shard-milestone-22",
+      "status": "partial",
+      "statusReason": "Row 22 stays inside the recovered shard family with one shipped Quadratic title candidate, matched 4-slot bonus arity and a get_SU22Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-22-Quadratic"
+        ],
+        "titleCandidates": [
+          "Quadratic"
+        ],
+        "playerFacingName": "Quadratic Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 4,
+        "calcAccessorCount": 4,
+        "groundedBonusCount": 4
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU22Cost"
+      }
+    },
+    {
+      "row": 23,
+      "rowKey": "SU23",
+      "milestoneId": "shard-milestone-23",
+      "status": "partial",
+      "statusReason": "Row 23 stays inside the recovered shard family with one shipped Layering title candidate, matched 5-slot bonus arity and a get_SU23Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-23-Layering"
+        ],
+        "titleCandidates": [
+          "Layering"
+        ],
+        "playerFacingName": "Layering Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 5,
+        "calcAccessorCount": 5,
+        "groundedBonusCount": 5
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU23Cost"
+      }
+    },
+    {
+      "row": 24,
+      "rowKey": "SU24",
+      "milestoneId": "shard-milestone-24",
+      "status": "partial",
+      "statusReason": "Row 24 stays inside the recovered shard family with one shipped Torn title candidate, matched 4-slot bonus arity and a get_SU24Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-24-Torn"
+        ],
+        "titleCandidates": [
+          "Torn"
+        ],
+        "playerFacingName": "Torn Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 4,
+        "calcAccessorCount": 4,
+        "groundedBonusCount": 4
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU24Cost"
+      }
+    },
+    {
+      "row": 25,
+      "rowKey": "SU25",
+      "milestoneId": "shard-milestone-25",
+      "status": "partial",
+      "statusReason": "Row 25 stays inside the recovered shard family with one shipped Fabricating title candidate, matched 3-slot bonus arity and a get_SU25Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-25-Fabricating"
+        ],
+        "titleCandidates": [
+          "Fabricating"
+        ],
+        "playerFacingName": "Fabricating Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU25Cost"
+      }
+    },
+    {
+      "row": 26,
+      "rowKey": "SU26",
+      "milestoneId": "shard-milestone-26",
+      "status": "partial",
+      "statusReason": "Row 26 stays inside the recovered shard family with one shipped Wonderous title candidate, matched 5-slot bonus arity and a get_SU26Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-26-Wonderous"
+        ],
+        "titleCandidates": [
+          "Wonderous"
+        ],
+        "playerFacingName": "Wonderous Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 5,
+        "calcAccessorCount": 5,
+        "groundedBonusCount": 5
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU26Cost"
+      }
+    },
+    {
+      "row": 27,
+      "rowKey": "SU27",
+      "milestoneId": "shard-milestone-27",
+      "status": "partial",
+      "statusReason": "Row 27 stays inside the recovered shard family with one shipped Sharp title candidate, matched 3-slot bonus arity and a get_SU27Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-27-Sharp"
+        ],
+        "titleCandidates": [
+          "Sharp"
+        ],
+        "playerFacingName": "The Sharp Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU27Cost"
+      }
+    },
+    {
+      "row": 28,
+      "rowKey": "SU28",
+      "milestoneId": "shard-milestone-28",
+      "status": "blocked",
+      "statusReason": "The title-side evidence conflicts on row 28 because the shipped asset family still preserves both Studying and Sly as candidates, so the final player-facing title remains unresolved.",
+      "titleBinding": {
+        "status": "blocked",
+        "assetNames": [
+          "SMilestone-28-Studying",
+          "SMilestone-28-Sly"
+        ],
+        "titleCandidates": [
+          "Studying",
+          "Sly"
+        ],
+        "playerFacingName": "The Sly Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU28Cost"
+      }
+    },
+    {
+      "row": 29,
+      "rowKey": "SU29",
+      "milestoneId": "shard-milestone-29",
+      "status": "partial",
+      "statusReason": "Row 29 stays inside the recovered shard family with one shipped Earthly title candidate, matched 3-slot bonus arity and a get_SU29Cost lane, but no full verified row package is promoted yet.",
+      "titleBinding": {
+        "status": "partial",
+        "assetNames": [
+          "SMilestone-29-Earthly"
+        ],
+        "titleCandidates": [
+          "Earthly"
+        ],
+        "playerFacingName": "The Earthly Milestone"
+      },
+      "effectBinding": {
+        "status": "partial",
+        "handler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+        "bonusFieldCount": 3,
+        "calcAccessorCount": 3,
+        "groundedBonusCount": 3
+      },
+      "costShell": {
+        "status": "partial",
+        "getterName": "get_SU29Cost"
+      }
+    }
+  ],
+  "currentBoundary": [
+    "Treat this dataset as the one shipped shared shard milestone evidence table for the reachable shard family inside ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo.",
+    "Expand future shard work by tightening or upgrading rows inside this shared family table instead of reopening standalone row-by-row recovery artifacts.",
+    "Use verified rows for descriptive evidence copy only. Do not read this table as planner-safe cost math, affordability, ROI, ETA, best-buy order, or recovered player-owned shard milestone state."
+  ]
+}

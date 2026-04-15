@@ -112,7 +112,7 @@ Future shard planner work still depends on a later extraction pass that recovers
 - which `SU*` rows correspond to the current descriptive shard milestone set
 - player-owned shard milestone or shard-upgrade state
 - verified player-facing labels for the recovered `FinalSU*Bonus*` fields
-- the exact serialized row payload or save-side owner behind the current `get_TotalMilestoneLevels`, `UpdateShardCostList`, `GetShardCostList`, and `CheckMilestone*ProgressFill` cluster
+- the exact serialized or rebuilt player-owned row-state path behind the current `get_TotalMilestoneLevels`, `UpdateShardCostList`, `GetShardCostList`, and `CheckMilestone*ProgressFill` cluster
 
 ## Shipped boundary artifact
 
@@ -130,13 +130,14 @@ The next shard-local fail-fast bundle is now also preserved as:
 - [data/shard-milestone-handoff-boundary.v1.json](data/shard-milestone-handoff-boundary.v1.json)
 - [data/shard-save-boundary.v1.json](data/shard-save-boundary.v1.json)
 
-That payload boundary keeps the current milestone-total, cost-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail, but it still does not recover player-owned row payloads.
+That payload boundary keeps the current milestone-total, cost-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail. The row-definition payload is now already recovered on direct `ShardMining` scene data, but it still does not recover player-owned row ownership.
 
-The row-shell boundary separately keeps the first partial `UnlockMilestone*`, `BuyMilestone*`, and `Milestone*TextChecker` shell attached to `ShardMining`, but it still does not identify the declaring row owner or a complete row table.
+The row-shell boundary separately keeps the first partial `UnlockMilestone*`, `BuyMilestone*`, and `Milestone*TextChecker` shell attached to `ShardMining`, but it still does not identify the player-owned save owner or a complete owned-state row table.
 
 The row-alignment boundary makes the next blocker explicit: the current controller-side shell splits into `UnlockMilestone17-29`, `Milestone0-12TextChecker`, and `BuyMilestone0` rather than one shared row-number family, so the repo should not infer one-to-one row mapping from those symbols alone.
 
-The handoff boundary narrows the next blocker one step further: `ShardMining` still owns the shard-local row shell, while `ConstructionMilestones` still owns the dense `BuyMilestone1-57` generic buy family and milestone text helpers, so the remaining declaring-owner question is now the exact handoff seam between those two families rather than a fully open-ended shard-owner search.
+The handoff boundary narrows the blocker further: `ShardMining` now already owns both the direct row-definition family and the shard-local runtime row shell, while `ConstructionMilestones` stays a generic nearby `BuyMilestone1-57` buy family and milestone text helper lane. The remaining question is therefore the player-owned state path behind `upgradeInfoList`, not a controller-to-academy naming seam.
 
-The shard save boundary separately keeps the narrowed shard-local owner trail and the broader `PlayerProfileData` / `CloudSavePlayerProfile` save-family path from being treated as the same recovered context.
+The shard save boundary separately keeps that narrowed shard-local owner trail and the broader `PlayerProfileData` / `CloudSavePlayerProfile` save-family path from being treated as the same recovered context. Current evidence supports a split result: reachable row definitions are direct-serialized on `ShardMining`, but player-owned row state still stops at the `upgradeInfoList -> ShardMining+ShardUpgradeInfo` runtime shell with no verified save-side owner.
 
+The new trace workflow tightens that blocker into one explicit owned-state verdict instead of leaving shards on a generic cost-only trace. The checked trace registry now preserves a dedicated shard-owned-state target centered on `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo`, and that target rules out both a local `ShardMining` construction bridge for `IsUnlocked`, current milestone progress or level, and adjacent row-owned state near `MaxLevel`, and a recovered deeper wrapper handoff behind the runtime shell. The strongest current conclusion is therefore narrower than before: those owned-state values now sit behind a checked non-local injection seam whose save-side source the repo still cannot name.
