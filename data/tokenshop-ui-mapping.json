@@ -1,0 +1,254 @@
+{
+  "ATU1Button": {
+    "path_id": 15839,
+    "tier": "t1",
+    "type": "Token Boost",
+    "prefab": "NewTokenUPGPrefab.T1.TokensBoost",
+    "title": "Tokens Booster",
+    "bonus_label": "Tokens Gained from Token Chests",
+    "matched_titles": []
+  },
+  "ATU2Button": {
+    "path_id": 15804,
+    "tier": "t1",
+    "type": "Diamond Boost",
+    "prefab": "NewDiamondUPGPrefab.T1.DiamondBoost",
+    "title": "Diamonds Booster",
+    "bonus_label": "Diamonds Gained from Diamond Chests",
+    "matched_titles": []
+  },
+  "ATU3Button": {
+    "path_id": 15810,
+    "tier": "t1",
+    "type": "Cells Boost",
+    "prefab": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+    "title": "Cells Booster",
+    "bonus_label": "Seconds timeskip to Cells Gained from Token & Diamond Chests",
+    "matched_titles": []
+  },
+  "ATU4Button": {
+    "path_id": 15796,
+    "tier": "t1",
+    "type": "Mod Points Boost",
+    "prefab": "NewTokenUPGPrefab.T1.ModPointsBooster",
+    "title": "Mod Points Booster",
+    "bonus_label": "Mod Points Gained",
+    "matched_titles": []
+  },
+  "ATU5Button": {
+    "path_id": 15831,
+    "tier": "t1",
+    "type": "MK1 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK1Booster",
+    "title": "Mk1 Generator Output",
+    "bonus_label": "Mk1 Output",
+    "matched_titles": []
+  },
+  "ATU6Button": {
+    "path_id": 15835,
+    "tier": "t1",
+    "type": "MK2 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK2Booster",
+    "title": "Mk2 Generator Booster",
+    "bonus_label": "Mk2 Output",
+    "matched_titles": []
+  },
+  "ATU7Button": {
+    "path_id": 15792,
+    "tier": "t1",
+    "type": "MK3 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK3Booster",
+    "title": "Mk3 Generator Booster",
+    "bonus_label": "Mk3 Output",
+    "matched_titles": []
+  },
+  "ATU8Button": {
+    "path_id": 15795,
+    "tier": "t1",
+    "type": "MK4 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK4Booster",
+    "title": "Mk4 Generator Booster",
+    "bonus_label": "Mk4 Output",
+    "matched_titles": []
+  },
+  "ATU9Button": {
+    "path_id": 15845,
+    "tier": "t1",
+    "type": "MK5 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK5Booster",
+    "title": "Mk5 Generator Booster",
+    "bonus_label": "Mk5 Output",
+    "matched_titles": []
+  },
+  "ATU10Button": {
+    "path_id": 15837,
+    "tier": "t1",
+    "type": "MK6 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK6Booster",
+    "title": "Mk6 Generator Booster",
+    "bonus_label": "Mk6 Output",
+    "matched_titles": []
+  },
+  "ATU11Button": {
+    "path_id": 15793,
+    "tier": "t1",
+    "type": "MK7 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK7Booster",
+    "title": "Mk7 Generator Booster",
+    "bonus_label": "Mk7 Output",
+    "matched_titles": []
+  },
+  "ATU12Button": {
+    "path_id": 15814,
+    "tier": "t1",
+    "type": "MK8 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK8Booster",
+    "title": "Mk8 Generator Booster",
+    "bonus_label": "Mk8 Output",
+    "matched_titles": []
+  },
+  "ATU13Button": {
+    "path_id": 15821,
+    "tier": "t2",
+    "type": "Duo 1",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterOne",
+    "title": "Duo Booster One",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU14Button": {
+    "path_id": 15844,
+    "tier": "t2",
+    "type": "Duo 2",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterTwo",
+    "title": "Duo Booster Two",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU15Button": {
+    "path_id": 15850,
+    "tier": "t2",
+    "type": "Duo 3",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterThree",
+    "title": "Duo Booster Three",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU16Button": {
+    "path_id": 15827,
+    "tier": "t2",
+    "type": "Duo 4",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterFour",
+    "title": "Duo Booster Four",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU17Button": {
+    "path_id": 15841,
+    "tier": "t2",
+    "type": "Duo 5",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterFive",
+    "title": "Duo Booster Five",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU18Button": {
+    "path_id": 15834,
+    "tier": "t2",
+    "type": "Duo 6",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterSix",
+    "title": "Duo Booster Six",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU19Button": {
+    "path_id": 15842,
+    "tier": "t3",
+    "type": "Trinity 1",
+    "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+    "title": "Trio Booster One",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU20Button": {
+    "path_id": 15812,
+    "tier": "t3",
+    "type": "T3 Tokens",
+    "prefab": "NewTokenUPGPrefab.T3.TokensBoost",
+    "title": "Tokens Booster T3",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU21Button": {
+    "path_id": 15829,
+    "tier": "t3",
+    "type": "Trinity 1",
+    "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+    "title": "Daily Tokens T3",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU22Button": {
+    "path_id": 15806,
+    "tier": "t3",
+    "type": "Trinity 2",
+    "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterTwo",
+    "title": "Trinity Booster Two",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU23Button": {
+    "path_id": 15828,
+    "tier": "t3",
+    "type": "Trinity 3",
+    "prefab": "NewTokenUPGPrefab.T3.DailyTokens",
+    "title": "Trinity Booster Three",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU24Button": {
+    "path_id": 15797,
+    "tier": "t4",
+    "type": "Ultima Shards",
+    "prefab": "NewTokenUPGPrefab.T4.Ultima",
+    "title": "Ultima Shards",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU25Button": {
+    "path_id": 15820,
+    "tier": "t4",
+    "type": "Ultima",
+    "prefab": "NewTokenUPGPrefab.T4.Ultima",
+    "title": "Ultima",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU26Button": {
+    "path_id": 15840,
+    "tier": "t5",
+    "type": "Campaign Fragments",
+    "prefab": "NewTokenUPGPrefab.T5.CampaignFragments",
+    "title": "Campaign Fragments",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU27Button": {
+    "path_id": 15832,
+    "tier": "t5",
+    "type": "Ultima RP",
+    "prefab": "NewTokenUPGPrefab.T5.UltimaRP",
+    "title": "Ultima RP",
+    "bonus_label": "",
+    "matched_titles": []
+  },
+  "ATU28Button": {
+    "path_id": 15813,
+    "tier": "t5",
+    "type": "Ultima MP",
+    "prefab": "NewTokenUPGPrefab.T5.UltimaMP",
+    "title": "Ultima MP",
+    "bonus_label": "",
+    "matched_titles": []
+  }
+}

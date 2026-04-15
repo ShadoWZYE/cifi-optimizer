@@ -1,0 +1,13 @@
+{
+  "dataset": "tokenshop-cost-method-probe",
+  "generatedAt": "2026-04-16",
+  "source": {
+    "uabeaProbeReport": "data/uabea-probe-report.json"
+  },
+  "costGetterFamily": {
+    "count": 0,
+    "returnType": "Unknown (likely BigDouble)",
+    "rows": []
+  },
+  "helperMethods": []
+}

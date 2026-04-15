@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
+import types
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -15,6 +17,44 @@ JSON_OUT = ROOT / "data" / "unity-trace-bundle.json"
 MD_OUT = ROOT / "docs" / "unity" / "unity-trace-bundle.md"
 REGISTRY_PATH = ROOT / "data" / "unity-trace-target-registry.json"
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
+UNITY_JOINED_DIR = ROOT / "workbench" / "unity" / "joined"
+
+UNITY_ENV: Any = None
+
+
+def install_unitypy_stubs() -> None:
+    brotli = types.ModuleType("brotli")
+    brotli.decompress = lambda data: data
+    brotli.compress = lambda data, *args, **kwargs: data
+
+    lz4 = types.ModuleType("lz4")
+    lz4_block = types.ModuleType("lz4.block")
+    lz4_block.decompress = lambda data, uncompressed_size=None: data
+    lz4_block.compress = lambda data, **kwargs: data
+    lz4.block = lz4_block
+
+    pil = types.ModuleType("PIL")
+    pil_image = types.ModuleType("PIL.Image")
+    pil_image.open = lambda *args, **kwargs: None
+    pil.Image = pil_image
+
+    sys.modules.setdefault("brotli", brotli)
+    sys.modules.setdefault("lz4", lz4)
+    sys.modules.setdefault("lz4.block", lz4_block)
+    sys.modules.setdefault("PIL", pil)
+    sys.modules.setdefault("PIL.Image", pil_image)
+
+
+def get_unity_env():
+    global UNITY_ENV
+    if UNITY_ENV is None:
+        install_unitypy_stubs()
+        sys.path.insert(0, str((ROOT / ".deps").resolve()))
+        from UnityPy import Environment
+        UNITY_ENV = Environment()
+        UNITY_ENV.load_folder(str(UNITY_JOINED_DIR))
+    return UNITY_ENV
+
 
 ASCII_RE = re.compile(rb"[ -~]{4,}")
 UTF16_RE = re.compile(rb"(?:[\x20-\x7E]\x00){4,}")
@@ -24,6 +64,9 @@ CLASSLIKE_RE = re.compile(r"^[A-Z][A-Za-z0-9_<>]+$")
 
 ALL_SOURCE_PATHS = {
     "metadata": METADATA_PATH,
+    "level0": ROOT / "workbench" / "unity" / "joined" / "level0",
+    "sharedassets0": ROOT / "workbench" / "unity" / "joined" / "sharedassets0.assets",
+    "globalgamemanagers": ROOT / "workbench" / "unity" / "joined" / "globalgamemanagers.assets",
     "tokenShopExtract": ROOT / "data" / "token-shop-values.json",
     "tokenShopRowRemapBoundary": ROOT / "data" / "token-shop-row-remap-boundary.json",
     "tokenShopLateAtuBoundary": ROOT / "data" / "token-shop-late-atu-boundary.json",
@@ -52,6 +95,9 @@ ALL_SOURCE_PATHS = {
 
 SOURCE_ROLE_TEXT = {
     "metadata": "Preserves raw declaration-side string neighborhoods from global-metadata.dat.",
+    "level0": "Direct Unity scene extraction from level0 (TokenShop, ShardMining, MultiverseMarket objects).",
+    "sharedassets0": "Direct Unity shared assets extraction (prefabs, materials).",
+    "globalgamemanagers": "Direct Unity global managers assets extraction.",
     "tokenShopExtract": "Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser.",
     "tokenShopRowRemapBoundary": "Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing.",
     "tokenShopLateAtuBoundary": "Preserves the checked late ATU24-ATU28 shell neighborhood and its bounded negative title or prefab join result.",
@@ -612,6 +658,19 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
             "suppressedNoiseCount": suppressed_count,
             "hits": hits,
         }
+    if source_id in ("level0", "sharedassets0", "globalgamemanagers"):
+        hits, suppressed_count = collect_unity_hits(source_id, anchor_specs)
+        return {
+            "sourceId": source_id,
+            "sourcePath": repo_relative(ALL_SOURCE_PATHS[source_id]),
+            "searchModes": ["object-name", "class-name", "component-type", "text-content"],
+            "hitCount": len(hits),
+            "highSignalHitCount": sum(1 for hit in hits if hit.get("signalTier") == "high-signal"),
+            "supportingHitCount": sum(1 for hit in hits if hit.get("signalTier") == "supporting"),
+            "incidentalHitCount": sum(1 for hit in hits if hit.get("signalTier") == "incidental"),
+            "suppressedNoiseCount": suppressed_count,
+            "hits": hits,
+        }
     hits, suppressed_count = collect_exact_hits(documents[source_id], anchor_specs, source_id, shell_window)
     return {
         "sourceId": source_id,
@@ -624,6 +683,83 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
         "suppressedNoiseCount": suppressed_count,
         "hits": hits,
     }
+
+
+def collect_unity_hits(source_id: str, anchor_specs: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], int]:
+    """Collect hits from Unity files using UnityPy"""
+    hits: list[dict[str, Any]] = []
+    suppressed_count = 0
+    exact_terms = {spec["value"] for spec in anchor_specs}
+
+    env = get_unity_env()
+
+    for obj in env.objects:
+        if source_id not in (obj.assets_file.name, "resources"):
+            continue
+
+        search_surfaces = []
+
+        if obj.type.name == "MonoBehaviour":
+            try:
+                data = obj.read()
+                script = getattr(data, "m_Script", None)
+                if script:
+                    try:
+                        script_data = script.read()
+                        class_name = getattr(script_data, "m_Name", "")
+                        search_surfaces.append(("class-name", class_name, 90))
+                    except Exception:
+                        pass
+                obj_name = getattr(data, "m_Name", "") or ""
+                if obj_name:
+                    search_surfaces.append(("object-name", obj_name, 80))
+            except Exception:
+                pass
+        elif obj.type.name == "GameObject":
+            try:
+                data = obj.read()
+                name = getattr(data, "m_Name", "") or ""
+                if name:
+                    search_surfaces.append(("object-name", name, 85))
+            except Exception:
+                pass
+        elif obj.type.name in ("Text", "TextMeshProUGUI", "TextMeshPro"):
+            try:
+                data = obj.read()
+                text_field = "m_text" if obj.type.name in ("TextMeshProUGUI", "TextMeshPro") else "m_Text"
+                text_content = getattr(data, text_field, "") or ""
+                if text_content:
+                    search_surfaces.append(("text-content", text_content, 70))
+            except Exception:
+                pass
+
+        for surface_type, surface_value, base_score in search_surfaces:
+            str_value = str(surface_value)
+            for term in exact_terms:
+                matched = False
+                match_mode = ""
+                if str_value == term:
+                    matched = True
+                    match_mode = "exact-string"
+                elif term.lower() in str_value.lower():
+                    matched = True
+                    match_mode = "bounded-containment"
+
+                if matched:
+                    signal_tier = "high-signal" if match_mode == "exact-string" else "supporting"
+                    hits.append({
+                        "term": term,
+                        "matchedValue": str_value[:200],
+                        "surfaceType": surface_type,
+                        "pathId": obj.path_id,
+                        "objectType": obj.type.name,
+                        "signalTier": signal_tier,
+                        "matchMode": match_mode,
+                        "score": base_score if match_mode == "exact-string" else base_score // 2,
+                    })
+                    break
+
+    return hits, suppressed_count
 
 
 def find_surface(surfaces: list[dict[str, Any]], surface_id: str) -> dict[str, Any]:
@@ -4841,7 +4977,8 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
     execution_anchor_specs = build_anchor_specs(anchors, "execution-anchor")
     expanded_anchor_specs = build_anchor_specs(planner_resolution["expandedAnchors"], "planner-expanded-anchor")
     source_paths, source_roles = resolve_source_catalog(registry, target["requiredSourceFamilies"])
-    documents = {source_id: load_json(path) for source_id, path in source_paths.items() if source_id != "metadata"}
+    json_sources = {"metadata", "level0", "sharedassets0", "globalgamemanagers"}
+    documents = {source_id: load_json(path) for source_id, path in source_paths.items() if source_id not in json_sources}
     trace_payload = build_trace_payload(selected_target_id, target, anchors, documents)
     return {
         "dataset": "unity-trace-bundle",
@@ -4986,6 +5123,11 @@ def write_markdown(dataset: dict[str, Any]) -> None:
                     lines.append(
                         f"  - `{hit['term']}` at metadata offset `{hit['offset']}` "
                         f"[{hit['signalTier']}, score {hit['signalScore']}, {hit['matchMode']}]"
+                    )
+                elif source_entry["sourceId"] in ("level0", "sharedassets0", "globalgamemanagers"):
+                    lines.append(
+                        f"  - `{hit['term']}` at path_id `{hit['pathId']}` ({hit['objectType']}, {hit['surfaceType']}) "
+                        f"[{hit['signalTier']}, score {hit['score']}, {hit['matchMode']}]"
                     )
                 else:
                     lines.append(

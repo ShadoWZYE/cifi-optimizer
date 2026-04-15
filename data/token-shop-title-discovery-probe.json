@@ -1,0 +1,497 @@
+{
+  "dataset": "token-shop-title-discovery-probe",
+  "target_path_ids": {
+    "15839": "ATU1Button",
+    "15804": "ATU2Button",
+    "15796": "ATU4Button",
+    "15831": "ATU5Button",
+    "15821": "ATU13Button",
+    "15812": "ATU20Button"
+  },
+  "findings": {
+    "path_id_references": [],
+    "title_methods": [],
+    "direct_button_joins": [
+      {
+        "offset": 662106,
+        "kind": "ascii",
+        "value": "ATU1Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 662235,
+        "kind": "ascii",
+        "value": "ATU2Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 662349,
+        "kind": "ascii",
+        "value": "ATU3Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 662458,
+        "kind": "ascii",
+        "value": "ATU4Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 662620,
+        "kind": "ascii",
+        "value": "ATU5Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 662782,
+        "kind": "ascii",
+        "value": "ATU6Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 662944,
+        "kind": "ascii",
+        "value": "ATU7Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 663106,
+        "kind": "ascii",
+        "value": "ATU8Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 663268,
+        "kind": "ascii",
+        "value": "ATU9Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 663430,
+        "kind": "ascii",
+        "value": "ATU10Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 663596,
+        "kind": "ascii",
+        "value": "ATU11Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 663762,
+        "kind": "ascii",
+        "value": "ATU12Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 663919,
+        "kind": "ascii",
+        "value": "ATU13Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664060,
+        "kind": "ascii",
+        "value": "ATU14Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664161,
+        "kind": "ascii",
+        "value": "ATU15Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664262,
+        "kind": "ascii",
+        "value": "ATU16Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664363,
+        "kind": "ascii",
+        "value": "ATU17Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664464,
+        "kind": "ascii",
+        "value": "ATU18Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664565,
+        "kind": "ascii",
+        "value": "ATU19Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664696,
+        "kind": "ascii",
+        "value": "ATU20Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664837,
+        "kind": "ascii",
+        "value": "ATU21Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 664943,
+        "kind": "ascii",
+        "value": "ATU22Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 665049,
+        "kind": "ascii",
+        "value": "ATU23Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 665162,
+        "kind": "ascii",
+        "value": "ATU24Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 665258,
+        "kind": "ascii",
+        "value": "ATU25Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 665354,
+        "kind": "ascii",
+        "value": "ATU26Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 665450,
+        "kind": "ascii",
+        "value": "ATU27Button",
+        "context": "button_field_reference"
+      },
+      {
+        "offset": 665546,
+        "kind": "ascii",
+        "value": "ATU28Button",
+        "context": "button_field_reference"
+      }
+    ],
+    "title_nearby_search": [
+      {
+        "title": "Tokens Booster T1",
+        "target_path_id": 15839,
+        "offset": 30204460,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Token Ultima: Cells",
+          "nrek",
+          "Token Ultima: MP",
+          "nrek",
+          "Mk2 Generator Booster",
+          "nrek",
+          "Duo Booster Three",
+          "nrek",
+          "Duo Booster Two",
+          "nrek",
+          "Mk1 Generator Booster",
+          "nrek",
+          "Mk7 Generator Booster",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Tokens Booster T2",
+        "target_path_id": 15821,
+        "offset": 30209900,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Tokens Booster T1",
+          "nrek",
+          "Trinity Booster Two",
+          "nrek",
+          "Tier 2 Max Level Increaser",
+          "nrek",
+          "Duo Booster Four",
+          "nrek",
+          "Daily Tokens T4",
+          "nrek",
+          "Mk6 Generator Booster",
+          "nrek",
+          "Mk9 Generator Booster",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Tokens Booster T3",
+        "target_path_id": 15812,
+        "offset": 30220796,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Mission Materials Booster",
+          "nrek",
+          "Mod Points Booster",
+          "nrek",
+          "Academy Booster",
+          "nrek",
+          "Mk5 Generator Booster",
+          "nrek",
+          "Mk4 Generator Booster",
+          "nrek",
+          "Tokens Booster",
+          "nrek",
+          "Mk3 Generator Booster",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Tokens Booster",
+        "target_path_id": 15839,
+        "offset": 30204460,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Token Ultima: Cells",
+          "nrek",
+          "Token Ultima: MP",
+          "nrek",
+          "Mk2 Generator Booster",
+          "nrek",
+          "Duo Booster Three",
+          "nrek",
+          "Duo Booster Two",
+          "nrek",
+          "Mk1 Generator Booster",
+          "nrek",
+          "Mk7 Generator Booster",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Tokens Booster",
+        "target_path_id": 15839,
+        "offset": 30209900,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Tokens Booster T1",
+          "nrek",
+          "Trinity Booster Two",
+          "nrek",
+          "Tier 2 Max Level Increaser",
+          "nrek",
+          "Duo Booster Four",
+          "nrek",
+          "Daily Tokens T4",
+          "nrek",
+          "Mk6 Generator Booster",
+          "nrek",
+          "Mk9 Generator Booster",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Tokens Booster",
+        "target_path_id": 15839,
+        "offset": 30220796,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Mission Materials Booster",
+          "nrek",
+          "Mod Points Booster",
+          "nrek",
+          "Academy Booster",
+          "nrek",
+          "Mk5 Generator Booster",
+          "nrek",
+          "Mk4 Generator Booster",
+          "nrek",
+          "Tokens Booster",
+          "nrek",
+          "Mk3 Generator Booster",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Tokens Booster",
+        "target_path_id": 15839,
+        "offset": 30223516,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Trinity Booster One",
+          "nrek",
+          "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests",
+          "nrek",
+          "Tier 3 Max Level Increaser",
+          "nrek",
+          "Diamonds Booster",
+          "nrek",
+          "Mk1 Generator Booster",
+          "nrek",
+          "Mod Points Booster",
+          "nrek",
+          "Ouroboros Orb Booster",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Token Ultima: MP",
+        "target_path_id": 15796,
+        "offset": 30196860,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "<color=#CBCBCB>This skill reduces the <color=#FF5B",
+          "nrek",
+          "nrek",
+          "nrek",
+          "nrek",
+          "nrek",
+          "All Gens Booster",
+          "nrek",
+          "Mk5 Generator Booster",
+          "nrek",
+          "Generator Amplifier",
+          "nrek",
+          "Mk6 Generator Booster",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Token Ultima: MP",
+        "target_path_id": 15796,
+        "offset": 30200652,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "nrek",
+          "nrek",
+          "Token Ultima: MP",
+          "nrek",
+          "Duo Booster One",
+          "nrek",
+          "Borge Loot",
+          "nrek",
+          "Token Ultima: MP",
+          "nrek",
+          "Tier 1 Max Level Increaser",
+          "nrek",
+          "Duo Booster Five",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Token Ultima: MP",
+        "target_path_id": 15796,
+        "offset": 30201740,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "All Gens Booster",
+          "nrek",
+          "Mk5 Generator Booster",
+          "nrek",
+          "Generator Amplifier",
+          "nrek",
+          "Mk6 Generator Booster",
+          "nrek",
+          "Mk11 Generator Booster",
+          "nrek",
+          "Tokens Booster T1",
+          "nrek",
+          "Trinity Booster Two",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Token Ultima: MP",
+        "target_path_id": 15796,
+        "offset": 30228956,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Tokens Booster",
+          "nrek",
+          "Mk3 Generator Booster",
+          "nrek",
+          "Token Ultima",
+          "nrek",
+          "Mk4 Generator Booster",
+          "nrek",
+          "<size=\"32\">10</size>",
+          "nrek",
+          "<color=#C6C6C6>100</color>",
+          "------",
+          "<size=\"32\">10</size>",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Mod Points Booster",
+        "target_path_id": 15796,
+        "offset": 30216940,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Mk3 Generator Booster",
+          "nrek",
+          "Knox Loot",
+          "nrek",
+          "Mk8 Generator Booster",
+          "nrek",
+          "Mk12 Generator Booster",
+          "nrek",
+          "Trinity Booster One",
+          "nrek",
+          "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests",
+          "nrek",
+          "Tier 3 Max Level Increaser",
+          "nrek"
+        ]
+      },
+      {
+        "title": "Mod Points Booster",
+        "target_path_id": 15796,
+        "offset": 30226236,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "Tokens Booster T3",
+          "nrek",
+          "Cells Booster",
+          "nrek",
+          "Campaign Fragments",
+          "nrek",
+          "Mk7 Generator Booster",
+          "nrek",
+          "Hunter Revive Booster",
+          "nrek",
+          "Token Ultima: MP",
+          "nrek",
+          "<color=#C6C6C6>100</color>",
+          "------"
+        ]
+      },
+      {
+        "title": "1. MK1 Generator Output",
+        "target_path_id": 15831,
+        "offset": 34256603,
+        "has_path_id_nearby": false,
+        "context_sample": [
+          "EXIT",
+          "Pressed",
+          "UnityEngine.GameObject, UnityEngine",
+          "UnityEngine.GameObject, UnityEngine",
+          "ButtonRecoloring, Assembly-CSharp",
+          "SoundManager, Assembly-CSharp",
+          " 5A>g[",
+          "2. Mod Points Gained,",
+          "5. Academy Points Gained,",
+          "8. Permanent Daily Rewards Power,",
+          "&'>@",
+          "Pressed",
+          "UnityEngine.GameObject, UnityEngine",
+          "UnityEngine.GameObject, UnityEngine"
+        ]
+      }
+    ],
+    "prefab_title_pairs": [],
+    "direct_button_joins_level0": []
+  }
+}

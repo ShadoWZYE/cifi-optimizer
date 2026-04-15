@@ -1,0 +1,365 @@
+{
+  "dataset": "token-shop-row-remap-boundary",
+  "generatedAt": "2026-04-15",
+  "sources": {
+    "tokenShopExtract": "data/token-shop-values.json",
+    "uabeaProbe": "data/uabea-probe-report.json",
+    "unityProbe": "data/unity-probe-report.json",
+    "dailyTokeniumLaneProbe": "data/daily-tokenium-lane-probe.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0"
+  },
+  "systemOverview": {
+    "atuCount": 28,
+    "tierStructure": {
+      "tier1": "ATU1-12 (basic boosters)",
+      "tier2": "ATU13-18 (Duo boosters)",
+      "tier3": "ATU19-23 (Trio boosters)",
+      "tier4plus": "ATU24-28 (Ultima/campaign fragments)"
+    },
+    "totalNumericFields": 227,
+    "numericGroups": 32
+  },
+  "groundedRows": [
+    {
+      "field": "ATU1Level",
+      "buttonPathId": 15839,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.TokensBoost",
+      "groundedConclusion": "ATU1Button aligns directly with TokenBoost owner-field block, action-lane clues preserve BuyTokenBoost, prefab roster preserves NewTokenUPGPrefab.T1.TokensBoost.",
+      "bonusField": "TokenBoostBonus",
+      "bonusLabel": "Tokens Gained from Token Chests",
+      "bonusMode": "additive"
+    },
+    {
+      "field": "ATU2Level",
+      "buttonPathId": 15804,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.DiamondBoost",
+      "groundedConclusion": "ATU2Button aligns directly with DiamondBoost owner-field block, prefab roster preserves NewTokenUPGPrefab.T1.DiamondBoost.",
+      "bonusField": "DiamondBoostBonus",
+      "bonusLabel": "Diamonds Gained from Diamond Chests",
+      "bonusMode": "additive"
+    },
+    {
+      "field": "ATU3Level",
+      "buttonPathId": 15810,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+      "groundedConclusion": "ATU3 effect-driven through BuyCellBoost -> shared chest-effect chain with CellBoostBonus=1. Prefab bridge not recovered, but effect surface clear.",
+      "bonusField": "CellBoostBonus",
+      "bonusLabel": "Seconds timeskip to Cells Gained from Token & Diamond Chests",
+      "bonusMode": "additive",
+      "rowType": "effect-driven"
+    },
+    {
+      "field": "ATU4Level",
+      "buttonPathId": 15796,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.ModPointsBooster",
+      "groundedConclusion": "ATU4Button aligns with ModBoost block, action-lane clues preserve BuyModBoost, prefab roster preserves NewTokenUPGPrefab.T1.ModPointsBooster.",
+      "bonusField": "ModBoostBonus",
+      "bonusLabel": "Mod Points Gained",
+      "bonusMode": "multiplier"
+    },
+    {
+      "field": "ATU5Level",
+      "buttonPathId": 15831,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK1Booster",
+      "groundedConclusion": "ATU5Button aligns with MK1TokenBoost block, action-lane clues preserve BuyMK1TokenBoost, prefab roster preserves NewTokenUPGPrefab.T1.MK1Booster. Named identity '1. MK1 Generator Output' recovered.",
+      "bonusField": "MK1TokenBoostBonus",
+      "bonusLabel": "Mk1 Output",
+      "bonusMode": "multiplier"
+    },
+    {
+      "field": "ATU6Level",
+      "buttonPathId": 15835,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK2Booster",
+      "groundedConclusion": "ATU6Button has full shell-to-prefab-to-title chain. Player-facing title 'Mk2 Generator Booster' confirmed.",
+      "bonusField": "MK2TokenBoostBonus",
+      "bonusLabel": "Mk2 Output",
+      "bonusMode": "multiplier",
+      "titleRecovery": "Mk2 Generator Booster"
+    },
+    {
+      "field": "ATU7Level",
+      "buttonPathId": 15792,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK3Booster",
+      "groundedConclusion": "ATU7Button shell-to-prefab-to-title text chain recovered.",
+      "bonusField": "MK3TokenBoostBonus",
+      "bonusLabel": "Mk3 Output",
+      "bonusMode": "multiplier",
+      "titleRecovery": "Mk3 Generator Booster"
+    },
+    {
+      "field": "ATU8Level",
+      "buttonPathId": 15795,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK4Booster",
+      "groundedConclusion": "ATU8Button shell-to-prefab-to-title text chain recovered.",
+      "bonusField": "MK4TokenBoostBonus",
+      "bonusLabel": "Mk4 Output",
+      "bonusMode": "multiplier",
+      "titleRecovery": "Mk4 Generator Booster"
+    },
+    {
+      "field": "ATU9Level",
+      "buttonPathId": 15845,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK5Booster",
+      "groundedConclusion": "ATU9Button shell-to-prefab-to-title text chain recovered.",
+      "bonusField": "MK5TokenBoostBonus",
+      "bonusLabel": "Mk5 Output",
+      "bonusMode": "multiplier",
+      "titleRecovery": "Mk5 Generator Booster"
+    },
+    {
+      "field": "ATU10Level",
+      "buttonPathId": 15837,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK6Booster",
+      "groundedConclusion": "ATU10Button shell-to-prefab-to-title text chain recovered.",
+      "bonusField": "MK6TokenBoostBonus",
+      "bonusLabel": "Mk6 Output",
+      "bonusMode": "multiplier",
+      "titleRecovery": "Mk6 Generator Booster"
+    },
+    {
+      "field": "ATU11Level",
+      "buttonPathId": 15793,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK7Booster",
+      "groundedConclusion": "ATU11Button prefab bridge recovered. Quarantined: only detached 'MK7 GEN ENHANCEMENT' title-side text, no final row title join.",
+      "bonusField": "MK7TokenBoostBonus",
+      "bonusLabel": "Mk7 Output",
+      "bonusMode": "multiplier",
+      "status": "quarantined"
+    },
+    {
+      "field": "ATU12Level",
+      "buttonPathId": 15814,
+      "prefabIdentity": "NewTokenUPGPrefab.T1.MK8Booster",
+      "groundedConclusion": "ATU12Button shell-to-prefab-to-title text chain recovered.",
+      "bonusField": "MK8TokenBoostBonus",
+      "bonusLabel": "Mk8 Output",
+      "bonusMode": "multiplier",
+      "titleRecovery": "Mk8 Generator Booster"
+    },
+    {
+      "field": "ATU13Level",
+      "buttonPathId": 15821,
+      "prefabIdentity": "NewTokenUPGPrefab.T2.TokensBoost",
+      "groundedConclusion": "ATU13Button aligns with TokenBoostT2 block, action-lane clues preserve BuyTokenT2.",
+      "bonusField": "TokenBoostT2Bonus",
+      "bonusLabel": "Tokens Gained from Token Chests",
+      "bonusMode": "additive"
+    },
+    {
+      "field": "ATU20Level",
+      "buttonPathId": 15812,
+      "prefabIdentity": "NewTokenUPGPrefab.T3.TokensBoost",
+      "groundedConclusion": "ATU20Button aligns with TokenBoostT3 block, action-lane clues preserve BuyTokenT3.",
+      "bonusField": "TokenBoostT3Bonus",
+      "bonusLabel": "Tokens Gained from Token Chests",
+      "bonusMode": "additive"
+    }
+  ],
+  "unmappedRows": [
+    {
+      "field": "ATU14Level",
+      "buttonPathId": 15844,
+      "costFields": ["T2Duo1StartCost", "T2Duo1AdditiveCost", "T2Duo1Bonus"],
+      "maxLevel": 500,
+      "startCost": 1275.0,
+      "additiveCost": 25.0,
+      "bonus": 1.0199999809265137,
+      "prefabCandidate": "NewTokenUPGPrefab.T2.DuoBoosterOne",
+      "effectHook": "ATU14TokenDailiesBonus",
+      "groundedNote": "DAILY TOKENIUM ROW - provides daily tokenium bonus, not standard token. Effect hook ATU14TokenDailiesBonus confirmed in unity-probe-report.json. Likely purchased via BuyTrio1Boost in Daily Tokenium lane, not standard TokenShop."
+    },
+    {
+      "field": "ATU15Level",
+      "buttonPathId": 15850,
+      "costFields": ["T2Duo2StartCost", "T2Duo2AdditiveCost", "T2Duo2Bonus"],
+      "maxLevel": 2500,
+      "startCost": 75.0,
+      "additiveCost": 2.0,
+      "bonus": 1.0199999809265137,
+      "prefabCandidate": "NewTokenUPGPrefab.T2.DuoBoosterTwo",
+      "buyHook": "BuyDuo2Boost",
+      "groundedNote": "DAILY TOKENIUM ROW - BuyDuo2Boost hook found in Daily Tokenium lane. Not standard TokenShop."
+    },
+    {
+      "field": "ATU16Level",
+      "buttonPathId": 15827,
+      "costFields": ["T2Duo3StartCost", "T2Duo3AdditiveCost", "T2Duo3Bonus"],
+      "maxLevel": 2500,
+      "startCost": 100.0,
+      "additiveCost": 3.0,
+      "bonus": 1.0199999809265137,
+      "prefabCandidate": "NewTokenUPGPrefab.T2.DuoBoosterThree",
+      "buyHook": "BuyDuo3Boost",
+      "groundedNote": "DAILY TOKENIUM ROW - BuyDuo3Boost hook found in Daily Tokenium lane. Not standard TokenShop."
+    },
+    {
+      "field": "ATU17Level",
+      "buttonPathId": 15841,
+      "costFields": ["T2Duo4StartCost", "T2Duo4AdditiveCost", "T2Duo4Bonus"],
+      "maxLevel": 2500,
+      "startCost": 125.0,
+      "additiveCost": 4.0,
+      "bonus": 1.0199999809265137,
+      "prefabCandidate": "NewTokenUPGPrefab.T2.DuoBoosterFour",
+      "buyHook": "BuyDuo4Boost",
+      "groundedNote": "DAILY TOKENIUM ROW - BuyDuo4Boost hook found in Daily Tokenium lane. Not standard TokenShop."
+    },
+    {
+      "field": "ATU18Level",
+      "buttonPathId": 15834,
+      "costFields": ["T2Duo5StartCost", "T2Duo5AdditiveCost", "T2Duo5Bonus"],
+      "maxLevel": 2500,
+      "startCost": 150.0,
+      "additiveCost": 5.0,
+      "bonus": 1.0199999809265137,
+      "prefabCandidate": "NewTokenUPGPrefab.T2.DuoBoosterFive",
+      "buyHook": "BuyDuo5Boost",
+      "groundedNote": "DAILY TOKENIUM ROW - BuyDuo5Boost hook found in Daily Tokenium lane. Not standard TokenShop."
+    },
+    {
+      "field": "ATU19Level",
+      "buttonPathId": 15842,
+      "costFields": ["TokenBoostT3StartCost", "TokenBoostT3AdditiveCost", "TokenBoostT3Bonus"],
+      "maxLevel": 25,
+      "startCost": 2500.0,
+      "additiveCost": 750.0,
+      "bonus": 1.0,
+      "prefabCandidate": "NewTokenUPGPrefab.T3.TokensBoost",
+      "groundedNote": "UNUSED SLOT - Duplicate of ATU20. Button path_id 15842 is same as ATU20 but appears to be unused/deprecated. Shares TokenBoostT3 fields with ATU20."
+    },
+    {
+      "field": "ATU21Level",
+      "buttonPathId": 15829,
+      "costFields": ["T3Trio1StartCost", "T3Trio1AdditiveCost", "T3Trio1Bonus"],
+      "maxLevel": 2000,
+      "startCost": 7000.0,
+      "additiveCost": 100.0,
+      "bonus": 1.0299999713897705,
+      "prefabCandidate": "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+      "effectHook": "ATU21TokenDailiesBonus",
+      "groundedNote": "DAILY TOKENIUM ROW - provides daily tokenium bonus. BuyTrio1Boost hook in Daily Tokenium lane. Likely similar to LM244 but higher tier. Evidence extraction pending."
+    },
+    {
+      "field": "ATU22Level",
+      "buttonPathId": 15806,
+      "costFields": ["T3Trio2StartCost", "T3Trio2AdditiveCost", "T3Trio2Bonus"],
+      "maxLevel": 2000,
+      "startCost": 8000.0,
+      "additiveCost": 200.0,
+      "bonus": 1.0299999713897705,
+      "prefabCandidate": "NewTokenUPGPrefab.T3.TrinityBoosterTwo",
+      "groundedNote": "T3 Trio booster tier. BuyTrio2Boost hook exists. Evidence extraction pending."
+    },
+    {
+      "field": "ATU23Level",
+      "buttonPathId": 15828,
+      "costFields": [],
+      "groundedNote": "UNUSED SLOT - No cost fields after ATU23Button in token-shop-values.json. Appears to be placeholder or deprecated."
+    },
+{
+      "field": "ATU24Level",
+      "buttonPathId": 15797,
+      "costFields": ["ATU24StartCost", "ATU24Bonus1-5"],
+      "maxLevel": null,
+      "startCost": 40000000.0,
+      "bonus": "multi-step (1.001 to 1.0001 multiplier)",
+      "prefabCandidate": "NewTokenUPGPrefab.T4.Ultima",
+      "buyHook": "BuyATU24",
+      "effectHook": "ATU24Bonus3Shards",
+      "groundedNote": "DAILY TOKENIUM ROW (shard-related) - BuyATU24 hook in Daily Tokenium lane. Multi-step bonus for shard gains."
+    },
+    {
+      "field": "ATU25Level",
+      "buttonPathId": 15820,
+      "costFields": ["ATU25StartCost", "ATU25AdditiveCost", "ATU25Bonus"],
+      "maxLevel": 50,
+      "startCost": 1000000.0,
+      "additiveCost": 25000.0,
+      "bonus": 0.5,
+      "prefabCandidate": "NewTokenUPGPrefab.T4.Ultima",
+      "buyHook": "BuyATU25",
+      "groundedNote": "DAILY TOKENIUM ROW - BuyATU25 hook in Daily Tokenium lane."
+    },
+    {
+      "field": "ATU26Level",
+      "buttonPathId": 15840,
+      "costFields": ["ATU26StartCost", "ATU26AdditiveCost", "ATU26Bonus"],
+      "maxLevel": 15,
+      "startCost": 10000000.0,
+      "additiveCost": 1000000.0,
+      "bonus": 1000,
+      "prefabCandidate": "NewTokenUPGPrefab.T5.CampaignFragments",
+      "buyHook": "BuyATU26",
+      "groundedNote": "DAILY TOKENIUM ROW - BuyATU26 hook in Daily Tokenium lane. Campaign fragments related."
+    },
+    {
+      "field": "ATU27Level",
+      "buttonPathId": 15832,
+      "costFields": ["ATU27StartCost", "ATU27AdditiveCost", "ATU27Bonus"],
+      "maxLevel": 15,
+      "startCost": 50000000.0,
+      "additiveCost": 10000000.0,
+      "bonus": 500,
+      "prefabCandidate": "NewTokenUPGPrefab.T5.CampaignFragments",
+      "buyHook": "BuyATU27",
+      "groundedNote": "DAILY TOKENIUM ROW - BuyATU27 hook in Daily Tokenium lane."
+    },
+    {
+      "field": "ATU28Level",
+      "buttonPathId": 15813,
+      "costFields": ["ATU28StartCost", "ATU28AdditiveCost", "ATU28Bonus"],
+      "maxLevel": 15,
+      "startCost": 250000000.0,
+      "additiveCost": 50000000.0,
+      "bonus": 500,
+      "prefabCandidate": "NewTokenUPGPrefab.T5.CampaignFragments",
+      "buyHook": "BuyATU28",
+      "groundedNote": "DAILY TOKENIUM ROW - BuyATU28 hook in Daily Tokenium lane."
+    }
+  ]
+}
+  ],
+  "effectHooks": [
+    "ATU1TokenBonus",
+    "ATU2DiamondsBonus",
+    "ATU14TokenDailiesBonus",
+    "ATU20TokenBonus",
+    "ATU21TokenDailiesBonus",
+    "ATU24Bonus3Shards"
+  ],
+  "buyHooks": [
+    "BuyTokenBoost",
+    "BuyDiamondBoost", 
+    "BuyCellBoost",
+    "BuyModBoost",
+    "BuyMK1TokenBoost",
+    "BuyMK2TokenBoost",
+    "BuyMK3TokenBoost",
+    "BuyMK4TokenBoost",
+    "BuyMK5TokenBoost",
+    "BuyMK6TokenBoost",
+    "BuyMK7TokenBoost",
+    "BuyMK8TokenBoost",
+    "BuyTokenT2",
+    "BuyTokenT3",
+    "BuyATU24",
+    "BuyATU25",
+    "BuyATU26",
+    "BuyATU27",
+    "BuyATU28"
+  ],
+  "costExponents": {
+    "TokenBoost": 2.3,
+    "DiamondBoost": 2.5,
+    "CellBoost": 2.4,
+    "ModBoost": 2.6
+  },
+  "notes": {
+    "tier2DuoMapping": "T2 Duo boosters (ATU14-18) use naming pattern T2Duo1 through T2Duo5, likely mapped to NewTokenUPGPrefab.T2.DuoBooster*",
+    "tier3TrioMapping": "T3 Trio boosters (ATU21-22) use naming pattern T3Trio1 and T3Trio2, likely mapped to NewTokenUPGPrefab.T3.TrinityBooster*",
+    "lateAtuPattern": "ATU24-28 appear to be shard/campaign related, possibly NewTokenUPGPrefab.T4.Ultima or T5.CampaignFragments",
+    "effectDrivenRow": "ATU3 stays effect-driven via CellBoostBonus read through BuyCellBoost action hook",
+    "quarantinedRow": "ATU11 has prefab bridge but no final title join - stays quarantined"
+  }
+}

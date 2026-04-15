@@ -6,6 +6,9 @@
       "label": "TokenShop",
       "sourceIds": [
         "metadata",
+        "level0",
+        "sharedassets0",
+        "globalgamemanagers",
         "tokenShopExtract",
         "tokenShopRowRemapBoundary",
         "tokenShopLateAtuBoundary",
@@ -462,6 +465,8 @@
             "id": "prefab-lane",
             "label": "Prefab identity lane",
             "sourceIds": [
+              "level0",
+              "sharedassets0",
               "uabeaProbe",
               "unityProbe",
               "lm244TargetedProbe"
@@ -474,6 +479,8 @@
             "id": "title-lane",
             "label": "Mod title lane",
             "sourceIds": [
+              "level0",
+              "sharedassets0",
               "unityProbe"
             ],
             "terms": [
@@ -485,6 +492,8 @@
             "id": "text-hooks",
             "label": "Generic TokenShop text-hook lane",
             "sourceIds": [
+              "level0",
+              "sharedassets0",
               "unityProbe",
               "dailyTokeniumLaneProbe",
               "lm244TargetedProbe"
@@ -573,6 +582,8 @@
             "id": "prefab-lane",
             "label": "Prefab identity lane",
             "sourceIds": [
+              "level0",
+              "sharedassets0",
               "uabeaProbe",
               "unityProbe"
             ],
@@ -584,6 +595,8 @@
             "id": "support-text-lane",
             "label": "MK1 generator support-text lane",
             "sourceIds": [
+              "level0",
+              "sharedassets0",
               "unityProbe",
               "dailyTokeniumLaneProbe",
               "dailyTokeniumOwnerProbe",
@@ -611,6 +624,8 @@
             "id": "text-hooks",
             "label": "Generic TokenShop text-hook lane",
             "sourceIds": [
+              "level0",
+              "sharedassets0",
               "unityProbe",
               "dailyTokeniumLaneProbe",
               "lm244TargetedProbe"
@@ -849,6 +864,8 @@
             "id": "prefab-lane",
             "label": "Prefab identity lane",
             "sourceIds": [
+              "level0",
+              "sharedassets0",
               "uabeaProbe",
               "unityProbe",
               "lm244TargetedProbe"
@@ -1347,6 +1364,8 @@
             "id": "text-hooks",
             "label": "Generic TokenShop text-hook lane",
             "sourceIds": [
+              "level0",
+              "sharedassets0",
               "unityProbe"
             ],
             "terms": [

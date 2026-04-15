@@ -1,0 +1,254 @@
+{
+  "ATU1Button": {
+    "path_id": 15839,
+    "tier": "t1",
+    "type": "Token Boost",
+    "start": 20.0,
+    "add": 5.0,
+    "max": 20,
+    "bonus": 0.20000000298023224
+  },
+  "ATU2Button": {
+    "path_id": 15804,
+    "tier": "t1",
+    "type": "Diamond Boost",
+    "start": 200.0,
+    "add": 300.0,
+    "max": 2,
+    "bonus": 1
+  },
+  "ATU3Button": {
+    "path_id": 15810,
+    "tier": "t1",
+    "type": "Cells Boost",
+    "start": 1.0,
+    "add": 0.25,
+    "max": 60,
+    "bonus": 1
+  },
+  "ATU4Button": {
+    "path_id": 15796,
+    "tier": "t1",
+    "type": "Mod Points Boost",
+    "start": 10.0,
+    "add": 2.0,
+    "max": 200,
+    "bonus": 1.0099999904632568
+  },
+  "ATU5Button": {
+    "path_id": 15831,
+    "tier": "t1",
+    "type": "MK1 Generator",
+    "start": 1.0,
+    "add": 0.10000000149011612,
+    "max": 5000,
+    "bonus": "{'field': 'MK1TokenBoostBonus', 'value': 1.0099999904632568, 'raw_u32': 1065437102, 'raw_f32': 1.0099999904632568}"
+  },
+  "ATU6Button": {
+    "path_id": 15835,
+    "tier": "t1",
+    "type": "MK2 Generator",
+    "start": 2.0,
+    "add": 0.11999999731779099,
+    "max": 5000,
+    "bonus": 1.0099999904632568
+  },
+  "ATU7Button": {
+    "path_id": 15792,
+    "tier": "t1",
+    "type": "MK3 Generator",
+    "start": 3.0,
+    "add": 0.12999999523162842,
+    "max": 5000,
+    "bonus": 1.0099999904632568
+  },
+  "ATU8Button": {
+    "path_id": 15795,
+    "tier": "t1",
+    "type": "MK4 Generator",
+    "start": 4.0,
+    "add": 0.14000000059604645,
+    "max": 5000,
+    "bonus": 1.0099999904632568
+  },
+  "ATU9Button": {
+    "path_id": 15845,
+    "tier": "t1",
+    "type": "MK5 Generator",
+    "start": 15.0,
+    "add": 0.15000000596046448,
+    "max": 5000,
+    "bonus": 1.0099999904632568
+  },
+  "ATU10Button": {
+    "path_id": 15837,
+    "tier": "t1",
+    "type": "MK6 Generator",
+    "start": 26.0,
+    "add": 0.1599999964237213,
+    "max": 5000,
+    "bonus": 1.0099999904632568
+  },
+  "ATU11Button": {
+    "path_id": 15793,
+    "tier": "t1",
+    "type": "MK7 Generator",
+    "start": 37.0,
+    "add": 0.20000000298023224,
+    "max": 5000,
+    "bonus": 1.0099999904632568
+  },
+  "ATU12Button": {
+    "path_id": 15814,
+    "tier": "t1",
+    "type": "MK8 Generator",
+    "start": 48.0,
+    "add": 0.30000001192092896,
+    "max": 5000,
+    "bonus": 1.0099999904632568
+  },
+  "ATU13Button": {
+    "path_id": 15821,
+    "tier": "t2",
+    "type": "Duo 1",
+    "start": 1000.0,
+    "add": 500.0,
+    "max": 10,
+    "bonus": 0.5
+  },
+  "ATU14Button": {
+    "path_id": 15844,
+    "tier": "t2",
+    "type": "Duo 2",
+    "start": 1000.0,
+    "add": 800.0,
+    "max": 10,
+    "bonus": 0.20000000298023224
+  },
+  "ATU15Button": {
+    "path_id": 15850,
+    "tier": "t2",
+    "type": "Duo 3",
+    "start": 1275.0,
+    "add": 25.0,
+    "max": 500,
+    "bonus": "{'field': 'T2Duo1Bonus', 'value': 1.0199999809265137, 'raw_u32': 1065520988, 'raw_f32': 1.0199999809265137}"
+  },
+  "ATU16Button": {
+    "path_id": 15827,
+    "tier": "t2",
+    "type": "Duo 4",
+    "start": 75.0,
+    "add": 2.0,
+    "max": 2500,
+    "bonus": 1.0199999809265137
+  },
+  "ATU17Button": {
+    "path_id": 15841,
+    "tier": "t2",
+    "type": "Duo 5",
+    "start": 100.0,
+    "add": 3.0,
+    "max": 2500,
+    "bonus": 1.0199999809265137
+  },
+  "ATU18Button": {
+    "path_id": 15834,
+    "tier": "t2",
+    "type": "Duo 6",
+    "start": 125.0,
+    "add": 4.0,
+    "max": 2500,
+    "bonus": 1.0199999809265137
+  },
+  "ATU19Button": {
+    "path_id": 15842,
+    "tier": "t3",
+    "type": "Trinity 1",
+    "start": 150.0,
+    "add": 5.0,
+    "max": 2500,
+    "bonus": 1.0199999809265137
+  },
+  "ATU20Button": {
+    "path_id": 15812,
+    "tier": "t3",
+    "type": "T3 Tokens",
+    "start": 2500.0,
+    "add": 750.0,
+    "max": 25,
+    "bonus": 1.0
+  },
+  "ATU21Button": {
+    "path_id": 15829,
+    "tier": "t3",
+    "type": "Trinity 1",
+    "start": 3000.0,
+    "add": 900.0,
+    "max": 50,
+    "bonus": 0.20000000298023224
+  },
+  "ATU22Button": {
+    "path_id": 15806,
+    "tier": "t3",
+    "type": "Trinity 2",
+    "start": 7000.0,
+    "add": 100.0,
+    "max": 2000,
+    "bonus": "{'field': 'T3Trio1Bonus', 'value': 1.0299999713897705, 'raw_u32': 1065604874, 'raw_f32': 1.0299999713897705}"
+  },
+  "ATU23Button": {
+    "path_id": 15828,
+    "tier": "t3",
+    "type": "Trinity 3",
+    "start": 8000.0,
+    "add": 200.0,
+    "max": 2000,
+    "bonus": 1.0299999713897705
+  },
+  "ATU24Button": {
+    "path_id": 15797,
+    "tier": "t4",
+    "type": "Ultima Shards",
+    "start": 40000000.0,
+    "add": null,
+    "max": null,
+    "bonus": 1.0003000497817993
+  },
+  "ATU25Button": {
+    "path_id": 15820,
+    "tier": "t4",
+    "type": "Ultima",
+    "start": 1000000.0,
+    "add": 25000.0,
+    "max": 50,
+    "bonus": 0.5
+  },
+  "ATU26Button": {
+    "path_id": 15840,
+    "tier": "t5",
+    "type": "Campaign Fragments",
+    "start": 10000000.0,
+    "add": 1000000.0,
+    "max": 15,
+    "bonus": 1000
+  },
+  "ATU27Button": {
+    "path_id": 15832,
+    "tier": "t5",
+    "type": "Ultima RP",
+    "start": 50000000.0,
+    "add": 10000000.0,
+    "max": 15,
+    "bonus": 500
+  },
+  "ATU28Button": {
+    "path_id": 15813,
+    "tier": "t5",
+    "type": "Ultima MP",
+    "start": 250000000.0,
+    "add": 50000000.0,
+    "max": 15,
+    "bonus": 500
+  }
+}

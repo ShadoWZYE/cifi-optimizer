@@ -1,197 +1,755 @@
 # Unity Trace Bundle
 
-- Target: `shard-owned-state-upgradeinfolist-population`
-- Label: Shard owned-state population boundary
-- Anchors: `upgradeInfoList, ShardMining+ShardUpgradeInfo, IsUnlocked, MaxLevel, InitializeShards, UpdateUnlockedMilestonesList, UpdateMaxedMilestonesList`
-- Join goal: Trace the owned-state population path behind ShardMining.upgradeInfoList end to end and distinguish whether reachable shard row state is filled by a local runtime bridge, a deeper wrapper handoff, or a still-negative non-local injection seam.
+- Target: `token-shop-atu3-cells`
+- Label: TokenShop ATU3 cells split
+- Anchors: `ATU3Button, 15810, T2, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
+- Join goal: Recover one checked ATU3Button or path id 15810 bridge to one exact prefab identity or final player-facing title.
 
 ## Planner resolution
 
-- Selection mode: `explicit-target`
-- Matched family: `shard-owned-state` (Shard owned state)
-- Run mode: `trace`
-- Requested queries: `none`
-- Requested anchors: `none`
-- Expanded anchor kinds: `upgradeInfoList (string), ShardMining+ShardUpgradeInfo (string), IsUnlocked (class), MaxLevel (class), InitializeShards (method), UpdateUnlockedMilestonesList (method), UpdateMaxedMilestonesList (method)`
-- Decision note: Used explicit target shard-owned-state-upgradeinfolist-population in the Shard owned state family and kept family-aware anchor expansion so the backend records the same checked synonym surface deterministically.
+- Selection mode: `query-planner`
+- Matched family: `token-shop` (TokenShop)
+- Run mode: `compare`
+- Requested queries: `TokenShop`
+- Requested anchors: `T2`
+- Expanded anchor kinds: `ATU3Button (class), 15810 (path id), TokenShop (class), T2 (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method), ATU (class), ATU1Button (class), Currency (class), Tokens (class), Tokenium (class), Diamond Upgrade (string)`
+- Decision note: Matched TokenShop to TokenShop through token-shop-shell, currency-lane and chose the bounded token-shop-atu3-vs-atu1 compare run because this query is better grounded as one checked solved-vs-blocked family trace.
 
 ## Execution anchors
 
-- Typed execution anchors: `upgradeInfoList (string), ShardMining+ShardUpgradeInfo (string), IsUnlocked (class), MaxLevel (class), InitializeShards (method), UpdateUnlockedMilestonesList (method), UpdateMaxedMilestonesList (method)`
+- Typed execution anchors: `ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
 
 ## Workflow
 
 - Command: `node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]`
 - Direct example: `node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>`
 - Planner example: `node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>`
-- Accepted anchor kinds: `class, method, field, dataset`
+- Accepted anchor kinds: `class, method, string, path id`
 - Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.
-- Registry target: `shard-owned-state-upgradeinfolist-population` from `shard-owned-state` via [`data/unity-trace-target-registry.json`](data/unity-trace-target-registry.json)
-
-## Outcome
-
-- Kind: `non-local-injection-seam`
-- Label: Non-local injection seam
-- Summary: The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values remain bounded as a non-local injection seam.
+- Registry target: `token-shop-atu3-cells` from `token-shop` via [`data/unity-trace-target-registry.json`](data/unity-trace-target-registry.json)
 
 ## Source reads
 
-- `shardSaveBoundary`: [`data/shard-save-boundary.v1.json`](data/shard-save-boundary.v1.json)
-  - Preserves the split between direct ShardMining row-definition payload and the still-unresolved owned-state path behind upgradeInfoList.
-- `shardMilestonePayloadBoundary`: [`data/shard-milestone-payload-boundary.v1.json`](data/shard-milestone-payload-boundary.v1.json)
-  - Preserves the shard-local watcher hooks and payload-watch clusters without promoting them into a recovered owned-state source.
-- `shardMilestoneHandoffBoundary`: [`data/shard-milestone-handoff-boundary.v1.json`](data/shard-milestone-handoff-boundary.v1.json)
-  - Preserves the current shard-local versus academy-side handoff narrowing around upgradeInfoList and generic ConstructionMilestones helpers.
-- `shardTypeMetadataProbe`: [`data/shard-type-metadata-probe.v1.json`](data/shard-type-metadata-probe.v1.json)
-  - Preserves typed shard owner-list fields plus ShardMining+ShardUpgradeInfo row-state fields recovered from direct type reflection.
-- `shardSceneMonoBehaviourProbe`: [`data/shard-scene-monobehaviour-probe.v1.json`](data/shard-scene-monobehaviour-probe.v1.json)
-  - Preserves the exact level0 ShardMining MonoBehaviour object that holds the direct shard definition payload.
-- `shardMilestoneSaveOwnerCandidates`: [`data/shard-milestone-save-owner-candidates.v1.json`](data/shard-milestone-save-owner-candidates.v1.json)
-  - Preserves the still-blocked shard save-owner candidate narrowing used to keep structural cost work separate from save-side promotion.
+- `metadata`: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat)
+  - Preserves raw declaration-side string neighborhoods from global-metadata.dat.
+- `level0`: [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
+  - Direct Unity scene extraction from level0 (TokenShop, ShardMining, MultiverseMarket objects).
+- `sharedassets0`: [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets)
+  - Direct Unity shared assets extraction (prefabs, materials).
+- `globalgamemanagers`: [`workbench/unity/joined/globalgamemanagers.assets`](workbench/unity/joined/globalgamemanagers.assets)
+  - Direct Unity global managers assets extraction.
+- `tokenShopExtract`: [`data/token-shop-values.json`](data/token-shop-values.json)
+  - Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser.
+- `tokenShopRowRemapBoundary`: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json)
+  - Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing.
+- `tokenShopLateAtuBoundary`: [`data/token-shop-late-atu-boundary.json`](data/token-shop-late-atu-boundary.json)
+  - Preserves the checked late ATU24-ATU28 shell neighborhood and its bounded negative title or prefab join result.
+- `dailyTokeniumLaneProbe`: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json)
+  - Preserves named action-hook neighborhoods from the committed targeted string probe outputs.
+- `dailyTokeniumOwnerProbe`: [`data/daily-tokenium-owner-probe.json`](data/daily-tokenium-owner-probe.json)
+  - Preserves committed owner-side TokenShop title and support-text neighborhoods from the local level0 probe lane.
+- `uabeaProbe`: [`data/uabea-probe-report.json`](data/uabea-probe-report.json)
+  - Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities or typed field tables.
+- `unityProbe`: [`data/unity-probe-report.json`](data/unity-probe-report.json)
+  - Preserves broader committed unity string buckets including title or text-hook surfaces.
+- `lm244TargetedProbe`: [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json)
+  - Preserves targeted string-hit neighborhoods from the local lm244 follow-up probe lane.
 
 ## Shell window
 
-- Shell field: `upgradeInfoList`
-- Shell path id: `5216`
-- Owner field block: `<Cost>k__BackingField, <MaxLevel>k__BackingField, <IsUnlocked>k__BackingField`
+- Shell field: `ATU3Button`
+- Shell path id: `15810`
+- Owner field block: `CellBoostStartCost, CellBoostAdditiveCost, CellBoostBonus, CellBoostMaxLevel, CellBoostFill`
 
 ## Surface traces
 
-### Direct scene owner
+### Metadata neighborhood
 
-- Search terms: `ShardMining, ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo, upgradeInfoList, ShardMining+ShardUpgradeInfo, IsUnlocked, MaxLevel, InitializeShards, UpdateUnlockedMilestonesList, UpdateMaxedMilestonesList`
-- Typed anchors: `ShardMining (class), ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo (string), upgradeInfoList (string), ShardMining+ShardUpgradeInfo (string), IsUnlocked (class), MaxLevel (class), InitializeShards (method), UpdateUnlockedMilestonesList (method), UpdateMaxedMilestonesList (method)`
-- Source: [`data/shard-scene-monobehaviour-probe.v1.json`](data/shard-scene-monobehaviour-probe.v1.json) (2 hits)
+- Search terms: `ATU3Button, CellBoost, BuyCellBoost, 15810, T2, SetAllTokenShopTexts`
+- Typed anchors: `ATU3Button (class), CellBoost (class), BuyCellBoost (method), 15810 (path id), T2 (class), SetAllTokenShopTexts (method)`
+- Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) (11 hits)
+  - Signal summary: 0 high-signal, 3 supporting, 8 incidental, 9 suppressed-noise
+  - `BuyCellBoost` at metadata offset `659754` [supporting, score 90, exact-string]
+  - `ATU3Button` at metadata offset `662349` [supporting, score 90, exact-string]
+  - `SetAllTokenShopTexts` at metadata offset `979315` [supporting, score 90, exact-string]
+  - `RainbowEffect2DSprite` at metadata offset `600936` [incidental, score 45, bounded-containment]
+  - `comboText2` at metadata offset `607629` [incidental, score 45, bounded-containment]
+  - `CellmasAchievementOverlayText2` at metadata offset `620909` [incidental, score 45, bounded-containment]
+  - `Present24ValueText2` at metadata offset `622795` [incidental, score 45, bounded-containment]
+  - `BuyCellBoostEnum` at metadata offset `661133` [incidental, score 45, bounded-containment]
+  - `CellBoostStartCost` at metadata offset `662261` [incidental, score 45, bounded-containment]
+  - `CellBoostAdditiveCost` at metadata offset `662280` [incidental, score 45, bounded-containment]
+  - `<BuyCellBoostEnum>d__630` at metadata offset `668194` [incidental, score 45, bounded-containment]
+
+### Action hook lane
+
+- Search terms: `StartCellBostHold, StopCellBostHold, BuyCellBoost, ATU3Button, 15810, T2, CellBoost, SetAllTokenShopTexts`
+- Typed anchors: `StartCellBostHold (method), StopCellBostHold (method), BuyCellBoost (method), ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), SetAllTokenShopTexts (method)`
+- Source: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json) (16 hits)
+  - Signal summary: 16 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `StartCellBostHold` at `$[0].matches[101].byte_context[30].value` [high-signal, score 100, exact-structured]
+  - `StopCellBostHold` at `$[0].matches[101].byte_context[33].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[101].byte_context[41].value` [high-signal, score 100, exact-structured]
+  - `StartCellBostHold` at `$[0].matches[101].entry_context[17].value` [high-signal, score 100, exact-structured]
+  - `StopCellBostHold` at `$[0].matches[101].entry_context[20].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[101].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `StartCellBostHold` at `$[0].matches[102].byte_context[29].value` [high-signal, score 100, exact-structured]
+  - `StopCellBostHold` at `$[0].matches[102].byte_context[32].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[102].byte_context[40].value` [high-signal, score 100, exact-structured]
+  - `StartCellBostHold` at `$[0].matches[102].entry_context[14].value` [high-signal, score 100, exact-structured]
+  - `StopCellBostHold` at `$[0].matches[102].entry_context[17].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[102].entry_context[25].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].byte_context[118].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].entry_context[16].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[313].entry_context[4].value` [high-signal, score 100, exact-structured]
+
+### Diamond-special prefab or title lane
+
+- Search terms: `NewDiamondUPGPrefab.Specials.CellsBoost, >Diamond Upgrade 10 - CellsBoost, ATU3Button, 15810, T2, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
+- Typed anchors: `NewDiamondUPGPrefab.Specials.CellsBoost (string), >Diamond Upgrade 10 - CellsBoost (string), ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
+- Source: [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json) (2 hits)
+  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
+  - `SetAllTokenShopTexts` at `$[0].matches[225].byte_context[48].value` [supporting, score 95, exact-structured]
+  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$[0].matches[23].byte_context[89].value` [supporting, score 95, exact-structured]
+- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (4 hits)
+  - Signal summary: 0 high-signal, 4 supporting, 0 incidental, 0 suppressed-noise
+  - `>Diamond Upgrade 10 - CellsBoost` at `$.apk_results[0].keyword_hits.diamond[45]` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$.apk_results[7].keyword_hits.diamond[16]` [supporting, score 95, exact-structured]
+  - `>Diamond Upgrade 10 - CellsBoost` at `$.file_results[0].keyword_hits.diamond[45]` [supporting, score 95, exact-structured]
+- Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) (1 hits)
+  - Signal summary: 1 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$.namedObjectHits[10352].name` [high-signal, score 100, exact-structured]
+
+### Token prefab or title lane
+
+- Search terms: `NewTokenUPGPrefab.T1.CellsPerChestBooster, NewTokenUPGPrefab.T5.UltimaCells, Token Ultima: Cells, ATU3Button, 15810, T2, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
+- Typed anchors: `NewTokenUPGPrefab.T1.CellsPerChestBooster (string), NewTokenUPGPrefab.T5.UltimaCells (string), Token Ultima: Cells (string), ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
+- Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) (2 hits)
   - Signal summary: 2 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `ShardMining` at `$.monoBehaviours[1].scriptName` [high-signal, score 100, exact-structured]
-  - `290724` at `$.monoBehaviours[1].pathId` [high-signal, score 100, exact-structured]
-- Source: [`data/shard-save-boundary.v1.json`](data/shard-save-boundary.v1.json) (2 hits)
-  - Signal summary: 2 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `ShardMining` at `$.recoveredDirectRowDefinitionPayload.ownerType` [high-signal, score 100, exact-structured]
-  - `upgradeInfoList` at `$.recoveredDeclaringRowModel.declaringField.name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.namedObjectHits[10371].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.namedObjectHits[10395].name` [high-signal, score 100, exact-structured]
+- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (6 hits)
+  - Signal summary: 0 high-signal, 6 supporting, 0 incidental, 0 suppressed-noise
+  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.token[25]` [supporting, score 95, exact-structured]
+  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.ultima[5]` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.apk_results[7].keyword_hits.token[38]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.apk_results[7].keyword_hits.token[4]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.apk_results[7].keyword_hits.ultima[2]` [supporting, score 95, exact-structured]
 
-### upgradeInfoList runtime shell
+### Generic TokenShop text-hook lane
 
-- Search terms: `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo, <Cost>k__BackingField, <MaxLevel>k__BackingField, <IsUnlocked>k__BackingField, upgradeInfoList, ShardMining+ShardUpgradeInfo, IsUnlocked, MaxLevel, InitializeShards, UpdateUnlockedMilestonesList, UpdateMaxedMilestonesList`
-- Typed anchors: `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo (string), <Cost>k__BackingField (method), <MaxLevel>k__BackingField (method), <IsUnlocked>k__BackingField (method), upgradeInfoList (string), ShardMining+ShardUpgradeInfo (string), IsUnlocked (class), MaxLevel (class), InitializeShards (method), UpdateUnlockedMilestonesList (method), UpdateMaxedMilestonesList (method)`
-- Source: [`data/shard-save-boundary.v1.json`](data/shard-save-boundary.v1.json) (5 hits)
-  - Signal summary: 5 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `upgradeInfoList` at `$.recoveredDeclaringRowModel.declaringField.name` [high-signal, score 100, exact-structured]
-  - `ShardMining+ShardUpgradeInfo` at `$.recoveredDeclaringRowModel.rowModelType.fullName` [high-signal, score 100, exact-structured]
-  - `<Cost>k__BackingField` at `$.recoveredDeclaringRowModel.rowStateFields` [high-signal, score 100, exact-structured]
-  - `<MaxLevel>k__BackingField` at `$.recoveredDeclaringRowModel.rowStateFields` [high-signal, score 100, exact-structured]
-  - `<IsUnlocked>k__BackingField` at `$.recoveredDeclaringRowModel.rowStateFields` [high-signal, score 100, exact-structured]
-- Source: [`data/shard-type-metadata-probe.v1.json`](data/shard-type-metadata-probe.v1.json) (4 hits)
-  - Signal summary: 4 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `upgradeInfoList` at `$.targets.shardMining.ownerListFields` [high-signal, score 100, exact-structured]
-  - `<Cost>k__BackingField` at `$.targets.shardUpgradeInfo.fields` [high-signal, score 100, exact-structured]
-  - `<MaxLevel>k__BackingField` at `$.targets.shardUpgradeInfo.fields` [high-signal, score 100, exact-structured]
-  - `<IsUnlocked>k__BackingField` at `$.targets.shardUpgradeInfo.fields` [high-signal, score 100, exact-structured]
-
-### Shard-local watcher and list shells
-
-- Search terms: `InitializeShards, InitializeMaxLevelBools, UpdateUnlockedMilestonesList, UpdateMaxedMilestonesList, CheckAllMilestoneLevelFills, MaxedMilestonesList, UnlockedMilestonesList, MilestoneCostList, upgradeInfoList, upgradeInfoList, ShardMining+ShardUpgradeInfo, IsUnlocked, MaxLevel, InitializeShards, UpdateUnlockedMilestonesList, UpdateMaxedMilestonesList`
-- Typed anchors: `InitializeShards (method), InitializeMaxLevelBools (method), UpdateUnlockedMilestonesList (method), UpdateMaxedMilestonesList (method), CheckAllMilestoneLevelFills (method), MaxedMilestonesList (class), UnlockedMilestonesList (class), MilestoneCostList (class), upgradeInfoList (string), ShardMining+ShardUpgradeInfo (string), IsUnlocked (class), MaxLevel (class)`
-- Source: [`data/shard-milestone-payload-boundary.v1.json`](data/shard-milestone-payload-boundary.v1.json) (6 hits)
-  - Signal summary: 6 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `get_TotalMilestoneLevels` at `$.costAndListHooks` [high-signal, score 100, exact-structured]
-  - `InitializeMaxLevelBools` at `$.costAndListHooks` [high-signal, score 100, exact-structured]
-  - `UpdateMaxedMilestonesList` at `$.costAndListHooks` [high-signal, score 100, exact-structured]
-  - `UpdateUnlockedMilestonesList` at `$.costAndListHooks` [high-signal, score 100, exact-structured]
-  - `CheckAllMilestoneLevelFills` at `$.progressFillHooks` [high-signal, score 100, exact-structured]
-  - `CheckMilestone0ProgressFill` at `$.progressFillHooks` [high-signal, score 100, exact-structured]
-- Source: [`data/shard-type-metadata-probe.v1.json`](data/shard-type-metadata-probe.v1.json) (4 hits)
-  - Signal summary: 4 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `MaxedMilestonesList` at `$.targets.shardMining.ownerListFields` [high-signal, score 100, exact-structured]
-  - `UnlockedMilestonesList` at `$.targets.shardMining.ownerListFields` [high-signal, score 100, exact-structured]
-  - `MilestoneCostList` at `$.targets.shardMining.ownerListFields` [high-signal, score 100, exact-structured]
-  - `upgradeInfoList` at `$.targets.shardMining.ownerListFields` [high-signal, score 100, exact-structured]
-
-### Controller versus wrapper handoff boundary
-
-- Search terms: `ConstructionMilestones, Assembly-CSharp, ConstructionMilestones, upgradeInfoList, ShardMining+ShardUpgradeInfo, IsUnlocked, MaxLevel, InitializeShards, UpdateUnlockedMilestonesList, UpdateMaxedMilestonesList`
-- Typed anchors: `ConstructionMilestones, Assembly-CSharp (string), ConstructionMilestones (class), upgradeInfoList (string), ShardMining+ShardUpgradeInfo (string), IsUnlocked (class), MaxLevel (class), InitializeShards (method), UpdateUnlockedMilestonesList (method), UpdateMaxedMilestonesList (method)`
-- Source: [`data/shard-milestone-handoff-boundary.v1.json`](data/shard-milestone-handoff-boundary.v1.json) (3 hits)
-  - Signal summary: 3 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `ShardMining` at `$.shardControllerFamily` [high-signal, score 100, exact-structured]
-  - `ConstructionMilestones, Assembly-CSharp` at `$.genericMilestoneLead.family` [high-signal, score 100, exact-structured]
-  - `upgradeInfoList` at `$.handoffFindings[3]` [high-signal, score 100, exact-structured]
-
-### Save-side blocker
-
-- Search terms: `PlayerProfile-side shard member shell, PlayerProfileData, CloudSavePlayerProfile, upgradeInfoList, ShardMining+ShardUpgradeInfo, IsUnlocked, MaxLevel, InitializeShards, UpdateUnlockedMilestonesList, UpdateMaxedMilestonesList`
-- Typed anchors: `PlayerProfile-side shard member shell (string), PlayerProfileData (class), CloudSavePlayerProfile (class), upgradeInfoList (string), ShardMining+ShardUpgradeInfo (string), IsUnlocked (class), MaxLevel (class), InitializeShards (method), UpdateUnlockedMilestonesList (method), UpdateMaxedMilestonesList (method)`
-- Source: [`data/shard-milestone-save-owner-candidates.v1.json`](data/shard-milestone-save-owner-candidates.v1.json) (3 hits)
-  - Signal summary: 3 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `PlayerProfile-side shard member shell` at `$.remainingSaveOwnerCandidates[0].label` [high-signal, score 100, exact-structured]
-  - `PlayerProfileData` at `$.remainingSaveOwnerCandidates[0].candidateFieldClusters` [high-signal, score 100, exact-structured]
-  - `CloudSavePlayerProfile` at `$.remainingSaveOwnerCandidates[0].candidateFieldClusters` [high-signal, score 100, exact-structured]
-- Source: [`data/shard-save-boundary.v1.json`](data/shard-save-boundary.v1.json) (2 hits)
-  - Signal summary: 2 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `PlayerProfileData` at `$.saveFamilyTermsChecked` [high-signal, score 100, exact-structured]
-  - `CloudSavePlayerProfile` at `$.saveFamilyTermsChecked` [high-signal, score 100, exact-structured]
+- Search terms: `SetAllTokenShopTexts, SetTokenTexts, ATU3Button, 15810, T2, CellBoost, BuyCellBoost`
+- Typed anchors: `SetAllTokenShopTexts (method), SetTokenTexts (method), ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), BuyCellBoost (method)`
+- Source: [`workbench/unity/joined/level0`](workbench/unity/joined/level0) (525 hits)
+  - Signal summary: 0 high-signal, 525 supporting, 0 incidental, 0 suppressed-noise
+  - `T2` at path_id `260` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `320` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `329` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `422` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `429` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `637` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `1749` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `1974` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `2036` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `2040` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `2525` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `2572` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `2911` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `3390` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `3777` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `4186` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `4381` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `4816` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `5177` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `5594` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `5732` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `6062` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `6142` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `6145` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `6229` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `6791` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `6997` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `7208` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `7276` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `7641` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `8171` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `8176` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `8344` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `8401` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `8803` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `8954` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `8969` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9061` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9284` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9329` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9420` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9550` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9629` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9640` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9671` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `9905` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `10015` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `10417` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `10733` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `11320` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `11709` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `12032` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `12238` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `12366` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `12399` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `12511` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `12656` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `12769` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `13381` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `15395` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `15396` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `15397` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `18062` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `18063` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `18064` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `18065` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `18066` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `18067` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `20288` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `20289` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `20290` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `20291` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `20292` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `20293` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `21327` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `22866` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `23647` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `26909` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `27691` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `27740` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `27775` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `27797` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `27827` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `27858` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28371` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28372` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28373` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28374` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28375` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28376` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28985` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28986` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28987` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28988` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28989` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28990` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28991` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28992` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `28993` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30389` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30394` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30409` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30410` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30415` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30421` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30425` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30430` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `30431` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32240` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32279` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32325` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32357` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32364` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32376` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32393` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32428` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `32475` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33744` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33747` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33749` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33752` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33754` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33755` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33756` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33757` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33760` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33761` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33763` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33769` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33777` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33779` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33780` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33781` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33784` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33786` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33787` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33788` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33791` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33793` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33794` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33795` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33797` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33805` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33809` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33817` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33821` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `33824` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34120` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34121` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34128` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34131` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34967` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34968` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34969` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34970` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34971` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34972` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34973` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34974` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34975` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34976` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34977` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34978` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34979` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34980` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34981` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34982` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34983` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34984` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34985` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34986` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34987` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34988` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34989` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34990` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34991` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34992` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34993` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34994` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34995` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34996` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34997` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34998` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `34999` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35000` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35001` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35002` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35003` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35004` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35005` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35006` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35007` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35008` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35009` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35010` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35011` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35012` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35013` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35014` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35015` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35016` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35017` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35018` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35019` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35020` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35021` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35022` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35023` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35024` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35025` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35026` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35027` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `35028` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36623` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36970` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36971` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36972` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36973` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36974` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36975` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36976` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36977` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36978` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36979` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36980` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36981` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36982` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36983` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36984` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36985` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36986` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36987` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36988` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36989` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36990` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36991` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36992` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36993` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36994` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36995` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36996` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36997` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `36998` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37729` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37734` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37737` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37771` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37780` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37788` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37847` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37874` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37876` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37890` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37943` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37965` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `37978` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38003` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38009` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38032` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38068` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38076` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38103` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38105` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38154` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38156` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38171` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38181` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38199` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38224` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38244` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38259` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38292` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38311` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38322` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38336` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38340` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38355` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38358` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38369` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38374` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38395` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38398` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38412` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38555` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38564` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38594` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38597` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38628` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38652` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38691` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38729` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38762` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38831` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38846` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38864` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38866` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38930` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38971` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `38980` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39003` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39016` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39037` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39060` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39062` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39091` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39135` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39184` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39232` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39238` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39239` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39242` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39257` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39303` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39306` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39328` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39383` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39389` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39418` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39434` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39521` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39530` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39534` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39541` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39553` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39570` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39586` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39672` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39684` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39717` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39726` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39734` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39736` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39738` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39746` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39753` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39762` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39765` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39766` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39788` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39835` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39845` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39849` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39850` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39884` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39905` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39944` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39955` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39958` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39966` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `39985` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `40000` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `40072` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `40074` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `40098` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `40113` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `46818` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `46826` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `46836` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `46849` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `46858` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `46882` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `47968` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `48842` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `48843` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `48849` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `48853` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `48860` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `48863` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `48865` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `50965` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `50990` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51022` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51034` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51042` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51047` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51058` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51059` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51066` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51077` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51084` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51092` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51103` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51111` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51122` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51128` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51139` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51140` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51146` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51180` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51197` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51223` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51234` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51243` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51250` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51256` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51259` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51272` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `51278` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `59140` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `61636` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `61973` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `62023` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63721` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63722` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63724` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63725` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63728` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63731` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63732` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63734` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63735` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63738` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63739` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63742` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63749` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63759` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63765` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63771` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63775` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63778` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63780` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63781` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63787` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63788` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63790` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63791` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63793` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63794` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63795` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63802` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63805` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63809` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63811` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63812` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63815` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63817` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63819` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63822` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63823` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63824` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63831` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63840` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63843` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63847` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63849` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `63852` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `70207` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `70209` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `70211` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `70218` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `70221` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `70235` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `70532` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `72145` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `72752` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `73598` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `74743` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `75263` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `75607` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `83764` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `85643` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `85774` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `85786` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `85795` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `85796` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `85812` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `85813` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86228` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86588` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86636` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86681` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86686` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86711` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86713` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86733` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86739` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86782` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86828` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86832` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86850` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86867` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86872` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86897` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86929` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86959` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86961` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `86993` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87006` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87026` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87044` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87053` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87068` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87084` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87129` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87136` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87161` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87167` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87182` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87190` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87192` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87238` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87249` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87255` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87284` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87292` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87319` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87382` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87421` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87426` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87456` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87464` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87524` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87530` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87605` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87625` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87666` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87677` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87678` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87690` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87776` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87785` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87825` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87861` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `87891` (GameObject, object-name) [supporting, score 42, bounded-containment]
+  - `T2` at path_id `89846` (GameObject, object-name) [supporting, score 42, bounded-containment]
+- Source: [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets) (0 hits)
+  - Signal summary: 0 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (2 hits)
+  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$.apk_results[32].keyword_hits.token[7]` [supporting, score 95, exact-structured]
 
 ## Bridge check
 
-- Result: `checked non-local injection seam preserved`
+- Result: `no checked object-or-title bridge recovered`
+- No committed source keeps the shell-side anchor and one exact prefab or title in the same local container.
 
 ## Trace graph
 
-- Present typed edges: `5`
-- Negative typed edges: `2`
+- Present typed edges: `8`
+- Negative typed edges: `4`
 
 ### Proved joins
 
-- `direct-scene-definition-payload`: The direct level0 ShardMining MonoBehaviour object still holds the reachable shard definition family locally. [direct]
-  - `shardSceneMonoBehaviourProbe` at `$.monoBehaviours[1].pathId` proves `290724`
-  - `shardSaveBoundary` at `$.recoveredDirectRowDefinitionPayload.ownerType` proves `ShardMining`
-- `definition-to-runtime-shell`: The same ShardMining owner that carries direct row definitions also declares upgradeInfoList -> ShardMining+ShardUpgradeInfo as the recovered runtime row shell. [direct]
-  - `shardSaveBoundary` at `$.recoveredDeclaringRowModel.declaringField.name` proves `upgradeInfoList`
-  - `shardSaveBoundary` at `$.recoveredDeclaringRowModel.rowModelType.fullName` proves `ShardMining+ShardUpgradeInfo`
-- `runtime-shell-to-owner-lists`: Type reflection preserves upgradeInfoList beside MaxedMilestonesList, UnlockedMilestonesList, and MilestoneCostList on ShardMining. [direct]
-  - `shardTypeMetadataProbe` at `$.targets.shardMining.ownerListFields` proves `MaxedMilestonesList, UnlockedMilestonesList, MilestoneCostList, upgradeInfoList`
-- `runtime-shell-to-local-hooks`: The shard payload-watch boundary keeps InitializeShards, list refresh hooks, and milestone progress-fill hooks attached to the same shard-local runtime shell. [supporting]
-  - `shardMilestonePayloadBoundary` at `$.costAndListHooks` proves `get_TotalMilestoneLevels, InitializeMaxLevelBools, UpdateMaxedMilestonesList, UpdateUnlockedMilestonesList, SortCostAndBools`
-  - `shardMilestonePayloadBoundary` at `$.progressFillHooks` proves `CheckAllMilestoneLevelFills, CheckMilestone0ProgressFill, CheckMilestone1ProgressFill, CheckMilestone9ProgressFill`
-- `non-local-injection-seam`: The committed shard boundary set now narrows the owned-state path to a non-local seam: direct definitions and the runtime shell are recovered locally, but owned-state values still arrive from a source the repo cannot yet name. [derived]
-  - `shardSaveBoundary` at `$.currentBoundary[2]` proves `This is enough to keep direct row-definition payload recovery separate from unresolved player-owned row-state ownership, and it tightens the blocker further: the current repo can now preserve one exact non-local injection seam result for owned-state values whose save-side source it still cannot name.`
-  - `shardMilestoneSaveOwnerCandidates` at `$.confidenceNotes[1]` proves `The current evidence still separates player-owned shard ownership from save-family anchors, and the shard-owned-state trace now rules out both a local population bridge and a recovered deeper wrapper handoff for upgradeInfoList owned-state values, so confidence remains intentionally bounded.`
+- `serialized-adjacency`: The target shell still sits directly beside the CellBoost owner-field block in the committed TokenShop extract. [direct]
+  - `tokenShopExtract` at `$.fields` proves `ATU3Button path_id 15810`
+- `declaration-neighborhood`: The metadata neighborhood keeps ATU3Button and the CellBoost declaration block in one raw declaration area. [contextual]
+  - `metadata` at `metadata offset 662261` proves `CellBoostStartCost`
+  - `metadata` at `metadata offset 662349` proves `ATU3Button`
+- `family-action-cluster`: The cells-domain action lane preserves BuyCellBoost as the nearest named buy hook for the same family, but only as a generic cluster. [supporting]
+  - `dailyTokeniumLaneProbe` at `$[0].matches[101].byte_context[41].value` proves `BuyCellBoost`
+- `candidate-prefab-surface`: A separate diamond-special CellsBoost prefab candidate is preserved on committed probe surfaces. [direct]
+  - `unityProbe` at `$.apk_results[7].keyword_hits.diamond[16]` proves `NewDiamondUPGPrefab.Specials.CellsBoost`
+  - `lm244TargetedProbe` at `$[0].matches[23].byte_context[89].value` proves `NewDiamondUPGPrefab.Specials.CellsBoost`
+- `candidate-title-surface`: The same detached diamond-special surface also preserves one final title candidate. [direct]
+  - `unityProbe` at `$.apk_results[0].keyword_hits.diamond[45]` proves `>Diamond Upgrade 10 - CellsBoost`
+- `candidate-prefab-surface`: Separate token-side prefab identities for cells-domain upgrades are preserved, but not joined back to the target shell. [direct]
+  - `uabeaProbe` at `$.namedObjectHits[10371].name` proves `NewTokenUPGPrefab.T1.CellsPerChestBooster`
+  - `unityProbe` at `$.apk_results[7].keyword_hits.token[38]` proves `NewTokenUPGPrefab.T5.UltimaCells`
+- `candidate-title-surface`: The token-side candidate surface also preserves one detached title clue. [direct]
+  - `unityProbe` at `$.apk_results[23].keyword_hits.token[25]` proves `Token Ultima: Cells`
+- `generic-text-hook-cluster`: The generic TokenShop text hooks are preserved as a separate surface, but they do not close the ATU3 join. [supporting]
+  - `unityProbe` at `$.apk_results[32].keyword_hits.token[6]` proves `SetAllTokenShopTexts`
+  - `unityProbe` at `$.apk_results[32].keyword_hits.token[7]` proves `SetTokenTexts`
 
 ### Missing joins
 
-- `local-runtime-population-bridge`: The checked shard-local watcher hooks still do not recover any exact write, constructor, or setup path that populates upgradeInfoList owned-state values locally. [negative]
-  - `shardSaveBoundary` at `$.runtimeConstructionBoundary.traceResult[1]` records `That target rules out a local runtime population bridge for upgradeInfoList, IsUnlocked, MaxLevel, and adjacent row-owned state because the shard-local watcher hooks still do not recover an exact write, constructor, or setup path.`
-  - `shardMilestonePayloadBoundary` at `$.currentBoundary[1]` records `Use it to keep milestone-total, affordability-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail while keeping InitializeShards, InitializeMaxLevelBools, UpdateUnlockedMilestonesList, and UpdateMaxedMilestonesList framed as local watcher hooks rather than a recovered owned-state source.`
-- `deeper-wrapper-handoff-recovery`: The repo still does not recover an exact deeper wrapper or save-side owner behind upgradeInfoList even though a PlayerProfile-side shard member shell remains the leading unresolved candidate. [negative]
-  - `shardMilestoneSaveOwnerCandidates` at `$.remainingSaveOwnerCandidates[0].label` records `PlayerProfile-side shard member shell`
-  - `shardMilestoneSaveOwnerCandidates` at `$.currentBoundary[0]` records `Treat this dataset as one recovered direct row-definition payload, one recovered shard-local runtime row shell, and one remaining non-local save-owner gap, not as recovered player-owned shard milestone state or a verified save owner.`
+- `exact-shell-to-action-hook`: No committed source proves one ATU3-specific direct buy or effect hook; the nearest named action surface stays the generic BuyCellBoost cluster. [negative]
+  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]` records `No checked repo artifact in this lane currently preserves an ATU3-specific effect hook.`
+  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]` records `No checked repo artifact in this lane currently preserves an ATU3-specific direct buy hook.`
+- `exact-shell-to-prefab`: No committed source proves that the ATU3 shell or path id 15810 crosses directly into the detached diamond-special CellsBoost prefab candidate. [negative]
+  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.testedSurfaces[1].missingJoin` records `The checked diamond-special surface still preserves a separate CellsBoost prefab and title lane, but it does not preserve any ATU3 shell, path id 15810, or exact bridge from the ATU3 owner block into that diamond-special identity surface.`
+- `exact-shell-to-prefab`: No committed source proves that the ATU3 shell or path id 15810 crosses directly into one exact token-side prefab identity. [negative]
+  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]` records `No checked repo artifact in this lane currently joins ATU3Button directly to one exact NewTokenUPGPrefab.* object identity.`
+  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.testedSurfaces[2].missingJoin` records `The checked token-side surface still preserves separate token prefab and title clues for cells-domain upgrades, but it does not preserve any direct ATU3 shell join or one concrete object or title bridge back to path id 15810.`
+- `exact-shell-to-title`: No committed source proves one exact ATU3 shell-to-final-title join across either the diamond-special or token-side title candidates. [negative]
+  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.groundedConclusion` records `The bounded ATU3 cells-domain disambiguation pass stays negative. Across the exact BuyCellBoost, diamond-special CellsBoost, and token-side CellsPerChestBooster or Token Ultima: Cells search surfaces, the repo still preserves only separate cells-domain clusters rather than one checked object-or-title join back to ATU3Button path id 15810.`
 
 ## Solved vs blocked
 
-- Baseline: `upgradeInfoList` path id `5216` stays cleared as the comparison shape.
-- Blocked target: `upgradeInfoList` path id `owned-state-bridge` stays blocked.
-- Shared present edge types: `direct-scene-definition-payload, definition-to-runtime-shell, runtime-shell-to-owner-lists, runtime-shell-to-local-hooks`
-- Baseline-only present edge types: `non-local-injection-seam`
-- Blocked missing edge types: `local-runtime-population-bridge, deeper-wrapper-handoff-recovery`
+- Baseline: `ATU1Button` path id `15839` stays cleared as the comparison shape.
+- Blocked target: `ATU3Button` path id `15810` stays blocked.
+- Shared present edge types: `serialized-adjacency`
+- Baseline-only present edge types: `exact-shell-to-action-hook, exact-shell-to-prefab, supporting-effect-hook`
+- Blocked missing edge types: `exact-shell-to-action-hook, exact-shell-to-prefab, exact-shell-to-title`
 
-- The current shard trace preserves one direct scene owner, one direct row-definition family, one recovered runtime row shell, and one shard-local watcher/list cluster.
-- The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values remain bounded as a non-local injection seam.
-- Player-owned shard import stays blocked until a real local producer or exact deeper wrapper handoff is recovered.
+- Both rows preserve the direct serialized shell-to-owner-block adjacency.
+- The solved ATU1 baseline also preserves one exact row-specific effect hook, one checked row-specific buy hook, and one exact prefab identity.
+- The blocked ATU3 target stays missing the exact shell-to-action-hook, shell-to-prefab, and shell-to-title joins, so the cells-domain clues remain split instead of forming one checked bridge.
 
 ## Decision summary
 
-- Verdict: `quarantine`
-- Summary: The shard owned-state trace is grounded enough to preserve one exact boundary verdict, but the result must stay quarantined to blocker evidence until a local bridge or deeper wrapper handoff is recovered.
-- Proved edges: `5`
-- Negative edges: `2`
-- Baseline gap: `local-runtime-population-bridge, deeper-wrapper-handoff-recovery`
+- Verdict: `keep researching`
+- Summary: The trace still preserves only split cells-domain clues, so keep researching and do not wire or quarantine product behavior from this join.
+- Proved edges: `8`
+- Negative edges: `4`
+- Baseline gap: `exact-shell-to-action-hook, exact-shell-to-prefab, exact-shell-to-title`
 
 ## Current loss
 
-- Shard-local watcher hooks still sit beside upgradeInfoList, UnlockedMilestonesList, MaxedMilestonesList, and MilestoneCostList without one committed write path into IsUnlocked, MaxLevel, or current milestone progress.
-- The leading PlayerProfile-side shard member shell remains an unresolved candidate rather than a recovered declaring wrapper or serialized payload owner.
-- Keep the owned-state result quarantined to blocker evidence only; it does not reopen planner math, affordability, ROI, ETA, or canonical state.playerProfile promotion.
+- The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.
+- The metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area, but it does not keep one checked prefab identity or final title in the same local container.
+- The action lane survives only as a generic named buy cluster in the daily-tokenium lane probe, with StartCellBostHold, StopCellBostHold, and BuyCellBoost but no shell-side path id.
+- Prefab identities survive as detached UABEA, targeted-string, or unity-probe hits, and final titles survive as separate unity-probe buckets, so the current extraction still loses the direct cross-surface join back to 15810.
 
 ## Conclusion
 
-- The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values remain bounded as a non-local injection seam.
+- The ATU3Button or 15810 trace stays negative. The trace workflow now preserves shell, metadata, action-hook, prefab, title, and text-hook surfaces in one checked bundle, but no committed source carries one exact ATU3Button or path id 15810 bridge together with one exact prefab identity or final player-facing title.

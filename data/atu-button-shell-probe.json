@@ -1,0 +1,933 @@
+{
+  "dataset": "atu-button-shell-probe",
+  "source": {
+    "unityJoinedDir": "workbench/unity/joined",
+    "probeMethod": "UnityPy GameObject component/children traversal with shared helpers"
+  },
+  "buttons": {
+    "ATU1Button": {
+      "path_id": 15839,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202885,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123245,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386871,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291776,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291775,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU2Button": {
+      "path_id": 15804,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202912,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123299,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386835,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 270766,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 270765,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU3Button": {
+      "path_id": 15810,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202919,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123277,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386840,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 279524,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 279523,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU4Button": {
+      "path_id": 15796,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202906,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123290,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386825,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 273527,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 273526,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU5Button": {
+      "path_id": 15831,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202878,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123266,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386862,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291965,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291964,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU6Button": {
+      "path_id": 15835,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202881,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123241,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386875,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291558,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291557,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU7Button": {
+      "path_id": 15792,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202901,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123289,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386830,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 278498,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 278497,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU8Button": {
+      "path_id": 15795,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202902,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123294,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386829,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 292353,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 292352,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU9Button": {
+      "path_id": 15845,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202890,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123250,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386883,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 289789,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 289788,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU10Button": {
+      "path_id": 15837,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202883,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123239,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386873,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 289538,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 289537,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU11Button": {
+      "path_id": 15793,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202900,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123288,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386831,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291978,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291977,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU12Button": {
+      "path_id": 15814,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202922,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123280,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386852,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 275002,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 275001,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU13Button": {
+      "path_id": 15821,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202868,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123256,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386857,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 283949,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 283948,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU14Button": {
+      "path_id": 15844,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202891,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123249,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386882,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 288027,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 288026,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU15Button": {
+      "path_id": 15850,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202896,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123251,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386877,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 288118,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 288117,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU16Button": {
+      "path_id": 15827,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202874,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123263,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386866,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 280701,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 280700,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU17Button": {
+      "path_id": 15841,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202886,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123244,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386870,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291068,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291067,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU18Button": {
+      "path_id": 15834,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202879,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123270,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386861,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 283600,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 283599,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU19Button": {
+      "path_id": 15842,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202888,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123246,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386868,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 292288,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 292287,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU20Button": {
+      "path_id": 15812,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202921,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123278,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386838,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 280454,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 280453,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU21Button": {
+      "path_id": 15829,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202875,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123265,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386865,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 281821,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 281820,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU22Button": {
+      "path_id": 15806,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202915,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123272,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386844,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 278320,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 278319,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU23Button": {
+      "path_id": 15828,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202873,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123264,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386867,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 280610,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 280609,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU24Button": {
+      "path_id": 15797,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202905,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123291,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386826,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 273600,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 273599,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU25Button": {
+      "path_id": 15820,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202866,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123258,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386859,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 284241,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 284240,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU26Button": {
+      "path_id": 15840,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202887,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123243,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386869,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291028,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 291027,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU27Button": {
+      "path_id": 15832,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202877,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123267,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386863,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 282152,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 282151,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    },
+    "ATU28Button": {
+      "path_id": 15813,
+      "game_object_name": "UPGButton",
+      "component_count": 5,
+      "components": [
+        {
+          "path_id": 202920,
+          "type": "RectTransform"
+        },
+        {
+          "path_id": 123279,
+          "type": "CanvasRenderer"
+        },
+        {
+          "path_id": 386839,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 280471,
+          "type": "MonoBehaviour"
+        },
+        {
+          "path_id": 280470,
+          "type": "MonoBehaviour"
+        }
+      ],
+      "children_count": 0,
+      "children": [],
+      "text_count": 0,
+      "texts": [],
+      "nearby_monobehaviours_count": 0,
+      "nearby_monobehaviours": []
+    }
+  }
+}

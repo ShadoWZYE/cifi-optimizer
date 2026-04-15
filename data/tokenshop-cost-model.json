@@ -1,0 +1,325 @@
+{
+  "ATU1Button": {
+    "path_id": 15839,
+    "tier": "t1",
+    "type": "Token Boost",
+    "prefab": "NewTokenUPGPrefab.T1.TokensBoost",
+    "start_cost": 20.0,
+    "additive_cost": 5.0,
+    "bonus": 0.20000000298023224,
+    "max_level": 20,
+    "formula": "cost = 20.0 + (level - 1) * 5.0"
+  },
+  "ATU2Button": {
+    "path_id": 15804,
+    "tier": "t1",
+    "type": "Diamond Boost",
+    "prefab": "NewDiamondUPGPrefab.T1.DiamondBoost",
+    "start_cost": 200.0,
+    "additive_cost": 300.0,
+    "bonus": 1,
+    "max_level": 2,
+    "formula": "cost = 200.0 + (level - 1) * 300.0"
+  },
+  "ATU3Button": {
+    "path_id": 15810,
+    "tier": "t1",
+    "type": "Cells Boost",
+    "prefab": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+    "start_cost": 1.0,
+    "additive_cost": 0.25,
+    "bonus": 1,
+    "max_level": 60,
+    "formula": "cost = 1.0 + (level - 1) * 0.25"
+  },
+  "ATU4Button": {
+    "path_id": 15796,
+    "tier": "t1",
+    "type": "Mod Points Boost",
+    "prefab": "NewTokenUPGPrefab.T1.ModPointsBooster",
+    "start_cost": 10.0,
+    "additive_cost": 2.0,
+    "bonus": 1.0099999904632568,
+    "max_level": 200,
+    "formula": "cost = 10.0 + (level - 1) * 2.0"
+  },
+  "ATU5Button": {
+    "path_id": 15831,
+    "tier": "t1",
+    "type": "MK1 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK1Booster",
+    "start_cost": 1.0,
+    "additive_cost": 0.10000000149011612,
+    "bonus": {
+      "field": "MK1TokenBoostBonus",
+      "value": 1.0099999904632568,
+      "raw_u32": 1065437102,
+      "raw_f32": 1.0099999904632568
+    },
+    "max_level": 5000,
+    "formula": "cost = 1.0 + (level - 1) * 0.10000000149011612"
+  },
+  "ATU6Button": {
+    "path_id": 15835,
+    "tier": "t1",
+    "type": "MK2 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK2Booster",
+    "start_cost": 2.0,
+    "additive_cost": 0.11999999731779099,
+    "bonus": 1.0099999904632568,
+    "max_level": 5000,
+    "formula": "cost = 2.0 + (level - 1) * 0.11999999731779099"
+  },
+  "ATU7Button": {
+    "path_id": 15792,
+    "tier": "t1",
+    "type": "MK3 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK3Booster",
+    "start_cost": 3.0,
+    "additive_cost": 0.12999999523162842,
+    "bonus": 1.0099999904632568,
+    "max_level": 5000,
+    "formula": "cost = 3.0 + (level - 1) * 0.12999999523162842"
+  },
+  "ATU8Button": {
+    "path_id": 15795,
+    "tier": "t1",
+    "type": "MK4 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK4Booster",
+    "start_cost": 4.0,
+    "additive_cost": 0.14000000059604645,
+    "bonus": 1.0099999904632568,
+    "max_level": 5000,
+    "formula": "cost = 4.0 + (level - 1) * 0.14000000059604645"
+  },
+  "ATU9Button": {
+    "path_id": 15845,
+    "tier": "t1",
+    "type": "MK5 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK5Booster",
+    "start_cost": 15.0,
+    "additive_cost": 0.15000000596046448,
+    "bonus": 1.0099999904632568,
+    "max_level": 5000,
+    "formula": "cost = 15.0 + (level - 1) * 0.15000000596046448"
+  },
+  "ATU10Button": {
+    "path_id": 15837,
+    "tier": "t1",
+    "type": "MK6 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK6Booster",
+    "start_cost": 26.0,
+    "additive_cost": 0.1599999964237213,
+    "bonus": 1.0099999904632568,
+    "max_level": 5000,
+    "formula": "cost = 26.0 + (level - 1) * 0.1599999964237213"
+  },
+  "ATU11Button": {
+    "path_id": 15793,
+    "tier": "t1",
+    "type": "MK7 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK7Booster",
+    "start_cost": 37.0,
+    "additive_cost": 0.20000000298023224,
+    "bonus": 1.0099999904632568,
+    "max_level": 5000,
+    "formula": "cost = 37.0 + (level - 1) * 0.20000000298023224"
+  },
+  "ATU12Button": {
+    "path_id": 15814,
+    "tier": "t1",
+    "type": "MK8 Generator",
+    "prefab": "NewTokenUPGPrefab.T1.MK8Booster",
+    "start_cost": 48.0,
+    "additive_cost": 0.30000001192092896,
+    "bonus": 1.0099999904632568,
+    "max_level": 5000,
+    "formula": "cost = 48.0 + (level - 1) * 0.30000001192092896"
+  },
+  "ATU13Button": {
+    "path_id": 15821,
+    "tier": "t2",
+    "type": "Duo 1",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterOne",
+    "start_cost": 1000.0,
+    "additive_cost": 500.0,
+    "bonus": 0.5,
+    "max_level": 10,
+    "formula": "cost = 1000.0 + (level - 1) * 500.0"
+  },
+  "ATU14Button": {
+    "path_id": 15844,
+    "tier": "t2",
+    "type": "Duo 2",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterTwo",
+    "start_cost": 1000.0,
+    "additive_cost": 800.0,
+    "bonus": 0.20000000298023224,
+    "max_level": 10,
+    "formula": "cost = 1000.0 + (level - 1) * 800.0"
+  },
+  "ATU15Button": {
+    "path_id": 15850,
+    "tier": "t2",
+    "type": "Duo 3",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterThree",
+    "start_cost": 1275.0,
+    "additive_cost": 25.0,
+    "bonus": {
+      "field": "T2Duo1Bonus",
+      "value": 1.0199999809265137,
+      "raw_u32": 1065520988,
+      "raw_f32": 1.0199999809265137
+    },
+    "max_level": 500,
+    "formula": "cost = 1275.0 + (level - 1) * 25.0"
+  },
+  "ATU16Button": {
+    "path_id": 15827,
+    "tier": "t2",
+    "type": "Duo 4",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterFour",
+    "start_cost": 75.0,
+    "additive_cost": 2.0,
+    "bonus": 1.0199999809265137,
+    "max_level": 2500,
+    "formula": "cost = 75.0 + (level - 1) * 2.0"
+  },
+  "ATU17Button": {
+    "path_id": 15841,
+    "tier": "t2",
+    "type": "Duo 5",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterFive",
+    "start_cost": 100.0,
+    "additive_cost": 3.0,
+    "bonus": 1.0199999809265137,
+    "max_level": 2500,
+    "formula": "cost = 100.0 + (level - 1) * 3.0"
+  },
+  "ATU18Button": {
+    "path_id": 15834,
+    "tier": "t2",
+    "type": "Duo 6",
+    "prefab": "NewTokenUPGPrefab.T2.DuoBoosterSix",
+    "start_cost": 125.0,
+    "additive_cost": 4.0,
+    "bonus": 1.0199999809265137,
+    "max_level": 2500,
+    "formula": "cost = 125.0 + (level - 1) * 4.0"
+  },
+  "ATU19Button": {
+    "path_id": 15842,
+    "tier": "t3",
+    "type": "Trinity 1",
+    "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+    "start_cost": 150.0,
+    "additive_cost": 5.0,
+    "bonus": 1.0199999809265137,
+    "max_level": 2500,
+    "formula": "cost = 150.0 + (level - 1) * 5.0"
+  },
+  "ATU20Button": {
+    "path_id": 15812,
+    "tier": "t3",
+    "type": "T3 Tokens",
+    "prefab": "NewTokenUPGPrefab.T3.TokensBoost",
+    "start_cost": 2500.0,
+    "additive_cost": 750.0,
+    "bonus": 1.0,
+    "max_level": 25,
+    "formula": "cost = 2500.0 + (level - 1) * 750.0"
+  },
+  "ATU21Button": {
+    "path_id": 15829,
+    "tier": "t3",
+    "type": "Trinity 1",
+    "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+    "start_cost": 3000.0,
+    "additive_cost": 900.0,
+    "bonus": 0.20000000298023224,
+    "max_level": 50,
+    "formula": "cost = 3000.0 + (level - 1) * 900.0"
+  },
+  "ATU22Button": {
+    "path_id": 15806,
+    "tier": "t3",
+    "type": "Trinity 2",
+    "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterTwo",
+    "start_cost": 7000.0,
+    "additive_cost": 100.0,
+    "bonus": {
+      "field": "T3Trio1Bonus",
+      "value": 1.0299999713897705,
+      "raw_u32": 1065604874,
+      "raw_f32": 1.0299999713897705
+    },
+    "max_level": 2000,
+    "formula": "cost = 7000.0 + (level - 1) * 100.0"
+  },
+  "ATU23Button": {
+    "path_id": 15828,
+    "tier": "t3",
+    "type": "Trinity 3",
+    "prefab": "NewTokenUPGPrefab.T3.DailyTokens",
+    "start_cost": 8000.0,
+    "additive_cost": 200.0,
+    "bonus": 1.0299999713897705,
+    "max_level": 2000,
+    "formula": "cost = 8000.0 + (level - 1) * 200.0"
+  },
+  "ATU24Button": {
+    "path_id": 15797,
+    "tier": "t4",
+    "type": "Ultima Shards",
+    "prefab": "NewTokenUPGPrefab.T4.Ultima",
+    "start_cost": 40000000.0,
+    "additive_cost": null,
+    "bonus": 1.0003000497817993,
+    "max_level": null,
+    "formula": "cost = 40000000.0 + (level - 1) * None"
+  },
+  "ATU25Button": {
+    "path_id": 15820,
+    "tier": "t4",
+    "type": "Ultima",
+    "prefab": "NewTokenUPGPrefab.T4.Ultima",
+    "start_cost": 1000000.0,
+    "additive_cost": 25000.0,
+    "bonus": 0.5,
+    "max_level": 50,
+    "formula": "cost = 1000000.0 + (level - 1) * 25000.0"
+  },
+  "ATU26Button": {
+    "path_id": 15840,
+    "tier": "t5",
+    "type": "Campaign Fragments",
+    "prefab": "NewTokenUPGPrefab.T5.CampaignFragments",
+    "start_cost": 10000000.0,
+    "additive_cost": 1000000.0,
+    "bonus": 1000,
+    "max_level": 15,
+    "formula": "cost = 10000000.0 + (level - 1) * 1000000.0"
+  },
+  "ATU27Button": {
+    "path_id": 15832,
+    "tier": "t5",
+    "type": "Ultima RP",
+    "prefab": "NewTokenUPGPrefab.T5.UltimaRP",
+    "start_cost": 50000000.0,
+    "additive_cost": 10000000.0,
+    "bonus": 500,
+    "max_level": 15,
+    "formula": "cost = 50000000.0 + (level - 1) * 10000000.0"
+  },
+  "ATU28Button": {
+    "path_id": 15813,
+    "tier": "t5",
+    "type": "Ultima MP",
+    "prefab": "NewTokenUPGPrefab.T5.UltimaMP",
+    "start_cost": 250000000.0,
+    "additive_cost": 50000000.0,
+    "bonus": 500,
+    "max_level": 15,
+    "formula": "cost = 250000000.0 + (level - 1) * 50000000.0"
+  }
+}
