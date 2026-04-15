@@ -97,7 +97,18 @@ test("boundary audit and completion helpers keep labeled import summaries", () =
       shipPlanner: { summary: { power: 10, speed: null } },
       compatibility: {
         unresolved: { gemDust: 123, hunterLevel: null },
-        unmappedSystems: { tokenShop: {}, multiverseMarket: { IS71Level: 3 } }
+        unmappedSystems: {
+          tokenShop: {},
+          multiverseMarket: {
+            status: "quarantined-raw-unmapped",
+            importedState: { IS71Level: 3 },
+            mappingGate: {
+              clearedForCanonicalPromotion: false,
+              clearedForPlannerUse: false
+            },
+            currentBoundary: ["compatibility-only"]
+          }
+        }
       }
     },
     (value) => {
@@ -112,10 +123,9 @@ test("boundary audit and completion helpers keep labeled import summaries", () =
   );
 
   assert.deepEqual(audit.counts, ["Canonical shared truth: 2/2", "Compatibility leftovers: 0/2"]);
-  assert.match(audit.notes[0], /No quarantined unmapped system blobs/);
+  assert.match(audit.notes[0], /Quarantined unmapped system blobs preserved: multiverseMarket/);
   assert.match(audit.notes[1], /external-model implementation state/);
   assert.match(audit.notes[2], /gemDust/);
-  assert.match(audit.notes[3], /Ignored one unlabeled MultiverseMarket compatibility payload/);
 
   const profile = {
     meta: { profileName: "Pilot", dataConfidence: "manual" },

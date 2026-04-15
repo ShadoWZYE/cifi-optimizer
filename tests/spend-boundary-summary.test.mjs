@@ -108,12 +108,18 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
 test("imported multiverse market preview keeps the compatibility-only summary shape", () => {
   const preview = getImportedMultiverseMarketPreview(
     {
+      status: "quarantined-raw-unmapped",
       importedState: {
         IS71Level: 3,
         IS72Level: 4,
         EsotericR1Trades: 9,
         Mech1Unlocked: true
-      }
+      },
+      mappingGate: {
+        plannerUseAllowed: false,
+        canonicalPromotionBlocked: true
+      },
+      currentBoundary: ["compatibility-only"]
     },
     {},
     { overlapIds: [71, 72] },
