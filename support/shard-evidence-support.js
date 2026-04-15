@@ -22,6 +22,34 @@ export function createShardEvidenceSupport({
     return getShardGrounding()?.milestones?.canonicalMechanics?.shardMilestoneSystem ?? {};
   }
 
+  function getShardMilestoneFamilyEvidence() {
+    const rows = Array.isArray(getShardGrounding()?.milestoneFamilyEvidence?.rows)
+      ? getShardGrounding().milestoneFamilyEvidence.rows
+      : [];
+    return [...rows].sort((left, right) => Number(left?.row ?? 0) - Number(right?.row ?? 0));
+  }
+
+  function getShardMilestoneEvidenceRow(milestoneOrRow) {
+    const row =
+      typeof milestoneOrRow === "number"
+        ? Number(milestoneOrRow)
+        : Number(milestoneOrRow?.milestoneNumber ?? milestoneOrRow?.row);
+    return getShardMilestoneFamilyEvidence().find((entry) => Number(entry?.row) === row) || null;
+  }
+
+  function getShardMilestoneEvidenceCounts() {
+    return getShardMilestoneFamilyEvidence().reduce(
+      (totals, row) => {
+        const status = String(row?.status || "partial").toLowerCase();
+        if (status === "verified" || status === "partial" || status === "blocked") {
+          totals[status] += 1;
+        }
+        return totals;
+      },
+      { verified: 0, partial: 0, blocked: 0 }
+    );
+  }
+
   function getDefaultShardFocusMilestoneId(milestones) {
     if (!milestones.length) {
       return "";
@@ -31,15 +59,21 @@ export function createShardEvidenceSupport({
   }
 
   function getVerifiedShardRowPackages() {
-    return (
-      Array.isArray(getShardGrounding()?.verifiedRows) ? getShardGrounding().verifiedRows : []
-    )
-      .filter(
-        (entry) => entry?.verifiedRow?.rowKey && entry?.verifiedRow?.titleBinding?.playerFacingName
-      )
-      .sort(
-        (left, right) => Number(left?.verifiedRow?.row ?? 0) - Number(right?.verifiedRow?.row ?? 0)
-      );
+    return getShardMilestoneFamilyEvidence()
+      .filter((entry) => entry?.status === "verified" && entry?.verifiedPackage)
+      .map((entry) => ({
+        verifiedRow: {
+          row: entry.row,
+          rowKey: entry.rowKey,
+          titleBinding: {
+            playerFacingName: entry.titleBinding?.playerFacingName,
+            title: Array.isArray(entry.titleBinding?.titleCandidates)
+              ? entry.titleBinding.titleCandidates[0]
+              : ""
+          },
+          effectPackage: entry.verifiedPackage
+        }
+      }));
   }
 
   function formatVerifiedShardBonusPackage(effectPackage) {
@@ -255,107 +289,67 @@ export function createShardEvidenceSupport({
 
   function getShardMilestoneGroundedSummary(milestone) {
     const row = Number(milestone?.milestoneNumber);
-    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
-      getShardGrounding()?.rowModelBoundary
-    );
-    const titleEffectBoundary = getShardGrounding()?.titleEffectBoundary;
-    const titleEffectSummary = getShardMilestoneTitleEffectBoundarySummary(titleEffectBoundary);
-    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
-      getShardGrounding()?.effectTextHandlerBoundary
-    );
-    const costModelBoundary = getShardCostModelBoundarySummary(
-      getShardGrounding()?.costModelBoundary
-    );
-    const costParameterProbe = getShardCostParameterProbeSummary(
-      getShardGrounding()?.costParameterProbe
-    );
-    const bonusSlotSummary = getShardBonusSlotRowSummary(row);
-    const directRowValues = getShardRowDirectValues(row);
+    const evidenceRow = getShardMilestoneEvidenceRow(row);
     const extractedUnlockRequirement = getShardExtractedUnlockRequirement(row);
-    const titleCandidates = (
-      Array.isArray(titleEffectBoundary?.titleAssetCandidates)
-        ? titleEffectBoundary.titleAssetCandidates
-        : []
-    )
-      .filter((entry) => entry?.row === row)
-      .map((entry) => entry.title);
-    const uniqueTitles = [...new Set(titleCandidates)];
-    const bonusCalcAccessors = (
-      Array.isArray(titleEffectBoundary?.sampleBonusCalcAccessors)
-        ? titleEffectBoundary.sampleBonusCalcAccessors
-        : []
-    ).filter((name) => name.startsWith(`get_SU${row}Bonus`));
-    const hasRowCostAccessor =
-      rowModelBoundary.hasBoundary && ((row >= 0 && row <= 9) || (row >= 23 && row <= 29));
-    const titleCoverageStatusLabel = uniqueTitles.length ? "Available" : "Unmapped";
-    const rowShellStatusLabel = rowModelBoundary.hasBoundary ? "Unmapped" : "Blocked";
+    const status = String(evidenceRow?.status || "partial").toLowerCase();
+    const titleCandidates = Array.isArray(evidenceRow?.titleBinding?.titleCandidates)
+      ? evidenceRow.titleBinding.titleCandidates
+      : [];
+    const titleCoverageStatusLabel =
+      status === "verified" ? "Verified" : status === "blocked" ? "Blocked" : "Partial";
+    const rowShellStatusLabel =
+      status === "verified" ? "Verified" : status === "blocked" ? "Blocked" : "Partial";
     const effectStatusLabel =
-      effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily
-        ? "Available"
-        : "Blocked";
-    const costStatusLabel = directRowValues
-      ? "Available"
-      : row === 0 ||
-          hasRowCostAccessor ||
-          costParameterProbe.hasRowAlignedTuples ||
-          costParameterProbe.hasCandidateTuples ||
-          costModelBoundary.hasSampledCostWindows
-        ? "Integrated"
-        : "Blocked";
+      status === "verified" ? "Verified" : status === "blocked" ? "Blocked" : "Partial";
+    const costStatusLabel =
+      evidenceRow?.costShell?.status === "verified"
+        ? "Verified"
+        : status === "blocked"
+          ? "Blocked"
+          : "Partial";
     return {
-      titleCoverageTone: uniqueTitles.length ? "pass" : "warn",
+      titleCoverageTone: status === "blocked" ? "warn" : "pass",
       titleCoverageStatusLabel,
       titleCoverageStatusClass: `shard-status-pill-${titleCoverageStatusLabel.toLowerCase()}`,
-      titleCoverageLine:
-        uniqueTitles.length > 1
-          ? `Row ${row} has multiple shipped title candidates, so the UI keeps the label descriptive: ${uniqueTitles.join(" | ")}.`
-          : uniqueTitles.length === 1
-            ? `Row ${row} has a shipped title candidate: ${uniqueTitles[0]}.`
-            : `Row ${row} does not yet have a preserved shipped title candidate in the checked bundle.`,
-      rowShellTone: rowModelBoundary.hasBoundary ? "pass" : "warn",
+      titleCoverageLine: Array.isArray(titleCandidates) && titleCandidates.length > 1
+        ? `Shipped title candidates still conflict for row ${row}: ${titleCandidates.join(" | ")}.`
+        : titleCandidates.length === 1
+          ? `Shipped title evidence for row ${row}: ${titleCandidates[0]}.`
+          : `No shipped title candidate is preserved for row ${row}.`,
+      rowShellTone: status === "blocked" ? "warn" : "pass",
       rowShellStatusLabel,
       rowShellStatusClass: `shard-status-pill-${rowShellStatusLabel.toLowerCase()}`,
-      rowShellLine: rowModelBoundary.hasBoundary
-        ? `Row ${row} sits on a recovered shard-local row shell, but its final player-owned owner mapping is still unresolved.`
-        : `The checked row-model bundle is not strong enough to map row ${row} safely yet.`,
-      effectTone:
-        effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily
-          ? "pass"
-          : "warn",
+      rowShellLine:
+        evidenceRow?.status === "verified"
+          ? `Row ${row} clears one checked shard-local row shell package without promoting save-owned milestone state.`
+          : `Row ${row} stays inside the recovered shard-local row family, but its save-owned milestone state remains unresolved.`,
+      effectTone: status === "blocked" ? "warn" : "pass",
       effectStatusLabel,
       effectStatusClass: `shard-status-pill-${effectStatusLabel.toLowerCase()}`,
-      effectLine: bonusCalcAccessors.length
-        ? `Recovered shard-side effect evidence preserves ${bonusSlotSummary?.bonusFieldCount ?? bonusCalcAccessors.length} row-local bonus slots for this row.`
-        : effectTextHandlerBoundary.hasBoundary && titleEffectSummary.hasEffectPresentationFamily
-          ? `Recovered shard-side effect evidence is attached to this row.${bonusSlotSummary ? ` Metadata also preserves ${bonusSlotSummary.bonusFieldCount} bonus slots.` : ""}${bonusSlotSummary && !bonusSlotSummary.matchesGroundedCount ? " Descriptive bonus entries still undershoot the recovered slot count." : ""}`
-          : `The current build does not preserve a strong enough shard-side effect path for row ${row}.`,
-      costTone: row === 0 || hasRowCostAccessor || directRowValues ? "pass" : "warn",
+      effectLine:
+        evidenceRow?.status === "blocked"
+          ? evidenceRow?.statusReason || `Effect evidence for row ${row} is still blocked.`
+          : `Recovered shard-side effect evidence preserves ${evidenceRow?.effectBinding?.bonusFieldCount ?? 0} bonus slots for this row through ${evidenceRow?.effectBinding?.handler || "the shard bonus handler"}.`,
+      costTone: status === "blocked" ? "warn" : "pass",
       costStatusLabel,
       costStatusClass: `shard-status-pill-${costStatusLabel.toLowerCase()}`,
       costLine:
-        row === 0 && costModelBoundary.hasRow0FormulaShell
-          ? `${costParameterProbe.hasFullMetadataFamilies ? "Recovered metadata preserves the full row-local shard-cost family." : "Recovered metadata preserves part of the row-local shard-cost family."} ${directRowValues ? "Row 0 also preserves direct serialized cost values." : costParameterProbe.hasRowAlignedTuples ? `Other rows already preserve ${costParameterProbe.rowAlignedTupleCount} direct row-aligned cost value groups.` : costParameterProbe.hasCandidateTuples ? "Additional numeric shard-cost evidence is present but not yet row-complete." : "Numeric row values are still blocked."} The app shows this as descriptive evidence only, not exact next-cost certainty.`
-          : hasRowCostAccessor && costModelBoundary.hasSampledCostWindows
-            ? `${directRowValues ? "This row preserves direct serialized shard-cost values and bonus-per-level evidence." : costParameterProbe.hasRowAlignedTuples ? "Nearby rows preserve row-aligned shard-cost value groups, which supports this row's cost lane." : "The row-specific cost lane is identified, but its direct numeric values are still blocked."} The app keeps this evidence descriptive until owner mapping and exact cost math are verified.`
-            : directRowValues
-              ? "This row preserves direct shard-cost values, which is enough for a descriptive evidence note but not enough for exact affordability or best-buy claims."
-              : `${costParameterProbe.hasFullMetadataFamilies ? "Recovered shard-cost field families exist globally." : "Only a partial shard-cost shell is recovered so far."} ${costParameterProbe.hasRowAlignedTuples ? "Direct row-aligned cost evidence exists for other rows, but this row is not fully mapped yet." : costParameterProbe.hasCandidateTuples ? "Unmapped numeric shard-cost evidence exists, but it is not attached to this row yet." : "Only generic cost-bump notes remain available."}`,
+        evidenceRow?.costShell?.note ||
+        `Recovered shard cost evidence keeps ${evidenceRow?.costShell?.getterName || `get_SU${row}Cost`} inside the shared family, but exact evaluator math remains blocked.`,
       extractedUnlockRequirement
     };
   }
 
   function getShardMilestoneDisplayName(milestone) {
-    const row = Number(milestone?.milestoneNumber);
-    const titleCandidates = (
-      Array.isArray(getShardGrounding()?.titleEffectBoundary?.titleAssetCandidates)
-        ? getShardGrounding().titleEffectBoundary.titleAssetCandidates
-        : []
-    )
-      .filter((entry) => entry?.row === row)
-      .map((entry) => String(entry.title || "").trim())
-      .filter(Boolean);
+    const row = Number(milestone?.milestoneNumber ?? 0);
+    const evidenceRow = getShardMilestoneEvidenceRow(milestone);
+    const titleCandidates = Array.isArray(evidenceRow?.titleBinding?.titleCandidates)
+      ? evidenceRow.titleBinding.titleCandidates
+          .map((entry) => String(entry || "").trim())
+          .filter(Boolean)
+      : [];
     const uniqueTitles = [...new Set(titleCandidates)];
-    if (uniqueTitles.length === 1) {
+    if (uniqueTitles.length === 1 && evidenceRow?.status !== "blocked") {
       return uniqueTitles[0];
     }
     return milestone?.name || `Milestone ${row}`;
@@ -398,6 +392,11 @@ export function createShardEvidenceSupport({
   function getShardMilestoneDisplayMeta(milestone) {
     const preferredTitle = getShardMilestoneDisplayName(milestone);
     const sourceTitle = milestone?.name || "";
+    const evidenceRow = getShardMilestoneEvidenceRow(milestone);
+    if (evidenceRow?.status) {
+      const label = evidenceRow.status.charAt(0).toUpperCase() + evidenceRow.status.slice(1);
+      return `Evidence status: ${label}`;
+    }
     if (preferredTitle && sourceTitle && preferredTitle !== sourceTitle) {
       return `Community alias: ${sourceTitle}`;
     }
@@ -652,6 +651,9 @@ export function createShardEvidenceSupport({
     getShardExtractedCostFieldMapping,
     getShardExtractedUnlockRequirement,
     getShardFormulaApplicationProfile,
+    getShardMilestoneEvidenceCounts,
+    getShardMilestoneEvidenceRow,
+    getShardMilestoneFamilyEvidence,
     getShardMilestoneDisplayMeta,
     getShardMilestoneDisplayName,
     getShardMilestoneGroundedSummary,

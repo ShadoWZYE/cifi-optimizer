@@ -151,10 +151,12 @@ const {
   getShardExtractedCostFieldMapping,
   getShardExtractedUnlockRequirement,
   getShardFormulaApplicationProfile,
+  getShardMilestoneEvidenceCounts,
+  getShardMilestoneEvidenceRow,
+  getShardMilestoneFamilyEvidence,
   getShardMilestoneDisplayMeta,
   getShardMilestoneDisplayName,
   getShardMilestoneGroundedSummary,
-  getShardMilestoneLevelRailSummary,
   getShardMilestonePanelTitle,
   getShardNativeCostStageSummary,
   getShardUnlockRequirement,
@@ -548,8 +550,7 @@ async function bootstrap() {
     shardCostParameterProbe,
     shardCostNativeProbe,
     shardBonusSlotProbe,
-    shardRowVerificationSu1,
-    shardRowVerificationSu2,
+    shardMilestoneFamilyEvidence,
     extractionCandidateRanking,
     tokenShopValues,
     multiverseMarketValues,
@@ -593,8 +594,7 @@ async function bootstrap() {
     fetchJson("./data/shard-cost-parameter-probe.v1.json"),
     fetchJson("./data/shard-cost-native-probe.v1.json"),
     fetchJson("./data/shard-bonus-slot-probe.v1.json"),
-    fetchJson("./data/shard-row-verification-su1.v1.json"),
-    fetchJson("./data/shard-row-verification-su2.v1.json"),
+    fetchJson("./data/shard-milestone-family-evidence.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
     fetchJson("./data/token-shop-values.json"),
     fetchJson("./data/multiverse-market-values.json"),
@@ -646,7 +646,7 @@ async function bootstrap() {
     costParameterProbe: shardCostParameterProbe,
     costNativeProbe: shardCostNativeProbe,
     bonusSlotProbe: shardBonusSlotProbe,
-    verifiedRows: [shardRowVerificationSu1, shardRowVerificationSu2]
+    milestoneFamilyEvidence: shardMilestoneFamilyEvidence
   };
   state.extractionCandidateRanking = extractionCandidateRanking;
   state.extractedMechanics = {
@@ -3719,30 +3719,37 @@ function getDatasetBadgeMeta(datasetId, fallbackLabel = "Unmapped") {
 function renderShardMilestoneDirectory() {
   const mechanics = getGroundedShardMechanics();
   const milestones = getMilestonesForDisplay();
+  const evidenceCounts = getShardMilestoneEvidenceCounts();
+  const familyEvidence = state.shardGrounding?.milestoneFamilyEvidence;
+  const sharedEvidence = familyEvidence?.sharedEvidence ?? {};
   return `
     <div class="meta-stack">
-      <p class="eyebrow">Shard Mining rows</p>
+      <p class="eyebrow">Shard Mining family evidence</p>
       <h3>Shard milestone rows</h3>
-      <p class="meta">These rows live inside Shard Mining. Each card keeps its own observed level, stays in canonical order, and focuses on player-facing row tracking rather than in-page grounding detail.</p>
+      <p class="meta">These rows render from one shared shard-family evidence table for the reachable ShardMining family. The output stays descriptive-only and evidence-first: no planner math, ROI, ETA, affordability, or best-buy claims.</p>
+      <div class="snapshot-card">
+        <span class="snapshot-title">Shared shard family boundary</span>
+        <p class="meta">Reachable family: rows 0-29 via <strong>ShardMining.upgradeInfoList</strong> -> <strong>ShardMining+ShardUpgradeInfo</strong>.</p>
+        <p class="meta">Status counts: ${escapeHtml(`${evidenceCounts.verified} verified | ${evidenceCounts.partial} partial | ${evidenceCounts.blocked} blocked`)}</p>
+        <p class="meta">${escapeHtml(sharedEvidence.rowModel?.summary || "Row-model summary unavailable.")}</p>
+        <p class="meta">${escapeHtml(sharedEvidence.rowShell?.summary || "Row-shell summary unavailable.")}</p>
+        <p class="meta">${escapeHtml(sharedEvidence.payloadWatch?.summary || "Payload-watch summary unavailable.")}</p>
+        <p class="meta">${escapeHtml(sharedEvidence.saveBoundary?.summary || "Save-boundary summary unavailable.")}</p>
+      </div>
       <div class="preview-stack">
 ${milestones
   .map((milestone) => {
-    const trackedLevel = getShardFocusLevelForMilestone(milestone);
+    const evidenceRow = getShardMilestoneEvidenceRow(milestone);
     const isCardOpen = isShardMilestoneOpen(milestone.id);
     const panelTitle = getShardMilestonePanelTitle(milestone);
     const displayMeta = getShardMilestoneDisplayMeta(milestone);
     const headerMeta = `${formatShardRarity(milestone.rarity)} | Unlock ${describeUnlockCondition(milestone.unlockCondition)}`;
     const thresholdSchedule = getThresholdScheduleForMilestone(milestone, mechanics);
     const hasThresholdSchedule = Array.isArray(thresholdSchedule) && thresholdSchedule.length > 0;
-    const extractedBonusValues = (milestone.bonuses || [])
-      .map((bonus, index) => {
-        const extracted = getShardExtractedBonusPerLevel(milestone.milestoneNumber, index);
-        return Number.isFinite(extracted)
-          ? `${bonus.effectLabel || `Bonus ${index + 1}`}: ${formatShardExtractedBonusPerLevel(extracted)}`
-          : null;
-      })
-      .filter(Boolean);
-    const levelRailSummary = getShardMilestoneLevelRailSummary(milestone);
+    const summary = getShardMilestoneGroundedSummary(milestone);
+    const evidenceStatus = String(evidenceRow?.status || "partial");
+    const evidenceStatusLabel = evidenceStatus.charAt(0).toUpperCase() + evidenceStatus.slice(1);
+    const verifiedPackage = evidenceRow?.verifiedPackage;
     return `
           <details class="snapshot-card shard-milestone-card" data-shard-milestone-card="${escapeHtml(String(milestone.id))}" ${isCardOpen ? "open" : ""}>
             <summary class="shard-milestone-summary">
@@ -3751,20 +3758,18 @@ ${milestones
                 <div class="shard-milestone-heading-copy">
                   <strong>${escapeHtml(panelTitle)}</strong>
                   <p class="meta">${escapeHtml(headerMeta)}</p>
-                  ${
-                    displayMeta.startsWith("Community alias:")
-                      ? `<p class="meta shard-milestone-alias">${escapeHtml(displayMeta)}</p>`
-                      : ""
-                  }
+                  <p class="meta shard-milestone-alias">${escapeHtml(displayMeta)}</p>
                 </div>
               </div>
               <div class="shard-milestone-summary-pills">
+                <span class="pill ${escapeHtml(summary.titleCoverageStatusClass)}">${escapeHtml(`Evidence ${evidenceStatusLabel}`)}</span>
                 <span class="pill shard-threshold-pill ${hasThresholdSchedule ? "" : "pill-neutral"}">${escapeHtml(hasThresholdSchedule ? `Thresholds ${formatThresholdLevels(thresholdSchedule)}` : "No explicit thresholds")}</span>
               </div>
             </summary>
             <div class="shard-milestone-hero">
               <div class="shard-milestone-hero-copy">
                 <p class="meta">${escapeHtml(milestone.summary || "No milestone summary captured.")}</p>
+                <p class="meta"><strong>Evidence note</strong> ${escapeHtml(evidenceRow?.statusReason || "Evidence summary unavailable.")}</p>
                 <div class="shard-milestone-facts">
                   <p class="meta"><strong>Unlock</strong> ${escapeHtml(describeUnlockCondition(milestone.unlockCondition))}</p>
                   <p class="meta"><strong>Thresholds</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
@@ -3774,17 +3779,8 @@ ${milestones
             <div class="shard-milestone-main-panel">
               <div class="shard-bonus-list">
               ${(milestone.bonuses || [])
-                .map((bonus, index) => {
-                  const computedBonus = getShardComputedBonusSummary(
-                    milestone,
-                    bonus,
-                    trackedLevel
-                  );
-                  const extractedBonusPerLevel = getShardExtractedBonusPerLevel(
-                    milestone.milestoneNumber,
-                    index
-                  );
-                  return `
+                .map(
+                  (bonus, index) => `
                 <article class="shard-bonus-card shard-panel-card">
                   <div class="shard-panel-card-header">
                     <strong>${escapeHtml(bonus.effectLabel || "Unnamed bonus")}</strong>
@@ -3793,34 +3789,22 @@ ${milestones
                   <p class="meta">Unlock level: ${bonus.unlockLevel ?? "Listed without explicit threshold"}</p>
                   <p class="meta">Initial bonus: ${escapeHtml(String(bonus.initialBonus ?? "Unknown"))}</p>
                   <p class="meta">Bonus per level: ${escapeHtml(String(bonus.bonusPerLevel ?? "Unknown"))}</p>
-                  <p class="meta"><strong>Observed value</strong> ${escapeHtml(computedBonus.currentLabel)}</p>
-                  <p class="meta"><strong>Next level</strong> ${escapeHtml(computedBonus.nextLabel)}</p>
                 </article>
-              `;
-                })
+              `
+                )
                 .join("")}
               </div>
               <aside class="shard-level-up-rail shard-panel-card">
-                <p class="snapshot-title">Level up</p>
-                <label class="mini-field shard-row-focus-field shard-level-up-observed">
-                  <span>Observed level</span>
-                  <input data-shard-focus-level data-shard-focus-level-for="${escapeHtml(String(milestone.id))}" type="number" min="0" step="1" value="${trackedLevel ?? ""}" placeholder="0">
-                </label>
-                <div class="shard-level-up-summary">
-                  ${(() => {
-                    const nextThreshold = getNextShardThreshold(milestone, trackedLevel, mechanics);
-                    const nextThresholdLabel =
-                      nextThreshold === null || nextThreshold === undefined
-                        ? "Already past listed thresholds"
-                        : formatShardNumber(nextThreshold);
-                    return `
-                  <p class="meta"><strong>Threshold schedule</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
-                  <p class="meta"><strong>Next threshold</strong> ${escapeHtml(nextThresholdLabel)}</p>
-                    `;
-                  })()}
-                </div>
-                <p class="shard-level-up-cost">${escapeHtml(levelRailSummary.costLabel)}</p>
-                <button class="button ghost shard-level-up-button" type="button" disabled>${escapeHtml(levelRailSummary.buttonLabel)}</button>
+                <p class="snapshot-title">Evidence boundary</p>
+                <p class="meta"><strong>Title side</strong> ${escapeHtml(summary.titleCoverageLine)}</p>
+                <p class="meta"><strong>Row shell</strong> ${escapeHtml(summary.rowShellLine)}</p>
+                <p class="meta"><strong>Effect text</strong> ${escapeHtml(summary.effectLine)}</p>
+                <p class="meta"><strong>Cost shell</strong> ${escapeHtml(summary.costLine)}</p>
+                ${
+                  verifiedPackage
+                    ? `<p class="meta"><strong>Verified package</strong> ${escapeHtml(`Breakpoints ${Array.isArray(verifiedPackage.fixedBreakpoints) ? verifiedPackage.fixedBreakpoints.join("/") : "n/a"} | Cost fields ${(verifiedPackage.serializedCostFields || []).join(", ")}`)}</p>`
+                    : `<p class="meta"><strong>Verified package</strong> Not yet promoted for this row.</p>`
+                }
               </aside>
             </div>
           </details>
@@ -4116,20 +4100,27 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  const verifiedShardRows = getVerifiedShardRowPackages();
-  if (verifiedShardRows.length) {
-    const verifiedRowKeys = verifiedShardRows
-      .map((entry) => entry?.verifiedRow?.rowKey)
+  const shardFamilyEvidence = state.shardGrounding?.milestoneFamilyEvidence;
+  const shardFamilyRows = Array.isArray(shardFamilyEvidence?.rows) ? shardFamilyEvidence.rows : [];
+  if (shardFamilyRows.length) {
+    const statusCounts = getShardMilestoneEvidenceCounts();
+    const verifiedRowKeys = shardFamilyRows
+      .filter((entry) => entry?.status === "verified")
+      .map((entry) => entry?.rowKey)
       .filter(Boolean);
-    const hasVerifiedPreviewSlice =
-      verifiedRowKeys.includes("SU1") && verifiedRowKeys.includes("SU2");
+    const hasSharedFamilyEvidence =
+      shardFamilyRows.length === 30 &&
+      verifiedRowKeys.includes("SU1") &&
+      verifiedRowKeys.includes("SU2") &&
+      statusCounts.partial > 0 &&
+      statusCounts.blocked > 0;
     cases.push({
-      title: "Verified shard rows preview",
-      expected: "SU1 and SU2 verified rows available for descriptive preview",
-      actual: hasVerifiedPreviewSlice
-        ? "SU1 and SU2 verified rows available for descriptive preview"
-        : "Verified shard rows preview drifted",
-      pass: hasVerifiedPreviewSlice,
+      title: "Shard family evidence table",
+      expected: "Shared shard family evidence covers rows 0-29 with verified, partial, and blocked classifications",
+      actual: hasSharedFamilyEvidence
+        ? "Shared shard family evidence covers rows 0-29 with verified, partial, and blocked classifications"
+        : "Shared shard family evidence table drifted",
+      pass: hasSharedFamilyEvidence,
       scope: "APK"
     });
   }
@@ -5720,9 +5711,12 @@ function getShardFocusMilestone() {
 }
 
 function getMilestonesForDisplay() {
-  return [...getGroundedShardMilestones()].sort((left, right) => {
-    return Number(left.milestoneNumber || 0) - Number(right.milestoneNumber || 0);
-  });
+  const milestonesByRow = new Map(
+    getGroundedShardMilestones().map((milestone) => [Number(milestone.milestoneNumber), milestone])
+  );
+  return getShardMilestoneFamilyEvidence()
+    .map((entry) => milestonesByRow.get(Number(entry.row)))
+    .filter(Boolean);
 }
 
 function isShardMilestoneOpen(id) {

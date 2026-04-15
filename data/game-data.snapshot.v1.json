@@ -194,10 +194,10 @@
       "title": "Shard milestone payload recovery",
       "status": "active",
       "goal": "Recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs and future external-tool replacement.",
-      "currentSlice": "Ship one bounded player-facing verified shard rows preview: use the recovered ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo foothold plus the already verified SU1 and SU2 row packages to show a small descriptive shard surface with explicit blocked notes for every row that is not yet verified.",
+      "currentSlice": "Ship one shared shard-family evidence table for the reachable ShardMining rows: use the recovered ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo foothold plus the existing row-model, row-shell, title-side, effect-text, cost-shell, payload-watch, and save-boundary artifacts to classify rows 0-29 as verified, partial, or blocked in one descriptive surface.",
       "exitCondition": "The exact serialized shard milestone row payload or declaring save-side owner is recovered from the narrowed shard-specific trail.",
-      "blockedBy": "The repo now recovers the shard-local declaring row model plus verified SU1 and SU2 row packages, but still lacks a broader verified shard row table, exact serialized list payload recovery, and any checked save-family bridge for player-owned shard milestone state.",
-      "smallestShippableSlice": "A small descriptive verified shard rows preview that only renders SU1 and SU2 with their checked title, bonus-package, text-slot, and cost-shell evidence while leaving broader row-table, affordability, and save-side claims blocked.",
+      "blockedBy": "The repo now recovers the shard-local declaring row model plus one reachable shard-family evidence pass, but still lacks exact serialized list payload recovery, a checked save-family bridge for player-owned shard milestone state, and planner-safe shard cost math.",
+      "smallestShippableSlice": "One shared descriptive shard-family evidence table that keeps SU1 and SU2 as verified rows, holds unresolved rows as partial or blocked, and explicitly leaves affordability, planner math, and save-side claims blocked.",
       "completedSteps": [
         "Narrow the shard-specific owner trail to ShardMining plus ShardUpgradeInfo.",
         "Preserve FinalSU unlock and bonus-field families as a checked shard-specific boundary.",
@@ -214,12 +214,12 @@
         "Promote a shard milestone handoff boundary that keeps ConstructionMilestones as the nearby generic family while the shard-local declaring row model is now recovered as ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo.",
         "Promote one bounded shard row-verification artifact so SU1 now binds to the shipped Alpha title asset, a three-bonus effect package, and the checked get_SU1Cost cost shell without claiming a full row table.",
         "Promote one bounded shard row-verification artifact so SU2 now binds to the shipped Aquarius title asset, a three-bonus effect package, and the checked get_SU2Cost cost shell without claiming a full row table.",
-        "Ship a first player-facing verified shard rows preview so the app can safely show SU1 and SU2 as descriptive verified rows while everything else stays explicitly blocked.",
-        "Fold that verified SU1/SU2 slice into the existing Shard Mining row cards so the single milestone surface now carries the verified package evidence inline instead of splitting it into a second shard preview panel."
+        "Promote one shared shard-family evidence table that classifies the reachable rows 0-29 as verified, partial, or blocked instead of reopening standalone row artifacts for the player-facing surface.",
+        "Ship the Shard Mining family surface from that single evidence table so the row cards stay descriptive-only and evidence-first."
       ],
       "nextSteps": [
-        "Keep the player-facing preview limited to verified rows only until another row clears end-to-end.",
-        "If a future preview expansion needs one more row, verify one additional row package without reopening broad owner hunting or claiming a full shard table."
+        "Keep future shard follow-up inside the shared family evidence table instead of reopening standalone row artifacts.",
+        "If a future row moves from partial or blocked to verified, upgrade that row inside the shared table without reopening broad owner hunting or claiming a full save-side recovery."
       ],
       "sources": [
         "docs/systems/shards/shard-system-verification.md",
@@ -239,8 +239,7 @@
         "data/shard-milestone-row-alignment-boundary.v1.json",
         "data/shard-milestone-handoff-boundary.v1.json",
         "data/shard-save-boundary.v1.json",
-        "data/shard-row-verification-su1.v1.json",
-        "data/shard-row-verification-su2.v1.json",
+        "data/shard-milestone-family-evidence.v1.json",
         "data/shard-scene-monobehaviour-probe.v1.json",
         "data/shard-cost-parameter-probe.v1.json",
         "data/shard-cost-method-probe.v1.json",
@@ -270,12 +269,12 @@
         "The current partial shard row shell does not yet provide one clean shared row-number family: unlock hooks currently sit at 17-29 while text-checker hooks sit at 0-12.",
         "SU1 now clears as one bounded verified row: the shipped Alpha title asset, grounded three-bonus package, three bonus slots, three get_SU1Bonus*Calc accessors, and get_SU1Cost shell all align on the same row.",
         "SU2 now clears as one bounded verified row: the shipped Aquarius title asset, grounded three-bonus package, three bonus slots, three get_SU2Bonus*Calc accessors, and get_SU2Cost shell all align on the same row.",
-        "The app can now safely show the verified SU1 and SU2 row packages inline on the existing Shard Mining row cards, while every unverified row stays explicitly descriptive-only.",
+        "The app now renders the reachable shard family from one shared evidence table: SU1 and SU2 are verified, rows 0, 7, and 28 stay explicitly blocked, and the remaining rows stay descriptive partials.",
         "The shard-local declaring row model is now recovered as ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo while ConstructionMilestones stays only a nearby generic family.",
         "The narrowed shard-local contexts still have zero checked overlap with PlayerProfileData and CloudSavePlayerProfile."
       ],
       "uncertain": [
-        "How far the same row-verification method generalizes beyond SU1 without hitting title conflicts, slot-count mismatches, or unresolved handler joins on other rows.",
+        "Which partial or blocked rows can be upgraded inside the shared family evidence table without reopening standalone row-by-row artifact work.",
         "Which save-side owner or exact serialized list host actually persists player-owned shard milestone rows beyond the recovered ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo shell.",
         "What numeric values fill the recovered shard cost parameter shell across enough rows to verify exact per-level cost formulas.",
         "Which exact text handler or declaring owner maps the recovered shard rows and bonus calc accessors back to player-facing effect text.",

@@ -5472,6 +5472,136 @@ function validateShardRowVerificationSu2(boundary) {
   };
 }
 
+function validateShardMilestoneFamilyEvidence(boundary) {
+  expectNonEmptyString(
+    boundary.dataset,
+    "shard milestone family evidence dataset id must be present"
+  );
+  expectNonEmptyString(
+    boundary.generatedAt,
+    "shard milestone family evidence generatedAt must be present"
+  );
+  expectRecord(boundary.sources, "shard milestone family evidence sources must be an object");
+  [
+    "groundedMilestones",
+    "rowModelBoundary",
+    "rowShellBoundary",
+    "titleEffectBoundary",
+    "effectTextHandlerBoundary",
+    "payloadBoundary",
+    "saveBoundary",
+    "bonusSlotProbe",
+    "costMethodProbe",
+    "costNativeProbe",
+    "handoffBoundary",
+    "typeMetadataProbe"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `shard milestone family evidence sources.${field} must be present`
+    );
+  });
+  expectRecord(
+    boundary.reachableFamily,
+    "shard milestone family evidence reachableFamily must be an object"
+  );
+  expectRecord(
+    boundary.reachableFamily.declaringField,
+    "shard milestone family evidence declaringField must be an object"
+  );
+  expectRecord(
+    boundary.reachableFamily.reachableRows,
+    "shard milestone family evidence reachableRows must be an object"
+  );
+  expectRecord(
+    boundary.reachableFamily.statusMeanings,
+    "shard milestone family evidence statusMeanings must be an object"
+  );
+  expectRecord(
+    boundary.sharedEvidence,
+    "shard milestone family evidence sharedEvidence must be an object"
+  );
+  expectArray(boundary.familyFindings, "shard milestone family evidence familyFindings must be an array");
+  expectArray(boundary.rows, "shard milestone family evidence rows must be an array");
+  expectArray(
+    boundary.currentBoundary,
+    "shard milestone family evidence currentBoundary must be an array"
+  );
+
+  assert.equal(
+    boundary.reachableFamily.screenController,
+    "ShardMining, Assembly-CSharp",
+    "shard milestone family evidence screenController drifted"
+  );
+  assert.equal(
+    boundary.reachableFamily.declaringField.name,
+    "upgradeInfoList",
+    "shard milestone family evidence declaringField.name drifted"
+  );
+  assert.equal(
+    boundary.reachableFamily.reachableRows.start,
+    0,
+    "shard milestone family evidence reachableRows.start drifted"
+  );
+  assert.equal(
+    boundary.reachableFamily.reachableRows.end,
+    29,
+    "shard milestone family evidence reachableRows.end drifted"
+  );
+  assert.equal(
+    boundary.reachableFamily.reachableRows.count,
+    30,
+    "shard milestone family evidence reachableRows.count drifted"
+  );
+
+  const verifiedRows = boundary.rows.filter((entry) => entry?.status === "verified");
+  const partialRows = boundary.rows.filter((entry) => entry?.status === "partial");
+  const blockedRows = boundary.rows.filter((entry) => entry?.status === "blocked");
+  assert.equal(boundary.rows.length, 30, "shard milestone family evidence must keep 30 rows");
+  assert.deepEqual(
+    verifiedRows.map((entry) => entry.rowKey),
+    ["SU1", "SU2"],
+    "shard milestone family evidence verified rows drifted"
+  );
+  assert.ok(
+    blockedRows.some((entry) => entry.rowKey === "SU0"),
+    "shard milestone family evidence must keep SU0 blocked"
+  );
+  assert.ok(
+    blockedRows.some((entry) => entry.rowKey === "SU7"),
+    "shard milestone family evidence must keep SU7 blocked"
+  );
+  assert.ok(
+    blockedRows.some((entry) => entry.rowKey === "SU28"),
+    "shard milestone family evidence must keep SU28 blocked"
+  );
+  assert.ok(
+    partialRows.length >= 20,
+    "shard milestone family evidence should preserve the descriptive partial family"
+  );
+  assert.ok(
+    verifiedRows.every((entry) => entry?.verifiedPackage?.rowShellFields?.unlockRequirementField),
+    "shard milestone family evidence verified rows must preserve rowShellFields"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) =>
+      String(line).includes("shared shard milestone evidence table")
+    ),
+    "shard milestone family evidence must preserve shared-table boundary framing"
+  );
+
+  return {
+    id: "shard-milestone-family-evidence",
+    label: "Shard milestone family evidence",
+    classification: "extracted-mechanics",
+    stats: [
+      `${boundary.rows.length} reachable shard rows`,
+      `${verifiedRows.length} verified | ${partialRows.length} partial | ${blockedRows.length} blocked`,
+      "Shared shard-family evidence stays descriptive-only and save-side blocked"
+    ]
+  };
+}
+
 function validateExtractionCandidateFamilies(families) {
   expectNonEmptyString(
     families.dataset,
@@ -13522,8 +13652,8 @@ async function validateBundledDatasetContract(contract) {
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
   assert.equal(
     contract.datasets.length,
-    62,
-    "bundled dataset contract must track the sixty-two shipped dataset groups"
+    61,
+    "bundled dataset contract must track the sixty-one shipped dataset groups"
   );
 
   for (const [index, dataset] of contract.datasets.entries()) {
@@ -13634,8 +13764,9 @@ export async function validateBundledDatasets() {
   const shardCostListPathProbe = await readJson("../../data/shard-cost-list-path-probe.v1.json");
   const shardCostFormulaModel = await readJson("../../data/shard-cost-formula-model.v1.json");
   const shardBonusSlotProbe = await readJson("../../data/shard-bonus-slot-probe.v1.json");
-  const shardRowVerificationSu1 = await readJson("../../data/shard-row-verification-su1.v1.json");
-  const shardRowVerificationSu2 = await readJson("../../data/shard-row-verification-su2.v1.json");
+  const shardMilestoneFamilyEvidence = await readJson(
+    "../../data/shard-milestone-family-evidence.v1.json"
+  );
   const shardTypeMetadataProbe = await readJson("../../data/shard-type-metadata-probe.v1.json");
   const extractionCandidateFamilies = await readJson(
     "../../data/extraction-candidate-families.v1.json"
@@ -13762,8 +13893,7 @@ export async function validateBundledDatasets() {
     validateShardCostListPathProbe(shardCostListPathProbe),
     validateShardCostFormulaModel(shardCostFormulaModel),
     validateShardBonusSlotProbe(shardBonusSlotProbe),
-    validateShardRowVerificationSu1(shardRowVerificationSu1),
-    validateShardRowVerificationSu2(shardRowVerificationSu2),
+    validateShardMilestoneFamilyEvidence(shardMilestoneFamilyEvidence),
     validateShardTypeMetadataProbe(shardTypeMetadataProbe),
     validateExtractionCandidateFamilies(extractionCandidateFamilies),
     validateExtractionCandidateRanking(extractionCandidateRanking),

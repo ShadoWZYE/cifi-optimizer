@@ -141,9 +141,22 @@ Still blocked:
 
 In short: ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until shard owner mapping is completed.
 
+## Shared family evidence table
+
+The shipped shard surface now expands from one shared family evidence table:
+
+- `data/shard-milestone-family-evidence.v1.json`
+- reachable family: rows `0-29` inside `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo`
+- current row classes:
+  - `verified`: `SU1`, `SU2`
+  - `blocked`: `SU0`, `SU7`, `SU28`
+  - `partial`: all other reachable rows
+
+That table is the current player-facing handoff surface for shard row evidence. Future shard follow-up should upgrade rows inside that shared table instead of reopening standalone row-by-row artifacts for the UI.
+
 ## Next allowed shard step
 
-The next shard planner pass should recover the exact serialized milestone row payload or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail, using the partial `UnlockMilestone*` / `BuyMilestone*` / `Milestone*TextChecker` row shell plus the newly narrowed `ConstructionMilestones` handoff seam as the nearest row-owner target, and compare that extracted layer against the current descriptive dataset before any planner expansion.
+The next shard planner pass should recover the exact serialized milestone row payload or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail, use that result to upgrade rows inside the shared shard-family evidence table, and compare that extracted layer against the current descriptive dataset before any planner expansion.
 
 Current heuristic ranking for that work:
 

@@ -32,20 +32,19 @@ Prefer recovering whole related families together when they share one implementa
   - the repo has checked shard payload-watch, row-shell, row-alignment, handoff, save-boundary, cost-parameter, cost-method, cost-native, type-metadata, and bonus-slot artifacts
   - the checked `ShardMining` to `ConstructionMilestones` handoff plus typed field table now recover one shard-local declaring row model: `ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo`
   - the recovered shard-local row shell currently exposes `Cost`, `MaxLevel`, and `IsUnlocked`
-  - two concrete rows now clear as bounded verification passes: `SU1` binds to the shipped `Alpha` title asset and `SU2` binds to the shipped `Aquarius` title asset, each with one three-slot effect package and one checked `get_SU*Cost` cost shell
-  - the app can now safely show a small `verified shard rows` preview for `SU1` and `SU2` with explicit blocked notes for everything else
+  - the repo now ships one shared shard-family evidence table for reachable rows `0-29`
+  - that shared table keeps `SU1` and `SU2` as verified rows, keeps rows `0`, `7`, and `28` explicitly blocked, and holds the remaining reachable rows as descriptive partials
 - Still blocked:
-  - only two shard rows are currently verified end-to-end; the repo still does not have a full verified row table
+  - only two shard rows are currently verified end-to-end; the shared family table is still descriptive evidence, not a full verified row table
   - the exact serialized `upgradeInfoList` payload or save-side owner is not yet recovered
   - exact player-owned shard row state is not yet import-ready
   - exact planner-safe shard cost math and effect-text mapping are not yet recovered
 - Largest coherent adjacent slice:
-  - keep the player-facing preview limited to the currently verified shard row family, and only split into narrower row checks when a real evidence or validation boundary appears
+  - keep future shard follow-up inside the shared family evidence table, upgrading rows from `partial` or `blocked` to `verified` only when a real evidence or validation boundary clears
 - Start here:
   - `docs/systems/shards/shard-system-verification.md`
   - `docs/systems/shards/shard-owner-family-verification.md`
-  - `data/shard-row-verification-su1.v1.json`
-  - `data/shard-row-verification-su2.v1.json`
+  - `data/shard-milestone-family-evidence.v1.json`
   - `data/shard-milestone-handoff-boundary.v1.json`
   - `data/shard-save-boundary.v1.json`
   - `data/shard-milestone-save-owner-candidates.v1.json`

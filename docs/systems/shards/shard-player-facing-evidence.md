@@ -11,7 +11,7 @@ Safe to show in the app now:
 - shards as a real in-game resource tied to Operations and the Shard Mining menu
 - loop-reset warnings and shard watch cards
 - descriptive unlock thresholds and cost-bump notes
-- descriptive shard-cost evidence with explicit status labels
+- descriptive shard-family evidence with explicit `verified`, `partial`, and `blocked` row labels
 - explicit boundary notes about what is still blocked and why
 
 Not safe to imply in the app:
@@ -33,6 +33,12 @@ Tell the player plainly:
 External-model compatibility can preserve community-tool payloads or imported unmapped blobs so a player does not lose context during research. That does not make those payloads grounded shard truth or recommendation-grade planner input.
 
 ## Status meanings
+
+Shard-family row labels:
+
+- `Verified`: one row now has aligned shipped title-side, row-shell, effect-package, and cost-shell evidence in the shared family table
+- `Partial`: the row stays inside the recovered shard family, but at least one player-facing identity or verified-package seam is still unresolved
+- `Blocked`: the current row evidence still conflicts or undershoots the recovered shard shell, so stronger player-facing claims would overreach
 
 - `Available`: repo data supports a descriptive evidence claim for the current shard view
 - `Integrated`: bundled descriptive data is intentionally shown in the player-facing UI
