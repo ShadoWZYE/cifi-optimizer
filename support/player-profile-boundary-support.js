@@ -116,10 +116,7 @@ export function getPlayerProfileBoundaryAudit(groups, context, isBoundaryValuePr
     notes.push("No compatibility-only leftover fields were populated by this import.");
   }
 
-  if (
-    context.compatibility.unmappedSystems?.multiverseMarket &&
-    !sanitizedMultiverseMarket
-  ) {
+  if (context.compatibility.unmappedSystems?.multiverseMarket && !sanitizedMultiverseMarket) {
     notes.push(
       "Ignored one unlabeled MultiverseMarket compatibility payload because it did not match the required raw/unmapped importedState plus mappingGate wrapper."
     );

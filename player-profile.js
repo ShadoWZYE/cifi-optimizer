@@ -797,7 +797,7 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
           )
         )
       )
-  );
+    );
 
   const mergedShipToolState = mergeDeep(
     baselineShipPlayerState,

@@ -76,7 +76,10 @@ test("normalizePlayerProfile keeps only the exact typed bounded multiverse marke
     profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS0Level,
     undefined
   );
-  assert.equal(profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS1Level, 4);
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS1Level,
+    4
+  );
   assert.equal(
     profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS24Level,
     4
@@ -153,13 +156,10 @@ test("normalizePlayerProfile keeps imported Emporium compatibility state out of 
     profile.compatibility.unmappedSystemState.multiverseMarket.status,
     "quarantined-raw-unmapped"
   );
-  assert.deepEqual(
-    profile.compatibility.unmappedSystemState.multiverseMarket.importedState,
-    {
-      IS71Level: 3,
-      EsotericR1Trades: 2
-    }
-  );
+  assert.deepEqual(profile.compatibility.unmappedSystemState.multiverseMarket.importedState, {
+    IS71Level: 3,
+    EsotericR1Trades: 2
+  });
   assert.equal(profile.player.multiverseMarket, undefined);
   assert.equal(profile.player.resources.tokens, null);
   assert.equal(profile.planning.tokenShop.checkedSubsetPlayerState.ATU1Level, null);

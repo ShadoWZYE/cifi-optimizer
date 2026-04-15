@@ -2362,14 +2362,12 @@ function renderTokenShopSavedStateSnapshot() {
     {
       label: "Banked Tokens",
       value: tokenShopState.BankedTokens,
-      note:
-        "Current stored amount recovered from compatibility import only. Token-bank cap and claimable-bank state remain blocked."
+      note: "Current stored amount recovered from compatibility import only. Token-bank cap and claimable-bank state remain blocked."
     },
     {
       label: "Daily Tokenium",
       value: tokenShopState.DailyTokenium,
-      note:
-        "Current stored amount recovered from compatibility import only. Daily Tokenium cap and ready state remain blocked."
+      note: "Current stored amount recovered from compatibility import only. Daily Tokenium cap and ready state remain blocked."
     }
   ].filter((entry) => isBoundaryValuePresent(entry.value));
 
@@ -4623,8 +4621,7 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       field: "ATU5Level",
       slot: "ATU5",
       identity:
-        boundary?.boundedRecoveredBridge?.prefabIdentity ||
-        "NewTokenUPGPrefab.T1.MK1Booster",
+        boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
       identitySource: "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
@@ -4656,8 +4653,7 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "MK2TokenBoostFillMaxLevel",
       bonusStepLabel: "Mk2 Output",
       bonusStepMode: "multiplier",
-      playerFacingSupportText:
-        boundary?.verifiedTitleJoin?.titleProbeSupportText ?? null,
+      playerFacingSupportText: boundary?.verifiedTitleJoin?.titleProbeSupportText ?? null,
       note: "Checked shell-to-prefab-to-title chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     },
     {
