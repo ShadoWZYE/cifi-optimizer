@@ -165,7 +165,8 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
       },
       saveBoundary: {
         probeResults: {
-          saveSideOwnerRecovered: false
+          saveSideOwnerRecovered: false,
+          traceOwnedStateOutcomeKind: "non-local-injection-seam"
         },
         recoveredDeclaringRowModel: {
           ownerType: "ShardMining",
@@ -196,6 +197,7 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
   assert.match(definitionSummary.bonusShapeLine, /Recovered bonus package shape/);
   const ownedStateBlocker = support.getShardOwnedStateBlockerSummary();
   assert.match(ownedStateBlocker.ownerLine, /No checked save-side owner is recovered/);
+  assert.match(ownedStateBlocker.traceLine, /non-local injection seam/);
   assert.match(ownedStateBlocker.importLine, /No grounded import path is available/);
   assert.match(ownedStateBlocker.candidateLine, /PlayerProfile-side shard member shell/);
   assert.equal(

@@ -37,6 +37,11 @@ ALL_SOURCE_PATHS = {
     "shardCostMethodProbe": ROOT / "data" / "shard-cost-method-probe.v1.json",
     "shardCostNativeProbe": ROOT / "data" / "shard-cost-native-probe.v1.json",
     "shardCostFormulaModel": ROOT / "data" / "shard-cost-formula-model.v1.json",
+    "shardSaveBoundary": ROOT / "data" / "shard-save-boundary.v1.json",
+    "shardMilestonePayloadBoundary": ROOT / "data" / "shard-milestone-payload-boundary.v1.json",
+    "shardMilestoneHandoffBoundary": ROOT / "data" / "shard-milestone-handoff-boundary.v1.json",
+    "shardTypeMetadataProbe": ROOT / "data" / "shard-type-metadata-probe.v1.json",
+    "shardSceneMonoBehaviourProbe": ROOT / "data" / "shard-scene-monobehaviour-probe.v1.json",
     "shardMilestoneSaveOwnerCandidates": ROOT / "data" / "shard-milestone-save-owner-candidates.v1.json",
     "multiverseMarketMemberBoundary": ROOT / "data" / "multiverse-market-market-member-boundary.json",
     "multiverseMarketSaveDataImportBoundary": ROOT / "data" / "multiverse-market-savedata-import-boundary.json",
@@ -60,6 +65,11 @@ SOURCE_ROLE_TEXT = {
     "shardCostMethodProbe": "Preserves the getter-family and helper-method structure for shard cost accessors.",
     "shardCostNativeProbe": "Preserves native getter field-read evidence tying get_SU* methods to specific shard cost parameters.",
     "shardCostFormulaModel": "Preserves the canonical shard-cost evaluator structure model and completion flags without claiming planner-safe closure.",
+    "shardSaveBoundary": "Preserves the split between direct ShardMining row-definition payload and the still-unresolved owned-state path behind upgradeInfoList.",
+    "shardMilestonePayloadBoundary": "Preserves the shard-local watcher hooks and payload-watch clusters without promoting them into a recovered owned-state source.",
+    "shardMilestoneHandoffBoundary": "Preserves the current shard-local versus academy-side handoff narrowing around upgradeInfoList and generic ConstructionMilestones helpers.",
+    "shardTypeMetadataProbe": "Preserves typed shard owner-list fields plus ShardMining+ShardUpgradeInfo row-state fields recovered from direct type reflection.",
+    "shardSceneMonoBehaviourProbe": "Preserves the exact level0 ShardMining MonoBehaviour object that holds the direct shard definition payload.",
     "shardMilestoneSaveOwnerCandidates": "Preserves the still-blocked shard save-owner candidate narrowing used to keep structural cost work separate from save-side promotion.",
     "multiverseMarketMemberBoundary": "Preserves the checked PlayerProfileHandler.get_Market to MultiverseMarket accessor bridge and the exact SaveData owner boundary clues.",
     "multiverseMarketSaveDataImportBoundary": "Preserves the bounded compatibility-only Emporium import decision and the blocked canonical-import framing.",
@@ -3594,13 +3604,24 @@ def make_surface_source(source_id: str, hits: list[dict[str, Any]]) -> dict[str,
     return {
         "sourceId": source_id,
         "sourcePath": repo_relative(ALL_SOURCE_PATHS[source_id]),
+        "searchModes": get_source_search_modes(source_id),
         "hitCount": len(hits),
+        "highSignalHitCount": len(hits),
+        "supportingHitCount": 0,
+        "incidentalHitCount": 0,
+        "suppressedNoiseCount": 0,
         "hits": hits,
     }
 
 
 def make_surface_hit(term: str, json_path: str) -> dict[str, Any]:
-    return {"term": term, "jsonPath": json_path}
+    return {
+        "term": term,
+        "jsonPath": json_path,
+        "signalTier": "high-signal",
+        "signalScore": 100,
+        "matchMode": "exact-structured",
+    }
 
 
 def build_token_shop_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
@@ -4191,6 +4212,458 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
     }
 
 
+def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
+    config = target["strategyConfig"]
+    save_boundary = documents["shardSaveBoundary"]
+    payload_boundary = documents["shardMilestonePayloadBoundary"]
+    handoff_boundary = documents["shardMilestoneHandoffBoundary"]
+    type_probe = documents["shardTypeMetadataProbe"]
+    scene_probe = documents["shardSceneMonoBehaviourProbe"]
+    save_owner_candidates = documents["shardMilestoneSaveOwnerCandidates"]
+
+    recovered_runtime_shell = save_boundary["recoveredDeclaringRowModel"]
+    row_state_fields = [field["name"] for field in recovered_runtime_shell["rowStateFields"]]
+    owner_list_fields = [
+        field["name"]
+        for field in type_probe["targets"]["shardMining"]["ownerListFields"]
+        if field["name"] in {"MaxedMilestonesList", "UnlockedMilestonesList", "MilestoneCostList", "upgradeInfoList"}
+    ]
+    shard_scene = next(
+        item for item in scene_probe["monoBehaviours"] if item["scriptName"] == "ShardMining"
+    )
+    local_hooks_checked = list(save_boundary["runtimeConstructionBoundary"]["localHooksChecked"])
+
+    local_bridge_recovered = save_boundary["probeResults"].get("runtimePopulationLocalProducerRecovered") is True
+    wrapper_handoff_recovered = save_boundary["probeResults"].get("saveSideOwnerRecovered") is True
+    if local_bridge_recovered:
+        outcome_kind = "local-runtime-population-bridge"
+        outcome_label = "Local runtime population bridge"
+        outcome_summary = (
+            "The trace now preserves one shard-local construction bridge that populates upgradeInfoList owned-state values directly."
+        )
+        outcome_node_label = "Local ShardMining population bridge"
+        outcome_statement = (
+            "Committed shard boundary evidence now preserves one local ShardMining-side producer that fills upgradeInfoList owned-state values."
+        )
+        outcome_citations = [
+            cite_row_boundary(
+                "shardSaveBoundary",
+                "$.runtimeConstructionBoundary.traceResult",
+                save_boundary["runtimeConstructionBoundary"]["traceResult"][1],
+            )
+        ]
+        bridge_result = "checked local runtime population bridge recovered"
+    elif wrapper_handoff_recovered:
+        outcome_kind = "deeper-wrapper-handoff"
+        outcome_label = "Deeper wrapper handoff"
+        outcome_summary = (
+            "The trace now preserves a deeper save-side wrapper handoff for player-owned shard row state even though it does not stop on a local ShardMining producer."
+        )
+        outcome_node_label = "Recovered deeper save-side wrapper"
+        outcome_statement = (
+            "Committed shard boundary evidence now preserves one deeper wrapper handoff for player-owned shard row state behind upgradeInfoList."
+        )
+        outcome_citations = [
+            cite_row_boundary(
+                "shardMilestoneSaveOwnerCandidates",
+                "$.currentBoundary",
+                save_owner_candidates["currentBoundary"][0],
+            )
+        ]
+        bridge_result = "checked deeper wrapper handoff recovered"
+    else:
+        outcome_kind = "non-local-injection-seam"
+        outcome_label = "Non-local injection seam"
+        outcome_summary = (
+            "The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values remain bounded as a non-local injection seam."
+        )
+        outcome_node_label = "Non-local save-side injection seam"
+        outcome_statement = (
+            "The committed shard boundary set now narrows the owned-state path to a non-local seam: direct definitions and the runtime shell are recovered locally, but owned-state values still arrive from a source the repo cannot yet name."
+        )
+        outcome_citations = [
+            cite_row_boundary(
+                "shardSaveBoundary",
+                "$.currentBoundary[2]",
+                save_boundary["currentBoundary"][2],
+            ),
+            cite_row_boundary(
+                "shardMilestoneSaveOwnerCandidates",
+                "$.confidenceNotes[1]",
+                save_owner_candidates["confidenceNotes"][1],
+            ),
+        ]
+        bridge_result = "checked non-local injection seam preserved"
+
+    shell_window = {
+        "source": repo_relative(ALL_SOURCE_PATHS["shardSaveBoundary"]),
+        "shellField": recovered_runtime_shell["declaringField"]["name"],
+        "shellPathId": recovered_runtime_shell["declaringField"]["fieldOffset"],
+        "shellObjectOffset": shard_scene["pathId"],
+        "ownerFieldBlock": row_state_fields,
+        "window": [
+            {"field": recovered_runtime_shell["declaringField"]["name"], "group": "runtime-shell", "kind": "field", "value": recovered_runtime_shell["declaringField"]["type"]},
+            *[
+                {"field": field["name"], "group": "runtime-row-state", "kind": "field", "value": field["type"]}
+                for field in recovered_runtime_shell["rowStateFields"]
+            ],
+        ],
+    }
+
+    surfaces = [
+        {
+            "id": "scene-owner",
+            "label": "Direct scene owner",
+            "terms": [config["sceneOwner"], config["runtimeShell"], *anchors],
+            "sources": [
+                make_surface_source(
+                    "shardSceneMonoBehaviourProbe",
+                    [
+                        make_surface_hit("ShardMining", "$.monoBehaviours[1].scriptName"),
+                        make_surface_hit(str(shard_scene["pathId"]), "$.monoBehaviours[1].pathId"),
+                    ],
+                ),
+                make_surface_source(
+                    "shardSaveBoundary",
+                    [
+                        make_surface_hit(
+                            save_boundary["recoveredDirectRowDefinitionPayload"]["ownerType"],
+                            "$.recoveredDirectRowDefinitionPayload.ownerType",
+                        ),
+                        make_surface_hit(
+                            recovered_runtime_shell["declaringField"]["name"],
+                            "$.recoveredDeclaringRowModel.declaringField.name",
+                        ),
+                    ],
+                ),
+            ],
+        },
+        {
+            "id": "runtime-shell",
+            "label": "upgradeInfoList runtime shell",
+            "terms": [config["runtimeShell"], *row_state_fields, *anchors],
+            "sources": [
+                make_surface_source(
+                    "shardSaveBoundary",
+                    [
+                        make_surface_hit(
+                            recovered_runtime_shell["declaringField"]["name"],
+                            "$.recoveredDeclaringRowModel.declaringField.name",
+                        ),
+                        make_surface_hit(
+                            recovered_runtime_shell["rowModelType"]["fullName"],
+                            "$.recoveredDeclaringRowModel.rowModelType.fullName",
+                        ),
+                        *[
+                            make_surface_hit(
+                                field["name"],
+                                "$.recoveredDeclaringRowModel.rowStateFields",
+                            )
+                            for field in recovered_runtime_shell["rowStateFields"]
+                        ],
+                    ],
+                ),
+                make_surface_source(
+                    "shardTypeMetadataProbe",
+                    [
+                        make_surface_hit("upgradeInfoList", "$.targets.shardMining.ownerListFields"),
+                        *[
+                            make_surface_hit(field["name"], "$.targets.shardUpgradeInfo.fields")
+                            for field in type_probe["targets"]["shardUpgradeInfo"]["fields"]
+                        ],
+                    ],
+                ),
+            ],
+        },
+        {
+            "id": "owner-list-watchers",
+            "label": "Shard-local watcher and list shells",
+            "terms": [*local_hooks_checked, *owner_list_fields, *anchors],
+            "sources": [
+                make_surface_source(
+                    "shardMilestonePayloadBoundary",
+                    [
+                        *[
+                            make_surface_hit(name, "$.costAndListHooks")
+                            for name in payload_boundary["costAndListHooks"][:4]
+                        ],
+                        *[
+                            make_surface_hit(name, "$.progressFillHooks")
+                            for name in payload_boundary["progressFillHooks"][:2]
+                        ],
+                    ],
+                ),
+                make_surface_source(
+                    "shardTypeMetadataProbe",
+                    [
+                        *[
+                            make_surface_hit(name, "$.targets.shardMining.ownerListFields")
+                            for name in owner_list_fields
+                        ],
+                    ],
+                ),
+            ],
+        },
+        {
+            "id": "handoff-boundary",
+            "label": "Controller versus wrapper handoff boundary",
+            "terms": [config["genericLead"], "ConstructionMilestones", *anchors],
+            "sources": [
+                make_surface_source(
+                    "shardMilestoneHandoffBoundary",
+                    [
+                        make_surface_hit("ShardMining", "$.shardControllerFamily"),
+                        make_surface_hit(
+                            handoff_boundary["genericMilestoneLead"]["family"],
+                            "$.genericMilestoneLead.family",
+                        ),
+                        make_surface_hit(
+                            recovered_runtime_shell["declaringField"]["name"],
+                            "$.handoffFindings[3]",
+                        ),
+                    ],
+                )
+            ],
+        },
+        {
+            "id": "save-gap",
+            "label": "Save-side blocker",
+            "terms": [config["saveCandidate"], "PlayerProfileData", "CloudSavePlayerProfile", *anchors],
+            "sources": [
+                make_surface_source(
+                    "shardMilestoneSaveOwnerCandidates",
+                    [
+                        make_surface_hit(
+                            save_owner_candidates["remainingSaveOwnerCandidates"][0]["label"],
+                            "$.remainingSaveOwnerCandidates[0].label",
+                        ),
+                        make_surface_hit("PlayerProfileData", "$.remainingSaveOwnerCandidates[0].candidateFieldClusters"),
+                        make_surface_hit("CloudSavePlayerProfile", "$.remainingSaveOwnerCandidates[0].candidateFieldClusters"),
+                    ],
+                ),
+                make_surface_source(
+                    "shardSaveBoundary",
+                    [
+                        make_surface_hit("PlayerProfileData", "$.saveFamilyTermsChecked"),
+                        make_surface_hit("CloudSavePlayerProfile", "$.saveFamilyTermsChecked"),
+                    ],
+                ),
+            ],
+        },
+    ]
+    for surface in surfaces:
+        surface["anchorSpecs"] = build_anchor_specs(surface["terms"], "surface-search")
+
+    trace_graph = {
+        "nodes": [
+            make_node("shard-scene-owner", "scene-owner", f"{config['sceneOwner']} path_id {shard_scene['pathId']}", "present", "The direct level0 ShardMining MonoBehaviour object is preserved."),
+            make_node("shard-definition-family", "definition-payload", "Direct ShardMining SU0-29 definition payload", "present", "The reachable row-definition family is preserved directly on the ShardMining scene object."),
+            make_node("shard-runtime-shell", "runtime-shell", config["runtimeShell"], "present", "The owned-state shell is preserved as upgradeInfoList -> ShardMining+ShardUpgradeInfo."),
+            make_node("shard-owner-list-shell", "owner-list-shell", ", ".join(owner_list_fields), "present", "ShardMining preserves adjacent list shells that watch milestone cost and bool state."),
+            make_node("shard-local-hooks", "watcher-hooks", ", ".join(local_hooks_checked), "present", "Shard-local watcher hooks around costs, unlock lists, max-level lists, and progress fills are preserved."),
+            make_node("shard-owned-state-outcome", "owned-state-outcome", outcome_node_label, "present", outcome_summary),
+        ],
+        "edges": [
+            make_edge(
+                "shard-scene-to-definition",
+                "shard-scene-owner",
+                "shard-definition-family",
+                "direct-scene-definition-payload",
+                "present",
+                "direct",
+                "The direct level0 ShardMining MonoBehaviour object still holds the reachable shard definition family locally.",
+                [
+                    cite_row_boundary("shardSceneMonoBehaviourProbe", "$.monoBehaviours[1].pathId", str(shard_scene["pathId"])),
+                    cite_row_boundary("shardSaveBoundary", "$.recoveredDirectRowDefinitionPayload.ownerType", save_boundary["recoveredDirectRowDefinitionPayload"]["ownerType"]),
+                ],
+            ),
+            make_edge(
+                "shard-definition-to-runtime-shell",
+                "shard-definition-family",
+                "shard-runtime-shell",
+                "definition-to-runtime-shell",
+                "present",
+                "direct",
+                "The same ShardMining owner that carries direct row definitions also declares upgradeInfoList -> ShardMining+ShardUpgradeInfo as the recovered runtime row shell.",
+                [
+                    cite_row_boundary("shardSaveBoundary", "$.recoveredDeclaringRowModel.declaringField.name", recovered_runtime_shell["declaringField"]["name"]),
+                    cite_row_boundary("shardSaveBoundary", "$.recoveredDeclaringRowModel.rowModelType.fullName", recovered_runtime_shell["rowModelType"]["fullName"]),
+                ],
+            ),
+            make_edge(
+                "shard-runtime-to-owner-lists",
+                "shard-runtime-shell",
+                "shard-owner-list-shell",
+                "runtime-shell-to-owner-lists",
+                "present",
+                "direct",
+                "Type reflection preserves upgradeInfoList beside MaxedMilestonesList, UnlockedMilestonesList, and MilestoneCostList on ShardMining.",
+                [
+                    cite_row_boundary("shardTypeMetadataProbe", "$.targets.shardMining.ownerListFields", ", ".join(owner_list_fields)),
+                ],
+            ),
+            make_edge(
+                "shard-runtime-to-local-hooks",
+                "shard-runtime-shell",
+                "shard-local-hooks",
+                "runtime-shell-to-local-hooks",
+                "present",
+                "supporting",
+                "The shard payload-watch boundary keeps InitializeShards, list refresh hooks, and milestone progress-fill hooks attached to the same shard-local runtime shell.",
+                [
+                    cite_row_boundary("shardMilestonePayloadBoundary", "$.costAndListHooks", ", ".join(payload_boundary["costAndListHooks"][:5])),
+                    cite_row_boundary("shardMilestonePayloadBoundary", "$.progressFillHooks", ", ".join(payload_boundary["progressFillHooks"])),
+                ],
+            ),
+            make_edge(
+                "shard-runtime-to-outcome",
+                "shard-runtime-shell",
+                "shard-owned-state-outcome",
+                outcome_kind,
+                "present",
+                "derived",
+                outcome_statement,
+                outcome_citations,
+            ),
+        ],
+        "negativeEdges": [],
+        "claimLedger": [],
+    }
+
+    if not local_bridge_recovered:
+        trace_graph["negativeEdges"].append(
+            make_edge(
+                "shard-missing-local-bridge",
+                "shard-local-hooks",
+                "shard-runtime-shell",
+                "local-runtime-population-bridge",
+                "missing",
+                "negative",
+                "The checked shard-local watcher hooks still do not recover any exact write, constructor, or setup path that populates upgradeInfoList owned-state values locally.",
+                [
+                    cite_row_boundary(
+                        "shardSaveBoundary",
+                        "$.runtimeConstructionBoundary.traceResult[1]",
+                        save_boundary["runtimeConstructionBoundary"]["traceResult"][1],
+                    ),
+                    cite_row_boundary(
+                        "shardMilestonePayloadBoundary",
+                        "$.currentBoundary[1]",
+                        payload_boundary["currentBoundary"][1],
+                    ),
+                ],
+            )
+        )
+
+    if not wrapper_handoff_recovered:
+        trace_graph["negativeEdges"].append(
+            make_edge(
+                "shard-missing-wrapper-handoff",
+                "shard-runtime-shell",
+                "shard-owned-state-outcome",
+                "deeper-wrapper-handoff-recovery",
+                "missing",
+                "negative",
+                "The repo still does not recover an exact deeper wrapper or save-side owner behind upgradeInfoList even though a PlayerProfile-side shard member shell remains the leading unresolved candidate.",
+                [
+                    cite_row_boundary(
+                        "shardMilestoneSaveOwnerCandidates",
+                        "$.remainingSaveOwnerCandidates[0].label",
+                        save_owner_candidates["remainingSaveOwnerCandidates"][0]["label"],
+                    ),
+                    cite_row_boundary(
+                        "shardMilestoneSaveOwnerCandidates",
+                        "$.currentBoundary[0]",
+                        save_owner_candidates["currentBoundary"][0],
+                    ),
+                ],
+            )
+        )
+
+    comparison_shape = [
+        {"type": "direct-scene-definition-payload", "status": "present"},
+        {"type": "definition-to-runtime-shell", "status": "present"},
+        {"type": "runtime-shell-to-owner-lists", "status": "present"},
+        {"type": "runtime-shell-to-local-hooks", "status": "present"},
+        {"type": outcome_kind, "status": "present"},
+    ]
+    blocked_shape = []
+    if not local_bridge_recovered:
+        blocked_shape.append({"type": "local-runtime-population-bridge", "status": "missing"})
+    if not wrapper_handoff_recovered:
+        blocked_shape.append({"type": "deeper-wrapper-handoff-recovery", "status": "missing"})
+
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "traceGraph": trace_graph,
+        "outcome": {
+            "kind": outcome_kind,
+            "label": outcome_label,
+            "summary": outcome_summary,
+        },
+        "bridgePromotionRule": "Only promote player-owned shard state past descriptive quarantine when one exact local population bridge or deeper save-side wrapper handoff is recovered explicitly.",
+        "bridgeCheck": {
+            "candidateTerms": [config["runtimeShell"], *row_state_fields, *local_hooks_checked[:4]],
+            "bridgeCleared": True,
+            "bridgeHits": [
+                {"surfaceId": "runtime-shell", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardSaveBoundary"]), "term": recovered_runtime_shell["declaringField"]["name"]},
+                {"surfaceId": "owner-list-watchers", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardMilestonePayloadBoundary"]), "term": local_hooks_checked[0]},
+                {"surfaceId": "save-gap", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardMilestoneSaveOwnerCandidates"]), "term": save_owner_candidates["remainingSaveOwnerCandidates"][0]["label"]},
+            ],
+            "result": bridge_result,
+        },
+        "solvedVsBlockedDiff": {
+            "baseline": {
+                "id": "shard-owned-state-upgradeinfolist-population",
+                "label": "Shard owned-state population boundary",
+                "status": "cleared",
+                "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardSaveBoundary"]),
+                "shellField": recovered_runtime_shell["declaringField"]["name"],
+                "shellPathId": recovered_runtime_shell["declaringField"]["fieldOffset"],
+                "comparisonShape": comparison_shape,
+                "groundedConclusion": outcome_summary,
+            },
+            "blockedTarget": {
+                "id": "shard-owned-state-local-bridge",
+                "label": "Shard local owned-state producer",
+                "status": "blocked",
+                "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardMilestonePayloadBoundary"]),
+                "shellField": recovered_runtime_shell["declaringField"]["name"],
+                "shellPathId": "owned-state-bridge",
+                "comparisonShape": blocked_shape,
+                "groundedConclusion": "A recovered local producer or deeper wrapper handoff is still required before player-owned shard state can be named safely.",
+            },
+            "delta": {
+                "sharedPresentEdgeTypes": [
+                    "direct-scene-definition-payload",
+                    "definition-to-runtime-shell",
+                    "runtime-shell-to-owner-lists",
+                    "runtime-shell-to-local-hooks",
+                ],
+                "baselineOnlyPresentEdgeTypes": [outcome_kind],
+                "blockedMissingEdgeTypes": [entry["type"] for entry in blocked_shape],
+                "solvedVsBlockedSummary": [
+                    "The current shard trace preserves one direct scene owner, one direct row-definition family, one recovered runtime row shell, and one shard-local watcher/list cluster.",
+                    outcome_summary,
+                    "Player-owned shard import stays blocked until a real local producer or exact deeper wrapper handoff is recovered.",
+                ],
+            },
+        },
+        "lostStructure": [
+            "Shard-local watcher hooks still sit beside upgradeInfoList, UnlockedMilestonesList, MaxedMilestonesList, and MilestoneCostList without one committed write path into IsUnlocked, MaxLevel, or current milestone progress.",
+            "The leading PlayerProfile-side shard member shell remains an unresolved candidate rather than a recovered declaring wrapper or serialized payload owner.",
+            "Keep the owned-state result quarantined to blocker evidence only; it does not reopen planner math, affordability, ROI, ETA, or canonical state.playerProfile promotion.",
+        ],
+        "groundedConclusion": outcome_summary,
+        "currentBoundary": [
+            "This target preserves the shard owned-state population boundary only.",
+            "It keeps direct ShardMining row definitions, the recovered upgradeInfoList runtime shell, and local watcher/list clusters visible in one trace bundle without promoting them into a recovered import path.",
+            "Treat the result as blocker evidence for player-owned shard state, not as planner-safe state, canonical import, or row-package verification.",
+        ],
+    }
+
+
 def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = target["strategyConfig"]
     member_boundary = documents["multiverseMarketMemberBoundary"]
@@ -4326,6 +4799,8 @@ def build_trace_payload(target_id: str, target: dict[str, Any], anchors: list[st
         return build_token_shop_family_structure_trace(target_id, target, anchors, documents)
     if strategy == "shard-cost-su0-structure":
         return build_shard_cost_trace(target, anchors, documents)
+    if strategy == "shard-owned-state-upgradeinfolist-population":
+        return build_shard_owned_state_trace(target, anchors, documents)
     if strategy == "multiverse-market-save-owner-boundary":
         return build_multiverse_market_save_owner_trace(target, anchors, documents)
     raise ValueError(f"Unsupported unity trace strategy: {strategy}")
@@ -4419,6 +4894,7 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
         "shellWindow": trace_payload["shellWindow"],
         "surfaces": trace_payload["surfaces"],
         "traceGraph": trace_payload["traceGraph"],
+        "outcome": trace_payload.get("outcome"),
         "decisionSummary": build_decision_summary(target, trace_payload),
         "bridgePromotionRule": trace_payload["bridgePromotionRule"],
         "bridgeCheck": trace_payload["bridgeCheck"],
@@ -4461,9 +4937,24 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         "- Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.",
         f"- Registry target: `{dataset['traceRegistry']['selectedTargetId']}` from `{dataset['traceRegistry']['selectedFamilyId']}` via {md_link(ROOT / dataset['traceRegistry']['path'])}",
         "",
+    ]
+    if dataset.get("outcome"):
+        lines.extend(
+            [
+                "## Outcome",
+                "",
+                f"- Kind: `{dataset['outcome']['kind']}`",
+                f"- Label: {dataset['outcome']['label']}",
+                f"- Summary: {dataset['outcome']['summary']}",
+                "",
+            ]
+        )
+    lines.extend(
+        [
         "## Source reads",
         "",
-    ]
+        ]
+    )
     for source_role in dataset["sourceRoles"]:
         lines.append(f"- `{source_role['sourceId']}`: {md_link(ROOT / source_role['path'])}")
         lines.append(f"  - {source_role['role']}")

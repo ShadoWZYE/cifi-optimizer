@@ -44,8 +44,12 @@
     "declaringRowModelRecovered": true,
     "directSerializedRowDefinitionRecovered": true,
     "runtimeOwnedStateShellRecovered": true,
-    "traceRegistryHasOwnedStateTarget": false,
+    "traceRegistryHasOwnedStateTarget": true,
     "traceWorkflowHasOwnedStatePopulationBridge": false,
+    "traceOwnedStateOutcomeKind": "non-local-injection-seam",
+    "traceOwnedStateOutcomeLabel": "Non-local injection seam",
+    "traceHasDeeperWrapperHandoff": false,
+    "traceHasNonLocalInjectionSeam": true,
     "runtimePopulationLocalProducerRecovered": false,
     "saveSideOwnerRecovered": false
   },
@@ -101,14 +105,14 @@
       "CheckAllMilestoneLevelFills"
     ],
     "traceResult": [
-      "The checked unity trace workflow currently preserves one shard-cost getter-to-parameter-shell target only.",
-      "That trace target explicitly leaves save-owner-recovery as an allowed negative edge and does not recover a population bridge for upgradeInfoList, IsUnlocked, MaxLevel, or any adjacent player-owned shard row state.",
-      "The current repo evidence therefore still stops at a runtime row shell whose owned-state values behave like a non-local input the repo cannot yet name."
+      "The checked unity trace workflow now preserves one shard-owned-state population target centered on ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo.",
+      "That target rules out a local runtime population bridge for upgradeInfoList, IsUnlocked, MaxLevel, and adjacent row-owned state because the shard-local watcher hooks still do not recover an exact write, constructor, or setup path.",
+      "It also fails to recover a deeper wrapper handoff behind upgradeInfoList, so the strongest current result is a non-local injection seam whose save-side source the repo still cannot name."
     ]
   },
   "currentBoundary": [
     "The checked shard-specific owner trail now preserves a split result: direct ShardMining scene payload already recovers the row-definition family for reachable SU0-29 milestone rows, while ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo remains the strongest recovered runtime row-state shell.",
-    "The same narrowed shard-local metadata neighborhoods, level0 contexts, and current unity trace workflow still preserve zero checked overlap cases where the shard owner trail shares context with PlayerProfileData, GetPlayerProfileData, FillPlayerProfileData, or CloudSavePlayerProfile, and they still do not recover a local producer that populates upgradeInfoList owned-state fields.",
-    "This is enough to keep direct row-definition payload recovery separate from unresolved player-owned row-state ownership, and it tightens the blocker further: the current repo can only prove that owned-state values are injected or rebuilt from a non-local save-side source it still cannot name."
+    "The same narrowed shard-local metadata neighborhoods, level0 contexts, and shard-owned-state trace target preserve zero checked overlap cases where the shard owner trail shares context with PlayerProfileData, GetPlayerProfileData, FillPlayerProfileData, or CloudSavePlayerProfile, and they rule out both a local upgradeInfoList population bridge and a recovered deeper wrapper handoff.",
+    "This is enough to keep direct row-definition payload recovery separate from unresolved player-owned row-state ownership, and it tightens the blocker further: the current repo can now preserve one exact non-local injection seam result for owned-state values whose save-side source it still cannot name."
   ]
 }

@@ -399,6 +399,10 @@ export function createShardEvidenceSupport({
         probeResults.saveSideOwnerRecovered === false
           ? `No checked save-side owner is recovered for player-owned shard rows; the trail still stops at ${runtimeShellAnchor}.`
           : "A checked save-side owner is recovered.",
+      traceLine:
+        probeResults.traceOwnedStateOutcomeKind === "deeper-wrapper-handoff"
+          ? "The trace does not recover a local ShardMining producer, but it does preserve a deeper wrapper handoff for owned-state values."
+          : "The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values stay bounded as a non-local injection seam.",
       importLine:
         "No grounded import path is available from PlayerProfileData or CloudSavePlayerProfile, so player-owned shard rows cannot be imported from this contract.",
       plannerLine:

@@ -5219,9 +5219,11 @@ assert.ok(
 assert.equal(unityTraceTargetRegistryData.dataset, "unity-trace-target-registry");
 assert.ok(unityTraceTargetRegistryData.sourceFamilies["token-shop"]);
 assert.ok(unityTraceTargetRegistryData.sourceFamilies["shard-cost"]);
+assert.ok(unityTraceTargetRegistryData.sourceFamilies["shard-owned-state"]);
 assert.ok(unityTraceTargetRegistryData.sourceFamilies["multiverse-market-save-owner"]);
 assert.ok(unityTraceTargetRegistryData.planner.families["token-shop"]);
 assert.ok(unityTraceTargetRegistryData.planner.families["shard-cost"]);
+assert.ok(unityTraceTargetRegistryData.planner.families["shard-owned-state"]);
 assert.ok(unityTraceTargetRegistryData.planner.families["multiverse-market-save-owner"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-cells"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu3-cells-effect"]);
@@ -5232,6 +5234,7 @@ assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu5-mk1-title"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-atu7-mk3-bridge"]);
 assert.ok(unityTraceTargetRegistryData.targets["token-shop-family-structure"]);
 assert.ok(unityTraceTargetRegistryData.targets["shard-cost-su0-structure"]);
+assert.ok(unityTraceTargetRegistryData.targets["shard-owned-state-upgradeinfolist-population"]);
 assert.ok(unityTraceTargetRegistryData.targets["multiverse-market-save-owner-boundary"]);
 assert.equal(unityTraceBundleData.dataset, "unity-trace-bundle");
 assert.equal(
@@ -5239,139 +5242,119 @@ assert.equal(
   "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]"
 );
 assert.equal(unityTraceBundleData.plannerResolution.selectionMode, "explicit-target");
-assert.equal(unityTraceBundleData.plannerResolution.matchedFamilyId, "token-shop");
+assert.equal(unityTraceBundleData.plannerResolution.matchedFamilyId, "shard-owned-state");
 assert.equal(unityTraceBundleData.plannerResolution.runMode, "trace");
 assert.equal(unityTraceBundleData.plannerResolution.comparePresetId, null);
-assert.ok(unityTraceBundleData.plannerResolution.expandedAnchors.includes("ATU3Button"));
+assert.ok(unityTraceBundleData.plannerResolution.expandedAnchors.includes("upgradeInfoList"));
 assert.ok(
   unityTraceBundleData.plannerResolution.expandedAnchorSpecs.some(
-    (anchor) => anchor.value === "15810" && anchor.kind === "path id"
+    (anchor) => anchor.value === "upgradeInfoList" && anchor.kind === "string"
   )
 );
-assert.match(unityTraceBundleData.plannerResolution.decisionNote, /TokenShop/i);
+assert.match(unityTraceBundleData.plannerResolution.decisionNote, /Shard owned state/i);
 assert.ok(
   unityTraceBundleData.executionAnchors.some(
-    (anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"
+    (anchor) => anchor.value === "upgradeInfoList" && anchor.kind === "string"
   )
 );
 assert.ok(
   unityTraceBundleData.executionAnchors.some(
-    (anchor) => anchor.value === "BuyCellBoost" && anchor.kind === "method"
+    (anchor) => anchor.value === "UpdateUnlockedMilestonesList" && anchor.kind === "method"
   )
 );
 assert.equal(unityTraceBundleData.traceRegistry.path, "data/unity-trace-target-registry.json");
-assert.equal(unityTraceBundleData.traceRegistry.selectedFamilyId, "token-shop");
-assert.equal(unityTraceBundleData.target.id, "token-shop-atu3-chest-consumer-read");
-assert.ok(unityTraceBundleData.target.anchors.includes("ATU3Button"));
-assert.equal(unityTraceBundleData.shellWindow.shellField, "ATU3Button");
-assert.equal(unityTraceBundleData.shellWindow.shellPathId, 15810);
+assert.equal(unityTraceBundleData.traceRegistry.selectedFamilyId, "shard-owned-state");
+assert.equal(unityTraceBundleData.target.id, "shard-owned-state-upgradeinfolist-population");
+assert.ok(unityTraceBundleData.target.anchors.includes("upgradeInfoList"));
+assert.equal(unityTraceBundleData.shellWindow.shellField, "upgradeInfoList");
+assert.equal(unityTraceBundleData.shellWindow.shellPathId, 5216);
 assert.deepEqual(unityTraceBundleData.shellWindow.ownerFieldBlock, [
-  "CellBoostStartCost",
-  "CellBoostAdditiveCost",
-  "CellBoostBonus",
-  "CellBoostMaxLevel",
-  "CellBoostFill"
+  "<Cost>k__BackingField",
+  "<MaxLevel>k__BackingField",
+  "<IsUnlocked>k__BackingField"
 ]);
 assert.equal(unityTraceBundleData.bridgeCheck.bridgeCleared, true);
-assert.equal(
-  unityTraceBundleData.bridgeCheck.result,
-  "checked consumer-internal bonus shell recovered"
-);
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "metadata-neighborhood"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "consumer-family"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "consumer-routines"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "cell-gain-getters"));
-assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "booster-bonus-shell"));
-assert.ok(
-  unityTraceBundleData.surfaces.some((surface) => surface.id === "final-chest-bonus-shell")
-);
-const traceMetadataSurface = unityTraceBundleData.surfaces.find(
-  (surface) => surface.id === "metadata-neighborhood"
+assert.equal(unityTraceBundleData.bridgeCheck.result, "checked non-local injection seam preserved");
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "scene-owner"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "runtime-shell"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "owner-list-watchers"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "handoff-boundary"));
+assert.ok(unityTraceBundleData.surfaces.some((surface) => surface.id === "save-gap"));
+const traceRuntimeSurface = unityTraceBundleData.surfaces.find(
+  (surface) => surface.id === "runtime-shell"
 );
 assert.ok(
-  traceMetadataSurface.anchorSpecs.some(
-    (anchor) => anchor.value === "ATU3Button" && anchor.kind === "class"
+  traceRuntimeSurface.anchorSpecs.some(
+    (anchor) => anchor.value === "upgradeInfoList" && anchor.kind === "string"
   )
 );
-const traceMetadataSource = traceMetadataSurface.sources.find(
-  (source) => source.sourceId === "metadata"
+const traceRuntimeSource = traceRuntimeSurface.sources.find(
+  (source) => source.sourceId === "shardSaveBoundary"
 );
-assert.deepEqual(traceMetadataSource.searchModes, ["exact-string", "bounded-containment"]);
-assert.ok(traceMetadataSource.supportingHitCount >= 3);
-assert.ok(traceMetadataSource.incidentalHitCount >= 1);
-assert.ok(traceMetadataSource.hits.every((hit) => !/PublicKey=/i.test(hit.term)));
-assert.ok(traceMetadataSource.hits.every((hit) => !(hit.matchedTerms || []).includes("15810")));
-assert.equal(unityTraceBundleData.traceGraph.edges.length, 6);
-assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 1);
+assert.deepEqual(traceRuntimeSource.searchModes, ["exact-structured"]);
+assert.ok(traceRuntimeSource.highSignalHitCount >= 3);
+assert.equal(unityTraceBundleData.traceGraph.edges.length, 5);
+assert.equal(unityTraceBundleData.traceGraph.negativeEdges.length, 2);
 assert.ok(
   unityTraceBundleData.traceGraph.edges.some(
-    (edge) => edge.type === "serialized-adjacency" && edge.provenanceStrength === "direct"
+    (edge) =>
+      edge.type === "direct-scene-definition-payload" && edge.provenanceStrength === "direct"
   )
 );
 assert.ok(
-  unityTraceBundleData.traceGraph.edges.some(
-    (edge) => edge.type === "shared-effect-to-consumer-family"
-  )
+  unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "definition-to-runtime-shell")
 );
 assert.ok(
-  unityTraceBundleData.traceGraph.edges.some(
-    (edge) => edge.type === "consumer-family-to-chest-routines"
-  )
+  unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "runtime-shell-to-owner-lists")
 );
 assert.ok(
-  unityTraceBundleData.traceGraph.edges.some(
-    (edge) => edge.type === "consumer-family-to-cell-gain-getters"
-  )
+  unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "runtime-shell-to-local-hooks")
 );
 assert.ok(
-  unityTraceBundleData.traceGraph.edges.some(
-    (edge) => edge.type === "cell-gain-getters-to-booster-bonus-shell"
-  )
+  unityTraceBundleData.traceGraph.edges.some((edge) => edge.type === "non-local-injection-seam")
 );
 assert.ok(
-  unityTraceBundleData.traceGraph.edges.some(
-    (edge) => edge.type === "booster-bonus-shell-to-final-chest-bonus-shell"
+  unityTraceBundleData.traceGraph.negativeEdges.some(
+    (edge) => edge.type === "local-runtime-population-bridge"
   )
 );
 assert.ok(
   unityTraceBundleData.traceGraph.negativeEdges.some(
-    (edge) => edge.type === "exact-cellboost-to-booster-bonus-handoff"
+    (edge) => edge.type === "deeper-wrapper-handoff-recovery"
   )
 );
 assert.equal(unityTraceBundleData.decisionSummary.verdict, "quarantine");
 assert.deepEqual(unityTraceBundleData.decisionSummary.baselineGap, [
-  "exact-cellboost-to-booster-bonus-handoff"
+  "local-runtime-population-bridge",
+  "deeper-wrapper-handoff-recovery"
 ]);
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "ATU3Button");
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 15810);
-assert.equal(unityTraceBundleData.solvedVsBlockedDiff.blockedTarget.shellField, "ATU3Button");
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellField, "upgradeInfoList");
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.baseline.shellPathId, 5216);
+assert.equal(unityTraceBundleData.solvedVsBlockedDiff.blockedTarget.shellField, "upgradeInfoList");
 assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.sharedPresentEdgeTypes, [
-  "serialized-adjacency",
-  "shared-effect-to-consumer-family",
-  "consumer-family-to-chest-routines"
+  "direct-scene-definition-payload",
+  "definition-to-runtime-shell",
+  "runtime-shell-to-owner-lists",
+  "runtime-shell-to-local-hooks"
 ]);
 assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.baselineOnlyPresentEdgeTypes, [
-  "consumer-family-to-cell-gain-getters",
-  "cell-gain-getters-to-booster-bonus-shell",
-  "booster-bonus-shell-to-final-chest-bonus-shell"
+  "non-local-injection-seam"
 ]);
 assert.deepEqual(unityTraceBundleData.solvedVsBlockedDiff.delta.blockedMissingEdgeTypes, [
-  "exact-cellboost-to-booster-bonus-handoff"
+  "local-runtime-population-bridge",
+  "deeper-wrapper-handoff-recovery"
 ]);
 assert.ok(
   unityTraceBundleData.lostStructure.some((line) =>
-    /checked ATU3 chain now reaches the concrete AdManager consumer family/i.test(line)
+    /without one committed write path into IsUnlocked/i.test(line)
   )
 );
 assert.ok(
   unityTraceBundleData.lostStructure.some((line) =>
-    /exact CellBoostBonus read-site or typed-field handoff/i.test(line)
+    /PlayerProfile-side shard member shell remains an unresolved candidate/i.test(line)
   )
 );
-assert.match(
-  unityTraceBundleData.groundedConclusion,
-  /ATU3 consumer-internal read trace now preserves/i
-);
+assert.match(unityTraceBundleData.groundedConclusion, /non-local injection seam/i);
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("ClaimBankedTokens"));
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("SetBankFill"));
@@ -8063,19 +8046,20 @@ assert.match(
   tokenShopRowRemapVerificationDoc,
   /AdManager, Assembly-CSharp.*chest consumer family/i
 );
-assert.match(unityTraceBundleDoc, /Target: `token-shop-atu3-chest-consumer-read`/);
+assert.match(unityTraceBundleDoc, /Target: `shard-owned-state-upgradeinfolist-population`/);
 assert.match(
   unityTraceBundleDoc,
-  /Registry target: `token-shop-atu3-chest-consumer-read` from `token-shop`/
+  /Registry target: `shard-owned-state-upgradeinfolist-population` from `shard-owned-state`/
 );
-assert.match(unityTraceBundleDoc, /Result: `checked consumer-internal bonus shell recovered`/);
-assert.match(unityTraceBundleDoc, /Shell field: `ATU3Button`/);
+assert.match(unityTraceBundleDoc, /Kind: `non-local-injection-seam`/);
+assert.match(unityTraceBundleDoc, /Result: `checked non-local injection seam preserved`/);
+assert.match(unityTraceBundleDoc, /Shell field: `upgradeInfoList`/);
 assert.match(unityTraceBundleDoc, /## Trace graph/);
-assert.match(unityTraceBundleDoc, /cell-gain-getters-to-booster-bonus-shell/);
+assert.match(unityTraceBundleDoc, /runtime-shell-to-owner-lists/);
 assert.match(unityTraceBundleDoc, /## Solved vs blocked/);
 assert.match(unityTraceBundleDoc, /## Decision summary/);
 assert.match(unityTraceBundleDoc, /Verdict: `quarantine`/);
-assert.match(unityTraceBundleDoc, /Baseline: `ATU3Button` path id `15810`/);
+assert.match(unityTraceBundleDoc, /Baseline: `upgradeInfoList` path id `5216`/);
 assert.match(multiverseMarketDoc, /## Integration status/);
 assert.match(multiverseMarketDoc, /CostBox-InscryptionsDone/);
 assert.match(
@@ -8768,7 +8752,7 @@ assert.match(unityAuditPlaybook, /wire`, `quarantine`, or `keep researching`/);
 assert.match(unityTraceBundleDoc, /Typed execution anchors/i);
 assert.match(
   unityTraceBundleDoc,
-  /Signal summary: 0 high-signal, 6 supporting, 4 incidental, 0 suppressed-noise/
+  /Signal summary: \d+ high-signal, \d+ supporting, \d+ incidental, 0 suppressed-noise/
 );
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);

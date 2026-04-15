@@ -56,6 +56,6 @@
     "Treat this bundle as the current shard payload-watch boundary around ShardUpgradeInfo and its ShardMining tie-in.",
     "Use it to keep milestone-total, affordability-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail while keeping InitializeShards, InitializeMaxLevelBools, UpdateUnlockedMilestonesList, and UpdateMaxedMilestonesList framed as local watcher hooks rather than a recovered owned-state source.",
     "Do not treat these hooks as recovered serialized player-owned milestone rows, verified player-facing milestone labels, or planner-safe affordability truth.",
-    "The direct row-definition payload is already recovered on the ShardMining scene object; the checked trace workflow closes shard cost structure only and leaves the exact serialized or rebuilt player-owned row-state path behind the narrowed shard-specific runtime shell unresolved."
+    "The direct row-definition payload is already recovered on the ShardMining scene object; the checked shard-owned-state trace now rules out a local upgradeInfoList population bridge and still leaves the exact deeper wrapper or save-side source behind the narrowed shard-specific runtime shell unresolved."
   ]
 }

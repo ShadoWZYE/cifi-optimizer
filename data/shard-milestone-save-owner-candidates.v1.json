@@ -72,7 +72,7 @@
       "why": [
         "Shard save-boundary checks still show zero direct overlap between the narrowed shard-local owner trail and PlayerProfileData save-family anchors.",
         "A PlayerProfile-side shard member shell remains the current unresolved save-owner class because player-owned shard state still has to land somewhere save-side even though the row-definition payload and the shard-local runtime shell are both now recovered.",
-        "The current unity trace workflow only recovers a shard-cost structure target and leaves save-owner-recovery explicitly negative, which tightens the blocker toward a non-local save-side source rather than a local ShardMining population path."
+        "The current shard-owned-state trace rules out a local ShardMining population bridge and still does not recover a deeper wrapper handoff, which tightens the blocker toward a non-local save-side source rather than a local upgradeInfoList producer."
       ],
       "candidateFieldClusters": [
         "PlayerProfileData",
@@ -90,7 +90,7 @@
   ],
   "confidenceNotes": [
     "This artifact now preserves both a recovered direct row-definition payload and a recovered shard-local runtime row shell, but it still does not recover a concrete declaring save type for player-owned shard milestone state.",
-    "The current evidence still separates player-owned shard ownership from save-family anchors, and the trace workflow does not recover any local population bridge for upgradeInfoList owned-state values, so confidence remains intentionally bounded."
+    "The current evidence still separates player-owned shard ownership from save-family anchors, and the shard-owned-state trace now rules out both a local population bridge and a recovered deeper wrapper handoff for upgradeInfoList owned-state values, so confidence remains intentionally bounded."
   ],
   "checkedOverlapStatistics": {
     "saveFamilyTermsChecked": 4,
@@ -100,6 +100,7 @@
     "declaringRowModelRecovered": true,
     "directSerializedRowDefinitionRecovered": true,
     "traceWorkflowHasOwnedStatePopulationBridge": false,
+    "traceOwnedStateOutcomeKind": "non-local-injection-seam",
     "remainingSaveOwnerCandidateCount": 1
   },
   "warnings": [
@@ -110,6 +111,6 @@
   "currentBoundary": [
     "Treat this dataset as one recovered direct row-definition payload, one recovered shard-local runtime row shell, and one remaining non-local save-owner gap, not as recovered player-owned shard milestone state or a verified save owner.",
     "The current repo evidence still preserves zero checked overlap between narrowed shard-local owner clues and PlayerProfileData save-family anchors.",
-    "Use this recovered shard-local row-model result and the remaining save-owner candidate to focus future extraction work, not to enable planner-safe shard state, recommendation logic, or import mapping."
+    "Use this recovered shard-local row-model result, the trace-backed non-local injection seam, and the remaining save-owner candidate to focus future extraction work, not to enable planner-safe shard state, recommendation logic, or import mapping."
   ]
 }

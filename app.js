@@ -3752,6 +3752,7 @@ function renderShardMilestoneDirectory() {
           <span class="snapshot-title">Owned-state blocker</span>
           <p class="meta">${escapeHtml(sharedEvidence.saveBoundary?.summary || "Save-boundary summary unavailable.")}</p>
           <p class="meta">${escapeHtml(ownedStateBlocker.ownerLine)}</p>
+          <p class="meta">${escapeHtml(ownedStateBlocker.traceLine)}</p>
           <p class="meta">${escapeHtml(ownedStateBlocker.importLine)}</p>
           <p class="meta">${escapeHtml(ownedStateBlocker.plannerLine)}</p>
         </article>
@@ -3832,6 +3833,7 @@ ${milestones
               <aside class="shard-level-up-rail shard-panel-card">
                 <p class="snapshot-title">Owned-state blocker</p>
                 <p class="meta"><strong>Save owner</strong> ${escapeHtml(rowOwnedStateBlocker.ownerLine)}</p>
+                <p class="meta"><strong>Trace result</strong> ${escapeHtml(rowOwnedStateBlocker.traceLine)}</p>
                 <p class="meta"><strong>Import path</strong> ${escapeHtml(rowOwnedStateBlocker.importLine)}</p>
                 <p class="meta"><strong>Planner use</strong> ${escapeHtml(rowOwnedStateBlocker.plannerLine)}</p>
                 <p class="meta"><strong>Current candidate</strong> ${escapeHtml(rowOwnedStateBlocker.candidateLine)}</p>

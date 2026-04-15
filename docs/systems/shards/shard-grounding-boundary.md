@@ -156,7 +156,7 @@ That table is the current player-facing handoff surface for shard row evidence. 
 
 ## Next allowed shard step
 
-The next shard pass should recover the player-owned milestone ownership or exact serialized payload path behind the narrowed `ShardMining` / `ShardUpgradeInfo` runtime shell. The current trace workflow already closes shard cost structure only, so future work should treat owned-state population as a non-local save-side blocker until one real construction bridge or save owner is recovered.
+The next shard pass should recover the player-owned milestone ownership or exact serialized payload path behind the narrowed `ShardMining` / `ShardUpgradeInfo` runtime shell. The current shard-owned-state trace now already rules out a local `upgradeInfoList` population bridge and still does not recover a deeper wrapper handoff, so future work should treat owned-state population as a checked non-local injection seam until one real construction bridge or save owner is recovered.
 
 Current heuristic ranking for that work:
 
@@ -166,4 +166,3 @@ Current heuristic ranking for that work:
 Reference:
 
 - [data/extraction-candidate-ranking.v1.json](data/extraction-candidate-ranking.v1.json)
-
