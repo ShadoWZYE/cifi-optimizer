@@ -1872,7 +1872,6 @@ function renderShardSubsystemSection(items) {
       </div>
       <p class="meta">Shard Mining is the player-facing shard surface. It keeps milestone guidance and row tracking together, while grounding details and recovery evidence stay in docs.</p>
       ${cards ? `<div class="recommendation-list">${cards}</div>` : `<article class="validation-card warn"><strong>Shard Mining unavailable</strong><p class="meta">No player-facing shard cards currently passed the shared recommendation contract.</p></article>`}
-      ${renderVerifiedShardRowsPreview()}
       ${renderShardMilestoneDirectory()}
       ${renderShardDocsNotice()}
     </section>
@@ -2350,8 +2349,64 @@ function renderTokenShopSubsystemSection() {
         </div>
       </div>
       <p class="meta">TokenShop keeps its own Progression category so it does not get mixed into the Shard Mining surface or force an endlessly scrolling page.</p>
+      ${renderTokenShopSavedStateSnapshot()}
       ${renderTokenShopProgressionEditor()}
     </section>
+  `;
+}
+
+function renderTokenShopSavedStateSnapshot() {
+  const compatibility = getCompatibilityProfileState();
+  const tokenShopState = compatibility.unmappedSystems?.tokenShop ?? {};
+  const storedAmountCards = [
+    {
+      label: "Banked Tokens",
+      value: tokenShopState.BankedTokens,
+      note:
+        "Current stored amount recovered from compatibility import only. Token-bank cap and claimable-bank state remain blocked."
+    },
+    {
+      label: "Daily Tokenium",
+      value: tokenShopState.DailyTokenium,
+      note:
+        "Current stored amount recovered from compatibility import only. Daily Tokenium cap and ready state remain blocked."
+    }
+  ].filter((entry) => isBoundaryValuePresent(entry.value));
+
+  if (!storedAmountCards.length) {
+    return "";
+  }
+
+  const hasGenericClaimableClue = isBoundaryValuePresent(tokenShopState.ClaimableTokenium);
+
+  return `
+    <article class="validation-card warn">
+      <strong>Imported TokenShop saved amounts</strong>
+      <p class="meta">This snapshot shows exact stored amounts recovered under <code>compatibility.unmappedSystemState.tokenShop</code>. These values stay compatibility-only and are not promoted into canonical player state.</p>
+      <div class="pill-row">
+        <span class="pill">${storedAmountCards.length}/2 stored amounts available</span>
+        <span class="pill">Compatibility-only import</span>
+        <span class="pill">No cap or ready-state promotion</span>
+      </div>
+      <div class="preview-stack">
+        ${storedAmountCards
+          .map(
+            (entry) => `
+          <article class="preview-card">
+            <span class="snapshot-title">${escapeHtml(entry.label)}</span>
+            <strong>${escapeHtml(formatBoundaryValue(entry.value))}</strong>
+            <p class="meta">${escapeHtml(entry.note)}</p>
+          </article>
+        `
+          )
+          .join("")}
+      </div>
+      ${
+        hasGenericClaimableClue
+          ? '<p class="meta">A broader generic Tokenium claimable clue is present in the same import, but it stays out of this snapshot because it is not a cleared token-bank or Daily Tokenium-ready value.</p>'
+          : ""
+      }
+    </article>
   `;
 }
 
@@ -3546,52 +3601,6 @@ function renderShardGroundingBoundary() {
   `;
 }
 
-function renderVerifiedShardRowsPreview() {
-  const verifiedRows = getVerifiedShardRowPackages();
-  if (!verifiedRows.length) {
-    return "";
-  }
-  const previewStatus = getShardBadgeMetaFromLabel("Integrated");
-  return `
-    <article class="snapshot-card shard-status-card ${previewStatus.cardClass}">
-      <div class="shard-status-heading">
-        <span class="snapshot-title">Verified shard rows preview</span>
-        <span class="shard-status-pill ${previewStatus.pillClass}">${escapeHtml(previewStatus.label)}</span>
-      </div>
-      <strong>Safely named shard rows the app can already show end-to-end</strong>
-      <div class="meta-stack">
-        <p class="meta">This preview is intentionally small and descriptive. It only shows rows whose shipped title, grounded three-bonus package, checked text slots, and checked cost shell all align in the current shard contract.</p>
-        ${verifiedRows
-          .map((entry) => {
-            const verifiedRow = entry.verifiedRow;
-            const titleBinding = verifiedRow.titleBinding;
-            const effectPackage = verifiedRow.effectPackage;
-            const effectPresentation = verifiedRow.effectPresentationBinding;
-            const rowShell = verifiedRow.declaringRowModel?.rowShellFields;
-            const costShell = verifiedRow.costShell;
-            const renderCodeList = (items) =>
-              (Array.isArray(items) ? items : [])
-                .map((item) => `<code>${escapeHtml(String(item))}</code>`)
-                .join(", ");
-            return `
-            <div class="shard-note-card">
-              <strong>#${escapeHtml(String(verifiedRow.row))} ${escapeHtml(titleBinding.playerFacingName)}</strong>
-              <p class="meta"><strong>Shipped title</strong> ${escapeHtml(titleBinding.title)} via <code>${escapeHtml(titleBinding.assetName)}</code></p>
-              <p class="meta"><strong>Grounded three-bonus package</strong> ${escapeHtml(formatVerifiedShardBonusPackage(effectPackage))}</p>
-              <p class="meta"><strong>Checked text slots</strong> ${renderCodeList(rowShell?.bonusTextFields)}</p>
-              <p class="meta"><strong>Checked cost shell</strong> <code>${escapeHtml(costShell.getterName)}</code> -> ${renderCodeList(costShell.serializedCostFields)}</p>
-              <p class="meta"><strong>Checked effect accessors</strong> ${renderCodeList(effectPresentation.calcAccessors)}</p>
-            </div>
-          `;
-          })
-          .join("")}
-        <p class="meta">Rows outside SU1 and SU2 stay explicitly blocked until a matching row package clears end-to-end.</p>
-        <p class="meta">No affordability math, ROI, ETA, ranking, best-upgrade logic, save import, or full shard-table claims are implied by this preview.</p>
-      </div>
-    </article>
-  `;
-}
-
 function renderShardWorkflowReference() {
   const mechanics = getGroundedShardMechanics();
   const provenance = state.shardGrounding?.provenance;
@@ -3736,7 +3745,6 @@ ${milestones
       })
       .filter(Boolean);
     const levelRailSummary = getShardMilestoneLevelRailSummary(milestone);
-    const formulaProfile = getShardFormulaApplicationProfile(milestone.milestoneNumber);
     return `
           <details class="snapshot-card shard-milestone-card" data-shard-milestone-card="${escapeHtml(String(milestone.id))}" ${isCardOpen ? "open" : ""}>
             <summary class="shard-milestone-summary">
@@ -3762,7 +3770,6 @@ ${milestones
                 <div class="shard-milestone-facts">
                   <p class="meta"><strong>Unlock</strong> ${escapeHtml(describeUnlockCondition(milestone.unlockCondition))}</p>
                   <p class="meta"><strong>Thresholds</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
-                  <p class="meta"><strong>Formula class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
                 </div>
               </div>
             </div>
@@ -3788,7 +3795,6 @@ ${milestones
                   <p class="meta">Unlock level: ${bonus.unlockLevel ?? "Listed without explicit threshold"}</p>
                   <p class="meta">Initial bonus: ${escapeHtml(String(bonus.initialBonus ?? "Unknown"))}</p>
                   <p class="meta">Bonus per level: ${escapeHtml(String(bonus.bonusPerLevel ?? "Unknown"))}</p>
-                  <p class="meta"><strong>Extracted bonus per level</strong> ${escapeHtml(Number.isFinite(extractedBonusPerLevel) ? formatShardExtractedBonusPerLevel(extractedBonusPerLevel) : "Not recovered in direct row payload")}</p>
                   <p class="meta"><strong>Observed value</strong> ${escapeHtml(computedBonus.currentLabel)}</p>
                   <p class="meta"><strong>Next level</strong> ${escapeHtml(computedBonus.nextLabel)}</p>
                 </article>
@@ -3803,10 +3809,17 @@ ${milestones
                   <input data-shard-focus-level data-shard-focus-level-for="${escapeHtml(String(milestone.id))}" type="number" min="0" step="1" value="${trackedLevel ?? ""}" placeholder="0">
                 </label>
                 <div class="shard-level-up-summary">
-                  <p class="meta"><strong>Formula class</strong> ${escapeHtml(levelRailSummary.formulaLabel)}</p>
-                  <p class="meta"><strong>Stage path</strong> ${escapeHtml(levelRailSummary.stageLabel)}</p>
-                  <p class="meta"><strong>Next stage</strong> ${escapeHtml(levelRailSummary.nextStageLabel)}</p>
-                  ${formulaProfile ? `<p class="meta"><strong>Cost staging note</strong> ${escapeHtml(formulaProfile.summary)}</p>` : ""}
+                  ${(() => {
+                    const nextThreshold = getNextShardThreshold(milestone, trackedLevel, mechanics);
+                    const nextThresholdLabel =
+                      nextThreshold === null || nextThreshold === undefined
+                        ? "Already past listed thresholds"
+                        : formatShardNumber(nextThreshold);
+                    return `
+                  <p class="meta"><strong>Threshold schedule</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
+                  <p class="meta"><strong>Next threshold</strong> ${escapeHtml(nextThresholdLabel)}</p>
+                    `;
+                  })()}
                 </div>
                 <p class="shard-level-up-cost">${escapeHtml(levelRailSummary.costLabel)}</p>
                 <button class="button ghost shard-level-up-button" type="button" disabled>${escapeHtml(levelRailSummary.buttonLabel)}</button>
@@ -4610,7 +4623,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       field: "ATU5Level",
       slot: "ATU5",
       identity:
-        boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
+        boundary?.boundedRecoveredBridge?.prefabIdentity ||
+        "NewTokenUPGPrefab.T1.MK1Booster",
       identitySource: "Checked prefab identity",
       rowType: "prefab-driven",
       rowTypeLabel: "Prefab-driven checked row",
@@ -4620,6 +4634,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "MK1TokenBoostFillMaxLevel",
       bonusStepLabel: "Mk1 Output",
       bonusStepMode: "multiplier",
+      playerFacingSupportText:
+        boundary?.atu5TitleFollowUp?.verifiedNamedIdentityJoin?.supportingTitleTextSurface ?? [],
       note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
@@ -4640,6 +4656,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "MK2TokenBoostFillMaxLevel",
       bonusStepLabel: "Mk2 Output",
       bonusStepMode: "multiplier",
+      playerFacingSupportText:
+        boundary?.verifiedTitleJoin?.titleProbeSupportText ?? null,
       note: "Checked shell-to-prefab-to-title chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     },
     {
@@ -4660,6 +4678,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "MK3TokenBoostFillMaxLevel",
       bonusStepLabel: "Mk3 Output",
       bonusStepMode: "multiplier",
+      playerFacingSupportText:
+        boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeSupportText ?? [],
       note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
@@ -4680,6 +4700,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "MK4TokenBoostFillMaxLevel",
       bonusStepLabel: "Mk4 Output",
       bonusStepMode: "multiplier",
+      playerFacingSupportText:
+        boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeSupportText ?? [],
       note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     },
     {
@@ -4700,6 +4722,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "MK5TokenBoostFillMaxLevel",
       bonusStepLabel: "Mk5 Output",
       bonusStepMode: "multiplier",
+      playerFacingSupportText:
+        boundary?.atu9BridgeFollowUp?.verifiedTitleTextChain?.titleProbeSupportText ?? [],
       note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     },
     {
@@ -4720,6 +4744,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "MK6TokenBoostFillMaxLevel",
       bonusStepLabel: "Mk6 Output",
       bonusStepMode: "multiplier",
+      playerFacingSupportText:
+        boundary?.atu10BridgeFollowUp?.verifiedTitleTextChain?.titleProbeSupportText ?? [],
       note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     },
     {
@@ -4740,6 +4766,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "MK8TokenBoostFillMaxLevel",
       bonusStepLabel: "Mk8 Output",
       bonusStepMode: "multiplier",
+      playerFacingSupportText:
+        boundary?.atu12BridgeFollowUp?.verifiedTitleTextChain?.titleProbeSupportText ?? [],
       note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     }
   ];
@@ -4801,6 +4829,7 @@ function renderTokenShopOverviewAffordabilityModule() {
           .map((row) => {
             const displayTitle = tokenShopUi.getTokenShopRowDisplayTitle(row);
             const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
+            const playerFacingSupportText = tokenShopUi.getTokenShopPlayerFacingSupportText(row);
             const nextKnownCostLabel = row.isMaxed
               ? "No next cost within known cap"
               : typeof row.nextKnownCost === "number"
@@ -4834,6 +4863,7 @@ function renderTokenShopOverviewAffordabilityModule() {
                           ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
                         </div>
                         <p class="meta token-shop-effect-line">${escapeHtml(tokenShopUi.formatTokenShopSentence(tokenShopUi.formatTokenShopEffectLine(row)))}</p>
+                        ${playerFacingSupportText ? `<p class="meta">${escapeHtml(tokenShopUi.formatTokenShopSentence(playerFacingSupportText))}</p>` : ""}
                       </div>
                     </div>
                   </div>
@@ -4971,6 +5001,7 @@ function renderTokenShopProgressionEditor() {
             const effectLine = tokenShopUi.formatTokenShopSentence(
               tokenShopUi.formatTokenShopEffectLine(row)
             );
+            const playerFacingSupportText = tokenShopUi.getTokenShopPlayerFacingSupportText(row);
             const actionLabel = tokenShopUi.getTokenShopActionLabel(row);
             const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
             const groundingSummary = tokenShopUi.getTokenShopRowGroundingSummary(row);
@@ -5011,6 +5042,7 @@ function renderTokenShopProgressionEditor() {
                           ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
                         </div>
                         <p class="meta token-shop-effect-line">${escapeHtml(effectLine)}</p>
+                        ${playerFacingSupportText ? `<p class="meta">${escapeHtml(tokenShopUi.formatTokenShopSentence(playerFacingSupportText))}</p>` : ""}
                       </div>
                     </div>
                   </div>
