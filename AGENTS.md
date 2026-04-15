@@ -9,6 +9,11 @@ Evolve this repo toward a grounded MVP core that can expand into a unified repla
 - make incremental, focused changes
 - preserve local-first browser behavior
 - prefer the largest coherent adjacent slice that answers a real player question honestly
+- operate as the owner of the current lane, not as a one-task finisher
+- continue in the same lane by default after each successful run
+- choose the next highest-value adjacent step automatically when the current slice closes cleanly
+- prefer tool, probe, or evidence-path realignment when the current instrument cannot resolve the blocker
+- stop only when human input, human validation, or a real cross-lane choice is needed
 - use extraction, decompilation, and research as intake when they unblock a slice, not as the default product lane
 - do not introduce speculative mechanics or fake precision
 - keep verified game truth separate from planner helpers, external models, and compatibility data
@@ -41,8 +46,26 @@ Every future lane should declare:
 - the explicit non-blockers that should not hold the slice open
 - the current true blocker
 - the largest coherent adjacent slice that is still shippable, reviewable, and validation-safe
+- the default next adjacent step if the current slice lands cleanly
 
 If a neighboring lane is not a consumed input for the current slice, keep it listed as a non-blocker instead of letting it silently block implementation.
+
+## Lane-owner operating mode
+
+Codex should treat each accepted lane as owned work, not a one-run task ticket.
+
+After a successful run inside the same lane:
+
+- continue by default instead of waiting for a new micro-task
+- pick the next highest-value adjacent step that fits the active lane contract
+- realign tools, probes, or evidence paths when the current instrument cannot clear the blocker
+- keep neighboring lanes visible as non-blockers unless the active slice truly consumes them
+
+Codex should stop and hand control back only when:
+
+- human input is required
+- human validation is the gating step
+- the next honest move depends on a real cross-lane choice
 
 ## Grounding rule
 

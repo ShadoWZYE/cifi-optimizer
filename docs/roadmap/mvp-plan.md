@@ -31,6 +31,11 @@ Default bias:
 - start from the narrow player question
 - identify the minimum grounded inputs needed to answer it
 - prefer the largest coherent adjacent slice that can answer it honestly without exceeding review or validation safety
+- treat Codex as the lane owner rather than a one-task finisher
+- continue in the same lane by default after each successful run
+- choose the next highest-value adjacent step automatically when the current slice lands cleanly
+- realign tools, probes, or evidence paths when the current instrument cannot clear the blocker
+- stop only when human input, human validation, or a real cross-lane choice is needed
 - treat research, extraction, and decompilation as intake that supports that slice
 - recover whole related families together when they share implementation shape
 - do not confuse tiny scope with disciplined scope
@@ -88,8 +93,17 @@ Every active lane should declare:
 - the explicit non-blockers
 - the current true blocker
 - the largest coherent adjacent slice that is still shippable, reviewable, and validation-safe
+- the default next adjacent step if the current slice lands cleanly
 
 This contract is how work gets chosen, handed off, and promoted from research into implementation.
+
+## Lane-owner execution rule
+
+Codex should keep advancing the active lane by default.
+
+After each successful run, the next move should be the highest-value adjacent step that still fits the lane contract. If the blocker remains but the current instrument is exhausted, change the probe, tool, or evidence path before treating the lane as stalled.
+
+Stop only when the next honest move needs human input, human validation, or a real cross-lane choice.
 
 ## Source priority
 
@@ -172,7 +186,7 @@ A track can move into implementation only when:
 - MVP value is clear
 - the work can be cut into a shippable slice
 - the work is framed as the largest coherent adjacent slice rather than the smallest local artifact
-- the lane contract makes the true blocker and explicit non-blockers visible
+- the lane contract makes the true blocker, explicit non-blockers, and default next adjacent step visible
 
 ## Definition of done
 

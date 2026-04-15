@@ -13,12 +13,13 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
 ## How to use it
 
 - read this first for current lane boundaries
-- use the lane contract first: user-facing question, minimum required inputs, explicit non-blockers, current true blocker, and largest coherent adjacent slice
+- use the lane contract first: user-facing question, minimum required inputs, explicit non-blockers, current true blocker, largest coherent adjacent slice, and default next adjacent step
 - read `docs/roadmap/known-false-paths.md` next so ruled-out interpretations do not get reopened
 - then open only the lane notes and artifacts listed for the slice you are touching
 
 When restarting or handing off a lane, do not let adjacent unresolved systems become silent blockers unless the current slice actually consumes them.
 Prefer recovering whole related families together when they share one implementation path. Do not reflexively split into one row, one field, one symbol, or one tiny evidence fragment at a time unless there is a real boundary.
+Continue the same lane by default, and if the current probe cannot clear the blocker, realign instruments before treating the lane as stalled.
 
 ## Active lanes
 

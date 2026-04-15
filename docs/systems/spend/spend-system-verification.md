@@ -6,7 +6,7 @@ It exists to enforce the repo rule that systems must be understood in-game and i
 
 Data being present in the repo is not enough. These systems should be treated as available but unmapped until their currencies, owned-state inputs, and player-facing labels are verified well enough for app integration.
 
-This is also a slice-selection document. Use it to decide the smallest honest spend tool slice, not to silently bundle every spend lane into one blocker.
+This is also a slice-selection document. Use it to decide the next honest spend lane slice, not to silently bundle every spend lane into one blocker or stop after one bounded pass.
 
 ## Integration rule
 
@@ -39,8 +39,10 @@ Now that the first checked-row affordability preview has shipped, evaluate the n
   - best-buy ranking, ROI math, or next-purchase recommendation logic
 - Current true blocker:
   - keeping the row-detail slice subset-bound, fixed-order, and non-optimizer instead of silently widening it into a next-purchase planner
-- Smallest shippable tool slice:
+- Largest coherent adjacent slice:
   - a first Progression-side TokenShop editor that shows the checked TokenShop subset, keeps local non-canonical current levels for that subset, uses compatibility import only as prefill, and shows next known cost, known max-level status, and current-vs-next grounded bonus-step change from shipped TokenShop values data only, with no recommendation math
+- Default next adjacent step:
+  - keep expanding the same spend lane by grounding only the additional checked-row inputs that the Progression-side TokenShop editor directly consumes; if the current evidence path stalls, change the probe or join path before escalating to a broader lane split
 
 ## TokenShop
 
@@ -178,4 +180,5 @@ Priority order:
 4. recover token-bank, Daily Tokenium, or Emporium state only when a planned slice directly consumes those inputs
 5. only after consumed inputs are grounded, consider broader spend recommendations with explicit assumptions
 
+Continue this lane by default while those priorities still fit the same slice contract. Stop only when human input, human validation, or a real cross-lane choice changes the honest next move.
 
