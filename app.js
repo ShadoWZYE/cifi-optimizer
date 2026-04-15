@@ -22,6 +22,7 @@ import {
   partitionValidationResults
 } from "./support/research-validation-support.js";
 import {
+  getQuarantinedMultiverseMarketState,
   PLAYER_PROFILE_SCHEMA_VERSION,
   createDefaultPlayerProfile,
   normalizePlayerProfile
@@ -1085,7 +1086,12 @@ function getCompatibilityProfileState() {
   return {
     legacyStage: state.playerProfile.compatibility.legacyStage,
     unresolved: state.playerProfile.compatibility.unresolvedProfileFields,
-    unmappedSystems: state.playerProfile.compatibility.unmappedSystemState
+    unmappedSystems: {
+      ...state.playerProfile.compatibility.unmappedSystemState,
+      multiverseMarket: getQuarantinedMultiverseMarketState(
+        state.playerProfile.compatibility.unmappedSystemState.multiverseMarket
+      )
+    }
   };
 }
 

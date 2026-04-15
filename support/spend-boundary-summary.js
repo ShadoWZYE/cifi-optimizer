@@ -774,6 +774,8 @@ export function getMultiverseMarketMetadataSummary(neighborhood) {
   };
 }
 
+import { getQuarantinedMultiverseMarketImportedState } from "../player-profile.js";
+
 export function getMultiverseMarketValidatedCoverage(multiverseMarket) {
   const validatedIds = Array.isArray(multiverseMarket?.source?.validated_ids)
     ? [
@@ -863,12 +865,7 @@ export function getImportedMultiverseMarketPreview(
         )
       ]
     : [];
-  const importedState =
-    typeof importedMarketState?.importedState === "object" && importedMarketState.importedState
-      ? importedMarketState.importedState
-      : typeof importedMarketState === "object" && importedMarketState
-        ? importedMarketState
-        : {};
+  const importedState = getQuarantinedMultiverseMarketImportedState(importedMarketState) ?? {};
   const overlapIdSet = new Set(overlapIds);
   const importedSpanRows = Object.entries(importedState)
     .map(([key, value]) => {

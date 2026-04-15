@@ -8,6 +8,7 @@ import {
   getPlayerProfileBoundaryAudit,
   getProfileCompletion
 } from "../support/player-profile-boundary-support.js";
+import { QUARANTINED_MULTIVERSE_MARKET_STATUS } from "../player-profile.js";
 
 test("player profile boundary groups preserve canonical, planner, and compatibility slices", () => {
   const groups = buildPlayerProfileBoundaryGroups({
@@ -42,7 +43,15 @@ test("player profile boundary groups preserve canonical, planner, and compatibil
       unmappedSystems: {
         shardMilestones: { selectedMilestone: "su3" },
         tokenShop: { ATU1Level: 2 },
-        multiverseMarket: { IS71Level: 3 }
+        multiverseMarket: {
+          status: QUARANTINED_MULTIVERSE_MARKET_STATUS,
+          importedState: { IS71Level: 3 },
+          mappingGate: {
+            plannerUseAllowed: false,
+            canonicalPromotionBlocked: true
+          },
+          currentBoundary: ["compatibility-only"]
+        }
       }
     }
   });
@@ -51,7 +60,18 @@ test("player profile boundary groups preserve canonical, planner, and compatibil
   assert.equal(groups[0].title, "Canonical shared truth");
   assert.deepEqual(groups[2].items[0], ["Total shard milestone levels", 21]);
   assert.deepEqual(groups[3].items[3], ["Ship calibration groups", 2]);
-  assert.deepEqual(groups[5].items.at(-1), ["Raw/unmapped MultiverseMarket state", { IS71Level: 3 }]);
+  assert.deepEqual(groups[5].items.at(-1), [
+    "Raw/unmapped MultiverseMarket state",
+    {
+      status: QUARANTINED_MULTIVERSE_MARKET_STATUS,
+      importedState: { IS71Level: 3 },
+      mappingGate: {
+        plannerUseAllowed: false,
+        canonicalPromotionBlocked: true
+      },
+      currentBoundary: ["compatibility-only"]
+    }
+  ]);
 });
 
 test("boundary audit and completion helpers keep labeled import summaries", () => {
@@ -67,7 +87,7 @@ test("boundary audit and completion helpers keep labeled import summaries", () =
       title: "Compatibility leftovers",
       items: [
         ["Legacy gemDust", null],
-        ["Unmapped MultiverseMarket state", { IS71Level: 3 }]
+        ["Raw/unmapped MultiverseMarket state", null]
       ]
     }
   ];
@@ -91,10 +111,11 @@ test("boundary audit and completion helpers keep labeled import summaries", () =
     }
   );
 
-  assert.deepEqual(audit.counts, ["Canonical shared truth: 2/2", "Compatibility leftovers: 1/2"]);
-  assert.match(audit.notes[0], /multiverseMarket/);
+  assert.deepEqual(audit.counts, ["Canonical shared truth: 2/2", "Compatibility leftovers: 0/2"]);
+  assert.match(audit.notes[0], /No quarantined unmapped system blobs/);
   assert.match(audit.notes[1], /external-model implementation state/);
   assert.match(audit.notes[2], /gemDust/);
+  assert.match(audit.notes[3], /Ignored one unlabeled MultiverseMarket compatibility payload/);
 
   const profile = {
     meta: { profileName: "Pilot", dataConfidence: "manual" },

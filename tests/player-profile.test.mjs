@@ -133,3 +133,34 @@ test("normalizePlayerProfile keeps only the exact typed bounded multiverse marke
   assert.equal(profile.player.resources.diamonds, null);
   assert.equal(profile.player.IS71Level, undefined);
 });
+
+test("normalizePlayerProfile keeps imported Emporium compatibility state out of canonical player state", () => {
+  const profile = normalizePlayerProfile({
+    systems: {
+      multiverseMarket: {
+        IS71Level: 3,
+        EsotericR1Trades: 2
+      }
+    },
+    player: {
+      multiverseMarket: {
+        IS71Level: 99
+      }
+    }
+  });
+
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.status,
+    "quarantined-raw-unmapped"
+  );
+  assert.deepEqual(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState,
+    {
+      IS71Level: 3,
+      EsotericR1Trades: 2
+    }
+  );
+  assert.equal(profile.player.multiverseMarket, undefined);
+  assert.equal(profile.player.resources.tokens, null);
+  assert.equal(profile.planning.tokenShop.checkedSubsetPlayerState.ATU1Level, null);
+});

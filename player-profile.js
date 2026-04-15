@@ -1,4 +1,5 @@
 export const PLAYER_PROFILE_SCHEMA_VERSION = 3;
+export const QUARANTINED_MULTIVERSE_MARKET_STATUS = "quarantined-raw-unmapped";
 export const PLAYER_PROFILE_IMPORT_ALIASES = {
   meta: {
     profileName: [["meta", "profileName"], ["profileName"]],
@@ -188,6 +189,26 @@ const CI_SUFFIX_EXPONENTS = {
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+export function isQuarantinedMultiverseMarketState(value) {
+  return (
+    isRecord(value) &&
+    value.status === QUARANTINED_MULTIVERSE_MARKET_STATUS &&
+    isRecord(value.importedState) &&
+    isRecord(value.mappingGate) &&
+    value.mappingGate.plannerUseAllowed === false &&
+    value.mappingGate.canonicalPromotionBlocked === true &&
+    Array.isArray(value.currentBoundary)
+  );
+}
+
+export function getQuarantinedMultiverseMarketState(value) {
+  return isQuarantinedMultiverseMarketState(value) ? value : null;
+}
+
+export function getQuarantinedMultiverseMarketImportedState(value) {
+  return getQuarantinedMultiverseMarketState(value)?.importedState ?? null;
 }
 
 function cloneValue(value) {
@@ -450,7 +471,7 @@ function coerceQuarantinedMultiverseMarketState(value) {
   }
 
   return {
-    status: "quarantined-raw-unmapped",
+    status: QUARANTINED_MULTIVERSE_MARKET_STATUS,
     importedState,
     mappingGate: {
       plannerUseAllowed: false,
