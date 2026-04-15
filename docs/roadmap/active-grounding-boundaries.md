@@ -37,6 +37,7 @@ Prefer recovering whole related families together when they share one implementa
 - Still blocked:
   - only two shard rows are currently verified end-to-end; the shared family table is still descriptive evidence, not a full verified row table
   - the direct row-definition payload is recovered on `ShardMining`, but the player-owned row state behind `upgradeInfoList` still has no verified save-side owner or serialized payload path
+  - the checked trace workflow closes shard cost structure only and still does not recover any local producer that populates `IsUnlocked`, current milestone progress or level, or adjacent row-owned state
   - exact player-owned shard row state is not yet import-ready
   - exact planner-safe shard cost math and effect-text mapping are not yet recovered
 - Largest coherent adjacent slice:

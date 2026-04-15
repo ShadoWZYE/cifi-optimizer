@@ -156,7 +156,7 @@ That table is the current player-facing handoff surface for shard row evidence. 
 
 ## Next allowed shard step
 
-The next shard pass should recover the player-owned milestone ownership or exact serialized payload path behind the narrowed `ShardMining` / `ShardUpgradeInfo` runtime shell, use that result to upgrade rows inside the shared shard-family evidence table, and compare that extracted layer against the current descriptive dataset before any planner expansion.
+The next shard pass should recover the player-owned milestone ownership or exact serialized payload path behind the narrowed `ShardMining` / `ShardUpgradeInfo` runtime shell. The current trace workflow already closes shard cost structure only, so future work should treat owned-state population as a non-local save-side blocker until one real construction bridge or save owner is recovered.
 
 Current heuristic ranking for that work:
 

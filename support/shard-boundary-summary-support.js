@@ -428,6 +428,8 @@ export function getShardSaveBoundarySummary(boundary) {
       saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
     hasDirectRowDefinitionPayload: probeResults.directSerializedRowDefinitionRecovered === true,
     hasRuntimeOwnedStateShell: probeResults.runtimeOwnedStateShellRecovered === true,
+    hasTraceOwnedStatePopulationBridge:
+      probeResults.traceWorkflowHasOwnedStatePopulationBridge === true,
     ownerAnchor: "ShardMining / ShardUpgradeInfo",
     saveAnchor: "PlayerProfileData",
     cloudSaveAnchor: "CloudSavePlayerProfile",
@@ -435,6 +437,10 @@ export function getShardSaveBoundarySummary(boundary) {
     runtimeShellAnchor: recoveredDeclaringRowModel.ownerType
       ? `${recoveredDeclaringRowModel.ownerType}.upgradeInfoList`
       : "ShardMining.upgradeInfoList",
+    traceOwnedStateLabel:
+      probeResults.traceWorkflowHasOwnedStatePopulationBridge !== true
+        ? "Trace closes shard-cost structure only; owned-state population stays non-local"
+        : "Trace-owned-state population bridge recovered",
     overlapLabel: "zero direct overlap",
     ownerTermCount: ownerShellTermsChecked.length
   };

@@ -1584,8 +1584,10 @@ assert.deepEqual(
   ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]
 );
 assert.ok(
-  shardMilestoneHandoffBoundary.currentBoundary.some((line) =>
-    /runtime row shell recovered/.test(line) && /row-definition family already recovered/.test(line)
+  shardMilestoneHandoffBoundary.currentBoundary.some(
+    (line) =>
+      /runtime row shell recovered/.test(line) &&
+      /row-definition family already recovered/.test(line)
   )
 );
 assert.ok(
@@ -3783,10 +3785,11 @@ assert.deepEqual(
   shardFamilyBlockedRows.map((entry) => entry.rowKey),
   ["SU0", "SU7", "SU28"]
 );
-assert.deepEqual(
-  shardFamilyVerifiedRows[0].verifiedPackage.rowShellFields.bonusTextFields,
-  ["SM1B1Text", "SM1B2Text", "SM1B3Text"]
-);
+assert.deepEqual(shardFamilyVerifiedRows[0].verifiedPackage.rowShellFields.bonusTextFields, [
+  "SM1B1Text",
+  "SM1B2Text",
+  "SM1B3Text"
+]);
 assert.deepEqual(shardFamilyVerifiedRows[0].verifiedPackage.fixedBreakpoints, [1, 25, 50]);
 assert.deepEqual(shardFamilyVerifiedRows[1].verifiedPackage.fixedBreakpoints, [1, 25, 50]);
 assert.deepEqual(shardFamilyVerifiedRows[1].verifiedPackage.serializedCostFields, [
@@ -3794,10 +3797,7 @@ assert.deepEqual(shardFamilyVerifiedRows[1].verifiedPackage.serializedCostFields
   "SU2CostExponent",
   "SU2GrowthExponent"
 ]);
-assert.equal(
-  shardMilestoneFamilyEvidence.sharedEvidence.saveBoundary.status,
-  "blocked"
-);
+assert.equal(shardMilestoneFamilyEvidence.sharedEvidence.saveBoundary.status, "blocked");
 assert.ok(
   shardMilestoneFamilyEvidence.currentBoundary.some((line) =>
     /shared shard milestone evidence table/.test(line)
@@ -5613,11 +5613,7 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
     track.verified.some((line) => /SU1 now clears as one bounded verified row/.test(line)),
     "expected shard successor track to record the first verified row in verified facts"
   );
-  assert.ok(
-    track.nextSteps.some((step) =>
-      /shared family evidence table/.test(step)
-    )
-  );
+  assert.ok(track.nextSteps.some((step) => /shared family evidence table/.test(step)));
   assert.ok(track.nextSteps.some((step) => /upgrade that row inside the shared table/.test(step)));
   assert.equal(track.nextSteps.length, 2);
   assert.ok(
@@ -5630,11 +5626,7 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
       /Promote one bounded shard row-verification artifact so SU2 now binds/.test(step)
     )
   );
-  assert.ok(
-    track.completedSteps.some((step) =>
-      /shared shard-family evidence table/.test(step)
-    )
-  );
+  assert.ok(track.completedSteps.some((step) => /shared shard-family evidence table/.test(step)));
   assert.ok(
     track.uncertain.some((line) =>
       /Which save-side owner or exact serialized list host actually persists player-owned shard milestone rows/.test(
@@ -8343,10 +8335,7 @@ assert.match(
   /THE \$\{normalizedName\.toUpperCase\(\)\} MILESTONE/
 );
 assert.match(appJs, /shard-threshold-pill/);
-assert.match(
-  shardEvidenceSupportModule,
-  /Recovered shard cost evidence keeps/
-);
+assert.match(shardEvidenceSupportModule, /Recovered shard cost evidence keeps/);
 assert.match(appJs, /Definition evidence/);
 assert.match(appJs, /Owned-state blocker/);
 assert.doesNotMatch(appJs, /exact serialized cost fields/);

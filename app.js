@@ -3572,6 +3572,7 @@ function renderShardGroundingBoundary() {
         <div class="meta-stack">
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "Recovered shard-local evidence still separates direct row definitions from unresolved PlayerProfile save ownership." : "The current build does not yet preserve a clean shard-to-save separation result."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary && saveBoundary.hasDirectRowDefinitionPayload && saveBoundary.hasRuntimeOwnedStateShell ? "Direct ShardMining payload names the reachable row family, but player-owned row state still stops at the upgradeInfoList runtime shell." : "The current split between shard row definitions and owned-state recovery is not yet preserved in this build."}</p>
+          <p class="meta">${saveBoundary.hasSeparationBoundary ? escapeHtml(saveBoundary.traceOwnedStateLabel) : "The current trace workflow does not yet preserve a shard owned-state population boundary."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "That is useful because it blocks the UI from implying imported shard milestone ownership that the contract does not support." : "Until separation is verified, shard evidence should be treated as even more provisional."}</p>
           <p class="meta">Manual inputs can guide descriptive watch cards, but they do not turn this flow into recovered save-state truth or a grounded import path.</p>
           <p class="meta">If a player imports external-model or compatibility data, it is treated as an interim reference path only and not as canonical shard state.</p>
@@ -4145,7 +4146,8 @@ function buildApkGroundingValidationCases() {
       statusCounts.blocked > 0;
     cases.push({
       title: "Shard family evidence table",
-      expected: "Shared shard family evidence covers rows 0-29 with verified, partial, and blocked classifications",
+      expected:
+        "Shared shard family evidence covers rows 0-29 with verified, partial, and blocked classifications",
       actual: hasSharedFamilyEvidence
         ? "Shared shard family evidence covers rows 0-29 with verified, partial, and blocked classifications"
         : "Shared shard family evidence table drifted",

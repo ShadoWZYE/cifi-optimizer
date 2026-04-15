@@ -1292,6 +1292,10 @@ function validateShardSaveBoundary(boundary) {
     "payloadBoundary",
     "handoffBoundary",
     "typeMetadataProbe",
+    "costParameterProbe",
+    "sceneMonoBehaviourProbe",
+    "unityTraceTargetRegistry",
+    "unityTraceBundle",
     "globalMetadata",
     "level0"
   ].forEach((field) => {
@@ -1379,6 +1383,31 @@ function validateShardSaveBoundary(boundary) {
     "shard save boundary declaringRowModelRecovered drifted"
   );
   assert.equal(
+    boundary.probeResults.directSerializedRowDefinitionRecovered,
+    true,
+    "shard save boundary directSerializedRowDefinitionRecovered drifted"
+  );
+  assert.equal(
+    boundary.probeResults.runtimeOwnedStateShellRecovered,
+    true,
+    "shard save boundary runtimeOwnedStateShellRecovered drifted"
+  );
+  assert.equal(
+    boundary.probeResults.traceRegistryHasOwnedStateTarget,
+    false,
+    "shard save boundary traceRegistryHasOwnedStateTarget drifted"
+  );
+  assert.equal(
+    boundary.probeResults.traceWorkflowHasOwnedStatePopulationBridge,
+    false,
+    "shard save boundary traceWorkflowHasOwnedStatePopulationBridge drifted"
+  );
+  assert.equal(
+    boundary.probeResults.runtimePopulationLocalProducerRecovered,
+    false,
+    "shard save boundary runtimePopulationLocalProducerRecovered drifted"
+  );
+  assert.equal(
     boundary.probeResults.saveSideOwnerRecovered,
     false,
     "shard save boundary saveSideOwnerRecovered drifted"
@@ -1415,6 +1444,10 @@ function validateShardSaveBoundary(boundary) {
   assert.ok(
     boundary.currentBoundary.some((line) => String(line).includes("upgradeInfoList")),
     "shard save boundary must preserve row-model seam framing"
+  );
+  assert.ok(
+    boundary.currentBoundary.some((line) => String(line).includes("non-local save-side source")),
+    "shard save boundary must preserve non-local source framing"
   );
 
   return {
@@ -1576,6 +1609,16 @@ function validateShardMilestoneSaveOwnerCandidates(candidates) {
     "shard milestone save-owner candidates declaringRowModelRecovered drifted"
   );
   assert.equal(
+    candidates.checkedOverlapStatistics.directSerializedRowDefinitionRecovered,
+    true,
+    "shard milestone save-owner candidates directSerializedRowDefinitionRecovered drifted"
+  );
+  assert.equal(
+    candidates.checkedOverlapStatistics.traceWorkflowHasOwnedStatePopulationBridge,
+    false,
+    "shard milestone save-owner candidates traceWorkflowHasOwnedStatePopulationBridge drifted"
+  );
+  assert.equal(
     candidates.checkedOverlapStatistics.remainingSaveOwnerCandidateCount,
     1,
     "shard milestone save-owner candidates remainingSaveOwnerCandidateCount drifted"
@@ -1586,7 +1629,7 @@ function validateShardMilestoneSaveOwnerCandidates(candidates) {
   );
   assert.ok(
     candidates.currentBoundary.some((line) =>
-      String(line).includes("recovered shard-local row-model result")
+      String(line).includes("recovered shard-local runtime row shell")
     ),
     "shard milestone save-owner candidates must preserve row-model framing"
   );
@@ -4951,8 +4994,16 @@ function validateShardMilestoneHandoffBoundary(boundary) {
   );
   assert.ok(
     boundary.currentBoundary.some((line) => String(line).includes("runtime row shell recovered")) &&
-      boundary.currentBoundary.some((line) => String(line).includes("row-definition family already recovered")),
+      boundary.currentBoundary.some((line) =>
+        String(line).includes("row-definition family already recovered")
+      ),
     "shard milestone handoff boundary must preserve split row-definition and runtime-shell framing"
+  );
+  assert.ok(
+    boundary.handoffFindings.some((line) =>
+      String(line).includes("does not recover any local producer")
+    ),
+    "shard milestone handoff boundary must preserve missing local-producer framing"
   );
   assert.ok(
     boundary.currentBoundary.some((line) =>
@@ -5522,7 +5573,10 @@ function validateShardMilestoneFamilyEvidence(boundary) {
     boundary.sharedEvidence,
     "shard milestone family evidence sharedEvidence must be an object"
   );
-  expectArray(boundary.familyFindings, "shard milestone family evidence familyFindings must be an array");
+  expectArray(
+    boundary.familyFindings,
+    "shard milestone family evidence familyFindings must be an array"
+  );
   expectArray(boundary.rows, "shard milestone family evidence rows must be an array");
   expectArray(
     boundary.currentBoundary,

@@ -311,11 +311,12 @@ export function createShardEvidenceSupport({
       titleCoverageTone: status === "blocked" ? "warn" : "pass",
       titleCoverageStatusLabel,
       titleCoverageStatusClass: `shard-status-pill-${titleCoverageStatusLabel.toLowerCase()}`,
-      titleCoverageLine: Array.isArray(titleCandidates) && titleCandidates.length > 1
-        ? `Shipped title candidates still conflict for row ${row}: ${titleCandidates.join(" | ")}.`
-        : titleCandidates.length === 1
-          ? `Shipped title evidence for row ${row}: ${titleCandidates[0]}.`
-          : `No shipped title candidate is preserved for row ${row}.`,
+      titleCoverageLine:
+        Array.isArray(titleCandidates) && titleCandidates.length > 1
+          ? `Shipped title candidates still conflict for row ${row}: ${titleCandidates.join(" | ")}.`
+          : titleCandidates.length === 1
+            ? `Shipped title evidence for row ${row}: ${titleCandidates[0]}.`
+            : `No shipped title candidate is preserved for row ${row}.`,
       rowShellTone: status === "blocked" ? "warn" : "pass",
       rowShellStatusLabel,
       rowShellStatusClass: `shard-status-pill-${rowShellStatusLabel.toLowerCase()}`,
@@ -383,7 +384,9 @@ export function createShardEvidenceSupport({
       saveBoundary.recoveredDeclaringRowModel
         ? saveBoundary.recoveredDeclaringRowModel
         : {};
-    const remainingCandidates = Array.isArray(getShardGrounding()?.saveOwnerCandidates?.remainingSaveOwnerCandidates)
+    const remainingCandidates = Array.isArray(
+      getShardGrounding()?.saveOwnerCandidates?.remainingSaveOwnerCandidates
+    )
       ? getShardGrounding().saveOwnerCandidates.remainingSaveOwnerCandidates
       : [];
     const leadingCandidate = remainingCandidates[0] ?? null;

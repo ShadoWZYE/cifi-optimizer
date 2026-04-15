@@ -6,6 +6,8 @@
     "handoffBoundary": "data/shard-milestone-handoff-boundary.v1.json",
     "ownerFamilyBoundary": "data/shard-owner-family-boundary.v1.json",
     "payloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
+    "unityTraceTargetRegistry": "data/unity-trace-target-registry.json",
+    "unityTraceBundle": "data/unity-trace-bundle.json",
     "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json",
     "extractionCandidateFamilies": "data/extraction-candidate-families.v1.json",
     "globalMetadata": "workbench/apk/base/global-metadata.dat",
@@ -69,7 +71,8 @@
       "confidence": "low",
       "why": [
         "Shard save-boundary checks still show zero direct overlap between the narrowed shard-local owner trail and PlayerProfileData save-family anchors.",
-        "A PlayerProfile-side shard member shell remains the current unresolved save-owner class because player-owned shard state still has to land somewhere save-side even though the row-definition payload and the shard-local runtime shell are both now recovered."
+        "A PlayerProfile-side shard member shell remains the current unresolved save-owner class because player-owned shard state still has to land somewhere save-side even though the row-definition payload and the shard-local runtime shell are both now recovered.",
+        "The current unity trace workflow only recovers a shard-cost structure target and leaves save-owner-recovery explicitly negative, which tightens the blocker toward a non-local save-side source rather than a local ShardMining population path."
       ],
       "candidateFieldClusters": [
         "PlayerProfileData",
@@ -87,7 +90,7 @@
   ],
   "confidenceNotes": [
     "This artifact now preserves both a recovered direct row-definition payload and a recovered shard-local runtime row shell, but it still does not recover a concrete declaring save type for player-owned shard milestone state.",
-    "The current evidence still separates player-owned shard ownership from save-family anchors, so confidence remains intentionally bounded."
+    "The current evidence still separates player-owned shard ownership from save-family anchors, and the trace workflow does not recover any local population bridge for upgradeInfoList owned-state values, so confidence remains intentionally bounded."
   ],
   "checkedOverlapStatistics": {
     "saveFamilyTermsChecked": 4,
@@ -96,6 +99,7 @@
     "directShardPlayerProfileContext": false,
     "declaringRowModelRecovered": true,
     "directSerializedRowDefinitionRecovered": true,
+    "traceWorkflowHasOwnedStatePopulationBridge": false,
     "remainingSaveOwnerCandidateCount": 1
   },
   "warnings": [
@@ -104,7 +108,7 @@
     "Do not wire planner logic, affordability logic, or import logic to these candidates."
   ],
   "currentBoundary": [
-    "Treat this dataset as one recovered direct row-definition payload, one recovered shard-local runtime row shell, and one remaining save-owner gap, not as recovered player-owned shard milestone state or a verified save owner.",
+    "Treat this dataset as one recovered direct row-definition payload, one recovered shard-local runtime row shell, and one remaining non-local save-owner gap, not as recovered player-owned shard milestone state or a verified save owner.",
     "The current repo evidence still preserves zero checked overlap between narrowed shard-local owner clues and PlayerProfileData save-family anchors.",
     "Use this recovered shard-local row-model result and the remaining save-owner candidate to focus future extraction work, not to enable planner-safe shard state, recommendation logic, or import mapping."
   ]

@@ -56,11 +56,14 @@ test("shard owner-family and save-boundary summaries preserve descriptive gate l
       hasSeparationBoundary: true,
       hasDirectRowDefinitionPayload: true,
       hasRuntimeOwnedStateShell: true,
+      hasTraceOwnedStatePopulationBridge: false,
       ownerAnchor: "ShardMining / ShardUpgradeInfo",
       saveAnchor: "PlayerProfileData",
       cloudSaveAnchor: "CloudSavePlayerProfile",
       directPayloadAnchor: "ShardMining",
       runtimeShellAnchor: "ShardMining.upgradeInfoList",
+      traceOwnedStateLabel:
+        "Trace closes shard-cost structure only; owned-state population stays non-local",
       overlapLabel: "zero direct overlap",
       ownerTermCount: 1
     }
