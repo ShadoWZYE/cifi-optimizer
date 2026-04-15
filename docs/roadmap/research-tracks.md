@@ -87,16 +87,18 @@ Tracks should leave the active queue quickly once they stop being the best unit 
 Research should support shipping, not become its own infinite product.
 
 When choosing between:
+
 - another boundary/check/doc pass, or
 - the smallest credible capability unlock,
 
 prefer the capability unlock.
 
 If exact truth is still blocked, prefer:
+
 - a clearly labeled partial slice
 - a descriptive preview
 - a smaller extraction track
-over another broad “sanitize everything” pass.
+  over another broad “sanitize everything” pass.
 
 ---
 
@@ -142,38 +144,49 @@ Each active track should include:
 ## Authoring rules
 
 ### `goal`
+
 Name the real player-value or implementation unlock, not just the research topic.
 
 ### `userQuestion`
+
 Write the player-facing question the lane is trying to answer.
 
 ### `minimumRequiredInputs`
+
 List only the inputs the current slice actually consumes.
 
 ### `explicitNonBlockers`
+
 Name adjacent unresolved lanes that should stay visible but should not block the current slice.
 
 ### `currentSlice`
+
 Describe only the current narrow problem being worked.
 
 ### `exitCondition`
+
 State what must become true for the track to end.
 
 Examples:
+
 - recovered saved-state owner for TokenShop row levels
 - mapped shard milestone payload to verified player-facing rows
 - decided mech planning is deferred post-MVP
 
 ### `blockedBy`
+
 Name the current true blocker, not every uncertainty in the lane.
 
 ### `largestCoherentAdjacentSlice`
+
 Describe the largest related family that can ship honestly without crossing a real boundary or pretending the whole system is solved.
 
 ### `defaultNextStep`
+
 Record the next highest-value adjacent move that should happen by default if the track stays in the same lane.
 
 ### `nextSteps`
+
 Keep this short.
 Use 1-3 steps maximum.
 If more are needed, fork.
@@ -235,8 +248,11 @@ Current active or queued tracks:
 - `shard-milestone-payload-recovery`
   - status: `active`
   - goal: recover the player-owned shard row owner or exact serialized payload path needed behind the shard-local runtime shell
-- `spend-multiverse-savedata-import-surface`
+- `spend-planner-first-ui-slice`
   - status: `active`
+  - goal: keep the normal-app spend panel canonical-only, descriptive, and explicit about blocked owner-dependent seams
+- `spend-multiverse-savedata-import-surface`
+  - status: `queued`
   - goal: reach one bounded admissibility decision for `SaveData`-backed Emporium import without mixing that decision with row identity/remap research or planner behavior
 - `spend-token-shop-row-level-recovery`
   - status: `archived`
@@ -256,15 +272,6 @@ Current active or queued tracks:
 
 Superseded parent:
 
-- `spend-planner-first-ui-slice`
-  - status: `archived`
-  - goal: shipped the first real TokenShop tool slice around one real player question instead of treating the whole spend domain as one blocker
-  - user question: `What grounded TokenShop upgrades can I buy right now from the subset we actually know?`
-  - minimum required inputs: canonical Tokens, checked TokenShop row-remap subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`, imported current levels for that same subset, and checked `StartCost` / `AdditiveCost` values for those same rows
-  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math
-  - current true blocker: closed for this slice; broader planner-safe spend behavior remains on separate owner and remap lanes
-  - largest coherent adjacent slice: a separate Overview module that shows each grounded subset row's identity, current level, next known cost, and current affordability in fixed grounded slot order, without optimizer claims or canonical `ATU*Level` promotion
-  - default next adjacent step: stay in the same spend lane only if a follow-up slice still consumes the same checked subset; otherwise continue on the separate owner or remap lanes already called out as blockers
 - `spend-token-shop-row-detail-slice`
   - status: `archived`
   - goal: extend the shipped checked-row TokenShop panel into the next small grounded row-detail tool for the same verified subset only
@@ -283,6 +290,18 @@ Superseded parent:
   - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
   - largest coherent adjacent slice: a dedicated TokenShop category under the Progression selector that keeps row order fixed to `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU12`, saves local checked-row current levels under a non-canonical planner path, uses compatibility import only as prefill, and shows grounded identity, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change without optimizer claims or canonical `ATU*Level` promotion
   - default next adjacent step: continue only by grounding the next directly consumed checked-row inputs for that editor surface; keep ranking, ROI, and unresolved-row family expansion on separate lanes
+
+Active spend panel contract:
+
+- `spend-planner-first-ui-slice`
+  - status: `active`
+  - goal: keep one descriptive spend-planner panel on Overview that reads only canonical spend inputs already available in `state.playerProfile`
+  - user question: `What spend-side grounded information can I inspect safely right now without importing or guessing blocked owner-dependent state?`
+  - minimum required inputs: canonical `player.resources.tokens`, `player.resources.diamonds`, `player.loop.loopReset`, and importable `player.resources.academyRelics`
+  - explicit non-blockers: TokenShop checked-row tools, raw `ATU*Level` imports, token-bank import clues, Daily Tokenium import clues, Emporium import previews, ranking, ROI math, recommendation rules
+  - current true blocker: the next truthful planner action still depends on blocked owner-dependent fields that are not safe to promote into canonical planner behavior yet
+  - largest coherent adjacent slice: descriptive UI and contract refinements that keep the panel canonical-only while making blocked seams and disabled actions clearer
+  - default next adjacent step: stay in this lane only for canonical-only spend-panel UX or contract work; move back to owner or import lanes only when a future slice actually consumes one newly cleared field
 - `spend-planner-from-extracted-data`
   - status: `archived`
   - reason: it mixed multiple independent spend blockers that now have distinct exit conditions and should no longer share one queue item
