@@ -4836,10 +4836,13 @@ assert.equal(
   tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
   "Mk6 Generator Booster"
 );
-assert.deepEqual(tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText, [
-  "This upgrade divides the cost of MK6 Generators by 6qa.",
-  "This upgrade provides a 30% increase to the output of MK6 Generators."
-]);
+assert.deepEqual(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+  [
+    "This upgrade divides the cost of MK6 Generators by 6qa.",
+    "This upgrade provides a 30% increase to the output of MK6 Generators."
+  ]
+);
 assert.match(
   tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
   /shell-to-prefab-to-title-side-text chain/i
@@ -4881,11 +4884,14 @@ assert.equal(
   tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.prefabIdentity,
   "NewTokenUPGPrefab.T1.MK7Booster"
 );
-assert.deepEqual(tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.detachedTitleSurface, [
-  "MK7 GEN ENHANCEMENT",
-  "This upgrade divides the cost of MK7 Generators by 70Qu.",
-  "This upgrade provides a 30% increase to the output of MK7 Generators."
-]);
+assert.deepEqual(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.detachedTitleSurface,
+  [
+    "MK7 GEN ENHANCEMENT",
+    "This upgrade divides the cost of MK7 Generators by 70Qu.",
+    "This upgrade provides a 30% increase to the output of MK7 Generators."
+  ]
+);
 assert.match(
   tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.missingJoin,
   /Mk7 Generator Booster title/i
@@ -4935,10 +4941,13 @@ assert.equal(
   tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
   "Mk8 Generator Booster"
 );
-assert.deepEqual(tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText, [
-  "This upgrade divides the cost of MK8 Generators by 8e100.",
-  "This upgrade provides a 30% increase to the output of MK8 Generators."
-]);
+assert.deepEqual(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+  [
+    "This upgrade divides the cost of MK8 Generators by 8e100.",
+    "This upgrade provides a 30% increase to the output of MK8 Generators."
+  ]
+);
 assert.match(
   tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
   /shell-to-prefab-to-title-side-text chain/i
@@ -5126,7 +5135,8 @@ assert.match(
   );
 });
 assert.match(
-  tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.negativeConclusion,
+  tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam
+    .negativeConclusion,
   /stop searching that cluster for an exact handoff unless a new committed artifact lands/i
 );
 assert.equal(
