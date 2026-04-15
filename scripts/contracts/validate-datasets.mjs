@@ -10479,17 +10479,12 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   );
   assert.deepEqual(
     boundary.boundedImportConclusion.importSafeSubset,
-    [
-      "IS1Level through IS110Level",
-      "EsotericR1Trades through EsotericR9Trades",
-      "NecrumR1Trades through NecrumR9Trades",
-      "Mech1Unlocked through Mech2Unlocked"
-    ],
+    ["IS1Level through IS110Level"],
     "multiverse market SaveData import boundary importSafeSubset drifted"
   );
   assert.equal(
     boundary.boundedImportConclusion.exactImportSafeSubsetLabel,
-    "IS1Level through IS110Level plus separate bounded trade-counter and early-mech quarantine ranges after the dual-declared InscryptionsDone boundary",
+    "IS1Level through IS110Level only",
     "multiverse market SaveData import boundary exactImportSafeSubsetLabel drifted"
   );
   assert.equal(
@@ -10524,18 +10519,8 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   );
   assert.match(
     boundary.boundedImportConclusion.currentBoundary,
-    /EsotericR1Trades through EsotericR9Trades/i,
-    "multiverse market SaveData import boundary currentBoundary must preserve the bounded trade-counter range"
-  );
-  assert.match(
-    boundary.boundedImportConclusion.currentBoundary,
-    /NecrumR1Trades through NecrumR9Trades/i,
-    "multiverse market SaveData import boundary currentBoundary must preserve the bounded trade-counter range"
-  );
-  assert.match(
-    boundary.boundedImportConclusion.currentBoundary,
-    /Mech1Unlocked through Mech2Unlocked/i,
-    "multiverse market SaveData import boundary currentBoundary must preserve the bounded early-mech window"
+    /verified-but-blocked neighbors outside this admitted Emporium import slice/i,
+    "multiverse market SaveData import boundary currentBoundary must preserve the outside-slice neighbor rule"
   );
   assert.match(
     boundary.boundedImportConclusion.currentBoundary,
@@ -10561,7 +10546,7 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
 
   assert.equal(
     boundary.classifications.safe_import_candidate.length,
-    3,
+    1,
     "multiverse market SaveData import boundary safe_import_candidate count drifted"
   );
   assert.equal(
@@ -10571,7 +10556,7 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   );
   assert.equal(
     boundary.classifications.verified_but_blocked.length,
-    1,
+    3,
     "multiverse market SaveData import boundary verified_but_blocked count drifted"
   );
   assert.equal(
@@ -10585,27 +10570,13 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   );
   assert.deepEqual(
     [...safeById.keys()],
-    [
-      "savedata-owned-is1-110",
-      "savedata-owned-trade-counters",
-      "savedata-owned-adjacent-mech-window"
-    ],
+    ["savedata-owned-is1-110"],
     "multiverse market SaveData import boundary safe_import_candidate entry ids drifted"
   );
   assert.deepEqual(
     safeById.get("savedata-owned-is1-110")?.fieldNames,
     ["IS1Level through IS110Level"],
     "multiverse market SaveData import boundary IS span fieldNames drifted"
-  );
-  assert.deepEqual(
-    safeById.get("savedata-owned-trade-counters")?.fieldNames,
-    ["EsotericR1Trades through EsotericR9Trades", "NecrumR1Trades through NecrumR9Trades"],
-    "multiverse market SaveData import boundary trade counter safe fieldNames drifted"
-  );
-  assert.deepEqual(
-    safeById.get("savedata-owned-adjacent-mech-window")?.fieldNames,
-    ["Mech1Unlocked through Mech2Unlocked"],
-    "multiverse market SaveData import boundary early-mech safe fieldNames drifted"
   );
   [...safeById.values()].forEach((entry) => {
     assert.equal(
@@ -10619,15 +10590,36 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
     /compatibility-only raw Emporium import truth/i,
     "multiverse market SaveData import boundary IS span safe rationale drifted"
   );
-  assert.match(
-    safeById.get("savedata-owned-trade-counters")?.why || "",
-    /separate bounded quarantine ranges/i,
-    "multiverse market SaveData import boundary trade safe rationale drifted"
+  const blockedById = new Map(
+    boundary.classifications.verified_but_blocked.map((entry) => [entry.entryId, entry])
+  );
+  assert.ok(
+    blockedById.has("savedata-owned-trade-counters-outside-import-slice"),
+    "multiverse market SaveData import boundary trade counters should stay verified-but-blocked"
+  );
+  assert.ok(
+    blockedById.has("savedata-owned-adjacent-mech-window-outside-import-slice"),
+    "multiverse market SaveData import boundary early mech window should stay verified-but-blocked"
+  );
+  assert.deepEqual(
+    blockedById.get("savedata-owned-trade-counters-outside-import-slice")?.fieldNames,
+    ["EsotericR1Trades through EsotericR9Trades", "NecrumR1Trades through NecrumR9Trades"],
+    "multiverse market SaveData import boundary trade counter blocked fieldNames drifted"
+  );
+  assert.deepEqual(
+    blockedById.get("savedata-owned-adjacent-mech-window-outside-import-slice")?.fieldNames,
+    ["Mech1Unlocked through Mech2Unlocked"],
+    "multiverse market SaveData import boundary early-mech blocked fieldNames drifted"
   );
   assert.match(
-    safeById.get("savedata-owned-adjacent-mech-window")?.why || "",
-    /broader Mech2\* continuation/i,
-    "multiverse market SaveData import boundary mech safe rationale drifted"
+    blockedById.get("savedata-owned-trade-counters-outside-import-slice")?.why || "",
+    /outside the admitted Emporium import slice/i,
+    "multiverse market SaveData import boundary trade blocked rationale drifted"
+  );
+  assert.match(
+    blockedById.get("savedata-owned-adjacent-mech-window-outside-import-slice")?.why || "",
+    /outside the admitted Emporium import slice/i,
+    "multiverse market SaveData import boundary mech blocked rationale drifted"
   );
 
   const wrapperEntry = boundary.classifications.wrapper_or_export_only[0];
@@ -10647,12 +10639,13 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
     "multiverse market SaveData import boundary wrapper rationale drifted"
   );
 
-  const blockedById = new Map(
-    boundary.classifications.verified_but_blocked.map((entry) => [entry.entryId, entry])
-  );
   assert.deepEqual(
     [...blockedById.keys()],
-    ["checked-row-order-is71-74"],
+    [
+      "checked-row-order-is71-74",
+      "savedata-owned-trade-counters-outside-import-slice",
+      "savedata-owned-adjacent-mech-window-outside-import-slice"
+    ],
     "multiverse market SaveData import boundary verified_but_blocked entry ids drifted"
   );
   assert.deepEqual(
@@ -10694,13 +10687,13 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   );
   assert.match(
     combinedDoc,
-    /`safe_import_candidate`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/,
-    "multiverse market state verification doc must preserve the compatibility-safe trade counter entries"
+    /`verified_but_blocked`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/,
+    "multiverse market state verification doc must preserve the blocked trade counter entries"
   );
   assert.match(
     combinedDoc,
-    /`safe_import_candidate`[\s\S]*`Mech1Unlocked` through `Mech2Unlocked`/,
-    "multiverse market state verification doc must preserve the compatibility-safe early-mech window"
+    /`verified_but_blocked`[\s\S]*`Mech1Unlocked` through `Mech2Unlocked`/,
+    "multiverse market state verification doc must preserve the blocked early-mech window"
   );
   assert.match(
     combinedDoc,
@@ -10714,8 +10707,8 @@ function validateMultiverseMarketSaveDataImportBoundary(boundary, stateDoc) {
   );
   assert.match(
     combinedDoc,
-    /split into separate exact typed quarantine ranges/i,
-    "multiverse market state verification doc must preserve the split-envelope conclusion"
+    /admitted Emporium import slice now stops at that exact `IS1Level` through `IS110Level` span/i,
+    "multiverse market state verification doc must preserve the narrower admitted import conclusion"
   );
   assert.match(
     combinedDoc,

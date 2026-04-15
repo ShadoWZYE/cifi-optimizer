@@ -46,17 +46,17 @@ This note records the active follow-up lane after save-owner recovery closed: on
   - `IS1Level` through `IS110Level`
     - this exact SaveData-owned `IS*Level` span is now safe to preserve as compatibility-only raw Emporium import truth under `compatibility.unmappedSystemState.multiverseMarket`
     - the checked rows `71-74` overlap anchors that wider run to validated Emporium rows without claiming final player-facing row identity
-  - `EsotericR1Trades` through `EsotericR9Trades`
-  - `NecrumR1Trades` through `NecrumR9Trades`
-    - these exact typed trade-counter ranges sit immediately after the dual-declared `InscryptionsDone` boundary on `SaveData`, so they belong in the same compatibility envelope but as separate bounded quarantine ranges rather than as an extension of the `IS*Level` span
-  - `Mech1Unlocked` through `Mech2Unlocked`
-    - this exact typed early-mech window continues immediately after `NecrumR9Trades` and stays bounded before the broader `Mech2*` continuation, so it is safe to preserve as a separate quarantined range under the same compatibility envelope
 - `wrapper_or_export_only`
   - `InscryptionsDone`
     - `PlayerProfileData` already exposes `InscryptionsDone` as a flat wrapper/export field, so importing it from the wider `SaveData` block would widen the owner surface without adding a new bounded canonical Emporium import
 - `verified_but_blocked`
   - `IS71Level` through `IS74Level`
     - these now have a checked ordered row-position mapping to validated rows `71-74`, but final row labels and canonical import targets are still not grounded
+  - `EsotericR1Trades` through `EsotericR9Trades`
+  - `NecrumR1Trades` through `NecrumR9Trades`
+    - these exact typed trade-counter ranges are verified on `SaveData`, but they remain outside the admitted Emporium import slice because this lane only admits the raw `IS*Level` span
+  - `Mech1Unlocked` through `Mech2Unlocked`
+    - this exact typed early-mech window is also verified on `SaveData`, but it remains outside the admitted Emporium import slice because it widens beyond bounded Emporium import support
 - `unresolved`
   - none
 
@@ -66,7 +66,7 @@ This note records the active follow-up lane after save-owner recovery closed: on
 - The exact SaveData-owned `IS*Level` span that is safe to import as raw Emporium truth is `IS1Level` through `IS110Level`.
 - That import-safe span is compatibility-only and should stay under `compatibility.unmappedSystemState.multiverseMarket`.
 - In normalized PlayerProfile storage, that compatibility path should stay explicitly wrapped as raw/unmapped state and preserve the exact SaveData span under `compatibility.unmappedSystemState.multiverseMarket.importedState`.
-- The adjacent `EsotericR*Trades`, `NecrumR*Trades`, and early-mech window belong in that same compatibility envelope only as separate bounded quarantine ranges after the dual-declared `InscryptionsDone` boundary.
+- The adjacent `EsotericR*Trades`, `NecrumR*Trades`, and early-mech window remain verified SaveData neighbors, but they stay outside the admitted Emporium import slice and should not be preserved under the Emporium raw-import wrapper.
 - `InscryptionsDone` remains explicitly dual-declared and wrapper/export-only rather than part of the promoted `IS*Level` import span.
 - Exact typed recovery currently sets hard boundaries on that compatibility span: no checked `IS0Level` below it and no checked `IS111Level` above it.
 - Rows `71-74` remain ordered overlap only for identity work, not an import-admissible canonical subset.

@@ -855,6 +855,8 @@ export function getImportedMultiverseMarketPreview(
   { formatBoundaryValue, formatShardNumber, isBoundaryValuePresent }
 ) {
   void multiverseMarket;
+  void formatBoundaryValue;
+  void isBoundaryValuePresent;
   const overlapIds = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)
     ? [
         ...new Set(
@@ -897,66 +899,6 @@ export function getImportedMultiverseMarketPreview(
   }
   const previewRows = importedSpanRows.slice(0, 12);
   const trailingPreviewRows = importedSpanRows.slice(-4);
-  const importedTradeCounters = Object.entries(importedState)
-    .map(([key, value]) => {
-      const match = /^(Esoteric|Necrum)R([1-9])Trades$/u.exec(String(key));
-      if (!match) {
-        return null;
-      }
-      return {
-        family: match[1],
-        rank: Number(match[2]),
-        key,
-        value,
-        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.importedState.${key}`
-      };
-    })
-    .filter(Boolean)
-    .sort((left, right) => {
-      if (left.family !== right.family) {
-        return left.family.localeCompare(right.family);
-      }
-      return left.rank - right.rank;
-    });
-  const expectedTradeCounterKeys = [
-    ...Array.from({ length: 9 }, (_, index) => `EsotericR${index + 1}Trades`),
-    ...Array.from({ length: 9 }, (_, index) => `NecrumR${index + 1}Trades`)
-  ];
-  const importedTradeKeySet = new Set(importedTradeCounters.map((entry) => entry.key));
-  const missingTradeCounterKeys = expectedTradeCounterKeys.filter(
-    (key) => !importedTradeKeySet.has(key)
-  );
-  const tradeCounterFamilies = {
-    Esoteric: importedTradeCounters.filter((entry) => entry.family === "Esoteric"),
-    Necrum: importedTradeCounters.filter((entry) => entry.family === "Necrum")
-  };
-  const earlyMechWindowKeys = [
-    "Mech1Unlocked",
-    "Mech1Units",
-    "Mech1Upg1Level",
-    "Mech1Upg2Level",
-    "Mech1MissionsProgress",
-    "FinalMech1MainBonus",
-    "Mech1MissionsCompleted",
-    "Mech2Unlocked"
-  ];
-  const importedEarlyMechFields = earlyMechWindowKeys
-    .map((key) => {
-      const value = importedState[key];
-      if (!isBoundaryValuePresent(value)) {
-        return null;
-      }
-      return {
-        key,
-        value,
-        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.importedState.${key}`
-      };
-    })
-    .filter(Boolean);
-  const importedEarlyMechKeySet = new Set(importedEarlyMechFields.map((entry) => entry.key));
-  const missingEarlyMechFields = earlyMechWindowKeys.filter(
-    (key) => !importedEarlyMechKeySet.has(key)
-  );
   const supportedTextModel = {
     effectLabelLane: "BonusDescriptionText",
     baseBonusLane: "PerLevelBonusText",
@@ -1006,17 +948,11 @@ export function getImportedMultiverseMarketPreview(
   }));
 
   return {
-    hasImportedCompatibilityPreview:
-      importedSpanRows.length > 0 ||
-      importedTradeCounters.length > 0 ||
-      importedEarlyMechFields.length > 0,
+    hasImportedCompatibilityPreview: importedSpanRows.length > 0,
     hasImportedSpanPreview: importedSpanRows.length > 0,
     importTargetPath: "compatibility.unmappedSystemState.multiverseMarket",
     wrapperOnlyFieldLabel: "InscryptionsDone",
     typedSpanLabel: "IS1Level through IS110Level",
-    tradeCounterLabel:
-      "EsotericR1Trades through EsotericR9Trades and NecrumR1Trades through NecrumR9Trades",
-    earlyMechWindowLabel: "Mech1Unlocked through Mech2Unlocked",
     importedSpanRowCount: importedSpanRows.length,
     totalSpanRowCount: 110,
     importedRangeLabel: importedSpanRows.length
@@ -1045,29 +981,6 @@ export function getImportedMultiverseMarketPreview(
     missingOverlapRows,
     missingOverlapLabel: missingOverlapRows.length
       ? missingOverlapRows.map((rowId) => `IS${rowId}Level`).join(", ")
-      : "none",
-    hasTradeCounterPreview: importedTradeCounters.length > 0,
-    importedTradeCounters,
-    importedTradeCounterCount: importedTradeCounters.length,
-    totalTradeCounterCount: expectedTradeCounterKeys.length,
-    missingTradeCounterKeys,
-    missingTradeCounterLabel: missingTradeCounterKeys.length
-      ? missingTradeCounterKeys.slice(0, 12).join(", ")
-      : "none",
-    tradeCounterFamilies,
-    tradeCounterSampleLine: importedTradeCounters.length
-      ? importedTradeCounters
-          .slice(0, 6)
-          .map((entry) => `${entry.key} ${formatBoundaryValue(entry.value)}`)
-          .join(" | ")
-      : "",
-    hasEarlyMechPreview: importedEarlyMechFields.length > 0,
-    importedEarlyMechFields,
-    importedEarlyMechCount: importedEarlyMechFields.length,
-    totalEarlyMechCount: earlyMechWindowKeys.length,
-    missingEarlyMechFields,
-    missingEarlyMechLabel: missingEarlyMechFields.length
-      ? missingEarlyMechFields.join(", ")
       : "none",
     previewRows,
     trailingPreviewRows,
