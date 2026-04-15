@@ -7742,7 +7742,23 @@ assert.match(
 );
 assert.match(
   activeGroundingBoundariesDoc,
-  /closed ATU3 bonus-aggregation cluster, the closed ATU11 MK7 title-side seam, or the closed ATU12 MK8 bridge-plus-title-side-text seam/i
+  /Largest coherent adjacent slice: keep the current ATU bridge-side family quarantined until a coherent adjacent remap family is grounded/i
+);
+assert.match(
+  activeGroundingBoundariesDoc,
+  /only split into narrower `ATU\*` probes where the owner path, runtime path, or validation path genuinely diverges/i
+);
+assert.match(
+  activeGroundingBoundariesDoc,
+  /closed ATU3 bonus-aggregation cluster/i
+);
+assert.match(
+  activeGroundingBoundariesDoc,
+  /closed ATU11 MK7 title-side seam/i
+);
+assert.match(
+  activeGroundingBoundariesDoc,
+  /closed ATU12 MK8 bridge-plus-title-side-text seam/i
 );
 assert.match(
   activeGroundingBoundariesDoc,
