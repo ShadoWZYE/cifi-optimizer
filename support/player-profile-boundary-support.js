@@ -154,8 +154,6 @@ export function getImportedMultiverseMarketPreviewCardModel(preview, formatShard
     hasPreview: true,
     pillLabels: [
       `${preview.importedSpanRowCount}/${preview.totalSpanRowCount} raw IS rows imported`,
-      `${preview.importedTradeCounterCount}/${preview.totalTradeCounterCount} trade counters imported`,
-      `${preview.importedEarlyMechCount}/${preview.totalEarlyMechCount} early-mech fields imported`,
       preview.hasOverlapGroundedRows
         ? `${preview.importedOverlapRowCount}/${preview.overlapRowCount} ordered-overlap rows imported`
         : null,
@@ -197,22 +195,11 @@ export function getImportedMultiverseMarketPreviewCardModel(preview, formatShard
       preview.missingSpanCount
         ? `Missing raw span fields still absent from this import: ${preview.missingSpanLabel}${preview.missingSpanCount > 12 ? "..." : ""}.`
         : "All raw fields in the checked IS1Level through IS110Level compatibility span are present in this import.",
-      preview.hasTradeCounterPreview
-        ? `Imported trade-counter quarantine currently covers ${preview.tradeCounterLabel} with ${preview.importedTradeCounterCount} recovered fields.`
-        : "No adjacent trade-counter quarantine fields are currently imported from the checked compatibility envelope.",
-      preview.missingTradeCounterKeys.length
-        ? `Missing trade-counter quarantine fields: ${preview.missingTradeCounterLabel}${preview.missingTradeCounterKeys.length > 12 ? "..." : ""}.`
-        : "All checked Esoteric and Necrum trade-counter quarantine fields are present in this import.",
-      preview.hasEarlyMechPreview
-        ? `Imported early-mech quarantine currently covers ${preview.earlyMechWindowLabel} with ${preview.importedEarlyMechCount} recovered fields.`
-        : "No early-mech quarantine fields are currently imported from the checked compatibility envelope.",
-      preview.missingEarlyMechFields.length
-        ? `Missing early-mech quarantine fields: ${preview.missingEarlyMechLabel}.`
-        : "All checked early-mech quarantine fields are present in this import.",
+      "Broader SaveData progression neighbors after the dual-declared InscryptionsDone boundary stay outside this admitted Emporium import slice, even when the repo has verified them on SaveData.",
       preview.hasOverlapGroundedRows
         ? `The checked ordered-overlap support rows ${preview.overlapRangeLabel} are tracked only as boundary evidence. Missing ordered-overlap imports: ${preview.missingOverlapLabel}.`
         : "No ordered-overlap support rows are available in this build.",
-      "Planner use stays blocked. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence, not canonical player truth, not row-label claims, not complete live-text bindings, and not recommendation inputs."
+      "Planner use stays blocked. These imported levels remain quarantined compatibility evidence, not canonical player truth, not row-label claims, not complete live-text bindings, and not recommendation inputs."
     ],
     overlapCards: preview.hasOverlapLevelPreview
       ? preview.overlapRowSummaries.map((entry) => ({
@@ -246,7 +233,7 @@ export function getImportedMultiverseMarketPreviewCardModel(preview, formatShard
             .map((entry) => `IS${entry.rowId}Level ${formatShardNumber(entry.level)}`)
             .join(" | ")}`
         : "",
-    importedTradeCounters: preview.importedTradeCounters.slice(0, 8),
-    importedEarlyMechFields: preview.importedEarlyMechFields.slice(0, 8)
+    importedTradeCounters: [],
+    importedEarlyMechFields: []
   };
 }

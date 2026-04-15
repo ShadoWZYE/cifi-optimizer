@@ -121,9 +121,10 @@ Import rule:
 - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
 - imported `systems.shardMilestones` or `compatibility.unmappedSystemState.shardMilestoneState` payloads must remain quarantined under `compatibility.unmappedSystemState.*` until the save owner, field mapping, and planner-safe recommendation gate are verified
 - imported `systems.multiverseMarket` or `compatibility.unmappedSystemState.multiverseMarket` payloads must remain quarantined as raw/unmapped compatibility storage; preserve the exact `IS1Level` through `IS110Level` SaveData span under `.importedState`, keep canonical promotion blocked, and do not treat the remaining metadata-only `Market` wrapper seam as closed
-- flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, and the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked` may be quarantined under `compatibility.unmappedSystemState.*`
+- flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level` may be quarantined under `compatibility.unmappedSystemState.*`
 - quarantine for `ClaimableTokenium` is compatibility-only and descriptive; it must not be read as token-bank claimable ownership, Daily Tokenium-specific ready state, or canonical `player.*` truth
 - Emporium quarantine must stay explicit: `compatibility.unmappedSystemState.multiverseMarket.status` labels the blob as raw/unmapped compatibility state, `importedState` holds the preserved raw fields, and the wrapper-level mapping gate blocks planner use and canonical promotion
+- exact typed SaveData neighbors after `InscryptionsDone`, including Emporium-adjacent trade counters and early `Mech*` fields, remain verified-but-blocked evidence outside the admitted Emporium import slice and should not be normalized into `compatibility.unmappedSystemState.multiverseMarket.importedState`
 
 Mapping gate before canonical promotion:
 
@@ -167,4 +168,3 @@ The active Profile form should show:
 - only directly visible in-game planner helpers
 
 It should not present external-model or compatibility fields as raw CIFI account state. Ship calibration belongs on the Ship Planner page, not the shared Profile page.
-

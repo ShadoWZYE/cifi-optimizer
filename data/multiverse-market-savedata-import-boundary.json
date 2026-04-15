@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-07",
+  "generatedAt": "2026-04-15",
   "dataset": "multiverse-market-savedata-import-boundary",
   "sources": {
     "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
@@ -152,16 +152,13 @@
   },
   "boundedImportConclusion": {
     "importSafeSubset": [
-      "IS1Level through IS110Level",
-      "EsotericR1Trades through EsotericR9Trades",
-      "NecrumR1Trades through NecrumR9Trades",
-      "Mech1Unlocked through Mech2Unlocked"
+      "IS1Level through IS110Level"
     ],
-    "exactImportSafeSubsetLabel": "IS1Level through IS110Level plus separate bounded trade-counter and early-mech quarantine ranges after the dual-declared InscryptionsDone boundary",
+    "exactImportSafeSubsetLabel": "IS1Level through IS110Level only",
     "importTargetPath": "compatibility.unmappedSystemState.multiverseMarket",
     "canonicalImportSafeSubset": [],
     "exactCanonicalImportSafeSubsetLabel": "none",
-    "currentBoundary": "The exact SaveData-owned IS1Level through IS110Level span remains safe to preserve as compatibility-only raw Emporium truth under compatibility.unmappedSystemState.multiverseMarket, but the overall Emporium-adjacent import envelope is not one uninterrupted span past IS110Level. Exact typed recovery still proves the hard IS lower boundary at IS1Level rather than IS0Level and the hard IS upper boundary at IS110Level before the dual-declared InscryptionsDone boundary. Because InscryptionsDone remains explicitly split out as wrapper/export evidence on both SaveData and PlayerProfileData, the adjacent SaveData-owned trade counters and early-mech window should be quarantined as separate exact typed ranges: EsotericR1Trades through EsotericR9Trades, NecrumR1Trades through NecrumR9Trades, and Mech1Unlocked through Mech2Unlocked. The checked ordered overlap at rows 71-74 still anchors only the wider IS run to validated Emporium rows, and no recovered SaveData field is currently safe to promote into canonical PlayerProfile import.",
+    "currentBoundary": "The exact SaveData-owned IS1Level through IS110Level span remains safe to preserve as compatibility-only raw Emporium truth under compatibility.unmappedSystemState.multiverseMarket. Exact typed recovery still proves the hard IS lower boundary at IS1Level rather than IS0Level and the hard IS upper boundary at IS110Level before the dual-declared InscryptionsDone boundary. InscryptionsDone remains explicitly split out as wrapper/export evidence on both SaveData and PlayerProfileData, and the adjacent SaveData-owned trade counters and early-mech window remain verified-but-blocked neighbors outside this admitted Emporium import slice. The checked ordered overlap at rows 71-74 still anchors only the wider IS run to validated Emporium rows, and no recovered SaveData field is currently safe to promote into canonical PlayerProfile import.",
     "blockedBy": [
       "do not reopen the metadata-only Market typed-field question without new direct evidence",
       "do not treat the compatibility-safe IS1Level through IS110Level import span or the ordered overlap at rows 71-74 as canonical import admissibility or row-identity recovery",
@@ -194,51 +191,6 @@
           {
             "artifact": "data/multiverse-market-market-member-boundary.json",
             "claim": "SaveData is the exact declaring owner for the checked IS*Level / trade-counter / early Mech* cluster while InscryptionsDone stays split out as a dual declaration on SaveData and PlayerProfileData"
-          }
-        ]
-      },
-      {
-        "entryId": "savedata-owned-trade-counters",
-        "fieldNames": [
-          "EsotericR1Trades through EsotericR9Trades",
-          "NecrumR1Trades through NecrumR9Trades"
-        ],
-        "targetPath": "compatibility.unmappedSystemState.multiverseMarket",
-        "why": "These exact typed trade-counter families sit immediately after the dual-declared InscryptionsDone boundary on SaveData, remain bounded to R1 through R9 in the checked field table, and belong in the same compatibility envelope only as separate bounded quarantine ranges rather than as a continuation of the IS*Level span.",
-        "evidence": [
-          {
-            "artifact": "data/uabea-probe-report.json",
-            "claim": "SaveData exact field names place EsotericR1Trades through EsotericR9Trades immediately after InscryptionsDone and then continue into NecrumR1Trades through NecrumR9Trades"
-          },
-          {
-            "artifact": "data/multiverse-market-market-member-boundary.json",
-            "claim": "typedSaveDataProgressionOwnerSamples include EsotericR1Trades and NecrumR1Trades on SaveData while InscryptionsDone stays split out as a dual declaration on SaveData and PlayerProfileData"
-          },
-          {
-            "artifact": "data/multiverse-market-metadata-neighborhood.json",
-            "claim": "InscryptionsDone neighborhood preserves EsotericR1Trades through EsotericR9Trades and NecrumR1Trades through NecrumR9Trades"
-          }
-        ]
-      },
-      {
-        "entryId": "savedata-owned-adjacent-mech-window",
-        "fieldNames": [
-          "Mech1Unlocked through Mech2Unlocked"
-        ],
-        "targetPath": "compatibility.unmappedSystemState.multiverseMarket",
-        "why": "The checked typed SaveData table continues from NecrumR9Trades into a narrow early-mech adjacency window that starts at Mech1Unlocked and reaches Mech2Unlocked before the broader Mech2* continuation. Keeping that exact window quarantined under the same compatibility envelope preserves the typed evidence without pretending the whole downstream mech progression family is grounded for canonical use.",
-        "evidence": [
-          {
-            "artifact": "data/uabea-probe-report.json",
-            "claim": "SaveData exact field names continue from NecrumR9Trades into Mech1Unlocked, Mech1Units, Mech1Upg1Level, Mech1Upg2Level, Mech1MissionsProgress, FinalMech1MainBonus, Mech1MissionsCompleted, and Mech2Unlocked before continuing into Mech2Units"
-          },
-          {
-            "artifact": "data/multiverse-market-market-member-boundary.json",
-            "claim": "typedSaveDataProgressionOwnerSamples include Mech1Unlocked and Mech1MissionsCompleted on SaveData"
-          },
-          {
-            "artifact": "data/multiverse-market-metadata-neighborhood.json",
-            "claim": "the recovered InscryptionsDone neighborhood runs forward into early Mech1* fields and Mech2Unlocked"
           }
         ]
       }
@@ -293,6 +245,51 @@
           {
             "artifact": "data/multiverse-market-market-member-boundary.json",
             "claim": "typedSaveDataProgressionOwnerSamples includes IS71Level and SaveData is the exact declaring owner for the checked IS*Level / trade-counter / early Mech* cluster"
+          }
+        ]
+      },
+      {
+        "entryId": "savedata-owned-trade-counters-outside-import-slice",
+        "fieldNames": [
+          "EsotericR1Trades through EsotericR9Trades",
+          "NecrumR1Trades through NecrumR9Trades"
+        ],
+        "why": "These exact typed trade-counter families are verified on SaveData, but they stay outside the admitted Emporium import slice because this lane only admits the raw IS1Level through IS110Level span under the Emporium compatibility wrapper.",
+        "blockedBy": [
+          "these fields sit after the dual-declared InscryptionsDone boundary rather than inside the admitted IS*Level span",
+          "including them would widen the Emporium import slice beyond the bounded admissibility decision",
+          "they do not clear canonical Emporium import or planner use"
+        ],
+        "evidence": [
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "SaveData exact field names place EsotericR1Trades through EsotericR9Trades immediately after InscryptionsDone and then continue into NecrumR1Trades through NecrumR9Trades"
+          },
+          {
+            "artifact": "data/multiverse-market-market-member-boundary.json",
+            "claim": "typedSaveDataProgressionOwnerSamples include EsotericR1Trades and NecrumR1Trades on SaveData while InscryptionsDone stays split out as a dual declaration on SaveData and PlayerProfileData"
+          }
+        ]
+      },
+      {
+        "entryId": "savedata-owned-adjacent-mech-window-outside-import-slice",
+        "fieldNames": [
+          "Mech1Unlocked through Mech2Unlocked"
+        ],
+        "why": "This exact typed early-mech window is verified on SaveData, but it stays outside the admitted Emporium import slice because it widens beyond bounded Emporium import support and is not part of the raw IS1Level through IS110Level span.",
+        "blockedBy": [
+          "this window begins after the verified trade-counter run, beyond the admitted Emporium level span",
+          "including it would widen the Emporium import slice into broader SaveData progression",
+          "it does not clear canonical Emporium import or planner use"
+        ],
+        "evidence": [
+          {
+            "artifact": "data/uabea-probe-report.json",
+            "claim": "SaveData exact field names continue from NecrumR9Trades into Mech1Unlocked, Mech1Units, Mech1Upg1Level, Mech1Upg2Level, Mech1MissionsProgress, FinalMech1MainBonus, Mech1MissionsCompleted, and Mech2Unlocked before continuing into Mech2Units"
+          },
+          {
+            "artifact": "data/multiverse-market-market-member-boundary.json",
+            "claim": "typedSaveDataProgressionOwnerSamples include Mech1Unlocked and Mech1MissionsCompleted on SaveData"
           }
         ]
       }

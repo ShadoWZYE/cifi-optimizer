@@ -58,8 +58,9 @@ Each versioned payload must carry provenance metadata:
 - versioned `externalModels.communityTools.*` payloads are external-model state only; they must not silently populate canonical `player.*` fields or planner-approved shard inputs
 - imported objects like `systems.shardMilestones`, `systems.tokenShop`, or `systems.multiverseMarket` may be preserved under `compatibility.unmappedSystemState.*`
 - Emporium import storage is explicitly wrapped: `compatibility.unmappedSystemState.multiverseMarket` stays a raw/unmapped compatibility wrapper, and the exact SaveData-owned `IS1Level` through `IS110Level` span is preserved under `compatibility.unmappedSystemState.multiverseMarket.importedState`
-- flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked`, `ATU*Level`, `Tier*TokensUnlocked`, `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`, or `FinalTokenBankFillSpeed` may also be preserved under `compatibility.unmappedSystemState.*`
+- flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, `ATU*Level`, `Tier*TokensUnlocked`, `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`, or `FinalTokenBankFillSpeed` may also be preserved under `compatibility.unmappedSystemState.*`
 - preserving `ClaimableTokenium` there keeps one broader generic Tokenium-cluster clue available for descriptive evidence only; it does not clear token-bank claimable state or a Daily Tokenium-specific ready join
+- exact typed SaveData neighbors after `InscryptionsDone`, including Emporium-adjacent trade counters and early `Mech*` fields, stay verified-but-blocked outside the admitted Emporium import slice and should not be normalized into `compatibility.unmappedSystemState.multiverseMarket.importedState`
 - preserving those objects does not make the system planner-ready or canonical
 - preserving the Emporium wrapper does not close row-label remap, canonical Emporium state, planner behavior, or the remaining metadata-only typed `Market` wrapper seam
 
@@ -129,5 +130,4 @@ Columns:
 - `nextSteps`
 
 `nextSteps` can be comma-separated in CSV imports.
-
 

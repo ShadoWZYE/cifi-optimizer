@@ -111,9 +111,7 @@ test("imported multiverse market preview keeps the compatibility-only summary sh
       status: "quarantined-raw-unmapped",
       importedState: {
         IS71Level: 3,
-        IS72Level: 4,
-        EsotericR1Trades: 9,
-        Mech1Unlocked: true
+        IS72Level: 4
       },
       mappingGate: {
         plannerUseAllowed: false,
@@ -139,7 +137,6 @@ test("imported multiverse market preview keeps the compatibility-only summary sh
   assert.equal(preview.hasImportedCompatibilityPreview, true);
   assert.equal(preview.importedRangeLabel, "71-72");
   assert.equal(preview.overlapRangeLabel, "71-72");
-  assert.equal(preview.tradeCounterSampleLine, "EsotericR1Trades 9");
   assert.equal(preview.missingOverlapLabel, "none");
   assert.equal(preview.rowSummaryShape.shapeId, "multiverse-market-row-local-text-summary");
 });
@@ -167,8 +164,7 @@ test("imported multiverse market preview rejects unlabeled raw compatibility pay
 
   assert.equal(preview.hasImportedCompatibilityPreview, false);
   assert.equal(preview.importedSpanRowCount, 0);
-  assert.equal(preview.importedTradeCounterCount, 0);
-  assert.equal(preview.importedEarlyMechCount, 0);
+  assert.equal(preview.hasOverlapLevelPreview, false);
 });
 
 test("getMultiverseMarketMarketMemberBoundarySummary keeps the PlayerProfile host narrowing", () => {

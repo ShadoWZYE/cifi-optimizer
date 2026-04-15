@@ -162,17 +162,6 @@ const TOKEN_SHOP_CHECKED_SUBSET_PLAYER_STATE_ALIASES = Object.fromEntries(
   ])
 );
 const MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN = /^IS(?:[1-9]|[1-9]\d|10\d|110)Level$/u;
-const MULTIVERSE_MARKET_TRADE_COUNTER_PATTERN = /^(?:Esoteric|Necrum)R[1-9]Trades$/u;
-const MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS = {
-  Mech1Unlocked: [["Mech1Unlocked"]],
-  Mech1Units: [["Mech1Units"]],
-  Mech1Upg1Level: [["Mech1Upg1Level"]],
-  Mech1Upg2Level: [["Mech1Upg2Level"]],
-  Mech1MissionsProgress: [["Mech1MissionsProgress"]],
-  FinalMech1MainBonus: [["FinalMech1MainBonus"]],
-  Mech1MissionsCompleted: [["Mech1MissionsCompleted"]],
-  Mech2Unlocked: [["Mech2Unlocked"]]
-};
 const CI_SUFFIX_EXPONENTS = {
   k: 3,
   m: 6,
@@ -461,12 +450,31 @@ function coerceQuarantinedShardMilestoneState(value) {
 }
 
 function coerceQuarantinedMultiverseMarketState(value) {
-  const importedState = isRecord(value?.importedState)
-    ? cloneValue(value.importedState)
+  const importedStateSource = isRecord(value?.importedState)
+    ? value.importedState
     : isRecord(value)
-      ? cloneValue(value)
+      ? value
       : null;
+  const importedState = importedStateSource
+    ? Object.fromEntries(
+        Object.entries(importedStateSource)
+          .map(([key, rawValue]) => {
+            if (!MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN.test(key)) {
+              return null;
+            }
+            const numericValue = coerceNullableNumber(rawValue);
+            if (numericValue === null) {
+              return null;
+            }
+            return [key, numericValue];
+          })
+          .filter(Boolean)
+      )
+    : null;
   if (!importedState) {
+    return null;
+  }
+  if (!Object.keys(importedState).length) {
     return null;
   }
 
@@ -484,7 +492,8 @@ function coerceQuarantinedMultiverseMarketState(value) {
     },
     currentBoundary: [
       "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
-      "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
+      "Preserve only the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile.",
+      "Keep InscryptionsDone wrapper-only and leave adjacent SaveData trade-counter and early-mech progression fields outside this admitted Emporium import slice."
     ]
   };
 }
@@ -774,28 +783,11 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
     source,
     MULTIVERSE_MARKET_SAVEDATA_LEVEL_PATTERN
   );
-  const importedMultiverseMarketTradeCounters = collectTopLevelCompatibilityPattern(
-    source,
-    MULTIVERSE_MARKET_TRADE_COUNTER_PATTERN
-  );
-  const importedMultiverseMarketAdjacentMechWindow = collectAliasedCompatibilityFields(
-    source,
-    MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS
-  );
   normalized.compatibility.unmappedSystemState.multiverseMarket =
     coerceQuarantinedMultiverseMarketState(
       mergeCompatibilityRecord(
         importedMultiverseMarketRecord,
-        mergeCompatibilityRecord(
-          importedMultiverseMarketStateClues,
-          mergeCompatibilityRecord(
-            importedMultiverseMarketLevels,
-            mergeCompatibilityRecord(
-              importedMultiverseMarketTradeCounters,
-              importedMultiverseMarketAdjacentMechWindow
-            )
-          )
-        )
+        mergeCompatibilityRecord(importedMultiverseMarketStateClues, importedMultiverseMarketLevels)
       )
     );
 

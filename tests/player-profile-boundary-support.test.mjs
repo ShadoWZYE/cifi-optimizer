@@ -156,10 +156,6 @@ test("Emporium import preview card model preserves compatibility-only summary li
       typedSpanLabel: "IS1Level through IS110Level",
       importedSpanRowCount: 2,
       totalSpanRowCount: 110,
-      importedTradeCounterCount: 1,
-      totalTradeCounterCount: 8,
-      importedEarlyMechCount: 1,
-      totalEarlyMechCount: 4,
       hasOverlapGroundedRows: true,
       importedOverlapRowCount: 1,
       overlapRowCount: 4,
@@ -180,14 +176,6 @@ test("Emporium import preview card model preserves compatibility-only summary li
       lastImportedRowLabel: "IS72Level",
       missingSpanCount: 0,
       missingSpanLabel: "",
-      hasTradeCounterPreview: true,
-      tradeCounterLabel: "EsotericR1Trades",
-      missingTradeCounterKeys: [],
-      missingTradeCounterLabel: "",
-      hasEarlyMechPreview: true,
-      earlyMechWindowLabel: "Mech1Unlocked through Mech2Unlocked",
-      missingEarlyMechFields: [],
-      missingEarlyMechLabel: "",
       overlapRangeLabel: "71-74",
       missingOverlapLabel: "IS74Level",
       hasOverlapLevelPreview: true,
@@ -216,10 +204,7 @@ test("Emporium import preview card model preserves compatibility-only summary li
         }
       ],
       previewRows: [{ rowId: 71, level: 3, fieldPath: "path.a" }],
-      trailingPreviewRows: [{ rowId: 72, level: 4 }],
-      importedTradeCounters: [{ key: "EsotericR1Trades", value: 9, fieldPath: "path.b" }],
-      tradeCounterSampleLine: "EsotericR1Trades 9",
-      importedEarlyMechFields: [{ key: "Mech1Unlocked", value: true, fieldPath: "path.c" }]
+      trailingPreviewRows: [{ rowId: 72, level: 4 }]
     },
     (value) => `#${value}`
   );
@@ -230,9 +215,5 @@ test("Emporium import preview card model preserves compatibility-only summary li
   assert.equal(model.overlapCards[0].level, "#3");
   assert.equal(model.previewRows[0].level, "#3");
   assert.equal(model.trailingPreviewLine, "Trailing imported raw rows: IS72Level #4");
-  assert.deepEqual(model.importedTradeCounters[0], {
-    key: "EsotericR1Trades",
-    value: 9,
-    fieldPath: "path.b"
-  });
+  assert.deepEqual(model.importedTradeCounters, []);
 });

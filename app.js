@@ -2281,7 +2281,7 @@ function renderSpendPlannerBoundary() {
     {
       label: "Emporium owned progression and Inscryptions balance",
       reason:
-        "Blocked for planner use. The app may show a compatibility-only preview of the raw IS1Level through IS110Level span plus separate bounded trade-counter and early-mech quarantine ranges, but InscryptionsDone remains wrapper-only, the preview stays non-canonical, and no Emporium recommendation path is unlocked."
+        "Blocked for planner use. The app may show a compatibility-only preview of the raw IS1Level through IS110Level span, but InscryptionsDone remains wrapper-only, broader SaveData progression neighbors stay outside the admitted import slice, the preview stays non-canonical, and no Emporium recommendation path is unlocked."
     }
   ];
   const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
@@ -2314,7 +2314,7 @@ function renderSpendPlannerBoundary() {
         <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
         <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That keeps ${marketMemberSummary.canonicalHostLabel} as the checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is ${marketMemberSummary.exactSaveOwnerLabel}.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
         <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the active lane stays on bounded import admissibility rather than planner logic or row remap.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save path and needs review."}</p>
-        <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Grounded SaveData overlap currently stops at ordered rows ${escapeHtml(importedMarketPreview.overlapRangeLabel)}, and ordered overlap is not an import-admissibility result, so the canonical Emporium import-safe subset stays empty.` : "The current build does not yet expose an overlap-grounded Emporium subset, so the canonical import-safe subset stays empty."}</p>
+        <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Grounded SaveData overlap currently stops at ordered rows ${escapeHtml(importedMarketPreview.overlapRangeLabel)}, and ordered overlap is not an import-admissibility result, so the canonical Emporium import-safe subset stays empty while broader SaveData neighbors remain outside the admitted import slice.` : "The current build does not yet expose an overlap-grounded Emporium subset, so the canonical import-safe subset stays empty and broader SaveData neighbors stay outside the admitted import slice."}</p>
         <p class="meta">${Array.isArray(emporiumTrack?.nextSteps) && emporiumTrack.nextSteps.length ? `Emporium next step: ${escapeHtml(emporiumTrack.nextSteps[0])}` : "Emporium next step is still the bounded import-surface decision, not planner logic or generic owner recovery."}</p>
     </div>
     <div class="meta-stack">
@@ -5136,7 +5136,7 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
   return `
     <article class="preview-card">
       <strong>Emporium compatibility preview</strong>
-      <p class="meta">This is a descriptive preview of compatibility-only Emporium import state under <code>${escapeHtml(preview.importTargetPath)}</code>. It preserves the checked raw <code>${escapeHtml(preview.typedSpanLabel)}</code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only.</p>
+      <p class="meta">This is a descriptive preview of compatibility-only Emporium import state under <code>${escapeHtml(preview.importTargetPath)}</code>. It preserves only the checked raw <code>${escapeHtml(preview.typedSpanLabel)}</code> span as non-canonical evidence, while broader SaveData progression neighbors stay outside the admitted Emporium import slice.</p>
       <div class="pill-row">
         ${model.pillLabels.map((label) => `<span class="pill">${escapeHtml(label)}</span>`).join("")}
       </div>
@@ -5189,38 +5189,7 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
           )
           .join("")}</div>
         ${model.trailingPreviewLine ? `<p class="meta">${escapeHtml(model.trailingPreviewLine)}</p>` : ""}
-        ${
-          preview.hasTradeCounterPreview
-            ? `<div class="preview-stack">${model.importedTradeCounters
-                .map(
-                  (entry) => `
-          <article class="preview-card">
-            <strong>${escapeHtml(entry.key)}</strong>
-            <p class="meta">Imported raw count ${escapeHtml(formatBoundaryValue(entry.value))}</p>
-            <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
-          </article>
-        `
-                )
-                .join("")}</div>`
-            : ""
-        }
-        ${preview.tradeCounterSampleLine ? `<p class="meta">Trade-counter sample: ${escapeHtml(preview.tradeCounterSampleLine)}${preview.importedTradeCounterCount > 6 ? "..." : ""}</p>` : ""}
-        ${
-          preview.hasEarlyMechPreview
-            ? `<div class="preview-stack">${model.importedEarlyMechFields
-                .map(
-                  (entry) => `
-          <article class="preview-card">
-            <strong>${escapeHtml(entry.key)}</strong>
-            <p class="meta">Imported raw value ${escapeHtml(formatBoundaryValue(entry.value))}</p>
-            <p class="meta"><code>${escapeHtml(entry.fieldPath)}</code></p>
-          </article>
-        `
-                )
-                .join("")}</div>`
-            : ""
-        }
-      </div>
+        </div>
     </article>
   `;
 }

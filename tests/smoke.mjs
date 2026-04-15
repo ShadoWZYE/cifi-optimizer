@@ -5683,7 +5683,7 @@ withRequiredValue(
     assert.match(track.currentSlice, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/);
     assert.match(
       track.currentSlice,
-      /`IS1Level` through `IS110Level` as the compatibility-safe raw Emporium import span/
+      /`IS1Level` through `IS110Level` as the only compatibility-safe raw Emporium import span/
     );
     assert.ok(
       track.completedSteps.some((step) =>
@@ -6521,16 +6521,11 @@ assert.equal(
 );
 assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importSafeSubset,
-  [
-    "IS1Level through IS110Level",
-    "EsotericR1Trades through EsotericR9Trades",
-    "NecrumR1Trades through NecrumR9Trades",
-    "Mech1Unlocked through Mech2Unlocked"
-  ]
+  ["IS1Level through IS110Level"]
 );
 assert.equal(
   multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.exactImportSafeSubsetLabel,
-  "IS1Level through IS110Level plus separate bounded trade-counter and early-mech quarantine ranges after the dual-declared InscryptionsDone boundary"
+  "IS1Level through IS110Level only"
 );
 assert.equal(
   multiverseMarketSaveDataImportBoundaryData.boundedImportConclusion.importTargetPath,
@@ -6608,7 +6603,7 @@ assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.classifications.safe_import_candidate.map(
     (entry) => entry.entryId
   ),
-  ["savedata-owned-is1-110", "savedata-owned-trade-counters", "savedata-owned-adjacent-mech-window"]
+  ["savedata-owned-is1-110"]
 );
 assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.classifications.wrapper_or_export_only.map(
@@ -6620,7 +6615,11 @@ assert.deepEqual(
   multiverseMarketSaveDataImportBoundaryData.classifications.verified_but_blocked.map(
     (entry) => entry.entryId
   ),
-  ["checked-row-order-is71-74"]
+  [
+    "checked-row-order-is71-74",
+    "savedata-owned-trade-counters-outside-import-slice",
+    "savedata-owned-adjacent-mech-window-outside-import-slice"
+  ]
 );
 assert.deepEqual(multiverseMarketSaveDataImportBoundaryData.classifications.unresolved, []);
 assert.match(
@@ -6636,11 +6635,11 @@ assert.match(
 );
 assert.match(
   multiverseMarketStateVerificationDoc,
-  /`safe_import_candidate`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/
+  /`verified_but_blocked`[\s\S]*`EsotericR1Trades` through `EsotericR9Trades`[\s\S]*`NecrumR1Trades` through `NecrumR9Trades`/
 );
 assert.match(
   multiverseMarketStateVerificationDoc,
-  /`safe_import_candidate`[\s\S]*`Mech1Unlocked` through `Mech2Unlocked`/
+  /`verified_but_blocked`[\s\S]*`Mech1Unlocked` through `Mech2Unlocked`/
 );
 assert.match(
   multiverseMarketStateVerificationDoc,
@@ -6652,7 +6651,7 @@ assert.match(
 );
 assert.match(
   multiverseMarketStateVerificationDoc,
-  /split into separate exact typed quarantine ranges/i
+  /admitted Emporium import slice now stops at that exact `IS1Level` through `IS110Level` span/i
 );
 assert.match(multiverseMarketStateVerificationDoc, /`unresolved`[\s\S]*none/);
 assert.match(
@@ -7970,7 +7969,7 @@ assert.match(
 );
 assert.match(
   playerProfileSchemaDoc,
-  /flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, and the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked` may be quarantined/
+  /flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, and exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level` may be quarantined/
 );
 assert.match(
   importMappingDoc,
@@ -7996,7 +7995,7 @@ assert.match(
 assert.match(importMappingDoc, /top-level `power`, `speed`, and `cargo` are retired/);
 assert.match(
   importMappingDoc,
-  /flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked`, `ATU\*Level`, `Tier\*TokensUnlocked`, `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`, or `FinalTokenBankFillSpeed` may also be preserved/
+  /flat spend-state clues such as `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, `ATU\*Level`, `Tier\*TokensUnlocked`, `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `DailyTokeniumCap`, or `FinalTokenBankFillSpeed` may also be preserved/
 );
 assert.match(tokenShopDoc, /## Integration status/);
 assert.match(tokenShopDoc, /Not yet verified enough for app recommendations/);
@@ -8493,7 +8492,7 @@ assert.match(spendBoundarySummaryJs, /quarantined-unrecovered-runtime-only-displ
 assert.match(spendBoundarySummaryJs, /Distinct unrecovered runtime-only display lane/);
 assert.match(
   appJs,
-  /compatibility-only Emporium import state under <code>\$\{escapeHtml\(preview\.importTargetPath\)\}<\/code>\. It preserves the checked raw <code>\$\{escapeHtml\(preview\.typedSpanLabel\)\}<\/code> span plus separate bounded trade-counter and early-mech quarantine ranges as non-canonical evidence only\./i
+  /compatibility-only Emporium import state under <code>\$\{escapeHtml\(preview\.importTargetPath\)\}<\/code>\. It preserves only the checked raw <code>\$\{escapeHtml\(preview\.typedSpanLabel\)\}<\/code> span as non-canonical evidence, while broader SaveData progression neighbors stay outside the admitted Emporium import slice\./i
 );
 assert.match(
   playerProfileBoundarySupportModule,
@@ -8501,15 +8500,11 @@ assert.match(
 );
 assert.match(
   playerProfileBoundarySupportModule,
-  /Imported trade-counter quarantine currently covers \$\{preview\.tradeCounterLabel\} with \$\{preview\.importedTradeCounterCount\} recovered fields\./
+  /Broader SaveData progression neighbors after the dual-declared InscryptionsDone boundary stay outside this admitted Emporium import slice/
 );
 assert.match(
   playerProfileBoundarySupportModule,
-  /Imported early-mech quarantine currently covers \$\{preview\.earlyMechWindowLabel\} with \$\{preview\.importedEarlyMechCount\} recovered fields\./
-);
-assert.match(
-  playerProfileBoundarySupportModule,
-  /Planner use stays blocked\. These imported levels, trade counters, and early-mech fields remain quarantined compatibility evidence/
+  /Planner use stays blocked\. These imported levels remain quarantined compatibility evidence/
 );
 assert.match(
   spendBoundarySummaryJs,
@@ -9226,27 +9221,9 @@ assert.deepEqual(
 assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.tokenShop, {
   tokenBoostLevel: 4
 });
-assert.deepEqual(
+assert.equal(
   migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.multiverseMarket,
-  {
-    status: "quarantined-raw-unmapped",
-    importedState: {
-      inscription51Level: 2
-    },
-    mappingGate: {
-      plannerUseAllowed: false,
-      canonicalPromotionBlocked: true,
-      requiredBeforeCanonicalPromotion: [
-        "Recover a direct typed Market wrapper seam beyond the current metadata-only Market member clue.",
-        "Recover grounded Emporium row labels before promoting any IS*Level field beyond raw compatibility storage.",
-        "Approve planner-safe recommendation use only after canonical Emporium player-state inputs are grounded."
-      ]
-    },
-    currentBoundary: [
-      "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
-      "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
-    ]
-  }
+  null
 );
 assert.equal(migratedUnmappedSystemsProfile.player.resources.tokens, null);
 
@@ -9356,14 +9333,8 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket, {
   status: "quarantined-raw-unmapped",
   importedState: {
-    InscryptionsDone: 98,
     IS1Level: 2,
-    IS73Level: 4,
-    EsotericR1Trades: 5,
-    NecrumR9Trades: 6,
-    Mech1Unlocked: true,
-    FinalMech1MainBonus: 2500,
-    Mech2Unlocked: false
+    IS73Level: 4
   },
   mappingGate: {
     plannerUseAllowed: false,
@@ -9376,9 +9347,25 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
   },
   currentBoundary: [
     "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
-    "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
+    "Preserve only the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile.",
+    "Keep InscryptionsDone wrapper-only and leave adjacent SaveData trade-counter and early-mech progression fields outside this admitted Emporium import slice."
   ]
 });
+assert.equal(
+  migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.importedState
+    .InscryptionsDone,
+  undefined
+);
+assert.equal(
+  migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.importedState
+    .EsotericR1Trades,
+  undefined
+);
+assert.equal(
+  migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.importedState
+    .Mech1Unlocked,
+  undefined
+);
 assert.equal(
   migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.importedState
     .Mech2Units,

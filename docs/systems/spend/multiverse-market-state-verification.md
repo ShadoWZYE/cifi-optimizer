@@ -465,17 +465,17 @@ Current grounded conclusion:
   - `IS1Level` through `IS110Level`
     - this exact SaveData-owned `IS*Level` span is now safe to preserve as compatibility-only raw Emporium import truth under `compatibility.unmappedSystemState.multiverseMarket`
     - the checked rows `71-74` overlap anchors that wider run to validated Emporium rows without claiming final player-facing row identity
-  - `EsotericR1Trades` through `EsotericR9Trades`
-  - `NecrumR1Trades` through `NecrumR9Trades`
-    - these exact typed trade-counter ranges sit immediately after the dual-declared `InscryptionsDone` boundary on `SaveData`, so they belong in the same compatibility envelope but as separate bounded quarantine ranges rather than as an extension of the `IS*Level` span
-  - `Mech1Unlocked` through `Mech2Unlocked`
-    - this exact typed early-mech window continues immediately after `NecrumR9Trades` and stays bounded before the broader `Mech2*` continuation, so it is safe to preserve as a separate quarantined range under the same compatibility envelope
 - `wrapper_or_export_only`
   - `InscryptionsDone`
     - `PlayerProfileData` already exposes `InscryptionsDone` as a flat wrapper/export field, so importing it from the wider `SaveData` block would widen the owner surface without adding a new bounded canonical Emporium import
 - `verified_but_blocked`
   - `IS71Level` through `IS74Level`
     - these now have a checked ordered row-position mapping to validated rows `71-74`, but final row labels and planner-safe canonical import mapping are still blocked in this slice
+  - `EsotericR1Trades` through `EsotericR9Trades`
+  - `NecrumR1Trades` through `NecrumR9Trades`
+    - these exact typed trade-counter ranges are verified on `SaveData`, but they stay outside the admitted Emporium import slice because this lane only admits the raw `IS*Level` span
+  - `Mech1Unlocked` through `Mech2Unlocked`
+    - this exact typed early-mech window is also verified on `SaveData`, but it stays outside the admitted Emporium import slice because it widens beyond bounded Emporium import support
 - `unresolved`
   - none
 
@@ -483,11 +483,11 @@ Current grounded conclusion:
 
 - the exact SaveData-owned `IS*Level` span that is now safe to treat as raw Emporium import truth is `IS1Level` through `IS110Level`
 - that import-safe span is compatibility-only and should stay under `compatibility.unmappedSystemState.multiverseMarket`
-- the compatibility-safe import envelope is now split into separate exact typed quarantine ranges rather than one uninterrupted span past `InscryptionsDone`
+- the admitted Emporium import slice now stops at that exact `IS1Level` through `IS110Level` span instead of continuing past `InscryptionsDone`
 - no recovered field from the checked `SaveData` Emporium-adjacent block is currently safe to promote into canonical `PlayerProfile` import
 - `InscryptionsDone` stays wrapper/export-only because `PlayerProfileData` already exposes it as a flat wrapper surface
 - `IS71Level` through `IS74Level` remain the strongest ordered-overlap evidence for identity work, but they are still blocked from canonical import because final row labels and broader row remap remain unresolved
-- the broader `IS*Level`, trade-counter, and early `Mech*` neighbors remain verified on `SaveData` but blocked from canonical import because this slice does not reopen `Market` typed-field recovery, row remap, or planner integration
+- the broader SaveData trade-counter and early `Mech*` neighbors remain verified on `SaveData` but stay outside the admitted Emporium import slice because this slice does not reopen `Market` typed-field recovery, row remap, or planner integration
 
 ## Current app implication
 

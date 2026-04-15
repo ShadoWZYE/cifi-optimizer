@@ -55,7 +55,7 @@ test("normalizePlayerProfile keeps only the exact typed bounded multiverse marke
     Mech2Unlocked: false,
     Mech2Units: 10,
     IS111Level: 6,
-    multiverseMarket: { ExistingRow: 8 }
+    multiverseMarket: { ExistingRow: 8, IS80Level: 8 }
   });
 
   assert.equal(profile.meta.schemaVersion, PLAYER_PROFILE_SCHEMA_VERSION);
@@ -93,35 +93,7 @@ test("normalizePlayerProfile keeps only the exact typed bounded multiverse marke
     5
   );
   assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.EsotericR1Trades,
-    6
-  );
-  assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.NecrumR9Trades,
-    7
-  );
-  assert.equal(
     profile.compatibility.unmappedSystemState.multiverseMarket.importedState.EsotericR10Trades,
-    undefined
-  );
-  assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech1Unlocked,
-    true
-  );
-  assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech1Units,
-    9
-  );
-  assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.FinalMech1MainBonus,
-    125000
-  );
-  assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech2Unlocked,
-    false
-  );
-  assert.equal(
-    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech2Units,
     undefined
   );
   assert.equal(
@@ -130,7 +102,39 @@ test("normalizePlayerProfile keeps only the exact typed bounded multiverse marke
   );
   assert.equal(
     profile.compatibility.unmappedSystemState.multiverseMarket.importedState.ExistingRow,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.IS80Level,
     8
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.EsotericR1Trades,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.NecrumR9Trades,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech1Unlocked,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech1Units,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.FinalMech1MainBonus,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech2Unlocked,
+    undefined
+  );
+  assert.equal(
+    profile.compatibility.unmappedSystemState.multiverseMarket.importedState.Mech2Units,
+    undefined
   );
   assert.equal(profile.player.resources.tokens, null);
   assert.equal(profile.player.resources.diamonds, null);
@@ -157,8 +161,7 @@ test("normalizePlayerProfile keeps imported Emporium compatibility state out of 
     "quarantined-raw-unmapped"
   );
   assert.deepEqual(profile.compatibility.unmappedSystemState.multiverseMarket.importedState, {
-    IS71Level: 3,
-    EsotericR1Trades: 2
+    IS71Level: 3
   });
   assert.equal(profile.player.multiverseMarket, undefined);
   assert.equal(profile.player.resources.tokens, null);
