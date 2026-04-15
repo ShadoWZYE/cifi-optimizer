@@ -55,3 +55,15 @@ test("getTokenShopBonusStripEntries handles multiplier rows and maxed rows", () 
     ]
   );
 });
+
+test("getTokenShopPlayerFacingSupportText joins grounded title-side support text", () => {
+  assert.equal(
+    tokenShopUi.getTokenShopPlayerFacingSupportText({
+      playerFacingSupportText: [
+        "This upgrade divides the cost of MK3 Generators by 3m",
+        "This upgrade provides a 30% increase to the output of MK3 Generators."
+      ]
+    }),
+    "This upgrade divides the cost of MK3 Generators by 3m This upgrade provides a 30% increase to the output of MK3 Generators."
+  );
+});

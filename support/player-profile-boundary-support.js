@@ -1,3 +1,5 @@
+import { getQuarantinedMultiverseMarketState } from "../player-profile.js";
+
 export function buildPlayerProfileBoundaryGroups({
   canonical,
   shardPlanner,
@@ -5,6 +7,9 @@ export function buildPlayerProfileBoundaryGroups({
   experimental,
   compatibility
 }) {
+  const sanitizedMultiverseMarket = getQuarantinedMultiverseMarketState(
+    compatibility.unmappedSystems.multiverseMarket
+  );
   return [
     {
       title: "Canonical shared truth",
@@ -65,13 +70,16 @@ export function buildPlayerProfileBoundaryGroups({
         ["Legacy mech parts", compatibility.unresolved.mechParts],
         ["Unmapped shard milestone state", compatibility.unmappedSystems.shardMilestones],
         ["Unmapped TokenShop state", compatibility.unmappedSystems.tokenShop],
-        ["Unmapped MultiverseMarket state", compatibility.unmappedSystems.multiverseMarket]
+        ["Raw/unmapped MultiverseMarket state", sanitizedMultiverseMarket]
       ]
     }
   ];
 }
 
 export function getPlayerProfileBoundaryAudit(groups, context, isBoundaryValuePresent) {
+  const sanitizedMultiverseMarket = getQuarantinedMultiverseMarketState(
+    context.compatibility.unmappedSystems?.multiverseMarket
+  );
   const counts = groups.map((group) => {
     const populated = group.items.filter(([, value]) => isBoundaryValuePresent(value)).length;
     return `${group.title}: ${populated}/${group.items.length}`;
@@ -106,6 +114,12 @@ export function getPlayerProfileBoundaryAudit(groups, context, isBoundaryValuePr
     );
   } else {
     notes.push("No compatibility-only leftover fields were populated by this import.");
+  }
+
+  if (context.compatibility.unmappedSystems?.multiverseMarket && !sanitizedMultiverseMarket) {
+    notes.push(
+      "Ignored one unlabeled MultiverseMarket compatibility payload because it did not match the required raw/unmapped importedState plus mappingGate wrapper."
+    );
   }
 
   return { counts, notes };

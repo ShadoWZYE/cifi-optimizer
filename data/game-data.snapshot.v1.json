@@ -214,7 +214,8 @@
         "Promote a shard milestone handoff boundary that keeps ConstructionMilestones as the nearby generic family while the shard-local declaring row model is now recovered as ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo.",
         "Promote one bounded shard row-verification artifact so SU1 now binds to the shipped Alpha title asset, a three-bonus effect package, and the checked get_SU1Cost cost shell without claiming a full row table.",
         "Promote one bounded shard row-verification artifact so SU2 now binds to the shipped Aquarius title asset, a three-bonus effect package, and the checked get_SU2Cost cost shell without claiming a full row table.",
-        "Ship a first player-facing verified shard rows preview so the app can safely show SU1 and SU2 as descriptive verified rows while everything else stays explicitly blocked."
+        "Ship a first player-facing verified shard rows preview so the app can safely show SU1 and SU2 as descriptive verified rows while everything else stays explicitly blocked.",
+        "Fold that verified SU1/SU2 slice into the existing Shard Mining row cards so the single milestone surface now carries the verified package evidence inline instead of splitting it into a second shard preview panel."
       ],
       "nextSteps": [
         "Keep the player-facing preview limited to verified rows only until another row clears end-to-end.",
@@ -269,7 +270,7 @@
         "The current partial shard row shell does not yet provide one clean shared row-number family: unlock hooks currently sit at 17-29 while text-checker hooks sit at 0-12.",
         "SU1 now clears as one bounded verified row: the shipped Alpha title asset, grounded three-bonus package, three bonus slots, three get_SU1Bonus*Calc accessors, and get_SU1Cost shell all align on the same row.",
         "SU2 now clears as one bounded verified row: the shipped Aquarius title asset, grounded three-bonus package, three bonus slots, three get_SU2Bonus*Calc accessors, and get_SU2Cost shell all align on the same row.",
-        "The app can now safely show a small verified shard rows preview that renders only SU1 and SU2 with explicit blocked notes for every unverified row.",
+        "The app can now safely show the verified SU1 and SU2 row packages inline on the existing Shard Mining row cards, while every unverified row stays explicitly descriptive-only.",
         "The shard-local declaring row model is now recovered as ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo while ConstructionMilestones stays only a nearby generic family.",
         "The narrowed shard-local contexts still have zero checked overlap with PlayerProfileData and CloudSavePlayerProfile."
       ],

@@ -793,7 +793,7 @@ assert.match(
 );
 assert.match(
   appJs,
-  /boundary\?\.boundedRecoveredBridge\?\.prefabIdentity \|\| "NewTokenUPGPrefab\.T1\.MK1Booster"/
+  /boundary\?\.boundedRecoveredBridge\?\.prefabIdentity[\s\S]*"NewTokenUPGPrefab\.T1\.MK1Booster"/
 );
 assert.match(
   normalizedAppJs,
@@ -837,6 +837,26 @@ assert.match(
   /TokenShop keeps its own Progression category so it does not get mixed into the Shard Mining surface/
 );
 assert.match(appJs, /TokenShop \(\$\{counts\.tokenShop\}\)/);
+assert.match(appJs, /function renderTokenShopSavedStateSnapshot\(\)/);
+assert.match(appJs, /Imported TokenShop saved amounts/);
+assert.match(
+  appJs,
+  /exact stored amounts recovered under <code>compatibility\.unmappedSystemState\.tokenShop<\/code>/
+);
+assert.match(appJs, /Banked Tokens/);
+assert.match(appJs, /Daily Tokenium/);
+assert.match(
+  appJs,
+  /Current stored amount recovered from compatibility import only\. Token-bank cap and claimable-bank state remain blocked\./
+);
+assert.match(
+  appJs,
+  /Current stored amount recovered from compatibility import only\. Daily Tokenium cap and ready state remain blocked\./
+);
+assert.match(
+  appJs,
+  /A broader generic Tokenium claimable clue is present in the same import, but it stays out of this snapshot/
+);
 assert.match(
   appJs,
   /Checked subset only\. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool\./
@@ -5708,7 +5728,7 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
   assert.ok(track.verified.some((line) => /SU2 now clears as one bounded verified row/.test(line)));
   assert.ok(
     track.verified.some((line) =>
-      /small verified shard rows preview that renders only SU1 and SU2/.test(line)
+      /verified SU1 and SU2 row packages inline on the existing Shard Mining row cards/.test(line)
     )
   );
 });
@@ -8398,7 +8418,7 @@ assert.match(
   shardEvidenceSupportModule,
   /Direct row-aligned cost evidence exists for other rows, but this row is not fully mapped yet/
 );
-assert.match(appJs, /Extracted bonus per level/);
+assert.match(appJs, /Observed value/);
 assert.doesNotMatch(appJs, /exact serialized cost fields/);
 assert.doesNotMatch(appJs, /Unlock req/);
 assert.doesNotMatch(appJs, /Extracted row state/);
@@ -8480,14 +8500,6 @@ assert.match(appJs, /Shard milestone row shell/);
 assert.match(appJs, /Shard milestone row alignment/);
 assert.match(appJs, /UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell/);
 assert.match(appJs, /with partial row hooks such as/);
-assert.match(appJs, /Verified shard rows preview/);
-assert.match(appJs, /Checked text slots/);
-assert.match(appJs, /Checked cost shell/);
-assert.match(appJs, /Rows outside SU1 and SU2 stay explicitly blocked/);
-assert.match(
-  appJs,
-  /No affordability math, ROI, ETA, ranking, best-upgrade logic, save import, or full shard-table claims are implied by this preview/
-);
 assert.match(appJs, /SU1 and SU2 verified rows available for descriptive preview/);
 assert.match(appJs, /\.\/data\/extraction-candidate-ranking\.v1\.json/);
 assert.match(appJs, /npm run verify:data/);
@@ -8500,7 +8512,7 @@ assert.match(playerProfileBoundarySupportModule, /Experimental support-surface h
 assert.match(playerProfileBoundarySupportModule, /Compatibility leftovers/);
 assert.match(playerProfileBoundarySupportModule, /Unmapped shard milestone state/);
 assert.match(playerProfileBoundarySupportModule, /Unmapped TokenShop state/);
-assert.match(playerProfileBoundarySupportModule, /Unmapped MultiverseMarket state/);
+assert.match(playerProfileBoundarySupportModule, /Raw\/unmapped MultiverseMarket state/);
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
@@ -9313,7 +9325,23 @@ assert.deepEqual(migratedUnmappedSystemsProfile.compatibility.unmappedSystemStat
 assert.deepEqual(
   migratedUnmappedSystemsProfile.compatibility.unmappedSystemState.multiverseMarket,
   {
-    inscription51Level: 2
+    status: "quarantined-raw-unmapped",
+    importedState: {
+      inscription51Level: 2
+    },
+    mappingGate: {
+      plannerUseAllowed: false,
+      canonicalPromotionBlocked: true,
+      requiredBeforeCanonicalPromotion: [
+        "Recover a direct typed Market wrapper seam beyond the current metadata-only Market member clue.",
+        "Recover grounded Emporium row labels before promoting any IS*Level field beyond raw compatibility storage.",
+        "Approve planner-safe recommendation use only after canonical Emporium player-state inputs are grounded."
+      ]
+    },
+    currentBoundary: [
+      "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
+      "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
+    ]
   }
 );
 assert.equal(migratedUnmappedSystemsProfile.player.resources.tokens, null);
@@ -9422,17 +9450,34 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
   DailyTokeniumCap: 2000
 });
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket, {
-  InscryptionsDone: 98,
-  IS1Level: 2,
-  IS73Level: 4,
-  EsotericR1Trades: 5,
-  NecrumR9Trades: 6,
-  Mech1Unlocked: true,
-  FinalMech1MainBonus: 2500,
-  Mech2Unlocked: false
+  status: "quarantined-raw-unmapped",
+  importedState: {
+    InscryptionsDone: 98,
+    IS1Level: 2,
+    IS73Level: 4,
+    EsotericR1Trades: 5,
+    NecrumR9Trades: 6,
+    Mech1Unlocked: true,
+    FinalMech1MainBonus: 2500,
+    Mech2Unlocked: false
+  },
+  mappingGate: {
+    plannerUseAllowed: false,
+    canonicalPromotionBlocked: true,
+    requiredBeforeCanonicalPromotion: [
+      "Recover a direct typed Market wrapper seam beyond the current metadata-only Market member clue.",
+      "Recover grounded Emporium row labels before promoting any IS*Level field beyond raw compatibility storage.",
+      "Approve planner-safe recommendation use only after canonical Emporium player-state inputs are grounded."
+    ]
+  },
+  currentBoundary: [
+    "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
+    "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
+  ]
 });
 assert.equal(
-  migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.Mech2Units,
+  migratedFlatSpendStateProfile.compatibility.unmappedSystemState.multiverseMarket.importedState
+    .Mech2Units,
   undefined
 );
 assert.equal(migratedFlatSpendStateProfile.player.resources.tokens, null);

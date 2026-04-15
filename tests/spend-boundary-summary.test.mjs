@@ -108,10 +108,18 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
 test("imported multiverse market preview keeps the compatibility-only summary shape", () => {
   const preview = getImportedMultiverseMarketPreview(
     {
-      IS71Level: 3,
-      IS72Level: 4,
-      EsotericR1Trades: 9,
-      Mech1Unlocked: true
+      status: "quarantined-raw-unmapped",
+      importedState: {
+        IS71Level: 3,
+        IS72Level: 4,
+        EsotericR1Trades: 9,
+        Mech1Unlocked: true
+      },
+      mappingGate: {
+        plannerUseAllowed: false,
+        canonicalPromotionBlocked: true
+      },
+      currentBoundary: ["compatibility-only"]
     },
     {},
     { overlapIds: [71, 72] },
@@ -134,6 +142,33 @@ test("imported multiverse market preview keeps the compatibility-only summary sh
   assert.equal(preview.tradeCounterSampleLine, "EsotericR1Trades 9");
   assert.equal(preview.missingOverlapLabel, "none");
   assert.equal(preview.rowSummaryShape.shapeId, "multiverse-market-row-local-text-summary");
+});
+
+test("imported multiverse market preview rejects unlabeled raw compatibility payloads", () => {
+  const preview = getImportedMultiverseMarketPreview(
+    {
+      IS71Level: 3,
+      EsotericR1Trades: 9
+    },
+    {},
+    { overlapIds: [71] },
+    {
+      formatBoundaryValue(value) {
+        return String(value);
+      },
+      formatShardNumber(value) {
+        return String(value);
+      },
+      isBoundaryValuePresent(value) {
+        return value !== null && value !== undefined && value !== "";
+      }
+    }
+  );
+
+  assert.equal(preview.hasImportedCompatibilityPreview, false);
+  assert.equal(preview.importedSpanRowCount, 0);
+  assert.equal(preview.importedTradeCounterCount, 0);
+  assert.equal(preview.importedEarlyMechCount, 0);
 });
 
 test("getMultiverseMarketMarketMemberBoundarySummary keeps the PlayerProfile host narrowing", () => {

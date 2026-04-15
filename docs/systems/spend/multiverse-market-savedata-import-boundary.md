@@ -65,6 +65,7 @@ This note records the active follow-up lane after save-owner recovery closed: on
 - The smallest checked mapping is ordered only: `IS71Level -> row 71`, `IS72Level -> row 72`, `IS73Level -> row 73`, and `IS74Level -> row 74`.
 - The exact SaveData-owned `IS*Level` span that is safe to import as raw Emporium truth is `IS1Level` through `IS110Level`.
 - That import-safe span is compatibility-only and should stay under `compatibility.unmappedSystemState.multiverseMarket`.
+- In normalized PlayerProfile storage, that compatibility path should stay explicitly wrapped as raw/unmapped state and preserve the exact SaveData span under `compatibility.unmappedSystemState.multiverseMarket.importedState`.
 - The adjacent `EsotericR*Trades`, `NecrumR*Trades`, and early-mech window belong in that same compatibility envelope only as separate bounded quarantine ranges after the dual-declared `InscryptionsDone` boundary.
 - `InscryptionsDone` remains explicitly dual-declared and wrapper/export-only rather than part of the promoted `IS*Level` import span.
 - Exact typed recovery currently sets hard boundaries on that compatibility span: no checked `IS0Level` below it and no checked `IS111Level` above it.

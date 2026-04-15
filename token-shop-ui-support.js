@@ -86,6 +86,20 @@ export function createTokenShopUiSupport({ formatValue }) {
     return formatTokenShopBonusStep(row, row?.bonusValue);
   }
 
+  function getTokenShopPlayerFacingSupportText(row) {
+    const value = row?.playerFacingSupportText;
+    if (Array.isArray(value)) {
+      return value
+        .map((entry) => sanitizeTokenShopRichText(entry))
+        .filter(Boolean)
+        .join(" ");
+    }
+    if (typeof value === "string") {
+      return sanitizeTokenShopRichText(value);
+    }
+    return "";
+  }
+
   function getTokenShopRowGroundingSummary(row) {
     if (row?.rowType === "effect-driven") {
       return "Grounded as an effect-driven row from checked shell, action, and shared-effect evidence.";
@@ -157,6 +171,7 @@ export function createTokenShopUiSupport({ formatValue }) {
     sanitizeTokenShopRichText,
     getTokenShopRowDisplayTitle,
     formatTokenShopEffectLine,
+    getTokenShopPlayerFacingSupportText,
     getTokenShopRowGroundingSummary,
     formatTokenShopSentence,
     getTokenShopActionLabel,

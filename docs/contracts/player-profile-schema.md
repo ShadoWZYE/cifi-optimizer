@@ -112,15 +112,18 @@ Migration-only values:
 | Legacy stage fields | `compatibility.legacyStage.*` | old schema compatibility only |
 | Quarantined shard milestone state | `compatibility.unmappedSystemState.shardMilestoneState` | preferred quarantine location for imported shard milestone blobs; never canonical without a verified save-owner and grounded field mapping |
 | Legacy shard milestone mirror | `compatibility.unmappedSystemState.shardMilestones` | compatibility mirror of the quarantined shard milestone blob for older consumers |
-| Unmapped system blobs | `compatibility.unmappedSystemState.*` | TokenShop, MultiverseMarket, and other non-canonical system state |
+| Unmapped system blobs | `compatibility.unmappedSystemState.*` | TokenShop and other non-canonical system state blobs stay compatibility-only |
+| Raw/unmapped Emporium SaveData wrapper | `compatibility.unmappedSystemState.multiverseMarket` | quarantined raw import wrapper; preserve the exact `IS1Level` through `IS110Level` SaveData span under `.importedState` without promoting it into canonical `state.playerProfile` |
 
 Import rule:
 
 - prefer explicit `compatibility.*` paths or namespaced legacy sources such as `stage.*` and `systems.metaProgression.*`
 - flat `gemDust`, `hunterLevel`, `traitSphereCount`, and `mechParts` no longer migrate automatically
 - imported `systems.shardMilestones` or `compatibility.unmappedSystemState.shardMilestoneState` payloads must remain quarantined under `compatibility.unmappedSystemState.*` until the save owner, field mapping, and planner-safe recommendation gate are verified
+- imported `systems.multiverseMarket` or `compatibility.unmappedSystemState.multiverseMarket` payloads must remain quarantined as raw/unmapped compatibility storage; preserve the exact `IS1Level` through `IS110Level` SaveData span under `.importedState`, keep canonical promotion blocked, and do not treat the remaining metadata-only `Market` wrapper seam as closed
 - flat spend-state clues such as `BankedTokens`, `DailyTokenium`, `ClaimableTokenium`, `TokenBankCap`, `ClaimableBankTokens`, `FinalTokenBankCap`, `FinalTokenBankFillSpeed`, `DailyTokeniumCap`, `InscryptionsDone`, exact typed SaveData-backed Emporium levels `IS1Level` through `IS110Level`, exact typed Emporium-adjacent trade counters `EsotericR1Trades` through `EsotericR9Trades` and `NecrumR1Trades` through `NecrumR9Trades`, and the bounded early-mech quarantine window `Mech1Unlocked` through `Mech2Unlocked` may be quarantined under `compatibility.unmappedSystemState.*`
 - quarantine for `ClaimableTokenium` is compatibility-only and descriptive; it must not be read as token-bank claimable ownership, Daily Tokenium-specific ready state, or canonical `player.*` truth
+- Emporium quarantine must stay explicit: `compatibility.unmappedSystemState.multiverseMarket.status` labels the blob as raw/unmapped compatibility state, `importedState` holds the preserved raw fields, and the wrapper-level mapping gate blocks planner use and canonical promotion
 
 Mapping gate before canonical promotion:
 
@@ -164,5 +167,4 @@ The active Profile form should show:
 - only directly visible in-game planner helpers
 
 It should not present external-model or compatibility fields as raw CIFI account state. Ship calibration belongs on the Ship Planner page, not the shared Profile page.
-
 

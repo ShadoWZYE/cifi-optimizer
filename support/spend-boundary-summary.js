@@ -774,6 +774,8 @@ export function getMultiverseMarketMetadataSummary(neighborhood) {
   };
 }
 
+import { getQuarantinedMultiverseMarketImportedState } from "../player-profile.js";
+
 export function getMultiverseMarketValidatedCoverage(multiverseMarket) {
   const validatedIds = Array.isArray(multiverseMarket?.source?.validated_ids)
     ? [
@@ -863,8 +865,7 @@ export function getImportedMultiverseMarketPreview(
         )
       ]
     : [];
-  const importedState =
-    typeof importedMarketState === "object" && importedMarketState ? importedMarketState : {};
+  const importedState = getQuarantinedMultiverseMarketImportedState(importedMarketState) ?? {};
   const overlapIdSet = new Set(overlapIds);
   const importedSpanRows = Object.entries(importedState)
     .map(([key, value]) => {
@@ -880,7 +881,7 @@ export function getImportedMultiverseMarketPreview(
       return {
         rowId,
         level,
-        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.IS${rowId}Level`
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.importedState.IS${rowId}Level`
       };
     })
     .filter(Boolean)
@@ -907,7 +908,7 @@ export function getImportedMultiverseMarketPreview(
         rank: Number(match[2]),
         key,
         value,
-        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.${key}`
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.importedState.${key}`
       };
     })
     .filter(Boolean)
@@ -948,7 +949,7 @@ export function getImportedMultiverseMarketPreview(
       return {
         key,
         value,
-        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.${key}`
+        fieldPath: `compatibility.unmappedSystemState.multiverseMarket.importedState.${key}`
       };
     })
     .filter(Boolean);

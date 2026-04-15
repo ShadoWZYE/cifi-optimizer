@@ -1,4 +1,5 @@
-export const PLAYER_PROFILE_SCHEMA_VERSION = 2;
+export const PLAYER_PROFILE_SCHEMA_VERSION = 3;
+export const QUARANTINED_MULTIVERSE_MARKET_STATUS = "quarantined-raw-unmapped";
 export const PLAYER_PROFILE_IMPORT_ALIASES = {
   meta: {
     profileName: [["meta", "profileName"], ["profileName"]],
@@ -188,6 +189,26 @@ const CI_SUFFIX_EXPONENTS = {
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+export function isQuarantinedMultiverseMarketState(value) {
+  return (
+    isRecord(value) &&
+    value.status === QUARANTINED_MULTIVERSE_MARKET_STATUS &&
+    isRecord(value.importedState) &&
+    isRecord(value.mappingGate) &&
+    value.mappingGate.plannerUseAllowed === false &&
+    value.mappingGate.canonicalPromotionBlocked === true &&
+    Array.isArray(value.currentBoundary)
+  );
+}
+
+export function getQuarantinedMultiverseMarketState(value) {
+  return isQuarantinedMultiverseMarketState(value) ? value : null;
+}
+
+export function getQuarantinedMultiverseMarketImportedState(value) {
+  return getQuarantinedMultiverseMarketState(value)?.importedState ?? null;
 }
 
 function cloneValue(value) {
@@ -435,6 +456,35 @@ function coerceQuarantinedShardMilestoneState(value) {
     currentBoundary: [
       "Imported shard milestone state stays quarantined until the save owner, field mapping, and planner-safe interpretation are verified.",
       "Do not treat this blob as canonical player truth or grounded planner input."
+    ]
+  };
+}
+
+function coerceQuarantinedMultiverseMarketState(value) {
+  const importedState = isRecord(value?.importedState)
+    ? cloneValue(value.importedState)
+    : isRecord(value)
+      ? cloneValue(value)
+      : null;
+  if (!importedState) {
+    return null;
+  }
+
+  return {
+    status: QUARANTINED_MULTIVERSE_MARKET_STATUS,
+    importedState,
+    mappingGate: {
+      plannerUseAllowed: false,
+      canonicalPromotionBlocked: true,
+      requiredBeforeCanonicalPromotion: [
+        "Recover a direct typed Market wrapper seam beyond the current metadata-only Market member clue.",
+        "Recover grounded Emporium row labels before promoting any IS*Level field beyond raw compatibility storage.",
+        "Approve planner-safe recommendation use only after canonical Emporium player-state inputs are grounded."
+      ]
+    },
+    currentBoundary: [
+      "Imported Emporium SaveData state stays quarantined as raw/unmapped compatibility evidence under compatibility.unmappedSystemState.multiverseMarket.",
+      "Preserve the exact SaveData-owned IS1Level through IS110Level span here without promoting it into canonical state.playerProfile."
     ]
   };
 }
@@ -732,19 +782,22 @@ export function normalizePlayerProfile(profile, baselineShipPlayerState = {}) {
     source,
     MULTIVERSE_MARKET_ADJACENT_MECH_FIELDS
   );
-  normalized.compatibility.unmappedSystemState.multiverseMarket = mergeCompatibilityRecord(
-    importedMultiverseMarketRecord,
-    mergeCompatibilityRecord(
-      importedMultiverseMarketStateClues,
+  normalized.compatibility.unmappedSystemState.multiverseMarket =
+    coerceQuarantinedMultiverseMarketState(
       mergeCompatibilityRecord(
-        importedMultiverseMarketLevels,
+        importedMultiverseMarketRecord,
         mergeCompatibilityRecord(
-          importedMultiverseMarketTradeCounters,
-          importedMultiverseMarketAdjacentMechWindow
+          importedMultiverseMarketStateClues,
+          mergeCompatibilityRecord(
+            importedMultiverseMarketLevels,
+            mergeCompatibilityRecord(
+              importedMultiverseMarketTradeCounters,
+              importedMultiverseMarketAdjacentMechWindow
+            )
+          )
         )
       )
-    )
-  );
+    );
 
   const mergedShipToolState = mergeDeep(
     baselineShipPlayerState,
