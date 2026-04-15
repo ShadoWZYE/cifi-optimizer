@@ -13,9 +13,12 @@ Build the grounded MVP core that makes later consolidation credible.
 Current repo bias:
 
 - start from a real player question
-- ship the smallest honest tool slice that answers it
+- prefer the largest coherent adjacent slice that answers it honestly and stays reviewable
 - use research, extraction, and decompilation to unblock that slice instead of letting them silently become the product
 - keep recommendation math and broad gameplay modeling behind grounded MVP needs
+- do not confuse tiny scope with disciplined scope
+- recover whole related families together when they share the same implementation path, validation path, and evidence shape
+- split work only when the boundary is real: different owner families, runtime systems, validation paths, blocker states, or unrelated review risk
 
 Current MVP focus:
 
@@ -36,7 +39,7 @@ Every active lane should state:
 - the minimum required inputs
 - the explicit non-blockers
 - the current true blocker
-- the smallest shippable tool slice
+- the largest coherent adjacent slice that is still shippable, reviewable, and validation-safe
 
 Adjacent lanes should only block a slice when they are actual consumed inputs for that slice.
 
@@ -86,6 +89,7 @@ If the APK/Unity path has not been checked for an unresolved mechanic, it should
 ## Commands
 
 - `npm run dev`
+- `npm run ci:local`
 - `npm run verify:data`
 - `npm test`
 - `npm run test:unit`

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "check:syntax": "node ./scripts/contracts/check-js-syntax.mjs",
+    "ci:local": "npm run verify && npm test && npm run test:unit",
     "contracts:gen-index": "node ./scripts/contracts/generate-dataset-index.mjs",
     "dev": "node ./scripts/dev-server.mjs",
     "format": "prettier --write \"package*.json\" \".prettierrc.json\" \".github/**/*.{md,yml,yaml}\" \"AGENTS.md\" \"CODEX_BRIEF.md\" \"README.md\" \"THIRD_PARTY_NOTICES.md\" \"app.js\" \"player-profile.js\" \"recommendation-contract.js\" \"support/*.js\" \"index.html\" \"styles.css\" \"scripts/**/*.mjs\" \"tests/**/*.{json,mjs}\"",
