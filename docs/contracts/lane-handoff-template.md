@@ -31,6 +31,7 @@ Do not use it as a substitute for:
 - Explicit non-blockers: `<adjacent lanes that should stay visible but should not block this slice>`
 - Current true blocker: `<single strongest blocker>`
 - Largest coherent adjacent slice: `<largest related family that can ship honestly without crossing a real boundary>`
+- Default next adjacent step: `<what Codex should do next by default if this lane is reopened and no human decision is needed>`
 
 ## Grounded carry-forward
 
@@ -63,7 +64,19 @@ Do not use it as a substitute for:
 - `Largest coherent adjacent slice`: recover whole related families together when they share implementation shape, evidence shape, and validation path
 - `Largest coherent adjacent slice`: do not reduce work to one row, one field, one symbol, or one tiny evidence fragment when the surrounding family can be recovered together honestly
 - `Largest coherent adjacent slice`: split only when there is a real boundary such as different owner families, runtime systems, validation paths, blocker states, or unrelated review risk
+- `Default next adjacent step`: keep work in the same lane by default, pick the highest-value adjacent move that fits the lane contract, and only point outside the lane when a real cross-lane choice is the blocker
 - `Grounded carry-forward`: only facts already supported by repo-local evidence
 - `Boundary to preserve`: narrowed checked seams, not guesses
 - `Known false paths`: only ruled-out interpretations, not unresolved hypotheses
 - `Open sources`: keep this to the minimum set needed to restart work
+
+## Lane-owner rule
+
+Use this handoff format to preserve lane ownership, not to imply that work stops after one bounded task.
+
+When a lane is reopened:
+
+- continue the same lane by default
+- take the recorded default next adjacent step unless newer evidence changes the priority
+- realign tools, probes, or evidence paths when the current instrument is the blocker
+- stop only when human input, human validation, or a real cross-lane choice is required

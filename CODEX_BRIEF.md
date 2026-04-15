@@ -11,6 +11,11 @@ Help build the grounded MVP core of a local-first CIFI toolkit that can replace 
 - keep diffs small and task-shaped
 - preserve local-first browser behavior
 - prefer the largest coherent adjacent slice that answers a real player question honestly
+- operate as the owner of the active lane, not as a one-task finisher
+- continue in the same lane by default after a successful run
+- choose the next highest-value adjacent step automatically when the current slice closes cleanly
+- prefer tool, probe, or evidence-path realignment when the current instrument cannot resolve the blocker
+- stop only when human input, human validation, or a real cross-lane choice is needed
 - treat extraction, mapping, decompilation, and validation as intake that supports a slice, not as default product scope
 - do not invent formulas, labels, owners, or player-state fields
 - treat `state.playerProfile` as the shared state boundary
@@ -30,6 +35,8 @@ Help build the grounded MVP core of a local-first CIFI toolkit that can replace 
 - keep each branch scoped to one coherent grounded claim or one coherent adjacent slice
 - do not mix unrelated cleanup, planner integration, UI expansion, or parallel research lanes into the same PR
 - do not discard, reset, clean, or delete tracked work unless the user explicitly asks
+- after a successful run, keep advancing the same lane until the next honest move requires human input, human validation, or a real cross-lane decision
+- when a blocker survives the current instrument, change probes, tools, or evidence paths before declaring the lane stalled
 
 ## Slice contract
 
@@ -40,6 +47,7 @@ Every lane, PR, or handoff should declare:
 3. the explicit non-blockers
 4. the current true blocker
 5. the largest coherent adjacent slice that can ship honestly
+6. the default next adjacent step if the current slice lands cleanly
 
 Do not let adjacent research or extraction lanes block a slice unless they are consumed inputs for that slice.
 
@@ -85,7 +93,8 @@ Always report:
 2. grounded conclusion reached
 3. files changed
 4. what remains blocked
-5. validation run and results
+5. default next adjacent step
+6. validation run and results
 
 ## Verify
 

@@ -14,6 +14,11 @@ Current repo bias:
 
 - start from a real player question
 - prefer the largest coherent adjacent slice that answers it honestly and stays reviewable
+- treat Codex as the owner of the active lane, not as a one-task finisher
+- continue in the same lane by default after a clean successful run
+- choose the next highest-value adjacent step automatically when the current slice closes
+- realign tools, probes, or evidence paths when the current instrument cannot resolve the blocker
+- stop only when human input, human validation, or a real cross-lane choice is needed
 - use research, extraction, and decompilation to unblock that slice instead of letting them silently become the product
 - keep recommendation math and broad gameplay modeling behind grounded MVP needs
 - do not confuse tiny scope with disciplined scope
@@ -40,8 +45,17 @@ Every active lane should state:
 - the explicit non-blockers
 - the current true blocker
 - the largest coherent adjacent slice that is still shippable, reviewable, and validation-safe
+- the default next adjacent step if the current slice lands cleanly
 
 Adjacent lanes should only block a slice when they are actual consumed inputs for that slice.
+
+## Lane-owner default
+
+Codex should keep moving inside the current lane by default.
+
+When one slice lands cleanly, the next move should be the highest-value adjacent step that still fits the lane contract and does not cross a real lane boundary. If the current tool, probe, or evidence path cannot resolve the blocker, the default move is to realign instrumentation before treating the lane as stalled.
+
+Work should stop only when the next honest move needs human input, human validation, or a real cross-lane product choice.
 
 ## Local-first
 
@@ -83,7 +97,7 @@ If the APK/Unity path has not been checked for an unresolved mechanic, it should
 - `docs/roadmap/research-tracks.md` = active research/extraction queue
 - `docs/roadmap/active-grounding-boundaries.md` = compact handoff for active grounding lanes
 - `docs/roadmap/known-false-paths.md` = ruled-out interpretations to keep closed
-- `docs/contracts/lane-handoff-template.md` = minimal lane handoff/result format
+- `docs/contracts/lane-handoff-template.md` = minimal lane handoff/result format with default next-step carry-forward
 - `docs/tools/ocr.md` = optional tooling notes for OCR setup and troubleshooting
 
 ## Commands
