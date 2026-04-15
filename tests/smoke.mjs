@@ -807,14 +807,14 @@ assert.match(tokenShopProgressionModel, /Default level 0/);
 assert.match(appJs, /Prefill local rows from compatibility import/);
 assert.ok(
   tokenShopProgressionModel.includes(
-    "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8."
+    "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, ATU12."
   )
 );
 assert.match(appJs, /Effect-driven checked row/);
 assert.match(appJs, /Prefab-driven checked row/);
 assert.match(
   appJs,
-  /ATU3 remains effect-driven and is not promoted into a prefab or final-title remap\./
+  /ATU3 remains effect-driven, ATU10 and ATU12 are newly grounded title-side rows, ATU11 stays quarantined because it still lacks a final title join/
 );
 assert.match(
   appJs,
@@ -869,7 +869,7 @@ assert.match(
 assert.match(appJs, /Overview TokenShop affordability/);
 assert.match(
   appJs,
-  /This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level<\/code>, <code>ATU2Level<\/code>, <code>ATU3Level<\/code>, <code>ATU4Level<\/code>, <code>ATU5Level<\/code>, <code>ATU6Level<\/code>, <code>ATU7Level<\/code>, and <code>ATU8Level<\/code>/
+  /This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level<\/code>, <code>ATU2Level<\/code>, <code>ATU3Level<\/code>, <code>ATU4Level<\/code>, <code>ATU5Level<\/code>, <code>ATU6Level<\/code>, <code>ATU7Level<\/code>, <code>ATU8Level<\/code>, <code>ATU9Level<\/code>, <code>ATU10Level<\/code>, and <code>ATU12Level<\/code>/
 );
 assert.match(
   appJs,
@@ -1098,7 +1098,10 @@ assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetLevels, {
   ATU5Level: null,
   ATU6Level: null,
   ATU7Level: null,
-  ATU8Level: null
+  ATU8Level: null,
+  ATU9Level: null,
+  ATU10Level: null,
+  ATU12Level: null
 });
 assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU1Level: null,
@@ -1108,7 +1111,10 @@ assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU5Level: null,
   ATU6Level: null,
   ATU7Level: null,
-  ATU8Level: null
+  ATU8Level: null,
+  ATU9Level: null,
+  ATU10Level: null,
+  ATU12Level: null
 });
 assert.deepEqual(defaultProfile.externalModels.communityTools.shipOptimizer, {});
 assert.deepEqual(defaultProfile.externalModels.communityTools.shardOptimizer, {});
@@ -4741,6 +4747,215 @@ assert.equal(
   tokenShopRowRemapBoundaryData.atu8BridgeFollowUp.result,
   "checked object bridge plus title-side text chain recovered"
 );
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.targetId,
+  "token-shop-atu9-mk5-bridge"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.recoveredBridge.shellField,
+  "ATU9Button"
+);
+assert.equal(tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.recoveredBridge.shellPathId, 15845);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.recoveredBridge.supportingActionHook,
+  "BuyMK5TokenBoost"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.recoveredBridge.prefabIdentity,
+  "NewTokenUPGPrefab.T1.MK5Booster"
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.recoveredBridge.groundedConclusion,
+  /ATU9Button now has one checked bridge/
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.verifiedTitleTextChain.shellField,
+  "ATU9Button"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.verifiedTitleTextChain.shellPathId,
+  15845
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.verifiedTitleTextChain.prefabIdentity,
+  "NewTokenUPGPrefab.T1.MK5Booster"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
+  "Mk5 Generator Booster"
+);
+assert.deepEqual(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+  [
+    "This upgrade divides the cost of MK5 Generators by 50b.",
+    "This upgrade provides a 30% increase to the output of MK5 Generators."
+  ]
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
+  /shell-to-prefab-to-title-side-text chain/i
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu9BridgeFollowUp.result,
+  "checked object bridge plus title-side text chain recovered"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.targetId,
+  "token-shop-atu10-mk6-bridge"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.recoveredBridge.shellField,
+  "ATU10Button"
+);
+assert.equal(tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.recoveredBridge.shellPathId, 15837);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.recoveredBridge.supportingActionHook,
+  "BuyMK6TokenBoost"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.recoveredBridge.prefabIdentity,
+  "NewTokenUPGPrefab.T1.MK6Booster"
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.recoveredBridge.groundedConclusion,
+  /ATU10Button now has one checked bridge/i
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.shellField,
+  "ATU10Button"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.shellPathId,
+  15837
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.prefabIdentity,
+  "NewTokenUPGPrefab.T1.MK6Booster"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
+  "Mk6 Generator Booster"
+);
+assert.deepEqual(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+  [
+    "This upgrade divides the cost of MK6 Generators by 6qa.",
+    "This upgrade provides a 30% increase to the output of MK6 Generators."
+  ]
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
+  /shell-to-prefab-to-title-side-text chain/i
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu10BridgeFollowUp.result,
+  "checked object bridge plus title-side text chain recovered"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.targetId,
+  "token-shop-atu11-mk7-bridge"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.recoveredBridge.shellField,
+  "ATU11Button"
+);
+assert.equal(tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.recoveredBridge.shellPathId, 15793);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.recoveredBridge.supportingActionHook,
+  "BuyMK7TokenBoost"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.recoveredBridge.prefabIdentity,
+  "NewTokenUPGPrefab.T1.MK7Booster"
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.recoveredBridge.groundedConclusion,
+  /ATU11Button now has one checked bridge/i
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.shellField,
+  "ATU11Button"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.shellPathId,
+  15793
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.prefabIdentity,
+  "NewTokenUPGPrefab.T1.MK7Booster"
+);
+assert.deepEqual(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.detachedTitleSurface,
+  [
+    "MK7 GEN ENHANCEMENT",
+    "This upgrade divides the cost of MK7 Generators by 70Qu.",
+    "This upgrade provides a 30% increase to the output of MK7 Generators."
+  ]
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.missingJoin,
+  /Mk7 Generator Booster title/i
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.boundedTitleSideNegative.groundedConclusion,
+  /row-specific negative on the title side/i
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu11BridgeFollowUp.result,
+  "checked object bridge recovered but final title-side join remains unresolved"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.targetId,
+  "token-shop-atu12-mk8-bridge"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.recoveredBridge.shellField,
+  "ATU12Button"
+);
+assert.equal(tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.recoveredBridge.shellPathId, 15830);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.recoveredBridge.supportingActionHook,
+  "BuyMK8TokenBoost"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.recoveredBridge.prefabIdentity,
+  "NewTokenUPGPrefab.T1.MK8Booster"
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.recoveredBridge.groundedConclusion,
+  /ATU12Button now has one checked bridge/i
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.shellField,
+  "ATU12Button"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.shellPathId,
+  15830
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.prefabIdentity,
+  "NewTokenUPGPrefab.T1.MK8Booster"
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.titleProbeTitle,
+  "Mk8 Generator Booster"
+);
+assert.deepEqual(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.titleProbeSupportText,
+  [
+    "This upgrade divides the cost of MK8 Generators by 8e100.",
+    "This upgrade provides a 30% increase to the output of MK8 Generators."
+  ]
+);
+assert.match(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.verifiedTitleTextChain.groundedConclusion,
+  /shell-to-prefab-to-title-side-text chain/i
+);
+assert.equal(
+  tokenShopRowRemapBoundaryData.atu12BridgeFollowUp.result,
+  "checked object bridge plus title-side text chain recovered"
+);
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellField, "ATU3Button");
 assert.equal(tokenShopRowRemapBoundaryData.atu3CellsDisambiguationPass.shellPathId, 15810);
 assert.equal(
@@ -4892,9 +5107,41 @@ assert.match(
   tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin,
   /CellBoostBonus read or typed field handoff into the internal AdManager bonus-aggregation shell/i
 );
+[
+  "<TokenChestRoutine>d__149",
+  "<DiamondChestRoutine>d__155",
+  "<FinalAdTokenChestBonus>k__BackingField",
+  "<FinalDiamondChestBonus>k__BackingField"
+].forEach((name) => {
+  assert.ok(
+    tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.ruledOutDirectConsumerTargets.includes(
+      name
+    )
+  );
+});
+[
+  "get_SmallAdCellGains",
+  "get_BigAdCellGains",
+  "SetBoosterAdBonus",
+  "get_FinalBoosterAdBonus",
+  "set_FinalBoosterAdBonus",
+  "FinalBoosterAdBonus",
+  "<FinalBoosterAdBonus>k__BackingField"
+].forEach((name) => {
+  assert.ok(
+    tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.ruledOutRemainingBonusAggregationTargets.includes(
+      name
+    )
+  );
+});
+assert.match(
+  tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.missingExactReadSiteSeam
+    .negativeConclusion,
+  /stop searching that cluster for an exact handoff unless a new committed artifact lands/i
+);
 assert.equal(
   tokenShopRowRemapBoundaryData.atu3ChestConsumerReadTrace.result,
-  "checked consumer-internal bonus shell recovered and explicit CellBoostBonus anchor still stays detached from any exact AdManager read site"
+  "checked consumer-internal bonus shell recovered and remaining internal AdManager bonus-aggregation family stays ruled out as an exact CellBoostBonus handoff"
 );
 assert.equal(
   tokenShopRowRemapBoundaryData.atu3ChestConsumerTrace.result,
@@ -4914,7 +5161,7 @@ assert.ok(
 );
 assert.ok(
   tokenShopRowRemapBoundaryData.currentBoundary.some((line) =>
-    /seven checked TokenShop row bridges/i.test(line)
+    /eleven checked TokenShop row bridges/i.test(line)
   )
 );
 assert.ok(
@@ -4930,6 +5177,11 @@ assert.ok(
 assert.ok(
   tokenShopRowRemapBoundaryData.currentBoundary.some((line) =>
     /ATU8Button aligns directly with the MK4TokenBoost owner-field block/i.test(line)
+  )
+);
+assert.ok(
+  tokenShopRowRemapBoundaryData.currentBoundary.some((line) =>
+    /ATU9Button aligns directly with the MK5TokenBoost owner-field block/i.test(line)
   )
 );
 assert.ok(
@@ -5615,7 +5867,7 @@ withRequiredValue(
     assert.match(track.currentSlice, /canonical `state\.playerProfile\.player\.resources\.tokens`/);
     assert.match(
       track.currentSlice,
-      /`ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level` subset/
+      /`ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` subset/
     );
     assert.match(
       track.currentSlice,
@@ -5666,7 +5918,7 @@ withRequiredValue(
     );
     assert.ok(
       track.completedSteps.some((step) =>
-        /checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(
+        /checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(
           step
         )
       ),
@@ -5712,7 +5964,7 @@ withRequiredValue(
     );
     assert.ok(
       track.verified.some((line) =>
-        /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level`/.test(
+        /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`/.test(
           line
         )
       ),
@@ -5728,7 +5980,7 @@ withRequiredValue(
     );
     assert.ok(
       track.verified.some((line) =>
-        /shipped Overview affordability surface can now consume the full currently grounded product-facing subset: `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level`/i.test(
+        /shipped Overview affordability surface can now consume the full currently grounded product-facing subset: `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`/i.test(
           line
         )
       ),
@@ -7486,11 +7738,15 @@ assert.match(
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
 assert.match(
   activeGroundingBoundariesDoc,
-  /seven checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, `ATU7Button`, and `ATU8Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, one bounded `ATU5Button` -> `NewTokenUPGPrefab\.T1\.MK1Booster` -> `1\. MK1 Generator Output,` named-identity and title-side text chain, one bounded `ATU8Button` -> `NewTokenUPGPrefab\.T1\.MK4Booster` -> `Mk4 Generator Booster` title-side text chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain.*remaining ATU5 blocker is now only the absent exact final row-title string/i
+  /eleven checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, `ATU7Button`, `ATU8Button`, `ATU9Button`, `ATU10Button`, `ATU11Button`, and `ATU12Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab\.T1\.MK2Booster` -> `Mk2 Generator Booster` title chain, one bounded `ATU5Button` -> `NewTokenUPGPrefab\.T1\.MK1Booster` -> `1\. MK1 Generator Output,` named-identity and title-side text chain, one bounded `ATU8Button` -> `NewTokenUPGPrefab\.T1\.MK4Booster` -> `Mk4 Generator Booster` title-side text chain, one bounded `ATU9Button` -> `NewTokenUPGPrefab\.T1\.MK5Booster` -> `Mk5 Generator Booster` title-side text chain, one bounded `ATU10Button` -> `NewTokenUPGPrefab\.T1\.MK6Booster` -> `Mk6 Generator Booster` title-side text chain, one narrower `ATU11Button` -> `NewTokenUPGPrefab\.T1\.MK7Booster` bridge with only detached `MK7 GEN ENHANCEMENT` title-side text, one bounded `ATU12Button` -> `NewTokenUPGPrefab\.T1\.MK8Booster` -> `Mk8 Generator Booster` title-side text chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain.*remaining ATU5 blocker is still only the absent exact final row-title string/i
 );
 assert.match(
   activeGroundingBoundariesDoc,
-  /exact `CellBoostBonus` read-site or typed-field handoff into that internal shell/i
+  /closed ATU3 bonus-aggregation cluster, the closed ATU11 MK7 title-side seam, or the closed ATU12 MK8 bridge-plus-title-side-text seam/i
+);
+assert.match(
+  activeGroundingBoundariesDoc,
+  /closes the full internal AdManager bonus-aggregation family as a bounded negative result/i
 );
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium/);
 assert.match(tokenShopDoc, /resourceicons\/resource_tokenium_cap/);
@@ -7504,7 +7760,7 @@ const tokenShopRowRemapTrack = snapshot.researchTracks.find(
 assert.ok(tokenShopRowRemapTrack, "Expected snapshot research track spend-token-shop-row-remap");
 assert.match(
   tokenShopRowRemapTrack?.currentSlice ?? "",
-  /ATU1, ATU2, ATU4, ATU5, ATU6, ATU7, and ATU8 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain/i
+  /ATU1, ATU2, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, ATU11, and ATU12 shell-to-prefab bridges plus one checked ATU6 shell-to-prefab-to-title chain/i
 );
 assert.match(
   tokenShopRowRemapTrack?.currentSlice ?? "",
@@ -7516,7 +7772,7 @@ assert.match(
 );
 assert.match(
   tokenShopRowRemapTrack?.blockedBy ?? "",
-  /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain, one tighter shared-effect-to-consumer-family handoff, and one checked internal bonus-aggregation shell while still failing exact prefab-or-title localization.*late ATU24-ATU28 shell neighborhood now stays negative/
+  /ATU3 now also clears one shell-to-action-hook-to-shared-effect chain, one tighter shared-effect-to-consumer-family handoff, and one checked internal bonus-aggregation shell while still failing exact prefab-or-title localization.*closes the outer chest routines, the final token-or-diamond chest bonus backing fields, and the remaining internal getter-or-booster aggregation family.*late ATU24-ATU28 shell neighborhood now stays negative/
 );
 assert.ok(
   tokenShopRowRemapTrack?.verified?.some((line) =>
@@ -7536,6 +7792,16 @@ assert.ok(
 assert.ok(
   tokenShopRowRemapTrack?.verified?.some((line) =>
     /ATU8Button` to `NewTokenUPGPrefab\.T1\.MK4Booster/.test(line)
+  )
+);
+assert.ok(
+  tokenShopRowRemapTrack?.verified?.some((line) =>
+    /ATU9Button` to `NewTokenUPGPrefab\.T1\.MK5Booster/.test(line)
+  )
+);
+assert.ok(
+  tokenShopRowRemapTrack?.verified?.some((line) =>
+    /ATU10Button` to `NewTokenUPGPrefab\.T1\.MK6Booster/.test(line)
   )
 );
 assert.ok(
@@ -7584,6 +7850,11 @@ assert.ok(
 assert.ok(
   tokenShopRowRemapTrack?.verified?.some((line) =>
     /ATU8Button` to `NewTokenUPGPrefab\.T1\.MK4Booster` to `Mk4 Generator Booster`/.test(line)
+  )
+);
+assert.ok(
+  tokenShopRowRemapTrack?.verified?.some((line) =>
+    /ATU9Button` to `NewTokenUPGPrefab\.T1\.MK5Booster` to `Mk5 Generator Booster`/.test(line)
   )
 );
 assert.ok(
@@ -7821,7 +8092,7 @@ assert.match(
 assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to affect/);
 assert.match(
   spendSystemVerificationDoc,
-  /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, and `ATU8Level` remap subset/
+  /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` remap subset/
 );
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
@@ -9092,6 +9363,9 @@ const migratedFlatSpendStateProfile = normalizePlayerProfile({
   ATU6Level: "7",
   ATU7Level: "8",
   ATU8Level: "9",
+  ATU9Level: "10",
+  ATU10Level: "11",
+  ATU12Level: "12",
   ATU28Level: 1,
   Tier2TokensUnlocked: true,
   Tier4TokensUnlocked: false,
@@ -9121,7 +9395,10 @@ assert.deepEqual(migratedFlatSpendStateProfile.planning.tokenShop.checkedSubsetP
   ATU5Level: 2,
   ATU6Level: 7,
   ATU7Level: 8,
-  ATU8Level: 9
+  ATU8Level: 9,
+  ATU9Level: 10,
+  ATU10Level: 11,
+  ATU12Level: 12
 });
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
   ATU1Level: 3,
@@ -9132,6 +9409,9 @@ assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState
   ATU6Level: 7,
   ATU7Level: 8,
   ATU8Level: 9,
+  ATU9Level: 10,
+  ATU10Level: 11,
+  ATU12Level: 12,
   ATU28Level: 1,
   Tier2TokensUnlocked: true,
   Tier4TokensUnlocked: false,

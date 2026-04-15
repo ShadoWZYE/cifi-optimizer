@@ -651,6 +651,7 @@ export function createShardEvidenceSupport({
     getShardExtractedBonusPerLevel,
     getShardExtractedCostFieldMapping,
     getShardExtractedUnlockRequirement,
+    getShardFormulaApplicationProfile,
     getShardMilestoneDisplayMeta,
     getShardMilestoneDisplayName,
     getShardMilestoneGroundedSummary,

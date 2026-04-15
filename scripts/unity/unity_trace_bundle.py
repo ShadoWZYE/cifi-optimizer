@@ -2808,6 +2808,8 @@ def build_atu3_chest_consumer_read_trace_graph(
     small_cells_hit = find_hit(booster_source, "SmallAdCellGains")
     big_cells_hit = find_hit(booster_source, "BigAdCellGains")
     final_booster_hit = find_hit(booster_source, "FinalBoosterAdBonus")
+    set_final_booster_hit = find_hit(booster_source, "set_FinalBoosterAdBonus")
+    final_booster_field_hit = find_hit(booster_source, "<FinalBoosterAdBonus>k__BackingField")
     booster_routine_hit = find_hit(booster_source, "<BoosterAdRoutine>d__158")
     final_token_bonus_hit = find_hit(final_source, "<FinalAdTokenChestBonus>k__BackingField")
     final_diamond_bonus_hit = find_hit(final_source, "<FinalDiamondChestBonus>k__BackingField")
@@ -2936,7 +2938,9 @@ def build_atu3_chest_consumer_read_trace_graph(
                 cite_hit(getter_source, big_getter_hit),
                 cite_hit(booster_source, set_booster_hit),
                 cite_hit(booster_source, final_booster_getter_hit),
+                cite_hit(booster_source, set_final_booster_hit),
                 cite_hit(booster_source, final_booster_hit),
+                cite_hit(booster_source, final_booster_field_hit),
             ],
         ),
     ]
@@ -2964,7 +2968,7 @@ def build_atu3_chest_consumer_read_trace_graph(
             {
                 "id": "claim-missing-exact-cellboost-read-site",
                 "status": "missing",
-                "statement": "The exact CellBoostBonus read site or typed field handoff into the internal bonus shell still is not recovered.",
+                "statement": "The exact CellBoostBonus read site or typed field handoff anywhere inside the checked internal bonus-aggregation family still is not recovered.",
                 "edgeIds": [edge["id"] for edge in negative_edges],
                 "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
             },
@@ -3948,8 +3952,8 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
             "This is a target-driven cross-system trace workflow, not a standard prefab-or-title TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU3 consumer-internal bonus shell inside the AdManager chest consumer family while keeping the exact CellBoostBonus runtime read explicit as the only remaining break.",
-            "Keep the ATU3 result quarantined to effect-chain completion evidence until one committed source recovers the exact CellBoostBonus read site or typed field handoff.",
+            "It now preserves one exact ATU3 consumer-internal bonus shell inside the AdManager chest consumer family while also closing the checked outer chest routines, final token-or-diamond chest bonus backing fields, remaining getter-or-booster aggregation family, and FinalBoosterAdBonus setter-or-backing-field surfaces as a bounded negative result for one exact CellBoostBonus handoff.",
+            "Keep the ATU3 result quarantined to effect-chain completion evidence and do not reopen this closed AdManager bonus-aggregation cluster unless a new committed artifact lands.",
         ],
     }
 
