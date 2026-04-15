@@ -2196,25 +2196,8 @@ function renderDatasetRefreshHardening() {
 
 function renderSpendPlannerBoundary() {
   const canonical = getCanonicalProfileState();
-  const compatibility = getCompatibilityProfileState();
   const spendTrack = state.snapshot?.researchTracks?.find(
     (track) => track.id === "spend-planner-first-ui-slice"
-  );
-  const emporiumTrack = state.snapshot?.researchTracks?.find(
-    (track) => track.id === "spend-multiverse-savedata-import-surface"
-  );
-  const tokenShop = state.extractedMechanics?.tokenShop ?? {};
-  const multiverseMarket = state.extractedMechanics?.multiverseMarket ?? {};
-  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
-    state.extractedMechanics?.multiverseMarketMarketMemberBoundary
-  );
-  const resourceIcons = Array.isArray(tokenShop.resource_icons) ? tokenShop.resource_icons : [];
-  const importedMarketState = compatibility.unmappedSystems?.multiverseMarket;
-  const importedMarketPreview = getImportedMultiverseMarketPreview(
-    importedMarketState,
-    multiverseMarket,
-    state.extractedMechanics?.multiverseMarketRangeBoundary,
-    { formatBoundaryValue, formatShardNumber, isBoundaryValuePresent }
   );
   const canonicalInputs = [
     {
@@ -2242,94 +2225,88 @@ function renderSpendPlannerBoundary() {
       note: "Grounded canonical aggregate when imported, but still descriptive only in this slice."
     }
   ];
-  const boundaryBackedInputs = [
-    {
-      label: "Boundary-backed: Banked tokens (stored amount)",
-      value: compatibility.unmappedSystems?.tokenShop?.BankedTokens,
-      path: "compatibility.unmappedSystemState.tokenShop.BankedTokens",
-      note: "Exact SaveData.BankedTokens recovery grounds the current stored token-bank amount as boundary-backed state only. Cap and claimable planning stay blocked."
-    },
-    {
-      label: "Boundary-backed: Daily Tokenium (stored amount)",
-      value: compatibility.unmappedSystems?.tokenShop?.DailyTokenium,
-      path: "compatibility.unmappedSystemState.tokenShop.DailyTokenium",
-      note: "Exact SaveData.DailyTokenium recovery plus the narrowed SaveData mission-persistence wrapper grounds the current Daily Tokenium stored amount as boundary-backed non-canonical evidence only. Cap and Daily Tokenium-specific ready or claimable planning stay blocked."
-    },
-    {
-      label: "Boundary-backed: Tokenium-cluster claimable evidence (generic)",
-      value: compatibility.unmappedSystems?.tokenShop?.ClaimableTokenium,
-      path: "compatibility.unmappedSystemState.tokenShop.ClaimableTokenium",
-      note: "Exact SaveData.ClaimableTokenium recovery grounds a broader generic Tokenium-cluster claimable field as boundary-backed evidence only. It does not clear token-bank claimable tokens, Daily Tokenium-specific ready state, or canonical state.playerProfile promotion."
-    }
-  ];
   const blockedInputs = [
     {
-      label: "TokenShop recommendations beyond the checked editor subset",
+      label: "TokenShop row levels and recommendation math",
       reason:
-        "The checked ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, and ATU12 remap subset can now appear on shipped Overview and Progression surfaces, but recommendation logic, ATU11, and the rest of the recovered raw TokenShop ATU row family still stay blocked until broader row remap coverage and a true next-purchase rule set clear."
+        "This panel intentionally does not read checked TokenShop row levels, compatibility-backed ATU imports, or the Progression-side editor seam. The checked subset tools stay separate, non-canonical, and blocked from planner behavior until broader row remap coverage and a truthful next-purchase rule set clear."
     },
     {
-      label: "Token-bank cap and claimable tokens",
+      label: "Token-bank state",
       reason:
-        "Blocked even with BankedTokens recovered and generic ClaimableTokenium evidence surfaced. Current TokenShop and FinalTokenBank clues still do not name planner-safe cap or token-bank-specific claimable saved values."
+        "Blocked for planner use. Banked amount, cap, fill, and claimable-bank state remain owner-dependent seams outside this canonical spend panel, so the app does not auto-apply imported token-bank values or unlock token-bank actions here."
     },
     {
-      label: "Daily Tokenium cap and ready or claimable state",
+      label: "Daily Tokenium lane state",
       reason:
-        "Blocked even with the current stored amount recovered and generic ClaimableTokenium evidence surfaced. The lane now narrows to a SaveData mission-persistence wrapper, but no checked DailyTokeniumCap field or Daily Tokenium-specific ready or claimable join is recovered yet."
+        "Blocked for planner use. Stored amount, cap, and ready or claimable state stay outside the consumed contract until the Academy or Farm Mission owner lane is grounded strongly enough for planner-safe use."
     },
     {
       label: "Emporium owned progression and Inscryptions balance",
       reason:
-        "Blocked for planner use. The app may show a compatibility-only preview of the raw IS1Level through IS110Level span, but InscryptionsDone remains wrapper-only, broader SaveData progression neighbors stay outside the admitted import slice, the preview stays non-canonical, and no Emporium recommendation path is unlocked."
+        "Intentionally parked. The spend planner does not consume Emporium import previews, raw IS levels, or wrapper-only Inscryptions fields here; owned progression stays blocked until a separate import-safe contract is ready without leaking row-remap or save-owner archaeology into planner behavior."
+    }
+  ];
+  const disabledActions = [
+    {
+      label: "Recommend next spend",
+      note: "Disabled until blocked owner-dependent inputs graduate into planner-safe canonical behavior."
+    },
+    {
+      label: "Use imported spend state",
+      note: "Disabled here by design. This panel reads canonical state.playerProfile spend inputs only."
+    },
+    {
+      label: "Rank TokenShop or Emporium buys",
+      note: "Disabled while row levels, caps, claimable state, and owned progression remain blocked seams."
     }
   ];
   const nextSteps = Array.isArray(spendTrack?.nextSteps) ? spendTrack.nextSteps.slice(0, 3) : [];
 
   return `
     <div class="meta-stack">
-      <p class="meta">Forked from the research-only spend-planner lane into a normal app surface. This snapshot stays descriptive, keeps blocked owner-dependent state explicit, and does not add recommendations, ranking, or optimizer math.</p>
-      <p class="meta">Non-canonical values shown here are explicitly labeled as boundary-backed or compatibility-only so the surface does not blur grounded app truth with quarantined evidence.</p>
+      <p class="meta">Forked from the research-only spend-planner lane into a normal app surface. The active spend panel now stays tools first, import later: it reads canonical spend inputs already present in <code>state.playerProfile</code>, keeps blocked owner-dependent seams visible, and does not add recommendations, ranking, or optimizer math.</p>
+      <p class="meta">Anything that still depends on TokenShop row ownership, token-bank or Daily Tokenium save owners, or Emporium import safety stays out of this panel instead of being inferred from compatibility blobs, extracted constants, or archaeology-only traces.</p>
     </div>
     <div class="meta-stack">
-      <p class="snapshot-title">Canonical spend inputs</p>
+      <p class="snapshot-title">Canonical spend inputs available now</p>
+      <p class="meta">These are the only spend-side values this panel consumes today.</p>
         <ul class="research-step-list">${canonicalInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not entered yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
     </div>
     <div class="meta-stack">
-      <p class="snapshot-title">Boundary-backed spend evidence</p>
-        <ul class="research-step-list">${boundaryBackedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${isBoundaryValuePresent(input.value) ? escapeHtml(formatBoundaryValue(input.value)) : "Not imported yet"} <code>${escapeHtml(input.path)}</code>. ${escapeHtml(input.note)}</li>`).join("")}</ul>
+      <p class="snapshot-title">Blocked owner-dependent spend seams</p>
+      <p class="meta">The panel stays descriptive by surfacing blocked seams directly instead of partially consuming non-canonical state.</p>
+      <ul class="research-step-list">${blockedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${escapeHtml(input.reason)}</li>`).join("")}</ul>
     </div>
     <div class="meta-stack">
-      <p class="snapshot-title">TokenShop progression handoff</p>
-      <p class="meta">The checked TokenShop subset now ships in two bounded user-facing surfaces: this Overview affordability module and the separate Progression-side checked-row editor.</p>
-      <p class="meta">Overview reads the shared checked subset for current affordability only, while Progression keeps local row edits non-canonical under <code>planning.tokenShop.checkedSubsetLevels.*</code>. Compatibility imports remain prefill or fallback only, and the rest of the raw <code>ATU*Level</code> family stays quarantined under <code>compatibility.unmappedSystemState.tokenShop</code>.</p>
-    </div>
-    ${renderTokenShopOverviewAffordabilityModule()}
-    <div class="meta-stack">
-        <p class="snapshot-title">Blocked inputs and unavailable planner actions</p>
-        <ul class="research-step-list">${blockedInputs.map((input) => `<li>${escapeHtml(input.label)}: ${escapeHtml(input.reason)}</li>`).join("")}</ul>
-    </div>
-    <div class="meta-stack">
-        <p class="snapshot-title">Compatibility-only Emporium preview boundary</p>
-        <p class="meta">${marketMemberSummary.hasBoundary ? `The checked save-side handoff now preserves ${marketMemberSummary.accessorLabel} plus a bare ${marketMemberSummary.memberLabel} member shell inside the PlayerProfile path.` : "The checked Emporium market-member boundary is not available in this build."}</p>
-        <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That keeps ${marketMemberSummary.canonicalHostLabel} as the checked handoff into the Emporium save path, while the current exact declaring owner for the broader progression run is ${marketMemberSummary.exactSaveOwnerLabel}.` : "The current build does not yet narrow the future canonical market host beyond a broad PlayerProfile-side handoff."}</p>
-        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so the active lane stays on bounded import admissibility rather than planner logic or row remap.` : "The current build no longer preserves the expected direct-type-map gap for the Emporium save path and needs review."}</p>
-        <p class="meta">${importedMarketPreview.hasOverlapGroundedRows ? `Grounded SaveData overlap currently stops at ordered rows ${escapeHtml(importedMarketPreview.overlapRangeLabel)}, and ordered overlap is not an import-admissibility result, so the canonical Emporium import-safe subset stays empty while broader SaveData neighbors remain outside the admitted import slice.` : "The current build does not yet expose an overlap-grounded Emporium subset, so the canonical import-safe subset stays empty and broader SaveData neighbors stay outside the admitted import slice."}</p>
-        <p class="meta">${Array.isArray(emporiumTrack?.nextSteps) && emporiumTrack.nextSteps.length ? `Emporium next step: ${escapeHtml(emporiumTrack.nextSteps[0])}` : "Emporium next step is still the bounded import-surface decision, not planner logic or generic owner recovery."}</p>
+      <p class="snapshot-title">Disabled planner actions</p>
+      <p class="meta">Recommendation-safe actions stay disabled until blocked fields clear on their own lanes.</p>
+      <div class="preview-stack">
+        ${disabledActions
+          .map(
+            (action) => `
+          <article class="validation-card warn">
+            <button class="button button-ghost" type="button" disabled>${escapeHtml(action.label)}</button>
+            <p class="meta">${escapeHtml(action.note)}</p>
+          </article>
+        `
+          )
+          .join("")}
+      </div>
     </div>
     <div class="meta-stack">
-        <p class="snapshot-title">Why recommendations stay unavailable</p>
-        <p class="meta">Unresolved owners still prevent planner-safe recommendations. This slice does not claim best-buy order, ROI, ETA, optimizer correctness, or route quality while the blocked spend inputs remain unrecovered.</p>
-        <p class="meta">Confidence label: canonical PlayerProfile values and explicitly labeled boundary-backed evidence only. Unresolved owner-dependent inputs stay explicitly unavailable instead of being inferred from compatibility blobs, extracted constants, or UI text hooks.</p>
+      <p class="snapshot-title">Why recommendations stay unavailable</p>
+      <p class="meta">Unresolved owners still prevent planner-safe recommendations. This slice does not claim best-buy order, ROI, ETA, optimizer correctness, or route quality while the blocked spend inputs remain unrecovered.</p>
+      <p class="meta">Confidence label: canonical PlayerProfile spend values only. Unresolved owner-dependent inputs stay explicitly unavailable instead of being inferred from compatibility imports, extracted constants, or UI text hooks.</p>
     </div>
     ${nextSteps.length ? `<div class="meta-stack"><p class="snapshot-title">Research lane remains separate</p><ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul></div>` : ""}
     <div class="pill-row">
         <span class="pill">${canonicalInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${canonicalInputs.length} canonical inputs entered</span>
-        <span class="pill">${boundaryBackedInputs.filter((input) => isBoundaryValuePresent(input.value)).length}/${boundaryBackedInputs.length} boundary-backed inputs imported</span>
-        <span class="pill">${blockedInputs.length} blocked inputs surfaced</span>
+        <span class="pill">${blockedInputs.length} blocked seams surfaced</span>
+        <span class="pill">${disabledActions.length} planner actions disabled</span>
         <span class="pill">Canonical boundary preserved</span>
-        <span class="pill">Boundary-backed evidence labeled</span>
-        <span class="pill">Compatibility-only preview labeled</span>
+        <span class="pill">Tools first, import later</span>
+        <span class="pill">Owner-dependent inputs blocked</span>
         <span class="pill">Uncertainty visible</span>
         <span class="pill">No spend recommendations yet</span>
     </div>
@@ -2340,9 +2317,9 @@ function renderSpendPlannerResearchForkNote() {
   return `
     <div class="meta-stack">
       <p class="snapshot-title">Forked user-surface slice</p>
-      <p class="meta">The Overview page keeps the descriptive spend boundary and the checked-subset TokenShop affordability module, while the Progression page keeps the separate checked-row editor slice.</p>
-      <p class="meta">Those two shipped TokenShop surfaces answer two real player questions for the same checked subset only: what can I afford right now, and what do the grounded upgrades I can already inspect do at my current level and on the next level?</p>
-      <p class="meta">Anything beyond that consumed-input contract should fork into a new slice rather than reopening the shipped surfaces with optimizer behavior.</p>
+      <p class="meta">The Overview page now keeps a canonical-only descriptive spend panel, while row-level TokenShop tools and compatibility imports stay on separate non-canonical surfaces.</p>
+      <p class="meta">That keeps the product stance obvious: use grounded tools first, import later, and do not quietly turn blocked owner-dependent seams into planner behavior.</p>
+      <p class="meta">Anything beyond that consumed-input contract should fork into a new slice rather than reopening the spend panel with optimizer behavior or parked import archaeology.</p>
     </div>
   `;
 }

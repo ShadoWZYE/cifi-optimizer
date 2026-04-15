@@ -744,44 +744,39 @@ assert.match(appJs, /community-derived/);
 assert.match(html, /id="overviewSpendSnapshot"/);
 assert.match(appJs, /function renderSpendPlannerBoundary/);
 assert.match(appJs, /Forked from the research-only spend-planner lane into a normal app surface/);
-assert.match(
-  appJs,
-  /Non-canonical values shown here are explicitly labeled as boundary-backed or compatibility-only/
-);
-assert.match(appJs, /Canonical spend inputs/);
-assert.match(appJs, /Boundary-backed spend evidence/);
-assert.match(appJs, /TokenShop progression handoff/);
-assert.match(appJs, /Blocked inputs and unavailable planner actions/);
-assert.match(appJs, /Compatibility-only Emporium preview boundary/);
+assert.match(appJs, /The active spend panel now stays tools first, import later/);
+assert.match(appJs, /Canonical spend inputs available now/);
+assert.match(appJs, /Blocked owner-dependent spend seams/);
+assert.match(appJs, /Disabled planner actions/);
 assert.match(appJs, /Why recommendations stay unavailable/);
 assert.match(appJs, /Tokens",\s*value: canonical\.tokens/);
 assert.match(appJs, /Diamonds",\s*value: canonical\.diamonds/);
 assert.match(appJs, /Current LR",\s*value: canonical\.loopReset/);
 assert.match(appJs, /Academy relics",\s*value: canonical\.academyRelics/);
+assert.match(appJs, /These are the only spend-side values this panel consumes today/);
+assert.match(appJs, /TokenShop row levels and recommendation math/);
 assert.match(
   appJs,
-  /Boundary-backed: Banked tokens \(stored amount\)",\s*value: compatibility\.unmappedSystems\?\.tokenShop\?\.BankedTokens/
+  /This panel intentionally does not read checked TokenShop row levels, compatibility-backed ATU imports, or the Progression-side editor seam/
 );
+assert.match(appJs, /Token-bank state/);
 assert.match(
   appJs,
-  /Exact SaveData\.BankedTokens recovery grounds the current stored token-bank amount as boundary-backed state only/
+  /Blocked for planner use\. Banked amount, cap, fill, and claimable-bank state remain owner-dependent seams outside this canonical spend panel/
 );
+assert.match(appJs, /Daily Tokenium lane state/);
 assert.match(
   appJs,
-  /Boundary-backed: Daily Tokenium \(stored amount\)",\s*value: compatibility\.unmappedSystems\?\.tokenShop\?\.DailyTokenium/
+  /Stored amount, cap, and ready or claimable state stay outside the consumed contract until the Academy or Farm Mission owner lane is grounded strongly enough/
 );
+assert.match(appJs, /Emporium owned progression and Inscryptions balance/);
 assert.match(
   appJs,
-  /Exact SaveData\.DailyTokenium recovery plus the narrowed SaveData mission-persistence wrapper grounds the current Daily Tokenium stored amount as boundary-backed non-canonical evidence only/
+  /Intentionally parked\. The spend planner does not consume Emporium import previews/
 );
-assert.match(
-  appJs,
-  /Boundary-backed: Tokenium-cluster claimable evidence \(generic\)",\s*value: compatibility\.unmappedSystems\?\.tokenShop\?\.ClaimableTokenium/
-);
-assert.match(
-  appJs,
-  /Exact SaveData\.ClaimableTokenium recovery grounds a broader generic Tokenium-cluster claimable field as boundary-backed evidence only/
-);
+assert.match(appJs, /Recommend next spend/);
+assert.match(appJs, /Use imported spend state/);
+assert.match(appJs, /Rank TokenShop or Emporium buys/);
 assert.match(appJs, /\.\/data\/token-shop-row-remap-boundary\.json/);
 assert.match(
   appJs,
@@ -863,41 +858,29 @@ assert.match(
   appJs,
   /Checked subset only\. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool\./
 );
-assert.match(appJs, /TokenShop recommendations beyond the checked editor subset/);
-assert.match(appJs, /token-bank cap and claimable tokens/i);
-assert.match(appJs, /generic ClaimableTokenium evidence surfaced/);
-assert.match(appJs, /Daily Tokenium cap and ready or claimable state/);
+assert.match(appJs, /TokenShop row levels and recommendation math/);
+assert.match(appJs, /Token-bank state/);
+assert.match(appJs, /Daily Tokenium lane state/);
 assert.match(
   appJs,
-  /no checked DailyTokeniumCap field or Daily Tokenium-specific ready or claimable join is recovered yet/
+  /Academy or Farm Mission owner lane is grounded strongly enough for planner-safe use/
 );
 assert.match(appJs, /Emporium owned progression and Inscryptions balance/);
-assert.match(appJs, /Grounded SaveData overlap currently stops at ordered rows/);
-assert.match(appJs, /Emporium next step:/);
-assert.match(
-  appJs,
-  /Confidence label: canonical PlayerProfile values and explicitly labeled boundary-backed evidence only/
-);
+assert.match(appJs, /Confidence label: canonical PlayerProfile spend values only/);
 assert.match(appJs, /Canonical boundary preserved/);
-assert.match(appJs, /Boundary-backed evidence labeled/);
-assert.match(appJs, /Compatibility-only preview labeled/);
+assert.match(appJs, /Tools first, import later/);
+assert.match(appJs, /Owner-dependent inputs blocked/);
 assert.match(appJs, /Uncertainty visible/);
 assert.match(appJs, /No spend recommendations yet/);
 assert.match(appJs, /function renderSpendPlannerResearchForkNote/);
 assert.match(
   appJs,
-  /The Overview page keeps the descriptive spend boundary and the checked-subset TokenShop affordability module, while the Progression page keeps the separate checked-row editor slice/
-);
-assert.match(appJs, /Overview TokenShop affordability/);
-assert.match(
-  appJs,
-  /This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level<\/code>, <code>ATU2Level<\/code>, <code>ATU3Level<\/code>, <code>ATU4Level<\/code>, <code>ATU5Level<\/code>, <code>ATU6Level<\/code>, <code>ATU7Level<\/code>, <code>ATU8Level<\/code>, <code>ATU9Level<\/code>, <code>ATU10Level<\/code>, and <code>ATU12Level<\/code>/
+  /The Overview page now keeps a canonical-only descriptive spend panel, while row-level TokenShop tools and compatibility imports stay on separate non-canonical surfaces/
 );
 assert.match(
   appJs,
-  /Checked player-facing names are preferred where they exist, grounded prefab identity is used where they do not/
+  /That keeps the product stance obvious: use grounded tools first, import later/
 );
-assert.match(appJs, /Overview TokenShop affordability[\s\S]*Current vs next bonus •/);
 assert.match(
   tokenShopUiSupport,
   /Grounded as a checked shell-to-prefab-to-player-facing-title row\./
@@ -5678,7 +5661,11 @@ withRequiredValue(
   spendImportSurfaceTrack,
   "expected Emporium import-surface successor track",
   (track) => {
-    assert.equal(track.status, "active");
+    assert.equal(track.status, "queued");
+    assert.match(
+      track.currentSlice,
+      /Intentionally parked while the spend-planner-first lane tightens the canonical-only descriptive spend surface/
+    );
     assert.match(track.currentSlice, /`multiverse-market-savedata-import-boundary` artifact/);
     assert.match(track.currentSlice, /`PlayerProfileHandler\.get_Market -> MultiverseMarket`/);
     assert.match(
@@ -5778,22 +5765,28 @@ withRequiredValue(
   spendFirstUiSliceTrack,
   "expected spend planner first UI slice track",
   (track) => {
-    assert.equal(track.status, "archived");
-    assert.match(track.goal, /first real TokenShop-facing user module/i);
-    assert.match(track.currentSlice, /separate Overview module/);
-    assert.match(track.currentSlice, /canonical `state\.playerProfile\.player\.resources\.tokens`/);
+    assert.equal(track.status, "active");
+    assert.match(track.goal, /minimal descriptive spend-planner panel/i);
     assert.match(
       track.currentSlice,
-      /`ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` subset/
+      /canonical `player\.resources\.tokens`, `player\.resources\.diamonds`, `player\.loop\.loopReset`, and importable `player\.resources\.academyRelics`/
     );
     assert.match(
       track.currentSlice,
-      /row's identity, current level, next known cost, and whether it is affordable right now/
+      /TokenShop row levels, token-bank state, Daily Tokenium lane state, and Emporium owned progression as blocked seams/
     );
-    assert.match(track.blockedBy, /Archived after ship/);
+    assert.match(track.currentSlice, /tools first, import later/);
+    assert.match(
+      track.exitCondition,
+      /without importing or guessing blocked owner-dependent state/
+    );
+    assert.match(
+      track.blockedBy,
+      /Broader planner-safe spend behavior remains blocked on separate lanes/
+    );
     assert.match(
       track.smallestShippableSlice,
-      /computes next known cost from checked `StartCost \+ AdditiveCost \* currentLevel` inputs/
+      /lists only canonical spend inputs already in `state\.playerProfile`/
     );
     assert.ok(
       track.completedSteps.some((step) =>
@@ -5811,41 +5804,27 @@ withRequiredValue(
     );
     assert.ok(
       track.completedSteps.some((step) =>
-        /exact `SaveData\.BankedTokens` as boundary-backed token-bank stored-amount evidence/.test(
+        /TokenShop row levels, token-bank state, Daily Tokenium lane state, and Emporium owned progression explicit as blocked seams/.test(
           step
         )
       ),
-      "expected spend first UI slice track to record BankedTokens boundary-backed evidence"
+      "expected spend first UI slice track to keep blocked owner-dependent seams explicit"
+    );
+    assert.ok(
+      track.completedSteps.some((step) => /tools first, import later/.test(step)),
+      "expected spend first UI slice track to record the tools-first product stance"
+    );
+    assert.ok(
+      track.completedSteps.some((step) => /recommendation-safe spend actions disabled/.test(step)),
+      "expected spend first UI slice track to keep recommendation-safe actions disabled"
     );
     assert.ok(
       track.completedSteps.some((step) =>
-        /exact `SaveData\.DailyTokenium` as boundary-backed Daily Tokenium stored-amount evidence from `compatibility\.unmappedSystemState\.tokenShop`/.test(
+        /canonical `player\.resources\.tokens`, `player\.resources\.diamonds`, `player\.loop\.loopReset`, and importable `player\.resources\.academyRelics`/.test(
           step
         )
       ),
-      "expected spend first UI slice track to record DailyTokenium boundary-backed evidence"
-    );
-    assert.ok(
-      track.completedSteps.some((step) =>
-        /exact `SaveData\.ClaimableTokenium` only as explicitly labeled broader generic Tokenium-cluster claimable evidence from `compatibility\.unmappedSystemState\.tokenShop`/.test(
-          step
-        )
-      ),
-      "expected spend first UI slice track to record generic ClaimableTokenium boundary-backed evidence"
-    );
-    assert.ok(
-      track.completedSteps.some((step) =>
-        /checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` TokenShop remap subset as compatibility-only non-canonical row evidence/.test(
-          step
-        )
-      ),
-      "expected spend first UI slice track to record grounded TokenShop row subset evidence"
-    );
-    assert.ok(
-      track.completedSteps.some((step) =>
-        /separate TokenShop subset affordability module/.test(step)
-      ),
-      "expected spend first UI slice track to record the shipped affordability module"
+      "expected spend first UI slice track to record the canonical spend contract"
     );
     assert.ok(
       track.verified.some((line) =>
@@ -5857,51 +5836,35 @@ withRequiredValue(
     );
     assert.ok(
       track.verified.some((line) =>
-        /Exact `SaveData\.BankedTokens` recovery now grounds the current token-bank stored amount strongly enough to show it as boundary-backed evidence/.test(
+        /Current spend owner-dependent blockers still live on separate TokenShop row-level or next-purchase, token-bank cap or claimable state-owner, Daily Tokenium cap or ready-state, and Emporium import-safe owned-progression tracks/.test(
           line
         )
       ),
-      "expected spend first UI slice track to record BankedTokens as boundary-backed evidence"
+      "expected spend first UI slice track to keep owner-dependent blockers on separate lanes"
     );
     assert.ok(
       track.verified.some((line) =>
-        /Exact `SaveData\.DailyTokenium` recovery plus the narrowed `SaveData` mission-persistence wrapper now grounds the current Daily Tokenium stored amount strongly enough to show it as boundary-backed non-canonical evidence/.test(
+        /truthful spend-planner panel can stay useful while consuming only canonical spend inputs and explicitly refusing blocked compatibility or owner-dependent state/.test(
           line
         )
       ),
-      "expected spend first UI slice track to record DailyTokenium as boundary-backed evidence"
+      "expected spend first UI slice track to record the canonical-only usefulness boundary"
     );
     assert.ok(
       track.verified.some((line) =>
-        /Exact `SaveData\.ClaimableTokenium` recovery now grounds one broader generic Tokenium-cluster claimable clue strongly enough to show it as explicitly labeled boundary-backed evidence/.test(
+        /Recommendation-safe spend actions should stay disabled until one of the currently blocked owner-dependent seams clears strongly enough/.test(
           line
         )
       ),
-      "expected spend first UI slice track to record generic ClaimableTokenium evidence"
+      "expected spend first UI slice track to keep recommendation actions disabled in verified facts"
     );
     assert.ok(
       track.verified.some((line) =>
-        /small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`/.test(
+        /checked TokenShop row subset, token-bank import clues, Daily Tokenium import clues, and Emporium import preview can remain on separate tool or evidence surfaces/.test(
           line
         )
       ),
-      "expected spend first UI slice track to record grounded TokenShop row subset"
-    );
-    assert.ok(
-      track.verified.some((line) =>
-        /separate TokenShop subset affordability module can ship on a normal app surface without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs/.test(
-          line
-        )
-      ),
-      "expected spend first UI slice track to keep unresolved owners and wrapper-only Emporium fields out of canonical inputs"
-    );
-    assert.ok(
-      track.verified.some((line) =>
-        /shipped Overview affordability surface can now consume the full currently grounded product-facing subset: `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`/i.test(
-          line
-        )
-      ),
-      "expected spend first UI slice track to record the full Overview affordability subset"
+      "expected spend first UI slice track to keep tool-only evidence surfaces separate from the canonical panel"
     );
     assert.ok(track.nextSteps.length <= 3, "expected spend first UI slice next-step count");
   }
@@ -8465,7 +8428,7 @@ assert.match(appJs, /\.\/data\/multiverse-market-owner-family\.json/);
 assert.match(appJs, /\.\/data\/token-shop-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/multiverse-market-save-boundary\.json/);
 assert.match(appJs, /\.\/data\/token-bank-controller-shell\.json/);
-assert.match(appJs, /Blocked inputs and unavailable planner actions/);
+assert.match(appJs, /Blocked owner-dependent spend seams/);
 assert.match(appJs, /Emporium compatibility preview/);
 assert.match(playerProfileBoundarySupportModule, /grounded Emporium text model is split/i);
 assert.match(spendBoundarySummaryJs, /BonusDescriptionText/);

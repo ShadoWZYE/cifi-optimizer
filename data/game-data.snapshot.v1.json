@@ -377,28 +377,25 @@
     {
       "id": "spend-planner-first-ui-slice",
       "title": "Spend planner first UI slice",
-      "status": "archived",
-      "goal": "Ship the first real TokenShop-facing user module around one grounded player question instead of growing the spend area as research-only descriptive surface.",
-      "currentSlice": "Ship a separate Overview module that reads canonical `state.playerProfile.player.resources.tokens` plus imported compatibility-only levels for the already checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` subset, then shows each grounded row's identity, current level, next known cost, and whether it is affordable right now, while the existing spend snapshot stays boundary-oriented and non-optimizer.",
-      "exitCondition": "The app answers the player question `what grounded TokenShop upgrades can I buy right now from the subset we actually know?` with a separate user-facing module that uses only consumed grounded inputs, declares one simple display rule, and avoids best-buy, ROI, ranking, or canonical `ATU*Level` promotion claims.",
-      "blockedBy": "Archived after ship. Broader planner-safe spend behavior remains blocked on separate lanes for additional TokenShop row remap, token-bank cap and claimable state, Daily Tokenium cap and ready or claimable state, and Emporium owned progression.",
-      "smallestShippableSlice": "A separate Overview module that keeps row order fixed to the grounded ATU subset, reads canonical Tokens plus compatibility-only subset levels, computes next known cost from checked `StartCost + AdditiveCost * currentLevel` inputs for those same rows only, labels affordability without optimizer claims, and leaves all unresolved rows outside the module.",
+      "status": "active",
+      "goal": "Keep a minimal descriptive spend-planner panel on the normal app surface that reads only canonical spend inputs already available in `state.playerProfile`, makes blocked owner-dependent seams obvious, and leaves recommendation-safe actions disabled.",
+      "currentSlice": "Tighten the Overview spend panel so it consumes only canonical `player.resources.tokens`, `player.resources.diamonds`, `player.loop.loopReset`, and importable `player.resources.academyRelics`, then explicitly list TokenShop row levels, token-bank state, Daily Tokenium lane state, and Emporium owned progression as blocked seams while making the product stance `tools first, import later` obvious in both UI copy and snapshot surfaces.",
+      "exitCondition": "The app answers the player question `what spend-side grounded information can I inspect safely right now without importing or guessing blocked owner-dependent state?` with one descriptive panel that reads canonical spend inputs only, shows blocked seams explicitly, and keeps recommendation-safe actions disabled.",
+      "blockedBy": "Broader planner-safe spend behavior remains blocked on separate lanes for TokenShop row remap and next-purchase rules, token-bank cap and claimable state-owner, Daily Tokenium cap and ready or claimable state-owner, and Emporium import-safe owned progression.",
+      "smallestShippableSlice": "A separate Overview panel that lists only canonical spend inputs already in `state.playerProfile`, calls out blocked owner-dependent spend seams directly, disables recommendation actions in the UI, and avoids consuming compatibility-only imports, checked row levels, or parked Emporium preview state.",
       "completedSteps": [
         "Fork a UI-only spend-planner lane so the app can ship descriptive spend visibility without reopening save-owner recovery.",
         "Ship a forked user-surface spend snapshot on the normal app Overview page instead of growing the research-only descriptive spend panel.",
         "Ship a descriptive spend snapshot that reads canonical `player.resources.*`, `player.loop.loopReset`, and profile-confidence inputs only.",
-        "Surface exact `SaveData.BankedTokens` as boundary-backed token-bank stored-amount evidence without promoting it into canonical planner state.",
-        "Surface exact `SaveData.DailyTokenium` as boundary-backed Daily Tokenium stored-amount evidence from `compatibility.unmappedSystemState.tokenShop` without promoting it into canonical planner state.",
-        "Surface exact `SaveData.ClaimableTokenium` only as explicitly labeled broader generic Tokenium-cluster claimable evidence from `compatibility.unmappedSystemState.tokenShop`, without promoting it into token-bank, Daily Tokenium-specific, or canonical planner state.",
-        "Surface only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level` TokenShop remap subset as compatibility-only non-canonical row evidence while keeping `ATU11Level` and the remaining `ATU*Level` family quarantined.",
-        "Ship a separate TokenShop subset affordability module that answers one player question from canonical Tokens plus the checked compatibility-only subset levels only.",
-        "Show each grounded subset row's identity, current level, next known cost, and current affordability without best-buy, ROI, ranking, or planner claims.",
-        "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, and Emporium state outside the shipped module instead of silently widening the consumed-input contract."
+        "Tighten the active spend panel so it reads only canonical `player.resources.tokens`, `player.resources.diamonds`, `player.loop.loopReset`, and importable `player.resources.academyRelics`.",
+        "Keep TokenShop row levels, token-bank state, Daily Tokenium lane state, and Emporium owned progression explicit as blocked seams instead of partially consuming compatibility imports.",
+        "Make the product stance visible in the app: tools first, import later, and no quiet promotion of blocked owner-dependent spend inputs into planner behavior.",
+        "Keep recommendation-safe spend actions disabled on the descriptive panel until a separate owner-dependent field actually clears into canonical planner behavior."
       ],
       "nextSteps": [
-        "Keep any future TokenShop, token-bank, Daily Tokenium, or Emporium planner logic behind their existing owner-recovery tracks.",
-        "Expand TokenShop row coverage only when a new slice consumes more grounded rows.",
-        "Fork any future spend action beyond current subset affordability into a new lane instead of reopening this shipped slice."
+        "Keep any future TokenShop, token-bank, Daily Tokenium, or Emporium planner logic behind their existing owner-recovery or import-safe tracks.",
+        "If the Overview panel grows again, limit follow-up work to descriptive contract or UX clarity that still consumes only canonical spend inputs.",
+        "Do not reopen checked-row affordability, Emporium import preview, or save-owner archaeology from this panel unless a new slice explicitly consumes one newly cleared field."
       ],
       "sources": [
         "docs/contracts/player-profile-schema.md",
@@ -412,18 +409,14 @@
       ],
       "verified": [
         "Canonical spend-side inputs already available in `state.playerProfile` include `player.resources.tokens`, `player.resources.diamonds`, `player.loop.loopReset`, and importable `player.resources.academyRelics`.",
-        "Exact `SaveData.BankedTokens` recovery now grounds the current token-bank stored amount strongly enough to show it as boundary-backed evidence without promoting it into canonical planner state.",
-        "Exact `SaveData.DailyTokenium` recovery plus the narrowed `SaveData` mission-persistence wrapper now grounds the current Daily Tokenium stored amount strongly enough to show it as boundary-backed non-canonical evidence without promoting it into canonical planner state.",
-        "Exact `SaveData.ClaimableTokenium` recovery now grounds one broader generic Tokenium-cluster claimable clue strongly enough to show it as explicitly labeled boundary-backed evidence without promoting it into token-bank claimable state, Daily Tokenium-specific ready state, or canonical planner state.",
-        "The checked TokenShop row-remap boundary now clears a small tool-safe subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`, so those rows can appear in a separate affordability module while `ATU11Level` and the rest of the `ATU*Level` family stay quarantined.",
-        "The grounded TokenShop extract already preserves the checked cost inputs needed by this slice, so next known cost for that subset can stay on the exact `StartCost + AdditiveCost * currentLevel` contract without claiming broader planner logic.",
-        "Current spend owner-recovery blockers still live on separate TokenShop row-level, token-bank cap or claimable state-owner, Daily Tokenium cap or ready-state, and Emporium save-model tracks.",
-        "A separate TokenShop subset affordability module can ship on a normal app surface without promoting unresolved save owners or wrapper-only Emporium fields into canonical planner inputs.",
-        "The shipped Overview affordability surface can now consume the full currently grounded product-facing subset: `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`, while preferring checked player-facing names where they exist and falling back to grounded prefab identity where they do not."
+        "Current spend owner-dependent blockers still live on separate TokenShop row-level or next-purchase, token-bank cap or claimable state-owner, Daily Tokenium cap or ready-state, and Emporium import-safe owned-progression tracks.",
+        "A truthful spend-planner panel can stay useful while consuming only canonical spend inputs and explicitly refusing blocked compatibility or owner-dependent state.",
+        "Recommendation-safe spend actions should stay disabled until one of the currently blocked owner-dependent seams clears strongly enough for canonical planner behavior.",
+        "The checked TokenShop row subset, token-bank import clues, Daily Tokenium import clues, and Emporium import preview can remain on separate tool or evidence surfaces without being consumed by the canonical spend panel."
       ],
       "uncertain": [
-        "Which blocked spend lane will recover the next planner-safe player-owned input first.",
-        "Whether the next spend slice after this shipped subset should expand TokenShop row coverage or instead wait for a different owned-state lane to clear."
+        "Which blocked owner-dependent spend lane will recover the next planner-safe canonical input first.",
+        "Whether the next useful spend-panel follow-up after this canonical-only slice will be UX clarity only or will wait for a newly cleared owner-dependent field."
       ]
     },
     {
@@ -519,9 +512,9 @@
     {
       "id": "spend-multiverse-savedata-import-surface",
       "title": "MultiverseMarket SaveData import-surface decision",
-      "status": "active",
+      "status": "queued",
       "goal": "Reach one bounded admissibility decision for `SaveData`-backed Emporium import without mixing that decision with row identity/remap research or planner behavior.",
-      "currentSlice": "Use the checked `multiverse-market-savedata-import-boundary` artifact to keep the active Emporium question narrow: `PlayerProfileHandler.get_Market -> MultiverseMarket` is only the accessor bridge, `PlayerProfileData` stays a flatter wrapper/export surface and also directly declares `InscryptionsDone`, `SaveData` is the exact declaring owner for the checked `IS*Level` / trade-counter / mech block, exact typed recovery proves `IS1Level` through `IS110Level` as the only compatibility-safe raw Emporium import span under `compatibility.unmappedSystemState.multiverseMarket`, broader SaveData progression neighbors stay outside that admitted import slice, and rows `71-74` stay ordered-overlap-only while row identity/remap remains downstream.",
+      "currentSlice": "Intentionally parked while the spend-planner-first lane tightens the canonical-only descriptive spend surface. When this lane resumes, use the checked `multiverse-market-savedata-import-boundary` artifact to keep the Emporium question narrow: `PlayerProfileHandler.get_Market -> MultiverseMarket` is only the accessor bridge, `PlayerProfileData` stays a flatter wrapper/export surface and also directly declares `InscryptionsDone`, `SaveData` is the exact declaring owner for the checked `IS*Level` / trade-counter / mech block, exact typed recovery proves `IS1Level` through `IS110Level` as the only compatibility-safe raw Emporium import span under `compatibility.unmappedSystemState.multiverseMarket`, broader SaveData progression neighbors stay outside that admitted import slice, and rows `71-74` stay ordered-overlap-only while row identity/remap remains downstream.",
       "exitCondition": "The repo either names a bounded Emporium import-safe subset from the recovered `SaveData` block with grounded scope and explicit non-goals, or checks that the canonical import-safe subset stays empty until stronger identity evidence exists.",
       "blockedBy": "The same-number row chain now grounds Emporium row identity structurally, but the repo still lacks the actual game-side player-facing effect/label text source and a broader canonical import-safe join. The current narrowed runtime blocker is the separate CurrentBonusText writer lane after explicit negative checks against TextHandlerMarkets and the last plausible row-local fallback surfaces NavigationManager.UpdateInscryptionUI, NavigationManager+<UpdateInscryptionUI>d__185.MoveNext, NavigationManager+<InscEnum>d__186.MoveNext, NavigationManager.DisableInscryptionObjects, NavigationManager.OnAvailbleInscryptionsClick, NavigationManager.OnFinishedInscryptionsClick, TextHandlerShopNPCs.OpeningChrystosEmporium, TextHandlerShopNPCs.EmporiumDefaultText, and TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext, so canonical Emporium import and planner-safe use stay blocked.",
       "smallestShippableSlice": "A checked import-surface decision that keeps canonical `state.playerProfile` expansion empty for Emporium, classifies `InscryptionsDone` as wrapper/export-only, promotes the exact typed `IS1Level` through `IS110Level` span as compatibility-only raw Emporium import truth, and keeps the adjacent trade-counter and early `Mech*` `SaveData` neighbors outside that import slice.",
