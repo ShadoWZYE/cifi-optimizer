@@ -1,6 +1,7 @@
 # TokenShop ATU Row Remap Merge Notes
 
 This branch should merge with the following intentional groupings preserved.
+Review it in three buckets: shipped TokenShop subset expansion, required companion fixes, and intentional branch-local support work.
 
 ## Required companions
 
