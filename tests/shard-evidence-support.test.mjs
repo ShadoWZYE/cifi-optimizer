@@ -163,6 +163,20 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
         },
         uncertaintyLog: [{ status: "conflict_detected", what_is_missing: "Row owner unresolved." }]
       },
+      saveBoundary: {
+        probeResults: {
+          saveSideOwnerRecovered: false
+        },
+        recoveredDeclaringRowModel: {
+          ownerType: "ShardMining",
+          rowModelType: {
+            fullName: "ShardMining+ShardUpgradeInfo"
+          }
+        }
+      },
+      saveOwnerCandidates: {
+        remainingSaveOwnerCandidates: [{ label: "PlayerProfile-side shard member shell" }]
+      },
       rowModelBoundary: { hasBoundary: true }
     }
   });
@@ -174,6 +188,16 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
 
   assert.equal(summary.titleCoverageStatusLabel, "Partial");
   assert.match(summary.effectLine, /bonus slots/);
+  const definitionSummary = support.getShardDefinitionEvidenceSummary({
+    milestoneNumber: 4,
+    unlockCondition: { type: "total_milestone_levels_required", value: 40 }
+  });
+  assert.match(definitionSummary.unlockLine, /Unlock requirement: 40 total milestone levels/);
+  assert.match(definitionSummary.bonusShapeLine, /Recovered bonus package shape/);
+  const ownedStateBlocker = support.getShardOwnedStateBlockerSummary();
+  assert.match(ownedStateBlocker.ownerLine, /No checked save-side owner is recovered/);
+  assert.match(ownedStateBlocker.importLine, /No grounded import path is available/);
+  assert.match(ownedStateBlocker.candidateLine, /PlayerProfile-side shard member shell/);
   assert.equal(
     support.getMilestoneSourceLabel({ sourceIds: ["report_a", "report_b"] }),
     "Report A | Report B"

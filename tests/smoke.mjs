@@ -589,6 +589,8 @@ assert.deepEqual(
     "shardCostNativeProbe",
     "shardBonusSlotProbe",
     "shardMilestoneFamilyEvidence",
+    "shardMilestoneHandoffBoundary",
+    "shardMilestoneSaveOwnerCandidates",
     "extractionCandidateRanking",
     "tokenShopValues",
     "multiverseMarketValues",
@@ -638,6 +640,8 @@ assert.deepEqual(
     "./data/shard-cost-native-probe.v1.json",
     "./data/shard-bonus-slot-probe.v1.json",
     "./data/shard-milestone-family-evidence.v1.json",
+    "./data/shard-milestone-handoff-boundary.v1.json",
+    "./data/shard-milestone-save-owner-candidates.v1.json",
     "./data/extraction-candidate-ranking.v1.json",
     "./data/token-shop-values.json",
     "./data/multiverse-market-values.json",
@@ -720,12 +724,12 @@ assert.match(
   /export function getShardFinalSuBonusBoundarySummary/
 );
 assert.match(appJs, /Grounded shard evidence/);
-assert.match(appJs, /Ownership mapping/);
-assert.match(appJs, /Shard-specific ownership evidence is narrowed, not resolved/);
+assert.match(appJs, /Definition carrier/);
+assert.match(appJs, /ShardMining owns the reachable definition family/);
 assert.match(appJs, /Shard-cost evidence/);
 assert.match(appJs, /Recovered cost data now supports evidence cards/);
 assert.match(appJs, /Safe shard truths already shown in the app/);
-assert.match(appJs, /Recovered shard-cost evidence stays descriptive/);
+assert.match(appJs, /Definition family is grounded; owned state stays blocked/);
 assert.match(appJs, /What must be grounded before stronger behavior/);
 assert.match(
   appJs,
@@ -7883,7 +7887,7 @@ assert.match(
 );
 assert.match(
   shardPlayerFacingEvidenceDoc,
-  /the grounded app can show shard evidence, watch cards, threshold wording, and loop-reset guardrails today/i
+  /the grounded app can now treat the reachable `ShardMining` row-definition family as grounded product data/i
 );
 assert.match(
   shardPlayerFacingEvidenceDoc,
@@ -7891,7 +7895,7 @@ assert.match(
 );
 assert.match(
   shardPlayerFacingEvidenceDoc,
-  /cannot yet claim exact shard cost math, affordability, ROI, ETA certainty, or best-buy order/i
+  /cannot yet claim player-owned shard milestone ownership, exact shard cost math, affordability, ROI, ETA certainty, or best-buy order/i
 );
 assert.match(shardExtractionCandidatesDoc, /# Shard Extraction Candidates/);
 assert.match(shardExtractionCandidatesDoc, /shards\.milestone-owner-family/);
@@ -8327,11 +8331,11 @@ assert.match(appJs, /function renderProgressionSubsystemSection\(/);
 assert.match(appJs, /function renderShardSubsystemSection\(/);
 assert.match(appJs, /Shard Mining/);
 assert.match(appJs, /Loop Prestige/);
-assert.match(appJs, /Grounding and evidence live in docs/);
+assert.match(appJs, /Definition contract and blockers live in docs/);
 assert.match(appJs, /These rows render from one shared shard-family evidence table/);
-assert.match(appJs, /Shared shard family boundary/);
+assert.match(appJs, /Grounded definition family/);
 assert.doesNotMatch(appJs, /Tracked row/);
-assert.match(appJs, /descriptive-only and evidence-first/);
+assert.match(appJs, /finished definition-side contract/);
 assert.match(shardEvidenceSupportModule, /Evidence status:/);
 assert.match(shardEvidenceSupportModule, /getShardMilestonePanelTitle/);
 assert.match(
@@ -8343,9 +8347,10 @@ assert.match(
   shardEvidenceSupportModule,
   /Recovered shard cost evidence keeps/
 );
-assert.match(appJs, /Evidence boundary/);
+assert.match(appJs, /Definition evidence/);
+assert.match(appJs, /Owned-state blocker/);
 assert.doesNotMatch(appJs, /exact serialized cost fields/);
-assert.doesNotMatch(appJs, /Unlock req/);
+assert.match(appJs, /Unlock requirement/);
 assert.doesNotMatch(appJs, /Extracted row state/);
 assert.doesNotMatch(appJs, /Formula profile/);
 assert.doesNotMatch(appJs, /Grounding detail/);
@@ -8359,9 +8364,9 @@ assert.match(appJs, /Verified package/);
 assert.match(shardEvidenceSupportModule, /per-level multiplicative model/);
 assert.match(shardEvidenceSupportModule, /Current value unresolved from checked inputs/);
 assert.doesNotMatch(appJs, /Title source/);
-assert.match(appJs, /Row shell/);
-assert.match(appJs, /Effect text/);
-assert.match(appJs, /Cost shell/);
+assert.match(appJs, /Bonus package/);
+assert.match(appJs, /Row-local cost shell/);
+assert.match(appJs, /Save owner/);
 assert.match(appJs, /shard-panel-card-tag/);
 assert.match(appJs, /Lane \${escapeHtml\(String\(index \+ 1\)\)}/);
 assert.doesNotMatch(appJs, /Runtime row/);
@@ -8403,7 +8408,7 @@ assert.doesNotMatch(appJs, /Cost-model boundary/);
 assert.match(appJs, /Shard cost-model boundary/);
 assert.match(
   appJs,
-  /What the grounded app can safely show today: shard watch cards, loop warnings, threshold wording, and evidence-status notes sourced from the checked shard contract\./
+  /What the grounded app can safely show today: definition-side shard rows, loop warnings, threshold wording, and evidence-status notes sourced from the shared shard-family contract\./
 );
 assert.match(
   appJs,

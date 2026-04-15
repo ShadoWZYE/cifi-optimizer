@@ -154,10 +154,12 @@ const {
   getShardMilestoneEvidenceCounts,
   getShardMilestoneEvidenceRow,
   getShardMilestoneFamilyEvidence,
+  getShardDefinitionEvidenceSummary,
   getShardMilestoneDisplayMeta,
   getShardMilestoneDisplayName,
   getShardMilestoneGroundedSummary,
   getShardMilestonePanelTitle,
+  getShardOwnedStateBlockerSummary,
   getShardNativeCostStageSummary,
   getShardUnlockRequirement,
   getSourceTitlesForIds,
@@ -551,6 +553,8 @@ async function bootstrap() {
     shardCostNativeProbe,
     shardBonusSlotProbe,
     shardMilestoneFamilyEvidence,
+    shardMilestoneHandoffBoundary,
+    shardMilestoneSaveOwnerCandidates,
     extractionCandidateRanking,
     tokenShopValues,
     multiverseMarketValues,
@@ -595,6 +599,8 @@ async function bootstrap() {
     fetchJson("./data/shard-cost-native-probe.v1.json"),
     fetchJson("./data/shard-bonus-slot-probe.v1.json"),
     fetchJson("./data/shard-milestone-family-evidence.v1.json"),
+    fetchJson("./data/shard-milestone-handoff-boundary.v1.json"),
+    fetchJson("./data/shard-milestone-save-owner-candidates.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
     fetchJson("./data/token-shop-values.json"),
     fetchJson("./data/multiverse-market-values.json"),
@@ -646,7 +652,9 @@ async function bootstrap() {
     costParameterProbe: shardCostParameterProbe,
     costNativeProbe: shardCostNativeProbe,
     bonusSlotProbe: shardBonusSlotProbe,
-    milestoneFamilyEvidence: shardMilestoneFamilyEvidence
+    milestoneFamilyEvidence: shardMilestoneFamilyEvidence,
+    milestoneHandoffBoundary: shardMilestoneHandoffBoundary,
+    saveOwnerCandidates: shardMilestoneSaveOwnerCandidates
   };
   state.extractionCandidateRanking = extractionCandidateRanking;
   state.extractedMechanics = {
@@ -3509,25 +3517,25 @@ function renderShardGroundingBoundary() {
           <span class="snapshot-title">Player-facing contract</span>
           <span class="shard-status-pill ${descriptiveBundleStatus.pillClass}">${escapeHtml(descriptiveBundleStatus.label)}</span>
         </div>
-        <strong>Recovered shard-cost evidence stays descriptive</strong>
+        <strong>Definition family is grounded; owned state stays blocked</strong>
         <div class="meta-stack">
-          <p class="meta">Milestone names, unlock tables, effect lists, threshold wording, and cost evidence are shown as descriptive support, not as spend recommendations.</p>
-          <p class="meta">What the grounded app can safely show today: shard watch cards, loop warnings, threshold wording, and evidence-status notes sourced from the checked shard contract.</p>
-          <p class="meta">The UI does not rank spend order, ROI, ETA, or per-level affordability from this recovery path.</p>
-          <p class="meta">${escapeHtml(blockedUses.length ? `${blockedUses.join(", ")} remain blocked until shard owner mapping, save-state inputs, and planner-safe cost validation are recovered.` : "Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until shard owner mapping, save-state inputs, and planner-safe cost validation are recovered.")}</p>
+          <p class="meta">Direct ShardMining payload now grounds the reachable shard row-definition family as product data: title-side evidence, unlock requirements, bonus-package shape, and row-local cost shell all belong in the tool.</p>
+          <p class="meta">What the grounded app can safely show today: definition-side shard rows, loop warnings, threshold wording, and evidence-status notes sourced from the shared shard-family contract.</p>
+          <p class="meta">Player-owned shard state, import mapping, affordability, planner math, ROI, ETA, and best-buy claims stay blocked outside this contract.</p>
+          <p class="meta">${escapeHtml(blockedUses.length ? `${blockedUses.join(", ")} remain blocked until player-owned shard ownership and planner-safe cost validation are recovered.` : "Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until player-owned shard ownership and planner-safe cost validation are recovered.")}</p>
           <p class="meta">Interim compatibility path: external-model imports can preserve community-tool context while staying non-canonical and outside grounded shard recommendations.</p>
           <p class="meta">Current provenance load: ${conflictCount} conflict note${conflictCount === 1 ? "" : "s"} and ${missingCount} missing-data note${missingCount === 1 ? "" : "s"}.</p>
         </div>
       </article>
       <article class="snapshot-card shard-status-card ${ownerBoundaryStatus.cardClass}">
         <div class="shard-status-heading">
-          <span class="snapshot-title">Ownership mapping</span>
+          <span class="snapshot-title">Definition carrier</span>
           <span class="shard-status-pill ${ownerBoundaryStatus.pillClass}">${escapeHtml(ownerBoundaryStatus.label)}</span>
         </div>
-        <strong>Shard-specific ownership evidence is narrowed, not resolved</strong>
+        <strong>ShardMining owns the reachable definition family</strong>
         <div class="meta-stack">
           <p class="meta">${ownerBoundary.hasBoundary ? "Recovered ownership clues consistently point at a shard-specific family instead of the generic milestone shell." : "The current build still lacks enough shard-specific ownership evidence to map milestone rows safely."}</p>
-          <p class="meta">${ownerBoundary.hasBoundary ? "That improves confidence that the cost trail is shard-local." : "Until ownership mapping is resolved, row-level shard cost recovery stays descriptive only."}</p>
+          <p class="meta">${ownerBoundary.hasBoundary ? "That closes the row-definition carrier at the shard side instead of leaving the family on a generic academy milestone path." : "Until ownership mapping is resolved, row-level shard cost recovery stays descriptive only."}</p>
           <p class="meta">${ownerBoundary.hasDowngradedGenericLead ? "The generic milestone path is still intentionally downgraded so the app does not over-read shared UI structure as shard truth." : "Generic milestone overlap still needs more comparison work."}</p>
         </div>
       </article>
@@ -3545,10 +3553,10 @@ function renderShardGroundingBoundary() {
       </article>
       <article class="snapshot-card shard-status-card ${rowEvidenceStatus.cardClass}">
         <div class="shard-status-heading">
-          <span class="snapshot-title">Row evidence coverage</span>
+          <span class="snapshot-title">Definition coverage</span>
           <span class="shard-status-pill ${rowEvidenceStatus.pillClass}">${escapeHtml(rowEvidenceStatus.label)}</span>
         </div>
-        <strong>Titles, effect lanes, and row shells feed evidence cards</strong>
+        <strong>Row cards split grounded definitions from blocked ownership</strong>
         <div class="meta-stack">
           <p class="meta">${rowModelBoundary.hasBoundary ? `Recovered row shells currently cover rows ${rowModelBoundary.unlockRangeLabel}.` : "The current build does not yet preserve enough row-shell coverage for shard milestone cards."}</p>
           <p class="meta">${titleEffectBoundary.hasBoundary ? `Shipped title candidates currently cover rows ${titleEffectBoundary.titleRangeLabel}.` : "Shipped title candidates are still incomplete."}</p>
@@ -3557,7 +3565,7 @@ function renderShardGroundingBoundary() {
       </article>
       <article class="snapshot-card shard-status-card ${saveBoundaryStatus.cardClass}">
         <div class="shard-status-heading">
-          <span class="snapshot-title">Save-side mapping</span>
+          <span class="snapshot-title">Owned-state blocker</span>
           <span class="shard-status-pill ${saveBoundaryStatus.pillClass}">${escapeHtml(saveBoundaryStatus.label)}</span>
         </div>
         <strong>Player-owned shard state is still not recovered</strong>
@@ -3565,7 +3573,7 @@ function renderShardGroundingBoundary() {
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "Recovered shard-local evidence still separates direct row definitions from unresolved PlayerProfile save ownership." : "The current build does not yet preserve a clean shard-to-save separation result."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary && saveBoundary.hasDirectRowDefinitionPayload && saveBoundary.hasRuntimeOwnedStateShell ? "Direct ShardMining payload names the reachable row family, but player-owned row state still stops at the upgradeInfoList runtime shell." : "The current split between shard row definitions and owned-state recovery is not yet preserved in this build."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "That is useful because it blocks the UI from implying imported shard milestone ownership that the contract does not support." : "Until separation is verified, shard evidence should be treated as even more provisional."}</p>
-          <p class="meta">Manual inputs can guide descriptive watch cards, but they do not turn this flow into recovered save-state truth.</p>
+          <p class="meta">Manual inputs can guide descriptive watch cards, but they do not turn this flow into recovered save-state truth or a grounded import path.</p>
           <p class="meta">If a player imports external-model or compatibility data, it is treated as an interim reference path only and not as canonical shard state.</p>
         </div>
       </article>
@@ -3691,12 +3699,12 @@ function renderObservedShardBehaviors() {
 function renderShardDocsNotice() {
   return `
     <article class="validation-card">
-      <strong>Grounding and evidence live in docs</strong>
-      <p class="meta">Shard Mining keeps the player-facing workflow lightweight. Deep grounding, cost recovery, and probe detail have been moved out of the page.</p>
+      <strong>Definition contract and blockers live in docs</strong>
+      <p class="meta">Shard Mining now ships as a definition-family tool: the page shows grounded row definitions up front and keeps player-owned shard blockers explicit, while deeper extraction detail stays in docs.</p>
       <div class="shard-doc-link-list">
-        ${renderShardDocLink("./docs/systems/shards/shard-player-facing-evidence.md", "Shard evidence summary")}
+        ${renderShardDocLink("./docs/systems/shards/shard-player-facing-evidence.md", "Definition contract")}
         ${renderShardDocLink("./docs/systems/shards/shard-grounding-boundary.md", "Grounding boundary")}
-        ${renderShardDocLink("./docs/systems/shards/shard-cost-parameter-probe.md", "Cost parameter probe")}
+        ${renderShardDocLink("./docs/systems/shards/shard-owner-family-verification.md", "Owned-state blocker")}
       </div>
     </article>
   `;
@@ -3724,19 +3732,28 @@ function renderShardMilestoneDirectory() {
   const evidenceCounts = getShardMilestoneEvidenceCounts();
   const familyEvidence = state.shardGrounding?.milestoneFamilyEvidence;
   const sharedEvidence = familyEvidence?.sharedEvidence ?? {};
+  const ownedStateBlocker = getShardOwnedStateBlockerSummary();
   return `
     <div class="meta-stack">
       <p class="eyebrow">Shard Mining family evidence</p>
       <h3>Shard milestone rows</h3>
-      <p class="meta">These rows render from one shared shard-family evidence table for the reachable ShardMining family. The output stays descriptive-only and evidence-first: no planner math, ROI, ETA, affordability, or best-buy claims.</p>
-      <div class="snapshot-card">
-        <span class="snapshot-title">Shared shard family boundary</span>
-        <p class="meta">Reachable family: rows 0-29 via <strong>ShardMining.upgradeInfoList</strong> -> <strong>ShardMining+ShardUpgradeInfo</strong>.</p>
-        <p class="meta">Status counts: ${escapeHtml(`${evidenceCounts.verified} verified | ${evidenceCounts.partial} partial | ${evidenceCounts.blocked} blocked`)}</p>
-        <p class="meta">${escapeHtml(sharedEvidence.rowModel?.summary || "Row-model summary unavailable.")}</p>
-        <p class="meta">${escapeHtml(sharedEvidence.rowShell?.summary || "Row-shell summary unavailable.")}</p>
-        <p class="meta">${escapeHtml(sharedEvidence.payloadWatch?.summary || "Payload-watch summary unavailable.")}</p>
-        <p class="meta">${escapeHtml(sharedEvidence.saveBoundary?.summary || "Save-boundary summary unavailable.")}</p>
+      <p class="meta">These rows render from one shared shard-family evidence table for the reachable ShardMining family. The table now acts as a finished definition-side contract: row definitions are grounded product data, while player-owned shard state remains explicitly blocked.</p>
+      <div class="page-grid">
+        <article class="snapshot-card">
+          <span class="snapshot-title">Grounded definition family</span>
+          <p class="meta">Reachable family: rows 0-29 via <strong>ShardMining.upgradeInfoList</strong> -> <strong>ShardMining+ShardUpgradeInfo</strong>.</p>
+          <p class="meta">Definition status counts: ${escapeHtml(`${evidenceCounts.verified} verified | ${evidenceCounts.partial} partial | ${evidenceCounts.blocked} blocked`)}</p>
+          <p class="meta">${escapeHtml(sharedEvidence.rowModel?.summary || "Row-model summary unavailable.")}</p>
+          <p class="meta">${escapeHtml(sharedEvidence.payloadWatch?.summary || "Payload-watch summary unavailable.")}</p>
+          <p class="meta">Definition-side cards separate title, unlock requirement, bonus package shape, and row-local cost shell for each row.</p>
+        </article>
+        <article class="snapshot-card">
+          <span class="snapshot-title">Owned-state blocker</span>
+          <p class="meta">${escapeHtml(sharedEvidence.saveBoundary?.summary || "Save-boundary summary unavailable.")}</p>
+          <p class="meta">${escapeHtml(ownedStateBlocker.ownerLine)}</p>
+          <p class="meta">${escapeHtml(ownedStateBlocker.importLine)}</p>
+          <p class="meta">${escapeHtml(ownedStateBlocker.plannerLine)}</p>
+        </article>
       </div>
       <div class="preview-stack">
 ${milestones
@@ -3749,6 +3766,8 @@ ${milestones
     const thresholdSchedule = getThresholdScheduleForMilestone(milestone, mechanics);
     const hasThresholdSchedule = Array.isArray(thresholdSchedule) && thresholdSchedule.length > 0;
     const summary = getShardMilestoneGroundedSummary(milestone);
+    const definitionSummary = getShardDefinitionEvidenceSummary(milestone);
+    const rowOwnedStateBlocker = getShardOwnedStateBlockerSummary();
     const evidenceStatus = String(evidenceRow?.status || "partial");
     const evidenceStatusLabel = evidenceStatus.charAt(0).toUpperCase() + evidenceStatus.slice(1);
     const verifiedPackage = evidenceRow?.verifiedPackage;
@@ -3765,13 +3784,14 @@ ${milestones
               </div>
               <div class="shard-milestone-summary-pills">
                 <span class="pill ${escapeHtml(summary.titleCoverageStatusClass)}">${escapeHtml(`Evidence ${evidenceStatusLabel}`)}</span>
+                <span class="pill shard-status-pill-blocked">Owned state blocked</span>
                 <span class="pill shard-threshold-pill ${hasThresholdSchedule ? "" : "pill-neutral"}">${escapeHtml(hasThresholdSchedule ? `Thresholds ${formatThresholdLevels(thresholdSchedule)}` : "No explicit thresholds")}</span>
               </div>
             </summary>
             <div class="shard-milestone-hero">
               <div class="shard-milestone-hero-copy">
                 <p class="meta">${escapeHtml(milestone.summary || "No milestone summary captured.")}</p>
-                <p class="meta"><strong>Evidence note</strong> ${escapeHtml(evidenceRow?.statusReason || "Evidence summary unavailable.")}</p>
+                <p class="meta"><strong>Definition note</strong> ${escapeHtml(evidenceRow?.statusReason || "Evidence summary unavailable.")}</p>
                 <div class="shard-milestone-facts">
                   <p class="meta"><strong>Unlock</strong> ${escapeHtml(describeUnlockCondition(milestone.unlockCondition))}</p>
                   <p class="meta"><strong>Thresholds</strong> ${escapeHtml(formatThresholdLevels(thresholdSchedule))}</p>
@@ -3797,16 +3817,23 @@ ${milestones
                 .join("")}
               </div>
               <aside class="shard-level-up-rail shard-panel-card">
-                <p class="snapshot-title">Evidence boundary</p>
-                <p class="meta"><strong>Title side</strong> ${escapeHtml(summary.titleCoverageLine)}</p>
-                <p class="meta"><strong>Row shell</strong> ${escapeHtml(summary.rowShellLine)}</p>
-                <p class="meta"><strong>Effect text</strong> ${escapeHtml(summary.effectLine)}</p>
-                <p class="meta"><strong>Cost shell</strong> ${escapeHtml(summary.costLine)}</p>
+                <p class="snapshot-title">Definition evidence</p>
+                <p class="meta"><strong>Title side</strong> ${escapeHtml(definitionSummary.titleLine)}</p>
+                <p class="meta"><strong>Unlock requirement</strong> ${escapeHtml(definitionSummary.unlockLine)}</p>
+                <p class="meta"><strong>Bonus package</strong> ${escapeHtml(definitionSummary.bonusShapeLine)}</p>
+                <p class="meta"><strong>Row-local cost shell</strong> ${escapeHtml(definitionSummary.costLine)}</p>
                 ${
                   verifiedPackage
                     ? `<p class="meta"><strong>Verified package</strong> ${escapeHtml(`Breakpoints ${Array.isArray(verifiedPackage.fixedBreakpoints) ? verifiedPackage.fixedBreakpoints.join("/") : "n/a"} | Cost fields ${(verifiedPackage.serializedCostFields || []).join(", ")}`)}</p>`
                     : `<p class="meta"><strong>Verified package</strong> Not yet promoted for this row.</p>`
                 }
+              </aside>
+              <aside class="shard-level-up-rail shard-panel-card">
+                <p class="snapshot-title">Owned-state blocker</p>
+                <p class="meta"><strong>Save owner</strong> ${escapeHtml(rowOwnedStateBlocker.ownerLine)}</p>
+                <p class="meta"><strong>Import path</strong> ${escapeHtml(rowOwnedStateBlocker.importLine)}</p>
+                <p class="meta"><strong>Planner use</strong> ${escapeHtml(rowOwnedStateBlocker.plannerLine)}</p>
+                <p class="meta"><strong>Current candidate</strong> ${escapeHtml(rowOwnedStateBlocker.candidateLine)}</p>
               </aside>
             </div>
           </details>

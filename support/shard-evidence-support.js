@@ -340,6 +340,72 @@ export function createShardEvidenceSupport({
     };
   }
 
+  function getShardDefinitionEvidenceSummary(milestone) {
+    const row = Number(milestone?.milestoneNumber);
+    const evidenceRow = getShardMilestoneEvidenceRow(row);
+    const summary = getShardMilestoneGroundedSummary(milestone);
+    const titleCandidates = Array.isArray(evidenceRow?.titleBinding?.titleCandidates)
+      ? evidenceRow.titleBinding.titleCandidates
+      : [];
+    const unlockRequirement = Number.isFinite(summary.extractedUnlockRequirement)
+      ? `${formatShardNumber(summary.extractedUnlockRequirement)} total milestone levels (direct row payload)`
+      : describeUnlockCondition(milestone?.unlockCondition);
+    const bonusFieldCount = Number(evidenceRow?.effectBinding?.bonusFieldCount ?? 0);
+    const groundedBonusCount = Number(evidenceRow?.effectBinding?.groundedBonusCount ?? 0);
+    const calcAccessorCount = Number(evidenceRow?.effectBinding?.calcAccessorCount ?? 0);
+    const verifiedPackage = evidenceRow?.verifiedPackage;
+    const breakpoints = Array.isArray(verifiedPackage?.fixedBreakpoints)
+      ? verifiedPackage.fixedBreakpoints.join("/")
+      : null;
+    return {
+      titleLine:
+        titleCandidates.length > 1
+          ? `Shipped title candidates still conflict: ${titleCandidates.join(" | ")}.`
+          : titleCandidates.length === 1
+            ? `Shipped title binding: ${titleCandidates[0]}.`
+            : "Shipped title binding is not yet recovered for this row.",
+      unlockLine: `Unlock requirement: ${unlockRequirement}.`,
+      bonusShapeLine: verifiedPackage
+        ? `Verified bonus package with breakpoints ${breakpoints || "n/a"} and ${groundedBonusCount || 0} grounded bonus lane${groundedBonusCount === 1 ? "" : "s"}.`
+        : `Recovered bonus package shape: ${bonusFieldCount} slot${bonusFieldCount === 1 ? "" : "s"}, ${groundedBonusCount} grounded lane${groundedBonusCount === 1 ? "" : "s"}, ${calcAccessorCount} sampled calc accessor${calcAccessorCount === 1 ? "" : "s"}.`,
+      costLine: summary.costLine
+    };
+  }
+
+  function getShardOwnedStateBlockerSummary() {
+    const saveBoundary = getShardGrounding()?.saveBoundary ?? {};
+    const probeResults =
+      typeof saveBoundary?.probeResults === "object" && saveBoundary.probeResults
+        ? saveBoundary.probeResults
+        : {};
+    const recoveredDeclaringRowModel =
+      typeof saveBoundary?.recoveredDeclaringRowModel === "object" &&
+      saveBoundary.recoveredDeclaringRowModel
+        ? saveBoundary.recoveredDeclaringRowModel
+        : {};
+    const remainingCandidates = Array.isArray(getShardGrounding()?.saveOwnerCandidates?.remainingSaveOwnerCandidates)
+      ? getShardGrounding().saveOwnerCandidates.remainingSaveOwnerCandidates
+      : [];
+    const leadingCandidate = remainingCandidates[0] ?? null;
+    const runtimeShellAnchor = recoveredDeclaringRowModel?.ownerType
+      ? `${recoveredDeclaringRowModel.ownerType}.upgradeInfoList -> ${recoveredDeclaringRowModel.rowModelType?.fullName || "ShardMining+ShardUpgradeInfo"}`
+      : "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo";
+    return {
+      statusLabel: "Blocked",
+      ownerLine:
+        probeResults.saveSideOwnerRecovered === false
+          ? `No checked save-side owner is recovered for player-owned shard rows; the trail still stops at ${runtimeShellAnchor}.`
+          : "A checked save-side owner is recovered.",
+      importLine:
+        "No grounded import path is available from PlayerProfileData or CloudSavePlayerProfile, so player-owned shard rows cannot be imported from this contract.",
+      plannerLine:
+        "Planner-safe affordability, exact per-level math, ROI, ETA, and canonical state.playerProfile promotion stay blocked on this row.",
+      candidateLine: leadingCandidate?.label
+        ? `Current unresolved save-owner candidate: ${leadingCandidate.label}.`
+        : "No narrower save-owner candidate is promoted from this contract."
+    };
+  }
+
   function getShardMilestoneDisplayName(milestone) {
     const row = Number(milestone?.milestoneNumber ?? 0);
     const evidenceRow = getShardMilestoneEvidenceRow(milestone);
@@ -656,10 +722,12 @@ export function createShardEvidenceSupport({
     getShardMilestoneFamilyEvidence,
     getShardMilestoneDisplayMeta,
     getShardMilestoneDisplayName,
+    getShardDefinitionEvidenceSummary,
     getShardMilestoneGroundedSummary,
     getShardMilestoneLevelRailSummary,
     getShardMilestonePanelTitle,
     getShardNativeCostStageSummary,
+    getShardOwnedStateBlockerSummary,
     getShardUnlockRequirement,
     getSourceTitlesForIds,
     getThresholdScheduleForMilestone,
