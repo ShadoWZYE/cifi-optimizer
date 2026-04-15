@@ -25,7 +25,7 @@ Prefer recovering whole related families together when they share one implementa
 ### `shard-milestone-payload-recovery`
 
 - Status: `active`
-- Goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
+- Goal: recover the player-owned shard row owner or exact serialized payload path needed behind the shard-local runtime shell
 - Safe carry-forward:
   - `ShardMining` is the strongest current shard screen-controller family
   - `ShardUpgradeInfo` is the strongest current shard-specific data carrier candidate
@@ -36,7 +36,7 @@ Prefer recovering whole related families together when they share one implementa
   - that shared table keeps `SU1` and `SU2` as verified rows, keeps rows `0`, `7`, and `28` explicitly blocked, and holds the remaining reachable rows as descriptive partials
 - Still blocked:
   - only two shard rows are currently verified end-to-end; the shared family table is still descriptive evidence, not a full verified row table
-  - the exact serialized `upgradeInfoList` payload or save-side owner is not yet recovered
+  - the direct row-definition payload is recovered on `ShardMining`, but the player-owned row state behind `upgradeInfoList` still has no verified save-side owner or serialized payload path
   - exact player-owned shard row state is not yet import-ready
   - exact planner-safe shard cost math and effect-text mapping are not yet recovered
 - Largest coherent adjacent slice:

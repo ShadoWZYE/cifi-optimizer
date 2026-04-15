@@ -1,6 +1,6 @@
 {
   "dataset": "shard-milestone-save-owner-candidates.v1",
-  "generatedAt": "2026-04-13",
+  "generatedAt": "2026-04-15",
   "sources": {
     "shardSaveBoundary": "data/shard-save-boundary.v1.json",
     "handoffBoundary": "data/shard-milestone-handoff-boundary.v1.json",
@@ -46,7 +46,19 @@
     "why": [
       "Checked type reflection now directly exposes ShardMining.upgradeInfoList as List<ShardMining+ShardUpgradeInfo> instead of leaving the shard-local row shell unnamed.",
       "The nested ShardMining+ShardUpgradeInfo row shell already preserves Cost, MaxLevel, and IsUnlocked fields, which closes one declaring shard-local row-model step without claiming saved ownership.",
-      "The checked handoff boundary now keeps ConstructionMilestones as a nearby generic family while the remaining unresolved seam moves to exact serialized payload recovery or save-side ownership."
+      "The checked handoff boundary now keeps ConstructionMilestones as a nearby generic family while the remaining unresolved seam narrows to player-owned state ownership beyond the recovered shard-local runtime shell."
+    ]
+  },
+  "recoveredDirectRowDefinitionPayload": {
+    "id": "shardmining-direct-row-definition-payload",
+    "label": "Direct ShardMining row-definition payload",
+    "kind": "row-definition-payload",
+    "confidence": "medium",
+    "ownerType": "ShardMining",
+    "sceneObjectPathId": 290724,
+    "why": [
+      "The checked direct ShardMining scene payload now preserves exact serialized SU0-29 unlock requirement fields plus row-local cost-shell lanes, so the reachable shard family is not waiting on a deeper save model to name its row definitions.",
+      "This recovery is limited to the row-definition family and does not identify who owns the player's current shard milestone progress or unlock state in save data."
     ]
   },
   "remainingSaveOwnerCandidates": [
@@ -57,7 +69,7 @@
       "confidence": "low",
       "why": [
         "Shard save-boundary checks still show zero direct overlap between the narrowed shard-local owner trail and PlayerProfileData save-family anchors.",
-        "A PlayerProfile-side shard member shell remains the current unresolved save-owner class because player-owned shard state still has to land somewhere save-side even though the shard-local declaring row model is now recovered."
+        "A PlayerProfile-side shard member shell remains the current unresolved save-owner class because player-owned shard state still has to land somewhere save-side even though the row-definition payload and the shard-local runtime shell are both now recovered."
       ],
       "candidateFieldClusters": [
         "PlayerProfileData",
@@ -74,8 +86,8 @@
     }
   ],
   "confidenceNotes": [
-    "This artifact now preserves one recovered shard-local declaring row model, but it still does not recover a concrete declaring save type for player-owned shard milestone state.",
-    "The current evidence still separates the recovered shard-local row shell from save-family anchors, so confidence remains intentionally bounded."
+    "This artifact now preserves both a recovered direct row-definition payload and a recovered shard-local runtime row shell, but it still does not recover a concrete declaring save type for player-owned shard milestone state.",
+    "The current evidence still separates player-owned shard ownership from save-family anchors, so confidence remains intentionally bounded."
   ],
   "checkedOverlapStatistics": {
     "saveFamilyTermsChecked": 4,
@@ -83,15 +95,16 @@
     "ownerShellWithSaveOverlapCount": 0,
     "directShardPlayerProfileContext": false,
     "declaringRowModelRecovered": true,
+    "directSerializedRowDefinitionRecovered": true,
     "remainingSaveOwnerCandidateCount": 1
   },
   "warnings": [
-    "The recovered shard-local row model is not recovered player-owned shard milestone state.",
+    "The recovered direct row-definition payload and shard-local runtime row model are not recovered player-owned shard milestone state.",
     "The repo still has not recovered a save-side owner for player-owned shard milestone rows.",
     "Do not wire planner logic, affordability logic, or import logic to these candidates."
   ],
   "currentBoundary": [
-    "Treat this dataset as one recovered shard-local row-model result plus a remaining save-owner gap, not as recovered player-owned shard milestone state or a verified save owner.",
+    "Treat this dataset as one recovered direct row-definition payload, one recovered shard-local runtime row shell, and one remaining save-owner gap, not as recovered player-owned shard milestone state or a verified save owner.",
     "The current repo evidence still preserves zero checked overlap between narrowed shard-local owner clues and PlayerProfileData save-family anchors.",
     "Use this recovered shard-local row-model result and the remaining save-owner candidate to focus future extraction work, not to enable planner-safe shard state, recommendation logic, or import mapping."
   ]

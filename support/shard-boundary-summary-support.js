@@ -409,6 +409,15 @@ export function getShardSaveBoundarySummary(boundary) {
     typeof boundary?.probeResults === "object" && boundary.probeResults
       ? boundary.probeResults
       : {};
+  const recoveredDirectRowDefinitionPayload =
+    typeof boundary?.recoveredDirectRowDefinitionPayload === "object" &&
+    boundary.recoveredDirectRowDefinitionPayload
+      ? boundary.recoveredDirectRowDefinitionPayload
+      : {};
+  const recoveredDeclaringRowModel =
+    typeof boundary?.recoveredDeclaringRowModel === "object" && boundary.recoveredDeclaringRowModel
+      ? boundary.recoveredDeclaringRowModel
+      : {};
   return {
     hasSeparationBoundary:
       probeResults.metadataNeighborhoodHasSaveTerms === false &&
@@ -417,9 +426,15 @@ export function getShardSaveBoundarySummary(boundary) {
       probeResults.directShardPlayerProfileContext === false &&
       saveFamilyTermsChecked.includes("PlayerProfileData") &&
       saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
+    hasDirectRowDefinitionPayload: probeResults.directSerializedRowDefinitionRecovered === true,
+    hasRuntimeOwnedStateShell: probeResults.runtimeOwnedStateShellRecovered === true,
     ownerAnchor: "ShardMining / ShardUpgradeInfo",
     saveAnchor: "PlayerProfileData",
     cloudSaveAnchor: "CloudSavePlayerProfile",
+    directPayloadAnchor: recoveredDirectRowDefinitionPayload.ownerType || "ShardMining",
+    runtimeShellAnchor: recoveredDeclaringRowModel.ownerType
+      ? `${recoveredDeclaringRowModel.ownerType}.upgradeInfoList`
+      : "ShardMining.upgradeInfoList",
     overlapLabel: "zero direct overlap",
     ownerTermCount: ownerShellTermsChecked.length
   };

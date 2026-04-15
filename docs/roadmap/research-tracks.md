@@ -225,7 +225,7 @@ Current active or queued tracks:
 
 - `shard-milestone-payload-recovery`
   - status: `active`
-  - goal: recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs
+  - goal: recover the player-owned shard row owner or exact serialized payload path needed behind the shard-local runtime shell
 - `spend-multiverse-savedata-import-surface`
   - status: `active`
   - goal: reach one bounded admissibility decision for `SaveData`-backed Emporium import without mixing that decision with row identity/remap research or planner behavior
@@ -277,4 +277,3 @@ Superseded parent:
 - `spend-multiverse-save-model-recovery`
   - status: `archived`
   - reason: the save-owner question is now grounded enough that the active follow-up is a narrower `SaveData` import-surface decision, not more generic owner recovery
-

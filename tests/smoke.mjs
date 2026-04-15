@@ -1581,7 +1581,7 @@ assert.deepEqual(
 );
 assert.ok(
   shardMilestoneHandoffBoundary.currentBoundary.some((line) =>
-    /declaring row-model result/.test(line)
+    /runtime row shell recovered/.test(line) && /row-definition family already recovered/.test(line)
   )
 );
 assert.ok(
@@ -5486,14 +5486,14 @@ withRequiredValue(shardTrack, "expected shard milestone payload recovery track",
   assert.equal(track.status, "active");
   assert.match(
     track.goal,
-    /Recover the exact shard-side serialized row payload or declaring save-side owner/
+    /Recover the player-owned shard row owner or exact serialized payload path needed behind the shard-local runtime shell/
   );
   assert.match(track.currentSlice, /Ship one shared shard-family evidence table/);
   assert.match(track.currentSlice, /ShardMining\.upgradeInfoList -> ShardMining\+ShardUpgradeInfo/);
   assert.match(track.currentSlice, /classify rows 0-29 as verified, partial, or blocked/);
   assert.match(
     track.exitCondition,
-    /exact serialized shard milestone row payload or declaring save-side owner/
+    /serialized directly, rebuilt from a deeper save model, or stop at a runtime-only shell/
   );
   assert.match(track.blockedBy, /one reachable shard-family evidence pass/);
   assert.match(track.smallestShippableSlice, /shared descriptive shard-family evidence table/);

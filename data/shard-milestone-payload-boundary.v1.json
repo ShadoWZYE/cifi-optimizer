@@ -1,6 +1,6 @@
 {
   "dataset": "shard-milestone-payload-boundary.v1",
-  "generatedAt": "2026-04-03",
+  "generatedAt": "2026-04-15",
   "sources": {
     "shardMiningMetadataNeighborhood": "data/shardmining-metadata-neighborhood.v1.json",
     "shardUpgradeInfoMetadataNeighborhood": "data/shardupgradeinfo-metadata-neighborhood.v1.json",
@@ -55,6 +55,6 @@
     "Treat this bundle as the current shard payload-watch boundary around ShardUpgradeInfo and its ShardMining tie-in.",
     "Use it to keep milestone-total, affordability-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail.",
     "Do not treat these hooks as recovered serialized player-owned milestone rows, verified player-facing milestone labels, or planner-safe affordability truth.",
-    "The next extraction gate is still the exact serialized row payload or save-side owner behind the narrowed shard-specific trail."
+    "The direct row-definition payload is already recovered on the ShardMining scene object; the remaining extraction gate is the exact serialized or rebuilt player-owned row-state path behind the narrowed shard-specific runtime shell."
   ]
 }

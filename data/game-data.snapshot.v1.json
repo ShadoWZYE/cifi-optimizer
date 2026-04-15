@@ -171,7 +171,7 @@
       "title": "Shard workflow and loop guardrails",
       "status": "archived",
       "goal": "Keep shard guidance truthful while the repo verifies how much of the shard system is grounded from shipped-game evidence versus descriptive/community sources.",
-      "currentSlice": "Archived parent: this broader shard lane is now superseded by narrower successor work, starting with shard-milestone-payload-recovery for the exact serialized row payload or save-side owner behind the narrowed shard-specific trail.",
+      "currentSlice": "Archived parent: this broader shard lane is now superseded by narrower successor work, starting with shard-milestone-payload-recovery for the player-owned row owner or exact serialized payload path behind the narrowed shard-specific runtime shell.",
       "completedSteps": [
         "Keep shard workflow in grounded descriptive mode with ranking and cost math disabled.",
         "Add the first warning-oriented loop-reset guardrails tied to current LR and shard reset behavior.",
@@ -193,10 +193,10 @@
       "id": "shard-milestone-payload-recovery",
       "title": "Shard milestone payload recovery",
       "status": "active",
-      "goal": "Recover the exact shard-side serialized row payload or declaring save-side owner needed for player-owned shard workflow inputs and future external-tool replacement.",
+      "goal": "Recover the player-owned shard row owner or exact serialized payload path needed behind the shard-local runtime shell for player-owned shard workflow inputs and future external-tool replacement.",
       "currentSlice": "Ship one shared shard-family evidence table for the reachable ShardMining rows: use the recovered ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo foothold plus the existing row-model, row-shell, title-side, effect-text, cost-shell, payload-watch, and save-boundary artifacts to classify rows 0-29 as verified, partial, or blocked in one descriptive surface.",
-      "exitCondition": "The exact serialized shard milestone row payload or declaring save-side owner is recovered from the narrowed shard-specific trail.",
-      "blockedBy": "The repo now recovers the shard-local declaring row model plus one reachable shard-family evidence pass, but still lacks exact serialized list payload recovery, a checked save-family bridge for player-owned shard milestone state, and planner-safe shard cost math.",
+      "exitCondition": "The repo determines whether player-owned shard milestone rows are serialized directly, rebuilt from a deeper save model, or stop at a runtime-only shell behind the narrowed shard-specific trail.",
+      "blockedBy": "The repo now recovers the direct row-definition payload, the shard-local declaring row model, and one reachable shard-family evidence pass, but still lacks a checked save-family bridge or exact serialized payload path for player-owned shard milestone state and still lacks planner-safe shard cost math.",
       "smallestShippableSlice": "One shared descriptive shard-family evidence table that keeps SU1 and SU2 as verified rows, holds unresolved rows as partial or blocked, and explicitly leaves affordability, planner math, and save-side claims blocked.",
       "completedSteps": [
         "Narrow the shard-specific owner trail to ShardMining plus ShardUpgradeInfo.",

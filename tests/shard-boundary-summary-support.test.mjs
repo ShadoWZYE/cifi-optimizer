@@ -41,14 +41,26 @@ test("shard owner-family and save-boundary summaries preserve descriptive gate l
         metadataNeighborhoodHasSaveTerms: false,
         level0HasSaveTerms: false,
         ownerShellWithSaveOverlapCount: 0,
-        directShardPlayerProfileContext: false
+        directShardPlayerProfileContext: false,
+        directSerializedRowDefinitionRecovered: true,
+        runtimeOwnedStateShellRecovered: true
+      },
+      recoveredDirectRowDefinitionPayload: {
+        ownerType: "ShardMining"
+      },
+      recoveredDeclaringRowModel: {
+        ownerType: "ShardMining"
       }
     }),
     {
       hasSeparationBoundary: true,
+      hasDirectRowDefinitionPayload: true,
+      hasRuntimeOwnedStateShell: true,
       ownerAnchor: "ShardMining / ShardUpgradeInfo",
       saveAnchor: "PlayerProfileData",
       cloudSaveAnchor: "CloudSavePlayerProfile",
+      directPayloadAnchor: "ShardMining",
+      runtimeShellAnchor: "ShardMining.upgradeInfoList",
       overlapLabel: "zero direct overlap",
       ownerTermCount: 1
     }

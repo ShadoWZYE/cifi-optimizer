@@ -156,7 +156,7 @@ That table is the current player-facing handoff surface for shard row evidence. 
 
 ## Next allowed shard step
 
-The next shard planner pass should recover the exact serialized milestone row payload or save-side state from the narrowed `ShardMining` / `ShardUpgradeInfo` trail, use that result to upgrade rows inside the shared shard-family evidence table, and compare that extracted layer against the current descriptive dataset before any planner expansion.
+The next shard pass should recover the player-owned milestone ownership or exact serialized payload path behind the narrowed `ShardMining` / `ShardUpgradeInfo` runtime shell, use that result to upgrade rows inside the shared shard-family evidence table, and compare that extracted layer against the current descriptive dataset before any planner expansion.
 
 Current heuristic ranking for that work:
 

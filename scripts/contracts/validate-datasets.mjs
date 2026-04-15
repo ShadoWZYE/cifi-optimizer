@@ -4950,8 +4950,9 @@ function validateShardMilestoneHandoffBoundary(boundary) {
     "shard milestone handoff boundary must preserve recovered row-model narrowing"
   );
   assert.ok(
-    boundary.currentBoundary.some((line) => String(line).includes("declaring row-model result")),
-    "shard milestone handoff boundary must preserve declaring-row-model framing"
+    boundary.currentBoundary.some((line) => String(line).includes("runtime row shell recovered")) &&
+      boundary.currentBoundary.some((line) => String(line).includes("row-definition family already recovered")),
+    "shard milestone handoff boundary must preserve split row-definition and runtime-shell framing"
   );
   assert.ok(
     boundary.currentBoundary.some((line) =>

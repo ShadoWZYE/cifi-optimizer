@@ -53,7 +53,7 @@
     },
     "saveBoundary": {
       "status": "blocked",
-      "summary": "No checked PlayerProfileData or CloudSavePlayerProfile overlap exists in the narrowed shard-local contexts, so this table remains evidence-only and not a save-owner import map."
+      "summary": "The reachable row-definition family is direct-serialized on ShardMining, but no checked PlayerProfileData or CloudSavePlayerProfile overlap exists for player-owned row state, so this table remains evidence-only and not a save-owner import map."
     }
   },
   "familyFindings": [
