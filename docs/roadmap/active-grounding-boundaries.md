@@ -13,11 +13,12 @@ It is not a replacement for canonical datasets, deep verification notes, or the 
 ## How to use it
 
 - read this first for current lane boundaries
-- use the lane contract first: user-facing question, minimum required inputs, explicit non-blockers, current true blocker, and smallest shippable tool slice
+- use the lane contract first: user-facing question, minimum required inputs, explicit non-blockers, current true blocker, and largest coherent adjacent slice
 - read `docs/roadmap/known-false-paths.md` next so ruled-out interpretations do not get reopened
 - then open only the lane notes and artifacts listed for the slice you are touching
 
 When restarting or handing off a lane, do not let adjacent unresolved systems become silent blockers unless the current slice actually consumes them.
+Prefer recovering whole related families together when they share one implementation path. Do not reflexively split into one row, one field, one symbol, or one tiny evidence fragment at a time unless there is a real boundary.
 
 ## Active lanes
 
@@ -38,8 +39,8 @@ When restarting or handing off a lane, do not let adjacent unresolved systems be
   - the exact serialized `upgradeInfoList` payload or save-side owner is not yet recovered
   - exact player-owned shard row state is not yet import-ready
   - exact planner-safe shard cost math and effect-text mapping are not yet recovered
-- Smallest next slice:
-  - keep the player-facing preview limited to verified rows only, and verify one more concrete row only when the app needs to expand that preview
+- Largest coherent adjacent slice:
+  - keep the player-facing preview limited to the currently verified shard row family, and only split into narrower row checks when a real evidence or validation boundary appears
 - Start here:
   - `docs/systems/shards/shard-system-verification.md`
   - `docs/systems/shards/shard-owner-family-verification.md`
@@ -71,8 +72,8 @@ When restarting or handing off a lane, do not let adjacent unresolved systems be
   - canonical Emporium import remains blocked even though row identity is now structurally grounded, because the repo recovers the runtime `SetAllChrystosEmporiumTexts` -> `SetAllBaseBonusTexts` -> `SetISNBaseBonusText` base-bonus lane, the parallel `SetISNBonusText` effect-label lane, the row-local slot alias for that effect-label writer as `BonusDescriptionText`, and the control-row payload source through `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()`, but still lacks the separate `CurrentBonusText` writer lane after explicit negative checks against `TextHandlerMarkets` and the last plausible row-local fallback surfaces `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext`, plus a broader canonical import-safe join
   - the recovered wider `SaveData` block still mixes Emporium-adjacent rows with trade-counter and early `Mech*` progression fields, so canonical import-safe identity stays empty even though the exact `IS1Level-IS110Level` span is compatibility-safe raw import
   - the only remaining save-owner seam is whether the metadata-only `Market` shell ever resolves to a real typed wrapper field beyond the checked accessor bridge; the checked declaring owner for the current cluster is already closed on `SaveData`
-- Smallest next slice:
-  - keep canonical promotion explicitly blocked unless new evidence grounds player-facing row identity or a narrower canonical `SaveData`-backed Emporium import slice
+- Largest coherent adjacent slice:
+  - keep canonical promotion explicitly blocked unless new evidence grounds a coherent player-facing `SaveData`-backed Emporium import family; do not split that work into row-by-row admissibility claims without a real boundary
 - Start here:
   - `docs/systems/spend/multiverse-market-verification.md`
   - `docs/systems/spend/multiverse-market-state-verification.md`
@@ -87,7 +88,7 @@ Use these when the active lanes above close or split.
 
 - Goal: remap recovered `SaveData` `ATU*Level` fields onto grounded TokenShop rows without inventing player-facing names
 - Current blocker: the repo now has eleven checked shell-to-prefab bridges for `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, `ATU7Button`, `ATU8Button`, `ATU9Button`, `ATU10Button`, `ATU11Button`, and `ATU12Button`, plus one checked `ATU6Button` -> `NewTokenUPGPrefab.T1.MK2Booster` -> `Mk2 Generator Booster` title chain, one bounded `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster` -> `1. MK1 Generator Output,` named-identity and title-side text chain, one bounded `ATU8Button` -> `NewTokenUPGPrefab.T1.MK4Booster` -> `Mk4 Generator Booster` title-side text chain, one bounded `ATU9Button` -> `NewTokenUPGPrefab.T1.MK5Booster` -> `Mk5 Generator Booster` title-side text chain, one bounded `ATU10Button` -> `NewTokenUPGPrefab.T1.MK6Booster` -> `Mk6 Generator Booster` title-side text chain, one narrower `ATU11Button` -> `NewTokenUPGPrefab.T1.MK7Booster` bridge with only detached `MK7 GEN ENHANCEMENT` title-side text, one bounded `ATU12Button` -> `NewTokenUPGPrefab.T1.MK8Booster` -> `Mk8 Generator Booster` title-side text chain, and ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster (Chests)` chest-effect chain with `CellBoostBonus = 1` as a bounded parameter surface plus one tighter shared-effect-to-consumer-family handoff into the `AdManager` chest routine neighborhood and one checked internal bonus-aggregation shell; the explicit `CellBoostBonus`-anchor follow-up closes the full internal AdManager bonus-aggregation family as a bounded negative result, the bounded ATU4 title-side pass still stays negative, the remaining ATU5 blocker is still only the absent exact final row-title string, the late ATU24-ATU28 shell neighborhood remains a clean negative result, and the rest of the `ATU` family still lacks a checked bridge to a specific prefab identity or final player-facing row title
-- Smallest next slice: keep ATU10, ATU11, and ATU12 quarantined as bounded bridge-side rows rather than promoting them into the shipped checked subset, and move to a different unresolved `ATU*Button`, `ATU*Content`, or adjacent shell neighborhood without reopening the closed ATU3 bonus-aggregation cluster, the closed ATU11 MK7 title-side seam, or the closed ATU12 MK8 bridge-plus-title-side-text seam
+- Largest coherent adjacent slice: keep the current ATU bridge-side family quarantined until a coherent adjacent remap family is grounded, and only split into narrower `ATU*` probes where the owner path, runtime path, or validation path genuinely diverges
 
 ## Recently narrowed
 
@@ -104,19 +105,19 @@ Use these when the active lanes above close or split.
 
 - Goal: recover the saved-state owner behind token-bank cap, fill, and claimable-bank state
 - Current blocker: exact `SaveData.BankedTokens` recovery closes current stored amount, the checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge still only exposes generic `PlayerProfileData.Tokens` and `PlayerProfileData.Tokenium` wrapper strings, and the remaining `CloudSavePlayerProfile` evidence now narrows only to a metadata-only cloud save/load shell instead of a deeper typed wrapper, so bank-cap and claimable-bank ownership are still unresolved
-- Smallest next slice: checked bank-state owner boundary that either recovers a deeper declaring save model or proves a narrower non-`PlayerProfileData` wrapper than the current export bridge while keeping the metadata-only `CloudSavePlayerProfile` shell closed as a non-owner surface
+- Largest coherent adjacent slice: checked bank-state owner family boundary that either recovers a deeper declaring save model or proves a narrower non-`PlayerProfileData` wrapper than the current export bridge while keeping the metadata-only `CloudSavePlayerProfile` shell closed as a non-owner surface
 
 ### `spend-daily-tokenium-save-owner`
 
 - Goal: recover the gameplay owner and saved-state fields behind the Academy or Farm Mission Daily Tokenium lane
 - Current blocker: exact typed recovery now confirms `SaveData.DailyTokenium` for the current stored amount and narrows the save-side wrapper to the nearby mission-persistence block in `SaveData`, but cap and Daily Tokenium-specific ready-state ownership still stop short of a direct field and broader generic Tokenium claimable state is still not a checked Daily Tokenium join
-- Smallest next slice: checked cap or ready-state boundary inside that narrower `SaveData` mission-persistence neighborhood without collapsing generic `ClaimableTokenium` into Daily Tokenium
+- Largest coherent adjacent slice: checked Daily Tokenium mission-persistence family boundary inside that narrower `SaveData` neighborhood without collapsing generic `ClaimableTokenium` into Daily Tokenium
 
 ### `spend-multiverse-row-label-remap`
 
 - Goal: finish the validated Emporium row id and label remap after owned-state recovery is stronger
 - Current blocker: the active Emporium import-surface lane keeps the canonical import-safe subset empty, and rows `71-74` are still ordered-only overlap without grounded player-facing identity
-- Smallest next slice: checked remap artifact for the currently validated row block
+- Largest coherent adjacent slice: checked remap artifact for the currently validated Emporium row family, splitting only if a real owner or validation boundary appears
 
 ## Keep separate
 

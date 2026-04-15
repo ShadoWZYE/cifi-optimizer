@@ -8,11 +8,15 @@ Evolve this repo toward a grounded MVP core that can expand into a unified repla
 
 - make incremental, focused changes
 - preserve local-first browser behavior
-- prefer the smallest shippable tool slice that answers a real player question
+- prefer the largest coherent adjacent slice that answers a real player question honestly
 - use extraction, decompilation, and research as intake when they unblock a slice, not as the default product lane
 - do not introduce speculative mechanics or fake precision
 - keep verified game truth separate from planner helpers, external models, and compatibility data
 - keep diffs small unless broader change is clearly required
+- do not confuse tiny scope with disciplined scope
+- do not default to one row at a time, one field at a time, one symbol at a time, or one tiny evidence fragment at a time when the surrounding family shares the same implementation path and can be recovered together honestly
+- recover whole related families together when they share owner shape, runtime behavior, validation path, and blocker state
+- split work only when the boundary is real: different owner families, different runtime systems, different validation paths, meaningfully different blocker states, or review risk from unrelated changes
 
 ## MVP scope
 
@@ -35,7 +39,7 @@ Every future lane should declare:
 - the minimum required inputs for that answer
 - the explicit non-blockers that should not hold the slice open
 - the current true blocker
-- the smallest shippable tool slice
+- the largest coherent adjacent slice that is still shippable, reviewable, and validation-safe
 
 If a neighboring lane is not a consumed input for the current slice, keep it listed as a non-blocker instead of letting it silently block implementation.
 

@@ -6,7 +6,7 @@ Build a grounded MVP core that can expand into a unified replacement for fragmen
 
 ## North star
 
-Build one grounded local-first CIFI toolkit that gradually absorbs external tools by shipping small, high-value slices tied to real player questions.
+Build one grounded local-first CIFI toolkit that gradually absorbs external tools by shipping coherent, high-value slices tied to real player questions.
 
 ## Current phase
 
@@ -30,8 +30,10 @@ The MVP is not a full simulator and does not assume all systems should converge 
 Default bias:
 - start from the narrow player question
 - identify the minimum grounded inputs needed to answer it
-- ship the smallest honest tool slice first
+- prefer the largest coherent adjacent slice that can answer it honestly without exceeding review or validation safety
 - treat research, extraction, and decompilation as intake that supports that slice
+- recover whole related families together when they share implementation shape
+- do not confuse tiny scope with disciplined scope
 
 ## Local-first meaning
 
@@ -75,6 +77,8 @@ Core MVP modules:
 - prefer shippable slices over broad refactors
 - treat research as intake, not silent scope expansion
 - do not let broader decompilation or adjacent lane recovery become an implicit blocker unless the current slice actually consumes that input
+- do not split work into row-by-row, field-by-field, symbol-by-symbol, or tiny evidence-fragment tasks when the surrounding family can be recovered through the same path honestly
+- only split when the boundary is real: different owner families, runtime systems, validation paths, blocker states, or unrelated review risk
 
 ## Lane contract
 
@@ -83,7 +87,7 @@ Every active lane should declare:
 - the minimum required inputs
 - the explicit non-blockers
 - the current true blocker
-- the smallest shippable tool slice
+- the largest coherent adjacent slice that is still shippable, reviewable, and validation-safe
 
 This contract is how work gets chosen, handed off, and promoted from research into implementation.
 
@@ -113,7 +117,7 @@ Prioritize roadmap work that does at least one of:
 - replaces a repeated external-tool workflow
 - increases grounded recommendation or planning coverage
 - reduces fragmentation without forcing premature UI unification
-- can ship as a small tool slice with a clear user-facing question
+- can ship as one coherent adjacent slice with a clear user-facing question
 
 ## Sequence
 
@@ -125,7 +129,7 @@ Prioritize roadmap work that does at least one of:
    - confirm owner, labels, currencies, and player-owned inputs
 4. Land MVP-safe slices
    - implement grounded improvements that solve real player painpoints
-   - keep the slice scoped to only the inputs it actually consumes
+   - keep the slice scoped to the largest coherent adjacent family supported by the inputs it actually consumes
 5. Harden delivery
    - expand tests and make dataset drift fail fast
 
@@ -167,6 +171,7 @@ A track can move into implementation only when:
 - classification is clear
 - MVP value is clear
 - the work can be cut into a shippable slice
+- the work is framed as the largest coherent adjacent slice rather than the smallest local artifact
 - the lane contract makes the true blocker and explicit non-blockers visible
 
 ## Definition of done
