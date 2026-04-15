@@ -19,6 +19,10 @@ The goal is to:
 - Do not preserve fake precision
 - Prefer grounded placeholder behavior over fabricated scoring
 - Keep diffs focused and incremental
+- Treat the active grounding lane as owned work, not a one-off task
+- Continue in the same lane by default after each successful pass
+- Realign tools, probes, or evidence paths when the current instrument cannot clear the blocker
+- Stop only when human input, human validation, or a real cross-lane choice is needed
 - Preserve local-first behavior
 - Do not commit directly to main
 
@@ -50,3 +54,7 @@ Then review:
 - do not rebuild the full shard optimizer unless verified tables are present
 - do not expand non-MVP systems
 - do not add new speculative formulas
+
+## Continuation note
+
+If this archived handoff is ever used to restart work, treat it as lane carry-forward rather than a closed task list. The next move should stay inside the same grounding lane unless a real lane split or human decision is required.

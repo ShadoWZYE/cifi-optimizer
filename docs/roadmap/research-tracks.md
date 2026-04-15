@@ -34,17 +34,20 @@ A bad track becomes a container for multiple semi-independent problems, repeated
 
 ## Lane contract rule
 
-Every active track should make five things explicit:
+Every active track should make six things explicit:
 
 - the user-facing question it is trying to answer
 - the minimum required inputs for that answer
 - the explicit non-blockers that should not hold the track open
 - the current true blocker
-- the smallest shippable tool slice
+- the largest coherent adjacent slice that can ship honestly
+- the default next adjacent step if the current slice lands cleanly
 
 Use this contract to keep research aligned to shipping.
 
 If a neighboring system is not a consumed input for the current slice, name it under non-blockers instead of letting it silently block the lane.
+
+Tracks are lane-owned work, not one-off task tickets. After a successful pass, continue in the same lane by default, and if the current probe or tool cannot clear the blocker, realign the evidence path before treating the lane as stalled.
 
 ---
 
@@ -125,7 +128,8 @@ Each active track should include:
 - `currentSlice`
 - `exitCondition`
 - `blockedBy`
-- `smallestShippableSlice`
+- `largestCoherentAdjacentSlice`
+- `defaultNextStep`
 - `completedSteps`
 - `nextSteps`
 - `sources`
@@ -163,8 +167,11 @@ Examples:
 ### `blockedBy`
 Name the current true blocker, not every uncertainty in the lane.
 
-### `smallestShippableSlice`
-Describe the smallest useful output that could ship without pretending the whole system is solved.
+### `largestCoherentAdjacentSlice`
+Describe the largest related family that can ship honestly without crossing a real boundary or pretending the whole system is solved.
+
+### `defaultNextStep`
+Record the next highest-value adjacent move that should happen by default if the track stays in the same lane.
 
 ### `nextSteps`
 Keep this short.
@@ -210,6 +217,8 @@ When updating this file:
 - update an existing track only if the new work shares the same exit condition
 - otherwise fork a new track
 - supersede or archive the parent when the child tracks become the real active queue
+- continue the same lane by default when the next honest move still fits the same exit condition
+- stop only when human input, human validation, or a real cross-lane choice is required
 
 The goal is not to minimize the number of tracks.
 
@@ -254,7 +263,8 @@ Superseded parent:
   - minimum required inputs: canonical Tokens, checked TokenShop row-remap subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`, imported current levels for that same subset, and checked `StartCost` / `AdditiveCost` values for those same rows
   - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math
   - current true blocker: closed for this slice; broader planner-safe spend behavior remains on separate owner and remap lanes
-  - smallest shippable slice: a separate Overview module that shows each grounded subset row's identity, current level, next known cost, and current affordability in fixed grounded slot order, without optimizer claims or canonical `ATU*Level` promotion
+  - largest coherent adjacent slice: a separate Overview module that shows each grounded subset row's identity, current level, next known cost, and current affordability in fixed grounded slot order, without optimizer claims or canonical `ATU*Level` promotion
+  - default next adjacent step: stay in the same spend lane only if a follow-up slice still consumes the same checked subset; otherwise continue on the separate owner or remap lanes already called out as blockers
 - `spend-token-shop-row-detail-slice`
   - status: `archived`
   - goal: extend the shipped checked-row TokenShop panel into the next small grounded row-detail tool for the same verified subset only
@@ -262,7 +272,8 @@ Superseded parent:
   - minimum required inputs: checked TokenShop row-remap subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`, imported current levels for that same subset, and checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields for those same rows, with ATU3 explicitly allowed to stay effect-driven instead of prefab-driven
   - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math, next-purchase recommendation rules
   - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
-  - smallest shippable slice: a separate Overview module that keeps the fixed grounded row order `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU12`, then shows each row's grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change without optimizer claims or canonical `ATU*Level` promotion
+  - largest coherent adjacent slice: a separate Overview module that keeps the fixed grounded row order `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU12`, then shows each row's grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change without optimizer claims or canonical `ATU*Level` promotion
+  - default next adjacent step: continue the same spend lane by moving the same checked subset into the next player-facing editor surface, not by widening into ranking or unresolved-row coverage
 - `progression-token-shop-editor-first-slice`
   - status: `archived`
   - goal: move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop editor slice
@@ -270,7 +281,8 @@ Superseded parent:
   - minimum required inputs: checked TokenShop row-remap subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, and `ATU12Level`, local non-canonical editor levels for that same subset, compatibility import as prefill only, and checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields for those same rows
   - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math, next-purchase recommendation rules
   - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
-  - smallest shippable slice: a dedicated TokenShop category under the Progression selector that keeps row order fixed to `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU12`, saves local checked-row current levels under a non-canonical planner path, uses compatibility import only as prefill, and shows grounded identity, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change without optimizer claims or canonical `ATU*Level` promotion
+  - largest coherent adjacent slice: a dedicated TokenShop category under the Progression selector that keeps row order fixed to `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU12`, saves local checked-row current levels under a non-canonical planner path, uses compatibility import only as prefill, and shows grounded identity, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change without optimizer claims or canonical `ATU*Level` promotion
+  - default next adjacent step: continue only by grounding the next directly consumed checked-row inputs for that editor surface; keep ranking, ROI, and unresolved-row family expansion on separate lanes
 - `spend-planner-from-extracted-data`
   - status: `archived`
   - reason: it mixed multiple independent spend blockers that now have distinct exit conditions and should no longer share one queue item
