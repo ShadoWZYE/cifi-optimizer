@@ -4,9 +4,7 @@
 
 ## Validations run
 
-- [ ] `npm run verify:data`
-- [ ] `npm test`
-- [ ] `npm run test:unit`
-- [ ] `npm run check:syntax`
+- [ ] `npm run ci:local`
+- [ ] extra targeted checks if applicable
 
 ## Remaining blockers

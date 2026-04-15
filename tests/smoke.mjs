@@ -7748,18 +7748,9 @@ assert.match(
   activeGroundingBoundariesDoc,
   /only split into narrower `ATU\*` probes where the owner path, runtime path, or validation path genuinely diverges/i
 );
-assert.match(
-  activeGroundingBoundariesDoc,
-  /closed ATU3 bonus-aggregation cluster/i
-);
-assert.match(
-  activeGroundingBoundariesDoc,
-  /closed ATU11 MK7 title-side seam/i
-);
-assert.match(
-  activeGroundingBoundariesDoc,
-  /closed ATU12 MK8 bridge-plus-title-side-text seam/i
-);
+assert.match(activeGroundingBoundariesDoc, /closed ATU3 bonus-aggregation cluster/i);
+assert.match(activeGroundingBoundariesDoc, /closed ATU11 MK7 title-side seam/i);
+assert.match(activeGroundingBoundariesDoc, /closed ATU12 MK8 bridge-plus-title-side-text seam/i);
 assert.match(
   activeGroundingBoundariesDoc,
   /closes the full internal AdManager bonus-aggregation family as a bounded negative result/i

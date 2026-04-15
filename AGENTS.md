@@ -17,6 +17,7 @@ Evolve this repo toward a grounded MVP core that can expand into a unified repla
 - do not default to one row at a time, one field at a time, one symbol at a time, or one tiny evidence fragment at a time when the surrounding family shares the same implementation path and can be recovered together honestly
 - recover whole related families together when they share owner shape, runtime behavior, validation path, and blocker state
 - split work only when the boundary is real: different owner families, different runtime systems, different validation paths, meaningfully different blocker states, or review risk from unrelated changes
+- before finishing a task, run the same local checks CI runs: `npm run ci:local`
 
 ## MVP scope
 

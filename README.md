@@ -89,6 +89,7 @@ If the APK/Unity path has not been checked for an unresolved mechanic, it should
 ## Commands
 
 - `npm run dev`
+- `npm run ci:local`
 - `npm run verify:data`
 - `npm test`
 - `npm run test:unit`

@@ -89,8 +89,8 @@ Always report:
 
 ## Verify
 
-Run relevant checks for touched files:
+Before finishing a task, run the same local checks CI runs:
 
-- `npm run verify:data`
-- `npm test`
-- `node --check app.js`
+- `npm run ci:local`
+
+Only add extra targeted checks such as `node --check app.js` when the touched files or task call for them.

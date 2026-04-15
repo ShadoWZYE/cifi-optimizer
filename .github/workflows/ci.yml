@@ -96,11 +96,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run first-party verification
-        run: npm run verify
-
-      - name: Run tests
-        run: npm test
-
-      - name: Run unit tests
-        run: npm run test:unit
+      - name: Run local-equivalent CI checks
+        run: npm run ci:local
