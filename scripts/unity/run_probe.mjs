@@ -36,131 +36,6 @@ const sharedEnv = {
   NUGET_PACKAGES: path.join(root, ".nuget", "packages")
 };
 
-// Command sets for probe execution - exposed for inspection
-const commandSets = {
-  build: [["uabea-rebuild", []]],
-  uabea: [
-    ["uabea-build", []],
-    ["dotnet", [probeDll]]
-  ],
-  "shards:parameters": [
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]]
-  ],
-  "shards:type-metadata": [
-    ["uabea-build", []],
-    ["dotnet", [probeDll]],
-    ["python", [path.join(root, "scripts", "unity", "shard_type_metadata_probe.py")]]
-  ],
-  "shards:method": [
-    ["uabea-build", []],
-    ["dotnet", [probeDll]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_method_probe.py")]]
-  ],
-  "shards:cost-native": [
-    ["uabea-build", []],
-    ["dotnet", [probeDll]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_method_probe.py")]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_native_probe.py")]]
-  ],
-  trace: [["python", [path.join(root, "scripts", "unity", "unity_trace_bundle.py")]]],
-  compile: [["python", [path.join(root, "scripts", "compile_tokenshop_canonical.py")]]],
-  pipeline: [
-    ["uabea-build", []],
-    ["dotnet", ["run", "--project", "{project}"]],
-    ["python", ["scripts/unity/extract_analysis.py"]]
-  ]
-};
-
-// Output directory for probe artifacts
-const PROBE_OUTPUT_DIR = path.join(root, "workbench", "probes");
-
-function ensureProbeOutputDir() {
-  if (!existsSync(PROBE_OUTPUT_DIR)) {
-    mkdirSync(PROBE_OUTPUT_DIR, { recursive: true });
-  }
-}
-
-// Parse CLI arguments into a params object
-function parseArgs(args) {
-  const params = {
-    target: null,
-    anchors: [],
-    family: null,
-    level: "both",
-    output: null,
-    force: false,
-    resume: false,
-    continueOnError: false,
-    chain: [],
-    maxSteps: 5
-  };
-
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    const nextArg = args[i + 1];
-
-    if (arg === "--target" && nextArg) {
-      params.target = nextArg;
-      i++;
-    } else if (arg === "--anchor" && nextArg) {
-      params.anchors.push(nextArg);
-      i++;
-    } else if (arg === "--family" && nextArg) {
-      params.family = nextArg;
-      i++;
-    } else if (arg === "--level" && nextArg) {
-      params.level = nextArg;
-      i++;
-    } else if (arg === "--output" && nextArg) {
-      params.output = nextArg;
-      i++;
-    } else if (arg === "--chain" && nextArg) {
-      params.chain.push(nextArg);
-      i++;
-    } else if (arg === "--max-steps") {
-      params.maxSteps = parseInt(args[i + 1]) || 5;
-      i++;
-    } else if (arg === "--force") {
-      params.force = true;
-    } else if (arg === "--resume") {
-      params.resume = true;
-    } else if (arg === "--continue-on-error") {
-      params.continueOnError = true;
-    }
-  }
-
-  return params;
-}
-
-// Generate timestamp for output naming
-function getTimestamp() {
-  const now = new Date();
-  return now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
-}
-
-// Generate output path based on convention
-function generateOutputPath(params, defaultExt = "json") {
-  if (params.output) {
-    return path.resolve(root, params.output);
-  }
-
-  ensureProbeOutputDir();
-
-  const target = params.target || "default";
-  const timestamp = getTimestamp();
-  const anchorSuffix =
-    params.anchors.length > 0 ? "-" + params.anchors.join("-").replace(/[^a-zA-Z0-9]/g, "") : "";
-
-  const outputDir = path.join(PROBE_OUTPUT_DIR, `${target}${anchorSuffix}`, timestamp);
-
-  if (!existsSync(outputDir)) {
-    mkdirSync(outputDir, { recursive: true });
-  }
-
-  return outputDir;
-}
-
 // Command templates with parameter substitution
 const commandTemplates = {
   // Build commands
@@ -245,6 +120,15 @@ const commandSets = {
   compile: commandTemplates.compile,
   pipeline: commandTemplates.pipeline
 };
+
+// Output directory for probe artifacts
+const PROBE_OUTPUT_DIR = path.join(root, "workbench", "probes");
+
+function ensureProbeOutputDir() {
+  if (!existsSync(PROBE_OUTPUT_DIR)) {
+    mkdirSync(PROBE_OUTPUT_DIR, { recursive: true });
+  }
+}
 
 function formatRepoPath(targetPath) {
   return path.relative(root, targetPath).split(path.sep).join("/");

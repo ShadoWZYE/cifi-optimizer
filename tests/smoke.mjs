@@ -8814,13 +8814,13 @@ assert.equal(
 assert.equal(pkg.scripts["check:syntax"], "node ./scripts/contracts/check-js-syntax.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
 assert.equal(pkg.scripts["test:unit"], "node ./scripts/tests/run-unit-tests.mjs");
-assert.match(normalizedProbeRunner, /build:\s*\[/);
+assert.match(normalizedProbeRunner, /build:\s*\{/);
 assert.match(probeRunner, /Probe artifact is stale:/);
 assert.match(probeRunner, /npm run probe:build/);
 assert.match(probeRunner, /dotnet", \["restore", probeProject\]/);
 assert.match(probeRunner, /readdirSync\(probeSourceDir\)/);
 assert.match(probeRunner, /\.NET 8 SDK was not found on PATH/);
-assert.match(normalizedProbeRunner, /trace:\s*\[/);
+assert.match(normalizedProbeRunner, /trace:\s*\{/);
 assert.match(probeRunner, /const extraArgs = process\.argv\.slice\(3\)/);
 assert.match(pkg.scripts["probe:trace"], /run_probe\.mjs trace/);
 assert.match(unityAuditPlaybook, /`npm run probe:build`/);
