@@ -5203,18 +5203,98 @@ def write_markdown(dataset: dict[str, Any]) -> None:
 
 def main() -> None:
     registry = load_registry()
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--target", choices=sorted(registry["targets"].keys()))
-    parser.add_argument("--query", action="append", default=[])
-    parser.add_argument("--anchor", action="append", default=[])
-    parser.add_argument("--json-out", type=Path, default=JSON_OUT)
-    parser.add_argument("--md-out", type=Path, default=MD_OUT)
+    parser = argparse.ArgumentParser(
+        description="Unity Trace Bundle Generator - Extract and analyze Unity objects"
+    )
+    
+    # Target specification (from registry or custom)
+    parser.add_argument("--target", 
+                        choices=sorted(registry["targets"].keys()),
+                        help="Target ID from trace registry (e.g., token-shop-atu3-cells)")
+    parser.add_argument("--query", action="append", default=[],
+                        help="Query term to search for (can specify multiple)")
+    parser.add_argument("--anchor", action="append", default=[],
+                        help="Anchor to trace (class, method, string, path id - can specify multiple)")
+    
+    # Family specification for custom targets
+    parser.add_argument("--family",
+                        choices=["token-shop", "shard-owned-state", "multiverse-market", "custom"],
+                        help="Trace family for custom targets")
+    
+    # Hierarchy level control
+    parser.add_argument("--level",
+                        choices=["raw", "structured", "both"],
+                        default="both",
+                        help="Output level: raw (extracted), structured (analyzed), both (combined)")
+    
+    # Output control
+    parser.add_argument("--json-out", type=Path, default=JSON_OUT,
+                        help="Output JSON path")
+    parser.add_argument("--md-out", type=Path, default=MD_OUT,
+                        help="Output markdown path")
+    
+    # Pipeline control
+    parser.add_argument("--max-steps", type=int, default=5,
+                        help="Maximum analysis steps in chain")
+    parser.add_argument("--chain", action="append", default=[],
+                        help="Additional probe scripts to run in sequence")
+    parser.add_argument("--continue-on-error", action="store_true",
+                        help="Continue pipeline even if a step fails")
+    
+    # Output behavior
+    parser.add_argument("--force", action="store_true",
+                        help="Force regeneration even if output exists")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume from previous output if available")
+    
+    # Anchor kind specification
+    parser.add_argument("--anchor-kind",
+                        choices=["class", "method", "string", "path id", "prefab"],
+                        help="Kind of anchor being traced")
+    
     args = parser.parse_args()
+    
+    # Validate arguments
     if not args.target and not args.query and not args.anchor:
         parser.error("pass --target or at least one --query/--anchor")
-    dataset = build_dataset(args.target, args.query, args.anchor)
+    
+    # Handle custom target (not from registry)
+    if args.target and args.target not in registry["targets"]:
+        # Custom target - create temporary registry entry
+        custom_target = {
+            "id": args.target,
+            "anchors": args.anchor,
+            "family": args.family or "custom"
+        }
+        print(f"Using custom target: {args.target} (family: {args.family})")
+    
+    # Determine output level
+    if args.level == "raw":
+        output_mode = "raw_only"
+    elif args.level == "structured":
+        output_mode = "structured_only"
+    else:
+        output_mode = "both"
+    
+    # Build dataset with appropriate level
+    dataset = build_dataset(args.target, args.query, args.anchor, output_mode=output_mode)
+    
+    # Add metadata about the trace parameters
+    dataset["traceParams"] = {
+        "target": args.target,
+        "anchors": args.anchor,
+        "family": args.family,
+        "level": args.level,
+        "anchorKind": args.anchor_kind,
+        "maxSteps": args.max_steps
+    }
+    
+    # Write outputs
     args.json_out.write_text(json.dumps(dataset, indent=2) + "\n", encoding="utf-8")
     write_markdown(dataset)
+    
+    print(f"Trace bundle generated: {args.json_out}")
+    print(f"Markdown: {args.md_out}")
 
 
 if __name__ == "__main__":

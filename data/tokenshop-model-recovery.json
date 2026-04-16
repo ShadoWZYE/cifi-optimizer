@@ -1,0 +1,209 @@
+{
+  "documentation_type": "TokenShop Model Recovery Report",
+  "generated_at": "2026-04-16",
+  "game_system": "TokenShop (Advanced Tech Upgrades)",
+  "source": "APK Unity metadata + native code analysis",
+
+  "summary": {
+    "verified_count": 7,
+    "unverified_count": 0,
+    "blocking_issue": null,
+    "all_recoveries_complete": true
+  },
+
+  "verified_findings": [
+    {
+      "id": "VF-1",
+      "finding": "Cost formula is linear: cost = StartCost + (level-1) * AdditiveCost",
+      "evidence": [
+        "Native code at get_ATU*Cost methods shows direct float arithmetic (cvtsi2ss, mulss, addss)",
+        "TokenShop fields include StartCost and AdditiveCost at known offsets",
+        "Example: ATU1Button has StartCost=20, AdditiveCost=5 -> level 1 costs 20, level 2 costs 25, etc."
+      ],
+      "confidence": "high",
+      "blocking": false
+    },
+    {
+      "id": "VF-2",
+      "finding": "ATU levels stored in SaveData: ATU1Level through ATU28Level at offset 0x70C-0x778",
+      "evidence": [
+        "SaveData field offsets verified in uabea-probe-report.json",
+        "ATU1Level at 0x70C (System.Int32), ATU2Level at 0x710, ..., ATU28Level at 0x778",
+        "Adjacent to BankedTokens at 0x708 and tier unlock booleans at 0x77C-0x77F"
+      ],
+      "confidence": "exact",
+      "blocking": false
+    },
+    {
+      "id": "VF-3",
+      "finding": "All 28 get_ATU*Cost method RVAs indexed in native library",
+      "evidence": [
+        "uabea-probe-report.json contains all 28 methods with RVAs",
+        "get_ATU1Cost @ RVA 36740667, get_ATU2Cost @ RVA 36740751, etc.",
+        "All methods use BigDouble for cost computation (calls to 0x1bffba6, 0x1af7c01)"
+      ],
+      "confidence": "exact",
+      "blocking": false
+    },
+    {
+      "id": "VF-4",
+      "finding": "Cost fields exist for all 28 ATU rows in TokenShop class",
+      "evidence": [
+        "Early ATU (1-23) use TokenShop's StartCost/AdditiveCost fields at fixed offsets",
+        "Late ATU (24-28) have dedicated ATU*NStartCost and ATU*NAdditiveCost fields",
+        "All 28 bonus getters indexed (e.g., get_ATU1TokenBonus, get_ATU24Bonus1Cells)"
+      ],
+      "confidence": "exact",
+      "blocking": false
+    },
+    {
+      "id": "VF-5",
+      "finding": "ATU24 has 5 bonus fields: Bonus1 (Cells), Bonus2 (MP), Bonus3 (Shards), Bonus4 (RP), Bonus5 (AP)",
+      "evidence": [
+        "TokenShop fields: ATU24Bonus1 (0x510), Bonus2 (0x514), Bonus3 (0x518), Bonus4 (0x51C), Bonus5 (0x520)",
+        "Method getters: get_ATU24Bonus1Cells @ 36739459, get_ATU24Bonus2MP @ 36739750, etc.",
+        "Multi-bonus structure confirmed"
+      ],
+      "confidence": "exact",
+      "blocking": false
+    },
+    {
+      "id": "VF-6",
+      "finding": "All ATU upgrades cost tokens (no diamond-cost ATU found)",
+      "evidence": [
+        "TokenShop is named 'token shop' in game",
+        "SaveData.BankedTokens used as currency",
+        "No DiamondCost fields found in TokenShop class",
+        "ATU2 is Diamond Boost (bonus type), not diamond cost"
+      ],
+      "confidence": "high",
+      "blocking": false
+    }
+  ],
+
+  "unverified_findings": [],
+
+  "bonus_formula_verified": {
+    "formula": "bonus = BonusFieldValue * CurrentLevel",
+    "evidence": [
+      "Disassembly of get_ATU1TokenBonus shows: cvtsi2ss (level to float), mulss (multiply by bonus field)",
+      "At offset 0xE8 = TokenBoostBonus field",
+      "Formula: bonus = TokenBoostBonus * ATU1Level"
+    ],
+    "examples": [
+      {"atu": "ATU1 (Tokens Boost)", "bonus_field": "TokenBoostBonus", "bonus_value": 0.2, "level_1": 0.2, "level_10": 2.0},
+      {"atu": "ATU2 (Diamond Boost)", "bonus_field": "DiamondBoostBonus", "bonus_value": 1, "level_1": 1, "level_2": 2}
+    ]
+  },
+
+  "field_offset_map": {
+    "save_data": {
+      "ATU1Level": "0x70C",
+      "ATU2Level": "0x710",
+      "ATU3Level": "0x714",
+      "ATU4Level": "0x718",
+      "ATU5Level": "0x71C",
+      "ATU6Level": "0x720",
+      "ATU7Level": "0x724",
+      "ATU8Level": "0x728",
+      "ATU9Level": "0x72C",
+      "ATU10Level": "0x730",
+      "ATU11Level": "0x734",
+      "ATU12Level": "0x738",
+      "ATU13Level": "0x73C",
+      "ATU14Level": "0x740",
+      "ATU15Level": "0x744",
+      "ATU16Level": "0x748",
+      "ATU17Level": "0x74C",
+      "ATU18Level": "0x750",
+      "ATU19Level": "0x754",
+      "ATU20Level": "0x758",
+      "ATU21Level": "0x75C",
+      "ATU22Level": "0x760",
+      "ATU23Level": "0x764",
+      "ATU24Level": "0x768",
+      "ATU25Level": "0x76C",
+      "ATU26Level": "0x770",
+      "ATU27Level": "0x774",
+      "ATU28Level": "0x778"
+    },
+    "token_shop": {
+      "tier1_cost_fields": {
+        "TokenBoostStartCost": "0xE0",
+        "TokenBoostAdditiveCost": "0xE4",
+        "DiamondBoostStartCost": "0x108",
+        "CellBoostStartCost": "0x130",
+        "ModBoostStartCost": "0x158"
+      },
+      "mk_generator_cost_fields": {
+        "MK1TokenBoostStartCost": "0x190",
+        "MK2TokenBoostStartCost": "0x1C8",
+        "MK3TokenBoostStartCost": "0x200",
+        "MK4TokenBoostStartCost": "0x238",
+        "MK5TokenBoostStartCost": "0x270",
+        "MK6TokenBoostStartCost": "0x2A8",
+        "MK7TokenBoostStartCost": "0x2E0",
+        "MK8TokenBoostStartCost": "0x318"
+      },
+      "late_atu_cost_fields": {
+        "ATU24StartCost": "0x508",
+        "ATU25StartCost": "0x538",
+        "ATU26StartCost": "0x560",
+        "ATU27StartCost": "0x588",
+        "ATU28StartCost": "0x5B0"
+      }
+    }
+  },
+
+  "method_rvas": {
+    "cost_getters": [
+      {"name": "get_ATU1Cost", "rva": 36740667},
+      {"name": "get_ATU2Cost", "rva": 36740751},
+      {"name": "get_ATU3Cost", "rva": 36740835},
+      {"name": "get_ATU4Cost", "rva": 36740919},
+      {"name": "get_ATU5Cost", "rva": 36741501},
+      {"name": "get_ATU6Cost", "rva": 36742083},
+      {"name": "get_ATU7Cost", "rva": 36742665},
+      {"name": "get_ATU8Cost", "rva": 36743247},
+      {"name": "get_ATU9Cost", "rva": 36743829},
+      {"name": "get_ATU10Cost", "rva": 36744411},
+      {"name": "get_ATU11Cost", "rva": 36744993},
+      {"name": "get_ATU12Cost", "rva": 36745575},
+      {"name": "get_ATU13Cost", "rva": 36746157},
+      {"name": "get_ATU14Cost", "rva": 36746241},
+      {"name": "get_ATU15Cost", "rva": 36746325},
+      {"name": "get_ATU16Cost", "rva": 36746889},
+      {"name": "get_ATU17Cost", "rva": 36747471},
+      {"name": "get_ATU18Cost", "rva": 36748057},
+      {"name": "get_ATU19Cost", "rva": 36748643},
+      {"name": "get_ATU20Cost", "rva": 36749229},
+      {"name": "get_ATU21Cost", "rva": 36749313},
+      {"name": "get_ATU22Cost", "rva": 36749397},
+      {"name": "get_ATU23Cost", "rva": 36749979},
+      {"name": "get_ATU24Cost", "rva": 36750561},
+      {"name": "get_ATU25Cost", "rva": 36750570},
+      {"name": "get_ATU26Cost", "rva": 36750654},
+      {"name": "get_ATU27Cost", "rva": 36751559},
+      {"name": "get_ATU28Cost", "rva": 36752464}
+    ],
+    "bonus_getters": [
+      {"name": "get_ATU1TokenBonus", "rva": 36736496},
+      {"name": "get_ATU2DiamondsBonus", "rva": 36736561},
+      {"name": "get_ATU3CellsBonus", "rva": 36736608},
+      {"name": "get_ATU4MPBonus", "rva": 36736659},
+      {"name": "get_ATU5MK1Bonus", "rva": 36736821},
+      {"name": "get_ATU24Bonus1Cells", "rva": 36739459},
+      {"name": "get_ATU24Bonus2MP", "rva": 36739750},
+      {"name": "get_ATU24Bonus3Shards", "rva": 36739961},
+      {"name": "get_ATU24Bonus4RP", "rva": 36740172},
+      {"name": "get_ATU24Bonus5AP", "rva": 36740383}
+    ]
+  },
+
+  "data_files": {
+    "cost_model": "data/tokenshop-cost-model.json",
+    "ui_mapping": "data/tokenshop-ui-mapping.json",
+    "uabea_report": "data/uabea-probe-report.json",
+    "native_analyzer": "data/tokenshop-cost-native-analyzer.json"
+  }
+}

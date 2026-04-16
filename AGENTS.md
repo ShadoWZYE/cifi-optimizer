@@ -66,3 +66,14 @@ Before wiring systems into app behavior:
 4. Community/external-model labeled support
 
 Agents should prefer APK/Unity extraction/mapping when grounded game truth is missing.
+
+## Test suite rules
+
+The smoke test suite (`tests/smoke.mjs`) catches drift between committed data and code expectations. When data changes are intentional (not regressions), realign the smoke tests rather than reverting the data changes. This means:
+
+1. Update assertions to match new data structure
+2. Update expected dataset IDs in bundled-dataset-contract validation
+3. Update bootstrap fetch paths if new datasets are added
+4. Run smoke tests after any data or dataset-contract changes
+
+The test suite exists to catch unintended drift - intentional changes are expected to update the test surface.

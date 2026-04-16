@@ -1,0 +1,1150 @@
+{
+  "dataset": "tokenshop-canonical-v1",
+  "generated": "2026-04-16",
+  "description": "Grounded TokenShop dataset - all fields verified from APK analysis",
+  "source_priority": [
+    "uabea-probe-report.json (field offsets, method RVAs)",
+    "tokenshop-cost-model.json (extracted cost/bonus values)",
+    "tokenshop-model-recovery.json (verified formulas)"
+  ],
+  "formulas": {
+    "cost": {
+      "formula": "cost = StartCost + (level - 1) * AdditiveCost",
+      "verified_via": "Native code disassembly at get_ATU*Cost method RVAs"
+    },
+    "bonus": {
+      "formula": "bonus = BonusFieldValue * CurrentLevel",
+      "verified_via": "Native code disassembly at get_*Bonus method RVAs"
+    }
+  },
+  "save_data": {
+    "description": "ATU upgrade levels stored in SaveData class",
+    "source": "uabea-probe-report.json -> saveData type",
+    "count": 28,
+    "offsets": {
+      "ATU1Level": {
+        "offset": 1804,
+        "type": "System.Int32"
+      },
+      "ATU2Level": {
+        "offset": 1808,
+        "type": "System.Int32"
+      },
+      "ATU3Level": {
+        "offset": 1812,
+        "type": "System.Int32"
+      },
+      "ATU4Level": {
+        "offset": 1816,
+        "type": "System.Int32"
+      },
+      "ATU5Level": {
+        "offset": 1820,
+        "type": "System.Int32"
+      },
+      "ATU6Level": {
+        "offset": 1824,
+        "type": "System.Int32"
+      },
+      "ATU7Level": {
+        "offset": 1828,
+        "type": "System.Int32"
+      },
+      "ATU8Level": {
+        "offset": 1832,
+        "type": "System.Int32"
+      },
+      "ATU9Level": {
+        "offset": 1836,
+        "type": "System.Int32"
+      },
+      "ATU10Level": {
+        "offset": 1840,
+        "type": "System.Int32"
+      },
+      "ATU11Level": {
+        "offset": 1844,
+        "type": "System.Int32"
+      },
+      "ATU12Level": {
+        "offset": 1848,
+        "type": "System.Int32"
+      },
+      "ATU13Level": {
+        "offset": 1852,
+        "type": "System.Int32"
+      },
+      "ATU14Level": {
+        "offset": 1856,
+        "type": "System.Int32"
+      },
+      "ATU15Level": {
+        "offset": 1860,
+        "type": "System.Int32"
+      },
+      "ATU16Level": {
+        "offset": 1864,
+        "type": "System.Int32"
+      },
+      "ATU17Level": {
+        "offset": 1868,
+        "type": "System.Int32"
+      },
+      "ATU18Level": {
+        "offset": 1872,
+        "type": "System.Int32"
+      },
+      "ATU19Level": {
+        "offset": 1876,
+        "type": "System.Int32"
+      },
+      "ATU20Level": {
+        "offset": 1880,
+        "type": "System.Int32"
+      },
+      "ATU21Level": {
+        "offset": 1884,
+        "type": "System.Int32"
+      },
+      "ATU22Level": {
+        "offset": 1888,
+        "type": "System.Int32"
+      },
+      "ATU23Level": {
+        "offset": 1892,
+        "type": "System.Int32"
+      },
+      "ATU24Level": {
+        "offset": 1896,
+        "type": "System.Int32"
+      },
+      "ATU25Level": {
+        "offset": 1900,
+        "type": "System.Int32"
+      },
+      "ATU26Level": {
+        "offset": 1904,
+        "type": "System.Int32"
+      },
+      "ATU27Level": {
+        "offset": 1908,
+        "type": "System.Int32"
+      },
+      "ATU28Level": {
+        "offset": 1912,
+        "type": "System.Int32"
+      }
+    },
+    "adjacent_fields": {
+      "BankedTokens": {
+        "offset": 1800,
+        "type": "System.Single"
+      },
+      "Tier2TokensUnlocked": {
+        "offset": 1788,
+        "type": "System.Boolean"
+      }
+    }
+  },
+  "token_shop": {
+    "description": "TokenShop controller class - holds cost/bonus field values",
+    "source": "uabea-probe-report.json -> tokenShop type",
+    "cost_field_offsets": {
+      "ATU24StartCost": {
+        "offset": 1288,
+        "type": "System.Single"
+      },
+      "ATU25AdditiveCost": {
+        "offset": 1340,
+        "type": "System.Single"
+      },
+      "ATU25StartCost": {
+        "offset": 1336,
+        "type": "System.Single"
+      },
+      "ATU26AdditiveCost": {
+        "offset": 1380,
+        "type": "System.Single"
+      },
+      "ATU26StartCost": {
+        "offset": 1376,
+        "type": "System.Single"
+      },
+      "ATU27AdditiveCost": {
+        "offset": 1420,
+        "type": "System.Single"
+      },
+      "ATU27StartCost": {
+        "offset": 1416,
+        "type": "System.Single"
+      },
+      "ATU28AdditiveCost": {
+        "offset": 1460,
+        "type": "System.Single"
+      },
+      "ATU28StartCost": {
+        "offset": 1456,
+        "type": "System.Single"
+      },
+      "CellBoostAdditiveCost": {
+        "offset": 308,
+        "type": "System.Single"
+      },
+      "CellBoostStartCost": {
+        "offset": 304,
+        "type": "System.Single"
+      },
+      "DiamondBoostAdditiveCost": {
+        "offset": 268,
+        "type": "System.Single"
+      },
+      "DiamondBoostStartCost": {
+        "offset": 264,
+        "type": "System.Single"
+      },
+      "MK1TokenBoostAdditiveCost": {
+        "offset": 404,
+        "type": "System.Single"
+      },
+      "MK1TokenBoostStartCost": {
+        "offset": 400,
+        "type": "System.Single"
+      },
+      "MK2TokenBoostAdditiveCost": {
+        "offset": 460,
+        "type": "System.Single"
+      },
+      "MK2TokenBoostStartCost": {
+        "offset": 456,
+        "type": "System.Single"
+      },
+      "MK3TokenBoostAdditiveCost": {
+        "offset": 516,
+        "type": "System.Single"
+      },
+      "MK3TokenBoostStartCost": {
+        "offset": 512,
+        "type": "System.Single"
+      },
+      "MK4TokenBoostAdditiveCost": {
+        "offset": 572,
+        "type": "System.Single"
+      },
+      "MK4TokenBoostStartCost": {
+        "offset": 568,
+        "type": "System.Single"
+      },
+      "MK5TokenBoostAdditiveCost": {
+        "offset": 628,
+        "type": "System.Single"
+      },
+      "MK5TokenBoostStartCost": {
+        "offset": 624,
+        "type": "System.Single"
+      },
+      "MK6TokenBoostAdditiveCost": {
+        "offset": 684,
+        "type": "System.Single"
+      },
+      "MK6TokenBoostStartCost": {
+        "offset": 680,
+        "type": "System.Single"
+      },
+      "MK7TokenBoostAdditiveCost": {
+        "offset": 740,
+        "type": "System.Single"
+      },
+      "MK7TokenBoostStartCost": {
+        "offset": 736,
+        "type": "System.Single"
+      },
+      "MK8TokenBoostAdditiveCost": {
+        "offset": 796,
+        "type": "System.Single"
+      },
+      "MK8TokenBoostStartCost": {
+        "offset": 792,
+        "type": "System.Single"
+      },
+      "ModBoostAdditiveCost": {
+        "offset": 348,
+        "type": "System.Single"
+      },
+      "ModBoostStartCost": {
+        "offset": 344,
+        "type": "System.Single"
+      },
+      "T2Duo1AdditiveCost": {
+        "offset": 932,
+        "type": "System.Single"
+      },
+      "T2Duo1StartCost": {
+        "offset": 928,
+        "type": "System.Single"
+      },
+      "T2Duo2AdditiveCost": {
+        "offset": 972,
+        "type": "System.Single"
+      },
+      "T2Duo2StartCost": {
+        "offset": 968,
+        "type": "System.Single"
+      },
+      "T2Duo3AdditiveCost": {
+        "offset": 1012,
+        "type": "System.Single"
+      },
+      "T2Duo3StartCost": {
+        "offset": 1008,
+        "type": "System.Single"
+      },
+      "T2Duo4AdditiveCost": {
+        "offset": 1052,
+        "type": "System.Single"
+      },
+      "T2Duo4StartCost": {
+        "offset": 1048,
+        "type": "System.Single"
+      },
+      "T2Duo5AdditiveCost": {
+        "offset": 1092,
+        "type": "System.Single"
+      },
+      "T2Duo5StartCost": {
+        "offset": 1088,
+        "type": "System.Single"
+      },
+      "T3Trio1AdditiveCost": {
+        "offset": 1212,
+        "type": "System.Single"
+      },
+      "T3Trio1StartCost": {
+        "offset": 1208,
+        "type": "System.Single"
+      },
+      "T3Trio2AdditiveCost": {
+        "offset": 1252,
+        "type": "System.Single"
+      },
+      "T3Trio2StartCost": {
+        "offset": 1248,
+        "type": "System.Single"
+      },
+      "TokenBoostAdditiveCost": {
+        "offset": 228,
+        "type": "System.Single"
+      },
+      "TokenBoostStartCost": {
+        "offset": 224,
+        "type": "System.Single"
+      },
+      "TokenBoostT2AdditiveCost": {
+        "offset": 852,
+        "type": "System.Single"
+      },
+      "TokenBoostT2StartCost": {
+        "offset": 848,
+        "type": "System.Single"
+      },
+      "TokenBoostT3AdditiveCost": {
+        "offset": 1132,
+        "type": "System.Single"
+      },
+      "TokenBoostT3StartCost": {
+        "offset": 1128,
+        "type": "System.Single"
+      },
+      "TokenDailiesT2AdditiveCost": {
+        "offset": 892,
+        "type": "System.Single"
+      },
+      "TokenDailiesT2StartCost": {
+        "offset": 888,
+        "type": "System.Single"
+      },
+      "TokenDailiesT3AdditiveCost": {
+        "offset": 1172,
+        "type": "System.Single"
+      },
+      "TokenDailiesT3StartCost": {
+        "offset": 1168,
+        "type": "System.Single"
+      }
+    },
+    "bonus_field_offsets": {
+      "ATU24Bonus1": {
+        "offset": 1292,
+        "type": "System.Single"
+      },
+      "ATU24Bonus2": {
+        "offset": 1296,
+        "type": "System.Single"
+      },
+      "ATU24Bonus3": {
+        "offset": 1300,
+        "type": "System.Single"
+      },
+      "ATU24Bonus4": {
+        "offset": 1304,
+        "type": "System.Single"
+      },
+      "ATU24Bonus5": {
+        "offset": 1308,
+        "type": "System.Single"
+      },
+      "ATU25Bonus": {
+        "offset": 1344,
+        "type": "System.Single"
+      },
+      "ATU26Bonus": {
+        "offset": 1384,
+        "type": "System.Int32"
+      },
+      "ATU27Bonus": {
+        "offset": 1424,
+        "type": "System.Int32"
+      },
+      "ATU28Bonus": {
+        "offset": 1464,
+        "type": "System.Int32"
+      },
+      "CellBoostBonus": {
+        "offset": 312,
+        "type": "System.Int32"
+      },
+      "DiamondBoostBonus": {
+        "offset": 272,
+        "type": "System.Int32"
+      },
+      "MK1TokenBoostBonus": {
+        "offset": 408,
+        "type": "System.Single"
+      },
+      "MK2TokenBoostBonus": {
+        "offset": 464,
+        "type": "System.Single"
+      },
+      "MK3TokenBoostBonus": {
+        "offset": 520,
+        "type": "System.Single"
+      },
+      "MK4TokenBoostBonus": {
+        "offset": 576,
+        "type": "System.Single"
+      },
+      "MK5TokenBoostBonus": {
+        "offset": 632,
+        "type": "System.Single"
+      },
+      "MK6TokenBoostBonus": {
+        "offset": 688,
+        "type": "System.Single"
+      },
+      "MK7TokenBoostBonus": {
+        "offset": 744,
+        "type": "System.Single"
+      },
+      "MK8TokenBoostBonus": {
+        "offset": 800,
+        "type": "System.Single"
+      },
+      "ModBoostBonus": {
+        "offset": 352,
+        "type": "System.Single"
+      },
+      "T2Duo1Bonus": {
+        "offset": 936,
+        "type": "System.Single"
+      },
+      "T2Duo2Bonus": {
+        "offset": 976,
+        "type": "System.Single"
+      },
+      "T2Duo3Bonus": {
+        "offset": 1016,
+        "type": "System.Single"
+      },
+      "T2Duo4Bonus": {
+        "offset": 1056,
+        "type": "System.Single"
+      },
+      "T2Duo5Bonus": {
+        "offset": 1096,
+        "type": "System.Single"
+      },
+      "T3Trio1Bonus": {
+        "offset": 1216,
+        "type": "System.Single"
+      },
+      "T3Trio2Bonus": {
+        "offset": 1256,
+        "type": "System.Single"
+      },
+      "TokenBoostBonus": {
+        "offset": 232,
+        "type": "System.Single"
+      },
+      "TokenBoostT2Bonus": {
+        "offset": 856,
+        "type": "System.Single"
+      },
+      "TokenBoostT3Bonus": {
+        "offset": 1136,
+        "type": "System.Single"
+      },
+      "TokenDailiesT2Bonus": {
+        "offset": 896,
+        "type": "System.Single"
+      },
+      "TokenDailiesT3Bonus": {
+        "offset": 1176,
+        "type": "System.Single"
+      }
+    },
+    "methods": {
+      "get_ATU1TokenBonus": 36736496,
+      "get_ATU2DiamondsBonus": 36736561,
+      "get_ATU3CellsBonus": 36736608,
+      "get_ATU4MPBonus": 36736659,
+      "get_ATU5MK1Bonus": 36736821,
+      "get_ATU6MK2Bonus": 36736983,
+      "get_ATU7MK3Bonus": 36737145,
+      "get_ATU8MK4Bonus": 36737307,
+      "get_ATU9MK5Bonus": 36737469,
+      "get_ATU10MK6Bonus": 36737631,
+      "get_ATU11MK7Bonus": 36737793,
+      "get_ATU12MK8Bonus": 36737955,
+      "get_ATU13TokenBonus": 36738117,
+      "get_ATU14TokenDailiesBonus": 36738167,
+      "get_ATU15Bonus": 36738225,
+      "get_ATU16Bonus": 36738387,
+      "get_ATU17Bonus": 36738549,
+      "get_ATU18Bonus": 36738711,
+      "get_ATU19Bonus": 36738873,
+      "get_ATU20TokenBonus": 36739035,
+      "get_ATU21TokenDailiesBonus": 36739077,
+      "get_ATU22Bonus": 36739135,
+      "get_ATU23Bonus": 36739297,
+      "get_ATU24Bonus1Cells": 36739459,
+      "get_ATU24Bonus2MP": 36739750,
+      "get_ATU24Bonus3Shards": 36739961,
+      "get_ATU24Bonus4RP": 36740172,
+      "get_ATU24Bonus5AP": 36740383,
+      "get_ATU1Cost": 36740667,
+      "get_ATU2Cost": 36740751,
+      "get_ATU3Cost": 36740835,
+      "get_ATU4Cost": 36740919,
+      "get_ATU5Cost": 36741501,
+      "get_ATU6Cost": 36742083,
+      "get_ATU7Cost": 36742665,
+      "get_ATU8Cost": 36743247,
+      "get_ATU9Cost": 36743829,
+      "get_ATU10Cost": 36744411,
+      "get_ATU11Cost": 36744993,
+      "get_ATU12Cost": 36745575,
+      "get_ATU13Cost": 36746157,
+      "get_ATU14Cost": 36746241,
+      "get_ATU15Cost": 36746325,
+      "get_ATU16Cost": 36746889,
+      "get_ATU17Cost": 36747471,
+      "get_ATU18Cost": 36748057,
+      "get_ATU19Cost": 36748643,
+      "get_ATU20Cost": 36749229,
+      "get_ATU21Cost": 36749313,
+      "get_ATU22Cost": 36749397,
+      "get_ATU23Cost": 36749979,
+      "get_ATU24Cost": 36750561,
+      "get_ATU25Cost": 36750570,
+      "get_ATU26Cost": 36750654,
+      "get_ATU27Cost": 36751559,
+      "get_ATU28Cost": 36752464,
+      "BuyATU24": 36777558,
+      "BuyATU25": 36778182,
+      "BuyATU26": 36778771,
+      "BuyATU27": 36779368,
+      "BuyATU28": 36779965,
+      "BuyATU24Enum": 36783529,
+      "BuyATU25Enum": 36783650,
+      "BuyATU26Enum": 36783771,
+      "BuyATU27Enum": 36783892,
+      "BuyATU28Enum": 36784013
+    }
+  },
+  "atu_rows": {
+    "1": {
+      "field_name": "ATU1Button",
+      "level_field": "ATU1Level",
+      "level_offset": 1804,
+      "path_id": 15839,
+      "tier": "t1",
+      "type": "Token Boost",
+      "prefab": "NewTokenUPGPrefab.T1.TokensBoost",
+      "start_cost": 20.0,
+      "additive_cost": 5.0,
+      "max_level": 20,
+      "bonus_value": 0.20000000298023224,
+      "cost_formula": "cost = 20.0 + (level - 1) * 5.0",
+      "cost_at_level_1": 20.0,
+      "cost_at_level_2": 25.0,
+      "methods": {
+        "get_ATU1TokenBonus": 36736496,
+        "get_ATU1Cost": 36740667
+      }
+    },
+    "2": {
+      "field_name": "ATU2Button",
+      "level_field": "ATU2Level",
+      "level_offset": 1808,
+      "path_id": 15804,
+      "tier": "t1",
+      "type": "Diamond Boost",
+      "prefab": "NewDiamondUPGPrefab.T1.DiamondBoost",
+      "start_cost": 200.0,
+      "additive_cost": 300.0,
+      "max_level": 2,
+      "bonus_value": 1,
+      "cost_formula": "cost = 200.0 + (level - 1) * 300.0",
+      "cost_at_level_1": 200.0,
+      "cost_at_level_2": 500.0,
+      "methods": {
+        "get_ATU2DiamondsBonus": 36736561,
+        "get_ATU2Cost": 36740751
+      }
+    },
+    "3": {
+      "field_name": "ATU3Button",
+      "level_field": "ATU3Level",
+      "level_offset": 1812,
+      "path_id": 15810,
+      "tier": "t1",
+      "type": "Cells Boost",
+      "prefab": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+      "start_cost": 1.0,
+      "additive_cost": 0.25,
+      "max_level": 60,
+      "bonus_value": 1,
+      "cost_formula": "cost = 1.0 + (level - 1) * 0.25",
+      "cost_at_level_1": 1.0,
+      "cost_at_level_2": 1.25,
+      "methods": {
+        "get_ATU3CellsBonus": 36736608,
+        "get_ATU3Cost": 36740835
+      }
+    },
+    "4": {
+      "field_name": "ATU4Button",
+      "level_field": "ATU4Level",
+      "level_offset": 1816,
+      "path_id": 15796,
+      "tier": "t1",
+      "type": "Mod Points Boost",
+      "prefab": "NewTokenUPGPrefab.T1.ModPointsBooster",
+      "start_cost": 10.0,
+      "additive_cost": 2.0,
+      "max_level": 200,
+      "bonus_value": 1.0099999904632568,
+      "cost_formula": "cost = 10.0 + (level - 1) * 2.0",
+      "cost_at_level_1": 10.0,
+      "cost_at_level_2": 12.0,
+      "methods": {
+        "get_ATU4MPBonus": 36736659,
+        "get_ATU4Cost": 36740919
+      }
+    },
+    "5": {
+      "field_name": "ATU5Button",
+      "level_field": "ATU5Level",
+      "level_offset": 1820,
+      "path_id": 15831,
+      "tier": "t1",
+      "type": "MK1 Generator",
+      "prefab": "NewTokenUPGPrefab.T1.MK1Booster",
+      "start_cost": 1.0,
+      "additive_cost": 0.10000000149011612,
+      "max_level": 5000,
+      "bonus_value": {
+        "field": "MK1TokenBoostBonus",
+        "value": 1.0099999904632568,
+        "raw_u32": 1065437102,
+        "raw_f32": 1.0099999904632568
+      },
+      "cost_formula": "cost = 1.0 + (level - 1) * 0.10000000149011612",
+      "cost_at_level_1": 1.0,
+      "cost_at_level_2": 1.1000000014901161,
+      "methods": {
+        "get_ATU5MK1Bonus": 36736821,
+        "get_ATU5Cost": 36741501
+      }
+    },
+    "6": {
+      "field_name": "ATU6Button",
+      "level_field": "ATU6Level",
+      "level_offset": 1824,
+      "path_id": 15835,
+      "tier": "t1",
+      "type": "MK2 Generator",
+      "prefab": "NewTokenUPGPrefab.T1.MK2Booster",
+      "start_cost": 2.0,
+      "additive_cost": 0.11999999731779099,
+      "max_level": 5000,
+      "bonus_value": 1.0099999904632568,
+      "cost_formula": "cost = 2.0 + (level - 1) * 0.11999999731779099",
+      "cost_at_level_1": 2.0,
+      "cost_at_level_2": 2.119999997317791,
+      "methods": {
+        "get_ATU6MK2Bonus": 36736983,
+        "get_ATU6Cost": 36742083
+      }
+    },
+    "7": {
+      "field_name": "ATU7Button",
+      "level_field": "ATU7Level",
+      "level_offset": 1828,
+      "path_id": 15792,
+      "tier": "t1",
+      "type": "MK3 Generator",
+      "prefab": "NewTokenUPGPrefab.T1.MK3Booster",
+      "start_cost": 3.0,
+      "additive_cost": 0.12999999523162842,
+      "max_level": 5000,
+      "bonus_value": 1.0099999904632568,
+      "cost_formula": "cost = 3.0 + (level - 1) * 0.12999999523162842",
+      "cost_at_level_1": 3.0,
+      "cost_at_level_2": 3.1299999952316284,
+      "methods": {
+        "get_ATU7MK3Bonus": 36737145,
+        "get_ATU7Cost": 36742665
+      }
+    },
+    "8": {
+      "field_name": "ATU8Button",
+      "level_field": "ATU8Level",
+      "level_offset": 1832,
+      "path_id": 15795,
+      "tier": "t1",
+      "type": "MK4 Generator",
+      "prefab": "NewTokenUPGPrefab.T1.MK4Booster",
+      "start_cost": 4.0,
+      "additive_cost": 0.14000000059604645,
+      "max_level": 5000,
+      "bonus_value": 1.0099999904632568,
+      "cost_formula": "cost = 4.0 + (level - 1) * 0.14000000059604645",
+      "cost_at_level_1": 4.0,
+      "cost_at_level_2": 4.1400000005960464,
+      "methods": {
+        "get_ATU8MK4Bonus": 36737307,
+        "get_ATU8Cost": 36743247
+      }
+    },
+    "9": {
+      "field_name": "ATU9Button",
+      "level_field": "ATU9Level",
+      "level_offset": 1836,
+      "path_id": 15845,
+      "tier": "t1",
+      "type": "MK5 Generator",
+      "prefab": "NewTokenUPGPrefab.T1.MK5Booster",
+      "start_cost": 15.0,
+      "additive_cost": 0.15000000596046448,
+      "max_level": 5000,
+      "bonus_value": 1.0099999904632568,
+      "cost_formula": "cost = 15.0 + (level - 1) * 0.15000000596046448",
+      "cost_at_level_1": 15.0,
+      "cost_at_level_2": 15.150000005960464,
+      "methods": {
+        "get_ATU9MK5Bonus": 36737469,
+        "get_ATU9Cost": 36743829
+      }
+    },
+    "10": {
+      "field_name": "ATU10Button",
+      "level_field": "ATU10Level",
+      "level_offset": 1840,
+      "path_id": 15837,
+      "tier": "t1",
+      "type": "MK6 Generator",
+      "prefab": "NewTokenUPGPrefab.T1.MK6Booster",
+      "start_cost": 26.0,
+      "additive_cost": 0.1599999964237213,
+      "max_level": 5000,
+      "bonus_value": 1.0099999904632568,
+      "cost_formula": "cost = 26.0 + (level - 1) * 0.1599999964237213",
+      "cost_at_level_1": 26.0,
+      "cost_at_level_2": 26.15999999642372,
+      "methods": {
+        "get_ATU10MK6Bonus": 36737631,
+        "get_ATU10Cost": 36744411
+      }
+    },
+    "11": {
+      "field_name": "ATU11Button",
+      "level_field": "ATU11Level",
+      "level_offset": 1844,
+      "path_id": 15793,
+      "tier": "t1",
+      "type": "MK7 Generator",
+      "prefab": "NewTokenUPGPrefab.T1.MK7Booster",
+      "start_cost": 37.0,
+      "additive_cost": 0.20000000298023224,
+      "max_level": 5000,
+      "bonus_value": 1.0099999904632568,
+      "cost_formula": "cost = 37.0 + (level - 1) * 0.20000000298023224",
+      "cost_at_level_1": 37.0,
+      "cost_at_level_2": 37.20000000298023,
+      "methods": {
+        "get_ATU11MK7Bonus": 36737793,
+        "get_ATU11Cost": 36744993
+      }
+    },
+    "12": {
+      "field_name": "ATU12Button",
+      "level_field": "ATU12Level",
+      "level_offset": 1848,
+      "path_id": 15814,
+      "tier": "t1",
+      "type": "MK8 Generator",
+      "prefab": "NewTokenUPGPrefab.T1.MK8Booster",
+      "start_cost": 48.0,
+      "additive_cost": 0.30000001192092896,
+      "max_level": 5000,
+      "bonus_value": 1.0099999904632568,
+      "cost_formula": "cost = 48.0 + (level - 1) * 0.30000001192092896",
+      "cost_at_level_1": 48.0,
+      "cost_at_level_2": 48.30000001192093,
+      "methods": {
+        "get_ATU12MK8Bonus": 36737955,
+        "get_ATU12Cost": 36745575
+      }
+    },
+    "13": {
+      "field_name": "ATU13Button",
+      "level_field": "ATU13Level",
+      "level_offset": 1852,
+      "path_id": 15821,
+      "tier": "t2",
+      "type": "Duo 1",
+      "prefab": "NewTokenUPGPrefab.T2.DuoBoosterOne",
+      "start_cost": 1000.0,
+      "additive_cost": 500.0,
+      "max_level": 10,
+      "bonus_value": 0.5,
+      "cost_formula": "cost = 1000.0 + (level - 1) * 500.0",
+      "cost_at_level_1": 1000.0,
+      "cost_at_level_2": 1500.0,
+      "methods": {
+        "get_ATU13TokenBonus": 36738117,
+        "get_ATU13Cost": 36746157
+      }
+    },
+    "14": {
+      "field_name": "ATU14Button",
+      "level_field": "ATU14Level",
+      "level_offset": 1856,
+      "path_id": 15844,
+      "tier": "t2",
+      "type": "Duo 2",
+      "prefab": "NewTokenUPGPrefab.T2.DuoBoosterTwo",
+      "start_cost": 1000.0,
+      "additive_cost": 800.0,
+      "max_level": 10,
+      "bonus_value": 0.20000000298023224,
+      "cost_formula": "cost = 1000.0 + (level - 1) * 800.0",
+      "cost_at_level_1": 1000.0,
+      "cost_at_level_2": 1800.0,
+      "methods": {
+        "get_ATU14TokenDailiesBonus": 36738167,
+        "get_ATU14Cost": 36746241
+      }
+    },
+    "15": {
+      "field_name": "ATU15Button",
+      "level_field": "ATU15Level",
+      "level_offset": 1860,
+      "path_id": 15850,
+      "tier": "t2",
+      "type": "Duo 3",
+      "prefab": "NewTokenUPGPrefab.T2.DuoBoosterThree",
+      "start_cost": 1275.0,
+      "additive_cost": 25.0,
+      "max_level": 500,
+      "bonus_value": {
+        "field": "T2Duo1Bonus",
+        "value": 1.0199999809265137,
+        "raw_u32": 1065520988,
+        "raw_f32": 1.0199999809265137
+      },
+      "cost_formula": "cost = 1275.0 + (level - 1) * 25.0",
+      "cost_at_level_1": 1275.0,
+      "cost_at_level_2": 1300.0,
+      "methods": {
+        "get_ATU15Bonus": 36738225,
+        "get_ATU15Cost": 36746325
+      }
+    },
+    "16": {
+      "field_name": "ATU16Button",
+      "level_field": "ATU16Level",
+      "level_offset": 1864,
+      "path_id": 15827,
+      "tier": "t2",
+      "type": "Duo 4",
+      "prefab": "NewTokenUPGPrefab.T2.DuoBoosterFour",
+      "start_cost": 75.0,
+      "additive_cost": 2.0,
+      "max_level": 2500,
+      "bonus_value": 1.0199999809265137,
+      "cost_formula": "cost = 75.0 + (level - 1) * 2.0",
+      "cost_at_level_1": 75.0,
+      "cost_at_level_2": 77.0,
+      "methods": {
+        "get_ATU16Bonus": 36738387,
+        "get_ATU16Cost": 36746889
+      }
+    },
+    "17": {
+      "field_name": "ATU17Button",
+      "level_field": "ATU17Level",
+      "level_offset": 1868,
+      "path_id": 15841,
+      "tier": "t2",
+      "type": "Duo 5",
+      "prefab": "NewTokenUPGPrefab.T2.DuoBoosterFive",
+      "start_cost": 100.0,
+      "additive_cost": 3.0,
+      "max_level": 2500,
+      "bonus_value": 1.0199999809265137,
+      "cost_formula": "cost = 100.0 + (level - 1) * 3.0",
+      "cost_at_level_1": 100.0,
+      "cost_at_level_2": 103.0,
+      "methods": {
+        "get_ATU17Bonus": 36738549,
+        "get_ATU17Cost": 36747471
+      }
+    },
+    "18": {
+      "field_name": "ATU18Button",
+      "level_field": "ATU18Level",
+      "level_offset": 1872,
+      "path_id": 15834,
+      "tier": "t2",
+      "type": "Duo 6",
+      "prefab": "NewTokenUPGPrefab.T2.DuoBoosterSix",
+      "start_cost": 125.0,
+      "additive_cost": 4.0,
+      "max_level": 2500,
+      "bonus_value": 1.0199999809265137,
+      "cost_formula": "cost = 125.0 + (level - 1) * 4.0",
+      "cost_at_level_1": 125.0,
+      "cost_at_level_2": 129.0,
+      "methods": {
+        "get_ATU18Bonus": 36738711,
+        "get_ATU18Cost": 36748057
+      }
+    },
+    "19": {
+      "field_name": "ATU19Button",
+      "level_field": "ATU19Level",
+      "level_offset": 1876,
+      "path_id": 15842,
+      "tier": "t3",
+      "type": "Trinity 1",
+      "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+      "start_cost": 150.0,
+      "additive_cost": 5.0,
+      "max_level": 2500,
+      "bonus_value": 1.0199999809265137,
+      "cost_formula": "cost = 150.0 + (level - 1) * 5.0",
+      "cost_at_level_1": 150.0,
+      "cost_at_level_2": 155.0,
+      "methods": {
+        "get_ATU19Bonus": 36738873,
+        "get_ATU19Cost": 36748643
+      }
+    },
+    "20": {
+      "field_name": "ATU20Button",
+      "level_field": "ATU20Level",
+      "level_offset": 1880,
+      "path_id": 15812,
+      "tier": "t3",
+      "type": "T3 Tokens",
+      "prefab": "NewTokenUPGPrefab.T3.TokensBoost",
+      "start_cost": 2500.0,
+      "additive_cost": 750.0,
+      "max_level": 25,
+      "bonus_value": 1.0,
+      "cost_formula": "cost = 2500.0 + (level - 1) * 750.0",
+      "cost_at_level_1": 2500.0,
+      "cost_at_level_2": 3250.0,
+      "methods": {
+        "get_ATU20TokenBonus": 36739035,
+        "get_ATU20Cost": 36749229
+      }
+    },
+    "21": {
+      "field_name": "ATU21Button",
+      "level_field": "ATU21Level",
+      "level_offset": 1884,
+      "path_id": 15829,
+      "tier": "t3",
+      "type": "Trinity 1",
+      "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+      "start_cost": 3000.0,
+      "additive_cost": 900.0,
+      "max_level": 50,
+      "bonus_value": 0.20000000298023224,
+      "cost_formula": "cost = 3000.0 + (level - 1) * 900.0",
+      "cost_at_level_1": 3000.0,
+      "cost_at_level_2": 3900.0,
+      "methods": {
+        "get_ATU21TokenDailiesBonus": 36739077,
+        "get_ATU21Cost": 36749313
+      }
+    },
+    "22": {
+      "field_name": "ATU22Button",
+      "level_field": "ATU22Level",
+      "level_offset": 1888,
+      "path_id": 15806,
+      "tier": "t3",
+      "type": "Trinity 2",
+      "prefab": "NewTokenUPGPrefab.T3.TrinityBoosterTwo",
+      "start_cost": 7000.0,
+      "additive_cost": 100.0,
+      "max_level": 2000,
+      "bonus_value": {
+        "field": "T3Trio1Bonus",
+        "value": 1.0299999713897705,
+        "raw_u32": 1065604874,
+        "raw_f32": 1.0299999713897705
+      },
+      "cost_formula": "cost = 7000.0 + (level - 1) * 100.0",
+      "cost_at_level_1": 7000.0,
+      "cost_at_level_2": 7100.0,
+      "methods": {
+        "get_ATU22Bonus": 36739135,
+        "get_ATU22Cost": 36749397
+      }
+    },
+    "23": {
+      "field_name": "ATU23Button",
+      "level_field": "ATU23Level",
+      "level_offset": 1892,
+      "path_id": 15828,
+      "tier": "t3",
+      "type": "Trinity 3",
+      "prefab": "NewTokenUPGPrefab.T3.DailyTokens",
+      "start_cost": 8000.0,
+      "additive_cost": 200.0,
+      "max_level": 2000,
+      "bonus_value": 1.0299999713897705,
+      "cost_formula": "cost = 8000.0 + (level - 1) * 200.0",
+      "cost_at_level_1": 8000.0,
+      "cost_at_level_2": 8200.0,
+      "methods": {
+        "get_ATU23Bonus": 36739297,
+        "get_ATU23Cost": 36749979
+      }
+    },
+    "24": {
+      "field_name": "ATU24Button",
+      "level_field": "ATU24Level",
+      "level_offset": 1896,
+      "path_id": 15797,
+      "tier": "t4",
+      "type": "Ultima Shards",
+      "prefab": "NewTokenUPGPrefab.T4.Ultima",
+      "start_cost": 40000000.0,
+      "additive_cost": null,
+      "max_level": null,
+      "bonus_value": 1.0003000497817993,
+      "cost_formula": "cost = 40000000.0 + (level - 1) * None",
+      "cost_at_level_1": 40000000.0,
+      "cost_at_level_2": null,
+      "methods": {
+        "get_ATU24Bonus1Cells": 36739459,
+        "get_ATU24Bonus2MP": 36739750,
+        "get_ATU24Bonus3Shards": 36739961,
+        "get_ATU24Bonus4RP": 36740172,
+        "get_ATU24Bonus5AP": 36740383,
+        "get_ATU24Cost": 36750561
+      }
+    },
+    "25": {
+      "field_name": "ATU25Button",
+      "level_field": "ATU25Level",
+      "level_offset": 1900,
+      "path_id": 15820,
+      "tier": "t4",
+      "type": "Ultima",
+      "prefab": "NewTokenUPGPrefab.T4.Ultima",
+      "start_cost": 1000000.0,
+      "additive_cost": 25000.0,
+      "max_level": 50,
+      "bonus_value": 0.5,
+      "cost_formula": "cost = 1000000.0 + (level - 1) * 25000.0",
+      "cost_at_level_1": 1000000.0,
+      "cost_at_level_2": 1025000.0,
+      "methods": {
+        "get_ATU25Cost": 36750570
+      }
+    },
+    "26": {
+      "field_name": "ATU26Button",
+      "level_field": "ATU26Level",
+      "level_offset": 1904,
+      "path_id": 15840,
+      "tier": "t5",
+      "type": "Campaign Fragments",
+      "prefab": "NewTokenUPGPrefab.T5.CampaignFragments",
+      "start_cost": 10000000.0,
+      "additive_cost": 1000000.0,
+      "max_level": 15,
+      "bonus_value": 1000,
+      "cost_formula": "cost = 10000000.0 + (level - 1) * 1000000.0",
+      "cost_at_level_1": 10000000.0,
+      "cost_at_level_2": 11000000.0,
+      "methods": {
+        "get_ATU26Cost": 36750654
+      }
+    },
+    "27": {
+      "field_name": "ATU27Button",
+      "level_field": "ATU27Level",
+      "level_offset": 1908,
+      "path_id": 15832,
+      "tier": "t5",
+      "type": "Ultima RP",
+      "prefab": "NewTokenUPGPrefab.T5.UltimaRP",
+      "start_cost": 50000000.0,
+      "additive_cost": 10000000.0,
+      "max_level": 15,
+      "bonus_value": 500,
+      "cost_formula": "cost = 50000000.0 + (level - 1) * 10000000.0",
+      "cost_at_level_1": 50000000.0,
+      "cost_at_level_2": 60000000.0,
+      "methods": {
+        "get_ATU27Cost": 36751559
+      }
+    },
+    "28": {
+      "field_name": "ATU28Button",
+      "level_field": "ATU28Level",
+      "level_offset": 1912,
+      "path_id": 15813,
+      "tier": "t5",
+      "type": "Ultima MP",
+      "prefab": "NewTokenUPGPrefab.T5.UltimaMP",
+      "start_cost": 250000000.0,
+      "additive_cost": 50000000.0,
+      "max_level": 15,
+      "bonus_value": 500,
+      "cost_formula": "cost = 250000000.0 + (level - 1) * 50000000.0",
+      "cost_at_level_1": 250000000.0,
+      "cost_at_level_2": 300000000.0,
+      "methods": {
+        "get_ATU28Cost": 36752464
+      }
+    }
+  }
+}
