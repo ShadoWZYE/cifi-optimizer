@@ -1,5 +1,12 @@
-import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync, statSync } from "node:fs";
+import {
+  spawnSync,
+  mkdirSync,
+  existsSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+  readFileSync
+} from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -29,34 +36,99 @@ const sharedEnv = {
   NUGET_PACKAGES: path.join(root, ".nuget", "packages")
 };
 
-const commandSets = {
-  build: [["uabea-rebuild", []]],
-  uabea: [
-    ["uabea-build", []],
-    ["dotnet", [probeDll]]
-  ],
-  "shards:parameters": [
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]]
-  ],
-  "shards:type-metadata": [
-    ["uabea-build", []],
-    ["dotnet", [probeDll]],
-    ["python", [path.join(root, "scripts", "unity", "shard_type_metadata_probe.py")]]
-  ],
-  "shards:method": [
-    ["uabea-build", []],
-    ["dotnet", [probeDll]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_method_probe.py")]]
-  ],
-  "shards:cost-native": [
-    ["uabea-build", []],
-    ["dotnet", [probeDll]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_method_probe.py")]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_parameter_probe.py")]],
-    ["python", [path.join(root, "scripts", "unity", "shard_cost_native_probe.py")]]
-  ],
-  trace: [["python", [path.join(root, "scripts", "unity", "unity_trace_bundle.py")]]]
+// Command templates with parameter substitution
+const commandTemplates = {
+  // Build commands
+  build: {
+    steps: [["dotnet", ["build", "{project}", "-c", "Release", "-o", "{output}"]]],
+    defaults: { project: probeProject, output: probeOutputDir }
+  },
+  "uabea-rebuild": {
+    steps: [
+      ["dotnet", ["restore", "{project}"]],
+      ["dotnet", ["build", "{project}", "-c", "Release", "-o", "{output}"]]
+    ],
+    requires: ["project", "output"]
+  },
+
+  // Generic trace bundle with full parameterization
+  trace: {
+    steps: [["python", ["scripts/unity/unity_trace_bundle.py"]]],
+    passThrough: true // Pass all args through to script
+  },
+
+  // Generic compile for canonical dataset
+  compile: {
+    steps: [["python", ["scripts/compile_tokenshop_canonical.py"]]],
+    passThrough: true
+  },
+
+  // Generic pipeline for multi-step extraction
+  pipeline: {
+    steps: [
+      ["uabea-build", []],
+      ["dotnet", ["run", "--project", "{project}"]],
+      ["python", ["scripts/unity/extract_analysis.py"]]
+    ],
+    requires: ["target", "anchors", "output"]
+  },
+
+  // Specialized commands (kept for backwards compatibility reference)
+  "shards:parameters": {
+    legacy: true,
+    steps: [["python", ["scripts/unity/shard_cost_parameter_probe.py"]]]
+  },
+  "shards:type-metadata": {
+    legacy: true,
+    steps: [
+      ["uabea-build", []],
+      ["dotnet", [probeDll]],
+      ["python", ["scripts/unity/shard_type_metadata_probe.py"]]
+    ]
+  },
+  "shards:method": {
+    legacy: true,
+    steps: [
+      ["uabea-build", []],
+      ["dotnet", [probeDll]],
+      ["python", ["scripts/unity/shard_cost_method_probe.py"]]
+    ]
+  },
+  "shards:cost-native": {
+    legacy: true,
+    steps: [
+      ["uabea-build", []],
+      ["dotnet", [probeDll]],
+      ["python", ["scripts/unity/shard_cost_method_probe.py"]],
+      ["python", ["scripts/unity/shard_cost_parameter_probe.py"]],
+      ["python", ["scripts/unity/shard_cost_native_probe.py"]]
+    ]
+  }
 };
+
+const commandSets = {
+  // Legacy commands mapped to templates
+  build: commandTemplates.build,
+  uabea: { steps: [["dotnet", [probeDll]]] },
+  "shards:parameters": commandTemplates["shards:parameters"],
+  "shards:type-metadata": commandTemplates["shards:type-metadata"],
+  "shards:method": commandTemplates["shards:method"],
+  "shards:cost-native": commandTemplates["shards:cost-native"],
+
+  // New generalized commands
+  trace: commandTemplates.trace,
+  compile: commandTemplates.compile,
+  pipeline: commandTemplates.pipeline
+};
+
+// Output directory for probe artifacts
+const PROBE_OUTPUT_DIR = path.join(root, "workbench", "probes");
+
+function ensureProbeOutputDir() {
+  if (!existsSync(PROBE_OUTPUT_DIR)) {
+    mkdirSync(PROBE_OUTPUT_DIR, { recursive: true });
+  }
+}
 
 function formatRepoPath(targetPath) {
   return path.relative(root, targetPath).split(path.sep).join("/");
@@ -76,20 +148,13 @@ function getProbeFreshness() {
     (targetPath) => !existsSync(targetPath)
   );
   if (missingOutputs.length > 0) {
-    return {
-      status: "missing",
-      missingOutputs
-    };
+    return { status: "missing", missingOutputs };
   }
 
   const newestSource = getNewestPath(probeSourceInputs);
   const builtDll = getNewestPath([probeDll]);
   if (newestSource && builtDll && newestSource.mtimeMs > builtDll.mtimeMs) {
-    return {
-      status: "stale",
-      newestSource: newestSource.path,
-      builtDll: builtDll.path
-    };
+    return { status: "stale", newestSource: newestSource.path, builtDll: builtDll.path };
   }
 
   return { status: "fresh" };
@@ -123,10 +188,13 @@ function resolvePythonCommand() {
   );
 }
 
-function runCommand(command, args) {
+function runCommand(command, args, options = {}) {
+  const { force = false, continueOnError = false, outputPath = null } = options;
+
   if (command === "uabea-build") {
     const freshness = getProbeFreshness();
     if (freshness.status === "fresh") {
+      console.log("Probe artifact is fresh, skipping build");
       return;
     }
     if (freshness.status === "missing") {
@@ -161,6 +229,12 @@ function runCommand(command, args) {
         })()
       : [command, args];
 
+  // Check for existing output if not forcing
+  if (!force && outputPath && existsSync(outputPath)) {
+    console.log(`Output exists: ${outputPath}, use --force to overwrite`);
+    return;
+  }
+
   const result = spawnSync(resolvedCommand, resolvedArgs, {
     cwd: root,
     env: sharedEnv,
@@ -173,35 +247,126 @@ function runCommand(command, args) {
         ".NET 8 SDK was not found on PATH. Install the .NET 8 SDK, then rerun `npm run probe:build`."
       );
     }
-    throw result.error;
+    if (!continueOnError) {
+      throw result.error;
+    }
+    console.warn(`Warning: Command failed but continuing: ${command}`);
   }
-  if (result.status !== 0) {
+
+  if (result.status !== 0 && !continueOnError) {
     process.exit(result.status ?? 1);
   }
 }
 
+function substituteParams(template, params, defaults = {}) {
+  let result = template;
+  const allParams = { ...defaults, ...params };
+
+  for (const [key, value] of Object.entries(allParams)) {
+    if (value !== null && value !== undefined) {
+      const placeholder = `{${key}}`;
+      result = result.replace(new RegExp(placeholder, "g"), String(value));
+    }
+  }
+
+  return result;
+}
+
 function printUsage() {
-  console.error("Usage: node scripts/unity/run_probe.mjs <command>");
+  console.error("Usage: node scripts/unity/run_probe.mjs <command> [options]");
   console.error("");
   console.error("Commands:");
-  for (const name of Object.keys(commandSets)) {
-    console.error(`  ${name}`);
-  }
+  console.error("  build                 - Build C# probe (uabea)");
+  console.error("  uabea                 - Run uabea probe");
+  console.error("  trace                 - Run trace bundle (generalized)");
+  console.error("  compile               - Compile canonical dataset");
+  console.error("  pipeline              - Run multi-step extraction pipeline");
+  console.error("");
+  console.error("Legacy Commands (backwards compatible):");
+  console.error("  shards:parameters     - Extract shard parameter fields");
+  console.error("  shards:type-metadata  - Extract shard type metadata");
+  console.error("  shards:method         - Extract shard method data");
+  console.error("  shards:cost-native   - Full shard cost extraction");
+  console.error("");
+  console.error("Options:");
+  console.error("  --target <id>         - Target identifier (e.g., token-shop-atu3-cells)");
+  console.error("  --anchor <value>      - Anchor to trace (can be specified multiple times)");
+  console.error(
+    "  --family <name>       - Trace family (token-shop, shard-owned-state, multiverse-market)"
+  );
+  console.error("  --level <level>       - Output level: raw, structured, both (default: both)");
+  console.error("  --output <path>       - Output file path");
+  console.error("  --chain <script>      - Additional script to run in chain (can repeat)");
+  console.error("  --max-steps <n>       - Maximum analysis steps (default: 5)");
+  console.error("  --force               - Force regeneration even if output exists");
+  console.error("  --resume              - Resume from previous output if available");
+  console.error("  --continue-on-error   - Continue pipeline even if a step fails");
+  console.error("");
+  console.error("Examples:");
+  console.error(
+    "  node scripts/unity/run_probe.mjs trace --target token-shop-atu3-cells --anchor ATU3Button --family token-shop"
+  );
+  console.error(
+    "  node scripts/unity/run_probe.mjs trace --target shard-owned-state --anchor upgradeInfoList --family shard-owned-state --level structured"
+  );
+  console.error(
+    "  node scripts/unity/run_probe.mjs compile --output data/tokenshop-canonical-v1.json"
+  );
+  console.error(
+    "  node scripts/unity/run_probe.mjs pipeline --target TokenShop --anchors ATU1Button ATU2Button --output data/test.json --force"
+  );
 }
 
 const commandName = process.argv[2];
 const extraArgs = process.argv.slice(3);
+
 if (!commandName || !(commandName in commandSets)) {
   printUsage();
   process.exit(commandName ? 1 : 0);
 }
 
+// Parse extra args into params
+const params = parseArgs(extraArgs);
+
+// Get output path for this command
+const outputPath = generateOutputPath(params);
+
+// Handle pass-through commands (trace, compile)
+const commandConfig = commandSets[commandName];
+if (commandConfig.passThrough) {
+  // Pass all args through to script
+  runCommand(commandConfig.steps[0][0], [...commandConfig.steps[0][1], ...extraArgs], {
+    force: params.force,
+    continueOnError: params.continueOnError,
+    outputPath
+  });
+  process.exit(0);
+}
+
+// Handle legacy/simple commands
 if ((commandName === "uabea" || commandName.startsWith("shards:")) && !existsSync(probeProject)) {
   throw new Error(`Missing probe project: ${probeProject}`);
 }
 
-const pipeline = commandSets[commandName];
-for (const [index, [command, args]] of pipeline.entries()) {
-  const finalArgs = index === pipeline.length - 1 ? [...args, ...extraArgs] : args;
-  runCommand(command, finalArgs);
+const pipeline = commandSets[commandName].steps;
+for (const [index, [command, templateArgs]] of pipeline.entries()) {
+  // Substitute parameters in template
+  let args = templateArgs.map((arg) => substituteParams(arg, params, commandConfig.defaults || {}));
+
+  // For last step in pipeline, add extra CLI args
+  if (index === pipeline.length - 1 && extraArgs.length > 0) {
+    // Filter out options that were already parsed into params
+    const rawArgs = extraArgs.filter((arg) => arg.startsWith("--"));
+    args = [...args, ...rawArgs];
+  }
+
+  console.log(`[${index + 1}/${pipeline.length}] Running: ${command} ${args.join(" ")}`);
+
+  runCommand(command, args, {
+    force: params.force,
+    continueOnError: params.continueOnError,
+    outputPath: index === pipeline.length - 1 ? outputPath : null
+  });
 }
+
+console.log(`\nDone. Output: ${outputPath}`);

@@ -88,6 +88,7 @@ import {
 import { createShipPlannerSupport } from "./support/ship-planner-support.js";
 import { buildTokenShopProgressionModel } from "./token-shop-progression-model.js";
 import { createTokenShopUiSupport } from "./token-shop-ui-support.js";
+import { createTokenShopOptimizer } from "./support/spend-planner-optimizer.js";
 
 const STORAGE_KEYS = {
   playerProfile: "cifi-suite.player-profile",
@@ -121,6 +122,19 @@ const SERVER_SESSION_ENDPOINTS = {
 const tokenShopUi = createTokenShopUiSupport({
   formatValue: formatBoundaryValue
 });
+
+let tokenShopOptimizer = null;
+
+function getTokenShopOptimizer() {
+  if (tokenShopOptimizer) return tokenShopOptimizer;
+
+  const getModel = () => getTokenShopProgressionModel();
+  const getTokens = () => state.playerProfile?.player?.resources?.tokens ?? 0;
+  const getDiamonds = () => state.playerProfile?.player?.resources?.diamonds ?? 0;
+
+  tokenShopOptimizer = createTokenShopOptimizer(getModel, getTokens, getDiamonds);
+  return tokenShopOptimizer;
+}
 const shardEvidence = createShardEvidenceSupport({
   formatShardNumber,
   getShardCostModelBoundarySummary,
@@ -557,6 +571,7 @@ async function bootstrap() {
     shardMilestoneSaveOwnerCandidates,
     extractionCandidateRanking,
     tokenShopValues,
+    tokenshopCanonical,
     multiverseMarketValues,
     multiverseMarketMetadataNeighborhood,
     tokeniumNamingClues,
@@ -603,6 +618,7 @@ async function bootstrap() {
     fetchJson("./data/shard-milestone-save-owner-candidates.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
     fetchJson("./data/token-shop-values.json"),
+    fetchJson("./data/tokenshop-canonical-v1.json"),
     fetchJson("./data/multiverse-market-values.json"),
     fetchJson("./data/multiverse-market-metadata-neighborhood.json"),
     fetchJson("./data/tokenium-naming-clues.json"),
@@ -659,6 +675,7 @@ async function bootstrap() {
   state.extractionCandidateRanking = extractionCandidateRanking;
   state.extractedMechanics = {
     tokenShop: tokenShopValues,
+    tokenshopCanonical,
     multiverseMarket: multiverseMarketValues,
     multiverseMarketMetadataNeighborhood,
     tokeniumNamingClues,
@@ -4823,11 +4840,14 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
 }
 
 function getTokenShopProgressionModel() {
+  const canonical = state.extractedMechanics?.tokenshopCanonical?.atu_rows ?? {};
+
   return buildTokenShopProgressionModel({
     progressionState: getTokenShopProgressionProfileState(),
     compatibilityLevels: getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {},
     boundary: state.extractedMechanics?.tokenShopRowRemapBoundary,
     tokenShop: state.extractedMechanics?.tokenShop,
+    canonical,
     currentTokens: state.playerProfile.player.resources.tokens,
     getGroundedSubsetDefinitions: getTokenShopGroundedSubsetDefinitions,
     getKnownMaxStatus: tokenShopUi.getTokenShopKnownMaxStatus,

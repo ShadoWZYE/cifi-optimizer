@@ -207,6 +207,39 @@ export function getTokenBankFormulaBoundarySummary(clues) {
   };
 }
 
+export function calculateTokenBankCap(tierUnlocks) {
+  const baseCap = 2000;
+  const tierBonus = 500;
+
+  const tier2Unlocked = tierUnlocks?.tier2 === true;
+  const tier3Unlocked = tierUnlocks?.tier3 === true;
+  const tier4Unlocked = tierUnlocks?.tier4 === true;
+  const tier5Unlocked = tierUnlocks?.tier5 === true;
+
+  const tierCount = [tier2Unlocked, tier3Unlocked, tier4Unlocked, tier5Unlocked].filter(
+    Boolean
+  ).length;
+
+  return baseCap + tierCount * tierBonus;
+}
+
+export function calculateDailyTokeniumCap(tierUnlocks, upgradeLevels = {}) {
+  const baseCap = 2000;
+  const perLevelBonus = 200;
+
+  let totalCap = baseCap;
+
+  if (tierUnlocks?.tier2) {
+    totalCap += (upgradeLevels?.ATU14Level || 0) * perLevelBonus;
+  }
+
+  if (tierUnlocks?.tier3) {
+    totalCap += (upgradeLevels?.ATU21Level || 0) * perLevelBonus;
+  }
+
+  return totalCap;
+}
+
 export function getMultiverseMarketRangeBoundarySummary(boundary) {
   const validatedRowRanges = Array.isArray(boundary?.validatedRowRanges)
     ? boundary.validatedRowRanges

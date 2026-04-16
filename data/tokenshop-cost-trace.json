@@ -1,0 +1,31 @@
+{
+  "forward_refs": {},
+  "backward_refs": {},
+  "cost_getters": [],
+  "token_shop_methods": [
+    {
+      "path_id": 167,
+      "name": "TokenShop"
+    },
+    {
+      "path_id": 463,
+      "name": "TMP_FontFeaturesCommon"
+    },
+    {
+      "path_id": 1084,
+      "name": "TMP_FontFeatureTable"
+    },
+    {
+      "path_id": 1381,
+      "name": "FontFeatureCommonGSUB"
+    },
+    {
+      "path_id": 1908,
+      "name": "FontFeatureCommonGPOS"
+    },
+    {
+      "path_id": 2874,
+      "name": "FormatUtils"
+    }
+  ]
+}
