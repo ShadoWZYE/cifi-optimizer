@@ -31,38 +31,38 @@ That means:
 
 Active shared fields:
 
-| Field | Path | Notes |
-|---|---|---|
-| Profile name | `meta.profileName` | metadata, not gameplay state |
-| Data confidence | `meta.dataConfidence` | import trust label |
-| Current LR | `player.loop.loopReset` | loop guardrail and shard context |
-| Diamonds | `player.resources.diamonds` | legacy `gems` migrate here |
-| Tokens | `player.resources.tokens` | spend-planner input |
-| Current shards | `player.resources.shards` | shard workflow input |
-| Profile notes | `notes.profile` | manual context |
+| Field           | Path                        | Notes                            |
+| --------------- | --------------------------- | -------------------------------- |
+| Profile name    | `meta.profileName`          | metadata, not gameplay state     |
+| Data confidence | `meta.dataConfidence`       | import trust label               |
+| Current LR      | `player.loop.loopReset`     | loop guardrail and shard context |
+| Diamonds        | `player.resources.diamonds` | legacy `gems` migrate here       |
+| Tokens          | `player.resources.tokens`   | spend-planner input              |
+| Current shards  | `player.resources.shards`   | shard workflow input             |
+| Profile notes   | `notes.profile`             | manual context                   |
 
 Import-only or currently hidden canonical aggregates:
 
-| Field | Path | Notes |
-|---|---|---|
+| Field          | Path                             | Notes                                                                                                                             |
+| -------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Academy relics | `player.resources.academyRelics` | real profile aggregate, but not a direct active-form input because the game shows multiple relic levels instead of one fast total |
 
 ## Planner-only inputs
 
 Stored in `state.playerProfile`, but not canonical truth:
 
-| Field | Path | Notes |
-|---|---|---|
-| Total shard milestone levels | `planning.shards.totalMilestoneLevels` | unlock-watch helper |
-| Focus milestone | `planning.shards.focusMilestoneId` | manual target |
-| Focus milestone level | `planning.shards.focusMilestoneLevel` | manual target |
-| Checked TokenShop subset player-state seam | `planning.tokenShop.checkedSubsetPlayerState.ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level` checked subset | truthful saved/player-state-backed levels for the grounded TokenShop subset only; still non-canonical, subset-bound, and allowed to mix prefab-driven plus effect-driven checked rows while leaving `ATU11Level` quarantined |
-| Checked TokenShop subset editor levels | `planning.tokenShop.checkedSubsetLevels.ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level` checked subset | non-canonical local progression editor state for the grounded TokenShop subset only, including the ATU3 effect-driven row without promoting it into canonical identity and still leaving `ATU11Level` quarantined |
+| Field                                      | Path                                                                                                                                                                                | Notes                                                                                                                                                                 |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Total shard milestone levels               | `planning.shards.totalMilestoneLevels`                                                                                                                                              | unlock-watch helper                                                                                                                                                   |
+| Focus milestone                            | `planning.shards.focusMilestoneId`                                                                                                                                                  | manual target                                                                                                                                                         |
+| Focus milestone level                      | `planning.shards.focusMilestoneLevel`                                                                                                                                               | manual target                                                                                                                                                         |
+| Checked TokenShop subset player-state seam | `planning.tokenShop.checkedSubsetPlayerState.ATU1Level` through `ATU28Level` (all 28 ATU rows grouped by tier: T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28) | truthful saved/player-state-backed levels for all TokenShop rows with tier unlock detection                                                                           |
+| Checked TokenShop subset editor levels     | `planning.tokenShop.checkedSubsetLevels.ATU1Level` through `ATU28Level` (all 28 ATU rows grouped by tier)                                                                           | non-canonical local progression editor state for all TokenShop rows with tier grouping, including ATU3 effect-driven row without promoting it into canonical identity |
 
 Import-only or retired active helpers:
 
-| Field | Path | Notes |
-|---|---|---|
+| Field               | Path                          | Notes                                                                                     |
+| ------------------- | ----------------------------- | ----------------------------------------------------------------------------------------- |
 | Shard income / hour | `planning.shards.ratePerHour` | descriptive derived helper, not directly visible in game, so removed from the active form |
 
 Planner rule:
@@ -74,9 +74,9 @@ Planner rule:
 
 Canonical-system implementation state kept separate from shared truth:
 
-| Field | Path | Notes |
-|---|---|---|
-| Ship planner summary | `externalModels.shipPlanner.summary.*` | provisional implementation state |
+| Field                    | Path                                            | Notes                            |
+| ------------------------ | ----------------------------------------------- | -------------------------------- |
+| Ship planner summary     | `externalModels.shipPlanner.summary.*`          | provisional implementation state |
 | Ship planner calibration | `externalModels.shipPlanner.communityToolState` | preserved community-tool payload |
 
 Import rule:
@@ -88,11 +88,11 @@ Import rule:
 
 Non-MVP support helpers:
 
-| Field | Path | Notes |
-|---|---|---|
-| Gem node budget | `externalModels.experimental.gemNodes.budget` | experimental only |
-| Primary farming focus | `externalModels.experimental.profileHints.primaryFarmingFocus` | prototype helper |
-| Research hours | `externalModels.experimental.profileHints.researchHours` | app-side helper |
+| Field                 | Path                                                           | Notes             |
+| --------------------- | -------------------------------------------------------------- | ----------------- |
+| Gem node budget       | `externalModels.experimental.gemNodes.budget`                  | experimental only |
+| Primary farming focus | `externalModels.experimental.profileHints.primaryFarmingFocus` | prototype helper  |
+| Research hours        | `externalModels.experimental.profileHints.researchHours`       | app-side helper   |
 
 Import rule:
 
@@ -103,17 +103,17 @@ Import rule:
 
 Migration-only values:
 
-| Field | Path | Notes |
-|---|---|---|
-| Gem dust | `compatibility.unresolvedProfileFields.gemDust` | unresolved MVP role |
-| Hunter level | `compatibility.unresolvedProfileFields.hunterLevel` | real term, unresolved shared-profile role |
-| Trait sphere count | `compatibility.unresolvedProfileFields.traitSphereCount` | unresolved shared-profile role |
-| Mech parts | `compatibility.unresolvedProfileFields.mechParts` | research-track territory |
-| Legacy stage fields | `compatibility.legacyStage.*` | old schema compatibility only |
-| Quarantined shard milestone state | `compatibility.unmappedSystemState.shardMilestoneState` | preferred quarantine location for imported shard milestone blobs; never canonical without a verified save-owner and grounded field mapping |
-| Legacy shard milestone mirror | `compatibility.unmappedSystemState.shardMilestones` | compatibility mirror of the quarantined shard milestone blob for older consumers |
-| Unmapped system blobs | `compatibility.unmappedSystemState.*` | TokenShop and other non-canonical system state blobs stay compatibility-only |
-| Raw/unmapped Emporium SaveData wrapper | `compatibility.unmappedSystemState.multiverseMarket` | quarantined raw import wrapper; preserve the exact `IS1Level` through `IS110Level` SaveData span under `.importedState` without promoting it into canonical `state.playerProfile` |
+| Field                                  | Path                                                     | Notes                                                                                                                                                                             |
+| -------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gem dust                               | `compatibility.unresolvedProfileFields.gemDust`          | unresolved MVP role                                                                                                                                                               |
+| Hunter level                           | `compatibility.unresolvedProfileFields.hunterLevel`      | real term, unresolved shared-profile role                                                                                                                                         |
+| Trait sphere count                     | `compatibility.unresolvedProfileFields.traitSphereCount` | unresolved shared-profile role                                                                                                                                                    |
+| Mech parts                             | `compatibility.unresolvedProfileFields.mechParts`        | research-track territory                                                                                                                                                          |
+| Legacy stage fields                    | `compatibility.legacyStage.*`                            | old schema compatibility only                                                                                                                                                     |
+| Quarantined shard milestone state      | `compatibility.unmappedSystemState.shardMilestoneState`  | preferred quarantine location for imported shard milestone blobs; never canonical without a verified save-owner and grounded field mapping                                        |
+| Legacy shard milestone mirror          | `compatibility.unmappedSystemState.shardMilestones`      | compatibility mirror of the quarantined shard milestone blob for older consumers                                                                                                  |
+| Unmapped system blobs                  | `compatibility.unmappedSystemState.*`                    | TokenShop and other non-canonical system state blobs stay compatibility-only                                                                                                      |
+| Raw/unmapped Emporium SaveData wrapper | `compatibility.unmappedSystemState.multiverseMarket`     | quarantined raw import wrapper; preserve the exact `IS1Level` through `IS110Level` SaveData span under `.importedState` without promoting it into canonical `state.playerProfile` |
 
 Import rule:
 

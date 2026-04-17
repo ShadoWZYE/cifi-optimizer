@@ -1,12 +1,5 @@
-import {
-  spawnSync,
-  mkdirSync,
-  existsSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-  readFileSync
-} from "node:fs";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, existsSync, readdirSync, statSync, writeFileSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -55,6 +48,22 @@ const commandTemplates = {
   trace: {
     steps: [["python", ["scripts/unity/unity_trace_bundle.py"]]],
     passThrough: true // Pass all args through to script
+  },
+
+  // Direct C# AssetProbe execution with performance flags
+  probe: {
+    steps: [["dotnet", ["run", "--project", probeProject, "--no-build"]]],
+    passThrough: true
+  },
+
+  // Build and run C# AssetProbe
+  "probe:run": {
+    steps: [
+      ["dotnet", ["build", probeProject, "-c", "Release", "-o", probeOutputDir]],
+      ["dotnet", ["run", "--project", probeProject, "--no-build", "--"]]
+    ],
+    passThrough: true,
+    passThroughOnStep: 1 // Only pass args to second step
   },
 
   // Generic compile for canonical dataset
@@ -118,7 +127,11 @@ const commandSets = {
   // New generalized commands
   trace: commandTemplates.trace,
   compile: commandTemplates.compile,
-  pipeline: commandTemplates.pipeline
+  pipeline: commandTemplates.pipeline,
+
+  // C# AssetProbe commands
+  probe: commandTemplates.probe,
+  "probe:run": commandTemplates["probe:run"]
 };
 
 // Output directory for probe artifacts
@@ -272,15 +285,54 @@ function substituteParams(template, params, defaults = {}) {
   return result;
 }
 
+function parseArgs(args) {
+  const params = { force: false, continueOnError: false };
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === "--force") {
+      params.force = true;
+    } else if (arg === "--continue-on-error") {
+      params.continueOnError = true;
+    } else if (arg === "--target" && args[i + 1]) {
+      params.target = args[i + 1];
+      i++;
+    } else if (arg === "--anchors" || arg === "--anchor") {
+      if (!params.anchors) params.anchors = [];
+      params.anchors.push(args[i + 1]);
+      i++;
+    } else if (arg === "--family" && args[i + 1]) {
+      params.family = args[i + 1];
+      i++;
+    } else if (arg === "--level" && args[i + 1]) {
+      params.level = args[i + 1];
+      i++;
+    } else if (arg === "--output" && args[i + 1]) {
+      params.output = args[i + 1];
+      i++;
+    } else if (arg === "--query" && args[i + 1]) {
+      params.query = args[i + 1];
+      i++;
+    }
+  }
+  return params;
+}
+
 function printUsage() {
   console.error("Usage: node scripts/unity/run_probe.mjs <command> [options]");
   console.error("");
   console.error("Commands:");
   console.error("  build                 - Build C# probe (uabea)");
-  console.error("  uabea                 - Run uabea probe");
+  console.error("  uabea                 - Run uabea probe (built DLL)");
+  console.error("  probe                 - Run C# probe directly (requires build)");
+  console.error("  probe:run             - Build and run C# probe with one command");
   console.error("  trace                 - Run trace bundle (generalized)");
   console.error("  compile               - Compile canonical dataset");
   console.error("  pipeline              - Run multi-step extraction pipeline");
+  console.error("");
+  console.error("C# Probe Performance Flags (use with probe/probe:run):");
+  console.error("  --quick               - Metadata only, no fields/methods (fastest)");
+  console.error("  --no-metadata         - Skip Cpp2IL load, use cache if available");
+  console.error("  --term <name>          - Only process types matching name");
   console.error("");
   console.error("Legacy Commands (backwards compatible):");
   console.error("  shards:parameters     - Extract shard parameter fields");
@@ -315,6 +367,9 @@ function printUsage() {
   console.error(
     "  node scripts/unity/run_probe.mjs pipeline --target TokenShop --anchors ATU1Button ATU2Button --output data/test.json --force"
   );
+  console.error(
+    "  node scripts/unity/run_probe.mjs probe:run --quick -- --report data/uabea-probe-report.json"
+  );
 }
 
 const commandName = process.argv[2];
@@ -328,20 +383,28 @@ if (!commandName || !(commandName in commandSets)) {
 // Parse extra args into params
 const params = parseArgs(extraArgs);
 
-// Get output path for this command
-const outputPath = generateOutputPath(params);
-
 // Handle pass-through commands (trace, compile)
 const commandConfig = commandSets[commandName];
 if (commandConfig.passThrough) {
-  // Pass all args through to script
-  runCommand(commandConfig.steps[0][0], [...commandConfig.steps[0][1], ...extraArgs], {
+  // Determine which step gets the pass-through args
+  const targetStepIndex = commandConfig.passThroughOnStep ?? 0;
+  const targetStep = commandConfig.steps[targetStepIndex];
+
+  // For probe commands, pass raw args through after --
+  // Extract raw args (everything after -- if present)
+  const dashDashIndex = extraArgs.indexOf("--");
+  const rawArgs = dashDashIndex >= 0 ? extraArgs.slice(dashDashIndex + 1) : extraArgs;
+
+  runCommand(targetStep[0], [...targetStep[1], ...rawArgs], {
     force: params.force,
     continueOnError: params.continueOnError,
-    outputPath
+    outputPath: params.output || null
   });
   process.exit(0);
 }
+
+// Get output path for this command
+const outputPath = params.output || null;
 
 // Handle legacy/simple commands
 if ((commandName === "uabea" || commandName.startsWith("shards:")) && !existsSync(probeProject)) {

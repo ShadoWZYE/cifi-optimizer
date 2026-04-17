@@ -17,6 +17,26 @@
       "verified_via": "Native code disassembly at get_*Bonus method RVAs"
     }
   },
+  "tier_unlocks": {
+    "description": "Tier unlock thresholds based on total levels in previous tiers. Method names verified from game: get_TotalT1TokenLevels, get_TotalT2TokenLevels etc. Exact threshold constants NOT extracted - values below are ASSUMED/heuristic from pattern analysis.",
+    "status": "unverified_assumption",
+    "provenance_note": "Threshold values (25, 50, 100, 150) are pattern-based guesses, not verified from IL2CPP binary. Labeled as 'assumed' per AGENTS.md data provenance rule.",
+    "source": "unity-trace-bundle.json (method names), uabea-probe-report.json (SaveData fields)",
+    "tier_thresholds": {
+      "t1": { "min_levels": 0, "always_unlocked": true },
+      "t2": { "min_levels": 25, "description": "ASSUMED: Unlock at 25 total T1 levels", "fields": ["ATU13Level", "ATU14Level", "ATU15Level", "ATU16Level", "ATU17Level", "ATU18Level"] },
+      "t3": { "min_levels": 50, "description": "ASSUMED: Unlock at 50 total T1+T2 levels", "fields": ["ATU19Level", "ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"] },
+      "t4": { "min_levels": 100, "description": "ASSUMED: Unlock at 100 total levels", "fields": ["ATU24Level", "ATU25Level"] },
+      "t5": { "min_levels": 150, "description": "ASSUMED: Unlock at 150 total levels", "fields": ["ATU26Level", "ATU27Level", "ATU28Level"] }
+    },
+    "row_to_tier_mapping": {
+      "1": "t1", "2": "t1", "3": "t1", "4": "t1", "5": "t1", "6": "t1", "7": "t1", "8": "t1", "9": "t1", "10": "t1", "11": "t1", "12": "t1",
+      "13": "t2", "14": "t2", "15": "t2", "16": "t2", "17": "t2", "18": "t2",
+      "19": "t3", "20": "t3", "21": "t3", "22": "t3", "23": "t3",
+      "24": "t4", "25": "t4",
+      "26": "t5", "27": "t5", "28": "t5"
+    }
+  },
   "save_data": {
     "description": "ATU upgrade levels stored in SaveData class",
     "source": "uabea-probe-report.json -> saveData type",

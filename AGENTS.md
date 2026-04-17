@@ -41,6 +41,17 @@ Only add fields/labels/formulas/recommendations if:
 1. Known in-game CIFI concept
 2. Clearly labeled external/community input
 
+## Data provenance rule
+
+Never promote guessed, heuristic, or assumed data into canonical state without explicit labeling:
+
+- If data is extracted from game binary/metadata → Label as "verified" or "extracted"
+- If data is reasonable guess from patterns → Label as "assumed" or "heuristic" with noted uncertainty
+- If data is from community/external source → Label as "community" or "external"
+- Never mix unverified assumptions with grounded truth in shared state boundaries
+
+When in doubt, leave data as external/compatibility-only until verified.
+
 ## Integration gate
 
 Before wiring systems into app behavior:
@@ -77,3 +88,18 @@ The smoke test suite (`tests/smoke.mjs`) catches drift between committed data an
 4. Run smoke tests after any data or dataset-contract changes
 
 The test suite exists to catch unintended drift - intentional changes are expected to update the test surface.
+
+## Regression prevention
+
+When adding optimizations or performance improvements to tools:
+
+1. **Never remove existing optimizations** - If code has Parallel.ForEach, type indexing, or caching, keep it unless specifically asked
+2. **Check diff before restoring files** - Before `git checkout --` or `git restore`, run `git diff` to see what will be lost. Only restore if the loss is intentional and documented
+3. **Build before committing** - Run `dotnet build` to catch compilation errors from optimization changes
+4. **Test changes** - Run smoke tests to verify tool still produces correct output
+5. **Document new flags** - If adding new CLI flags (--quick, --cache, --no-metadata), update docs/tools/inventory.md
+6. **Keep pass-through working** - If modifying run_probe.mjs, ensure --arg syntax still passes through to underlying tools
+
+## Tool inventory
+
+See [docs/tools/inventory.md](docs/tools/inventory.md) for a complete inventory of available tools, scripts, and their usage.

@@ -118,7 +118,7 @@ export function buildTokenShopProgressionModel({
   return {
     currentTokens,
     displayRule:
-      "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, ATU12, ATU13, ATU20.",
+      "Rows are shown in grounded ATU slot order by tier: T1 (ATU1-ATU12), T2 (ATU13-ATU18), T3 (ATU19-ATU23), T4 (ATU24-ATU25), T5 (ATU26-ATU28). Locked tiers are hidden in player input.",
     rows,
     localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override")
       .length,

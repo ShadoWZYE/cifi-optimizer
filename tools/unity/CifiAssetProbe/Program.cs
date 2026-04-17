@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Collections.Concurrent;
+using System.Linq;
 using AssetsTools.NET;
 using AssetsTools.NET.Cpp2IL;
 using AssetsTools.NET.Extra;
@@ -42,6 +44,9 @@ var explicitSeeds = new List<string>();
 string reportPath = Path.Combine(root, "data", "uabea-probe-report.json");
 string? runtimeReportPath = null;
 var disableInterestingPatternFilter = false;
+var skipMetadata = false;
+var useCache = false;
+var quickMode = false;
 
 for (var index = 0; index < args.Length; index++)
 {
@@ -60,6 +65,15 @@ for (var index = 0; index < args.Length; index++)
                 throw new ArgumentException("Expected a value after --runtime-report.");
             }
             runtimeReportPath = Path.GetFullPath(Path.Combine(root, args[++index]));
+            break;
+        case "--cache":
+            useCache = true;
+            break;
+        case "--quick":
+            quickMode = true;
+            break;
+        case "--no-metadata":
+            skipMetadata = true;
             break;
         case "--term":
             if (index + 1 >= args.Length)
@@ -841,7 +855,40 @@ var directLibCpp2IlProbe = new Dictionary<string, object?>
     ["attempted"] = !seededOnlyMode
 };
 var directTargetTypeMetadata = new List<object>();
-if (!seededOnlyMode)
+var cachedDirectProbe = (Dictionary<string, object?>?)null;
+var cacheKey = "";
+var cacheFile = "";
+var cacheDir = "";
+var skipCpp2Il = skipMetadata;
+
+// Cache support - check if we have a valid cached result
+if (useCache && !skipMetadata)
+{
+    cacheDir = Path.Combine(root, "data", "probe-cache");
+    cacheKey = $"{Path.GetFileName(il2cppPath)}-{Path.GetFileName(metadataPath)}-{quickMode}".ToLowerInvariant();
+    cacheFile = Path.Combine(cacheDir, $"{cacheKey}.json");
+    
+    if (File.Exists(cacheFile))
+    {
+        var cachedTime = File.GetLastWriteTimeUtc(cacheFile);
+        var il2cppTime = File.GetLastWriteTimeUtc(il2cppPath);
+        var metadataTime = File.GetLastWriteTimeUtc(metadataPath);
+        
+        if (cachedTime > il2cppTime && cachedTime > metadataTime)
+        {
+            Console.WriteLine($"Loading from cache: {cacheFile}");
+            var cachedJson = File.ReadAllText(cacheFile);
+            cachedDirectProbe = JsonSerializer.Deserialize<Dictionary<string, object>>(cachedJson);
+            if (cachedDirectProbe is not null)
+            {
+                Console.WriteLine("Cache hit - skipping Cpp2IL processing");
+                skipCpp2Il = true;
+            }
+        }
+    }
+}
+
+if (!seededOnlyMode && !skipCpp2Il)
 {
     try
     {
@@ -859,28 +906,62 @@ if (!seededOnlyMode)
 
             if (assemblyCSharp is not null)
             {
-                IEnumerable<LibCpp2IL.Metadata.Il2CppTypeDefinition> assemblyTypes =
-                    assemblyCSharp.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>();
-                foreach (var target in directTypeTargets)
+                // Build type index for O(1) lookups
+                var assemblyTypes = (assemblyCSharp.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>()).ToList();
+                var typeIndex = new ConcurrentDictionary<string, LibCpp2IL.Metadata.Il2CppTypeDefinition>(StringComparer.Ordinal);
+                foreach (var t in assemblyTypes)
                 {
-                    var type = assemblyTypes.FirstOrDefault(t =>
-                        target.lookupNames.Any(lookupName =>
-                            string.Equals(t.Name, lookupName, StringComparison.Ordinal) ||
-                            string.Equals(t.FullName, lookupName, StringComparison.Ordinal) ||
-                            t.FullName.EndsWith("." + lookupName, StringComparison.Ordinal)));
+                    typeIndex.TryAdd(t.Name, t);
+                    if (!string.IsNullOrEmpty(t.FullName))
+                        typeIndex.TryAdd(t.FullName, t);
+                }
+
+                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Math.Min(Environment.ProcessorCount, directTypeTargets.Length)) };
+                var results = new ConcurrentBag<object>();
+
+                Parallel.ForEach(directTypeTargets, parallelOptions, target =>
+                {
+                    LibCpp2IL.Metadata.Il2CppTypeDefinition? type = null;
+                    foreach (var lookupName in target.lookupNames)
+                    {
+                        if (typeIndex.TryGetValue(lookupName, out var found))
+                        {
+                            type = found;
+                            break;
+                        }
+                    }
 
                     if (type is null)
                     {
-                        directTargetTypeMetadata.Add(new
-                        {
-                            reportKey = target.reportKey,
-                            scriptName = target.lookupNames[0],
-                            found = false
-                        });
-                        continue;
+                        results.Add(new { reportKey = target.reportKey, scriptName = target.lookupNames[0], found = false });
+                        return;
                     }
 
-                    directTargetTypeMetadata.Add(new
+                    // Skip fields and methods in quickMode
+                    var fields = quickMode ? Array.Empty<object>() : type.Fields.Select((field, index) => new
+                    {
+                        index,
+                        name = field.Name,
+                        type = field.FieldType?.ToString(),
+                        attributes = type.FieldAttributes[index].ToString(),
+                        defaultValue = type.FieldDefaults.Length > index && type.FieldDefaults[index] is not null ? type.FieldDefaults[index]!.ToString() : null,
+                        fieldOffset = type.FieldInfos.Length > index ? type.FieldInfos[index].FieldOffset : (int?)null
+                    }).ToArray();
+
+                    var methods = quickMode || target.methodPatterns.Length == 0
+                        ? Array.Empty<object>()
+                        : type.Methods.Where(method => target.methodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
+                            .Select((method, index) => new
+                            {
+                                index,
+                                name = method.Name,
+                                returnType = method.ReturnType?.ToString(),
+                                parameterCount = method.Parameters?.Length ?? 0,
+                                methodProperties = ReflectSerializablePublicProperties(method),
+                                parameters = method.Parameters?.Select(p => ReflectSerializablePublicProperties(p)).ToArray() ?? Array.Empty<object>()
+                            }).ToArray();
+
+                    results.Add(new
                     {
                         reportKey = target.reportKey,
                         scriptName = target.lookupNames[0],
@@ -889,35 +970,13 @@ if (!seededOnlyMode)
                         baseType = type.BaseType?.ToString(),
                         fieldCount = type.Fields.Length,
                         methodCount = type.Methods.Length,
-                        fields = type.Fields
-                            .Select((field, index) => new
-                            {
-                                index,
-                                name = field.Name,
-                                type = field.FieldType?.ToString(),
-                                attributes = type.FieldAttributes[index].ToString(),
-                                defaultValue = type.FieldDefaults.Length > index && type.FieldDefaults[index] is not null
-                                    ? type.FieldDefaults[index]!.ToString()
-                                    : null,
-                                fieldOffset = type.FieldInfos.Length > index
-                                    ? type.FieldInfos[index].FieldOffset
-                                    : (int?)null
-                            })
-                            .ToArray(),
-                        methods = type.Methods
-                            .Where(method => target.methodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
-                            .Select((method, index) => new
-                            {
-                                index,
-                                name = method.Name,
-                                returnType = method.ReturnType?.ToString(),
-                                parameterCount = method.Parameters?.Length ?? 0,
-                                methodProperties = ReflectSerializablePublicProperties(method),
-                                parameters = method.Parameters?.Select(parameter => ReflectSerializablePublicProperties(parameter)).ToArray() ?? Array.Empty<object>()
-                            })
-                            .ToArray()
+                        fields,
+                        methods
                     });
-                }
+                });
+
+                foreach (var r in results)
+                    directTargetTypeMetadata.Add(r);
 
                 directLibCpp2IlProbe["assemblySearches"] = new[]
                 {
@@ -1757,7 +1816,7 @@ var report = new
     unityVersion = primaryFile.file.Metadata.UnityVersion,
     loadedFileCount = loadedFiles.Count,
     cpp2IlStatus,
-    directLibCpp2IlProbe,
+directLibCpp2IlProbe = cachedDirectProbe is not null ? cachedDirectProbe : directLibCpp2IlProbe,
     directTargetTypeMetadata = directTargetTypeMetadata.ToArray(),
     failedFiles,
     fileTypeSummaries,
@@ -1793,5 +1852,21 @@ await File.WriteAllTextAsync(reportPath, JsonSerializer.Serialize(report, new Js
 {
     WriteIndented = true
 }));
+
+// Save to cache if enabled and Cpp2IL was processed
+if (useCache && !skipCpp2Il && !seededOnlyMode && directLibCpp2IlProbe.Count > 0)
+{
+    try
+    {
+        Directory.CreateDirectory(cacheDir);
+        var cacheJson = JsonSerializer.Serialize(directLibCpp2IlProbe, new JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(cacheFile, cacheJson);
+        Console.WriteLine($"Cached result to: {cacheFile}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Warning: Failed to write cache: {ex.Message}");
+    }
+}
 
 Console.WriteLine(reportPath);

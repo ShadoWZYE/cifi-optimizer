@@ -9296,6 +9296,14 @@ function validateUnityTraceBundle(bundle) {
       "token-shop",
       "unity trace bundle planner family must be token-shop"
     );
+  } else if (bundle.target.id === "token-shop-family-structure") {
+    // TokenShop family structure audit - validate basic structure
+    assert.equal(
+      bundle.plannerResolution.matchedFamilyId,
+      "token-shop",
+      "unity trace bundle planner family must be token-shop"
+    );
+    assert.ok(bundle.target.anchors.length > 0, "unity trace bundle target must have anchors");
   } else {
     throw new Error(`Unsupported committed unity trace bundle target: ${bundle.target.id}`);
   }

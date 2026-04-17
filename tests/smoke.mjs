@@ -806,15 +806,12 @@ assert.match(tokenShopProgressionModel, /Default level 0/);
 assert.match(appJs, /Prefill local rows from compatibility import/);
 assert.ok(
   tokenShopProgressionModel.includes(
-    "Rows are shown in grounded ATU slot order only: ATU1, ATU2, ATU3, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, ATU12, ATU13, ATU20."
+    "Rows are shown in grounded ATU slot order by tier: T1 (ATU1-ATU12), T2 (ATU13-ATU18), T3 (ATU19-ATU23), T4 (ATU24-ATU25), T5 (ATU26-ATU28). Locked tiers are hidden in player input."
   )
 );
 assert.match(appJs, /Effect-driven checked row/);
 assert.match(appJs, /Prefab-driven checked row/);
-assert.match(
-  appJs,
-  /ATU3 remains effect-driven, ATU10 and ATU12 remain title-side rows, ATU13 and ATU20 now clear as bridge-only token-booster rows, ATU11 stays quarantined because it still lacks a final title join/
-);
+assert.match(appJs, /T1 has prefab-driven rows.*ATU3.*ATU5-ATU12.*T2-T5 rows are canonical/i);
 assert.match(
   appJs,
   /detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839/
@@ -1107,9 +1104,24 @@ assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetLevels, {
   ATU8Level: null,
   ATU9Level: null,
   ATU10Level: null,
+  ATU11Level: null,
   ATU12Level: null,
   ATU13Level: null,
-  ATU20Level: null
+  ATU14Level: null,
+  ATU15Level: null,
+  ATU16Level: null,
+  ATU17Level: null,
+  ATU18Level: null,
+  ATU19Level: null,
+  ATU20Level: null,
+  ATU21Level: null,
+  ATU22Level: null,
+  ATU23Level: null,
+  ATU24Level: null,
+  ATU25Level: null,
+  ATU26Level: null,
+  ATU27Level: null,
+  ATU28Level: null
 });
 assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU1Level: null,
@@ -1122,9 +1134,24 @@ assert.deepEqual(defaultProfile.planning.tokenShop.checkedSubsetPlayerState, {
   ATU8Level: null,
   ATU9Level: null,
   ATU10Level: null,
+  ATU11Level: null,
   ATU12Level: null,
   ATU13Level: null,
-  ATU20Level: null
+  ATU14Level: null,
+  ATU15Level: null,
+  ATU16Level: null,
+  ATU17Level: null,
+  ATU18Level: null,
+  ATU19Level: null,
+  ATU20Level: null,
+  ATU21Level: null,
+  ATU22Level: null,
+  ATU23Level: null,
+  ATU24Level: null,
+  ATU25Level: null,
+  ATU26Level: null,
+  ATU27Level: null,
+  ATU28Level: null
 });
 assert.deepEqual(defaultProfile.externalModels.communityTools.shipOptimizer, {});
 assert.deepEqual(defaultProfile.externalModels.communityTools.shardOptimizer, {});
@@ -7743,7 +7770,7 @@ assert.match(
 assert.match(tokenShopDoc, /## Currency-lane grounding/);
 assert.match(
   activeGroundingBoundariesDoc,
-  /thirteen checked shell-to-prefab bridges[\s\S]*`ATU13Button`[\s\S]*`ATU20Button`[\s\S]*ATU3 now also has one checked effect-driven `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster \(Chests\)` chest-effect chain[\s\S]*remaining ATU5 blocker is still only the absent exact final row-title string/i
+  /tier-grouped ATU subset[\s\S]*T1.*ATU1-12[\s\S]*T2.*ATU13-18[\s\S]*T3.*ATU19-23[\s\S]*T4.*ATU24-25[\s\S]*T5.*ATU26-28/i
 );
 assert.match(
   activeGroundingBoundariesDoc,
@@ -8104,7 +8131,7 @@ assert.match(
 assert.match(tokenShopDoc, /## Downstream systems TokenShop upgrades appear to affect/);
 assert.match(
   spendSystemVerificationDoc,
-  /subset-bound TokenShop row-detail module for only the checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level` remap subset/
+  /tier-grouped TokenShop row-detail module for all 28 ATU rows[\s\S]*T1.*ATU1-12[\s\S]*T2.*ATU13-18[\s\S]*T3.*ATU19-23/i
 );
 assert.match(spendSystemVerificationDoc, /rest of the `ATU\*Level` family should stay quarantined/);
 assert.match(tokenShopDoc, /TokenShop is a canonical cross-system modifier hub/);
@@ -9410,9 +9437,24 @@ assert.deepEqual(migratedFlatSpendStateProfile.planning.tokenShop.checkedSubsetP
   ATU8Level: 9,
   ATU9Level: 10,
   ATU10Level: 11,
+  ATU11Level: null,
   ATU12Level: 12,
   ATU13Level: null,
-  ATU20Level: null
+  ATU14Level: null,
+  ATU15Level: null,
+  ATU16Level: null,
+  ATU17Level: null,
+  ATU18Level: null,
+  ATU19Level: null,
+  ATU20Level: null,
+  ATU21Level: null,
+  ATU22Level: null,
+  ATU23Level: null,
+  ATU24Level: null,
+  ATU25Level: null,
+  ATU26Level: null,
+  ATU27Level: null,
+  ATU28Level: 1
 });
 assert.deepEqual(migratedFlatSpendStateProfile.compatibility.unmappedSystemState.tokenShop, {
   ATU1Level: 3,

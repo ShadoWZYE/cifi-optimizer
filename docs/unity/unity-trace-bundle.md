@@ -1,23 +1,23 @@
 # Unity Trace Bundle
 
-- Target: `token-shop-atu3-cells`
-- Label: TokenShop ATU3 cells split
-- Anchors: `ATU3Button, 15810, T2, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
-- Join goal: Recover one checked ATU3Button or path id 15810 bridge to one exact prefab identity or final player-facing title.
+- Target: `token-shop-family-structure`
+- Label: TokenShop family structure audit
+- Anchors: `ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost, BuyCellBoost`
+- Join goal: Audit the whole TokenShop ATU shell family for repeated proved joins and repeated missing joins across shell ids, bridge-proxy hooks, prefab identities, and title or text surfaces without promoting any new remaps.
 
 ## Planner resolution
 
-- Selection mode: `query-planner`
+- Selection mode: `explicit-target`
 - Matched family: `token-shop` (TokenShop)
-- Run mode: `compare`
-- Requested queries: `TokenShop`
-- Requested anchors: `T2`
-- Expanded anchor kinds: `ATU3Button (class), 15810 (path id), TokenShop (class), T2 (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method), ATU (class), ATU1Button (class), Currency (class), Tokens (class), Tokenium (class), Diamond Upgrade (string)`
-- Decision note: Matched TokenShop to TokenShop through token-shop-shell, currency-lane and chose the bounded token-shop-atu3-vs-atu1 compare run because this query is better grounded as one checked solved-vs-blocked family trace.
+- Run mode: `trace`
+- Requested queries: `none`
+- Requested anchors: `TokenShop`
+- Expanded anchor kinds: `ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method), ATU (class), Currency (class), Tokens (class), Tokenium (class), Diamond Upgrade (string)`
+- Decision note: Used explicit target token-shop-family-structure in the TokenShop family and kept family-aware anchor expansion so the backend records the same checked synonym surface deterministically.
 
 ## Execution anchors
 
-- Typed execution anchors: `ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
+- Typed execution anchors: `ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
 
 ## Workflow
 
@@ -26,7 +26,7 @@
 - Planner example: `node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>`
 - Accepted anchor kinds: `class, method, string, path id`
 - Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.
-- Registry target: `token-shop-atu3-cells` from `token-shop` via [`data/unity-trace-target-registry.json`](data/unity-trace-target-registry.json)
+- Registry target: `token-shop-family-structure` from `token-shop` via [`data/unity-trace-target-registry.json`](data/unity-trace-target-registry.json)
 
 ## Source reads
 
@@ -57,699 +57,445 @@
 
 ## Shell window
 
-- Shell field: `ATU3Button`
-- Shell path id: `15810`
-- Owner field block: `CellBoostStartCost, CellBoostAdditiveCost, CellBoostBonus, CellBoostMaxLevel, CellBoostFill`
+- Shell field: `ATU1Button through ATU28Button`
+- Shell path id: `family-range`
+- Owner field block: `TokenBoost / DiamondBoost / ModBoost / MK1TokenBoost / MK2TokenBoost solved-row windows, ATU3 cells-domain split window, ATU24Button through ATU28Button late shell neighborhood`
 
 ## Surface traces
 
-### Metadata neighborhood
+### Family shell range
 
-- Search terms: `ATU3Button, CellBoost, BuyCellBoost, 15810, T2, SetAllTokenShopTexts`
-- Typed anchors: `ATU3Button (class), CellBoost (class), BuyCellBoost (method), 15810 (path id), T2 (class), SetAllTokenShopTexts (method)`
-- Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) (11 hits)
-  - Signal summary: 0 high-signal, 3 supporting, 8 incidental, 9 suppressed-noise
+- Search terms: `ATU1Button, ATU2Button, ATU3Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU24Button, ATU28Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost, BuyCellBoost`
+- Typed anchors: `ATU1Button (class), ATU2Button (class), ATU3Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU24Button (class), ATU28Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Source: [`data/token-shop-values.json`](data/token-shop-values.json) (10 hits)
+  - Signal summary: 10 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `15810` at `$.fields[26].path_id` [high-signal, score 125, exact-structured]
+  - `ATU1Button` at `$.fields[12].field` [high-signal, score 110, exact-structured]
+  - `ATU24Button` at `$.fields[193].field` [high-signal, score 110, exact-structured]
+  - `ATU2Button` at `$.fields[19].field` [high-signal, score 110, exact-structured]
+  - `ATU28Button` at `$.fields[221].field` [high-signal, score 110, exact-structured]
+  - `ATU3Button` at `$.fields[26].field` [high-signal, score 110, exact-structured]
+  - `ATU4Button` at `$.fields[33].field` [high-signal, score 110, exact-structured]
+  - `ATU5Button` at `$.fields[42].field` [high-signal, score 110, exact-structured]
+  - `ATU6Button` at `$.fields[51].field` [high-signal, score 110, exact-structured]
+  - `ATU7Button` at `$.fields[60].field` [high-signal, score 110, exact-structured]
+- Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) (19 hits)
+  - Signal summary: 0 high-signal, 12 supporting, 7 incidental, 0 suppressed-noise
+  - `TokenShop` at metadata offset `657154` [supporting, score 90, exact-string]
   - `BuyCellBoost` at metadata offset `659754` [supporting, score 90, exact-string]
+  - `ATU1Button` at metadata offset `662106` [supporting, score 90, exact-string]
+  - `ATU2Button` at metadata offset `662235` [supporting, score 90, exact-string]
   - `ATU3Button` at metadata offset `662349` [supporting, score 90, exact-string]
+  - `ATU4Button` at metadata offset `662458` [supporting, score 90, exact-string]
+  - `ATU5Button` at metadata offset `662620` [supporting, score 90, exact-string]
+  - `ATU6Button` at metadata offset `662782` [supporting, score 90, exact-string]
+  - `ATU7Button` at metadata offset `662944` [supporting, score 90, exact-string]
+  - `ATU24Button` at metadata offset `665162` [supporting, score 90, exact-string]
+  - `ATU28Button` at metadata offset `665546` [supporting, score 90, exact-string]
   - `SetAllTokenShopTexts` at metadata offset `979315` [supporting, score 90, exact-string]
-  - `RainbowEffect2DSprite` at metadata offset `600936` [incidental, score 45, bounded-containment]
-  - `comboText2` at metadata offset `607629` [incidental, score 45, bounded-containment]
-  - `CellmasAchievementOverlayText2` at metadata offset `620909` [incidental, score 45, bounded-containment]
-  - `Present24ValueText2` at metadata offset `622795` [incidental, score 45, bounded-containment]
+  - `InitializeTokenShop` at metadata offset `658937` [incidental, score 45, bounded-containment]
   - `BuyCellBoostEnum` at metadata offset `661133` [incidental, score 45, bounded-containment]
+  - `TokenShopButtonNotification` at metadata offset `661938` [incidental, score 45, bounded-containment]
   - `CellBoostStartCost` at metadata offset `662261` [incidental, score 45, bounded-containment]
   - `CellBoostAdditiveCost` at metadata offset `662280` [incidental, score 45, bounded-containment]
   - `<BuyCellBoostEnum>d__630` at metadata offset `668194` [incidental, score 45, bounded-containment]
+  - `get_TokenshopBonus` at metadata offset `794077` [incidental, score 45, bounded-containment]
 
-### Action hook lane
+### Bridge-proxy lane
 
-- Search terms: `StartCellBostHold, StopCellBostHold, BuyCellBoost, ATU3Button, 15810, T2, CellBoost, SetAllTokenShopTexts`
-- Typed anchors: `StartCellBostHold (method), StopCellBostHold (method), BuyCellBoost (method), ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), SetAllTokenShopTexts (method)`
-- Source: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json) (16 hits)
-  - Signal summary: 16 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+- Search terms: `BuyTokenBoost, ATU2DiamondsBonus, BuyModBoost, BuyMK1TokenBoost, BuyMK2TokenBoost, BuyMK3TokenBoost, BuyCellBoost, BuyATU24, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost`
+- Typed anchors: `BuyTokenBoost (method), ATU2DiamondsBonus (class), BuyModBoost (method), BuyMK1TokenBoost (method), BuyMK2TokenBoost (method), BuyMK3TokenBoost (method), BuyCellBoost (method), BuyATU24 (method), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class)`
+- Source: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json) (37 hits)
+  - Signal summary: 4 high-signal, 33 supporting, 0 incidental, 0 suppressed-noise
+  - `15810` at `$.adjacentFollowUp.blockedAdjacentShell.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3CellsDisambiguationPass.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellPathId` [high-signal, score 110, exact-structured]
+  - `BuyCellBoost` at `$.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.adjacentFollowUp.blockedAdjacentShell.shellField` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.adjacentFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU1Button` at `$.adjacentFollowUp.recoveredAdditionalBridge.shellField` [supporting, score 95, exact-structured]
+  - `BuyTokenBoost` at `$.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook` [supporting, score 95, exact-structured]
+  - `ATU1Button` at `$.adjacentFollowUp.testedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.adjacentFollowUp.testedNeighbors[1]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.atu3CellsDisambiguationPass.shellField` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].preservedNeighbors[2]` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].surface` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellField` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `BuyMK1TokenBoost` at `$.atu5TitleFollowUp.recoveredBridge.supportingActionHook` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.recoveredTitleTextChain.shellField` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellField` [supporting, score 95, exact-structured]
+  - `ATU7Button` at `$.atu7BridgeFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `BuyMK3TokenBoost` at `$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook` [supporting, score 95, exact-structured]
+  - `ATU7Button` at `$.atu7BridgeFollowUp.verifiedTitleTextChain.shellField` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.boundedRecoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `BuyMK1TokenBoost` at `$.boundedRecoveredBridge.supportingActionHook` [supporting, score 95, exact-structured]
+  - `ATU6Button` at `$.boundedRecoveredBridgeFollowUp.shellField` [supporting, score 95, exact-structured]
+  - `BuyMK2TokenBoost` at `$.boundedRecoveredBridgeFollowUp.supportingActionHook` [supporting, score 95, exact-structured]
+  - `BuyATU24` at `$.groundedNonLabelClues.directBuyHookSamples[0]` [supporting, score 95, exact-structured]
+  - `ATU2DiamondsBonus` at `$.groundedNonLabelClues.effectHookSamples[1]` [supporting, score 95, exact-structured]
+  - `ATU2Button` at `$.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU2DiamondsBonus` at `$.recoveredBridge.supportingEffectHook` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.traceFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU4Button` at `$.traceFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `BuyModBoost` at `$.traceFollowUp.recoveredBridge.supportingActionHook` [supporting, score 95, exact-structured]
+  - `ATU6Button` at `$.verifiedTitleJoin.shellField` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.verifiedTitleJoin.textHandlerSearchSurface[0]` [supporting, score 95, exact-structured]
+- Source: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json) (35 hits)
+  - Signal summary: 35 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `BuyCellBoost` at `$[0].matches[101].byte_context[41].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[101].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[102].byte_context[40].value` [high-signal, score 100, exact-structured]
+  - `BuyCellBoost` at `$[0].matches[102].entry_context[25].value` [high-signal, score 100, exact-structured]
+  - `BuyMK2TokenBoost` at `$[0].matches[192].byte_context[32].value` [high-signal, score 100, exact-structured]
+  - `BuyMK2TokenBoost` at `$[0].matches[192].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `BuyMK2TokenBoost` at `$[0].matches[193].byte_context[32].value` [high-signal, score 100, exact-structured]
+  - `BuyMK2TokenBoost` at `$[0].matches[193].entry_context[25].value` [high-signal, score 100, exact-structured]
+  - `BuyTokenBoost` at `$[0].matches[197].byte_context[64].value` [high-signal, score 100, exact-structured]
+  - `BuyTokenBoost` at `$[0].matches[197].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `BuyTokenBoost` at `$[0].matches[198].byte_context[61].value` [high-signal, score 100, exact-structured]
+  - `BuyTokenBoost` at `$[0].matches[198].entry_context[25].value` [high-signal, score 100, exact-structured]
+  - `BuyMK1TokenBoost` at `$[0].matches[200].byte_context[30].value` [high-signal, score 100, exact-structured]
+  - `BuyMK1TokenBoost` at `$[0].matches[200].entry_context[31].value` [high-signal, score 100, exact-structured]
+  - `BuyMK1TokenBoost` at `$[0].matches[201].byte_context[27].value` [high-signal, score 100, exact-structured]
+  - `BuyMK1TokenBoost` at `$[0].matches[201].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].byte_context[118].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].entry_context[16].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[312].value` [high-signal, score 100, exact-structured]
+  - `SetAllTokenShopTexts` at `$[0].matches[313].entry_context[4].value` [high-signal, score 100, exact-structured]
+  - `TokenShop` at `$[0].matches[4].byte_context[77].value` [high-signal, score 100, exact-structured]
+  - `TokenShop` at `$[0].matches[4].entry_context[16].value` [high-signal, score 100, exact-structured]
+  - `TokenShop` at `$[0].matches[4].value` [high-signal, score 100, exact-structured]
+  - `BuyModBoost` at `$[0].matches[68].byte_context[52].value` [high-signal, score 100, exact-structured]
+  - `BuyModBoost` at `$[0].matches[68].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `BuyModBoost` at `$[0].matches[69].byte_context[52].value` [high-signal, score 100, exact-structured]
+  - `BuyModBoost` at `$[0].matches[69].entry_context[25].value` [high-signal, score 100, exact-structured]
+  - `BuyATU24` at `$[0].matches[71].byte_context[37].value` [high-signal, score 100, exact-structured]
+  - `BuyATU24` at `$[0].matches[72].byte_context[35].value` [high-signal, score 100, exact-structured]
+  - `BuyATU24` at `$[0].matches[72].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `BuyATU24` at `$[0].matches[73].entry_context[25].value` [high-signal, score 100, exact-structured]
+  - `BuyMK3TokenBoost` at `$[0].matches[96].byte_context[82].value` [high-signal, score 100, exact-structured]
+  - `BuyMK3TokenBoost` at `$[0].matches[97].byte_context[60].value` [high-signal, score 100, exact-structured]
+  - `BuyMK3TokenBoost` at `$[0].matches[97].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `BuyMK3TokenBoost` at `$[0].matches[98].entry_context[25].value` [high-signal, score 100, exact-structured]
+
+### Prefab identity roster
+
+- Search terms: `NewTokenUPGPrefab.T1.TokensBoost, NewTokenUPGPrefab.T1.DiamondBoost, NewTokenUPGPrefab.T1.ModPointsBooster, NewTokenUPGPrefab.T1.MK1Booster, NewTokenUPGPrefab.T1.MK2Booster, NewTokenUPGPrefab.T1.MK3Booster, NewTokenUPGPrefab.T1.CellsPerChestBooster, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost, BuyCellBoost`
+- Typed anchors: `NewTokenUPGPrefab.T1.TokensBoost (string), NewTokenUPGPrefab.T1.DiamondBoost (string), NewTokenUPGPrefab.T1.ModPointsBooster (string), NewTokenUPGPrefab.T1.MK1Booster (string), NewTokenUPGPrefab.T1.MK2Booster (string), NewTokenUPGPrefab.T1.MK3Booster (string), NewTokenUPGPrefab.T1.CellsPerChestBooster (string), NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser (string), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Source: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json) (44 hits)
+  - Signal summary: 4 high-signal, 40 supporting, 0 incidental, 0 suppressed-noise
+  - `15810` at `$.adjacentFollowUp.blockedAdjacentShell.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3CellsDisambiguationPass.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellPathId` [high-signal, score 110, exact-structured]
+  - `BuyCellBoost` at `$.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.adjacentFollowUp.blockedAdjacentShell.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenPrefabCandidates[0]` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.adjacentFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.TokensBoost` at `$.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU1Button` at `$.adjacentFollowUp.recoveredAdditionalBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU1Button` at `$.adjacentFollowUp.testedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.adjacentFollowUp.testedNeighbors[1]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.atu3CellsDisambiguationPass.shellField` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].preservedNeighbors[2]` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].surface` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.atu3CellsDisambiguationPass.testedSurfaces[2].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.tokenSide[0]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellField` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK1Booster` at `$.atu5TitleFollowUp.recoveredBridge.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK1Booster` at `$.atu5TitleFollowUp.recoveredTitleTextChain.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.recoveredTitleTextChain.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK1Booster` at `$.atu5TitleFollowUp.verifiedNamedIdentityJoin.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK3Booster` at `$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU7Button` at `$.atu7BridgeFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK3Booster` at `$.atu7BridgeFollowUp.verifiedTitleTextChain.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU7Button` at `$.atu7BridgeFollowUp.verifiedTitleTextChain.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK1Booster` at `$.boundedRecoveredBridge.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.boundedRecoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK2Booster` at `$.boundedRecoveredBridgeFollowUp.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU6Button` at `$.boundedRecoveredBridgeFollowUp.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.TokensBoost` at `$.groundedNonLabelClues.prefabRosterSamples[0]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.DiamondBoost` at `$.recoveredBridge.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU2Button` at `$.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.textHookFollowUp.separatePrefabClusterSamples[0]` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.traceFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.ModPointsBooster` at `$.traceFollowUp.recoveredBridge.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU4Button` at `$.traceFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK2Booster` at `$.verifiedTitleJoin.prefabIdentity` [supporting, score 95, exact-structured]
+  - `ATU6Button` at `$.verifiedTitleJoin.shellField` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.verifiedTitleJoin.textHandlerSearchSurface[0]` [supporting, score 95, exact-structured]
+- Source: [`data/token-shop-late-atu-boundary.json`](data/token-shop-late-atu-boundary.json) (2 hits)
+  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
+  - `ATU24Button` at `$.lateRows[0].shellField` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser` at `$.prefabRosterBoundary.localPrefabCluster[1].identity` [supporting, score 95, exact-structured]
+- Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) (12 hits)
+  - Signal summary: 12 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `TokenShop` at `$.directTargetTypeMetadata[0].fields[27].type` [high-signal, score 100, exact-structured]
+  - `TokenShop` at `$.monoScriptHits[5].className` [high-signal, score 100, exact-structured]
+  - `TokenShop` at `$.monoScriptHits[5].scriptName` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T1.DiamondBoost` at `$.namedObjectHits[10350].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T1.ModPointsBooster` at `$.namedObjectHits[10353].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK3Booster` at `$.namedObjectHits[10362].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.namedObjectHits[10371].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser` at `$.namedObjectHits[10373].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK1Booster` at `$.namedObjectHits[10379].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T1.TokensBoost` at `$.namedObjectHits[10405].name` [high-signal, score 100, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK2Booster` at `$.namedObjectHits[10409].name` [high-signal, score 100, exact-structured]
+  - `TokenShop` at `$.namedObjectHits[1054].name` [high-signal, score 100, exact-structured]
+- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (11 hits)
+  - Signal summary: 0 high-signal, 11 supporting, 0 incidental, 0 suppressed-noise
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `TokenShop` at `$.apk_results[4].keyword_hits.token[14]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.DiamondBoost` at `$.apk_results[7].keyword_hits.diamond[25]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.ModPointsBooster` at `$.apk_results[7].keyword_hits.token[14]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.TokensBoost` at `$.apk_results[7].keyword_hits.token[15]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser` at `$.apk_results[7].keyword_hits.token[30]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.apk_results[7].keyword_hits.token[4]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.DiamondBoost` at `$.apk_results[7].keyword_hits.token[5]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK1Booster` at `$.apk_results[7].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK2Booster` at `$.apk_results[7].keyword_hits.token[7]` [supporting, score 95, exact-structured]
+  - `NewTokenUPGPrefab.T1.MK3Booster` at `$.apk_results[7].keyword_hits.token[8]` [supporting, score 95, exact-structured]
+
+### Title and text surfaces
+
+- Search terms: `SetAllTokenShopTexts, SetTokenTexts, Mk2 Generator Booster, Token Ultima: MP, 1. MK1 Generator Output,, Token Ultima: Cells, Academy Booster, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, TokenShop, 15810, CellBoost, BuyCellBoost`
+- Typed anchors: `SetAllTokenShopTexts (method), SetTokenTexts (method), Mk2 Generator Booster (string), Token Ultima: MP (string), 1. MK1 Generator Output, (string), Token Ultima: Cells (string), Academy Booster (string), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Source: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json) (46 hits)
+  - Signal summary: 4 high-signal, 42 supporting, 0 incidental, 0 suppressed-noise
+  - `15810` at `$.adjacentFollowUp.blockedAdjacentShell.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3CellsDisambiguationPass.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellPathId` [high-signal, score 110, exact-structured]
+  - `BuyCellBoost` at `$.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.adjacentFollowUp.blockedAdjacentShell.shellField` [supporting, score 95, exact-structured]
+  - `Token Ultima: Cells` at `$.adjacentFollowUp.blockedAdjacentShell.splitCellIdentitySurfaces.tokenTitleCandidate` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.adjacentFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$.adjacentFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[1]` [supporting, score 95, exact-structured]
+  - `ATU1Button` at `$.adjacentFollowUp.recoveredAdditionalBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU1Button` at `$.adjacentFollowUp.testedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.adjacentFollowUp.testedNeighbors[1]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.atu3CellsDisambiguationPass.shellField` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].preservedNeighbors[2]` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].surface` [supporting, score 95, exact-structured]
+  - `Token Ultima: Cells` at `$.atu3CellsDisambiguationPass.testedSurfaces[2].preservedNeighbors[2]` [supporting, score 95, exact-structured]
+  - `Token Ultima: Cells` at `$.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.tokenSide[2]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellField` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook` [supporting, score 95, exact-structured]
+  - `1. MK1 Generator Output,` at `$.atu5TitleFollowUp.blockedTitleJoin.supportTextCandidate` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[1]` [supporting, score 95, exact-structured]
+  - `1. MK1 Generator Output,` at `$.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces[1].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `Mk2 Generator Booster` at `$.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces[2].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.recoveredTitleTextChain.shellField` [supporting, score 95, exact-structured]
+  - `1. MK1 Generator Output,` at `$.atu5TitleFollowUp.recoveredTitleTextChain.titleSideTextSurface[0]` [supporting, score 95, exact-structured]
+  - `1. MK1 Generator Output,` at `$.atu5TitleFollowUp.verifiedNamedIdentityJoin.namedIdentity` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellField` [supporting, score 95, exact-structured]
+  - `ATU7Button` at `$.atu7BridgeFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU7Button` at `$.atu7BridgeFollowUp.verifiedTitleTextChain.shellField` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.boundedRecoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU6Button` at `$.boundedRecoveredBridgeFollowUp.shellField` [supporting, score 95, exact-structured]
+  - `Academy Booster` at `$.groundedNonLabelClues.playerFacingStringSamples[3]` [supporting, score 95, exact-structured]
+  - `ATU2Button` at `$.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `Token Ultima: Cells` at `$.textHookFollowUp.separateTitleClusterSamples[0]` [supporting, score 95, exact-structured]
+  - `Academy Booster` at `$.textHookFollowUp.separateTitleClusterSamples[4]` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.traceFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$.traceFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[1]` [supporting, score 95, exact-structured]
+  - `Token Ultima: MP` at `$.traceFollowUp.blockedTitleJoin.testedSurfaces[1].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `Token Ultima: MP` at `$.traceFollowUp.blockedTitleJoin.titleCandidate` [supporting, score 95, exact-structured]
+  - `ATU4Button` at `$.traceFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU6Button` at `$.verifiedTitleJoin.shellField` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.verifiedTitleJoin.textHandlerSearchSurface[0]` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$.verifiedTitleJoin.textHandlerSearchSurface[1]` [supporting, score 95, exact-structured]
+  - `Mk2 Generator Booster` at `$.verifiedTitleJoin.titleProbeTitle` [supporting, score 95, exact-structured]
+- Source: [`data/token-shop-late-atu-boundary.json`](data/token-shop-late-atu-boundary.json) (2 hits)
+  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
+  - `ATU24Button` at `$.lateRows[0].shellField` [supporting, score 95, exact-structured]
+  - `Academy Booster` at `$.titleRosterBoundary.localTitleCluster[2].title` [supporting, score 95, exact-structured]
+- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (7 hits)
+  - Signal summary: 0 high-signal, 7 supporting, 0 incidental, 0 suppressed-noise
+  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.token[25]` [supporting, score 95, exact-structured]
+  - `Token Ultima: MP` at `$.apk_results[23].keyword_hits.token[26]` [supporting, score 95, exact-structured]
+  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.ultima[5]` [supporting, score 95, exact-structured]
+  - `Token Ultima: MP` at `$.apk_results[23].keyword_hits.ultima[6]` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
+  - `SetTokenTexts` at `$.apk_results[32].keyword_hits.token[7]` [supporting, score 95, exact-structured]
+  - `TokenShop` at `$.apk_results[4].keyword_hits.token[14]` [supporting, score 95, exact-structured]
+- Source: [`data/daily-tokenium-owner-probe.json`](data/daily-tokenium-owner-probe.json) (10 hits)
+  - Signal summary: 0 high-signal, 10 supporting, 0 incidental, 0 suppressed-noise
+  - `Mk2 Generator Booster` at `$[0].matches[19].byte_context[17].value` [supporting, score 95, exact-structured]
+  - `Academy Booster` at `$[0].matches[19].byte_context[27].value` [supporting, score 95, exact-structured]
+  - `Mk2 Generator Booster` at `$[0].matches[19].entry_context[12].value` [supporting, score 95, exact-structured]
+  - `Academy Booster` at `$[0].matches[20].byte_context[15].value` [supporting, score 95, exact-structured]
+  - `Mk2 Generator Booster` at `$[0].matches[20].byte_context[5].value` [supporting, score 95, exact-structured]
+  - `Mk2 Generator Booster` at `$[0].matches[20].entry_context[0].value` [supporting, score 95, exact-structured]
+  - `Academy Booster` at `$[0].matches[20].entry_context[10].value` [supporting, score 95, exact-structured]
+  - `Academy Booster` at `$[0].matches[20].value` [supporting, score 95, exact-structured]
+  - `1. MK1 Generator Output,` at `$[0].matches[46].byte_context[29].value` [supporting, score 95, exact-structured]
+  - `1. MK1 Generator Output,` at `$[0].matches[46].entry_context[5].value` [supporting, score 95, exact-structured]
+
+### Bounded unresolved neighborhoods
+
+- Search terms: `ATU3Button, BuyCellBoost, ATU24Button, BuyATU24, StartCellBostHold, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost`
+- Typed anchors: `ATU3Button (class), BuyCellBoost (method), ATU24Button (class), BuyATU24 (method), StartCellBostHold (method), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class)`
+- Source: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json) (30 hits)
+  - Signal summary: 4 high-signal, 26 supporting, 0 incidental, 0 suppressed-noise
+  - `15810` at `$.adjacentFollowUp.blockedAdjacentShell.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3CellsDisambiguationPass.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3ChestConsumerTrace.recoveredConsumerHandoff.shellPathId` [high-signal, score 110, exact-structured]
+  - `15810` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellPathId` [high-signal, score 110, exact-structured]
+  - `BuyCellBoost` at `$.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.adjacentFollowUp.blockedAdjacentShell.shellField` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.adjacentFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU1Button` at `$.adjacentFollowUp.recoveredAdditionalBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU1Button` at `$.adjacentFollowUp.testedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.adjacentFollowUp.testedNeighbors[1]` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.atu3CellsDisambiguationPass.shellField` [supporting, score 95, exact-structured]
+  - `StartCellBostHold` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].preservedNeighbors[2]` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CellsDisambiguationPass.testedSurfaces[0].surface` [supporting, score 95, exact-structured]
+  - `ATU3Button` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.shellField` [supporting, score 95, exact-structured]
+  - `BuyCellBoost` at `$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.atu5TitleFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.recoveredTitleTextChain.shellField` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.atu5TitleFollowUp.verifiedNamedIdentityJoin.shellField` [supporting, score 95, exact-structured]
+  - `ATU7Button` at `$.atu7BridgeFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU7Button` at `$.atu7BridgeFollowUp.verifiedTitleTextChain.shellField` [supporting, score 95, exact-structured]
+  - `ATU5Button` at `$.boundedRecoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU6Button` at `$.boundedRecoveredBridgeFollowUp.shellField` [supporting, score 95, exact-structured]
+  - `BuyATU24` at `$.groundedNonLabelClues.directBuyHookSamples[0]` [supporting, score 95, exact-structured]
+  - `ATU2Button` at `$.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.traceFollowUp.blockedTitleJoin.testedSurfaces[0].preservedNeighbors[0]` [supporting, score 95, exact-structured]
+  - `ATU4Button` at `$.traceFollowUp.recoveredBridge.shellField` [supporting, score 95, exact-structured]
+  - `ATU6Button` at `$.verifiedTitleJoin.shellField` [supporting, score 95, exact-structured]
+  - `SetAllTokenShopTexts` at `$.verifiedTitleJoin.textHandlerSearchSurface[0]` [supporting, score 95, exact-structured]
+- Source: [`data/token-shop-late-atu-boundary.json`](data/token-shop-late-atu-boundary.json) (3 hits)
+  - Signal summary: 0 high-signal, 3 supporting, 0 incidental, 0 suppressed-noise
+  - `BuyATU24` at `$.actionNeighborhood.preservedLateHooks[0]` [supporting, score 95, exact-structured]
+  - `BuyATU24` at `$.lateRows[0].buyHook` [supporting, score 95, exact-structured]
+  - `ATU24Button` at `$.lateRows[0].shellField` [supporting, score 95, exact-structured]
+- Source: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json) (19 hits)
+  - Signal summary: 19 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
   - `StartCellBostHold` at `$[0].matches[101].byte_context[30].value` [high-signal, score 100, exact-structured]
-  - `StopCellBostHold` at `$[0].matches[101].byte_context[33].value` [high-signal, score 100, exact-structured]
   - `BuyCellBoost` at `$[0].matches[101].byte_context[41].value` [high-signal, score 100, exact-structured]
   - `StartCellBostHold` at `$[0].matches[101].entry_context[17].value` [high-signal, score 100, exact-structured]
-  - `StopCellBostHold` at `$[0].matches[101].entry_context[20].value` [high-signal, score 100, exact-structured]
   - `BuyCellBoost` at `$[0].matches[101].entry_context[28].value` [high-signal, score 100, exact-structured]
   - `StartCellBostHold` at `$[0].matches[102].byte_context[29].value` [high-signal, score 100, exact-structured]
-  - `StopCellBostHold` at `$[0].matches[102].byte_context[32].value` [high-signal, score 100, exact-structured]
   - `BuyCellBoost` at `$[0].matches[102].byte_context[40].value` [high-signal, score 100, exact-structured]
   - `StartCellBostHold` at `$[0].matches[102].entry_context[14].value` [high-signal, score 100, exact-structured]
-  - `StopCellBostHold` at `$[0].matches[102].entry_context[17].value` [high-signal, score 100, exact-structured]
   - `BuyCellBoost` at `$[0].matches[102].entry_context[25].value` [high-signal, score 100, exact-structured]
   - `SetAllTokenShopTexts` at `$[0].matches[312].byte_context[118].value` [high-signal, score 100, exact-structured]
   - `SetAllTokenShopTexts` at `$[0].matches[312].entry_context[16].value` [high-signal, score 100, exact-structured]
   - `SetAllTokenShopTexts` at `$[0].matches[312].value` [high-signal, score 100, exact-structured]
   - `SetAllTokenShopTexts` at `$[0].matches[313].entry_context[4].value` [high-signal, score 100, exact-structured]
-
-### Diamond-special prefab or title lane
-
-- Search terms: `NewDiamondUPGPrefab.Specials.CellsBoost, >Diamond Upgrade 10 - CellsBoost, ATU3Button, 15810, T2, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
-- Typed anchors: `NewDiamondUPGPrefab.Specials.CellsBoost (string), >Diamond Upgrade 10 - CellsBoost (string), ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
-- Source: [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json) (2 hits)
-  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
-  - `SetAllTokenShopTexts` at `$[0].matches[225].byte_context[48].value` [supporting, score 95, exact-structured]
-  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$[0].matches[23].byte_context[89].value` [supporting, score 95, exact-structured]
-- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (4 hits)
-  - Signal summary: 0 high-signal, 4 supporting, 0 incidental, 0 suppressed-noise
-  - `>Diamond Upgrade 10 - CellsBoost` at `$.apk_results[0].keyword_hits.diamond[45]` [supporting, score 95, exact-structured]
-  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
-  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$.apk_results[7].keyword_hits.diamond[16]` [supporting, score 95, exact-structured]
-  - `>Diamond Upgrade 10 - CellsBoost` at `$.file_results[0].keyword_hits.diamond[45]` [supporting, score 95, exact-structured]
-- Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) (1 hits)
-  - Signal summary: 1 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `NewDiamondUPGPrefab.Specials.CellsBoost` at `$.namedObjectHits[10352].name` [high-signal, score 100, exact-structured]
-
-### Token prefab or title lane
-
-- Search terms: `NewTokenUPGPrefab.T1.CellsPerChestBooster, NewTokenUPGPrefab.T5.UltimaCells, Token Ultima: Cells, ATU3Button, 15810, T2, CellBoost, BuyCellBoost, SetAllTokenShopTexts`
-- Typed anchors: `NewTokenUPGPrefab.T1.CellsPerChestBooster (string), NewTokenUPGPrefab.T5.UltimaCells (string), Token Ultima: Cells (string), ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), BuyCellBoost (method), SetAllTokenShopTexts (method)`
-- Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) (2 hits)
-  - Signal summary: 2 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.namedObjectHits[10371].name` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.namedObjectHits[10395].name` [high-signal, score 100, exact-structured]
-- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (6 hits)
-  - Signal summary: 0 high-signal, 6 supporting, 0 incidental, 0 suppressed-noise
-  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.token[25]` [supporting, score 95, exact-structured]
-  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.ultima[5]` [supporting, score 95, exact-structured]
-  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.apk_results[7].keyword_hits.token[38]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.apk_results[7].keyword_hits.token[4]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T5.UltimaCells` at `$.apk_results[7].keyword_hits.ultima[2]` [supporting, score 95, exact-structured]
-
-### Generic TokenShop text-hook lane
-
-- Search terms: `SetAllTokenShopTexts, SetTokenTexts, ATU3Button, 15810, T2, CellBoost, BuyCellBoost`
-- Typed anchors: `SetAllTokenShopTexts (method), SetTokenTexts (method), ATU3Button (class), 15810 (path id), T2 (class), CellBoost (class), BuyCellBoost (method)`
-- Source: [`workbench/unity/joined/level0`](workbench/unity/joined/level0) (525 hits)
-  - Signal summary: 0 high-signal, 525 supporting, 0 incidental, 0 suppressed-noise
-  - `T2` at path_id `260` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `320` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `329` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `422` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `429` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `637` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `1749` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `1974` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `2036` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `2040` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `2525` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `2572` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `2911` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `3390` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `3777` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `4186` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `4381` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `4816` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `5177` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `5594` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `5732` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `6062` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `6142` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `6145` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `6229` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `6791` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `6997` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `7208` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `7276` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `7641` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `8171` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `8176` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `8344` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `8401` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `8803` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `8954` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `8969` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9061` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9284` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9329` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9420` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9550` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9629` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9640` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9671` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `9905` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `10015` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `10417` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `10733` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `11320` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `11709` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `12032` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `12238` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `12366` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `12399` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `12511` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `12656` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `12769` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `13381` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `15395` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `15396` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `15397` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `18062` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `18063` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `18064` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `18065` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `18066` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `18067` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `20288` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `20289` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `20290` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `20291` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `20292` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `20293` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `21327` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `22866` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `23647` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `26909` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `27691` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `27740` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `27775` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `27797` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `27827` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `27858` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28371` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28372` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28373` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28374` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28375` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28376` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28985` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28986` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28987` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28988` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28989` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28990` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28991` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28992` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `28993` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30389` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30394` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30409` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30410` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30415` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30421` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30425` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30430` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `30431` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32240` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32279` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32325` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32357` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32364` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32376` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32393` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32428` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `32475` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33744` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33747` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33749` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33752` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33754` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33755` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33756` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33757` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33760` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33761` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33763` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33769` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33777` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33779` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33780` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33781` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33784` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33786` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33787` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33788` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33791` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33793` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33794` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33795` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33797` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33805` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33809` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33817` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33821` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `33824` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34120` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34121` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34128` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34131` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34967` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34968` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34969` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34970` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34971` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34972` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34973` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34974` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34975` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34976` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34977` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34978` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34979` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34980` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34981` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34982` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34983` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34984` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34985` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34986` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34987` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34988` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34989` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34990` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34991` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34992` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34993` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34994` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34995` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34996` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34997` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34998` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `34999` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35000` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35001` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35002` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35003` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35004` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35005` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35006` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35007` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35008` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35009` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35010` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35011` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35012` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35013` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35014` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35015` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35016` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35017` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35018` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35019` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35020` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35021` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35022` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35023` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35024` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35025` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35026` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35027` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `35028` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36623` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36970` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36971` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36972` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36973` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36974` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36975` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36976` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36977` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36978` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36979` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36980` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36981` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36982` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36983` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36984` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36985` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36986` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36987` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36988` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36989` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36990` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36991` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36992` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36993` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36994` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36995` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36996` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36997` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `36998` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37729` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37734` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37737` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37771` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37780` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37788` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37847` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37874` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37876` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37890` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37943` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37965` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `37978` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38003` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38009` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38032` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38068` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38076` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38103` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38105` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38154` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38156` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38171` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38181` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38199` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38224` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38244` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38259` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38292` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38311` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38322` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38336` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38340` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38355` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38358` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38369` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38374` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38395` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38398` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38412` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38555` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38564` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38594` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38597` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38628` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38652` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38691` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38729` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38762` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38831` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38846` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38864` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38866` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38930` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38971` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `38980` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39003` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39016` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39037` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39060` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39062` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39091` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39135` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39184` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39232` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39238` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39239` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39242` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39257` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39303` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39306` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39328` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39383` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39389` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39418` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39434` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39521` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39530` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39534` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39541` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39553` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39570` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39586` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39672` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39684` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39717` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39726` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39734` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39736` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39738` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39746` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39753` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39762` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39765` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39766` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39788` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39835` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39845` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39849` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39850` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39884` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39905` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39944` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39955` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39958` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39966` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `39985` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `40000` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `40072` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `40074` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `40098` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `40113` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `46818` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `46826` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `46836` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `46849` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `46858` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `46882` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `47968` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `48842` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `48843` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `48849` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `48853` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `48860` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `48863` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `48865` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `50965` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `50990` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51022` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51034` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51042` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51047` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51058` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51059` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51066` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51077` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51084` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51092` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51103` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51111` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51122` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51128` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51139` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51140` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51146` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51180` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51197` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51223` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51234` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51243` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51250` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51256` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51259` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51272` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `51278` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `59140` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `61636` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `61973` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `62023` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63721` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63722` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63724` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63725` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63728` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63731` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63732` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63734` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63735` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63738` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63739` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63742` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63749` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63759` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63765` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63771` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63775` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63778` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63780` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63781` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63787` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63788` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63790` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63791` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63793` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63794` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63795` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63802` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63805` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63809` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63811` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63812` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63815` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63817` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63819` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63822` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63823` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63824` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63831` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63840` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63843` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63847` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63849` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `63852` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `70207` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `70209` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `70211` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `70218` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `70221` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `70235` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `70532` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `72145` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `72752` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `73598` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `74743` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `75263` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `75607` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `83764` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `85643` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `85774` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `85786` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `85795` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `85796` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `85812` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `85813` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86228` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86588` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86636` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86681` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86686` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86711` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86713` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86733` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86739` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86782` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86828` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86832` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86850` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86867` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86872` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86897` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86929` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86959` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86961` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `86993` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87006` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87026` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87044` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87053` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87068` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87084` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87129` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87136` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87161` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87167` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87182` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87190` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87192` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87238` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87249` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87255` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87284` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87292` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87319` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87382` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87421` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87426` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87456` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87464` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87524` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87530` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87605` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87625` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87666` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87677` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87678` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87690` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87776` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87785` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87825` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87861` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `87891` (GameObject, object-name) [supporting, score 42, bounded-containment]
-  - `T2` at path_id `89846` (GameObject, object-name) [supporting, score 42, bounded-containment]
-- Source: [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets) (0 hits)
-  - Signal summary: 0 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (2 hits)
-  - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
-  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
-  - `SetTokenTexts` at `$.apk_results[32].keyword_hits.token[7]` [supporting, score 95, exact-structured]
+  - `TokenShop` at `$[0].matches[4].byte_context[77].value` [high-signal, score 100, exact-structured]
+  - `TokenShop` at `$[0].matches[4].entry_context[16].value` [high-signal, score 100, exact-structured]
+  - `TokenShop` at `$[0].matches[4].value` [high-signal, score 100, exact-structured]
+  - `BuyATU24` at `$[0].matches[71].byte_context[37].value` [high-signal, score 100, exact-structured]
+  - `BuyATU24` at `$[0].matches[72].byte_context[35].value` [high-signal, score 100, exact-structured]
+  - `BuyATU24` at `$[0].matches[72].entry_context[28].value` [high-signal, score 100, exact-structured]
+  - `BuyATU24` at `$[0].matches[73].entry_context[25].value` [high-signal, score 100, exact-structured]
 
 ## Bridge check
 
-- Result: `no checked object-or-title bridge recovered`
-- No committed source keeps the shell-side anchor and one exact prefab or title in the same local container.
+- Result: `checked family structure audit recovered`
 
 ## Trace graph
 
-- Present typed edges: `8`
-- Negative typed edges: `4`
+- Present typed edges: `6`
+- Negative typed edges: `2`
 
 ### Proved joins
 
-- `serialized-adjacency`: The target shell still sits directly beside the CellBoost owner-field block in the committed TokenShop extract. [direct]
-  - `tokenShopExtract` at `$.fields` proves `ATU3Button path_id 15810`
-- `declaration-neighborhood`: The metadata neighborhood keeps ATU3Button and the CellBoost declaration block in one raw declaration area. [contextual]
-  - `metadata` at `metadata offset 662261` proves `CellBoostStartCost`
-  - `metadata` at `metadata offset 662349` proves `ATU3Button`
-- `family-action-cluster`: The cells-domain action lane preserves BuyCellBoost as the nearest named buy hook for the same family, but only as a generic cluster. [supporting]
-  - `dailyTokeniumLaneProbe` at `$[0].matches[101].byte_context[41].value` proves `BuyCellBoost`
-- `candidate-prefab-surface`: A separate diamond-special CellsBoost prefab candidate is preserved on committed probe surfaces. [direct]
-  - `unityProbe` at `$.apk_results[7].keyword_hits.diamond[16]` proves `NewDiamondUPGPrefab.Specials.CellsBoost`
-  - `lm244TargetedProbe` at `$[0].matches[23].byte_context[89].value` proves `NewDiamondUPGPrefab.Specials.CellsBoost`
-- `candidate-title-surface`: The same detached diamond-special surface also preserves one final title candidate. [direct]
-  - `unityProbe` at `$.apk_results[0].keyword_hits.diamond[45]` proves `>Diamond Upgrade 10 - CellsBoost`
-- `candidate-prefab-surface`: Separate token-side prefab identities for cells-domain upgrades are preserved, but not joined back to the target shell. [direct]
-  - `uabeaProbe` at `$.namedObjectHits[10371].name` proves `NewTokenUPGPrefab.T1.CellsPerChestBooster`
-  - `unityProbe` at `$.apk_results[7].keyword_hits.token[38]` proves `NewTokenUPGPrefab.T5.UltimaCells`
-- `candidate-title-surface`: The token-side candidate surface also preserves one detached title clue. [direct]
-  - `unityProbe` at `$.apk_results[23].keyword_hits.token[25]` proves `Token Ultima: Cells`
-- `generic-text-hook-cluster`: The generic TokenShop text hooks are preserved as a separate surface, but they do not close the ATU3 join. [supporting]
+- `repeated-serialized-shell-adjacency`: The committed TokenShop payload repeatedly preserves exact ATU shell ids and adjacent owner neighborhoods across both solved and still-unresolved rows. [direct]
+  - `tokenShopExtract` at `$.fields[12].field` proves `ATU1Button`
+  - `tokenShopExtract` at `$.fields[51].field` proves `ATU6Button`
+  - `tokenShopExtract` at `$.fields[60].field` proves `ATU7Button`
+  - `tokenShopExtract` at `$.fields[193].field` proves `ATU24Button`
+  - `tokenShopLateAtuBoundary` at `$.targetNeighborhood.shellFieldRange` proves `ATU24Button through ATU28Button`
+- `repeated-row-family-proxy-lane`: The strongest solved subset repeatedly preserves one row-family proxy lane through buy hooks or effect hooks rather than raw row-order similarity. [supporting]
+  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.recoveredAdditionalBridge.supportingActionHook` proves `BuyTokenBoost`
+  - `tokenShopRowRemapBoundary` at `$.recoveredBridge.supportingEffectHook` proves `ATU2DiamondsBonus`
+  - `tokenShopRowRemapBoundary` at `$.traceFollowUp.recoveredBridge.supportingActionHook` proves `BuyModBoost`
+  - `tokenShopRowRemapBoundary` at `$.atu5TitleFollowUp.recoveredBridge.supportingActionHook` proves `BuyMK1TokenBoost`
+  - `tokenShopRowRemapBoundary` at `$.boundedRecoveredBridgeFollowUp.supportingActionHook` proves `BuyMK2TokenBoost`
+  - `tokenShopRowRemapBoundary` at `$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook` proves `BuyMK3TokenBoost`
+  - `dailyTokeniumLaneProbe` at `$[0].matches[197].byte_context[64].value` proves `BuyTokenBoost`
+  - `dailyTokeniumLaneProbe` at `$[0].matches[68].byte_context[52].value` proves `BuyModBoost`
+  - `dailyTokeniumLaneProbe` at `$[0].matches[200].byte_context[30].value` proves `BuyMK1TokenBoost`
+  - `dailyTokeniumLaneProbe` at `$[0].matches[192].byte_context[32].value` proves `BuyMK2TokenBoost`
+  - `dailyTokeniumLaneProbe` at `$[0].matches[96].byte_context[82].value` proves `BuyMK3TokenBoost`
+- `repeated-shell-to-prefab-subset`: The same solved subset repeatedly reaches exact prefab identities on committed sources, even when final titles still do not localize. [direct]
+  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.TokensBoost`
+  - `tokenShopRowRemapBoundary` at `$.recoveredBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.DiamondBoost`
+  - `tokenShopRowRemapBoundary` at `$.traceFollowUp.recoveredBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.ModPointsBooster`
+  - `tokenShopRowRemapBoundary` at `$.atu5TitleFollowUp.recoveredBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.MK1Booster`
+  - `tokenShopRowRemapBoundary` at `$.boundedRecoveredBridgeFollowUp.prefabIdentity` proves `NewTokenUPGPrefab.T1.MK2Booster`
+  - `tokenShopRowRemapBoundary` at `$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.MK3Booster`
+  - `uabeaProbe` at `$.namedObjectHits[10405].name` proves `NewTokenUPGPrefab.T1.TokensBoost`
+  - `uabeaProbe` at `$.namedObjectHits[10409].name` proves `NewTokenUPGPrefab.T1.MK2Booster`
+  - `uabeaProbe` at `$.namedObjectHits[10362].name` proves `NewTokenUPGPrefab.T1.MK3Booster`
+- `repeated-title-text-surface`: Generic TokenShop text hooks and row-adjacent title or support-text surfaces repeatedly survive, but they usually remain detached from exact shell ids. [supporting]
   - `unityProbe` at `$.apk_results[32].keyword_hits.token[6]` proves `SetAllTokenShopTexts`
-  - `unityProbe` at `$.apk_results[32].keyword_hits.token[7]` proves `SetTokenTexts`
+  - `unityProbe` at `$.apk_results[23].keyword_hits.token[26]` proves `Token Ultima: MP`
+  - `dailyTokeniumOwnerProbe` at `$[0].matches[46].byte_context[29].value` proves `1. MK1 Generator Output,`
+  - `tokenShopLateAtuBoundary` at `$.titleRosterBoundary.localTitleCluster[2].title` proves `Academy Booster`
+- `exact-shell-to-title-exemplar`: ATU6 remains the standout strongest row neighborhood because the repo preserves one exact shell-to-prefab-to-title chain there. [direct]
+  - `tokenShopRowRemapBoundary` at `$.verifiedTitleJoin.titleProbeTitle` proves `Mk2 Generator Booster`
+  - `dailyTokeniumOwnerProbe` at `$[0].matches[19].byte_context[17].value` proves `Mk2 Generator Booster`
+  - `tokenShopRowRemapBoundary` at `$.verifiedTitleJoin.prefabIdentity` proves `NewTokenUPGPrefab.T1.MK2Booster`
+- `bounded-unresolved-neighborhood-coverage`: The still-unresolved neighborhoods are already checked as bounded negatives rather than open-ended unknowns. [supporting]
+  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.groundedConclusion` proves `The bounded ATU3 cells-domain disambiguation pass stays negative. Across the exact BuyCellBoost, diamond-special CellsBoost, and token-side CellsPerChestBooster or Token Ultima: Cells search surfaces, the repo still preserves only separate cells-domain clusters rather than one checked object-or-title join back to ATU3Button path id 15810.`
+  - `tokenShopLateAtuBoundary` at `$.groundedConclusion` proves `The ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result. The repo preserves exact SaveData row levels, exact TokenShop shell path ids, direct BuyATU24 through BuyATU28 hooks, one local late title roster, one local late prefab roster, and separate Campaign Fragments or Academy effect-side strings, but no committed artifact crosses those surfaces back to one exact ATU24Button through ATU28Button shell. This neighborhood therefore narrows the unresolved late tier4plus seam without recovering one new checked shell-to-prefab or shell-to-title bridge.`
+  - `dailyTokeniumLaneProbe` at `$[0].matches[71].byte_context[37].value` proves `BuyATU24`
 
 ### Missing joins
 
-- `exact-shell-to-action-hook`: No committed source proves one ATU3-specific direct buy or effect hook; the nearest named action surface stays the generic BuyCellBoost cluster. [negative]
-  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]` records `No checked repo artifact in this lane currently preserves an ATU3-specific effect hook.`
-  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]` records `No checked repo artifact in this lane currently preserves an ATU3-specific direct buy hook.`
-- `exact-shell-to-prefab`: No committed source proves that the ATU3 shell or path id 15810 crosses directly into the detached diamond-special CellsBoost prefab candidate. [negative]
-  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.testedSurfaces[1].missingJoin` records `The checked diamond-special surface still preserves a separate CellsBoost prefab and title lane, but it does not preserve any ATU3 shell, path id 15810, or exact bridge from the ATU3 owner block into that diamond-special identity surface.`
-- `exact-shell-to-prefab`: No committed source proves that the ATU3 shell or path id 15810 crosses directly into one exact token-side prefab identity. [negative]
-  - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]` records `No checked repo artifact in this lane currently joins ATU3Button directly to one exact NewTokenUPGPrefab.* object identity.`
-  - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.testedSurfaces[2].missingJoin` records `The checked token-side surface still preserves separate token prefab and title clues for cells-domain upgrades, but it does not preserve any direct ATU3 shell join or one concrete object or title bridge back to path id 15810.`
-- `exact-shell-to-title`: No committed source proves one exact ATU3 shell-to-final-title join across either the diamond-special or token-side title candidates. [negative]
+- `repeated-shell-to-title-localization-gap`: Outside ATU6, the solved shell subset still does not repeatedly localize final player-facing row titles: ATU1, ATU2, ATU4, ATU5, and ATU7 all stop short of one exact shell-to-title join. [negative]
+  - `tokenShopRowRemapBoundary` at `$.blockedIdentityJoin.missingLinks[1]` records `No checked repo artifact currently ties ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU7Button, ATU8Button, ATU9Button, ATU10Button, ATU11Button, or ATU12Button directly to a final player-facing TokenShop row title string.`
+  - `tokenShopRowRemapBoundary` at `$.traceFollowUp.blockedTitleJoin.missingJoin` records `No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues stay detached from the traced ATU4 shell neighborhood.`
+  - `tokenShopRowRemapBoundary` at `$.atu5TitleFollowUp.blockedTitleJoin.missingJoin` records `No committed source currently ties ATU5Button directly to one final player-facing TokenShop row title; the surviving generic text hooks and neighboring generator title roster still stay detached from the traced ATU5 shell neighborhood even though the MK1 generator support-text cluster now clears as one bounded title-side text chain and one named MK1 Generator Output identity join.`
+  - `tokenShopRowRemapBoundary` at `$.atu7BridgeFollowUp.recoveredBridge.groundedConclusion` records `ATU7Button now has one checked trace-backed bridge to NewTokenUPGPrefab.T1.MK3Booster because the exact TokenShop owner payload places ATU7Button directly after the MK3TokenBoost field family, checked action-lane clues preserve BuyMK3TokenBoost, and the checked prefab roster preserves the exact MK3Booster token prefab identity.`
+- `repeated-unresolved-shell-identity-gap`: The unresolved ATU3 and late ATU24-ATU28 neighborhoods still fail the exact shell-to-prefab or shell-to-title localization step entirely, even though shell-side serialization and nearby hooks survive. [negative]
   - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.groundedConclusion` records `The bounded ATU3 cells-domain disambiguation pass stays negative. Across the exact BuyCellBoost, diamond-special CellsBoost, and token-side CellsPerChestBooster or Token Ultima: Cells search surfaces, the repo still preserves only separate cells-domain clusters rather than one checked object-or-title join back to ATU3Button path id 15810.`
+  - `tokenShopLateAtuBoundary` at `$.result` records `no concrete late-row object-or-title join cleared`
+  - `tokenShopLateAtuBoundary` at `$.groundedConclusion` records `The ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result. The repo preserves exact SaveData row levels, exact TokenShop shell path ids, direct BuyATU24 through BuyATU28 hooks, one local late title roster, one local late prefab roster, and separate Campaign Fragments or Academy effect-side strings, but no committed artifact crosses those surfaces back to one exact ATU24Button through ATU28Button shell. This neighborhood therefore narrows the unresolved late tier4plus seam without recovering one new checked shell-to-prefab or shell-to-title bridge.`
 
 ## Solved vs blocked
 
-- Baseline: `ATU1Button` path id `15839` stays cleared as the comparison shape.
-- Blocked target: `ATU3Button` path id `15810` stays blocked.
-- Shared present edge types: `serialized-adjacency`
-- Baseline-only present edge types: `exact-shell-to-action-hook, exact-shell-to-prefab, supporting-effect-hook`
-- Blocked missing edge types: `exact-shell-to-action-hook, exact-shell-to-prefab, exact-shell-to-title`
+- Baseline: `ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button` path id `solved-subset` stays cleared as the comparison shape.
+- Blocked target: `ATU3Button plus ATU24Button through ATU28Button` path id `bounded-unresolved-neighborhoods` stays blocked.
+- Shared present edge types: `repeated-row-family-proxy-lane, repeated-serialized-shell-adjacency`
+- Baseline-only present edge types: `exact-shell-to-title-exemplar, repeated-shell-to-prefab-subset`
+- Blocked missing edge types: `repeated-shell-to-prefab-subset, exact-shell-to-title-exemplar`
 
-- Both rows preserve the direct serialized shell-to-owner-block adjacency.
-- The solved ATU1 baseline also preserves one exact row-specific effect hook, one checked row-specific buy hook, and one exact prefab identity.
-- The blocked ATU3 target stays missing the exact shell-to-action-hook, shell-to-prefab, and shell-to-title joins, so the cells-domain clues remain split instead of forming one checked bridge.
+- Both the solved and unresolved neighborhoods still preserve shell-side ATU serialization.
+- The strongest solved subset adds repeated row-family proxy hooks and exact prefab identities, while ATU6 alone adds one exact title-chain exemplar.
+- The unresolved neighborhoods still stop before exact prefab or final-title localization, so the family audit remains descriptive rather than promotive.
 
 ## Decision summary
 
-- Verdict: `keep researching`
-- Summary: The trace still preserves only split cells-domain clues, so keep researching and do not wire or quarantine product behavior from this join.
-- Proved edges: `8`
-- Negative edges: `4`
-- Baseline gap: `exact-shell-to-action-hook, exact-shell-to-prefab, exact-shell-to-title`
+- Verdict: `quarantine`
+- Summary: The family audit preserves a repeated shell-to-proxy-to-prefab pattern and one standout ATU6 title-chain exemplar, but repeated title-localization gaps still quarantine the broader family.
+- Proved edges: `6`
+- Negative edges: `2`
+- Baseline gap: `repeated-shell-to-prefab-subset, exact-shell-to-title-exemplar`
 
 ## Current loss
 
-- The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.
-- The metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area, but it does not keep one checked prefab identity or final title in the same local container.
-- The action lane survives only as a generic named buy cluster in the daily-tokenium lane probe, with StartCellBostHold, StopCellBostHold, and BuyCellBoost but no shell-side path id.
-- Prefab identities survive as detached UABEA, targeted-string, or unity-probe hits, and final titles survive as separate unity-probe buckets, so the current extraction still loses the direct cross-surface join back to 15810.
+- The family audit confirms that shell-side ATU serialization survives much more often than row-local title localization does.
+- The strongest repeated solved pattern is shell adjacency plus one row-family proxy hook and one exact prefab identity, but the title-side surfaces usually remain detached into generic text hooks, support text, or loose title rosters.
+- ATU6 remains the standout strongest neighborhood because it is still the only row that carries one checked shell-to-prefab-to-title chain; ATU4, ATU5, and ATU7 stay structurally stronger than ATU3 and the late ATU24-ATU28 block, but still stop short of final title localization.
 
 ## Conclusion
 
-- The ATU3Button or 15810 trace stays negative. The trace workflow now preserves shell, metadata, action-hook, prefab, title, and text-hook surfaces in one checked bundle, but no committed source carries one exact ATU3Button or path id 15810 bridge together with one exact prefab identity or final player-facing title.
+- The TokenShop family audit is structurally informative but still quarantined. The repo repeatedly preserves shell-side ATU neighborhoods plus row-family proxy hooks and prefab identities on the solved subset, but repeated title-localization gaps remain for ATU1, ATU2, ATU4, ATU5, and ATU7, while ATU3 and the late ATU24-ATU28 block still fail the exact identity join entirely. ATU6 remains the strongest standout row neighborhood.
