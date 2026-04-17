@@ -60,9 +60,10 @@ const commandTemplates = {
   "probe:run": {
     steps: [
       ["dotnet", ["build", probeProject, "-c", "Release", "-o", probeOutputDir]],
-      ["dotnet", ["run", "--project", probeProject, "--no-build"]]
+      ["dotnet", ["run", "--project", probeProject, "--no-build", "--"]]
     ],
-    passThrough: true
+    passThrough: true,
+    passThroughOnStep: 1 // Only pass args to second step
   },
 
   // Generic compile for canonical dataset
@@ -385,8 +386,16 @@ const params = parseArgs(extraArgs);
 // Handle pass-through commands (trace, compile)
 const commandConfig = commandSets[commandName];
 if (commandConfig.passThrough) {
-  // Pass all args through to script
-  runCommand(commandConfig.steps[0][0], [...commandConfig.steps[0][1], ...extraArgs], {
+  // Determine which step gets the pass-through args
+  const targetStepIndex = commandConfig.passThroughOnStep ?? 0;
+  const targetStep = commandConfig.steps[targetStepIndex];
+
+  // For probe commands, pass raw args through after --
+  // Extract raw args (everything after -- if present)
+  const dashDashIndex = extraArgs.indexOf("--");
+  const rawArgs = dashDashIndex >= 0 ? extraArgs.slice(dashDashIndex + 1) : extraArgs;
+
+  runCommand(targetStep[0], [...targetStep[1], ...rawArgs], {
     force: params.force,
     continueOnError: params.continueOnError,
     outputPath: params.output || null

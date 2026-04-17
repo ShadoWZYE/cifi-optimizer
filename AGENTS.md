@@ -41,6 +41,17 @@ Only add fields/labels/formulas/recommendations if:
 1. Known in-game CIFI concept
 2. Clearly labeled external/community input
 
+## Data provenance rule
+
+Never promote guessed, heuristic, or assumed data into canonical state without explicit labeling:
+
+- If data is extracted from game binary/metadata → Label as "verified" or "extracted"
+- If data is reasonable guess from patterns → Label as "assumed" or "heuristic" with noted uncertainty
+- If data is from community/external source → Label as "community" or "external"
+- Never mix unverified assumptions with grounded truth in shared state boundaries
+
+When in doubt, leave data as external/compatibility-only until verified.
+
 ## Integration gate
 
 Before wiring systems into app behavior:
