@@ -1,9 +1,4 @@
 {
-  "description": "Disassembly analysis for tier unlock threshold constants",
-  "binary_size": 78563616,
-  "method_string_offsets": {},
-  "field_string_offsets": {},
-  "comparison_instructions": [],
   "threshold_candidates": [],
-  "constant_loads": []
+  "details": {}
 }

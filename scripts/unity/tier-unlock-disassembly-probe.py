@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-Tier Unlock Disassembly Probe - Use pyelftools properly
+Tier Unlock Disassembly Probe - Search for any tier-related strings
 """
 
 import json
 import re
-import struct
 import sys
 from pathlib import Path
-from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -17,87 +15,78 @@ VENDOR_PATH = ROOT / ".vendor_manual"
 if str(VENDOR_PATH) not in sys.path:
     sys.path.insert(0, str(VENDOR_PATH))
 
-# Use struct directly instead of elftools
-import lief
+from capstone import Cs, CS_ARCH_X86, CS_MODE_64
 
 
 LIBIL2CPP_PATH = ROOT / "workbench" / "apk" / "base" / "libil2cpp.so"
 JSON_OUT = ROOT / "data" / "tier-unlock-disassembly.json"
 
-METHOD_NAMES = [
-    "get_TotalT1TokenLevels",
-    "get_TotalT2TokenLevels", 
-    "get_TotalT3TokenLevels",
-    "get_TotalT4TokenLevels",
-    "get_TotalT5TokenLevels",
-    "get_TotalTokenLevels"
-]
-
 
 def main():
-    print(f"Loading {LIBIL2CPP_PATH}...")
+    print(f"Loading {LIBIL2CPP_PATH}")
     
-    binary = lief.parse(str(LIBIL2CPP_PATH))
+    with open(LIBIL2CPP_PATH, 'rb') as f:
+        data = f.read()
     
-    if not binary:
-        print("Failed to parse binary")
-        return
+    print(f"  Binary size: {len(data)} bytes")
     
-    print(f"  Binary type: {binary.format}")
-    print(f"  Architecture: {binary.header.machine_type}")
+    # Search for various tier-related patterns
+    search_patterns = [
+        b"TokenLevels",
+        b"TierUnlocked",
+        b"get_Total",
+        b"Tier2",
+        b"Tier3",
+        b"Tier4",
+        b"Tier5",
+    ]
     
-    # Get all symbols
-    print("\nSearching for method symbols...")
-    
-    symbols_found = {}
-    for symbol in binary.symbols:
-        for name in METHOD_NAMES:
-            if symbol.name and name in symbol.name:
-                symbols_found[name] = {
-                    "address": hex(symbol.value) if symbol.value else None,
-                    "size": symbol.size
-                }
-                print(f"  Found {name} at {hex(symbol.value) if symbol.value else 'N/A'}")
-    
-    # Get all strings in binary
-    print("\nSearching for strings...")
-    strings_found = {}
-    for section in binary.sections:
-        if section.name in [".rodata", ".dynstr", ".data"]:
+    print("\nSearching for tier-related strings...")
+    for pattern in search_patterns:
+        pos = data.find(pattern)
+        if pos >= 0:
+            # Get some context
+            context = data[pos:pos+50]
             try:
-                content = section.content
-                for name in METHOD_NAMES:
-                    search = name.encode()
-                    pos = bytes(content).find(search)
-                    if pos >= 0:
-                        strings_found[name] = hex(section.offset + pos)
+                text = context.decode('ascii', errors='ignore').split('\x00')[0]
+                print(f"  {pattern.decode()}: {hex(pos)} -> {text}")
             except:
-                pass
+                print(f"  {pattern.decode()}: {hex(pos)}")
     
-    print(f"Strings found: {strings_found}")
+    # Now scan for comparison instructions with specific values
+    print("\nScanning for comparison instructions with threshold values...")
+    md = Cs(CS_ARCH_X86, CS_MODE_64)
+    
+    # Focus on the code section area (after headers, typical .text starts around 0x1000)
+    # Sample more aggressively
+    threshold_values = {}
+    
+    # Scan in 1MB chunks
+    for chunk_start in range(0x100000, min(len(data), 60_000_000), 500_000):
+        chunk = data[chunk_start:chunk_start + 500_000]
+        
+        try:
+            for insn in md.disasm(chunk, chunk_start):
+                if insn.mnemonic == 'cmp':
+                    match = re.search(r'\$(-?\d+)', insn.op_str)
+                    if match:
+                        value = int(match.group(1))
+                        if 20 <= value <= 160:  # Range of interest
+                            if value not in threshold_values:
+                                threshold_values[value] = []
+                            threshold_values[value].append({
+                                'rva': hex(insn.address),
+                                'instr': f"{insn.mnemonic} {insn.op_str}"
+                            })
+        except:
+            pass
+    
+    print(f"\nFound threshold candidates: {sorted(threshold_values.keys())}")
     
     results = {
-        "description": "ELF analysis for tier unlock methods",
-        "symbols": symbols_found,
-        "strings": strings_found
+        "threshold_candidates": sorted(threshold_values.keys()),
+        "details": {str(k): v[:5] for k, v in threshold_values.items()}
     }
-    
-    # Try to find functions and disassemble them
-    print("\nAnalyzing functions...")
-    
-    from capstone import Cs, CS_ARCH_X86, CS_MODE_64
-    
-    for name, info in symbols_found.items():
-        if info["address"]:
-            try:
-                addr = int(info["address"], 16)
-                # Read some bytes at this address
-                with open(LIBIL2CPP_PATH, 'rb') as f:
-                    # This is a file offset, not a virtual address
-                    # We need to find the right offset
-                    pass
-            except:
-                pass
     
     with open(JSON_OUT, 'w') as f:
         json.dump(results, f, indent=2)
