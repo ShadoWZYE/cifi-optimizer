@@ -89,6 +89,16 @@ The smoke test suite (`tests/smoke.mjs`) catches drift between committed data an
 
 The test suite exists to catch unintended drift - intentional changes are expected to update the test surface.
 
+## Regression prevention
+
+When adding optimizations or performance improvements to tools:
+
+1. **Never remove existing optimizations** - If code has Parallel.ForEach, type indexing, or caching, keep it unless specifically asked
+2. **Build before committing** - Run `dotnet build` to catch compilation errors from optimization changes
+3. **Test changes** - Run smoke tests to verify tool still produces correct output
+4. **Document new flags** - If adding new CLI flags (--quick, --cache, --no-metadata), update docs/tools/inventory.md
+5. **Keep pass-through working** - If modifying run_probe.mjs, ensure --arg syntax still passes through to underlying tools
+
 ## Tool inventory
 
 See [docs/tools/inventory.md](docs/tools/inventory.md) for a complete inventory of available tools, scripts, and their usage.
