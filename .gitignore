@@ -38,6 +38,10 @@ Desktop.ini
 *.swp
 *.swo
 
+# Binary analysis tools
+tools/ghidra/
+tools/jdk/
+
 # Test/debug artifacts
 tests/ocr-debug/
 tools/**/bin/

@@ -45,15 +45,20 @@ The SaveData object is at a known offset. Look for code that:
 
 ## Status
 
-| Item             | Status           | Source           |
-| ---------------- | ---------------- | ---------------- |
-| Method names     | ✅ Verified      | Metadata (658k+) |
-| Field offsets    | ✅ Verified      | UABEA probe      |
-| Threshold values | ❌ Not extracted | IL2CPP           |
+| Item             | Status       | Source           |
+| ---------------- | ------------ | ---------------- |
+| Method names     | ✅ Verified  | Metadata (658k+) |
+| Field offsets    | ✅ Verified  | UABEA probe      |
+| Ghidra installed | ✅ Available | tools/ghidra/    |
+| JDK 21 installed | ✅ Available | tools/jdk/       |
+| Threshold values | ❌ Pending   | Ghidra analysis  |
 
 ## Tools Needed
 
 1. **Ghidra** (recommended): Free reverse engineering suite - load binary, search strings, navigate to function, read assembly
+   - Location: `tools/ghidra/ghidra_12.0.4_PUBLIC/`
+   - Requires JDK 21: `tools/jdk/jdk-21.0.10+7/`
+   - Run: `JAVA_HOME=tools/jdk/jdk-21.0.10+7 ./tools/ghidra/ghidra_12.0.4_PUBLIC/ghidraRun.bat`
 2. **IDA Pro** (optional): Professional disassembly
 
 ## References

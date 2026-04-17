@@ -133,7 +133,21 @@ dotnet run -- --term SaveData --quick
 | `check_dtm.py`              | Quick DTM check                   |
 | `check_formula_fields.py`   | Formula field validation          |
 
-### 7. OCR Tools
+### 8. Binary Analysis (Ghidra)
+
+| Tool                    | Purpose                       | Location        |
+| ----------------------- | ----------------------------- | --------------- |
+| `ghidra_12.0.4_PUBLIC/` | ARM64/x64 reverse engineering | `tools/ghidra/` |
+| `jdk-21.0.10+7/`        | Java runtime for Ghidra       | `tools/jdk/`    |
+
+**Usage:**
+
+```bash
+export JAVA_HOME="C:\Users\Shadow\Desktop\CiFi\tools\jdk\jdk-21.0.10+7"
+./tools/ghidra/ghidra_12.0.4_PUBLIC/ghidraRun.bat
+```
+
+**Purpose:** Extract hardcoded values from il2cpp.so (e.g., tier unlock thresholds) that aren't in metadata.
 
 | Script                         | Purpose                  | Committed Output? |
 | ------------------------------ | ------------------------ | ----------------- |
