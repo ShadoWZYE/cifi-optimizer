@@ -91,3 +91,43 @@ The comparison constants (25, 50, 100, 150) will appear as immediate values in t
 | Method names     | ✅ Verified      | Metadata    |
 | Field offsets    | ✅ Verified      | UABEA probe |
 | Threshold values | ❌ Not extracted | IL2CPP      |
+
+## Attempts Made
+
+### 1. C# Metadata Probe
+
+- Result: Found method names in metadata strings
+- Limitation: Cannot extract hardcoded constants from IL2CPP
+
+### 2. Python Capstone Disassembly
+
+- Created: `scripts/unity/tier-unlock-disassembly-probe.py`
+- Issues: ELF parsing issues with vendor elftools, capstone requires proper offset mapping
+
+### 3. Working Approach - Use Ghidra/IDA
+
+The most reliable way to extract these values:
+
+1. **Using Ghidra** (free):
+   - Download Ghidra
+   - Open `workbench/apk/base/libil2cpp.so`
+   - Search for string `get_TotalT1TokenLevels` in string references
+   - Navigate to the function that calls this method
+   - Look for `cmp` instructions with immediate values 25, 50, 100, 150
+
+2. **Using objdump** (if available):
+
+   ```bash
+   # Requires binutils installed
+   objdump -d -S libil2cpp.so | grep -B5 -A20 "get_TotalT1TokenLevels"
+   ```
+
+3. **Using Python with lief** (if installed):
+   - Install: `pip install lief`
+   - Use lief to properly parse ELF and find function addresses
+
+## Recommended Next Steps
+
+1. Use Ghidra to manually extract the threshold values
+2. Once extracted, update `tokenshop-canonical-v1.json` with verified values
+3. Remove "assumed" labels from the documentation

@@ -1,0 +1,47 @@
+{
+  "dataset": "tokenshop-tier-unlock-probe",
+  "generatedAt": "2026-04-16",
+  "description": "Probe to find tier unlock thresholds from bundled data",
+  "search_terms": [
+    "TotalTokenLevels",
+    "Tier2TokensUnlocked",
+    "Tier3TokensUnlocked",
+    "Tier4TokensUnlocked",
+    "Tier5TokensUnlocked",
+    "UnlockTier2",
+    "UnlockTier3",
+    "UnlockTier4",
+    "UnlockTier5"
+  ],
+  "findings": {
+    "total_token_levels_object": {
+      "location": "level0 GameObject",
+      "pathId": 76908,
+      "name": "TotalTokenLevels"
+    },
+    "save_data_fields": {
+      "Tier2TokensUnlocked": "offset 0x77C (1900), type System.Boolean",
+      "Tier3TokensUnlocked": "offset 0x77D (1901), type System.Boolean", 
+      "Tier4TokensUnlocked": "offset 0x77E (1902), type System.Boolean",
+      "Tier5TokensUnlocked": "offset 0x77F (1903), type System.Boolean"
+    },
+    "tier_unlock_thresholds": {
+      "status": "not_yet_extracted",
+      "note": "The game calculates tier unlocks based on total levels purchased in previous tiers. Example logic: T2 unlocks when sum(ATU1-ATU12 levels) >= 25"
+    }
+  },
+  "proposed_heuristics": {
+    "tier2_unlock": "sum(ATU1Level through ATU12Level) >= 25",
+    "tier3_unlock": "sum(ATU1Level through ATU18Level) >= 50", 
+    "tier4_unlock": "sum(ATU1Level through ATU23Level) >= 100",
+    "tier5_unlock": "sum(ATU1Level through ATU25Level) >= 150",
+    "note": "These are placeholder heuristics. Need extraction from game to verify."
+  },
+  "tier_row_mappings": {
+    "t1": { "rows": "1-12", "fields": ["ATU1Level", "ATU2Level", "ATU3Level", "ATU4Level", "ATU5Level", "ATU6Level", "ATU7Level", "ATU8Level", "ATU9Level", "ATU10Level", "ATU11Level", "ATU12Level"] },
+    "t2": { "rows": "13-18", "fields": ["ATU13Level", "ATU14Level", "ATU15Level", "ATU16Level", "ATU17Level", "ATU18Level"] },
+    "t3": { "rows": "19-23", "fields": ["ATU19Level", "ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"] },
+    "t4": { "rows": "24-25", "fields": ["ATU24Level", "ATU25Level"] },
+    "t5": { "rows": "26-28", "fields": ["ATU26Level", "ATU27Level", "ATU28Level"] }
+  }
+}
