@@ -143,7 +143,8 @@ dotnet run -- --term SaveData --quick
 **Usage:**
 
 ```bash
-export JAVA_HOME="C:\Users\Shadow\Desktop\CiFi\tools\jdk\jdk-21.0.10+7"
+# Set JAVA_HOME to your JDK path, then run Ghidra
+export JAVA_HOME="<path-to-jdk>"
 ./tools/ghidra/ghidra_12.0.4_PUBLIC/ghidraRun.bat
 ```
 

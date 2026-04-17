@@ -28,8 +28,8 @@
     ],
     "matchedFamilyId": "token-shop",
     "matchedFamilyLabel": "TokenShop",
-    "runMode": "trace",
-    "comparePresetId": null,
+    "runMode": "compare",
+    "comparePresetId": "token-shop-atu3-vs-atu1",
     "synonymSetsUsed": [
       {
         "id": "token-shop-shell",
