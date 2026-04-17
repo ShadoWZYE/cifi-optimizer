@@ -274,21 +274,21 @@ Superseded parent:
 
 - `spend-token-shop-row-detail-slice`
   - status: `archived`
-  - goal: extend the shipped checked-row TokenShop panel into the next small grounded row-detail tool for the same verified subset only
+  - goal: extend the shipped checked-row TokenShop panel into the next small grounded row-detail tool for all 28 ATU rows grouped by tier
   - user question: `What do the grounded upgrades I can already inspect actually do at my current level and on the next level?`
-  - minimum required inputs: checked TokenShop row-remap subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level`, imported current levels for that same subset, and checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields for those same rows, with ATU3 explicitly allowed to stay effect-driven instead of prefab-driven
-  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math, next-purchase recommendation rules
+  - minimum required inputs: all 28 ATU rows (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28) with tier unlock detection, imported current levels, and checked cost/bonus fields
+  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, best-buy ranking, ROI math, next-purchase recommendation rules
   - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
-  - largest coherent adjacent slice: a separate Overview module that keeps the fixed grounded row order `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU12`, then shows each row's grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change without optimizer claims or canonical `ATU*Level` promotion
-  - default next adjacent step: continue the same spend lane by moving the same checked subset into the next player-facing editor surface, not by widening into ranking or unresolved-row coverage
+  - largest coherent adjacent slice: a separate Overview module with tier tabs that shows all 28 rows grouped by tier (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28), respects tier unlock thresholds, and shows each row's grounded identity, current level, next known cost, known max-level status without optimizer claims
+  - default next adjacent step: continue the same spend lane by moving all 28 rows into player-facing editor with tier grouping, not by widening into ranking or unresolved-row coverage
 - `progression-token-shop-editor-first-slice`
   - status: `archived`
-  - goal: move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop editor slice
+  - goal: move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop editor slice with tier grouping
   - user question: `What do the grounded upgrades I can already inspect actually do at my current level and on the next level?`
-  - minimum required inputs: checked TokenShop row-remap subset for `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level`, local non-canonical editor levels for that same subset, compatibility import as prefill only, and checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields for those same rows
-  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, unresolved TokenShop rows outside the checked subset, best-buy ranking, ROI math, next-purchase recommendation rules
+  - minimum required inputs: all 28 ATU rows (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28) with tier unlock detection, local non-canonical editor levels, compatibility import as prefill only, and checked cost/bonus fields
+  - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, best-buy ranking, ROI math, next-purchase recommendation rules
   - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
-  - largest coherent adjacent slice: a dedicated TokenShop category under the Progression selector that keeps row order fixed to `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, `ATU9`, `ATU10`, `ATU12`, saves local checked-row current levels under a non-canonical planner path, uses compatibility import only as prefill, and shows grounded identity, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change without optimizer claims or canonical `ATU*Level` promotion
+  - largest coherent adjacent slice: a dedicated TokenShop category under the Progression selector with tier tabs that keeps row order grouped by tier, saves local row current levels under a non-canonical planner path, uses compatibility import only as prefill, and shows grounded identity, next known cost, known max-level status without optimizer claims
   - default next adjacent step: continue only by grounding the next directly consumed checked-row inputs for that editor surface; keep ranking, ROI, and unresolved-row family expansion on separate lanes
 
 Active spend panel contract:

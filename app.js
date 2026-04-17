@@ -204,8 +204,63 @@ const ACTIVE_PROFILE_FORM_FIELD_PATHS = {
   tokens: CANONICAL_PROFILE_FIELD_PATHS.tokens,
   shards: CANONICAL_PROFILE_FIELD_PATHS.shards,
   notes: CANONICAL_PROFILE_FIELD_PATHS.notes,
-  totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"]
+  totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"],
+  ATU1Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU1Level"],
+  ATU2Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU2Level"],
+  ATU3Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU3Level"],
+  ATU4Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU4Level"],
+  ATU5Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU5Level"],
+  ATU6Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU6Level"],
+  ATU7Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU7Level"],
+  ATU8Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU8Level"],
+  ATU9Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU9Level"],
+  ATU10Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU10Level"],
+  ATU11Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU11Level"],
+  ATU12Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU12Level"],
+  ATU13Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU13Level"],
+  ATU14Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU14Level"],
+  ATU15Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU15Level"],
+  ATU16Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU16Level"],
+  ATU17Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU17Level"],
+  ATU18Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU18Level"],
+  ATU19Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU19Level"],
+  ATU20Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU20Level"],
+  ATU21Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU21Level"],
+  ATU22Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU22Level"],
+  ATU23Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU23Level"],
+  ATU24Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU24Level"],
+  ATU25Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU25Level"],
+  ATU26Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU26Level"],
+  ATU27Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU27Level"],
+  ATU28Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU28Level"]
 };
+
+const TOKEN_SHOP_TIER_CONFIG = Object.freeze({
+  t1: {
+    rows: [
+      "ATU1Level",
+      "ATU2Level",
+      "ATU3Level",
+      "ATU4Level",
+      "ATU5Level",
+      "ATU6Level",
+      "ATU7Level",
+      "ATU8Level",
+      "ATU9Level",
+      "ATU10Level",
+      "ATU11Level",
+      "ATU12Level"
+    ],
+    label: "T1"
+  },
+  t2: {
+    rows: ["ATU13Level", "ATU14Level", "ATU15Level", "ATU16Level", "ATU17Level", "ATU18Level"],
+    label: "T2"
+  },
+  t3: { rows: ["ATU19Level", "ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"], label: "T3" },
+  t4: { rows: ["ATU24Level", "ATU25Level"], label: "T4" },
+  t5: { rows: ["ATU26Level", "ATU27Level", "ATU28Level"], label: "T5" }
+});
 
 const SUPPORT_SURFACE_VALIDATION_MODULES = new Set(["gem"]);
 
@@ -797,65 +852,228 @@ function initLaunchCoordinator() {
   return coordinator;
 }
 
-async function initServerSession() {
+function initTokenShopTierTabs() {
+  const grid = $("#tokenshopLevelsGrid");
+  if (!grid) return;
+
+  const tierLabels = {
+    ATU1Level: "Tokens Booster",
+    ATU2Level: "Diamonds Booster",
+    ATU3Level: "Cells Booster (Chests)",
+    ATU4Level: "Mod Points Booster",
+    ATU5Level: "Mk1 Generator Output",
+    ATU6Level: "Mk2 Generator Booster",
+    ATU7Level: "Mk3 Generator Booster",
+    ATU8Level: "Mk4 Generator Booster",
+    ATU9Level: "Mk5 Generator Booster",
+    ATU10Level: "Mk6 Generator Booster",
+    ATU11Level: "Mk7 Generator Booster",
+    ATU12Level: "Mk8 Generator Booster",
+    ATU13Level: "Duo Booster One",
+    ATU14Level: "Duo Booster Two",
+    ATU15Level: "Duo Booster Three",
+    ATU16Level: "Duo Booster Four",
+    ATU17Level: "Duo Booster Five",
+    ATU18Level: "Duo Booster Six",
+    ATU19Level: "Trio Booster One",
+    ATU20Level: "Tokens Booster T3",
+    ATU21Level: "Daily Tokens T3",
+    ATU22Level: "Trinity Booster Two",
+    ATU23Level: "Trinity Booster Three",
+    ATU24Level: "Ultima Shards",
+    ATU25Level: "Ultima",
+    ATU26Level: "Campaign Fragments",
+    ATU27Level: "Ultima RP",
+    ATU28Level: "Ultima MP"
+  };
+
+  function renderTier(tier) {
+    const tierConfig = TOKEN_SHOP_TIER_CONFIG[tier];
+    if (!tierConfig) return;
+
+    const tierUnlocks = state.extractedMechanics?.tokenshopCanonical?.tier_unlocks;
+    const thresholds = tierUnlocks?.tier_thresholds || {};
+    const tierUnlockStates = calculateTierUnlockStates(thresholds);
+
+    grid.innerHTML = tierConfig.rows
+      .map((field) => {
+        const label = tierLabels[field] || field;
+        const tierForField = getTierForField(field);
+        const isLocked = tierForField !== "t1" && !tierUnlockStates[tierForField];
+        return `
+          <div class="field-group${isLocked ? " locked" : ""}">
+            <label for="${field}">${label}${isLocked ? " (locked)" : ""}</label>
+            <input
+              id="${field}"
+              name="${field}"
+              type="text"
+              inputmode="decimal"
+              placeholder="0"
+              ${isLocked ? "disabled" : ""}
+            />
+          </div>
+        `;
+      })
+      .join("");
+
+    document.querySelectorAll(".tier-tab").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tier === tier);
+      const tabTier = btn.dataset.tier;
+      btn.classList.toggle("disabled", tabTier !== "t1" && !tierUnlockStates[tabTier]);
+    });
+  }
+
+  function calculateTierUnlockStates(thresholds) {
+    const profile = state.playerProfile?.planning?.tokenShop?.checkedSubsetLevels || {};
+    const levelForField = (field) => {
+      const val = profile[field];
+      return typeof val === "number" ? val : 0;
+    };
+
+    const t1Total = [
+      "ATU1Level",
+      "ATU2Level",
+      "ATU3Level",
+      "ATU4Level",
+      "ATU5Level",
+      "ATU6Level",
+      "ATU7Level",
+      "ATU8Level",
+      "ATU9Level",
+      "ATU10Level",
+      "ATU11Level",
+      "ATU12Level"
+    ].reduce((sum, f) => sum + levelForField(f), 0);
+
+    const t2Total = [
+      "ATU13Level",
+      "ATU14Level",
+      "ATU15Level",
+      "ATU16Level",
+      "ATU17Level",
+      "ATU18Level"
+    ].reduce((sum, f) => sum + levelForField(f), 0);
+
+    const t3Total = ["ATU19Level", "ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"].reduce(
+      (sum, f) => sum + levelForField(f),
+      0
+    );
+
+    const t4Total = ["ATU24Level", "ATU25Level"].reduce((sum, f) => sum + levelForField(f), 0);
+
+    return {
+      t1: true,
+      t2: t1Total >= (thresholds.t2?.min_levels || 25),
+      t3: t1Total + t2Total >= (thresholds.t3?.min_levels || 50),
+      t4: t1Total + t2Total + t3Total >= (thresholds.t4?.min_levels || 100),
+      t5: t1Total + t2Total + t3Total + t4Total >= (thresholds.t5?.min_levels || 150)
+    };
+  }
+
+  function getTierForField(field) {
+    const tierMap = {
+      ATU1Level: "t1",
+      ATU2Level: "t1",
+      ATU3Level: "t1",
+      ATU4Level: "t1",
+      ATU5Level: "t1",
+      ATU6Level: "t1",
+      ATU7Level: "t1",
+      ATU8Level: "t1",
+      ATU9Level: "t1",
+      ATU10Level: "t1",
+      ATU11Level: "t1",
+      ATU12Level: "t1",
+      ATU13Level: "t2",
+      ATU14Level: "t2",
+      ATU15Level: "t2",
+      ATU16Level: "t2",
+      ATU17Level: "t2",
+      ATU18Level: "t2",
+      ATU19Level: "t3",
+      ATU20Level: "t3",
+      ATU21Level: "t3",
+      ATU22Level: "t3",
+      ATU23Level: "t3",
+      ATU24Level: "t4",
+      ATU25Level: "t4",
+      ATU26Level: "t5",
+      ATU27Level: "t5",
+      ATU28Level: "t5"
+    };
+    return tierMap[field] || "t1";
+  }
+
+  renderTier("t1");
+
+  document.querySelectorAll(".tier-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      renderTier(btn.dataset.tier);
+    });
+  });
+}
+
+function initServerSession() {
   if (!window.location.origin.startsWith("http") || !SERVER_CAPABILITIES.sessionApi) {
     return;
   }
 
-  const session = {
-    id: `client-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    events: null,
-    heartbeatId: null,
-    launchSignalSequence: 0,
-    enabled: false
-  };
-  state.serverSession = session;
+  return (async () => {
+    const session = {
+      id: `client-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      events: null,
+      heartbeatId: null,
+      launchSignalSequence: 0,
+      enabled: false
+    };
+    state.serverSession = session;
 
-  const opened = await postServerSession(SERVER_SESSION_ENDPOINTS.open, session.id);
-  if (!opened) {
-    return;
-  }
-
-  session.enabled = true;
-  session.launchSignalSequence = Number(opened.launchSignalSequence || 0);
-  session.heartbeatId = window.setInterval(() => {
-    postServerSession(SERVER_SESSION_ENDPOINTS.heartbeat, session.id);
-  }, APP_LAUNCH_HEARTBEAT_MS);
-  session.events = new EventSource(
-    `${SERVER_SESSION_ENDPOINTS.events}?clientId=${encodeURIComponent(session.id)}`
-  );
-  session.events.addEventListener("ready", (event) => {
-    const payload = parseServerEvent(event);
-    if (!payload) {
+    const opened = await postServerSession(SERVER_SESSION_ENDPOINTS.open, session.id);
+    if (!opened) {
       return;
     }
-    session.launchSignalSequence = Number(
-      payload.launchSignalSequence || session.launchSignalSequence || 0
+
+    session.enabled = true;
+    session.launchSignalSequence = Number(opened.launchSignalSequence || 0);
+    session.heartbeatId = window.setInterval(() => {
+      postServerSession(SERVER_SESSION_ENDPOINTS.heartbeat, session.id);
+    }, APP_LAUNCH_HEARTBEAT_MS);
+    session.events = new EventSource(
+      `${SERVER_SESSION_ENDPOINTS.events}?clientId=${encodeURIComponent(session.id)}`
     );
-  });
-  session.events.addEventListener("launch", (event) => {
-    const payload = parseServerEvent(event);
-    if (!payload) {
-      return;
-    }
-    const nextSequence = Number(payload.launchSignalSequence || 0);
-    if (nextSequence > session.launchSignalSequence) {
-      session.launchSignalSequence = nextSequence;
-      if (state.launchCoordinator?.isPrimary) {
-        handlePrimaryReopen();
+    session.events.addEventListener("ready", (event) => {
+      const payload = parseServerEvent(event);
+      if (!payload) {
+        return;
       }
-    }
-  });
+      session.launchSignalSequence = Number(
+        payload.launchSignalSequence || session.launchSignalSequence || 0
+      );
+    });
+    session.events.addEventListener("launch", (event) => {
+      const payload = parseServerEvent(event);
+      if (!payload) {
+        return;
+      }
+      const nextSequence = Number(payload.launchSignalSequence || 0);
+      if (nextSequence > session.launchSignalSequence) {
+        session.launchSignalSequence = nextSequence;
+        if (state.launchCoordinator?.isPrimary) {
+          handlePrimaryReopen();
+        }
+      }
+    });
 
-  window.addEventListener("pagehide", () => {
-    closeServerSession(session);
-  });
-  window.addEventListener("beforeunload", () => {
-    closeServerSession(session);
-  });
-  window.addEventListener("unload", () => {
-    closeServerSession(session);
-  });
+    window.addEventListener("pagehide", () => {
+      closeServerSession(session);
+    });
+    window.addEventListener("beforeunload", () => {
+      closeServerSession(session);
+    });
+    window.addEventListener("unload", () => {
+      closeServerSession(session);
+    });
+  })();
 }
 
 async function postServerSession(endpoint, clientId) {
@@ -1238,6 +1456,8 @@ function bindNavigation() {
 }
 
 function bindProfileActions() {
+  initTokenShopTierTabs();
+
   $("#saveProfileBtn").addEventListener("click", () => {
     state.playerProfile = collectProfileForm();
     persistPlayerProfile();
@@ -1483,7 +1703,8 @@ function renderOverview() {
       ),
     renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
-  $("#overviewSpendSnapshot").innerHTML = renderSpendPlannerBoundary();
+  $("#overviewSpendSnapshot").innerHTML =
+    renderSpendPlannerBoundary() + renderTokenShopOverviewAffordabilityModule();
 }
 
 function renderShipPlayerState() {
@@ -4785,6 +5006,48 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
     },
     {
+      field: "ATU11Level",
+      slot: "ATU11",
+      identity:
+        boundary?.atu11BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
+        boundary?.atu11BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
+        "Mk7 Generator Booster",
+      identitySource: boundary?.atu11BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle
+        ? "Checked title-side text chain"
+        : "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "MK7TokenBoostStartCost",
+      additiveCostField: "MK7TokenBoostAdditiveCost",
+      bonusField: "MK7TokenBoostBonus",
+      maxLevelField: "MK7TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk7 Output",
+      bonusStepMode: "multiplier",
+      note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
+    },
+    {
+      field: "ATU12Level",
+      slot: "ATU12",
+      identity:
+        boundary?.atu12BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
+        boundary?.atu12BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
+        "Mk8 Generator Booster",
+      identitySource: boundary?.atu12BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle
+        ? "Checked title-side text chain"
+        : "Checked prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven checked row",
+      startCostField: "MK8TokenBoostStartCost",
+      additiveCostField: "MK8TokenBoostAdditiveCost",
+      bonusField: "MK8TokenBoostBonus",
+      maxLevelField: "MK8TokenBoostFillMaxLevel",
+      bonusStepLabel: "Mk8 Output",
+      bonusStepMode: "multiplier",
+      playerFacingSupportText:
+        boundary?.atu12BridgeFollowUp?.verifiedTitleTextChain?.titleProbeSupportText ?? [],
+      note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
+    },
+    {
       field: "ATU13Level",
       slot: "ATU13",
       identity:
@@ -4802,6 +5065,96 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       note: "Checked shell-to-prefab bridge only. The detached Tokens Booster T2 title-side clue still does not preserve one exact shell-local final-title join."
     },
     {
+      field: "ATU14Level",
+      slot: "ATU14",
+      identity: "NewTokenUPGPrefab.T2.DuoBoosterTwo",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T2Duo2StartCost",
+      additiveCostField: "T2Duo2AdditiveCost",
+      bonusField: "T2Duo2Bonus",
+      maxLevelField: "T2Duo2MaxLevel",
+      bonusStepLabel: "T2 Duo 2 Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU14 (Duo 2)"
+    },
+    {
+      field: "ATU15Level",
+      slot: "ATU15",
+      identity: "NewTokenUPGPrefab.T2.DuoBoosterThree",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T2Duo3StartCost",
+      additiveCostField: "T2Duo3AdditiveCost",
+      bonusField: "T2Duo3Bonus",
+      maxLevelField: "T2Duo3MaxLevel",
+      bonusStepLabel: "T2 Duo 3 Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU15 (Duo 3)"
+    },
+    {
+      field: "ATU16Level",
+      slot: "ATU16",
+      identity: "NewTokenUPGPrefab.T2.DuoBoosterFour",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T2Duo4StartCost",
+      additiveCostField: "T2Duo4AdditiveCost",
+      bonusField: "T2Duo4Bonus",
+      maxLevelField: "T2Duo4MaxLevel",
+      bonusStepLabel: "T2 Duo 4 Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU16 (Duo 4)"
+    },
+    {
+      field: "ATU17Level",
+      slot: "ATU17",
+      identity: "NewTokenUPGPrefab.T2.DuoBoosterFive",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T2Duo5StartCost",
+      additiveCostField: "T2Duo5AdditiveCost",
+      bonusField: "T2Duo5Bonus",
+      maxLevelField: "T2Duo5MaxLevel",
+      bonusStepLabel: "T2 Duo 5 Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU17 (Duo 5)"
+    },
+    {
+      field: "ATU18Level",
+      slot: "ATU18",
+      identity: "NewTokenUPGPrefab.T2.DuoBoosterSix",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T2Duo6StartCost",
+      additiveCostField: "T2Duo6AdditiveCost",
+      bonusField: "T2Duo6Bonus",
+      maxLevelField: "T2Duo6MaxLevel",
+      bonusStepLabel: "T2 Duo 6 Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU18 (Duo 6)"
+    },
+    {
+      field: "ATU19Level",
+      slot: "ATU19",
+      identity: "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T3Trinity1StartCost",
+      additiveCostField: "T3Trinity1AdditiveCost",
+      bonusField: "T3Trinity1Bonus",
+      maxLevelField: "T3Trinity1MaxLevel",
+      bonusStepLabel: "T3 Trinity 1 Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU19 (Trinity 1)"
+    },
+    {
       field: "ATU20Level",
       slot: "ATU20",
       identity:
@@ -4817,6 +5170,126 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       bonusStepLabel: "Tokens Gained from Token Chests",
       bonusStepMode: "additive",
       note: "Checked shell-to-prefab bridge only. The detached Tokens Booster T3 title-side clue still does not preserve one exact shell-local final-title join."
+    },
+    {
+      field: "ATU21Level",
+      slot: "ATU21",
+      identity: "NewTokenUPGPrefab.T3.TrinityBoosterOne",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T3Trinity1DailiesStartCost",
+      additiveCostField: "T3Trinity1DailiesAdditiveCost",
+      bonusField: "T3Trinity1DailiesBonus",
+      maxLevelField: "T3Trinity1DailiesMaxLevel",
+      bonusStepLabel: "T3 Trinity 1 Dailies Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU21 (Trinity 1 Dailies)"
+    },
+    {
+      field: "ATU22Level",
+      slot: "ATU22",
+      identity: "NewTokenUPGPrefab.T3.TrinityBoosterTwo",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T3Trinity2StartCost",
+      additiveCostField: "T3Trinity2AdditiveCost",
+      bonusField: "T3Trinity2Bonus",
+      maxLevelField: "T3Trinity2MaxLevel",
+      bonusStepLabel: "T3 Trinity 2 Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU22 (Trinity 2)"
+    },
+    {
+      field: "ATU23Level",
+      slot: "ATU23",
+      identity: "NewTokenUPGPrefab.T3.DailyTokens",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T3DailyTokensStartCost",
+      additiveCostField: "T3DailyTokensAdditiveCost",
+      bonusField: "T3DailyTokensBonus",
+      maxLevelField: "T3DailyTokensMaxLevel",
+      bonusStepLabel: "T3 Daily Tokens Bonus",
+      bonusStepMode: "additive",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU23 (Trinity 3)"
+    },
+    {
+      field: "ATU24Level",
+      slot: "ATU24",
+      identity: "NewTokenUPGPrefab.T4.Ultima",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T4UltimaShardsStartCost",
+      additiveCostField: "T4UltimaShardsAdditiveCost",
+      bonusField: "T4UltimaShardsBonus",
+      maxLevelField: "T4UltimaShardsMaxLevel",
+      bonusStepLabel: "T4 Ultima Shards Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU24 (Ultima Shards)"
+    },
+    {
+      field: "ATU25Level",
+      slot: "ATU25",
+      identity: "NewTokenUPGPrefab.T4.Ultima",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T4UltimaStartCost",
+      additiveCostField: "T4UltimaAdditiveCost",
+      bonusField: "T4UltimaBonus",
+      maxLevelField: "T4UltimaMaxLevel",
+      bonusStepLabel: "T4 Ultima Bonus",
+      bonusStepMode: "multiplier",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU25 (Ultima)"
+    },
+    {
+      field: "ATU26Level",
+      slot: "ATU26",
+      identity: "NewTokenUPGPrefab.T5.CampaignFragments",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T5CampaignFragmentsStartCost",
+      additiveCostField: "T5CampaignFragmentsAdditiveCost",
+      bonusField: "T5CampaignFragmentsBonus",
+      maxLevelField: "T5CampaignFragmentsMaxLevel",
+      bonusStepLabel: "T5 Campaign Fragments Bonus",
+      bonusStepMode: "additive",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU26 (Campaign Fragments)"
+    },
+    {
+      field: "ATU27Level",
+      slot: "ATU27",
+      identity: "NewTokenUPGPrefab.T5.UltimaRP",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T5UltimaRPStartCost",
+      additiveCostField: "T5UltimaRPAdditiveCost",
+      bonusField: "T5UltimaRPBonus",
+      maxLevelField: "T5UltimaRPMaxLevel",
+      bonusStepLabel: "T5 Ultima RP Bonus",
+      bonusStepMode: "additive",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU27 (Ultima RP)"
+    },
+    {
+      field: "ATU28Level",
+      slot: "ATU28",
+      identity: "NewTokenUPGPrefab.T5.UltimaMP",
+      identitySource: "Canonical prefab identity",
+      rowType: "prefab-driven",
+      rowTypeLabel: "Prefab-driven canonical row",
+      startCostField: "T5UltimaMPStartCost",
+      additiveCostField: "T5UltimaMPAdditiveCost",
+      bonusField: "T5UltimaMPBonus",
+      maxLevelField: "T5UltimaMPMaxLevel",
+      bonusStepLabel: "T5 Ultima MP Bonus",
+      bonusStepMode: "additive",
+      note: "Canonical row from tokenshop-canonical-v1.json ATU28 (Ultima MP)"
     }
   ];
 }
@@ -4861,12 +5334,22 @@ function renderTokenShopOverviewAffordabilityModule() {
     ? `${summary.playerStateCount}/${summary.rows.length} checked player-state row${summary.playerStateCount === 1 ? "" : "s"} active before compatibility fallback.`
     : "No checked player-state rows are active yet; compatibility import and default level 0 stay available.";
 
+  const tierUnlocks = state.extractedMechanics?.tokenshopCanonical?.tier_unlocks;
+  const thresholds = tierUnlocks?.tier_thresholds || {};
+  const tierUnlockStates = calculateTierUnlockStatesForOverview(thresholds);
+
   return `
     <div class="meta-stack">
-      <p class="snapshot-title">Overview TokenShop affordability</p>
-      <p class="meta">This Overview module stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, <code>ATU8Level</code>, <code>ATU9Level</code>, <code>ATU10Level</code>, <code>ATU12Level</code>, <code>ATU13Level</code>, and <code>ATU20Level</code>.</p>
-      <p class="meta">Checked player-facing names are preferred where they exist, grounded prefab identity is used where they do not, and the rest of the unresolved <code>ATU*Level</code> family stays quarantined outside this module.</p>
+      <p class="snapshot-title">TokenShop affordability by tier</p>
+      <p class="meta">Tiered display showing all 28 ATU rows grouped by tier. Rows in locked tiers are hidden. T2 unlocks at ${thresholds.t2?.min_levels || 25}+ total T1 levels, T3 at ${thresholds.t3?.min_levels || 50}+, T4 at ${thresholds.t4?.min_levels || 100}+, T5 at ${thresholds.t5?.min_levels || 150}+.</p>
       <p class="meta">${escapeHtml(sourceLine)}</p>
+      <div class="tier-tabs">
+        <button type="button" class="tier-tab active" data-overview-tier="t1">T1</button>
+        <button type="button" class="tier-tab${tierUnlockStates.t2 ? "" : " disabled"}" data-overview-tier="t2">T2</button>
+        <button type="button" class="tier-tab${tierUnlockStates.t3 ? "" : " disabled"}" data-overview-tier="t3">T3</button>
+        <button type="button" class="tier-tab${tierUnlockStates.t4 ? "" : " disabled"}" data-overview-tier="t4">T4</button>
+        <button type="button" class="tier-tab${tierUnlockStates.t5 ? "" : " disabled"}" data-overview-tier="t5">T5</button>
+      </div>
       <div class="pill-row">
         <span class="pill">${typeof summary.currentTokens === "number" ? `${summary.affordableCount}/${summary.rows.length} affordable from ${formatBoundaryValue(summary.currentTokens)} Tokens` : "Affordability gated by missing Tokens"}</span>
         <span class="pill">${summary.playerStateCount}/${summary.rows.length} checked player-state rows active</span>
@@ -4875,85 +5358,141 @@ function renderTokenShopOverviewAffordabilityModule() {
         <span class="pill">${summary.knownCapCount} at or above known cap</span>
         <span class="pill">${escapeHtml(summary.displayRule)}</span>
       </div>
-      <div class="preview-stack">
-        ${summary.rows
-          .map((row) => {
-            const displayTitle = tokenShopUi.getTokenShopRowDisplayTitle(row);
-            const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
-            const playerFacingSupportText = tokenShopUi.getTokenShopPlayerFacingSupportText(row);
-            const nextKnownCostLabel = row.isMaxed
-              ? "No next cost within known cap"
-              : typeof row.nextKnownCost === "number"
-                ? formatBoundaryValue(row.nextKnownCost)
-                : "No known next cost";
-            const affordabilityLine = row.isMaxed
-              ? "No next purchase within known cap."
-              : row.isAffordable === true
-                ? "Affordable from current Tokens."
-                : row.isAffordable === false &&
-                    typeof row.nextKnownCost === "number" &&
-                    typeof summary.currentTokens === "number"
-                  ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
-                  : "Affordability unavailable until Tokens are entered.";
-
-            return `
-            <article class="preview-card token-shop-affordability-card">
-              <div class="token-shop-game-row">
-                <div class="token-shop-level-ring">
-                  <span class="token-shop-level-value">${escapeHtml(formatBoundaryValue(row.currentLevel))}</span>
-                  <span class="token-shop-level-divider">/</span>
-                  <span class="token-shop-level-cap">${typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel) ? escapeHtml(formatBoundaryValue(row.maxLevel)) : "?"}</span>
-                </div>
-                <div class="token-shop-main-lane">
-                  <div class="token-shop-top-band">
-                    <div class="token-shop-affordability-head">
-                      <div class="meta-stack">
-                        <strong>${escapeHtml(displayTitle)}</strong>
-                        <div class="token-shop-row-tags">
-                          <span class="token-shop-row-tag">${escapeHtml(row.rowTypeLabel || "Checked row")}</span>
-                          ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
-                        </div>
-                        <p class="meta token-shop-effect-line">${escapeHtml(tokenShopUi.formatTokenShopSentence(tokenShopUi.formatTokenShopEffectLine(row)))}</p>
-                        ${playerFacingSupportText ? `<p class="meta">${escapeHtml(tokenShopUi.formatTokenShopSentence(playerFacingSupportText))}</p>` : ""}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="token-shop-stat-strip">
-                    ${bonusStripEntries
-                      .map(
-                        (entry) => `
-                      <div class="validation-card warn token-shop-stat-card">
-                        <span class="snapshot-title">Current vs next bonus • ${escapeHtml(entry.label)}</span>
-                        <strong>${escapeHtml(entry.currentLabel)}</strong>
-                        <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
-                      </div>
-                    `
-                      )
-                      .join("")}
-                  </div>
-                  <div class="token-shop-editor-strip">
-                    <div class="token-shop-editor-meta">
-                      <p class="meta">Level ${escapeHtml(formatBoundaryValue(row.currentLevel))} • ${escapeHtml(row.currentLevelSourceLabel)}</p>
-                      <p class="meta">${escapeHtml(tokenShopUi.getTokenShopRowGroundingSummary(row))}</p>
-                      <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
-                      <p class="meta">${escapeHtml(row.currentVsNextBonus.detail)}</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="token-shop-buy-panel">
-                  <span class="token-shop-buy-label">${escapeHtml(tokenShopUi.getTokenShopActionLabel(row))}</span>
-                  <strong>${escapeHtml(nextKnownCostLabel)}</strong>
-                  <p class="meta">${escapeHtml(affordabilityLine)}</p>
-                </div>
-              </div>
-            </article>
-          `;
-          })
-          .join("")}
+      <div class="preview-stack" id="overviewTokenShopGrid">
+        ${renderTokenShopOverviewTierRows("t1", summary.rows, summary)}
       </div>
       <p class="meta">Overview affordability only. No best-buy order, ROI, ranking, token-bank planner behavior, Daily Tokenium planner behavior, or canonical <code>state.playerProfile</code> promotion is added here.</p>
     </div>
   `;
+}
+
+function calculateTierUnlockStatesForOverview(thresholds) {
+  const model = getTokenShopProgressionModel();
+  const rows = model.rows || [];
+
+  const t1Rows = rows.slice(0, 12);
+  const t2Rows = rows.slice(12, 18);
+  const t3Rows = rows.slice(18, 23);
+  const t4Rows = rows.slice(23, 25);
+  const t5Rows = rows.slice(25, 28);
+
+  const t1Total = t1Rows.reduce((sum, r) => sum + (r.currentLevel || 0), 0);
+  const t2Total = t2Rows.reduce((sum, r) => sum + (r.currentLevel || 0), 0);
+  const t3Total = t3Rows.reduce((sum, r) => sum + (r.currentLevel || 0), 0);
+  const t4Total = t4Rows.reduce((sum, r) => sum + (r.currentLevel || 0), 0);
+
+  return {
+    t1: true,
+    t2: t1Total >= (thresholds.t2?.min_levels || 25),
+    t3: t1Total + t2Total >= (thresholds.t3?.min_levels || 50),
+    t4: t1Total + t2Total + t3Total >= (thresholds.t4?.min_levels || 100),
+    t5: t1Total + t2Total + t3Total + t4Total >= (thresholds.t5?.min_levels || 150)
+  };
+}
+
+function renderTokenShopOverviewTierRows(tier, allRows, summary) {
+  const tierToFieldMap = {
+    t1: [
+      "ATU1Level",
+      "ATU2Level",
+      "ATU3Level",
+      "ATU4Level",
+      "ATU5Level",
+      "ATU6Level",
+      "ATU7Level",
+      "ATU8Level",
+      "ATU9Level",
+      "ATU10Level",
+      "ATU11Level",
+      "ATU12Level"
+    ],
+    t2: ["ATU13Level", "ATU14Level", "ATU15Level", "ATU16Level", "ATU17Level", "ATU18Level"],
+    t3: ["ATU19Level", "ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"],
+    t4: ["ATU24Level", "ATU25Level"],
+    t5: ["ATU26Level", "ATU27Level", "ATU28Level"]
+  };
+
+  const tierFields = tierToFieldMap[tier] || [];
+  const tierRows = allRows.filter((r) => tierFields.includes(r.field));
+
+  if (tierRows.length === 0) {
+    return '<p class="meta">No rows available for this tier.</p>';
+  }
+
+  return tierRows
+    .map((row) => {
+      const displayTitle = tokenShopUi.getTokenShopRowDisplayTitle(row);
+      const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
+      const playerFacingSupportText = tokenShopUi.getTokenShopPlayerFacingSupportText(row);
+      const nextKnownCostLabel = row.isMaxed
+        ? "No next cost within known cap"
+        : typeof row.nextKnownCost === "number"
+          ? formatBoundaryValue(row.nextKnownCost)
+          : "No known next cost";
+      const affordabilityLine = row.isMaxed
+        ? "No next purchase within known cap."
+        : row.isAffordable === true
+          ? "Affordable from current Tokens."
+          : row.isAffordable === false &&
+              typeof row.nextKnownCost === "number" &&
+              typeof summary.currentTokens === "number"
+            ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+            : "Affordability unavailable until Tokens are entered.";
+
+      return `
+    <article class="preview-card token-shop-affordability-card">
+      <div class="token-shop-game-row">
+        <div class="token-shop-level-ring">
+          <span class="token-shop-level-value">${escapeHtml(formatBoundaryValue(row.currentLevel))}</span>
+          <span class="token-shop-level-divider">/</span>
+          <span class="token-shop-level-cap">${typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel) ? escapeHtml(formatBoundaryValue(row.maxLevel)) : "?"}</span>
+        </div>
+        <div class="token-shop-main-lane">
+          <div class="token-shop-top-band">
+            <div class="token-shop-affordability-head">
+              <div class="meta-stack">
+                <strong>${escapeHtml(displayTitle)}</strong>
+                <div class="token-shop-row-tags">
+                  <span class="token-shop-row-tag">${escapeHtml(row.rowTypeLabel || "Checked row")}</span>
+                  ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
+                </div>
+                <p class="meta token-shop-effect-line">${escapeHtml(tokenShopUi.formatTokenShopSentence(tokenShopUi.formatTokenShopEffectLine(row)))}</p>
+                ${playerFacingSupportText ? `<p class="meta">${escapeHtml(tokenShopUi.formatTokenShopSentence(playerFacingSupportText))}</p>` : ""}
+              </div>
+            </div>
+          </div>
+          <div class="token-shop-stat-strip">
+            ${bonusStripEntries
+              .map(
+                (entry) => `
+              <div class="validation-card warn token-shop-stat-card">
+                <span class="snapshot-title">Current vs next bonus - ${escapeHtml(entry.label)}</span>
+                <strong>${escapeHtml(entry.currentLabel)}</strong>
+                <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          <div class="token-shop-editor-strip">
+            <div class="token-shop-editor-meta">
+              <p class="meta">Level ${escapeHtml(formatBoundaryValue(row.currentLevel))} - ${escapeHtml(row.currentLevelSourceLabel)}</p>
+              <p class="meta">${escapeHtml(tokenShopUi.getTokenShopRowGroundingSummary(row))}</p>
+              <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
+              <p class="meta">${escapeHtml(row.currentVsNextBonus.detail)}</p>
+            </div>
+          </div>
+        </div>
+        <div class="token-shop-buy-panel">
+          <span class="token-shop-buy-label">${escapeHtml(tokenShopUi.getTokenShopActionLabel(row))}</span>
+          <strong>${escapeHtml(nextKnownCostLabel)}</strong>
+          <p class="meta">${escapeHtml(affordabilityLine)}</p>
+        </div>
+      </div>
+    </article>
+  `;
+    })
+    .join("");
 }
 
 function saveTokenShopProgressionLevel(fieldName, value) {
@@ -5028,8 +5567,8 @@ function renderTokenShopProgressionEditor() {
     <article class="validation-card warn">
       <strong>Grounded TokenShop checked-row editor</strong>
       <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
-      <p class="meta">This module is explicitly non-optimizer and stays fixed to the current grounded product-facing subset: <code>ATU1Level</code>, <code>ATU2Level</code>, <code>ATU3Level</code>, <code>ATU4Level</code>, <code>ATU5Level</code>, <code>ATU6Level</code>, <code>ATU7Level</code>, <code>ATU8Level</code>, <code>ATU9Level</code>, <code>ATU10Level</code>, <code>ATU12Level</code>, <code>ATU13Level</code>, and <code>ATU20Level</code>.</p>
-      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown separately inside the same bounded subset. ATU3 remains effect-driven, ATU10 and ATU12 remain title-side rows, ATU13 and ATU20 now clear as bridge-only token-booster rows, ATU11 stays quarantined because it still lacks a final title join, and the rest of the unresolved ATU family stays outside this editor.</p>
+      <p class="meta">This module is explicitly non-optimizer and stays fixed to the grounded ATU subset: all 28 rows grouped by tier (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28).</p>
+      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown inside the tier-grouped subset. T1 has prefab-driven rows (ATU1, ATU2, ATU4-ATU12), one effect-driven row (ATU3), plus canonical additions (ATU5-ATU12). T2-T5 rows are canonical prefab-driven from tokenshop-canonical-v1.json. Tier unlock thresholds are based on total levels in prior tiers.</p>
       <div class="profile-actions">
         <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
         <button class="button button-ghost" type="button" data-token-shop-clear-local>Clear local row levels</button>

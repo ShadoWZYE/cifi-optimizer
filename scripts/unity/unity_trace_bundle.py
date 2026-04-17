@@ -5276,8 +5276,8 @@ def main() -> None:
     else:
         output_mode = "both"
     
-    # Build dataset with appropriate level
-    dataset = build_dataset(args.target, args.query, args.anchor, output_mode=output_mode)
+    # Build dataset
+    dataset = build_dataset(args.target, args.query, args.anchor)
     
     # Add metadata about the trace parameters
     dataset["traceParams"] = {

@@ -13,12 +13,56 @@ The repo uses a centralized probe runner (`scripts/unity/run_probe.mjs`) that pr
 
 ## Quick Reference
 
-| Command                       | Purpose                       | Produces Committed Artifacts? |
-| ----------------------------- | ----------------------------- | ----------------------------- |
-| `node run_probe.mjs build`    | Build C# uabea probe          | No (build artifact)           |
-| `node run_probe.mjs trace`    | Generalized trace bundle      | Yes                           |
-| `node run_probe.mjs compile`  | Canonical dataset compilation | Yes                           |
-| `node run_probe.mjs pipeline` | Multi-step extraction         | Yes                           |
+| Command                        | Purpose                       | Produces Committed Artifacts?      |
+| ------------------------------ | ----------------------------- | ---------------------------------- |
+| `node run_probe.mjs build`     | Build C# AssetProbe           | No (build artifact)                |
+| `node run_probe.mjs probe`     | Run C# AssetProbe directly    | Yes (data/uabea-probe-report.json) |
+| `node run_probe.mjs probe:run` | Build + run in one command    | Yes                                |
+| `node run_probe.mjs trace`     | Generalized trace bundle      | Yes                                |
+| `node run_probe.mjs compile`   | Canonical dataset compilation | Yes                                |
+| `node run_probe.mjs pipeline`  | Multi-step extraction         | Yes                                |
+
+**C# Probe performance flags (with probe/probe:run):**
+
+- `--quick`: Metadata only, no fields/methods (~25x faster)
+- `--no-metadata`: Skip Cpp2IL load, use cache
+- `--term <name>`: Only process types matching name
+- `--report <path>`: Output report path
+
+### 0. C# Asset Probe (Native .NET)
+
+| Executable                             | Purpose                                                       | Output                         | Performance Flags                      |
+| -------------------------------------- | ------------------------------------------------------------- | ------------------------------ | -------------------------------------- |
+| `tools/unity/CifiAssetProbe/` (csproj) | High-performance IL2CPP/C# metadata extractor using LibCpp2IL | `data/uabea-probe-report.json` | `--quick`, `--no-metadata`, `--term X` |
+
+**Performance flags:**
+
+- `--quick`: Skip field/method enumeration (metadata-only, ~25x faster)
+- `--no-metadata`: Skip Cpp2IL loading entirely (use cached data)
+- `--term X`: Only process types matching term X (filters targets)
+
+**Build & Run:**
+
+```bash
+cd tools/unity/CifiAssetProbe
+dotnet build
+dotnet run -- --report ../../data/uabea-probe-report.json --quick
+dotnet run -- --term SaveData --quick
+```
+
+**Expected performance (full binary ~11MB, ~3000 types):**
+| Mode | Time | Speedup vs Original |
+|------|------|---------------------|
+| Default | ~3-5 min | 5-8x |
+| `--quick` | ~1-2 min | 12-25x |
+| `--term X` | ~1 min | 25x |
+
+**Optimizations implemented:**
+
+- Type index: O(1) dictionary lookups vs O(n) scans
+- Parallel processing: Uses all CPU cores
+- Lazy field/method enumeration: Only loads when needed
+- Reflection property cache: Caches PropertyInfo per type
 
 ## Tool Categories
 

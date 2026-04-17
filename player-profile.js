@@ -148,9 +148,24 @@ const TOKEN_SHOP_CHECKED_SUBSET_FIELDS = [
   "ATU8Level",
   "ATU9Level",
   "ATU10Level",
+  "ATU11Level",
   "ATU12Level",
   "ATU13Level",
-  "ATU20Level"
+  "ATU14Level",
+  "ATU15Level",
+  "ATU16Level",
+  "ATU17Level",
+  "ATU18Level",
+  "ATU19Level",
+  "ATU20Level",
+  "ATU21Level",
+  "ATU22Level",
+  "ATU23Level",
+  "ATU24Level",
+  "ATU25Level",
+  "ATU26Level",
+  "ATU27Level",
+  "ATU28Level"
 ];
 const TOKEN_SHOP_CHECKED_SUBSET_PLAYER_STATE_ALIASES = Object.fromEntries(
   TOKEN_SHOP_CHECKED_SUBSET_FIELDS.map((field) => [

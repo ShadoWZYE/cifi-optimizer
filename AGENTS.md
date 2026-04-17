@@ -77,3 +77,7 @@ The smoke test suite (`tests/smoke.mjs`) catches drift between committed data an
 4. Run smoke tests after any data or dataset-contract changes
 
 The test suite exists to catch unintended drift - intentional changes are expected to update the test surface.
+
+## Tool inventory
+
+See [docs/tools/inventory.md](docs/tools/inventory.md) for a complete inventory of available tools, scripts, and their usage.

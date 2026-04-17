@@ -1,8 +1,14 @@
 using System.Text.Json;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Reflection;
 using AssetsTools.NET;
 using AssetsTools.NET.Cpp2IL;
 using AssetsTools.NET.Extra;
 using LibCpp2IL;
+
+// Reflection property cache - lazily initialized
+ConcurrentDictionary<Type, PropertyInfo[]>? _propertyCache;
 
 static string ResolveRepoRoot()
 {
@@ -42,6 +48,9 @@ var explicitSeeds = new List<string>();
 string reportPath = Path.Combine(root, "data", "uabea-probe-report.json");
 string? runtimeReportPath = null;
 var disableInterestingPatternFilter = false;
+var skipMetadata = false;
+var useCache = false;
+var quickMode = false;
 
 for (var index = 0; index < args.Length; index++)
 {
@@ -60,6 +69,15 @@ for (var index = 0; index < args.Length; index++)
                 throw new ArgumentException("Expected a value after --runtime-report.");
             }
             runtimeReportPath = Path.GetFullPath(Path.Combine(root, args[++index]));
+            break;
+        case "--cache":
+            useCache = true;
+            break;
+        case "--quick":
+            quickMode = true;
+            break;
+        case "--no-metadata":
+            skipMetadata = true;
             break;
         case "--term":
             if (index + 1 >= args.Length)
@@ -364,14 +382,21 @@ static object? ToSerializableScalar(object? value)
 
 static Dictionary<string, object?> ReflectSerializablePublicProperties(object instance)
 {
-    var values = new Dictionary<string, object?>(StringComparer.Ordinal);
-    foreach (var property in instance.GetType().GetProperties())
+    var type = instance.GetType();
+    
+    // Lazily initialize cache and cache property info per type to avoid repeated reflection
+    _propertyCache ??= new ConcurrentDictionary<Type, PropertyInfo[]>();
+    if (!_propertyCache.TryGetValue(type, out var properties))
     {
-        if (!property.CanRead || property.GetIndexParameters().Length != 0)
-        {
-            continue;
-        }
+        properties = type.GetProperties()
+            .Where(p => p.CanRead && p.GetIndexParameters().Length == 0)
+            .ToArray();
+        _propertyCache[type] = properties;
+    }
 
+    var values = new Dictionary<string, object?>(StringComparer.Ordinal);
+    foreach (var property in properties)
+    {
         try
         {
             values[property.Name] = ToSerializableScalar(property.GetValue(instance));
@@ -841,7 +866,7 @@ var directLibCpp2IlProbe = new Dictionary<string, object?>
     ["attempted"] = !seededOnlyMode
 };
 var directTargetTypeMetadata = new List<object>();
-if (!seededOnlyMode)
+if (!seededOnlyMode && !skipMetadata)
 {
     try
     {
@@ -859,28 +884,62 @@ if (!seededOnlyMode)
 
             if (assemblyCSharp is not null)
             {
-                IEnumerable<LibCpp2IL.Metadata.Il2CppTypeDefinition> assemblyTypes =
-                    assemblyCSharp.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>();
-                foreach (var target in directTypeTargets)
+                // Build type index for O(1) lookups
+                var assemblyTypes = (assemblyCSharp.Image.Types ?? Array.Empty<LibCpp2IL.Metadata.Il2CppTypeDefinition>()).ToList();
+                var typeIndex = new ConcurrentDictionary<string, LibCpp2IL.Metadata.Il2CppTypeDefinition>(StringComparer.Ordinal);
+                foreach (var t in assemblyTypes)
                 {
-                    var type = assemblyTypes.FirstOrDefault(t =>
-                        target.lookupNames.Any(lookupName =>
-                            string.Equals(t.Name, lookupName, StringComparison.Ordinal) ||
-                            string.Equals(t.FullName, lookupName, StringComparison.Ordinal) ||
-                            t.FullName.EndsWith("." + lookupName, StringComparison.Ordinal)));
+                    typeIndex.TryAdd(t.Name, t);
+                    if (!string.IsNullOrEmpty(t.FullName))
+                        typeIndex.TryAdd(t.FullName, t);
+                }
+
+                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, directTypeTargets.Length) };
+                var results = new ConcurrentBag<object>();
+
+                Parallel.ForEach(directTypeTargets, parallelOptions, target =>
+                {
+                    LibCpp2IL.Metadata.Il2CppTypeDefinition? type = null;
+                    foreach (var lookupName in target.lookupNames)
+                    {
+                        if (typeIndex.TryGetValue(lookupName, out var found))
+                        {
+                            type = found;
+                            break;
+                        }
+                    }
 
                     if (type is null)
                     {
-                        directTargetTypeMetadata.Add(new
-                        {
-                            reportKey = target.reportKey,
-                            scriptName = target.lookupNames[0],
-                            found = false
-                        });
-                        continue;
+                        results.Add(new { reportKey = target.reportKey, scriptName = target.lookupNames[0], found = false });
+                        return;
                     }
 
-                    directTargetTypeMetadata.Add(new
+                    // Skip fields and methods in quickMode
+                    var fields = quickMode ? Array.Empty<object>() : type.Fields.Select((field, index) => new
+                    {
+                        index,
+                        name = field.Name,
+                        type = field.FieldType?.ToString(),
+                        attributes = type.FieldAttributes[index].ToString(),
+                        defaultValue = type.FieldDefaults.Length > index && type.FieldDefaults[index] is not null ? type.FieldDefaults[index]!.ToString() : null,
+                        fieldOffset = type.FieldInfos.Length > index ? type.FieldInfos[index].FieldOffset : (int?)null
+                    }).ToArray();
+
+                    var methods = quickMode || target.methodPatterns.Length == 0
+                        ? Array.Empty<object>()
+                        : type.Methods.Where(method => target.methodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
+                            .Select((method, index) => new
+                            {
+                                index,
+                                name = method.Name,
+                                returnType = method.ReturnType?.ToString(),
+                                parameterCount = method.Parameters?.Length ?? 0,
+                                methodProperties = ReflectSerializablePublicProperties(method),
+                                parameters = method.Parameters?.Select(p => ReflectSerializablePublicProperties(p)).ToArray() ?? Array.Empty<object>()
+                            }).ToArray();
+
+                    results.Add(new
                     {
                         reportKey = target.reportKey,
                         scriptName = target.lookupNames[0],
@@ -889,35 +948,13 @@ if (!seededOnlyMode)
                         baseType = type.BaseType?.ToString(),
                         fieldCount = type.Fields.Length,
                         methodCount = type.Methods.Length,
-                        fields = type.Fields
-                            .Select((field, index) => new
-                            {
-                                index,
-                                name = field.Name,
-                                type = field.FieldType?.ToString(),
-                                attributes = type.FieldAttributes[index].ToString(),
-                                defaultValue = type.FieldDefaults.Length > index && type.FieldDefaults[index] is not null
-                                    ? type.FieldDefaults[index]!.ToString()
-                                    : null,
-                                fieldOffset = type.FieldInfos.Length > index
-                                    ? type.FieldInfos[index].FieldOffset
-                                    : (int?)null
-                            })
-                            .ToArray(),
-                        methods = type.Methods
-                            .Where(method => target.methodPatterns.Any(pattern => method.Name.Contains(pattern, StringComparison.Ordinal)))
-                            .Select((method, index) => new
-                            {
-                                index,
-                                name = method.Name,
-                                returnType = method.ReturnType?.ToString(),
-                                parameterCount = method.Parameters?.Length ?? 0,
-                                methodProperties = ReflectSerializablePublicProperties(method),
-                                parameters = method.Parameters?.Select(parameter => ReflectSerializablePublicProperties(parameter)).ToArray() ?? Array.Empty<object>()
-                            })
-                            .ToArray()
+                        fields,
+                        methods
                     });
-                }
+                });
+
+                foreach (var r in results)
+                    directTargetTypeMetadata.Add(r);
 
                 directLibCpp2IlProbe["assemblySearches"] = new[]
                 {

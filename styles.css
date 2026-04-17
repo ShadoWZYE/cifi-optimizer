@@ -206,6 +206,49 @@ h2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.tier-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.tier-tab {
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.tier-tab:hover {
+  background: rgba(23, 129, 208, 0.08);
+}
+
+.tier-tab.active {
+  background: rgba(23, 129, 208, 0.15);
+  border-color: rgba(23, 129, 208, 0.45);
+  font-weight: 600;
+}
+
+.tier-tab.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.field-group.locked {
+  opacity: 0.5;
+}
+
+.field-group.locked input {
+  background: rgba(77, 98, 133, 0.08);
+  cursor: not-allowed;
+}
+
 .field-group {
   display: grid;
   gap: 8px;
