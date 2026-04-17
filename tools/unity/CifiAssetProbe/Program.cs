@@ -1,14 +1,10 @@
 using System.Text.Json;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Reflection;
 using AssetsTools.NET;
 using AssetsTools.NET.Cpp2IL;
 using AssetsTools.NET.Extra;
 using LibCpp2IL;
-
-// Reflection property cache - lazily initialized
-ConcurrentDictionary<Type, PropertyInfo[]>? _propertyCache;
 
 static string ResolveRepoRoot()
 {
@@ -382,21 +378,14 @@ static object? ToSerializableScalar(object? value)
 
 static Dictionary<string, object?> ReflectSerializablePublicProperties(object instance)
 {
-    var type = instance.GetType();
-    
-    // Lazily initialize cache and cache property info per type to avoid repeated reflection
-    _propertyCache ??= new ConcurrentDictionary<Type, PropertyInfo[]>();
-    if (!_propertyCache.TryGetValue(type, out var properties))
-    {
-        properties = type.GetProperties()
-            .Where(p => p.CanRead && p.GetIndexParameters().Length == 0)
-            .ToArray();
-        _propertyCache[type] = properties;
-    }
-
     var values = new Dictionary<string, object?>(StringComparer.Ordinal);
-    foreach (var property in properties)
+    foreach (var property in instance.GetType().GetProperties())
     {
+        if (!property.CanRead || property.GetIndexParameters().Length != 0)
+        {
+            continue;
+        }
+
         try
         {
             values[property.Name] = ToSerializableScalar(property.GetValue(instance));
