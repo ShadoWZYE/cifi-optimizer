@@ -916,7 +916,7 @@ if (!seededOnlyMode && !skipCpp2Il)
                         typeIndex.TryAdd(t.FullName, t);
                 }
 
-                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, directTypeTargets.Length) };
+                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Math.Min(Environment.ProcessorCount, directTypeTargets.Length)) };
                 var results = new ConcurrentBag<object>();
 
                 Parallel.ForEach(directTypeTargets, parallelOptions, target =>
