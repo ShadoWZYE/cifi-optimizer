@@ -855,7 +855,40 @@ var directLibCpp2IlProbe = new Dictionary<string, object?>
     ["attempted"] = !seededOnlyMode
 };
 var directTargetTypeMetadata = new List<object>();
-if (!seededOnlyMode && !skipMetadata)
+var cachedDirectProbe = (Dictionary<string, object?>?)null;
+var cacheKey = "";
+var cacheFile = "";
+var cacheDir = "";
+var skipCpp2Il = skipMetadata;
+
+// Cache support - check if we have a valid cached result
+if (useCache && !skipMetadata)
+{
+    cacheDir = Path.Combine(root, "data", "probe-cache");
+    cacheKey = $"{Path.GetFileName(il2cppPath)}-{Path.GetFileName(metadataPath)}-{quickMode}".ToLowerInvariant();
+    cacheFile = Path.Combine(cacheDir, $"{cacheKey}.json");
+    
+    if (File.Exists(cacheFile))
+    {
+        var cachedTime = File.GetLastWriteTimeUtc(cacheFile);
+        var il2cppTime = File.GetLastWriteTimeUtc(il2cppPath);
+        var metadataTime = File.GetLastWriteTimeUtc(metadataPath);
+        
+        if (cachedTime > il2cppTime && cachedTime > metadataTime)
+        {
+            Console.WriteLine($"Loading from cache: {cacheFile}");
+            var cachedJson = File.ReadAllText(cacheFile);
+            cachedDirectProbe = JsonSerializer.Deserialize<Dictionary<string, object>>(cachedJson);
+            if (cachedDirectProbe is not null)
+            {
+                Console.WriteLine("Cache hit - skipping Cpp2IL processing");
+                skipCpp2Il = true;
+            }
+        }
+    }
+}
+
+if (!seededOnlyMode && !skipCpp2Il)
 {
     try
     {
@@ -1783,7 +1816,7 @@ var report = new
     unityVersion = primaryFile.file.Metadata.UnityVersion,
     loadedFileCount = loadedFiles.Count,
     cpp2IlStatus,
-    directLibCpp2IlProbe,
+directLibCpp2IlProbe = cachedDirectProbe is not null ? cachedDirectProbe : directLibCpp2IlProbe,
     directTargetTypeMetadata = directTargetTypeMetadata.ToArray(),
     failedFiles,
     fileTypeSummaries,
@@ -1819,5 +1852,21 @@ await File.WriteAllTextAsync(reportPath, JsonSerializer.Serialize(report, new Js
 {
     WriteIndented = true
 }));
+
+// Save to cache if enabled and Cpp2IL was processed
+if (useCache && !skipCpp2Il && !seededOnlyMode && directLibCpp2IlProbe.Count > 0)
+{
+    try
+    {
+        Directory.CreateDirectory(cacheDir);
+        var cacheJson = JsonSerializer.Serialize(directLibCpp2IlProbe, new JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(cacheFile, cacheJson);
+        Console.WriteLine($"Cached result to: {cacheFile}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Warning: Failed to write cache: {ex.Message}");
+    }
+}
 
 Console.WriteLine(reportPath);
