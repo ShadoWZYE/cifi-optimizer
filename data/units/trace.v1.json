@@ -1,0 +1,132 @@
+{
+  "dataset": "repo-data-unit.v1",
+  "unitId": "trace",
+  "systemId": "trace",
+  "version": "v1",
+  "status": "active",
+  "kind": "tooling",
+  "schemaRef": "data/data-unit-format.v1.json",
+  "frameworkRef": "data/data-framework.v1.json",
+  "summary": "Central trace orchestration unit for registry, stable live trace-run outputs, and promotion-target definitions while centralized system units become the promotion targets behind trace.",
+  "liveConsumers": {
+    "appStatePaths": [],
+    "traceTargets": [
+      "token-shop-family-structure",
+      "token-shop-atu3-cells-effect",
+      "shard-cost-su0-structure",
+      "shard-owned-state-upgradeinfolist-population",
+      "multiverse-market-save-owner-boundary"
+    ],
+    "plannerConsumers": [
+      "scripts/unity/unity_trace_bundle.py",
+      "scripts/unity/run_probe.mjs"
+    ]
+  },
+  "subsystems": {
+    "registry": {
+      "summary": "Target registry and family-resolution definitions for trace runs.",
+      "seedOutputs": [
+        "data/unity-trace-target-registry.json"
+      ]
+    },
+    "live-runs": {
+      "summary": "Stable overwritten trace-run outputs that reflect the current live trace surface.",
+      "seedOutputs": [
+        "workbench/trace-runs/token-shop-family-structure.json",
+        "workbench/trace-runs/token-shop-atu3-cells-effect.json",
+        "workbench/trace-runs/shard-cost-su0-structure.json",
+        "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
+        "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+      ]
+    },
+    "promotion-targets": {
+      "summary": "Trace-facing lane that should eventually promote into centralized system units instead of raw probe files.",
+      "seedOutputs": []
+    }
+  },
+  "provenance": {
+    "policy": "Trace remains orchestration, so provenance here should preserve the registry contract plus the commands that regenerate the stable transient trace outputs embedded into the centralized unit.",
+    "transientProbePolicy": "Stable workbench trace outputs are disposable; preserve the command that regenerates them instead of treating the workbench files as shipped dependencies.",
+    "sourceRecords": [
+      {
+        "id": "trace-registry",
+        "kind": "dataset",
+        "path": "data/unity-trace-target-registry.json",
+        "role": "support",
+        "persistence": "committed"
+      },
+      {
+        "id": "token-shop-family-trace-command",
+        "kind": "command",
+        "role": "transient-regeneration",
+        "persistence": "transient",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --family token-shop --level structured",
+        "expectedOutputs": [
+          "workbench/trace-runs/token-shop-atu3-cells-effect.json",
+          "workbench/trace-runs/token-shop-family-structure.json"
+        ]
+      },
+      {
+        "id": "shard-cost-trace-command",
+        "kind": "command",
+        "role": "transient-regeneration",
+        "persistence": "transient",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-cost-su0-structure --level structured",
+        "expectedOutputs": [
+          "workbench/trace-runs/shard-cost-su0-structure.json",
+          "workbench/trace-runs/shard-cost-su0-structure.md"
+        ]
+      },
+      {
+        "id": "shard-owned-state-trace-command",
+        "kind": "command",
+        "role": "transient-regeneration",
+        "persistence": "transient",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-owned-state-upgradeinfolist-population --level structured",
+        "expectedOutputs": [
+          "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
+          "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.md"
+        ]
+      },
+      {
+        "id": "multiverse-market-trace-command",
+        "kind": "command",
+        "role": "transient-regeneration",
+        "persistence": "transient",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --target multiverse-market-save-owner-boundary --level structured",
+        "expectedOutputs": [
+          "workbench/trace-runs/multiverse-market-save-owner-boundary.json",
+          "workbench/trace-runs/multiverse-market-save-owner-boundary.md"
+        ]
+      }
+    ]
+  },
+  "views": {
+    "canonical": [],
+    "boundary": [],
+    "model": [],
+    "support": [
+      "data/unity-trace-target-registry.json",
+      "workbench/trace-runs/token-shop-family-structure.json",
+      "workbench/trace-runs/token-shop-atu3-cells-effect.json",
+      "workbench/trace-runs/shard-cost-su0-structure.json",
+      "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
+      "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+    ],
+    "historicalProbe": []
+  },
+  "replacementPlan": {
+    "seedOutputs": [
+      "data/system-units/trace.v1.json"
+    ],
+    "projectionTargets": [
+      "registry",
+      "live-runs",
+      "promotion-targets"
+    ],
+    "archiveAfterReplacement": [],
+    "requirementsBeforeArchive": [
+      "Trace remains the orchestration layer; centralized system units become its promotion targets instead of replacing it."
+    ]
+  }
+}

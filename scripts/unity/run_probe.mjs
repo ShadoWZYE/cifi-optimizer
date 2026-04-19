@@ -341,11 +341,9 @@ function printUsage() {
   console.error("  shards:cost-native   - Full shard cost extraction");
   console.error("");
   console.error("Options:");
-  console.error("  --target <id>         - Target identifier (e.g., token-shop-atu3-cells)");
+  console.error("  --target <id>         - Target identifier (e.g., token-shop-atu3-cells-effect)");
+  console.error("  --family <name>       - Family shortcut (e.g., token-shop, shard-cost)");
   console.error("  --anchor <value>      - Anchor to trace (can be specified multiple times)");
-  console.error(
-    "  --family <name>       - Trace family (token-shop, shard-owned-state, multiverse-market)"
-  );
   console.error("  --level <level>       - Output level: raw, structured, both (default: both)");
   console.error("  --output <path>       - Output file path");
   console.error("  --chain <script>      - Additional script to run in chain (can repeat)");
@@ -356,7 +354,10 @@ function printUsage() {
   console.error("");
   console.error("Examples:");
   console.error(
-    "  node scripts/unity/run_probe.mjs trace --target token-shop-atu3-cells --anchor ATU3Button --family token-shop"
+    "  node scripts/unity/run_probe.mjs trace --target token-shop-atu3-cells-effect --anchor ATU3Button --family token-shop"
+  );
+  console.error(
+    "  node scripts/unity/run_probe.mjs trace --family token-shop"
   );
   console.error(
     "  node scripts/unity/run_probe.mjs trace --target shard-owned-state --anchor upgradeInfoList --family shard-owned-state --level structured"

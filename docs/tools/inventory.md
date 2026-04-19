@@ -8,8 +8,13 @@ The repo uses a centralized probe runner (`scripts/unity/run_probe.mjs`) that pr
 
 - **Generalized commands** - Parameterized extraction for any target/anchor
 - **Pipeline chaining** - Multi-step analysis with `--chain` and `--max-steps`
-- **Output convention** - `{target}-{anchor}-{timestamp}.json` structure
+- **Trace outputs** - Stable per-target `.json` + `.md` files under `workbench/trace-runs/`
 - **Hierarchy levels** - `--level raw|structured|both` control
+
+Related workflow docs:
+
+- [`docs/extraction/extraction-flow.md`](../extraction/extraction-flow.md)
+- [`docs/extraction/trace-registry-extension.md`](../extraction/trace-registry-extension.md)
 
 ## Quick Reference
 
@@ -18,7 +23,7 @@ The repo uses a centralized probe runner (`scripts/unity/run_probe.mjs`) that pr
 | `node run_probe.mjs build`     | Build C# AssetProbe           | No (build artifact)                |
 | `node run_probe.mjs probe`     | Run C# AssetProbe directly    | Yes (data/uabea-probe-report.json) |
 | `node run_probe.mjs probe:run` | Build + run in one command    | Yes                                |
-| `node run_probe.mjs trace`     | Generalized trace bundle      | Yes                                |
+| `node run_probe.mjs trace`     | Generalized trace bundle      | No (stable workbench outputs, later promoted into system units) |
 | `node run_probe.mjs compile`   | Canonical dataset compilation | Yes                                |
 | `node run_probe.mjs pipeline`  | Multi-step extraction         | Yes                                |
 
@@ -71,7 +76,7 @@ dotnet run -- --term SaveData --quick
 | Script                   | Purpose                                                      | Committed Output?               |
 | ------------------------ | ------------------------------------------------------------ | ------------------------------- |
 | `run_probe.mjs`          | Centralized probe runner with generalized CLI                | No                              |
-| `unity_trace_bundle.py`  | Trace bundle generator - extracts and analyzes Unity objects | Yes (`unity-trace-bundle.json`) |
+| `unity_trace_bundle.py`  | Trace bundle generator - extracts and analyzes Unity objects | No (writes stable per-target outputs under `workbench/trace-runs/`) |
 | `unity_probe_helpers.py` | Reusable Unity probing methods                               | No (utility)                    |
 | `portable_paths.py`      | Path resolution helpers                                      | No (utility)                    |
 
@@ -148,17 +153,118 @@ export JAVA_HOME="<path-to-jdk>"
 ./tools/ghidra/ghidra_12.0.4_PUBLIC/ghidraRun.bat
 ```
 
-**Purpose:** Extract hardcoded values from il2cpp.so (e.g., tier unlock thresholds) that aren't in metadata.
+**Purpose:** Extract native execution details from `libil2cpp.so` that are not recoverable from
+metadata alone: compare sites, call chains, constants, field-offset reads/writes, and bounded
+native helper families.
 
-| Script                         | Purpose                  | Committed Output? |
-| ------------------------------ | ------------------------ | ----------------- |
-| `scripts/ocr/generator-ocr.py` | Generator OCR extraction | No (optional)     |
+| Script                         | Purpose                             | Committed Output? |
+| ------------------------------ | ----------------------------------- | ----------------- |
+| `ghidra_headless.py`           | Persistent-project Ghidra headless runner | No          |
+| `ghidra_scripts/CiFiTierAnalysisPy.py` | Repo-owned Jython post-script used by headless jobs | No |
+| `scripts/ocr/generator-ocr.py` | Generator OCR extraction            | No (optional)     |
+
+**Supported workflow**
+
+1. Use metadata/UABEA probes to recover names, types, and offsets.
+2. Build one persistent analyzed Ghidra project for `libil2cpp.so`.
+3. Reuse that project with `process-project` searches instead of re-importing.
+4. Bridge native findings back to managed names through offsets and surrounding evidence.
+
+**Headless usage**
+
+```bash
+# one-time persistent project build
+python scripts/unity/ghidra_headless.py launch-build-project cifi-full workbench/apk/base/libil2cpp.so --timeout 1800 --max-cpu 8
+python scripts/unity/ghidra_headless.py poll <job_id>
+
+# later project reuse
+python scripts/unity/ghidra_headless.py process-project cifi-full libil2cpp.so --search Tier2TokensUnlocked,get_TotalT1TokenLevels --timeout 1800 --max-cpu 14
+```
+
+`ghidra_headless.py` now forces headless settings/cache/temp files into `workbench/ghidra-runtime/`
+so runs do not depend on writable `%APPDATA%` profile state. The persistent project is still
+single-lock: do not run multiple `process-project` or `build-project` commands against `cifi-full`
+at the same time.
+
+`process-project` cache reuse is incremental:
+
+- search terms are normalized case-insensitively, deduped, and sorted before lookup
+- an exact prior completed job returns immediately from cache
+- direct single-term hits are reused first
+- still-missing terms can be backfilled from the repo-side native graph when they already appear as
+  incidental findings from prior searched terms
+- only truly missing terms execute a fresh Ghidra search
+- merged results are written back as a new completed job, so future reordered or repeated requests
+  hit the cache directly
+
+This cache behavior is repo-side over `workbench/ghidra-jobs/` and the persistent
+`workbench/ghidra-projects/cifi-full.rep` project. It is not an append-only mutation of Ghidra's
+internal runtime cache format.
+
+The wrapper also maintains a lightweight repo-side exact-match index at
+`workbench/ghidra-cache/process_project_index.json`. That index is derived from completed
+`process-project` jobs and lets later trace runs resolve common native term sets without rereading
+every job directory.
+
+It also maintains a term-centric native graph at
+`workbench/ghidra-cache/native_graph_index.json`. That graph grows from completed single-term jobs
+and stores:
+
+- searched terms and their latest completed raw/reconstructed payloads
+- incidental owner candidates
+- incidental method candidates
+- incidental field candidates
+- term-to-term cooccurrence links
+
+That graph is the long-lived cache shape. Exact merged jobs are still useful, but the durable
+reuse layer is now “what terms have we already searched and what graph evidence did those searches
+recover?” rather than only “have we already run this exact term set?”
+
+The wrapper also performs bounded automatic cleanup inside the workbench:
+
+- stale completed `process-project` jobs are removed automatically
+- orphaned cache result files are removed automatically
+- only a recent retained window of completed process jobs is kept
+- running jobs and non-process job types are left alone
+
+This keeps the repo-side native cache useful without letting old schema versions accumulate
+indefinitely.
+
+Native process-job reuse is schema-aware:
+
+- completed jobs carry a native trace schema version
+- exact cache hits are accepted only when they satisfy the current schema
+- nested managed reconstruction and search-expansion schema are checked too
+- older jobs are treated as stale and rerun automatically
+
+That prevents the trace from getting stuck on older weaker native payloads after reconstruction
+logic improves.
+
+Current headless native outputs now preserve:
+
+- `termBridges`
+  Per-term bridge kind and evidence counts
+- `metadataNeighborhoods`
+  Nearby managed terms from `global-metadata.dat`
+- `managedReconstruction`
+  Reconstructed owners, methods, fields, raw values, owner-to-term maps, and scored owners
+
+So even when strict native `functions` buckets are empty, the trace can still recover a useful
+owner/method/field chain from metadata-backed native reconstruction.
+
+**Important limitation**
+
+Managed names often live only in `global-metadata.dat`, not as searchable symbols in
+`libil2cpp.so`. Ghidra should therefore be used to recover _native implementation behavior_, not as
+the sole source of original Unity object structure. See
+`docs/extraction/ghidra-il2cpp-workflow.md`.
 
 ### 8. Compilation Scripts
 
 | Script                                   | Purpose                             | Committed Output?                   |
 | ---------------------------------------- | ----------------------------------- | ----------------------------------- |
 | `scripts/compile_tokenshop_canonical.py` | Compile canonical TokenShop dataset | Yes (`tokenshop-canonical-v1.json`) |
+| `scripts/contracts/generate-system-units.mjs` | Generate centralized embedded system-unit datasets | Yes (`data/system-units/*.json`) |
 | `score_extraction_candidates.py`         | Score extraction candidates         | No                                  |
 
 ## Usage Examples
@@ -167,10 +273,24 @@ export JAVA_HOME="<path-to-jdk>"
 
 ```bash
 node scripts/unity/run_probe.mjs trace \
-  --target token-shop-atu3-cells \
-  --anchor ATU3Button \
   --family token-shop
 ```
+
+Use `--extended-search` when you want the trace to widen beyond the current bounded target:
+
+- `--extended-search 0`: target-only sources
+- `--extended-search 1`: sibling targets in the same family
+- `--extended-search 2`: all trace families
+
+Use `--depth-search` when you want the trace to follow recovered strong terms outward after the
+bounded target completes:
+
+- `--depth-search 0`: disabled
+- `--depth-search 1`: one follow-up hop
+- `--depth-search 2`: two follow-up hops
+
+If you omit `--depth-search`, the trace can now use a target-level registry default depth when one
+is declared.
 
 ### With Hierarchy Level
 
@@ -180,6 +300,23 @@ node scripts/unity/run_probe.mjs trace \
   --anchor upgradeInfoList \
   --level structured
 ```
+
+### Ambiguous Explore
+
+```bash
+node scripts/unity/run_probe.mjs trace \
+  --query SomeUnknownLabel \
+  --level structured
+```
+
+If the planner cannot map the query cleanly to one family, the trace now falls back to
+`generic-explore` and scans committed metadata, Unity assets, and bounded extraction documents
+without promoting any canonical join by itself.
+
+For exact TokenShop shell anchors such as `ATU1Button` or `ATU6Button`, the planner now bypasses
+the TokenShop family default `ATU3` compare lane and routes directly to
+`token-shop-family-structure` unless the query also carries explicit `ATU3` effect terms such as
+`BuyCellBoost`, `CellBoost`, or `15810`.
 
 ### Pipeline with Resume
 
@@ -195,8 +332,10 @@ node scripts/unity/run_probe.mjs pipeline \
 
 ```bash
 node scripts/unity/run_probe.mjs trace \
-  --target token-shop-atu3-cells \
+  --target token-shop-atu3-cells-effect \
   --anchor ATU3Button \
+  --extended-search 1 \
+  --depth-search 1 \
   --force
 ```
 
@@ -210,25 +349,35 @@ node scripts/unity/run_probe.mjs pipeline \
 
 ## Output Convention
 
-Artifacts are stored in `workbench/probes/{target}-{anchors}/{timestamp}/`:
+Trace runs are stored in stable per-target paths under `workbench/trace-runs/` and overwrite on
+repeat for the same workspace asset set:
 
 ```
-workbench/probes/
-├── token-shop-ATU3Button/
-│   └── 2026-04-16T03-27-00/
-│       ├── raw/
-│       │   └── token-shop-raw.json
-│       ├── structured/
-│       │   ├── token-shop-fields.json
-│       │   ├── token-shop-methods.json
-│       │   └── token-shop-costs.json
-│       ├── both/
-│       │   └── token-shop-canonical.json
-│       └── manifest.json
-└── shard-owned-state-upgradeInfoList/
-    └── 2026-04-16T03-30-00/
-        └── ...
+workbench/trace-runs/
+├── generic-explore.json
+├── generic-explore.md
+├── token-shop-atu3-cells-effect.json
+├── token-shop-atu3-cells-effect.md
+├── shard-cost-su0-structure.json
+└── shard-cost-su0-structure.md
 ```
+
+Each trace payload records `generatedAt` and `assetSet.fingerprint` internally, so the timestamp no
+longer needs to live in the filename.
+
+Wait for the trace command to finish before reading the output files. The trace rewrites the stable
+`workbench/trace-runs/*.json` and `*.md` files in place, so reading during execution can show the
+previous run or a partially rewritten file.
+
+The markdown trace output now also includes:
+
+- reconstructed owners
+- reconstructed methods
+- reconstructed fields and raw value terms
+- scored owner candidates
+- owner-to-term reconstruction maps
+
+That section is the main native bridge summary when IL2CPP strips the original native symbol names.
 
 ## Legacy Commands
 

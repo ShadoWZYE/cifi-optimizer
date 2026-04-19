@@ -228,6 +228,8 @@
         "docs/unity/unity-audit-playbook.md"
       ],
       "artifacts": [
+        "data/system-units/shards.v1.json",
+        "data/system-units/trace.v1.json",
         "data/shard-owner-family-boundary.v1.json",
         "data/shard-finalsu-bonus-boundary.v1.json",
         "data/shard-milestone-payload-boundary.v1.json",
@@ -240,14 +242,8 @@
         "data/shard-milestone-handoff-boundary.v1.json",
         "data/shard-save-boundary.v1.json",
         "data/shard-milestone-family-evidence.v1.json",
-        "data/shard-scene-monobehaviour-probe.v1.json",
-        "data/shard-cost-parameter-probe.v1.json",
-        "data/shard-cost-method-probe.v1.json",
-        "data/shard-cost-native-probe.v1.json",
-        "data/shard-cost-list-path-probe.v1.json",
         "data/shard-cost-formula-model.v1.json",
         "data/shard-bonus-slot-probe.v1.json",
-        "data/shard-type-metadata-probe.v1.json",
         "data/shardmining-metadata-neighborhood.v1.json",
         "data/shardupgradeinfo-metadata-neighborhood.v1.json"
       ],
@@ -404,6 +400,8 @@
       ],
       "artifacts": [
         "data/game-data.snapshot.v1.json",
+        "data/system-units/token-shop.v1.json",
+        "data/system-units/multiverse-market.v1.json",
         "app.js",
         "tests/smoke.mjs"
       ],
@@ -449,6 +447,7 @@
       ],
       "artifacts": [
         "data/game-data.snapshot.v1.json",
+        "data/system-units/token-shop.v1.json",
         "app.js",
         "tests/smoke.mjs"
       ],
@@ -493,6 +492,7 @@
       ],
       "artifacts": [
         "data/game-data.snapshot.v1.json",
+        "data/system-units/token-shop.v1.json",
         "app.js",
         "index.html",
         "tests/smoke.mjs"
@@ -540,6 +540,7 @@
         "docs/unity/unity-audit-playbook.md"
       ],
       "artifacts": [
+        "data/system-units/multiverse-market.v1.json",
         "data/multiverse-market-savedata-import-boundary.json",
         "data/multiverse-market-market-member-boundary.json",
         "data/multiverse-market-range-boundary.json",
@@ -586,7 +587,7 @@
       ],
       "artifacts": [
         "data/token-shop-values.json",
-        "data/token-shop-row-level-owner.json",
+        "data/system-units/token-shop.v1.json",
         "player-profile.js"
       ],
       "verified": [
@@ -637,16 +638,14 @@
       "sources": [
         "docs/systems/spend/spend-system-verification.md",
         "docs/systems/spend/token-shop-row-remap-verification.md",
-        "data/token-shop-values.json",
-        "data/uabea-probe-report.json",
-        "data/unity-probe-report.json",
-        "data/daily-tokenium-lane-probe.json",
-        "data/daily-tokenium-owner-probe.json",
-        "data/lm244-targeted-probe.json"
+        "data/system-units/token-shop.v1.json",
+        "data/system-units/trace.v1.json",
+        "workbench/trace-runs/token-shop-family-structure.json",
+        "workbench/trace-runs/token-shop-atu3-cells-effect.json"
       ],
       "artifacts": [
-        "data/token-shop-row-level-owner.json",
-        "data/token-shop-row-remap-boundary.json",
+        "data/system-units/token-shop.v1.json",
+        "data/system-units/trace.v1.json",
         "data/token-shop-late-atu-boundary.json"
       ],
       "verified": [

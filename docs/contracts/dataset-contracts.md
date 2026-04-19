@@ -5,7 +5,9 @@ Defines the minimum contract for bundled JSON assets the app can treat as shippe
 ## Sources of truth
 
 - `data/bundled-dataset-contract.v1.json` — checked-in contract manifest
+- `data/data-framework.v1.json` — central migration manifest for consolidating probe-era files into explicit system units
 - `docs/contracts/dataset-refresh-checklist.md` — operator checklist for dataset promotion or refresh
+- `docs/contracts/data-framework.md` — guide for the centralized data migration model
 
 ## Why this exists
 
@@ -23,6 +25,25 @@ Prevent:
 - `community-derived` — intentionally sourced from a named community tool or sheet
 
 ## Shipped dataset groups
+
+### Central system units
+
+- files:
+  - `data/system-units/player-state.v1.json`
+  - `data/system-units/shards.v1.json`
+  - `data/system-units/token-shop.v1.json`
+  - `data/system-units/multiverse-market.v1.json`
+  - `data/system-units/trace.v1.json`
+- classification: `extracted-mechanics`
+- must contain the generated centralized system views, live-consumer metadata, provenance records,
+  and embedded sections that the app and trace now consume
+- must also absorb system-local boundary and support slices once they are fully represented inside
+  the generated unit contract; current examples include the TokenShop row owner/remap slices, the
+  Multiverse `69-74` row-identity anomaly cluster, and the Shard cost-support calibration/list-path/type-metadata slices
+- this is the preferred home for embedded row-identity and cost-support slices that no longer need
+  to remain first-class shipped contract artifacts
+- useful as the permanent repo-facing contract surface while older flat datasets are progressively
+  demoted to archive-only inputs
 
 ### App snapshot
 
@@ -156,23 +177,6 @@ Prevent:
 - must contain blocked-use framing against claiming a final BigDouble equation before the helper calls are typed
 - useful for narrowing the exact getter inputs and native lane splits behind future shard next-cost recovery
 
-### Shard cost screenshot calibration
-
-- file: `data/shard-cost-screenshot-calibration.v1.json`
-- classification: `extracted-mechanics`
-- must contain player-supplied in-game shard cost checkpoints with row ids, observed levels, and visible cost labels
-- must contain blocked-use framing against treating screenshot checkpoints as final formula proof
-- useful for calibrating candidate shard formulas against real in-game magnitudes while the runtime equation is still unresolved
-
-### Shard cost list-path probe
-
-- file: `data/shard-cost-list-path-probe.v1.json`
-- classification: `extracted-mechanics`
-- must contain the checked `GetShardCostList` call order through `get_SU0Cost` to `get_SU29Cost`
-- must contain the owner-side `MilestoneCostList` cache tie-in plus downstream `UpdateShardCostList`, `SortCostAndBools`, and `CountAffordableShard` framing
-- must contain blocked-use framing against treating the list-builder path as proof of a separate shard cost formula
-- useful for proving that the remaining formula work still lives inside `get_SU*Cost` instead of a hidden cache-builder path
-
 ### Shard cost formula model
 
 - file: `data/shard-cost-formula-model.v1.json`
@@ -197,13 +201,6 @@ Prevent:
 - must classify rows as `verified`, `partial`, or `blocked`
 - must migrate the checked `SU1` and `SU2` verified packages into that shared table
 - useful for the descriptive Shard Mining family surface, not itself a planner-safe cost model, affordability surface, or save import map
-
-### Shard type metadata probe
-
-- file: `data/shard-type-metadata-probe.v1.json`
-- classification: `extracted-mechanics`
-- must contain the direct `LibCpp2IL` typed shard schema for `ShardMining`, `ShardPerLevelTextHandler`, and nested `ShardUpgradeInfo`, plus the `upgradeInfoList` and `MilestoneCostList` owner hooks
-- useful for source-port validation and future typed shard value recovery, not itself a decoded serialized value table or verified cost formula
 
 ### Extraction candidate families
 
@@ -244,7 +241,6 @@ Prevent:
   - `data/multiverse-market-owner-family.json`
   - `data/multiverse-market-save-boundary.json`
   - `data/multiverse-market-market-member-boundary.json`
-  - `data/multiverse-market-69-74-anomaly-provenance.json`
   - `data/tokenium-naming-clues.json`
   - `data/token-bank-state-clues.json`
   - `data/daily-tokenium-lane-clues.json`
@@ -253,7 +249,6 @@ Prevent:
   - `data/spend-action-lane-clues.json`
   - `data/token-shop-owner-shell.json`
   - `data/token-shop-save-boundary.json`
-  - `data/unity-trace-bundle.json`
   - `data/token-bank-controller-shell.json`
 - classification: `extracted-mechanics`
 - must contain source paths, explicit grounded boundaries, and unresolved-gap-safe framing
@@ -275,5 +270,4 @@ Run:
 
 - `npm run verify:data`
 
-This validates the manifest plus the shipped snapshot, shard, shard-asset-grounding, shard-owner-family-boundary, shard-finalsu-bonus-boundary, shard-milestone-payload-boundary, shard-milestone-row-shell-boundary, shard-milestone-row-alignment-boundary, shard-milestone-handoff-boundary, shard-save-boundary, shard-scene-monobehaviour-probe, shard-cost-parameter-probe, shard-cost-method-probe, shard-cost-native-probe, shard-cost-screenshot-calibration, shard-cost-list-path-probe, shard-cost-formula-model, shard-bonus-slot-probe, shard-type-metadata-probe, extraction-candidate-families, extraction-candidate-ranking, token-shop, multiverse-market, and spend-boundary datasets. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
-
+This validates the manifest plus the shipped snapshot, the generated system units, the grounded shard datasets, the remaining standalone shard/model datasets, extraction-candidate datasets, TokenShop and Multiverse extracts, and the standalone spend-boundary datasets that still remain first-class shipped inputs. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.

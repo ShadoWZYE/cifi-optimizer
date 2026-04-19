@@ -1,0 +1,288 @@
+{
+  "dataset": "repo-data-framework.v1",
+  "updatedAt": "2026-04-18",
+  "purpose": "Central system-level migration manifest for consolidating probe-era data into explicit canonical, boundary, model, and support views without deleting original source files first.",
+  "targetState": {
+    "goal": "Make app, trace, and planner code consume centralized system units instead of individual probe files or narrow migration slices.",
+    "principles": [
+      "Centralize data by the actual in-game system it belongs to.",
+      "Keep canonical, boundary, model, support, and historical-probe roles explicit inside each system unit.",
+      "Preserve old files until every live read has been moved behind a centralized system unit.",
+      "Do not promote assumed or heuristic fields into canonical truth.",
+      "Treat probe-era files as source material until equivalent centralized projections exist.",
+      "When data is copied into a centralized unit, preserve verbose provenance and regeneration commands for transient probe-derived inputs."
+    ]
+  },
+  "roles": [
+    {
+      "id": "canonical",
+      "label": "Canonical dataset",
+      "description": "Grounded or app-consumed truth."
+    },
+    {
+      "id": "boundary",
+      "label": "Boundary dataset",
+      "description": "Explicit blocker, unresolved seam, or checked negative result."
+    },
+    {
+      "id": "model",
+      "label": "Model dataset",
+      "description": "Reusable structured evaluator or formula model."
+    },
+    {
+      "id": "support",
+      "label": "Support dataset",
+      "description": "Shared descriptive or mapping support that is still grounded and intentionally reused."
+    },
+    {
+      "id": "historical-probe",
+      "label": "Historical probe input",
+      "description": "Retained source material slated for later archival once centralized system units replace all live reads."
+    }
+  ],
+  "migrationUnits": [
+    {
+      "id": "shards",
+      "kind": "system",
+      "status": "seeded",
+      "domain": "shards",
+      "subsystems": [
+        "family",
+        "owned-state",
+        "cost"
+      ],
+      "targetDatasets": [
+        "data/system-units/shards.v1.json"
+      ],
+      "appStatePaths": [
+        "state.systemUnits.shards",
+        "app.js:getCurrentShardSystemView",
+        "support/system-unit-projections.js:buildShardSystemView"
+      ],
+      "traceTargets": [
+        "shard-owned-state-upgradeinfolist-population",
+        "shard-cost-su0-structure"
+      ],
+      "plannerConsumers": [
+        "scripts/shards/cost-evaluator.mjs"
+      ],
+      "inputs": {
+        "canonical": [
+          "data/shard-milestones.grounded.v1.json",
+          "data/shard-observed-behaviors.grounded.v1.json",
+          "data/shard-milestones-provenance.grounded.v1.json"
+        ],
+        "boundary": [
+          "data/shard-owner-family-boundary.v1.json",
+          "data/shard-finalsu-bonus-boundary.v1.json",
+          "data/shard-milestone-payload-boundary.v1.json",
+          "data/shard-cost-model-boundary.v1.json",
+          "data/shard-milestone-row-model-boundary.v1.json",
+          "data/shard-milestone-title-effect-boundary.v1.json",
+          "data/shard-effect-text-handler-boundary.v1.json",
+          "data/shard-milestone-row-shell-boundary.v1.json",
+          "data/shard-milestone-row-alignment-boundary.v1.json",
+          "data/shard-milestone-handoff-boundary.v1.json",
+          "data/shard-save-boundary.v1.json",
+          "data/shard-milestone-save-owner-candidates.v1.json"
+        ],
+        "model": [
+          "data/shard-cost-formula-model.v1.json"
+        ],
+        "support": [
+          "data/shard-milestone-family-evidence.v1.json"
+        ],
+        "historicalProbe": []
+      },
+      "notes": [
+        "Shard data should be consumed as one system with internal family, owned-state, and cost slices.",
+        "The split shard migration files were useful as a transition step but should not be the long-term shared data shape."
+      ]
+    },
+    {
+      "id": "player-state",
+      "kind": "system",
+      "status": "seeded",
+      "domain": "profile",
+      "subsystems": [
+        "canonical-shared-truth",
+        "planner-helpers",
+        "external-models",
+        "compatibility-imports"
+      ],
+      "targetDatasets": [
+        "data/system-units/player-state.v1.json"
+      ],
+      "appStatePaths": [
+        "state.playerProfile"
+      ],
+      "plannerConsumers": [
+        "player-profile.js",
+        "support/player-profile-boundary-support.js"
+      ],
+      "inputs": {
+        "canonical": [
+          "data/game-data.snapshot.v1.json"
+        ],
+        "boundary": [],
+        "model": [],
+        "support": [
+          "data/player-profile-import-aliases.v1.json"
+        ],
+        "historicalProbe": []
+      },
+      "notes": [
+        "Player-state is the shared app boundary and should become a first-class centralized system unit.",
+        "The current repo still expresses most player-state structure in code and docs; the alias audit is the first committed data-side projection of that boundary."
+      ]
+    },
+    {
+      "id": "token-shop",
+      "kind": "system",
+      "status": "seeded",
+      "domain": "spend",
+      "subsystems": [
+        "rows",
+        "token-bank",
+        "daily-tokenium"
+      ],
+      "targetDatasets": [
+        "data/system-units/token-shop.v1.json"
+      ],
+      "appStatePaths": [
+        "state.systemUnits.tokenShop",
+        "app.js:getCurrentSpendSystemView",
+        "support/system-unit-projections.js:buildSpendSystemView"
+      ],
+      "traceTargets": [
+        "token-shop-atu3-cells-effect",
+        "token-shop-atu4-mod",
+        "token-shop-atu5-mk1-title",
+        "token-shop-atu7-mk3-bridge",
+        "token-shop-family-structure"
+      ],
+      "plannerConsumers": [],
+      "inputs": {
+        "canonical": [],
+        "boundary": [
+          "data/token-shop-save-boundary.json",
+          "data/token-shop-row-remap-boundary.json",
+          "data/token-shop-late-atu-boundary.json",
+          "data/token-bank-formula-boundary.json"
+        ],
+        "model": [],
+        "support": [
+          "data/token-shop-values.json",
+          "data/tokenshop-canonical-v1.json",
+          "data/tokenium-naming-clues.json",
+          "data/token-bank-state-clues.json",
+          "data/daily-tokenium-lane-clues.json",
+          "data/token-shop-cost-lanes.json",
+          "data/spend-action-lane-clues.json",
+          "data/token-shop-owner-shell.json",
+          "data/token-bank-controller-shell.json"
+        ],
+        "historicalProbe": []
+      },
+      "notes": [
+        "TokenShop should converge into one system unit with row, token-bank, and Daily Tokenium projections instead of many shell or clue bundles.",
+        "ATU3 effect-chain remains the canonical trace lane for the system."
+      ]
+    },
+    {
+      "id": "multiverse-market",
+      "kind": "system",
+      "status": "seeded",
+      "domain": "spend",
+      "subsystems": [
+        "save-owner",
+        "row-identity",
+        "ui-shell"
+      ],
+      "targetDatasets": [
+        "data/system-units/multiverse-market.v1.json"
+      ],
+      "appStatePaths": [
+        "state.systemUnits.multiverseMarket",
+        "app.js:getCurrentSpendSystemView",
+        "support/system-unit-projections.js:buildSpendSystemView"
+      ],
+      "traceTargets": [
+        "multiverse-market-save-owner-boundary"
+      ],
+      "plannerConsumers": [],
+      "inputs": {
+        "canonical": [],
+        "boundary": [
+          "data/multiverse-market-save-boundary.json",
+          "data/multiverse-market-market-member-boundary.json",
+          "data/multiverse-market-savedata-import-boundary.json",
+          "data/multiverse-market-row69-74-identity-source-boundary.json",
+          "data/multiverse-market-serialized-label-source-boundary.json",
+          "data/multiverse-market-row71-74-identity-boundary.json",
+          "data/multiverse-market-inscription-numbering-stability-boundary.json",
+          "data/multiverse-market-shell-row-prediction-boundary.json",
+          "data/multiverse-market-text-provenance-path-boundary.json",
+          "data/multiverse-market-prefab-remap-boundary.json",
+          "data/multiverse-market-range-boundary.json"
+        ],
+        "model": [],
+        "support": [
+          "data/multiverse-market-values.json",
+          "data/multiverse-market-metadata-neighborhood.json",
+          "data/multiverse-market-row-text-coverage.json",
+          "data/multiverse-market-action-shell.json",
+          "data/multiverse-market-owner-family.json"
+        ],
+        "historicalProbe": []
+      },
+      "notes": [
+        "Multiverse Market should converge into one system unit with save-owner, row-identity, and UI-shell projections.",
+        "Boundary-heavy conclusions still stay explicit instead of being flattened into one guessed market table."
+      ]
+    },
+    {
+      "id": "trace",
+      "kind": "tooling",
+      "status": "active",
+      "domain": "tooling",
+        "subsystems": [
+          "registry",
+          "live-runs",
+          "promotion-targets"
+        ],
+      "targetDatasets": [
+        "data/system-units/trace.v1.json"
+      ],
+      "traceTargets": [
+        "token-shop-family-structure",
+        "token-shop-atu3-cells-effect",
+        "shard-cost-su0-structure",
+        "shard-owned-state-upgradeinfolist-population",
+        "multiverse-market-save-owner-boundary"
+      ],
+      "plannerConsumers": [
+        "scripts/unity/unity_trace_bundle.py",
+        "scripts/unity/run_probe.mjs"
+      ],
+      "inputs": {
+        "canonical": [],
+        "boundary": [],
+        "model": [],
+          "support": [
+            "data/unity-trace-target-registry.json",
+            "workbench/trace-runs/token-shop-family-structure.json",
+            "workbench/trace-runs/token-shop-atu3-cells-effect.json",
+            "workbench/trace-runs/shard-cost-su0-structure.json",
+            "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
+            "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+          ],
+        "historicalProbe": []
+      },
+      "notes": [
+        "Trace stays the orchestration layer for extraction and bounded follow-up.",
+        "System units are the promotion targets behind trace rather than a replacement for trace."
+      ]
+    }
+  ]
+}

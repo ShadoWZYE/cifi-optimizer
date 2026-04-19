@@ -1,62 +1,30 @@
 {
   "dataset": "unity-trace-bundle",
-  "generatedAt": "2026-04-17",
+  "generatedAt": "2026-04-17T22:47:05",
   "traceWorkflow": {
-    "command": "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]",
+    "command": "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--family <family-id>] [--query <query>] [--anchor <anchor>] [--extended-search <0|1|2>]",
     "directExample": "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>",
-    "plannerExample": "node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>",
+    "plannerExample": "node scripts/unity/run_probe.mjs trace --family <family-id> --query <query> --anchor <anchor> --extended-search <0|1|2>",
     "acceptedAnchors": [
       "class",
       "method",
       "string",
       "path id"
     ],
-    "targetResolution": "explicit target or checked query planner plus family-aware anchor expansion",
-    "readsCommittedSourcesOnly": true
+    "targetResolution": "explicit target, explicit family, or checked query planner plus family-aware anchor expansion",
+    "readsCommittedSourcesOnly": false
   },
   "plannerResolution": {
-    "selectionMode": "query-planner",
+    "selectionMode": "explicit-target",
     "requestedQueries": [],
-    "requestedAnchors": [
-      "TokenShop"
-    ],
-    "matchedInputs": [
-      "TokenShop"
-    ],
-    "matchedTerms": [
-      "TokenShop"
-    ],
+    "requestedAnchors": [],
+    "matchedInputs": [],
+    "matchedTerms": [],
     "matchedFamilyId": "token-shop",
     "matchedFamilyLabel": "TokenShop",
-    "runMode": "compare",
-    "comparePresetId": "token-shop-atu3-vs-atu1",
-    "synonymSetsUsed": [
-      {
-        "id": "token-shop-shell",
-        "matchedTerms": [
-          "TokenShop"
-        ],
-        "terms": [
-          "TokenShop",
-          "ATU",
-          "ATU1Button",
-          "ATU3Button",
-          "15810"
-        ]
-      },
-      {
-        "id": "currency-lane",
-        "matchedTerms": [
-          "Tokens"
-        ],
-        "terms": [
-          "Currency",
-          "Tokens",
-          "Tokenium",
-          "Diamond Upgrade"
-        ]
-      }
-    ],
+    "runMode": "trace",
+    "comparePresetId": null,
+    "synonymSetsUsed": [],
     "expandedAnchors": [
       "ATU1Button",
       "ATU2Button",
@@ -67,15 +35,9 @@
       "ATU3Button",
       "ATU24Button",
       "SetAllTokenShopTexts",
-      "TokenShop",
       "15810",
       "CellBoost",
-      "BuyCellBoost",
-      "ATU",
-      "Currency",
-      "Tokens",
-      "Tokenium",
-      "Diamond Upgrade"
+      "BuyCellBoost"
     ],
     "expandedAnchorSpecs": [
       {
@@ -124,11 +86,6 @@
         "origin": "planner-expanded-anchor"
       },
       {
-        "value": "TokenShop",
-        "kind": "class",
-        "origin": "planner-expanded-anchor"
-      },
-      {
         "value": "15810",
         "kind": "path id",
         "origin": "planner-expanded-anchor"
@@ -141,31 +98,6 @@
       {
         "value": "BuyCellBoost",
         "kind": "method",
-        "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "ATU",
-        "kind": "class",
-        "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "Currency",
-        "kind": "class",
-        "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "Tokens",
-        "kind": "class",
-        "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "Tokenium",
-        "kind": "class",
-        "origin": "planner-expanded-anchor"
-      },
-      {
-        "value": "Diamond Upgrade",
-        "kind": "string",
         "origin": "planner-expanded-anchor"
       }
     ],
@@ -218,11 +150,6 @@
       "origin": "execution-anchor"
     },
     {
-      "value": "TokenShop",
-      "kind": "class",
-      "origin": "execution-anchor"
-    },
-    {
       "value": "15810",
       "kind": "path id",
       "origin": "execution-anchor"
@@ -238,6 +165,15 @@
       "origin": "execution-anchor"
     }
   ],
+  "searchExpansion": {
+    "level": 0,
+    "label": "target-only"
+  },
+  "depthSearch": {
+    "level": 0,
+    "label": "disabled",
+    "hops": []
+  },
   "traceRegistry": {
     "path": "data/unity-trace-target-registry.json",
     "selectedTargetId": "token-shop-family-structure",
@@ -246,31 +182,29 @@
       "token-shop"
     ],
     "solvedBaselineTargetId": "token-shop-family-structure",
-    "blockedTargetId": "token-shop-atu3-cells",
+    "blockedTargetId": "token-shop-atu3-cells-effect",
     "comparisonPreset": {
-      "label": "TokenShop family structure audit vs unresolved ATU neighborhoods",
+      "label": "TokenShop family structure audit vs ATU3 effect chain",
       "solvedBaselineTargetId": "token-shop-family-structure",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "summaryFocus": [
         "repeated solved shell-to-proxy-to-prefab structure",
-        "repeated title-localization gap",
+        "shared effect-system chain",
         "standout strongest row neighborhood"
       ]
-    }
+    },
+    "defaultDepth": 0,
+    "followUpSurfaces": [],
+    "depthPlan": [],
+    "claimStages": []
   },
   "sources": {
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0",
     "sharedassets0": "workbench/unity/joined/sharedassets0.assets",
-    "globalgamemanagers": "workbench/unity/joined/globalgamemanagers.assets",
-    "tokenShopExtract": "data/token-shop-values.json",
+    "tokenShopExtract": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
     "tokenShopRowRemapBoundary": "data/token-shop-row-remap-boundary.json",
-    "tokenShopLateAtuBoundary": "data/token-shop-late-atu-boundary.json",
-    "dailyTokeniumLaneProbe": "data/daily-tokenium-lane-probe.json",
-    "dailyTokeniumOwnerProbe": "data/daily-tokenium-owner-probe.json",
-    "uabeaProbe": "data/uabea-probe-report.json",
-    "unityProbe": "data/unity-probe-report.json",
-    "lm244TargetedProbe": "data/lm244-targeted-probe.json"
+    "tokenShopLateAtuBoundary": "data/token-shop-late-atu-boundary.json"
   },
   "sourceRoles": [
     {
@@ -295,18 +229,11 @@
       "role": "Direct Unity shared assets extraction (prefabs, materials)."
     },
     {
-      "sourceId": "globalgamemanagers",
-      "path": "workbench/unity/joined/globalgamemanagers.assets",
-      "familyId": "token-shop",
-      "familyLabel": "TokenShop",
-      "role": "Direct Unity global managers assets extraction."
-    },
-    {
       "sourceId": "tokenShopExtract",
-      "path": "data/token-shop-values.json",
+      "path": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
       "familyId": "token-shop",
       "familyLabel": "TokenShop",
-      "role": "Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser."
+      "role": "Reconstructs exact owner-payload shell windows and path ids directly from level0 plus global-metadata.dat, while preserving compatibility with the historical TokenShop parser dataset contract."
     },
     {
       "sourceId": "tokenShopRowRemapBoundary",
@@ -321,43 +248,63 @@
       "familyId": "token-shop",
       "familyLabel": "TokenShop",
       "role": "Preserves the checked late ATU24-ATU28 shell neighborhood and its bounded negative title or prefab join result."
-    },
-    {
-      "sourceId": "dailyTokeniumLaneProbe",
-      "path": "data/daily-tokenium-lane-probe.json",
-      "familyId": "token-shop",
-      "familyLabel": "TokenShop",
-      "role": "Preserves named action-hook neighborhoods from the committed targeted string probe outputs."
-    },
-    {
-      "sourceId": "dailyTokeniumOwnerProbe",
-      "path": "data/daily-tokenium-owner-probe.json",
-      "familyId": "token-shop",
-      "familyLabel": "TokenShop",
-      "role": "Preserves committed owner-side TokenShop title and support-text neighborhoods from the local level0 probe lane."
-    },
-    {
-      "sourceId": "uabeaProbe",
-      "path": "data/uabea-probe-report.json",
-      "familyId": "token-shop",
-      "familyLabel": "TokenShop",
-      "role": "Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities or typed field tables."
-    },
-    {
-      "sourceId": "unityProbe",
-      "path": "data/unity-probe-report.json",
-      "familyId": "token-shop",
-      "familyLabel": "TokenShop",
-      "role": "Preserves broader committed unity string buckets including title or text-hook surfaces."
-    },
-    {
-      "sourceId": "lm244TargetedProbe",
-      "path": "data/lm244-targeted-probe.json",
-      "familyId": "token-shop",
-      "familyLabel": "TokenShop",
-      "role": "Preserves targeted string-hit neighborhoods from the local lm244 follow-up probe lane."
     }
   ],
+  "nativeTrace": {
+    "available": true,
+    "project": "cifi-full",
+    "searchTerms": [
+      "ATU1Button",
+      "ATU2Button",
+      "ATU4Button",
+      "ATU5Button",
+      "ATU6Button",
+      "ATU7Button"
+    ],
+    "returncode": 0,
+    "status": "completed",
+    "jobId": "process_20260417_220142",
+    "job": {
+      "job_id": "process_20260417_220142",
+      "mode": "process-project",
+      "project_name": "cifi-full",
+      "project_file": "libil2cpp.so",
+      "timeout": 120,
+      "max_cpu": null,
+      "search_strings": [
+        "ATU1Button",
+        "ATU2Button",
+        "ATU4Button",
+        "ATU5Button",
+        "ATU6Button",
+        "ATU7Button"
+      ],
+      "output_file": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\ghidra-jobs\\process_20260417_220142\\results.json",
+      "marker_file": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\ghidra-jobs\\process_20260417_220142\\results.done",
+      "log_file": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\ghidra-jobs\\process_20260417_220142\\headless.log",
+      "start_time": "2026-04-17T22:03:19.192385",
+      "status": "completed"
+    },
+    "result": {
+      "functions": {},
+      "functionCount": 200,
+      "strings": {},
+      "binary": "libil2cpp.so",
+      "errors": [],
+      "timestamp": "2026-04-17T22:02:03",
+      "headless": {
+        "status": "completed",
+        "analyze": false,
+        "returncode": 0,
+        "log_file": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\ghidra-jobs\\process_20260417_220142\\headless.log",
+        "script": "CiFiTierAnalysisPy.py",
+        "project_name": "cifi-full",
+        "project_file": "libil2cpp.so",
+        "mode": "process-project"
+      }
+    },
+    "cacheHit": true
+  },
   "target": {
     "id": "token-shop-family-structure",
     "label": "TokenShop family structure audit",
@@ -372,7 +319,6 @@
       "ATU3Button",
       "ATU24Button",
       "SetAllTokenShopTexts",
-      "TokenShop",
       "15810",
       "CellBoost",
       "BuyCellBoost"
@@ -382,10 +328,10 @@
       "token-shop"
     ],
     "solvedBaselineTargetId": "token-shop-family-structure",
-    "blockedTargetId": "token-shop-atu3-cells"
+    "blockedTargetId": "token-shop-atu3-cells-effect"
   },
   "shellWindow": {
-    "source": "data/token-shop-values.json",
+    "source": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
     "shellField": "ATU1Button through ATU28Button",
     "shellPathId": "family-range",
     "shellObjectOffset": null,
@@ -454,7 +400,6 @@
         "ATU24Button",
         "ATU28Button",
         "SetAllTokenShopTexts",
-        "TokenShop",
         "15810",
         "CellBoost",
         "BuyCellBoost"
@@ -511,11 +456,6 @@
           "origin": "surface-search"
         },
         {
-          "value": "TokenShop",
-          "kind": "class",
-          "origin": "surface-search"
-        },
-        {
           "value": "15810",
           "kind": "path id",
           "origin": "surface-search"
@@ -534,7 +474,7 @@
       "sources": [
         {
           "sourceId": "tokenShopExtract",
-          "sourcePath": "data/token-shop-values.json",
+          "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
           "searchModes": [
             "exact-structured"
           ],
@@ -1003,114 +943,12 @@
             "exact-string",
             "bounded-containment"
           ],
-          "hitCount": 19,
+          "hitCount": 15,
           "highSignalHitCount": 0,
-          "supportingHitCount": 12,
-          "incidentalHitCount": 7,
+          "supportingHitCount": 11,
+          "incidentalHitCount": 4,
           "suppressedNoiseCount": 0,
           "hits": [
-            {
-              "term": "TokenShop",
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-string",
-              "offset": 657154,
-              "context": [
-                {
-                  "offset": 657049,
-                  "encoding": "ascii",
-                  "value": "InitializeUGS"
-                },
-                {
-                  "offset": 657063,
-                  "encoding": "ascii",
-                  "value": "ugs_OnInitialized"
-                },
-                {
-                  "offset": 657081,
-                  "encoding": "ascii",
-                  "value": "environment"
-                },
-                {
-                  "offset": 657093,
-                  "encoding": "ascii",
-                  "value": "<Awake>d__3"
-                },
-                {
-                  "offset": 657105,
-                  "encoding": "ascii",
-                  "value": "stateMachine"
-                },
-                {
-                  "offset": 657118,
-                  "encoding": "ascii",
-                  "value": "SetStateMachine"
-                },
-                {
-                  "offset": 657134,
-                  "encoding": "ascii",
-                  "value": "<>t__builder"
-                },
-                {
-                  "offset": 657147,
-                  "encoding": "ascii",
-                  "value": "<>u__1"
-                },
-                {
-                  "offset": 657154,
-                  "encoding": "ascii",
-                  "value": "TokenShop"
-                },
-                {
-                  "offset": 657164,
-                  "encoding": "ascii",
-                  "value": "get_TokenBankCap"
-                },
-                {
-                  "offset": 657181,
-                  "encoding": "ascii",
-                  "value": "get_ClaimableBankTokens"
-                },
-                {
-                  "offset": 657205,
-                  "encoding": "ascii",
-                  "value": "get_FinalModBoostMaxLevel"
-                },
-                {
-                  "offset": 657231,
-                  "encoding": "ascii",
-                  "value": "get_FinalMK1TokenBoostFillMaxLevel"
-                },
-                {
-                  "offset": 657266,
-                  "encoding": "ascii",
-                  "value": "get_FinalMK2TokenBoostFillMaxLevel"
-                },
-                {
-                  "offset": 657301,
-                  "encoding": "ascii",
-                  "value": "get_FinalMK3TokenBoostFillMaxLevel"
-                },
-                {
-                  "offset": 657336,
-                  "encoding": "ascii",
-                  "value": "get_FinalMK4TokenBoostFillMaxLevel"
-                },
-                {
-                  "offset": 657371,
-                  "encoding": "ascii",
-                  "value": "get_FinalMK5TokenBoostFillMaxLevel"
-                }
-              ],
-              "signalScore": 90,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-string match on TokenShop via metadata"
-            },
             {
               "term": "BuyCellBoost",
               "matchedTerms": [
@@ -2136,12 +1974,10 @@
             {
               "term": "SetAllTokenShopTexts",
               "matchedTerms": [
-                "SetAllTokenShopTexts",
-                "TokenShop"
+                "SetAllTokenShopTexts"
               ],
               "matchedAnchorKinds": [
-                "method",
-                "class"
+                "method"
               ],
               "matchMode": "exact-string",
               "offset": 979315,
@@ -2235,109 +2071,7 @@
               "signalScore": 90,
               "signalTier": "supporting",
               "noiseFlags": [],
-              "signalReason": "exact-string match on SetAllTokenShopTexts, TokenShop via metadata"
-            },
-            {
-              "term": "InitializeTokenShop",
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "bounded-containment",
-              "offset": 658937,
-              "context": [
-                {
-                  "offset": 658768,
-                  "encoding": "ascii",
-                  "value": "get_TotalT1TokenLevels"
-                },
-                {
-                  "offset": 658791,
-                  "encoding": "ascii",
-                  "value": "get_TotalT2TokenLevels"
-                },
-                {
-                  "offset": 658814,
-                  "encoding": "ascii",
-                  "value": "get_TotalT3TokenLevels"
-                },
-                {
-                  "offset": 658837,
-                  "encoding": "ascii",
-                  "value": "get_TotalT4TokenLevels"
-                },
-                {
-                  "offset": 658860,
-                  "encoding": "ascii",
-                  "value": "get_TotalT5TokenLevels"
-                },
-                {
-                  "offset": 658883,
-                  "encoding": "ascii",
-                  "value": "get_TotalTokenLevels"
-                },
-                {
-                  "offset": 658904,
-                  "encoding": "ascii",
-                  "value": "get_T4Requirement"
-                },
-                {
-                  "offset": 658922,
-                  "encoding": "ascii",
-                  "value": "get_CheckValue"
-                },
-                {
-                  "offset": 658937,
-                  "encoding": "ascii",
-                  "value": "InitializeTokenShop"
-                },
-                {
-                  "offset": 658957,
-                  "encoding": "ascii",
-                  "value": "CheckMeltdownPanel"
-                },
-                {
-                  "offset": 658976,
-                  "encoding": "ascii",
-                  "value": "CheckAllOverlays"
-                },
-                {
-                  "offset": 658993,
-                  "encoding": "ascii",
-                  "value": "CheckATU1Overlay"
-                },
-                {
-                  "offset": 659010,
-                  "encoding": "ascii",
-                  "value": "CheckATU2Overlay"
-                },
-                {
-                  "offset": 659027,
-                  "encoding": "ascii",
-                  "value": "CheckATU3Overlay"
-                },
-                {
-                  "offset": 659044,
-                  "encoding": "ascii",
-                  "value": "CheckATU4Overlay"
-                },
-                {
-                  "offset": 659061,
-                  "encoding": "ascii",
-                  "value": "CheckATU5Overlay"
-                },
-                {
-                  "offset": 659078,
-                  "encoding": "ascii",
-                  "value": "CheckATU6Overlay"
-                }
-              ],
-              "signalScore": 45,
-              "signalTier": "incidental",
-              "noiseFlags": [],
-              "signalReason": "bounded-containment match on TokenShop via metadata"
+              "signalReason": "exact-string match on SetAllTokenShopTexts via metadata"
             },
             {
               "term": "BuyCellBoostEnum",
@@ -2442,108 +2176,6 @@
               "signalTier": "incidental",
               "noiseFlags": [],
               "signalReason": "bounded-containment match on CellBoost, BuyCellBoost via metadata"
-            },
-            {
-              "term": "TokenShopButtonNotification",
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "bounded-containment",
-              "offset": 661938,
-              "context": [
-                {
-                  "offset": 661807,
-                  "encoding": "ascii",
-                  "value": "SetTier2Fill"
-                },
-                {
-                  "offset": 661820,
-                  "encoding": "ascii",
-                  "value": "SetTier3Fill"
-                },
-                {
-                  "offset": 661833,
-                  "encoding": "ascii",
-                  "value": "SetTier4Fill"
-                },
-                {
-                  "offset": 661846,
-                  "encoding": "ascii",
-                  "value": "SetTier5Fill"
-                },
-                {
-                  "offset": 661862,
-                  "encoding": "ascii",
-                  "value": "MeltdownActiveObject"
-                },
-                {
-                  "offset": 661883,
-                  "encoding": "ascii",
-                  "value": "MeltdownT2ActiveObject"
-                },
-                {
-                  "offset": 661906,
-                  "encoding": "ascii",
-                  "value": "MeltdownT3ActiveObject"
-                },
-                {
-                  "offset": 661929,
-                  "encoding": "ascii",
-                  "value": "BankFill"
-                },
-                {
-                  "offset": 661938,
-                  "encoding": "ascii",
-                  "value": "TokenShopButtonNotification"
-                },
-                {
-                  "offset": 661966,
-                  "encoding": "ascii",
-                  "value": "NavButtonNotification"
-                },
-                {
-                  "offset": 661988,
-                  "encoding": "ascii",
-                  "value": "TokenBankDescriptionText"
-                },
-                {
-                  "offset": 662013,
-                  "encoding": "ascii",
-                  "value": "TokenBoostStartCost"
-                },
-                {
-                  "offset": 662033,
-                  "encoding": "ascii",
-                  "value": "TokenBoostAdditiveCost"
-                },
-                {
-                  "offset": 662056,
-                  "encoding": "ascii",
-                  "value": "TokenBoostBonus"
-                },
-                {
-                  "offset": 662072,
-                  "encoding": "ascii",
-                  "value": "TokenBoostMaxLevel"
-                },
-                {
-                  "offset": 662091,
-                  "encoding": "ascii",
-                  "value": "TokenBoostFill"
-                },
-                {
-                  "offset": 662106,
-                  "encoding": "ascii",
-                  "value": "ATU1Button"
-                }
-              ],
-              "signalScore": 45,
-              "signalTier": "incidental",
-              "noiseFlags": [],
-              "signalReason": "bounded-containment match on TokenShop via metadata"
             },
             {
               "term": "CellBoostStartCost",
@@ -2852,108 +2484,6 @@
               "signalTier": "incidental",
               "noiseFlags": [],
               "signalReason": "bounded-containment match on CellBoost, BuyCellBoost via metadata"
-            },
-            {
-              "term": "get_TokenshopBonus",
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "bounded-containment",
-              "offset": 794077,
-              "context": [
-                {
-                  "offset": 793903,
-                  "encoding": "ascii",
-                  "value": "get_DiamondCalculations"
-                },
-                {
-                  "offset": 793927,
-                  "encoding": "ascii",
-                  "value": "get_CellCalculations"
-                },
-                {
-                  "offset": 793948,
-                  "encoding": "ascii",
-                  "value": "get_MPCalculations"
-                },
-                {
-                  "offset": 793967,
-                  "encoding": "ascii",
-                  "value": "get_ShardCalculations"
-                },
-                {
-                  "offset": 793989,
-                  "encoding": "ascii",
-                  "value": "get_RPCalculations"
-                },
-                {
-                  "offset": 794008,
-                  "encoding": "ascii",
-                  "value": "get_APCalculations"
-                },
-                {
-                  "offset": 794027,
-                  "encoding": "ascii",
-                  "value": "get_DailyRewardsBonus"
-                },
-                {
-                  "offset": 794049,
-                  "encoding": "ascii",
-                  "value": "get_ResearchLaboratoryBonus"
-                },
-                {
-                  "offset": 794077,
-                  "encoding": "ascii",
-                  "value": "get_TokenshopBonus"
-                },
-                {
-                  "offset": 794096,
-                  "encoding": "ascii",
-                  "value": "get_GemBonus"
-                },
-                {
-                  "offset": 794109,
-                  "encoding": "ascii",
-                  "value": "OnEventEnd"
-                },
-                {
-                  "offset": 794120,
-                  "encoding": "ascii",
-                  "value": "StopEvent"
-                },
-                {
-                  "offset": 794130,
-                  "encoding": "ascii",
-                  "value": "AutoClaimAllEggstones"
-                },
-                {
-                  "offset": 794152,
-                  "encoding": "ascii",
-                  "value": "isEggsterActive"
-                },
-                {
-                  "offset": 794168,
-                  "encoding": "ascii",
-                  "value": "EggPrefab"
-                },
-                {
-                  "offset": 794178,
-                  "encoding": "ascii",
-                  "value": "EggsParent"
-                },
-                {
-                  "offset": 794189,
-                  "encoding": "ascii",
-                  "value": "EggCount"
-                }
-              ],
-              "signalScore": 45,
-              "signalTier": "incidental",
-              "noiseFlags": [],
-              "signalReason": "bounded-containment match on TokenShop via metadata"
             }
           ]
         }
@@ -2980,7 +2510,6 @@
         "ATU3Button",
         "ATU24Button",
         "SetAllTokenShopTexts",
-        "TokenShop",
         "15810",
         "CellBoost"
       ],
@@ -3068,11 +2597,6 @@
         {
           "value": "SetAllTokenShopTexts",
           "kind": "method",
-          "origin": "surface-search"
-        },
-        {
-          "value": "TokenShop",
-          "kind": "class",
           "origin": "surface-search"
         },
         {
@@ -4527,1171 +4051,107 @@
           ]
         },
         {
-          "sourceId": "dailyTokeniumLaneProbe",
-          "sourcePath": "data/daily-tokenium-lane-probe.json",
+          "sourceId": "level0",
+          "sourcePath": "workbench/unity/joined/level0",
           "searchModes": [
-            "exact-structured"
+            "object-name",
+            "class-name",
+            "component-type",
+            "text-content"
           ],
-          "hitCount": 35,
-          "highSignalHitCount": 35,
+          "hitCount": 8,
+          "highSignalHitCount": 8,
           "supportingHitCount": 0,
           "incidentalHitCount": 0,
           "suppressedNoiseCount": 0,
           "hits": [
             {
-              "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[101].byte_context[41].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyCellBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[101].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyCellBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[102].byte_context[40].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyCellBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[102].entry_context[25].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyCellBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyMK2TokenBoost",
-              "jsonPath": "$[0].matches[192].byte_context[32].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34228680
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK2TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK2TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK2TokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyMK2TokenBoost",
-              "jsonPath": "$[0].matches[192].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34228680
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK2TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK2TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK2TokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyMK2TokenBoost",
-              "jsonPath": "$[0].matches[193].byte_context[32].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34228680
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK2TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK2TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK2TokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyMK2TokenBoost",
-              "jsonPath": "$[0].matches[193].entry_context[25].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34228680
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK2TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK2TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK2TokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyTokenBoost",
-              "jsonPath": "$[0].matches[197].byte_context[64].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34263272
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyTokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyTokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyTokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyTokenBoost",
-              "jsonPath": "$[0].matches[197].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34263272
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyTokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyTokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyTokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyTokenBoost",
-              "jsonPath": "$[0].matches[198].byte_context[61].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34263272
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyTokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyTokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyTokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyTokenBoost",
-              "jsonPath": "$[0].matches[198].entry_context[25].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34263272
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyTokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyTokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyTokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyMK1TokenBoost",
-              "jsonPath": "$[0].matches[200].byte_context[30].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34292472
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK1TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK1TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK1TokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyMK1TokenBoost",
-              "jsonPath": "$[0].matches[200].entry_context[31].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34292472
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK1TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK1TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK1TokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyMK1TokenBoost",
-              "jsonPath": "$[0].matches[201].byte_context[27].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34292472
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK1TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK1TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK1TokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyMK1TokenBoost",
-              "jsonPath": "$[0].matches[201].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34292472
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK1TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK1TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK1TokenBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[312].byte_context[118].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 37825208
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "SetAllTokenShopTexts"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[312].entry_context[16].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 37825208
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "SetAllTokenShopTexts"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[312].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 37825208
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "SetAllTokenShopTexts"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[313].entry_context[4].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 37825208
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "SetAllTokenShopTexts"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$[0].matches[4].byte_context[77].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 10588180
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "TokenShop"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$[0].matches[4].entry_context[16].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 10588180
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "TokenShop"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$[0].matches[4].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 10588180
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "TokenShop"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via dailyTokeniumLaneProbe"
-            },
-            {
               "term": "BuyModBoost",
-              "jsonPath": "$[0].matches[68].byte_context[52].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31087432
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyModBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyModBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "BuyModBoost",
+              "surfaceType": "raw-string",
+              "offset": 31087432,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@31087432",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyModBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyModBoost",
-              "jsonPath": "$[0].matches[68].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31087432
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyModBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyModBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyModBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyModBoost",
-              "jsonPath": "$[0].matches[69].byte_context[52].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31087432
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyModBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyModBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyModBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyModBoost",
-              "jsonPath": "$[0].matches[69].entry_context[25].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31087432
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyModBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyModBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyModBoost via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "BuyATU24",
-              "jsonPath": "$[0].matches[71].byte_context[37].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31096872
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyATU24"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyATU24"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "BuyATU24",
+              "surfaceType": "raw-string",
+              "offset": 31096872,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@31096872",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyATU24 via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyATU24",
-              "jsonPath": "$[0].matches[72].byte_context[35].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31096872
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyATU24"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyATU24"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyATU24 via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyATU24",
-              "jsonPath": "$[0].matches[72].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31096872
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyATU24"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyATU24"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyATU24 via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyATU24",
-              "jsonPath": "$[0].matches[73].entry_context[25].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31096872
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyATU24"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyATU24"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyATU24 via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "BuyMK3TokenBoost",
-              "jsonPath": "$[0].matches[96].byte_context[82].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31904312
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK3TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK3TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "BuyMK3TokenBoost",
+              "surfaceType": "raw-string",
+              "offset": 31904312,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@31904312",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK3TokenBoost via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
-              "term": "BuyMK3TokenBoost",
-              "jsonPath": "$[0].matches[97].byte_context[60].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31904312
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK3TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK3TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "term": "BuyCellBoost",
+              "matchedValue": "BuyCellBoost",
+              "surfaceType": "raw-string",
+              "offset": 32115000,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@32115000",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK3TokenBoost via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
-              "term": "BuyMK3TokenBoost",
-              "jsonPath": "$[0].matches[97].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31904312
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK3TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK3TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "term": "BuyMK2TokenBoost",
+              "matchedValue": "BuyMK2TokenBoost",
+              "surfaceType": "raw-string",
+              "offset": 34228680,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@34228680",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK3TokenBoost via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
-              "term": "BuyMK3TokenBoost",
-              "jsonPath": "$[0].matches[98].entry_context[25].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31904312
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyMK3TokenBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyMK3TokenBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "term": "BuyTokenBoost",
+              "matchedValue": "BuyTokenBoost",
+              "surfaceType": "raw-string",
+              "offset": 34263272,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@34263272",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyMK3TokenBoost via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "BuyMK1TokenBoost",
+              "matchedValue": "BuyMK1TokenBoost",
+              "surfaceType": "raw-string",
+              "offset": 34292472,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@34292472",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "SetAllTokenShopTexts",
+              "matchedValue": "SetAllTokenShopTexts",
+              "surfaceType": "raw-string",
+              "offset": 37825208,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@37825208",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
             }
           ]
         }
@@ -5718,7 +4178,6 @@
         "ATU3Button",
         "ATU24Button",
         "SetAllTokenShopTexts",
-        "TokenShop",
         "15810",
         "CellBoost",
         "BuyCellBoost"
@@ -5807,11 +4266,6 @@
         {
           "value": "SetAllTokenShopTexts",
           "kind": "method",
-          "origin": "surface-search"
-        },
-        {
-          "value": "TokenShop",
-          "kind": "class",
           "origin": "surface-search"
         },
         {
@@ -7614,1175 +6068,227 @@
           ]
         },
         {
-          "sourceId": "uabeaProbe",
-          "sourcePath": "data/uabea-probe-report.json",
+          "sourceId": "level0",
+          "sourcePath": "workbench/unity/joined/level0",
           "searchModes": [
-            "exact-structured"
+            "object-name",
+            "class-name",
+            "component-type",
+            "text-content"
           ],
-          "hitCount": 12,
-          "highSignalHitCount": 12,
+          "hitCount": 18,
+          "highSignalHitCount": 18,
           "supportingHitCount": 0,
           "incidentalHitCount": 0,
           "suppressedNoiseCount": 0,
           "hits": [
             {
-              "term": "TokenShop",
-              "jsonPath": "$.directTargetTypeMetadata[0].fields[27].type",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "type",
-                "scalarEntries": [
-                  {
-                    "key": "index",
-                    "value": 27
-                  },
-                  {
-                    "key": "name",
-                    "value": "TS"
-                  },
-                  {
-                    "key": "type",
-                    "value": "TokenShop"
-                  },
-                  {
-                    "key": "attributes",
-                    "value": "Public"
-                  },
-                  {
-                    "key": "defaultValue",
-                    "value": null
-                  },
-                  {
-                    "key": "fieldOffset",
-                    "value": 240
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via uabeaProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$.monoScriptHits[5].className",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "className",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "globalgamemanagers.assets"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 167
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": "TokenShop"
-                  },
-                  {
-                    "key": "className",
-                    "value": "TokenShop"
-                  },
-                  {
-                    "key": "namespaceName",
-                    "value": ""
-                  },
-                  {
-                    "key": "assemblyName",
-                    "value": "Assembly-CSharp"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via uabeaProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$.monoScriptHits[5].scriptName",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "scriptName",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "globalgamemanagers.assets"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 167
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": "TokenShop"
-                  },
-                  {
-                    "key": "className",
-                    "value": "TokenShop"
-                  },
-                  {
-                    "key": "namespaceName",
-                    "value": ""
-                  },
-                  {
-                    "key": "assemblyName",
-                    "value": "Assembly-CSharp"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via uabeaProbe"
-            },
-            {
               "term": "NewTokenUPGPrefab.T1.DiamondBoost",
-              "jsonPath": "$.namedObjectHits[10350].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48809
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.DiamondBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "NewTokenUPGPrefab.T1.DiamondBoost",
+              "surfaceType": "object-name",
+              "pathId": 48809,
+              "objectType": "GameObject",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.DiamondBoost via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 85
             },
             {
               "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
-              "jsonPath": "$.namedObjectHits[10353].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48812
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T1.ModPointsBooster"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.ModPointsBooster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "surfaceType": "object-name",
+              "pathId": 48812,
+              "objectType": "GameObject",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.ModPointsBooster via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 85
             },
             {
               "term": "NewTokenUPGPrefab.T1.MK3Booster",
-              "jsonPath": "$.namedObjectHits[10362].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48821
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T1.MK3Booster"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.MK3Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "NewTokenUPGPrefab.T1.MK3Booster",
+              "surfaceType": "object-name",
+              "pathId": 48821,
+              "objectType": "GameObject",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.MK3Booster via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 85
             },
             {
               "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-              "jsonPath": "$.namedObjectHits[10371].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48830
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "surfaceType": "object-name",
+              "pathId": 48830,
+              "objectType": "GameObject",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.CellsPerChestBooster via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 85
             },
             {
               "term": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
-              "jsonPath": "$.namedObjectHits[10373].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48832
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+              "surfaceType": "object-name",
+              "pathId": 48832,
+              "objectType": "GameObject",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 85
             },
             {
               "term": "NewTokenUPGPrefab.T1.MK1Booster",
-              "jsonPath": "$.namedObjectHits[10379].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48838
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.MK1Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "NewTokenUPGPrefab.T1.MK1Booster",
+              "surfaceType": "object-name",
+              "pathId": 48838,
+              "objectType": "GameObject",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.MK1Booster via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 85
             },
             {
               "term": "NewTokenUPGPrefab.T1.TokensBoost",
-              "jsonPath": "$.namedObjectHits[10405].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48864
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T1.TokensBoost"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.TokensBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "NewTokenUPGPrefab.T1.TokensBoost",
+              "surfaceType": "object-name",
+              "pathId": 48864,
+              "objectType": "GameObject",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.TokensBoost via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 85
             },
             {
               "term": "NewTokenUPGPrefab.T1.MK2Booster",
-              "jsonPath": "$.namedObjectHits[10409].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 48868
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.MK2Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "NewTokenUPGPrefab.T1.MK2Booster",
+              "surfaceType": "object-name",
+              "pathId": 48868,
+              "objectType": "GameObject",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.MK2Booster via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 85
             },
             {
-              "term": "TokenShop",
-              "jsonPath": "$.namedObjectHits[1054].name",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "name",
-                "scalarEntries": [
-                  {
-                    "key": "fileName",
-                    "value": "level0"
-                  },
-                  {
-                    "key": "pathId",
-                    "value": 8768
-                  },
-                  {
-                    "key": "typeId",
-                    "value": 1
-                  },
-                  {
-                    "key": "typeName",
-                    "value": "GameObject"
-                  },
-                  {
-                    "key": "name",
-                    "value": "TokenShop"
-                  },
-                  {
-                    "key": "scriptPathId",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptName",
-                    "value": null
-                  },
-                  {
-                    "key": "scriptIndex",
-                    "value": null
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "term": "NewTokenUPGPrefab.T1.DiamondBoost",
+              "matchedValue": "NewTokenUPGPrefab.T1.DiamondBoost",
+              "surfaceType": "raw-string",
+              "offset": 13672148,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@13672148",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via uabeaProbe"
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "matchedValue": "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "surfaceType": "raw-string",
+              "offset": 13672404,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@13672404",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.MK3Booster",
+              "matchedValue": "NewTokenUPGPrefab.T1.MK3Booster",
+              "surfaceType": "raw-string",
+              "offset": 13673172,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@13673172",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "matchedValue": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "surfaceType": "raw-string",
+              "offset": 13673972,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@13673972",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+              "matchedValue": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+              "surfaceType": "raw-string",
+              "offset": 13674148,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@13674148",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.MK1Booster",
+              "matchedValue": "NewTokenUPGPrefab.T1.MK1Booster",
+              "surfaceType": "raw-string",
+              "offset": 13674660,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@13674660",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.TokensBoost",
+              "matchedValue": "NewTokenUPGPrefab.T1.TokensBoost",
+              "surfaceType": "raw-string",
+              "offset": 13676868,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@13676868",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "NewTokenUPGPrefab.T1.MK2Booster",
+              "matchedValue": "NewTokenUPGPrefab.T1.MK2Booster",
+              "surfaceType": "raw-string",
+              "offset": 13677188,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@13677188",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "BuyCellBoost",
+              "matchedValue": "BuyCellBoost",
+              "surfaceType": "raw-string",
+              "offset": 32115000,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@32115000",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "SetAllTokenShopTexts",
+              "matchedValue": "SetAllTokenShopTexts",
+              "surfaceType": "raw-string",
+              "offset": 37825208,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@37825208",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
             }
           ]
         },
         {
-          "sourceId": "unityProbe",
-          "sourcePath": "data/unity-probe-report.json",
+          "sourceId": "sharedassets0",
+          "sourcePath": "workbench/unity/joined/sharedassets0.assets",
           "searchModes": [
-            "exact-structured"
+            "object-name",
+            "class-name",
+            "component-type",
+            "text-content"
           ],
-          "hitCount": 11,
+          "hitCount": 0,
           "highSignalHitCount": 0,
-          "supportingHitCount": 11,
+          "supportingHitCount": 0,
           "incidentalHitCount": 0,
           "suppressedNoiseCount": 0,
-          "hits": [
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$.apk_results[32].keyword_hits.token[6]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 6,
-                "nearbyScalarValues": [
-                  {
-                    "index": 3,
-                    "value": "LV. 1 - (Tokens In Bank)^1.19"
-                  },
-                  {
-                    "index": 4,
-                    "value": "LV. 1 - (Tokens In Bank)^1.29"
-                  },
-                  {
-                    "index": 5,
-                    "value": "LV. 1 - Token Bank Capacity x2"
-                  },
-                  {
-                    "index": 6,
-                    "value": "SetAllTokenShopTexts"
-                  },
-                  {
-                    "index": 7,
-                    "value": "SetTokenTexts"
-                  },
-                  {
-                    "index": 8,
-                    "value": "TokenClaimRecolor"
-                  },
-                  {
-                    "index": 9,
-                    "value": "TokenShop, Assembly-CSharp"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$.apk_results[4].keyword_hits.token[14]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 14,
-                "nearbyScalarValues": [
-                  {
-                    "index": 11,
-                    "value": "TokenAdUnavailable"
-                  },
-                  {
-                    "index": 12,
-                    "value": "TokenCapText"
-                  },
-                  {
-                    "index": 13,
-                    "value": "TokenNotification"
-                  },
-                  {
-                    "index": 14,
-                    "value": "TokenShop"
-                  },
-                  {
-                    "index": 15,
-                    "value": "TokenShop.Canvas"
-                  },
-                  {
-                    "index": 16,
-                    "value": "TokenUPGTitleText_TMPro"
-                  },
-                  {
-                    "index": 17,
-                    "value": "TokeniumExchange"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.DiamondBoost",
-              "jsonPath": "$.apk_results[7].keyword_hits.diamond[25]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 25,
-                "nearbyScalarValues": [
-                  {
-                    "index": 22,
-                    "value": "NewDiamondUPGPrefab.Specials.ResearchBoost"
-                  },
-                  {
-                    "index": 23,
-                    "value": "NewDiamondUPGPrefab.Specials.ShardsBoost"
-                  },
-                  {
-                    "index": 24,
-                    "value": "NewDiamondUPGPrefab.Specials.TokensBoost"
-                  },
-                  {
-                    "index": 25,
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
-                  },
-                  {
-                    "index": 26,
-                    "value": "RewardBoxDiamonds"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.DiamondBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.DiamondBoost via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.ModPointsBooster",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[14]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 14,
-                "nearbyScalarValues": [
-                  {
-                    "index": 11,
-                    "value": "NewTokenUPGPrefab.T1.MK6Booster"
-                  },
-                  {
-                    "index": 12,
-                    "value": "NewTokenUPGPrefab.T1.MK7Booster"
-                  },
-                  {
-                    "index": 13,
-                    "value": "NewTokenUPGPrefab.T1.MK8Booster"
-                  },
-                  {
-                    "index": 14,
-                    "value": "NewTokenUPGPrefab.T1.ModPointsBooster"
-                  },
-                  {
-                    "index": 15,
-                    "value": "NewTokenUPGPrefab.T1.TokensBoost"
-                  },
-                  {
-                    "index": 16,
-                    "value": "NewTokenUPGPrefab.T2.DailyTokens"
-                  },
-                  {
-                    "index": 17,
-                    "value": "NewTokenUPGPrefab.T2.DuoBoosterFive"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.ModPointsBooster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.ModPointsBooster via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.TokensBoost",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[15]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 15,
-                "nearbyScalarValues": [
-                  {
-                    "index": 12,
-                    "value": "NewTokenUPGPrefab.T1.MK7Booster"
-                  },
-                  {
-                    "index": 13,
-                    "value": "NewTokenUPGPrefab.T1.MK8Booster"
-                  },
-                  {
-                    "index": 14,
-                    "value": "NewTokenUPGPrefab.T1.ModPointsBooster"
-                  },
-                  {
-                    "index": 15,
-                    "value": "NewTokenUPGPrefab.T1.TokensBoost"
-                  },
-                  {
-                    "index": 16,
-                    "value": "NewTokenUPGPrefab.T2.DailyTokens"
-                  },
-                  {
-                    "index": 17,
-                    "value": "NewTokenUPGPrefab.T2.DuoBoosterFive"
-                  },
-                  {
-                    "index": 18,
-                    "value": "NewTokenUPGPrefab.T2.DuoBoosterFour"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.TokensBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.TokensBoost via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[30]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 30,
-                "nearbyScalarValues": [
-                  {
-                    "index": 27,
-                    "value": "NewTokenUPGPrefab.T4.DailyTokens"
-                  },
-                  {
-                    "index": 28,
-                    "value": "NewTokenUPGPrefab.T4.Tier1MaxLevelIncreaser"
-                  },
-                  {
-                    "index": 29,
-                    "value": "NewTokenUPGPrefab.T4.Tier2MaxLevelIncreaser"
-                  },
-                  {
-                    "index": 30,
-                    "value": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
-                  },
-                  {
-                    "index": 31,
-                    "value": "NewTokenUPGPrefab.T4.Ultima"
-                  },
-                  {
-                    "index": 32,
-                    "value": "NewTokenUPGPrefab.T5.BorgeLoot"
-                  },
-                  {
-                    "index": 33,
-                    "value": "NewTokenUPGPrefab.T5.CampaignFragments"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[4]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 4,
-                "nearbyScalarValues": [
-                  {
-                    "index": 1,
-                    "value": "CellmasPresent_Token_Prefab1"
-                  },
-                  {
-                    "index": 2,
-                    "value": "MessagePrefab.Tokenium"
-                  },
-                  {
-                    "index": 3,
-                    "value": "NewDiamondUPGPrefab.Specials.TokensBoost"
-                  },
-                  {
-                    "index": 4,
-                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-                  },
-                  {
-                    "index": 5,
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
-                  },
-                  {
-                    "index": 6,
-                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
-                  },
-                  {
-                    "index": 7,
-                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.CellsPerChestBooster via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.DiamondBoost",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[5]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 5,
-                "nearbyScalarValues": [
-                  {
-                    "index": 2,
-                    "value": "MessagePrefab.Tokenium"
-                  },
-                  {
-                    "index": 3,
-                    "value": "NewDiamondUPGPrefab.Specials.TokensBoost"
-                  },
-                  {
-                    "index": 4,
-                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-                  },
-                  {
-                    "index": 5,
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
-                  },
-                  {
-                    "index": 6,
-                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
-                  },
-                  {
-                    "index": 7,
-                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
-                  },
-                  {
-                    "index": 8,
-                    "value": "NewTokenUPGPrefab.T1.MK3Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.DiamondBoost"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.DiamondBoost via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.MK1Booster",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[6]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 6,
-                "nearbyScalarValues": [
-                  {
-                    "index": 3,
-                    "value": "NewDiamondUPGPrefab.Specials.TokensBoost"
-                  },
-                  {
-                    "index": 4,
-                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-                  },
-                  {
-                    "index": 5,
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
-                  },
-                  {
-                    "index": 6,
-                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
-                  },
-                  {
-                    "index": 7,
-                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
-                  },
-                  {
-                    "index": 8,
-                    "value": "NewTokenUPGPrefab.T1.MK3Booster"
-                  },
-                  {
-                    "index": 9,
-                    "value": "NewTokenUPGPrefab.T1.MK4Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.MK1Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.MK1Booster via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.MK2Booster",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[7]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 7,
-                "nearbyScalarValues": [
-                  {
-                    "index": 4,
-                    "value": "NewTokenUPGPrefab.T1.CellsPerChestBooster"
-                  },
-                  {
-                    "index": 5,
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
-                  },
-                  {
-                    "index": 6,
-                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
-                  },
-                  {
-                    "index": 7,
-                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
-                  },
-                  {
-                    "index": 8,
-                    "value": "NewTokenUPGPrefab.T1.MK3Booster"
-                  },
-                  {
-                    "index": 9,
-                    "value": "NewTokenUPGPrefab.T1.MK4Booster"
-                  },
-                  {
-                    "index": 10,
-                    "value": "NewTokenUPGPrefab.T1.MK5Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.MK2Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.MK2Booster via unityProbe"
-            },
-            {
-              "term": "NewTokenUPGPrefab.T1.MK3Booster",
-              "jsonPath": "$.apk_results[7].keyword_hits.token[8]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 8,
-                "nearbyScalarValues": [
-                  {
-                    "index": 5,
-                    "value": "NewTokenUPGPrefab.T1.DiamondBoost"
-                  },
-                  {
-                    "index": 6,
-                    "value": "NewTokenUPGPrefab.T1.MK1Booster"
-                  },
-                  {
-                    "index": 7,
-                    "value": "NewTokenUPGPrefab.T1.MK2Booster"
-                  },
-                  {
-                    "index": 8,
-                    "value": "NewTokenUPGPrefab.T1.MK3Booster"
-                  },
-                  {
-                    "index": 9,
-                    "value": "NewTokenUPGPrefab.T1.MK4Booster"
-                  },
-                  {
-                    "index": 10,
-                    "value": "NewTokenUPGPrefab.T1.MK5Booster"
-                  },
-                  {
-                    "index": 11,
-                    "value": "NewTokenUPGPrefab.T1.MK6Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "NewTokenUPGPrefab.T1.MK3Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on NewTokenUPGPrefab.T1.MK3Booster via unityProbe"
-            }
-          ]
+          "hits": []
         }
       ]
     },
@@ -8805,7 +6311,6 @@
         "ATU7Button",
         "ATU3Button",
         "ATU24Button",
-        "TokenShop",
         "15810",
         "CellBoost",
         "BuyCellBoost"
@@ -8883,11 +6388,6 @@
         },
         {
           "value": "ATU24Button",
-          "kind": "class",
-          "origin": "surface-search"
-        },
-        {
-          "value": "TokenShop",
           "kind": "class",
           "origin": "surface-search"
         },
@@ -10685,685 +8185,169 @@
           ]
         },
         {
-          "sourceId": "unityProbe",
-          "sourcePath": "data/unity-probe-report.json",
+          "sourceId": "level0",
+          "sourcePath": "workbench/unity/joined/level0",
           "searchModes": [
-            "exact-structured"
+            "object-name",
+            "class-name",
+            "component-type",
+            "text-content"
           ],
-          "hitCount": 7,
-          "highSignalHitCount": 0,
-          "supportingHitCount": 7,
+          "hitCount": 12,
+          "highSignalHitCount": 12,
+          "supportingHitCount": 0,
           "incidentalHitCount": 0,
           "suppressedNoiseCount": 0,
           "hits": [
             {
-              "term": "Token Ultima: Cells",
-              "jsonPath": "$.apk_results[23].keyword_hits.token[25]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 25,
-                "nearbyScalarValues": [
-                  {
-                    "index": 22,
-                    "value": "T4 Token Shop is now here!"
-                  },
-                  {
-                    "index": 23,
-                    "value": "The Collectors Pack increases <b><color=#B5927F>Mission Materials</b></color> gained & the <b>Daily Cap of farmable <color=#FFD056>Tokenium</b></color> in the <b><color=#78B2FF>Academy Menu</b></color>, as well as an instant transmission of <b><color=#FF7ACB>Diamonds</b></color>."
-                  },
-                  {
-                    "index": 24,
-                    "value": "Token Ultima"
-                  },
-                  {
-                    "index": 25,
-                    "value": "Token Ultima: Cells"
-                  },
-                  {
-                    "index": 26,
-                    "value": "Token Ultima: MP"
-                  },
-                  {
-                    "index": 27,
-                    "value": "Tokens Booster"
-                  },
-                  {
-                    "index": 28,
-                    "value": "Tokens Booster T1"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Token Ultima: Cells"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Token Ultima: Cells via unityProbe"
-            },
-            {
               "term": "Token Ultima: MP",
-              "jsonPath": "$.apk_results[23].keyword_hits.token[26]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 26,
-                "nearbyScalarValues": [
-                  {
-                    "index": 23,
-                    "value": "The Collectors Pack increases <b><color=#B5927F>Mission Materials</b></color> gained & the <b>Daily Cap of farmable <color=#FFD056>Tokenium</b></color> in the <b><color=#78B2FF>Academy Menu</b></color>, as well as an instant transmission of <b><color=#FF7ACB>Diamonds</b></color>."
-                  },
-                  {
-                    "index": 24,
-                    "value": "Token Ultima"
-                  },
-                  {
-                    "index": 25,
-                    "value": "Token Ultima: Cells"
-                  },
-                  {
-                    "index": 26,
-                    "value": "Token Ultima: MP"
-                  },
-                  {
-                    "index": 27,
-                    "value": "Tokens Booster"
-                  },
-                  {
-                    "index": 28,
-                    "value": "Tokens Booster T1"
-                  },
-                  {
-                    "index": 29,
-                    "value": "Tokens Booster T2"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Token Ultima: MP"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Token Ultima: MP via unityProbe"
+              "matchedValue": "Token Ultima: MP",
+              "surfaceType": "raw-string",
+              "offset": 30196860,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@30196860",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "Token Ultima: Cells",
-              "jsonPath": "$.apk_results[23].keyword_hits.ultima[5]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 5,
-                "nearbyScalarValues": [
-                  {
-                    "index": 2,
-                    "value": "- New <b>\"Ultima\" Talent</b> unlocks when a hunter reaches level 70!"
-                  },
-                  {
-                    "index": 3,
-                    "value": "- Trait Sphere #09, #11, #12 & #14 now gives +1 additional Ultima Max Level"
-                  },
-                  {
-                    "index": 4,
-                    "value": "Token Ultima"
-                  },
-                  {
-                    "index": 5,
-                    "value": "Token Ultima: Cells"
-                  },
-                  {
-                    "index": 6,
-                    "value": "Token Ultima: MP"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Token Ultima: Cells"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Token Ultima: Cells via unityProbe"
+              "matchedValue": "Token Ultima: Cells",
+              "surfaceType": "raw-string",
+              "offset": 30199036,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@30199036",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "Token Ultima: MP",
-              "jsonPath": "$.apk_results[23].keyword_hits.ultima[6]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 6,
-                "nearbyScalarValues": [
-                  {
-                    "index": 3,
-                    "value": "- Trait Sphere #09, #11, #12 & #14 now gives +1 additional Ultima Max Level"
-                  },
-                  {
-                    "index": 4,
-                    "value": "Token Ultima"
-                  },
-                  {
-                    "index": 5,
-                    "value": "Token Ultima: Cells"
-                  },
-                  {
-                    "index": 6,
-                    "value": "Token Ultima: MP"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Token Ultima: MP"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Token Ultima: MP via unityProbe"
+              "matchedValue": "Token Ultima: MP",
+              "surfaceType": "raw-string",
+              "offset": 30200652,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@30200652",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "Token Ultima: MP",
+              "matchedValue": "Token Ultima: MP",
+              "surfaceType": "raw-string",
+              "offset": 30201740,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@30201740",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "Mk2 Generator Booster",
+              "matchedValue": "Mk2 Generator Booster",
+              "surfaceType": "raw-string",
+              "offset": 30202284,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@30202284",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "Mk2 Generator Booster",
+              "matchedValue": "Mk2 Generator Booster",
+              "surfaceType": "raw-string",
+              "offset": 30215852,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@30215852",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "Academy Booster",
+              "matchedValue": "Academy Booster",
+              "surfaceType": "raw-string",
+              "offset": 30218572,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@30218572",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "Token Ultima: MP",
+              "matchedValue": "Token Ultima: MP",
+              "surfaceType": "raw-string",
+              "offset": 30228956,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@30228956",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "BuyCellBoost",
+              "matchedValue": "BuyCellBoost",
+              "surfaceType": "raw-string",
+              "offset": 32115000,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@32115000",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
+            },
+            {
+              "term": "1. MK1 Generator Output,",
+              "matchedValue": "1. MK1 Generator Output,",
+              "surfaceType": "raw-string",
+              "offset": 34256603,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@34256603",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "SetAllTokenShopTexts",
-              "jsonPath": "$.apk_results[32].keyword_hits.token[6]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 6,
-                "nearbyScalarValues": [
-                  {
-                    "index": 3,
-                    "value": "LV. 1 - (Tokens In Bank)^1.19"
-                  },
-                  {
-                    "index": 4,
-                    "value": "LV. 1 - (Tokens In Bank)^1.29"
-                  },
-                  {
-                    "index": 5,
-                    "value": "LV. 1 - Token Bank Capacity x2"
-                  },
-                  {
-                    "index": 6,
-                    "value": "SetAllTokenShopTexts"
-                  },
-                  {
-                    "index": 7,
-                    "value": "SetTokenTexts"
-                  },
-                  {
-                    "index": 8,
-                    "value": "TokenClaimRecolor"
-                  },
-                  {
-                    "index": 9,
-                    "value": "TokenShop, Assembly-CSharp"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via unityProbe"
+              "matchedValue": "SetAllTokenShopTexts",
+              "surfaceType": "raw-string",
+              "offset": 37825208,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@37825208",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "SetTokenTexts",
-              "jsonPath": "$.apk_results[32].keyword_hits.token[7]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 7,
-                "nearbyScalarValues": [
-                  {
-                    "index": 4,
-                    "value": "LV. 1 - (Tokens In Bank)^1.29"
-                  },
-                  {
-                    "index": 5,
-                    "value": "LV. 1 - Token Bank Capacity x2"
-                  },
-                  {
-                    "index": 6,
-                    "value": "SetAllTokenShopTexts"
-                  },
-                  {
-                    "index": 7,
-                    "value": "SetTokenTexts"
-                  },
-                  {
-                    "index": 8,
-                    "value": "TokenClaimRecolor"
-                  },
-                  {
-                    "index": 9,
-                    "value": "TokenShop, Assembly-CSharp"
-                  },
-                  {
-                    "index": 10,
-                    "value": "TokenShopRecoloring"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetTokenTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetTokenTexts via unityProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$.apk_results[4].keyword_hits.token[14]",
-              "containerSummary": {
-                "containerType": "array",
-                "matchedIndex": 14,
-                "nearbyScalarValues": [
-                  {
-                    "index": 11,
-                    "value": "TokenAdUnavailable"
-                  },
-                  {
-                    "index": 12,
-                    "value": "TokenCapText"
-                  },
-                  {
-                    "index": 13,
-                    "value": "TokenNotification"
-                  },
-                  {
-                    "index": 14,
-                    "value": "TokenShop"
-                  },
-                  {
-                    "index": 15,
-                    "value": "TokenShop.Canvas"
-                  },
-                  {
-                    "index": 16,
-                    "value": "TokenUPGTitleText_TMPro"
-                  },
-                  {
-                    "index": 17,
-                    "value": "TokeniumExchange"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via unityProbe"
+              "matchedValue": "SetTokenTexts",
+              "surfaceType": "raw-string",
+              "offset": 37825348,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@37825348",
+              "signalTier": "high-signal",
+              "matchMode": "exact-string",
+              "score": 78
             }
           ]
         },
         {
-          "sourceId": "dailyTokeniumOwnerProbe",
-          "sourcePath": "data/daily-tokenium-owner-probe.json",
+          "sourceId": "sharedassets0",
+          "sourcePath": "workbench/unity/joined/sharedassets0.assets",
           "searchModes": [
-            "exact-structured"
+            "object-name",
+            "class-name",
+            "component-type",
+            "text-content"
           ],
-          "hitCount": 10,
+          "hitCount": 0,
           "highSignalHitCount": 0,
-          "supportingHitCount": 10,
+          "supportingHitCount": 0,
           "incidentalHitCount": 0,
           "suppressedNoiseCount": 0,
-          "hits": [
-            {
-              "term": "Mk2 Generator Booster",
-              "jsonPath": "$[0].matches[19].byte_context[17].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 30215852
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "Mk2 Generator Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Mk2 Generator Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Mk2 Generator Booster via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "Academy Booster",
-              "jsonPath": "$[0].matches[19].byte_context[27].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 30218572
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "Academy Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Academy Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Academy Booster via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "Mk2 Generator Booster",
-              "jsonPath": "$[0].matches[19].entry_context[12].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 30215852
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "Mk2 Generator Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Mk2 Generator Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Mk2 Generator Booster via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "Academy Booster",
-              "jsonPath": "$[0].matches[20].byte_context[15].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 30218572
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "Academy Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Academy Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Academy Booster via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "Mk2 Generator Booster",
-              "jsonPath": "$[0].matches[20].byte_context[5].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 30215852
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "Mk2 Generator Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Mk2 Generator Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Mk2 Generator Booster via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "Mk2 Generator Booster",
-              "jsonPath": "$[0].matches[20].entry_context[0].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 30215852
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "Mk2 Generator Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Mk2 Generator Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Mk2 Generator Booster via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "Academy Booster",
-              "jsonPath": "$[0].matches[20].entry_context[10].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 30218572
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "Academy Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Academy Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Academy Booster via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "Academy Booster",
-              "jsonPath": "$[0].matches[20].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 30218572
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "Academy Booster"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "Academy Booster"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on Academy Booster via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "1. MK1 Generator Output,",
-              "jsonPath": "$[0].matches[46].byte_context[29].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34256603
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "1. MK1 Generator Output,"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "1. MK1 Generator Output,"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on 1. MK1 Generator Output, via dailyTokeniumOwnerProbe"
-            },
-            {
-              "term": "1. MK1 Generator Output,",
-              "jsonPath": "$[0].matches[46].entry_context[5].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 34256603
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "1. MK1 Generator Output,"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "1. MK1 Generator Output,"
-              ],
-              "matchedAnchorKinds": [
-                "string"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 95,
-              "signalTier": "supporting",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on 1. MK1 Generator Output, via dailyTokeniumOwnerProbe"
-            }
-          ]
+          "hits": []
         }
       ]
     },
@@ -11383,7 +8367,6 @@
         "ATU6Button",
         "ATU7Button",
         "SetAllTokenShopTexts",
-        "TokenShop",
         "15810",
         "CellBoost"
       ],
@@ -11446,11 +8429,6 @@
         {
           "value": "SetAllTokenShopTexts",
           "kind": "method",
-          "origin": "surface-search"
-        },
-        {
-          "value": "TokenShop",
-          "kind": "class",
           "origin": "surface-search"
         },
         {
@@ -12747,649 +9725,70 @@
           ]
         },
         {
-          "sourceId": "dailyTokeniumLaneProbe",
-          "sourcePath": "data/daily-tokenium-lane-probe.json",
+          "sourceId": "level0",
+          "sourcePath": "workbench/unity/joined/level0",
           "searchModes": [
-            "exact-structured"
+            "object-name",
+            "class-name",
+            "component-type",
+            "text-content"
           ],
-          "hitCount": 19,
-          "highSignalHitCount": 19,
+          "hitCount": 4,
+          "highSignalHitCount": 4,
           "supportingHitCount": 0,
           "incidentalHitCount": 0,
           "suppressedNoiseCount": 0,
           "hits": [
             {
-              "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[101].byte_context[30].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StartCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "term": "BuyATU24",
+              "matchedValue": "BuyATU24",
+              "surfaceType": "raw-string",
+              "offset": 31096872,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@31096872",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[101].byte_context[41].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyCellBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[101].entry_context[17].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StartCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "StartCellBostHold",
+              "surfaceType": "raw-string",
+              "offset": 32114396,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@32114396",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[101].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyCellBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "BuyCellBoost",
+              "surfaceType": "raw-string",
+              "offset": 32115000,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@32115000",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[102].byte_context[29].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StartCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[102].byte_context[40].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyCellBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "StartCellBostHold",
-              "jsonPath": "$[0].matches[102].entry_context[14].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32114396
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "StartCellBostHold"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "StartCellBostHold"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on StartCellBostHold via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyCellBoost",
-              "jsonPath": "$[0].matches[102].entry_context[25].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 32115000
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyCellBoost"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyCellBoost"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyCellBoost via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             },
             {
               "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[312].byte_context[118].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 37825208
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "SetAllTokenShopTexts"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
+              "matchedValue": "SetAllTokenShopTexts",
+              "surfaceType": "raw-string",
+              "offset": 37825208,
+              "encoding": "ascii",
+              "jsonPath": "raw-string@37825208",
               "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[312].entry_context[16].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 37825208
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "SetAllTokenShopTexts"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[312].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 37825208
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "SetAllTokenShopTexts"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "SetAllTokenShopTexts",
-              "jsonPath": "$[0].matches[313].entry_context[4].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 37825208
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "SetAllTokenShopTexts"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "SetAllTokenShopTexts"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on SetAllTokenShopTexts via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$[0].matches[4].byte_context[77].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 10588180
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "TokenShop"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$[0].matches[4].entry_context[16].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 10588180
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "TokenShop"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "TokenShop",
-              "jsonPath": "$[0].matches[4].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 10588180
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "TokenShop"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "TokenShop"
-              ],
-              "matchedAnchorKinds": [
-                "class"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on TokenShop via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyATU24",
-              "jsonPath": "$[0].matches[71].byte_context[37].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31096872
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyATU24"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyATU24"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyATU24 via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyATU24",
-              "jsonPath": "$[0].matches[72].byte_context[35].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31096872
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyATU24"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyATU24"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyATU24 via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyATU24",
-              "jsonPath": "$[0].matches[72].entry_context[28].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31096872
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyATU24"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyATU24"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyATU24 via dailyTokeniumLaneProbe"
-            },
-            {
-              "term": "BuyATU24",
-              "jsonPath": "$[0].matches[73].entry_context[25].value",
-              "containerSummary": {
-                "containerType": "object",
-                "matchedKey": "value",
-                "scalarEntries": [
-                  {
-                    "key": "offset",
-                    "value": 31096872
-                  },
-                  {
-                    "key": "kind",
-                    "value": "ascii"
-                  },
-                  {
-                    "key": "value",
-                    "value": "BuyATU24"
-                  }
-                ]
-              },
-              "matchedTerms": [
-                "BuyATU24"
-              ],
-              "matchedAnchorKinds": [
-                "method"
-              ],
-              "matchMode": "exact-structured",
-              "signalScore": 100,
-              "signalTier": "high-signal",
-              "noiseFlags": [],
-              "signalReason": "exact-structured match on BuyATU24 via dailyTokeniumLaneProbe"
+              "matchMode": "exact-string",
+              "score": 78
             }
           ]
         }
       ]
     }
   ],
+  "depthExpansion": [],
   "traceGraph": {
     "nodes": [
       {
@@ -13454,25 +9853,25 @@
         "provedBy": [
           {
             "sourceId": "tokenShopExtract",
-            "sourcePath": "data/token-shop-values.json",
+            "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
             "term": "ATU1Button",
             "locator": "$.fields[12].field"
           },
           {
             "sourceId": "tokenShopExtract",
-            "sourcePath": "data/token-shop-values.json",
+            "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
             "term": "ATU6Button",
             "locator": "$.fields[51].field"
           },
           {
             "sourceId": "tokenShopExtract",
-            "sourcePath": "data/token-shop-values.json",
+            "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
             "term": "ATU7Button",
             "locator": "$.fields[60].field"
           },
           {
             "sourceId": "tokenShopExtract",
-            "sourcePath": "data/token-shop-values.json",
+            "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
             "term": "ATU24Button",
             "locator": "$.fields[193].field"
           },
@@ -13530,34 +9929,34 @@
             "locator": "$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyTokenBoost",
-            "locator": "$[0].matches[197].byte_context[64].value"
+            "locator": "raw-string@34263272"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyModBoost",
-            "locator": "$[0].matches[68].byte_context[52].value"
+            "locator": "raw-string@31087432"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyMK1TokenBoost",
-            "locator": "$[0].matches[200].byte_context[30].value"
+            "locator": "raw-string@34292472"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyMK2TokenBoost",
-            "locator": "$[0].matches[192].byte_context[32].value"
+            "locator": "raw-string@34228680"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyMK3TokenBoost",
-            "locator": "$[0].matches[96].byte_context[82].value"
+            "locator": "raw-string@31904312"
           }
         ]
       },
@@ -13607,22 +10006,22 @@
             "locator": "$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity"
           },
           {
-            "sourceId": "uabeaProbe",
-            "sourcePath": "data/uabea-probe-report.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "NewTokenUPGPrefab.T1.TokensBoost",
-            "locator": "$.namedObjectHits[10405].name"
+            "locator": "GameObject path_id 48864"
           },
           {
-            "sourceId": "uabeaProbe",
-            "sourcePath": "data/uabea-probe-report.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "NewTokenUPGPrefab.T1.MK2Booster",
-            "locator": "$.namedObjectHits[10409].name"
+            "locator": "GameObject path_id 48868"
           },
           {
-            "sourceId": "uabeaProbe",
-            "sourcePath": "data/uabea-probe-report.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "NewTokenUPGPrefab.T1.MK3Booster",
-            "locator": "$.namedObjectHits[10362].name"
+            "locator": "GameObject path_id 48821"
           }
         ]
       },
@@ -13636,22 +10035,22 @@
         "statement": "Generic TokenShop text hooks and row-adjacent title or support-text surfaces repeatedly survive, but they usually remain detached from exact shell ids.",
         "provedBy": [
           {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "SetAllTokenShopTexts",
-            "locator": "$.apk_results[32].keyword_hits.token[6]"
+            "locator": "raw-string@37825208"
           },
           {
-            "sourceId": "unityProbe",
-            "sourcePath": "data/unity-probe-report.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "Token Ultima: MP",
-            "locator": "$.apk_results[23].keyword_hits.token[26]"
+            "locator": "raw-string@30196860"
           },
           {
-            "sourceId": "dailyTokeniumOwnerProbe",
-            "sourcePath": "data/daily-tokenium-owner-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "1. MK1 Generator Output,",
-            "locator": "$[0].matches[46].byte_context[29].value"
+            "locator": "raw-string@34256603"
           },
           {
             "sourceId": "tokenShopLateAtuBoundary",
@@ -13677,10 +10076,10 @@
             "locator": "$.verifiedTitleJoin.titleProbeTitle"
           },
           {
-            "sourceId": "dailyTokeniumOwnerProbe",
-            "sourcePath": "data/daily-tokenium-owner-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "Mk2 Generator Booster",
-            "locator": "$[0].matches[19].byte_context[17].value"
+            "locator": "raw-string@30202284"
           },
           {
             "sourceId": "tokenShopRowRemapBoundary",
@@ -13712,10 +10111,10 @@
             "locator": "$.groundedConclusion"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyATU24",
-            "locator": "$[0].matches[71].byte_context[37].value"
+            "locator": "raw-string@31096872"
           }
         ]
       }
@@ -13799,25 +10198,25 @@
         "provedBy": [
           {
             "sourceId": "tokenShopExtract",
-            "sourcePath": "data/token-shop-values.json",
+            "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
             "term": "ATU1Button",
             "locator": "$.fields[12].field"
           },
           {
             "sourceId": "tokenShopExtract",
-            "sourcePath": "data/token-shop-values.json",
+            "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
             "term": "ATU6Button",
             "locator": "$.fields[51].field"
           },
           {
             "sourceId": "tokenShopExtract",
-            "sourcePath": "data/token-shop-values.json",
+            "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
             "term": "ATU7Button",
             "locator": "$.fields[60].field"
           },
           {
             "sourceId": "tokenShopExtract",
-            "sourcePath": "data/token-shop-values.json",
+            "sourcePath": "workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0",
             "term": "ATU24Button",
             "locator": "$.fields[193].field"
           },
@@ -13864,34 +10263,34 @@
             "locator": "$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyTokenBoost",
-            "locator": "$[0].matches[197].byte_context[64].value"
+            "locator": "raw-string@34263272"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyModBoost",
-            "locator": "$[0].matches[68].byte_context[52].value"
+            "locator": "raw-string@31087432"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyMK1TokenBoost",
-            "locator": "$[0].matches[200].byte_context[30].value"
+            "locator": "raw-string@34292472"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyMK2TokenBoost",
-            "locator": "$[0].matches[192].byte_context[32].value"
+            "locator": "raw-string@34228680"
           },
           {
-            "sourceId": "dailyTokeniumLaneProbe",
-            "sourcePath": "data/daily-tokenium-lane-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "BuyMK3TokenBoost",
-            "locator": "$[0].matches[96].byte_context[82].value"
+            "locator": "raw-string@31904312"
           },
           {
             "sourceId": "tokenShopRowRemapBoundary",
@@ -13930,22 +10329,22 @@
             "locator": "$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity"
           },
           {
-            "sourceId": "uabeaProbe",
-            "sourcePath": "data/uabea-probe-report.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "NewTokenUPGPrefab.T1.TokensBoost",
-            "locator": "$.namedObjectHits[10405].name"
+            "locator": "GameObject path_id 48864"
           },
           {
-            "sourceId": "uabeaProbe",
-            "sourcePath": "data/uabea-probe-report.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "NewTokenUPGPrefab.T1.MK2Booster",
-            "locator": "$.namedObjectHits[10409].name"
+            "locator": "GameObject path_id 48868"
           },
           {
-            "sourceId": "uabeaProbe",
-            "sourcePath": "data/uabea-probe-report.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "NewTokenUPGPrefab.T1.MK3Booster",
-            "locator": "$.namedObjectHits[10362].name"
+            "locator": "GameObject path_id 48821"
           }
         ]
       },
@@ -13964,10 +10363,10 @@
             "locator": "$.verifiedTitleJoin.titleProbeTitle"
           },
           {
-            "sourceId": "dailyTokeniumOwnerProbe",
-            "sourcePath": "data/daily-tokenium-owner-probe.json",
+            "sourceId": "level0",
+            "sourcePath": "workbench/unity/joined/level0",
             "term": "Mk2 Generator Booster",
-            "locator": "$[0].matches[19].byte_context[17].value"
+            "locator": "raw-string@30202284"
           },
           {
             "sourceId": "tokenShopRowRemapBoundary",
@@ -14070,22 +10469,22 @@
     "bridgeHits": [
       {
         "surfaceId": "bridge-proxies",
-        "sourcePath": "data/daily-tokenium-lane-probe.json",
+        "sourcePath": "workbench/unity/joined/level0",
         "term": "BuyTokenBoost"
       },
       {
         "surfaceId": "bridge-proxies",
-        "sourcePath": "data/daily-tokenium-lane-probe.json",
+        "sourcePath": "workbench/unity/joined/level0",
         "term": "BuyMK1TokenBoost"
       },
       {
         "surfaceId": "prefab-roster",
-        "sourcePath": "data/uabea-probe-report.json",
+        "sourcePath": "workbench/unity/joined/level0",
         "term": "NewTokenUPGPrefab.T1.MK2Booster"
       },
       {
         "surfaceId": "title-text-surfaces",
-        "sourcePath": "data/daily-tokenium-owner-probe.json",
+        "sourcePath": "workbench/unity/joined/level0",
         "term": "Mk2 Generator Booster"
       }
     ],
@@ -14337,12 +10736,51 @@
   ],
   "traceParams": {
     "target": "token-shop-family-structure",
-    "anchors": [
-      "TokenShop"
-    ],
-    "family": "token-shop",
+    "anchors": [],
+    "family": null,
+    "extendedSearch": 0,
+    "depthSearch": null,
     "level": "structured",
     "anchorKind": null,
     "maxSteps": 5
+  },
+  "assetSet": {
+    "fingerprint": "8fb76674da5f",
+    "inputCount": 5,
+    "inputs": [
+      {
+        "path": "workbench/apk/base/global-metadata.dat",
+        "size": 13737036,
+        "modifiedAt": "2026-03-29T07:53:58"
+      },
+      {
+        "path": "workbench/unity/joined/level0",
+        "size": 50699060,
+        "modifiedAt": "2026-03-29T07:54:01"
+      },
+      {
+        "path": "workbench/unity/joined/sharedassets0.assets",
+        "size": 287582268,
+        "modifiedAt": "2026-03-29T07:54:01"
+      },
+      {
+        "path": "workbench/unity/joined/globalgamemanagers.assets",
+        "size": 3578884,
+        "modifiedAt": "2026-03-29T07:54:00"
+      },
+      {
+        "path": "workbench/apk/base/libil2cpp.so",
+        "size": 78563616,
+        "modifiedAt": "2026-03-29T07:53:58"
+      }
+    ]
+  },
+  "traceRun": {
+    "id": "token-shop-family-structure",
+    "jsonOut": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\trace-runs\\token-shop-family-structure.json",
+    "mdOut": "C:\\Users\\Shadow\\Desktop\\CiFi\\workbench\\trace-runs\\token-shop-family-structure.md",
+    "mode": "stable-target-run",
+    "outputMode": "structured_only",
+    "overwritesOnRepeat": true
   }
 }

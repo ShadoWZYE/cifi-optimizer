@@ -207,7 +207,7 @@ Because those joins are still missing, the repo should not:
   - committed probe output still preserves `<FinalAdTokenChestBonus>k__BackingField` and `<FinalDiamondChestBonus>k__BackingField` as the adjacent final chest-bonus shell
   - that is enough to preserve one bounded consumer-internal bonus shell for ATU3, while the remaining honest blocker is now only one exact `CellBoostBonus` read-site or typed-field handoff into that internal bonus-aggregation shell
 - The upgraded join-preservation probe also now makes the current extraction state explicit instead of scattering it across multiple artifacts:
-  - the generated `data/unity-trace-bundle.json` artifact now preserves one bounded TokenShop family-structure trace audit inside the generic `probe:trace` workflow
+  - the generated `data/system-units/trace.v1.json` unit now preserves one bounded TokenShop family-structure trace audit inside the generic `probe:trace` workflow
   - that audit now groups the solved `ATU1`, `ATU2`, `ATU4`, `ATU5`, and `ATU6` shells beside the bounded `ATU3` and late `ATU24`-`ATU28` negatives so repeated proved edges and repeated missing edges can be judged from one checked bundle
   - the strongest repeated solved pattern is still shell adjacency plus one row-family proxy hook and one exact prefab identity, while `ATU6Button` remains the only exact shell-to-prefab-to-title exemplar through `Mk2 Generator Booster`
   - the repeated missing pattern is now narrower: `ATU1Button`, `ATU2Button`, `ATU4Button`, and `ATU5Button` still stop short of one final player-facing row title join, while `ATU3Button` and the late `ATU24`-`ATU28` block still fail exact prefab-or-title identity localization outright

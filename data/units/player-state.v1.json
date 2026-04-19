@@ -1,0 +1,105 @@
+{
+  "dataset": "repo-data-unit.v1",
+  "unitId": "player-state",
+  "systemId": "player-state",
+  "version": "v1",
+  "status": "seeded",
+  "kind": "system",
+  "schemaRef": "data/data-unit-format.v1.json",
+  "frameworkRef": "data/data-framework.v1.json",
+  "summary": "Central PlayerProfile system unit for canonical shared truth, planner-only helpers, external-model state, and compatibility import quarantine.",
+  "liveConsumers": {
+    "appStatePaths": [
+      "state.playerProfile"
+    ],
+    "traceTargets": [],
+    "plannerConsumers": [
+      "player-profile.js",
+      "support/player-profile-boundary-support.js"
+    ]
+  },
+  "subsystems": {
+    "canonical-shared-truth": {
+      "summary": "Canonical player-facing state under meta, player, and notes.",
+      "seedOutputs": [
+        "data/game-data.snapshot.v1.json"
+      ]
+    },
+    "planner-helpers": {
+      "summary": "Planner-only helpers that belong in state.playerProfile but not canonical account truth.",
+      "seedOutputs": []
+    },
+    "external-models": {
+      "summary": "Community-tool and implementation state kept separate from shared truth.",
+      "seedOutputs": []
+    },
+    "compatibility-imports": {
+      "summary": "Compatibility-only migration sinks and quarantined unmapped system blobs.",
+      "seedOutputs": [
+        "data/player-profile-import-aliases.v1.json"
+      ]
+    }
+  },
+  "provenance": {
+    "policy": "Embed centralized player-state data directly while preserving the committed contract or code source that defined each slice.",
+    "transientProbePolicy": "Player-state currently does not depend on transient probe reports; future extracted imports should record their regeneration commands before being embedded.",
+    "sourceRecords": [
+      {
+        "id": "snapshot",
+        "kind": "dataset",
+        "path": "data/game-data.snapshot.v1.json",
+        "role": "canonical",
+        "persistence": "committed"
+      },
+      {
+        "id": "player-profile-alias-audit",
+        "kind": "dataset",
+        "path": "data/player-profile-import-aliases.v1.json",
+        "role": "support",
+        "persistence": "committed"
+      },
+      {
+        "id": "player-profile-normalizer",
+        "kind": "code-contract",
+        "path": "player-profile.js",
+        "role": "contract",
+        "persistence": "committed"
+      },
+      {
+        "id": "player-profile-schema-doc",
+        "kind": "doc-contract",
+        "path": "docs/contracts/player-profile-schema.md",
+        "role": "contract",
+        "persistence": "committed"
+      }
+    ]
+  },
+  "views": {
+    "canonical": [
+      "data/game-data.snapshot.v1.json"
+    ],
+    "boundary": [],
+    "model": [],
+    "support": [
+      "data/player-profile-import-aliases.v1.json"
+    ],
+    "historicalProbe": []
+  },
+  "replacementPlan": {
+    "seedOutputs": [
+      "data/system-units/player-state.v1.json"
+    ],
+    "projectionTargets": [
+      "canonical-shared-truth",
+      "planner-helpers",
+      "external-models",
+      "compatibility-imports"
+    ],
+    "archiveAfterReplacement": [],
+    "requirementsBeforeArchive": [
+      "The PlayerProfile boundary should eventually have a dedicated data-side contract projection instead of living primarily in code and docs.",
+      "Canonical, planner-only, external-model, and compatibility import lanes must remain explicit inside the centralized player-state unit.",
+      "Any future embedded imported-system slice must carry either a committed source file link or the exact regeneration command used to produce the transient extraction report."
+    ]
+  }
+}

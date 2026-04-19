@@ -2,11 +2,26 @@ export function createShardEvidenceSupport({
   formatShardNumber,
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
-  getShardGrounding,
+  getShardSystemView,
   getShardMilestoneRowModelBoundarySummary,
   getShardMilestoneTitleEffectBoundarySummary,
   getShardPlannerState
 }) {
+  function getShardGroundingCompatibilityView() {
+    const shardSystem = getShardSystemView?.() ?? {};
+    return {
+      milestones: shardSystem?.family?.grounded?.milestones ?? null,
+      observedBehaviors: shardSystem?.family?.grounded?.observedBehaviors ?? null,
+      provenance: shardSystem?.family?.grounded?.provenance ?? null,
+      milestoneFamilyEvidence: shardSystem?.family?.familyEvidence ?? null,
+      bonusSlotProbe: shardSystem?.cost?.bonusSlotProbe ?? null,
+      costParameterProbe: shardSystem?.cost?.costParameterProbe ?? null,
+      costNativeProbe: shardSystem?.cost?.costNativeProbe ?? null,
+      saveBoundary: shardSystem?.ownedState?.saveBoundary ?? null,
+      saveOwnerCandidates: shardSystem?.ownedState?.saveOwnerCandidates ?? null
+    };
+  }
+
   function formatThresholdScheduleSummary(thresholds = {}) {
     return Object.entries(thresholds)
       .filter(([rarity]) => rarity !== "source_ids")
@@ -15,16 +30,19 @@ export function createShardEvidenceSupport({
   }
 
   function getGroundedShardMilestones() {
-    return getShardGrounding()?.milestones?.milestones ?? [];
+    return getShardGroundingCompatibilityView()?.milestones?.milestones ?? [];
   }
 
   function getGroundedShardMechanics() {
-    return getShardGrounding()?.milestones?.canonicalMechanics?.shardMilestoneSystem ?? {};
+    return (
+      getShardGroundingCompatibilityView()?.milestones?.canonicalMechanics?.shardMilestoneSystem ??
+      {}
+    );
   }
 
   function getShardMilestoneFamilyEvidence() {
-    const rows = Array.isArray(getShardGrounding()?.milestoneFamilyEvidence?.rows)
-      ? getShardGrounding().milestoneFamilyEvidence.rows
+    const rows = Array.isArray(getShardGroundingCompatibilityView()?.milestoneFamilyEvidence?.rows)
+      ? getShardGroundingCompatibilityView().milestoneFamilyEvidence.rows
       : [];
     return [...rows].sort((left, right) => Number(left?.row ?? 0) - Number(right?.row ?? 0));
   }
@@ -88,22 +106,24 @@ export function createShardEvidenceSupport({
   }
 
   function getShardBonusSlotRowSummary(row) {
-    const rows = Array.isArray(getShardGrounding()?.bonusSlotProbe?.rows)
-      ? getShardGrounding().bonusSlotProbe.rows
+    const rows = Array.isArray(getShardGroundingCompatibilityView()?.bonusSlotProbe?.rows)
+      ? getShardGroundingCompatibilityView().bonusSlotProbe.rows
       : [];
     return rows.find((entry) => Number(entry.row) === Number(row)) || null;
   }
 
   function getShardRowAlignedCostTuple(row) {
-    const tuples = Array.isArray(getShardGrounding()?.costParameterProbe?.rowAlignedTupleCandidates)
-      ? getShardGrounding().costParameterProbe.rowAlignedTupleCandidates
+    const tuples = Array.isArray(
+      getShardGroundingCompatibilityView()?.costParameterProbe?.rowAlignedTupleCandidates
+    )
+      ? getShardGroundingCompatibilityView().costParameterProbe.rowAlignedTupleCandidates
       : [];
     return tuples.find((entry) => Number(entry.row) === Number(row)) || null;
   }
 
   function getShardRowDirectValues(row) {
     if (Number(row) === 0) {
-      const row0 = getShardGrounding()?.costParameterProbe?.row0PreludeCandidate;
+      const row0 = getShardGroundingCompatibilityView()?.costParameterProbe?.row0PreludeCandidate;
       return Number(row0?.row) === 0 ? row0 : null;
     }
     return getShardRowAlignedCostTuple(row);
@@ -111,9 +131,9 @@ export function createShardEvidenceSupport({
 
   function getShardExtractedUnlockRequirement(row) {
     const values = Array.isArray(
-      getShardGrounding()?.costParameterProbe?.unlockRequirementBlock?.values
+      getShardGroundingCompatibilityView()?.costParameterProbe?.unlockRequirementBlock?.values
     )
-      ? getShardGrounding().costParameterProbe.unlockRequirementBlock.values
+      ? getShardGroundingCompatibilityView().costParameterProbe.unlockRequirementBlock.values
       : [];
     const value = values[Number(row)];
     return Number.isFinite(Number(value)) ? Number(value) : null;
@@ -134,8 +154,8 @@ export function createShardEvidenceSupport({
   }
 
   function getShardNativeCostRowSummary(row) {
-    const rows = Array.isArray(getShardGrounding()?.costNativeProbe?.rows)
-      ? getShardGrounding().costNativeProbe.rows
+    const rows = Array.isArray(getShardGroundingCompatibilityView()?.costNativeProbe?.rows)
+      ? getShardGroundingCompatibilityView().costNativeProbe.rows
       : [];
     return rows.find((entry) => Number(entry.row) === Number(row)) || null;
   }
@@ -180,7 +200,7 @@ export function createShardEvidenceSupport({
   }
 
   function getShardFormulaApplicationProfile(row) {
-    const profiles = getShardGrounding()?.costNativeProbe?.formulaApplicationProfiles;
+    const profiles = getShardGroundingCompatibilityView()?.costNativeProbe?.formulaApplicationProfiles;
     if (!profiles) {
       return null;
     }
@@ -374,7 +394,7 @@ export function createShardEvidenceSupport({
   }
 
   function getShardOwnedStateBlockerSummary() {
-    const saveBoundary = getShardGrounding()?.saveBoundary ?? {};
+    const saveBoundary = getShardGroundingCompatibilityView()?.saveBoundary ?? {};
     const probeResults =
       typeof saveBoundary?.probeResults === "object" && saveBoundary.probeResults
         ? saveBoundary.probeResults
@@ -385,9 +405,9 @@ export function createShardEvidenceSupport({
         ? saveBoundary.recoveredDeclaringRowModel
         : {};
     const remainingCandidates = Array.isArray(
-      getShardGrounding()?.saveOwnerCandidates?.remainingSaveOwnerCandidates
+      getShardGroundingCompatibilityView()?.saveOwnerCandidates?.remainingSaveOwnerCandidates
     )
-      ? getShardGrounding().saveOwnerCandidates.remainingSaveOwnerCandidates
+      ? getShardGroundingCompatibilityView().saveOwnerCandidates.remainingSaveOwnerCandidates
       : [];
     const leadingCandidate = remainingCandidates[0] ?? null;
     const runtimeShellAnchor = recoveredDeclaringRowModel?.ownerType
@@ -659,7 +679,7 @@ export function createShardEvidenceSupport({
   }
 
   function getSourceTitlesForIds(sourceIds = []) {
-    const sourceMap = getShardGrounding()?.provenance?.sources ?? {};
+    const sourceMap = getShardGroundingCompatibilityView()?.provenance?.sources ?? {};
     return sourceIds.map((sourceId) => sourceMap[sourceId]?.title).filter(Boolean);
   }
 
@@ -670,7 +690,7 @@ export function createShardEvidenceSupport({
 
   function getProvenanceConflictNote() {
     return (
-      (getShardGrounding()?.provenance?.uncertaintyLog ?? []).find(
+      (getShardGroundingCompatibilityView()?.provenance?.uncertaintyLog ?? []).find(
         (entry) => entry.status === "conflict_detected"
       )?.what_is_missing || ""
     );

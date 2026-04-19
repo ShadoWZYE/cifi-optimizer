@@ -1,8 +1,10 @@
 # Unity Trace Bundle
 
+- Generated at: `2026-04-17T22:47:05`
 - Target: `token-shop-family-structure`
 - Label: TokenShop family structure audit
-- Anchors: `ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost, BuyCellBoost`
+- Asset set fingerprint: `8fb76674da5f`
+- Anchors: `ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, 15810, CellBoost, BuyCellBoost`
 - Join goal: Audit the whole TokenShop ATU shell family for repeated proved joins and repeated missing joins across shell ids, bridge-proxy hooks, prefab identities, and title or text surfaces without promoting any new remaps.
 
 ## Planner resolution
@@ -11,22 +13,38 @@
 - Matched family: `token-shop` (TokenShop)
 - Run mode: `trace`
 - Requested queries: `none`
-- Requested anchors: `TokenShop`
-- Expanded anchor kinds: `ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method), ATU (class), Currency (class), Tokens (class), Tokenium (class), Diamond Upgrade (string)`
+- Requested anchors: `none`
+- Expanded anchor kinds: `ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
 - Decision note: Used explicit target token-shop-family-structure in the TokenShop family and kept family-aware anchor expansion so the backend records the same checked synonym surface deterministically.
 
 ## Execution anchors
 
-- Typed execution anchors: `ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Typed execution anchors: `ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Extended search: `0` (target-only)
+- Depth search: `0` (disabled)
 
 ## Workflow
 
-- Command: `node scripts/unity/run_probe.mjs trace [--target <target-id>] [--query <query>] [--anchor <anchor>]`
+- Command: `node scripts/unity/run_probe.mjs trace [--target <target-id>] [--family <family-id>] [--query <query>] [--anchor <anchor>] [--extended-search <0|1|2>]`
 - Direct example: `node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>`
-- Planner example: `node scripts/unity/run_probe.mjs trace --query <query> --anchor <anchor>`
+- Planner example: `node scripts/unity/run_probe.mjs trace --family <family-id> --query <query> --anchor <anchor> --extended-search <0|1|2>`
 - Accepted anchor kinds: `class, method, string, path id`
 - Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.
 - Registry target: `token-shop-family-structure` from `token-shop` via [`data/unity-trace-target-registry.json`](data/unity-trace-target-registry.json)
+- Registry default depth: `0`
+
+## Native Trace
+
+- Available: `True`
+- Project: `cifi-full`
+- Search terms: `ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button`
+- Status: `completed`
+- Job id: `process_20260417_220142`
+
+## Asset Set
+
+- Fingerprint: `8fb76674da5f`
+- Inputs: `5`
 
 ## Source reads
 
@@ -36,24 +54,12 @@
   - Direct Unity scene extraction from level0 (TokenShop, ShardMining, MultiverseMarket objects).
 - `sharedassets0`: [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets)
   - Direct Unity shared assets extraction (prefabs, materials).
-- `globalgamemanagers`: [`workbench/unity/joined/globalgamemanagers.assets`](workbench/unity/joined/globalgamemanagers.assets)
-  - Direct Unity global managers assets extraction.
-- `tokenShopExtract`: [`data/token-shop-values.json`](data/token-shop-values.json)
-  - Preserves exact owner-payload shell windows and path ids recovered from the TokenShop parser.
+- `tokenShopExtract`: [`workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0`](workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0)
+  - Reconstructs exact owner-payload shell windows and path ids directly from level0 plus global-metadata.dat, while preserving compatibility with the historical TokenShop parser dataset contract.
 - `tokenShopRowRemapBoundary`: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json)
   - Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing.
 - `tokenShopLateAtuBoundary`: [`data/token-shop-late-atu-boundary.json`](data/token-shop-late-atu-boundary.json)
   - Preserves the checked late ATU24-ATU28 shell neighborhood and its bounded negative title or prefab join result.
-- `dailyTokeniumLaneProbe`: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json)
-  - Preserves named action-hook neighborhoods from the committed targeted string probe outputs.
-- `dailyTokeniumOwnerProbe`: [`data/daily-tokenium-owner-probe.json`](data/daily-tokenium-owner-probe.json)
-  - Preserves committed owner-side TokenShop title and support-text neighborhoods from the local level0 probe lane.
-- `uabeaProbe`: [`data/uabea-probe-report.json`](data/uabea-probe-report.json)
-  - Preserves UABEA or CifiAssetProbe object and type output such as named prefab identities or typed field tables.
-- `unityProbe`: [`data/unity-probe-report.json`](data/unity-probe-report.json)
-  - Preserves broader committed unity string buckets including title or text-hook surfaces.
-- `lm244TargetedProbe`: [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json)
-  - Preserves targeted string-hit neighborhoods from the local lm244 follow-up probe lane.
 
 ## Shell window
 
@@ -65,9 +71,9 @@
 
 ### Family shell range
 
-- Search terms: `ATU1Button, ATU2Button, ATU3Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU24Button, ATU28Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost, BuyCellBoost`
-- Typed anchors: `ATU1Button (class), ATU2Button (class), ATU3Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU24Button (class), ATU28Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
-- Source: [`data/token-shop-values.json`](data/token-shop-values.json) (10 hits)
+- Search terms: `ATU1Button, ATU2Button, ATU3Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU24Button, ATU28Button, SetAllTokenShopTexts, 15810, CellBoost, BuyCellBoost`
+- Typed anchors: `ATU1Button (class), ATU2Button (class), ATU3Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU24Button (class), ATU28Button (class), SetAllTokenShopTexts (method), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Source: [`workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0`](workbench/apk/base/global-metadata.dat + workbench/unity/joined/level0) (10 hits)
   - Signal summary: 10 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
   - `15810` at `$.fields[26].path_id` [high-signal, score 125, exact-structured]
   - `ATU1Button` at `$.fields[12].field` [high-signal, score 110, exact-structured]
@@ -79,9 +85,8 @@
   - `ATU5Button` at `$.fields[42].field` [high-signal, score 110, exact-structured]
   - `ATU6Button` at `$.fields[51].field` [high-signal, score 110, exact-structured]
   - `ATU7Button` at `$.fields[60].field` [high-signal, score 110, exact-structured]
-- Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) (19 hits)
-  - Signal summary: 0 high-signal, 12 supporting, 7 incidental, 0 suppressed-noise
-  - `TokenShop` at metadata offset `657154` [supporting, score 90, exact-string]
+- Source: [`workbench/apk/base/global-metadata.dat`](workbench/apk/base/global-metadata.dat) (15 hits)
+  - Signal summary: 0 high-signal, 11 supporting, 4 incidental, 0 suppressed-noise
   - `BuyCellBoost` at metadata offset `659754` [supporting, score 90, exact-string]
   - `ATU1Button` at metadata offset `662106` [supporting, score 90, exact-string]
   - `ATU2Button` at metadata offset `662235` [supporting, score 90, exact-string]
@@ -93,18 +98,15 @@
   - `ATU24Button` at metadata offset `665162` [supporting, score 90, exact-string]
   - `ATU28Button` at metadata offset `665546` [supporting, score 90, exact-string]
   - `SetAllTokenShopTexts` at metadata offset `979315` [supporting, score 90, exact-string]
-  - `InitializeTokenShop` at metadata offset `658937` [incidental, score 45, bounded-containment]
   - `BuyCellBoostEnum` at metadata offset `661133` [incidental, score 45, bounded-containment]
-  - `TokenShopButtonNotification` at metadata offset `661938` [incidental, score 45, bounded-containment]
   - `CellBoostStartCost` at metadata offset `662261` [incidental, score 45, bounded-containment]
   - `CellBoostAdditiveCost` at metadata offset `662280` [incidental, score 45, bounded-containment]
   - `<BuyCellBoostEnum>d__630` at metadata offset `668194` [incidental, score 45, bounded-containment]
-  - `get_TokenshopBonus` at metadata offset `794077` [incidental, score 45, bounded-containment]
 
 ### Bridge-proxy lane
 
-- Search terms: `BuyTokenBoost, ATU2DiamondsBonus, BuyModBoost, BuyMK1TokenBoost, BuyMK2TokenBoost, BuyMK3TokenBoost, BuyCellBoost, BuyATU24, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost`
-- Typed anchors: `BuyTokenBoost (method), ATU2DiamondsBonus (class), BuyModBoost (method), BuyMK1TokenBoost (method), BuyMK2TokenBoost (method), BuyMK3TokenBoost (method), BuyCellBoost (method), BuyATU24 (method), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class)`
+- Search terms: `BuyTokenBoost, ATU2DiamondsBonus, BuyModBoost, BuyMK1TokenBoost, BuyMK2TokenBoost, BuyMK3TokenBoost, BuyCellBoost, BuyATU24, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, 15810, CellBoost`
+- Typed anchors: `BuyTokenBoost (method), ATU2DiamondsBonus (class), BuyModBoost (method), BuyMK1TokenBoost (method), BuyMK2TokenBoost (method), BuyMK3TokenBoost (method), BuyCellBoost (method), BuyATU24 (method), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), 15810 (path id), CellBoost (class)`
 - Source: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json) (37 hits)
   - Signal summary: 4 high-signal, 33 supporting, 0 incidental, 0 suppressed-noise
   - `15810` at `$.adjacentFollowUp.blockedAdjacentShell.shellPathId` [high-signal, score 110, exact-structured]
@@ -144,48 +146,21 @@
   - `BuyModBoost` at `$.traceFollowUp.recoveredBridge.supportingActionHook` [supporting, score 95, exact-structured]
   - `ATU6Button` at `$.verifiedTitleJoin.shellField` [supporting, score 95, exact-structured]
   - `SetAllTokenShopTexts` at `$.verifiedTitleJoin.textHandlerSearchSurface[0]` [supporting, score 95, exact-structured]
-- Source: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json) (35 hits)
-  - Signal summary: 35 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `BuyCellBoost` at `$[0].matches[101].byte_context[41].value` [high-signal, score 100, exact-structured]
-  - `BuyCellBoost` at `$[0].matches[101].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `BuyCellBoost` at `$[0].matches[102].byte_context[40].value` [high-signal, score 100, exact-structured]
-  - `BuyCellBoost` at `$[0].matches[102].entry_context[25].value` [high-signal, score 100, exact-structured]
-  - `BuyMK2TokenBoost` at `$[0].matches[192].byte_context[32].value` [high-signal, score 100, exact-structured]
-  - `BuyMK2TokenBoost` at `$[0].matches[192].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `BuyMK2TokenBoost` at `$[0].matches[193].byte_context[32].value` [high-signal, score 100, exact-structured]
-  - `BuyMK2TokenBoost` at `$[0].matches[193].entry_context[25].value` [high-signal, score 100, exact-structured]
-  - `BuyTokenBoost` at `$[0].matches[197].byte_context[64].value` [high-signal, score 100, exact-structured]
-  - `BuyTokenBoost` at `$[0].matches[197].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `BuyTokenBoost` at `$[0].matches[198].byte_context[61].value` [high-signal, score 100, exact-structured]
-  - `BuyTokenBoost` at `$[0].matches[198].entry_context[25].value` [high-signal, score 100, exact-structured]
-  - `BuyMK1TokenBoost` at `$[0].matches[200].byte_context[30].value` [high-signal, score 100, exact-structured]
-  - `BuyMK1TokenBoost` at `$[0].matches[200].entry_context[31].value` [high-signal, score 100, exact-structured]
-  - `BuyMK1TokenBoost` at `$[0].matches[201].byte_context[27].value` [high-signal, score 100, exact-structured]
-  - `BuyMK1TokenBoost` at `$[0].matches[201].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `SetAllTokenShopTexts` at `$[0].matches[312].byte_context[118].value` [high-signal, score 100, exact-structured]
-  - `SetAllTokenShopTexts` at `$[0].matches[312].entry_context[16].value` [high-signal, score 100, exact-structured]
-  - `SetAllTokenShopTexts` at `$[0].matches[312].value` [high-signal, score 100, exact-structured]
-  - `SetAllTokenShopTexts` at `$[0].matches[313].entry_context[4].value` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$[0].matches[4].byte_context[77].value` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$[0].matches[4].entry_context[16].value` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$[0].matches[4].value` [high-signal, score 100, exact-structured]
-  - `BuyModBoost` at `$[0].matches[68].byte_context[52].value` [high-signal, score 100, exact-structured]
-  - `BuyModBoost` at `$[0].matches[68].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `BuyModBoost` at `$[0].matches[69].byte_context[52].value` [high-signal, score 100, exact-structured]
-  - `BuyModBoost` at `$[0].matches[69].entry_context[25].value` [high-signal, score 100, exact-structured]
-  - `BuyATU24` at `$[0].matches[71].byte_context[37].value` [high-signal, score 100, exact-structured]
-  - `BuyATU24` at `$[0].matches[72].byte_context[35].value` [high-signal, score 100, exact-structured]
-  - `BuyATU24` at `$[0].matches[72].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `BuyATU24` at `$[0].matches[73].entry_context[25].value` [high-signal, score 100, exact-structured]
-  - `BuyMK3TokenBoost` at `$[0].matches[96].byte_context[82].value` [high-signal, score 100, exact-structured]
-  - `BuyMK3TokenBoost` at `$[0].matches[97].byte_context[60].value` [high-signal, score 100, exact-structured]
-  - `BuyMK3TokenBoost` at `$[0].matches[97].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `BuyMK3TokenBoost` at `$[0].matches[98].entry_context[25].value` [high-signal, score 100, exact-structured]
+- Source: [`workbench/unity/joined/level0`](workbench/unity/joined/level0) (8 hits)
+  - Signal summary: 8 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `BuyModBoost` at raw offset `31087432` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyATU24` at raw offset `31096872` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyMK3TokenBoost` at raw offset `31904312` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyCellBoost` at raw offset `32115000` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyMK2TokenBoost` at raw offset `34228680` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyTokenBoost` at raw offset `34263272` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyMK1TokenBoost` at raw offset `34292472` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `SetAllTokenShopTexts` at raw offset `37825208` (ascii, raw-string) [high-signal, score 78, exact-string]
 
 ### Prefab identity roster
 
-- Search terms: `NewTokenUPGPrefab.T1.TokensBoost, NewTokenUPGPrefab.T1.DiamondBoost, NewTokenUPGPrefab.T1.ModPointsBooster, NewTokenUPGPrefab.T1.MK1Booster, NewTokenUPGPrefab.T1.MK2Booster, NewTokenUPGPrefab.T1.MK3Booster, NewTokenUPGPrefab.T1.CellsPerChestBooster, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost, BuyCellBoost`
-- Typed anchors: `NewTokenUPGPrefab.T1.TokensBoost (string), NewTokenUPGPrefab.T1.DiamondBoost (string), NewTokenUPGPrefab.T1.ModPointsBooster (string), NewTokenUPGPrefab.T1.MK1Booster (string), NewTokenUPGPrefab.T1.MK2Booster (string), NewTokenUPGPrefab.T1.MK3Booster (string), NewTokenUPGPrefab.T1.CellsPerChestBooster (string), NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser (string), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Search terms: `NewTokenUPGPrefab.T1.TokensBoost, NewTokenUPGPrefab.T1.DiamondBoost, NewTokenUPGPrefab.T1.ModPointsBooster, NewTokenUPGPrefab.T1.MK1Booster, NewTokenUPGPrefab.T1.MK2Booster, NewTokenUPGPrefab.T1.MK3Booster, NewTokenUPGPrefab.T1.CellsPerChestBooster, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, SetAllTokenShopTexts, 15810, CellBoost, BuyCellBoost`
+- Typed anchors: `NewTokenUPGPrefab.T1.TokensBoost (string), NewTokenUPGPrefab.T1.DiamondBoost (string), NewTokenUPGPrefab.T1.ModPointsBooster (string), NewTokenUPGPrefab.T1.MK1Booster (string), NewTokenUPGPrefab.T1.MK2Booster (string), NewTokenUPGPrefab.T1.MK3Booster (string), NewTokenUPGPrefab.T1.CellsPerChestBooster (string), NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser (string), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), SetAllTokenShopTexts (method), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
 - Source: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json) (44 hits)
   - Signal summary: 4 high-signal, 40 supporting, 0 incidental, 0 suppressed-noise
   - `15810` at `$.adjacentFollowUp.blockedAdjacentShell.shellPathId` [high-signal, score 110, exact-structured]
@@ -236,38 +211,33 @@
   - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
   - `ATU24Button` at `$.lateRows[0].shellField` [supporting, score 95, exact-structured]
   - `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser` at `$.prefabRosterBoundary.localPrefabCluster[1].identity` [supporting, score 95, exact-structured]
-- Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) (12 hits)
-  - Signal summary: 12 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `TokenShop` at `$.directTargetTypeMetadata[0].fields[27].type` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$.monoScriptHits[5].className` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$.monoScriptHits[5].scriptName` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T1.DiamondBoost` at `$.namedObjectHits[10350].name` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T1.ModPointsBooster` at `$.namedObjectHits[10353].name` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T1.MK3Booster` at `$.namedObjectHits[10362].name` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.namedObjectHits[10371].name` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser` at `$.namedObjectHits[10373].name` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T1.MK1Booster` at `$.namedObjectHits[10379].name` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T1.TokensBoost` at `$.namedObjectHits[10405].name` [high-signal, score 100, exact-structured]
-  - `NewTokenUPGPrefab.T1.MK2Booster` at `$.namedObjectHits[10409].name` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$.namedObjectHits[1054].name` [high-signal, score 100, exact-structured]
-- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (11 hits)
-  - Signal summary: 0 high-signal, 11 supporting, 0 incidental, 0 suppressed-noise
-  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
-  - `TokenShop` at `$.apk_results[4].keyword_hits.token[14]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.DiamondBoost` at `$.apk_results[7].keyword_hits.diamond[25]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.ModPointsBooster` at `$.apk_results[7].keyword_hits.token[14]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.TokensBoost` at `$.apk_results[7].keyword_hits.token[15]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser` at `$.apk_results[7].keyword_hits.token[30]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at `$.apk_results[7].keyword_hits.token[4]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.DiamondBoost` at `$.apk_results[7].keyword_hits.token[5]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.MK1Booster` at `$.apk_results[7].keyword_hits.token[6]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.MK2Booster` at `$.apk_results[7].keyword_hits.token[7]` [supporting, score 95, exact-structured]
-  - `NewTokenUPGPrefab.T1.MK3Booster` at `$.apk_results[7].keyword_hits.token[8]` [supporting, score 95, exact-structured]
+- Source: [`workbench/unity/joined/level0`](workbench/unity/joined/level0) (18 hits)
+  - Signal summary: 18 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `NewTokenUPGPrefab.T1.DiamondBoost` at path_id `48809` (GameObject, object-name) [high-signal, score 85, exact-string]
+  - `NewTokenUPGPrefab.T1.ModPointsBooster` at path_id `48812` (GameObject, object-name) [high-signal, score 85, exact-string]
+  - `NewTokenUPGPrefab.T1.MK3Booster` at path_id `48821` (GameObject, object-name) [high-signal, score 85, exact-string]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at path_id `48830` (GameObject, object-name) [high-signal, score 85, exact-string]
+  - `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser` at path_id `48832` (GameObject, object-name) [high-signal, score 85, exact-string]
+  - `NewTokenUPGPrefab.T1.MK1Booster` at path_id `48838` (GameObject, object-name) [high-signal, score 85, exact-string]
+  - `NewTokenUPGPrefab.T1.TokensBoost` at path_id `48864` (GameObject, object-name) [high-signal, score 85, exact-string]
+  - `NewTokenUPGPrefab.T1.MK2Booster` at path_id `48868` (GameObject, object-name) [high-signal, score 85, exact-string]
+  - `NewTokenUPGPrefab.T1.DiamondBoost` at raw offset `13672148` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `NewTokenUPGPrefab.T1.ModPointsBooster` at raw offset `13672404` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `NewTokenUPGPrefab.T1.MK3Booster` at raw offset `13673172` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `NewTokenUPGPrefab.T1.CellsPerChestBooster` at raw offset `13673972` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser` at raw offset `13674148` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `NewTokenUPGPrefab.T1.MK1Booster` at raw offset `13674660` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `NewTokenUPGPrefab.T1.TokensBoost` at raw offset `13676868` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `NewTokenUPGPrefab.T1.MK2Booster` at raw offset `13677188` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyCellBoost` at raw offset `32115000` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `SetAllTokenShopTexts` at raw offset `37825208` (ascii, raw-string) [high-signal, score 78, exact-string]
+- Source: [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets) (0 hits)
+  - Signal summary: 0 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
 
 ### Title and text surfaces
 
-- Search terms: `SetAllTokenShopTexts, SetTokenTexts, Mk2 Generator Booster, Token Ultima: MP, 1. MK1 Generator Output,, Token Ultima: Cells, Academy Booster, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, TokenShop, 15810, CellBoost, BuyCellBoost`
-- Typed anchors: `SetAllTokenShopTexts (method), SetTokenTexts (method), Mk2 Generator Booster (string), Token Ultima: MP (string), 1. MK1 Generator Output, (string), Token Ultima: Cells (string), Academy Booster (string), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), TokenShop (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
+- Search terms: `SetAllTokenShopTexts, SetTokenTexts, Mk2 Generator Booster, Token Ultima: MP, 1. MK1 Generator Output,, Token Ultima: Cells, Academy Booster, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, ATU3Button, ATU24Button, 15810, CellBoost, BuyCellBoost`
+- Typed anchors: `SetAllTokenShopTexts (method), SetTokenTexts (method), Mk2 Generator Booster (string), Token Ultima: MP (string), 1. MK1 Generator Output, (string), Token Ultima: Cells (string), Academy Booster (string), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), ATU3Button (class), ATU24Button (class), 15810 (path id), CellBoost (class), BuyCellBoost (method)`
 - Source: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json) (46 hits)
   - Signal summary: 4 high-signal, 42 supporting, 0 incidental, 0 suppressed-noise
   - `15810` at `$.adjacentFollowUp.blockedAdjacentShell.shellPathId` [high-signal, score 110, exact-structured]
@@ -320,32 +290,27 @@
   - Signal summary: 0 high-signal, 2 supporting, 0 incidental, 0 suppressed-noise
   - `ATU24Button` at `$.lateRows[0].shellField` [supporting, score 95, exact-structured]
   - `Academy Booster` at `$.titleRosterBoundary.localTitleCluster[2].title` [supporting, score 95, exact-structured]
-- Source: [`data/unity-probe-report.json`](data/unity-probe-report.json) (7 hits)
-  - Signal summary: 0 high-signal, 7 supporting, 0 incidental, 0 suppressed-noise
-  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.token[25]` [supporting, score 95, exact-structured]
-  - `Token Ultima: MP` at `$.apk_results[23].keyword_hits.token[26]` [supporting, score 95, exact-structured]
-  - `Token Ultima: Cells` at `$.apk_results[23].keyword_hits.ultima[5]` [supporting, score 95, exact-structured]
-  - `Token Ultima: MP` at `$.apk_results[23].keyword_hits.ultima[6]` [supporting, score 95, exact-structured]
-  - `SetAllTokenShopTexts` at `$.apk_results[32].keyword_hits.token[6]` [supporting, score 95, exact-structured]
-  - `SetTokenTexts` at `$.apk_results[32].keyword_hits.token[7]` [supporting, score 95, exact-structured]
-  - `TokenShop` at `$.apk_results[4].keyword_hits.token[14]` [supporting, score 95, exact-structured]
-- Source: [`data/daily-tokenium-owner-probe.json`](data/daily-tokenium-owner-probe.json) (10 hits)
-  - Signal summary: 0 high-signal, 10 supporting, 0 incidental, 0 suppressed-noise
-  - `Mk2 Generator Booster` at `$[0].matches[19].byte_context[17].value` [supporting, score 95, exact-structured]
-  - `Academy Booster` at `$[0].matches[19].byte_context[27].value` [supporting, score 95, exact-structured]
-  - `Mk2 Generator Booster` at `$[0].matches[19].entry_context[12].value` [supporting, score 95, exact-structured]
-  - `Academy Booster` at `$[0].matches[20].byte_context[15].value` [supporting, score 95, exact-structured]
-  - `Mk2 Generator Booster` at `$[0].matches[20].byte_context[5].value` [supporting, score 95, exact-structured]
-  - `Mk2 Generator Booster` at `$[0].matches[20].entry_context[0].value` [supporting, score 95, exact-structured]
-  - `Academy Booster` at `$[0].matches[20].entry_context[10].value` [supporting, score 95, exact-structured]
-  - `Academy Booster` at `$[0].matches[20].value` [supporting, score 95, exact-structured]
-  - `1. MK1 Generator Output,` at `$[0].matches[46].byte_context[29].value` [supporting, score 95, exact-structured]
-  - `1. MK1 Generator Output,` at `$[0].matches[46].entry_context[5].value` [supporting, score 95, exact-structured]
+- Source: [`workbench/unity/joined/level0`](workbench/unity/joined/level0) (12 hits)
+  - Signal summary: 12 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `Token Ultima: MP` at raw offset `30196860` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `Token Ultima: Cells` at raw offset `30199036` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `Token Ultima: MP` at raw offset `30200652` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `Token Ultima: MP` at raw offset `30201740` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `Mk2 Generator Booster` at raw offset `30202284` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `Mk2 Generator Booster` at raw offset `30215852` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `Academy Booster` at raw offset `30218572` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `Token Ultima: MP` at raw offset `30228956` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyCellBoost` at raw offset `32115000` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `1. MK1 Generator Output,` at raw offset `34256603` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `SetAllTokenShopTexts` at raw offset `37825208` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `SetTokenTexts` at raw offset `37825348` (ascii, raw-string) [high-signal, score 78, exact-string]
+- Source: [`workbench/unity/joined/sharedassets0.assets`](workbench/unity/joined/sharedassets0.assets) (0 hits)
+  - Signal summary: 0 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
 
 ### Bounded unresolved neighborhoods
 
-- Search terms: `ATU3Button, BuyCellBoost, ATU24Button, BuyATU24, StartCellBostHold, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, SetAllTokenShopTexts, TokenShop, 15810, CellBoost`
-- Typed anchors: `ATU3Button (class), BuyCellBoost (method), ATU24Button (class), BuyATU24 (method), StartCellBostHold (method), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), SetAllTokenShopTexts (method), TokenShop (class), 15810 (path id), CellBoost (class)`
+- Search terms: `ATU3Button, BuyCellBoost, ATU24Button, BuyATU24, StartCellBostHold, ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button, SetAllTokenShopTexts, 15810, CellBoost`
+- Typed anchors: `ATU3Button (class), BuyCellBoost (method), ATU24Button (class), BuyATU24 (method), StartCellBostHold (method), ATU1Button (class), ATU2Button (class), ATU4Button (class), ATU5Button (class), ATU6Button (class), ATU7Button (class), SetAllTokenShopTexts (method), 15810 (path id), CellBoost (class)`
 - Source: [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json) (30 hits)
   - Signal summary: 4 high-signal, 26 supporting, 0 incidental, 0 suppressed-noise
   - `15810` at `$.adjacentFollowUp.blockedAdjacentShell.shellPathId` [high-signal, score 110, exact-structured]
@@ -383,27 +348,12 @@
   - `BuyATU24` at `$.actionNeighborhood.preservedLateHooks[0]` [supporting, score 95, exact-structured]
   - `BuyATU24` at `$.lateRows[0].buyHook` [supporting, score 95, exact-structured]
   - `ATU24Button` at `$.lateRows[0].shellField` [supporting, score 95, exact-structured]
-- Source: [`data/daily-tokenium-lane-probe.json`](data/daily-tokenium-lane-probe.json) (19 hits)
-  - Signal summary: 19 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
-  - `StartCellBostHold` at `$[0].matches[101].byte_context[30].value` [high-signal, score 100, exact-structured]
-  - `BuyCellBoost` at `$[0].matches[101].byte_context[41].value` [high-signal, score 100, exact-structured]
-  - `StartCellBostHold` at `$[0].matches[101].entry_context[17].value` [high-signal, score 100, exact-structured]
-  - `BuyCellBoost` at `$[0].matches[101].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `StartCellBostHold` at `$[0].matches[102].byte_context[29].value` [high-signal, score 100, exact-structured]
-  - `BuyCellBoost` at `$[0].matches[102].byte_context[40].value` [high-signal, score 100, exact-structured]
-  - `StartCellBostHold` at `$[0].matches[102].entry_context[14].value` [high-signal, score 100, exact-structured]
-  - `BuyCellBoost` at `$[0].matches[102].entry_context[25].value` [high-signal, score 100, exact-structured]
-  - `SetAllTokenShopTexts` at `$[0].matches[312].byte_context[118].value` [high-signal, score 100, exact-structured]
-  - `SetAllTokenShopTexts` at `$[0].matches[312].entry_context[16].value` [high-signal, score 100, exact-structured]
-  - `SetAllTokenShopTexts` at `$[0].matches[312].value` [high-signal, score 100, exact-structured]
-  - `SetAllTokenShopTexts` at `$[0].matches[313].entry_context[4].value` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$[0].matches[4].byte_context[77].value` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$[0].matches[4].entry_context[16].value` [high-signal, score 100, exact-structured]
-  - `TokenShop` at `$[0].matches[4].value` [high-signal, score 100, exact-structured]
-  - `BuyATU24` at `$[0].matches[71].byte_context[37].value` [high-signal, score 100, exact-structured]
-  - `BuyATU24` at `$[0].matches[72].byte_context[35].value` [high-signal, score 100, exact-structured]
-  - `BuyATU24` at `$[0].matches[72].entry_context[28].value` [high-signal, score 100, exact-structured]
-  - `BuyATU24` at `$[0].matches[73].entry_context[25].value` [high-signal, score 100, exact-structured]
+- Source: [`workbench/unity/joined/level0`](workbench/unity/joined/level0) (4 hits)
+  - Signal summary: 4 high-signal, 0 supporting, 0 incidental, 0 suppressed-noise
+  - `BuyATU24` at raw offset `31096872` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `StartCellBostHold` at raw offset `32114396` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `BuyCellBoost` at raw offset `32115000` (ascii, raw-string) [high-signal, score 78, exact-string]
+  - `SetAllTokenShopTexts` at raw offset `37825208` (ascii, raw-string) [high-signal, score 78, exact-string]
 
 ## Bridge check
 
@@ -429,11 +379,11 @@
   - `tokenShopRowRemapBoundary` at `$.atu5TitleFollowUp.recoveredBridge.supportingActionHook` proves `BuyMK1TokenBoost`
   - `tokenShopRowRemapBoundary` at `$.boundedRecoveredBridgeFollowUp.supportingActionHook` proves `BuyMK2TokenBoost`
   - `tokenShopRowRemapBoundary` at `$.atu7BridgeFollowUp.recoveredBridge.supportingActionHook` proves `BuyMK3TokenBoost`
-  - `dailyTokeniumLaneProbe` at `$[0].matches[197].byte_context[64].value` proves `BuyTokenBoost`
-  - `dailyTokeniumLaneProbe` at `$[0].matches[68].byte_context[52].value` proves `BuyModBoost`
-  - `dailyTokeniumLaneProbe` at `$[0].matches[200].byte_context[30].value` proves `BuyMK1TokenBoost`
-  - `dailyTokeniumLaneProbe` at `$[0].matches[192].byte_context[32].value` proves `BuyMK2TokenBoost`
-  - `dailyTokeniumLaneProbe` at `$[0].matches[96].byte_context[82].value` proves `BuyMK3TokenBoost`
+  - `level0` at `raw-string@34263272` proves `BuyTokenBoost`
+  - `level0` at `raw-string@31087432` proves `BuyModBoost`
+  - `level0` at `raw-string@34292472` proves `BuyMK1TokenBoost`
+  - `level0` at `raw-string@34228680` proves `BuyMK2TokenBoost`
+  - `level0` at `raw-string@31904312` proves `BuyMK3TokenBoost`
 - `repeated-shell-to-prefab-subset`: The same solved subset repeatedly reaches exact prefab identities on committed sources, even when final titles still do not localize. [direct]
   - `tokenShopRowRemapBoundary` at `$.adjacentFollowUp.recoveredAdditionalBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.TokensBoost`
   - `tokenShopRowRemapBoundary` at `$.recoveredBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.DiamondBoost`
@@ -441,22 +391,22 @@
   - `tokenShopRowRemapBoundary` at `$.atu5TitleFollowUp.recoveredBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.MK1Booster`
   - `tokenShopRowRemapBoundary` at `$.boundedRecoveredBridgeFollowUp.prefabIdentity` proves `NewTokenUPGPrefab.T1.MK2Booster`
   - `tokenShopRowRemapBoundary` at `$.atu7BridgeFollowUp.recoveredBridge.prefabIdentity` proves `NewTokenUPGPrefab.T1.MK3Booster`
-  - `uabeaProbe` at `$.namedObjectHits[10405].name` proves `NewTokenUPGPrefab.T1.TokensBoost`
-  - `uabeaProbe` at `$.namedObjectHits[10409].name` proves `NewTokenUPGPrefab.T1.MK2Booster`
-  - `uabeaProbe` at `$.namedObjectHits[10362].name` proves `NewTokenUPGPrefab.T1.MK3Booster`
+  - `level0` at `GameObject path_id 48864` proves `NewTokenUPGPrefab.T1.TokensBoost`
+  - `level0` at `GameObject path_id 48868` proves `NewTokenUPGPrefab.T1.MK2Booster`
+  - `level0` at `GameObject path_id 48821` proves `NewTokenUPGPrefab.T1.MK3Booster`
 - `repeated-title-text-surface`: Generic TokenShop text hooks and row-adjacent title or support-text surfaces repeatedly survive, but they usually remain detached from exact shell ids. [supporting]
-  - `unityProbe` at `$.apk_results[32].keyword_hits.token[6]` proves `SetAllTokenShopTexts`
-  - `unityProbe` at `$.apk_results[23].keyword_hits.token[26]` proves `Token Ultima: MP`
-  - `dailyTokeniumOwnerProbe` at `$[0].matches[46].byte_context[29].value` proves `1. MK1 Generator Output,`
+  - `level0` at `raw-string@37825208` proves `SetAllTokenShopTexts`
+  - `level0` at `raw-string@30196860` proves `Token Ultima: MP`
+  - `level0` at `raw-string@34256603` proves `1. MK1 Generator Output,`
   - `tokenShopLateAtuBoundary` at `$.titleRosterBoundary.localTitleCluster[2].title` proves `Academy Booster`
 - `exact-shell-to-title-exemplar`: ATU6 remains the standout strongest row neighborhood because the repo preserves one exact shell-to-prefab-to-title chain there. [direct]
   - `tokenShopRowRemapBoundary` at `$.verifiedTitleJoin.titleProbeTitle` proves `Mk2 Generator Booster`
-  - `dailyTokeniumOwnerProbe` at `$[0].matches[19].byte_context[17].value` proves `Mk2 Generator Booster`
+  - `level0` at `raw-string@30202284` proves `Mk2 Generator Booster`
   - `tokenShopRowRemapBoundary` at `$.verifiedTitleJoin.prefabIdentity` proves `NewTokenUPGPrefab.T1.MK2Booster`
 - `bounded-unresolved-neighborhood-coverage`: The still-unresolved neighborhoods are already checked as bounded negatives rather than open-ended unknowns. [supporting]
   - `tokenShopRowRemapBoundary` at `$.atu3CellsDisambiguationPass.groundedConclusion` proves `The bounded ATU3 cells-domain disambiguation pass stays negative. Across the exact BuyCellBoost, diamond-special CellsBoost, and token-side CellsPerChestBooster or Token Ultima: Cells search surfaces, the repo still preserves only separate cells-domain clusters rather than one checked object-or-title join back to ATU3Button path id 15810.`
   - `tokenShopLateAtuBoundary` at `$.groundedConclusion` proves `The ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result. The repo preserves exact SaveData row levels, exact TokenShop shell path ids, direct BuyATU24 through BuyATU28 hooks, one local late title roster, one local late prefab roster, and separate Campaign Fragments or Academy effect-side strings, but no committed artifact crosses those surfaces back to one exact ATU24Button through ATU28Button shell. This neighborhood therefore narrows the unresolved late tier4plus seam without recovering one new checked shell-to-prefab or shell-to-title bridge.`
-  - `dailyTokeniumLaneProbe` at `$[0].matches[71].byte_context[37].value` proves `BuyATU24`
+  - `level0` at `raw-string@31096872` proves `BuyATU24`
 
 ### Missing joins
 

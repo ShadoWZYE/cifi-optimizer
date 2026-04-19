@@ -11,20 +11,13 @@
         "globalgamemanagers",
         "tokenShopExtract",
         "tokenShopRowRemapBoundary",
-        "tokenShopLateAtuBoundary",
-        "dailyTokeniumLaneProbe",
-        "dailyTokeniumOwnerProbe",
-        "uabeaProbe",
-        "unityProbe",
-        "lm244TargetedProbe"
+        "tokenShopLateAtuBoundary"
       ]
     },
     "shard-cost": {
       "label": "Shard cost",
       "sourceIds": [
-        "shardCostModelBoundary",
-        "shardCostParameterProbe",
-        "shardCostMethodProbe",
+        "metadata",
         "shardCostNativeProbe",
         "shardCostFormulaModel",
         "shardMilestoneSaveOwnerCandidates"
@@ -34,22 +27,19 @@
       "label": "Shard owned state",
       "sourceIds": [
         "shardSaveBoundary",
-        "shardMilestonePayloadBoundary",
-        "shardMilestoneHandoffBoundary",
-        "shardTypeMetadataProbe",
-        "shardSceneMonoBehaviourProbe",
+        "metadata",
+        "level0",
         "shardMilestoneSaveOwnerCandidates"
       ]
     },
     "multiverse-market-save-owner": {
       "label": "Multiverse market/save-owner",
       "sourceIds": [
+        "metadata",
+        "level0",
         "multiverseMarketMemberBoundary",
         "multiverseMarketSaveDataImportBoundary",
-        "multiverseMarketRangeBoundary",
-        "multiverseMarketRowTextCoverage",
-        "multiverseMarketActionShell",
-        "uabeaProbe"
+        "multiverseMarketRangeBoundary"
       ]
     }
   },
@@ -73,7 +63,7 @@
     "families": {
       "token-shop": {
         "label": "TokenShop",
-        "defaultTargetId": "token-shop-atu3-cells",
+        "defaultTargetId": "token-shop-atu3-cells-effect",
         "defaultRunMode": "compare",
         "queryTerms": [
           "TokenShop",
@@ -284,49 +274,49 @@
   },
   "comparisonPresets": {
     "token-shop-atu3-vs-atu1": {
-      "label": "TokenShop ATU1 solved bridge vs ATU3 blocked trace",
+      "label": "TokenShop ATU1 solved bridge vs ATU3 effect chain",
       "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "summaryFocus": [
         "exact shell-to-action-hook join",
-        "exact shell-to-prefab join",
-        "exact shell-to-title join"
+        "shared effect-system chain",
+        "remaining typed effect-owner break"
       ]
     },
     "token-shop-atu4-vs-atu3": {
-      "label": "TokenShop ATU4 trace bridge vs ATU3 blocked trace",
+      "label": "TokenShop ATU4 trace bridge vs ATU3 effect chain",
       "solvedBaselineTargetId": "token-shop-atu4-mod",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "summaryFocus": [
         "exact shell-to-action-hook join",
-        "exact shell-to-prefab join",
-        "exact shell-to-title join"
+        "shared effect-system chain",
+        "remaining typed effect-owner break"
       ]
     },
     "token-shop-atu5-vs-atu3": {
-      "label": "TokenShop ATU5 trace bridge vs ATU3 blocked trace",
+      "label": "TokenShop ATU5 trace bridge vs ATU3 effect chain",
       "solvedBaselineTargetId": "token-shop-atu5-mk1-title",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "summaryFocus": [
         "exact shell-to-action-hook join",
-        "exact shell-to-prefab join",
-        "exact shell-to-title join"
+        "shared effect-system chain",
+        "remaining typed effect-owner break"
       ]
     },
     "token-shop-atu7-vs-atu3": {
-      "label": "TokenShop ATU7 trace bridge vs ATU3 blocked trace",
+      "label": "TokenShop ATU7 trace bridge vs ATU3 effect chain",
       "solvedBaselineTargetId": "token-shop-atu7-mk3-bridge",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "summaryFocus": [
         "exact shell-to-action-hook join",
-        "exact shell-to-prefab join",
-        "exact shell-to-title join"
+        "shared effect-system chain",
+        "remaining typed effect-owner break"
       ]
     },
     "token-shop-atu3-effect-vs-split": {
-      "label": "TokenShop ATU3 effect-chain vs prefab or title split",
+      "label": "TokenShop ATU3 effect-chain vs ATU1 row-bridge baseline",
       "solvedBaselineTargetId": "token-shop-atu3-cells-effect",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu1-row-bridge-baseline",
       "summaryFocus": [
         "shared effect-system chain",
         "derived player-facing effect surface",
@@ -354,12 +344,12 @@
         ]
       },
     "token-shop-family-structure-vs-unresolved": {
-      "label": "TokenShop family structure audit vs unresolved ATU neighborhoods",
+      "label": "TokenShop family structure audit vs ATU3 effect chain",
       "solvedBaselineTargetId": "token-shop-family-structure",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "summaryFocus": [
         "repeated solved shell-to-proxy-to-prefab structure",
-        "repeated title-localization gap",
+        "shared effect-system chain",
         "standout strongest row neighborhood"
       ]
     },
@@ -396,7 +386,7 @@
   },
   "targets": {
     "token-shop-atu4-mod": {
-      "label": "TokenShop ATU4 mod title pass",
+      "label": "TokenShop ATU4 runtime cost pass",
       "familyId": "token-shop",
       "strategy": "token-shop-atu4-mod",
       "acceptedAnchors": [
@@ -409,13 +399,13 @@
         "ATU4Button",
         "15796"
       ],
-      "joinGoal": "Recover one checked final player-facing title join for the already grounded ATU4Button or path id 15796 row, and keep the title-side result bounded if it still stays detached.",
+      "joinGoal": "Recover the grounded ATU4Button or path id 15796 row through direct assets plus native evidence, then close the remaining live BUY-cost runtime path without comparing against unrelated TokenShop rows.",
       "requiredSourceFamilies": [
         "token-shop"
       ],
-      "solvedBaselineTargetId": "token-shop-atu4-mod",
-      "blockedTargetId": "token-shop-atu3-cells",
-      "comparisonPresetId": "token-shop-atu4-vs-atu3",
+      "solvedBaselineTargetId": null,
+      "blockedTargetId": null,
+      "comparisonPresetId": null,
       "outputSummaryRules": {
         "wire": {
           "minPresentEdges": 5,
@@ -428,9 +418,9 @@
           ]
         },
         "messages": {
-          "wire": "One exact shell-to-prefab and title chain cleared cleanly enough to wire the traced boundary.",
-          "quarantine": "The trace now preserves the ATU4 shell-to-prefab bridge, but the title-side pass stays bounded negative so this row remains quarantined to remap evidence.",
-          "research": "The trace is still too incomplete to preserve one bounded ATU4 title-side verdict."
+          "wire": "The trace now preserves the ATU4 shell, prefab, literals, and runtime evaluator lane cleanly enough to keep the row as a bounded direct-asset/native recovery.",
+          "quarantine": "The trace preserves the ATU4 row structure and literals, but the live BUY-cost runtime path is still bounded open.",
+          "research": "The trace is still too incomplete to preserve one bounded ATU4 runtime-cost verdict."
         }
       },
       "strategyConfig": {
@@ -455,7 +445,7 @@
             "id": "action-lane",
             "label": "Action hook lane",
             "sourceIds": [
-              "dailyTokeniumLaneProbe"
+              "level0"
             ],
             "terms": [
               "BuyModBoost"
@@ -466,10 +456,7 @@
             "label": "Prefab identity lane",
             "sourceIds": [
               "level0",
-              "sharedassets0",
-              "uabeaProbe",
-              "unityProbe",
-              "lm244TargetedProbe"
+              "sharedassets0"
             ],
             "terms": [
               "NewTokenUPGPrefab.T1.ModPointsBooster"
@@ -481,7 +468,7 @@
             "sourceIds": [
               "level0",
               "sharedassets0",
-              "unityProbe"
+              "metadata"
             ],
             "terms": [
               "Token Ultima: MP",
@@ -493,10 +480,7 @@
             "label": "Generic TokenShop text-hook lane",
             "sourceIds": [
               "level0",
-              "sharedassets0",
-              "unityProbe",
-              "dailyTokeniumLaneProbe",
-              "lm244TargetedProbe"
+              "sharedassets0"
             ],
             "terms": [
               "SetAllTokenShopTexts",
@@ -505,11 +489,11 @@
           }
         ],
         "lostStructure": [
-          "The shell-side owner window survives only in the TokenShop extract, where ATU4Button path id 15796 stays adjacent to the ModBoost owner block.",
-          "The exact BuyModBoost action hook and NewTokenUPGPrefab.T1.ModPointsBooster prefab now converge on the same traced row family, but the final player-facing title still survives only as detached mod-domain title and generic text-hook surfaces.",
-          "Because the title-side join is still missing, the recovered ATU4 bridge is safe for row-remap evidence only and should not widen into canonical or planner behavior."
+          "The shell-side owner window survives directly in the TokenShop owner blob, where ATU4Button path id 15796 stays adjacent to the ModBoost base-value block.",
+          "The exact BuyModBoost action hook, NewTokenUPGPrefab.T1.ModPointsBooster prefab, and direct UI slot graph now converge on the same traced row family.",
+          "The remaining unresolved lane is not row identity or text localization; it is the live BUY-cost runtime path feeding CostText."
         ],
-        "groundedConclusion": "The ATU4Button or 15796 title-side trace stays negative. The row still preserves one checked shell-to-action-hook-to-prefab bridge to NewTokenUPGPrefab.T1.ModPointsBooster, but neither the generic TokenShop text hooks nor the detached mod-domain title candidates provide one exact final player-facing title join."
+        "groundedConclusion": "The ATU4Button or 15796 runtime-cost trace now clears one bounded direct-asset/native row recovery. The row preserves one checked shell-to-action-hook-to-prefab bridge to NewTokenUPGPrefab.T1.ModPointsBooster, one direct level0 UI slot graph, grounded literals, and one recovered runtime evaluator family, while the live BUY-cost path still remains open."
       }
     },
     "token-shop-atu5-mk1-title": {
@@ -531,7 +515,7 @@
         "token-shop"
       ],
       "solvedBaselineTargetId": "token-shop-atu5-mk1-title",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "comparisonPresetId": "token-shop-atu5-vs-atu3",
       "outputSummaryRules": {
         "wire": {
@@ -572,7 +556,7 @@
             "id": "action-lane",
             "label": "Action hook lane",
             "sourceIds": [
-              "dailyTokeniumLaneProbe"
+              "level0"
             ],
             "terms": [
               "BuyMK1TokenBoost"
@@ -583,9 +567,7 @@
             "label": "Prefab identity lane",
             "sourceIds": [
               "level0",
-              "sharedassets0",
-              "uabeaProbe",
-              "unityProbe"
+              "sharedassets0"
             ],
             "terms": [
               "NewTokenUPGPrefab.T1.MK1Booster"
@@ -596,11 +578,7 @@
             "label": "MK1 generator support-text lane",
             "sourceIds": [
               "level0",
-              "sharedassets0",
-              "unityProbe",
-              "dailyTokeniumLaneProbe",
-              "dailyTokeniumOwnerProbe",
-              "lm244TargetedProbe"
+              "sharedassets0"
             ],
             "terms": [
               "1. MK1 Generator Output,",
@@ -612,7 +590,8 @@
             "id": "title-roster-gap",
             "label": "Neighboring generator title roster",
             "sourceIds": [
-              "dailyTokeniumOwnerProbe"
+              "level0",
+              "sharedassets0"
             ],
             "terms": [
               "Mk2 Generator Booster",
@@ -625,10 +604,7 @@
             "label": "Generic TokenShop text-hook lane",
             "sourceIds": [
               "level0",
-              "sharedassets0",
-              "unityProbe",
-              "dailyTokeniumLaneProbe",
-              "lm244TargetedProbe"
+              "sharedassets0"
             ],
             "terms": [
               "SetAllTokenShopTexts",
@@ -670,7 +646,7 @@
         "token-shop"
       ],
       "solvedBaselineTargetId": "token-shop-family-structure",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "comparisonPresetId": "token-shop-family-structure-vs-unresolved",
       "outputSummaryRules": {
         "wire": {
@@ -719,7 +695,7 @@
             "label": "Bridge-proxy lane",
             "sourceIds": [
               "tokenShopRowRemapBoundary",
-              "dailyTokeniumLaneProbe"
+              "level0"
             ],
             "terms": [
               "BuyTokenBoost",
@@ -738,8 +714,8 @@
             "sourceIds": [
               "tokenShopRowRemapBoundary",
               "tokenShopLateAtuBoundary",
-              "uabeaProbe",
-              "unityProbe"
+              "level0",
+              "sharedassets0"
             ],
             "terms": [
               "NewTokenUPGPrefab.T1.TokensBoost",
@@ -758,8 +734,8 @@
             "sourceIds": [
               "tokenShopRowRemapBoundary",
               "tokenShopLateAtuBoundary",
-              "unityProbe",
-              "dailyTokeniumOwnerProbe"
+              "level0",
+              "sharedassets0"
             ],
             "terms": [
               "SetAllTokenShopTexts",
@@ -777,7 +753,7 @@
             "sourceIds": [
               "tokenShopRowRemapBoundary",
               "tokenShopLateAtuBoundary",
-              "dailyTokeniumLaneProbe"
+              "level0"
             ],
             "terms": [
               "ATU3Button",
@@ -815,7 +791,7 @@
         "token-shop"
       ],
       "solvedBaselineTargetId": "token-shop-atu7-mk3-bridge",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
       "comparisonPresetId": "token-shop-atu7-vs-atu3",
       "outputSummaryRules": {
         "wire": {
@@ -854,7 +830,7 @@
             "id": "action-lane",
             "label": "Action hook lane",
             "sourceIds": [
-              "dailyTokeniumLaneProbe"
+              "level0"
             ],
             "terms": [
               "BuyMK3TokenBoost"
@@ -865,10 +841,7 @@
             "label": "Prefab identity lane",
             "sourceIds": [
               "level0",
-              "sharedassets0",
-              "uabeaProbe",
-              "unityProbe",
-              "lm244TargetedProbe"
+              "sharedassets0"
             ],
             "terms": [
               "NewTokenUPGPrefab.T1.MK3Booster"
@@ -901,8 +874,9 @@
       "requiredSourceFamilies": [
         "token-shop"
       ],
+      "defaultDepth": 1,
       "solvedBaselineTargetId": "token-shop-atu3-cells-effect",
-      "blockedTargetId": "token-shop-atu3-cells",
+      "blockedTargetId": "token-shop-atu1-row-bridge-baseline",
       "comparisonPresetId": "token-shop-atu3-effect-vs-split",
       "outputSummaryRules": {
         "wire": {
@@ -943,7 +917,7 @@
             "id": "action-lane",
             "label": "Action hook lane",
             "sourceIds": [
-              "dailyTokeniumLaneProbe"
+              "level0"
             ],
             "terms": [
               "StartCellBostHold",
@@ -955,7 +929,7 @@
             "id": "shared-effect-title",
             "label": "Shared effect title lane",
             "sourceIds": [
-              "dailyTokeniumOwnerProbe"
+              "level0"
             ],
             "terms": [
               "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"
@@ -965,8 +939,7 @@
             "id": "shared-effect-text",
             "label": "Shared effect text lane",
             "sourceIds": [
-              "dailyTokeniumLaneProbe",
-              "unityProbe"
+              "level0"
             ],
             "terms": [
               "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."
@@ -976,9 +949,8 @@
             "id": "detached-identity-surfaces",
             "label": "Detached cells identity surfaces",
             "sourceIds": [
-              "lm244TargetedProbe",
-              "unityProbe",
-              "uabeaProbe"
+              "level0",
+              "metadata"
             ],
             "terms": [
               "BuyCellsBoost",
@@ -987,6 +959,70 @@
               "NewTokenUPGPrefab.T1.CellsPerChestBooster",
               "NewTokenUPGPrefab.T5.UltimaCells",
               "Token Ultima: Cells"
+            ]
+          }
+        ],
+        "followUpSurfaces": [
+          {
+            "id": "detached-identity-surfaces",
+            "label": "Detached cells identity surfaces",
+            "sourceIds": [
+              "level0",
+              "metadata"
+            ],
+            "terms": [
+              "BuyCellsBoost",
+              "NewDiamondUPGPrefab.Specials.CellsBoost",
+              ">Diamond Upgrade 10 - CellsBoost",
+              "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "NewTokenUPGPrefab.T5.UltimaCells",
+              "Token Ultima: Cells"
+            ]
+          }
+        ],
+        "depthPlan": [
+          {
+            "hop": 0,
+            "goal": "Recover the bounded ATU3 shell-to-action-hook-to-shared-effect chain.",
+            "surfaceIds": [
+              "metadata-neighborhood",
+              "action-lane",
+              "shared-effect-title",
+              "shared-effect-text"
+            ]
+          },
+          {
+            "hop": 1,
+            "goal": "Recover detached cells identity and contrast evidence without making it part of the bounded effect core.",
+            "surfaceIds": [
+              "detached-identity-surfaces"
+            ]
+          },
+          {
+            "hop": 2,
+            "goal": "Hand off from the shared effect lane into the concrete chest consumer family.",
+            "targetIds": [
+              "token-shop-atu3-chest-consumer"
+            ]
+          }
+        ],
+        "claimStages": [
+          {
+            "id": "effect-core",
+            "label": "ATU3 effect core",
+            "requiredEdgeTypes": [
+              "serialized-adjacency",
+              "exact-shell-to-action-hook",
+              "shared-effect-system",
+              "derived-player-effect-surface",
+              "parameter-surface"
+            ]
+          },
+          {
+            "id": "detached-contrast",
+            "label": "ATU3 detached contrast evidence",
+            "requiredEdgeTypes": [
+              "detached-identity-contrast"
             ]
           }
         ],
@@ -1018,6 +1054,7 @@
       "requiredSourceFamilies": [
         "token-shop"
       ],
+      "defaultDepth": 1,
       "solvedBaselineTargetId": "token-shop-atu3-chest-consumer",
       "blockedTargetId": "token-shop-atu3-cells-effect",
       "comparisonPresetId": "token-shop-atu3-consumer-vs-effect",
@@ -1060,7 +1097,7 @@
             "id": "shared-effect-title",
             "label": "Shared effect title lane",
             "sourceIds": [
-              "dailyTokeniumOwnerProbe"
+              "level0"
             ],
             "terms": [
               "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"
@@ -1070,8 +1107,7 @@
             "id": "shared-effect-text",
             "label": "Shared effect text lane",
             "sourceIds": [
-              "dailyTokeniumLaneProbe",
-              "unityProbe"
+              "level0"
             ],
             "terms": [
               "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."
@@ -1081,8 +1117,7 @@
             "id": "consumer-family",
             "label": "Chest consumer family",
             "sourceIds": [
-              "dailyTokeniumLaneProbe",
-              "lm244TargetedProbe"
+              "level0"
             ],
             "terms": [
               "AdManager, Assembly-CSharp",
@@ -1095,7 +1130,6 @@
             "id": "consumer-routines",
             "label": "Chest routine and bonus shell",
             "sourceIds": [
-              "unityProbe",
               "metadata"
             ],
             "terms": [
@@ -1115,11 +1149,44 @@
             "id": "chest-objects",
             "label": "Concrete chest objects",
             "sourceIds": [
-              "uabeaProbe"
+              "level0"
             ],
             "terms": [
               "TokenChest",
               "DiamondChest"
+            ]
+          }
+        ],
+        "depthPlan": [
+          {
+            "hop": 0,
+            "goal": "Recover the shared effect lane and concrete chest consumer family.",
+            "surfaceIds": [
+              "metadata-neighborhood",
+              "shared-effect-title",
+              "shared-effect-text",
+              "consumer-family",
+              "consumer-routines",
+              "chest-objects"
+            ]
+          },
+          {
+            "hop": 1,
+            "goal": "Follow the consumer family into the internal bonus-aggregation shell.",
+            "targetIds": [
+              "token-shop-atu3-chest-consumer-read"
+            ]
+          }
+        ],
+        "claimStages": [
+          {
+            "id": "consumer-handoff",
+            "label": "ATU3 consumer family handoff",
+            "requiredEdgeTypes": [
+              "shared-effect-system",
+              "shared-effect-to-consumer-family",
+              "consumer-family-to-chest-routines",
+              "consumer-family-to-bonus-shell"
             ]
           }
         ],
@@ -1152,6 +1219,7 @@
       "requiredSourceFamilies": [
         "token-shop"
       ],
+      "defaultDepth": 0,
       "solvedBaselineTargetId": "token-shop-atu3-chest-consumer-read",
       "blockedTargetId": "token-shop-atu3-chest-consumer",
       "comparisonPresetId": "token-shop-atu3-consumer-read-vs-consumer",
@@ -1194,8 +1262,7 @@
             "id": "consumer-family",
             "label": "Chest consumer family",
             "sourceIds": [
-              "dailyTokeniumLaneProbe",
-              "lm244TargetedProbe"
+              "level0"
             ],
             "terms": [
               "AdManager, Assembly-CSharp",
@@ -1208,8 +1275,7 @@
             "id": "consumer-routines",
             "label": "Chest consumer routines",
             "sourceIds": [
-              "metadata",
-              "unityProbe"
+              "metadata"
             ],
             "terms": [
               "StartTokenRoutine",
@@ -1250,11 +1316,38 @@
             "id": "final-chest-bonus-shell",
             "label": "Final chest bonus shell",
             "sourceIds": [
-              "unityProbe"
+              "metadata"
             ],
             "terms": [
               "<FinalAdTokenChestBonus>k__BackingField",
               "<FinalDiamondChestBonus>k__BackingField"
+            ]
+          }
+        ],
+        "depthPlan": [
+          {
+            "hop": 0,
+            "goal": "Recover the internal bonus-aggregation shell inside the chest consumer family.",
+            "surfaceIds": [
+              "metadata-neighborhood",
+              "consumer-family",
+              "consumer-routines",
+              "cell-gain-getters",
+              "booster-bonus-shell",
+              "final-chest-bonus-shell"
+            ]
+          }
+        ],
+        "claimStages": [
+          {
+            "id": "internal-bonus-shell",
+            "label": "ATU3 internal bonus shell",
+            "requiredEdgeTypes": [
+              "shared-effect-to-consumer-family",
+              "consumer-family-to-chest-routines",
+              "consumer-family-to-cell-gain-getters",
+              "cell-gain-getters-to-booster-bonus-shell",
+              "booster-bonus-shell-to-final-chest-bonus-shell"
             ]
           }
         ],
@@ -1264,130 +1357,6 @@
           "Because the exact CellBoostBonus runtime read is still missing, this trace should stay as effect-chain completion evidence only and should not widen into prefab, title, or planner promotion."
         ],
         "groundedConclusion": "The ATU3 consumer-internal read trace now preserves one checked internal bonus-aggregation shell inside the AdManager chest consumer family, but no committed source yet shows the exact CellBoostBonus read or typed field handoff into that shell."
-      }
-    },
-    "token-shop-atu3-cells": {
-      "label": "TokenShop ATU3 cells split",
-      "familyId": "token-shop",
-      "strategy": "token-shop-atu3-cells",
-      "acceptedAnchors": [
-        "class",
-        "method",
-        "string",
-        "path id"
-      ],
-      "defaultAnchors": [
-        "ATU3Button",
-        "15810"
-      ],
-      "joinGoal": "Recover one checked ATU3Button or path id 15810 bridge to one exact prefab identity or final player-facing title.",
-      "requiredSourceFamilies": [
-        "token-shop"
-      ],
-      "solvedBaselineTargetId": "token-shop-atu1-row-bridge-baseline",
-      "blockedTargetId": "token-shop-atu3-cells",
-      "comparisonPresetId": "token-shop-atu3-vs-atu1",
-      "outputSummaryRules": {
-        "wire": {
-          "minPresentEdges": 5,
-          "maxNegativeEdges": 0
-        },
-        "quarantine": {
-          "minPresentEdges": 5,
-          "allowedNegativeEdgeTypes": [
-            "exact-shell-to-title"
-          ]
-        },
-        "messages": {
-          "wire": "One exact shell-to-prefab or shell-to-title join cleared cleanly enough to wire the traced boundary.",
-          "quarantine": "The trace is structurally grounded but still needs quarantine because one bounded title-side join remains open.",
-          "research": "The trace still preserves only split cells-domain clues, so keep researching and do not wire or quarantine product behavior from this join."
-        }
-      },
-      "strategyConfig": {
-        "shellField": "ATU3Button",
-        "shellPathId": 15810,
-        "shellWindowSource": "tokenShopExtract",
-        "shellWindowRadius": 3,
-        "surfaces": [
-          {
-            "id": "metadata-neighborhood",
-            "label": "Metadata neighborhood",
-            "sourceIds": [
-              "metadata"
-            ],
-            "terms": [
-              "ATU3Button",
-              "CellBoost",
-              "BuyCellBoost"
-            ]
-          },
-          {
-            "id": "action-lane",
-            "label": "Action hook lane",
-            "sourceIds": [
-              "dailyTokeniumLaneProbe"
-            ],
-            "terms": [
-              "StartCellBostHold",
-              "StopCellBostHold",
-              "BuyCellBoost"
-            ]
-          },
-          {
-            "id": "diamond-special",
-            "label": "Diamond-special prefab or title lane",
-            "sourceIds": [
-              "lm244TargetedProbe",
-              "unityProbe",
-              "uabeaProbe"
-            ],
-            "terms": [
-              "NewDiamondUPGPrefab.Specials.CellsBoost",
-              ">Diamond Upgrade 10 - CellsBoost"
-            ]
-          },
-          {
-            "id": "token-lane",
-            "label": "Token prefab or title lane",
-            "sourceIds": [
-              "uabeaProbe",
-              "unityProbe"
-            ],
-            "terms": [
-              "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-              "NewTokenUPGPrefab.T5.UltimaCells",
-              "Token Ultima: Cells"
-            ]
-          },
-          {
-            "id": "text-hooks",
-            "label": "Generic TokenShop text-hook lane",
-            "sourceIds": [
-              "level0",
-              "sharedassets0",
-              "unityProbe"
-            ],
-            "terms": [
-              "SetAllTokenShopTexts",
-              "SetTokenTexts"
-            ]
-          }
-        ],
-        "bridgeCandidateTerms": [
-          "NewDiamondUPGPrefab.Specials.CellsBoost",
-          ">Diamond Upgrade 10 - CellsBoost",
-          "NewTokenUPGPrefab.T1.CellsPerChestBooster",
-          "NewTokenUPGPrefab.T5.UltimaCells",
-          "Token Ultima: Cells"
-        ],
-        "lostStructure": [
-          "The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
-          "The metadata neighborhood still proves ATU3Button and CellBoost live in one raw declaration area, but it does not keep one checked prefab identity or final title in the same local container.",
-          "The action lane survives only as a generic named buy cluster in the daily-tokenium lane probe, with StartCellBostHold, StopCellBostHold, and BuyCellBoost but no shell-side path id.",
-          "Prefab identities survive as detached UABEA, targeted-string, or unity-probe hits, and final titles survive as separate unity-probe buckets, so the current extraction still loses the direct cross-surface join back to 15810."
-        ],
-        "groundedConclusion": "The ATU3Button or 15810 trace stays negative. The trace workflow now preserves shell, metadata, action-hook, prefab, title, and text-hook surfaces in one checked bundle, but no committed source carries one exact ATU3Button or path id 15810 bridge together with one exact prefab identity or final player-facing title."
       }
     },
     "shard-cost-su0-structure": {

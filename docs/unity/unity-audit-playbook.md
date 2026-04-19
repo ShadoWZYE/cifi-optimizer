@@ -53,24 +53,25 @@ Repo-local npm probe wrappers:
   - if the runnable probe artifact is missing, the wrapper restores and rebuilds it automatically
   - if `Program.cs`, `CifiAssetProbe.csproj`, or `NuGet.Config` is newer than `bin/probe-run/CifiAssetProbe.dll`, the wrapper fails fast and tells you to run `npm run probe:build`
 - `npm run probe:shards:parameters`
-  - regenerates `data/shard-cost-parameter-probe.v1.json` and `docs/systems/shards/shard-cost-parameter-probe.md`
+  - historical extraction lane only; do not treat its output as a shipped app or trace dependency
 - `npm run probe:shards:type-metadata`
-  - refreshes `data/uabea-probe-report.json` first, then regenerates `data/shard-type-metadata-probe.v1.json` and `docs/systems/shards/shard-type-metadata-probe.md`
+  - historical extraction lane only; keep for provenance review when a newer centralized shard unit does not yet subsume a type-side clue
 - `npm run probe:shards:method`
-  - refreshes `data/uabea-probe-report.json` first, then regenerates `data/shard-cost-method-probe.v1.json` and `docs/systems/shards/shard-cost-method-probe.md`
+  - historical extraction lane only; current live shard cost flow should prefer the centralized shard unit plus formula/calibration data
 - `npm run probe:shards:cost-native`
-  - refreshes `data/uabea-probe-report.json`, then regenerates the shard method, parameter, and native probe outputs in dependency order
+  - historical extraction lane only; use when reviewing archived shard cost evidence, not as a primary shipped dataset refresh
 - `npm run probe:trace -- --query <query> --anchor <anchor>`
   - or pin an exact preset with `npm run probe:trace -- --target <target-id> --anchor <anchor>`
-  - regenerates `data/unity-trace-bundle.json` and `docs/unity/unity-trace-bundle.md`
+  - overwrites the stable per-target outputs under `workbench/trace-runs/`
+  - those runs are then embedded into `data/system-units/trace.v1.json` by `node scripts/contracts/generate-system-units.mjs`
   - reads the checked target registry in `data/unity-trace-target-registry.json`
   - resolves loose Codex-first queries through the checked planner block in `data/unity-trace-target-registry.json`, expands them into family-aware anchors and synonym sets, then chooses either one single trace or one bounded compare run
-  - reads committed `workbench/apk/base/global-metadata.dat`, `data/token-shop-values.json`, `data/daily-tokenium-lane-probe.json`, `data/uabea-probe-report.json`, `data/unity-probe-report.json`, and `data/lm244-targeted-probe.json`
-  - preserves target-driven cross-surface joins across metadata neighborhoods, owner-payload shells, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle before any remap-boundary promotion
+  - reads committed `workbench/apk/base/global-metadata.dat`, `workbench/unity/joined/level0`, `workbench/unity/joined/sharedassets0.assets`, direct extractor-backed support datasets, and the persistent Ghidra project when native behavior is needed
+  - preserves target-driven cross-surface joins across metadata neighborhoods, owner-payload shells, direct Unity extraction, bounded blocker datasets, and nearby prefab or title surfaces in one checked bundle before any promotion
   - records explicit typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape from committed sources so the bundle can say which join exists, which join is missing, and which artifact proved each claim
   - emits a compact planner decision note plus a summary verdict such as `wire`, `quarantine`, or `keep researching` so Codex can read the bundle without manually reinterpreting the full graph first
-  - current seeded trace families: `token-shop`, `shard-cost`, and `multiverse-market-save-owner`
-  - the current committed planner example resolves `Cells` to `token-shop-atu3-cells` and intentionally stays a negative compare trace unless one new committed artifact crosses back to `ATU3Button` or path id `15810`
+  - current seeded trace families: `token-shop`, `shard-cost`, `shard-owned-state`, and `multiverse-market-save-owner`
+  - the current committed token-shop planner path treats `token-shop-atu3-cells-effect` as the canonical ATU3 lane instead of the older negative split-row target
 
 Important primary files:
 

@@ -19,10 +19,8 @@ Boundary reference:
 - [data/shard-milestone-row-alignment-boundary.v1.json](data/shard-milestone-row-alignment-boundary.v1.json)
 - [data/shard-milestone-handoff-boundary.v1.json](data/shard-milestone-handoff-boundary.v1.json)
 - [data/shard-save-boundary.v1.json](data/shard-save-boundary.v1.json)
-- [data/shard-scene-monobehaviour-probe.v1.json](data/shard-scene-monobehaviour-probe.v1.json)
-- [data/shard-cost-parameter-probe.v1.json](data/shard-cost-parameter-probe.v1.json)
-- [data/shard-cost-method-probe.v1.json](data/shard-cost-method-probe.v1.json)
-- [data/shard-cost-native-probe.v1.json](data/shard-cost-native-probe.v1.json)
+- [data/shard-cost-formula-model.v1.json](data/shard-cost-formula-model.v1.json)
+- [data/shard-cost-screenshot-calibration.v1.json](data/shard-cost-screenshot-calibration.v1.json)
 - [data/shard-bonus-slot-probe.v1.json](data/shard-bonus-slot-probe.v1.json)
 - [data/shard-type-metadata-probe.v1.json](data/shard-type-metadata-probe.v1.json)
 

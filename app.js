@@ -50,6 +50,11 @@ import {
   getRecommendationFeedSupportNoticeLines
 } from "./support/recommendation-feed-support.js";
 import {
+  buildPlayerStateSystemView,
+  buildShardSystemView,
+  buildSpendSystemView
+} from "./support/system-unit-projections.js";
+import {
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
   getShardFinalSuBonusBoundarySummary,
@@ -139,7 +144,7 @@ const shardEvidence = createShardEvidenceSupport({
   formatShardNumber,
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
-  getShardGrounding: () => state.shardGrounding,
+  getShardSystemView: () => getCurrentShardSystemView(),
   getShardMilestoneRowModelBoundarySummary,
   getShardMilestoneTitleEffectBoundarySummary,
   getShardPlannerState
@@ -570,9 +575,8 @@ const state = {
   datasetContract: null,
   shipBaseline: null,
   shipTemplates: null,
-  shardGrounding: null,
+  systemUnits: null,
   extractionCandidateRanking: null,
-  extractedMechanics: null,
   playerProfile: null,
   shipConfig: null,
   launchCoordinator: null,
@@ -603,99 +607,25 @@ async function bootstrap() {
     snapshot,
     datasetContract,
     shipBaseline,
-    groundedShardMilestones,
-    groundedShardObservedBehaviors,
-    groundedShardProvenance,
-    shardAssetGrounding,
-    shardOwnerFamilyBoundary,
-    shardFinalSuBonusBoundary,
-    shardMilestonePayloadBoundary,
-    shardCostModelBoundary,
-    shardMilestoneRowModelBoundary,
-    shardMilestoneTitleEffectBoundary,
-    shardEffectTextHandlerBoundary,
-    shardMilestoneRowShellBoundary,
-    shardMilestoneRowAlignmentBoundary,
-    shardSaveBoundary,
-    shardSceneMonoBehaviourProbe,
-    shardCostParameterProbe,
-    shardCostNativeProbe,
-    shardBonusSlotProbe,
-    shardMilestoneFamilyEvidence,
-    shardMilestoneHandoffBoundary,
-    shardMilestoneSaveOwnerCandidates,
     extractionCandidateRanking,
-    tokenShopValues,
-    tokenshopCanonical,
-    multiverseMarketValues,
-    multiverseMarketMetadataNeighborhood,
-    tokeniumNamingClues,
-    tokenBankStateClues,
-    dailyTokeniumLaneClues,
-    tokenBankFormulaBoundary,
-    multiverseMarketRangeBoundary,
-    multiverseMarketRowTextCoverage,
-    multiverseMarketPrefabRemapBoundary,
-    tokenShopCostLanes,
-    spendActionLaneClues,
-    multiverseMarketActionShell,
-    multiverseMarketOwnerFamily,
-    tokenShopOwnerShell,
-    tokenShopSaveBoundary,
-    multiverseMarketSaveBoundary,
-    multiverseMarketMarketMemberBoundary,
-    tokenBankControllerShell,
-    tokenShopRowRemapBoundary
+    playerStateSystemUnit,
+    shardsSystemUnit,
+    tokenShopSystemUnit,
+    multiverseMarketSystemUnit
   ] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/bundled-dataset-contract.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
-    fetchJson("./data/shard-milestones.grounded.v1.json"),
-    fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
-    fetchJson("./data/shard-milestones-provenance.grounded.v1.json"),
-    fetchJson("./data/shard-asset-grounding.v1.json"),
-    fetchJson("./data/shard-owner-family-boundary.v1.json"),
-    fetchJson("./data/shard-finalsu-bonus-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-payload-boundary.v1.json"),
-    fetchJson("./data/shard-cost-model-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-row-model-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-title-effect-boundary.v1.json"),
-    fetchJson("./data/shard-effect-text-handler-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-row-shell-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-row-alignment-boundary.v1.json"),
-    fetchJson("./data/shard-save-boundary.v1.json"),
-    fetchJson("./data/shard-scene-monobehaviour-probe.v1.json"),
-    fetchJson("./data/shard-cost-parameter-probe.v1.json"),
-    fetchJson("./data/shard-cost-native-probe.v1.json"),
-    fetchJson("./data/shard-bonus-slot-probe.v1.json"),
-    fetchJson("./data/shard-milestone-family-evidence.v1.json"),
-    fetchJson("./data/shard-milestone-handoff-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-save-owner-candidates.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
-    fetchJson("./data/token-shop-values.json"),
-    fetchJson("./data/tokenshop-canonical-v1.json"),
-    fetchJson("./data/multiverse-market-values.json"),
-    fetchJson("./data/multiverse-market-metadata-neighborhood.json"),
-    fetchJson("./data/tokenium-naming-clues.json"),
-    fetchJson("./data/token-bank-state-clues.json"),
-    fetchJson("./data/daily-tokenium-lane-clues.json"),
-    fetchJson("./data/token-bank-formula-boundary.json"),
-    fetchJson("./data/multiverse-market-range-boundary.json"),
-    fetchJson("./data/multiverse-market-row-text-coverage.json"),
-    fetchJson("./data/multiverse-market-prefab-remap-boundary.json"),
-    fetchJson("./data/token-shop-cost-lanes.json"),
-    fetchJson("./data/spend-action-lane-clues.json"),
-    fetchJson("./data/multiverse-market-action-shell.json"),
-    fetchJson("./data/multiverse-market-owner-family.json"),
-    fetchJson("./data/token-shop-owner-shell.json"),
-    fetchJson("./data/token-shop-save-boundary.json"),
-    fetchJson("./data/multiverse-market-save-boundary.json"),
-    fetchJson("./data/multiverse-market-market-member-boundary.json"),
-    fetchJson("./data/token-bank-controller-shell.json"),
-    fetchJson("./data/token-shop-row-remap-boundary.json")
+    fetchJson("./data/system-units/player-state.v1.json"),
+    fetchJson("./data/system-units/shards.v1.json"),
+    fetchJson("./data/system-units/token-shop.v1.json"),
+    fetchJson("./data/system-units/multiverse-market.v1.json")
   ]);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
+  const playerStateView = buildPlayerStateSystemView(playerStateSystemUnit, mergeDeep);
+  const playerProfileDefaults = playerStateView.defaults;
   const legacyShipConfig = loadStoredJson(STORAGE_KEYS.shipConfig, null);
   const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, null);
   const legacyProfile = loadStoredJson(LEGACY_STORAGE_KEYS.profile, null);
@@ -704,55 +634,15 @@ async function bootstrap() {
   state.datasetContract = datasetContract;
   state.shipBaseline = shipBaseline;
   state.shipTemplates = buildShipTemplates(shipBaseline);
-  state.shardGrounding = {
-    milestones: groundedShardMilestones,
-    observedBehaviors: groundedShardObservedBehaviors,
-    provenance: groundedShardProvenance,
-    assetGrounding: shardAssetGrounding,
-    ownerFamilyBoundary: shardOwnerFamilyBoundary,
-    finalSuBonusBoundary: shardFinalSuBonusBoundary,
-    milestonePayloadBoundary: shardMilestonePayloadBoundary,
-    costModelBoundary: shardCostModelBoundary,
-    rowModelBoundary: shardMilestoneRowModelBoundary,
-    titleEffectBoundary: shardMilestoneTitleEffectBoundary,
-    effectTextHandlerBoundary: shardEffectTextHandlerBoundary,
-    milestoneRowShellBoundary: shardMilestoneRowShellBoundary,
-    milestoneRowAlignmentBoundary: shardMilestoneRowAlignmentBoundary,
-    saveBoundary: shardSaveBoundary,
-    sceneMonoBehaviourProbe: shardSceneMonoBehaviourProbe,
-    costParameterProbe: shardCostParameterProbe,
-    costNativeProbe: shardCostNativeProbe,
-    bonusSlotProbe: shardBonusSlotProbe,
-    milestoneFamilyEvidence: shardMilestoneFamilyEvidence,
-    milestoneHandoffBoundary: shardMilestoneHandoffBoundary,
-    saveOwnerCandidates: shardMilestoneSaveOwnerCandidates
+  state.systemUnits = {
+    playerState: playerStateSystemUnit,
+    shards: shardsSystemUnit,
+    tokenShop: tokenShopSystemUnit,
+    multiverseMarket: multiverseMarketSystemUnit
   };
   state.extractionCandidateRanking = extractionCandidateRanking;
-  state.extractedMechanics = {
-    tokenShop: tokenShopValues,
-    tokenshopCanonical,
-    multiverseMarket: multiverseMarketValues,
-    multiverseMarketMetadataNeighborhood,
-    tokeniumNamingClues,
-    tokenBankStateClues,
-    dailyTokeniumLaneClues,
-    tokenBankFormulaBoundary,
-    multiverseMarketRangeBoundary,
-    multiverseMarketRowTextCoverage,
-    multiverseMarketPrefabRemapBoundary,
-    tokenShopCostLanes,
-    spendActionLaneClues,
-    multiverseMarketActionShell,
-    multiverseMarketOwnerFamily,
-    tokenShopOwnerShell,
-    tokenShopSaveBoundary,
-    multiverseMarketSaveBoundary,
-    multiverseMarketMarketMemberBoundary,
-    tokenBankControllerShell,
-    tokenShopRowRemapBoundary
-  };
   state.playerProfile = normalizePlayerProfile(
-    storedPlayerProfile ?? legacyProfile,
+    storedPlayerProfile ?? legacyProfile ?? playerProfileDefaults,
     mergeDeep(
       mergeDeep(baselineShipPlayerState, legacyShipConfig?.playerState ?? {}),
       typeof legacyShipConfig?.softCap === "boolean"
@@ -785,6 +675,25 @@ function fetchJson(url) {
     }
     return response.json();
   });
+}
+
+function getCurrentPlayerStateView() {
+  return buildPlayerStateSystemView(state.systemUnits?.playerState, mergeDeep);
+}
+
+function getCurrentPlayerProfileDefaults() {
+  return getCurrentPlayerStateView().defaults;
+}
+
+function getCurrentSpendSystemView() {
+  return buildSpendSystemView({
+    tokenShopSystemUnit: state.systemUnits?.tokenShop,
+    multiverseMarketSystemUnit: state.systemUnits?.multiverseMarket
+  });
+}
+
+function getCurrentShardSystemView() {
+  return buildShardSystemView(state.systemUnits?.shards);
 }
 
 function loadStoredJson(key, fallback) {
@@ -891,7 +800,7 @@ function initTokenShopTierTabs() {
     const tierConfig = TOKEN_SHOP_TIER_CONFIG[tier];
     if (!tierConfig) return;
 
-    const tierUnlocks = state.extractedMechanics?.tokenshopCanonical?.tier_unlocks;
+    const tierUnlocks = getCurrentSpendSystemView()?.tokenShop?.rows?.canonical?.tier_unlocks;
     const thresholds = tierUnlocks?.tier_thresholds || {};
     const tierUnlockStates = calculateTierUnlockStates(thresholds);
 
@@ -1467,7 +1376,7 @@ function bindProfileActions() {
 
   $("#restoreDefaultsBtn").addEventListener("click", () => {
     state.playerProfile = normalizePlayerProfile(
-      createDefaultPlayerProfile(),
+      getCurrentPlayerProfileDefaults() ?? createDefaultPlayerProfile(),
       createDefaultShipPlayerState(state.shipBaseline)
     );
     persistPlayerProfile();
@@ -2185,15 +2094,16 @@ function renderValidationResults() {
 }
 
 function renderSpendSaveSideBoundary() {
-  const multiverseMarket = state.extractedMechanics?.multiverseMarket;
-  const multiverseMarketMetadataNeighborhood =
-    state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
-  const dailyTokeniumLaneClues = state.extractedMechanics?.dailyTokeniumLaneClues;
-  const tokenBankFormulaBoundary = state.extractedMechanics?.tokenBankFormulaBoundary;
-  const multiverseMarketRangeBoundary = state.extractedMechanics?.multiverseMarketRangeBoundary;
-  const multiverseMarketRowTextCoverage = state.extractedMechanics?.multiverseMarketRowTextCoverage;
-  const multiverseMarketPrefabRemapBoundary =
-    state.extractedMechanics?.multiverseMarketPrefabRemapBoundary;
+  const spendSystem = getCurrentSpendSystemView();
+  const tokenShop = spendSystem?.tokenShop;
+  const market = spendSystem?.multiverseMarket;
+  const multiverseMarket = market?.saveOwner?.extract;
+  const multiverseMarketMetadataNeighborhood = market?.rowIdentity?.metadataNeighborhood;
+  const dailyTokeniumLaneClues = tokenShop?.dailyTokenium?.laneClues;
+  const tokenBankFormulaBoundary = tokenShop?.tokenBank?.formulaBoundary;
+  const multiverseMarketRangeBoundary = market?.rowIdentity?.rangeBoundary;
+  const multiverseMarketRowTextCoverage = market?.rowIdentity?.rowTextCoverage;
+  const multiverseMarketPrefabRemapBoundary = market?.rowIdentity?.prefabRemapBoundary;
   if (!multiverseMarket && !multiverseMarketMetadataNeighborhood) {
     return "";
   }
@@ -2212,10 +2122,10 @@ function renderSpendSaveSideBoundary() {
     multiverseMarketPrefabRemapBoundary
   );
   const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
-    state.extractedMechanics?.multiverseMarketOwnerFamily
+    market?.uiShell?.ownerFamily
   );
   const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
-    state.extractedMechanics?.multiverseMarketMarketMemberBoundary
+    market?.saveOwner?.marketMemberBoundary
   );
   return `
     <section class="meta-stack">
@@ -2281,7 +2191,7 @@ function renderSpendSaveSideBoundary() {
         </article>
         <article class="validation-card warn">
           <strong>Still blocked for planner wiring</strong>
-          <p class="meta">Do not promote FinalIS or achievement symbols into canonical player state yet. Current evidence only narrows the search; it does not identify the declaring save model or which recovered IS*Level subset actually maps to the validated MultiverseMarket rows.</p>
+        <p class="meta">Do not promote FinalIS or achievement symbols into canonical player state yet. Current evidence now identifies the declaring save model, but it still does not prove which recovered IS*Level subset should be promoted as planner-safe validated MultiverseMarket rows.</p>
         </article>
       </div>
     </section>
@@ -2720,34 +2630,35 @@ function renderResearchTrackSupport(track) {
     track.id === "shards-and-loop-guardrails" ||
     track.id === "shard-milestone-payload-recovery"
   ) {
+    const shardSystem = getCurrentShardSystemView();
     const ownerBoundary = getShardOwnerFamilyBoundarySummary(
-      state.shardGrounding?.ownerFamilyBoundary
+      shardSystem?.family?.boundaries?.ownerFamily
     );
     const finalSuBoundary = getShardFinalSuBonusBoundarySummary(
-      state.shardGrounding?.finalSuBonusBoundary
+      shardSystem?.family?.boundaries?.finalSuBonus
     );
     const payloadBoundary = getShardMilestonePayloadBoundarySummary(
-      state.shardGrounding?.milestonePayloadBoundary
+      shardSystem?.family?.boundaries?.milestonePayload
     );
     const costModelBoundary = getShardCostModelBoundarySummary(
-      state.shardGrounding?.costModelBoundary
+      shardSystem?.cost?.costModelBoundary
     );
     const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
-      state.shardGrounding?.rowModelBoundary
+      shardSystem?.family?.boundaries?.rowModel
     );
     const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
-      state.shardGrounding?.titleEffectBoundary
+      shardSystem?.family?.boundaries?.titleEffect
     );
     const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
-      state.shardGrounding?.effectTextHandlerBoundary
+      shardSystem?.family?.boundaries?.effectTextHandler
     );
     const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(
-      state.shardGrounding?.milestoneRowShellBoundary
+      shardSystem?.family?.boundaries?.rowShell
     );
     const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(
-      state.shardGrounding?.milestoneRowAlignmentBoundary
+      shardSystem?.family?.boundaries?.rowAlignment
     );
-    const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
+    const saveBoundary = getShardSaveBoundarySummary(shardSystem?.ownedState?.saveBoundary);
     return `
       <div class="meta-stack">
         <p class="snapshot-title">Repo-local owner-family narrowing</p>
@@ -2782,57 +2693,50 @@ function renderResearchTrackSupport(track) {
   }
 
   if (track.id === "spend-multiverse-savedata-import-surface") {
-    const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
-    const validatedCoverage = getMultiverseMarketValidatedCoverage(
-      state.extractedMechanics?.multiverseMarket
-    );
+    const spendSystem = getCurrentSpendSystemView();
+    const tokenShop = spendSystem?.tokenShop;
+    const market = spendSystem?.multiverseMarket;
+    const tokenShopCoverage = getTokenShopCoverageSummary(tokenShop?.rows?.extract);
+    const validatedCoverage = getMultiverseMarketValidatedCoverage(market?.saveOwner?.extract);
     const metadataSummary = getMultiverseMarketMetadataSummary(
-      state.extractedMechanics?.multiverseMarketMetadataNeighborhood
+      market?.rowIdentity?.metadataNeighborhood
     );
     const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
-      state.extractedMechanics?.multiverseMarketMarketMemberBoundary
+      market?.saveOwner?.marketMemberBoundary
     );
-    const tokeniumNamingSummary = getTokeniumNamingSummary(
-      state.extractedMechanics?.tokeniumNamingClues
-    );
-    const tokenBankStateSummary = getTokenBankStateSummary(
-      state.extractedMechanics?.tokenBankStateClues
-    );
-    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(
-      state.extractedMechanics?.dailyTokeniumLaneClues
-    );
+    const tokeniumNamingSummary = getTokeniumNamingSummary(tokenShop?.tokenBank?.namingClues);
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop?.tokenBank?.stateClues);
+    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop?.dailyTokenium?.laneClues);
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
-      state.extractedMechanics?.tokenBankFormulaBoundary
+      tokenShop?.tokenBank?.formulaBoundary
     );
     const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
-      state.extractedMechanics?.multiverseMarketRangeBoundary
+      market?.rowIdentity?.rangeBoundary
     );
     const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
-      state.extractedMechanics?.multiverseMarketRowTextCoverage
+      market?.rowIdentity?.rowTextCoverage
     );
-    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(
-      state.extractedMechanics?.tokenShopCostLanes
-    );
+    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop?.spendLanes?.costLanes);
     const spendActionLaneSummary = getSpendActionLaneSummary(
-      state.extractedMechanics?.spendActionLaneClues
+      tokenShop?.spendLanes?.actionLaneClues
     );
     const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(
-      state.extractedMechanics?.multiverseMarketActionShell
+      market?.uiShell?.actionShell
     );
     const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
-      state.extractedMechanics?.multiverseMarketOwnerFamily
+      market?.uiShell?.ownerFamily
     );
     const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(
-      state.extractedMechanics?.tokenShopOwnerShell
+      tokenShop?.tokenBank?.ownerShell
     );
     const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(
-      state.extractedMechanics?.tokenShopSaveBoundary
+      tokenShop?.rows?.boundaries?.save
     );
     const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(
-      state.extractedMechanics?.multiverseMarketSaveBoundary
+      market?.saveOwner?.saveBoundary
     );
     const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
-      state.extractedMechanics?.tokenBankControllerShell
+      tokenShop?.tokenBank?.controllerShell
     );
     return `
       <div class="meta-stack">
@@ -2877,26 +2781,25 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${marketMemberSummary.hasCloudBridge ? `That combined neighborhood still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps the ${marketMemberSummary.canonicalHostLabel} checked even while the metadata-only ${marketMemberSummary.memberLabel} shell stays unresolved as an exact typed field and ${marketMemberSummary.negativeTypedSaveDataMarketLabel}.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
         <p class="meta">${marketMemberSummary.hasTypedSiblingContrast ? `Typed sibling contrast still exists through ${marketMemberSummary.typedSiblingContrastLabel}, but no equivalent typed Market or Inscryption owner has been recovered yet.` : "The current build does not yet preserve the expected typed sibling contrast clues for the market-member boundary."}</p>
         <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so this track stays out of planner implementation and row remap even though the exact save owner is recovered.` : "The current build no longer preserves the expected direct-type-map gap for the market-member boundary and needs review."}</p>
-        <p class="meta">${marketMemberSummary.favorsDirectMemberBoundary && marketMemberSummary.hasExactSaveDataProgressionOwner ? `This is enough to narrow the save-side handoff to a checked ${marketMemberSummary.canonicalHostLabel}, confirm ${marketMemberSummary.negativeMultiverseFieldLabel}, rule out flat direct PlayerProfileData progression ownership, and recover ${marketMemberSummary.exactSaveOwnerLabel} as the declaring save model while the metadata-only Market shell remains unresolved.` : "This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs."}</p>
+        <p class="meta">${marketMemberSummary.favorsDirectMemberBoundary && marketMemberSummary.hasExactSaveDataProgressionOwner ? `This is enough to narrow the save-side handoff to a checked ${marketMemberSummary.canonicalHostLabel}, confirm ${marketMemberSummary.negativeMultiverseFieldLabel}, rule out flat direct PlayerProfileData progression ownership, and recover ${marketMemberSummary.exactSaveOwnerLabel} as the declaring save model while the metadata-only Market shell remains unresolved.` : "This is enough to narrow future mapping work, but not enough to promote planner-ready owned-state inputs or canonical row-level imports yet."}</p>
       </div>
     `;
   }
 
   if (track.id === "spend-token-bank-state-owner") {
+    const tokenShop = getCurrentSpendSystemView()?.tokenShop;
     const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(
-      state.extractedMechanics?.tokenShopOwnerShell
+      tokenShop?.tokenBank?.ownerShell
     );
     const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(
-      state.extractedMechanics?.tokenShopSaveBoundary
+      tokenShop?.rows?.boundaries?.save
     );
     const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
-      state.extractedMechanics?.tokenBankControllerShell
+      tokenShop?.tokenBank?.controllerShell
     );
-    const tokenBankStateSummary = getTokenBankStateSummary(
-      state.extractedMechanics?.tokenBankStateClues
-    );
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop?.tokenBank?.stateClues);
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
-      state.extractedMechanics?.tokenBankFormulaBoundary
+      tokenShop?.tokenBank?.formulaBoundary
     );
     return `
       <div class="meta-stack">
@@ -2998,6 +2901,7 @@ function exportPlayerProfileJson() {
 }
 
 function renderPlayerProfileBoundarySummary() {
+  const market = getCurrentSpendSystemView()?.multiverseMarket;
   const canonical = getCanonicalProfileState();
   const shardPlanner = getShardPlannerState();
   const shipPlanner = getShipPlannerState();
@@ -3020,8 +2924,8 @@ function renderPlayerProfileBoundarySummary() {
   );
   const importedMultiverseMarketPreview = getImportedMultiverseMarketPreview(
     compatibility.unmappedSystems?.multiverseMarket,
-    state.extractedMechanics?.multiverseMarket,
-    state.extractedMechanics?.multiverseMarketRangeBoundary,
+    market?.saveOwner?.extract,
+    market?.rowIdentity?.rangeBoundary,
     { formatBoundaryValue, formatShardNumber, isBoundaryValuePresent }
   );
 
@@ -3636,7 +3540,8 @@ function renderShardPlannerControls() {
 }
 
 function renderShardWorkflowSnapshot() {
-  const mechanicsBundle = state.shardGrounding?.milestones?.canonicalMechanics ?? {};
+  const mechanicsBundle =
+    getCurrentShardSystemView()?.family?.grounded?.milestones?.canonicalMechanics ?? {};
   const milestones = getGroundedShardMilestones();
   const shardPlanner = getShardPlannerState();
   const totalLevels = Number(shardPlanner.totalMilestoneLevels || 0);
@@ -3670,27 +3575,28 @@ function renderShardWorkflowSnapshot() {
 }
 
 function renderShardGroundingBoundary() {
-  const provenance = state.shardGrounding?.provenance;
+  const shardSystem = getCurrentShardSystemView();
+  const provenance = shardSystem?.family?.grounded?.provenance;
   const uncertaintyLog = provenance?.uncertaintyLog ?? [];
   const conflictCount = uncertaintyLog.filter((item) => item.status === "conflict_detected").length;
   const missingCount = uncertaintyLog.filter((item) => item.status !== "conflict_detected").length;
-  const assetGrounding = state.shardGrounding?.assetGrounding;
+  const assetGrounding = shardSystem?.family?.grounded?.assetGrounding;
   const ownerBoundary = getShardOwnerFamilyBoundarySummary(
-    state.shardGrounding?.ownerFamilyBoundary
+    shardSystem?.family?.boundaries?.ownerFamily
   );
   const costModelBoundary = getShardCostModelBoundarySummary(
-    state.shardGrounding?.costModelBoundary
+    shardSystem?.cost?.costModelBoundary
   );
   const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
-    state.shardGrounding?.rowModelBoundary
+    shardSystem?.family?.boundaries?.rowModel
   );
   const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
-    state.shardGrounding?.titleEffectBoundary
+    shardSystem?.family?.boundaries?.titleEffect
   );
   const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
-    state.shardGrounding?.effectTextHandlerBoundary
+    shardSystem?.family?.boundaries?.effectTextHandler
   );
-  const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
+  const saveBoundary = getShardSaveBoundarySummary(shardSystem?.ownedState?.saveBoundary);
   const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers)
     ? assetGrounding.groundedShellIdentifiers.slice(0, 5)
     : [];
@@ -3816,8 +3722,8 @@ function renderShardGroundingBoundary() {
           <div class="shard-doc-link-list">
             ${renderShardDocLink("./docs/systems/shards/shard-player-facing-evidence.md", "Shard evidence summary")}
             ${renderShardDocLink("./docs/systems/shards/shard-grounding-boundary.md", "Grounding boundary")}
-            ${renderShardDocLink("./docs/systems/shards/shard-cost-parameter-probe.md", "Cost parameter probe")}
-            ${renderShardDocLink("./docs/systems/shards/shard-cost-native-probe.md", "Cost native probe")}
+            ${renderShardDocLink("./docs/systems/shards/shard-cost-pr23-audit.md", "Cost model audit")}
+            ${renderShardDocLink("./docs/systems/shards/shard-cost-screenshot-calibration.md", "Cost calibration")}
           </div>
         </div>
       </article>
@@ -3826,8 +3732,9 @@ function renderShardGroundingBoundary() {
 }
 
 function renderShardWorkflowReference() {
+  const shardSystem = getCurrentShardSystemView();
   const mechanics = getGroundedShardMechanics();
-  const provenance = state.shardGrounding?.provenance;
+  const provenance = shardSystem?.family?.grounded?.provenance;
   const thresholds = mechanics.rarity_bonus_thresholds ?? {};
   const levelCaps = mechanics.max_level_rules_and_modifiers ?? {};
   const uncertaintyLog = provenance?.uncertaintyLog ?? [];
@@ -3874,8 +3781,9 @@ function renderShardWorkflowReference() {
 }
 
 function renderObservedShardBehaviors() {
-  const observations = state.shardGrounding?.observedBehaviors?.observations ?? [];
-  const provenance = state.shardGrounding?.provenance;
+  const shardSystem = getCurrentShardSystemView();
+  const observations = shardSystem?.family?.grounded?.observedBehaviors?.observations ?? [];
+  const provenance = shardSystem?.family?.grounded?.provenance;
   return `
     <div class="page-grid">
       <article class="snapshot-card">
@@ -3946,7 +3854,7 @@ function renderShardMilestoneDirectory() {
   const mechanics = getGroundedShardMechanics();
   const milestones = getMilestonesForDisplay();
   const evidenceCounts = getShardMilestoneEvidenceCounts();
-  const familyEvidence = state.shardGrounding?.milestoneFamilyEvidence;
+  const familyEvidence = getCurrentShardSystemView()?.family?.familyEvidence;
   const sharedEvidence = familyEvidence?.sharedEvidence ?? {};
   const ownedStateBlocker = getShardOwnedStateBlockerSummary();
   return `
@@ -4110,38 +4018,40 @@ function runValidationCases() {
 }
 
 function buildApkGroundingValidationCases() {
-  const tokenShop = state.extractedMechanics?.tokenShop;
-  const multiverseMarket = state.extractedMechanics?.multiverseMarket;
-  const multiverseMarketMetadataNeighborhood =
-    state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
-  const tokeniumNamingClues = state.extractedMechanics?.tokeniumNamingClues;
-  const tokenBankStateClues = state.extractedMechanics?.tokenBankStateClues;
-  const dailyTokeniumLaneClues = state.extractedMechanics?.dailyTokeniumLaneClues;
-  const tokenBankFormulaBoundary = state.extractedMechanics?.tokenBankFormulaBoundary;
-  const multiverseMarketRangeBoundary = state.extractedMechanics?.multiverseMarketRangeBoundary;
-  const multiverseMarketRowTextCoverage = state.extractedMechanics?.multiverseMarketRowTextCoverage;
-  const tokenShopCostLanes = state.extractedMechanics?.tokenShopCostLanes;
-  const spendActionLaneClues = state.extractedMechanics?.spendActionLaneClues;
-  const multiverseMarketActionShell = state.extractedMechanics?.multiverseMarketActionShell;
-  const multiverseMarketOwnerFamily = state.extractedMechanics?.multiverseMarketOwnerFamily;
-  const tokenShopOwnerShell = state.extractedMechanics?.tokenShopOwnerShell;
-  const tokenShopSaveBoundary = state.extractedMechanics?.tokenShopSaveBoundary;
-  const multiverseMarketSaveBoundary = state.extractedMechanics?.multiverseMarketSaveBoundary;
-  const multiverseMarketMarketMemberBoundary =
-    state.extractedMechanics?.multiverseMarketMarketMemberBoundary;
-  const tokenBankControllerShell = state.extractedMechanics?.tokenBankControllerShell;
-  const shardMilestones = state.shardGrounding?.milestones;
-  const shardAssetGrounding = state.shardGrounding?.assetGrounding;
-  const shardOwnerFamilyBoundary = state.shardGrounding?.ownerFamilyBoundary;
-  const shardFinalSuBonusBoundary = state.shardGrounding?.finalSuBonusBoundary;
-  const shardMilestonePayloadBoundary = state.shardGrounding?.milestonePayloadBoundary;
-  const shardCostModelBoundary = state.shardGrounding?.costModelBoundary;
-  const shardMilestoneRowModelBoundary = state.shardGrounding?.rowModelBoundary;
-  const shardMilestoneTitleEffectBoundary = state.shardGrounding?.titleEffectBoundary;
-  const shardEffectTextHandlerBoundary = state.shardGrounding?.effectTextHandlerBoundary;
-  const shardMilestoneRowShellBoundary = state.shardGrounding?.milestoneRowShellBoundary;
-  const shardMilestoneRowAlignmentBoundary = state.shardGrounding?.milestoneRowAlignmentBoundary;
-  const shardSaveBoundary = state.shardGrounding?.saveBoundary;
+  const spendSystem = getCurrentSpendSystemView();
+  const shardSystem = getCurrentShardSystemView();
+  const tokenShop = spendSystem?.tokenShop;
+  const market = spendSystem?.multiverseMarket;
+  const multiverseMarket = market?.saveOwner?.extract;
+  const multiverseMarketMetadataNeighborhood = market?.rowIdentity?.metadataNeighborhood;
+  const tokeniumNamingClues = tokenShop?.tokenBank?.namingClues;
+  const tokenBankStateClues = tokenShop?.tokenBank?.stateClues;
+  const dailyTokeniumLaneClues = tokenShop?.dailyTokenium?.laneClues;
+  const tokenBankFormulaBoundary = tokenShop?.tokenBank?.formulaBoundary;
+  const multiverseMarketRangeBoundary = market?.rowIdentity?.rangeBoundary;
+  const multiverseMarketRowTextCoverage = market?.rowIdentity?.rowTextCoverage;
+  const multiverseMarketPrefabRemapBoundary = market?.rowIdentity?.prefabRemapBoundary;
+  const tokenShopCostLanes = tokenShop?.spendLanes?.costLanes;
+  const spendActionLaneClues = tokenShop?.spendLanes?.actionLaneClues;
+  const multiverseMarketActionShell = market?.uiShell?.actionShell;
+  const multiverseMarketOwnerFamily = market?.uiShell?.ownerFamily;
+  const tokenShopOwnerShell = tokenShop?.tokenBank?.ownerShell;
+  const tokenShopSaveBoundary = tokenShop?.rows?.boundaries?.save;
+  const multiverseMarketSaveBoundary = market?.saveOwner?.saveBoundary;
+  const multiverseMarketMarketMemberBoundary = market?.saveOwner?.marketMemberBoundary;
+  const tokenBankControllerShell = tokenShop?.tokenBank?.controllerShell;
+  const shardMilestones = shardSystem?.family?.grounded?.milestones;
+  const shardAssetGrounding = shardSystem?.family?.grounded?.assetGrounding;
+  const shardOwnerFamilyBoundary = shardSystem?.family?.boundaries?.ownerFamily;
+  const shardFinalSuBonusBoundary = shardSystem?.family?.boundaries?.finalSuBonus;
+  const shardMilestonePayloadBoundary = shardSystem?.family?.boundaries?.milestonePayload;
+  const shardCostModelBoundary = shardSystem?.cost?.costModelBoundary;
+  const shardMilestoneRowModelBoundary = shardSystem?.family?.boundaries?.rowModel;
+  const shardMilestoneTitleEffectBoundary = shardSystem?.family?.boundaries?.titleEffect;
+  const shardEffectTextHandlerBoundary = shardSystem?.family?.boundaries?.effectTextHandler;
+  const shardMilestoneRowShellBoundary = shardSystem?.family?.boundaries?.rowShell;
+  const shardMilestoneRowAlignmentBoundary = shardSystem?.family?.boundaries?.rowAlignment;
+  const shardSaveBoundary = shardSystem?.ownedState?.saveBoundary;
   const cases = [];
 
   if (shardAssetGrounding) {
@@ -4347,7 +4257,7 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  const shardFamilyEvidence = state.shardGrounding?.milestoneFamilyEvidence;
+  const shardFamilyEvidence = getCurrentShardSystemView()?.family?.familyEvidence;
   const shardFamilyRows = Array.isArray(shardFamilyEvidence?.rows) ? shardFamilyEvidence.rows : [];
   if (shardFamilyRows.length) {
     const statusCounts = getShardMilestoneEvidenceCounts();
@@ -4680,9 +4590,9 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (state.extractedMechanics?.multiverseMarketPrefabRemapBoundary) {
+  if (multiverseMarketPrefabRemapBoundary) {
     const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(
-      state.extractedMechanics.multiverseMarketPrefabRemapBoundary
+      multiverseMarketPrefabRemapBoundary
     );
     cases.push({
       title: "MultiverseMarket prefab remap boundary",
@@ -5313,13 +5223,15 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
 }
 
 function getTokenShopProgressionModel() {
-  const canonical = state.extractedMechanics?.tokenshopCanonical?.atu_rows ?? {};
+  const spendSystem = getCurrentSpendSystemView();
+  const tokenShop = spendSystem?.tokenShop;
+  const canonical = tokenShop?.rows?.canonical?.atu_rows ?? {};
 
   return buildTokenShopProgressionModel({
     progressionState: getTokenShopProgressionProfileState(),
     compatibilityLevels: getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {},
-    boundary: state.extractedMechanics?.tokenShopRowRemapBoundary,
-    tokenShop: state.extractedMechanics?.tokenShop,
+    boundary: tokenShop?.rows?.boundaries?.remap,
+    tokenShop: tokenShop?.rows?.extract,
     canonical,
     currentTokens: state.playerProfile.player.resources.tokens,
     getGroundedSubsetDefinitions: getTokenShopGroundedSubsetDefinitions,
@@ -5334,7 +5246,7 @@ function renderTokenShopOverviewAffordabilityModule() {
     ? `${summary.playerStateCount}/${summary.rows.length} checked player-state row${summary.playerStateCount === 1 ? "" : "s"} active before compatibility fallback.`
     : "No checked player-state rows are active yet; compatibility import and default level 0 stay available.";
 
-  const tierUnlocks = state.extractedMechanics?.tokenshopCanonical?.tier_unlocks;
+  const tierUnlocks = getCurrentSpendSystemView()?.tokenShop?.rows?.canonical?.tier_unlocks;
   const thresholds = tierUnlocks?.tier_thresholds || {};
   const tierUnlockStates = calculateTierUnlockStatesForOverview(thresholds);
 
@@ -5515,8 +5427,9 @@ function saveTokenShopProgressionLevel(fieldName, value) {
 
 function prefillTokenShopProgressionEditorFromCompatibility() {
   const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
+  const tokenShopBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
   const subsetFields = getTokenShopGroundedSubsetDefinitions(
-    state.extractedMechanics?.tokenShopRowRemapBoundary
+    tokenShopBoundary
   ).map((row) => row.field);
   let importedCount = 0;
   subsetFields.forEach((fieldName) => {
@@ -5542,8 +5455,9 @@ function prefillTokenShopProgressionEditorFromCompatibility() {
 }
 
 function clearTokenShopProgressionEditorLevels() {
+  const tokenShopBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
   getTokenShopGroundedSubsetDefinitions(
-    state.extractedMechanics?.tokenShopRowRemapBoundary
+    tokenShopBoundary
   ).forEach((row) => {
     setProfileValue(
       ["planning", "tokenShop", "checkedSubsetLevels", row.field],
@@ -5809,7 +5723,7 @@ function getProgressionSubsystemPartition(items) {
     shards: shardItems,
     loop: loopItems,
     tokenShop: getTokenShopGroundedSubsetDefinitions(
-      state.extractedMechanics?.tokenShopRowRemapBoundary
+      getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap
     )
   };
 }
@@ -6261,11 +6175,14 @@ function getImportedRecordCount() {
 }
 
 function getGroundedShardMilestones() {
-  return state.shardGrounding?.milestones?.milestones ?? [];
+  return getCurrentShardSystemView()?.family?.grounded?.milestones?.milestones ?? [];
 }
 
 function getGroundedShardMechanics() {
-  return state.shardGrounding?.milestones?.canonicalMechanics?.shardMilestoneSystem ?? {};
+  return (
+    getCurrentShardSystemView()?.family?.grounded?.milestones?.canonicalMechanics
+      ?.shardMilestoneSystem ?? {}
+  );
 }
 
 function getSelectedShardMilestoneId() {
@@ -6379,16 +6296,18 @@ function getShardCostParameterProbeSummary(probe) {
 
 function getPrimaryShardObservation() {
   return (
-    (state.shardGrounding?.observedBehaviors?.observations ?? []).map((observation) => ({
-      ...observation,
-      title: getObservationTitle(observation)
-    }))[0] ?? null
+    (getCurrentShardSystemView()?.family?.grounded?.observedBehaviors?.observations ?? []).map(
+      (observation) => ({
+        ...observation,
+        title: getObservationTitle(observation)
+      })
+    )[0] ?? null
   );
 }
 
 function getObservedBehaviorById(id) {
   return (
-    (state.shardGrounding?.observedBehaviors?.observations ?? []).find(
+    (getCurrentShardSystemView()?.family?.grounded?.observedBehaviors?.observations ?? []).find(
       (observation) => observation.id === id
     ) || null
   );

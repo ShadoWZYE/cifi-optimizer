@@ -1,0 +1,170 @@
+{
+  "dataset": "repo-data-unit.v1",
+  "unitId": "token-shop",
+  "systemId": "token-shop",
+  "version": "v1",
+  "status": "seeded",
+  "kind": "system",
+  "schemaRef": "data/data-unit-format.v1.json",
+  "frameworkRef": "data/data-framework.v1.json",
+  "summary": "Central TokenShop system unit for extracted row data, token-bank behavior, Daily Tokenium seams, and permanent spend-side boundary/support structure.",
+  "liveConsumers": {
+    "appStatePaths": [
+      "state.systemUnits.tokenShop",
+      "app.js:getCurrentSpendSystemView",
+      "support/system-unit-projections.js:buildSpendSystemView"
+    ],
+    "traceTargets": [
+      "token-shop-atu3-cells-effect",
+      "token-shop-atu4-mod",
+      "token-shop-atu5-mk1-title",
+      "token-shop-atu7-mk3-bridge",
+      "token-shop-family-structure"
+    ],
+    "plannerConsumers": []
+  },
+  "subsystems": {
+    "rows": {
+      "summary": "ATU row identity, shell, and row-remap grounding.",
+      "seedOutputs": [
+        "data/token-shop-values.json",
+        "data/tokenshop-canonical-v1.json"
+      ]
+    },
+    "token-bank": {
+      "summary": "Token-bank ownership, state, controller, and formula boundary surfaces.",
+      "seedOutputs": [
+        "data/token-bank-state-clues.json",
+        "data/token-bank-controller-shell.json",
+        "data/token-bank-formula-boundary.json"
+      ]
+    },
+    "daily-tokenium": {
+      "summary": "Daily Tokenium lane naming, action, and ownership clues.",
+      "seedOutputs": [
+        "data/daily-tokenium-lane-clues.json"
+      ]
+    }
+  },
+  "provenance": {
+    "policy": "Copy TokenShop rows, token-bank evidence, and Daily Tokenium evidence into centralized TokenShop views while preserving the committed source file or transient regeneration command for each embedded slice.",
+    "transientProbePolicy": "Historical TokenShop probes should not remain live dependencies; when their evidence is copied forward, keep the regeneration command instead of a permanent pointer to the old report shape.",
+    "sourceRecords": [
+      {
+        "id": "token-shop-values",
+        "kind": "dataset",
+        "path": "data/token-shop-values.json",
+        "role": "support",
+        "persistence": "committed"
+      },
+      {
+        "id": "tokenshop-canonical",
+        "kind": "dataset",
+        "path": "data/tokenshop-canonical-v1.json",
+        "role": "support",
+        "persistence": "committed"
+      },
+      {
+        "id": "token-shop-row-remap-boundary",
+        "kind": "dataset",
+        "path": "data/token-shop-row-remap-boundary.json",
+        "role": "boundary",
+        "persistence": "committed"
+      },
+      {
+        "id": "token-shop-row-level-owner",
+        "kind": "dataset",
+        "path": "data/token-shop-row-level-owner.json",
+        "role": "boundary",
+        "persistence": "committed"
+      },
+      {
+        "id": "token-shop-trace-command",
+        "kind": "command",
+        "role": "transient-regeneration",
+        "persistence": "transient",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --family token-shop --level structured",
+        "expectedOutputs": [
+          "workbench/trace-runs/token-shop-atu3-cells-effect.json",
+          "workbench/trace-runs/token-shop-family-structure.json"
+        ]
+      }
+    ]
+  },
+  "views": {
+    "canonical": [],
+    "boundary": [
+      "data/token-shop-row-level-owner.json",
+      "data/token-shop-save-boundary.json",
+      "data/token-shop-row-remap-boundary.json",
+      "data/token-shop-late-atu-boundary.json",
+      "data/token-bank-formula-boundary.json"
+    ],
+    "model": [],
+    "support": [
+      "data/token-shop-values.json",
+      "data/tokenshop-canonical-v1.json",
+      "data/tokenium-naming-clues.json",
+      "data/token-bank-state-clues.json",
+      "data/daily-tokenium-lane-clues.json",
+      "data/token-shop-cost-lanes.json",
+      "data/spend-action-lane-clues.json",
+      "data/token-shop-owner-shell.json",
+      "data/token-bank-controller-shell.json"
+    ],
+    "historicalProbe": []
+  },
+  "replacementPlan": {
+    "seedOutputs": [
+      "data/system-units/token-shop.v1.json"
+    ],
+    "projectionTargets": [
+      "rows",
+      "token-bank",
+      "daily-tokenium"
+    ],
+    "archiveAfterReplacement": [
+      "data/daily-tokenium-lane-probe.json",
+      "data/daily-tokenium-owner-probe.json",
+      "data/unity-probe-report.json",
+      "data/lm244-targeted-probe.json"
+    ],
+    "archiveReview": [
+      {
+        "path": "data/token-shop-row-level-owner.json",
+        "status": "keep",
+        "reason": "This remains the distinct raw SaveData ATU owner boundary and is not yet superseded by the row-remap or trace-backed TokenShop views.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/daily-tokenium-lane-probe.json",
+        "status": "archive-candidate",
+        "reason": "The live TokenShop unit and trace path already rebuild the action and owner seams from direct extraction plus bounded trace evidence.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/daily-tokenium-owner-probe.json",
+        "status": "archive-candidate",
+        "reason": "The live TokenShop unit no longer depends on this probe as an active source.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/unity-probe-report.json",
+        "status": "archive-candidate",
+        "reason": "This is no longer a live TokenShop source and keeping it active risks conflicting with newer direct level0 and metadata-backed mappings.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/lm244-targeted-probe.json",
+        "status": "archive-candidate",
+        "reason": "This targeted probe is no longer part of the active TokenShop product path.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      }
+    ],
+    "requirementsBeforeArchive": [
+      "App spend summaries must resolve from the centralized TokenShop unit or explicit projections of it.",
+      "Trace must keep citing grounded boundaries without depending on the historical probe reports.",
+      "Any transient TokenShop evidence folded into the centralized unit must carry the command used to regenerate it."
+    ]
+  }
+}

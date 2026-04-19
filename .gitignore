@@ -51,5 +51,11 @@ tools/**/obj/
 workbench/extract/
 workbench/unity/raw/
 workbench/emulator/
+workbench/ghidra-cache/
+workbench/ghidra-jobs/
+workbench/ghidra-projects/
+workbench/test-ghidra/
+workbench/trace-runs/*
+!workbench/trace-runs/.gitkeep
 tools/unity/AssetRipper/temp/
 data/unity-textassets/
