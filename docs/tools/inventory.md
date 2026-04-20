@@ -8,7 +8,7 @@ The repo uses a centralized probe runner (`scripts/unity/run_probe.mjs`) that pr
 
 - **Generalized commands** - Parameterized extraction for any target/anchor
 - **Pipeline chaining** - Multi-step analysis with `--chain` and `--max-steps`
-- **Trace outputs** - Stable per-target `.json` + `.md` files under `workbench/trace-runs/`
+- **Trace outputs** - DB-backed trace state with optional on-demand trace-run exports under `workbench/trace-runs/`
 - **Hierarchy levels** - `--level raw|structured|both` control
 
 Related workflow docs:
@@ -23,7 +23,7 @@ Related workflow docs:
 | `node run_probe.mjs build`     | Build C# AssetProbe           | No (build artifact)                |
 | `node run_probe.mjs probe`     | Run C# AssetProbe directly    | Yes (data/uabea-probe-report.json) |
 | `node run_probe.mjs probe:run` | Build + run in one command    | Yes                                |
-| `node run_probe.mjs trace`     | Generalized trace bundle      | No (stable workbench outputs, later promoted into system units) |
+| `node run_probe.mjs trace`     | Generalized trace bundle      | No (DB-backed trace state; optional exports can be generated on demand) |
 | `node run_probe.mjs compile`   | Canonical dataset compilation | Yes                                |
 | `node run_probe.mjs pipeline`  | Multi-step extraction         | Yes                                |
 
@@ -76,7 +76,7 @@ dotnet run -- --term SaveData --quick
 | Script                   | Purpose                                                      | Committed Output?               |
 | ------------------------ | ------------------------------------------------------------ | ------------------------------- |
 | `run_probe.mjs`          | Centralized probe runner with generalized CLI                | No                              |
-| `unity_trace_bundle.py`  | Trace bundle generator - extracts and analyzes Unity objects | No (writes stable per-target outputs under `workbench/trace-runs/`) |
+| `unity_trace_bundle.py`  | Trace bundle generator - extracts and analyzes Unity objects | No (stores DB-backed trace fragments/views; optional exports can write derived per-target outputs under `workbench/trace-runs/`) |
 | `unity_probe_helpers.py` | Reusable Unity probing methods                               | No (utility)                    |
 | `portable_paths.py`      | Path resolution helpers                                      | No (utility)                    |
 
@@ -201,14 +201,29 @@ This cache behavior is repo-side over `workbench/ghidra-jobs/` and the persisten
 `workbench/ghidra-projects/cifi-full.rep` project. It is not an append-only mutation of Ghidra's
 internal runtime cache format.
 
-The wrapper also maintains a lightweight repo-side exact-match index at
-`workbench/ghidra-cache/process_project_index.json`. That index is derived from completed
-`process-project` jobs and lets later trace runs resolve common native term sets without rereading
-every job directory.
+The wrapper now keeps its control plane in
+`workbench/ghidra-cache/ghidra_cache.sqlite3`. That SQLite DB owns:
 
-It also maintains a term-centric native graph at
-`workbench/ghidra-cache/native_graph_index.json`. That graph grows from completed single-term jobs
-and stores:
+- exact merged-job lookup
+- canonical term/materialized exact lookup
+- graph-backfill links between searched and incidental terms
+- job lease / reclaim state
+- targeted invalidation state
+- immutable per-job evidence rows
+- canonical term-aspect reductions
+- rebuildable materialized term/job views
+- staged native-trace extraction evidence such as:
+  - `bridge_plan`
+  - `native_search_attempt`
+  - `native_signal_fragment`
+  - `metadata_context_fragment`
+  - `owner_inference`
+  - `sibling_cluster`
+- rebuildable materialized native-trace views keyed by request signature
+
+The term-centric native graph is now stored canonically in SQLite and can be exported on demand as
+`workbench/ghidra-cache/native_graph_index.json` for compatibility/debug use. Its long-lived shape
+still grows from completed single-term jobs and stores:
 
 - searched terms and their latest completed raw/reconstructed payloads
 - incidental owner candidates
@@ -229,6 +244,38 @@ The wrapper also performs bounded automatic cleanup inside the workbench:
 
 This keeps the repo-side native cache useful without letting old schema versions accumulate
 indefinitely.
+
+Minimal maintenance hooks:
+
+```bash
+python scripts/unity/ghidra_headless.py rebuild-cache-db
+python scripts/unity/ghidra_headless.py rebuild-cache-db --stage native-cache
+python scripts/unity/ghidra_headless.py rebuild-cache-db --stage trace-system
+python scripts/unity/ghidra_headless.py export-process-index
+python scripts/unity/ghidra_headless.py export-native-graph
+python scripts/unity/ghidra_headless.py reclaim
+python scripts/unity/ghidra_headless.py invalidate --term ModBoostBonus
+python scripts/unity/ghidra_headless.py invalidate --job-id process_20260418_163019
+python scripts/unity/ghidra_headless.py invalidate --schema-lt 6
+```
+
+- `rebuild-cache-db` now refreshes the full DB-backed runtime state by default:
+  - native cache/index state
+  - canonical/materialized native trace views
+  - canonical trace/system views
+  - canonical semantic fragments
+  - materialized target bundles and semantic coverage/progress projections
+- `--stage native-cache`, `--stage trace-system`, and `--stage materialization` can narrow the rebuild when needed
+- `export-process-index` and `export-native-graph` regenerate the old JSON views from DB state only when explicitly requested
+- `reclaim` expires stuck running jobs whose lease timed out
+- `invalidate` can mark whole jobs stale or selectively invalidate evidence by term/aspect/script/producer version
+
+The cache now treats raw jobs as immutable provenance and reduces them into canonical views:
+
+- one job can contribute multiple evidence slices for the same term
+- multiple jobs can contribute complementary evidence to one term
+- conflicting evidence is reduced deterministically per aspect while keeping alternate provenance
+- materialized term/job views can be rebuilt from surviving evidence after selective invalidation without rerunning Ghidra
 
 Native process-job reuse is schema-aware:
 
@@ -264,8 +311,14 @@ the sole source of original Unity object structure. See
 | Script                                   | Purpose                             | Committed Output?                   |
 | ---------------------------------------- | ----------------------------------- | ----------------------------------- |
 | `scripts/compile_tokenshop_canonical.py` | Compile canonical TokenShop dataset | Yes (`tokenshop-canonical-v1.json`) |
-| `scripts/contracts/generate-system-units.mjs` | Generate centralized embedded system-unit datasets | Yes (`data/system-units/*.json`) |
+| `scripts/contracts/generate-system-units.mjs` | Export app-facing system-unit read models from DB-backed target bundles and canonical repo data | Yes (`data/system-units/*.json`) |
+| `scripts/contracts/system_unit_db.py` | Inspect/materialize DB-backed target-bundle and system-unit views for app/runtime integration | No |
 | `score_extraction_candidates.py`         | Score extraction candidates         | No                                  |
+
+Local app/runtime note:
+
+- normal HTTP/dev app runtime now reads system units through `/api/system-units`, backed by SQLite `materialized_system_unit_views`
+- `data/system-units/*.json` remain explicit static/export read models for distribution, snapshots, and offline fallback
 
 ## Usage Examples
 
@@ -349,8 +402,8 @@ node scripts/unity/run_probe.mjs pipeline \
 
 ## Output Convention
 
-Trace runs are stored in stable per-target paths under `workbench/trace-runs/` and overwrite on
-repeat for the same workspace asset set:
+Trace runs are materialized into the SQLite cache layer first. Optional debug/compatibility exports
+can be written to stable per-target paths under `workbench/trace-runs/` when explicitly requested:
 
 ```
 workbench/trace-runs/
@@ -365,9 +418,40 @@ workbench/trace-runs/
 Each trace payload records `generatedAt` and `assetSet.fingerprint` internally, so the timestamp no
 longer needs to live in the filename.
 
-Wait for the trace command to finish before reading the output files. The trace rewrites the stable
-`workbench/trace-runs/*.json` and `*.md` files in place, so reading during execution can show the
-previous run or a partially rewritten file.
+The primary trace source of truth is `workbench/ghidra-cache/ghidra_cache.sqlite3`, which now
+stores trace fragments, reusable semantic fragments with stable keys, canonical trace fragment
+reductions, canonical system-trace views, canonical semantic fragments, semantic coverage/progress
+summaries, and materialized target-bundle views. Target-bundle materialization now projects
+canonical semantic views plus coverage/conflict metadata from SQLite state. The
+`workbench/trace-runs/*.json` and `*.md` files are optional derived compatibility/debug exports.
+
+The default structured target bundle is now a compact projection over:
+
+- canonical source families
+- DB-backed native/system/semantic views
+- semantic coverage/support/conflict state
+- materialization/provenance metadata
+
+It no longer carries probe-era embedded sections such as shell windows, raw surface bundles, typed
+trace graphs, solved-vs-blocked boundary payloads, or other boundary/model intermediates as
+first-class bundle content. Those remain available only through lower-level trace/debug views and
+explicit exports when needed.
+
+Primary runtime source families are now intentionally limited to:
+
+- `metadata`
+- `level0`
+- `assets`
+- `native`
+
+Concrete asset files such as `sharedassets0.assets` and `globalgamemanagers.assets` remain internal
+members of the `assets` family. Older JSON probe outputs such as `tokenShopExtract`,
+`tokenShopRowRemapBoundary`, `shardCostNativeProbe`, and related boundary/model exports remain only
+as compatibility/import/debug artifacts and are no longer treated as primary runtime sources.
+
+Use `python scripts/unity/unity_trace_bundle.py ... --export` when you explicitly want a derived
+trace-run JSON/Markdown export. Normal trace runs persist to SQLite only and do not require the
+`workbench/trace-runs/*.json` or `*.md` files to exist.
 
 The markdown trace output now also includes:
 

@@ -189,6 +189,8 @@ Until then, prefer:
 Run:
 
 - `node scripts/contracts/generate-system-units.mjs`
+- optional DB inspection/materialization helper:
+  - `python scripts/contracts/system_unit_db.py fetch-system-unit --system-id token-shop --version v1`
 
 Current generated outputs:
 
@@ -198,8 +200,9 @@ Current generated outputs:
 - `data/system-units/shards.v1.json`
 - `data/system-units/trace.v1.json`
 
-These generated files are meant to embed normalized data for later wiring. They should not become
-thin pointer layers back to the old source files.
+These generated files are app-facing exported read models. Their runtime source of truth is the
+DB-backed target-bundle and system-unit materialization layer plus canonical repo data. They should
+not become thin pointer layers back to old trace-run files or other derived compatibility artifacts.
 
 ### Regrounding after centralization
 
@@ -248,7 +251,7 @@ Typical provenance records are:
 
 ### Fully bootstrap-wired
 
-These app bootstrap reads now come from centralized generated units instead of the older per-file
+These app bootstrap reads now come from centralized system units instead of the older per-file
 dataset pile:
 
 - `player-state`
@@ -256,14 +259,18 @@ dataset pile:
 - `token-shop`
 - `multiverse-market`
 
-In practice, `app.js` now fetches:
+In local HTTP/dev runtime, `app.js` now loads these through the app-facing provider in
+`support/system-unit-provider.js`, which prefers the local `/api/system-units` API backed by
+SQLite `materialized_system_unit_views`.
+
+Static/export fallback still exists and uses:
 
 - `data/system-units/player-state.v1.json`
 - `data/system-units/shards.v1.json`
 - `data/system-units/token-shop.v1.json`
 - `data/system-units/multiverse-market.v1.json`
 
-plus the remaining shared non-system inputs:
+The remaining shared non-system inputs still load directly from committed JSON:
 
 - `data/game-data.snapshot.v1.json`
 - `data/bundled-dataset-contract.v1.json`
@@ -274,6 +281,7 @@ plus the remaining shared non-system inputs:
 
 These lanes now have explicit code projections in:
 
+- `support/system-unit-provider.js`
 - `support/system-unit-projections.js`
 
 Current projections:
@@ -283,7 +291,8 @@ Current projections:
 - `buildSpendSystemView(...)`
 
 This means the unit-to-runtime mapping is no longer hand-expanded inline in bootstrap.
-`app.js` now reads centralized getters instead of dereferencing the compatibility mirrors directly.
+`app.js` now reads centralized getters over DB-backed or static-export system units instead of
+dereferencing compatibility mirrors directly.
 
 ### Still in progress
 

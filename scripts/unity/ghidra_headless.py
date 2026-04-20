@@ -15,6 +15,11 @@ Usage:
     python ghidra_headless.py poll <job_id>
     python ghidra_headless.py status
     python ghidra_headless.py cache <job_id> [--query string]
+    python ghidra_headless.py rebuild-cache-db
+    python ghidra_headless.py reclaim
+    python ghidra_headless.py invalidate [--job-id id] [--term value] [--aspect kind] [--script name] [--producer-version v] [--schema-lt N] [--trace-scope scope] [--trace-fragment kind]
+    python ghidra_headless.py export-process-index [--out path]
+    python ghidra_headless.py export-native-graph [--out path]
 """
 
 from __future__ import annotations
@@ -29,6 +34,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
+from ghidra_cache_db import GhidraCacheDB
+
 ROOT = Path(__file__).resolve().parents[2]
 GHIDRA_ROOT = ROOT / "tools/ghidra/ghidra_12.0.4_PUBLIC"
 JDK_ROOT = ROOT / "tools/jdk/jdk-21.0.10+7"
@@ -38,6 +45,7 @@ GHIDRA_JYTHON_SCRIPT_DIR = GHIDRA_ROOT / "Ghidra/Features/Jython/ghidra_scripts"
 CACHE_DIR = ROOT / "workbench/ghidra-cache"
 PROCESS_INDEX_FILE = CACHE_DIR / "process_project_index.json"
 NATIVE_GRAPH_INDEX_FILE = CACHE_DIR / "native_graph_index.json"
+CACHE_DB_FILE = CACHE_DIR / "ghidra_cache.sqlite3"
 PROJECT_DIR = ROOT / "workbench/ghidra-projects"
 JOBS_DIR = ROOT / "workbench/ghidra-jobs"
 GHIDRA_RUNTIME_DIR = ROOT / "workbench/ghidra-runtime"
@@ -57,6 +65,14 @@ DEFAULT_SEARCH = [
 ASCII_MIN_LEN = 4
 METADATA_NEIGHBORHOOD_WINDOW = 0x120
 NATIVE_TRACE_SCHEMA_VERSION = 6
+_CACHE_DB: GhidraCacheDB | None = None
+
+
+def _get_cache_db() -> GhidraCacheDB:
+    global _CACHE_DB
+    if _CACHE_DB is None:
+        _CACHE_DB = GhidraCacheDB(CACHE_DB_FILE, JOBS_DIR)
+    return _CACHE_DB
 
 
 def _default_max_cpu() -> int:
@@ -971,6 +987,53 @@ def _empty_process_index() -> dict[str, Any]:
     }
 
 
+def _load_result_for_job(job_info: dict[str, Any]) -> dict[str, Any] | None:
+    output_file = Path(str(job_info.get("output_file", "")))
+    if not output_file.exists():
+        return None
+    return _load_json(output_file)
+
+
+def _refresh_runtime_state(stages: list[str] | None = None) -> dict[str, Any]:
+    selected_stages = [stage.lower() for stage in (stages or ["full"])]
+    if "full" in selected_stages:
+        selected_stages = ["native-cache", "trace-system", "materialization"]
+    db = _get_cache_db()
+    process_index: dict[str, Any] | None = None
+    native_graph_index: dict[str, Any] | None = None
+    completed: list[str] = []
+
+    if "native-cache" in selected_stages:
+        db.rebuild_indices(_load_result_for_job, _process_result_is_stale)
+        process_index = db.export_process_index()
+        native_graph_index = db.export_native_graph_index()
+        completed.append("native-cache")
+
+    if any(stage in selected_stages for stage in ("trace-system", "semantic", "materialization")):
+        db.rebuild_trace_views()
+        if "trace-system" not in completed:
+            completed.append("trace-system")
+        if "materialization" in selected_stages:
+            completed.append("materialization")
+
+    return {
+        "processIndex": process_index or db.export_process_index(),
+        "nativeGraphIndex": native_graph_index or db.export_native_graph_index(),
+        "stagesRun": completed,
+    }
+
+
+def _sync_job_file(job_info: dict[str, Any]) -> dict[str, Any]:
+    job_id = str(job_info.get("job_id", "")).strip()
+    if not job_id:
+        return job_info
+    job_file = Path(str(job_info.get("job_file", JOBS_DIR / job_id / "job.json")))
+    job_file.parent.mkdir(parents=True, exist_ok=True)
+    job_file.write_text(json.dumps(job_info, indent=2), encoding="utf-8")
+    job_info["job_file"] = str(job_file)
+    return job_info
+
+
 def _process_result_is_stale(result_payload: dict[str, Any] | None, wanted_terms: list[str]) -> bool:
     if not isinstance(result_payload, dict):
         return True
@@ -1006,27 +1069,51 @@ def _process_result_is_stale(result_payload: dict[str, Any] | None, wanted_terms
 
 
 def _load_process_index() -> dict[str, Any]:
-    index = _load_json(PROCESS_INDEX_FILE)
+    index = _get_cache_db().export_process_index()
     if not isinstance(index, dict) or "jobsByProject" not in index:
         return _empty_process_index()
     return index
 
 
 def _write_process_index(index: dict[str, Any]) -> None:
-    index["generatedAt"] = datetime.now().isoformat()
-    PROCESS_INDEX_FILE.write_text(json.dumps(index, indent=2), encoding="utf-8")
+    _write_process_index_to_path(index, PROCESS_INDEX_FILE)
 
 
 def _write_native_graph_index(index: dict[str, Any]) -> None:
-    index["generatedAt"] = datetime.now().isoformat()
-    NATIVE_GRAPH_INDEX_FILE.write_text(json.dumps(index, indent=2), encoding="utf-8")
+    _write_native_graph_index_to_path(index, NATIVE_GRAPH_INDEX_FILE)
+
+
+def _write_process_index_to_path(index: dict[str, Any], path: Path) -> None:
+    payload = dict(index)
+    payload["generatedAt"] = datetime.now().isoformat()
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def _write_native_graph_index_to_path(index: dict[str, Any], path: Path) -> None:
+    payload = dict(index)
+    payload["generatedAt"] = datetime.now().isoformat()
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def _load_native_graph_index() -> dict[str, Any]:
-    index = _load_json(NATIVE_GRAPH_INDEX_FILE)
+    index = _get_cache_db().export_native_graph_index()
     if not isinstance(index, dict) or "projects" not in index:
         return {}
     return index
+
+
+def export_process_index(out_path: Path | None = None) -> dict[str, Any]:
+    index = _get_cache_db().export_process_index()
+    target = out_path or PROCESS_INDEX_FILE
+    _write_process_index_to_path(index, target)
+    return {"database": str(CACHE_DB_FILE), "out": str(target)}
+
+
+def export_native_graph(out_path: Path | None = None) -> dict[str, Any]:
+    index = _get_cache_db().export_native_graph_index()
+    target = out_path or NATIVE_GRAPH_INDEX_FILE
+    _write_native_graph_index_to_path(index, target)
+    return {"database": str(CACHE_DB_FILE), "out": str(target)}
 
 
 def _safe_remove_job_dir(job_dir: Path) -> None:
@@ -1052,8 +1139,10 @@ def prune_ghidra_artifacts() -> None:
     if not JOBS_DIR.exists():
         return
 
+    db = _get_cache_db()
     process_jobs: list[tuple[str, Path, dict[str, Any], dict[str, Any] | None]] = []
     jobs_to_remove: list[Path] = []
+    removed_job_ids: list[str] = []
     newest_by_signature: dict[str, tuple[str, Path, dict[str, Any], dict[str, Any] | None]] = {}
 
     for job_dir in JOBS_DIR.iterdir():
@@ -1098,6 +1187,7 @@ def prune_ghidra_artifacts() -> None:
         seen_job_ids.add(job_id)
         _safe_remove_job_dir(job_dir)
         if job_id:
+            removed_job_ids.append(job_id)
             _safe_remove_cache_file(CACHE_DIR / "{}_results.json".format(job_id))
 
     for cache_file in CACHE_DIR.glob("*_results.json"):
@@ -1107,8 +1197,9 @@ def prune_ghidra_artifacts() -> None:
         if not (JOBS_DIR / job_id).exists():
             _safe_remove_cache_file(cache_file)
 
-    _rebuild_process_index()
-    _rebuild_native_graph_index()
+    if removed_job_ids:
+        db.remove_jobs(removed_job_ids)
+    _rebuild_cache_views()
 
 
 def _index_bucket(index: dict[str, Any], project_name: str, project_file: str, create: bool = False) -> list[dict[str, Any]]:
@@ -1120,118 +1211,12 @@ def _index_bucket(index: dict[str, Any], project_name: str, project_file: str, c
 
 
 def _rebuild_process_index() -> dict[str, Any]:
-    index = _empty_process_index()
-    for job_dir in JOBS_DIR.iterdir():
-        if not job_dir.is_dir():
-            continue
-        job_info = _load_json(job_dir / "job.json")
-        if not job_info:
-            continue
-        if job_info.get("mode") != "process-project":
-            continue
-        if job_info.get("status") != "completed":
-            continue
-        _upsert_process_index_entry(index, job_info)
-    _write_process_index(index)
+    index, _ = _rebuild_cache_views()
     return index
 
 
 def _rebuild_native_graph_index() -> dict[str, Any]:
-    graph_index: dict[str, Any] = {
-        "version": 1,
-        "generatedAt": datetime.now().isoformat(),
-        "projects": {},
-    }
-    for candidate in _load_completed_process_job_candidates("cifi-full", "libil2cpp.so"):
-        terms = candidate.get("terms", [])
-        if len(terms) != 1:
-            continue
-        result = candidate.get("result", {})
-        term = terms[0]
-        project_bucket = graph_index.setdefault("projects", {}).setdefault("cifi-full", {}).setdefault("libil2cpp.so", {})
-        per_term_bucket = project_bucket.setdefault("perTerm", {})
-        per_term_bucket[term] = {
-            "jobId": candidate.get("job", {}).get("job_id"),
-            "termBridge": result.get("termBridges", {}).get(term, {}),
-            "managedReconstruction": result.get("managedReconstruction", {}),
-            "managedGraph": result.get("managedGraph", {}),
-            "outputFile": candidate.get("job", {}).get("output_file"),
-            "startTime": candidate.get("job", {}).get("start_time"),
-        }
-        aggregate = project_bucket.setdefault(
-            "aggregateGraph",
-            {
-                "owners": {},
-                "methods": {},
-                "fields": {},
-                "rawValues": {},
-                "termLinks": {},
-                "incidentalFindings": [],
-            },
-        )
-        managed_reconstruction = result.get("managedReconstruction", {})
-        managed_graph = result.get("managedGraph", {})
-        for owner_entry in managed_graph.get("owners", []):
-            owner_name = str(owner_entry.get("owner", "")).strip()
-            if not owner_name:
-                continue
-            owner_bucket = aggregate["owners"].setdefault(
-                owner_name,
-                {"terms": [], "methods": [], "fields": [], "rawValues": [], "scores": []},
-            )
-            if term not in owner_bucket["terms"]:
-                owner_bucket["terms"].append(term)
-            score = int(owner_entry.get("score", 0) or 0)
-            if score and score not in owner_bucket["scores"]:
-                owner_bucket["scores"].append(score)
-            for method in owner_entry.get("methods", []):
-                if method not in owner_bucket["methods"]:
-                    owner_bucket["methods"].append(method)
-                aggregate["methods"].setdefault(method, {"terms": []})
-                if term not in aggregate["methods"][method]["terms"]:
-                    aggregate["methods"][method]["terms"].append(term)
-            for field in owner_entry.get("fields", []):
-                if field not in owner_bucket["fields"]:
-                    owner_bucket["fields"].append(field)
-                aggregate["fields"].setdefault(field, {"terms": []})
-                if term not in aggregate["fields"][field]["terms"]:
-                    aggregate["fields"][field]["terms"].append(term)
-            for raw_value in owner_entry.get("rawValues", []):
-                if raw_value not in owner_bucket["rawValues"]:
-                    owner_bucket["rawValues"].append(raw_value)
-                aggregate["rawValues"].setdefault(raw_value, {"terms": []})
-                if term not in aggregate["rawValues"][raw_value]["terms"]:
-                    aggregate["rawValues"][raw_value]["terms"].append(term)
-
-        search_expansion = result.get("termBridges", {}).get(term, {}).get("searchExpansion", {})
-        for kind in ("ownerCandidates", "methodCandidates", "fieldCandidates", "relatedTerms"):
-            for incidental in search_expansion.get(kind, []):
-                normalized_incidental = str(incidental).strip()
-                if not normalized_incidental:
-                    continue
-                aggregate["incidentalFindings"].append(
-                    {"sourceTerm": term, "kind": kind, "value": normalized_incidental}
-                )
-                aggregate["termLinks"].setdefault(term, [])
-                link = {"kind": kind, "value": normalized_incidental}
-                if link not in aggregate["termLinks"][term]:
-                    aggregate["termLinks"][term].append(link)
-                if kind == "ownerCandidates":
-                    owner_bucket = aggregate["owners"].setdefault(
-                        normalized_incidental,
-                        {"terms": [], "methods": [], "fields": [], "rawValues": [], "scores": []},
-                    )
-                    if term not in owner_bucket["terms"]:
-                        owner_bucket["terms"].append(term)
-                elif kind == "methodCandidates":
-                    aggregate["methods"].setdefault(normalized_incidental, {"terms": []})
-                    if term not in aggregate["methods"][normalized_incidental]["terms"]:
-                        aggregate["methods"][normalized_incidental]["terms"].append(term)
-                elif kind == "fieldCandidates":
-                    aggregate["fields"].setdefault(normalized_incidental, {"terms": []})
-                    if term not in aggregate["fields"][normalized_incidental]["terms"]:
-                        aggregate["fields"][normalized_incidental]["terms"].append(term)
-    _write_native_graph_index(graph_index)
+    _, graph_index = _rebuild_cache_views()
     return graph_index
 
 
@@ -1256,62 +1241,47 @@ def _upsert_process_index_entry(index: dict[str, Any], job_info: dict[str, Any])
 
 
 def _load_completed_process_job_candidates(project_name: str, project_file: str) -> list[dict[str, Any]]:
+    db = _get_cache_db()
     candidates: list[dict[str, Any]] = []
-    index = _load_process_index()
-    indexed_entries = _index_bucket(index, project_name, project_file)
-    stale_index = False
+    stale_job_ids: list[str] = []
 
-    for entry in indexed_entries:
-        job_id = entry.get("job_id")
-        if not job_id:
-            stale_index = True
+    for job_info in db.get_completed_process_jobs(project_name, project_file):
+        result = _load_result_for_job(job_info)
+        terms = normalize_search_terms(job_info.get("search_strings", []))
+        if not result or _process_result_is_stale(result, terms):
+            job_id = str(job_info.get("job_id", "")).strip()
+            if job_id:
+                stale_job_ids.append(job_id)
             continue
-        job_dir = JOBS_DIR / str(job_id)
-        job_info = _load_json(job_dir / "job.json")
-        output_file = Path(str(entry.get("output_file", "")))
-        if not job_info or not output_file.exists():
-            stale_index = True
-            continue
-        result = _load_json(output_file)
-        if not result or _process_result_is_stale(result, normalize_search_terms(job_info.get("search_strings", []))):
-            stale_index = True
-            continue
-        candidates.append(
-            {
-                "job": job_info,
-                "result": result,
-                "terms": normalize_search_terms(job_info.get("search_strings", [])),
-            }
-        )
+        candidates.append({"job": _sync_job_file(job_info), "result": result, "terms": terms})
 
-    if candidates and not stale_index:
-        return candidates
-
-    if JOBS_DIR.exists():
-        index = _rebuild_process_index()
-        for entry in _index_bucket(index, project_name, project_file):
-            job_id = entry.get("job_id")
-            if not job_id:
+    if stale_job_ids:
+        for job_id in stale_job_ids:
+            db.invalidate(job_id=job_id, reason="stale-process-result")
+        _rebuild_cache_views()
+        fresh_candidates: list[dict[str, Any]] = []
+        for job_info in db.get_completed_process_jobs(project_name, project_file):
+            result = _load_result_for_job(job_info)
+            terms = normalize_search_terms(job_info.get("search_strings", []))
+            if not result or _process_result_is_stale(result, terms):
                 continue
-            job_dir = JOBS_DIR / str(job_id)
-            job_info = _load_json(job_dir / "job.json")
-            output_file = Path(str(entry.get("output_file", "")))
-            if not job_info or not output_file.exists():
-                continue
-            result = _load_json(output_file)
-            if not result or _process_result_is_stale(result, normalize_search_terms(job_info.get("search_strings", []))):
-                continue
-            candidates.append(
-                {
-                    "job": job_info,
-                    "result": result,
-                    "terms": normalize_search_terms(job_info.get("search_strings", [])),
-                }
-            )
+            fresh_candidates.append({"job": _sync_job_file(job_info), "result": result, "terms": terms})
+        return fresh_candidates
     return candidates
 
 
 def _choose_cached_process_subset(project_name: str, project_file: str, wanted_terms: list[str]) -> Optional[dict[str, Any]]:
+    db = _get_cache_db()
+    signature = _term_signature(wanted_terms)
+    exact_job = db.find_exact_subset_job(project_name, project_file, signature)
+    if exact_job:
+        result = _load_result_for_job(exact_job)
+        terms = normalize_search_terms(exact_job.get("search_strings", []))
+        if result and not _process_result_is_stale(result, terms):
+            return {"job": _sync_job_file(exact_job), "result": result, "terms": terms}
+    materialized = db.find_materialized_job_view(project_name, project_file, signature)
+    if materialized:
+        return materialized
     wanted_set = {term.lower() for term in wanted_terms}
     best: Optional[dict[str, Any]] = None
     best_size = -1
@@ -1331,22 +1301,11 @@ def _choose_cached_process_subset(project_name: str, project_file: str, wanted_t
 
 
 def _choose_cached_process_term_jobs(project_name: str, project_file: str, wanted_terms: list[str]) -> tuple[list[dict[str, Any]], list[str]]:
-    latest_by_term: dict[str, dict[str, Any]] = {}
-    for candidate in _load_completed_process_job_candidates(project_name, project_file):
-        candidate_terms = candidate.get("terms", [])
-        if len(candidate_terms) != 1:
-            continue
-        term = candidate_terms[0]
-        lowered = term.lower()
-        current = latest_by_term.get(lowered)
-        current_time = str(current.get("job", {}).get("start_time", "")) if current else ""
-        candidate_time = str(candidate.get("job", {}).get("start_time", ""))
-        if current is None or candidate_time > current_time:
-            latest_by_term[lowered] = candidate
     hits: list[dict[str, Any]] = []
     missing: list[str] = []
+    db = _get_cache_db()
     for term in wanted_terms:
-        candidate = latest_by_term.get(term.lower())
+        candidate = db.find_canonical_term_view(project_name, project_file, term)
         if candidate is None:
             missing.append(term)
             continue
@@ -1396,29 +1355,7 @@ def _choose_graph_backfill_candidates(
     missing_terms: list[str],
     direct_hits: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[str], dict[str, list[dict[str, str]]]]:
-    graph_index = _load_native_graph_index()
-    project_bucket = (
-        graph_index.get("projects", {})
-        .get(project_name, {})
-        .get(project_file, {})
-    )
-    aggregate_graph = project_bucket.get("aggregateGraph", {})
-    if not aggregate_graph:
-        return [], missing_terms, {}
-
-    latest_by_term: dict[str, dict[str, Any]] = {}
-    for candidate in _load_completed_process_job_candidates(project_name, project_file):
-        candidate_terms = candidate.get("terms", [])
-        if len(candidate_terms) != 1:
-            continue
-        term = candidate_terms[0]
-        lowered = term.lower()
-        current = latest_by_term.get(lowered)
-        current_time = str(current.get("job", {}).get("start_time", "")) if current else ""
-        candidate_time = str(candidate.get("job", {}).get("start_time", ""))
-        if current is None or candidate_time > current_time:
-            latest_by_term[lowered] = candidate
-
+    db = _get_cache_db()
     seen_job_ids = {
         str(candidate.get("job", {}).get("job_id", ""))
         for candidate in direct_hits
@@ -1429,7 +1366,7 @@ def _choose_graph_backfill_candidates(
     remaining_missing: list[str] = []
 
     for term in missing_terms:
-        links = _graph_backfill_links_for_term(aggregate_graph, term)
+        links = db.find_graph_backfill(project_name, project_file, term)
         if not links:
             remaining_missing.append(term)
             continue
@@ -1439,7 +1376,7 @@ def _choose_graph_backfill_candidates(
             source_term = str(link.get("sourceTerm", "")).strip()
             if not source_term:
                 continue
-            candidate = latest_by_term.get(source_term.lower())
+            candidate = db.find_canonical_term_view(project_name, project_file, source_term)
             if candidate is None:
                 continue
             selected_candidate = candidate
@@ -1758,10 +1695,7 @@ def _run_single_process_project_term(
         job_info["error"] = error
     written = _write_job_info(job_dir, job_info)
     if written.get("status") == "completed":
-        index = _load_process_index()
-        _upsert_process_index_entry(index, written)
-        _write_process_index(index)
-        _rebuild_native_graph_index()
+        _rebuild_cache_views()
         prune_ghidra_artifacts()
     return {
         "job": written,
@@ -1813,8 +1747,12 @@ def _run_headless_command(
 
 
 def _write_job_info(job_dir: Path, job_info: dict) -> dict:
-    (job_dir / "job.json").write_text(json.dumps(job_info, indent=2), encoding="utf-8")
-    return job_info
+    normalized = dict(job_info)
+    normalized["signature"] = _term_signature(normalized.get("search_strings", []))
+    normalized["job_file"] = str(job_dir / "job.json")
+    normalized = _sync_job_file(normalized)
+    _get_cache_db().upsert_job(normalized)
+    return normalized
 
 
 def _read_job_info(job_dir: Path) -> dict:
@@ -1930,9 +1868,7 @@ def run_analysis(binary_path: str, search_strings: list[str], timeout: int = 600
         job_info["error"] = error
     written = _write_job_info(job_dir, job_info)
     if written.get("status") == "completed":
-        index = _load_process_index()
-        _upsert_process_index_entry(index, written)
-        _write_process_index(index)
+        _rebuild_cache_views()
         prune_ghidra_artifacts()
     return written
 
@@ -2077,6 +2013,7 @@ def build_project(
 
     written = _write_job_info(job_dir, job_info)
     if written.get("status") == "completed":
+        _rebuild_cache_views()
         prune_ghidra_artifacts()
     return written
 
@@ -2303,11 +2240,7 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
         job_info["graph_reused_job_ids"] = graph_reused_job_ids
 
     written = _write_job_info(job_dir, job_info)
-    if written.get("status") == "completed":
-        index = _load_process_index()
-        _upsert_process_index_entry(index, written)
-        _write_process_index(index)
-    _rebuild_native_graph_index()
+    _rebuild_cache_views()
     prune_ghidra_artifacts()
     return written
 
@@ -2370,6 +2303,93 @@ def get_status() -> None:
         if job.get("error"):
             print("  Error: {}".format(job["error"]))
         print()
+
+
+def rebuild_cache_db(stages: list[str] | None = None) -> dict[str, Any]:
+    db = _get_cache_db()
+    rebuild = _refresh_runtime_state(stages)
+    process_index = rebuild["processIndex"]
+    native_graph_index = rebuild["nativeGraphIndex"]
+    summary = {
+        "database": str(CACHE_DB_FILE),
+        "stagesRun": rebuild["stagesRun"],
+        "processProjectEntries": sum(
+            len(project_files)
+            for projects in process_index.get("jobsByProject", {}).values()
+            for project_files in projects.values()
+        ),
+        "nativeProjects": len(native_graph_index.get("projects", {})),
+    }
+    summary.update(db.get_stats())
+    return summary
+
+
+def reclaim_expired_jobs() -> dict[str, Any]:
+    db = _get_cache_db()
+    reclaimed = db.reclaim_expired_running_jobs()
+    synced: list[str] = []
+    for job_id in reclaimed:
+        job = db.get_job(job_id)
+        if not job:
+            continue
+        _sync_job_file(job)
+        synced.append(job_id)
+    if reclaimed:
+        _refresh_runtime_state()
+    return {"database": str(CACHE_DB_FILE), "reclaimedJobIds": synced}
+
+
+def invalidate_cached_jobs(
+    job_id: str | None = None,
+    term: str | None = None,
+    schema_lt: int | None = None,
+    aspect_kind: str | None = None,
+    script_name: str | None = None,
+    producer_version: str | None = None,
+    trace_scope: str | None = None,
+    trace_fragment: str | None = None,
+) -> dict[str, Any]:
+    db = _get_cache_db()
+    invalidated_jobs: list[str] = []
+    invalidated_evidence: list[int] = []
+    invalidated_trace_fragments: list[int] = []
+    if aspect_kind or script_name or producer_version:
+        invalidated_evidence = db.invalidate_evidence(
+            term=term,
+            aspect_kind=aspect_kind,
+            source_job_id=job_id,
+            script_name=script_name,
+            producer_version=producer_version,
+            schema_lt=schema_lt,
+        )
+    elif trace_scope or trace_fragment:
+        invalidated_trace_fragments = db.invalidate_trace_fragments(
+            trace_scope=trace_scope,
+            fragment_kind=trace_fragment,
+            source_job_id=job_id,
+        )
+    else:
+        invalidated_jobs = db.invalidate_jobs(
+            job_id=job_id,
+            term=term,
+            schema_lt=schema_lt,
+            result_loader=_load_result_for_job,
+        )
+    synced: list[str] = []
+    for current_job_id in invalidated_jobs:
+        job = db.get_job(current_job_id)
+        if not job:
+            continue
+        _sync_job_file(job)
+        synced.append(current_job_id)
+    if invalidated_jobs or invalidated_evidence or invalidated_trace_fragments:
+        _refresh_runtime_state()
+    return {
+        "database": str(CACHE_DB_FILE),
+        "invalidatedJobIds": synced,
+        "invalidatedEvidenceIds": invalidated_evidence,
+        "invalidatedTraceFragmentIds": invalidated_trace_fragments,
+    }
 
 
 def main() -> None:
@@ -2530,6 +2550,93 @@ def main() -> None:
             results = query_cache(sys.argv[4])
             print("Query results:")
             print(json.dumps(results, indent=2))
+        return
+
+    if command == "rebuild-cache-db":
+        stages: list[str] = []
+        i = 2
+        while i < len(sys.argv):
+            if sys.argv[i] == "--stage" and i + 1 < len(sys.argv):
+                stages.append(sys.argv[i + 1])
+                i += 2
+            else:
+                i += 1
+        print(json.dumps(rebuild_cache_db(stages or None), indent=2))
+        return
+
+    if command == "export-process-index":
+        out_path = None
+        if len(sys.argv) >= 4 and sys.argv[2] == "--out":
+            out_path = Path(sys.argv[3])
+        print(json.dumps(export_process_index(out_path), indent=2))
+        return
+
+    if command == "export-native-graph":
+        out_path = None
+        if len(sys.argv) >= 4 and sys.argv[2] == "--out":
+            out_path = Path(sys.argv[3])
+        print(json.dumps(export_native_graph(out_path), indent=2))
+        return
+
+    if command == "reclaim":
+        print(json.dumps(reclaim_expired_jobs(), indent=2))
+        return
+
+    if command == "invalidate":
+        job_id = None
+        term = None
+        schema_lt = None
+        aspect_kind = None
+        script_name = None
+        producer_version = None
+        trace_scope = None
+        trace_fragment = None
+        i = 2
+        while i < len(sys.argv):
+            if sys.argv[i] == "--job-id" and i + 1 < len(sys.argv):
+                job_id = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--term" and i + 1 < len(sys.argv):
+                term = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--aspect" and i + 1 < len(sys.argv):
+                aspect_kind = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--script" and i + 1 < len(sys.argv):
+                script_name = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--producer-version" and i + 1 < len(sys.argv):
+                producer_version = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--trace-scope" and i + 1 < len(sys.argv):
+                trace_scope = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--trace-fragment" and i + 1 < len(sys.argv):
+                trace_fragment = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--schema-lt" and i + 1 < len(sys.argv):
+                schema_lt = int(sys.argv[i + 1])
+                i += 2
+            else:
+                i += 1
+        if not any(value is not None for value in (job_id, term, schema_lt, aspect_kind, script_name, producer_version, trace_scope, trace_fragment)):
+            print("Usage: ghidra_headless.py invalidate [--job-id id] [--term value] [--aspect kind] [--script name] [--producer-version v] [--schema-lt N] [--trace-scope scope] [--trace-fragment kind]")
+            sys.exit(1)
+        print(
+            json.dumps(
+                invalidate_cached_jobs(
+                    job_id=job_id,
+                    term=term,
+                    schema_lt=schema_lt,
+                    aspect_kind=aspect_kind,
+                    script_name=script_name,
+                    producer_version=producer_version,
+                    trace_scope=trace_scope,
+                    trace_fragment=trace_fragment,
+                ),
+                indent=2,
+            )
+        )
         return
 
     print("Unknown command: {}".format(command))

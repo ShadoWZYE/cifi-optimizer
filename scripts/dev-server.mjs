@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { extname, join, normalize } from "node:path";
 import { cwd } from "node:process";
 import { spawn } from "node:child_process";
+import { DatabaseSync } from "node:sqlite";
 import {
   createGeneratorOcrStageError,
   createMissingGeneratorOcrScriptError,
@@ -12,6 +13,7 @@ import {
 
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
+const cacheDbPath = join(root, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
 const launcherMode =
   process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
 const clientLeaseTtlMs = 60000;
@@ -33,7 +35,8 @@ const mimeTypes = {
 };
 const serverCapabilitiesScript = `<script>window.__CIFI_SERVER_CAPABILITIES__ = ${JSON.stringify({
   sessionApi: true,
-  launcherMode
+  launcherMode,
+  systemUnitApi: true
 })};</script>`;
 
 const server = createServer(async (request, response) => {
@@ -80,6 +83,11 @@ const server = createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/generator-ocr") {
     await handleGeneratorOcr(request, response);
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/system-units") {
+    handleSystemUnits(response, requestUrl);
     return;
   }
 
@@ -213,6 +221,69 @@ async function handleGeneratorOcr(request, response) {
     }
   } catch (error) {
     writeJson(response, 500, { error: error instanceof Error ? error.message : String(error) });
+  }
+}
+
+function withCacheDb(fn) {
+  const db = new DatabaseSync(cacheDbPath);
+  db.exec("PRAGMA busy_timeout=30000");
+  try {
+    return fn(db);
+  } finally {
+    db.close();
+  }
+}
+
+function handleSystemUnits(response, requestUrl) {
+  const requestedIds = String(requestUrl.searchParams.get("ids") || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const systemIds = requestedIds.length
+    ? requestedIds
+    : ["player-state", "shards", "token-shop", "multiverse-market"];
+  try {
+    const result = withCacheDb((db) => {
+      const statement = db.prepare(`
+        SELECT system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
+        FROM materialized_system_unit_views
+        WHERE system_id = ? AND version = 'v1'
+      `);
+      const units = {};
+      const missing = [];
+      let latestBuiltAt = null;
+      for (const systemId of systemIds) {
+        const row = statement.get(systemId);
+        if (!row) {
+          missing.push(systemId);
+          continue;
+        }
+        units[systemId] = JSON.parse(row.payload_json);
+        if (!latestBuiltAt || String(row.built_at) > latestBuiltAt) {
+          latestBuiltAt = String(row.built_at);
+        }
+      }
+      return { units, missing, builtAt: latestBuiltAt };
+    });
+    if (result.missing.length) {
+      writeJson(response, 503, {
+        error: "Missing DB-backed system-unit views.",
+        source: "materialized_system_unit_views",
+        missingIds: result.missing
+      });
+      return;
+    }
+    writeJson(response, 200, {
+      source: "materialized_system_unit_views",
+      mode: "db",
+      builtAt: result.builtAt,
+      units: result.units
+    });
+  } catch (error) {
+    writeJson(response, 500, {
+      error: error instanceof Error ? error.message : String(error),
+      source: "materialized_system_unit_views"
+    });
   }
 }
 

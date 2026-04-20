@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from ghidra_cache_db import GhidraCacheDB
 from portable_paths import md_link, repo_relative
 from trace_extractors import (
     TraceDocumentCache,
@@ -31,6 +32,9 @@ REGISTRY_PATH = ROOT / "data" / "unity-trace-target-registry.json"
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
 UNITY_JOINED_DIR = ROOT / "workbench" / "unity" / "joined"
 TRACE_RUNS_DIR = ROOT / "workbench" / "trace-runs"
+TRACE_CACHE_DB = ROOT / "workbench" / "ghidra-cache" / "ghidra_cache.sqlite3"
+
+TRACE_DB: GhidraCacheDB | None = None
 
 UNITY_ENV: Any = None
 METADATA_STRING_ENTRIES: list[dict[str, Any]] | None = None
@@ -38,6 +42,13 @@ UNITY_SEARCH_INDEX: dict[str, list[dict[str, Any]]] | None = None
 UNITY_RAW_STRING_INDEX: dict[str, list[dict[str, Any]]] | None = None
 UNITY_OBJECTS_BY_PATH_ID: dict[int, Any] | None = None
 UNITY_OBJECTS_BY_ASSET_AND_PATH_ID: dict[tuple[str, int], Any] | None = None
+
+
+def get_trace_db() -> GhidraCacheDB:
+    global TRACE_DB
+    if TRACE_DB is None:
+        TRACE_DB = GhidraCacheDB(TRACE_CACHE_DB, ROOT / "workbench" / "ghidra-jobs")
+    return TRACE_DB
 
 
 def install_unitypy_stubs() -> None:
@@ -233,12 +244,9 @@ def get_unity_source_keys(obj: Any) -> set[str]:
 
 
 def get_unity_source_path(source_id: str) -> Path | None:
-    path = ALL_SOURCE_PATHS.get(source_id)
-    if not path:
-        return None
-    if source_id in {"level0", "sharedassets0", "globalgamemanagers"}:
-        return path
-    return None
+    if source_id == "level0":
+        return PRIMARY_SOURCE_PATHS["level0"]
+    return ASSET_SOURCE_MEMBER_PATHS.get(source_id)
 
 
 def get_unity_search_index() -> dict[str, list[dict[str, Any]]]:
@@ -314,7 +322,7 @@ def get_unity_raw_string_index() -> dict[str, list[dict[str, Any]]]:
         return UNITY_RAW_STRING_INDEX
 
     index: dict[str, list[dict[str, Any]]] = {}
-    for source_id in ("level0", "sharedassets0", "globalgamemanagers"):
+    for source_id in ("level0", *ASSET_SOURCE_MEMBERS):
         path = get_unity_source_path(source_id)
         if not path or not path.exists():
             index[source_id] = []
@@ -2996,11 +3004,18 @@ NUMERIC_RE = re.compile(r"^\d+$")
 METHOD_RE = re.compile(r"^(?:get_|set_|Buy|Claim|Check|Start|Stop|Set|Fill|Open|Close|Display|Convert|Attach|Initialize|Update|On)[A-Za-z0-9_<>]+$")
 CLASSLIKE_RE = re.compile(r"^[A-Z][A-Za-z0-9_<>]+$")
 
-ALL_SOURCE_PATHS = {
+PRIMARY_SOURCE_PATHS = {
     "metadata": METADATA_PATH,
     "level0": ROOT / "workbench" / "unity" / "joined" / "level0",
+    "native": ROOT / "workbench" / "apk" / "base" / "libil2cpp.so",
+}
+
+ASSET_SOURCE_MEMBER_PATHS = {
     "sharedassets0": ROOT / "workbench" / "unity" / "joined" / "sharedassets0.assets",
     "globalgamemanagers": ROOT / "workbench" / "unity" / "joined" / "globalgamemanagers.assets",
+}
+
+COMPATIBILITY_SOURCE_PATHS = {
     "tokenShopExtract": ROOT / "data" / "token-shop-values.json",
     "tokenShopRowRemapBoundary": ROOT / "data" / "token-shop-row-remap-boundary.json",
     "tokenShopLateAtuBoundary": ROOT / "data" / "token-shop-late-atu-boundary.json",
@@ -3013,30 +3028,48 @@ ALL_SOURCE_PATHS = {
     "multiverseMarketRangeBoundary": ROOT / "data" / "multiverse-market-range-boundary.json",
 }
 
-SOURCE_REFERENCE_OVERRIDES = {
-    "tokenShopExtract": f"{repo_relative(METADATA_PATH)} + {repo_relative(ALL_SOURCE_PATHS['level0'])}",
+CONCRETE_SOURCE_PATHS = {
+    **PRIMARY_SOURCE_PATHS,
+    **ASSET_SOURCE_MEMBER_PATHS,
+    **COMPATIBILITY_SOURCE_PATHS,
 }
 
-SOURCE_ROLE_TEXT = {
-    "metadata": "Preserves raw declaration-side string neighborhoods from global-metadata.dat.",
-    "level0": "Direct Unity scene extraction from level0 (TokenShop, ShardMining, MultiverseMarket objects).",
-    "sharedassets0": "Direct Unity shared assets extraction (prefabs, materials).",
-    "globalgamemanagers": "Direct Unity global managers assets extraction.",
-    "tokenShopExtract": "Reconstructs exact owner-payload shell windows and path ids directly from level0 plus global-metadata.dat, while preserving compatibility with the historical TokenShop parser dataset contract.",
-    "tokenShopRowRemapBoundary": "Preserves one already-cleared TokenShop row bridge and the checked blocked ATU3 comparison notes used for solved-vs-blocked diffing.",
-    "tokenShopLateAtuBoundary": "Preserves the checked late ATU24-ATU28 shell neighborhood and its bounded negative title or prefab join result.",
-    "shardCostNativeProbe": "Preserves native getter field-read evidence tying get_SU* methods to specific shard cost parameters.",
-    "shardCostFormulaModel": "Preserves the canonical shard-cost evaluator structure model and completion flags without claiming planner-safe closure.",
-    "shardSaveBoundary": "Preserves the split between direct ShardMining row-definition payload and the still-unresolved owned-state path behind upgradeInfoList.",
-    "shardMilestoneSaveOwnerCandidates": "Preserves the still-blocked shard save-owner candidate narrowing used to keep structural cost work separate from save-side promotion.",
-    "multiverseMarketMemberBoundary": "Preserves the checked PlayerProfileHandler.get_Market to MultiverseMarket accessor bridge and the exact SaveData owner boundary clues.",
-    "multiverseMarketSaveDataImportBoundary": "Preserves the bounded compatibility-only Emporium import decision and the blocked canonical-import framing.",
-    "multiverseMarketRangeBoundary": "Preserves the checked row-range overlap between validated Emporium rows and the wider IS* typed span.",
+# Internal concrete-path lookup for compatibility-only helpers and legacy citations.
+ALL_SOURCE_PATHS = CONCRETE_SOURCE_PATHS
+
+PRIMARY_SOURCE_ROLE_TEXT = {
+    "metadata": "Primary raw declaration-side source from global-metadata.dat.",
+    "level0": "Primary direct Unity scene/object extraction from level0.",
+    "assets": "Primary shared Unity assets family spanning sharedassets0 and globalgamemanagers.",
+    "native": "Primary native executable source from libil2cpp.so via DB-backed native extraction.",
 }
+
+COMPATIBILITY_SOURCE_ROLE_TEXT = {
+    "tokenShopExtract": "Compatibility/import artifact preserving one historical TokenShop owner-payload extraction.",
+    "tokenShopRowRemapBoundary": "Compatibility/debug artifact preserving one historical TokenShop row-remap boundary pass.",
+    "tokenShopLateAtuBoundary": "Compatibility/debug artifact preserving one historical late-ATU boundary pass.",
+    "shardCostNativeProbe": "Compatibility/reference artifact preserving one historical shard native-probe result.",
+    "shardCostFormulaModel": "Compatibility/reference artifact preserving one historical shard cost model export.",
+    "shardSaveBoundary": "Compatibility/reference artifact preserving one historical shard save-boundary export.",
+    "shardMilestoneSaveOwnerCandidates": "Compatibility/reference artifact preserving one historical shard save-owner narrowing pass.",
+    "multiverseMarketMemberBoundary": "Compatibility/reference artifact preserving one historical market member-boundary pass.",
+    "multiverseMarketSaveDataImportBoundary": "Compatibility/reference artifact preserving one historical market import-boundary pass.",
+    "multiverseMarketRangeBoundary": "Compatibility/reference artifact preserving one historical market range-boundary pass.",
+}
+
+ASSET_SOURCE_MEMBERS = tuple(ASSET_SOURCE_MEMBER_PATHS.keys())
+PRIMARY_SOURCE_IDS = ("metadata", "level0", "assets", "native")
 
 
 def get_source_reference(source_id: str) -> str:
-    return SOURCE_REFERENCE_OVERRIDES.get(source_id, repo_relative(ALL_SOURCE_PATHS[source_id]))
+    if source_id == "assets":
+        return " + ".join(repo_relative(path) for path in ASSET_SOURCE_MEMBER_PATHS.values())
+    if source_id == "tokenShopExtract":
+        return f"{repo_relative(METADATA_PATH)} + {repo_relative(PRIMARY_SOURCE_PATHS['level0'])}"
+    path = CONCRETE_SOURCE_PATHS.get(source_id)
+    if path is None:
+        raise KeyError(f"Unknown source id: {source_id}")
+    return repo_relative(path)
 
 
 def load_json(path: Path) -> Any:
@@ -3104,6 +3137,14 @@ def get_signal_tier(score: int) -> str:
 
 def get_source_search_modes(source_id: str) -> list[str]:
     return ["exact-structured"] if source_id != "metadata" else ["exact-string", "bounded-containment"]
+
+
+def canonicalize_primary_source_id(source_id: str) -> str:
+    if source_id in PRIMARY_SOURCE_IDS:
+        return source_id
+    if source_id in ASSET_SOURCE_MEMBER_PATHS:
+        return "assets"
+    return source_id
 
 
 def is_obvious_noise(value: str) -> list[str]:
@@ -3468,14 +3509,17 @@ def resolve_source_catalog(registry: dict[str, Any], family_ids: list[str]) -> t
             if source_id in seen:
                 continue
             seen.add(source_id)
-            source_paths[source_id] = ALL_SOURCE_PATHS[source_id]
+            if source_id == "assets":
+                source_paths[source_id] = UNITY_JOINED_DIR
+            else:
+                source_paths[source_id] = PRIMARY_SOURCE_PATHS[source_id]
             source_roles.append(
                 {
                     "sourceId": source_id,
                     "path": get_source_reference(source_id),
                     "familyId": family_id,
                     "familyLabel": family["label"],
-                    "role": SOURCE_ROLE_TEXT[source_id],
+                    "role": PRIMARY_SOURCE_ROLE_TEXT[source_id],
                 }
             )
     return source_paths, source_roles
@@ -3486,6 +3530,7 @@ def get_active_source_ids_for_target(target: dict[str, Any]) -> list[str]:
     seen: set[str] = set()
 
     def add(source_id: str) -> None:
+        source_id = canonicalize_primary_source_id(source_id)
         if source_id not in seen:
             seen.add(source_id)
             active_ids.append(source_id)
@@ -3494,39 +3539,10 @@ def get_active_source_ids_for_target(target: dict[str, Any]) -> list[str]:
         for source_id in surface.get("sourceIds", []):
             add(source_id)
 
-    strategy_extras = {
-        "token-shop-atu4-mod": ["tokenShopExtract"],
-        "token-shop-atu5-mk1-title": ["tokenShopExtract", "tokenShopRowRemapBoundary"],
-        "token-shop-atu7-mk3-bridge": ["tokenShopExtract", "tokenShopRowRemapBoundary"],
-        "token-shop-atu3-cells-effect": ["tokenShopExtract", "tokenShopRowRemapBoundary"],
-        "token-shop-atu3-chest-consumer": ["tokenShopExtract", "tokenShopRowRemapBoundary"],
-        "token-shop-atu3-chest-consumer-read": ["tokenShopExtract", "tokenShopRowRemapBoundary"],
-        "token-shop-family-structure": ["tokenShopExtract", "tokenShopRowRemapBoundary", "tokenShopLateAtuBoundary"],
-        "shard-cost-su0-structure": [
-            "metadata",
-            "shardCostNativeProbe",
-            "shardCostFormulaModel",
-            "shardMilestoneSaveOwnerCandidates",
-        ],
-        "shard-owned-state-upgradeinfolist-population": [
-            "shardSaveBoundary",
-            "metadata",
-            "level0",
-            "shardMilestoneSaveOwnerCandidates",
-        ],
-        "multiverse-market-save-owner-boundary": [
-            "metadata",
-            "level0",
-            "multiverseMarketMemberBoundary",
-            "multiverseMarketSaveDataImportBoundary",
-            "multiverseMarketRangeBoundary",
-        ],
-    }
-    for source_id in strategy_extras.get(target["strategy"], []):
-        add(source_id)
+    add("native")
 
     if not active_ids:
-        return list(ALL_SOURCE_PATHS)
+        return list(PRIMARY_SOURCE_IDS)
     return active_ids
 
 
@@ -4057,8 +4073,14 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
             "suppressedNoiseCount": suppressed_count,
             "hits": hits,
         }
-    if source_id in ("level0", "sharedassets0", "globalgamemanagers"):
-        hits, suppressed_count = collect_unity_hits(source_id, anchor_specs)
+    if source_id in ("level0", "assets", *ASSET_SOURCE_MEMBERS):
+        unity_source_ids = [source_id] if source_id != "assets" else list(ASSET_SOURCE_MEMBERS)
+        hits: list[dict[str, Any]] = []
+        suppressed_count = 0
+        for unity_source_id in unity_source_ids:
+            member_hits, member_suppressed = collect_unity_hits(unity_source_id, anchor_specs)
+            hits.extend(member_hits)
+            suppressed_count += member_suppressed
         return {
             "sourceId": source_id,
             "sourcePath": get_source_reference(source_id),
@@ -4069,6 +4091,18 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
             "incidentalHitCount": sum(1 for hit in hits if hit.get("signalTier") == "incidental"),
             "suppressedNoiseCount": suppressed_count,
             "hits": hits,
+        }
+    if source_id == "native":
+        return {
+            "sourceId": source_id,
+            "sourcePath": get_source_reference(source_id),
+            "searchModes": ["bridge-plan", "process-project", "db-materialized-native-trace"],
+            "hitCount": 0,
+            "highSignalHitCount": 0,
+            "supportingHitCount": 0,
+            "incidentalHitCount": 0,
+            "suppressedNoiseCount": 0,
+            "hits": [],
         }
     hits, suppressed_count = collect_exact_hits(documents[source_id], anchor_specs, source_id, shell_window)
     return {
@@ -4299,6 +4333,8 @@ def _collect_native_owner_selection_terms(target: dict[str, Any], trace_payload:
         normalized = term.strip()
         if not normalized:
             continue
+        if "Prefab" in normalized:
+            continue
         lowered = normalized.lower()
         if lowered in seen:
             continue
@@ -4374,7 +4410,7 @@ def _build_token_shop_row_recovery(
     formula_fields = [field for field in owner_field_block if field in reconstructed_fields or field in raw_value_terms]
     controller_objects = [field for field in controller_block if field.endswith(("Overlay", "Content", "Button"))]
     bridge_hits = trace_payload.get("bridgeCheck", {}).get("bridgeHits", [])
-    direct_source_ids = {"metadata", "level0", "sharedassets0", "tokenShopExtract"}
+    direct_source_ids = {"metadata", "level0", "assets", "tokenShopExtract"}
     prefab_candidates: list[str] = []
     direct_text_candidates: list[str] = []
     detached_text_candidates: list[str] = []
@@ -4400,7 +4436,7 @@ def _build_token_shop_row_recovery(
                 action_candidates.append(term)
     for hit in bridge_hits:
         source_path = str(hit.get("sourcePath", ""))
-        if not any(token in source_path for token in ("global-metadata.dat", "level0", "sharedassets0")):
+        if not any(token in source_path for token in ("global-metadata.dat", "level0", "sharedassets0", "globalgamemanagers")):
             continue
         term = str(hit.get("term", "")).strip()
         if not term:
@@ -7359,7 +7395,7 @@ def build_surface_bundle(
 ) -> dict[str, Any]:
     terms = list(dict.fromkeys([*surface["terms"], *anchors]))
     anchor_specs = build_anchor_specs(terms, "surface-search")
-    primary_source_ids = list(surface["sourceIds"])
+    primary_source_ids = unique_strings([canonicalize_primary_source_id(source_id) for source_id in surface["sourceIds"]])
     sources = [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in primary_source_ids]
 
     if extended_search > 0:
@@ -8777,7 +8813,7 @@ def build_decision_summary(target: dict[str, Any], trace_payload: dict[str, Any]
     }
 
 
-def get_priority_preload_sources(target: dict[str, Any]) -> list[str]:
+def get_priority_preload_documents(target: dict[str, Any]) -> list[str]:
     family_id = target["familyId"]
     if family_id == "exploration":
         return ["tokenShopExtract", "tokenShopRowRemapBoundary", "shardCostFormulaModel", "multiverseMarketMemberBoundary"]
@@ -8822,10 +8858,8 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
         resolved_depth_search = target.get("defaultDepth", 0) if depth_search is None else depth_search
     execution_anchor_specs = build_anchor_specs(anchors, "execution-anchor")
     expanded_anchor_specs = build_anchor_specs(planner_resolution["expandedAnchors"], "planner-expanded-anchor")
-    json_sources = {"metadata", "level0", "sharedassets0", "globalgamemanagers"}
-    document_paths = {source_id: path for source_id, path in source_paths.items() if source_id not in json_sources}
-    documents = TraceDocumentCache(document_paths)
-    documents.preload(get_priority_preload_sources(target))
+    documents = TraceDocumentCache(COMPATIBILITY_SOURCE_PATHS)
+    documents.preload(get_priority_preload_documents(target))
     trace_payload = (
         build_generic_explore_trace(anchors, list(source_paths.keys()), documents)
         if is_generic_explore
@@ -8861,7 +8895,7 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
             "plannerExample": "node scripts/unity/run_probe.mjs trace --family <family-id> --query <query> --anchor <anchor> --extended-search <0|1|2>",
             "acceptedAnchors": target["acceptedAnchors"],
             "targetResolution": "explicit target, explicit family, or checked query planner plus family-aware anchor expansion",
-            "readsCommittedSourcesOnly": False,
+            "readsCommittedSourcesOnly": True,
         },
         "plannerResolution": {
             "selectionMode": planner_resolution["selectionMode"],
@@ -8939,6 +8973,55 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
 
 
 def write_markdown(dataset: dict[str, Any]) -> None:
+    def format_source_ref(source_ref: str) -> str:
+        return f"`{source_ref}`" if " + " in source_ref else md_link(ROOT / source_ref)
+
+    if "nativeTrace" not in dataset and "nativeView" in dataset:
+        lines = [
+            "# Unity Trace Bundle",
+            "",
+            f"- Generated at: `{dataset.get('generatedAt')}`",
+            f"- Target: `{(dataset.get('target') or {}).get('id')}`",
+            f"- Label: {(dataset.get('target') or {}).get('label')}",
+            f"- Status: `{dataset.get('status') or 'unknown'}`",
+            f"- Semantic status: `{dataset.get('semanticStatus') or 'unknown'}`",
+            f"- Literal status: `{dataset.get('literalStatus') or 'unknown'}`",
+            f"- Runtime status: `{dataset.get('runtimeStatus') or 'unknown'}`",
+            "",
+            "## Canonical Sources",
+            "",
+        ]
+        source_families = ((dataset.get("sourceFamilies") or {}).get("families") or {})
+        source_order = list(((dataset.get("sourceFamilies") or {}).get("order") or source_families.keys()))
+        for source_id in source_order:
+            entry = source_families.get(source_id) or {}
+            lines.append(f"- `{source_id}`: {format_source_ref(str(entry.get('reference') or 'n/a'))}")
+            if entry.get("role"):
+                lines.append(f"  - {entry['role']}")
+        native_view = dataset.get("nativeView") or {}
+        lines.extend([
+            "",
+            "## Native View",
+            "",
+            f"- Available: `{native_view.get('available')}`",
+            f"- Project: `{native_view.get('project')}`",
+            f"- Search terms: `{', '.join(native_view.get('searchTerms') or []) or 'none'}`",
+            "",
+            "## Semantic Coverage",
+            "",
+            f"- Canonical count: `{(dataset.get('semanticCoverage') or {}).get('canonicalCount', 0)}`",
+            f"- Conflicted keys: `{', '.join((dataset.get('semanticCoverage') or {}).get('conflictedKeys', [])) or 'none'}`",
+            "",
+            "## Materialization",
+            "",
+            f"- Trace scope: `{(dataset.get('materialization') or {}).get('traceScope')}`",
+            f"- Request signature: `{(dataset.get('materialization') or {}).get('requestSignature')}`",
+            "",
+        ])
+        output_path = Path(dataset["traceRun"]["mdOut"])
+        output_path.write_text("\n".join(lines), encoding="utf-8")
+        return
+
     lines = [
         "# Unity Trace Bundle",
         "",
@@ -9249,7 +9332,7 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         ]
     )
     for source_role in dataset["sourceRoles"]:
-        lines.append(f"- `{source_role['sourceId']}`: {md_link(ROOT / source_role['path'])}")
+        lines.append(f"- `{source_role['sourceId']}`: {format_source_ref(source_role['path'])}")
         lines.append(f"  - {source_role['role']}")
     lines.extend([
         "",
@@ -9268,7 +9351,7 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         lines.append(f"- Search terms: `{', '.join(surface['terms'])}`")
         lines.append(f"- Typed anchors: `{format_anchor_specs(surface.get('anchorSpecs', []))}`")
         for source_entry in surface["sources"]:
-            lines.append(f"- Source: {md_link(ROOT / source_entry['sourcePath'])} ({source_entry['hitCount']} hits)")
+            lines.append(f"- Source: {format_source_ref(source_entry['sourcePath'])} ({source_entry['hitCount']} hits)")
             lines.append(
                 f"  - Signal summary: {source_entry['highSignalHitCount']} high-signal, "
                 f"{source_entry['supportingHitCount']} supporting, {source_entry['incidentalHitCount']} incidental, "
@@ -9280,7 +9363,7 @@ def write_markdown(dataset: dict[str, Any]) -> None:
                         f"  - `{hit['term']}` at metadata offset `{hit['offset']}` "
                         f"[{hit['signalTier']}, score {hit['signalScore']}, {hit['matchMode']}]"
                     )
-                elif source_entry["sourceId"] in ("level0", "sharedassets0", "globalgamemanagers"):
+                elif source_entry["sourceId"] in ("level0", "assets", "sharedassets0", "globalgamemanagers"):
                     if "pathId" in hit:
                         location = f"path_id `{hit['pathId']}` ({hit['objectType']}, {hit['surfaceType']})"
                     else:
@@ -9419,10 +9502,9 @@ def sanitize_run_label(value: str) -> str:
 def build_trace_asset_set() -> dict[str, Any]:
     asset_paths = [
         METADATA_PATH,
-        ALL_SOURCE_PATHS["level0"],
-        ALL_SOURCE_PATHS["sharedassets0"],
-        ALL_SOURCE_PATHS["globalgamemanagers"],
-        ROOT / "workbench" / "apk" / "base" / "libil2cpp.so",
+        PRIMARY_SOURCE_PATHS["level0"],
+        *ASSET_SOURCE_MEMBER_PATHS.values(),
+        PRIMARY_SOURCE_PATHS["native"],
     ]
     fingerprint_parts: list[str] = []
     inputs: list[dict[str, Any]] = []
@@ -9452,6 +9534,461 @@ def allocate_trace_run_paths(target_id: str, family_id: str, explicit_json_out: 
     json_path = explicit_json_out or (TRACE_RUNS_DIR / f"{run_label}.json")
     md_path = explicit_md_out or (TRACE_RUNS_DIR / f"{run_label}.md")
     return json_path, md_path, run_label
+
+
+def export_trace_run(dataset: dict[str, Any], json_out: Path, md_out: Path) -> None:
+    TRACE_RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    json_out.write_text(json.dumps(dataset, indent=2) + "\n", encoding="utf-8")
+    write_markdown(dataset)
+
+
+def build_trace_request_signature(
+    selected_target_id: str,
+    selected_family_id: str,
+    queries: list[str],
+    anchors: list[str],
+    extended_search: int,
+    depth_search: int | None,
+    level: str,
+    asset_fingerprint: str,
+) -> str:
+    payload = {
+        "target": selected_target_id,
+        "family": selected_family_id,
+        "queries": sorted(set(queries)),
+        "anchors": sorted(set(anchors)),
+        "extendedSearch": extended_search,
+        "depthSearch": depth_search,
+        "level": level,
+        "assetFingerprint": asset_fingerprint,
+    }
+    return hashlib.sha1(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()[:16]
+
+
+def _semantic_key(*parts: Any) -> str:
+    return ":".join(str(part).strip() for part in parts if str(part).strip())
+
+
+def _load_canonical_term_payload(term: str) -> dict[str, Any]:
+    view = get_trace_db().find_canonical_term_view("cifi-full", "libil2cpp.so", term)
+    if not view:
+        return {}
+    return dict(view.get("result") or {})
+
+
+def _load_canonical_semantic_payload(fragment_kind: str, fragment_key: str) -> dict[str, Any]:
+    view = get_trace_db().find_canonical_semantic_fragment("cifi-full", "libil2cpp.so", fragment_kind, fragment_key)
+    if not view:
+        return {}
+    return dict(view.get("payload") or {})
+
+
+def _load_canonical_semantic_scope_payload(dataset: dict[str, Any]) -> dict[str, Any]:
+    row_recovery = dataset.get("rowRecovery") or {}
+    semantic_scope_id = str(row_recovery.get("semanticScopeId") or "").strip()
+    if not semantic_scope_id:
+        return {}
+    return _load_canonical_semantic_payload("semantic_scope_fragment", semantic_scope_id)
+
+
+def _load_target_ui_binding_views(target: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    family_id = str(target.get("familyId") or "").strip()
+    target_id = str(target.get("id") or "").strip()
+    if not family_id or not target_id:
+        return {}
+    views: dict[str, dict[str, Any]] = {}
+    for role in ("title", "description", "cost", "level", "requirement", "bonus", "fill", "icon", "overlay"):
+        fragment_key = _semantic_key("ui-binding", family_id, target_id, role)
+        payload = _load_canonical_semantic_payload("ui_binding_fragment", fragment_key)
+        if payload:
+            views[role] = payload
+    return views
+
+
+def _collect_dependency_edges(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    trace_graph = dataset.get("traceGraph") or {}
+    row_recovery = dataset.get("rowRecovery") or {}
+    semantic_scope_payload = _load_canonical_semantic_scope_payload(dataset)
+    for candidate in (
+        trace_graph.get("edges"),
+        (row_recovery.get("semanticGraph") or {}).get("edges"),
+        (semantic_scope_payload.get("semanticGraph") or {}).get("edges"),
+    ):
+        if isinstance(candidate, list) and candidate:
+            return [edge for edge in candidate if isinstance(edge, dict)]
+    return []
+
+
+def extract_owner_controller_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    row_recovery = dataset.get("rowRecovery") or {}
+    target = dataset.get("target") or {}
+    native_reconstruction = dataset.get("nativeReconstruction") or {}
+    fragments: list[dict[str, Any]] = []
+    owner_blob_row = row_recovery.get("ownerBlobRow") or {}
+    runtime_instance = row_recovery.get("runtimeInstanceRecovery") or {}
+    runtime_evaluator = row_recovery.get("runtimeEvaluatorRecovery") or {}
+    owner_names = unique_strings([
+        str((row_recovery.get("literalSchemaRecovery") or {}).get("owner") or ""),
+        str(runtime_instance.get("instanceOwner") or ""),
+        str(runtime_evaluator.get("owner") or ""),
+        *(str(owner) for owner in (native_reconstruction.get("owners") or [])),
+    ])
+    for owner in owner_names:
+        canonical_payload = _load_canonical_semantic_payload("owner_controller_fragment", _semantic_key("owner-controller", owner))
+        fragments.append(
+            {
+                "fragment_kind": "owner_controller_fragment",
+                "fragment_key": _semantic_key("owner-controller", owner),
+                "payload": {
+                    "semanticKey": _semantic_key("owner-controller", owner),
+                    "owner": owner,
+                    "familyId": target.get("familyId"),
+                    "targetId": target.get("id"),
+                    "ownerBlobRow": owner_blob_row,
+                    "runtimeEvaluatorRecovery": runtime_evaluator,
+                    "runtimeInstanceRecovery": runtime_instance,
+                    "dbCorroboration": canonical_payload,
+                },
+            }
+        )
+    return fragments
+
+
+def extract_formula_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    row_recovery = dataset.get("rowRecovery") or {}
+    formula_reconstruction = row_recovery.get("formulaReconstruction") or {}
+    target = dataset.get("target") or {}
+    recovered_formula_fields = list(row_recovery.get("recoveredFormulaFields") or [])
+    canonical_field_views = {
+        field: _load_canonical_term_payload(field)
+        for field in recovered_formula_fields
+    }
+    grounded = dict(formula_reconstruction.get("groundedConstants") or {})
+    for field in recovered_formula_fields:
+        if grounded.get(field) is not None:
+            continue
+        field_view = canonical_field_views.get(field) or {}
+        for value in (
+            field_view.get("termBridge", {}).get("resolvedValue"),
+            field_view.get("managedReconstruction", {}).get("resolvedValue"),
+            field_view.get("resolvedValue"),
+        ):
+            if value is not None:
+                grounded[field] = value
+                break
+    if not grounded and not recovered_formula_fields:
+        return []
+    formula_key = _semantic_key(
+        "formula",
+        target.get("familyId"),
+        *recovered_formula_fields,
+    ) or _semantic_key("formula", target.get("id"))
+    return [
+        {
+            "fragment_kind": "formula_fragment",
+            "fragment_key": formula_key,
+            "payload": {
+                "semanticKey": formula_key,
+                "targetId": target.get("id"),
+                "familyId": target.get("familyId"),
+                "recoveredFormulaFields": recovered_formula_fields,
+                "groundedConstants": grounded,
+                "inferredCostModel": formula_reconstruction.get("inferredCostModel"),
+                "runtimeCostModel": formula_reconstruction.get("runtimeCostModel"),
+                "canonicalFieldViews": canonical_field_views,
+            },
+        }
+    ]
+
+
+def extract_threshold_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    row_recovery = dataset.get("rowRecovery") or {}
+    formula_reconstruction = row_recovery.get("formulaReconstruction") or {}
+    runtime_cost_model = formula_reconstruction.get("runtimeCostModel") or {}
+    if not runtime_cost_model:
+        return []
+    target = dataset.get("target") or {}
+    threshold_key = _semantic_key("threshold", target.get("familyId"), target.get("id"), "runtime-cost")
+    return [
+        {
+            "fragment_kind": "threshold_fragment",
+            "fragment_key": threshold_key,
+            "payload": {
+                "semanticKey": threshold_key,
+                "targetId": target.get("id"),
+                "familyId": target.get("familyId"),
+                "runtimeCostModel": runtime_cost_model,
+                "unresolvedRuntimeTargets": (dataset.get("closureStatus") or {}).get("unresolvedRuntimeTargets"),
+            },
+        }
+    ]
+
+
+def extract_dependency_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    target = dataset.get("target") or {}
+    fragments: list[dict[str, Any]] = []
+    semantic_scope_payload = _load_canonical_semantic_scope_payload(dataset)
+    for edge in _collect_dependency_edges(dataset):
+        if not isinstance(edge, dict):
+            continue
+        edge_type = str(edge.get("type") or "").strip()
+        source = str(edge.get("from") or "").strip()
+        dest = str(edge.get("to") or "").strip()
+        if not edge_type or not source or not dest:
+            continue
+        edge_key = _semantic_key("dependency", target.get("familyId"), edge_type, source, dest)
+        fragments.append(
+            {
+                "fragment_kind": "dependency_fragment",
+                "fragment_key": edge_key,
+                "payload": {
+                    "semanticKey": edge_key,
+                    "targetId": target.get("id"),
+                    "familyId": target.get("familyId"),
+                    "edge": edge,
+                    "nativeSummary": dataset.get("nativeReconstruction"),
+                    "semanticScope": semantic_scope_payload,
+                },
+            }
+        )
+    return fragments
+
+
+def extract_ui_binding_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    row_recovery = dataset.get("rowRecovery") or {}
+    presentation_update = row_recovery.get("presentationUpdatePath") or {}
+    target = dataset.get("target") or {}
+    canonical_bindings = _load_target_ui_binding_views(target)
+    slot_roles = sorted(
+        {
+            *[str(role) for role in (presentation_update.get("slots") or {}).keys()],
+            *[str(role) for role in canonical_bindings.keys()],
+        }
+    )
+    fragments: list[dict[str, Any]] = []
+    for role in slot_roles:
+        values = (presentation_update.get("slots") or {}).get(role) or []
+        canonical_binding = canonical_bindings.get(role) or {}
+        if not values:
+            values = list(canonical_binding.get("values") or [])
+        effective_presentation_path = presentation_update or {}
+        if not effective_presentation_path:
+            presentation_paths = canonical_binding.get("presentationUpdatePaths") or []
+            if presentation_paths:
+                effective_presentation_path = presentation_paths[0]
+        if not values:
+            continue
+        role_key = _semantic_key("ui-binding", target.get("familyId"), target.get("id"), role)
+        fragments.append(
+            {
+                "fragment_kind": "ui_binding_fragment",
+                "fragment_key": role_key,
+                "payload": {
+                    "semanticKey": role_key,
+                    "targetId": target.get("id"),
+                    "familyId": target.get("familyId"),
+                    "role": role,
+                    "values": values,
+                    "presentationUpdatePath": effective_presentation_path,
+                    "shellField": row_recovery.get("shellField"),
+                    "dbCorroboration": canonical_binding,
+                },
+            }
+        )
+    return fragments
+
+
+def extract_progression_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    row_recovery = dataset.get("rowRecovery") or {}
+    runtime_evaluator = row_recovery.get("runtimeEvaluatorRecovery") or {}
+    if not runtime_evaluator:
+        return []
+    target = dataset.get("target") or {}
+    progression_key = _semantic_key("progression", target.get("familyId"), str(runtime_evaluator.get("owner") or "runtime"))
+    return [
+        {
+            "fragment_kind": "progression_fragment",
+            "fragment_key": progression_key,
+            "payload": {
+                "semanticKey": progression_key,
+                "targetId": target.get("id"),
+                "familyId": target.get("familyId"),
+                "runtimeEvaluatorRecovery": runtime_evaluator,
+                "decisionSummary": dataset.get("decisionSummary"),
+            },
+        }
+    ]
+
+
+def extract_runtime_table_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    row_recovery = dataset.get("rowRecovery") or {}
+    runtime_instance = row_recovery.get("runtimeInstanceRecovery") or {}
+    if not runtime_instance:
+        return []
+    target = dataset.get("target") or {}
+    runtime_key = _semantic_key("runtime-table", target.get("familyId"), str(runtime_instance.get("instanceOwner") or target.get("id")))
+    return [
+        {
+            "fragment_kind": "runtime_table_fragment",
+            "fragment_key": runtime_key,
+            "payload": {
+                "semanticKey": runtime_key,
+                "targetId": target.get("id"),
+                "familyId": target.get("familyId"),
+                "runtimeInstanceRecovery": runtime_instance,
+                "nativeReconstruction": dataset.get("nativeReconstruction"),
+            },
+        }
+    ]
+
+
+def extract_semantic_scope_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    row_recovery = dataset.get("rowRecovery") or {}
+    semantic_scope_id = str(row_recovery.get("semanticScopeId") or "").strip()
+    if not semantic_scope_id:
+        return []
+    target = dataset.get("target") or {}
+    return [
+        {
+            "fragment_kind": "semantic_scope_fragment",
+            "fragment_key": semantic_scope_id,
+            "payload": {
+                "semanticKey": semantic_scope_id,
+                "targetId": target.get("id"),
+                "familyId": target.get("familyId"),
+                "semanticGraph": row_recovery.get("semanticGraph"),
+                "semanticSearchPlan": row_recovery.get("semanticSearchPlan"),
+            },
+        }
+    ]
+
+
+def extract_reconstruction_note_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    target = dataset.get("target") or {}
+    note_key = _semantic_key("reconstruction-note", target.get("familyId"), target.get("id"))
+    return [
+        {
+            "fragment_kind": "reconstruction_note_fragment",
+            "fragment_key": note_key,
+            "payload": {
+                "semanticKey": note_key,
+                "targetId": target.get("id"),
+                "familyId": target.get("familyId"),
+                "bridgeCheck": dataset.get("bridgeCheck"),
+                "groundedConclusion": dataset.get("groundedConclusion"),
+                "decisionSummary": dataset.get("decisionSummary"),
+            },
+        }
+    ]
+
+
+def collect_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    fragments: list[dict[str, Any]] = []
+    for extractor in (
+        extract_owner_controller_semantic_fragments,
+        extract_formula_semantic_fragments,
+        extract_threshold_semantic_fragments,
+        extract_dependency_semantic_fragments,
+        extract_ui_binding_semantic_fragments,
+        extract_progression_semantic_fragments,
+        extract_runtime_table_semantic_fragments,
+        extract_semantic_scope_semantic_fragments,
+        extract_reconstruction_note_semantic_fragments,
+    ):
+        fragments.extend(extractor(dataset))
+    return fragments
+
+
+def plan_trace_bundle_request(
+    args: argparse.Namespace,
+    registry: dict[str, Any],
+) -> dict[str, Any]:
+    planner_resolution = resolve_planner_selection(registry, args.target, args.query, args.anchor, args.family)
+    selected_target_id = str(planner_resolution["selectedTargetId"])
+    selected_family_id = (
+        str(registry["targets"][selected_target_id]["familyId"])
+        if selected_target_id in registry.get("targets", {})
+        else str(planner_resolution.get("matchedFamilyId") or args.family or "exploration")
+    )
+    asset_set = build_trace_asset_set()
+    request_signature = build_trace_request_signature(
+        selected_target_id,
+        selected_family_id,
+        args.query,
+        args.anchor,
+        args.extended_search,
+        args.depth_search,
+        args.level,
+        asset_set.get("fingerprint", ""),
+    )
+    return {
+        "plannerResolution": planner_resolution,
+        "selectedTargetId": selected_target_id,
+        "selectedFamilyId": selected_family_id,
+        "assetSet": asset_set,
+        "requestSignature": request_signature,
+    }
+
+
+def collect_trace_bundle_components(
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    dataset = build_dataset(args.target, args.query, args.anchor, args.family, args.extended_search, args.depth_search)
+    dataset["semanticFragments"] = collect_semantic_fragments(dataset)
+    return dataset
+
+
+def persist_trace_bundle_fragments(
+    dataset: dict[str, Any],
+    trace_scope: str,
+    request_signature: str,
+) -> None:
+    db = get_trace_db()
+    db.upsert_trace_dataset("cifi-full", "libil2cpp.so", trace_scope, request_signature, dataset)
+
+
+def materialize_trace_bundle_dataset(
+    dataset: dict[str, Any],
+    trace_scope: str,
+    request_signature: str,
+) -> dict[str, Any]:
+    current_trace_run = dict(dataset.get("traceRun", {}) or {})
+    db = get_trace_db()
+    materialized = db.find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", trace_scope, request_signature)
+    if materialized is None:
+        materialized = db.find_materialized_trace_view("cifi-full", "libil2cpp.so", trace_scope, request_signature)
+    if materialized:
+        payload = dict(materialized["payload"])
+        trace_run = dict(current_trace_run)
+        trace_run["dbBacked"] = True
+        trace_run["traceScope"] = trace_scope
+        trace_run["requestSignature"] = request_signature
+        trace_run["materializedAt"] = materialized.get("builtAt")
+        trace_run["reducerVersion"] = materialized.get("reducerVersion")
+        payload["traceRun"] = trace_run
+        payload["traceProvenance"] = materialized.get("provenance", {})
+        return payload
+    dataset["traceRun"] = dict(current_trace_run)
+    dataset["traceRun"]["dbBacked"] = True
+    dataset["traceRun"]["traceScope"] = trace_scope
+    dataset["traceRun"]["requestSignature"] = request_signature
+    return dataset
+
+
+def trace_dataset_has_required_fragments(dataset: dict[str, Any]) -> bool:
+    if {"traceRegistry", "target", "decisionSummary", "nativeTrace"}.issubset(dataset):
+        return True
+    required = {
+        "traceRegistry",
+        "target",
+        "decisionSummary",
+        "nativeView",
+        "systemViews",
+        "canonicalSemanticViews",
+        "semanticCoverage",
+        "sourceFamilies",
+    }
+    return all(key in dataset for key in required)
 
 
 def main() -> None:
@@ -9495,6 +10032,8 @@ def main() -> None:
                         help="Output JSON path")
     parser.add_argument("--md-out", type=Path, default=MD_OUT,
                         help="Output markdown path")
+    parser.add_argument("--export", action="store_true",
+                        help="Write derived trace-run JSON/Markdown exports to disk")
     
     # Pipeline control
     parser.add_argument("--max-steps", type=int, default=5,
@@ -9529,8 +10068,25 @@ def main() -> None:
     else:
         output_mode = "both"
     
-    # Build dataset
-    dataset = build_dataset(args.target, args.query, args.anchor, args.family, args.extended_search, args.depth_search)
+    trace_plan = plan_trace_bundle_request(args, registry)
+    planner_resolution = trace_plan["plannerResolution"]
+    selected_target_id = str(trace_plan["selectedTargetId"])
+    selected_family_id = str(trace_plan["selectedFamilyId"])
+    asset_set = trace_plan["assetSet"]
+    request_signature = str(trace_plan["requestSignature"])
+
+    if args.resume:
+        existing = get_trace_db().find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", selected_target_id, request_signature)
+        if existing is None:
+            existing = get_trace_db().find_materialized_trace_view("cifi-full", "libil2cpp.so", selected_target_id, request_signature)
+        if existing and trace_dataset_has_required_fragments(existing["payload"]):
+            dataset = dict(existing["payload"])
+        else:
+            dataset = collect_trace_bundle_components(args)
+    else:
+        dataset = collect_trace_bundle_components(args)
+
+    export_requested = args.export or args.json_out != JSON_OUT or args.md_out != MD_OUT
     json_out, md_out, run_id = allocate_trace_run_paths(
         dataset["traceRegistry"]["selectedTargetId"],
         dataset["traceRegistry"]["selectedFamilyId"],
@@ -9549,23 +10105,25 @@ def main() -> None:
         "anchorKind": args.anchor_kind,
         "maxSteps": args.max_steps
     }
-    dataset["assetSet"] = build_trace_asset_set()
+    dataset["assetSet"] = asset_set
     dataset["traceRun"] = {
         "id": run_id,
-        "jsonOut": str(json_out),
-        "mdOut": str(md_out),
+        "jsonOut": str(json_out) if export_requested else None,
+        "mdOut": str(md_out) if export_requested else None,
         "mode": "stable-target-run",
         "outputMode": output_mode,
-        "overwritesOnRepeat": True,
+        "overwritesOnRepeat": export_requested,
     }
-    
-    # Write outputs
-    TRACE_RUNS_DIR.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(json.dumps(dataset, indent=2) + "\n", encoding="utf-8")
-    write_markdown(dataset)
-    
-    print(f"Trace bundle generated: {json_out}")
-    print(f"Markdown: {md_out}")
+
+    persist_trace_bundle_fragments(dataset, str(dataset["traceRegistry"]["selectedTargetId"]), request_signature)
+    dataset = materialize_trace_bundle_dataset(dataset, str(dataset["traceRegistry"]["selectedTargetId"]), request_signature)
+
+    if export_requested:
+        export_trace_run(dataset, json_out, md_out)
+        print(f"Trace bundle exported: {json_out}")
+        print(f"Markdown: {md_out}")
+    else:
+        print(f"Trace bundle materialized in DB for target: {selected_target_id}")
 
 
 if __name__ == "__main__":

@@ -7,29 +7,26 @@
       "sourceIds": [
         "metadata",
         "level0",
-        "sharedassets0",
-        "globalgamemanagers",
-        "tokenShopExtract",
-        "tokenShopRowRemapBoundary",
-        "tokenShopLateAtuBoundary"
+        "assets",
+        "native"
       ]
     },
     "shard-cost": {
       "label": "Shard cost",
       "sourceIds": [
         "metadata",
-        "shardCostNativeProbe",
-        "shardCostFormulaModel",
-        "shardMilestoneSaveOwnerCandidates"
+        "level0",
+        "assets",
+        "native"
       ]
     },
     "shard-owned-state": {
       "label": "Shard owned state",
       "sourceIds": [
-        "shardSaveBoundary",
         "metadata",
         "level0",
-        "shardMilestoneSaveOwnerCandidates"
+        "assets",
+        "native"
       ]
     },
     "multiverse-market-save-owner": {
@@ -37,9 +34,8 @@
       "sourceIds": [
         "metadata",
         "level0",
-        "multiverseMarketMemberBoundary",
-        "multiverseMarketSaveDataImportBoundary",
-        "multiverseMarketRangeBoundary"
+        "assets",
+        "native"
       ]
     }
   },

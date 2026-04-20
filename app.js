@@ -54,6 +54,7 @@ import {
   buildShardSystemView,
   buildSpendSystemView
 } from "./support/system-unit-projections.js";
+import { loadSystemUnits } from "./support/system-unit-provider.js";
 import {
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
@@ -116,7 +117,8 @@ const APP_LAUNCH_HEARTBEAT_MS = 4000;
 const APP_LAUNCH_STALE_MS = 60000;
 const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
   sessionApi: false,
-  launcherMode: false
+  launcherMode: false,
+  systemUnitApi: false
 });
 const SERVER_SESSION_ENDPOINTS = {
   open: "/api/client/open",
@@ -576,6 +578,7 @@ const state = {
   shipBaseline: null,
   shipTemplates: null,
   systemUnits: null,
+  systemUnitSource: null,
   extractionCandidateRanking: null,
   playerProfile: null,
   shipConfig: null,
@@ -608,20 +611,27 @@ async function bootstrap() {
     datasetContract,
     shipBaseline,
     extractionCandidateRanking,
-    playerStateSystemUnit,
-    shardsSystemUnit,
-    tokenShopSystemUnit,
-    multiverseMarketSystemUnit
+    loadedSystemUnits
   ] = await Promise.all([
     fetchJson("./data/game-data.snapshot.v1.json"),
     fetchJson("./data/bundled-dataset-contract.v1.json"),
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
     fetchJson("./data/extraction-candidate-ranking.v1.json"),
-    fetchJson("./data/system-units/player-state.v1.json"),
-    fetchJson("./data/system-units/shards.v1.json"),
-    fetchJson("./data/system-units/token-shop.v1.json"),
-    fetchJson("./data/system-units/multiverse-market.v1.json")
+    loadSystemUnits({
+      fetchJson,
+      origin: window.location.origin,
+      serverCapabilities: SERVER_CAPABILITIES
+    })
   ]);
+  const {
+    units: {
+      playerState: playerStateSystemUnit,
+      shards: shardsSystemUnit,
+      tokenShop: tokenShopSystemUnit,
+      multiverseMarket: multiverseMarketSystemUnit
+    },
+    mode: systemUnitSource
+  } = loadedSystemUnits;
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
   const playerStateView = buildPlayerStateSystemView(playerStateSystemUnit, mergeDeep);
@@ -640,6 +650,7 @@ async function bootstrap() {
     tokenShop: tokenShopSystemUnit,
     multiverseMarket: multiverseMarketSystemUnit
   };
+  state.systemUnitSource = systemUnitSource;
   state.extractionCandidateRanking = extractionCandidateRanking;
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile ?? playerProfileDefaults,
@@ -1043,7 +1054,8 @@ function getServerCapabilities() {
 
   return {
     sessionApi: raw.sessionApi === true,
-    launcherMode: raw.launcherMode === true
+    launcherMode: raw.launcherMode === true,
+    systemUnitApi: raw.systemUnitApi === true
   };
 }
 

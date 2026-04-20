@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DatabaseSync } from "node:sqlite";
 
 import {
   createDefaultPlayerProfile,
@@ -11,6 +12,7 @@ import {
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const dataRoot = path.join(repoRoot, "data");
 const outputRoot = path.join(dataRoot, "system-units");
+const dbPath = path.join(repoRoot, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
 
 async function readJson(relativePath) {
   return JSON.parse(await readFile(path.join(repoRoot, relativePath), "utf8"));
@@ -20,6 +22,75 @@ async function writeJson(relativePath, value) {
   const outputPath = path.join(repoRoot, relativePath);
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+function withDb(fn) {
+  const db = new DatabaseSync(dbPath);
+  db.exec("PRAGMA busy_timeout=30000");
+  try {
+    return fn(db);
+  } finally {
+    db.close();
+  }
+}
+
+function fetchLatestMaterializedTargetBundle(traceScope) {
+  return withDb((db) => {
+    const row = db
+      .prepare(`
+        SELECT trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
+        FROM materialized_target_bundle_views
+        WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+        ORDER BY built_at DESC, request_signature DESC
+        LIMIT 1
+      `)
+      .get("cifi-full", "libil2cpp.so", traceScope);
+    if (!row) {
+      throw new Error(
+        `Missing materialized target bundle view for trace scope "${traceScope}". ` +
+          `Refresh DB-backed trace materializations before generating system units.`
+      );
+    }
+    return {
+      traceScope: row.trace_scope,
+      requestSignature: row.request_signature,
+      payload: JSON.parse(row.payload_json),
+      provenance: row.provenance_json ? JSON.parse(row.provenance_json) : {},
+      reducerVersion: row.reducer_version,
+      builtAt: row.built_at
+    };
+  });
+}
+
+function upsertMaterializedSystemUnit(systemId, version, payload, exportedPath) {
+  const provenance = {
+    systemId,
+    version,
+    generatedBy: payload?.generatedBy ?? null,
+    exportedPath,
+    sourceModel: "db-first-system-unit-export"
+  };
+  withDb((db) => {
+    db.prepare(`
+      INSERT INTO materialized_system_unit_views(
+        system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(system_id, version) DO UPDATE SET
+        payload_json = excluded.payload_json,
+        provenance_json = excluded.provenance_json,
+        reducer_version = excluded.reducer_version,
+        built_at = excluded.built_at,
+        exported_path = excluded.exported_path
+    `).run(
+      systemId,
+      version,
+      JSON.stringify(payload),
+      JSON.stringify(provenance),
+      "system-unit-v1",
+      new Date().toISOString(),
+      exportedPath
+    );
+  });
 }
 
 function groupAliasesById(aliasAudit) {
@@ -132,8 +203,17 @@ function datasetSection(path, data, provenanceSources) {
   };
 }
 
-async function traceRunSection(relativePath, provenanceSources) {
-  return datasetSection(relativePath, await readJson(relativePath), provenanceSources);
+async function traceRunSection(traceScope, provenanceSources) {
+  const materialized = fetchLatestMaterializedTargetBundle(traceScope);
+  return {
+    sourcePath: `db:materialized-target-bundle:${traceScope}`,
+    provenanceSources,
+    traceScope,
+    requestSignature: materialized.requestSignature ?? null,
+    builtAt: materialized.builtAt ?? null,
+    reducerVersion: materialized.reducerVersion ?? null,
+    data: materialized.payload ?? null
+  };
 }
 
 function withTargetShape(unit, targetShape) {
@@ -164,31 +244,31 @@ async function buildTokenShopUnit() {
   const tokenShopOwnerShell = await readJson("data/token-shop-owner-shell.json");
   const tokenBankControllerShell = await readJson("data/token-bank-controller-shell.json");
   const tokenShopAtu3EffectTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-atu3-cells-effect.json",
+    "token-shop-atu3-cells-effect",
     ["token-shop-trace-command"]
   );
   const tokenShopAtu3ChestConsumerTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-atu3-chest-consumer.json",
+    "token-shop-atu3-chest-consumer",
     ["token-shop-trace-command"]
   );
   const tokenShopAtu3ChestConsumerReadTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-atu3-chest-consumer-read.json",
+    "token-shop-atu3-chest-consumer-read",
     ["token-shop-trace-command"]
   );
   const tokenShopAtu4ModTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-atu4-mod.json",
+    "token-shop-atu4-mod",
     ["token-shop-trace-command"]
   );
   const tokenShopAtu5Mk1TitleTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-atu5-mk1-title.json",
+    "token-shop-atu5-mk1-title",
     ["token-shop-trace-command"]
   );
   const tokenShopAtu7Mk3BridgeTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-atu7-mk3-bridge.json",
+    "token-shop-atu7-mk3-bridge",
     ["token-shop-trace-command"]
   );
   const tokenShopFamilyStructureTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-family-structure.json",
+    "token-shop-family-structure",
     ["token-shop-trace-command"]
   );
 
@@ -372,7 +452,7 @@ async function buildMultiverseMarketUnit() {
     "data/multiverse-market-text-provenance-path-boundary.json"
   );
   const multiverseMarketSaveOwnerTrace = await traceRunSection(
-    "workbench/trace-runs/multiverse-market-save-owner-boundary.json",
+    "multiverse-market-save-owner-boundary",
     ["multiverse-market-trace-command"]
   );
 
@@ -586,11 +666,11 @@ async function buildShardsUnit() {
   const shardCostFormulaModel = await readJson("data/shard-cost-formula-model.v1.json");
   const shardTypeMetadataProbe = await readJson("data/shard-type-metadata-probe.v1.json");
   const shardOwnedStateTrace = await traceRunSection(
-    "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
+    "shard-owned-state-upgradeinfolist-population",
     ["shard-owned-state-trace-command"]
   );
   const shardCostTrace = await traceRunSection(
-    "workbench/trace-runs/shard-cost-su0-structure.json",
+    "shard-cost-su0-structure",
     ["shard-cost-trace-command"]
   );
 
@@ -786,23 +866,23 @@ async function buildTraceUnit() {
   const unitInventory = await readJson("data/units/trace.v1.json");
   const traceRegistry = await readJson("data/unity-trace-target-registry.json");
   const tokenShopFamilyStructureTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-family-structure.json",
+    "token-shop-family-structure",
     ["token-shop-family-trace-command"]
   );
   const tokenShopAtu3EffectTrace = await traceRunSection(
-    "workbench/trace-runs/token-shop-atu3-cells-effect.json",
+    "token-shop-atu3-cells-effect",
     ["token-shop-family-trace-command"]
   );
   const shardCostTrace = await traceRunSection(
-    "workbench/trace-runs/shard-cost-su0-structure.json",
+    "shard-cost-su0-structure",
     ["shard-cost-trace-command"]
   );
   const shardOwnedStateTrace = await traceRunSection(
-    "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
+    "shard-owned-state-upgradeinfolist-population",
     ["shard-owned-state-trace-command"]
   );
   const multiverseMarketSaveOwnerTrace = await traceRunSection(
-    "workbench/trace-runs/multiverse-market-save-owner-boundary.json",
+    "multiverse-market-save-owner-boundary",
     ["multiverse-market-trace-command"]
   );
 
@@ -865,6 +945,12 @@ async function main() {
   await writeJson("data/system-units/multiverse-market.v1.json", multiverseMarketUnit);
   await writeJson("data/system-units/shards.v1.json", shardsUnit);
   await writeJson("data/system-units/trace.v1.json", traceUnit);
+
+  upsertMaterializedSystemUnit("player-state", "v1", playerStateUnit, "data/system-units/player-state.v1.json");
+  upsertMaterializedSystemUnit("token-shop", "v1", tokenShopUnit, "data/system-units/token-shop.v1.json");
+  upsertMaterializedSystemUnit("multiverse-market", "v1", multiverseMarketUnit, "data/system-units/multiverse-market.v1.json");
+  upsertMaterializedSystemUnit("shards", "v1", shardsUnit, "data/system-units/shards.v1.json");
+  upsertMaterializedSystemUnit("trace", "v1", traceUnit, "data/system-units/trace.v1.json");
 
   console.log("Generated system units:");
   console.log("- data/system-units/player-state.v1.json");

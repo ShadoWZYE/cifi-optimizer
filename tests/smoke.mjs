@@ -300,6 +300,10 @@ const tokenBankControllerShellData = JSON.parse(
 );
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const appJs = await readFile(new URL("../app.js", import.meta.url), "utf8");
+const systemUnitProviderJs = await readFile(
+  new URL("../support/system-unit-provider.js", import.meta.url),
+  "utf8"
+);
 const importNormalizationSupportModule = await readFile(
   new URL("../support/import-normalization-support.js", import.meta.url),
   "utf8"
@@ -569,10 +573,7 @@ assert.deepEqual(
     "datasetContract",
     "shipBaseline",
     "extractionCandidateRanking",
-    "playerStateSystemUnit",
-    "shardsSystemUnit",
-    "tokenShopSystemUnit",
-    "multiverseMarketSystemUnit"
+    "loadedSystemUnits"
   ],
   "bootstrap dataset destructuring changed unexpectedly"
 );
@@ -583,13 +584,11 @@ assert.deepEqual(
     "./data/bundled-dataset-contract.v1.json",
     "./data/ship-optimizer.desmos-baseline.v1.json",
     "./data/extraction-candidate-ranking.v1.json",
-    "./data/system-units/player-state.v1.json",
-    "./data/system-units/shards.v1.json",
-    "./data/system-units/token-shop.v1.json",
-    "./data/system-units/multiverse-market.v1.json",
   ],
   "bootstrap fetch order changed unexpectedly"
 );
+assert.match(appJs, /loadSystemUnits\(\{/);
+assert.match(appJs, /state\.systemUnitSource = systemUnitSource/);
 assert.match(appJs, /TokenShop currency shell/);
 assert.match(appJs, /Token or tokenium spend lane grounded/);
 assertTextIncludesAllConcepts(
@@ -707,7 +706,7 @@ assertTextIncludesAllConcepts(
 assert.match(appJs, /Recommend next spend/);
 assert.match(appJs, /Use imported spend state/);
 assert.match(appJs, /Rank TokenShop or Emporium buys/);
-assert.match(appJs, /\.\/data\/system-units\/token-shop\.v1\.json/);
+assert.match(systemUnitProviderJs, /\.\/data\/system-units\/token-shop\.v1\.json/);
 assert.match(
   appJs,
   /boundary\?\.adjacentFollowUp\?\.verifiedNamedIdentityJoin\?\.namedIdentity[\s\S]*boundary\?\.adjacentFollowUp\?\.verifiedTitleTextChain\?\.titleProbeTitle[\s\S]*boundary\?\.adjacentFollowUp\?\.recoveredAdditionalBridge\?\.prefabIdentity[\s\S]*"NewTokenUPGPrefab\.T1\.TokensBoost"/
@@ -3824,107 +3823,57 @@ assert.ok(unityTraceTargetRegistryData.targets["shard-cost-su0-structure"]);
 assert.ok(unityTraceTargetRegistryData.targets["shard-owned-state-upgradeinfolist-population"]);
 assert.ok(unityTraceTargetRegistryData.targets["multiverse-market-save-owner-boundary"]);
 assert.equal(
-  shardOwnedStateTraceRun.traceWorkflow.command,
-  "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--family <family-id>] [--query <query>] [--anchor <anchor>] [--extended-search <0|1|2>]"
+  generatedTraceSystemUnit.sections.liveRuns.shardOwnedStateUpgradeinfolistPopulation.sourcePath,
+  "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population"
 );
 assert.equal(shardOwnedStateTraceRun.target.id, "shard-owned-state-upgradeinfolist-population");
-assert.equal(shardOwnedStateTraceRun.plannerResolution.selectionMode, "explicit-family");
+assert.equal(shardOwnedStateTraceRun.dataset, "unity-trace-bundle");
+assert.equal(shardOwnedStateTraceRun.plannerResolution.selectionMode, "explicit-target");
 assert.equal(shardOwnedStateTraceRun.plannerResolution.matchedFamilyId, "shard-owned-state");
-assert.equal(shardOwnedStateTraceRun.plannerResolution.runMode, "compare");
-assert.equal(
-  shardOwnedStateTraceRun.plannerResolution.comparePresetId,
-  "shard-owned-state-seam-vs-local-bridge"
-);
+assert.equal(shardOwnedStateTraceRun.plannerResolution.runMode, "trace");
 assert.ok(shardOwnedStateTraceRun.plannerResolution.expandedAnchors.includes("upgradeInfoList"));
 assert.ok(
   shardOwnedStateTraceRun.plannerResolution.expandedAnchorSpecs.some(
     (anchor) => anchor.value === "upgradeInfoList" && anchor.kind === "string"
   )
 );
-assert.equal(shardOwnedStateTraceRun.traceRegistry.path, "data/unity-trace-target-registry.json");
 assert.equal(shardOwnedStateTraceRun.traceRegistry.selectedFamilyId, "shard-owned-state");
-assert.equal(shardOwnedStateTraceRun.shellWindow.shellField, "upgradeInfoList");
-assert.equal(shardOwnedStateTraceRun.shellWindow.shellPathId, 5216);
-assert.deepEqual(shardOwnedStateTraceRun.shellWindow.ownerFieldBlock, [
-  "<Cost>k__BackingField",
-  "<MaxLevel>k__BackingField",
-  "<IsUnlocked>k__BackingField"
-]);
-assert.equal(shardOwnedStateTraceRun.traceGraph.edges.length, 5);
-assert.equal(shardOwnedStateTraceRun.traceGraph.negativeEdges.length, 2);
-assert.ok(
-  shardOwnedStateTraceRun.traceGraph.edges.some((edge) => edge.type === "direct-scene-definition-payload")
-);
-assert.ok(
-  shardOwnedStateTraceRun.traceGraph.edges.some((edge) => edge.type === "runtime-shell-to-owner-lists")
-);
-assert.ok(
-  shardOwnedStateTraceRun.traceGraph.negativeEdges.some(
-    (edge) => edge.type === "local-runtime-population-bridge"
-  )
-);
-assert.ok(
-  shardOwnedStateTraceRun.traceGraph.negativeEdges.some(
-    (edge) => edge.type === "deeper-wrapper-handoff-recovery"
-  )
-);
+assert.equal(shardOwnedStateTraceRun.materialization.traceView, "materialized_trace_view");
+assert.equal(shardOwnedStateTraceRun.materialization.systemView, "canonical_system_trace_view");
+assert.equal(shardOwnedStateTraceRun.materialization.traceScope, "shard-owned-state-upgradeinfolist-population");
+assert.ok(shardOwnedStateTraceRun.sourceFamilies.order.includes("native"));
+assert.ok(shardOwnedStateTraceRun.nativeView);
+assert.ok(shardOwnedStateTraceRun.systemViews.owner_controller_fragment);
+assert.ok(shardOwnedStateTraceRun.semanticCoverage);
 assert.equal(shardOwnedStateTraceRun.decisionSummary.verdict, "quarantine");
 assert.deepEqual(shardOwnedStateTraceRun.decisionSummary.baselineGap, [
   "local-runtime-population-bridge",
   "deeper-wrapper-handoff-recovery"
 ]);
-assert.match(shardOwnedStateTraceRun.groundedConclusion, /non-local injection seam/i);
 assert.equal(tokenShopAtu3EffectTraceRun.target.id, "token-shop-atu3-cells-effect");
-assert.equal(tokenShopAtu3EffectTraceRun.plannerResolution.selectionMode, "explicit-family");
-assert.equal(tokenShopAtu3EffectTraceRun.plannerResolution.matchedFamilyId, "token-shop");
-assert.equal(tokenShopAtu3EffectTraceRun.plannerResolution.runMode, "compare");
 assert.equal(
-  tokenShopAtu3EffectTraceRun.plannerResolution.comparePresetId,
-  "token-shop-atu3-effect-vs-split"
+  generatedTraceSystemUnit.sections.liveRuns.tokenShopAtu3Effect.sourcePath,
+  "db:materialized-target-bundle:token-shop-atu3-cells-effect"
 );
+assert.equal(tokenShopAtu3EffectTraceRun.dataset, "unity-trace-bundle");
+assert.equal(tokenShopAtu3EffectTraceRun.plannerResolution.selectionMode, "explicit-target");
+assert.equal(tokenShopAtu3EffectTraceRun.plannerResolution.matchedFamilyId, "token-shop");
+assert.equal(tokenShopAtu3EffectTraceRun.plannerResolution.runMode, "trace");
 assert.ok(tokenShopAtu3EffectTraceRun.plannerResolution.expandedAnchors.includes("ATU3Button"));
 assert.equal(tokenShopAtu3EffectTraceRun.traceRegistry.selectedFamilyId, "token-shop");
-assert.equal(tokenShopAtu3EffectTraceRun.shellWindow.shellField, "ATU3Button");
-assert.equal(tokenShopAtu3EffectTraceRun.shellWindow.shellPathId, 15810);
-assert.deepEqual(tokenShopAtu3EffectTraceRun.shellWindow.ownerFieldBlock, [
-  "CellBoostStartCost",
-  "CellBoostAdditiveCost",
-  "CellBoostBonus",
-  "CellBoostMaxLevel",
-  "CellBoostFill"
-]);
-assert.equal(tokenShopAtu3EffectTraceRun.traceGraph.edges.length, 6);
-assert.equal(tokenShopAtu3EffectTraceRun.traceGraph.negativeEdges.length, 1);
-assert.ok(
-  tokenShopAtu3EffectTraceRun.traceGraph.edges.some(
-    (edge) => edge.type === "exact-shell-to-action-hook"
-  )
-);
-assert.ok(
-  tokenShopAtu3EffectTraceRun.traceGraph.edges.some(
-    (edge) => edge.type === "shared-effect-system"
-  )
-);
-assert.ok(
-  tokenShopAtu3EffectTraceRun.traceGraph.negativeEdges.some(
-    (edge) => edge.type === "typed-shared-effect-owner"
-  )
-);
+assert.equal(tokenShopAtu3EffectTraceRun.materialization.traceView, "materialized_trace_view");
+assert.equal(tokenShopAtu3EffectTraceRun.materialization.systemView, "canonical_system_trace_view");
+assert.equal(tokenShopAtu3EffectTraceRun.materialization.traceScope, "token-shop-atu3-cells-effect");
+assert.ok(tokenShopAtu3EffectTraceRun.sourceFamilies.order.includes("native"));
+assert.ok(tokenShopAtu3EffectTraceRun.systemViews.formula_fragment);
+assert.ok(tokenShopAtu3EffectTraceRun.canonicalSemanticViews.ui_binding_fragment);
 assert.equal(tokenShopAtu3EffectTraceRun.decisionSummary.verdict, "quarantine");
 assert.deepEqual(tokenShopAtu3EffectTraceRun.decisionSummary.baselineGap, [
   "exact-shell-to-action-hook",
   "shared-effect-system",
   "derived-player-effect-surface"
 ]);
-assert.match(tokenShopAtu3EffectTraceRun.groundedConclusion, /shell-to-action-hook-to-shared-effect chain/i);
-assert.ok(
-  tokenShopAtu3EffectTraceRun.traceRegistry.followUpSurfaces.some(
-    (surface) => surface.id === "detached-identity-surfaces"
-  )
-);
-assert.ok(
-  tokenShopAtu3EffectTraceRun.traceRegistry.depthPlan.some((hop) => hop.hop === 2)
-);
+assert.equal(tokenShopAtu3EffectTraceRun.runtimeStatus, "open");
 
 // TokenBank controller shell assertions
 assert.ok(tokenBankControllerShellData.controllerAnchors.includes("TokenShop"));
@@ -6805,7 +6754,8 @@ assert.match(
   appJs,
   /Shard milestone manual import stays disabled; this build only uses the bundled grounded descriptive dataset/
 );
-assert.match(appJs, /\.\/data\/system-units\/shards\.v1\.json/);
+assert.doesNotMatch(appJs, /\.\/data\/system-units\/shards\.v1\.json/);
+assert.match(systemUnitProviderJs, /\.\/data\/system-units\/shards\.v1\.json/);
 assert.match(appJs, /buildPlayerStateSystemView/);
 assert.match(appJs, /buildShardSystemView/);
 assert.match(appJs, /buildSpendSystemView/);
@@ -6893,8 +6843,10 @@ assert.match(
   appJs,
   /identifies the declaring save model, but it still does not prove which recovered IS\*Level subset should be promoted as planner-safe validated MultiverseMarket rows/
 );
-assert.match(appJs, /\.\/data\/system-units\/token-shop\.v1\.json/);
-assert.match(appJs, /\.\/data\/system-units\/multiverse-market\.v1\.json/);
+assert.doesNotMatch(appJs, /\.\/data\/system-units\/token-shop\.v1\.json/);
+assert.doesNotMatch(appJs, /\.\/data\/system-units\/multiverse-market\.v1\.json/);
+assert.match(systemUnitProviderJs, /\.\/data\/system-units\/token-shop\.v1\.json/);
+assert.match(systemUnitProviderJs, /\.\/data\/system-units\/multiverse-market\.v1\.json/);
 assert.match(appJs, /Blocked owner-dependent spend seams/);
 assert.match(appJs, /Emporium compatibility preview/);
 assert.match(playerProfileBoundarySupportModule, /grounded Emporium text model is split/i);
@@ -6957,7 +6909,7 @@ assert.match(
   appJs,
   /Shard owner trail and PlayerProfileData save-family clues stay separate with zero overlap/
 );
-assert.match(appJs, /\.\/data\/system-units\/token-shop\.v1\.json/);
+assert.match(systemUnitProviderJs, /\.\/data\/system-units\/token-shop\.v1\.json/);
 assert.match(spendBoundarySummaryJs, /function getTokenShopCostLaneSummary/);
 assert.match(appJs, /TokenShop cost-lane split/);
 assert.match(
@@ -7088,6 +7040,8 @@ assert.match(
 );
 assert.match(appJs, /\/api\/client\/open/);
 assert.match(appJs, /\/api\/client\/events/);
+assert.match(appJs, /loadSystemUnits/);
+assert.match(appJs, /systemUnitApi/);
 assert.match(appJs, /const DEFAULT_SERVER_CAPABILITIES = Object\.freeze/);
 assert.match(appJs, /const SERVER_CAPABILITIES = getServerCapabilities\(\)/);
 assert.match(
@@ -7098,6 +7052,7 @@ assert.match(appJs, /function getServerCapabilities\(\)/);
 assert.match(appJs, /new EventSource/);
 assert.match(html, /window\.__CIFI_SERVER_CAPABILITIES__ = \{/);
 assert.match(html, /sessionApi: false/);
+assert.match(html, /systemUnitApi: false/);
 assert.doesNotMatch(
   appJs,
   /externalModels\.experimental\.gemNodes\.budget\s*\|\|\s*state\.playerProfile\.compatibility\.unresolvedProfileFields\.gemDust/
@@ -7113,8 +7068,13 @@ assert.match(devServer, /\/api\/healthz/);
 assert.match(devServer, /\/api\/launcher\/reopen/);
 assert.match(devServer, /\/api\/client\/open/);
 assert.match(devServer, /\/api\/client\/events/);
+assert.match(devServer, /\/api\/system-units/);
 assert.match(devServer, /window\.__CIFI_SERVER_CAPABILITIES__/);
 assert.match(devServer, /sessionApi: true/);
+assert.match(devServer, /systemUnitApi: true/);
+assert.match(systemUnitProviderJs, /\/api\/system-units/);
+assert.match(systemUnitProviderJs, /mode: "db"/);
+assert.match(systemUnitProviderJs, /mode: "static-export"/);
 assert.match(devServer, /event: launch/);
 assert.match(devServer, /Launcher-mode server is idle\. Shutting down\./);
 assert.match(launcherVbs, /http:\/\/localhost:4173\//);
@@ -8247,6 +8207,13 @@ async function verifyLauncherModeServerLifecycle() {
   const healthAfterOpen = await fetchJson(`http://localhost:${testPort}/api/healthz`);
   hardAssert.equal(healthAfterOpen.clientCount, 1);
   hardAssert.equal(healthAfterOpen.launchSignalSequence, 1);
+
+  const systemUnits = await fetchJson(
+    `http://localhost:${testPort}/api/system-units?ids=player-state,token-shop`
+  );
+  hardAssert.equal(systemUnits.mode, "db");
+  hardAssert.ok(systemUnits.units["player-state"]);
+  hardAssert.ok(systemUnits.units["token-shop"]);
 
   const clientClose = await postJson(`http://localhost:${testPort}/api/client/close`, {
     clientId: "smoke-client"

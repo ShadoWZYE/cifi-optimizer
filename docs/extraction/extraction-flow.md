@@ -49,11 +49,11 @@ The trace now prefers direct extraction from:
 
 - `global-metadata.dat`
 - `level0`
-- `sharedassets0`
+- `assets`
 - the persistent Ghidra project when native behavior is needed
 
-Stable trace outputs are overwritten in place under `workbench/trace-runs/`. Wait for the trace
-command to finish before reading them.
+Trace state is persisted to SQLite first. Use `--export` only when you explicitly want derived
+`workbench/trace-runs/*.json` or `*.md` outputs for debugging or compatibility.
 
 ### 3. Expand only when the bounded target is too shallow
 
@@ -78,7 +78,7 @@ The persistent project is the native implementation cache:
 
 - project: `workbench/ghidra-projects/cifi-full.rep`
 - runtime/cache: `workbench/ghidra-runtime/`
-- repo-side native result index: `workbench/ghidra-cache/process_project_index.json`
+- canonical cache DB: `workbench/ghidra-cache/ghidra_cache.sqlite3`
 
 Use Ghidra to recover:
 

@@ -197,8 +197,8 @@ The durable cache now has two layers:
 
 1. `workbench/ghidra-jobs/`
    Stores the raw completed per-term and merged jobs.
-2. `workbench/ghidra-cache/native_graph_index.json`
-   Stores the growing term-centric graph reconstructed from those jobs.
+2. `workbench/ghidra-cache/ghidra_cache.sqlite3`
+   Stores the growing term-centric graph and canonical/materialized cache views reconstructed from those jobs.
 
 That graph records:
 

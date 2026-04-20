@@ -62,8 +62,8 @@ Repo-local npm probe wrappers:
   - historical extraction lane only; use when reviewing archived shard cost evidence, not as a primary shipped dataset refresh
 - `npm run probe:trace -- --query <query> --anchor <anchor>`
   - or pin an exact preset with `npm run probe:trace -- --target <target-id> --anchor <anchor>`
-  - overwrites the stable per-target outputs under `workbench/trace-runs/`
-  - those runs are then embedded into `data/system-units/trace.v1.json` by `node scripts/contracts/generate-system-units.mjs`
+  - persists DB-backed trace state first; add `--export` only when you want derived `workbench/trace-runs/` outputs
+  - those DB-backed target bundles are then projected into `data/system-units/trace.v1.json` and the other `data/system-units/*.json` read models by `node scripts/contracts/generate-system-units.mjs`
   - reads the checked target registry in `data/unity-trace-target-registry.json`
   - resolves loose Codex-first queries through the checked planner block in `data/unity-trace-target-registry.json`, expands them into family-aware anchors and synonym sets, then chooses either one single trace or one bounded compare run
   - reads committed `workbench/apk/base/global-metadata.dat`, `workbench/unity/joined/level0`, `workbench/unity/joined/sharedassets0.assets`, direct extractor-backed support datasets, and the persistent Ghidra project when native behavior is needed
@@ -72,6 +72,10 @@ Repo-local npm probe wrappers:
   - emits a compact planner decision note plus a summary verdict such as `wire`, `quarantine`, or `keep researching` so Codex can read the bundle without manually reinterpreting the full graph first
   - current seeded trace families: `token-shop`, `shard-cost`, `shard-owned-state`, and `multiverse-market-save-owner`
   - the current committed token-shop planner path treats `token-shop-atu3-cells-effect` as the canonical ATU3 lane instead of the older negative split-row target
+- `node scripts/contracts/generate-system-units.mjs`
+  - reads canonical repo inputs plus DB-backed `materialized_target_bundle_views`
+  - writes `data/system-units/*.json` only as exported app/browser read models
+  - also persists matching `materialized_system_unit_views` in SQLite so app-facing system units are not a parallel file-first truth path
 
 Important primary files:
 
